@@ -1,0 +1,89 @@
+{
+  "header": {
+    "title": "Transfert entre logiciels",
+    "subtitle": "Recopie une timeline d’un logiciel de montage vers un autre, à l’image près."
+  },
+  "picker": {
+    "source": "Depuis",
+    "target": "Vers",
+    "swap": "Inverser source et cible",
+    "offline": "Hors ligne : {{hosts}}.",
+    "online": "connecté",
+    "hostOffline": "hors ligne",
+    "swapUnavailable": "Inversion impossible pour ce couple"
+  },
+  "sections": {
+    "source": "Timeline dans {{host}}",
+    "target": "Destination dans {{host}}",
+    "options": "Options",
+    "media": "Médias",
+    "outDir": "Dossier de sortie",
+    "encoding": "Encodage"
+  },
+  "form": {
+    "refresh": "Rafraîchir",
+    "noTimeline": "Aucune timeline",
+    "timelineOpen": "{{name}} (ouverte)",
+    "namePlaceholder": "Nom de la timeline créée",
+    "modeNew": "Nouvelle timeline",
+    "modeAppend": "Timeline existante",
+    "videoOnly": "Vidéo seulement",
+    "richAe": "Options After Effects avancées",
+    "richAeHint": "Transforms, vitesse et précompositions, au lieu d’une simple recopie des plans.",
+    "yes": "Oui",
+    "no": "Non",
+    "choose": "Choisir…",
+    "none": "Aucun"
+  },
+  "preview": {
+    "clips": "Plans lus",
+    "tracks": "Pistes",
+    "duration": "Durée",
+    "fps": "Cadence",
+    "missing": "{{count}} source(s) introuvable(s)",
+    "fidelityExact": "Équivalence native prévue",
+    "fidelityLimited": "Limites prévues avant transfert",
+    "fidelityCounts": "{{exact}} exactes · {{approximated}} approchées · {{unsupported}} non garanties",
+    "animationUnavailable": "Images clés illisibles : le logiciel source a refusé l’export qui les porte. Le transfert posera les valeurs fixes.",
+    "mediaLess": "{{count}} élément(s) sans média (cache, calque d’effet) : aucun logiciel ne peut les recevoir.",
+    "graphics": "{{count}} titre(s) : recréés chez la cible depuis leur texte et leur style."
+  },
+  "phases": {
+    "read": "Lecture de la timeline",
+    "sources": "Résolution des sources",
+    "build": "Montage",
+    "done": "Terminé"
+  },
+  "run": {
+    "label": "Transférer {{from}} → {{to}}",
+    "busy": "Transfert en cours…"
+  },
+  "result": {
+    "done": "{{count}} plan(s) posé(s) dans « {{timeline}} » ({{host}}).",
+    "verified": "Propriétés relues : transfert vérifié.",
+    "unverified": "{{applied}} propriété(s) confirmée(s) · {{issues}} limite(s) ou écart(s).",
+    "tracksClamped": "Pistes rabattues : le logiciel cible n’a pas pu en créer assez.",
+    "missing": "{{count}} source(s) introuvable(s) sur le disque.",
+    "mediaLess": "{{count}} élément(s) sans média (cache, calque d’effet) : aucun logiciel ne peut les recevoir.",
+    "titles": "{{count}} titre(s) recréé(s).",
+    "titlesRetimed": "{{count}} titre(s) à la durée du modèle : DaVinci Resolve ne permet pas de la régler.",
+    "titlesFailed": "{{count}} titre(s) non posé(s).",
+    "vehicleImport": "Montage lu par DaVinci Resolve : images clés, niveaux audio et vitesse appliqués par le logiciel lui-même.",
+    "vehicleApi": "Plans posés un par un par script : les images clés viennent de la lecture de NetsuRush.",
+    "exchangeFile": "DaVinci Resolve a refusé le montage par script. Le même fichier s’importe correctement à la main — avec les images clés et les niveaux audio : Fichier ▸ Importer ▸ Timeline."
+  },
+  "mediaModes": {
+    "copy": {
+      "label": "Liens directs",
+      "hint": "Fichiers d’origine liés tels quels. Aucun fichier écrit."
+    },
+    "remux": {
+      "label": "Réencapsuler",
+      "hint": "Nouveau conteneur, sans perte. Utile si la cible ne lit pas celui de la source."
+    },
+    "reencode": {
+      "label": "Réencoder",
+      "hint": "Chaque plan transcodé en codec de montage, coupé à l’image près."
+    }
+  }
+}

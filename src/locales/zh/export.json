@@ -1,0 +1,200 @@
+{
+  "settings": {
+    "title": "导出设置",
+    "new": "新建",
+    "newProfile": "新建预设",
+    "duplicate": "复制",
+    "duplicateProfile": "复制预设",
+    "deleteProfile": "删除预设",
+    "cardButton": "缩略图按钮",
+    "menuLabel": "导出预设"
+  },
+  "editor": {
+    "name": "名称",
+    "namePlaceholder": "预设名称",
+    "destination": "目标位置",
+    "timeline": "时间线",
+    "folder": "文件夹",
+    "folderPlaceholder": "文件夹名称…",
+    "defaultFolder": "NetsuRush — 剪切",
+    "existingFolders": "已有文件夹",
+    "mediaPoolFolders": "Media Pool 文件夹",
+    "profile": "配置",
+    "profileCustom": "自定义",
+    "optimization": "优化",
+    "speed": "速度",
+    "codec": "编码格式",
+    "audio": "音频",
+    "audioCodec": "音频编码",
+    "timelineTarget": "目标时间线",
+    "timelineInsertion": "插入模式 — {{host}}",
+    "insertionInsert": "插入",
+    "insertionOverwrite": "覆盖",
+    "insertionReplace": "替换",
+    "insertionFit": "适配填充",
+    "insertionAbove": "置于上方",
+    "insertionEnd": "添加到末尾",
+    "insertionRippleOverwrite": "波纹覆盖",
+    "aeftInsertion": {
+      "insert": "插入并移动图层",
+      "replace": "替换图层",
+      "fit": "适配图层时长",
+      "above": "添加到图层上方",
+      "end": "添加到合成末尾"
+    },
+    "container": "封装格式",
+    "mergeToOne": "合并为单个文件",
+    "fileName": "文件名",
+    "fileNamePlaceholder": "{base}_{index}",
+    "insertToken": "插入标记",
+    "tokens": {
+      "base": "基础名称",
+      "source": "源文件",
+      "index": "镜头编号",
+      "total": "镜头数量",
+      "start": "开始",
+      "end": "结束",
+      "duration": "时长",
+      "label": "镜头标签",
+      "profile": "配置名称",
+      "codec": "编解码器",
+      "container": "容器",
+      "date": "日期",
+      "time": "时间"
+    },
+    "mergeGap": "镜头之间的黑场",
+    "milliseconds": "毫秒"
+  },
+  "encoder": {
+    "gpu": "GPU",
+    "nvenc": "NVIDIA NVENC",
+    "amf": "AMD AMF",
+    "qsv": "Intel Quick Sync",
+    "cpu": "CPU"
+  },
+  "speed": {
+    "fast": {
+      "label": "快速",
+      "hint": "优先编码速度"
+    },
+    "balanced": {
+      "label": "均衡",
+      "hint": "速度与压缩兼顾"
+    },
+    "quality": {
+      "label": "质量",
+      "hint": "更佳压缩"
+    },
+    "max": {
+      "label": "最高",
+      "hint": "更慢且文件更小"
+    }
+  },
+  "toggle": {
+    "yes": "是",
+    "no": "否"
+  },
+  "issue": {
+    "binTargetRequired": "填写目标文件夹名称",
+    "profileIncomplete": "预设不完整：{{issue}}"
+  },
+  "audio": {
+    "allTracks": "全部轨道",
+    "noAudio": "无（仅视频）",
+    "trackLabel": "轨道 {{n}}{{lang}} · {{channels}} 声道 · {{codec}}",
+    "languageGroup": "语言",
+    "trackGroup": "轨道",
+    "trackN": "轨道 {{n}}",
+    "langResolved": "{{lang}} → 轨道 {{n}}",
+    "langUnresolved": "{{lang}} → 未找到轨道",
+    "timelineHint": "Resolve 导入音频只能全要或全不要。"
+  },
+  "iconPicker": {
+    "search": "搜索图标…",
+    "importedImage": "已导入的图片",
+    "removeFromLibrary": "从库中移除",
+    "importImage": "导入图片 / GIF",
+    "profileIcon": "预设图标",
+    "defaultIcon": "默认图标",
+    "default": "默认",
+    "tabEmojis": "表情",
+    "tabIcons": "图标",
+    "tabImages": "图片"
+  },
+  "notice": {
+    "cancelled": "已取消导出：未选择目标文件夹。",
+    "merging": "合并中…",
+    "exporting": "导出中…",
+    "exported_one": "已导出 {{count}} 个文件（{{profile}}）→ {{dir}}{{failed}}",
+    "exported_other": "已导出 {{count}} 个文件（{{profile}}）→ {{dir}}{{failed}}",
+    "failedSuffix_one": " · {{count}} 个失败",
+    "failedSuffix_other": " · {{count}} 个失败",
+    "exportFailed": "导出失败"
+  },
+  "workflow": {
+    "timeline": "时间线",
+    "remux": "重新封装",
+    "encode": "重新编码"
+  },
+  "audioMode": {
+    "copy": "直接复制",
+    "aac_128": "AAC 128 kbps",
+    "aac": "AAC 192 kbps",
+    "aac_256": "AAC 256 kbps",
+    "aac_320": "AAC 320 kbps",
+    "opus_128": "Opus 128 kbps",
+    "opus": "Opus 160 kbps",
+    "opus_192": "Opus 192 kbps",
+    "mp3_192": "MP3 192 kbps",
+    "mp3": "MP3 320 kbps",
+    "flac": "FLAC",
+    "alac": "ALAC",
+    "pcm16": "PCM 16 位",
+    "pcm24": "PCM 24 位"
+  },
+  "audioGroup": {
+    "lossy": "有损",
+    "lossless": "无损"
+  },
+  "codec": {
+    "bitDepth": "{{count}} 位",
+    "profile": "配置 {{count}}",
+    "losslessArchive": "无损（归档）",
+    "archive": "归档"
+  },
+  "lang": {
+    "ja": "日语",
+    "en": "英语",
+    "fr": "法语",
+    "es": "西班牙语",
+    "de": "德语",
+    "it": "意大利语",
+    "pt": "葡萄牙语",
+    "ru": "俄语",
+    "zh": "中文",
+    "ko": "韩语",
+    "ar": "阿拉伯语",
+    "hi": "印地语"
+  },
+  "profileName": {
+    "toTimeline": "发送到时间线",
+    "fileNoReencode": "文件（不重新编码）",
+    "mp4H264": "MP4 H.264",
+    "mp4H265_10": "MP4 H.265 10 位",
+    "prores422hq": "ProRes 422 HQ",
+    "dnxhrHq": "DNxHR HQ",
+    "mkvH265_10": "MKV H.265 10 位",
+    "webmAv1": "WebM AV1",
+    "prores4444": "ProRes 4444（含 Alpha）",
+    "dnxhrHqx": "DNxHR HQX 10 位",
+    "ffv1Archive": "FFV1 — 归档",
+    "generic": "预设 {{index}}",
+    "fallback": "导出预设"
+  },
+  "summary": {
+    "timelineImport": "导入到时间线",
+    "streamCopy": "流复制",
+    "merged": " · 已合并"
+  },
+  "codecUnknown": "未知编码"
+}

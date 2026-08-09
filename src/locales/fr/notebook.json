@@ -1,0 +1,639 @@
+{
+  "editor": {
+    "uploadFailed": "Échec de l'envoi du fichier",
+    "dateToday": "Date du jour",
+    "createNamed": "Créer « {{name}} »"
+  },
+  "panel": {
+    "scriptNotebook": "Carnet du script",
+    "untitled": "Sans titre",
+    "notebookFallback": "Carnet",
+    "notebooks": "Carnets",
+    "noNotebooks": "Aucun carnet",
+    "newNotebook": "Nouveau carnet",
+    "editNotebook": "Modifier ce carnet",
+    "importMarkdown": "Importer du Markdown…",
+    "exportNetsu": "Exporter (.netsu)",
+    "importNetsu": "Importer (.netsu)",
+    "deleteNotebook": "Supprimer ce carnet",
+    "collapseSidebar": "Replier la barre latérale (Ctrl+\\)",
+    "expandSidebar": "Afficher la barre latérale (Ctrl+\\)",
+    "search": "Rechercher",
+    "newPage": "Nouvelle page",
+    "pages": "Pages",
+    "trash": "Corbeille",
+    "settings": "Paramètres",
+    "emptyNotebookHint": "Crée un carnet pour commencer.",
+    "emptyTitleHasNb": "Une page vierge vous attend",
+    "emptyTitleNoNb": "Bienvenue dans le Carnet",
+    "emptyBodyHasNb": "Notes, plans, brouillons, bases de données — posez vos idées en vrac.",
+    "emptyBodyNoNb": "Un bloc-notes : carnets, pages imbriquées, blocs riches et bases de données.",
+    "createNotebook": "Créer un carnet",
+    "confirmDeleteNbTitle": "Supprimer « {{name}} » ?",
+    "confirmDeleteNbDesc": "Le carnet et TOUTES ses pages sont supprimés définitivement.",
+    "confirmTrashTitle": "Envoyer à la corbeille ?",
+    "confirmTrashDesc": "« {{name}} » et ses sous-pages partent à la corbeille (restaurables).",
+    "sendToTrash": "Envoyer à la corbeille",
+    "saveAsProject": "Enregistrer sous…",
+    "openProject": "Ouvrir un carnet…"
+  },
+  "blocks": {
+    "bookmark": {
+      "pastePlaceholder": "Coller un lien de site web…"
+    },
+    "embed": {
+      "pastePlaceholder": "Coller un lien à intégrer (Vimeo, X, TikTok…)",
+      "iframeTitle": "Intégration"
+    },
+    "toggle": {
+      "collapse": "Replier",
+      "expand": "Déplier"
+    },
+    "youtube": {
+      "pastePlaceholder": "Coller un lien YouTube…"
+    }
+  },
+  "db": {
+    "field": {
+      "checked": "Coché",
+      "unchecked": "Non coché",
+      "empty": "Vide"
+    },
+    "option": {
+      "searchOrCreate": "Rechercher ou créer…",
+      "create": "Créer « {{label}} »"
+    },
+    "checklist": {
+      "addTask": "Ajouter une tâche…"
+    }
+  },
+  "navigation": {
+    "notebookRoot": "Racine du carnet",
+    "moveTo": "Déplacer vers…",
+    "filterPages": "Filtrer les pages…",
+    "noMatch": "Aucune page ne correspond.",
+    "backlinks": "Rétroliens",
+    "siblings": "Pages du même niveau",
+    "intermediate": "Pages intermédiaires",
+    "searchTitle": "Rechercher dans le carnet",
+    "searchDescription": "Recherche dans les titres et le contenu des pages",
+    "searchPlaceholder": "Titre ou contenu…",
+    "noSearchResult": "Aucun résultat pour « {{query}} »",
+    "favorites": "Favoris",
+    "recent": "Récents"
+  },
+  "tree": {
+    "deletedSubpage": "Sous-page supprimée",
+    "subpage": "Sous-page",
+    "rename": "Renommer",
+    "empty": "Aucune page — créez-en une"
+  },
+  "tabs": {
+    "prev": "Page précédente",
+    "next": "Page suivante",
+    "closeTab": "Fermer l'onglet",
+    "closeOthers": "Fermer les autres",
+    "all": "Tous les onglets",
+    "newPage": "Nouvelle page dans un onglet"
+  },
+  "actions": {
+    "stats": "{{words}} mots · {{chars}} caractères",
+    "modified": "Modifié le {{date}}",
+    "removeFavorite": "Retirer des favoris",
+    "addFavorite": "Ajouter aux favoris",
+    "documentActions": "Actions du document",
+    "openNewTab": "Ouvrir dans un nouvel onglet",
+    "copyPageLink": "Copier le lien de la page",
+    "duplicate": "Dupliquer",
+    "exportMarkdown": "Exporter en Markdown",
+    "exportHtml": "Exporter en HTML",
+    "exportNetsu": "Exporter en .netsu (avec sous-pages)"
+  },
+  "trash": {
+    "title": "Corbeille",
+    "count_one": "{{count}} page supprimée — restaurable.",
+    "count_other": "{{count}} pages supprimées — restaurables.",
+    "description": "Les pages supprimées atterrissent ici.",
+    "empty": "La corbeille est vide.",
+    "restore": "Restaurer",
+    "restoreWithChildren": "Restaurer (avec ses sous-pages)",
+    "deleteForever": "Supprimer définitivement",
+    "confirmAll": "Tout supprimer définitivement ?",
+    "cancel": "Annuler",
+    "deleteAll": "Tout supprimer",
+    "emptyTrash": "Vider la corbeille"
+  },
+  "slash": {
+    "groups": {
+      "blocks": "Blocs Carnet",
+      "media": "Médias",
+      "insert": "Insertion"
+    },
+    "subpage": {
+      "title": "Sous-page",
+      "desc": "Nouvelle page enfant, intégrée ici",
+      "aliases": "subpage|souspage|sous-page|page|enfant"
+    },
+    "callout": {
+      "title": "Encadré",
+      "desc": "Bandeau coloré avec emoji",
+      "aliases": "callout|encadre|note|info"
+    },
+    "toggle": {
+      "title": "Bascule",
+      "desc": "Section repliable",
+      "aliases": "toggle|bascule|repliable|accordeon"
+    },
+    "database": {
+      "title": "Base de données",
+      "desc": "Table + kanban, colonnes typées",
+      "aliases": "database|base|table|grille|kanban"
+    },
+    "equation": {
+      "title": "Équation",
+      "desc": "Formule LaTeX (KaTeX)",
+      "aliases": "equation|math|latex|formule|katex"
+    },
+    "divider": {
+      "title": "Séparateur",
+      "desc": "Ligne, tirets, points ou étoiles",
+      "aliases": "divider|separateur|séparateur|ligne|hr|---"
+    },
+    "youtube": {
+      "desc": "Intégrer une vidéo YouTube",
+      "aliases": "youtube|video|yt"
+    },
+    "embed": {
+      "title": "Intégration",
+      "aliases": "embed|integration|iframe|vimeo|twitter|tiktok"
+    },
+    "bookmark": {
+      "title": "Signet",
+      "desc": "Aperçu d'un lien web",
+      "aliases": "bookmark|signet|lien|web|link"
+    },
+    "video": {
+      "title": "Vidéo",
+      "desc": "Fichier local ou URL, lecteur intégré",
+      "aliases": "video|vidéo|mp4|film|clip"
+    },
+    "audio": {
+      "desc": "Lecteur harmonisé (forme d'onde)",
+      "aliases": "audio|son|mp3|musique|wav|podcast"
+    },
+    "file": {
+      "title": "Fichier",
+      "desc": "PDF, Word, Excel, ZIP… (aperçu PDF)",
+      "aliases": "file|fichier|pdf|doc|document|zip|excel|word"
+    },
+    "gallery": {
+      "title": "Galerie d'images",
+      "desc": "Plusieurs images défilables sur une ligne",
+      "aliases": "gallery|galerie|images|carrousel|carousel|album"
+    },
+    "date": {
+      "title": "Date",
+      "desc": "Insérer une date au fil du texte",
+      "aliases": "date|jour|calendrier|aujourd'hui"
+    }
+  },
+  "dbUi": {
+    "group": {
+      "all": "Toutes",
+      "none": "Sans"
+    },
+    "calc": {
+      "none": "Aucun",
+      "count": "Nombre",
+      "empty": "Vides",
+      "filled": "Remplies",
+      "sum": "Somme",
+      "avg": "Moyenne",
+      "median": "Médiane",
+      "min": "Minimum",
+      "max": "Maximum"
+    },
+    "view": {
+      "table": "Grille",
+      "kanban": "Tableau",
+      "gallery": "Galerie",
+      "calendar": "Calendrier",
+      "list": "Liste"
+    },
+    "rowHeight": {
+      "short": "Compacte",
+      "medium": "Moyenne",
+      "tall": "Grande"
+    },
+    "color": {
+      "gray": "Gris",
+      "blue": "Bleu",
+      "green": "Vert",
+      "yellow": "Jaune",
+      "orange": "Orange",
+      "red": "Rouge",
+      "purple": "Violet",
+      "pink": "Rose"
+    },
+    "field": {
+      "text": "Texte",
+      "number": "Nombre",
+      "select": "Sélection",
+      "multiSelect": "Multi-sélection",
+      "date": "Date",
+      "checkbox": "Case à cocher",
+      "url": "Lien",
+      "checklist": "Liste de tâches",
+      "createdTime": "Créé le",
+      "lastEditedTime": "Modifié le"
+    }
+  },
+  "paste": {
+    "mention": {
+      "label": "Mention",
+      "desc": "Puce compacte au fil du texte"
+    },
+    "url": {
+      "label": "Lien",
+      "desc": "Lien cliquable en ligne"
+    },
+    "bookmark": {
+      "label": "Signet",
+      "desc": "Aperçu en carte"
+    },
+    "embed": {
+      "label": "Intégration",
+      "desc": "Lecteur intégré (iframe / YouTube)"
+    }
+  },
+  "fileKind": {
+    "doc": "Document",
+    "sheet": "Tableur",
+    "slide": "Présentation",
+    "archive": "Archive",
+    "video": "Vidéo",
+    "image": "Image",
+    "text": "Texte",
+    "other": "Fichier"
+  },
+  "blocksUi": {
+    "preview": "Aperçu",
+    "playbackSpeed": "Vitesse de lecture",
+    "chooseAudio": "Choisir un audio…",
+    "audioDrop": "MP3, WAV, FLAC… ou glisse-dépose",
+    "audioUrl": "…ou coller une URL audio + Entrée",
+    "chooseFile": "Choisir un fichier…",
+    "fileDrop": "PDF, Word, Excel, ZIP… ou glisse-dépose",
+    "fileUrl": "…ou coller une URL de fichier + Entrée",
+    "open": "Ouvrir",
+    "download": "Télécharger",
+    "play": "Lire",
+    "fullscreen": "Plein écran",
+    "chooseVideo": "Choisir une vidéo…",
+    "dropFile": "ou glisse-dépose un fichier",
+    "videoUrl": "…ou coller une URL de vidéo + Entrée",
+    "changeDivider": "Changer le style du séparateur",
+    "today": "Aujourd'hui",
+    "clear": "Effacer"
+  },
+  "equation": {
+    "group": {
+      "structures": "Structures",
+      "calculus": "Calcul",
+      "matrices": "Matrices et systèmes",
+      "chemistry": "Chimie (mhchem)"
+    },
+    "template": {
+      "fraction": "Fraction",
+      "squareRoot": "Racine carrée",
+      "nthRoot": "Racine n-ième",
+      "exponent": "Exposant",
+      "subscript": "Indice",
+      "binomial": "Binôme",
+      "sum": "Somme",
+      "product": "Produit",
+      "integral": "Intégrale",
+      "limit": "Limite",
+      "derivative": "Dérivée",
+      "partialDerivative": "Dérivée partielle",
+      "matrix": "Matrice 2×2",
+      "determinant": "Déterminant",
+      "system": "Système (cas)",
+      "vector": "Vecteur",
+      "molecule": "Molécule",
+      "reaction": "Réaction",
+      "equilibrium": "Équilibre",
+      "ion": "Ion"
+    },
+    "empty": "Équation vide — cliquer pour écrire du LaTeX",
+    "templates": "Modèles",
+    "error": "Erreur LaTeX : {{error}}",
+    "hint": "LaTeX complet (KaTeX + chimie \\ce) · Ctrl+Entrée pour valider · Échap pour annuler",
+    "edit": "Modifier l’équation",
+    "input": "Code LaTeX de l’équation"
+  },
+  "gallery": {
+    "chooseImages": "Choisir des images…",
+    "dropFiles": "ou glisse-dépose des fichiers",
+    "imageUrl": "…ou coller une URL d'image + Entrée",
+    "row": "Bande (défilement horizontal)",
+    "carousel": "Carrousel",
+    "grid": "Grille",
+    "height": "Hauteur {{size}}",
+    "imageCount_one": "{{count}} image",
+    "imageCount_other": "{{count}} images",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "removeImage": "Retirer cette image",
+    "caption": "Légende…",
+    "openImage": "Ouvrir l’image"
+  },
+  "dbBasics": {
+    "noDateField": "Aucun champ « Date » pour placer les lignes.",
+    "addDateField": "Ajouter un champ Date",
+    "rowDetail": "Détail de la ligne",
+    "previousRow": "Ligne précédente",
+    "nextRow": "Ligne suivante",
+    "newProperty": "Nouvelle propriété",
+    "delete": "Supprimer",
+    "calculation": "Calcul",
+    "rowActions": "Actions de la ligne",
+    "rowCount_one": "{{count}} ligne",
+    "rowCount_other": "{{count}} lignes",
+    "newRow": "Nouvelle ligne"
+  },
+  "dbView": {
+    "viewOptions": "Options de la vue",
+    "moveLeft": "Déplacer à gauche",
+    "moveRight": "Déplacer à droite",
+    "deleteView": "Supprimer la vue",
+    "settings": "Réglages",
+    "viewSettings": "Réglages de la vue",
+    "fields": "Champs",
+    "rowHeight": "Hauteur des lignes",
+    "groupBy": "Regrouper par",
+    "noSelectField": "Aucun champ « Sélection »",
+    "addView": "Ajouter une vue",
+    "newView": "Nouvelle vue",
+    "databaseActions": "Actions de la base",
+    "deleteDatabase": "Supprimer la base",
+    "missingDatabase": "Base de données absente.",
+    "recreate": "Recréer"
+  },
+  "callout": {
+    "basic": "Basique",
+    "info": "Info",
+    "tip": "Astuce",
+    "warning": "Attention",
+    "alert": "Alerte",
+    "changeEmoji": "Changer l'emoji",
+    "presets": "Préréglages",
+    "background": "Couleur de fond",
+    "style": "Style de l'encadré"
+  },
+  "window": {
+    "detach": "Détacher le carnet",
+    "unpin": "Détacher du premier plan",
+    "alwaysOnTop": "Toujours au premier plan",
+    "stopAlwaysOnTop": "Ne plus garder au premier plan",
+    "keepOnTop": "Garder au premier plan",
+    "attach": "Rattacher à la fenêtre principale",
+    "minimize": "Réduire",
+    "restore": "Restaurer",
+    "maximize": "Agrandir",
+    "close": "Fermer",
+    "title": "Fenêtre",
+    "reload": "Recharger",
+    "closeWindow": "Fermer la fenêtre"
+  },
+  "dbFields": {
+    "type": "Type",
+    "numberFormat": "Format du nombre",
+    "dateFormat": "Format de la date",
+    "includeTime": "Inclure l'heure",
+    "insertLeft": "Insérer à gauche",
+    "insertRight": "Insérer à droite",
+    "hide": "Masquer",
+    "clearValues": "Effacer les valeurs",
+    "addColumn": "Ajouter une colonne",
+    "newColumn": "Nouvelle colonne",
+    "columnOptions": "Options de la colonne",
+    "hideColumn": "Masquer la colonne",
+    "addCard": "Ajouter une carte",
+    "groupHint": "Choisir un champ de type « Sélection » pour regrouper les cartes (Réglages › Regrouper par).",
+    "showColumn": "Afficher la colonne"
+  },
+  "settings": {
+    "title": "Paramètres du carnet",
+    "description": "Appliqués immédiatement, partagés entre tous les carnets.",
+    "appearance": "Apparence",
+    "pageWidth": "Largeur du document",
+    "fontScale": "Échelle de police",
+    "breadcrumb": "Fil d'Ariane au-dessus du document",
+    "visible": "Visible",
+    "hidden": "Masqué",
+    "editor": "Éditeur",
+    "autosaveDelay": "Délai d'enregistrement auto",
+    "confirmTrash": "Confirmer avant d'envoyer à la corbeille",
+    "yes": "Oui",
+    "no": "Non",
+    "shortcuts": "Raccourcis clavier",
+    "reset": "Réinitialiser",
+    "press": "Presser…",
+    "shortcutHint": "Cliquer puis presser la nouvelle combinaison (Échap annule)",
+    "shortcutConflict": "Un raccourci déjà utilisé est échangé avec l'action qui le possédait.",
+    "width": {
+      "narrow": "Étroite",
+      "medium": "Moyenne",
+      "wide": "Large",
+      "full": "Pleine largeur"
+    },
+    "shortcut": {
+      "newPage": "Nouvelle page",
+      "newTab": "Nouvel onglet",
+      "closeTab": "Fermer l'onglet",
+      "reopenTab": "Rouvrir l'onglet fermé",
+      "nextTab": "Onglet suivant",
+      "prevTab": "Onglet précédent",
+      "back": "Page précédente (historique)",
+      "forward": "Page suivante (historique)",
+      "search": "Rechercher dans le carnet",
+      "settings": "Paramètres du carnet",
+      "save": "Enregistrer la page",
+      "trash": "Ouvrir la corbeille",
+      "toggleSidebar": "Afficher/masquer la barre latérale"
+    },
+    "spellcheck": "Correcteur orthographique",
+    "spellcheckHint": "Souligne les fautes ; clic droit ou Ctrl+. pour corriger",
+    "spellUnsupported": "Pas de dictionnaire pour cette langue — soulignement natif seul",
+    "spellOn": "Actif",
+    "spellOff": "Coupé",
+    "personalDictionary": "Dictionnaire personnel",
+    "personalEmpty": "Aucun mot ajouté",
+    "personalRemove": "Retirer du dictionnaire"
+  },
+  "filterSort": {
+    "filters": "Filtres",
+    "add": "Ajouter",
+    "sort": "Trier",
+    "sortBy": "Trier par",
+    "op": {
+      "is": "est",
+      "isNot": "n'est pas",
+      "contains": "contient",
+      "notContains": "ne contient pas",
+      "isEmpty": "est vide",
+      "notEmpty": "n'est pas vide",
+      "gt": ">",
+      "gte": "≥",
+      "lt": "<",
+      "lte": "≤",
+      "checked": "cochée",
+      "unchecked": "décochée"
+    }
+  },
+  "lightbox": {
+    "zoomOut": "Zoom arrière",
+    "zoomIn": "Zoom avant",
+    "pause": "Pause (Espace)",
+    "slideshow": "Diaporama (Espace)",
+    "previous": "Précédente",
+    "next": "Suivante"
+  },
+  "icons": {
+    "search": "Rechercher une icône…",
+    "uploading": "Envoi…",
+    "chooseImage": "Choisir une image",
+    "dropFile": "ou glisse-dépose un fichier",
+    "emojis": "Emojis",
+    "icons": "Icônes",
+    "upload": "Import"
+  },
+  "pageHeader": {
+    "cover": "Couverture",
+    "change": "Changer",
+    "icon": "Icône"
+  },
+  "finalPass": {
+    "convertOptions": "Convertir / options",
+    "convertTo": "Convertir en",
+    "pasteAs": "Coller comme",
+    "copy": "Copier",
+    "copyText": "Copier le texte sélectionné",
+    "copyLink": "Copier le lien",
+    "copyPassageLink": "Copier le lien vers ce passage",
+    "exitFullscreen": "Réduire",
+    "openFullscreen": "Ouvrir en pleine page",
+    "deleteColumn": "Supprimer la colonne",
+    "volume": "Volume"
+  },
+  "numberLabels": {
+    "number": "Nombre",
+    "integer": "Entier",
+    "percent": "Pourcentage",
+    "euro": "Euro (€)",
+    "dollar": "Dollar ($)",
+    "audio": "Audio"
+  },
+  "preview": {
+    "unavailable": "Aperçu indisponible",
+    "openPdf": "ouvrir le PDF",
+    "loadingPdf": "Chargement du PDF… ({{label}})",
+    "loading": "Chargement…"
+  },
+  "subpage": {
+    "openHint": "Ouvrir la sous-page (clic du milieu : nouvel onglet)"
+  },
+  "sideMenu": {
+    "changeType": "Transformer en",
+    "copyBlockLink": "Copier le lien du bloc",
+    "turnIntoSubpage": "Transformer en sous-page",
+    "colors": "Couleurs",
+    "rowHeader": "Ligne d'en-tête",
+    "columnHeader": "Colonne d'en-tête"
+  },
+  "linkPage": {
+    "tooltip": "Lier à une page ou une URL",
+    "placeholder": "Coller une URL ou rechercher une page…",
+    "linkTo": "Lier à",
+    "hint": "Saisissez une URL ou un titre de page"
+  },
+  "mention": {
+    "block": "Bloc",
+    "openBlock": "Ouvrir au bloc",
+    "showChip": "Afficher en pastille",
+    "showCard": "Afficher en carte",
+    "refreshLabel": "Actualiser le libellé",
+    "deletedPage": "Page supprimée",
+    "blockMissing": "Bloc introuvable (supprimé ?)",
+    "deletedTitle": "{{title}} (supprimée)",
+    "linkedBlock": "bloc lié",
+    "type": {
+      "equation": "Équation",
+      "image": "Image",
+      "video": "Vidéo",
+      "audio": "Audio",
+      "file": "Fichier",
+      "gallery": "Galerie d'images",
+      "database": "Base de données",
+      "youtube": "Vidéo YouTube",
+      "embed": "Intégration",
+      "bookmark": "Signet",
+      "divider": "Séparateur",
+      "subpage": "Sous-page",
+      "table": "Tableau",
+      "codeBlock": "Bloc de code"
+    }
+  },
+  "meta": {
+    "name": "Nom du carnet",
+    "type": "Type",
+    "languageLabel": "Langue",
+    "kind": {
+      "notes": "Notes",
+      "project": "Projet",
+      "script": "Script",
+      "research": "Recherche",
+      "journal": "Journal"
+    },
+    "language": {
+      "fr": "Français",
+      "en": "Anglais",
+      "es": "Espagnol",
+      "de": "Allemand",
+      "ja": "Japonais",
+      "zh": "Chinois"
+    }
+  },
+  "create": {
+    "title": "Créer un carnet",
+    "description": "Donnez-lui un nom, un type et une langue. Vous pourrez tout modifier ensuite.",
+    "namePlaceholder": "Nom du carnet…",
+    "cancel": "Annuler",
+    "submit": "Créer"
+  },
+  "edit": {
+    "title": "Modifier le carnet",
+    "description": "Modifiez le nom, le type ou la langue de ce carnet.",
+    "done": "Terminé"
+  },
+  "blockTypes": {
+    "paragraph": "Texte",
+    "heading1": "Titre",
+    "heading2": "Sous-titre",
+    "heading3": "Petit titre",
+    "bulletList": "Liste à puces",
+    "numberedList": "Liste numérotée",
+    "checkList": "Liste de tâches",
+    "quote": "Citation"
+  },
+  "dbDefaults": {
+    "titleField": "Nom",
+    "statusField": "Statut",
+    "tableView": "Grille",
+    "todo": "À faire",
+    "inProgress": "En cours",
+    "done": "Terminé",
+    "name": "Base de données"
+  }
+}

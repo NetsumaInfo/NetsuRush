@@ -1,0 +1,32 @@
+# NetsuRush — dependances OPTIONNELLES (best-effort, installees une par une par setup.ps1).
+# Un echec ici ne bloque PAS l'installation : seule la fonctionnalite associee reste indisponible.
+# Raison d'etre : ces paquets compilent depuis les sources (pas de wheel pour le Python du venv) et
+# exigent un toolchain (CMake + compilateur C++) absent des machines testeur.
+
+# RIFE n'est pas listé ici : le gestionnaire installe son wheel Windows officiel précompilé.
+
+# --- NetsuLab / Voix : moteurs ajoutes (best-effort, scaffolds runtime a valider) ---
+# Sous-titres : alignement mot frame-accurate (WhisperX, BSD-2). Tire wav2vec2 au 1er usage.
+whisperx
+# Detourage BiRefNet standalone + Depth Anything 3 (transformers trust_remote_code) : deps du code distant.
+timm
+einops
+kornia
+# Suppression d'objet video (Roto Studio → MiniMax-Remover) : pipeline diffusion Wan. Le CODE vit dans
+# python/nrroto/vendor/ (2 .py du depot zibojia, hors pip) ; diffusers>=0.33 fournit AutoencoderKLWan.
+diffusers>=0.33
+# Dictee streaming faible latence (future) : runtime ONNX multi-modeles (sherpa-onnx, MIT).
+sherpa-onnx
+# Confirmation anti-bruit NOVA-VAD (couche par-dessus Silero) : classifieur sklearn RF+GBT (MIT).
+# librosa/soundfile deja dans requirements.txt ; le depot nova-vad est clone par setup.ps1.
+scikit-learn
+joblib
+# Recherche visage ANIME (faces.py) : detection YOLO anime (MIT) + identite personnage CCIP
+# (OpenRAIL), ONNX. ATTENTION : tire opencv-contrib-python (GUI) → setup.ps1 re-normalise le
+# venv sur opencv-contrib-python-headless juste apres (2 dists cv2 = imports casses).
+dghs-imgutils[gpu]
+# NOTE (installer manuellement, trop lourds / depuis git — non ajoutes ici) :
+#   nemo_toolkit[asr]              -> Canary-1B-v2 (ASR 25 langues)
+#   segment-anything-2 (git)      -> Roto Studio (SAM 2.1/3.1)
+#   video-depth-anything (git)    -> profondeur video temporelle
+#   FloED / MiniMax-Remover (git) -> suppression d'objet video

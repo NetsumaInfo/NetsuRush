@@ -1,0 +1,123 @@
+{
+  "app": {
+    "modulePreparing": "Module in the works — coming soon."
+  },
+  "nav": { "derush": "NetsuCut", "script": "NetsuDraft", "notebook": "NetsuBook", "search": "NetsuSearch", "upscale": "NetsuLab", "reference": "NetsuBoard", "transfer": "NetsuBridge", "voice": "NetsuTalk", "chat": "NetsuPilot", "optimisation": "NetsuBoost" },
+  "sidebar": {
+    "settings": "Settings",
+    "hostPicked": "Controlled app"
+  },
+  "status": {
+    "connected": "Connected",
+    "offline": "Offline",
+    "connectedLower": "connected",
+    "offlineLower": "offline",
+    "panelConnected": "panel connected",
+    "panelOffline": "panel offline",
+    "resolveConnected": "Resolve connected",
+    "resolveOffline": "Resolve offline",
+    "project": "Project: {{project}}",
+    "refresh": "Refresh status",
+    "resolveHint": "The bridge is running, but Resolve isn't responding. Open <b1>Resolve Studio</b1> with a project, then set <b2>Preferences ▸ System ▸ General ▸ External scripting using = Local</b2> and restart Resolve.",
+    "adobeHint": "Open {{host}}, then the <b>Window ▸ Extensions ▸ NetsuRush</b> panel (install it from the Adobe tab)."
+  },
+  "menu": { "derush": "Footage", "chat": "Chat",
+    "edit": "Edit",
+    "cut": "Cut",
+    "paste": "Paste",
+    "selectAll": "Select all",
+    "derushHome": "Logging home",
+    "reloadRushes": "Reload footage",
+    "cutTimeline": "Cut a timeline",
+    "section": "Section",
+    "sectionDecoupage": "Cutting",
+    "sectionCollections": "Collections",
+    "sectionTimeline": "Live timeline",
+    "search": "Search",
+    "resultView": "Result view",
+    "resultFlat": "Flat",
+    "resultClusters": "Clusters",
+    "resultDedup": "Duplicates",
+    "clearRefs": "Clear references",
+    "clearChain": "Clear chain",
+    "clearSources": "Clear selection",
+    "voice": "Voice",
+    "listen": "Listen",
+    "listenNone": "Raw source",
+    "listenAll": "Full edit",
+    "listenSilences": "Silences cut",
+    "listenFillers": "No fillers",
+    "listenRepeats": "No repeats",
+    "reset": "Reset",
+    "clearChat": "Clear conversation",
+    "gotoModule": "Go to module",
+    "console": "Console",
+    "refreshStatus": "Refresh status",
+    "reloadApp": "Reload NetsuRush",
+    "pinned": "Window pinned",
+    "hideSidebar": "Hide sidebar",
+    "pinAbove": "Pin on top"
+  },
+  "windowControls": {
+    "unpin": "Unpin window",
+    "pinAbove": "Pin on top",
+    "unpinShort": "Unpin",
+    "minimize": "Minimize",
+    "restore": "Restore",
+    "maximize": "Maximize"
+  },
+  "errorBadge": {
+    "aria": "Errors: {{count}} — open the console",
+    "open": "Open the console",
+    "markRead": "Mark as read"
+  },
+  "errorBoundary": {
+    "title": "NetsuRush crashed while rendering",
+    "reload": "Reload"
+  },
+  "notebook": {
+    "untitled": "Untitled",
+    "prev": "Previous",
+    "next": "Next",
+    "closeTab": "Close tab",
+    "closeOthers": "Close others",
+    "allTabs": "All tabs",
+    "newPageTab": "New page in a tab"
+  },
+  "emoji": {
+    "search": "Search emoji…",
+    "none": "No emoji for \"{{q}}\".",
+    "cat": {
+      "people": "Smileys & people",
+      "nature": "Animals & nature",
+      "foods": "Food & drink",
+      "activity": "Activities",
+      "places": "Travel & places",
+      "objects": "Objects",
+      "symbols": "Symbols",
+      "flags": "Flags"
+    }
+  },
+  "scrollTop": "Back to top",
+  "select": {
+    "select": "Select",
+    "deselect": "Deselect"
+  },
+  "power": {
+    "reopenHost": "Reopen {{host}}",
+    "freeRam": "Close to free up RAM",
+    "closeNub": "Close {{host}} (free RAM/GPU)",
+    "opInProgress": "Operation in progress…",
+    "hostClosed": "{{host}} closed",
+    "reopenToResume": "Reopen on \"{{project}}\" to resume.",
+    "reopenToResumeNoProject": "Reopen to resume.",
+    "collapse": "Collapse",
+    "collapseCorner": "Collapse to the corner",
+    "closeHostQ": "Close {{host}}?",
+    "freeRamDesc": "Frees RAM and GPU for the task. One-click reopen on the project when it's done.",
+    "resolveSafeCloseDesc": "Frees RAM and GPU. Before closing, NetsuRush saves the project and verifies its cache.",
+    "later": "Later",
+    "closeHost": "Close {{host}}",
+    "failed": "failed"
+  }
+}

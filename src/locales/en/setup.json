@@ -1,0 +1,58 @@
+{
+  "title": "Configure NetsuRush",
+  "desc": "Choose the downloads you need. The compatible foundation for this PC is installed automatically.",
+  "progressAria": "Configuration steps",
+  "models": {
+    "title": "Optional downloads",
+    "subtitle": "Grouped by feature and repairable at any time.",
+    "search": "Search models…",
+    "none": "No downloads",
+    "sceneDetection": "Scene cutting",
+    "sceneDetectionHint": "The lightweight component required by NetsuCut is included with the prerequisites.",
+    "included": "Included",
+    "empty": "No model matches this search.",
+    "selected": "{{count}} selected",
+    "noExtraSpace": "no extra space",
+    "tier": {
+      "light": "light",
+      "balanced": "balanced",
+      "heavy": "heavy"
+    }
+  },
+  "packs": {
+    "recommended": "Recommended pack",
+    "select": "Select pack"
+  },
+  "scan": {
+    "running": "Scanning the installation and GPU…"
+  },
+  "review": {
+    "title": "Ready to install",
+    "subtitle": "Review what will be added to this PC.",
+    "downloads": "Optional space",
+    "modelCount": "{{count}} download(s)",
+    "noOptionalModels": "No optional downloads",
+    "mandatoryOnly": "Foundation and scene cutting only",
+    "sceneDetection": "Scene cutting included"
+  },
+  "detectedBackend": "Selected compute engine: {{backend}}",
+  "installFailed": "Installation failed",
+  "running": "Installing prerequisites…",
+  "log": "Install log",
+  "done": "Installation complete",
+  "restartHint": "Restart NetsuRush to load the new environment.",
+  "restartApp": "Restart app",
+  "installing": "Installing…",
+  "install": "Install selection",
+  "repair": "Repair and verify",
+  "skip": "Continue without installing",
+  "update": {
+    "action": "Update",
+    "download": "Download the update"
+  },
+  "adobe": {
+    "title": "Adobe extension",
+    "detected": "Detected: {{apps}}",
+    "hint": "installs the NetsuRush panel and keeps it up to date automatically."
+  }
+}

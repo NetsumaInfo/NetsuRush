@@ -1,0 +1,654 @@
+{
+  "title": "设置",
+  "nav": {
+    "account": "账号",
+    "interface": "界面",
+    "media": "媒体",
+    "ai": "模型",
+    "export": "导出",
+    "adobe": "Adobe",
+    "storage": "存储",
+    "system": "系统",
+    "about": "关于"
+  },
+  "about": {
+    "tagline": "本地素材整理中心，直连 DaVinci Resolve、Premiere Pro 和 After Effects。",
+    "socialTitle": "社交网络",
+    "social": {
+      "discord": "加入服务器"
+    },
+    "legal": "© 2026 Haim Faraj · NetsuRush 根据 GNU AGPL v3.0-only 分发 · 不提供担保。",
+    "licenseLink": "完整许可证文本",
+    "sourceLink": "对应源代码"
+  },
+  "account": {
+    "title": "账号",
+    "notConfigured": "此安装尚未配置登录。",
+    "subtitle": "已连接到 NetsuRush 的 Discord 账号。",
+    "none": "未连接任何账号。",
+    "discordUser": "Discord 用户",
+    "signOut": "退出登录"
+  },
+  "playback": {
+    "title": "预览和缩略图",
+    "subtitle": "配置视频预览和缩略图。",
+    "soundTitle": "声音",
+    "playerVolume": "播放器音量",
+    "playerVolumeHint": "由 NetsuCut、合集、语音和放大共享。",
+    "hoverVolume": "悬停音量",
+    "hoverVolumeHint": "悬停缩略图的音量；自动播放的预览始终静音。",
+    "globalMuted": "已被播放器音量静音。",
+    "generation": {
+      "proxyTitle": "动态预览",
+      "thumbnailTitle": "静态缩略图",
+      "format": "格式",
+      "formatHint": {
+        "hevc": "文件更小，适合HEVC解码流畅的设备。",
+        "h264": "兼容性高，通常解码速度快。",
+        "webp": "用于网格的无声预览，不含音轨。"
+      },
+      "engine": "引擎",
+      "engineAuto": "自动・推荐",
+      "engineHint": "自动选择实际可用的最佳引擎。",
+      "preset": "配置",
+      "presetHint": "所选引擎的实际FFmpeg参数。",
+      "resolution": "分辨率",
+      "resolutionHint": "卡片默认使用480p。",
+      "audio": "音频",
+      "audioHint": "为视频代理添加轻量AAC音轨。",
+      "noWebpAudio": "动态WebP不支持声音。",
+      "audioUnavailable": "当前预览没有音频。",
+      "enabled": "已启用",
+      "disabled": "已禁用",
+      "thumbnailFormatHint": "WebP通常更小；JPEG兼容性更高。",
+      "quality": "图像质量",
+      "qualityLow": "轻量",
+      "qualityStandard": "均衡",
+      "qualityHigh": "清晰",
+      "qualityHint": "档位同时决定清晰度和生成速度。",
+      "thumbnailTiming": "保持快速模式，在切点后几帧提取缩略图。",
+      "cacheHint": "更改设置后仍保留现有缓存。",
+      "cacheCleared": "旧缓存已删除。",
+      "reset": "重置",
+      "clearOld": "删除旧缓存"
+    }
+  },
+  "performance": {
+    "indexingTitle": "镜头分析",
+    "accelerationTitle": "加速",
+    "shotDecode": "批量取帧",
+    "shotDecodeHint": "一次取出整个镜头的画面，而不是逐张取。最快可达 6 倍，取到的画面完全相同。",
+    "vramProfile": "内存档位",
+    "vramProfileHint": "同时进行多少工作。影响到剪辑就调低，机器空闲就调高。",
+    "vram": {
+      "economy": "省内存",
+      "balanced": "均衡",
+      "performance": "性能"
+    },
+    "maxPatches": "分析分辨率",
+    "maxPatchesHint": "模型在每张画面里看到的细节量。调高能认出细小元素，但更耗时间和内存。",
+    "patchesDefault": "{{value}}（默认）",
+    "reindexWarning": "在这个分辨率下素材需要重建索引。调回 256 会原封不动地找回原来的索引。",
+    "onnxGpu": "人脸与听写用 GPU",
+    "onnxGpuHint": "比处理器快约 8 倍，结果完全一致。显卡驱动崩溃时可以关掉。",
+    "enabled": "开启",
+    "disabled": "关闭",
+    "reset": "重置性能设置",
+    "quick": "性能",
+    "quickMore": "全部设置…"
+  },
+  "appearance": {
+    "title": "主题",
+    "subtitle": "选择适合工作环境的配色。",
+    "group": {
+      "dark": "深色",
+      "light": "浅色"
+    },
+    "theme": {
+      "dark": {
+        "label": "深色",
+        "hint": "中性且对比清晰。"
+      },
+      "midnight": {
+        "label": "午夜",
+        "hint": "纯黑背景与低调表面。"
+      },
+      "blue": {
+        "label": "夜蓝",
+        "hint": "深邃明亮的蓝色。"
+      },
+      "light": {
+        "label": "浅色",
+        "hint": "清爽且易读的白色。"
+      },
+      "soft-light": {
+        "label": "柔和浅色",
+        "hint": "降低眩光的蓝灰色。"
+      },
+      "graphite": {
+        "label": "石墨",
+        "hint": "中性灰，无色偏。"
+      },
+      "forest": {
+        "label": "森林",
+        "hint": "深绿配翡翠色强调。"
+      },
+      "ember": {
+        "label": "余烬",
+        "hint": "暖炭灰配琥珀色强调。"
+      },
+      "plum": {
+        "label": "李紫",
+        "hint": "低饱和紫配藕荷色强调。"
+      },
+      "contrast": {
+        "label": "高对比度",
+        "hint": "纯黑背景与清晰边框。"
+      },
+      "paper": {
+        "label": "纸张",
+        "hint": "柔和棕褐配陶土色强调。"
+      }
+    },
+    "wallpaper": {
+      "title": "背景",
+      "choose": "选择图片",
+      "none": "无",
+      "remove": "从库中移除",
+      "empty": "暂无背景。把文件拖到这里。",
+      "importFailed": "导入失败。",
+      "blockedByTheme": "高对比度主题不支持背景。",
+      "blur": "模糊",
+      "opacity": "不透明度",
+      "saturate": "饱和度",
+      "uiOpacity": "面板不透明度",
+      "animate": "播放",
+      "pauseUnfocused": "后台时静止",
+      "pauseWhileBusy": "处理时静止",
+      "groupFraming": "取景",
+      "groupRender": "呈现",
+      "groupReadability": "可读性",
+      "groupMotion": "动画",
+      "reset": "重置",
+      "openFraming": "调整画面",
+      "framingTitle": "背景取景",
+      "rotateLeft": "向左旋转",
+      "rotateRight": "向右旋转",
+      "flipH": "水平翻转",
+      "flipV": "垂直翻转",
+      "resetFraming": "重置取景",
+      "cropWidth": "裁剪宽度",
+      "transform": "方向",
+      "applyFraming": "应用",
+      "cropSize": "裁剪尺寸",
+      "groupScope": "应用范围",
+      "onDetached": "分离窗口",
+      "global": "所有主题共用"
+    },
+    "colors": {
+      "title": "颜色",
+      "perTheme": "为该主题设置",
+      "primary": "强调色",
+      "fg": "文字",
+      "bg": "背景",
+      "surface": "面板",
+      "border": "边框",
+      "restore": "恢复主题色",
+      "fromTheme": "来自主题",
+      "resetAll": "全部恢复主题",
+      "resetAllHint": "清除该主题的所有自定义。"
+    },
+    "custom": {
+      "title": "我的主题",
+      "subtitle": "保存当前外观：调色板、颜色和背景。",
+      "create": "新建主题",
+      "save": "保存",
+      "delete": "删除此主题",
+      "empty": "尚未保存任何主题。",
+      "namePlaceholder": "主题名称",
+      "confirm": "确定",
+      "rename": "重命名",
+      "unsaved": "“{{name}}” 有未保存的更改。"
+    }
+  },
+  "updates": {
+    "title": "更新",
+    "subtitle": "从 GitHub 检查版本，并在安装前验证签名。",
+    "auto": "自动检查",
+    "autoHint": "启动数秒后检查新版本。",
+    "on": "开启",
+    "off": "关闭",
+    "ready": "可以检查",
+    "checking": "正在检查更新…",
+    "available": "版本 {{version}} 可用",
+    "downloading": "正在下载并验证…",
+    "failed": "检查失败",
+    "current": "NetsuRush 已是最新版本",
+    "check": "检查",
+    "install": "安装",
+    "history": "各版本新内容",
+    "whatsNew": "版本 {{version}} 的新内容",
+    "gotIt": "开始使用"
+  },
+  "compatibility": {
+    "title": "此电脑的兼容性",
+    "gpuFunctions": "使用 GPU 的功能",
+    "cpuFunctions": "使用 CPU 或备用功能",
+    "igpu": "iGPU",
+    "dgpu": "dGPU",
+    "driver": "驱动程序",
+    "noHardware": "未检测到组件。",
+    "state": {
+      "gpu": "GPU",
+      "cpu": "CPU",
+      "fallback": "CPU 备用",
+      "missing": "不可用"
+    },
+    "thumbnailEngine": "按设计使用 CPU 生成。",
+    "subtitle": "NetsuRush 只使用此电脑上可用的运行引擎。",
+    "refresh": "检查",
+    "hardware": "检测到的组件",
+    "gpu": "显卡",
+    "cpu": "处理器",
+    "uses": "功能",
+    "notInstalled": "不可用",
+    "available": "可用",
+    "unavailable": "无法检查此电脑的组件。",
+    "features": {
+      "netsucut": "NetsuCut",
+      "torchModels": "AI 模型",
+      "onnxModels": "ONNX 模型",
+      "transcription": "转录",
+      "notebook": "NetsuBook"
+    },
+    "featureHints": {
+      "netsucut": "创建预览并编码视频。",
+      "torchModels": "检测镜头、搜索并增强图像。",
+      "onnxModels": "移除背景并运行 ONNX 模型。",
+      "transcription": "将语音转换为文字。",
+      "notebook": "保存并整理笔记，无需 GPU。"
+    }
+  },
+  "exportProfiles": {
+    "title": "导出配置",
+    "subtitle": "应用于缩略图和搜索结果下载按钮的编码设置。",
+    "new": "新建",
+    "duplicate": "复制",
+    "deleteAria": "删除配置",
+    "restore": "恢复",
+    "restoreHint": "恢复列表中缺失的内置预设。",
+    "cardButton": "缩略图按钮",
+    "cardButtonHint": "悬停缩略图时显示的按钮所执行的操作。"
+  },
+  "console": {
+    "title": "控制台",
+    "subtitle": "应用、服务和 AI 写下的内容。",
+    "copy": "复制",
+    "errors": "错误",
+    "export": "导出",
+    "clearAria": "清空控制台",
+    "all": "全部（{{count}}）",
+    "warnings": "警告（{{count}}）",
+    "errorsCount": "错误（{{count}}）",
+    "empty": "暂无日志。",
+    "emptyFilter": "没有符合此筛选条件的日志。",
+    "emptyClipboard": "暂无日志。"
+  },
+  "bugReport": {
+    "title": "反馈问题",
+    "type": "出了什么事？",
+    "module": "在哪里？",
+    "detail": "用几个字说说",
+    "detailPlaceholder": "例如：点发送没反应",
+    "severity": "有多严重？",
+    "frequency": "出现频率…",
+    "groups": {
+      "problem": "有问题",
+      "improvement": "有想法",
+      "other": "其他"
+    },
+    "categories": {
+      "crash": "程序自己关掉了",
+      "freeze": "程序卡住了",
+      "startup": "程序打不开",
+      "dataLoss": "我的东西丢了",
+      "wrongResult": "结果不对",
+      "playback": "视频放不了",
+      "export": "导出不成功",
+      "hostLink": "连不上 Resolve 或 Adobe",
+      "ai": "AI 用不了",
+      "download": "下载失败",
+      "performance": "太慢了",
+      "ui": "显示不对劲",
+      "accessibility": "看不清或点不到",
+      "i18n": "文字有错",
+      "security": "隐私方面的问题",
+      "regression": "以前是好的",
+      "feature": "想要一个新功能",
+      "ux": "让它更简单的想法",
+      "question": "我有个问题",
+      "other": "别的事"
+    },
+    "severities": {
+      "blocker": "完全没法用",
+      "major": "有点烦",
+      "minor": "小问题",
+      "idea": "想法"
+    },
+    "frequencies": {
+      "always": "每次",
+      "often": "经常",
+      "rare": "偶尔",
+      "once": "只有一次"
+    },
+    "description": "说说发生了什么",
+    "descriptionPlaceholder": "你做了什么，哪里不对劲…",
+    "descriptionIdea": "说说你的想法",
+    "descriptionIdeaPlaceholder": "你希望能做什么，为什么",
+    "steps": "怎么再弄一次？",
+    "stepsPlaceholder": "1. 打开… 2. 点击… 3. …",
+    "expected": "本来应该怎样？",
+    "expectedPlaceholder": "你期待的结果",
+    "videoSource": "视频链接",
+    "videoPlaceholder": "可以下载的链接",
+    "discord": "你的 Discord",
+    "discordPlaceholder": "@用户名",
+    "auto": "自动",
+    "specs": {
+      "title": "你的电脑",
+      "copy": "复制",
+      "refresh": "重新读取",
+      "loading": "正在读取…",
+      "more": "全部展开",
+      "less": "收起",
+      "manual": "自己填写",
+      "manualPlaceholder": "RTX 3060、Ryzen 5600X、32 GB、Windows 11"
+    },
+    "sending": "发送中…",
+    "send": "发送",
+    "download": "保存这条消息",
+    "logsAttached": "已附上 {{count}} 行日志",
+    "logErrors": "{{count}} 个错误",
+    "sendFailed": "没发出去，请再试一次。",
+    "validation": {
+      "description": "发送前先说说发生了什么。",
+      "detail": "用几个字说说是什么事。",
+      "tooLarge": "有文件超过 {{size}} MB。"
+    },
+    "noWebhook": "发送已停用：未配置 Webhook。请在 nr.config.json 中填写 <c1>bugWebhook</c1>（或设置环境变量 <c2>NR_BUG_WEBHOOK</c2>）。",
+    "descriptionOther": "详细说说",
+    "descriptionOtherPlaceholder": "你的问题，或者想告诉我们的事…",
+    "files": {
+      "label": "附件",
+      "choose": "添加文件",
+      "add": "添加",
+      "remove": "移除",
+      "limit": "最多 {{count}} 个文件"
+    }
+  },
+  "outbox": {
+    "opening": "正在打开缓存…",
+    "intro": "在繁重编码期间关闭 Resolve/Premiere Pro 以释放 GPU，也不会丢失发送内容：它们会被缓存，并在<b>重新打开时自动应用</b>。",
+    "enabled": "启用队列",
+    "enabledHint": "否则，向已关闭的软件发送内容仍会像以前一样失败。",
+    "on": "已启用",
+    "off": "已禁用",
+    "delay": "应用前等待",
+    "delayHint": "让编辑软件有时间完成启动。",
+    "destination": "缓存发送的目标",
+    "targetNew": "每次发送一个时间线",
+    "targetSingle": "单一时间线",
+    "targetPlaceholder": "汇总时间线名称",
+    "targetSingleHint": "所有待处理发送都会进入重新打开时创建的同一条时间线。",
+    "targetNewHint": "每次发送都会像直接发送一样创建自己的时间线。",
+    "queue": "队列",
+    "pendingCount": "{{count}} 项待处理",
+    "applyNow": "立即应用",
+    "clearHistory": "清空历史",
+    "empty": "没有缓存的发送。",
+    "applied": "已应用",
+    "failed": "失败",
+    "pending": "待处理",
+    "offline": {
+      "title": "时间线离线缓存",
+      "upToDate": "已是最新",
+      "stats": "{{clips}} 个片段 · {{cached}}/{{total}} 条时间线已保存镜头。",
+      "none": "没有缓存 — Resolve 关闭时，时间线会空白打开。",
+      "update": "更新",
+      "needResolve": "必须连接 Resolve 才能构建缓存。",
+      "building": "正在后台更新（媒体处理优先）…",
+      "auto": "自动在后台更新，只读取新增时间线。",
+      "rebuild": "全部重新计算"
+    }
+  },
+  "discord": {
+    "title": "Discord 状态",
+    "preview": {
+      "heading": "正在玩",
+      "elapsed": "已进行 {{time}}",
+      "empty": "不会显示任何内容。"
+    },
+    "on": "已开启",
+    "off": "已关闭",
+    "status": {
+      "connected": "显示在 {{user}} 的个人资料上。",
+      "searching": "未找到 Discord — 打开后状态会出现。",
+      "disabled": "你的个人资料不显示任何内容。",
+      "noAppId": "未填写 Discord 应用。"
+    },
+    "showModule": "当前模块",
+    "showProject": "项目名称",
+    "showProjectHint": "可能泄露客户名称。",
+    "showElapsed": "已用时间",
+    "custom": "自定义文本",
+    "customHelp": "替换自动生成的行。{module} 和 {projet} 会被替换。",
+    "details": "第一行",
+    "state": "第二行"
+  },
+  "storage": {
+    "empty": "暂无缓存。",
+    "emptyHint": "浏览素材时会逐步建立缩略图和预览。",
+    "diskFree": "可用 {{free}}，共 {{total}}",
+    "refresh": "刷新",
+    "kind": {
+      "thumb": "缩略图",
+      "proxy": "视频预览",
+      "voice": "提取的音频",
+      "upscaleTest": "处理测试",
+      "roto": "转描会话",
+      "scenes": "镜头检测",
+      "transcripts": "转录",
+      "embeddings": "搜索向量",
+      "indexThumbs": "索引缩略图",
+      "faces": "人脸索引"
+    },
+    "kindHint": {
+      "thumb": "每个镜头一张图。冷启动时重建较慢。",
+      "proxy": "GPU 编码的短片段。一秒即可重建。",
+      "voice": "用于转录和静音检测的 16 kHz WAV。",
+      "upscaleTest": "“试试看”生成的全分辨率图像。",
+      "roto": "分割会话的帧和蒙版。",
+      "scenes": "AI 检测出的剪切点。重建 = 一次检测。",
+      "transcripts": "词级文本和时间码。重建 = 一次 ASR。",
+      "embeddings": "每个镜头一个向量，即模型“看到”的内容。重建 = 数小时 GPU。",
+      "indexThumbs": "索引里遗留的旧缩略图。搜索现在显示与剪辑相同的那一份，剩下的可以清掉。",
+      "faces": "每张检出人脸一个身份向量。重建 = 一次检测。"
+    },
+    "tree": {
+      "title": "按项目",
+      "desc": "按源文件夹分组。清空已完结项目的缓存，不影响其他项目。",
+      "rushCount_one": "{{count}} 个素材",
+      "rushCount_other": "{{count}} 个素材",
+      "unattributed": "未归属",
+      "unattributedHint": "索引前写入的缓存，或找不到对应素材。可整批清除。",
+      "selected": "已选 {{count}} 项 · {{size}}",
+      "clearSelection": "取消选择",
+      "purgeSelection": "清空所选"
+    },
+    "reindex": {
+      "action": "重建索引",
+      "hint": "补上磁盘上已有的缓存：索引只认得引入之后写入的内容。",
+      "running": "重建索引…",
+      "done": "已索引 {{added}} 项，其中 {{attributed}} 项归到素材。",
+      "scan": "读取已知素材…",
+      "index": "分析文件夹…"
+    },
+    "dir": {
+      "title": "缓存文件夹",
+      "desc": "适用于缩略图和视频预览。数据库和模型不变。",
+      "default": "默认位置",
+      "choose": "选择…",
+      "reset": "恢复默认",
+      "moveTitle": "移动现有缓存？",
+      "moveDesc": "旧文件夹里已有 {{size}}。移动可省去全部重建。",
+      "moveNow": "移动",
+      "leave": "留在原处",
+      "leaveHint": "旧文件夹仍会列在这里，可以删除。",
+      "moving": "移动中… {{done}}/{{total}}",
+      "moved": "已移动 {{count}} 个文件。",
+      "movedNone": "已应用新文件夹。"
+    },
+    "lifecycle": {
+      "session": "会话临时文件",
+      "sessionDesc": "当前编辑期间使用的帧、蒙版和测试文件。",
+      "sessionBadge": "自动清理",
+      "sessionEmpty": "本次会话尚未写入任何内容。",
+      "reusable": "可复用预览",
+      "reusableDesc": "缺失时会自动重新生成。",
+      "durable": "保留的分析",
+      "durableDesc": "计算成本高的结果仅在你明确要求时删除。"
+    },
+    "policy": {
+      "title": "自动清理",
+      "desc": "快速预览默认设有限额；高成本分析结果会继续保留。",
+      "auto": "自动清理",
+      "quota": "配额",
+      "quotaHint": "超出后，最久未使用的条目先删。",
+      "age": "最长保留",
+      "ageHint": "删除超过该时限未使用的内容。",
+      "gb": "GB",
+      "days": "天",
+      "manualOnly": "仅手动清除",
+      "manualOnlyHint": "该类型不跟踪使用情况：无法自动清除。",
+      "sessionTitle": "工作缓存",
+      "sessionDesc": "选择每种大型衍生文件何时不再需要。退出应用始终作为最后保障。",
+      "sequenceTitle": "模型中间图像序列",
+      "sequenceHint": "仅用于输入模型的帧文件夹。用户导出的图像序列绝不会被删除。",
+      "trigger": {
+        "roto": "切换镜头时",
+        "upscaleTest": "更换来源或设置时",
+        "page": "离开页面时",
+        "app": "关闭应用时",
+        "immediate": "操作完成后立即"
+      },
+      "sessionOnly": "退出应用时",
+      "sessionOnlyHint": "关闭 NetsuRush 时会删除整个文件夹；崩溃后下次启动时会再次检查。",
+      "warnTitle": "提醒我",
+      "warnCache": "当缓存超过",
+      "warnDisk": "当剩余空间少于",
+      "warnDiskSuffix": "时",
+      "warnNever": "只提醒，不删除。"
+    },
+    "warn": {
+      "cache": "缓存已达 {{size}}。",
+      "disk": "磁盘快满了：剩余 {{size}}。"
+    },
+    "confirm": {
+      "title": "删除该缓存？",
+      "descKinds": "将释放 {{size}}。内容会在需要时重建。",
+      "descSources": "将为 {{count}} 个素材释放 {{size}}。其他素材不受影响。",
+      "descUnattributed": "将释放 {{size}} 未归属缓存。",
+      "expensive": "包含搜索索引：重建需要数小时 GPU。",
+      "cancel": "取消",
+      "confirm": "删除",
+      "purging": "删除中…",
+      "done": "已释放 {{size}} · {{files}} 个文件",
+      "doneRows": "已释放 {{size}} · {{files}} 个文件，{{rows}} 条数据库记录",
+      "skipped": " · 已跳过 {{count}} 个（被占用）"
+    },
+    "maintenance": {
+      "title": "维护",
+      "desc": "按项目清理覆盖不到的两个角落。"
+    },
+    "missing": {
+      "title": "找不到的素材",
+      "desc": "拔掉一个外置硬盘就够让它们消失：未经你确认不会删除。",
+      "purge": "清空其缓存",
+      "none": "所有已索引素材都可访问。"
+    },
+    "db": {
+      "title": "数据库",
+      "unavailable": "找不到数据库。",
+      "vacuum": "压缩",
+      "vacuumHint": "清除后空间仍留在文件里。压缩可归还给磁盘。",
+      "vacuumDone": "已释放 {{size}} 磁盘空间。",
+      "vacuumBusy": "有任务正在使用数据库，无法压缩。请先关闭进行中的处理再试。",
+      "faiss": "向量索引 {{size}}"
+    },
+    "projects": {
+      "current": "已打开",
+      "desc": "搜索默认只覆盖当前打开的项目。NetsuRush 读取过某项目的媒体池后，该项目就会出现在此列表。扫描会依次打开每个 Resolve 项目以收集其素材，随后重新打开原来的项目。",
+      "empty": "尚无已知项目。",
+      "forget": "移除",
+      "forgetTooltip": "从列表中移除该项目（不影响索引与文件）",
+      "rushCount_one": "{{count}} 个素材",
+      "rushCount_other": "{{count}} 个素材",
+      "scan": "扫描 Resolve 项目",
+      "scanDone": "已收集 {{count}} 个项目",
+      "scanStarting": "准备中…",
+      "scanning": "{{project}} — {{done}}/{{total}}",
+      "title": "搜索已知的项目"
+    }
+  },
+  "navigation": {
+    "title": "页面与导航顺序",
+    "subtitle": "隐藏不用的页面，并调整它们在侧边栏中的顺序。",
+    "reset": "全部恢复",
+    "required": "始终可用",
+    "visible": "显示",
+    "hidden": "隐藏",
+    "moveUp": "上移 {{module}}",
+    "moveDown": "下移 {{module}}",
+    "requiredAria": "{{module}} 为必需页面",
+    "hideAria": "隐藏 {{module}}",
+    "showAria": "显示 {{module}}"
+  },
+  "detection": {
+    "reindexHint": "换一个模型，镜头的分界也会不同：已经建好索引的素材需要重建。"
+  },
+  "tab": {
+    "account": {
+      "profile": "资料",
+      "discord": "Discord"
+    },
+    "interface": {
+      "theme": "主题",
+      "language": "语言",
+      "navigation": "导航"
+    },
+    "media": {
+      "preview": "预览"
+    },
+    "ai": {
+      "models": "视频",
+      "dictation": "语音输入",
+      "indexing": "索引"
+    },
+    "storage": {
+      "media": "素材缓存",
+      "cleanup": "清理",
+      "project": "项目缓存",
+      "projects": "项目"
+    },
+    "system": {
+      "updates": "更新",
+      "compatibility": "兼容性",
+      "console": "控制台"
+    }
+  },
+  "indexing": {
+    "title": "索引",
+    "subtitle": "素材先被切成镜头，再逐个镜头分析。不影响结果的设置已经默认开启。",
+    "cutTitle": "镜头分割"
+  }
+}

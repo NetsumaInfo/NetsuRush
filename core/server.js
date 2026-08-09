@@ -1,0 +1,190 @@
+// @ts-check
+// core/server.js
+// Point d'entrée du service Node "core" (headless). La coquille Tauri spawn ce process.
+// Un seul serveur HTTP local : média (Range/stream) + RPC (WS/SSE).
+// La coquille Tauri spawn ce process et le webview tape sur http://127.0.0.1:NR_CORE_PORT.
+
+// Node imprime `ExperimentalWarning: SQLite…` sur stderr au 1er require('node:sqlite') (avec préfixe
+// `(node:PID)`) → capté en ROUGE `[error]` dans le journal alors que c'est bénin (avertissement, pas
+// erreur). On l'étouffe À LA SOURCE avant tout chargement de module qui tire node:sqlite. Les vrais
+// avertissements passent toujours (process.on('warning') dans logbus les émet en niveau `warn`).
+const _emitWarning = process.emitWarning.bind(process);
+process.emitWarning = (warning, ...rest) => {
+  const type = typeof rest[0] === "object" && rest[0] ? rest[0].type : rest[0];
+  const msg = typeof warning === "string" ? warning : warning && warning.message;
+  if (type === "ExperimentalWarning" && /\bSQLite\b/i.test(String(msg))) return;
+  return _emitWarning(warning, ...rest);
+};
+
+// Purge les dérivés de la session précédente AVANT de charger RPC et ses sidecars. C'est le filet de
+// sécurité après crash ; le chemin normal les supprime déjà à la fermeture.
+const sessionCache = require("./sessionCache");
+sessionCache.resetSync();
+
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
+const { serveFile, streamMedia, mediaGuard } = require("./media-server");
+const { serveApp } = require("./appstatic");
+const { serveYoutube } = require("./ytstream");
+const { createRpc } = require("./rpc");
+const { killSidecars } = require("./sidecars");
+const { killRoto } = require("./roto");
+const { ffBin, NR_HOME } = require("./config");
+const { getCapabilities } = require("./export/capabilities");
+
+const HOST = "127.0.0.1";
+// Port IMPOSÉ par la coquille Tauri (elle en choisit un libre et le sert au renderer via
+// `nr_core_port`) : il fait autorité, et un conflit se règle par un redémarrage qui en reprendra un
+// autre. Lancé seul (`npm run core`), le service balaie lui-même la plage — sinon un port occupé
+// laissait l'app sans backend.
+const FIXED_PORT = Number(process.env.NR_CORE_PORT) || 0;
+const PORT_FIRST = 8730;
+const PORT_SPAN = 20;
+
+const rpc = createRpc();
+
+const server = http.createServer((req, res) => {
+  const u = new URL(req.url, `http://${HOST}`);
+
+  // CORS UNIQUEMENT pour le RPC/SSE/health (le webview Tauri tauri://localhost et vite :1420 sont
+  // cross-origin et lisent ces réponses via fetch). On NE met PAS d'en-tête CORS sur /media et
+  // /stream : ces routes servent des fichiers disque arbitraires ; sans `Access-Control-Allow-Origin`,
+  // un site web tiers ouvert dans un navigateur ne peut PAS lire leur contenu via fetch (les balises
+  // <img>/<video> du webview, elles, n'exigent pas de CORS pour s'afficher).
+  if (u.pathname !== "/media" && u.pathname !== "/stream" && u.pathname !== "/ytstream") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "content-type");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  }
+  if (req.method === "OPTIONS") {
+    res.writeHead(204).end();
+    return;
+  }
+
+  if (u.pathname === "/healthz") {
+    // `app` identifie le service : un client qui balaie la plage de ports doit pouvoir écarter un
+    // logiciel tiers qui répondrait 200 sur le même port.
+    res.writeHead(200, { "Content-Type": "application/json" })
+      .end(JSON.stringify({ ok: true, app: "netsurush", port: activePort, channels: rpc.channels.length }));
+    return;
+  }
+  // Renderer buildé sous /app (vue remote du panneau CEP en production, sans Vite).
+  if (serveApp(req, res, u)) return;
+  if (u.pathname === "/media") {
+    if (mediaGuard(req, res, u)) return;
+    serveFile(req, res, u.searchParams.get("p"));
+    return;
+  }
+  if (u.pathname === "/stream") {
+    if (mediaGuard(req, res, u)) return;
+    streamMedia(req, res, {
+      p: u.searchParams.get("p"),
+      t: parseFloat(u.searchParams.get("t") || "0") || 0,
+      mode: u.searchParams.get("mode") === "copy" ? "copy" : "enc",
+      ffmpegBin: ffBin("ffmpeg"),
+    });
+    return;
+  }
+  // Flux YouTube relayé (lecture sans iframe, cf. core/ytstream.js). Même garde que /media : hôte
+  // local + jeton, et pas d'en-tête CORS (une page tierce ne doit pas pouvoir lire la réponse).
+  if (u.pathname === "/ytstream") {
+    if (mediaGuard(req, res, u)) return;
+    void serveYoutube(req, res, u.searchParams.get("id"));
+    return;
+  }
+  if (rpc.handle(req, res, u)) return;
+
+  res.writeHead(404).end("not found");
+});
+
+let activePort = FIXED_PORT || PORT_FIRST;
+
+// Le port retenu est publié sur disque : les clients HORS processus (panneau CEP, diagnostic) n'ont
+// aucun autre moyen de le connaître, et le renderer Tauri, lui, le tient de la coquille.
+function publishPort(port) {
+  process.env.NR_CORE_PORT = String(port); // hérité par les sidecars et le serveur MCP
+  try {
+    fs.mkdirSync(NR_HOME, { recursive: true });
+    fs.writeFileSync(path.join(NR_HOME, "core-port.json"), JSON.stringify({ port, pid: process.pid, url: `http://${HOST}:${port}` }));
+  } catch (error) {
+    console.warn("core: port non publié (le panneau Adobe devra le chercher)", String(error));
+  }
+}
+
+function onListening() {
+  activePort = /** @type {any} */ (server.address())?.port || activePort;
+  publishPort(activePort);
+  console.log(`NetsuRush core: http://${HOST}:${activePort} (${rpc.channels.length} canaux)`);
+  // Chauffe la sonde d'encodeurs en arrière-plan : NetsuCut récupère ensuite immédiatement le bon
+  // moteur NVENC/AMF/QSV (ou son repli CPU) au premier survol.
+  void getCapabilities()
+    .then((caps) => console.log(`Encodeurs vidéo: ${caps.hwEncoders.join(', ') || 'CPU'}`))
+    .catch((error) => console.warn('Sonde encodeurs indisponible, repli CPU:', String(error)));
+}
+
+server.on("listening", onListening);
+
+server.on("error", (err) => {
+  if (/** @type {any} */ (err).code !== "EADDRINUSE") {
+    console.error("core server error:", err);
+    void shutdown(1);
+    return;
+  }
+  // Port pris : une autre instance de NetsuRush, une session de développement, ou un logiciel tiers.
+  // Quand la coquille impose le port, elle est la seule à savoir lequel le renderer interrogera :
+  // en changer ici rendrait le service introuvable — elle en choisit un autre au redémarrage.
+  if (FIXED_PORT) {
+    console.error(`core: port ${FIXED_PORT} déjà utilisé ; l'application en choisira un autre au redémarrage.`);
+    void shutdown(1);
+    return;
+  }
+  const next = activePort + 1;
+  if (next >= PORT_FIRST + PORT_SPAN) {
+    console.error(`core: aucun port libre entre ${PORT_FIRST} et ${PORT_FIRST + PORT_SPAN - 1}.`);
+    void shutdown(1);
+    return;
+  }
+  console.warn(`core: port ${activePort} occupé, essai sur ${next}.`);
+  activePort = next;
+  server.listen(activePort, HOST);
+});
+
+server.listen(activePort, HOST);
+
+let shuttingDown = false;
+async function shutdown(code = 0) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  try { rpc.stopWatch?.(); } catch {}
+  try { rpc.stopAgent?.(); } catch {}
+  try { rpc.stopDiscord?.(); } catch {} // retire la Rich Presence : sinon elle reste affichée sur le profil
+  try { rpc.stopCache?.(); } catch {}
+  try { rpc.stopWatchdog?.(); } catch {}
+  try { rpc.stopArchiveQueue?.(); } catch {}
+  try { rpc.stopPrewarm?.(); } catch {}
+  // Referme les projets .netsu ouverts : sans ce repli du journal WAL, un `-wal` reste à côté de
+  // chaque fichier et la prochaine ouverture repart d'un journal à rejouer.
+  try { rpc.closeProjects?.(); } catch (e) { console.error("netsu: fermeture des projets impossible", e); }
+  // Vide les édits de découpe encore en tampon AVANT de tuer quoi que ce soit (écriture disque courte).
+  try { rpc.flushCutEdits?.(); } catch (e) { console.error("cut-edits: vidage final impossible", e); }
+  try { killSidecars(); } catch {} // tue les daemons python avant de supprimer leurs fichiers de travail
+  try { killRoto(); } catch {}
+  await sessionCache.cleanup();
+  await new Promise((resolve) => {
+    try { server.close(resolve); } catch { resolve(); }
+  });
+  process.exit(code);
+}
+
+// La coquille Tauri écrit cette commande dans stdin avant son kill de secours. Contrairement à un
+// `Child.kill()` Windows, ce chemin laisse Node arrêter Python et vider le cache de session.
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", (chunk) => {
+  if (String(chunk).split(/\r?\n/).some((line) => line.trim() === "shutdown")) void shutdown(0);
+});
+process.stdin.resume();
+
+for (const sig of ["SIGINT", "SIGTERM"]) {
+  process.on(sig, () => void shutdown(0));
+}

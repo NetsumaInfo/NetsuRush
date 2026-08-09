@@ -1,0 +1,75 @@
+{
+  "transcribing": "Transcribing…",
+  "button": {
+    "ariaStop": "Stop dictation",
+    "ariaDictate": "Dictate",
+    "tooltipStop": "Stop (inserts the text)",
+    "tooltipDictate": "Dictate (talk, it types)"
+  },
+  "overlay": {
+    "listening": "Listening…"
+  },
+  "hotkey": {
+    "capturePrompt": "Press the combo…",
+    "mod": {
+      "ctrl": "Ctrl",
+      "shift": "Shift",
+      "alt": "Alt",
+      "meta": "Meta"
+    },
+    "code": {
+      "space": "Space",
+      "escape": "Esc",
+      "enter": "Enter",
+      "tab": "Tab"
+    }
+  },
+  "settings": {
+    "title": "Voice dictation",
+    "intro": "Hold the shortcut anywhere in the app, speak, then release it: the transcript appears in the field or editor you were using. No button — just a small indicator while it listens.",
+    "enableLabel": "Enable dictation",
+    "enableHint": "Listens for the global shortcut.",
+    "enabledOn": "On",
+    "enabledOff": "Off",
+    "micLabel": "Mic",
+    "micHint": "Audio input used for dictation.",
+    "micDefault": "Default mic",
+    "micNumbered": "Mic {{n}}",
+    "hotkeyLabel": "Shortcut (hold)",
+    "hotkeyHint": "Click, then press your combo. Esc to cancel.",
+    "unloadLabel": "Unload the model after",
+    "unloadHint": "Idle this long → the model leaves VRAM (cold start next time).",
+    "liveLabel": "Live preview",
+    "liveHint": "Text shows up while you talk (periodic re-transcription).",
+    "liveOn": "On",
+    "liveOff": "Off",
+    "modelLabel": "Transcription model"
+  },
+  "unload": {
+    "s30": "30 seconds",
+    "m1": "1 minute",
+    "m5": "5 minutes",
+    "m15": "15 minutes",
+    "never": "Never (stay warm)"
+  },
+  "model": {
+    "default": "default",
+    "bundled": "Bundled",
+    "installed": "Installed",
+    "removeTooltip": "Delete from disk",
+    "get": "Get"
+  },
+  "cpp": {
+    "engine": "transcribe.cpp engine",
+    "ready": " · ready ({{backend}})",
+    "notInstalled": " · not installed",
+    "readyHint": "Native binary found — GGUF models (Nemotron) are good to go.",
+    "notInstalledHint": "Needed for Nemotron. Drop transcribe-cli (GitHub prebuild) in NR_HOME/bin, or set transcribeCppBin in nr.config.json."
+  },
+  "mic": {
+    "busy": "Microphone busy in another application.",
+    "denied": "Microphone denied. Allow microphone access to dictate.",
+    "fallback": "Chosen microphone unavailable — using the default one.",
+    "missing": "No microphone available."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  // Type-check du backend core/ (JS CommonJS) SANS build : tsc --noEmit uniquement.
+  // Opt-in par fichier via `// @ts-check` en tête — checkJs reste false pour ne pas inonder
+  // de faux positifs les modules pas encore annotés (resolve-proxy, ponts dynamiques…).
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    // Volontairement souple : on vérifie le code existant sans exiger une annotation partout.
+    "strict": false,
+    "noImplicitAny": false
+  },
+  "include": ["core/**/*.js"],
+  // core/poc/ = preuves de concept jetables, hors dépôt (cf. .gitignore) mais parfois présentes
+  // en local. Les exclure évite qu'un scratch non typé fasse échouer le contrôle du core.
+  "exclude": ["core/poc/**"]
+}

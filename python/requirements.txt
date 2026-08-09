@@ -1,0 +1,44 @@
+# NetsuRush — sidecar ML
+# Détection de plans (défaut) : TransNetV2 (réseau neuronal, poids inclus dans le package)
+transnetv2-pytorch>=1.0.5
+einops                     # architecture AutoShot officielle (checkpoint téléchargé depuis l’app)
+# Détection de plans alternative (optionnel) : OmniShotCut → python/requirements-omnishot.txt
+# Recherche de plans (search.py) : embeddings SigLIP 2 (google/siglip2-so400m-patch16-naflex)
+transformers>=4.49
+pillow>=10
+sentencepiece            # tokenizer Gemma (variante naflex)
+protobuf
+opencv-contrib-python-headless   # detect.py (frames/fps) + recherche visage réel (FaceDetectorYN/FaceRecognizerSF).
+                                 # CONTRIB-headless = surensemble sans GUI, UNIQUE dist cv2 du venv (dghs-imgutils
+                                 # tirerait opencv-contrib-python → setup.ps1 normalise sur celle-ci après install).
+faiss-cpu                # index IVFPQ compressé : bascule auto quand la RAM sature (sinon brute-force)
+accelerate               # chargement modèle à faible pic RAM (low_cpu_mem_usage) → pas de swap au load
+# PLANCHER, pas un simple confort : transformers 5.x importe `is_offline_mode`, absent avant le hub 1.5.
+# Un modèle qui épingle le hub plus bas (MatAnyone : `huggingface_hub==0.36.2`) rend SigLIP INCHARGEABLE
+# et la recherche muette — vu en vrai. Le pin amont est retiré par `pipPatch`, ce plancher est le filet.
+huggingface_hub>=1.5
+# Upscaling vidéo (upscale.py) : Real-ESRGAN. basicsr casse à l'import avec torchvision>=0.17
+# (functional_tensor retiré) → upscale.py ré-expose rgb_to_grayscale au runtime (pas de patch package).
+realesrgan
+basicsr
+# Loader générique (modèle "fallin" = CUGAN, et tout .pth/.safetensors OpenModelDB) : Spandrel (MIT).
+spandrel
+# Board de référence : extraction du vrai média derrière liens sociaux / sites vidéo.
+yt-dlp
+gallery-dl
+# Module voix (transcribe.py / silence.py) — silences + sous-titres + montage par texte.
+# ⚠️ `faster-whisper` déclare `onnxruntime` SANS extra : pip pose alors la variante CPU PAR-DESSUS
+# `onnxruntime-gpu` (les deux distributions écrivent dans le MÊME dossier `onnxruntime/`), et le CPU
+# gagne l'import. Résultat mesuré : visages/Parakeet/rembg 7,9× plus lents, sans aucun message.
+# `setup.ps1` réinstalle donc la variante voulue APRÈS ce fichier — ne pas y ajouter `onnxruntime`.
+faster-whisper>=1.1        # ASR « Précis » : Whisper large-v3-turbo (CTranslate2, GPU, word timestamps)
+onnx-asr[gpu,hub]>=0.6     # ASR « Rapide » : Parakeet TDT 0.6b v3 (ONNX, onnxruntime-gpu)
+silero-vad>=5.1            # VAD : Silero v5 (ONNX) → détection de silences
+soundfile                  # lecture WAV (silero read_audio / fallback)
+librosa>=0.10              # détection ACOUSTIQUE des hésitations (F0/flux/RMS/ZCR) — pur signal, sans modèle
+# Traitements vidéo (process.py) — hub interpolation / depth / removeBG.
+rembg[gpu]                 # removeBG : isnet-anime / birefnet-general / u2net (onnxruntime, alpha)
+# depth = transformers (déjà présent) : Depth-Anything-V2-Small / Intel DPT
+# NOTE : RIFE est installé à la demande depuis un wheel Windows précompilé par core/models.js.
+# depuis les sources (pas de wheel py3.12) et exige un compilateur C++ que les testeurs n'ont pas.
+# Installé best-effort par setup.ps1 : son absence ne bloque QUE l'interpolation, pas le reste.

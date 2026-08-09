@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Une seule exécution par branche : un push qui suit de près annule le précédent.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  renderer:
+    name: Renderer (tsc + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type-check et build du renderer
+        run: npm run build
+      - name: Textes et traductions
+        run: npm run check:i18n
+
+  core:
+    name: Core (type-check + tests Node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type-check du service core
+        run: npm run check:core
+      - name: Tests Node
+        run: node --test test/*.test.cjs
+
+  python:
+    name: Sidecars Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Les tests posent eux-mêmes `python/` dans sys.path et ne touchent ni torch ni CUDA :
+      # seuls Pillow, numpy et OpenCV sont réellement importés. Installer requirements.txt entier
+      # tirerait plusieurs gigaoctets de roues ML pour rien.
+      - run: pip install pillow numpy opencv-contrib-python-headless
+      - name: Tests Python
+        run: python -m unittest discover -s test -p "test_*.py" -v
+
+  rust:
+    name: Coquille Rust (check)
+    runs-on: windows-latest
+    # `cargo check` sur les dépendances Tauri est long et dépend d'un cache externe : il ne doit
+    # pas bloquer une PR dont il ne juge pas le code. Volontairement informatif.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      # `tauri build` embarque resources/**, dont le runtime mpv (non versionné, cf.
+      # scripts/fetch-mpv.ps1). `cargo check` ne lit pas les ressources : la coquille se
+      # vérifie sans lui. Aucun build complet n'est lancé ici.
+      - name: cargo check
+        working-directory: src-tauri
+        run: cargo check --locked

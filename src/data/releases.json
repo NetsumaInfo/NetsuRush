@@ -1,0 +1,281 @@
+[
+  {
+    "id": "netsurush-0.3.5",
+    "version": "0.3.5",
+    "date": "2026-08-09",
+    "title": {
+      "fr": "Première version publique",
+      "en": "First public release"
+    },
+    "highlights": {
+      "fr": [
+        "NetsuRush est désormais distribué depuis son nouveau dépôt public, avec un installateur Windows complet et les mises à jour intégrées.",
+        "Les fonds personnalisés, les thèmes sur mesure et les réglages d’apparence enrichissent l’interface sans ralentir les traitements lourds.",
+        "Le format .netsu regroupe les projets, le board, le carnet et les médias embarqués dans un conteneur portable et robuste.",
+        "Les transferts entre Resolve, Premiere Pro et After Effects, les rapports de bugs et les outils de production gagnent de nombreux correctifs de fiabilité."
+      ],
+      "en": [
+        "NetsuRush is now distributed from its new public repository, with a complete Windows installer and integrated updates.",
+        "Custom wallpapers, tailored themes, and appearance controls enrich the interface without slowing down heavy processing.",
+        "The .netsu format now packages projects, the board, notebooks, and embedded media into a portable and resilient container.",
+        "Transfers between Resolve, Premiere Pro, and After Effects, bug reports, and production tools receive extensive reliability fixes."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-3.1.1",
+    "version": "3.1.1",
+    "date": "2026-08-04",
+    "title": {
+      "fr": "Démarrage fiable et mise à jour de secours",
+      "en": "Reliable startup and recovery updates"
+    },
+    "highlights": {
+      "fr": [
+        "Le nettoyage des caches de session ne bloque plus le démarrage du service de fond, même après une opération interrompue contenant des milliers de fichiers.",
+        "L’interface attend désormais suffisamment longtemps le premier démarrage du core tout en détectant rapidement les pannes suivantes.",
+        "Une mise à jour peut être recherchée et installée directement depuis l’écran de configuration lorsque le core reste indisponible.",
+        "Les états de mise à jour sont maintenant partagés entre l’écran de secours et les paramètres système."
+      ],
+      "en": [
+        "Session cache cleanup no longer blocks background-service startup, even after interrupted jobs containing thousands of files.",
+        "The interface now allows enough time for the first core startup while still detecting later failures quickly.",
+        "Updates can be checked and installed directly from the setup screen when the core remains unavailable.",
+        "Update status is now shared between the recovery screen and system settings."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.3.1",
+    "version": "0.3.1",
+    "date": "2026-08-04",
+    "title": {
+      "fr": "Démarrage diagnostiqué et upscale du board corrigé",
+      "en": "Diagnosable startup and fixed board upscale"
+    },
+    "highlights": {
+      "fr": [
+        "Le service de fond écrit désormais ses erreurs de démarrage dans un journal persistant et explique les ressources ou processus défaillants.",
+        "L’upscale du board prend en charge l’aperçu des shaders Turbo et propose un mode rapide avec les réglages par défaut.",
+        "Le téléchargement et la suppression des modèles rembg utilisent maintenant le même dossier réel, avec des installations MatAnyone2 plus fiables.",
+        "Les médias du board conservent mieux leurs variantes locales et leurs préférences lors des changements de lecteur ou d’upscale."
+      ],
+      "en": [
+        "The background service now writes startup failures to a persistent log and identifies missing resources or failing processes.",
+        "Board upscale now previews Turbo shaders and offers a quick mode using the saved defaults.",
+        "rembg model downloads and removal now use the same actual directory, with more reliable MatAnyone2 installation.",
+        "Board media now preserve local variants and preferences more reliably when switching playback or upscale modes."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.3.0",
+    "version": "0.3.0",
+    "date": "2026-08-04",
+    "title": {
+      "fr": "NetsuBridge et outils de production étendus",
+      "en": "NetsuBridge and expanded production tools"
+    },
+    "highlights": {
+      "fr": [
+        "NetsuBridge transfère les séquences et médias entre DaVinci Resolve, After Effects et Premiere Pro avec des réglages d’encodage adaptés.",
+        "NetsuLab enrichit l’upscale, l’interpolation et le roto avec de nouveaux moteurs, modèles communautaires et outils de nettoyage.",
+        "L’optimisation gagne un watchdog, une gestion plus sûre des caches et de nouveaux contrôles de bruit, boost et accélération GPU.",
+        "La recherche, les collections, les profils d’export et l’intégration Adobe reçoivent de nouveaux flux et de nombreuses corrections de fiabilité."
+      ],
+      "en": [
+        "NetsuBridge transfers sequences and media between DaVinci Resolve, After Effects, and Premiere Pro with tailored encoding settings.",
+        "NetsuLab expands upscale, interpolation, and roto with new engines, community models, and cleanup tools.",
+        "Optimization gains a watchdog, safer cache management, and new noise, boost, and GPU acceleration controls.",
+        "Search, collections, export profiles, and Adobe integration receive new workflows and extensive reliability fixes."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.10",
+    "version": "0.2.10",
+    "date": "2026-07-26",
+    "title": {
+      "fr": "Modèles vérifiés et comparaison des rendus",
+      "en": "Verified models and render comparison"
+    },
+    "highlights": {
+      "fr": [
+        "Les modèles affichés sont maintenant vérifiés avec leur moteur Python ; les modèles absents ou non disponibles sont masqués et renvoient vers la réparation.",
+        "Après un téléchargement, NetsuRush contrôle l’installation et propose un vrai redémarrage de l’application.",
+        "NetsuLab ouvre automatiquement le rendu final, conserve son historique par source et permet une comparaison A/B synchronisée ou image sans perte.",
+        "Timeline Live rafraîchit ses données sans perdre inutilement ses miniatures et proxies valides."
+      ],
+      "en": [
+        "Displayed models are now verified against their Python runtime; missing or unavailable models are hidden and redirect to repair.",
+        "After a download, NetsuRush validates the installation and offers a real application restart.",
+        "NetsuLab automatically opens the final render, keeps per-source history, and provides synchronized A/B or lossless frame comparison.",
+        "Timeline Live refreshes its data without unnecessarily discarding valid thumbnails and proxies."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.9",
+    "version": "0.2.9",
+    "date": "2026-07-26",
+    "title": {
+      "fr": "Cache Timeline Live fiable",
+      "en": "Reliable Timeline Live cache"
+    },
+    "highlights": {
+      "fr": [
+        "Timeline Live conserve les miniatures et proxies tant que la géométrie complète du montage reste inchangée.",
+        "Quand une timeline change, les anciens aperçus sont supprimés puis les miniatures reviennent progressivement ; les proxies restent générés à la demande.",
+        "Le cache attend que l’interface soit disponible, réutilise les timelines déjà vérifiées et réserve des workers aux cartes visibles."
+      ],
+      "en": [
+        "Timeline Live keeps thumbnails and proxies while the complete edit geometry remains unchanged.",
+        "When a timeline changes, stale previews are removed before thumbnails return progressively; proxies remain on demand.",
+        "Caching waits for the interface, reuses verified timelines, and reserves workers for visible cards."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.8",
+    "version": "0.2.8",
+    "date": "2026-07-26",
+    "title": {
+      "fr": "Proxy vidéo partagé et compatible",
+      "en": "Shared, compatible video previews"
+    },
+    "highlights": {
+      "fr": [
+        "La grille et le lecteur NetsuCut utilisent exactement le même proxy, généré uniquement s’il manque.",
+        "Les proxies H.264 et HEVC utilisent NVENC quand il est disponible ; WebM VP8 reste un repli rapide et compatible.",
+        "La génération est limitée à une basse résolution et à des formats décodables par le lecteur WebView2."
+      ],
+      "en": [
+        "The NetsuCut grid and player use exactly the same proxy, generated only when it is missing.",
+        "H.264 and HEVC proxies use NVENC when available; WebM VP8 remains a fast compatible fallback.",
+        "Generation stays low-resolution and limited to formats the WebView2 player can decode."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.7",
+    "version": "0.2.7",
+    "date": "2026-07-26",
+    "title": {
+      "fr": "Mise à jour sans verrou de fichiers",
+      "en": "Update without file locks"
+    },
+    "highlights": {
+      "fr": [
+        "L’installateur demande la fermeture normale de NetsuRush avant de remplacer les fichiers, sans PowerShell ni arrêt forcé.",
+        "NetsuRush attend maintenant l’arrêt complet de son service node.exe avant de quitter.",
+        "Après l’installation des prérequis, le bouton relance directement l’application."
+      ],
+      "en": [
+        "The installer requests a normal NetsuRush shutdown before replacing files, without PowerShell or forced termination.",
+        "NetsuRush now waits for its node.exe service to fully stop before exiting.",
+        "After prerequisites are installed, the button directly relaunches the application."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.6",
+    "version": "0.2.6",
+    "date": "2026-07-26",
+    "title": {
+      "fr": "Mise à jour allégée et plus sûre",
+      "en": "Lighter and safer update"
+    },
+    "highlights": {
+      "fr": [
+        "Après une installation terminée, NetsuRush effectue uniquement une vérification locale rapide au démarrage.",
+        "L’installateur ne lance plus de script PowerShell pour énumérer ni arrêter de force les processus pendant une mise à jour."
+      ],
+      "en": [
+        "After setup completes, NetsuRush performs only a quick local check at startup.",
+        "The installer no longer runs a PowerShell script to enumerate or forcibly stop processes during an update."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.5",
+    "version": "0.2.5",
+    "date": "2026-07-24",
+    "title": {
+      "fr": "Lecture proxy et détection stabilisées",
+      "en": "Stabilized proxy playback and detection"
+    },
+    "highlights": {
+      "fr": [
+        "Le lecteur NetsuCut recharge désormais le proxy H.265 du premier plan dès l'ouverture d'un rush déjà découpé.",
+        "OmniShotCut maintient son signal de progression pendant les inférences GPU longues pour éviter les faux délais dépassés.",
+        "L'installateur affiche les actions Réparer, Mettre à jour et Désinstaller avec l'icône NetsuRush."
+      ],
+      "en": [
+        "NetsuCut now reloads the first scene's H.265 proxy when opening an already cut clip.",
+        "OmniShotCut keeps a liveness signal during long GPU inference to avoid false timeouts.",
+        "The installer shows Repair, Update, and Uninstall actions with the NetsuRush icon."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.4",
+    "version": "0.2.4",
+    "date": "2026-07-24",
+    "title": {
+      "fr": "Réparation fiable d'OmniShotCut",
+      "en": "Reliable OmniShotCut repair"
+    },
+    "highlights": {
+      "fr": [
+        "Le bouton Réparer réinstalle OmniShotCut depuis le paquet inclus puis vérifie réellement son import.",
+        "L'installation ne peut plus se déclarer terminée si OmniShotCut manque dans le venv local."
+      ],
+      "en": [
+        "Repair reinstalls OmniShotCut from the bundled package and verifies its import.",
+        "Setup can no longer report success when OmniShotCut is missing from the local venv."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.3",
+    "version": "0.2.3",
+    "date": "2026-07-23",
+    "title": {
+      "fr": "Installation vérifiée et réparation",
+      "en": "Verified setup and repair"
+    },
+    "highlights": {
+      "fr": [
+        "L'installation vérifie maintenant le runtime, les modèles et le backend GPU avant l'entrée dans l'application.",
+        "La page de configuration restaure les contrôles de fenêtre, la recherche et les packs recommandés.",
+        "Le lecteur NetsuCut ne bloque plus sur le faux chargement final des scènes."
+      ],
+      "en": [
+        "Setup now verifies the runtime, models, and GPU backend before entering the app.",
+        "The configuration page restores window controls, search, and recommended packs.",
+        "NetsuCut no longer waits on the removed fake final scene loading step."
+      ]
+    }
+  },
+  {
+    "id": "netsurush-0.2.2",
+    "version": "0.2.2",
+    "date": "2026-07-23",
+    "title": {
+      "fr": "Installation sur mesure",
+      "en": "A tailored installation"
+    },
+    "highlights": {
+      "fr": [
+        "Les mises à jour ferment proprement NetsuRush avant de remplacer ses fichiers.",
+        "Le service core se reconnecte et se relance automatiquement en cas d'arrêt.",
+        "L'installation reste affichée tant que Python, TransNetV2 et ffmpeg ne sont pas prêts."
+      ],
+      "en": [
+        "Updates close NetsuRush cleanly before replacing its files.",
+        "The core service reconnects and restarts automatically if it stops.",
+        "Setup remains visible until Python, TransNetV2 and ffmpeg are ready."
+      ]
+    }
+  }
+]

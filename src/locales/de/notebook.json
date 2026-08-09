@@ -1,0 +1,639 @@
+{
+  "editor": {
+    "uploadFailed": "Upload fehlgeschlagen",
+    "dateToday": "Heutiges Datum",
+    "createNamed": "„{{name}}“ erstellen"
+  },
+  "panel": {
+    "scriptNotebook": "Skript-Notizbuch",
+    "untitled": "Ohne Titel",
+    "notebookFallback": "Notizbuch",
+    "notebooks": "Notizbücher",
+    "noNotebooks": "Keine Notizbücher",
+    "newNotebook": "Neues Notizbuch",
+    "editNotebook": "Dieses Notizbuch bearbeiten",
+    "importMarkdown": "Markdown importieren…",
+    "exportNetsu": "Exportieren (.netsu)",
+    "importNetsu": "Importieren (.netsu)",
+    "deleteNotebook": "Notizbuch löschen",
+    "collapseSidebar": "Seitenleiste einklappen (Ctrl+\\)",
+    "expandSidebar": "Seitenleiste einblenden (Ctrl+\\)",
+    "search": "Suchen",
+    "newPage": "Neue Seite",
+    "pages": "Seiten",
+    "trash": "Papierkorb",
+    "settings": "Einstellungen",
+    "emptyNotebookHint": "Leg ein Notizbuch an, um zu starten.",
+    "emptyTitleHasNb": "Eine leere Seite wartet",
+    "emptyTitleNoNb": "Willkommen im Notizbuch",
+    "emptyBodyHasNb": "Notizen, Pläne, Entwürfe, Datenbanken — schreib deine Ideen einfach rein.",
+    "emptyBodyNoNb": "Ein Notizblock: Notizbücher, verschachtelte Seiten, Rich-Blöcke und Datenbanken.",
+    "createNotebook": "Notizbuch erstellen",
+    "confirmDeleteNbTitle": "„{{name}}“ löschen?",
+    "confirmDeleteNbDesc": "Das Notizbuch und ALLE Seiten werden endgültig gelöscht.",
+    "confirmTrashTitle": "In den Papierkorb legen?",
+    "confirmTrashDesc": "„{{name}}“ und die Unterseiten wandern in den Papierkorb (wiederherstellbar).",
+    "sendToTrash": "In den Papierkorb",
+    "saveAsProject": "Speichern unter…",
+    "openProject": "Notizbuch öffnen…"
+  },
+  "blocks": {
+    "bookmark": {
+      "pastePlaceholder": "Website-Link einfügen…"
+    },
+    "embed": {
+      "pastePlaceholder": "Link zum Einbetten einfügen (Vimeo, X, TikTok…)",
+      "iframeTitle": "Einbettung"
+    },
+    "toggle": {
+      "collapse": "Einklappen",
+      "expand": "Ausklappen"
+    },
+    "youtube": {
+      "pastePlaceholder": "YouTube-Link einfügen…"
+    }
+  },
+  "db": {
+    "field": {
+      "checked": "Aktiviert",
+      "unchecked": "Nicht aktiviert",
+      "empty": "Leer"
+    },
+    "option": {
+      "searchOrCreate": "Suchen oder erstellen…",
+      "create": "„{{label}}“ erstellen"
+    },
+    "checklist": {
+      "addTask": "Aufgabe hinzufügen…"
+    }
+  },
+  "navigation": {
+    "notebookRoot": "Notizbuch-Stamm",
+    "moveTo": "Verschieben nach…",
+    "filterPages": "Seiten filtern…",
+    "noMatch": "Keine passende Seite.",
+    "backlinks": "Rückverweise",
+    "siblings": "Seiten auf derselben Ebene",
+    "intermediate": "Zwischenseiten",
+    "searchTitle": "Notizbuch durchsuchen",
+    "searchDescription": "Seitentitel und Inhalte durchsuchen",
+    "searchPlaceholder": "Titel oder Inhalt…",
+    "noSearchResult": "Keine Ergebnisse für „{{query}}“",
+    "favorites": "Favoriten",
+    "recent": "Zuletzt verwendet"
+  },
+  "actions": {
+    "stats": "{{words}} Wörter · {{chars}} Zeichen",
+    "modified": "Geändert am {{date}}",
+    "removeFavorite": "Aus Favoriten entfernen",
+    "addFavorite": "Zu Favoriten hinzufügen",
+    "documentActions": "Dokumentaktionen",
+    "openNewTab": "In neuem Tab öffnen",
+    "copyPageLink": "Seitenlink kopieren",
+    "duplicate": "Duplizieren",
+    "exportMarkdown": "Als Markdown exportieren",
+    "exportHtml": "Als HTML exportieren",
+    "exportNetsu": "Als .netsu exportieren (mit Unterseiten)"
+  },
+  "trash": {
+    "title": "Papierkorb",
+    "count_one": "{{count}} gelöschte Seite — wiederherstellbar.",
+    "count_other": "{{count}} gelöschte Seiten — wiederherstellbar.",
+    "description": "Gelöschte Seiten werden hier angezeigt.",
+    "empty": "Der Papierkorb ist leer.",
+    "restore": "Wiederherstellen",
+    "restoreWithChildren": "Wiederherstellen (mit Unterseiten)",
+    "deleteForever": "Endgültig löschen",
+    "confirmAll": "Alles endgültig löschen?",
+    "cancel": "Abbrechen",
+    "deleteAll": "Alles löschen",
+    "emptyTrash": "Papierkorb leeren"
+  },
+  "tree": {
+    "deletedSubpage": "Gelöschte Unterseite",
+    "subpage": "Unterseite",
+    "rename": "Umbenennen",
+    "empty": "Keine Seiten — erstellen Sie eine"
+  },
+  "tabs": {
+    "prev": "Vorherige Seite",
+    "next": "Nächste Seite",
+    "closeTab": "Tab schließen",
+    "closeOthers": "Andere Tabs schließen",
+    "all": "Alle Tabs",
+    "newPage": "Neue Seite in einem Tab"
+  },
+  "slash": {
+    "groups": {
+      "blocks": "Notizbuch-Blöcke",
+      "media": "Medien",
+      "insert": "Einfügen"
+    },
+    "subpage": {
+      "title": "Unterseite",
+      "desc": "Neue untergeordnete Seite, hier eingebettet",
+      "aliases": "unterseite|kindseite|seite"
+    },
+    "callout": {
+      "title": "Hinweis",
+      "desc": "Farbiger Bereich mit Emoji",
+      "aliases": "hinweis|notiz|info"
+    },
+    "toggle": {
+      "title": "Aufklappbereich",
+      "desc": "Ein- und ausklappbarer Abschnitt",
+      "aliases": "aufklappen|einklappen|akkordeon"
+    },
+    "database": {
+      "title": "Datenbank",
+      "desc": "Tabelle und Kanban mit typisierten Spalten",
+      "aliases": "datenbank|tabelle|raster|kanban"
+    },
+    "equation": {
+      "title": "Gleichung",
+      "desc": "LaTeX-Formel (KaTeX)",
+      "aliases": "gleichung|mathe|latex|formel|katex"
+    },
+    "divider": {
+      "title": "Trennlinie",
+      "desc": "Linie, Striche, Punkte oder Sterne",
+      "aliases": "trenner|linie|hr|---"
+    },
+    "youtube": {
+      "desc": "YouTube-Video einbetten",
+      "aliases": "youtube|video|yt"
+    },
+    "embed": {
+      "title": "Einbettung",
+      "aliases": "einbetten|iframe|vimeo|twitter|tiktok"
+    },
+    "bookmark": {
+      "title": "Lesezeichen",
+      "desc": "Vorschau eines Weblinks",
+      "aliases": "lesezeichen|link|web"
+    },
+    "video": {
+      "title": "Video",
+      "desc": "Lokale Datei oder URL mit integriertem Player",
+      "aliases": "video|mp4|film|clip"
+    },
+    "audio": {
+      "desc": "Integrierter Player mit Wellenform",
+      "aliases": "audio|ton|mp3|musik|wav|podcast"
+    },
+    "file": {
+      "title": "Datei",
+      "desc": "PDF, Word, Excel, ZIP… (PDF-Vorschau)",
+      "aliases": "datei|pdf|doc|dokument|zip|excel|word"
+    },
+    "gallery": {
+      "title": "Bildergalerie",
+      "desc": "Mehrere scrollbar angeordnete Bilder",
+      "aliases": "galerie|bilder|karussell|album"
+    },
+    "date": {
+      "title": "Datum",
+      "desc": "Datum in den Text einfügen",
+      "aliases": "datum|tag|kalender|heute"
+    }
+  },
+  "dbUi": {
+    "group": {
+      "all": "Alle",
+      "none": "Ohne Wert"
+    },
+    "calc": {
+      "none": "Keine",
+      "count": "Anzahl",
+      "empty": "Leer",
+      "filled": "Ausgefüllt",
+      "sum": "Summe",
+      "avg": "Durchschnitt",
+      "median": "Median",
+      "min": "Minimum",
+      "max": "Maximum"
+    },
+    "view": {
+      "table": "Raster",
+      "kanban": "Board",
+      "gallery": "Galerie",
+      "calendar": "Kalender",
+      "list": "Liste"
+    },
+    "rowHeight": {
+      "short": "Kompakt",
+      "medium": "Mittel",
+      "tall": "Groß"
+    },
+    "color": {
+      "gray": "Grau",
+      "blue": "Blau",
+      "green": "Grün",
+      "yellow": "Gelb",
+      "orange": "Orange",
+      "red": "Rot",
+      "purple": "Violett",
+      "pink": "Rosa"
+    },
+    "field": {
+      "text": "Text",
+      "number": "Zahl",
+      "select": "Auswahl",
+      "multiSelect": "Mehrfachauswahl",
+      "date": "Datum",
+      "checkbox": "Kontrollkästchen",
+      "url": "Link",
+      "checklist": "Aufgabenliste",
+      "createdTime": "Erstellt",
+      "lastEditedTime": "Zuletzt bearbeitet"
+    }
+  },
+  "paste": {
+    "mention": {
+      "label": "Erwähnung",
+      "desc": "Kompakte Marke im Text"
+    },
+    "url": {
+      "label": "Link",
+      "desc": "Anklickbarer Inline-Link"
+    },
+    "bookmark": {
+      "label": "Lesezeichen",
+      "desc": "Kartenvorschau"
+    },
+    "embed": {
+      "label": "Einbettung",
+      "desc": "Eingebetteter Player (iframe / YouTube)"
+    }
+  },
+  "fileKind": {
+    "doc": "Dokument",
+    "sheet": "Tabelle",
+    "slide": "Präsentation",
+    "archive": "Archiv",
+    "video": "Video",
+    "image": "Bild",
+    "text": "Text",
+    "other": "Datei"
+  },
+  "blocksUi": {
+    "preview": "Vorschau",
+    "playbackSpeed": "Wiedergabegeschwindigkeit",
+    "chooseAudio": "Audio auswählen…",
+    "audioDrop": "MP3, WAV, FLAC… oder hierher ziehen",
+    "audioUrl": "…oder Audio-URL einfügen und Eingabe drücken",
+    "chooseFile": "Datei auswählen…",
+    "fileDrop": "PDF, Word, Excel, ZIP… oder hierher ziehen",
+    "fileUrl": "…oder Datei-URL einfügen und Eingabe drücken",
+    "open": "Öffnen",
+    "download": "Herunterladen",
+    "play": "Wiedergeben",
+    "fullscreen": "Vollbild",
+    "chooseVideo": "Video auswählen…",
+    "dropFile": "oder Datei hierher ziehen",
+    "videoUrl": "…oder Video-URL einfügen und Eingabe drücken",
+    "changeDivider": "Stil der Trennlinie ändern",
+    "today": "Heute",
+    "clear": "Löschen"
+  },
+  "equation": {
+    "group": {
+      "structures": "Strukturen",
+      "calculus": "Analysis",
+      "matrices": "Matrizen und Systeme",
+      "chemistry": "Chemie (mhchem)"
+    },
+    "template": {
+      "fraction": "Bruch",
+      "squareRoot": "Quadratwurzel",
+      "nthRoot": "N-te Wurzel",
+      "exponent": "Exponent",
+      "subscript": "Index",
+      "binomial": "Binomialkoeffizient",
+      "sum": "Summe",
+      "product": "Produkt",
+      "integral": "Integral",
+      "limit": "Grenzwert",
+      "derivative": "Ableitung",
+      "partialDerivative": "Partielle Ableitung",
+      "matrix": "2×2-Matrix",
+      "determinant": "Determinante",
+      "system": "Gleichungssystem",
+      "vector": "Vektor",
+      "molecule": "Molekül",
+      "reaction": "Reaktion",
+      "equilibrium": "Gleichgewicht",
+      "ion": "Ion"
+    },
+    "empty": "Leere Gleichung — klicken, um LaTeX einzugeben",
+    "templates": "Vorlagen",
+    "error": "LaTeX-Fehler: {{error}}",
+    "hint": "Vollständiges LaTeX (KaTeX + Chemie \\ce) · Strg+Eingabe zum Anwenden · Escape zum Abbrechen",
+    "edit": "Gleichung bearbeiten",
+    "input": "LaTeX-Code der Gleichung"
+  },
+  "gallery": {
+    "chooseImages": "Bilder auswählen…",
+    "dropFiles": "oder Dateien hierher ziehen",
+    "imageUrl": "…oder Bild-URL einfügen und Eingabe drücken",
+    "row": "Streifen (horizontal scrollbar)",
+    "carousel": "Karussell",
+    "grid": "Raster",
+    "height": "Höhe {{size}}",
+    "imageCount_one": "{{count}} Bild",
+    "imageCount_other": "{{count}} Bilder",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "removeImage": "Dieses Bild entfernen",
+    "caption": "Bildunterschrift…",
+    "openImage": "Bild öffnen"
+  },
+  "dbBasics": {
+    "noDateField": "Kein Datumsfeld zum Platzieren der Zeilen vorhanden.",
+    "addDateField": "Datumsfeld hinzufügen",
+    "rowDetail": "Zeilendetails",
+    "previousRow": "Vorherige Zeile",
+    "nextRow": "Nächste Zeile",
+    "newProperty": "Neue Eigenschaft",
+    "delete": "Löschen",
+    "calculation": "Berechnung",
+    "rowActions": "Zeilenaktionen",
+    "rowCount_one": "{{count}} Zeile",
+    "rowCount_other": "{{count}} Zeilen",
+    "newRow": "Neue Zeile"
+  },
+  "dbView": {
+    "viewOptions": "Ansichtsoptionen",
+    "moveLeft": "Nach links verschieben",
+    "moveRight": "Nach rechts verschieben",
+    "deleteView": "Ansicht löschen",
+    "settings": "Einstellungen",
+    "viewSettings": "Ansichtseinstellungen",
+    "fields": "Felder",
+    "rowHeight": "Zeilenhöhe",
+    "groupBy": "Gruppieren nach",
+    "noSelectField": "Kein Auswahlfeld",
+    "addView": "Ansicht hinzufügen",
+    "newView": "Neue Ansicht",
+    "databaseActions": "Datenbankaktionen",
+    "deleteDatabase": "Datenbank löschen",
+    "missingDatabase": "Datenbank fehlt.",
+    "recreate": "Neu erstellen"
+  },
+  "callout": {
+    "basic": "Standard",
+    "info": "Info",
+    "tip": "Tipp",
+    "warning": "Warnung",
+    "alert": "Alarm",
+    "changeEmoji": "Emoji ändern",
+    "presets": "Voreinstellungen",
+    "background": "Hintergrundfarbe",
+    "style": "Hinweisstil"
+  },
+  "window": {
+    "detach": "Notizbuch abdocken",
+    "unpin": "Nicht mehr im Vordergrund",
+    "alwaysOnTop": "Immer im Vordergrund",
+    "stopAlwaysOnTop": "Nicht mehr im Vordergrund halten",
+    "keepOnTop": "Im Vordergrund halten",
+    "attach": "An Hauptfenster andocken",
+    "minimize": "Minimieren",
+    "restore": "Wiederherstellen",
+    "maximize": "Maximieren",
+    "close": "Schließen",
+    "title": "Fenster",
+    "reload": "Neu laden",
+    "closeWindow": "Fenster schließen"
+  },
+  "dbFields": {
+    "type": "Typ",
+    "numberFormat": "Zahlenformat",
+    "dateFormat": "Datumsformat",
+    "includeTime": "Uhrzeit einbeziehen",
+    "insertLeft": "Links einfügen",
+    "insertRight": "Rechts einfügen",
+    "hide": "Ausblenden",
+    "clearValues": "Werte löschen",
+    "addColumn": "Spalte hinzufügen",
+    "newColumn": "Neue Spalte",
+    "columnOptions": "Spaltenoptionen",
+    "hideColumn": "Spalte ausblenden",
+    "addCard": "Karte hinzufügen",
+    "groupHint": "Wählen Sie ein Auswahlfeld zum Gruppieren der Karten (Einstellungen › Gruppieren nach).",
+    "showColumn": "Spalte anzeigen"
+  },
+  "settings": {
+    "title": "Notizbuch-Einstellungen",
+    "description": "Werden sofort angewendet und für alle Notizbücher übernommen.",
+    "appearance": "Darstellung",
+    "pageWidth": "Dokumentbreite",
+    "fontScale": "Schriftgröße",
+    "breadcrumb": "Breadcrumb über dem Dokument",
+    "visible": "Sichtbar",
+    "hidden": "Ausgeblendet",
+    "editor": "Editor",
+    "autosaveDelay": "Intervall für automatisches Speichern",
+    "confirmTrash": "Vor dem Verschieben in den Papierkorb bestätigen",
+    "yes": "Ja",
+    "no": "Nein",
+    "shortcuts": "Tastenkürzel",
+    "reset": "Zurücksetzen",
+    "press": "Drücken…",
+    "shortcutHint": "Klicken und dann das neue Kürzel drücken (Escape bricht ab)",
+    "shortcutConflict": "Ein bereits verwendetes Kürzel wird mit der bisherigen Aktion getauscht.",
+    "width": {
+      "narrow": "Schmal",
+      "medium": "Mittel",
+      "wide": "Breit",
+      "full": "Volle Breite"
+    },
+    "shortcut": {
+      "newPage": "Neue Seite",
+      "newTab": "Neuer Tab",
+      "closeTab": "Tab schließen",
+      "reopenTab": "Geschlossenen Tab öffnen",
+      "nextTab": "Nächster Tab",
+      "prevTab": "Vorheriger Tab",
+      "back": "Vorherige Seite (Verlauf)",
+      "forward": "Nächste Seite (Verlauf)",
+      "search": "Notizbuch durchsuchen",
+      "settings": "Notizbuch-Einstellungen",
+      "save": "Seite speichern",
+      "trash": "Papierkorb öffnen",
+      "toggleSidebar": "Seitenleiste ein-/ausblenden"
+    },
+    "spellcheck": "Rechtschreibprüfung",
+    "spellcheckHint": "Unterstreicht Fehler; Rechtsklick oder Strg+. zum Korrigieren",
+    "spellUnsupported": "Kein Wörterbuch für diese Sprache — nur native Unterstreichung",
+    "spellOn": "Aktiv",
+    "spellOff": "Aus",
+    "personalDictionary": "Persönliches Wörterbuch",
+    "personalEmpty": "Kein Wort hinzugefügt",
+    "personalRemove": "Aus dem Wörterbuch entfernen"
+  },
+  "filterSort": {
+    "filters": "Filter",
+    "add": "Hinzufügen",
+    "sort": "Sortieren",
+    "sortBy": "Sortieren nach",
+    "op": {
+      "is": "ist",
+      "isNot": "ist nicht",
+      "contains": "enthält",
+      "notContains": "enthält nicht",
+      "isEmpty": "ist leer",
+      "notEmpty": "ist nicht leer",
+      "gt": ">",
+      "gte": "≥",
+      "lt": "<",
+      "lte": "≤",
+      "checked": "aktiviert",
+      "unchecked": "nicht aktiviert"
+    }
+  },
+  "lightbox": {
+    "zoomOut": "Verkleinern",
+    "zoomIn": "Vergrößern",
+    "pause": "Pause (Leertaste)",
+    "slideshow": "Diashow (Leertaste)",
+    "previous": "Zurück",
+    "next": "Weiter"
+  },
+  "icons": {
+    "search": "Symbol suchen…",
+    "uploading": "Wird hochgeladen…",
+    "chooseImage": "Bild auswählen",
+    "dropFile": "oder Datei hierherziehen",
+    "emojis": "Emojis",
+    "icons": "Symbole",
+    "upload": "Importieren"
+  },
+  "pageHeader": {
+    "cover": "Titelbild",
+    "change": "Ändern",
+    "icon": "Symbol"
+  },
+  "finalPass": {
+    "convertOptions": "Konvertieren / Optionen",
+    "convertTo": "Konvertieren in",
+    "pasteAs": "Einfügen als",
+    "copy": "Kopieren",
+    "copyText": "Ausgewählten Text kopieren",
+    "copyLink": "Link kopieren",
+    "copyPassageLink": "Link zu diesem Abschnitt kopieren",
+    "exitFullscreen": "Ganzseitenansicht verlassen",
+    "openFullscreen": "Als ganze Seite öffnen",
+    "deleteColumn": "Spalte löschen",
+    "volume": "Lautstärke"
+  },
+  "numberLabels": {
+    "number": "Zahl",
+    "integer": "Ganzzahl",
+    "percent": "Prozent",
+    "euro": "Euro (€)",
+    "dollar": "Dollar ($)",
+    "audio": "Audio"
+  },
+  "preview": {
+    "unavailable": "Vorschau nicht verfügbar",
+    "openPdf": "PDF öffnen",
+    "loadingPdf": "PDF wird geladen… ({{label}})",
+    "loading": "Wird geladen…"
+  },
+  "subpage": {
+    "openHint": "Unterseite öffnen (Mittelklick: neuer Tab)"
+  },
+  "sideMenu": {
+    "changeType": "Umwandeln in",
+    "copyBlockLink": "Blocklink kopieren",
+    "turnIntoSubpage": "In Unterseite umwandeln",
+    "colors": "Farben",
+    "rowHeader": "Kopfzeile",
+    "columnHeader": "Kopfspalte"
+  },
+  "linkPage": {
+    "tooltip": "Mit einer Seite oder URL verknüpfen",
+    "placeholder": "URL einfügen oder Seite suchen…",
+    "linkTo": "Verknüpfen mit",
+    "hint": "URL oder Seitentitel eingeben"
+  },
+  "mention": {
+    "block": "Block",
+    "openBlock": "Beim Block öffnen",
+    "showChip": "Als Chip anzeigen",
+    "showCard": "Als Karte anzeigen",
+    "refreshLabel": "Beschriftung aktualisieren",
+    "deletedPage": "Gelöschte Seite",
+    "blockMissing": "Block nicht gefunden (gelöscht?)",
+    "deletedTitle": "{{title}} (gelöscht)",
+    "linkedBlock": "verknüpfter Block",
+    "type": {
+      "equation": "Gleichung",
+      "image": "Bild",
+      "video": "Video",
+      "audio": "Audio",
+      "file": "Datei",
+      "gallery": "Bildergalerie",
+      "database": "Datenbank",
+      "youtube": "YouTube-Video",
+      "embed": "Einbettung",
+      "bookmark": "Lesezeichen",
+      "divider": "Trennlinie",
+      "subpage": "Unterseite",
+      "table": "Tabelle",
+      "codeBlock": "Codeblock"
+    }
+  },
+  "meta": {
+    "name": "Notizbuchname",
+    "type": "Typ",
+    "languageLabel": "Sprache",
+    "kind": {
+      "notes": "Notizen",
+      "project": "Projekt",
+      "script": "Drehbuch",
+      "research": "Recherche",
+      "journal": "Journal"
+    },
+    "language": {
+      "fr": "Französisch",
+      "en": "Englisch",
+      "es": "Spanisch",
+      "de": "Deutsch",
+      "ja": "Japanisch",
+      "zh": "Chinesisch"
+    }
+  },
+  "create": {
+    "title": "Notizbuch erstellen",
+    "description": "Name, Typ und Sprache festlegen. Alles kann später geändert werden.",
+    "namePlaceholder": "Notizbuchname…",
+    "cancel": "Abbrechen",
+    "submit": "Erstellen"
+  },
+  "edit": {
+    "title": "Notizbuch bearbeiten",
+    "description": "Name, Typ oder Sprache dieses Notizbuchs ändern.",
+    "done": "Fertig"
+  },
+  "blockTypes": {
+    "paragraph": "Text",
+    "heading1": "Titel",
+    "heading2": "Untertitel",
+    "heading3": "Kleine Überschrift",
+    "bulletList": "Aufzählung",
+    "numberedList": "Nummerierte Liste",
+    "checkList": "Aufgabenliste",
+    "quote": "Zitat"
+  },
+  "dbDefaults": {
+    "titleField": "Name",
+    "statusField": "Status",
+    "tableView": "Raster",
+    "todo": "Zu erledigen",
+    "inProgress": "In Arbeit",
+    "done": "Erledigt",
+    "name": "Datenbank"
+  }
+}

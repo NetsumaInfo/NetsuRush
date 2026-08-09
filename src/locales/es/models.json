@@ -1,0 +1,71 @@
+{
+  "taskHint": {
+    "search": "Búsqueda visual y comparación de planos.",
+    "faces": "Detección y agrupación de rostros.",
+    "voice": "Transcripción automática de voz.",
+    "upscale": "Mejora de resolución de imágenes y vídeos.",
+    "restore": "Restauración y limpieza de imágenes.",
+    "interpolate": "Creación de fotogramas intermedios para obtener vídeos más fluidos.",
+    "depth": "Creación de mapas de profundidad.",
+    "matte-image": "Recorte y eliminación del fondo en imágenes.",
+    "matte-video": "Recorte y seguimiento de sujetos en vídeo.",
+    "object-removal": "Eliminación de objetos en vídeo."
+  },
+  "title": "Modelos",
+  "subtitle": "No se descarga nada por defecto. Instalar lo necesario y eliminar en cualquier momento.",
+  "disk": "Disco:",
+  "noneInstalled": "Sin modelos instalados — instalar uno, si no esta función no va a funcionar.",
+  "badge": {
+    "default": "por defecto",
+    "heavy": "pesado",
+    "exclusive": "exclusivo",
+    "exclusiveTip": "SAMURAI y SAM2Long sustituyen el motor SAM 2 por el suyo: solo uno puede estar instalado a la vez. Instalar el segundo pide confirmación antes de quitar el primero; al borrarlo se restaura el motor original."
+  },
+  "conflict": {
+    "title": "Solo uno de los dos",
+    "body": "{{model}} sustituye el motor de {{other}}, ya instalado: los dos no pueden convivir. Instalar {{model}} quita {{other}}.",
+    "replace": "Instalar y quitar el otro"
+  },
+  "sort": {
+    "default": "Por defecto",
+    "defaultTip": "Orden del catálogo: el recomendado primero.",
+    "size": "Tamaño",
+    "sizeTip": "Por tamaño en disco.",
+    "vram": "VRAM",
+    "vramTip": "Por VRAM requerida.",
+    "name": "Nombre",
+    "nameTip": "Alfabético.",
+    "asc": "Ascendente",
+    "desc": "Descendente"
+  },
+  "vramShort": "Requiere {{need}} GB de VRAM y la tarjeta tiene {{have}} ({{gpu}}) — no va a caber. Se puede descargar igual.",
+  "status": {
+    "bundled": "Incluido",
+    "bundledTip": "Viene con el runtime (no se puede eliminar).",
+    "installed": "Instalado",
+    "removing": "Desinstalando…",
+    "removeTip": "Eliminar del disco",
+    "auto": "Auto",
+    "autoTip": "La librería lo obtiene al primer uso — no hay que descargar nada."
+  },
+  "action": {
+    "resume": "Reanudar",
+    "resumeTip": "Descarga incompleta — reanuda los pesos que faltan y el código.",
+    "download": "Descargar",
+    "cancelDownload": "Cancelar la descarga"
+  },
+  "search": {
+    "active": "Activo",
+    "activeTip": "Variante utilizada por la búsqueda",
+    "use": "Usar",
+    "useTip": "Convertir esta variante en el modelo de búsqueda",
+    "switchTitle": "Cambiar el modelo de búsqueda",
+    "switchEmpty": "{{model}} aún no ha indexado nada: la búsqueda seguirá vacía hasta una reindexación completa. El índice de la variante actual permanece intacto en el disco.",
+    "switchPartial": "Clips ya indexados con {{model}}: {{clips}}. Los demás tendrán que reindexarse; el índice de la variante actual permanece en el disco.",
+    "switchConfirm": "Usar esta variante"
+  },
+  "advanced": {
+    "label": "Avanzado",
+    "tip": "Muestra todo el catálogo: variantes, generaciones anteriores y motores experimentales. Por defecto solo se muestra la selección actual de cada tarea."
+  }
+}

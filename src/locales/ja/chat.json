@@ -1,0 +1,126 @@
+{
+  "stream": { "error": "エラーが発生しました。" },
+  "panel": {
+    "copilot": "NetsuRush コパイロット",
+    "noCliAgent": "CLI エージェントが見つかりません — Claude/OpenAI に切り替えるか claude/codex をインストール",
+    "configureKey": "開始するには API キーを設定"
+  },
+  "composer": {
+    "pickEngine": "送信するには設定 ⚙ でエンジン（API キーまたは CLI エージェント）を設定してください。",
+    "placeholder": "AI に Resolve の操作を頼む…",
+    "attachFiles": "ファイルを添付",
+    "attachTip": "画像 / ファイルを添付",
+    "attachedFilesPrompt": "添付ファイル（ローカルパス — 必要に応じて読み取りまたは確認してください）",
+    "stop": "停止",
+    "send": "送信"
+  },
+  "header": { "defaultTitle": "新しい会話",
+    "conversations": "会話",
+    "newConv": "新しい会話",
+    "noConv": "会話なし",
+    "settings": "設定"
+  },
+  "settings": {
+    "apiKeys": "API キー（BYOK）",
+    "noVault": "アプリ外では暗号化保管庫を使えません — キーはセッション中のみ保持されます。",
+    "hide": "非表示",
+    "show": "表示",
+    "keySet": "設定済み",
+    "keyAbsent": "未設定",
+    "cliAgents": "検出された CLI エージェント",
+    "rescan": "再スキャン",
+    "noAgentsPre": "エージェントがありません —「再スキャン」をクリック。それでもなければ ",
+    "noAgentsPost": " をインストールし、core の PATH にあるか確認してください。",
+    "detected": "検出",
+    "absent": "なし",
+    "saved": "保存しました"
+  },
+  "engine": {
+    "engine": "エンジン",
+    "cliAgent": "CLI エージェント",
+    "agent": "エージェント",
+    "model": "モデル",
+    "default": "デフォルト",
+    "freeId": "自由入力 id：vendor/model…",
+    "permissions": "権限"
+  },
+  "mode": {
+    "readonly": "読み取り",
+    "ask": "確認",
+    "safe": "複製",
+    "auto": "自動"
+  },
+  "modeTitle": {
+    "readonly": "読み取り専用 — 書き込みなし",
+    "ask": "危険な操作のみ確認（ファイル/レンダリング/メディア削除）。タイムライン編集はそのまま実行",
+    "safe": "書き込み前にタイムラインを複製 — 元は変更されません",
+    "auto": "確認なしでタイムラインに直接書き込み"
+  },
+  "message": {
+    "thinking": "思考中…",
+    "reasoning": "推論",
+    "hideReasoning": "推論を非表示",
+    "showReasoning": "推論を表示",
+    "copyText": "テキストをコピー"
+  },
+  "toolcard": {
+    "running": "実行中",
+    "failed": "失敗",
+    "arguments": "引数",
+    "result": "結果",
+    "copyName": "ツール名をコピー",
+    "copyArgs": "引数をコピー",
+    "copyResult": "結果をコピー",
+    "collapse": "折りたたむ",
+    "expand": "展開"
+  },
+  "tool": {
+    "quoted": "「{{value}}」",
+    "resolveStatus": "Resolve の状態",
+    "listMediaPool": "Media Pool の読み取り",
+    "searchClips": "検索{{q}}",
+    "indexClip": "素材のインデックス作成",
+    "detectScenes": "ショット検出",
+    "cachedScenes": "キャッシュ済みショットの読み取り",
+    "listTimelines": "タイムライン一覧",
+    "readTimeline": "タイムラインの読み取り",
+    "buildTimeline": "タイムライン作成{{q}}",
+    "cutTimeline": "タイムラインのカット",
+    "probeMedia": "メディアの解析",
+    "makeThumbnail": "サムネイル生成",
+    "upscaleMedia": "動画のアップスケール",
+    "exportAe": "After Effects 書き出し",
+    "importMedia": "Media Pool へ読み込み",
+    "board": "リファレンスボード{{suffix}}",
+    "page": "ページ {{page}}",
+    "resolveApp": "Resolve アプリケーション",
+    "grabStill": "スチル取得",
+    "setTimecode": "再生ヘッドの移動",
+    "viewer": "Resolve ビューア",
+    "removeAudio": "オーディオの削除",
+    "duplicate": "タイムラインの複製",
+    "addMarker": "マーカーの追加",
+    "addTrack": "トラックの追加",
+    "deleteTrack": "トラックの削除",
+    "timelineFallback": "タイムライン · {{action}}",
+    "mediaPool": "Media Pool · {{action}}",
+    "render": "レンダリング · {{action}}",
+    "timelineItem": "現在のショット · {{action}}",
+    "project": "プロジェクト · {{action}}",
+    "resolveCall": "Resolve API · {{root}}"
+  },
+  "approval": {
+    "title": "この操作を許可しますか？",
+    "allow": "許可",
+    "deny": "拒否"
+  },
+  "risk": {
+    "read": "読み取り",
+    "write": "書き込み",
+    "destructive": "破壊的"
+  },
+  "store": {
+    "convFallback": "会話",
+    "error": "エラー"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "transcribing": "转录中…",
+  "button": {
+    "ariaStop": "停止语音输入",
+    "ariaDictate": "语音输入",
+    "tooltipStop": "停止（插入文本）",
+    "tooltipDictate": "语音输入（说话即成文）"
+  },
+  "overlay": {
+    "listening": "正在聆听…"
+  },
+  "hotkey": {
+    "capturePrompt": "按下组合键…",
+    "mod": {
+      "ctrl": "Ctrl",
+      "shift": "Shift",
+      "alt": "Alt",
+      "meta": "Meta"
+    },
+    "code": {
+      "space": "空格",
+      "escape": "Esc",
+      "enter": "回车",
+      "tab": "Tab"
+    }
+  },
+  "settings": {
+    "title": "语音输入",
+    "intro": "在应用任意位置按住快捷键，说话，松开：转录的文本会插入你所在的输入框或编辑器。没有按钮——聆听时只有一个小标记。",
+    "enableLabel": "启用语音输入",
+    "enableHint": "监听全局快捷键。",
+    "enabledOn": "已启用",
+    "enabledOff": "已禁用",
+    "micLabel": "麦克风",
+    "micHint": "语音输入使用的音频输入。",
+    "micDefault": "默认麦克风",
+    "micNumbered": "麦克风 {{n}}",
+    "hotkeyLabel": "快捷键（按住）",
+    "hotkeyHint": "点击后按下组合键。按 Esc 取消。",
+    "unloadLabel": "闲置后卸载模型",
+    "unloadHint": "闲置超过此时长 → 模型退出 VRAM（之后需冷启动）。",
+    "liveLabel": "实时预览",
+    "liveHint": "说话时同步显示文本（定期重新转录）。",
+    "liveOn": "已启用",
+    "liveOff": "已禁用",
+    "modelLabel": "转录模型"
+  },
+  "unload": {
+    "s30": "30 秒",
+    "m1": "1 分钟",
+    "m5": "5 分钟",
+    "m15": "15 分钟",
+    "never": "从不（保持常驻）"
+  },
+  "model": {
+    "default": "默认",
+    "bundled": "内置",
+    "installed": "已安装",
+    "removeTooltip": "从磁盘删除",
+    "get": "获取"
+  },
+  "cpp": {
+    "engine": "transcribe.cpp 引擎",
+    "ready": " · 就绪（{{backend}}）",
+    "notInstalled": " · 未安装",
+    "readyHint": "已检测到原生二进制——可使用 GGUF 模型（Nemotron）。",
+    "notInstalledHint": "Nemotron 必需。把 transcribe-cli（GitHub 预编译版）放到 NR_HOME/bin，或在 nr.config.json 中设置 transcribeCppBin。"
+  },
+  "mic": {
+    "busy": "麦克风被其他应用占用。",
+    "denied": "麦克风被拒绝。请允许麦克风访问以进行听写。",
+    "fallback": "所选麦克风不可用 — 已改用默认麦克风。",
+    "missing": "没有可用的麦克风。"
+  }
+}

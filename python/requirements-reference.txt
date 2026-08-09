@@ -1,0 +1,4 @@
+# NetsuBoard : résolution des médias derrière les liens sociaux.
+yt-dlp
+gallery-dl
+

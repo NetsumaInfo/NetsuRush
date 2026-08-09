@@ -1,0 +1,44 @@
+name: Proposer une fonctionnalité
+description: Une idée pour améliorer le workflow
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Le problème
+      description: >
+        Qu'est-ce qui vous ralentit aujourd'hui ? Décrivez la situation réelle,
+        pas la solution — c'est ce qui permet d'en trouver une meilleure.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ce que vous imaginez
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module concerné
+      options:
+        - NetsuCut (découpe, détection de plans)
+        - NetsuSearch (recherche de plans)
+        - NetsuBoard (board de référence)
+        - NetsuBook (carnet)
+        - NetsuDraft (script)
+        - NetsuLab (upscale, interpolation, roto)
+        - NetsuTalk (voix, sous-titres)
+        - NetsuPilot (chat IA)
+        - NetsuBoost (optimisation)
+        - NetsuBridge (transfert entre logiciels)
+        - Nouveau module
+        - Transversal
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Comment vous faites en attendant
+      description: Un autre outil, une manipulation manuelle, un script.

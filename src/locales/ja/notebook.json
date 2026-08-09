@@ -1,0 +1,639 @@
+{
+  "editor": {
+    "uploadFailed": "ファイルを送信できません",
+    "dateToday": "今日の日付",
+    "createNamed": "「{{name}}」を作成"
+  },
+  "panel": {
+    "scriptNotebook": "スクリプト用ノートブック",
+    "untitled": "無題",
+    "notebookFallback": "ノートブック",
+    "notebooks": "ノートブック",
+    "noNotebooks": "ノートブックなし",
+    "newNotebook": "新規ノートブック",
+    "editNotebook": "このノートブックを編集",
+    "importMarkdown": "Markdown を読み込み…",
+    "exportNetsu": "書き出し (.netsu)",
+    "importNetsu": "読み込み (.netsu)",
+    "deleteNotebook": "このノートブックを削除",
+    "collapseSidebar": "サイドバーを閉じる (Ctrl+\\)",
+    "expandSidebar": "サイドバーを表示 (Ctrl+\\)",
+    "search": "検索",
+    "newPage": "新規ページ",
+    "pages": "ページ",
+    "trash": "ゴミ箱",
+    "settings": "設定",
+    "emptyNotebookHint": "まずノートブックを作成します。",
+    "emptyTitleHasNb": "白紙のページがあります",
+    "emptyTitleNoNb": "ノートブックへようこそ",
+    "emptyBodyHasNb": "メモ、構成、下書き、データベース。思いつくままに書けます。",
+    "emptyBodyNoNb": "メモ帳のような作業場。ノートブック、入れ子ページ、リッチブロック、データベース。",
+    "createNotebook": "ノートブックを作成",
+    "confirmDeleteNbTitle": "「{{name}}」を削除しますか？",
+    "confirmDeleteNbDesc": "ノートブックとすべてのページが完全に削除されます。",
+    "confirmTrashTitle": "ゴミ箱に入れますか？",
+    "confirmTrashDesc": "「{{name}}」と下位ページがゴミ箱に移動します（復元できます）。",
+    "sendToTrash": "ゴミ箱に入れる",
+    "saveAsProject": "名前を付けて保存…",
+    "openProject": "ノートを開く…"
+  },
+  "blocks": {
+    "bookmark": {
+      "pastePlaceholder": "サイトのリンクを貼り付け…"
+    },
+    "embed": {
+      "pastePlaceholder": "埋め込むリンクを貼り付け（Vimeo、X、TikTok…）",
+      "iframeTitle": "埋め込み"
+    },
+    "toggle": {
+      "collapse": "折りたたむ",
+      "expand": "展開"
+    },
+    "youtube": {
+      "pastePlaceholder": "YouTube のリンクを貼り付け…"
+    }
+  },
+  "db": {
+    "field": {
+      "checked": "チェック済み",
+      "unchecked": "未チェック",
+      "empty": "空"
+    },
+    "option": {
+      "searchOrCreate": "検索または作成…",
+      "create": "「{{label}}」を作成"
+    },
+    "checklist": {
+      "addTask": "タスクを追加…"
+    }
+  },
+  "navigation": {
+    "notebookRoot": "ノートブックのルート",
+    "moveTo": "移動先…",
+    "filterPages": "ページを絞り込み…",
+    "noMatch": "一致するページはありません。",
+    "backlinks": "被リンク",
+    "siblings": "同じ階層のページ",
+    "intermediate": "途中のページ",
+    "searchTitle": "ノートブックを検索",
+    "searchDescription": "ページのタイトルと内容を検索",
+    "searchPlaceholder": "タイトルまたは内容…",
+    "noSearchResult": "「{{query}}」の検索結果はありません",
+    "favorites": "お気に入り",
+    "recent": "最近使用"
+  },
+  "actions": {
+    "stats": "{{words}}語 · {{chars}}文字",
+    "modified": "{{date}}に更新",
+    "removeFavorite": "お気に入りから削除",
+    "addFavorite": "お気に入りに追加",
+    "documentActions": "ドキュメントの操作",
+    "openNewTab": "新しいタブで開く",
+    "copyPageLink": "ページリンクをコピー",
+    "duplicate": "複製",
+    "exportMarkdown": "Markdownで書き出し",
+    "exportHtml": "HTMLで書き出し",
+    "exportNetsu": ".netsuで書き出し（サブページを含む）"
+  },
+  "trash": {
+    "title": "ゴミ箱",
+    "count_one": "削除済みページ{{count}}件 — 復元できます。",
+    "count_other": "削除済みページ{{count}}件 — 復元できます。",
+    "description": "削除したページがここに表示されます。",
+    "empty": "ゴミ箱は空です。",
+    "restore": "復元",
+    "restoreWithChildren": "復元（サブページを含む）",
+    "deleteForever": "完全に削除",
+    "confirmAll": "すべて完全に削除しますか？",
+    "cancel": "キャンセル",
+    "deleteAll": "すべて削除",
+    "emptyTrash": "ゴミ箱を空にする"
+  },
+  "tree": {
+    "deletedSubpage": "削除されたサブページ",
+    "subpage": "サブページ",
+    "rename": "名前を変更",
+    "empty": "ページがありません — 作成してください"
+  },
+  "tabs": {
+    "prev": "前のページ",
+    "next": "次のページ",
+    "closeTab": "タブを閉じる",
+    "closeOthers": "他のタブを閉じる",
+    "all": "すべてのタブ",
+    "newPage": "新しいタブにページを作成"
+  },
+  "slash": {
+    "groups": {
+      "blocks": "ノートブックのブロック",
+      "media": "メディア",
+      "insert": "挿入"
+    },
+    "subpage": {
+      "title": "サブページ",
+      "desc": "子ページを作成してここに埋め込みます",
+      "aliases": "サブページ|子ページ|ページ"
+    },
+    "callout": {
+      "title": "コールアウト",
+      "desc": "絵文字付きの色付きバナー",
+      "aliases": "コールアウト|ノート|情報"
+    },
+    "toggle": {
+      "title": "トグル",
+      "desc": "折りたたみ可能なセクション",
+      "aliases": "トグル|折りたたみ|アコーディオン"
+    },
+    "database": {
+      "title": "データベース",
+      "desc": "型付き列のテーブルとカンバン",
+      "aliases": "データベース|テーブル|グリッド|カンバン"
+    },
+    "equation": {
+      "title": "数式",
+      "desc": "LaTeX数式（KaTeX）",
+      "aliases": "数式|数学|latex|katex"
+    },
+    "divider": {
+      "title": "区切り線",
+      "desc": "線、破線、点線、星印",
+      "aliases": "区切り|線|hr|---"
+    },
+    "youtube": {
+      "desc": "YouTube動画を埋め込む",
+      "aliases": "youtube|動画|yt"
+    },
+    "embed": {
+      "title": "埋め込み",
+      "aliases": "埋め込み|iframe|vimeo|twitter|tiktok"
+    },
+    "bookmark": {
+      "title": "ブックマーク",
+      "desc": "Webリンクをプレビュー",
+      "aliases": "ブックマーク|リンク|web"
+    },
+    "video": {
+      "title": "動画",
+      "desc": "ローカルファイルまたはURLを内蔵プレーヤーで再生",
+      "aliases": "動画|mp4|映画|クリップ"
+    },
+    "audio": {
+      "desc": "波形付きの内蔵プレーヤー",
+      "aliases": "音声|サウンド|mp3|音楽|wav|ポッドキャスト"
+    },
+    "file": {
+      "title": "ファイル",
+      "desc": "PDF、Word、Excel、ZIP…（PDFプレビュー）",
+      "aliases": "ファイル|pdf|doc|文書|zip|excel|word"
+    },
+    "gallery": {
+      "title": "画像ギャラリー",
+      "desc": "複数の画像を横一列でスクロール表示",
+      "aliases": "ギャラリー|画像|カルーセル|アルバム"
+    },
+    "date": {
+      "title": "日付",
+      "desc": "文中に日付を挿入",
+      "aliases": "日付|日|カレンダー|今日"
+    }
+  },
+  "dbUi": {
+    "group": {
+      "all": "すべて",
+      "none": "値なし"
+    },
+    "calc": {
+      "none": "なし",
+      "count": "件数",
+      "empty": "空欄",
+      "filled": "入力済み",
+      "sum": "合計",
+      "avg": "平均",
+      "median": "中央値",
+      "min": "最小",
+      "max": "最大"
+    },
+    "view": {
+      "table": "グリッド",
+      "kanban": "ボード",
+      "gallery": "ギャラリー",
+      "calendar": "カレンダー",
+      "list": "リスト"
+    },
+    "rowHeight": {
+      "short": "コンパクト",
+      "medium": "標準",
+      "tall": "大"
+    },
+    "color": {
+      "gray": "グレー",
+      "blue": "青",
+      "green": "緑",
+      "yellow": "黄",
+      "orange": "オレンジ",
+      "red": "赤",
+      "purple": "紫",
+      "pink": "ピンク"
+    },
+    "field": {
+      "text": "テキスト",
+      "number": "数値",
+      "select": "選択",
+      "multiSelect": "複数選択",
+      "date": "日付",
+      "checkbox": "チェックボックス",
+      "url": "リンク",
+      "checklist": "タスクリスト",
+      "createdTime": "作成日時",
+      "lastEditedTime": "更新日時"
+    }
+  },
+  "paste": {
+    "mention": {
+      "label": "メンション",
+      "desc": "文中のコンパクトなチップ"
+    },
+    "url": {
+      "label": "リンク",
+      "desc": "クリック可能なインラインリンク"
+    },
+    "bookmark": {
+      "label": "ブックマーク",
+      "desc": "カードプレビュー"
+    },
+    "embed": {
+      "label": "埋め込み",
+      "desc": "埋め込みプレーヤー（iframe / YouTube）"
+    }
+  },
+  "fileKind": {
+    "doc": "文書",
+    "sheet": "スプレッドシート",
+    "slide": "プレゼンテーション",
+    "archive": "アーカイブ",
+    "video": "動画",
+    "image": "画像",
+    "text": "テキスト",
+    "other": "ファイル"
+  },
+  "blocksUi": {
+    "preview": "プレビュー",
+    "playbackSpeed": "再生速度",
+    "chooseAudio": "音声を選択…",
+    "audioDrop": "MP3、WAV、FLAC… またはドラッグ＆ドロップ",
+    "audioUrl": "…または音声URLを貼り付けてEnter",
+    "chooseFile": "ファイルを選択…",
+    "fileDrop": "PDF、Word、Excel、ZIP… またはドラッグ＆ドロップ",
+    "fileUrl": "…またはファイルURLを貼り付けてEnter",
+    "open": "開く",
+    "download": "ダウンロード",
+    "play": "再生",
+    "fullscreen": "全画面",
+    "chooseVideo": "動画を選択…",
+    "dropFile": "またはファイルをドラッグ＆ドロップ",
+    "videoUrl": "…または動画URLを貼り付けてEnter",
+    "changeDivider": "区切り線のスタイルを変更",
+    "today": "今日",
+    "clear": "クリア"
+  },
+  "equation": {
+    "group": {
+      "structures": "構造",
+      "calculus": "微積分",
+      "matrices": "行列と連立方程式",
+      "chemistry": "化学（mhchem）"
+    },
+    "template": {
+      "fraction": "分数",
+      "squareRoot": "平方根",
+      "nthRoot": "n乗根",
+      "exponent": "指数",
+      "subscript": "添字",
+      "binomial": "二項係数",
+      "sum": "総和",
+      "product": "総積",
+      "integral": "積分",
+      "limit": "極限",
+      "derivative": "微分",
+      "partialDerivative": "偏微分",
+      "matrix": "2×2行列",
+      "determinant": "行列式",
+      "system": "連立方程式",
+      "vector": "ベクトル",
+      "molecule": "分子",
+      "reaction": "反応",
+      "equilibrium": "平衡",
+      "ion": "イオン"
+    },
+    "empty": "空の数式 — クリックしてLaTeXを入力",
+    "templates": "テンプレート",
+    "error": "LaTeXエラー：{{error}}",
+    "hint": "完全なLaTeX（KaTeX + 化学 \\ce）· Ctrl+Enterで確定 · Escapeでキャンセル",
+    "edit": "数式を編集",
+    "input": "数式の LaTeX コード"
+  },
+  "gallery": {
+    "chooseImages": "画像を選択…",
+    "dropFiles": "またはファイルをドラッグ＆ドロップ",
+    "imageUrl": "…または画像URLを貼り付けてEnter",
+    "row": "ストリップ（横スクロール）",
+    "carousel": "カルーセル",
+    "grid": "グリッド",
+    "height": "高さ {{size}}",
+    "imageCount_one": "{{count}}枚",
+    "imageCount_other": "{{count}}枚",
+    "add": "追加",
+    "remove": "削除",
+    "removeImage": "この画像を削除",
+    "caption": "キャプション…",
+    "openImage": "画像を開く"
+  },
+  "dbBasics": {
+    "noDateField": "行を配置する日付フィールドがありません。",
+    "addDateField": "日付フィールドを追加",
+    "rowDetail": "行の詳細",
+    "previousRow": "前の行",
+    "nextRow": "次の行",
+    "newProperty": "新しいプロパティ",
+    "delete": "削除",
+    "calculation": "計算",
+    "rowActions": "行の操作",
+    "rowCount_one": "{{count}}行",
+    "rowCount_other": "{{count}}行",
+    "newRow": "新しい行"
+  },
+  "dbView": {
+    "viewOptions": "ビューのオプション",
+    "moveLeft": "左へ移動",
+    "moveRight": "右へ移動",
+    "deleteView": "ビューを削除",
+    "settings": "設定",
+    "viewSettings": "ビュー設定",
+    "fields": "フィールド",
+    "rowHeight": "行の高さ",
+    "groupBy": "グループ化",
+    "noSelectField": "選択フィールドがありません",
+    "addView": "ビューを追加",
+    "newView": "新しいビュー",
+    "databaseActions": "データベースの操作",
+    "deleteDatabase": "データベースを削除",
+    "missingDatabase": "データベースがありません。",
+    "recreate": "再作成"
+  },
+  "callout": {
+    "basic": "基本",
+    "info": "情報",
+    "tip": "ヒント",
+    "warning": "注意",
+    "alert": "警告",
+    "changeEmoji": "絵文字を変更",
+    "presets": "プリセット",
+    "background": "背景色",
+    "style": "コールアウトのスタイル"
+  },
+  "window": {
+    "detach": "ノートを切り離す",
+    "unpin": "最前面表示を解除",
+    "alwaysOnTop": "常に最前面",
+    "stopAlwaysOnTop": "最前面表示をやめる",
+    "keepOnTop": "最前面に表示",
+    "attach": "メインウィンドウに戻す",
+    "minimize": "最小化",
+    "restore": "元に戻す",
+    "maximize": "最大化",
+    "close": "閉じる",
+    "title": "ウィンドウ",
+    "reload": "再読み込み",
+    "closeWindow": "ウィンドウを閉じる"
+  },
+  "dbFields": {
+    "type": "種類",
+    "numberFormat": "数値形式",
+    "dateFormat": "日付形式",
+    "includeTime": "時刻を含める",
+    "insertLeft": "左に挿入",
+    "insertRight": "右に挿入",
+    "hide": "非表示",
+    "clearValues": "値をクリア",
+    "addColumn": "列を追加",
+    "newColumn": "新しい列",
+    "columnOptions": "列のオプション",
+    "hideColumn": "列を非表示",
+    "addCard": "カードを追加",
+    "groupHint": "カードをグループ化する選択フィールドを指定してください（設定 › グループ化）。",
+    "showColumn": "列を表示"
+  },
+  "settings": {
+    "title": "ノートブック設定",
+    "description": "すぐに適用され、すべてのノートブックで共有されます。",
+    "appearance": "表示",
+    "pageWidth": "ドキュメントの幅",
+    "fontScale": "文字サイズ",
+    "breadcrumb": "ドキュメント上部のパンくずリスト",
+    "visible": "表示",
+    "hidden": "非表示",
+    "editor": "エディター",
+    "autosaveDelay": "自動保存の間隔",
+    "confirmTrash": "ゴミ箱へ移動する前に確認",
+    "yes": "はい",
+    "no": "いいえ",
+    "shortcuts": "キーボードショートカット",
+    "reset": "リセット",
+    "press": "キーを入力…",
+    "shortcutHint": "クリックして新しいキー操作を入力（Escapeでキャンセル）",
+    "shortcutConflict": "使用中のショートカットは、元の操作と入れ替わります。",
+    "width": {
+      "narrow": "狭い",
+      "medium": "標準",
+      "wide": "広い",
+      "full": "全幅"
+    },
+    "shortcut": {
+      "newPage": "新規ページ",
+      "newTab": "新規タブ",
+      "closeTab": "タブを閉じる",
+      "reopenTab": "閉じたタブを開く",
+      "nextTab": "次のタブ",
+      "prevTab": "前のタブ",
+      "back": "前のページ（履歴）",
+      "forward": "次のページ（履歴）",
+      "search": "ノートブックを検索",
+      "settings": "ノートブック設定",
+      "save": "ページを保存",
+      "trash": "ゴミ箱を開く",
+      "toggleSidebar": "サイドバーを表示／非表示"
+    },
+    "spellcheck": "スペルチェック",
+    "spellcheckHint": "誤りに下線を引きます。右クリックまたは Ctrl+. で修正",
+    "spellUnsupported": "この言語の辞書はありません — ネイティブの下線のみ",
+    "spellOn": "オン",
+    "spellOff": "オフ",
+    "personalDictionary": "ユーザー辞書",
+    "personalEmpty": "登録された単語はありません",
+    "personalRemove": "辞書から削除"
+  },
+  "filterSort": {
+    "filters": "フィルター",
+    "add": "追加",
+    "sort": "並べ替え",
+    "sortBy": "並べ替え",
+    "op": {
+      "is": "次と等しい",
+      "isNot": "次と等しくない",
+      "contains": "次を含む",
+      "notContains": "次を含まない",
+      "isEmpty": "空である",
+      "notEmpty": "空ではない",
+      "gt": ">",
+      "gte": "≥",
+      "lt": "<",
+      "lte": "≤",
+      "checked": "チェック済み",
+      "unchecked": "未チェック"
+    }
+  },
+  "lightbox": {
+    "zoomOut": "縮小",
+    "zoomIn": "拡大",
+    "pause": "一時停止（スペース）",
+    "slideshow": "スライドショー（スペース）",
+    "previous": "前へ",
+    "next": "次へ"
+  },
+  "icons": {
+    "search": "アイコンを検索…",
+    "uploading": "アップロード中…",
+    "chooseImage": "画像を選択",
+    "dropFile": "またはファイルをドラッグ＆ドロップ",
+    "emojis": "絵文字",
+    "icons": "アイコン",
+    "upload": "インポート"
+  },
+  "pageHeader": {
+    "cover": "カバー",
+    "change": "変更",
+    "icon": "アイコン"
+  },
+  "finalPass": {
+    "convertOptions": "変換 / オプション",
+    "convertTo": "変換先",
+    "pasteAs": "形式を選択して貼り付け",
+    "copy": "コピー",
+    "copyText": "選択したテキストをコピー",
+    "copyLink": "リンクをコピー",
+    "copyPassageLink": "この箇所へのリンクをコピー",
+    "exitFullscreen": "全ページ表示を閉じる",
+    "openFullscreen": "全ページで開く",
+    "deleteColumn": "列を削除",
+    "volume": "音量"
+  },
+  "numberLabels": {
+    "number": "数値",
+    "integer": "整数",
+    "percent": "パーセント",
+    "euro": "ユーロ（€）",
+    "dollar": "ドル（$）",
+    "audio": "音声"
+  },
+  "preview": {
+    "unavailable": "プレビューを表示できません",
+    "openPdf": "PDFを開く",
+    "loadingPdf": "PDFを読み込み中…（{{label}}）",
+    "loading": "読み込み中…"
+  },
+  "subpage": {
+    "openHint": "サブページを開く（中央クリック：新しいタブ）"
+  },
+  "sideMenu": {
+    "changeType": "変換",
+    "copyBlockLink": "ブロックのリンクをコピー",
+    "turnIntoSubpage": "サブページに変換",
+    "colors": "色",
+    "rowHeader": "見出し行",
+    "columnHeader": "見出し列"
+  },
+  "linkPage": {
+    "tooltip": "ページまたはURLにリンク",
+    "placeholder": "URLを貼り付けるかページを検索…",
+    "linkTo": "リンク先",
+    "hint": "URLまたはページタイトルを入力"
+  },
+  "mention": {
+    "block": "ブロック",
+    "openBlock": "ブロック位置で開く",
+    "showChip": "チップで表示",
+    "showCard": "カードで表示",
+    "refreshLabel": "ラベルを更新",
+    "deletedPage": "削除されたページ",
+    "blockMissing": "ブロックが見つかりません（削除済み？）",
+    "deletedTitle": "{{title}}（削除済み）",
+    "linkedBlock": "リンクされたブロック",
+    "type": {
+      "equation": "数式",
+      "image": "画像",
+      "video": "動画",
+      "audio": "音声",
+      "file": "ファイル",
+      "gallery": "画像ギャラリー",
+      "database": "データベース",
+      "youtube": "YouTube動画",
+      "embed": "埋め込み",
+      "bookmark": "ブックマーク",
+      "divider": "区切り線",
+      "subpage": "サブページ",
+      "table": "表",
+      "codeBlock": "コードブロック"
+    }
+  },
+  "meta": {
+    "name": "ノート名",
+    "type": "種類",
+    "languageLabel": "言語",
+    "kind": {
+      "notes": "ノート",
+      "project": "プロジェクト",
+      "script": "脚本",
+      "research": "調査",
+      "journal": "日記"
+    },
+    "language": {
+      "fr": "フランス語",
+      "en": "英語",
+      "es": "スペイン語",
+      "de": "ドイツ語",
+      "ja": "日本語",
+      "zh": "中国語"
+    }
+  },
+  "create": {
+    "title": "ノートを作成",
+    "description": "名前、種類、言語を設定します。後から変更できます。",
+    "namePlaceholder": "ノート名…",
+    "cancel": "キャンセル",
+    "submit": "作成"
+  },
+  "edit": {
+    "title": "ノートブックを編集",
+    "description": "名前、種類、言語を変更します。",
+    "done": "完了"
+  },
+  "blockTypes": {
+    "paragraph": "テキスト",
+    "heading1": "タイトル",
+    "heading2": "サブタイトル",
+    "heading3": "小見出し",
+    "bulletList": "箇条書き",
+    "numberedList": "番号付きリスト",
+    "checkList": "タスクリスト",
+    "quote": "引用"
+  },
+  "dbDefaults": {
+    "titleField": "名前",
+    "statusField": "ステータス",
+    "tableView": "グリッド",
+    "todo": "未着手",
+    "inProgress": "進行中",
+    "done": "完了",
+    "name": "データベース"
+  }
+}

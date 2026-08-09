@@ -1,0 +1,123 @@
+{
+  "app": {
+    "modulePreparing": "模块正在准备中 — 即将推出。"
+  },
+  "nav": { "derush": "NetsuCut", "script": "NetsuDraft", "notebook": "NetsuBook", "search": "NetsuSearch", "upscale": "NetsuLab", "reference": "NetsuBoard", "transfer": "NetsuBridge", "voice": "NetsuTalk", "chat": "NetsuPilot", "optimisation": "NetsuBoost" },
+  "sidebar": {
+    "settings": "设置",
+    "hostPicked": "控制的软件"
+  },
+  "status": {
+    "connected": "已连接",
+    "offline": "离线",
+    "connectedLower": "已连接",
+    "offlineLower": "离线",
+    "panelConnected": "面板已连接",
+    "panelOffline": "面板离线",
+    "resolveConnected": "Resolve 已连接",
+    "resolveOffline": "Resolve 离线",
+    "project": "项目：{{project}}",
+    "refresh": "刷新状态",
+    "resolveHint": "桥接正常，但 Resolve 无响应。打开 <b1>Resolve Studio</b1> 并载入项目，然后开启 <b2>偏好设置 ▸ 系统 ▸ 常规 ▸ 外部脚本 = 本地</b2> 并重启 Resolve。",
+    "adobeHint": "打开 {{host}}，再打开面板 <b>窗口 ▸ 扩展 ▸ NetsuRush</b>（先在 Adobe 选项卡中安装）。"
+  },
+  "menu": { "derush": "素材整理", "chat": "聊天",
+    "edit": "编辑",
+    "cut": "剪切",
+    "paste": "粘贴",
+    "selectAll": "全选",
+    "derushHome": "Derush 主页",
+    "reloadRushes": "重新载入素材",
+    "cutTimeline": "切分时间线",
+    "section": "分区",
+    "sectionDecoupage": "切分",
+    "sectionCollections": "合集",
+    "sectionTimeline": "实时时间线",
+    "search": "搜索",
+    "resultView": "结果视图",
+    "resultFlat": "平铺",
+    "resultClusters": "分组",
+    "resultDedup": "重复项",
+    "clearRefs": "清空参考图",
+    "clearChain": "清空链路",
+    "clearSources": "清空选择",
+    "voice": "语音",
+    "listen": "试听",
+    "listenNone": "原始素材",
+    "listenAll": "完整剪辑",
+    "listenSilences": "已剪静音",
+    "listenFillers": "去除语气词",
+    "listenRepeats": "去除重复",
+    "reset": "重置",
+    "clearChat": "清空对话",
+    "gotoModule": "前往模块",
+    "console": "控制台",
+    "refreshStatus": "刷新状态",
+    "reloadApp": "重新载入 NetsuRush",
+    "pinned": "窗口已固定",
+    "hideSidebar": "隐藏侧边栏",
+    "pinAbove": "固定在最前"
+  },
+  "windowControls": {
+    "unpin": "取消固定窗口",
+    "pinAbove": "固定在最前",
+    "unpinShort": "取消固定",
+    "minimize": "最小化",
+    "restore": "还原",
+    "maximize": "最大化"
+  },
+  "errorBadge": {
+    "aria": "{{count}} 个错误 — 打开控制台",
+    "open": "打开控制台",
+    "markRead": "标为已读"
+  },
+  "errorBoundary": {
+    "title": "NetsuRush 渲染崩溃",
+    "reload": "重新载入"
+  },
+  "notebook": {
+    "untitled": "无标题",
+    "prev": "上一个",
+    "next": "下一个",
+    "closeTab": "关闭标签页",
+    "closeOthers": "关闭其他",
+    "allTabs": "全部标签页",
+    "newPageTab": "在新标签页中新建页面"
+  },
+  "emoji": {
+    "search": "搜索表情…",
+    "none": "没有匹配“{{q}}”的表情。",
+    "cat": {
+      "people": "表情与人物",
+      "nature": "动物与自然",
+      "foods": "食物与饮品",
+      "activity": "活动",
+      "places": "旅行与地点",
+      "objects": "物品",
+      "symbols": "符号",
+      "flags": "旗帜"
+    }
+  },
+  "scrollTop": "回到顶部",
+  "select": {
+    "select": "选择",
+    "deselect": "取消选择"
+  },
+  "power": {
+    "reopenHost": "重新打开 {{host}}",
+    "freeRam": "关闭以释放 RAM",
+    "closeNub": "关闭 {{host}}（释放 RAM/GPU）",
+    "opInProgress": "操作进行中…",
+    "hostClosed": "{{host}} 已关闭",
+    "reopenToResume": "重新打开“{{project}}”以继续。",
+    "reopenToResumeNoProject": "重新打开以继续。",
+    "collapse": "收起",
+    "collapseCorner": "收起到角落",
+    "closeHostQ": "关闭 {{host}}？",
+    "freeRamDesc": "为任务释放 RAM 和 GPU。结束后一键重新打开项目。",
+    "resolveSafeCloseDesc": "释放 RAM 和 GPU。关闭前，NetsuRush 会保存项目并验证缓存。",
+    "later": "稍后",
+    "closeHost": "关闭 {{host}}",
+    "failed": "失败"
+  }
+}

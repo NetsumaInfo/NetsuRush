@@ -1,0 +1,138 @@
+import { memo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Check, Play, Download, CheckSquare, Clapperboard } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PreviewVideo } from "@/components/player/PreviewVideo";
+import { selectionRing, SelectToggle } from "@/components/common/selectable";
+import { AddToCollection } from "@/components/collections/AddToCollection";
+import { IS_REMOTE } from "@/lib/remote";
+import { type Segment } from "./cutStudioShared";
+import { useSceneCardMedia } from "./useSceneCardMedia";
+
+// En remote (panneau Adobe) : le survol est peu fiable → les icônes d'action (sélection, collection,
+// envoi timeline) restent TOUJOURS visibles. Ailleurs = apparition au survol (design d'origine).
+const ACT_VIS = IS_REMOTE ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100";
+
+function SceneCardImpl({
+  seg, index, clipPath, clipName, srcFrames, cols, cellH, active, selected, play, getProxy, bustProxy, onPlay, onToggle, onAddToTimeline, addLabel, pos, dur,
+}: {
+  seg: Segment; index: number; clipPath: string; clipName: string; srcFrames: number; cols: number; cellH: number; active: boolean; selected: boolean; play: boolean;
+  getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>; bustProxy: () => void; onPlay: () => void;
+  // `mods` porte les modificateurs du clic : Maj = étendre la plage depuis l'ancre, Ctrl = basculer.
+  onToggle: (mods?: { shift?: boolean; ctrl?: boolean }) => void;
+  onAddToTimeline?: () => Promise<{ ok: boolean; error?: string }>; addLabel?: string; pos: string; dur: string;
+}) {
+  const { t } = useTranslation("derush");
+  const { rootRef, thumb, url, showVideo, hovered, onVideoError, enter, leave } =
+    useSceneCardMedia({ seg, index, clipPath, cols, play, getProxy, bustProxy });
+
+  const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
+
+  async function doAdd(e: { stopPropagation: () => void }) {
+    e.stopPropagation();
+    if (adding === "busy" || !onAddToTimeline) return;
+    setAdding("busy");
+    try { const r = await onAddToTimeline(); setAdding(r.ok ? "done" : "err"); }
+    catch { setAdding("err"); }
+    setTimeout(() => setAdding("idle"), 1400);
+  }
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger render={
+        <div
+          ref={rootRef}
+          role="button"
+          tabIndex={0}
+          // Repère lu par useCutShortcuts : une carte focalisée garde Entrée/Espace/P pour elle.
+          data-scene-card=""
+          aria-pressed={selected}
+          aria-label={selected ? t("sceneCard.ariaDeselect", { n: index + 1 }) : t("sceneCard.ariaSelect", { n: index + 1 })}
+          onMouseEnter={enter}
+          onMouseLeave={leave}
+          // clic = sélectionner (toggle) ; Maj+clic = plage ; Ctrl+clic = bascule ; double-clic = lecteur
+          onClick={(e) => onToggle({ shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey })}
+          onDoubleClick={onPlay}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle({ shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey }); }
+            else if (e.key === "p" || e.key === "P") { e.preventDefault(); onPlay(); }
+          }}
+          // `containIntrinsicSize` = hauteur RÉELLE de la carte → le placeholder hors-vue (content-visibility:auto)
+          // colle à la taille affichée : pas d'oscillation de layout au scroll (rangées blanches en densité forte).
+          style={cellH ? { containIntrinsicSize: `auto ${cellH}px` } : undefined}
+          className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 [content-visibility:auto] [contain-intrinsic-size:auto_200px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}
+        />
+      }>
+      {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
+      {/* la vignette reste la couche de fond : quand la <video> se démonte (Lecture auto coupée),
+          elle est déjà là dessous → aucun flash noir. La <video> se superpose le temps de jouer. */}
+      {thumb && <img src={thumb} alt={t("shared.shotPreview", { n: index + 1 })} className="absolute inset-0 h-full w-full object-cover" />}
+      {showVideo && (
+        <PreviewVideo url={url!} label={t("shared.shotPreview", { n: index + 1 })} onError={onVideoError} audible={hovered} />
+      )}
+      <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20">
+        {!showVideo && <Play className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />}
+      </div>
+      <span className="absolute left-1.5 top-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums">#{index + 1}</span>
+      <SelectToggle selected={selected} onToggle={() => onToggle()} />
+      {/* ranger ce plan dans une collection (bibliothèque) — directement sur la vignette */}
+      <Tooltip>
+        <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${ACT_VIS}`} />}>
+          <AddToCollection
+            shots={[{ path: clipPath, name: clipName, in: seg.in, out: seg.out, inFrame: seg.inFrame, outFrame: seg.outFrame, srcFrames }]}
+            className="nr-chip shadow-md p-1 text-white/80 hover:text-primary"
+          />
+        </TooltipTrigger>
+        <TooltipContent>{t("shared.rangeInCollection")}</TooltipContent>
+      </Tooltip>
+
+      {/* ajouter ce plan à la timeline ouverte (reste visible tant qu'un ajout est en cours/terminé) */}
+      {onAddToTimeline && (
+        <Tooltip>
+          <TooltipTrigger render={<button type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
+            className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : ACT_VIS} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
+            {adding === "busy" ? <Spinner className="size-3.5" />
+              : adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
+              : <Download className="h-3.5 w-3.5" />}
+          </TooltipTrigger>
+          <TooltipContent>{addLabel ?? t("shared.sendToTimeline")}</TooltipContent>
+        </Tooltip>
+      )}
+      <Tooltip>
+        <TooltipTrigger render={<span className="absolute bottom-1.5 right-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums" />}>
+          {dur}
+        </TooltipTrigger>
+        <TooltipContent>{t("sceneCard.startAt", { pos })}</TooltipContent>
+      </Tooltip>
+      </ContextMenuTrigger>
+      {/* Clic droit : lire / (dé)sélectionner / envoyer à la timeline. */}
+      <ContextMenuContent className="min-w-48">
+        <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => onToggle()}>
+          <CheckSquare /> {selected ? t("shared.deselect") : t("shared.select")}
+        </ContextMenuItem>
+        {onAddToTimeline && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={(e) => doAdd(e)}>
+              <Clapperboard /> {addLabel ?? t("shared.addToTimeline")}
+            </ContextMenuItem>
+          </>
+        )}
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
+// Mémoïsé : la grille re-rend à chaque sélection/lecture/survol d'UNE carte. On compare les seules
+// props qui changent le rendu ; les callbacks (recréés à chaque rendu parent, sémantique stable,
+// lus via ref dans le hook média) sont volontairement ignorés → 1 seule carte re-rend, pas 494.
+export const SceneCard = memo(SceneCardImpl, (a, b) =>
+  a.seg.id === b.seg.id && a.seg.in === b.seg.in && a.seg.out === b.seg.out &&
+  a.index === b.index && a.clipPath === b.clipPath && a.clipName === b.clipName && a.srcFrames === b.srcFrames && a.cols === b.cols && a.cellH === b.cellH &&
+  a.active === b.active && a.selected === b.selected && a.play === b.play &&
+  a.pos === b.pos && a.dur === b.dur && a.addLabel === b.addLabel && !!a.onAddToTimeline === !!b.onAddToTimeline,
+);

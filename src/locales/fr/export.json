@@ -1,0 +1,200 @@
+{
+  "settings": {
+    "title": "Réglages d'export",
+    "new": "Nouveau",
+    "newProfile": "Nouveau profil",
+    "duplicate": "Dupliquer",
+    "duplicateProfile": "Dupliquer le profil",
+    "deleteProfile": "Supprimer le profil",
+    "cardButton": "Bouton de vignette",
+    "menuLabel": "Profil d'export"
+  },
+  "editor": {
+    "name": "Nom",
+    "namePlaceholder": "Nom du profil",
+    "destination": "Destination",
+    "timeline": "Timeline",
+    "folder": "Dossier",
+    "folderPlaceholder": "Nom du dossier…",
+    "defaultFolder": "NetsuRush — Coupes",
+    "existingFolders": "Dossiers existants",
+    "mediaPoolFolders": "Dossiers du Media Pool",
+    "profile": "Profil",
+    "profileCustom": "Personnalisé",
+    "optimization": "Optimisation",
+    "speed": "Vitesse",
+    "codec": "Codec",
+    "audio": "Audio",
+    "audioCodec": "Codec audio",
+    "timelineTarget": "Timeline cible",
+    "timelineInsertion": "Mode d’insertion — {{host}}",
+    "insertionInsert": "Insérer",
+    "insertionOverwrite": "Écraser",
+    "insertionReplace": "Remplacer",
+    "insertionFit": "Remplacer et adapter la vitesse",
+    "insertionAbove": "Placer au-dessus",
+    "insertionEnd": "Ajouter à la fin",
+    "insertionRippleOverwrite": "Écraser avec décalage",
+    "aeftInsertion": {
+      "insert": "Insérer et décaler les calques",
+      "replace": "Remplacer le calque",
+      "fit": "Adapter à la durée du calque",
+      "above": "Ajouter au-dessus des calques",
+      "end": "Ajouter à la fin de la composition"
+    },
+    "container": "Conteneur",
+    "mergeToOne": "Fusionner en un fichier",
+    "fileName": "Nom des fichiers",
+    "fileNamePlaceholder": "{base}_{index}",
+    "insertToken": "Insérer un jeton",
+    "tokens": {
+      "base": "Nom de base",
+      "source": "Fichier source",
+      "index": "N° du plan",
+      "total": "Nombre de plans",
+      "start": "Début",
+      "end": "Fin",
+      "duration": "Durée",
+      "label": "Libellé du plan",
+      "profile": "Nom du profil",
+      "codec": "Codec",
+      "container": "Conteneur",
+      "date": "Date",
+      "time": "Heure"
+    },
+    "mergeGap": "Noir entre les plans",
+    "milliseconds": "ms"
+  },
+  "encoder": {
+    "gpu": "GPU",
+    "nvenc": "NVIDIA NVENC",
+    "amf": "AMD AMF",
+    "qsv": "Intel Quick Sync",
+    "cpu": "CPU"
+  },
+  "speed": {
+    "fast": {
+      "label": "Rapide",
+      "hint": "encodage prioritaire"
+    },
+    "balanced": {
+      "label": "Équilibré",
+      "hint": "bon compromis"
+    },
+    "quality": {
+      "label": "Qualité",
+      "hint": "meilleure compression"
+    },
+    "max": {
+      "label": "Maximale",
+      "hint": "plus lent et compact"
+    }
+  },
+  "toggle": {
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "issue": {
+    "binTargetRequired": "Nomme le dossier de destination",
+    "profileIncomplete": "Profil incomplet : {{issue}}"
+  },
+  "audio": {
+    "allTracks": "Toutes les pistes",
+    "noAudio": "Aucune (vidéo seule)",
+    "trackLabel": "Piste {{n}}{{lang}} · {{channels}} ch · {{codec}}",
+    "languageGroup": "Langue",
+    "trackGroup": "Piste",
+    "trackN": "Piste {{n}}",
+    "langResolved": "{{lang}} → Piste {{n}}",
+    "langUnresolved": "{{lang}} → aucune piste trouvée",
+    "timelineHint": "Resolve importe toutes les pistes audio ou aucune."
+  },
+  "iconPicker": {
+    "search": "Rechercher une icône…",
+    "importedImage": "Image importée",
+    "removeFromLibrary": "Retirer de la bibliothèque",
+    "importImage": "Importer une image / GIF",
+    "profileIcon": "Icône du profil",
+    "defaultIcon": "Icône par défaut",
+    "default": "Défaut",
+    "tabEmojis": "Emojis",
+    "tabIcons": "Icônes",
+    "tabImages": "Images"
+  },
+  "notice": {
+    "cancelled": "Export annulé : aucun dossier de destination choisi.",
+    "merging": "Fusion…",
+    "exporting": "Export…",
+    "exported_one": "{{count}} fichier exporté ({{profile}}) → {{dir}}{{failed}}",
+    "exported_other": "{{count}} fichiers exportés ({{profile}}) → {{dir}}{{failed}}",
+    "failedSuffix_one": " · {{count}} échec",
+    "failedSuffix_other": " · {{count}} échecs",
+    "exportFailed": "échec export"
+  },
+  "workflow": {
+    "timeline": "Timeline",
+    "remux": "Copie des flux",
+    "encode": "Réencodage"
+  },
+  "audioMode": {
+    "copy": "Copie",
+    "aac_128": "AAC 128 kbps",
+    "aac": "AAC 192 kbps",
+    "aac_256": "AAC 256 kbps",
+    "aac_320": "AAC 320 kbps",
+    "opus_128": "Opus 128 kbps",
+    "opus": "Opus 160 kbps",
+    "opus_192": "Opus 192 kbps",
+    "mp3_192": "MP3 192 kbps",
+    "mp3": "MP3 320 kbps",
+    "flac": "FLAC",
+    "alac": "ALAC",
+    "pcm16": "PCM 16 bits",
+    "pcm24": "PCM 24 bits"
+  },
+  "audioGroup": {
+    "lossy": "Avec perte",
+    "lossless": "Sans perte"
+  },
+  "codec": {
+    "bitDepth": "{{count}} bits",
+    "profile": "Profil {{count}}",
+    "losslessArchive": "Sans perte (archivage)",
+    "archive": "archivage"
+  },
+  "lang": {
+    "ja": "Japonais",
+    "en": "Anglais",
+    "fr": "Français",
+    "es": "Espagnol",
+    "de": "Allemand",
+    "it": "Italien",
+    "pt": "Portugais",
+    "ru": "Russe",
+    "zh": "Chinois",
+    "ko": "Coréen",
+    "ar": "Arabe",
+    "hi": "Hindi"
+  },
+  "profileName": {
+    "toTimeline": "Vers la timeline",
+    "fileNoReencode": "Fichier sans réencodage",
+    "mp4H264": "MP4 H.264",
+    "mp4H265_10": "MP4 H.265 10 bits",
+    "prores422hq": "ProRes 422 HQ",
+    "dnxhrHq": "DNxHR HQ",
+    "mkvH265_10": "MKV H.265 10 bits",
+    "webmAv1": "WebM AV1",
+    "prores4444": "ProRes 4444 (alpha)",
+    "dnxhrHqx": "DNxHR HQX 10 bits",
+    "ffv1Archive": "FFV1 — archivage",
+    "generic": "Profil {{index}}",
+    "fallback": "Profil d'export"
+  },
+  "summary": {
+    "timelineImport": "Import dans la timeline",
+    "streamCopy": "Copie de flux",
+    "merged": " · fusionné"
+  },
+  "codecUnknown": "Codec inconnu"
+}

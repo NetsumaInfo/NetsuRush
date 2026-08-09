@@ -1,0 +1,654 @@
+{
+  "title": "Settings",
+  "nav": {
+    "account": "Account",
+    "interface": "Interface",
+    "media": "Media",
+    "ai": "Model",
+    "export": "Export",
+    "adobe": "Adobe",
+    "storage": "Storage",
+    "system": "System",
+    "about": "About"
+  },
+  "about": {
+    "tagline": "Local rush-prep hub, wired to DaVinci Resolve, Premiere Pro and After Effects.",
+    "socialTitle": "Social",
+    "social": {
+      "discord": "Join the server"
+    },
+    "legal": "© 2026 Haim Faraj · NetsuRush is distributed under GNU AGPL v3.0-only · No warranty.",
+    "licenseLink": "Full license text",
+    "sourceLink": "Corresponding source code"
+  },
+  "account": {
+    "title": "Account",
+    "notConfigured": "Sign-in is not configured on this installation.",
+    "subtitle": "The Discord account connected to NetsuRush.",
+    "none": "No account connected.",
+    "discordUser": "Discord user",
+    "signOut": "Sign out"
+  },
+  "playback": {
+    "title": "Previews and thumbnails",
+    "subtitle": "Configure video previews and thumbnails.",
+    "soundTitle": "Sound",
+    "playerVolume": "Player volume",
+    "playerVolumeHint": "Shared by NetsuCut, Collections, Voice and Upscale.",
+    "hoverVolume": "Hover volume",
+    "hoverVolumeHint": "Volume of the hovered thumbnail; auto-playing previews stay muted.",
+    "globalMuted": "Muted by the player volume.",
+    "generation": {
+      "proxyTitle": "Animated previews",
+      "thumbnailTitle": "Static thumbnails",
+      "format": "Format",
+      "formatHint": {
+        "hevc": "Smaller files, best when HEVC decoding is smooth.",
+        "h264": "Highly compatible and generally quick to decode.",
+        "webp": "Silent grid preview with no audio track."
+      },
+      "engine": "Engine",
+      "engineAuto": "Automatic · recommended",
+      "engineHint": "Auto selects the best engine that actually works.",
+      "preset": "Profile",
+      "presetHint": "Actual FFmpeg values for the selected engine.",
+      "resolution": "Resolution",
+      "resolutionHint": "480p is the default setting for cards.",
+      "audio": "Audio",
+      "audioHint": "Adds a lightweight AAC track to video proxies.",
+      "noWebpAudio": "Animated WebP does not support audio.",
+      "audioUnavailable": "No audio in the configured preview.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "thumbnailFormatHint": "WebP is often smaller; JPEG remains universal.",
+      "quality": "Image quality",
+      "qualityLow": "Light",
+      "qualityStandard": "Balanced",
+      "qualityHigh": "Sharp",
+      "qualityHint": "The step sets both detail and generation speed.",
+      "thumbnailTiming": "The thumbnail is still captured a few frames after the cut in fast mode.",
+      "cacheHint": "Existing caches remain available after a change.",
+      "cacheCleared": "Old caches removed.",
+      "reset": "Reset",
+      "clearOld": "Remove old caches"
+    }
+  },
+  "performance": {
+    "indexingTitle": "Shot analysis",
+    "accelerationTitle": "Acceleration",
+    "shotDecode": "Grouped extraction",
+    "shotDecodeHint": "Pulls a shot's frames in one go instead of one by one. Up to 6× faster, for exactly the same frames.",
+    "vramProfile": "Memory profile",
+    "vramProfileHint": "How much work runs at once. Lower it if the app gets in the way of your edit, raise it if the machine is free.",
+    "vram": {
+      "economy": "Economy",
+      "balanced": "Balanced",
+      "performance": "Performance"
+    },
+    "maxPatches": "Analysis resolution",
+    "maxPatchesHint": "How much detail the model sees in each frame. Higher catches small elements, but costs time and memory.",
+    "patchesDefault": "{{value}} (default)",
+    "reindexWarning": "At this resolution your rushes must be indexed again. Going back to 256 finds the original index intact.",
+    "onnxGpu": "Faces and dictation on GPU",
+    "onnxGpuHint": "About 8× faster than the processor, for the same results. Turn it off if your graphics driver crashes.",
+    "enabled": "On",
+    "disabled": "Off",
+    "reset": "Reset performance",
+    "quick": "Performance",
+    "quickMore": "All settings…"
+  },
+  "appearance": {
+    "title": "Theme",
+    "subtitle": "Choose a palette that suits your workspace.",
+    "group": {
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "theme": {
+      "dark": {
+        "label": "Dark",
+        "hint": "Neutral with strong contrast."
+      },
+      "midnight": {
+        "label": "Midnight",
+        "hint": "True black with discreet surfaces."
+      },
+      "blue": {
+        "label": "Night blue",
+        "hint": "Deep, vivid blue."
+      },
+      "light": {
+        "label": "Light",
+        "hint": "Clean white with crisp contrast."
+      },
+      "soft-light": {
+        "label": "Soft light",
+        "hint": "Blue-gray with reduced glare."
+      },
+      "graphite": {
+        "label": "Graphite",
+        "hint": "Neutral gray, no tint."
+      },
+      "forest": {
+        "label": "Forest",
+        "hint": "Deep green with an emerald accent."
+      },
+      "ember": {
+        "label": "Ember",
+        "hint": "Warm charcoal with an amber accent."
+      },
+      "plum": {
+        "label": "Plum",
+        "hint": "Muted purple with a mauve accent."
+      },
+      "contrast": {
+        "label": "High contrast",
+        "hint": "Pure black with crisp borders."
+      },
+      "paper": {
+        "label": "Paper",
+        "hint": "Soft sepia with a terracotta accent."
+      }
+    },
+    "wallpaper": {
+      "title": "Background",
+      "choose": "Choose an image",
+      "none": "None",
+      "remove": "Remove from library",
+      "empty": "No background yet. Drop a file here.",
+      "importFailed": "Import failed.",
+      "blockedByTheme": "The High contrast theme takes no background.",
+      "blur": "Blur",
+      "opacity": "Opacity",
+      "saturate": "Saturation",
+      "uiOpacity": "Panel opacity",
+      "animate": "Animate",
+      "pauseUnfocused": "Freeze in background",
+      "pauseWhileBusy": "Freeze during processing",
+      "groupFraming": "Framing",
+      "groupRender": "Render",
+      "groupReadability": "Readability",
+      "groupMotion": "Motion",
+      "reset": "Reset",
+      "openFraming": "Frame the image",
+      "framingTitle": "Background framing",
+      "rotateLeft": "Rotate left",
+      "rotateRight": "Rotate right",
+      "flipH": "Flip horizontally",
+      "flipV": "Flip vertically",
+      "resetFraming": "Reset framing",
+      "cropWidth": "Crop width",
+      "transform": "Orientation",
+      "applyFraming": "Apply",
+      "cropSize": "Crop size",
+      "groupScope": "Scope",
+      "onDetached": "Detached windows",
+      "global": "Shared by every theme"
+    },
+    "colors": {
+      "title": "Colors",
+      "perTheme": "Set for this theme",
+      "primary": "Accent",
+      "fg": "Text",
+      "bg": "Background",
+      "surface": "Panels",
+      "border": "Borders",
+      "restore": "Back to theme",
+      "fromTheme": "From theme",
+      "resetAll": "Back to theme",
+      "resetAllHint": "Drops every tweak on this theme."
+    },
+    "custom": {
+      "title": "My themes",
+      "subtitle": "Save the current look: palette, colors and background.",
+      "create": "New theme",
+      "save": "Save",
+      "delete": "Delete this theme",
+      "empty": "No saved theme yet.",
+      "namePlaceholder": "Theme name",
+      "confirm": "Confirm",
+      "rename": "Rename",
+      "unsaved": "“{{name}}” has unsaved changes."
+    }
+  },
+  "updates": {
+    "title": "Updates",
+    "subtitle": "Releases are checked on GitHub and their signature is verified before installation.",
+    "auto": "Automatic checks",
+    "autoHint": "Looks for a new version a few seconds after startup.",
+    "on": "On",
+    "off": "Off",
+    "ready": "Ready to check",
+    "checking": "Checking for updates…",
+    "available": "Version {{version}} is available",
+    "downloading": "Downloading and verifying…",
+    "failed": "The update check failed",
+    "current": "NetsuRush is up to date",
+    "check": "Check",
+    "install": "Install",
+    "history": "What's new by version",
+    "whatsNew": "What's new in version {{version}}",
+    "gotIt": "Let's go"
+  },
+  "compatibility": {
+    "title": "This PC's compatibility",
+    "gpuFunctions": "GPU functions",
+    "cpuFunctions": "CPU or fallback functions",
+    "igpu": "iGPU",
+    "dgpu": "dGPU",
+    "driver": "Driver",
+    "noHardware": "No components detected.",
+    "state": {
+      "gpu": "GPU",
+      "cpu": "CPU",
+      "fallback": "CPU fallback",
+      "missing": "Unavailable"
+    },
+    "thumbnailEngine": "Generated on the CPU by design.",
+    "subtitle": "NetsuRush uses only the engines available on this machine.",
+    "refresh": "Check",
+    "hardware": "Detected components",
+    "gpu": "Graphics card",
+    "cpu": "Processor",
+    "uses": "Features",
+    "notInstalled": "Unavailable",
+    "available": "Available",
+    "unavailable": "NetsuRush could not check this PC's components.",
+    "features": {
+      "netsucut": "NetsuCut",
+      "torchModels": "AI models",
+      "onnxModels": "ONNX models",
+      "transcription": "Transcription",
+      "notebook": "NetsuBook"
+    },
+    "featureHints": {
+      "netsucut": "Creates previews and encodes video.",
+      "torchModels": "Detects shots, searches and improves images.",
+      "onnxModels": "Removes backgrounds and runs ONNX models.",
+      "transcription": "Turns speech into text.",
+      "notebook": "Saves and organizes notes. No GPU required."
+    }
+  },
+  "exportProfiles": {
+    "title": "Export profiles",
+    "subtitle": "Codec settings applied to the Download button on thumbnails and search results.",
+    "new": "New",
+    "duplicate": "Duplicate",
+    "deleteAria": "Delete profile",
+    "restore": "Restore",
+    "restoreHint": "Restores the shipped presets missing from the list.",
+    "cardButton": "Thumbnail button",
+    "cardButtonHint": "Action of the button shown when hovering a thumbnail."
+  },
+  "console": {
+    "title": "Console",
+    "subtitle": "What the app, the service and the AI wrote.",
+    "copy": "Copy",
+    "errors": "Errors",
+    "export": "Export",
+    "clearAria": "Clear console",
+    "all": "All ({{count}})",
+    "warnings": "Warnings ({{count}})",
+    "errorsCount": "Errors ({{count}})",
+    "empty": "No logs yet.",
+    "emptyFilter": "No logs match this filter.",
+    "emptyClipboard": "No logs."
+  },
+  "bugReport": {
+    "title": "Report a problem",
+    "type": "What is happening?",
+    "module": "Where?",
+    "detail": "Say it in a few words",
+    "detailPlaceholder": "e.g. the Send button does nothing",
+    "severity": "How bad?",
+    "frequency": "It happens…",
+    "groups": {
+      "problem": "A problem",
+      "improvement": "An idea",
+      "other": "Other"
+    },
+    "categories": {
+      "crash": "The app closes on its own",
+      "freeze": "The app is stuck",
+      "startup": "The app won't open",
+      "dataLoss": "I lost my work",
+      "wrongResult": "The result is wrong",
+      "playback": "The video won't play",
+      "export": "Export doesn't work",
+      "hostLink": "Resolve or Adobe not connected",
+      "ai": "The AI doesn't work",
+      "download": "A download fails",
+      "performance": "It's too slow",
+      "ui": "Something looks wrong",
+      "accessibility": "Hard to read or to click",
+      "i18n": "A typo in the text",
+      "security": "A privacy concern",
+      "regression": "It used to work",
+      "feature": "I'd like a new feature",
+      "ux": "An idea to make it simpler",
+      "question": "I have a question",
+      "other": "Something else"
+    },
+    "severities": {
+      "blocker": "Blocks everything",
+      "major": "Annoying",
+      "minor": "Small detail",
+      "idea": "Idea"
+    },
+    "frequencies": {
+      "always": "Always",
+      "often": "Often",
+      "rare": "Rarely",
+      "once": "Once"
+    },
+    "description": "Tell us what happened",
+    "descriptionPlaceholder": "What you did, and what went wrong…",
+    "descriptionIdea": "Tell us your idea",
+    "descriptionIdeaPlaceholder": "What you'd like to do, and why",
+    "steps": "How to do it again?",
+    "stepsPlaceholder": "1. I open… 2. I click… 3. …",
+    "expected": "What should it have done?",
+    "expectedPlaceholder": "The result you expected",
+    "videoSource": "Link to the video",
+    "videoPlaceholder": "a link we can download it from",
+    "discord": "Your Discord",
+    "discordPlaceholder": "@handle",
+    "auto": "auto",
+    "specs": {
+      "title": "Your PC",
+      "copy": "Copy",
+      "refresh": "Read again",
+      "loading": "Reading…",
+      "more": "See all",
+      "less": "Collapse",
+      "manual": "Type it yourself",
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 GB, Windows 11"
+    },
+    "sending": "Sending…",
+    "send": "Send",
+    "download": "Save the message",
+    "logsAttached": "{{count}} log lines attached",
+    "logErrors": "{{count}} errors",
+    "sendFailed": "Sending didn't work. Try again.",
+    "validation": {
+      "description": "Tell us what happened before sending.",
+      "detail": "Say in a few words what it is about.",
+      "tooLarge": "A file is over {{size}} MB."
+    },
+    "noWebhook": "Sending is disabled: no webhook configured. Set <c1>bugWebhook</c1> in nr.config.json (or the <c2>NR_BUG_WEBHOOK</c2> environment variable).",
+    "descriptionOther": "Tell us more",
+    "descriptionOtherPlaceholder": "Your question, or whatever you want to tell us…",
+    "files": {
+      "label": "Attachments",
+      "choose": "Attach a file",
+      "add": "Add",
+      "remove": "Remove",
+      "limit": "{{count}} files at most"
+    }
+  },
+  "outbox": {
+    "opening": "Opening cache…",
+    "intro": "Close Resolve/Premiere Pro to free the GPU during heavy encodes without losing your sends: they are cached and applied <b>automatically when the app reopens</b>.",
+    "enabled": "Queue enabled",
+    "enabledHint": "Otherwise, sending to a closed editing app fails as before.",
+    "on": "Enabled",
+    "off": "Disabled",
+    "delay": "Delay before applying",
+    "delayHint": "Gives the editing app time to finish opening.",
+    "destination": "Destination for cached sends",
+    "targetNew": "One timeline per send",
+    "targetSingle": "Single timeline",
+    "targetPlaceholder": "Collector timeline name",
+    "targetSingleHint": "All pending sends go to one timeline, created when the app reopens.",
+    "targetNewHint": "Each send creates its own timeline, just like a direct send.",
+    "queue": "Queue",
+    "pendingCount": "{{count}} pending",
+    "applyNow": "Apply now",
+    "clearHistory": "Clear history",
+    "empty": "No cached sends.",
+    "applied": "applied",
+    "failed": "failed",
+    "pending": "pending",
+    "offline": {
+      "title": "Offline timeline cache",
+      "upToDate": "up to date",
+      "stats": "{{clips}} clips · {{cached}}/{{total}} timelines with their shots.",
+      "none": "No cache — with Resolve closed, timelines open empty.",
+      "update": "Update",
+      "needResolve": "Resolve must be connected to build the cache.",
+      "building": "Updating in the background (media keeps priority)…",
+      "auto": "Updates automatically in the background and reads only new timelines.",
+      "rebuild": "Rebuild all"
+    }
+  },
+  "discord": {
+    "title": "Discord presence",
+    "preview": {
+      "heading": "Playing",
+      "elapsed": "{{time}} elapsed",
+      "empty": "Nothing will show up."
+    },
+    "on": "On",
+    "off": "Off",
+    "status": {
+      "connected": "Visible on {{user}}'s profile.",
+      "searching": "Can't find Discord — presence shows up once it's open.",
+      "disabled": "Your profile shows nothing.",
+      "noAppId": "No Discord application set."
+    },
+    "showModule": "Open module",
+    "showProject": "Project name",
+    "showProjectHint": "Can reveal a client's name.",
+    "showElapsed": "Time elapsed",
+    "custom": "Custom text",
+    "customHelp": "Replaces the automatic lines. {module} and {projet} get substituted.",
+    "details": "First line",
+    "state": "Second line"
+  },
+  "storage": {
+    "empty": "No cache yet.",
+    "emptyHint": "Thumbnails and previews get indexed as you browse footage.",
+    "diskFree": "{{free}} free of {{total}}",
+    "refresh": "Refresh",
+    "kind": {
+      "thumb": "Thumbnails",
+      "proxy": "Video previews",
+      "voice": "Extracted audio",
+      "upscaleTest": "Processing tests",
+      "roto": "Roto sessions",
+      "scenes": "Shot detection",
+      "transcripts": "Transcriptions",
+      "embeddings": "Search vectors",
+      "indexThumbs": "Index thumbnails",
+      "faces": "Face index"
+    },
+    "kindHint": {
+      "thumb": "One image per shot. Slow to rebuild from cold.",
+      "proxy": "Short clips encoded on GPU. Rebuilt in a second.",
+      "voice": "16 kHz WAV for transcription and silence detection.",
+      "upscaleTest": "Full-res frames from \"what if?\" tests.",
+      "roto": "Frames and masks from segmentation sessions.",
+      "scenes": "AI-detected cut points. Rebuild = one detection pass.",
+      "transcripts": "Text and word timings. Rebuild = one ASR pass.",
+      "embeddings": "One vector per shot — what the model saw. Rebuild = hours of GPU.",
+      "indexThumbs": "Old thumbnails left inside the index. Search now shows the ones from cutting, so whatever remains here can go.",
+      "faces": "One identity vector per detected face. Rebuild = one detection pass."
+    },
+    "tree": {
+      "title": "By project",
+      "desc": "Grouped by source folder. Clear what belongs to a finished project without touching the rest.",
+      "rushCount_one": "{{count}} clip",
+      "rushCount_other": "{{count}} clips",
+      "unattributed": "Unattributed",
+      "unattributedHint": "Cache written before the index, or whose footage couldn't be found. Can be purged all at once.",
+      "selected": "{{count}} selected · {{size}}",
+      "clearSelection": "Deselect",
+      "purgeSelection": "Clear selection"
+    },
+    "reindex": {
+      "action": "Reindex",
+      "hint": "Picks up cache already on disk: the index only knows what was written since it landed.",
+      "running": "Reindexing…",
+      "done": "{{added}} entries indexed, {{attributed}} matched to footage.",
+      "scan": "Reading known footage…",
+      "index": "Scanning folders…"
+    },
+    "dir": {
+      "title": "Cache folder",
+      "desc": "Applies to thumbnails and video previews. The database and models stay put.",
+      "default": "Default location",
+      "choose": "Choose…",
+      "reset": "Reset to default",
+      "moveTitle": "Move the existing cache?",
+      "moveDesc": "{{size}} already sit in the old folder. Moving them saves a full rebuild.",
+      "moveNow": "Move",
+      "leave": "Leave it",
+      "leaveHint": "The old folder stays listed here and can be deleted.",
+      "moving": "Moving… {{done}}/{{total}}",
+      "moved": "Files moved: {{count}}.",
+      "movedNone": "New folder applied."
+    },
+    "lifecycle": {
+      "session": "Session temporary files",
+      "sessionDesc": "Frames, masks and tests used while current edits are in progress.",
+      "sessionBadge": "Automatic cleanup",
+      "sessionEmpty": "Nothing written during this session.",
+      "reusable": "Reusable previews",
+      "reusableDesc": "Rebuilt on their own whenever they are missing.",
+      "durable": "Saved analyses",
+      "durableDesc": "Expensive results are only removed when you ask."
+    },
+    "policy": {
+      "title": "Automatic cleanup",
+      "desc": "Fast previews are bounded by default. Expensive analyses stay saved.",
+      "auto": "Auto cleanup",
+      "quota": "Quota",
+      "quotaHint": "Past this, the least recently used entries go first.",
+      "age": "Max age",
+      "ageHint": "Deletes anything unused for this long.",
+      "gb": "GB",
+      "days": "days",
+      "manualOnly": "Manual purge only",
+      "manualOnlyHint": "This type isn't usage-tracked: no auto-purge possible.",
+      "sessionTitle": "Working caches",
+      "sessionDesc": "Choose when each large derivative stops being useful. App exit always remains the safety net.",
+      "sequenceTitle": "Model intermediate sequences",
+      "sequenceHint": "Frame folders created only to feed a model. User-exported sequences are never touched.",
+      "trigger": {
+        "roto": "When changing shot",
+        "upscaleTest": "When source or settings change",
+        "page": "When leaving the page",
+        "app": "When closing the app",
+        "immediate": "Right after the operation"
+      },
+      "sessionOnly": "On app exit",
+      "sessionOnlyHint": "The whole folder is removed when NetsuRush closes and checked again on the next launch after a crash.",
+      "warnTitle": "Warn me",
+      "warnCache": "When the cache goes over",
+      "warnDisk": "When there's less than",
+      "warnDiskSuffix": "left on disk",
+      "warnNever": "Warning only — nothing gets deleted."
+    },
+    "warn": {
+      "cache": "Cache is up to {{size}}.",
+      "disk": "Disk almost full: {{size}} free."
+    },
+    "confirm": {
+      "title": "Delete this cache?",
+      "descKinds": "{{size}} will be freed. The content rebuilds when needed.",
+      "descSources": "{{size}} will be freed for these clips ({{count}}). Other footage isn't touched.",
+      "descUnattributed": "{{size}} of unattributed cache will be freed.",
+      "expensive": "The search index is included: rebuilding it takes hours of GPU.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "purging": "Deleting…",
+      "done": "{{size}} freed · {{files}} files",
+      "doneRows": "{{size}} freed · {{files}} files, {{rows}} database entries",
+      "skipped": " · {{count}} skipped (locked)"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "desc": "Two corners that per-project cleanup doesn't cover."
+    },
+    "missing": {
+      "title": "Missing footage",
+      "desc": "Unplugging an external drive is enough to make it vanish: nothing gets deleted without you.",
+      "purge": "Clear its cache",
+      "none": "All indexed footage is reachable."
+    },
+    "db": {
+      "title": "Database",
+      "unavailable": "Can't find the database.",
+      "vacuum": "Compact",
+      "vacuumHint": "A purge leaves the space reserved in the file. Compacting gives it back to the disk.",
+      "vacuumDone": "{{size}} given back to the disk.",
+      "vacuumBusy": "Can't do this while a task is using the database. Close what's running and try again.",
+      "faiss": "Vector index {{size}}"
+    },
+    "projects": {
+      "current": "Open",
+      "desc": "Search is limited to the open project by default. A project joins this list once NetsuRush has read its Media Pool. Scanning opens each Resolve project in turn to collect its footage, then reopens the original one — useful for projects indexed before this list existed.",
+      "empty": "No project known yet.",
+      "forget": "Forget",
+      "forgetTooltip": "Removes the project from the list (index and files are untouched)",
+      "rushCount_one": "{{count}} clip",
+      "rushCount_other": "{{count}} clips",
+      "scan": "Scan Resolve projects",
+      "scanDone": "{{count}} project(s) collected",
+      "scanStarting": "Preparing…",
+      "scanning": "{{project}} — {{done}}/{{total}}",
+      "title": "Projects known to search"
+    }
+  },
+  "navigation": {
+    "title": "Pages and navigation order",
+    "subtitle": "Hide pages you do not use and choose their order in the sidebar.",
+    "reset": "Restore all",
+    "required": "Always available",
+    "visible": "Visible",
+    "hidden": "Hidden",
+    "moveUp": "Move {{module}} up",
+    "moveDown": "Move {{module}} down",
+    "requiredAria": "{{module}} is required",
+    "hideAria": "Hide {{module}}",
+    "showAria": "Show {{module}}"
+  },
+  "detection": {
+    "reindexHint": "Another model draws different shot boundaries: rushes already indexed will have to be indexed again."
+  },
+  "tab": {
+    "account": {
+      "profile": "Profile",
+      "discord": "Discord"
+    },
+    "interface": {
+      "theme": "Theme",
+      "language": "Language",
+      "navigation": "Navigation"
+    },
+    "media": {
+      "preview": "Previews"
+    },
+    "ai": {
+      "models": "Video",
+      "dictation": "Dictation",
+      "indexing": "Indexing"
+    },
+    "storage": {
+      "media": "Media cache",
+      "cleanup": "Cleanup",
+      "project": "Project cache",
+      "projects": "Projects"
+    },
+    "system": {
+      "updates": "Updates",
+      "compatibility": "Compatibility",
+      "console": "Console"
+    }
+  },
+  "indexing": {
+    "title": "Indexing",
+    "subtitle": "Rushes are first cut into shots, then each shot is analysed. Settings that change nothing in the results are already on.",
+    "cutTitle": "Shot detection"
+  }
+}

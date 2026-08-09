@@ -1,0 +1,58 @@
+version = 1
+
+[[annotations]]
+path = [
+  "package.json",
+  "package-lock.json",
+  "index.html",
+  "vite.config.ts",
+  "tsconfig*.json",
+  "src/**/*.ts",
+  "src/**/*.tsx",
+  "src/**/*.js",
+  "src/**/*.jsx",
+  "src/**/*.css",
+  "src/**/*.json",
+  "core/**/*.js",
+  "core/**/*.cjs",
+  "core/**/*.mjs",
+  "core/**/*.py",
+  "core/**/*.json",
+  "python/**/*.py",
+  "scripts/**/*.ps1",
+  "scripts/**/*.mjs",
+  "scripts/**/*.js",
+  "test/**/*.cjs",
+  "test/**/*.js",
+  "test/**/*.mjs",
+  "test/**/*.py",
+  "test/**/*.ts",
+  "adobe-cep/**/*.js",
+  "adobe-cep/**/*.jsx",
+  "adobe-cep/**/*.json",
+  "adobe-cep/**/*.html",
+  "adobe-cep/**/*.xml",
+  "adobe-cep/**/*.css",
+  "src-tauri/build.rs",
+  "src-tauri/windows/**/*.nsh",
+  "src-tauri/Cargo.toml",
+  "src-tauri/tauri.conf.json",
+  "src-tauri/src/**/*.rs",
+  "README.md",
+  "docs/licensing.md",
+  "docs/the-anime-scripter-models.md",
+  "build-exe.bat",
+  "run.bat"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Haim Faraj <https://github.com/NetsumaInfo/NetsuRush>"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+[[annotations]]
+path = [
+  "python/nrautoshot/model.py",
+  "python/nrautoshot/linear.py"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2023 Wentao Zhu and AutoShot contributors"
+SPDX-License-Identifier = "MIT"

@@ -1,0 +1,2 @@
+# Le runtime RIFE Windows est installé à la demande depuis son wheel officiel précompilé
+# par core/models.js. Ne jamais remettre le sdist PyPI ici : il exige CMake, MSVC et Vulkan SDK.

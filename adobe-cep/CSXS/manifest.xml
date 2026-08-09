@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ExtensionManifest ExtensionBundleId="com.netsurush.panel" ExtensionBundleVersion="0.3.10"
+    ExtensionBundleName="NetsuRush" Version="7.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ExtensionList>
+    <Extension Id="com.netsurush.panel.main" Version="0.3.10"/>
+  </ExtensionList>
+  <ExecutionEnvironment>
+    <!-- Plage de version OUVERTE [0.0,99.9] : Premiere & After Effects toutes versions (2020→2026+).
+         On ne gate pas par version ici (les features dégradent selon les API dispo côté hôte). -->
+    <HostList>
+      <Host Name="PPRO" Version="[0.0,99.9]"/>
+      <Host Name="AEFT" Version="[0.0,99.9]"/>
+    </HostList>
+    <LocaleList>
+      <Locale Code="All"/>
+    </LocaleList>
+    <!-- CSXS 7.0 = plancher large (CC 2017+) → accepté par tous les CEP jusqu'à CEP 12 (2026). -->
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="7.0"/>
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+  <DispatchInfoList>
+    <Extension Id="com.netsurush.panel.main">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./index.html</MainPath>
+          <ScriptPath>./jsx/host.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--allow-file-access</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
+            <!-- Rendu « en remote » : le panneau charge l'app (iframe http://localhost) → autoriser
+                 le contenu non-sécurisé + lever la same-origin pour l'iframe cross-port. -->
+            <Parameter>--allow-running-insecure-content</Parameter>
+            <Parameter>--disable-web-security</Parameter>
+            <!-- Lecture des aperçus vidéo : Chromium bloque l'autoplay programmatique (survol / « tout
+                 lire ») sans geste utilisateur → on lève la contrainte dans le moteur du panneau. -->
+            <Parameter>--autoplay-policy=no-user-gesture-required</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>NetsuRush</Menu>
+          <Geometry>
+            <Size>
+              <Height>620</Height>
+              <Width>420</Width>
+            </Size>
+            <MinSize>
+              <Height>300</Height>
+              <Width>300</Width>
+            </MinSize>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>

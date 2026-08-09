@@ -1,0 +1,71 @@
+{
+  "taskHint": {
+    "search": "Recherche visuelle et comparaison des plans.",
+    "faces": "Détection et regroupement des visages.",
+    "voice": "Transcription automatique de la parole.",
+    "upscale": "Amélioration de la définition des images et vidéos.",
+    "restore": "Restauration et nettoyage des images.",
+    "interpolate": "Création d'images intermédiaires pour fluidifier la vidéo.",
+    "depth": "Création de cartes de profondeur.",
+    "matte-image": "Détourage et suppression de l'arrière-plan des images.",
+    "matte-video": "Détourage et suivi des sujets dans la vidéo.",
+    "object-removal": "Suppression d'objets dans la vidéo."
+  },
+  "title": "Modèles",
+  "subtitle": "Rien n'est téléchargé d'office. Prends ce dont tu as besoin, supprime à tout moment.",
+  "disk": "Disque :",
+  "noneInstalled": "Aucun modèle installé — installe-en un, sinon cette fonction ne marchera pas.",
+  "badge": {
+    "default": "défaut",
+    "heavy": "lourd",
+    "exclusive": "exclusif",
+    "exclusiveTip": "SAMURAI et SAM2Long remplacent le moteur SAM 2 par le leur : un seul peut être installé à la fois. Installer le second demande d'abord confirmation, puis retire le premier ; le supprimer remet le moteur d'origine."
+  },
+  "conflict": {
+    "title": "Un seul des deux à la fois",
+    "body": "{{model}} remplace le moteur de {{other}}, déjà installé : les deux ne peuvent pas cohabiter. Installer {{model}} retire {{other}}.",
+    "replace": "Installer et retirer l'autre"
+  },
+  "sort": {
+    "default": "Défaut",
+    "defaultTip": "Ordre du catalogue : le recommandé en tête.",
+    "size": "Taille",
+    "sizeTip": "Par taille sur disque.",
+    "vram": "VRAM",
+    "vramTip": "Par VRAM requise.",
+    "name": "Nom",
+    "nameTip": "Alphabétique.",
+    "asc": "Croissant",
+    "desc": "Décroissant"
+  },
+  "vramShort": "Demande {{need}} Go de VRAM, ta carte en a {{have}} ({{gpu}}) — il ne tiendra pas. Téléchargeable quand même.",
+  "status": {
+    "bundled": "Fourni",
+    "bundledTip": "Inclus dans le runtime (non supprimable).",
+    "installed": "Installé",
+    "removing": "Désinstallation…",
+    "removeTip": "Supprimer du disque",
+    "auto": "Auto",
+    "autoTip": "Récupéré par la librairie au 1er usage — rien à télécharger."
+  },
+  "action": {
+    "resume": "Reprendre",
+    "resumeTip": "Téléchargement incomplet — reprend les poids manquants et le code.",
+    "download": "Télécharger",
+    "cancelDownload": "Annuler le téléchargement"
+  },
+  "search": {
+    "active": "Actif",
+    "activeTip": "Variante utilisée par la recherche",
+    "use": "Utiliser",
+    "useTip": "Faire de cette variante le modèle de recherche",
+    "switchTitle": "Changer de modèle de recherche",
+    "switchEmpty": "{{model}} n’a encore rien indexé : la recherche restera vide jusqu’à une ré-indexation complète. L’index de la variante actuelle reste sur le disque, intact.",
+    "switchPartial": "Rushs déjà indexés avec {{model}} : {{clips}}. Les autres devront être ré-indexés ; l’index de la variante actuelle reste sur le disque.",
+    "switchConfirm": "Utiliser cette variante"
+  },
+  "advanced": {
+    "label": "Avancé",
+    "tip": "Affiche tout le catalogue : variantes, générations antérieures et moteurs expérimentaux. Par défaut on ne montre que la sélection courante de chaque tâche."
+  }
+}

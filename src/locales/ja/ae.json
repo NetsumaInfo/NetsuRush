@@ -1,0 +1,83 @@
+{
+  "header": {
+    "title": "After Effects へ書き出し",
+    "subtitle": "生成したスクリプトで、タイムラインを After Effects のコンポに忠実に再現します（位置・トラック・フレーム単位）。"
+  },
+  "result": {
+    "scriptPrefix": "スクリプト：{{name}}",
+    "clipsDone": "{{count}} ショット →「{{comp}}」コンポ。",
+    "imported": "After Effects に読み込みました（プロジェクトパネルを確認）。",
+    "launching": "After Effects を起動中 — 起動後に自動で読み込みます（プロジェクトを開いた状態が必要）。",
+    "missing": "ファイルのない {{count}} ショットをスキップしました。"
+  },
+  "run": {
+    "busy": "書き出し中…",
+    "label": "After Effects へ書き出し"
+  },
+  "form": {
+    "refresh": "更新",
+    "noTimeline": "タイムラインなし",
+    "timelineOpen": "{{name}}（開いています）",
+    "compPlaceholder": "After Effects のコンポ名",
+    "individualRender": "ショットごとに個別書き出し",
+    "individualHint": "1 ショット＝1 ファイルを再エンコードし、フレーム単位でカット。下でコーデックを選択 · 出力フォルダーが必要です。",
+    "yes": "はい",
+    "no": "いいえ",
+    "codec": "コーデック",
+    "container": "コンテナ",
+    "mode": "モード",
+    "nestedFlatten": "中身",
+    "nestedComp": "プリコンポ",
+    "nestedRender": "レンダリング",
+    "nestedHintComp": "ネストされたタイムラインを専用のプリコンポにします（オーディオも中に含む）。",
+    "nestedHintRender": "Resolve がネストされたタイムラインを 1 ファイルにレンダリングし（忠実だが低速）、1 レイヤーとして読み込みます。",
+    "nestedHintFlatten": "ネストされたタイムラインのショットをコンポ内に直接展開します。ショットは上のビデオモードに従います。",
+    "outputFormat": "出力形式",
+    "audioFormat": "オーディオ形式（オーディオのみのタイムライン時）",
+    "bitrate": "ビットレート",
+    "handleSeconds": "前後の秒数",
+    "precompEach": "各ビデオショットをプリコンポに",
+    "target": "対象",
+    "targetVideo": "ビデオ",
+    "targetImage": "画像",
+    "targetBoth": "両方",
+    "precompNaming": "プリコンポ名",
+    "namingFile": "ファイル名",
+    "namingNumber": "番号",
+    "foldersLabel": "フォルダーに整理（素材 / プリコンポ / オーディオ / 画像）",
+    "none": "なし",
+    "choose": "選択…"
+  },
+  "sections": {
+    "timeline": "タイムライン",
+    "compName": "コンポ名",
+    "video": "ビデオ",
+    "transforms": "トランスフォームと速度",
+    "nested": "ネストされたタイムライン",
+    "audio": "オーディオ",
+    "handles": "ハンドル",
+    "precomp": "プリコンポ",
+    "organization": "整理",
+    "outDir": "出力フォルダー"
+  },
+  "videoModes": {
+    "copy": { "label": "コピー", "hint": "ソースファイルのまま、カットは AE 側 — 変換なし。" },
+    "remux": { "label": "リマックス", "hint": "ロスレスの .mov コンテナ（-c copy）、カットは AE 側。" },
+    "reencode": { "label": "再エンコード", "hint": "各ショットを編集用コーデックに変換、ハンドル込み。" }
+  },
+  "audioModes": {
+    "copy": "コピー",
+    "remux": "リマックス",
+    "aac": "AAC",
+    "pcm": "PCM",
+    "none": "なし"
+  },
+  "transformModes": {
+    "none": { "label": "なし", "hint": "素材そのまま — タイムラインのトランスフォームと速度を無視。" },
+    "ae": { "label": "After Effects 側", "hint": "トランスフォームと速度を AE のレイヤーに、ソースはそのまま。" },
+    "bake": { "label": "再エンコード", "hint": "速度をファイルに焼き込み、空間トランスフォームは AE 側。" }
+  },
+  "errors": {
+    "timelinesUnavailable": "タイムラインを取得できません"
+  }
+}

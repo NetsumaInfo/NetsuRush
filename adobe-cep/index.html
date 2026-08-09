@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>NetsuRush</title>
+  <style>
+    /* Design tokens et palette — COPIE FIGÉE des tokens de `src/index.css`, à resynchroniser à la
+       main quand la palette de l'app change (pas de Tailwind ici : CEF 61-99).
+       CSS volontairement conservateur : pas de `gap` flex (Chromium 84+), pas de `inset`
+       (Chromium 66+) → marges + top/right/bottom/left explicites, OK dès CEF 61 (CEP 9). */
+    :root {
+      --bg: #0a0b0e;
+      --surface: #111319;
+      --border: #262a34;
+      --fg: #e3e4e8;
+      --muted: #888d99;
+      --primary: #4f86f7;
+      --ok: #10b981;
+      --err: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 12px/1.5 "Segoe UI", system-ui, sans-serif;
+      padding: 12px;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .header { display: flex; align-items: center; margin-bottom: 12px; }
+    .header > * + * { margin-left: 8px; }
+    .brand { font-size: 14px; font-weight: 600; letter-spacing: 0.02em; }
+    .badge {
+      font-size: 10px; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 1px 8px;
+    }
+    .spacer { flex: 1; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--err); }
+    .dot.on { background: var(--ok); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .card h2 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .row { display: flex; align-items: center; }
+    .row > * + * { margin-left: 8px; }
+    button {
+      background: var(--primary); color: #fff;
+      border: 0; border-radius: 6px;
+      padding: 7px 12px; font: inherit; font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.1); }
+    button:disabled { opacity: 0.45; cursor: default; }
+    button.ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .stat { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted); }
+    .stat b { color: var(--fg); font-weight: 600; }
+    .hint { margin-top: 6px; color: var(--muted); font-size: 10px; }
+    #log {
+      color: var(--muted); font-size: 11px;
+      max-height: 140px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-all;
+      -webkit-user-select: text; user-select: text;
+    }
+    .err { color: var(--err); }
+    /* Vue remote : l'app NetsuRush occupe TOUT le panneau (l'accueil ci-dessous reste derrière).
+       Aucune barre de coquille : son libellé doublonnait le titre du panneau Adobe, et Recharger /
+       Fermer vivent maintenant dans l'entête de l'app (postMessage `nr:panel`). */
+    #remoteWrap {
+      display: none;
+      position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 50; background: var(--bg);
+      flex-direction: column;
+    }
+    #appFrame { flex: 1; width: 100%; border: 0; background: var(--bg); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="brand">NetsuRush</span>
+    <span class="badge" id="host">—</span>
+    <span class="spacer"></span>
+    <span class="dot" id="coreDot" title="Service NetsuRush"></span>
+  </div>
+
+  <div class="card">
+    <h2 id="serviceTitle">Service NetsuRush</h2>
+    <div class="stat"><span id="statusLabel">Statut</span><b id="coreState">hors ligne</b></div>
+    <div class="row" style="margin-top:8px">
+      <button id="btnOpenApp" class="ghost">Ouvrir NetsuRush</button>
+      <button id="btnRemote">Afficher NetsuRush ici</button>
+    </div>
+    <div class="hint" id="serviceHint">
+      NetsuRush s'affiche automatiquement DANS ce panneau dès que le service est en ligne
+      (moteur Adobe ancien → rendu possiblement dégradé). Clic droit : menu du panneau.
+    </div>
+  </div>
+
+  <!-- Rendu « en remote » : l'app NetsuRush chargée en iframe, À L'INTÉRIEUR du panneau. -->
+  <div id="remoteWrap">
+    <iframe id="appFrame" title="NetsuRush" allow="autoplay; encrypted-media"></iframe>
+  </div>
+
+  <div class="card">
+    <h2 id="projectTitle">Projet</h2>
+    <div class="stat"><span id="rushesLabel">Rushs</span><b id="nRushes">—</b></div>
+    <div class="stat"><span id="sequencesLabel">Séquences / comps</span><b id="nSeqs">—</b></div>
+    <div class="stat"><span id="lastScanLabel">Dernier scan</span><b id="lastScan">jamais</b></div>
+    <div class="row" style="margin-top:8px">
+      <button id="btnScan">Envoyer vers NetsuRush</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="logTitle">Journal</h2>
+    <div id="log"></div>
+  </div>
+
+  <script src="./js/CSInterface.js"></script>
+  <script src="./js/panel.js"></script>
+</body>
+</html>

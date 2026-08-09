@@ -1,0 +1,654 @@
+{
+  "title": "Paramètres",
+  "nav": {
+    "account": "Compte",
+    "interface": "Interface",
+    "media": "Médias",
+    "ai": "Modèle",
+    "export": "Export",
+    "adobe": "Adobe",
+    "storage": "Stockage",
+    "system": "Système",
+    "about": "À propos"
+  },
+  "about": {
+    "tagline": "Hub de dérush local, relié à DaVinci Resolve, Premiere Pro et After Effects.",
+    "socialTitle": "Réseaux sociaux",
+    "social": {
+      "discord": "Rejoindre le serveur"
+    },
+    "legal": "© 2026 Haim Faraj · NetsuRush est distribué sous GNU AGPL v3.0-only · Sans garantie.",
+    "licenseLink": "Texte intégral de la licence",
+    "sourceLink": "Code source correspondant"
+  },
+  "account": {
+    "title": "Compte",
+    "notConfigured": "La connexion n'est pas configurée sur cette installation.",
+    "subtitle": "Le compte Discord connecté à NetsuRush.",
+    "none": "Aucun compte connecté.",
+    "discordUser": "Utilisateur Discord",
+    "signOut": "Se déconnecter"
+  },
+  "playback": {
+    "title": "Lecture et miniatures",
+    "subtitle": "Configure les aperçus vidéo et les miniatures.",
+    "soundTitle": "Son",
+    "playerVolume": "Volume des lecteurs",
+    "playerVolumeHint": "Partagé par NetsuCut, Collections, Voix et Upscale.",
+    "hoverVolume": "Volume au survol",
+    "hoverVolumeHint": "Volume de la vignette survolée ; les aperçus en lecture auto restent muets.",
+    "globalMuted": "Coupé par le volume des lecteurs.",
+    "generation": {
+      "proxyTitle": "Aperçus vidéo",
+      "thumbnailTitle": "Miniatures fixes",
+      "format": "Format",
+      "formatHint": {
+        "hevc": "Fichiers légers si la lecture du H.265 est fluide.",
+        "h264": "Très compatible et généralement rapide à lire.",
+        "webp": "Aperçu silencieux pour les grilles, sans son."
+      },
+      "engine": "Carte ou processeur",
+      "engineAuto": "Choisir automatiquement",
+      "engineHint": "Choisis une carte ou laisse NetsuRush décider.",
+      "preset": "Profil",
+      "presetHint": "Trois réglages simples : teste celui qui te convient le mieux.",
+      "resolution": "Résolution",
+      "resolutionHint": "480p est le réglage par défaut pour les cartes.",
+      "audio": "Audio",
+      "audioHint": "Ajoute le son au proxy vidéo.",
+      "noWebpAudio": "Le WebP animé ne prend pas en charge le son.",
+      "audioUnavailable": "Aucun son dans l’aperçu configuré.",
+      "enabled": "Activé",
+      "disabled": "Désactivé",
+      "thumbnailFormatHint": "WebP prend souvent moins de place ; JPEG est très compatible.",
+      "quality": "Qualité de l’image",
+      "qualityLow": "Léger",
+      "qualityStandard": "Équilibré",
+      "qualityHigh": "Net",
+      "qualityHint": "Le cran règle la finesse et la vitesse de génération.",
+      "thumbnailTiming": "La miniature est prise quelques frames après la coupe.",
+      "cacheHint": "Les anciens caches restent disponibles après un changement.",
+      "cacheCleared": "Anciens caches supprimés.",
+      "reset": "Réinitialiser",
+      "clearOld": "Supprimer les anciens caches"
+    }
+  },
+  "performance": {
+    "indexingTitle": "Analyse des plans",
+    "accelerationTitle": "Accélération",
+    "shotDecode": "Extraction groupée",
+    "shotDecodeHint": "Extrait les images d'un plan en une fois au lieu d'une par une. Jusqu'à 6× plus rapide, pour exactement les mêmes images.",
+    "vramProfile": "Profil mémoire",
+    "vramProfileHint": "Combien de travail mené en parallèle. Baisse-le si l'application gêne ton montage, monte-le si la machine est libre.",
+    "vram": {
+      "economy": "Économe",
+      "balanced": "Équilibré",
+      "performance": "Performance"
+    },
+    "maxPatches": "Résolution d'analyse",
+    "maxPatchesHint": "Niveau de détail que le modèle voit sur chaque image. Plus haut repère les petits éléments, mais coûte du temps et de la mémoire.",
+    "patchesDefault": "{{value}} (défaut)",
+    "reindexWarning": "À cette résolution, tes rush doivent être réindexés. Revenir à 256 retrouve l'index d'origine intact.",
+    "onnxGpu": "Visages et dictée sur GPU",
+    "onnxGpuHint": "Environ 8× plus rapide que le processeur, pour les mêmes résultats. À couper si ton pilote graphique plante.",
+    "enabled": "Activé",
+    "disabled": "Coupé",
+    "reset": "Réinitialiser la performance",
+    "quick": "Performance",
+    "quickMore": "Tous les réglages…"
+  },
+  "appearance": {
+    "title": "Thème",
+    "subtitle": "Choisis une palette adaptée à ton espace de travail.",
+    "group": {
+      "dark": "Sombres",
+      "light": "Clairs"
+    },
+    "theme": {
+      "dark": {
+        "label": "Sombre",
+        "hint": "Neutre et contrasté."
+      },
+      "midnight": {
+        "label": "Minuit",
+        "hint": "Noir profond et surfaces discrètes."
+      },
+      "blue": {
+        "label": "Bleu nuit",
+        "hint": "Bleu profond et lumineux."
+      },
+      "light": {
+        "label": "Clair",
+        "hint": "Blanc net et lisible."
+      },
+      "soft-light": {
+        "label": "Clair doux",
+        "hint": "Gris bleuté, moins éblouissant."
+      },
+      "graphite": {
+        "label": "Graphite",
+        "hint": "Gris neutre, sans teinte."
+      },
+      "forest": {
+        "label": "Forêt",
+        "hint": "Vert profond, accent émeraude."
+      },
+      "ember": {
+        "label": "Braise",
+        "hint": "Charbon chaud, accent ambre."
+      },
+      "plum": {
+        "label": "Prune",
+        "hint": "Violet sourd, accent mauve."
+      },
+      "contrast": {
+        "label": "Contraste élevé",
+        "hint": "Noir pur et bordures franches."
+      },
+      "paper": {
+        "label": "Papier",
+        "hint": "Sépia doux, accent terracotta."
+      }
+    },
+    "wallpaper": {
+      "title": "Fond d'écran",
+      "choose": "Choisir une image",
+      "none": "Aucun",
+      "remove": "Retirer de la bibliothèque",
+      "empty": "Aucun fond. Dépose un fichier ici.",
+      "importFailed": "Import impossible.",
+      "blockedByTheme": "Le thème Contraste élevé n'accepte pas de fond.",
+      "blur": "Flou",
+      "opacity": "Opacité",
+      "saturate": "Saturation",
+      "uiOpacity": "Opacité des panneaux",
+      "animate": "Animer",
+      "pauseUnfocused": "Figer en arrière-plan",
+      "pauseWhileBusy": "Figer pendant les traitements",
+      "groupFraming": "Cadrage",
+      "groupRender": "Rendu",
+      "groupReadability": "Lisibilité",
+      "groupMotion": "Animation",
+      "reset": "Réinitialiser",
+      "openFraming": "Cadrer l'image",
+      "framingTitle": "Cadrage du fond",
+      "rotateLeft": "Tourner à gauche",
+      "rotateRight": "Tourner à droite",
+      "flipH": "Miroir horizontal",
+      "flipV": "Miroir vertical",
+      "resetFraming": "Recadrer",
+      "cropWidth": "Largeur du cadre",
+      "transform": "Orientation",
+      "applyFraming": "Appliquer",
+      "cropSize": "Taille du cadre",
+      "groupScope": "Portée",
+      "onDetached": "Fenêtres détachées",
+      "global": "Partagé par tous les thèmes"
+    },
+    "colors": {
+      "title": "Couleurs",
+      "perTheme": "Réglé pour ce thème",
+      "primary": "Accent",
+      "fg": "Texte",
+      "bg": "Fond",
+      "surface": "Panneaux",
+      "border": "Bordures",
+      "restore": "Rendre au thème",
+      "fromTheme": "Du thème",
+      "resetAll": "Tout rendre au thème",
+      "resetAllHint": "Retire toutes les retouches de ce thème."
+    },
+    "custom": {
+      "title": "Mes thèmes",
+      "subtitle": "Enregistre l'apparence courante : palette, couleurs et fond.",
+      "create": "Nouveau thème",
+      "save": "Enregistrer",
+      "delete": "Supprimer ce thème",
+      "empty": "Aucun thème enregistré.",
+      "namePlaceholder": "Nom du thème",
+      "confirm": "Valider",
+      "rename": "Renommer",
+      "unsaved": "« {{name}} » a des modifications non enregistrées."
+    }
+  },
+  "updates": {
+    "title": "Mises à jour",
+    "subtitle": "Les versions sont vérifiées sur GitHub et leur signature est validée avant installation.",
+    "auto": "Vérification automatique",
+    "autoHint": "Recherche une nouvelle version quelques secondes après le démarrage.",
+    "on": "Activée",
+    "off": "Désactivée",
+    "ready": "Prêt à vérifier",
+    "checking": "Recherche d'une mise à jour…",
+    "available": "Version {{version}} disponible",
+    "downloading": "Téléchargement et vérification…",
+    "failed": "La vérification a échoué",
+    "current": "NetsuRush est à jour",
+    "check": "Vérifier",
+    "install": "Installer",
+    "history": "Nouveautés par version",
+    "whatsNew": "Nouveautés de la version {{version}}",
+    "gotIt": "C'est parti"
+  },
+  "compatibility": {
+    "title": "Compatibilité de ce PC",
+    "subtitle": "NetsuRush utilise uniquement les moteurs disponibles sur cette machine.",
+    "refresh": "Vérifier",
+    "hardware": "Composants détectés",
+    "gpu": "Carte graphique",
+    "cpu": "Processeur",
+    "uses": "Fonctions",
+    "notInstalled": "Indisponible",
+    "available": "Disponible",
+    "unavailable": "Impossible de vérifier les composants de ce PC.",
+    "gpuFunctions": "Fonctions utilisant le GPU",
+    "cpuFunctions": "Fonctions utilisant le CPU ou un repli",
+    "igpu": "iGPU",
+    "dgpu": "dGPU",
+    "driver": "Pilote",
+    "noHardware": "Aucun composant détecté.",
+    "state": {
+      "gpu": "GPU",
+      "cpu": "CPU",
+      "fallback": "Repli CPU",
+      "missing": "Indisponible"
+    },
+    "thumbnailEngine": "Génération volontairement faite sur le CPU.",
+    "features": {
+      "netsucut": "Aperçus vidéo",
+      "torchModels": "Modèles IA",
+      "onnxModels": "Modèles ONNX",
+      "transcription": "Transcription",
+      "notebook": "NetsuBook"
+    },
+    "featureHints": {
+      "netsucut": "Encode les aperçus avec le moteur disponible.",
+      "torchModels": "Détecte les plans, recherche et améliore les images.",
+      "onnxModels": "Détoure les images et exécute les modèles ONNX.",
+      "transcription": "Transforme la voix en texte.",
+      "notebook": "Enregistre et organise les notes. Aucun GPU nécessaire."
+    }
+  },
+  "exportProfiles": {
+    "title": "Profils d'export",
+    "subtitle": "Réglages de codec appliqués au bouton Télécharger des vignettes et des résultats.",
+    "new": "Nouveau",
+    "duplicate": "Dupliquer",
+    "deleteAria": "Supprimer le profil",
+    "restore": "Rétablir",
+    "restoreHint": "Rétablit les préréglages livrés qui manquent dans la liste.",
+    "cardButton": "Bouton de vignette",
+    "cardButtonHint": "Action du bouton affiché au survol d'une vignette."
+  },
+  "console": {
+    "title": "Console",
+    "subtitle": "Ce que l'app, le service et l'IA ont écrit.",
+    "copy": "Copier",
+    "errors": "Erreurs",
+    "export": "Exporter",
+    "clearAria": "Vider la console",
+    "all": "Tout ({{count}})",
+    "warnings": "Alertes ({{count}})",
+    "errorsCount": "Erreurs ({{count}})",
+    "empty": "Aucun log pour l'instant.",
+    "emptyFilter": "Aucun log pour ce filtre.",
+    "emptyClipboard": "Aucun log."
+  },
+  "bugReport": {
+    "title": "Signaler un souci",
+    "type": "Il se passe quoi ?",
+    "module": "Où ça ?",
+    "detail": "Dis-le en quelques mots",
+    "detailPlaceholder": "ex : le bouton Envoyer ne fait rien",
+    "severity": "C'est grave ?",
+    "frequency": "Ça arrive…",
+    "groups": {
+      "problem": "Un problème",
+      "improvement": "Une idée",
+      "other": "Autre"
+    },
+    "categories": {
+      "crash": "L'app se ferme toute seule",
+      "freeze": "L'app est bloquée",
+      "startup": "L'app ne s'ouvre pas",
+      "dataLoss": "J'ai perdu mon travail",
+      "wrongResult": "Le résultat est faux",
+      "playback": "La vidéo ne se lit pas",
+      "export": "L'export ne marche pas",
+      "hostLink": "Resolve ou Adobe pas connecté",
+      "ai": "L'IA ne marche pas",
+      "download": "Un téléchargement échoue",
+      "performance": "C'est trop lent",
+      "ui": "Un souci d'affichage",
+      "accessibility": "C'est dur à lire ou à cliquer",
+      "i18n": "Une faute dans un texte",
+      "security": "Un souci de vie privée",
+      "regression": "Ça marchait avant",
+      "feature": "J'aimerais une nouvelle fonction",
+      "ux": "Une idée pour simplifier",
+      "question": "J'ai une question",
+      "other": "Autre chose"
+    },
+    "severities": {
+      "blocker": "Ça bloque tout",
+      "major": "Ça gêne",
+      "minor": "Petit détail",
+      "idea": "Idée"
+    },
+    "frequencies": {
+      "always": "Toujours",
+      "often": "Souvent",
+      "rare": "Rarement",
+      "once": "1 fois"
+    },
+    "description": "Raconte ce qui s'est passé",
+    "descriptionPlaceholder": "Ce que tu as fait, et ce qui a cloché…",
+    "descriptionIdea": "Raconte ton idée",
+    "descriptionIdeaPlaceholder": "Ce que tu aimerais faire, et pourquoi",
+    "steps": "Comment le refaire ?",
+    "stepsPlaceholder": "1. J'ouvre… 2. Je clique sur… 3. …",
+    "expected": "Ça aurait dû faire quoi ?",
+    "expectedPlaceholder": "Le résultat que tu attendais",
+    "videoSource": "Lien de la vidéo",
+    "videoPlaceholder": "un lien pour la télécharger",
+    "discord": "Ton Discord",
+    "discordPlaceholder": "@pseudo",
+    "auto": "auto",
+    "specs": {
+      "title": "Ton PC",
+      "copy": "Copier",
+      "refresh": "Relire",
+      "loading": "Lecture en cours…",
+      "more": "Tout voir",
+      "less": "Réduire",
+      "manual": "Écris-le toi-même",
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11"
+    },
+    "sending": "Envoi…",
+    "send": "Envoyer",
+    "download": "Enregistrer le message",
+    "logsAttached": "{{count}} lignes de journal jointes",
+    "logErrors": "{{count}} erreurs",
+    "sendFailed": "L'envoi n'a pas marché. Réessaie.",
+    "validation": {
+      "description": "Raconte ce qui s'est passé avant d'envoyer.",
+      "detail": "Dis en quelques mots de quoi il s'agit.",
+      "tooLarge": "Un fichier dépasse {{size}} Mo."
+    },
+    "noWebhook": "Envoi désactivé : aucun webhook configuré. Renseignez <c1>bugWebhook</c1> dans nr.config.json (ou la variable d'environnement <c2>NR_BUG_WEBHOOK</c2>).",
+    "descriptionOther": "Explique ta demande",
+    "descriptionOtherPlaceholder": "Ta question, ou ce que tu veux nous dire…",
+    "files": {
+      "label": "Pièces jointes",
+      "choose": "Joindre un fichier",
+      "add": "Ajouter",
+      "remove": "Retirer",
+      "limit": "{{count}} fichiers au maximum"
+    }
+  },
+  "outbox": {
+    "opening": "Ouverture du cache…",
+    "intro": "Ferme Resolve/Premiere Pro pour libérer le GPU pendant les encodes lourds sans perdre tes envois : ils sont mis en cache et appliqués <b>automatiquement à la réouverture</b>.",
+    "enabled": "File d'attente active",
+    "enabledHint": "Sinon, un envoi vers un logiciel fermé échoue comme avant.",
+    "on": "Activé",
+    "off": "Désactivé",
+    "delay": "Délai avant application",
+    "delayHint": "Laisse le logiciel finir de s'ouvrir.",
+    "destination": "Destination des envois en cache",
+    "targetNew": "Une timeline / envoi",
+    "targetSingle": "Timeline unique",
+    "targetPlaceholder": "Nom de la timeline collectrice",
+    "targetSingleHint": "Tous les envois en attente atterrissent dans une seule timeline (créée à la réouverture).",
+    "targetNewHint": "Chaque envoi crée sa propre timeline, comme un envoi direct.",
+    "queue": "File d'attente",
+    "pendingCount": "{{count}} en attente",
+    "applyNow": "Appliquer maintenant",
+    "clearHistory": "Vider l'historique",
+    "empty": "Aucun envoi en cache.",
+    "applied": "appliqué",
+    "failed": "échec",
+    "pending": "en attente",
+    "offline": {
+      "title": "Cache hors-ligne des timelines",
+      "upToDate": "à jour",
+      "stats": "{{clips}} rush(s) · {{cached}}/{{total}} timeline(s) avec leurs plans.",
+      "none": "Aucun cache — Resolve fermé, les timelines s'ouvrent vides.",
+      "update": "Mettre à jour",
+      "needResolve": "Resolve doit être connecté pour construire le cache.",
+      "building": "Mise à jour en arrière-plan (cède la priorité aux médias)…",
+      "auto": "Se met à jour automatiquement en fond ; ne relit que les nouvelles timelines.",
+      "rebuild": "Tout recalculer"
+    }
+  },
+  "discord": {
+    "title": "Présence Discord",
+    "preview": {
+      "heading": "Joue à",
+      "elapsed": "{{time}} écoulées",
+      "empty": "Rien ne s'affichera."
+    },
+    "on": "Activée",
+    "off": "Désactivée",
+    "status": {
+      "connected": "Visible sur le profil de {{user}}.",
+      "searching": "Discord introuvable — la présence apparaîtra à son ouverture.",
+      "disabled": "Ton profil n'affiche rien.",
+      "noAppId": "Application Discord non renseignée."
+    },
+    "showModule": "Module ouvert",
+    "showProject": "Nom du projet",
+    "showProjectHint": "Peut révéler un nom de client.",
+    "showElapsed": "Temps écoulé",
+    "custom": "Textes personnalisés",
+    "customHelp": "Remplacent les lignes automatiques. {module} et {projet} sont substitués.",
+    "details": "Première ligne",
+    "state": "Seconde ligne"
+  },
+  "storage": {
+    "empty": "Aucun cache pour l'instant.",
+    "emptyHint": "Les vignettes et aperçus s'indexent au fil de la navigation dans les rushs.",
+    "diskFree": "{{free}} libres sur {{total}}",
+    "refresh": "Actualiser",
+    "kind": {
+      "thumb": "Vignettes",
+      "proxy": "Aperçus vidéo",
+      "voice": "Audio extrait",
+      "upscaleTest": "Tests de traitement",
+      "roto": "Sessions roto",
+      "scenes": "Détection de plans",
+      "transcripts": "Transcriptions",
+      "embeddings": "Vecteurs de recherche",
+      "indexThumbs": "Vignettes de l'index",
+      "faces": "Index des visages"
+    },
+    "kindHint": {
+      "thumb": "Une image par plan. Régénération lente à froid.",
+      "proxy": "Extraits courts encodés sur GPU. Régénérés en une seconde.",
+      "voice": "WAV 16 kHz pour la transcription et la détection de silences.",
+      "upscaleTest": "Images pleine résolution des essais « et si ? ».",
+      "roto": "Frames et masques des sessions de segmentation.",
+      "scenes": "Points de coupe détectés par IA. Régénération = une détection.",
+      "transcripts": "Texte et horodatage des mots. Régénération = un passage ASR.",
+      "embeddings": "Un vecteur par plan, ce que le modèle a « vu ». Régénération = des heures de GPU.",
+      "indexThumbs": "Anciennes vignettes rangées dans l’index. La recherche affiche maintenant celles du découpage : tu peux vider ce qui reste.",
+      "faces": "Un vecteur d'identité par visage détecté. Régénération = une passe de détection."
+    },
+    "tree": {
+      "title": "Par projet",
+      "desc": "Regroupé par dossier source. Vide ce qui appartient à un projet terminé sans toucher aux autres.",
+      "rushCount_one": "{{count}} rush",
+      "rushCount_other": "{{count}} rushs",
+      "unattributed": "Non attribué",
+      "unattributedHint": "Cache écrit avant l'index, ou dont le rush n'a pas pu être retrouvé. Purgeable en bloc.",
+      "selected": "{{count}} sélectionné(s) · {{size}}",
+      "clearSelection": "Désélectionner",
+      "purgeSelection": "Vider la sélection"
+    },
+    "reindex": {
+      "action": "Réindexer",
+      "hint": "Rattrape les caches déjà sur disque : l'index ne connaît que ce qui a été écrit depuis son introduction.",
+      "running": "Réindexation…",
+      "done": "{{added}} entrée(s) indexée(s), {{attributed}} rattachée(s) à un rush.",
+      "scan": "Lecture des rushs connus…",
+      "index": "Analyse des dossiers…"
+    },
+    "dir": {
+      "title": "Dossier du cache",
+      "desc": "S'applique aux vignettes et aux aperçus vidéo. La base de données et les modèles ne bougent pas.",
+      "default": "Emplacement par défaut",
+      "choose": "Choisir…",
+      "reset": "Rétablir le défaut",
+      "moveTitle": "Déplacer le cache existant ?",
+      "moveDesc": "{{size}} sont déjà dans l'ancien dossier. Les déplacer évite de tout régénérer.",
+      "moveNow": "Déplacer",
+      "leave": "Laisser sur place",
+      "leaveHint": "L'ancien dossier restera listé ici et supprimable.",
+      "moving": "Déplacement… {{done}}/{{total}}",
+      "moved": "{{count}} fichier(s) déplacé(s).",
+      "movedNone": "Nouveau dossier appliqué."
+    },
+    "lifecycle": {
+      "session": "Temporaire de session",
+      "sessionDesc": "Frames, masques et tests utiles pendant les retouches en cours.",
+      "sessionBadge": "Nettoyage automatique",
+      "sessionEmpty": "Rien d’écrit dans cette session.",
+      "reusable": "Aperçus réutilisables",
+      "reusableDesc": "Se refabriquent tout seuls quand ils manquent.",
+      "durable": "Analyses conservées",
+      "durableDesc": "Résultats coûteux à recalculer, supprimés uniquement à ta demande."
+    },
+    "policy": {
+      "title": "Nettoyage automatique",
+      "desc": "Les aperçus rapides sont bornés par défaut. Les analyses coûteuses restent conservées.",
+      "auto": "Nettoyage auto",
+      "quota": "Quota",
+      "quotaHint": "Au-delà, les entrées les moins récemment utilisées partent en premier.",
+      "age": "Âge maximal",
+      "ageHint": "Supprime ce qui n'a pas servi depuis ce délai.",
+      "gb": "Go",
+      "days": "jours",
+      "manualOnly": "Purge manuelle uniquement",
+      "manualOnlyHint": "Ce type n'est pas suivi à l'usage : pas d'auto-purge possible.",
+      "sessionTitle": "Caches de travail",
+      "sessionDesc": "Choisis quand chaque dérivé volumineux cesse d’être utile. La fermeture reste toujours le filet de sécurité.",
+      "sequenceTitle": "Séquences intermédiaires des modèles",
+      "sequenceHint": "Dossiers de frames créés uniquement pour alimenter un modèle. Les séquences exportées par l’utilisateur ne sont jamais touchées.",
+      "trigger": {
+        "roto": "Au changement de plan",
+        "upscaleTest": "Au changement de source ou réglage",
+        "page": "En quittant la page",
+        "app": "À la fermeture de l’app",
+        "immediate": "Juste après l’opération"
+      },
+      "sessionOnly": "À la fermeture",
+      "sessionOnlyHint": "Le dossier complet est supprimé quand NetsuRush se ferme, puis vérifié au prochain démarrage après un crash.",
+      "warnTitle": "M'avertir",
+      "warnCache": "Quand le cache dépasse",
+      "warnDisk": "Quand il reste moins de",
+      "warnDiskSuffix": "sur le disque",
+      "warnNever": "Avertir seulement — aucune suppression."
+    },
+    "warn": {
+      "cache": "Le cache atteint {{size}}.",
+      "disk": "Disque presque plein : {{size}} libres."
+    },
+    "confirm": {
+      "title": "Supprimer ce cache ?",
+      "descKinds": "{{size}} seront libérés. Le contenu se régénère au besoin.",
+      "descSources": "{{size}} seront libérés pour {{count}} rush(s). Les autres rushs ne sont pas touchés.",
+      "descUnattributed": "{{size}} de cache non attribué seront libérés.",
+      "expensive": "L'index de recherche est inclus : le reconstruire prend des heures de GPU.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer",
+      "purging": "Suppression…",
+      "done": "{{size}} libéré(s) · {{files}} fichier(s)",
+      "doneRows": "{{size}} libéré(s) · {{files}} fichier(s), {{rows}} entrée(s) en base",
+      "skipped": " · {{count}} ignoré(s) (verrouillé(s))"
+    },
+    "maintenance": {
+      "title": "Entretien",
+      "desc": "Deux recoins que le nettoyage par projet ne couvre pas."
+    },
+    "missing": {
+      "title": "Rushs introuvables",
+      "desc": "Un disque externe débranché suffit à les faire disparaître : rien n'est supprimé sans toi.",
+      "purge": "Vider leur cache",
+      "none": "Tous les rushs indexés sont accessibles."
+    },
+    "db": {
+      "title": "Base de données",
+      "unavailable": "Base introuvable.",
+      "vacuum": "Compacter",
+      "vacuumHint": "Une purge laisse l'espace réservé dans le fichier. Compacter le rend au disque.",
+      "vacuumDone": "{{size}} rendus au disque.",
+      "vacuumBusy": "Impossible pendant qu'une tâche utilise la base. Ferme les traitements en cours et réessaie.",
+      "faiss": "Index vectoriel {{size}}"
+    },
+    "projects": {
+      "current": "Ouvert",
+      "desc": "La recherche se limite par défaut au projet ouvert. Un projet rejoint cette liste dès que NetsuRush a lu son Media Pool. Le recensement ouvre chaque projet Resolve à tour de rôle pour relever ses rushs, puis rouvre celui de départ — utile pour les projets indexés avant l'arrivée de cette liste.",
+      "empty": "Aucun projet connu pour l'instant.",
+      "forget": "Oublier",
+      "forgetTooltip": "Retire le projet de la liste (l'index et les fichiers ne sont pas touchés)",
+      "rushCount_one": "{{count}} rush",
+      "rushCount_other": "{{count}} rush",
+      "scan": "Recenser les projets Resolve",
+      "scanDone": "{{count}} projet(s) relevé(s)",
+      "scanStarting": "Préparation…",
+      "scanning": "{{project}} — {{done}}/{{total}}",
+      "title": "Projets connus de la recherche"
+    }
+  },
+  "navigation": {
+    "title": "Pages et ordre de navigation",
+    "subtitle": "Masque les pages inutiles et choisis leur ordre dans la barre latérale.",
+    "reset": "Tout rétablir",
+    "required": "Toujours disponible",
+    "visible": "Visible",
+    "hidden": "Masqué",
+    "moveUp": "Monter {{module}}",
+    "moveDown": "Descendre {{module}}",
+    "requiredAria": "{{module}} est obligatoire",
+    "hideAria": "Masquer {{module}}",
+    "showAria": "Afficher {{module}}"
+  },
+  "detection": {
+    "reindexHint": "Un autre modèle découpe les plans autrement : tes rush déjà indexés devront l'être à nouveau."
+  },
+  "tab": {
+    "account": {
+      "profile": "Profil",
+      "discord": "Discord"
+    },
+    "interface": {
+      "theme": "Thème",
+      "language": "Langue",
+      "navigation": "Navigation"
+    },
+    "media": {
+      "preview": "Aperçus"
+    },
+    "ai": {
+      "models": "Vidéo",
+      "dictation": "Dictée",
+      "indexing": "Indexation"
+    },
+    "storage": {
+      "media": "Cache médias",
+      "cleanup": "Nettoyage",
+      "project": "Cache projet",
+      "projects": "Projets"
+    },
+    "system": {
+      "updates": "Mises à jour",
+      "compatibility": "Compatibilité",
+      "console": "Console"
+    }
+  },
+  "indexing": {
+    "title": "Indexation",
+    "subtitle": "Les rush sont d'abord découpés en plans, puis chaque plan est analysé. Les réglages qui ne changent rien aux résultats sont déjà actifs.",
+    "cutTitle": "Découpe en plans"
+  }
+}

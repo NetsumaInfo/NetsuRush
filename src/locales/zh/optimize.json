@@ -1,0 +1,477 @@
+{
+  "notice": {
+    "failed": "失败"
+  },
+  "panel": {
+    "title": "优化",
+    "diagnose": "诊断",
+    "diagError": "诊断出错：{{error}}"
+  },
+  "diagnostic": {
+    "offline": "Resolve 离线",
+    "offlineHint": "需打开 Resolve Studio 并将外部脚本设为 Local。清理缓存仍可用。",
+    "project": "项目",
+    "timelineLabel": "时间线：{{name}}",
+    "noTimeline": "没有活动时间线",
+    "pageLabel": "页面：{{page}}",
+    "version": "Resolve {{version}}",
+    "render": "渲染",
+    "renderActive": "进行中",
+    "renderIdle": "空闲",
+    "jobsQueued_one": "队列中 {{count}} 个任务",
+    "jobsQueued_other": "队列中 {{count}} 个任务",
+    "settingsRead": "已读取性能设置",
+    "cacheProxyKeys": "{{count}} 个缓存/代理文件键",
+    "cacheFoldersDetected": "检测到 {{count}} 个缓存文件夹",
+    "noCacheFolder": "未自动检测到缓存文件夹",
+    "database": "数据库",
+    "dbBig": "{{name}} · 体积过大 → 建议拆分",
+    "dbHealthy": "{{name}} · 体积正常",
+    "dbRemote": "PostgreSQL",
+    "dbMissing": "未找到"
+  },
+  "memory": {
+    "title": "本次会话内存",
+    "measuring": "测量中 — 一分钟内显示增长。",
+    "drift": "Resolve.exe：{{now}} · {{elapsed}} 内 {{drift}}",
+    "driftDown": "Resolve.exe：{{now}} · {{elapsed}} 内稳定",
+    "vram": "VRAM：{{used}} / {{total}} GB",
+    "verdictOk": "会话正常。",
+    "verdictWatch": "Resolve 越来越重。重载项目可释放时间线占用的 RAM。",
+    "verdictHigh": "会话负载很高。只有重启才能释放 VRAM 和 Fusion 缓存。",
+    "reload": "重载项目",
+    "reloadTitle": "重新加载“{{project}}”？",
+    "reloadBody": "先保存，关闭再重新打开：释放堆积时间线占用的 RAM，回到你所在的页面。不会丢东西。别在渲染时用。",
+    "reloadDone": "已重新加载项目“{{project}}”。",
+    "restart": "重启 Resolve",
+    "restartTitle": "重启 Resolve？",
+    "restartBody": "先保存并关闭，再重新启动“{{project}}”，然后返回当前页面。此操作会释放 VRAM 和 Fusion 缓存；当前会话中没有任何 API 可以清空它们。约需一到两分钟，请勿在渲染时执行。",
+    "restartDone": "Resolve 已重启并打开“{{project}}”。"
+  },
+  "prefs": {
+    "title": "Resolve 设置",
+    "subtitle": "从磁盘读取的真实值。脚本 API 不写这些偏好设置 —— 应用会关闭并重开 Resolve。",
+    "unavailable": "无法读取 Resolve 偏好设置：{{error}}",
+    "warn": "待检查",
+    "advisory": "视情况而定",
+    "recommended": "推荐：{{value}}",
+    "pending_one": "{{count}} 项待应用",
+    "pending_other": "{{count}} 项待应用",
+    "apply": "应用并重启",
+    "reset": "取消",
+    "applyTitle": "应用 {{count}} 项更改？",
+    "applyBody": "先保存项目并备份当前配置，再关闭 Resolve、写入首选项，然后重新打开“{{project}}”。约需一到两分钟，请勿在渲染时执行。",
+    "applyDone_one": "已应用 {{count}} 项设置 —— Resolve 已重启。",
+    "applyDone_other": "已应用 {{count}} 项设置 —— Resolve 已重启。",
+    "applyNoRestart": "设置已写入。无法重开 Resolve：{{error}}",
+    "backups": "备份",
+    "backupsHint": "每次应用前的配置。可在 Resolve 关闭时恢复。",
+    "restore": "恢复",
+    "restoreDone": "配置已恢复。重启 Resolve 生效。",
+    "noBackups": "暂无备份 —— 首次应用时会创建一个。",
+    "on": "开",
+    "off": "关",
+    "items": {
+      "loadAllTimelines": {
+        "label": "打开时加载所有时间线",
+        "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
+        "body": "开启后，打开项目时所有时间线都会载入 RAM。Blackmagic 默认关闭它，是为了多时间线项目的打开速度。"
+      },
+      "resolveMemory": {
+        "label": "Resolve 内存上限",
+        "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
+        "body": "默认为 RAM 的 75%。调低不会让 Resolve 更快：它把 RAM 留给其他程序 —— 包括 NetsuRush 的 AI 处理。按你同时在跑什么来权衡。"
+      },
+      "fusionMemory": {
+        "label": "Fusion 内存缓存",
+        "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
+        "body": "Resolve 分配额中留给 Fusion 的比例（上限 80%）。调高则 Fusion 播放更流畅，留给剪辑和调色的 RAM 更少。"
+      },
+      "gpuMode": {
+        "label": "GPU 处理模式",
+        "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
+        "body": "自动模式在 NVIDIA 上已经会选 CUDA。只有当你发现装了 NVIDIA 显卡却选中 OpenCL 时才手动指定。"
+      },
+      "hwDecode": {
+        "label": "H.264/H.265 硬件解码",
+        "where": "偏好设置 ▸ 系统 ▸ 解码",
+        "body": "把解码交给 GPU。8 bit 4:2:0 很可靠；4:2:2 和 4:4:4 取决于显卡。看到画面异常就关掉。"
+      },
+      "liveSave": {
+        "label": "实时保存",
+        "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
+        "body": "每次改动都保存。手册推荐开启，并称影响极小；报告中的卡顿都发生在网络或慢速存储上。本地 SSD 就留着开。"
+      },
+      "timelineBackups": {
+        "label": "时间线备份",
+        "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
+        "body": "在项目保存之外定期做快照。当天第一次可能有点慢，之后几乎察觉不到。"
+      }
+    }
+  },
+  "gpu": {
+    "title": "GPU / CPU / RAM 监视器",
+    "free": "释放",
+    "saturated": "{{what}} 已占满 —— 有崩溃风险。现在就释放或重载。",
+    "vramUnreadable": "此驱动无法读取显存。处理功能仍可使用。",
+    "ramSystem": "系统 RAM",
+    "resolveRam": "Resolve.exe：{{size}}",
+    "deadKilledSuffix": " · 已关闭 {{count}} 个无响应进程",
+    "nothingToFree": "没有可释放的",
+    "ramFreed": "已释放 +{{mb}} MB RAM",
+    "vramFreed": "-{{mb}} MB VRAM",
+    "residuesCleaned": "残留已清理"
+  },
+  "process": {
+    "title": "占用大的进程（整机）",
+    "cleanBlocked": "清理无响应进程",
+    "scan": "扫描",
+    "colProcess": "进程",
+    "colAction": "操作",
+    "protected": "（受保护）",
+    "protectedTip": "受保护的进程",
+    "kill": "结束",
+    "noneListed": "没有列出进程（仅限 Windows）。",
+    "killed": "{{name}}（PID {{pid}}）已结束。",
+    "noneBlocked": "没有需要清理的无响应进程。",
+    "cleaned": "已清理 {{count}} 个无响应进程。",
+    "killTitle": "结束 {{name}}？",
+    "killForced": "强制关闭 —— 未保存的内容会丢失。",
+    "cleanTitle": "清理 {{count}} 个无响应进程？",
+    "cleanBody": "此程序已卡死（“未响应”）。强制关闭会丢失未保存的内容。",
+    "clean": "清理"
+  },
+  "watchdog": {
+    "title": "内存监控",
+    "idle": "待机中 — 渲染或编码时自动启用。",
+    "armed": "已启用：{{source}}进行中。",
+    "on": "开启",
+    "off": "关闭",
+    "gauges": "可用内存 {{ram}}% · 显存占用 {{vram}}%",
+    "lastPurge": "已归还 {{freed}}（{{count}} 个任务已减负）。",
+    "suggestTitle": "释放内存仍不够",
+    "suggestBody": "这些后台任务占用的内存无法通过释放收回。是否结束由你决定。",
+    "stopThem_one": "结束该任务",
+    "stopThem_other": "结束这 {{count}} 个任务",
+    "ignore": "忽略",
+    "source": {
+      "export": "导出",
+      "proxy": "代理编码",
+      "render": "渲染"
+    }
+  },
+  "noise": {
+    "title": "无用的后台任务",
+    "subtitle": "更新程序、游戏浮层、同步客户端——常驻运行，剪辑时毫无用处。",
+    "scan": "扫描",
+    "none": "未发现无用的后台任务。",
+    "stop_one": "结束（{{count}}）",
+    "stop_other": "结束（{{count}}）",
+    "stopped_one": "已结束 {{count}} 个任务。",
+    "stopped_other": "已结束 {{count}} 个任务。",
+    "frees": "约可释放 {{size}}",
+    "family": {
+      "updaters": "更新程序",
+      "overlays": "游戏浮层",
+      "sync": "同步",
+      "social": "即时通讯",
+      "browsers": "浏览器"
+    }
+  },
+  "snapshot": {
+    "title": "还原点（.drp）",
+    "folder": "文件夹",
+    "create": "创建还原点",
+    "created": "已创建还原点（{{size}}）。"
+  },
+  "cleanup": {
+    "title": "清理 Resolve 缓存",
+    "browse": "浏览",
+    "rescan": "重新扫描",
+    "folder": "文件夹：{{path}}",
+    "disk": "磁盘：剩余 {{free}} / 共 {{total}}",
+    "diskFull": "磁盘快满了 —— Resolve 有卡死风险。",
+    "noneFound": "这里没找到 Resolve 缓存。",
+    "cleanSelection": "清理所选（{{size}}）",
+    "confirmTitle": "删除这些缓存？",
+    "confirmBody": "可释放 {{size}}。请先关闭 Resolve。以下内容会删除，需要时会重新生成：",
+    "freed": "已释放 {{size}}（{{count}} 个文件夹）。",
+    "cleanFailed": "失败：{{error}}"
+  },
+  "stop": {
+    "title": "停止任务",
+    "stopRender": "停止渲染",
+    "clearFinished": "清除已完成",
+    "clearQueue": "清空队列",
+    "deleteJob": "删除此任务",
+    "queueEmpty": "渲染队列为空。"
+  },
+  "advice": {
+    "heading": "建议（在 Resolve 中操作）",
+    "items": {
+      "cachessd": {
+        "title": "缓存放在高速 SSD",
+        "where": "项目设置 ▸ 常规设置 ▸ 工作文件夹",
+        "body": "默认在系统盘上，而系统盘本来就扛着操作系统。换成独立于素材盘的 NVMe，立刻见效。"
+      },
+      "playproxy": {
+        "title": "时间线代理分辨率",
+        "where": "播放 ▸ 时间线代理分辨率",
+        "body": "剪辑时用二分之一或四分之一：4K 下用四分之一，GPU 负担少四倍。导出仍是全分辨率。"
+      },
+      "optimizedmedia": {
+        "title": "优化媒体",
+        "where": "右键点击片段 ▸ 生成优化媒体",
+        "body": "转码成 DNxHR 一次，之后播放流畅。这才是 H.264/H.265 卡顿的真正解法，比缓存管用得多。"
+      },
+      "effectsheavy": {
+        "title": "堆叠的特效和调色",
+        "where": "播放 ▸ 渲染缓存 ▸ 智能",
+        "body": "耗性能的是单条时间线的负载，不是时间线的数量。智能缓存会自动缓存重的节点。"
+      },
+      "mercurygpu": {
+        "title": "软件渲染引擎",
+        "where": "文件 ▸ 项目设置 ▸ 常规 ▸ 渲染器",
+        "body": "Mercury Playback Engine 的软件模式把一切都交给 CPU。若显卡支持，请选择 GPU 加速。"
+      },
+      "hwdecode": {
+        "title": "硬件解码",
+        "where": "首选项 ▸ 媒体 ▸ 硬件加速解码",
+        "body": "关闭时，每一帧 H.264、HEVC 或 AV1 都由 CPU 解码。这是播放卡顿的首要原因。"
+      },
+      "previewcodec": {
+        "title": "预览编解码器",
+        "where": "序列 ▸ 序列设置 ▸ 视频预览",
+        "body": "I-Frame MPEG 渲染快但回放差；ProRes 或 CineForm 回放好但渲染慢。取决于显卡和硬盘。"
+      },
+      "cacheotherdisk": {
+        "title": "缓存与素材同盘",
+        "where": "首选项 ▸ 暂存盘",
+        "body": "缓存与媒体在同一卷上会争抢同一读写通道。分开只需改一个设置，效果立竿见影。"
+      },
+      "diskcachessd": {
+        "title": "磁盘缓存放在 SSD",
+        "where": "首选项 ▸ 内存与性能 ▸ 磁盘缓存",
+        "body": "After Effects 每次预览都会读取磁盘缓存。放在慢盘或素材盘上，等于抵消了它自身的收益。"
+      },
+      "diskcacheon": {
+        "title": "磁盘缓存已关闭",
+        "where": "首选项 ▸ 内存与性能 ▸ 启用磁盘缓存",
+        "body": "未勾选时，内存一满每次预览都要从头再来。这是 After Effects 中最不易察觉的时间浪费。"
+      },
+      "mfrcpu": {
+        "title": "CPU 占比设得过高",
+        "where": "首选项 ▸ 内存与性能 ▸ 多帧渲染",
+        "body": "After Effects 每使用一个核心约需 4 GB 内存。超出内存能承受的范围后，增加核心反而更慢。"
+      },
+      "bitdepth": {
+        "title": "32 位项目",
+        "where": "文件 ▸ 项目设置 ▸ 颜色 ▸ 深度",
+        "body": "32 位只对高动态范围合成有意义。在 8 位素材上出于习惯打开，只会浪费时间。"
+      }
+    }
+  },
+  "boost": {
+    "degraded": {
+      "title": "NetsuRush 扩展未连接",
+      "body": "磁盘缓存、可用空间和 Adobe 进程仍可读取。清理、设置和代理需要应用处于打开状态并显示 NetsuRush 扩展（窗口 ▸ 扩展功能 ▸ NetsuRush）。"
+    },
+    "status": {
+      "installed": "已安装",
+      "notInstalled": "未找到",
+      "running": "运行中",
+      "stopped": "已关闭",
+      "noProject": "没有打开的项目",
+      "panel": "CEP 扩展",
+      "panelConnected": "已连接",
+      "panelSilent": "无响应",
+      "panelInstalled": "扩展已安装 — 请重启应用",
+      "installPanel": "安装扩展",
+      "panelHint": "打开应用，然后选择 窗口 ▸ 扩展功能 ▸ NetsuRush。",
+
+      "uxpHint": "Premiere Pro {{year}} 会优先加载 UXP：若 窗口 ▸ 扩展功能 中没有该扩展，请重新安装并重启应用。",
+      "caches": "缓存",
+      "cacheFolders_one": "检测到 {{count}} 个文件夹",
+      "cacheFolders_other": "检测到 {{count}} 个文件夹",
+      "noCacheFolder": "未找到缓存文件夹",
+      "disk": "磁盘",
+      "diskFree": "可用，共 {{total}}",
+      "diskUnknown": "磁盘空间未知"
+    },
+    "cache": {
+      "title": "磁盘缓存",
+      "subtitle": "只能在应用关闭时清理：Adobe 使用期间写入会损坏其缓存数据库。",
+      "noneFound": "在这台机器上未检测到缓存。",
+      "ageFilter": "存放时间",
+      "ageAll": "全部",
+      "ageDays": "超过 {{days}} 天",
+      "shared": "共享",
+      "notRegenerable": "无法重新生成",
+      "slowRebuild": "重新一致化很慢",
+      "dbWarning": "清空缓存数据库会迫使 Adobe 在下次启动时重新一致化所有媒体：过程很慢，且没有设置能加速。",
+      "autoSaveWarning": "自动保存是你作品的版本，不是缓存：一旦删除便无法恢复。",
+      "closePurgeReopen": "关闭、清理、重开",
+      "cleanSelection": "删除所选（{{size}}）",
+      "runningHint": "应用正在运行：NetsuRush 会正常关闭它，清理后再重新打开项目。",
+      "freed_one": "已释放 {{size}} · 清空 {{count}} 个文件夹",
+      "freed_other": "已释放 {{size}} · 清空 {{count}} 个文件夹",
+      "reopenFailed": "无法重新打开：{{error}}",
+      "cleanFailed": "清理失败：{{error}}",
+      "confirmTitle": "删除这些缓存？",
+      "confirmBody": "将释放 {{size}}。文件夹会保留，仅删除其中的内容。",
+      "confirmRestartTitle": "关闭应用、清理后再重新打开？",
+      "confirmRestartBody": "将关闭应用（会提示保存），释放 {{size}}，然后重新打开项目。",
+      "roots": {
+        "mediaCacheFiles": "媒体缓存文件",
+        "mediaCacheDb": "媒体缓存数据库",
+        "peakFiles": "音频波形",
+        "aeDiskCache": "After Effects 磁盘缓存",
+        "autoSave": "自动保存",
+        "videoPreviews": "视频预览",
+        "audioPreviews": "音频预览",
+        "aeProjectAutoSave": "项目自动保存"
+      },
+      "kinds": {
+        "mediaCache": "媒体缓存",
+        "mediaCacheDb": "缓存数据库",
+        "peak": "波形",
+        "diskCache": "磁盘缓存",
+        "autoSave": "自动保存",
+        "previews": "预览"
+      }
+    },
+    "procs": {
+      "title": "Adobe 进程",
+      "subtitle": "Premiere Pro 和 After Effects 关闭后会留下辅助进程。单个很小，加起来不小。",
+      "summary_one": "{{count}} 个进程 · {{size}}",
+      "summary_other": "{{count}} 个进程 · {{size}}",
+      "scan": "扫描",
+      "colProcess": "进程",
+      "colAction": "操作",
+      "protected": "受保护",
+      "protectedTip": "宿主应用正在运行：强制结束会丢失当前剪辑。",
+      "kill": "结束",
+      "none": "没有残留的 Adobe 进程。",
+      "killed": "已结束 {{name}}",
+      "killTitle": "结束 {{name}}？",
+      "killForced": "强制结束：该进程中未保存的工作会丢失。"
+    },
+    "purge": {
+      "title": "清理",
+      "subtitle": "由 NetsuRush 扩展在应用内执行的操作。",
+      "needsPanel": "需要应用处于打开状态并显示 NetsuRush 扩展（窗口 ▸ 扩展功能 ▸ NetsuRush）。",
+      "memoryInUse": "After Effects 已占用",
+      "targets": {
+        "memory": "清空内存",
+        "image": "图像缓存",
+        "undo": "撤销历史",
+        "snapshot": "快照",
+        "all": "全部，含磁盘"
+      },
+      "allCachesWarning": "“全部，含磁盘”也会清空磁盘缓存：重建很慢。After Effects 可能会在自己的窗口中要求确认。",
+      "deletePreviews": "删除渲染文件",
+      "experimental": "实验性",
+      "qeExperimental": "Premiere Pro 没有官方的清理 API：此调用走的是 QE DOM，一个随版本变化的未公开接口。若失败，可在关闭应用后用“磁盘缓存”一节完成同样的工作。",
+      "compatAeft": "兼容 After Effects 2020（17.0）至 2026（26.x）。自 24.3 起，“全部，含磁盘”也会清空磁盘缓存。",
+      "compatPpro": "已在 Premiere Pro 2020（14.0）至 2025（25.x）验证。",
+
+      "uxpEra": "Premiere Pro {{year}}：Adobe 已转向 UXP，ExtendScript 不再维护，支持将于 2026 年 9 月结束。该调用可能静默失败。",
+
+      "uxpFallback": "上方的“磁盘缓存”一节不使用任何 Adobe API，也能完成同样的工作。",
+      "hygiene": "项目整理",
+      "hygieneHint": "作用于已打开的项目，可在应用内撤销。",
+      "hygieneOps": {
+        "removeUnused": "移除未使用的素材",
+        "consolidate": "合并重复素材",
+        "consolidateDuplicates": "合并重复项"
+      },
+      "done": "完成",
+      "doneFreed": "已释放 {{size}}",
+      "hygieneDone_one": "已移除 {{count}} 个项目",
+      "hygieneDone_other": "已移除 {{count}} 个项目",
+      "previewsDone": "已删除渲染文件",
+      "confirmHeavy": "磁盘缓存将被清空：预览需要重新计算。",
+      "confirmHygiene": "会修改已打开的项目。该操作可在应用内撤销。"
+    },
+    "prefs": {
+      "title": "性能设置",
+      "subtitle": "由面板实时读写：无需关闭应用，也不改动文件。",
+      "needsPanel": "需要应用处于打开状态并显示 NetsuRush 扩展（窗口 ▸ 扩展功能 ▸ NetsuRush）。",
+      "warn": "需修正",
+      "advisory": "取决于机器",
+      "volatile": "不会保留",
+      "writeOnly": "应用没有提供读取此设置的方式：当前值未知，只能写入。",
+      "on": "开",
+      "off": "关",
+      "noPath": "无文件夹",
+      "none": "此版本没有可读取的设置。",
+      "apply_one": "应用（{{count}}）",
+      "apply_other": "应用（{{count}}）",
+      "applied_one": "已应用 {{count}} 项设置",
+      "applied_other": "已应用 {{count}} 项设置",
+      "applyTitle": "应用这些设置？",
+      "applyBody_one": "将向应用写入 {{count}} 项设置。整批一起校验：不会只应用一部分。",
+      "applyBody_other": "将向应用写入 {{count}} 项设置。整批一起校验：不会只应用一部分。",
+      "items": {
+        "gpuAccelType": {
+          "label": "渲染 GPU 加速",
+          "body": "有显卡却仍用软件渲染，每一帧都是纯损失。"
+        },
+        "bitsPerChannel": {
+          "label": "项目位深度",
+          "body": "32 位会成倍增加每一帧的开销。8 位项目中经常被无谓地打开。"
+        },
+        "imageCachePct": {
+          "label": "图像缓存占比",
+          "body": "分配内存中留给图像缓存的比例。"
+        },
+        "maxMemPct": {
+          "label": "最大内存",
+          "body": "After Effects 允许自己占用的系统内存比例。"
+        },
+        "mfrEnabled": {
+          "label": "多帧渲染",
+          "body": "Adobe 会在每个脚本结束时重置该设置：它只对由 NetsuRush 驱动的渲染有效，不是持久设置。"
+        },
+        "mfrMaxCpuPct": {
+          "label": "多帧渲染 CPU 占比",
+          "body": "After Effects 每个核心大约需要 4 GB：在内存不足的机器上调高这个百分比只会更慢。"
+        },
+        "enableProxies": {
+          "label": "使用代理",
+          "body": "全局开关：Premiere Pro 播放已附加的代理而非原始素材。"
+        },
+        "scratchVideoPreviews": {
+          "label": "视频预览文件夹",
+          "body": "放在与素材盘分开的高速 SSD 上，是收益最大的磁盘设置。"
+        },
+        "scratchAudioPreviews": {
+          "label": "音频预览文件夹",
+          "body": "与视频同理，但占用小得多。"
+        },
+        "scratchAutoSave": {
+          "label": "自动保存文件夹",
+          "body": "放在与项目不同的磁盘上，可防范该卷故障。"
+        }
+      }
+    },
+    "proxy": {
+      "title": "已附加代理",
+      "summary": "{{total}} 个素材中有 {{withProxy}} 个已有代理",
+      "needsPanel": "需要打开 Premiere Pro 并显示 NetsuRush 扩展（窗口 ▸ 扩展功能 ▸ NetsuRush）。",
+      "useProxies": "播放代理",
+      "rescan": "重新扫描",
+      "has": "代理",
+      "missing": "无代理",
+      "cannot": "不适用",
+      "encoding": "编码中 {{done}} / {{total}}",
+      "generate_one": "生成并附加（{{count}}）",
+      "generate_other": "生成并附加（{{count}}）",
+      "attached_one": "已附加 {{count}} 个代理",
+      "attached_other": "已附加 {{count}} 个代理",
+      "attachedPartial": "已附加 {{count}} 个代理，{{missed}} 个失败",
+      "encodeFailed_one": "有 {{count}} 个素材无法编码",
+      "encodeFailed_other": "有 {{count}} 个素材无法编码"
+    }
+  }
+}

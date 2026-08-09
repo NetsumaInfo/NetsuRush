@@ -1,0 +1,71 @@
+{
+  "taskHint": {
+    "search": "Visual search and shot comparison.",
+    "faces": "Face detection and grouping.",
+    "voice": "Automatic speech transcription.",
+    "upscale": "Image and video upscaling.",
+    "restore": "Image restoration and cleanup.",
+    "interpolate": "Intermediate frame generation for smoother video.",
+    "depth": "Depth map generation.",
+    "matte-image": "Image cutout and background removal.",
+    "matte-video": "Subject cutout and tracking in video.",
+    "object-removal": "Object removal in video."
+  },
+  "title": "Models",
+  "subtitle": "Nothing downloads on its own. Grab what you need, remove it anytime.",
+  "disk": "Disk:",
+  "noneInstalled": "No model installed — install one or this feature won't work.",
+  "badge": {
+    "default": "default",
+    "heavy": "heavy",
+    "exclusive": "exclusive",
+    "exclusiveTip": "SAMURAI and SAM2Long each replace the SAM 2 engine with their own: only one can be installed at a time. Installing the second asks for confirmation first, then removes the first; deleting it restores the original engine."
+  },
+  "conflict": {
+    "title": "Only one of the two",
+    "body": "{{model}} replaces the engine of {{other}}, which is already installed: the two cannot coexist. Installing {{model}} removes {{other}}.",
+    "replace": "Install and remove the other"
+  },
+  "sort": {
+    "default": "Default",
+    "defaultTip": "Catalog order: recommended first.",
+    "size": "Size",
+    "sizeTip": "By size on disk.",
+    "vram": "VRAM",
+    "vramTip": "By VRAM needed.",
+    "name": "Name",
+    "nameTip": "Alphabetical.",
+    "asc": "Ascending",
+    "desc": "Descending"
+  },
+  "vramShort": "Needs {{need}} GB of VRAM, your card has {{have}} ({{gpu}}) — it won't fit. You can still download it.",
+  "status": {
+    "bundled": "Bundled",
+    "bundledTip": "Included in the runtime (can't be removed).",
+    "installed": "Installed",
+    "removing": "Uninstalling…",
+    "removeTip": "Remove from disk",
+    "auto": "Auto",
+    "autoTip": "Fetched by the library on first use — nothing to download."
+  },
+  "action": {
+    "resume": "Resume",
+    "resumeTip": "Incomplete download — picks up the missing weights and code.",
+    "download": "Download",
+    "cancelDownload": "Cancel download"
+  },
+  "search": {
+    "active": "Active",
+    "activeTip": "Variant used by search",
+    "use": "Use",
+    "useTip": "Make this variant the search model",
+    "switchTitle": "Change the search model",
+    "switchEmpty": "{{model}} has indexed nothing yet: search stays empty until a full re-index. The current variant keeps its index on disk, untouched.",
+    "switchPartial": "Clips already indexed with {{model}}: {{clips}}. The rest will need a re-index; the current variant keeps its index on disk.",
+    "switchConfirm": "Use this variant"
+  },
+  "advanced": {
+    "label": "Advanced",
+    "tip": "Show the whole catalog: variants, earlier generations and experimental engines. By default only each task's current selection is shown."
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "title": "Adobe",
+  "subtitle": "Pont vers Premiere Pro et After Effects (2020 et +) : le panneau NetsuRush lit le projet ouvert et l'envoie ici.",
+  "installPanel": "Installer le panneau",
+  "reinstallPanel": "Réinstaller le panneau",
+  "panel": {
+    "cepTitle": "Panneau CEP",
+    "installed": "Installé",
+    "notInstalled": "Non installé",
+    "copiedIn": "Copié dans",
+    "inApp": "Dans Premiere Pro/After Effects : ",
+    "menuPath": "Fenêtre ▸ Extensions ▸ NetsuRush",
+    "restartHint": " (redémarre l'app si elle était déjà ouverte).",
+    "installHint": "Clique « Installer le panneau » puis ouvre Premiere Pro/After Effects ▸ Fenêtre ▸ Extensions ▸ NetsuRush.",
+    "diagnose": "Diagnostic",
+    "autoUpdate": "Gestion automatique",
+    "autoUpdateHint": "le panneau est posé dès qu'une app Adobe est détectée, puis remis à jour avec NetsuRush",
+    "autoUpdateOn": "Activée",
+    "autoUpdateOff": "Désactivée",
+    "updatePending": "Une version plus récente du panneau est livrée avec cette version de NetsuRush",
+    "updateNow": "Mettre à jour",
+    "restartApps": "Panneau mis à jour — redémarre {{apps}} pour le recharger."
+  },
+  "diag": {
+    "verdictOk": "VERDICT: Install OK ✓ (dossier + manifest + PlayerDebugMode). Ouvre le panneau dans Adobe : Fenêtre ▸ Extensions ▸ NetsuRush.",
+    "verdictIncomplete": "VERDICT: Install incomplète — voir ci-dessous.",
+    "folder": "Dossier: {{dir}}",
+    "manifestPresent": "Manifest présent: {{yesNo}}",
+    "yes": "OUI",
+    "no": "NON",
+    "files": "Fichiers: {{files}}",
+    "filesEmpty": "(vide)",
+    "manifestHead": "Manifest (début):",
+    "cepLogFound": "Log CEP (erreurs NetsuRush trouvées):",
+    "cepLogNone": "Log CEP: aucune ERREUR NetsuRush (normal — le log ne mentionne l'extension qu'en cas de problème de chargement)."
+  },
+  "status": {
+    "installed": "Installé",
+    "notFound": "Introuvable",
+    "running": "Lancé",
+    "closed": "Fermé",
+    "panelConnected": "Panneau connecté",
+    "panelOffline": "Panneau hors ligne",
+    "launch": "Lancer",
+    "scanProject": "Scanner le projet",
+    "openPanelHint": "Ouvre le panneau : Fenêtre ▸ Extensions ▸ NetsuRush.",
+    "launchThenOpenHint": "Lance l'application puis ouvre Fenêtre ▸ Extensions ▸ NetsuRush."
+  },
+  "snapshot": {
+    "timecodes": "Timeline {{tlStart}} → {{tlEnd}} · Source {{srcIn}} → {{srcOut}}",
+    "copySourcePath": "Copier le chemin source",
+    "copyTimecodes": "Copier les timecodes",
+    "copyName": "Copier le nom",
+    "copyPath": "Copier le chemin",
+    "sendToNetsulab": "Envoyer vers NetsuLab",
+    "shotsCount": "{{n}} plans",
+    "thTrack": "Piste",
+    "thShot": "Plan",
+    "thTimeline": "Timeline",
+    "thSource": "Source",
+    "noProject": "Aucun projet reçu — ouvre le panneau NetsuRush dans l'application puis « Envoyer vers NetsuRush ».",
+    "receivedAt": "reçu à {{time}}",
+    "rushes": "Rushs",
+    "noFileMedia": "Aucun média fichier dans le projet."
+  },
+  "notice": {
+    "launchFailed": "Lancement impossible",
+    "alreadyOpen": "Application déjà ouverte",
+    "panelUnreachable": "Panneau injoignable",
+    "installFailed": "Installation impossible",
+    "installedRestart": "Panneau installé. REDÉMARRE {{apps}}, puis Fenêtre ▸ Extensions ▸ NetsuRush.",
+    "installedOpen": "Panneau installé. Ouvre Premiere Pro/After Effects puis Fenêtre ▸ Extensions ▸ NetsuRush.",
+    "autoUpdateFailed": "Réglage de mise à jour impossible"
+  },
+  "remote": {
+    "settings": "Paramètres",
+    "reload": "Recharger NetsuRush",
+    "close": "Fermer NetsuRush"
+  }
+}

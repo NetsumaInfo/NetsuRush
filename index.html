@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr" class="dark" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:," />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NetsuRush</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Rendu « en remote » (iframe dans le panneau CEP Adobe) : l'app est servie sur localhost mais
+         n'est PAS dans Tauri → on force l'URL du service core via ?core=... AVANT le chargement du
+         bridge (sinon il tomberait en mock). ?remote=1 = mode panneau compact (cf. App.tsx). -->
+    <script>
+      (function () {
+        try {
+          var themes = ["dark", "midnight", "blue", "light", "soft-light"];
+          var theme = localStorage.getItem("nr-theme");
+          document.documentElement.setAttribute("data-theme", themes.indexOf(theme) >= 0 ? theme : "dark");
+          var p = new URLSearchParams(location.search);
+          var core = p.get("core");
+          if (core) window.__NR_CORE__ = core;
+          if (p.get("remote") === "1") window.__NR_REMOTE__ = true;
+          var host = p.get("host");
+          if (host) window.__NR_HOST__ = host;
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

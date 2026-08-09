@@ -1,0 +1,89 @@
+{
+  "header": {
+    "title": "Transferencia entre aplicaciones",
+    "subtitle": "Copia una línea de tiempo de una aplicación de edición a otra, con precisión de fotograma."
+  },
+  "picker": {
+    "source": "Desde",
+    "target": "Hacia",
+    "swap": "Invertir origen y destino",
+    "offline": "Sin conexión: {{hosts}}.",
+    "online": "conectado",
+    "hostOffline": "sin conexión",
+    "swapUnavailable": "Este par no se puede invertir"
+  },
+  "sections": {
+    "source": "Línea de tiempo en {{host}}",
+    "target": "Destino en {{host}}",
+    "options": "Opciones",
+    "media": "Medios",
+    "outDir": "Carpeta de salida",
+    "encoding": "Codificación"
+  },
+  "form": {
+    "refresh": "Actualizar",
+    "noTimeline": "Ninguna línea de tiempo",
+    "timelineOpen": "{{name}} (abierta)",
+    "namePlaceholder": "Nombre de la línea de tiempo creada",
+    "modeNew": "Nueva línea de tiempo",
+    "modeAppend": "Línea de tiempo existente",
+    "videoOnly": "Solo vídeo",
+    "richAe": "Opciones avanzadas de After Effects",
+    "richAeHint": "Transformaciones, velocidad y precomposiciones, en lugar de una copia simple de los planos.",
+    "yes": "Sí",
+    "no": "No",
+    "choose": "Elegir…",
+    "none": "Ninguna"
+  },
+  "preview": {
+    "clips": "Planos leídos",
+    "tracks": "Pistas",
+    "duration": "Duración",
+    "fps": "Velocidad",
+    "missing": "{{count}} fuente(s) no encontrada(s)",
+    "fidelityExact": "Equivalencia nativa prevista",
+    "fidelityLimited": "Límites previstos antes de transferir",
+    "fidelityCounts": "{{exact}} exactas · {{approximated}} aproximadas · {{unsupported}} no garantizadas",
+    "animationUnavailable": "No se pueden leer los fotogramas clave: la aplicación de origen rechazó la exportación que los contiene. La transferencia usará valores fijos.",
+    "mediaLess": "{{count}} elemento(s) sin medios (máscara, capa de ajuste): ninguna aplicación puede recibirlos.",
+    "graphics": "{{count}} título(s): se recrean en el destino a partir de su texto y su estilo."
+  },
+  "phases": {
+    "read": "Leyendo la línea de tiempo",
+    "sources": "Resolviendo las fuentes",
+    "build": "Montaje",
+    "done": "Terminado"
+  },
+  "run": {
+    "label": "Transferir {{from}} → {{to}}",
+    "busy": "Transfiriendo…"
+  },
+  "result": {
+    "done": "{{count}} plano(s) colocado(s) en «{{timeline}}» ({{host}}).",
+    "verified": "Propiedades releídas: transferencia verificada.",
+    "unverified": "{{applied}} propiedad(es) confirmada(s) · {{issues}} límite(s) o diferencia(s).",
+    "tracksClamped": "Pistas ajustadas: la aplicación de destino no pudo crear suficientes.",
+    "missing": "{{count}} fuente(s) no encontrada(s) en el disco.",
+    "mediaLess": "{{count}} elemento(s) sin medios (máscara, capa de ajuste): ninguna aplicación puede recibirlos.",
+    "titles": "{{count}} título(s) recreado(s).",
+    "titlesRetimed": "{{count}} título(s) con la duración de la plantilla: DaVinci Resolve no permite ajustarla.",
+    "titlesFailed": "{{count}} título(s) no se pudieron colocar.",
+    "vehicleImport": "Montaje leído por DaVinci Resolve: fotogramas clave, niveles de audio y velocidad aplicados por la propia aplicación.",
+    "vehicleApi": "Planos colocados uno a uno por script: los fotogramas clave provienen de la lectura de NetsuRush.",
+    "exchangeFile": "DaVinci Resolve rechazó el montaje por script. El mismo archivo se importa correctamente a mano, con fotogramas clave y niveles de audio: Archivo ▸ Importar ▸ Línea de tiempo."
+  },
+  "mediaModes": {
+    "copy": {
+      "label": "Enlaces directos",
+      "hint": "Los archivos originales se enlazan tal cual. No se escribe ningún archivo."
+    },
+    "remux": {
+      "label": "Reempaquetar",
+      "hint": "Nuevo contenedor, sin pérdida. Útil si el destino no lee el de origen."
+    },
+    "reencode": {
+      "label": "Recodificar",
+      "hint": "Cada plano transcodificado a un códec de edición, cortado con precisión de fotograma."
+    }
+  }
+}

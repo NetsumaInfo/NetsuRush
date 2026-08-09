@@ -1,0 +1,126 @@
+{
+  "stream": { "error": "Se ha producido un error." },
+  "panel": {
+    "copilot": "Copiloto NetsuRush",
+    "noCliAgent": "Ningún agente CLI detectado — cambiar a Claude/OpenAI o instalar claude/codex",
+    "configureKey": "Configurar una clave API para empezar"
+  },
+  "composer": {
+    "pickEngine": "Configurar un motor (clave API o agente CLI) en los ajustes ⚙ para enviar.",
+    "placeholder": "Pedir a la IA que controle Resolve…",
+    "attachFiles": "Adjuntar archivos",
+    "attachTip": "Adjuntar imagen / archivo",
+    "attachedFilesPrompt": "Archivos adjuntos (rutas locales — léelos o míralos si hace falta)",
+    "stop": "Parar",
+    "send": "Enviar"
+  },
+  "header": { "defaultTitle": "Nueva conversación",
+    "conversations": "Conversaciones",
+    "newConv": "Nueva conversación",
+    "noConv": "Sin conversaciones",
+    "settings": "Ajustes"
+  },
+  "settings": {
+    "apiKeys": "Claves API (BYOK)",
+    "noVault": "Baúl cifrado no disponible fuera de la aplicación — las claves solo duran la sesión.",
+    "hide": "Ocultar",
+    "show": "Mostrar",
+    "keySet": "configurada",
+    "keyAbsent": "ausente",
+    "cliAgents": "Agentes CLI detectados",
+    "rescan": "Volver a escanear",
+    "noAgentsPre": "Ningún agente en la lista — pulsar «Volver a escanear». Si no aparece nada, instalar ",
+    "noAgentsPost": " y comprobar que están en el PATH del core.",
+    "detected": "detectado",
+    "absent": "ausente",
+    "saved": "Guardado"
+  },
+  "engine": {
+    "engine": "Motor",
+    "cliAgent": "Agente CLI",
+    "agent": "Agente",
+    "model": "Modelo",
+    "default": "Por defecto",
+    "freeId": "id libre: vendor/model…",
+    "permissions": "Permisos"
+  },
+  "mode": {
+    "readonly": "Lectura",
+    "ask": "Preguntar",
+    "safe": "Duplicar",
+    "auto": "Auto"
+  },
+  "modeTitle": {
+    "readonly": "Solo lectura — no escribe nada",
+    "ask": "Confirma solo lo arriesgado (archivos/renderizado/borrado de medios); el montaje en la timeline pasa",
+    "safe": "Duplica la timeline antes de escribir — la original queda intacta",
+    "auto": "Escribe directo en la timeline, sin confirmar"
+  },
+  "message": {
+    "thinking": "Pensando…",
+    "reasoning": "Razonamiento",
+    "hideReasoning": "Ocultar el razonamiento",
+    "showReasoning": "Mostrar el razonamiento",
+    "copyText": "Copiar el texto"
+  },
+  "toolcard": {
+    "running": "en curso",
+    "failed": "fallo",
+    "arguments": "Argumentos",
+    "result": "Resultado",
+    "copyName": "Copiar el nombre de la herramienta",
+    "copyArgs": "Copiar los argumentos",
+    "copyResult": "Copiar el resultado",
+    "collapse": "Plegar",
+    "expand": "Desplegar"
+  },
+  "tool": {
+    "quoted": " «{{value}}»",
+    "resolveStatus": "Estado de Resolve",
+    "listMediaPool": "Lectura del Media Pool",
+    "searchClips": "Búsqueda{{q}}",
+    "indexClip": "Indexación de un clip",
+    "detectScenes": "Detección de planos",
+    "cachedScenes": "Lectura de planos en caché",
+    "listTimelines": "Lista de timelines",
+    "readTimeline": "Lectura de la timeline",
+    "buildTimeline": "Montaje de timeline{{q}}",
+    "cutTimeline": "Corte de timeline",
+    "probeMedia": "Análisis de un medio",
+    "makeThumbnail": "Generación de una miniatura",
+    "upscaleMedia": "Escalado de un vídeo",
+    "exportAe": "Exportación a After Effects",
+    "importMedia": "Importación al Media Pool",
+    "board": "Tablero de referencia{{suffix}}",
+    "page": "Página {{page}}",
+    "resolveApp": "Aplicación Resolve",
+    "grabStill": "Captura de imagen",
+    "setTimecode": "Movimiento del reproductor",
+    "viewer": "Reproductor Resolve",
+    "removeAudio": "Eliminación del audio",
+    "duplicate": "Duplicado de la timeline",
+    "addMarker": "Añadir un marcador",
+    "addTrack": "Añadir una pista",
+    "deleteTrack": "Eliminar una pista",
+    "timelineFallback": "Timeline · {{action}}",
+    "mediaPool": "Media Pool · {{action}}",
+    "render": "Renderizado · {{action}}",
+    "timelineItem": "Plano actual · {{action}}",
+    "project": "Proyecto · {{action}}",
+    "resolveCall": "API Resolve · {{root}}"
+  },
+  "approval": {
+    "title": "¿Autorizar la acción?",
+    "allow": "Autorizar",
+    "deny": "Denegar"
+  },
+  "risk": {
+    "read": "lectura",
+    "write": "escritura",
+    "destructive": "destructivo"
+  },
+  "store": {
+    "convFallback": "Conversación",
+    "error": "error"
+  }
+}

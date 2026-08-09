@@ -1,0 +1,200 @@
+{
+  "settings": {
+    "title": "書き出し設定",
+    "new": "新規",
+    "newProfile": "新規プロファイル",
+    "duplicate": "複製",
+    "duplicateProfile": "プロファイルを複製",
+    "deleteProfile": "プロファイルを削除",
+    "cardButton": "サムネイルのボタン",
+    "menuLabel": "書き出しプロファイル"
+  },
+  "editor": {
+    "name": "名前",
+    "namePlaceholder": "プロファイル名",
+    "destination": "書き出し先",
+    "timeline": "タイムライン",
+    "folder": "フォルダー",
+    "folderPlaceholder": "フォルダー名…",
+    "defaultFolder": "NetsuRush — カット",
+    "existingFolders": "既存のフォルダー",
+    "mediaPoolFolders": "Media Pool のフォルダー",
+    "profile": "プロファイル",
+    "profileCustom": "カスタム",
+    "optimization": "最適化",
+    "speed": "速度",
+    "codec": "コーデック",
+    "audio": "オーディオ",
+    "audioCodec": "オーディオコーデック",
+    "timelineTarget": "対象タイムライン",
+    "timelineInsertion": "挿入モード — {{host}}",
+    "insertionInsert": "挿入",
+    "insertionOverwrite": "上書き",
+    "insertionReplace": "置き換え",
+    "insertionFit": "フィットして上書き",
+    "insertionAbove": "上に配置",
+    "insertionEnd": "末尾に追加",
+    "insertionRippleOverwrite": "リップル上書き",
+    "aeftInsertion": {
+      "insert": "挿入してレイヤーを移動",
+      "replace": "レイヤーを置き換え",
+      "fit": "レイヤーのデュレーションに合わせる",
+      "above": "レイヤーの上に追加",
+      "end": "コンポジションの最後に追加"
+    },
+    "container": "コンテナ",
+    "mergeToOne": "1つのファイルに結合",
+    "fileName": "ファイル名",
+    "fileNamePlaceholder": "{base}_{index}",
+    "insertToken": "トークンを挿入",
+    "tokens": {
+      "base": "基本名",
+      "source": "元ファイル",
+      "index": "ショット番号",
+      "total": "ショット数",
+      "start": "開始",
+      "end": "終了",
+      "duration": "長さ",
+      "label": "ショットのラベル",
+      "profile": "プロファイル名",
+      "codec": "コーデック",
+      "container": "コンテナ",
+      "date": "日付",
+      "time": "時刻"
+    },
+    "mergeGap": "ショット間の黒み",
+    "milliseconds": "ms"
+  },
+  "encoder": {
+    "gpu": "GPU",
+    "nvenc": "NVIDIA NVENC",
+    "amf": "AMD AMF",
+    "qsv": "Intel Quick Sync",
+    "cpu": "CPU"
+  },
+  "speed": {
+    "fast": {
+      "label": "高速",
+      "hint": "速度を優先"
+    },
+    "balanced": {
+      "label": "バランス",
+      "hint": "速度と圧縮の両立"
+    },
+    "quality": {
+      "label": "高品質",
+      "hint": "圧縮効率を優先"
+    },
+    "max": {
+      "label": "最大",
+      "hint": "低速で最小サイズ"
+    }
+  },
+  "toggle": {
+    "yes": "オン",
+    "no": "オフ"
+  },
+  "issue": {
+    "binTargetRequired": "書き出し先のフォルダー名を入力",
+    "profileIncomplete": "プロファイルが未完成：{{issue}}"
+  },
+  "audio": {
+    "allTracks": "すべてのトラック",
+    "noAudio": "なし（映像のみ）",
+    "trackLabel": "トラック {{n}}{{lang}} · {{channels}} ch · {{codec}}",
+    "languageGroup": "言語",
+    "trackGroup": "トラック",
+    "trackN": "トラック {{n}}",
+    "langResolved": "{{lang}} → トラック {{n}}",
+    "langUnresolved": "{{lang}} → 該当トラックなし",
+    "timelineHint": "Resolve はオーディオを全部か全く読み込まないかのどちらかです。"
+  },
+  "iconPicker": {
+    "search": "アイコンを検索…",
+    "importedImage": "読み込んだ画像",
+    "removeFromLibrary": "ライブラリから削除",
+    "importImage": "画像 / GIF を読み込む",
+    "profileIcon": "プロファイルのアイコン",
+    "defaultIcon": "デフォルトのアイコン",
+    "default": "デフォルト",
+    "tabEmojis": "絵文字",
+    "tabIcons": "アイコン",
+    "tabImages": "画像"
+  },
+  "notice": {
+    "cancelled": "書き出しを中止：書き出し先フォルダーが未選択です。",
+    "merging": "結合中…",
+    "exporting": "書き出し中…",
+    "exported_one": "{{count}} 件を書き出しました（{{profile}}）→ {{dir}}{{failed}}",
+    "exported_other": "{{count}} 件を書き出しました（{{profile}}）→ {{dir}}{{failed}}",
+    "failedSuffix_one": " · {{count}} 件失敗",
+    "failedSuffix_other": " · {{count}} 件失敗",
+    "exportFailed": "書き出し失敗"
+  },
+  "workflow": {
+    "timeline": "タイムライン",
+    "remux": "Remux",
+    "encode": "再エンコード"
+  },
+  "audioMode": {
+    "copy": "コピー",
+    "aac_128": "AAC 128 kbps",
+    "aac": "AAC 192 kbps",
+    "aac_256": "AAC 256 kbps",
+    "aac_320": "AAC 320 kbps",
+    "opus_128": "Opus 128 kbps",
+    "opus": "Opus 160 kbps",
+    "opus_192": "Opus 192 kbps",
+    "mp3_192": "MP3 192 kbps",
+    "mp3": "MP3 320 kbps",
+    "flac": "FLAC",
+    "alac": "ALAC",
+    "pcm16": "PCM 16 bit",
+    "pcm24": "PCM 24 bit"
+  },
+  "audioGroup": {
+    "lossy": "非可逆圧縮",
+    "lossless": "可逆圧縮"
+  },
+  "codec": {
+    "bitDepth": "{{count}} ビット",
+    "profile": "プロファイル {{count}}",
+    "losslessArchive": "ロスレス（アーカイブ）",
+    "archive": "アーカイブ"
+  },
+  "lang": {
+    "ja": "日本語",
+    "en": "英語",
+    "fr": "フランス語",
+    "es": "スペイン語",
+    "de": "ドイツ語",
+    "it": "イタリア語",
+    "pt": "ポルトガル語",
+    "ru": "ロシア語",
+    "zh": "中国語",
+    "ko": "韓国語",
+    "ar": "アラビア語",
+    "hi": "ヒンディー語"
+  },
+  "profileName": {
+    "toTimeline": "タイムラインへ",
+    "fileNoReencode": "再エンコードなしのファイル",
+    "mp4H264": "MP4 H.264",
+    "mp4H265_10": "MP4 H.265 10 bit",
+    "prores422hq": "ProRes 422 HQ",
+    "dnxhrHq": "DNxHR HQ",
+    "mkvH265_10": "MKV H.265 10 bit",
+    "webmAv1": "WebM AV1",
+    "prores4444": "ProRes 4444（アルファ）",
+    "dnxhrHqx": "DNxHR HQX 10 bit",
+    "ffv1Archive": "FFV1 — アーカイブ",
+    "generic": "プロファイル {{index}}",
+    "fallback": "書き出しプロファイル"
+  },
+  "summary": {
+    "timelineImport": "タイムラインへ読み込み",
+    "streamCopy": "ストリームコピー",
+    "merged": " · 結合済み"
+  },
+  "codecUnknown": "不明なコーデック"
+}

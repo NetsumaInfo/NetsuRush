@@ -1,0 +1,428 @@
+// Écran d'accueil du board (onglet Référence) : zone de dépôt, bouton « Nouveau projet », grille
+// « Projets » (les .netsu enregistrés sur disque, avec leur dossier) et grille « Récent » (scènes de
+// la bibliothèque interne) avec favoris (localStorage) et options de suppression par carte.
+
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  ImageUp, History, Settings2, FileInput, FilePlus2, FolderOpen, FileCheck2, FileWarning, X,
+  Star, Trash2, EyeOff,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { nr } from "@/lib/bridge";
+import type { NetsuRecent, RefSceneMeta } from "@/lib/bridge";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SceneThumb } from "./SceneThumb";
+
+const RTF = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
+function relDate(ts: number): string {
+  const diff = ts - Date.now();
+  const abs = Math.abs(diff);
+  const min = 60_000, hour = 60 * min, day = 24 * hour;
+  if (abs < hour) return RTF.format(Math.round(diff / min), "minute");
+  if (abs < day) return RTF.format(Math.round(diff / hour), "hour");
+  if (abs < 30 * day) return RTF.format(Math.round(diff / day), "day");
+  return RTF.format(Math.round(diff / (30 * day)), "month");
+}
+
+const LS_FAV = "nr-ref-favorites";
+const LS_HIDDEN = "nr-ref-hidden";
+
+function loadSet(key: string): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(key) ?? "[]") as string[]); }
+  catch { return new Set(); }
+}
+function saveSet(key: string, s: Set<string>) {
+  localStorage.setItem(key, JSON.stringify([...s]));
+}
+
+function sortScenes(list: RefSceneMeta[], favs: Set<string>): RefSceneMeta[] {
+  return [...list].sort((a, b) => {
+    const af = favs.has(a.id) ? 1 : 0;
+    const bf = favs.has(b.id) ? 1 : 0;
+    if (af !== bf) return bf - af;
+    return b.updatedAt - a.updatedAt;
+  });
+}
+
+// ---------- Carte de scène ----------
+function SceneCard({
+  scene, isFavorite, onOpen, onToggleFavorite, onHide, onDelete,
+}: {
+  scene: RefSceneMeta;
+  isFavorite: boolean;
+  onOpen: () => void;
+  onToggleFavorite: () => void;
+  onHide: () => void;
+  onDelete: () => void;
+}) {
+  const { t } = useTranslation("reference");
+  return (
+    <div className="group relative flex flex-col gap-2">
+      {/* Vignette — div cliquable (pas un <button> : il contient des boutons d'action) */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onOpen}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
+        className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-lg border border-border bg-muted/30 transition-colors group-hover:border-primary/50"
+      >
+        <SceneThumb id={scene.id} />
+
+        {/* Overlay actions (visible au survol) */}
+        <div className="absolute inset-0 flex items-start justify-between p-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+          {/* Favori */}
+          <button
+            type="button"
+            aria-label={isFavorite ? t("actions.removeFavorite") : t("actions.addFavorite")}
+            onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+            className={cn(
+              "inline-flex size-6 items-center justify-center rounded-md backdrop-blur-[2px] transition-colors",
+              isFavorite
+                ? "bg-primary text-primary-foreground"
+                : "bg-black/50 text-white/70 hover:bg-black/70 hover:text-destructive",
+            )}
+          >
+            <Star className="size-3.5" fill={isFavorite ? "currentColor" : "none"} />
+          </button>
+
+          {/* Supprimer — dropdown deux options */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={t("home.deleteOptions")}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex size-6 items-center justify-center rounded-md bg-black/50 text-white/70 hover:bg-black/70 hover:text-destructive backdrop-blur-[2px] transition-colors"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onHide(); }}>
+                <EyeOff className="size-4" />
+                {t("home.hideFromList")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              >
+                <Trash2 className="size-4" />
+                {t("home.deleteScene")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Badge favori permanent (masqué au hover pour laisser les boutons visibles) */}
+        {isFavorite && (
+          <div className="pointer-events-none absolute left-1.5 top-1.5 flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground opacity-100 transition-opacity group-hover:opacity-0">
+            <Star className="size-3.5" fill="currentColor" />
+          </div>
+        )}
+      </div>
+
+      {/* Nom + date */}
+      <button type="button" onClick={onOpen} className="min-w-0 text-left">
+        <p className="truncate text-sm font-medium text-foreground">{scene.name}</p>
+        <p className="truncate text-xs text-muted-foreground">{t("home.modified", { date: relDate(scene.updatedAt) })}</p>
+      </button>
+    </div>
+  );
+}
+
+// Carte d'un projet enregistré sur disque. Elle montre le DOSSIER autant que le nom : c'est ce que
+// la bibliothèque interne ne pouvait pas dire, et la raison d'être de l'enregistrement dans un fichier.
+function ProjectCard({ entry, onOpen, onForget }: {
+  entry: NetsuRecent;
+  onOpen: () => void;
+  onForget: () => void;
+}) {
+  const { t } = useTranslation("reference");
+  const folder = entry.path.slice(0, Math.max(0, entry.path.lastIndexOf(entry.path.includes("\\") ? "\\" : "/")));
+  return (
+    <div className="group relative flex flex-col gap-2">
+      <button
+        type="button"
+        aria-label={entry.title}
+        onClick={onOpen}
+        disabled={entry.missing}
+        className={cn(
+          "flex aspect-[4/3] w-full items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors",
+          entry.missing ? "opacity-50" : "group-hover:border-primary/50",
+        )}
+      >
+        {entry.missing ? <FileWarning className="size-7 opacity-70" strokeWidth={1.5} /> : <FileCheck2 className="size-7 opacity-70" strokeWidth={1.5} />}
+      </button>
+      <Tooltip>
+        <TooltipTrigger render={<button type="button" onClick={onForget} aria-label={t("home.forgetProject")} className="absolute right-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded bg-card/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100" />}>
+          <X className="size-3.5" />
+        </TooltipTrigger>
+        <TooltipContent>{t("home.forgetProject")}</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger render={<button type="button" onClick={onOpen} disabled={entry.missing} className="min-w-0 text-left" />}>
+          <p className="truncate text-sm font-medium text-foreground">{entry.title}</p>
+          <p className="truncate text-xs text-muted-foreground">{entry.missing ? t("home.projectMissing") : folder}</p>
+        </TooltipTrigger>
+        <TooltipContent>{entry.path}</TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+// ---------- Composant principal ----------
+export function ReferenceHome({
+  hasSession,
+  onResume,
+  onOpen,
+  onNew,
+  onNewFiles,
+  onSettings,
+  onImport,
+  onOpenProject,
+  onOpenRecent,
+  recents,
+}: {
+  hasSession: boolean;
+  onResume: () => void;
+  onOpen: (id: string) => void;
+  onNew: () => void;
+  onNewFiles: (files: File[]) => void;
+  onSettings: () => void;
+  onImport?: () => void;
+  onOpenProject?: () => void;
+  onOpenRecent?: (filePath: string) => void;
+  recents?: () => Promise<NetsuRecent[]>;
+}) {
+  const { t } = useTranslation("reference");
+  const [recent, setRecent] = useState<RefSceneMeta[]>([]);
+  const [projects, setProjects] = useState<NetsuRecent[]>([]);
+  const [over, setOver] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(() => loadSet(LS_FAV));
+  const [hidden, setHidden] = useState<Set<string>>(() => loadSet(LS_HIDDEN));
+
+  useEffect(() => {
+    let alive = true;
+    const initFavs = loadSet(LS_FAV);
+    void (async () => {
+      const list = (await nr.reference?.listScenes()) ?? [];
+      const filtered = list.filter((s) => !s.id.startsWith("__"));
+      if (alive) setRecent(sortScenes(filtered, initFavs));
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!recents) return undefined;
+    let alive = true;
+    void recents().then((list) => { if (alive) setProjects(list); });
+    return () => { alive = false; };
+  }, [recents]);
+
+  const forgetProject = useCallback(async (filePath: string) => {
+    setProjects(await (nr.reference?.forgetProject(filePath) ?? Promise.resolve([])));
+  }, []);
+
+  const toggleFavorite = useCallback((id: string) => {
+    const next = new Set(favorites);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setFavorites(next);
+    saveSet(LS_FAV, next);
+    setRecent((r) => sortScenes(r, next));
+  }, [favorites]);
+
+  const hideScene = useCallback((id: string) => {
+    const next = new Set(hidden);
+    next.add(id);
+    setHidden(next);
+    saveSet(LS_HIDDEN, next);
+  }, [hidden]);
+
+  const deleteScene = useCallback(async (id: string) => {
+    await nr.reference?.deleteScene(id);
+    setRecent((prev) => prev.filter((s) => s.id !== id));
+    if (!favorites.has(id)) return;
+    const next = new Set(favorites);
+    next.delete(id);
+    setFavorites(next);
+    saveSet(LS_FAV, next);
+  }, [favorites]);
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setOver(false);
+    const files = Array.from(e.dataTransfer.files).filter(
+      (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
+    );
+    if (files.length) onNewFiles(files);
+  };
+
+  const visible = recent.filter((s) => !hidden.has(s.id));
+
+  return (
+    <div
+      className="relative flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-bg)]"
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+      onDragLeave={(e) => { if (e.target === e.currentTarget) setOver(false); }}
+      onDrop={onDrop}
+    >
+      {/* Ouvrir un projet .netsu (le fichier devient le document) / importer une archive (copie) */}
+      <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
+        {onOpenProject && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={t("home.openProject")}
+                  onClick={onOpenProject}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                />
+              }
+            >
+              <FolderOpen className="size-4" /> {t("home.openProject")}
+            </TooltipTrigger>
+            <TooltipContent>{t("home.openProjectHint")}</TooltipContent>
+          </Tooltip>
+        )}
+        {onImport && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={t("home.importBoard")}
+                  onClick={onImport}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                />
+              }
+            >
+              <FileInput className="size-4" /> {t("home.importNetsu")}
+            </TooltipTrigger>
+            <TooltipContent>{t("home.importBoard")}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* Paramètres */}
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              aria-label={t("actions.settings")}
+              onClick={onSettings}
+              className="absolute right-4 top-4 z-10 inline-flex size-6 items-center justify-center rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            />
+          }
+        >
+          <Settings2 className="size-4" />
+        </TooltipTrigger>
+        <TooltipContent>{t("actions.settings")}</TooltipContent>
+      </Tooltip>
+
+      {/* Héros : zone de dépôt + nouveau projet */}
+      <div className="flex flex-1 items-center justify-center p-8">
+        <div
+          className={cn(
+            "flex w-full max-w-md flex-col items-center gap-5 rounded-2xl border-2 border-dashed px-8 py-14 text-center transition-colors",
+            over ? "border-primary bg-primary/10" : "border-border",
+          )}
+        >
+          <div
+            className={cn(
+              "flex size-20 items-center justify-center rounded-2xl bg-muted text-primary transition-transform",
+              over && "scale-110",
+            )}
+          >
+            <ImageUp className="size-10" strokeWidth={1.5} />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <p className="text-base font-medium text-foreground">{t("home.dropMedia")}</p>
+            <p className="text-sm text-muted-foreground">{t("home.dropHint")}</p>
+          </div>
+
+          <div className="flex w-full items-center gap-3 text-xs text-muted-foreground">
+            <div className="h-px flex-1 bg-border" />
+            <span>{t("home.or")}</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <button
+            type="button"
+            onClick={onNew}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted"
+          >
+            <FilePlus2 className="size-4" />
+            {t("home.createEmpty")}
+          </button>
+        </div>
+      </div>
+
+      {/* Section Projets : les .netsu enregistrés sur disque, avec leur dossier. */}
+      {onOpenRecent && projects.length > 0 && (
+        <div className="border-t border-border bg-card/40 px-8 py-6">
+          <h2 className="mb-4 text-sm font-semibold text-foreground">{t("home.projects")}</h2>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
+            {projects.map((entry) => (
+              <ProjectCard
+                key={entry.path}
+                entry={entry}
+                onOpen={() => onOpenRecent(entry.path)}
+                onForget={() => void forgetProject(entry.path)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Section Récent */}
+      {(hasSession || visible.length > 0) && (
+        <div className="border-t border-border bg-card/40 px-8 py-6">
+          <h2 className="mb-4 text-sm font-semibold text-foreground">{t("home.recent")}</h2>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
+            {/* Session en cours */}
+            {hasSession && (
+              <div className="group relative flex flex-col gap-2">
+                <button
+                  type="button"
+                  aria-label={t("home.resume")}
+                  onClick={onResume}
+                  className="flex aspect-[4/3] w-full items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors group-hover:border-primary/50"
+                >
+                  <History className="size-7 opacity-70" strokeWidth={1.5} />
+                </button>
+                <button type="button" onClick={onResume} className="min-w-0 text-left">
+                  <p className="truncate text-sm font-medium text-foreground">{t("home.resume")}</p>
+                  <p className="truncate text-xs text-muted-foreground">{t("home.currentBoard")}</p>
+                </button>
+              </div>
+            )}
+
+            {/* Scènes récentes */}
+            {visible.map((s) => (
+              <SceneCard
+                key={s.id}
+                scene={s}
+                isFavorite={favorites.has(s.id)}
+                onOpen={() => onOpen(s.id)}
+                onToggleFavorite={() => toggleFavorite(s.id)}
+                onHide={() => hideScene(s.id)}
+                onDelete={() => void deleteScene(s.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

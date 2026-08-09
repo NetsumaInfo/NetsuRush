@@ -1,0 +1,71 @@
+{
+  "taskHint": {
+    "search": "视觉搜索和镜头比较。",
+    "faces": "人脸检测和分组。",
+    "voice": "自动语音转写。",
+    "upscale": "提升图像和视频的分辨率。",
+    "restore": "图像恢复和清理。",
+    "interpolate": "生成中间帧，让视频更流畅。",
+    "depth": "生成深度图。",
+    "matte-image": "图像抠图和背景移除。",
+    "matte-video": "视频主体抠图和跟踪。",
+    "object-removal": "移除视频中的对象。"
+  },
+  "title": "模型",
+  "subtitle": "默认不下载任何东西。按需获取，随时删除。",
+  "disk": "磁盘：",
+  "noneInstalled": "未安装模型 — 装一个，否则此功能无法使用。",
+  "badge": {
+    "default": "默认",
+    "heavy": "重型",
+    "exclusive": "互斥",
+    "exclusiveTip": "SAMURAI 与 SAM2Long 都会用各自的引擎替换 SAM 2，同一时间只能装一个。安装第二个时会先征求确认，再移除第一个；删除后恢复原引擎。"
+  },
+  "conflict": {
+    "title": "两者只能选其一",
+    "body": "{{model}} 会替换已安装的 {{other}} 所用的引擎，两者无法共存。安装 {{model}} 会移除 {{other}}。",
+    "replace": "安装并移除另一个"
+  },
+  "sort": {
+    "default": "默认",
+    "defaultTip": "目录顺序：推荐的排在最前。",
+    "size": "大小",
+    "sizeTip": "按磁盘占用排序。",
+    "vram": "VRAM",
+    "vramTip": "按所需 VRAM 排序。",
+    "name": "名称",
+    "nameTip": "按字母排序。",
+    "asc": "升序",
+    "desc": "降序"
+  },
+  "vramShort": "需要 {{need}} GB VRAM，你的显卡只有 {{have}}（{{gpu}}）— 跑不动。仍可下载。",
+  "status": {
+    "bundled": "已内置",
+    "bundledTip": "随运行时提供（不可删除）。",
+    "installed": "已安装",
+    "removing": "正在卸载…",
+    "removeTip": "从磁盘删除",
+    "auto": "自动",
+    "autoTip": "首次使用时由库自动获取 — 无需下载。"
+  },
+  "action": {
+    "resume": "继续",
+    "resumeTip": "下载未完成 — 继续获取缺失的权重和代码。",
+    "download": "下载",
+    "cancelDownload": "取消下载"
+  },
+  "search": {
+    "active": "使用中",
+    "activeTip": "搜索当前使用的变体",
+    "use": "使用",
+    "useTip": "将此变体设为搜索模型",
+    "switchTitle": "更换搜索模型",
+    "switchEmpty": "{{model}} 尚未索引任何内容：在完成整体重新索引之前，搜索结果将为空。当前变体的索引仍完整保留在磁盘上。",
+    "switchPartial": "已用 {{model}} 索引的素材：{{clips}}。其余素材需要重新索引；当前变体的索引仍保留在磁盘上。",
+    "switchConfirm": "使用此变体"
+  },
+  "advanced": {
+    "label": "高级",
+    "tip": "显示完整目录：各种变体、旧版本和实验性引擎。默认只显示每项任务的精选模型。"
+  }
+}

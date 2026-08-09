@@ -1,0 +1,80 @@
+{
+  "title": "Adobe",
+  "subtitle": "Brücke zu Premiere Pro und After Effects (2020 und neuer): Das NetsuRush-Panel liest das offene Projekt und schickt es hierher.",
+  "installPanel": "Panel installieren",
+  "reinstallPanel": "Panel neu installieren",
+  "panel": {
+    "cepTitle": "CEP-Panel",
+    "installed": "Installiert",
+    "notInstalled": "Nicht installiert",
+    "copiedIn": "Kopiert nach",
+    "inApp": "In Premiere Pro/After Effects: ",
+    "menuPath": "Fenster ▸ Erweiterungen ▸ NetsuRush",
+    "restartHint": " (App neu starten, falls sie schon offen war).",
+    "installHint": "Auf „Panel installieren“ klicken, dann Premiere Pro/After Effects ▸ Fenster ▸ Erweiterungen ▸ NetsuRush öffnen.",
+    "diagnose": "Diagnose",
+    "autoUpdate": "Automatische Verwaltung",
+    "autoUpdateHint": "Das Bedienfeld wird installiert, sobald eine Adobe-App erkannt wird, und danach mit NetsuRush aktuell gehalten",
+    "autoUpdateOn": "Ein",
+    "autoUpdateOff": "Aus",
+    "updatePending": "Diese NetsuRush-Version liefert ein neueres Bedienfeld",
+    "updateNow": "Jetzt aktualisieren",
+    "restartApps": "Bedienfeld aktualisiert – starten Sie {{apps}} neu, um es zu laden."
+  },
+  "diag": {
+    "verdictOk": "ERGEBNIS: Installation OK ✓ (Ordner + Manifest + PlayerDebugMode). Panel in Adobe öffnen: Fenster ▸ Erweiterungen ▸ NetsuRush.",
+    "verdictIncomplete": "ERGEBNIS: Installation unvollständig — siehe unten.",
+    "folder": "Ordner: {{dir}}",
+    "manifestPresent": "Manifest vorhanden: {{yesNo}}",
+    "yes": "JA",
+    "no": "NEIN",
+    "files": "Dateien: {{files}}",
+    "filesEmpty": "(leer)",
+    "manifestHead": "Manifest (Anfang):",
+    "cepLogFound": "CEP-Log (NetsuRush-Fehler gefunden):",
+    "cepLogNone": "CEP-Log: kein NetsuRush-FEHLER (normal — das Log nennt die Erweiterung nur bei Ladeproblemen)."
+  },
+  "status": {
+    "installed": "Installiert",
+    "notFound": "Nicht gefunden",
+    "running": "Läuft",
+    "closed": "Geschlossen",
+    "panelConnected": "Panel verbunden",
+    "panelOffline": "Panel offline",
+    "launch": "Starten",
+    "scanProject": "Projekt scannen",
+    "openPanelHint": "Panel öffnen: Fenster ▸ Erweiterungen ▸ NetsuRush.",
+    "launchThenOpenHint": "App starten, dann Fenster ▸ Erweiterungen ▸ NetsuRush öffnen."
+  },
+  "snapshot": {
+    "timecodes": "Timeline {{tlStart}} → {{tlEnd}} · Quelle {{srcIn}} → {{srcOut}}",
+    "copySourcePath": "Quellpfad kopieren",
+    "copyTimecodes": "Timecodes kopieren",
+    "copyName": "Namen kopieren",
+    "copyPath": "Pfad kopieren",
+    "sendToNetsulab": "An NetsuLab senden",
+    "shotsCount": "{{n}} Shots",
+    "thTrack": "Spur",
+    "thShot": "Shot",
+    "thTimeline": "Timeline",
+    "thSource": "Quelle",
+    "noProject": "Kein Projekt empfangen — NetsuRush-Panel in der App öffnen, dann „An NetsuRush senden“.",
+    "receivedAt": "empfangen um {{time}}",
+    "rushes": "Rohmaterial",
+    "noFileMedia": "Keine Datei-Medien im Projekt."
+  },
+  "notice": {
+    "launchFailed": "Start fehlgeschlagen",
+    "alreadyOpen": "App schon offen",
+    "panelUnreachable": "Panel nicht erreichbar",
+    "installFailed": "Installation fehlgeschlagen",
+    "installedRestart": "Panel installiert. {{apps}} NEU STARTEN, dann Fenster ▸ Erweiterungen ▸ NetsuRush.",
+    "installedOpen": "Panel installiert. Premiere Pro/After Effects öffnen, dann Fenster ▸ Erweiterungen ▸ NetsuRush.",
+    "autoUpdateFailed": "Aktualisierungseinstellung konnte nicht geändert werden"
+  },
+  "remote": {
+    "settings": "Einstellungen",
+    "reload": "NetsuRush neu laden",
+    "close": "NetsuRush schließen"
+  }
+}

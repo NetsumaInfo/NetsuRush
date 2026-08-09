@@ -1,0 +1,126 @@
+{
+  "stream": { "error": "Une erreur est survenue." },
+  "panel": {
+    "copilot": "Copilote NetsuRush",
+    "noCliAgent": "Aucun agent CLI détecté — passe en Claude/OpenAI ou installe claude/codex",
+    "configureKey": "Configurer une clé API pour démarrer"
+  },
+  "composer": {
+    "pickEngine": "Configure un moteur (clé API ou agent CLI) dans les réglages ⚙ pour envoyer.",
+    "placeholder": "Demande à l'IA de piloter Resolve…",
+    "attachFiles": "Joindre des fichiers",
+    "attachTip": "Joindre image / fichier",
+    "attachedFilesPrompt": "Fichiers joints (chemins locaux — lis-les ou regarde-les si utile)",
+    "stop": "Stop",
+    "send": "Envoyer"
+  },
+  "header": { "defaultTitle": "Nouvelle conversation",
+    "conversations": "Conversations",
+    "newConv": "Nouvelle conversation",
+    "noConv": "Aucune conversation",
+    "settings": "Réglages"
+  },
+  "settings": {
+    "apiKeys": "Clés API (BYOK)",
+    "noVault": "Coffre chiffré indisponible hors application — les clés ne seront gardées que le temps de la session.",
+    "hide": "Masquer",
+    "show": "Afficher",
+    "keySet": "configurée",
+    "keyAbsent": "absente",
+    "cliAgents": "Agents CLI détectés",
+    "rescan": "Re-scanner",
+    "noAgentsPre": "Aucun agent listé — clique « Re-scanner ». Si rien, installe ",
+    "noAgentsPost": " et vérifie qu'ils sont dans le PATH du core.",
+    "detected": "détecté",
+    "absent": "absent",
+    "saved": "Enregistré"
+  },
+  "engine": {
+    "engine": "Moteur",
+    "cliAgent": "Agent CLI",
+    "agent": "Agent",
+    "model": "Modèle",
+    "default": "Par défaut",
+    "freeId": "id libre : vendor/model…",
+    "permissions": "Permissions"
+  },
+  "mode": {
+    "readonly": "Lecture",
+    "ask": "Demander",
+    "safe": "Doublure",
+    "auto": "Auto"
+  },
+  "modeTitle": {
+    "readonly": "Lecture seule — aucune écriture",
+    "ask": "Confirme seulement le risqué (fichiers/rendu/suppression média) ; le montage timeline passe",
+    "safe": "Duplique la timeline avant d'écrire — l'originale reste intacte",
+    "auto": "Écrit direct dans la timeline, sans confirmation"
+  },
+  "message": {
+    "thinking": "Réflexion…",
+    "reasoning": "Raisonnement",
+    "hideReasoning": "Masquer le raisonnement",
+    "showReasoning": "Afficher le raisonnement",
+    "copyText": "Copier le texte"
+  },
+  "toolcard": {
+    "running": "en cours",
+    "failed": "échec",
+    "arguments": "Arguments",
+    "result": "Résultat",
+    "copyName": "Copier le nom d'outil",
+    "copyArgs": "Copier les arguments",
+    "copyResult": "Copier le résultat",
+    "collapse": "Replier",
+    "expand": "Déplier"
+  },
+  "tool": {
+    "quoted": " « {{value}} »",
+    "resolveStatus": "État de Resolve",
+    "listMediaPool": "Lecture du Media Pool",
+    "searchClips": "Recherche{{q}}",
+    "indexClip": "Indexation d'un rush",
+    "detectScenes": "Détection des plans",
+    "cachedScenes": "Lecture des plans en cache",
+    "listTimelines": "Liste des timelines",
+    "readTimeline": "Lecture de la timeline",
+    "buildTimeline": "Montage de timeline{{q}}",
+    "cutTimeline": "Découpe de timeline",
+    "probeMedia": "Analyse d'un média",
+    "makeThumbnail": "Génération d'une vignette",
+    "upscaleMedia": "Upscale d'une vidéo",
+    "exportAe": "Export After Effects",
+    "importMedia": "Import dans le Media Pool",
+    "board": "Board de référence{{suffix}}",
+    "page": "Page {{page}}",
+    "resolveApp": "Application Resolve",
+    "grabStill": "Capture de l'image",
+    "setTimecode": "Déplacement du lecteur",
+    "viewer": "Lecteur Resolve",
+    "removeAudio": "Suppression de l'audio",
+    "duplicate": "Doublure de la timeline",
+    "addMarker": "Ajout d'un marqueur",
+    "addTrack": "Ajout d'une piste",
+    "deleteTrack": "Suppression d'une piste",
+    "timelineFallback": "Timeline · {{action}}",
+    "mediaPool": "Media Pool · {{action}}",
+    "render": "Rendu · {{action}}",
+    "timelineItem": "Plan courant · {{action}}",
+    "project": "Projet · {{action}}",
+    "resolveCall": "API Resolve · {{root}}"
+  },
+  "approval": {
+    "title": "Autoriser l'action ?",
+    "allow": "Autoriser",
+    "deny": "Refuser"
+  },
+  "risk": {
+    "read": "lecture",
+    "write": "écriture",
+    "destructive": "destructif"
+  },
+  "store": {
+    "convFallback": "Conversation",
+    "error": "erreur"
+  }
+}

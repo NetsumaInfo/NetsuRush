@@ -1,0 +1,83 @@
+{
+  "action": {
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "continue": "Weiter",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "rename": "Umbenennen",
+    "edit": "Bearbeiten",
+    "copy": "Kopieren",
+    "reset": "Zurücksetzen",
+    "apply": "Übernehmen",
+    "open": "Öffnen",
+    "retry": "Erneut versuchen",
+    "import": "Importieren",
+    "decrease": "Verringern",
+    "increase": "Erhöhen",
+    "loading": "Wird geladen…"
+  },
+  "status": {
+    "loading": "Lädt…",
+    "error": "Fehler",
+    "ok": "OK",
+    "empty": "Nichts anzuzeigen"
+  },
+  "color": {
+    "hexValue": "Hexadezimalwert",
+    "transparent": "Transparent",
+    "choose": "Farbe auswählen",
+    "swatch": "Farbe {{color}}"
+  },
+  "player": {
+    "scenePreview": "Einstellungsvorschau",
+    "progress": "Fortschrittsleiste",
+    "play": "Wiedergabe",
+    "pause": "Pause",
+    "prevFrame": "Vorheriges Bild",
+    "nextFrame": "Nächstes Bild",
+    "prevFrameShortcut": "Vorheriges Bild (←)",
+    "nextFrameShortcut": "Nächstes Bild (→)",
+    "soundOn": "Ton einschalten",
+    "soundOff": "Stummschalten",
+    "volume": "Lautstärke",
+    "muted": "Stumm",
+    "fullscreen": "Vollbild",
+    "seek": "Im Video navigieren"
+  },
+  "fileType": {
+    "video": "Video",
+    "image": "Bild",
+    "media": "Medien"
+  },
+  "window": {
+    "reference": "Referenz",
+    "notebook": "Notizbuch"
+  },
+  "mock": {
+    "resolveUnavailable": "Resolve ist im Browser nicht verfügbar.",
+    "appUnavailable": "Diese Funktion ist im Browser nicht verfügbar.",
+    "outsideApp": "Diese Funktion ist nur in der App verfügbar.",
+    "pageNotFound": "Seite nicht gefunden",
+    "collectionNotFound": "Sammlung nicht gefunden",
+    "archiveUnavailable": "Archivieren ist außerhalb der App nicht verfügbar.",
+    "folderImportUnavailable": "Ordnerimport ist außerhalb der App nicht verfügbar.",
+    "emptyFolderName": "Der Ordnername ist leer",
+    "invalidFolderName": "Der Ordnername darf weder '/' noch '\\\\' enthalten",
+    "folder": "Ordner"
+  },
+  "spell": {
+    "title": "Rechtschreibung",
+    "unknownWord": "Unbekanntes Wort",
+    "searching": "Vorschläge werden gesucht…",
+    "noSuggestion": "Keine Vorschläge",
+    "addToDictionary": "Zum Wörterbuch hinzufügen",
+    "ignoreOnce": "In dieser Sitzung ignorieren",
+    "replaceAll": "Alle {{count}} Vorkommen ersetzen"
+  }
+}

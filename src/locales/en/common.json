@@ -1,0 +1,83 @@
+{
+  "action": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "continue": "Continue",
+    "add": "Add",
+    "remove": "Remove",
+    "rename": "Rename",
+    "edit": "Edit",
+    "copy": "Copy",
+    "reset": "Reset",
+    "apply": "Apply",
+    "open": "Open",
+    "retry": "Retry",
+    "error": "Error",
+    "import": "Import",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "loading": "Loading…"
+  },
+  "status": {
+    "loading": "Loading…",
+    "error": "Error",
+    "ok": "OK",
+    "empty": "Nothing to show"
+  },
+  "color": {
+    "hexValue": "Hex value",
+    "transparent": "Transparent",
+    "choose": "Choose a color",
+    "swatch": "Color {{color}}"
+  },
+  "player": {
+    "scenePreview": "Shot preview",
+    "progress": "Progress bar",
+    "play": "Play",
+    "pause": "Pause",
+    "prevFrame": "Previous frame",
+    "nextFrame": "Next frame",
+    "prevFrameShortcut": "Previous frame (←)",
+    "nextFrameShortcut": "Next frame (→)",
+    "soundOn": "Turn sound on",
+    "soundOff": "Mute sound",
+    "volume": "Volume",
+    "muted": "Muted",
+    "fullscreen": "Full screen",
+    "seek": "Seek in the video"
+  },
+  "fileType": {
+    "video": "Video",
+    "image": "Image",
+    "media": "Media"
+  },
+  "window": {
+    "reference": "NetsuRush — Reference",
+    "notebook": "NetsuRush — Notebook"
+  },
+  "mock": {
+    "resolveUnavailable": "Resolve is unavailable in the browser.",
+    "appUnavailable": "This feature is unavailable in the browser.",
+    "outsideApp": "This feature is only available in the app.",
+    "pageNotFound": "Page not found",
+    "collectionNotFound": "Collection not found",
+    "archiveUnavailable": "Archiving is unavailable outside the app.",
+    "folderImportUnavailable": "Folder import is unavailable outside the app.",
+    "emptyFolderName": "Folder name is empty",
+    "invalidFolderName": "Folder names cannot contain '/' or '\\'",
+    "folder": "Folder"
+  },
+  "spell": {
+    "title": "Spelling",
+    "unknownWord": "Unknown word",
+    "searching": "Looking for suggestions…",
+    "noSuggestion": "No suggestion",
+    "addToDictionary": "Add to dictionary",
+    "ignoreOnce": "Ignore in this session",
+    "replaceAll": "Replace all {{count}} occurrences"
+  }
+}

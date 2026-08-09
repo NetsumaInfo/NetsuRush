@@ -1,0 +1,58 @@
+{
+  "title": "Configurar NetsuRush",
+  "desc": "Elige solo las descargas que necesitas. La base compatible con este PC se instala automáticamente.",
+  "progressAria": "Pasos de configuración",
+  "models": {
+    "title": "Descargas opcionales",
+    "subtitle": "Agrupadas por función y reparables en cualquier momento.",
+    "search": "Buscar modelos…",
+    "none": "Ninguna descarga",
+    "sceneDetection": "Corte de escenas",
+    "sceneDetectionHint": "El componente ligero necesario para NetsuCut se incluye con los requisitos.",
+    "included": "Incluido",
+    "empty": "Ningún modelo coincide con la búsqueda.",
+    "selected": "{{count}} seleccionado(s)",
+    "noExtraSpace": "sin espacio adicional",
+    "tier": {
+      "light": "ligero",
+      "balanced": "equilibrado",
+      "heavy": "pesado"
+    }
+  },
+  "packs": {
+    "recommended": "Paquete recomendado",
+    "select": "Seleccionar paquete"
+  },
+  "scan": {
+    "running": "Analizando la instalación y la GPU…"
+  },
+  "review": {
+    "title": "Listo para instalar",
+    "subtitle": "Comprueba lo que se añadirá a este PC.",
+    "downloads": "Espacio opcional",
+    "modelCount": "{{count}} descarga(s)",
+    "noOptionalModels": "Sin descargas opcionales",
+    "mandatoryOnly": "Solo base y corte de escenas",
+    "sceneDetection": "Corte de escenas incluido"
+  },
+  "detectedBackend": "Motor de cálculo seleccionado: {{backend}}",
+  "installFailed": "Error de instalación",
+  "running": "Instalando requisitos…",
+  "log": "Registro de instalación",
+  "done": "Instalación terminada",
+  "restartHint": "Reinicia NetsuRush para cargar el nuevo entorno.",
+  "restartApp": "Reiniciar la aplicación",
+  "installing": "Instalando…",
+  "install": "Instalar la selección",
+  "repair": "Reparar y verificar",
+  "skip": "Continuar sin instalar",
+  "update": {
+    "action": "Actualizar",
+    "download": "Descargar la actualización"
+  },
+  "adobe": {
+    "title": "Extensión de Adobe",
+    "detected": "Detectado: {{apps}}",
+    "hint": "instala el panel de NetsuRush y lo mantiene actualizado automáticamente."
+  }
+}

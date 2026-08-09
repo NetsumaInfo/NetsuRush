@@ -1,0 +1,75 @@
+{
+  "transcribing": "Transcription…",
+  "button": {
+    "ariaStop": "Arrêter la dictée",
+    "ariaDictate": "Dicter",
+    "tooltipStop": "Arrêter (insère le texte)",
+    "tooltipDictate": "Dicter (parle, ça écrit)"
+  },
+  "overlay": {
+    "listening": "Écoute…"
+  },
+  "hotkey": {
+    "capturePrompt": "Appuie sur la combinaison…",
+    "mod": {
+      "ctrl": "Ctrl",
+      "shift": "Maj",
+      "alt": "Alt",
+      "meta": "Meta"
+    },
+    "code": {
+      "space": "Espace",
+      "escape": "Échap",
+      "enter": "Entrée",
+      "tab": "Tab"
+    }
+  },
+  "settings": {
+    "title": "Dictée vocale",
+    "intro": "Maintiens le raccourci n'importe où dans l'app, parle, relâche : le texte transcrit s'insère dans le champ ou l'éditeur où tu étais. Aucun bouton — juste une pastille discrète pendant l'écoute.",
+    "enableLabel": "Activer la dictée",
+    "enableHint": "Écoute le raccourci global.",
+    "enabledOn": "Activée",
+    "enabledOff": "Désactivée",
+    "micLabel": "Micro",
+    "micHint": "Entrée audio utilisée pour la dictée.",
+    "micDefault": "Micro par défaut",
+    "micNumbered": "Micro {{n}}",
+    "hotkeyLabel": "Raccourci (maintenir)",
+    "hotkeyHint": "Clique puis appuie ta combinaison. Échap pour annuler.",
+    "unloadLabel": "Décharger le modèle après",
+    "unloadHint": "Inactif ce délai → le modèle quitte la VRAM (relance à froid ensuite).",
+    "liveLabel": "Aperçu en direct",
+    "liveHint": "Le texte s'affiche pendant que tu parles (re-transcription périodique).",
+    "liveOn": "Activé",
+    "liveOff": "Désactivé",
+    "modelLabel": "Modèle de transcription"
+  },
+  "unload": {
+    "s30": "30 secondes",
+    "m1": "1 minute",
+    "m5": "5 minutes",
+    "m15": "15 minutes",
+    "never": "Jamais (rester chaud)"
+  },
+  "model": {
+    "default": "défaut",
+    "bundled": "Fourni",
+    "installed": "Installé",
+    "removeTooltip": "Supprimer du disque",
+    "get": "Obtenir"
+  },
+  "cpp": {
+    "engine": "Moteur transcribe.cpp",
+    "ready": " · prêt ({{backend}})",
+    "notInstalled": " · non installé",
+    "readyHint": "Binaire natif détecté — les modèles GGUF (Nemotron) sont utilisables.",
+    "notInstalledHint": "Requis pour Nemotron. Pose transcribe-cli (prébuild GitHub) dans NR_HOME/bin, ou règle transcribeCppBin dans nr.config.json."
+  },
+  "mic": {
+    "busy": "Micro occupé par une autre application.",
+    "denied": "Micro refusé. Autorise l'accès au micro pour dicter.",
+    "fallback": "Micro choisi indisponible — micro par défaut utilisé.",
+    "missing": "Aucun micro disponible."
+  }
+}

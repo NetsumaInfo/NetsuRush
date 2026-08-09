@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord NetsuRush
+    url: https://discord.gg/Vq7K6mWNX5
+    about: Questions d'utilisation, entraide et retours de bêta — la réponse y est plus rapide.
+  - name: Faille de sécurité
+    url: https://github.com/NetsumaInfo/NetsuRush/security/policy
+    about: Ne l'ouvrez pas en issue publique. Suivez la politique de sécurité.

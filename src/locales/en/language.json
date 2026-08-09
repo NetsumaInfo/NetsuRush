@@ -1,0 +1,13 @@
+{
+  "gate": {
+    "title": "Choose your language",
+    "subtitle": "You can change it any time in Settings.",
+    "continue": "Continue"
+  },
+  "settings": {
+    "navLabel": "Language",
+    "title": "Language",
+    "subtitle": "Language of the app interface.",
+    "fieldLabel": "Interface language"
+  }
+}

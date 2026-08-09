@@ -1,0 +1,284 @@
+{
+  "img": "帧",
+  "cancel": "取消",
+  "compare": {
+    "before": "处理前",
+    "after": "处理后"
+  },
+  "object": {
+    "name": "对象 {{n}}"
+  },
+  "studio": {
+    "title": "Roto Studio",
+    "pickSource": "勾选一个素材开始转描。",
+    "play": "播放",
+    "pause": "暂停",
+    "playTip": "播放（L / 空格）— J = 倒放",
+    "pauseTip": "暂停（K / 空格）",
+    "prevFrame": "上一帧",
+    "nextFrame": "下一帧",
+    "inHere": "在此设入点",
+    "inTip": "在当前帧设入点（I — Shift+I 清除）。跟踪和导出只在此范围内。",
+    "outHere": "在此设出点",
+    "outTip": "在当前帧设出点（O — Shift+O 清除）",
+    "range": "范围 {{from}}–{{to}}",
+    "clickHint": "点击 = {{mode}}（E 切换）· 右键 = 排除 · Shift+悬停 = 预览 · 滚轮 = 缩放 · J/K/L · I/O · , ; = 单帧跟踪 · 1-9 切换对象",
+    "include": "包含",
+    "exclude": "排除",
+    "pointsHere": "· 此处 {{count}} 个点",
+    "showMask": "显示蒙版",
+    "hideOverlay": "隐藏叠加层",
+    "showOverlay": "显示叠加层",
+    "testTitle": "测试 — {{label}}",
+    "testHint": "仅预览，不写入文件。效果满意就对整个镜头执行。"
+  },
+  "panels": {
+    "model": "模型",
+    "noSam": "未安装 SAM 模型 — 请到“设置 › 模型”下载 SAM 2.1。",
+    "display": "显示",
+    "maskRefine": "蒙版微调",
+    "output": "输出",
+    "matteFine": "精细遮罩",
+    "removeObject": "移除对象",
+    "track": "跟踪",
+    "selection": "选择",
+    "mask": "蒙版"
+  },
+  "objects": {
+    "title": "对象",
+    "add": "添加对象",
+    "addTip": "添加要抠出的对象",
+    "include": "包含",
+    "includeTip": "左键点击会把该处加入当前对象的蒙版",
+    "exclude": "排除",
+    "excludeTip": "左键点击会从蒙版中减去（负点）— 用来修掉溢出部分",
+    "nameAria": "对象名称",
+    "removeAria": "移除 {{name}}",
+    "setActive": "设为当前",
+    "remove": "删除对象"
+  },
+  "points": {
+    "title": "点",
+    "allFrames": "所有帧",
+    "allFramesTip": "列出所有帧的点（否则只列当前帧）",
+    "removeAria": "删除此点",
+    "goToFrame": "跳到该帧",
+    "removePoint": "删除此点"
+  },
+  "track": {
+    "clearFramePoints": "清除本帧的点",
+    "trackAll": "跟踪整个镜头",
+    "stepBack": "步进 ←",
+    "stepBackTip": "向后跟踪一帧后停下（逐帧控制）",
+    "stepFwd": "步进 →",
+    "stepFwdTip": "向前跟踪一帧后停下（逐帧控制）",
+    "retrackBack": "重跟踪 ←",
+    "retrackBackTip": "从当前帧向后重新传播（局部修正）",
+    "retrackFwd": "重跟踪 →",
+    "retrackFwdTip": "从当前帧向前重新传播（局部修正）",
+    "dedupe": "去重",
+    "dedupeTip": "动画：几乎相同的帧（定格）共用同一个遮罩 — 轮廓更稳。可撤销。",
+    "restoreMattesAria": "还原遮罩",
+    "restoreMattesTip": "还原去重前的遮罩",
+    "resetAria": "重置跟踪",
+    "resetTip": "清除跟踪结果（遮罩），保留所有点",
+    "upToDate": "跟踪已是最新 — 可修点后局部重跟踪，或直接导出。"
+  },
+  "view": {
+    "outline": "轮廓",
+    "outlineTip": "用各对象自己的颜色描出轮廓",
+    "bgColorAria": "背景颜色",
+    "bgColorTip": "合成背景的颜色",
+    "opacity": "蒙版不透明度"
+  },
+  "viewMode": {
+    "editLabel": "编辑",
+    "editHint": "画面 + 按对象着色的蒙版（工作模式）",
+    "matteLabel": "遮罩",
+    "matteHint": "只看黑白蒙版（检查边缘）",
+    "alphaLabel": "Alpha",
+    "alphaHint": "抠出的画面叠在棋盘格上（实际结果）",
+    "bgcolorLabel": "纯色背景",
+    "bgcolorHint": "画面合成在纯色上（检查抠像）"
+  },
+  "post": {
+    "grow": "扩张 / 收缩",
+    "feather": "边缘羽化",
+    "holes": "填补空洞",
+    "dots": "去除杂点",
+    "smooth": "平滑轮廓",
+    "border": "修正画面边缘",
+    "gamma": "浓度（gamma）",
+    "resetTip": "双击 = 重置"
+  },
+  "remove": {
+    "steps": "扩散步数",
+    "stepsTip": "步数越多填充越好，也越慢（12 = 平衡）",
+    "grow": "擦除余量",
+    "growTip": "擦除前先扩张蒙版 — 覆盖对象的边缘和投影",
+    "plate": "干净背景板",
+    "plateTip": "在让模型凭空生成之前，先从相邻帧中取回真正拍到的背景：这些像素本来就有正确的颜色和颗粒",
+    "harmonize": "融合",
+    "harmonizeTip": "把重建区域的颜色和锐度对齐到周围画面 — 没有它，即使内容正确也能看出补丁",
+    "grain": "颗粒",
+    "grainTip": "补回在周围测得的颗粒：光滑的填充放在有颗粒的素材上会很扎眼。素材干净时为零",
+    "quality": "质量",
+    "qualityTip": "扩散分辨率。越高填充越清晰，但更耗显存；显存不足时会自动降到下一档",
+    "qualityFast": "快速",
+    "qualityStandard": "标准",
+    "qualityMax": "最高",
+    "on": "开",
+    "off": "关",
+    "advanced": "模型设置",
+    "seed": "种子",
+    "seedTip": "固定随机取样。种子相同结果就相同——这样才能重现一次成功的填补。",
+    "reroll": "重新取样",
+    "rerollTip": "换一个新种子。填补失败时最先该试的一步。",
+    "window": "窗口",
+    "windowTip": "模型一次处理的帧数。越大时间上越连贯，也越占显存。",
+    "overlap": "重叠",
+    "overlapTip": "相邻两个窗口共用并相互淡化的帧数。为 0 时接缝会表现为跳变。",
+    "vaeTiling": "分块解码",
+    "vaeTilingTip": "大幅节省显存，但可能留下分块接缝。显存够用时可以关闭。",
+    "cpuOffload": "卸载到处理器",
+    "cpuOffloadTip": "只在各自计算时才把权重放上显卡。明显更慢，但小显存也能跑。",
+    "qualityTiny": "最小",
+    "qualityUltra": "极高"
+  },
+  "engineRow": {
+    "noneInstalled": "尚未安装 {{label}} 引擎",
+    "testAria": "在当前帧测试 {{label}}",
+    "testTip": "在当前帧测试 — 仅预览，不写入文件"
+  },
+  "engineHint": {
+    "minimax-remover": "约 6 步扩散并保持时间一致性 — 处理动态背景更干净。",
+    "diffueraser": "高质量 — 引擎尚待接入。",
+    "matanyone": "基于记忆的跟踪 — 适合头发和边缘。",
+    "matanyone2": "比 v1 的细节更好、更稳健。"
+  },
+  "exportRow": {
+    "allObjects": "所有对象",
+    "exportAria": "导出"
+  },
+  "exportFmt": {
+    "proresLabel": "ProRes 4444（alpha）",
+    "proresHint": "视频 + alpha 通道 — 剪辑用（Resolve/AE）",
+    "webmLabel": "WebM VP9（alpha）",
+    "webmHint": "体积小，带 alpha — 网页/预览",
+    "ffv1Label": "FFV1（alpha，无损）",
+    "ffv1Hint": "无损，带 alpha — 归档（MKV）",
+    "matteLabel": "黑白遮罩（MP4）",
+    "matteHint": "只有黑白蒙版",
+    "bgcolorLabel": "纯色背景（MP4）",
+    "bgcolorHint": "对象合成在显示模式的背景色上",
+    "pngLabel": "PNG 序列（遮罩）",
+    "pngHint": "每帧一张遮罩图"
+  },
+  "sam": {
+    "large": "蒙版质量更好，占用更多 VRAM。",
+    "base": "快速备选，低 VRAM。",
+    "small": "中间档：显存低于 Base+，掩码略粗。",
+    "tiny": "SAM 2.1 最小版本 — 适合显存紧张的显卡。",
+    "edgetam": "最轻量（56 MB）也最快。掩码比 SAM 2.1 粗。",
+    "sam31": "最新一代：能跟住交错或消失的目标。需要 NVIDIA GPU。",
+    "samurai": "目标被遮挡也能继续跟踪（运动感知记忆）。使用已安装的 SAM 2.1 权重。",
+    "sam2long": "适合长镜头：保留多条假设并剪除较差的，误差不再累积。使用已安装的 SAM 2.1 权重。"
+  },
+  "timeline": {
+    "inHere": "在此设入点（第 {{n}} 帧）",
+    "outHere": "在此设出点（第 {{n}} 帧）",
+    "resetRange": "重置范围"
+  },
+  "viewer": {
+    "zoomSuffix": "× — 双击适配窗口"
+  },
+  "test": {
+    "matteImage": "精细遮罩 — 第 {{n}} 帧",
+    "removeImage": "移除 — 第 {{n}} 帧"
+  },
+  "busy": {
+    "open": "正在打开…",
+    "segment": "正在分割…",
+    "undo": "正在撤销…",
+    "recalc": "正在重算…",
+    "track": "跟踪",
+    "resetTrack": "重置跟踪",
+    "dedupe": "去重",
+    "restoreMattes": "还原遮罩",
+    "export": "导出",
+    "matteFine": "精细遮罩",
+    "remove": "移除",
+    "testMatte": "遮罩测试（1 帧）",
+    "testRemove": "移除测试（1 帧）"
+  },
+  "note": {
+    "canceled": "{{label}}已取消 — 已跟踪的帧保留。",
+    "output": "{{label}} → {{output}}",
+    "done": "{{label}}完成。",
+    "unavailable": "{{label}}不可用",
+    "restored": "已从缓存恢复会话 — 点和跟踪都在。",
+    "dedupeOutput": "{{groups}} 个组，{{changed}} 帧已统一"
+  },
+  "errors": {
+    "openFailed": "无法打开",
+    "segmentFailed": "分割失败",
+    "undoFailed": "撤销失败",
+    "clearFailed": "清除失败",
+    "removePointFailed": "删除失败",
+    "moveFailed": "移动失败"
+  },
+  "stage": {
+    "load": "正在加载模型…",
+    "extract": "正在提取帧…",
+    "extractwait": "正在完成提取…",
+    "roi": "正在裁剪有效区域…",
+    "refine": "正在推理遮罩…",
+    "export": "正在编码…",
+    "remove": "正在移除…",
+    "dedupe": "正在分析重复帧…"
+  },
+  "summary": {
+    "tracked": "已是最新",
+    "notTracked": "尚未跟踪",
+    "matteNone": "未计算",
+    "matteOn": "启用",
+    "matteOff": "已计算，未启用",
+    "remove": "{{steps}} 步 · 种子 {{seed}}",
+    "select_one": "{{model}} · {{count}} 个对象",
+    "select_other": "{{model}} · {{count}} 个对象",
+    "points_one": "{{count}} 个点",
+    "points_other": "{{count}} 个点",
+    "post_one": "{{count}} 项设置",
+    "post_other": "{{count}} 项设置"
+  },
+  "matte": {
+    "run": "计算蒙版",
+    "test": "试算",
+    "testTip": "只细化当前帧并显示结果，不写入任何文件。",
+    "useRefined": "使用精细蒙版",
+    "useRefinedTip": "在细化后的 alpha 与跟踪原始蒙版之间切换，无需重新计算。显示、导出和移除都会跟随。",
+    "advanced": "高级设置",
+    "size": "处理分辨率",
+    "sizeTip": "送入模型的短边上限。越高边缘越细腻，但更慢也更占显存。",
+    "size480": "480",
+    "size720": "720",
+    "size1080": "1080",
+    "sizeFull": "最大",
+    "warmup": "稳定次数",
+    "warmupTip": "在每个起始帧上额外运行的次数。首次预测来自硬边蒙版，这些次数让它松弛下来。",
+    "combined": "合并处理所有对象",
+    "combinedTip": "对并集只跑一遍，而不是每个对象各跑一遍。快得多，但导出单个对象会退回原始蒙版。",
+    "batch": "每批帧数",
+    "batchTip": "模型一次处理的帧数。越大时间上越连贯，占用的内存也随之上升。",
+    "overlap": "重叠",
+    "overlapTip": "相邻两批共用的帧。它们会重算并淡化衔接，下一批从上一批的 alpha 出发——没有它接缝会显现。"
+  },
+  "mask": {
+    "stepModel": "细化 alpha",
+    "stepManual": "作用于跟踪蒙版",
+    "stepOnRefined": "叠加在精细蒙版之上"
+  },
+  "output": {
+    "exportStep": "导出"
+  }
+}

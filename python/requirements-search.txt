@@ -1,0 +1,7 @@
+# NetsuSearch : embeddings visuels et index local.
+transformers>=4.49
+sentencepiece
+protobuf
+faiss-cpu
+accelerate
+

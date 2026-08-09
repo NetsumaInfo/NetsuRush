@@ -1,0 +1,83 @@
+{
+  "header": {
+    "title": "Exportar a After Effects",
+    "subtitle": "Reconstruye una timeline como una composición fiel de After Effects (posiciones, pistas y precisión de fotograma) mediante un script generado."
+  },
+  "result": {
+    "scriptPrefix": "Script: {{name}}",
+    "clipsDone": "Planos procesados: {{count}} → composición «{{comp}}».",
+    "imported": "Importado en After Effects (revisar el panel Proyecto).",
+    "launching": "After Effects se está abriendo — import automático al arrancar (requiere un proyecto abierto).",
+    "missing": "Planos omitidos por falta de archivo: {{count}}."
+  },
+  "run": {
+    "busy": "Exportando…",
+    "label": "Exportar a After Effects"
+  },
+  "form": {
+    "refresh": "Actualizar",
+    "noTimeline": "Sin timeline",
+    "timelineOpen": "{{name}} (abierta)",
+    "compPlaceholder": "Nombre de la composición de After Effects",
+    "individualRender": "Corte individual separado",
+    "individualHint": "Cada plano genera un archivo recodificado con precisión de fotograma. Elige el códec abajo · se necesita una carpeta de salida.",
+    "yes": "Sí",
+    "no": "No",
+    "codec": "Códec",
+    "container": "Contenedor",
+    "mode": "Modo",
+    "nestedFlatten": "Contenido",
+    "nestedComp": "Precomposición",
+    "nestedRender": "Renderizado",
+    "nestedHintComp": "La timeline anidada pasa a una precomposición propia (audio incluido).",
+    "nestedHintRender": "Resolve renderiza la timeline anidada en un solo archivo (fiel, lento), importado como 1 capa.",
+    "nestedHintFlatten": "Los planos de la timeline anidada se aplanan directamente en la composición. Siguen el modo Vídeo de arriba.",
+    "outputFormat": "Formato de salida",
+    "audioFormat": "Formato de audio (si la timeline es solo audio)",
+    "bitrate": "Bitrate",
+    "handleSeconds": "Segundos antes / después",
+    "precompEach": "Cada plano de vídeo en una precomposición",
+    "target": "Destino",
+    "targetVideo": "Vídeos",
+    "targetImage": "Imágenes",
+    "targetBoth": "Ambos",
+    "precompNaming": "Nombre de las precomposiciones",
+    "namingFile": "Nombre del archivo",
+    "namingNumber": "Número",
+    "foldersLabel": "Ordenar en carpetas (Clips / Precomposiciones / Audio / Imágenes)",
+    "none": "Ninguno",
+    "choose": "Elegir…"
+  },
+  "sections": {
+    "timeline": "Timeline",
+    "compName": "Nombre de la composición",
+    "video": "Vídeo",
+    "transforms": "Transformaciones y velocidad",
+    "nested": "Timeline anidada",
+    "audio": "Audio",
+    "handles": "Márgenes",
+    "precomp": "Precomposición",
+    "organization": "Organización",
+    "outDir": "Carpeta de salida"
+  },
+  "videoModes": {
+    "copy": { "label": "Copia", "hint": "Archivos fuente, corte en AE — sin transcodificar." },
+    "remux": { "label": "Remux", "hint": "Contenedor .mov sin pérdidas (-c copy), corte en AE." },
+    "reencode": { "label": "Recodificar", "hint": "Cada plano transcodificado a códec de edición, márgenes incluidos." }
+  },
+  "audioModes": {
+    "copy": "Copiar",
+    "remux": "Remux",
+    "aac": "AAC",
+    "pcm": "PCM",
+    "none": "Ninguno"
+  },
+  "transformModes": {
+    "none": { "label": "Ninguna", "hint": "Clip original — ignora transformaciones y velocidad de la timeline." },
+    "ae": { "label": "En After Effects", "hint": "Transformaciones y velocidad en la capa de AE, fuente intacta." },
+    "bake": { "label": "Recodificado", "hint": "Velocidad aplicada al archivo, transformaciones espaciales en AE." }
+  },
+  "errors": {
+    "timelinesUnavailable": "Timelines no disponibles"
+  }
+}

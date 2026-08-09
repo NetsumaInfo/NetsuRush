@@ -1,0 +1,71 @@
+{
+  "taskHint": {
+    "search": "Visuelle Suche und Vergleich von Einstellungen.",
+    "faces": "Gesichtserkennung und -gruppierung.",
+    "voice": "Automatische Transkription von Sprache.",
+    "upscale": "Hochskalieren von Bildern und Videos.",
+    "restore": "Bildwiederherstellung und -bereinigung.",
+    "interpolate": "Erzeugung von Zwischenbildern für flüssigere Videos.",
+    "depth": "Erzeugung von Tiefenkarten.",
+    "matte-image": "Freistellen und Entfernen des Bildhintergrunds.",
+    "matte-video": "Freistellen und Verfolgen von Motiven im Video.",
+    "object-removal": "Entfernen von Objekten aus Videos."
+  },
+  "title": "Modelle",
+  "subtitle": "Nichts wird automatisch geladen. Hol dir, was du brauchst, lösch es jederzeit wieder.",
+  "disk": "Speicher:",
+  "noneInstalled": "Kein Modell installiert — installier eins, sonst läuft diese Funktion nicht.",
+  "badge": {
+    "default": "Standard",
+    "heavy": "schwer",
+    "exclusive": "exklusiv",
+    "exclusiveTip": "SAMURAI und SAM2Long ersetzen die SAM-2-Engine jeweils durch ihre eigene: nur eines kann gleichzeitig installiert sein. Das zweite zu installieren fragt zuerst nach und entfernt dann das erste; beim Löschen kehrt die ursprüngliche Engine zurück."
+  },
+  "conflict": {
+    "title": "Nur eines von beiden",
+    "body": "{{model}} ersetzt die Engine von {{other}}, das bereits installiert ist: beide können nicht nebeneinander bestehen. {{model}} zu installieren entfernt {{other}}.",
+    "replace": "Installieren und das andere entfernen"
+  },
+  "sort": {
+    "default": "Standard",
+    "defaultTip": "Reihenfolge im Katalog: Empfehlung zuerst.",
+    "size": "Größe",
+    "sizeTip": "Nach Größe auf der Platte.",
+    "vram": "VRAM",
+    "vramTip": "Nach benötigtem VRAM.",
+    "name": "Name",
+    "nameTip": "Alphabetisch.",
+    "asc": "Aufsteigend",
+    "desc": "Absteigend"
+  },
+  "vramShort": "Braucht {{need}} GB VRAM, deine Karte hat {{have}} ({{gpu}}) — passt nicht. Laden geht trotzdem.",
+  "status": {
+    "bundled": "Mitgeliefert",
+    "bundledTip": "Teil der Laufzeit (nicht löschbar).",
+    "installed": "Installiert",
+    "removing": "Deinstallation…",
+    "removeTip": "Von der Platte löschen",
+    "auto": "Auto",
+    "autoTip": "Wird beim ersten Einsatz von der Bibliothek geholt — nichts zu laden."
+  },
+  "action": {
+    "resume": "Fortsetzen",
+    "resumeTip": "Download unvollständig — holt fehlende Gewichte und Code nach.",
+    "download": "Laden",
+    "cancelDownload": "Download abbrechen"
+  },
+  "search": {
+    "active": "Aktiv",
+    "activeTip": "Von der Suche verwendete Variante",
+    "use": "Verwenden",
+    "useTip": "Diese Variante als Suchmodell festlegen",
+    "switchTitle": "Suchmodell wechseln",
+    "switchEmpty": "{{model}} hat noch nichts indexiert: die Suche bleibt leer, bis vollständig neu indexiert wurde. Der Index der aktuellen Variante bleibt unverändert auf der Festplatte.",
+    "switchPartial": "Mit {{model}} bereits indexierte Clips: {{clips}}. Der Rest muss neu indexiert werden; der Index der aktuellen Variante bleibt auf der Festplatte.",
+    "switchConfirm": "Diese Variante verwenden"
+  },
+  "advanced": {
+    "label": "Erweitert",
+    "tip": "Zeigt den gesamten Katalog: Varianten, frühere Generationen und experimentelle Engines. Standardmäßig wird nur die aktuelle Auswahl je Aufgabe angezeigt."
+  }
+}

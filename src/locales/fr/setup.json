@@ -1,0 +1,58 @@
+{
+  "title": "Configuration de NetsuRush",
+  "desc": "Choisis les téléchargements utiles. Le socle compatible avec ce PC s'installe automatiquement.",
+  "progressAria": "Étapes de configuration",
+  "models": {
+    "title": "Téléchargements optionnels",
+    "subtitle": "Classés par fonctionnalité et réparables à tout moment.",
+    "search": "Rechercher un modèle…",
+    "none": "Aucun téléchargement",
+    "sceneDetection": "Découpage des scènes",
+    "sceneDetectionHint": "Le composant léger nécessaire à NetsuCut est inclus dans les prérequis.",
+    "included": "Inclus",
+    "empty": "Aucun modèle ne correspond à cette recherche.",
+    "selected": "{{count}} sélectionné(s)",
+    "noExtraSpace": "aucun espace en plus",
+    "tier": {
+      "light": "léger",
+      "balanced": "équilibré",
+      "heavy": "lourd"
+    }
+  },
+  "packs": {
+    "recommended": "Pack recommandé",
+    "select": "Sélectionner le pack"
+  },
+  "scan": {
+    "running": "Analyse de l'installation et du GPU…"
+  },
+  "review": {
+    "title": "Prêt à installer",
+    "subtitle": "Vérifie ce qui sera ajouté à ce PC.",
+    "downloads": "Espace optionnel",
+    "modelCount": "{{count}} téléchargement(s)",
+    "noOptionalModels": "Aucun téléchargement optionnel",
+    "mandatoryOnly": "Socle et découpage uniquement",
+    "sceneDetection": "Découpage des scènes inclus"
+  },
+  "detectedBackend": "Moteur de calcul sélectionné : {{backend}}",
+  "installFailed": "Échec de l'installation",
+  "running": "Installation des prérequis…",
+  "log": "Journal d'installation",
+  "done": "Installation terminée",
+  "restartHint": "Relance NetsuRush pour charger le nouvel environnement.",
+  "restartApp": "Relancer l'application",
+  "installing": "Installation…",
+  "install": "Installer la sélection",
+  "repair": "Réparer et vérifier",
+  "skip": "Continuer sans installer",
+  "update": {
+    "action": "Mettre à jour",
+    "download": "Télécharger la mise à jour"
+  },
+  "adobe": {
+    "title": "Extension Adobe",
+    "detected": "Détecté : {{apps}}",
+    "hint": "installe le panneau NetsuRush et le garde à jour automatiquement."
+  }
+}

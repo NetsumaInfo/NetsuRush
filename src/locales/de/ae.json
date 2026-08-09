@@ -1,0 +1,83 @@
+{
+  "header": {
+    "title": "Export nach After Effects",
+    "subtitle": "Erstellt eine Timeline mit einem generierten Skript originalgetreu als After-Effects-Komposition nach (Positionen, Spuren und framegenau)."
+  },
+  "result": {
+    "scriptPrefix": "Skript: {{name}}",
+    "clipsDone": "Verarbeitete Einstellungen: {{count}} → Komposition „{{comp}}“.",
+    "imported": "In After Effects importiert (siehe Projekt-Panel).",
+    "launching": "After Effects startet — Import läuft automatisch (offenes Projekt nötig).",
+    "missing": "Wegen fehlender Datei übersprungene Einstellungen: {{count}}."
+  },
+  "run": {
+    "busy": "Export läuft…",
+    "label": "Nach After Effects exportieren"
+  },
+  "form": {
+    "refresh": "Aktualisieren",
+    "noTimeline": "Keine Timeline",
+    "timelineOpen": "{{name}} (offen)",
+    "compPlaceholder": "Name der After-Effects-Comp",
+    "individualRender": "Jeden Shot einzeln schneiden",
+    "individualHint": "Jede Einstellung ergibt eine neu kodierte, framegenau geschnittene Datei. Codec unten wählen · Ausgabeordner erforderlich.",
+    "yes": "Ja",
+    "no": "Nein",
+    "codec": "Codec",
+    "container": "Container",
+    "mode": "Modus",
+    "nestedFlatten": "Inhalt",
+    "nestedComp": "Vorkomp",
+    "nestedRender": "Rendern",
+    "nestedHintComp": "Die verschachtelte Timeline wird zur eigenen Vorkomp (Audio darin enthalten).",
+    "nestedHintRender": "Resolve rendert die verschachtelte Timeline als eine Datei (originalgetreu, langsam), Import als 1 Ebene.",
+    "nestedHintFlatten": "Die Shots der verschachtelten Timeline landen direkt in der Comp. Sie folgen dem Video-Modus oben.",
+    "outputFormat": "Ausgabeformat",
+    "audioFormat": "Audioformat (bei reiner Audio-Timeline)",
+    "bitrate": "Bitrate",
+    "handleSeconds": "Sekunden davor / danach",
+    "precompEach": "Jeden Video-Shot als Vorkomp",
+    "target": "Ziel",
+    "targetVideo": "Videos",
+    "targetImage": "Bilder",
+    "targetBoth": "Beides",
+    "precompNaming": "Namen der Vorkomps",
+    "namingFile": "Dateiname",
+    "namingNumber": "Nummer",
+    "foldersLabel": "In Ordner sortieren (Rohmaterial / Vorkomps / Audio / Bilder)",
+    "none": "Keins",
+    "choose": "Wählen…"
+  },
+  "sections": {
+    "timeline": "Timeline",
+    "compName": "Name der Komposition",
+    "video": "Video",
+    "transforms": "Transformationen & Tempo",
+    "nested": "Verschachtelte Timeline",
+    "audio": "Audio",
+    "handles": "Handles",
+    "precomp": "Vorkomposition",
+    "organization": "Organisation",
+    "outDir": "Ausgabeordner"
+  },
+  "videoModes": {
+    "copy": { "label": "Kopie", "hint": "Quelldateien, Schnitt in AE — kein Transkodieren." },
+    "remux": { "label": "Remux", "hint": "Verlustfreier .mov-Container (-c copy), Schnitt in AE." },
+    "reencode": { "label": "Neu kodieren", "hint": "Jeder Shot in Schnitt-Codec transkodiert, inkl. Handles." }
+  },
+  "audioModes": {
+    "copy": "Kopieren",
+    "remux": "Remux",
+    "aac": "AAC",
+    "pcm": "PCM",
+    "none": "Keins"
+  },
+  "transformModes": {
+    "none": { "label": "Keine", "hint": "Rohes Material — Transformationen und Tempo der Timeline werden ignoriert." },
+    "ae": { "label": "In After Effects", "hint": "Transformationen + Tempo auf der AE-Ebene, Quelle bleibt unangetastet." },
+    "bake": { "label": "Neu kodiert", "hint": "Tempo in die Datei eingerechnet, räumliche Transformationen in AE." }
+  },
+  "errors": {
+    "timelinesUnavailable": "Timelines nicht verfügbar"
+  }
+}

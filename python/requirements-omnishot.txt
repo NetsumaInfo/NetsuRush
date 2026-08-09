@@ -1,0 +1,9 @@
+# NetsuRush — modèle de détection de plans OPTIONNEL : OmniShotCut
+# (UVA Computer Vision Lab, licence MIT). Plus précis que TransNetV2 sur les
+# transitions/fondus, mais lourd (torch + transformers) et lent en CPU sans GPU.
+# Les poids (~164 Mo) se téléchargent automatiquement depuis HuggingFace au 1er run.
+#
+# À installer SEULEMENT si tu choisis OmniShotCut dans l'UI :
+#   pip install -r python/requirements-omnishot.txt
+git+https://github.com/UVA-Computer-Vision-Lab/OmniShotCut.git
+opencv-python

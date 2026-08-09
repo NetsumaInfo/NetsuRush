@@ -1,0 +1,83 @@
+{
+  "header": {
+    "title": "Export to After Effects",
+    "subtitle": "Rebuilds a timeline as a faithful After Effects comp (positions, tracks, frame-accurate) with a generated script."
+  },
+  "result": {
+    "scriptPrefix": "Script: {{name}}",
+    "clipsDone": "Shots processed: {{count}} → \"{{comp}}\" comp.",
+    "imported": "Imported into After Effects (check the Project panel).",
+    "launching": "After Effects is starting — it'll import on launch (needs an open project).",
+    "missing": "Shots skipped because the file was missing: {{count}}."
+  },
+  "run": {
+    "busy": "Exporting…",
+    "label": "Export to After Effects"
+  },
+  "form": {
+    "refresh": "Refresh",
+    "noTimeline": "No timeline",
+    "timelineOpen": "{{name}} (open)",
+    "compPlaceholder": "After Effects comp name",
+    "individualRender": "Separate file per shot",
+    "individualHint": "Each shot becomes one re-encoded file with frame-accurate cuts. Pick the codec below · output folder required.",
+    "yes": "Yes",
+    "no": "No",
+    "codec": "Codec",
+    "container": "Container",
+    "mode": "Mode",
+    "nestedFlatten": "Contents",
+    "nestedComp": "Precomp",
+    "nestedRender": "Render",
+    "nestedHintComp": "The nested timeline becomes its own precomp (audio inside it).",
+    "nestedHintRender": "Resolve renders the nested timeline to a single file (faithful, slow), imported as 1 layer.",
+    "nestedHintFlatten": "Shots from the nested timeline are flattened straight into the comp. They follow the Video mode above.",
+    "outputFormat": "Output format",
+    "audioFormat": "Audio format (audio-only timeline)",
+    "bitrate": "Bitrate",
+    "handleSeconds": "Seconds before / after",
+    "precompEach": "Each video shot in a precomp",
+    "target": "Target",
+    "targetVideo": "Video",
+    "targetImage": "Stills",
+    "targetBoth": "Both",
+    "precompNaming": "Precomp names",
+    "namingFile": "File name",
+    "namingNumber": "Number",
+    "foldersLabel": "Sort into folders (Footage / Precomps / Audio / Images)",
+    "none": "None",
+    "choose": "Choose…"
+  },
+  "sections": {
+    "timeline": "Timeline",
+    "compName": "Comp name",
+    "video": "Video",
+    "transforms": "Transforms & speed",
+    "nested": "Nested timeline",
+    "audio": "Audio",
+    "handles": "Handles",
+    "precomp": "Precomp",
+    "organization": "Organization",
+    "outDir": "Output folder"
+  },
+  "videoModes": {
+    "copy": { "label": "Copy", "hint": "Source files, cut in AE — no transcode." },
+    "remux": { "label": "Remux", "hint": "Lossless .mov container (-c copy), cut in AE." },
+    "reencode": { "label": "Re-encode", "hint": "Each shot transcoded to an edit codec, handles included." }
+  },
+  "audioModes": {
+    "copy": "Copy",
+    "remux": "Remux",
+    "aac": "AAC",
+    "pcm": "PCM",
+    "none": "None"
+  },
+  "transformModes": {
+    "none": { "label": "None", "hint": "Raw footage — ignores timeline transforms and speed." },
+    "ae": { "label": "In After Effects", "hint": "Transforms + speed on the AE layer, source untouched." },
+    "bake": { "label": "Re-encoded", "hint": "Speed baked into the file, spatial transforms in AE." }
+  },
+  "errors": {
+    "timelinesUnavailable": "Timelines unavailable"
+  }
+}

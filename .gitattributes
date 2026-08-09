@@ -1,0 +1,35 @@
+# Line-ending normalisation. Without this file, a macOS or Linux contributor rewrites the whole
+# repository on their first commit and the diff becomes unreadable.
+* text=auto eol=lf
+
+# Windows PowerShell 5.1 (the one the core spawns, and the one that runs build.ps1) reads a BOM-less
+# .ps1 as cp1252. These scripts MUST keep CRLF line endings.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.nsh text eol=crlf
+
+# Adobe CEP extension: loaded by an old CEF engine, on Windows only.
+adobe-cep/**/*.jsx text eol=crlf
+
+# Binaries — never converted, never diffed as text.
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.mp4 binary
+*.pth binary
+*.onnx binary
+*.dll binary
+*.exe binary
+*.zip binary
+*.7z binary
+*.whl binary
+
+# Generated files: excluded from GitHub language stats and collapsed in reviews.
+package-lock.json linguist-generated=true
+src-tauri/Cargo.lock linguist-generated=true
+convex/_generated/** linguist-generated=true
+
+# GLSL shaders must not count as project code (third-party MIT dependencies).
+*.glsl linguist-vendored=true

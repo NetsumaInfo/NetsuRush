@@ -1,0 +1,75 @@
+{
+  "transcribing": "Transcribiendo…",
+  "button": {
+    "ariaStop": "Detener el dictado",
+    "ariaDictate": "Dictar",
+    "tooltipStop": "Detener (inserta el texto)",
+    "tooltipDictate": "Dictar (al hablar, se escribe)"
+  },
+  "overlay": {
+    "listening": "Escuchando…"
+  },
+  "hotkey": {
+    "capturePrompt": "Pulsar la combinación…",
+    "mod": {
+      "ctrl": "Ctrl",
+      "shift": "Mayús",
+      "alt": "Alt",
+      "meta": "Meta"
+    },
+    "code": {
+      "space": "Espacio",
+      "escape": "Esc",
+      "enter": "Intro",
+      "tab": "Tab"
+    }
+  },
+  "settings": {
+    "title": "Dictado por voz",
+    "intro": "Mantener pulsado el atajo en cualquier parte de la app, hablar y soltar: el texto transcrito se inserta en el campo o el editor activo. Sin botones: solo un punto discreto mientras escucha.",
+    "enableLabel": "Activar el dictado",
+    "enableHint": "Escucha el atajo global.",
+    "enabledOn": "Activado",
+    "enabledOff": "Desactivado",
+    "micLabel": "Micrófono",
+    "micHint": "Entrada de audio usada para el dictado.",
+    "micDefault": "Micrófono predeterminado",
+    "micNumbered": "Micrófono {{n}}",
+    "hotkeyLabel": "Atajo (mantener pulsado)",
+    "hotkeyHint": "Hacer clic y pulsar la combinación. Esc para cancelar.",
+    "unloadLabel": "Descargar el modelo tras",
+    "unloadHint": "Inactivo este tiempo → el modelo sale de la VRAM (luego arranca en frío).",
+    "liveLabel": "Vista previa en directo",
+    "liveHint": "El texto aparece mientras se habla (retranscripción periódica).",
+    "liveOn": "Activado",
+    "liveOff": "Desactivado",
+    "modelLabel": "Modelo de transcripción"
+  },
+  "unload": {
+    "s30": "30 segundos",
+    "m1": "1 minuto",
+    "m5": "5 minutos",
+    "m15": "15 minutos",
+    "never": "Nunca (mantener en caliente)"
+  },
+  "model": {
+    "default": "predeterminado",
+    "bundled": "Incluido",
+    "installed": "Instalado",
+    "removeTooltip": "Eliminar del disco",
+    "get": "Obtener"
+  },
+  "cpp": {
+    "engine": "Motor transcribe.cpp",
+    "ready": " · listo ({{backend}})",
+    "notInstalled": " · no instalado",
+    "readyHint": "Binario nativo detectado: los modelos GGUF (Nemotron) se pueden usar.",
+    "notInstalledHint": "Necesario para Nemotron. Colocar transcribe-cli (prebuild de GitHub) en NR_HOME/bin, o ajustar transcribeCppBin en nr.config.json."
+  },
+  "mic": {
+    "busy": "El micrófono lo está usando otra aplicación.",
+    "denied": "Micrófono denegado. Permite el acceso para dictar.",
+    "fallback": "El micrófono elegido no está disponible: se usa el predeterminado.",
+    "missing": "No hay ningún micrófono disponible."
+  }
+}

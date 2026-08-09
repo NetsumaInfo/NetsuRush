@@ -1,0 +1,6 @@
+# Socle universel : détection de plans obligatoire (TransNetV2) et téléchargement à la demande.
+transnetv2-pytorch>=1.0.5
+opencv-contrib-python-headless
+pillow>=10
+huggingface-hub>=0.28
+einops

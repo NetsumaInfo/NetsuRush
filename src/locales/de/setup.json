@@ -1,0 +1,58 @@
+{
+  "title": "NetsuRush konfigurieren",
+  "desc": "Wähle nur die benötigten Downloads. Die passende Grundlage für diesen PC wird automatisch installiert.",
+  "progressAria": "Konfigurationsschritte",
+  "models": {
+    "title": "Optionale Downloads",
+    "subtitle": "Nach Funktion gruppiert und jederzeit reparierbar.",
+    "search": "Modelle suchen…",
+    "none": "Keine Downloads",
+    "sceneDetection": "Szenenschnitt",
+    "sceneDetectionHint": "Die leichte NetsuCut-Komponente ist in den Voraussetzungen enthalten.",
+    "included": "Enthalten",
+    "empty": "Kein Modell entspricht der Suche.",
+    "selected": "{{count}} ausgewählt",
+    "noExtraSpace": "kein zusätzlicher Speicher",
+    "tier": {
+      "light": "leicht",
+      "balanced": "ausgewogen",
+      "heavy": "groß"
+    }
+  },
+  "packs": {
+    "recommended": "Empfohlenes Paket",
+    "select": "Paket auswählen"
+  },
+  "scan": {
+    "running": "Installation und GPU werden geprüft…"
+  },
+  "review": {
+    "title": "Bereit zur Installation",
+    "subtitle": "Prüfe, was diesem PC hinzugefügt wird.",
+    "downloads": "Optionaler Speicher",
+    "modelCount": "{{count}} Download(s)",
+    "noOptionalModels": "Keine optionalen Downloads",
+    "mandatoryOnly": "Nur Grundlage und Szenenschnitt",
+    "sceneDetection": "Szenenschnitt enthalten"
+  },
+  "detectedBackend": "Ausgewählte Rechen-Engine: {{backend}}",
+  "installFailed": "Installation fehlgeschlagen",
+  "running": "Voraussetzungen werden installiert…",
+  "log": "Installationsprotokoll",
+  "done": "Installation abgeschlossen",
+  "restartHint": "Starte NetsuRush neu, um die neue Umgebung zu laden.",
+  "restartApp": "App neu starten",
+  "installing": "Installiere…",
+  "install": "Auswahl installieren",
+  "repair": "Reparieren und prüfen",
+  "skip": "Ohne Installation fortfahren",
+  "update": {
+    "action": "Aktualisieren",
+    "download": "Update herunterladen"
+  },
+  "adobe": {
+    "title": "Adobe-Erweiterung",
+    "detected": "Erkannt: {{apps}}",
+    "hint": "installiert das NetsuRush-Bedienfeld und hält es automatisch aktuell."
+  }
+}

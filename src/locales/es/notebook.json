@@ -1,0 +1,639 @@
+{
+  "editor": {
+    "uploadFailed": "Error al subir el archivo",
+    "dateToday": "Fecha de hoy",
+    "createNamed": "Crear «{{name}}»"
+  },
+  "panel": {
+    "scriptNotebook": "Cuaderno del guion",
+    "untitled": "Sin título",
+    "notebookFallback": "Cuaderno",
+    "notebooks": "Cuadernos",
+    "noNotebooks": "Sin cuadernos",
+    "newNotebook": "Nuevo cuaderno",
+    "editNotebook": "Editar este cuaderno",
+    "importMarkdown": "Importar Markdown…",
+    "exportNetsu": "Exportar (.netsu)",
+    "importNetsu": "Importar (.netsu)",
+    "deleteNotebook": "Eliminar este cuaderno",
+    "collapseSidebar": "Ocultar la barra lateral (Ctrl+\\)",
+    "expandSidebar": "Mostrar la barra lateral (Ctrl+\\)",
+    "search": "Buscar",
+    "newPage": "Nueva página",
+    "pages": "Páginas",
+    "trash": "Papelera",
+    "settings": "Ajustes",
+    "emptyNotebookHint": "Crear un cuaderno para empezar.",
+    "emptyTitleHasNb": "Una página en blanco espera",
+    "emptyTitleNoNb": "Bienvenido al Cuaderno",
+    "emptyBodyHasNb": "Notas, planes, borradores, bases de datos: volcar las ideas sin orden.",
+    "emptyBodyNoNb": "Un bloc de notas: cuadernos, páginas anidadas, bloques enriquecidos y bases de datos.",
+    "createNotebook": "Crear un cuaderno",
+    "confirmDeleteNbTitle": "¿Eliminar «{{name}}»?",
+    "confirmDeleteNbDesc": "El cuaderno y TODAS sus páginas se eliminan definitivamente.",
+    "confirmTrashTitle": "¿Enviar a la papelera?",
+    "confirmTrashDesc": "«{{name}}» y sus subpáginas van a la papelera (se pueden restaurar).",
+    "sendToTrash": "Enviar a la papelera",
+    "saveAsProject": "Guardar como…",
+    "openProject": "Abrir un cuaderno…"
+  },
+  "blocks": {
+    "bookmark": {
+      "pastePlaceholder": "Pegar un enlace de sitio web…"
+    },
+    "embed": {
+      "pastePlaceholder": "Pegar un enlace para incrustar (Vimeo, X, TikTok…)",
+      "iframeTitle": "Contenido incrustado"
+    },
+    "toggle": {
+      "collapse": "Contraer",
+      "expand": "Expandir"
+    },
+    "youtube": {
+      "pastePlaceholder": "Pegar un enlace de YouTube…"
+    }
+  },
+  "db": {
+    "field": {
+      "checked": "Marcado",
+      "unchecked": "Sin marcar",
+      "empty": "Vacío"
+    },
+    "option": {
+      "searchOrCreate": "Buscar o crear…",
+      "create": "Crear «{{label}}»"
+    },
+    "checklist": {
+      "addTask": "Añadir una tarea…"
+    }
+  },
+  "navigation": {
+    "notebookRoot": "Raíz del cuaderno",
+    "moveTo": "Mover a…",
+    "filterPages": "Filtrar páginas…",
+    "noMatch": "No hay páginas que coincidan.",
+    "backlinks": "Enlaces entrantes",
+    "siblings": "Páginas del mismo nivel",
+    "intermediate": "Páginas intermedias",
+    "searchTitle": "Buscar en el cuaderno",
+    "searchDescription": "Busca en los títulos y el contenido de las páginas",
+    "searchPlaceholder": "Título o contenido…",
+    "noSearchResult": "No hay resultados para «{{query}}»",
+    "favorites": "Favoritos",
+    "recent": "Recientes"
+  },
+  "actions": {
+    "stats": "{{words}} palabras · {{chars}} caracteres",
+    "modified": "Modificado el {{date}}",
+    "removeFavorite": "Quitar de favoritos",
+    "addFavorite": "Añadir a favoritos",
+    "documentActions": "Acciones del documento",
+    "openNewTab": "Abrir en una pestaña nueva",
+    "copyPageLink": "Copiar enlace de la página",
+    "duplicate": "Duplicar",
+    "exportMarkdown": "Exportar como Markdown",
+    "exportHtml": "Exportar como HTML",
+    "exportNetsu": "Exportar como .netsu (con subpáginas)"
+  },
+  "trash": {
+    "title": "Papelera",
+    "count_one": "{{count}} página eliminada — se puede restaurar.",
+    "count_other": "{{count}} páginas eliminadas — se pueden restaurar.",
+    "description": "Las páginas eliminadas aparecen aquí.",
+    "empty": "La papelera está vacía.",
+    "restore": "Restaurar",
+    "restoreWithChildren": "Restaurar (con sus subpáginas)",
+    "deleteForever": "Eliminar definitivamente",
+    "confirmAll": "¿Eliminar todo definitivamente?",
+    "cancel": "Cancelar",
+    "deleteAll": "Eliminar todo",
+    "emptyTrash": "Vaciar la papelera"
+  },
+  "tree": {
+    "deletedSubpage": "Subpágina eliminada",
+    "subpage": "Subpágina",
+    "rename": "Cambiar nombre",
+    "empty": "No hay páginas — crea una"
+  },
+  "tabs": {
+    "prev": "Página anterior",
+    "next": "Página siguiente",
+    "closeTab": "Cerrar pestaña",
+    "closeOthers": "Cerrar las demás",
+    "all": "Todas las pestañas",
+    "newPage": "Nueva página en una pestaña"
+  },
+  "slash": {
+    "groups": {
+      "blocks": "Bloques del cuaderno",
+      "media": "Medios",
+      "insert": "Insertar"
+    },
+    "subpage": {
+      "title": "Subpágina",
+      "desc": "Nueva página secundaria integrada aquí",
+      "aliases": "subpagina|hija|pagina"
+    },
+    "callout": {
+      "title": "Recuadro",
+      "desc": "Banda de color con emoji",
+      "aliases": "recuadro|nota|info"
+    },
+    "toggle": {
+      "title": "Desplegable",
+      "desc": "Sección plegable",
+      "aliases": "desplegable|plegable|acordeon"
+    },
+    "database": {
+      "title": "Base de datos",
+      "desc": "Tabla y kanban con columnas tipadas",
+      "aliases": "base|tabla|cuadricula|kanban"
+    },
+    "equation": {
+      "title": "Ecuación",
+      "desc": "Fórmula LaTeX (KaTeX)",
+      "aliases": "ecuacion|matematicas|latex|formula|katex"
+    },
+    "divider": {
+      "title": "Separador",
+      "desc": "Línea, guiones, puntos o estrellas",
+      "aliases": "separador|linea|hr|---"
+    },
+    "youtube": {
+      "desc": "Insertar un vídeo de YouTube",
+      "aliases": "youtube|video|yt"
+    },
+    "embed": {
+      "title": "Contenido integrado",
+      "aliases": "insertar|iframe|vimeo|twitter|tiktok"
+    },
+    "bookmark": {
+      "title": "Marcador",
+      "desc": "Vista previa de un enlace web",
+      "aliases": "marcador|enlace|web"
+    },
+    "video": {
+      "title": "Vídeo",
+      "desc": "Archivo local o URL con reproductor integrado",
+      "aliases": "video|mp4|pelicula|clip"
+    },
+    "audio": {
+      "desc": "Reproductor integrado con forma de onda",
+      "aliases": "audio|sonido|mp3|musica|wav|podcast"
+    },
+    "file": {
+      "title": "Archivo",
+      "desc": "PDF, Word, Excel, ZIP… (vista previa PDF)",
+      "aliases": "archivo|pdf|doc|documento|zip|excel|word"
+    },
+    "gallery": {
+      "title": "Galería de imágenes",
+      "desc": "Varias imágenes desplazables en una fila",
+      "aliases": "galeria|imagenes|carrusel|album"
+    },
+    "date": {
+      "title": "Fecha",
+      "desc": "Insertar una fecha en el texto",
+      "aliases": "fecha|dia|calendario|hoy"
+    }
+  },
+  "dbUi": {
+    "group": {
+      "all": "Todas",
+      "none": "Sin valor"
+    },
+    "calc": {
+      "none": "Ninguno",
+      "count": "Recuento",
+      "empty": "Vacías",
+      "filled": "Rellenas",
+      "sum": "Suma",
+      "avg": "Media",
+      "median": "Mediana",
+      "min": "Mínimo",
+      "max": "Máximo"
+    },
+    "view": {
+      "table": "Cuadrícula",
+      "kanban": "Tablero",
+      "gallery": "Galería",
+      "calendar": "Calendario",
+      "list": "Lista"
+    },
+    "rowHeight": {
+      "short": "Compacta",
+      "medium": "Media",
+      "tall": "Alta"
+    },
+    "color": {
+      "gray": "Gris",
+      "blue": "Azul",
+      "green": "Verde",
+      "yellow": "Amarillo",
+      "orange": "Naranja",
+      "red": "Rojo",
+      "purple": "Morado",
+      "pink": "Rosa"
+    },
+    "field": {
+      "text": "Texto",
+      "number": "Número",
+      "select": "Selección",
+      "multiSelect": "Selección múltiple",
+      "date": "Fecha",
+      "checkbox": "Casilla",
+      "url": "Enlace",
+      "checklist": "Lista de tareas",
+      "createdTime": "Creado",
+      "lastEditedTime": "Última edición"
+    }
+  },
+  "paste": {
+    "mention": {
+      "label": "Mención",
+      "desc": "Etiqueta compacta en el texto"
+    },
+    "url": {
+      "label": "Enlace",
+      "desc": "Enlace en línea"
+    },
+    "bookmark": {
+      "label": "Marcador",
+      "desc": "Vista previa en tarjeta"
+    },
+    "embed": {
+      "label": "Contenido integrado",
+      "desc": "Reproductor integrado (iframe / YouTube)"
+    }
+  },
+  "fileKind": {
+    "doc": "Documento",
+    "sheet": "Hoja de cálculo",
+    "slide": "Presentación",
+    "archive": "Archivo comprimido",
+    "video": "Vídeo",
+    "image": "Imagen",
+    "text": "Texto",
+    "other": "Archivo"
+  },
+  "blocksUi": {
+    "preview": "Vista previa",
+    "playbackSpeed": "Velocidad de reproducción",
+    "chooseAudio": "Elegir audio…",
+    "audioDrop": "MP3, WAV, FLAC… o arrastra y suelta",
+    "audioUrl": "…o pega una URL de audio y pulsa Entrar",
+    "chooseFile": "Elegir un archivo…",
+    "fileDrop": "PDF, Word, Excel, ZIP… o arrastra y suelta",
+    "fileUrl": "…o pega una URL de archivo y pulsa Entrar",
+    "open": "Abrir",
+    "download": "Descargar",
+    "play": "Reproducir",
+    "fullscreen": "Pantalla completa",
+    "chooseVideo": "Elegir un vídeo…",
+    "dropFile": "o arrastra y suelta un archivo",
+    "videoUrl": "…o pega una URL de vídeo y pulsa Entrar",
+    "changeDivider": "Cambiar el estilo del separador",
+    "today": "Hoy",
+    "clear": "Borrar"
+  },
+  "equation": {
+    "group": {
+      "structures": "Estructuras",
+      "calculus": "Cálculo",
+      "matrices": "Matrices y sistemas",
+      "chemistry": "Química (mhchem)"
+    },
+    "template": {
+      "fraction": "Fracción",
+      "squareRoot": "Raíz cuadrada",
+      "nthRoot": "Raíz n-ésima",
+      "exponent": "Exponente",
+      "subscript": "Subíndice",
+      "binomial": "Binomio",
+      "sum": "Suma",
+      "product": "Producto",
+      "integral": "Integral",
+      "limit": "Límite",
+      "derivative": "Derivada",
+      "partialDerivative": "Derivada parcial",
+      "matrix": "Matriz 2×2",
+      "determinant": "Determinante",
+      "system": "Sistema (casos)",
+      "vector": "Vector",
+      "molecule": "Molécula",
+      "reaction": "Reacción",
+      "equilibrium": "Equilibrio",
+      "ion": "Ion"
+    },
+    "empty": "Ecuación vacía — haz clic para escribir LaTeX",
+    "templates": "Plantillas",
+    "error": "Error de LaTeX: {{error}}",
+    "hint": "LaTeX completo (KaTeX + química \\ce) · Ctrl+Entrar para aplicar · Escape para cancelar",
+    "edit": "Editar la ecuación",
+    "input": "Código LaTeX de la ecuación"
+  },
+  "gallery": {
+    "chooseImages": "Elegir imágenes…",
+    "dropFiles": "o arrastra y suelta archivos",
+    "imageUrl": "…o pega una URL de imagen y pulsa Entrar",
+    "row": "Tira (desplazamiento horizontal)",
+    "carousel": "Carrusel",
+    "grid": "Cuadrícula",
+    "height": "Altura {{size}}",
+    "imageCount_one": "{{count}} imagen",
+    "imageCount_other": "{{count}} imágenes",
+    "add": "Añadir",
+    "remove": "Quitar",
+    "removeImage": "Quitar esta imagen",
+    "caption": "Leyenda…",
+    "openImage": "Abrir la imagen"
+  },
+  "dbBasics": {
+    "noDateField": "No hay ningún campo Fecha para colocar las filas.",
+    "addDateField": "Añadir un campo Fecha",
+    "rowDetail": "Detalle de la fila",
+    "previousRow": "Fila anterior",
+    "nextRow": "Fila siguiente",
+    "newProperty": "Nueva propiedad",
+    "delete": "Eliminar",
+    "calculation": "Cálculo",
+    "rowActions": "Acciones de la fila",
+    "rowCount_one": "{{count}} fila",
+    "rowCount_other": "{{count}} filas",
+    "newRow": "Nueva fila"
+  },
+  "dbView": {
+    "viewOptions": "Opciones de la vista",
+    "moveLeft": "Mover a la izquierda",
+    "moveRight": "Mover a la derecha",
+    "deleteView": "Eliminar vista",
+    "settings": "Ajustes",
+    "viewSettings": "Ajustes de la vista",
+    "fields": "Campos",
+    "rowHeight": "Altura de las filas",
+    "groupBy": "Agrupar por",
+    "noSelectField": "No hay campos Selección",
+    "addView": "Añadir vista",
+    "newView": "Nueva vista",
+    "databaseActions": "Acciones de la base de datos",
+    "deleteDatabase": "Eliminar base de datos",
+    "missingDatabase": "Falta la base de datos.",
+    "recreate": "Volver a crear"
+  },
+  "callout": {
+    "basic": "Básico",
+    "info": "Información",
+    "tip": "Consejo",
+    "warning": "Atención",
+    "alert": "Alerta",
+    "changeEmoji": "Cambiar emoji",
+    "presets": "Preajustes",
+    "background": "Color de fondo",
+    "style": "Estilo del recuadro"
+  },
+  "window": {
+    "detach": "Separar cuaderno",
+    "unpin": "Quitar del primer plano",
+    "alwaysOnTop": "Siempre en primer plano",
+    "stopAlwaysOnTop": "Dejar de mantener en primer plano",
+    "keepOnTop": "Mantener en primer plano",
+    "attach": "Acoplar a la ventana principal",
+    "minimize": "Minimizar",
+    "restore": "Restaurar",
+    "maximize": "Maximizar",
+    "close": "Cerrar",
+    "title": "Ventana",
+    "reload": "Recargar",
+    "closeWindow": "Cerrar ventana"
+  },
+  "dbFields": {
+    "type": "Tipo",
+    "numberFormat": "Formato numérico",
+    "dateFormat": "Formato de fecha",
+    "includeTime": "Incluir hora",
+    "insertLeft": "Insertar a la izquierda",
+    "insertRight": "Insertar a la derecha",
+    "hide": "Ocultar",
+    "clearValues": "Borrar valores",
+    "addColumn": "Añadir columna",
+    "newColumn": "Nueva columna",
+    "columnOptions": "Opciones de la columna",
+    "hideColumn": "Ocultar columna",
+    "addCard": "Añadir tarjeta",
+    "groupHint": "Elige un campo Selección para agrupar las tarjetas (Ajustes › Agrupar por).",
+    "showColumn": "Mostrar columna"
+  },
+  "settings": {
+    "title": "Ajustes del cuaderno",
+    "description": "Se aplican al instante y se comparten entre todos los cuadernos.",
+    "appearance": "Apariencia",
+    "pageWidth": "Ancho del documento",
+    "fontScale": "Escala de la fuente",
+    "breadcrumb": "Ruta de navegación sobre el documento",
+    "visible": "Visible",
+    "hidden": "Oculta",
+    "editor": "Editor",
+    "autosaveDelay": "Intervalo de guardado automático",
+    "confirmTrash": "Confirmar antes de enviar a la papelera",
+    "yes": "Sí",
+    "no": "No",
+    "shortcuts": "Atajos de teclado",
+    "reset": "Restablecer",
+    "press": "Pulsa…",
+    "shortcutHint": "Haz clic y pulsa la nueva combinación (Escape cancela)",
+    "shortcutConflict": "Si el atajo ya está en uso, se intercambia con la acción que lo tenía.",
+    "width": {
+      "narrow": "Estrecho",
+      "medium": "Medio",
+      "wide": "Ancho",
+      "full": "Ancho completo"
+    },
+    "shortcut": {
+      "newPage": "Nueva página",
+      "newTab": "Nueva pestaña",
+      "closeTab": "Cerrar pestaña",
+      "reopenTab": "Reabrir pestaña cerrada",
+      "nextTab": "Pestaña siguiente",
+      "prevTab": "Pestaña anterior",
+      "back": "Página anterior (historial)",
+      "forward": "Página siguiente (historial)",
+      "search": "Buscar en el cuaderno",
+      "settings": "Ajustes del cuaderno",
+      "save": "Guardar página",
+      "trash": "Abrir papelera",
+      "toggleSidebar": "Mostrar/ocultar barra lateral"
+    },
+    "spellcheck": "Corrector ortográfico",
+    "spellcheckHint": "Subraya los errores; clic derecho o Ctrl+. para corregir",
+    "spellUnsupported": "Sin diccionario para este idioma — solo subrayado nativo",
+    "spellOn": "Activo",
+    "spellOff": "Apagado",
+    "personalDictionary": "Diccionario personal",
+    "personalEmpty": "Ningún término añadido",
+    "personalRemove": "Quitar del diccionario"
+  },
+  "filterSort": {
+    "filters": "Filtros",
+    "add": "Añadir",
+    "sort": "Ordenar",
+    "sortBy": "Ordenar por",
+    "op": {
+      "is": "es",
+      "isNot": "no es",
+      "contains": "contiene",
+      "notContains": "no contiene",
+      "isEmpty": "está vacío",
+      "notEmpty": "no está vacío",
+      "gt": ">",
+      "gte": "≥",
+      "lt": "<",
+      "lte": "≤",
+      "checked": "marcado",
+      "unchecked": "sin marcar"
+    }
+  },
+  "lightbox": {
+    "zoomOut": "Alejar",
+    "zoomIn": "Acercar",
+    "pause": "Pausa (Espacio)",
+    "slideshow": "Presentación (Espacio)",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "icons": {
+    "search": "Buscar un icono…",
+    "uploading": "Subiendo…",
+    "chooseImage": "Elegir una imagen",
+    "dropFile": "o arrastra y suelta un archivo",
+    "emojis": "Emojis",
+    "icons": "Iconos",
+    "upload": "Importar"
+  },
+  "pageHeader": {
+    "cover": "Portada",
+    "change": "Cambiar",
+    "icon": "Icono"
+  },
+  "finalPass": {
+    "convertOptions": "Convertir / opciones",
+    "convertTo": "Convertir en",
+    "pasteAs": "Pegar como",
+    "copy": "Copiar",
+    "copyText": "Copiar el texto seleccionado",
+    "copyLink": "Copiar enlace",
+    "copyPassageLink": "Copiar enlace a este fragmento",
+    "exitFullscreen": "Salir de página completa",
+    "openFullscreen": "Abrir como página completa",
+    "deleteColumn": "Eliminar columna",
+    "volume": "Volumen"
+  },
+  "numberLabels": {
+    "number": "Número",
+    "integer": "Entero",
+    "percent": "Porcentaje",
+    "euro": "Euro (€)",
+    "dollar": "Dólar ($)",
+    "audio": "Audio"
+  },
+  "preview": {
+    "unavailable": "Vista previa no disponible",
+    "openPdf": "abrir el PDF",
+    "loadingPdf": "Cargando PDF… ({{label}})",
+    "loading": "Cargando…"
+  },
+  "subpage": {
+    "openHint": "Abrir subpágina (clic central: pestaña nueva)"
+  },
+  "sideMenu": {
+    "changeType": "Convertir en",
+    "copyBlockLink": "Copiar enlace del bloque",
+    "turnIntoSubpage": "Convertir en subpágina",
+    "colors": "Colores",
+    "rowHeader": "Fila de encabezado",
+    "columnHeader": "Columna de encabezado"
+  },
+  "linkPage": {
+    "tooltip": "Enlazar a una página o URL",
+    "placeholder": "Pega una URL o busca una página…",
+    "linkTo": "Enlazar a",
+    "hint": "Escribe una URL o el título de una página"
+  },
+  "mention": {
+    "block": "Bloque",
+    "openBlock": "Abrir en el bloque",
+    "showChip": "Mostrar como etiqueta",
+    "showCard": "Mostrar como tarjeta",
+    "refreshLabel": "Actualizar etiqueta",
+    "deletedPage": "Página eliminada",
+    "blockMissing": "No se encontró el bloque (¿eliminado?)",
+    "deletedTitle": "{{title}} (eliminada)",
+    "linkedBlock": "bloque enlazado",
+    "type": {
+      "equation": "Ecuación",
+      "image": "Imagen",
+      "video": "Vídeo",
+      "audio": "Audio",
+      "file": "Archivo",
+      "gallery": "Galería de imágenes",
+      "database": "Base de datos",
+      "youtube": "Vídeo de YouTube",
+      "embed": "Contenido incrustado",
+      "bookmark": "Marcador",
+      "divider": "Separador",
+      "subpage": "Subpágina",
+      "table": "Tabla",
+      "codeBlock": "Bloque de código"
+    }
+  },
+  "meta": {
+    "name": "Nombre del cuaderno",
+    "type": "Tipo",
+    "languageLabel": "Idioma",
+    "kind": {
+      "notes": "Notas",
+      "project": "Proyecto",
+      "script": "Guion",
+      "research": "Investigación",
+      "journal": "Diario"
+    },
+    "language": {
+      "fr": "Francés",
+      "en": "Inglés",
+      "es": "Español",
+      "de": "Alemán",
+      "ja": "Japonés",
+      "zh": "Chino"
+    }
+  },
+  "create": {
+    "title": "Crear un cuaderno",
+    "description": "Asigna un nombre, un tipo y un idioma. Podrás cambiarlos después.",
+    "namePlaceholder": "Nombre del cuaderno…",
+    "cancel": "Cancelar",
+    "submit": "Crear"
+  },
+  "edit": {
+    "title": "Editar cuaderno",
+    "description": "Cambia el nombre, el tipo o el idioma de este cuaderno.",
+    "done": "Listo"
+  },
+  "blockTypes": {
+    "paragraph": "Texto",
+    "heading1": "Título",
+    "heading2": "Subtítulo",
+    "heading3": "Título pequeño",
+    "bulletList": "Lista con viñetas",
+    "numberedList": "Lista numerada",
+    "checkList": "Lista de tareas",
+    "quote": "Cita"
+  },
+  "dbDefaults": {
+    "titleField": "Nombre",
+    "statusField": "Estado",
+    "tableView": "Cuadrícula",
+    "todo": "Por hacer",
+    "inProgress": "En curso",
+    "done": "Terminado",
+    "name": "Base de datos"
+  }
+}

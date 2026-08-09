@@ -1,0 +1,315 @@
+// Éditeur d'un profil d'export. Layout STABLE : toutes les lignes sont toujours présentes,
+// désactivées (grisées) quand elles ne s'appliquent pas au flux choisi → l'UI ne saute jamais
+// quand on change de réglage. Moteurs GPU filtrés par sonde réelle côté core. shadcn Base UI.
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Film, FolderInput, ChevronDown } from "lucide-react";
+import { useApp } from "@/store";
+import { nr } from "@/lib/bridge";
+import { swrRead } from "@/lib/swr";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Toggle } from "@/components/ui/toggle";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem,
+} from "@/components/ui/select";
+import { ExportAudioSelect } from "./ExportAudioSelect";
+import { ExportNaming } from "./ExportNaming";
+import { ExportTimelineTarget } from "./ExportTimelineTarget";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import {
+  type ExportProfile,
+  type ExportEncoderMode,
+  EXPORT_WORKFLOW_OPTIONS,
+  EXPORT_AUDIO_OPTIONS,
+  EXPORT_CONTAINER_OPTIONS,
+  EXPORT_SPEED_OPTIONS,
+  getExportCodecLabel,
+  usesEncoding,
+  usesFile,
+  getExportProfileIssue,
+  MERGE_GAP_MAX_MS,
+  MERGE_GAP_STEP_MS,
+} from "@/features/export/profiles";
+import { NumberSpin } from "@/components/ui/number-spin";
+import { useExportEncodingFields } from "@/features/export/encodingFields";
+import { IconPicker } from "./IconPicker";
+
+function Row({ label, disabled, children }: { label: string; disabled?: boolean; children: React.ReactNode }) {
+  return (
+    <div className={cn("flex items-center justify-between gap-3 transition-opacity", disabled && "opacity-40")}>
+      <span className="text-[0.8125rem] text-muted-foreground">{label}</span>
+      <div className="w-[56%] shrink-0">{children}</div>
+    </div>
+  );
+}
+
+export function ProfileEditor({ profile }: { profile: ExportProfile }) {
+  const { t } = useTranslation("export");
+  const update = useApp((s) => s.updateExportProfile);
+  const set = (patch: Partial<ExportProfile>) => update(profile.id, patch);
+
+  const encode = usesEncoding(profile.workflow);
+  const file = usesFile(profile.workflow);
+  const isTimelineImport = profile.workflow === "timeline_import";
+  // Le choix de piste vaut pour l'import timeline aussi (l'import n'y répond qu'en tout-ou-rien).
+  const audioSettable = file || isTimelineImport;
+  // Sans objet si le son est coupé (la ligne Audio au-dessus le dit) ou hors ré-encodage.
+  const codecSettable = encode && profile.audioMode !== "none";
+
+  // Moteurs/codecs réellement exécutables ici + cascade de compatibilité : logique partagée avec les
+  // réglages du hub et l'archivage d'une collection (features/export/encodingFields).
+  const fields = useExportEncodingFields(profile, set);
+  const speedSettable = encode && fields.speedSettable;
+
+  // Codec audio : en remux comme en import, ré-encoder le son n'a pas de sens → « Copie » seule.
+  const audioOptions = encode ? fields.audioOptions : EXPORT_AUDIO_OPTIONS.filter((o) => o.value === "copy");
+  const audioGroups = encode ? fields.audioGroups : [];
+  const audioLoneOptions = audioOptions.filter((o) => !audioGroups.some((g) => g.options.includes(o)));
+  // Conteneurs proposés : filtrés au codec en ré-encodage (jamais un couple invalide), tous sinon.
+  const containerOptions = encode ? fields.containerOptions : EXPORT_CONTAINER_OPTIONS;
+
+  // Réglage obligatoire manquant → champ en rouge (et export bloqué côté bouton).
+  const binIssue = getExportProfileIssue(profile, "binTarget");
+  const binErrorId = `${profile.id}-bin-error`;
+
+  // Dossiers Media Pool existants (suggestions du sélecteur de destination) : on peut en choisir un
+  // OU en saisir un nouveau (créé à la volée côté Resolve). Chargés seulement pour l'import timeline.
+  const [bins, setBins] = useState<string[]>([]);
+  useEffect(() => {
+    if (!isTimelineImport) return;
+    let alive = true;
+    // SWR : bins du snapshot d'abord (instantané), timelineTree live remplace ensuite.
+    void swrRead(
+      nr.snapshot?.peek("tree"),
+      () => nr.timelineTree(),
+      (r) => {
+        if (!alive || !r.ok) return;
+        const uniq = [...new Set(r.timelines.map((t: { bin: string }) => t.bin).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        setBins(uniq);
+      },
+    );
+    return () => { alive = false; };
+  }, [isTimelineImport]);
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[0.8125rem] text-muted-foreground">{t("editor.name")}</span>
+        <div className="flex items-center gap-2">
+          <IconPicker profile={profile} onChange={(icon) => set({ icon })} />
+          <Input value={profile.name} onChange={(e) => set({ name: e.target.value })} placeholder={t("editor.namePlaceholder")} className="flex-1" />
+        </div>
+      </div>
+
+      <ToggleGroup
+        className="w-full"
+        value={[profile.workflow]}
+        onValueChange={(v) => {
+          const wf = v[0] as ExportProfile["workflow"] | undefined;
+          if (!wf) return;
+          // Remux/import timeline n'acceptent pas un codec audio ré-encodé → retour à « Copie ».
+          // Le son coupé (« none ») survit au changement de flux : c'est un choix de piste, pas de codec.
+          const fix = (wf === "video_remux" || wf === "timeline_import") && profile.audioMode !== "copy" && profile.audioMode !== "none"
+            ? { audioMode: "copy" as const } : {};
+          set({ workflow: wf, ...fix });
+        }}
+      >
+        {EXPORT_WORKFLOW_OPTIONS.map((o) => (
+          <ToggleGroupItem key={o.value} className="flex-1 text-xs" value={o.value}>{o.label}</ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+
+      {/* Destination (workflow Timeline) : timeline à la racine OU rangée dans un dossier du Media Pool. */}
+      {isTimelineImport && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[0.8125rem] text-muted-foreground">{t("editor.destination")}</span>
+          <div className="flex items-center gap-2">
+            {/* `!= null` et pas la véracité : un nom VIDE reste le mode « Dossier » (en rouge), sinon le
+                sélecteur resauterait sur « Timeline » dès qu'on efface le champ pour le retaper. */}
+            <ToggleGroup
+              value={[profile.binTarget != null ? "bin" : "timeline"]}
+              onValueChange={(v) => { const d = v[0]; if (d === "timeline") set({ binTarget: null }); else if (d === "bin") set({ binTarget: profile.binTarget || t("editor.defaultFolder") }); }}
+            >
+              <ToggleGroupItem value="timeline" className="flex-1 gap-1.5 text-xs"><Film className="size-3.5" /> {t("editor.timeline")}</ToggleGroupItem>
+              <ToggleGroupItem value="bin" className="flex-1 gap-1.5 text-xs"><FolderInput className="size-3.5" /> {t("editor.folder")}</ToggleGroupItem>
+            </ToggleGroup>
+            {profile.binTarget != null && (
+              <div className="flex flex-1 items-center gap-1">
+                <Input
+                  value={profile.binTarget}
+                  onChange={(e) => set({ binTarget: e.target.value })}
+                  placeholder={t("editor.folderPlaceholder")}
+                  className={cn("flex-1", binIssue && "border-destructive focus-visible:ring-destructive/40")}
+                  aria-invalid={!!binIssue}
+                  aria-errormessage={binIssue ? binErrorId : undefined}
+                />
+                {bins.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label={t("editor.existingFolders")}>
+                      <ChevronDown className="size-4" />
+                    </Button>} />
+                    <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>{t("editor.mediaPoolFolders")}</DropdownMenuLabel>
+                        {bins.map((b) => (
+                          <DropdownMenuItem key={b} onClick={() => set({ binTarget: b })}>
+                            <FolderInput className="size-3.5" /> {b}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            )}
+          </div>
+          {binIssue && (
+            <span id={binErrorId} className="text-[0.75rem] text-destructive">{binIssue.message}</span>
+          )}
+        </div>
+      )}
+
+      {/* Timeline visée : celle ouverte, une nouvelle, ou une existante par son nom. Même valeur que
+          le sélecteur du panneau de droite (elle vit dans le profil). */}
+      {isTimelineImport && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[0.8125rem] text-muted-foreground">{t("editor.timelineTarget")}</span>
+          <ExportTimelineTarget profile={profile} className="w-full" />
+        </div>
+      )}
+
+      <Row label={t("editor.optimization")} disabled={!encode}>
+        <Select
+          value={fields.encoderMode}
+          onValueChange={(value) => fields.pickEncoderMode(value as ExportEncoderMode)}
+          items={fields.encoderItems}
+          disabled={!encode}
+        >
+          <SelectTrigger>
+            <SelectValue>{fields.encoderItems.find((item) => item.value === fields.encoderMode)?.label}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {fields.encoderItems.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      <Row label={t("editor.speed")} disabled={!speedSettable}>
+        <Select
+          value={fields.speed}
+          onValueChange={(value) => set({ speed: value as ExportProfile["speed"] })}
+          items={EXPORT_SPEED_OPTIONS}
+          disabled={!speedSettable}
+        >
+          <SelectTrigger><SelectValue>{EXPORT_SPEED_OPTIONS.find((option) => option.value === fields.speed)?.label}</SelectValue></SelectTrigger>
+          <SelectContent>
+            {EXPORT_SPEED_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      <Row label={t("editor.codec")} disabled={!encode}>
+        <Select
+          value={profile.codec}
+          // Cale le conteneur sur un choix compatible (ex. AV1 refuse MOV) → jamais de couple invalide,
+          // puis le codec audio sur le conteneur retenu (WebM → Opus).
+          onValueChange={(v) => fields.pickCodec(v as ExportProfile["codec"])}
+          items={fields.codecOptions}
+          disabled={!encode}
+        >
+          <SelectTrigger><SelectValue>{getExportCodecLabel(profile.codec)}</SelectValue></SelectTrigger>
+          <SelectContent>
+            {fields.codecGroups.map((g) => (
+              <SelectGroup key={g.key}>
+                <SelectGroupLabel>{g.label}</SelectGroupLabel>
+                {g.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectGroup>
+            ))}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      {/* QUELLE audio sortir : toutes les pistes, aucune, une piste précise ou la piste d'une langue
+          (tags normalisés + secours IA si non étiquetée). Menu partagé avec le panneau du derush. */}
+      <Row label={t("editor.audio")} disabled={!audioSettable}>
+        <ExportAudioSelect profile={profile} />
+      </Row>
+
+      {/* COMMENT l'encoder. « Aucun » n'est plus ici : couper le son se dit dans la ligne au-dessus. */}
+      <Row label={t("editor.audioCodec")} disabled={!codecSettable}>
+        {/* Son coupé → la ligne est grisée : on y montre le 1er codec offert par le conteneur, jamais
+            « Copie » en dur (le WebM ne l'offre pas → le champ serait vide). */}
+        <Select
+          value={profile.audioMode === "none" ? (audioOptions[0]?.value ?? "copy") : profile.audioMode}
+          onValueChange={(v) => set({ audioMode: v as ExportProfile["audioMode"] })}
+          items={audioOptions}
+          disabled={!codecSettable}
+        >
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {audioLoneOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+            {audioGroups.map((g) => (
+              <SelectGroup key={g.family}>
+                <SelectGroupLabel>{g.label}</SelectGroupLabel>
+                {g.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectGroup>
+            ))}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      <Row label={t("editor.container")} disabled={!file}>
+        <Select
+          value={profile.container}
+          onValueChange={(v) => fields.pickContainer(v as ExportProfile["container"])}
+          items={containerOptions}
+          disabled={!file}
+        >
+          <SelectTrigger><SelectValue>{profile.container.toUpperCase()}</SelectValue></SelectTrigger>
+          <SelectContent>
+            {containerOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      {/* Nom des fichiers produits. Hors flux fichier il n'y a aucun fichier à nommer (l'import
+          timeline ne sort rien) → le bloc disparaît au lieu d'être grisé : c'est un champ libre avec
+          son aperçu, pas une ligne de réglage à largeur fixe. */}
+      {file && <ExportNaming profile={profile} onChange={(naming) => set({ naming })} />}
+
+      <Row label={t("editor.mergeToOne")} disabled={!file}>
+        <div className="flex justify-end">
+          <Toggle pressed={profile.mergeEnabled} onPressedChange={(p) => set({ mergeEnabled: p })} disabled={!file}>
+            {profile.mergeEnabled ? t("toggle.yes") : t("toggle.no")}
+          </Toggle>
+        </div>
+      </Row>
+
+      {/* Noir intercalé entre les plans du montage fusionné : bout à bout, deux plans consécutifs se
+          touchent à l'image près et rien ne marque la coupe à l'œil. Sans fusion la ligne n'a pas
+          d'objet (chaque plan est déjà un fichier), mais elle reste EN PLACE, grisée — le panneau ne
+          doit pas se réagencer quand on bascule un interrupteur. */}
+      <Row label={t("editor.mergeGap")} disabled={!file || !profile.mergeEnabled}>
+        <div className="flex items-center justify-end gap-1.5">
+          <NumberSpin
+            value={profile.mergeGap ?? 0}
+            min={0}
+            max={MERGE_GAP_MAX_MS}
+            step={MERGE_GAP_STEP_MS}
+            ariaLabel={t("editor.mergeGap")}
+            disabled={!file || !profile.mergeEnabled}
+            onCommit={(v) => set({ mergeGap: v })}
+          />
+          <span className="text-[0.75rem] text-muted-foreground">{t("editor.milliseconds")}</span>
+        </div>
+      </Row>
+    </div>
+  );
+}

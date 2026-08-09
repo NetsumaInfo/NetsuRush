@@ -1,0 +1,83 @@
+{
+  "action": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "add": "Añadir",
+    "remove": "Quitar",
+    "rename": "Renombrar",
+    "edit": "Editar",
+    "copy": "Copiar",
+    "reset": "Restablecer",
+    "apply": "Aplicar",
+    "open": "Abrir",
+    "retry": "Reintentar",
+    "error": "Error",
+    "import": "Importar",
+    "decrease": "Reducir",
+    "increase": "Aumentar",
+    "loading": "Cargando…"
+  },
+  "status": {
+    "loading": "Cargando…",
+    "error": "Error",
+    "ok": "OK",
+    "empty": "Nada que mostrar"
+  },
+  "color": {
+    "hexValue": "Valor hexadecimal",
+    "transparent": "Transparente",
+    "choose": "Elegir un color",
+    "swatch": "Color {{color}}"
+  },
+  "player": {
+    "scenePreview": "Vista previa del plano",
+    "progress": "Barra de progreso",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "prevFrame": "Fotograma anterior",
+    "nextFrame": "Fotograma siguiente",
+    "prevFrameShortcut": "Fotograma anterior (←)",
+    "nextFrameShortcut": "Fotograma siguiente (→)",
+    "soundOn": "Activar el sonido",
+    "soundOff": "Silenciar",
+    "volume": "Volumen",
+    "muted": "Silenciado",
+    "fullscreen": "Pantalla completa",
+    "seek": "Desplazarse por el vídeo"
+  },
+  "fileType": {
+    "video": "Vídeo",
+    "image": "Imagen",
+    "media": "Medios"
+  },
+  "window": {
+    "reference": "NetsuRush — Referencia",
+    "notebook": "NetsuRush — Cuaderno"
+  },
+  "mock": {
+    "resolveUnavailable": "Resolve no está disponible en el navegador.",
+    "appUnavailable": "Esta función no está disponible en el navegador.",
+    "outsideApp": "Esta función solo está disponible en la aplicación.",
+    "pageNotFound": "Página no encontrada",
+    "collectionNotFound": "Colección no encontrada",
+    "archiveUnavailable": "El archivado no está disponible fuera de la aplicación.",
+    "folderImportUnavailable": "La importación de carpetas no está disponible fuera de la aplicación.",
+    "emptyFolderName": "El nombre de la carpeta está vacío",
+    "invalidFolderName": "El nombre de la carpeta no puede contener '/' ni '\\'",
+    "folder": "Carpeta"
+  },
+  "spell": {
+    "title": "Ortografía",
+    "unknownWord": "Palabra desconocida",
+    "searching": "Buscando sugerencias…",
+    "noSuggestion": "Sin sugerencias",
+    "addToDictionary": "Añadir al diccionario",
+    "ignoreOnce": "Ignorar en esta sesión",
+    "replaceAll": "Reemplazar las {{count}} apariciones"
+  }
+}

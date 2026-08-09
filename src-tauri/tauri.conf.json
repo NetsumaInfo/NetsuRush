@@ -1,0 +1,76 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "NetsuRush",
+  "version": "0.3.5",
+  "identifier": "com.netsurush.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "NetsuRush",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 380,
+        "minHeight": 420,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": false,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEUzMTE1M0FERDQ3QTUyMzgKUldRNFVuclVyVk1SNDMzR1k1dCtET2p2eWxIRGFyV0M1MHZ4dnZ3bHhidko4NHEzdTJ4ZHFYdWsK",
+      "endpoints": [
+        "https://github.com/NetsumaInfo/NetsuRush/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": ["netsurush"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": ["nsis"],
+    "license": "AGPL-3.0-only",
+    "licenseFile": "../LICENSE",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": ["resources/**/*", "../LICENSE"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["French", "English"],
+        "customLanguageFiles": {
+          "French": "windows/netsurush-installer-french.nsh",
+          "English": "windows/netsurush-installer-english.nsh"
+        },
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "installerHooks": "windows/installer-hooks.nsh"
+      }
+    },
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  }
+}

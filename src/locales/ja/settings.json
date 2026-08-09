@@ -1,0 +1,654 @@
+{
+  "title": "設定",
+  "nav": {
+    "account": "アカウント",
+    "interface": "インターフェース",
+    "media": "メディア",
+    "ai": "モデル",
+    "export": "書き出し",
+    "adobe": "Adobe",
+    "storage": "ストレージ",
+    "system": "システム",
+    "about": "情報"
+  },
+  "about": {
+    "tagline": "ローカルの素材整理ハブ。DaVinci Resolve、Premiere Pro、After Effects と連携します。",
+    "socialTitle": "ソーシャル",
+    "social": {
+      "discord": "サーバーに参加"
+    },
+    "legal": "© 2026 Haim Faraj · NetsuRush は GNU AGPL v3.0-only の下で配布されます · 無保証。",
+    "licenseLink": "ライセンス全文",
+    "sourceLink": "対応するソースコード"
+  },
+  "account": {
+    "title": "アカウント",
+    "notConfigured": "この環境ではサインインが設定されていません。",
+    "subtitle": "NetsuRush に接続している Discord アカウントです。",
+    "none": "接続中のアカウントはありません。",
+    "discordUser": "Discord ユーザー",
+    "signOut": "サインアウト"
+  },
+  "playback": {
+    "title": "プレビューとサムネイル",
+    "subtitle": "動画プレビューとサムネイルを設定します。",
+    "soundTitle": "サウンド",
+    "playerVolume": "プレーヤーの音量",
+    "playerVolumeHint": "NetsuCut・コレクション・音声・アップスケールで共有されます。",
+    "hoverVolume": "ホバー時の音量",
+    "hoverVolumeHint": "ホバー中のサムネイルの音量。自動再生のプレビューは常にミュートです。",
+    "globalMuted": "プレーヤーの音量でミュートされています。",
+    "generation": {
+      "proxyTitle": "アニメーションプレビュー",
+      "thumbnailTitle": "静止サムネイル",
+      "format": "形式",
+      "formatHint": {
+        "hevc": "HEVCを滑らかに再生できる環境向けの軽量ファイルです。",
+        "h264": "互換性が高く、一般に高速に再生できます。",
+        "webp": "音声トラックのないグリッド用プレビューです。"
+      },
+      "engine": "エンジン",
+      "engineAuto": "自動・推奨",
+      "engineHint": "実際に利用できる最適なエンジンを選択します。",
+      "preset": "プロファイル",
+      "presetHint": "選択したエンジンの実際のFFmpeg値です。",
+      "resolution": "解像度",
+      "resolutionHint": "カードの初期設定は480pです。",
+      "audio": "音声",
+      "audioHint": "動画プロキシに軽量なAAC音声を追加します。",
+      "noWebpAudio": "アニメーションWebPは音声に対応していません。",
+      "audioUnavailable": "設定したプレビューに音声はありません。",
+      "enabled": "有効",
+      "disabled": "無効",
+      "thumbnailFormatHint": "WebPは小さく、JPEGは高い互換性があります。",
+      "quality": "画像品質",
+      "qualityLow": "軽量",
+      "qualityStandard": "バランス",
+      "qualityHigh": "高精細",
+      "qualityHint": "段階で精細さと生成速度が決まります。",
+      "thumbnailTiming": "高速モードのまま、カットの数フレーム後を取得します。",
+      "cacheHint": "設定変更後も既存キャッシュは保持されます。",
+      "cacheCleared": "古いキャッシュを削除しました。",
+      "reset": "リセット",
+      "clearOld": "古いキャッシュを削除"
+    }
+  },
+  "performance": {
+    "indexingTitle": "ショット解析",
+    "accelerationTitle": "アクセラレーション",
+    "shotDecode": "まとめて抽出",
+    "shotDecodeHint": "ショットの画像を 1 枚ずつではなくまとめて取り出します。最大 6 倍速く、取り出す画像はまったく同じです。",
+    "vramProfile": "メモリプロファイル",
+    "vramProfileHint": "同時に進める作業量です。編集の邪魔になるなら下げ、マシンに余裕があれば上げてください。",
+    "vram": {
+      "economy": "省メモリ",
+      "balanced": "バランス",
+      "performance": "パフォーマンス"
+    },
+    "maxPatches": "解析解像度",
+    "maxPatchesHint": "モデルが 1 枚の画像から見る細かさです。上げると小さな要素まで拾えますが、時間とメモリを使います。",
+    "patchesDefault": "{{value}}（既定）",
+    "reindexWarning": "この解像度では素材を作り直す必要があります。256 に戻せば元のインデックスがそのまま見つかります。",
+    "onnxGpu": "顔と音声入力を GPU で",
+    "onnxGpuHint": "結果は同じまま、プロセッサの約 8 倍の速さです。グラフィックドライバが落ちる場合は切ってください。",
+    "enabled": "オン",
+    "disabled": "オフ",
+    "reset": "パフォーマンスを初期化",
+    "quick": "パフォーマンス",
+    "quickMore": "すべての設定…"
+  },
+  "appearance": {
+    "title": "テーマ",
+    "subtitle": "作業環境に合う配色を選択します。",
+    "group": {
+      "dark": "ダーク",
+      "light": "ライト"
+    },
+    "theme": {
+      "dark": {
+        "label": "ダーク",
+        "hint": "ニュートラルで高コントラストです。"
+      },
+      "midnight": {
+        "label": "ミッドナイト",
+        "hint": "純黒と控えめなサーフェスです。"
+      },
+      "blue": {
+        "label": "ナイトブルー",
+        "hint": "深みのある鮮やかな青です。"
+      },
+      "light": {
+        "label": "ライト",
+        "hint": "明瞭で読みやすい白です。"
+      },
+      "soft-light": {
+        "label": "ソフトライト",
+        "hint": "眩しさを抑えたブルーグレーです。"
+      },
+      "graphite": {
+        "label": "グラファイト",
+        "hint": "色味のないニュートラルグレーです。"
+      },
+      "forest": {
+        "label": "フォレスト",
+        "hint": "深いグリーンとエメラルドのアクセントです。"
+      },
+      "ember": {
+        "label": "エンバー",
+        "hint": "温かみのあるチャコールとアンバーのアクセントです。"
+      },
+      "plum": {
+        "label": "プラム",
+        "hint": "落ち着いた紫とモーブのアクセントです。"
+      },
+      "contrast": {
+        "label": "ハイコントラスト",
+        "hint": "純黒とはっきりした境界線です。"
+      },
+      "paper": {
+        "label": "ペーパー",
+        "hint": "やわらかなセピアとテラコッタのアクセントです。"
+      }
+    },
+    "wallpaper": {
+      "title": "背景",
+      "choose": "画像を選ぶ",
+      "none": "なし",
+      "remove": "ライブラリから削除",
+      "empty": "背景なし。ここにファイルをドロップ。",
+      "importFailed": "読み込めませんでした。",
+      "blockedByTheme": "ハイコントラストのテーマは背景を受け付けません。",
+      "blur": "ぼかし",
+      "opacity": "不透明度",
+      "saturate": "彩度",
+      "uiOpacity": "パネルの不透明度",
+      "animate": "動かす",
+      "pauseUnfocused": "背面では止める",
+      "pauseWhileBusy": "処理中は止める",
+      "groupFraming": "位置",
+      "groupRender": "見た目",
+      "groupReadability": "読みやすさ",
+      "groupMotion": "動き",
+      "reset": "初期化",
+      "openFraming": "画像を合わせる",
+      "framingTitle": "背景の配置",
+      "rotateLeft": "左に回転",
+      "rotateRight": "右に回転",
+      "flipH": "左右反転",
+      "flipV": "上下反転",
+      "resetFraming": "配置を戻す",
+      "cropWidth": "切り抜きの幅",
+      "transform": "向き",
+      "applyFraming": "適用",
+      "cropSize": "切り抜きのサイズ",
+      "groupScope": "適用範囲",
+      "onDetached": "分離ウィンドウ",
+      "global": "すべてのテーマで共有"
+    },
+    "colors": {
+      "title": "色",
+      "perTheme": "このテーマ用の設定",
+      "primary": "アクセント",
+      "fg": "文字",
+      "bg": "背景",
+      "surface": "パネル",
+      "border": "枠線",
+      "restore": "テーマに戻す",
+      "fromTheme": "テーマの色",
+      "resetAll": "すべてテーマに戻す",
+      "resetAllHint": "このテーマの変更をすべて取り消します。"
+    },
+    "custom": {
+      "title": "マイテーマ",
+      "subtitle": "現在の外観（パレット・色・背景）を保存します。",
+      "create": "新しいテーマ",
+      "save": "保存",
+      "delete": "このテーマを削除",
+      "empty": "保存されたテーマはありません。",
+      "namePlaceholder": "テーマ名",
+      "confirm": "決定",
+      "rename": "名前を変更",
+      "unsaved": "「{{name}}」に未保存の変更があります。"
+    }
+  },
+  "updates": {
+    "title": "アップデート",
+    "subtitle": "GitHub でリリースを確認し、署名を検証してからインストールします。",
+    "auto": "自動確認",
+    "autoHint": "起動から数秒後に新しいバージョンを確認します。",
+    "on": "オン",
+    "off": "オフ",
+    "ready": "確認できます",
+    "checking": "アップデートを確認中…",
+    "available": "バージョン {{version}} を利用できます",
+    "downloading": "ダウンロードと検証中…",
+    "failed": "確認に失敗しました",
+    "current": "NetsuRush は最新です",
+    "check": "確認",
+    "install": "インストール",
+    "history": "バージョン別の新機能",
+    "whatsNew": "バージョン {{version}} の新機能",
+    "gotIt": "始める"
+  },
+  "compatibility": {
+    "title": "この PC の互換性",
+    "gpuFunctions": "GPUを使う機能",
+    "cpuFunctions": "CPUまたはフォールバック機能",
+    "igpu": "iGPU",
+    "dgpu": "dGPU",
+    "driver": "ドライバー",
+    "noHardware": "コンポーネントが検出されませんでした。",
+    "state": {
+      "gpu": "GPU",
+      "cpu": "CPU",
+      "fallback": "CPUフォールバック",
+      "missing": "利用不可"
+    },
+    "thumbnailEngine": "意図的にCPUで生成します。",
+    "subtitle": "NetsuRush はこの PC で利用できるエンジンだけを使用します。",
+    "refresh": "確認",
+    "hardware": "検出されたコンポーネント",
+    "gpu": "グラフィックカード",
+    "cpu": "プロセッサー",
+    "uses": "機能",
+    "notInstalled": "利用不可",
+    "available": "利用可能",
+    "unavailable": "この PC のコンポーネントを確認できませんでした。",
+    "features": {
+      "netsucut": "NetsuCut",
+      "torchModels": "AI モデル",
+      "onnxModels": "ONNX モデル",
+      "transcription": "文字起こし",
+      "notebook": "NetsuBook"
+    },
+    "featureHints": {
+      "netsucut": "プレビューを作成し、動画をエンコードします。",
+      "torchModels": "ショットを検出し、検索と画像改善を行います。",
+      "onnxModels": "背景を削除し、ONNX モデルを実行します。",
+      "transcription": "音声をテキストに変換します。",
+      "notebook": "ノートを保存・整理します。GPU は不要です。"
+    }
+  },
+  "exportProfiles": {
+    "title": "書き出しプロファイル",
+    "subtitle": "サムネイルと検索結果のダウンロードボタンに適用されるコーデック設定です。",
+    "new": "新規",
+    "duplicate": "複製",
+    "deleteAria": "プロファイルを削除",
+    "restore": "復元",
+    "restoreHint": "一覧にない標準プリセットを復元します。",
+    "cardButton": "サムネイルボタン",
+    "cardButtonHint": "サムネイルにカーソルを合わせたときに表示されるボタンの動作です。"
+  },
+  "console": {
+    "title": "コンソール",
+    "subtitle": "アプリ・サービス・AI が書き出した内容。",
+    "copy": "コピー",
+    "errors": "エラー",
+    "export": "書き出し",
+    "clearAria": "コンソールを消去",
+    "all": "すべて（{{count}}）",
+    "warnings": "警告（{{count}}）",
+    "errorsCount": "エラー（{{count}}）",
+    "empty": "ログはまだありません。",
+    "emptyFilter": "この条件に一致するログはありません。",
+    "emptyClipboard": "ログはありません。"
+  },
+  "bugReport": {
+    "title": "問題を知らせる",
+    "type": "どうなりましたか？",
+    "module": "どこで？",
+    "detail": "ひとことで教えてください",
+    "detailPlaceholder": "例：送信ボタンが反応しない",
+    "severity": "どれくらい困る？",
+    "frequency": "起きるのは…",
+    "groups": {
+      "problem": "うまくいかない",
+      "improvement": "アイデア",
+      "other": "その他"
+    },
+    "categories": {
+      "crash": "アプリが勝手に閉じる",
+      "freeze": "アプリが固まる",
+      "startup": "アプリが開かない",
+      "dataLoss": "作業が消えた",
+      "wrongResult": "結果が違う",
+      "playback": "動画が再生できない",
+      "export": "書き出しができない",
+      "hostLink": "Resolve や Adobe とつながらない",
+      "ai": "AI が動かない",
+      "download": "ダウンロードが失敗する",
+      "performance": "動きが遅い",
+      "ui": "表示がおかしい",
+      "accessibility": "読みにくい・押しにくい",
+      "i18n": "文章の間違い",
+      "security": "プライバシーが気になる",
+      "regression": "前は動いていた",
+      "feature": "新しい機能がほしい",
+      "ux": "もっと簡単にする案",
+      "question": "質問がある",
+      "other": "そのほか"
+    },
+    "severities": {
+      "blocker": "何もできない",
+      "major": "困る",
+      "minor": "小さなこと",
+      "idea": "アイデア"
+    },
+    "frequencies": {
+      "always": "毎回",
+      "often": "よく",
+      "rare": "たまに",
+      "once": "1回だけ"
+    },
+    "description": "何があったか教えてください",
+    "descriptionPlaceholder": "やったこと、うまくいかなかったこと…",
+    "descriptionIdea": "アイデアを教えてください",
+    "descriptionIdeaPlaceholder": "できるようになってほしいこと、その理由",
+    "steps": "もう一度やるには？",
+    "stepsPlaceholder": "1. 開く… 2. 押す… 3. …",
+    "expected": "本当はどうなるはず？",
+    "expectedPlaceholder": "期待していた結果",
+    "videoSource": "動画のリンク",
+    "videoPlaceholder": "ダウンロードできるリンク",
+    "discord": "あなたの Discord",
+    "discordPlaceholder": "@ユーザー名",
+    "auto": "自動",
+    "specs": {
+      "title": "あなたの PC",
+      "copy": "コピー",
+      "refresh": "読み直す",
+      "loading": "読み取り中…",
+      "more": "すべて見る",
+      "less": "たたむ",
+      "manual": "自分で書く",
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 GB, Windows 11"
+    },
+    "sending": "送信中…",
+    "send": "送る",
+    "download": "メッセージを保存",
+    "logsAttached": "ログ {{count}} 行を添付",
+    "logErrors": "エラー {{count}} 件",
+    "sendFailed": "送れませんでした。もう一度お試しください。",
+    "validation": {
+      "description": "送る前に、何があったか書いてください。",
+      "detail": "ひとことで内容を書いてください。",
+      "tooLarge": "ファイルが {{size}} MB を超えています。"
+    },
+    "noWebhook": "送信は無効です：Webhook が設定されていません。nr.config.json に <c1>bugWebhook</c1> を設定するか、環境変数 <c2>NR_BUG_WEBHOOK</c2> を指定してください。",
+    "descriptionOther": "くわしく教えてください",
+    "descriptionOtherPlaceholder": "質問や、伝えたいことを書いてください…",
+    "files": {
+      "label": "添付ファイル",
+      "choose": "ファイルを添付",
+      "add": "追加",
+      "remove": "削除",
+      "limit": "ファイルは最大 {{count}} 件"
+    }
+  },
+  "outbox": {
+    "opening": "キャッシュを開いています…",
+    "intro": "重いエンコード中にGPUを空けるためResolve/Premiere Proを閉じても、送信内容は失われません。キャッシュされ、<b>再起動時に自動で適用</b>されます。",
+    "enabled": "キューを有効化",
+    "enabledHint": "無効にすると、閉じている編集ソフトへの送信は従来どおり失敗します。",
+    "on": "有効",
+    "off": "無効",
+    "delay": "適用までの待ち時間",
+    "delayHint": "編集ソフトが起動し終わるまで待ちます。",
+    "destination": "キャッシュ送信の保存先",
+    "targetNew": "送信ごとにタイムライン",
+    "targetSingle": "1つのタイムライン",
+    "targetPlaceholder": "集約タイムライン名",
+    "targetSingleHint": "保留中の送信を、再起動時に作成する1つのタイムラインへまとめます。",
+    "targetNewHint": "直接送信と同様に、送信ごとに別のタイムラインを作成します。",
+    "queue": "キュー",
+    "pendingCount": "{{count}}件保留",
+    "applyNow": "今すぐ適用",
+    "clearHistory": "履歴を消去",
+    "empty": "キャッシュされた送信はありません。",
+    "applied": "適用済み",
+    "failed": "失敗",
+    "pending": "保留中",
+    "offline": {
+      "title": "タイムラインのオフラインキャッシュ",
+      "upToDate": "最新",
+      "stats": "クリップ{{clips}}件 · {{cached}}/{{total}}タイムラインのショットを保存済み。",
+      "none": "キャッシュがありません。Resolveを閉じるとタイムラインは空で開きます。",
+      "update": "更新",
+      "needResolve": "キャッシュの作成にはResolveへの接続が必要です。",
+      "building": "バックグラウンドで更新中（メディア処理を優先）…",
+      "auto": "バックグラウンドで自動更新し、新しいタイムラインだけを読み込みます。",
+      "rebuild": "すべて再計算"
+    }
+  },
+  "discord": {
+    "title": "Discord プレゼンス",
+    "preview": {
+      "heading": "プレイ中",
+      "elapsed": "{{time}} 経過",
+      "empty": "何も表示されません。"
+    },
+    "on": "オン",
+    "off": "オフ",
+    "status": {
+      "connected": "{{user}} のプロフィールに表示中。",
+      "searching": "Discord が見つかりません。起動すると表示されます。",
+      "disabled": "プロフィールには何も出ません。",
+      "noAppId": "Discord アプリケーションが未設定です。"
+    },
+    "showModule": "開いているモジュール",
+    "showProject": "プロジェクト名",
+    "showProjectHint": "クライアント名が漏れる場合があります。",
+    "showElapsed": "経過時間",
+    "custom": "カスタムテキスト",
+    "customHelp": "自動の行を置き換えます。{module} と {projet} が差し替わります。",
+    "details": "1 行目",
+    "state": "2 行目"
+  },
+  "storage": {
+    "empty": "キャッシュはまだありません。",
+    "emptyHint": "サムネイルとプレビューは素材を見ていくうちに登録されます。",
+    "diskFree": "{{total}} 中 {{free}} 空き",
+    "refresh": "更新",
+    "kind": {
+      "thumb": "サムネイル",
+      "proxy": "映像プレビュー",
+      "voice": "抽出した音声",
+      "upscaleTest": "処理のテスト",
+      "roto": "ロトセッション",
+      "scenes": "ショット検出",
+      "transcripts": "文字起こし",
+      "embeddings": "検索ベクトル",
+      "indexThumbs": "インデックスのサムネイル",
+      "faces": "顔インデックス"
+    },
+    "kindHint": {
+      "thumb": "ショットごとに 1 枚。ゼロからの再生成は遅め。",
+      "proxy": "GPU でエンコードした短い抜粋。再生成は一瞬。",
+      "voice": "文字起こしと無音検出用の 16 kHz WAV。",
+      "upscaleTest": "「お試し」の実寸画像。",
+      "roto": "セグメンテーションのフレームとマスク。",
+      "scenes": "AI が検出したカット点。再生成＝検出 1 回。",
+      "transcripts": "単語のテキストとタイムスタンプ。再生成＝ASR 1 回。",
+      "embeddings": "ショットごとに 1 本、モデルが「見た」もの。再生成＝GPU で数時間。",
+      "indexThumbs": "インデックスに残った古いサムネイル。検索はカットと同じものを表示するので、残りは消して大丈夫。",
+      "faces": "検出した顔ごとの識別ベクトル。再生成＝検出 1 回。"
+    },
+    "tree": {
+      "title": "プロジェクト別",
+      "desc": "元フォルダーごとにまとめて表示。終わったプロジェクトの分だけ消せます。",
+      "rushCount_one": "素材 {{count}} 件",
+      "rushCount_other": "素材 {{count}} 件",
+      "unattributed": "未割り当て",
+      "unattributedHint": "インデックス前に書かれた、または素材が見つからないキャッシュ。まとめて削除できます。",
+      "selected": "{{count}} 件選択 · {{size}}",
+      "clearSelection": "選択解除",
+      "purgeSelection": "選択分を削除"
+    },
+    "reindex": {
+      "action": "再インデックス",
+      "hint": "ディスク上の既存キャッシュを拾います。インデックスは導入後に書かれた分しか知りません。",
+      "running": "再インデックス中…",
+      "done": "{{added}} 件を登録、{{attributed}} 件を素材に紐付け。",
+      "scan": "既知の素材を読み込み中…",
+      "index": "フォルダーを解析中…"
+    },
+    "dir": {
+      "title": "キャッシュフォルダー",
+      "desc": "サムネイルと映像プレビューが対象。データベースとモデルは移動しません。",
+      "default": "既定の場所",
+      "choose": "選択…",
+      "reset": "既定に戻す",
+      "moveTitle": "既存のキャッシュを移動しますか？",
+      "moveDesc": "旧フォルダーに {{size}} あります。移動すれば作り直さずに済みます。",
+      "moveNow": "移動",
+      "leave": "そのまま残す",
+      "leaveHint": "旧フォルダーはここに残り、あとで削除できます。",
+      "moving": "移動中… {{done}}/{{total}}",
+      "moved": "{{count}} 件のファイルを移動しました。",
+      "movedNone": "新しいフォルダーを適用しました。"
+    },
+    "lifecycle": {
+      "session": "セッション一時ファイル",
+      "sessionDesc": "編集中に使うフレーム、マスク、テストです。",
+      "sessionBadge": "自動クリーンアップ",
+      "sessionEmpty": "このセッションではまだ書き込まれていません。",
+      "reusable": "再利用できるプレビュー",
+      "reusableDesc": "足りなくなれば自動で作り直します。",
+      "durable": "保存する解析結果",
+      "durableDesc": "再計算コストの高い結果は、明示した場合のみ削除します。"
+    },
+    "policy": {
+      "title": "自動クリーンアップ",
+      "desc": "高速なプレビューには既定の上限があります。高コストな解析結果は保持します。",
+      "auto": "自動削除",
+      "quota": "上限",
+      "quotaHint": "超えたぶんは、使っていないものから順に消えます。",
+      "age": "保持期間",
+      "ageHint": "この期間使われなかったものを削除します。",
+      "gb": "GB",
+      "days": "日",
+      "manualOnly": "手動削除のみ",
+      "manualOnlyHint": "この種類は使用状況を記録しないため、自動削除できません。",
+      "sessionTitle": "作業キャッシュ",
+      "sessionDesc": "大きな作業ファイルをいつ削除するか選べます。アプリ終了時の削除は常に安全策として残ります。",
+      "sequenceTitle": "モデルの中間フレーム列",
+      "sequenceHint": "モデル入力のためだけに作られるフレームフォルダーです。ユーザーが書き出したシーケンスは削除しません。",
+      "trigger": {
+        "roto": "ショット切り替え時",
+        "upscaleTest": "ソースまたは設定の変更時",
+        "page": "ページを離れる時",
+        "app": "アプリ終了時",
+        "immediate": "処理直後"
+      },
+      "sessionOnly": "アプリ終了時",
+      "sessionOnlyHint": "NetsuRush の終了時にフォルダー全体を削除し、クラッシュ後は次回起動時にも確認します。",
+      "warnTitle": "通知する",
+      "warnCache": "キャッシュが次を超えたら",
+      "warnDisk": "空き容量が次を下回ったら",
+      "warnDiskSuffix": "ディスク上で",
+      "warnNever": "通知のみ。削除はしません。"
+    },
+    "warn": {
+      "cache": "キャッシュが {{size}} に達しました。",
+      "disk": "ディスクの空きがわずかです：{{size}}。"
+    },
+    "confirm": {
+      "title": "このキャッシュを削除しますか？",
+      "descKinds": "{{size}} 空きます。中身は必要になれば作り直されます。",
+      "descSources": "素材 {{count}} 件ぶん、{{size}} 空きます。他の素材はそのままです。",
+      "descUnattributed": "未割り当てのキャッシュ {{size}} を削除します。",
+      "expensive": "検索インデックスを含みます。作り直しには GPU で数時間かかります。",
+      "cancel": "キャンセル",
+      "confirm": "削除",
+      "purging": "削除中…",
+      "done": "{{size}} 空き · {{files}} 件のファイル",
+      "doneRows": "{{size}} 空き · {{files}} 件のファイル、DB {{rows}} 件",
+      "skipped": " · {{count}} 件スキップ（ロック中）"
+    },
+    "maintenance": {
+      "title": "メンテナンス",
+      "desc": "プロジェクト別のクリーンアップでは届かない 2 か所。"
+    },
+    "missing": {
+      "title": "見つからない素材",
+      "desc": "外付けディスクを抜いただけでも消えます。勝手には削除しません。",
+      "purge": "キャッシュを削除",
+      "none": "登録済みの素材はすべて参照できます。"
+    },
+    "db": {
+      "title": "データベース",
+      "unavailable": "データベースが見つかりません。",
+      "vacuum": "圧縮",
+      "vacuumHint": "削除しても領域はファイル内に残ります。圧縮するとディスクに返ります。",
+      "vacuumDone": "ディスク容量を {{size}} 解放しました。",
+      "vacuumBusy": "データベースの使用中は実行できません。処理を終えてから再試行してください。",
+      "faiss": "ベクトルインデックス {{size}}"
+    },
+    "projects": {
+      "current": "開いています",
+      "desc": "検索は既定で開いているプロジェクトに限定されます。NetsuRush がメディアプールを読み込むと、そのプロジェクトがこの一覧に加わります。スキャンは各 Resolve プロジェクトを順に開いて素材を収集し、最後に元のプロジェクトを開き直します。",
+      "empty": "まだ把握しているプロジェクトはありません。",
+      "forget": "削除",
+      "forgetTooltip": "一覧から削除します（インデックスとファイルはそのまま）",
+      "rushCount_one": "{{count}} 素材",
+      "rushCount_other": "{{count}} 素材",
+      "scan": "Resolve プロジェクトをスキャン",
+      "scanDone": "{{count}} 件のプロジェクトを収集しました",
+      "scanStarting": "準備中…",
+      "scanning": "{{project}} — {{done}}/{{total}}",
+      "title": "検索が把握しているプロジェクト"
+    }
+  },
+  "navigation": {
+    "title": "ページとナビゲーション順",
+    "subtitle": "使わないページを非表示にし、サイドバーの順序を変更できます。",
+    "reset": "すべて元に戻す",
+    "required": "常に利用可能",
+    "visible": "表示",
+    "hidden": "非表示",
+    "moveUp": "{{module}}を上へ",
+    "moveDown": "{{module}}を下へ",
+    "requiredAria": "{{module}}は必須です",
+    "hideAria": "{{module}}を非表示",
+    "showAria": "{{module}}を表示"
+  },
+  "detection": {
+    "reindexHint": "モデルが変わるとショットの区切りも変わります。インデックス済みの素材は作り直しになります。"
+  },
+  "tab": {
+    "account": {
+      "profile": "プロフィール",
+      "discord": "Discord"
+    },
+    "interface": {
+      "theme": "テーマ",
+      "language": "言語",
+      "navigation": "ナビゲーション"
+    },
+    "media": {
+      "preview": "プレビュー"
+    },
+    "ai": {
+      "models": "動画",
+      "dictation": "音声入力",
+      "indexing": "インデックス作成"
+    },
+    "storage": {
+      "media": "メディアキャッシュ",
+      "cleanup": "クリーンアップ",
+      "project": "プロジェクトキャッシュ",
+      "projects": "プロジェクト"
+    },
+    "system": {
+      "updates": "アップデート",
+      "compatibility": "互換性",
+      "console": "コンソール"
+    }
+  },
+  "indexing": {
+    "title": "インデックス作成",
+    "subtitle": "素材はまずショットに分割され、それからショットごとに解析されます。結果が変わらない設定は最初から有効です。",
+    "cutTitle": "ショット分割"
+  }
+}

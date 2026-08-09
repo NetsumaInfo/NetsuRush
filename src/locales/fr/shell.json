@@ -1,0 +1,123 @@
+{
+  "app": {
+    "modulePreparing": "Module en cours de préparation — bientôt disponible."
+  },
+  "nav": { "derush": "NetsuCut", "script": "NetsuDraft", "notebook": "NetsuBook", "search": "NetsuSearch", "upscale": "NetsuLab", "reference": "NetsuBoard", "transfer": "NetsuBridge", "voice": "NetsuTalk", "chat": "NetsuPilot", "optimisation": "NetsuBoost" },
+  "sidebar": {
+    "settings": "Paramètres",
+    "hostPicked": "Logiciel piloté"
+  },
+  "status": {
+    "connected": "Connecté",
+    "offline": "Hors ligne",
+    "connectedLower": "connecté",
+    "offlineLower": "hors ligne",
+    "panelConnected": "panneau connecté",
+    "panelOffline": "panneau hors ligne",
+    "resolveConnected": "Resolve connecté",
+    "resolveOffline": "Resolve hors ligne",
+    "project": "Projet : {{project}}",
+    "refresh": "Rafraîchir le statut",
+    "resolveHint": "Le pont fonctionne, mais Resolve ne répond pas. Ouvre <b1>Resolve Studio</b1> avec un projet, puis active <b2>Préférences ▸ Système ▸ Général ▸ Scripting externe = Local</b2> et redémarre Resolve.",
+    "adobeHint": "Ouvre {{host}}, puis le panneau <b>Fenêtre ▸ Extensions ▸ NetsuRush</b> (à installer depuis l'onglet Adobe)."
+  },
+  "menu": { "derush": "Dérush", "chat": "Chat",
+    "edit": "Édition",
+    "cut": "Couper",
+    "paste": "Coller",
+    "selectAll": "Tout sélectionner",
+    "derushHome": "Accueil du derush",
+    "reloadRushes": "Recharger les rushs",
+    "cutTimeline": "Découper une timeline",
+    "section": "Section",
+    "sectionDecoupage": "Découpage",
+    "sectionCollections": "Collections",
+    "sectionTimeline": "Timeline live",
+    "search": "Recherche",
+    "resultView": "Vue des résultats",
+    "resultFlat": "À plat",
+    "resultClusters": "Groupes",
+    "resultDedup": "Doublons",
+    "clearRefs": "Vider les références",
+    "clearChain": "Vider la chaîne",
+    "clearSources": "Vider la sélection",
+    "voice": "Voix",
+    "listen": "Écoute",
+    "listenNone": "Source brute",
+    "listenAll": "Montage complet",
+    "listenSilences": "Silences coupés",
+    "listenFillers": "Sans hésitations",
+    "listenRepeats": "Sans répétitions",
+    "reset": "Réinitialiser",
+    "clearChat": "Effacer la conversation",
+    "gotoModule": "Aller au module",
+    "console": "Console",
+    "refreshStatus": "Actualiser le statut",
+    "reloadApp": "Recharger NetsuRush",
+    "pinned": "Fenêtre épinglée",
+    "hideSidebar": "Masquer la barre latérale",
+    "pinAbove": "Épingler au-dessus"
+  },
+  "windowControls": {
+    "unpin": "Désépingler la fenêtre",
+    "pinAbove": "Épingler au-dessus",
+    "unpinShort": "Désépingler",
+    "minimize": "Réduire",
+    "restore": "Restaurer",
+    "maximize": "Agrandir"
+  },
+  "errorBadge": {
+    "aria": "{{count}} erreur(s) — ouvrir la console",
+    "open": "Ouvrir la console",
+    "markRead": "Marquer comme lu"
+  },
+  "errorBoundary": {
+    "title": "NetsuRush a planté au rendu",
+    "reload": "Recharger"
+  },
+  "notebook": {
+    "untitled": "Sans titre",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "closeTab": "Fermer l'onglet",
+    "closeOthers": "Fermer les autres",
+    "allTabs": "Tous les onglets",
+    "newPageTab": "Nouvelle page dans un onglet"
+  },
+  "emoji": {
+    "search": "Rechercher un emoji…",
+    "none": "Aucun emoji pour « {{q}} ».",
+    "cat": {
+      "people": "Smileys & personnes",
+      "nature": "Animaux & nature",
+      "foods": "Nourriture & boissons",
+      "activity": "Activités",
+      "places": "Voyages & lieux",
+      "objects": "Objets",
+      "symbols": "Symboles",
+      "flags": "Drapeaux"
+    }
+  },
+  "scrollTop": "Remonter en haut",
+  "select": {
+    "select": "Sélectionner",
+    "deselect": "Désélectionner"
+  },
+  "power": {
+    "reopenHost": "Rouvrir {{host}}",
+    "freeRam": "Fermer pour libérer la RAM",
+    "closeNub": "Fermer {{host}} (libérer RAM/GPU)",
+    "opInProgress": "Opération en cours…",
+    "hostClosed": "{{host}} fermé",
+    "reopenToResume": "Rouvrir sur « {{project}} » pour reprendre.",
+    "reopenToResumeNoProject": "Rouvrir pour reprendre.",
+    "collapse": "Réduire",
+    "collapseCorner": "Réduire dans le coin",
+    "closeHostQ": "Fermer {{host}} ?",
+    "freeRamDesc": "Libère la RAM et le GPU pour la tâche. Réouverture sur le projet en un clic à la fin.",
+    "resolveSafeCloseDesc": "Libère la RAM et le GPU. Avant de fermer, NetsuRush sauvegarde le projet et vérifie son cache.",
+    "later": "Plus tard",
+    "closeHost": "Fermer {{host}}",
+    "failed": "échec"
+  }
+}

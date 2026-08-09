@@ -1,0 +1,126 @@
+{
+  "stream": { "error": "发生错误。" },
+  "panel": {
+    "copilot": "NetsuRush 助手",
+    "noCliAgent": "未检测到 CLI 代理 — 改用 Claude/OpenAI，或安装 claude/codex",
+    "configureKey": "配置 API 密钥后开始"
+  },
+  "composer": {
+    "pickEngine": "先在设置 ⚙ 里配置引擎（API 密钥或 CLI 代理）才能发送。",
+    "placeholder": "让 AI 操控 Resolve…",
+    "attachFiles": "添加文件",
+    "attachTip": "添加图片 / 文件",
+    "attachedFilesPrompt": "附件（本地路径 — 如有需要请读取或查看）",
+    "stop": "停止",
+    "send": "发送"
+  },
+  "header": { "defaultTitle": "新建对话",
+    "conversations": "对话",
+    "newConv": "新建对话",
+    "noConv": "暂无对话",
+    "settings": "设置"
+  },
+  "settings": {
+    "apiKeys": "API 密钥（BYOK）",
+    "noVault": "应用外无法使用加密保险库 — 密钥仅在本次会话内保留。",
+    "hide": "隐藏",
+    "show": "显示",
+    "keySet": "已配置",
+    "keyAbsent": "未配置",
+    "cliAgents": "已检测到的 CLI 代理",
+    "rescan": "重新扫描",
+    "noAgentsPre": "列表为空 — 点击“重新扫描”。仍无结果则安装 ",
+    "noAgentsPost": "，并确认它们在 core 的 PATH 中。",
+    "detected": "已检测到",
+    "absent": "未找到",
+    "saved": "已保存"
+  },
+  "engine": {
+    "engine": "引擎",
+    "cliAgent": "CLI 代理",
+    "agent": "代理",
+    "model": "模型",
+    "default": "默认",
+    "freeId": "自定义 id：vendor/model…",
+    "permissions": "权限"
+  },
+  "mode": {
+    "readonly": "只读",
+    "ask": "询问",
+    "safe": "副本",
+    "auto": "自动"
+  },
+  "modeTitle": {
+    "readonly": "只读 — 不写入任何内容",
+    "ask": "仅在有风险时确认（文件/渲染/删除素材）；时间线剪辑直接执行",
+    "safe": "写入前复制时间线 — 原时间线保持不变",
+    "auto": "直接写入时间线，无需确认"
+  },
+  "message": {
+    "thinking": "思考中…",
+    "reasoning": "推理过程",
+    "hideReasoning": "隐藏推理过程",
+    "showReasoning": "显示推理过程",
+    "copyText": "复制文本"
+  },
+  "toolcard": {
+    "running": "进行中",
+    "failed": "失败",
+    "arguments": "参数",
+    "result": "结果",
+    "copyName": "复制工具名",
+    "copyArgs": "复制参数",
+    "copyResult": "复制结果",
+    "collapse": "收起",
+    "expand": "展开"
+  },
+  "tool": {
+    "quoted": "“{{value}}”",
+    "resolveStatus": "Resolve 状态",
+    "listMediaPool": "读取 Media Pool",
+    "searchClips": "搜索{{q}}",
+    "indexClip": "索引素材",
+    "detectScenes": "检测镜头",
+    "cachedScenes": "读取缓存镜头",
+    "listTimelines": "时间线列表",
+    "readTimeline": "读取时间线",
+    "buildTimeline": "生成时间线{{q}}",
+    "cutTimeline": "切分时间线",
+    "probeMedia": "分析媒体",
+    "makeThumbnail": "生成缩略图",
+    "upscaleMedia": "视频超分辨率",
+    "exportAe": "导出到 After Effects",
+    "importMedia": "导入 Media Pool",
+    "board": "参考画板{{suffix}}",
+    "page": "页面 {{page}}",
+    "resolveApp": "Resolve 应用",
+    "grabStill": "抓取静帧",
+    "setTimecode": "移动播放头",
+    "viewer": "Resolve 检视器",
+    "removeAudio": "删除音频",
+    "duplicate": "复制时间线",
+    "addMarker": "添加标记",
+    "addTrack": "添加轨道",
+    "deleteTrack": "删除轨道",
+    "timelineFallback": "时间线 · {{action}}",
+    "mediaPool": "Media Pool · {{action}}",
+    "render": "渲染 · {{action}}",
+    "timelineItem": "当前镜头 · {{action}}",
+    "project": "项目 · {{action}}",
+    "resolveCall": "Resolve API · {{root}}"
+  },
+  "approval": {
+    "title": "允许此操作？",
+    "allow": "允许",
+    "deny": "拒绝"
+  },
+  "risk": {
+    "read": "读取",
+    "write": "写入",
+    "destructive": "破坏性"
+  },
+  "store": {
+    "convFallback": "对话",
+    "error": "错误"
+  }
+}

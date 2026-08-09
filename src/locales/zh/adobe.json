@@ -1,0 +1,80 @@
+{
+  "title": "Adobe",
+  "subtitle": "连接 Premiere Pro 和 After Effects（2020 及以上）：NetsuRush 面板读取已打开的项目并发送到这里。",
+  "installPanel": "安装面板",
+  "reinstallPanel": "重新安装面板",
+  "panel": {
+    "cepTitle": "CEP 面板",
+    "installed": "已安装",
+    "notInstalled": "未安装",
+    "copiedIn": "已复制到",
+    "inApp": "在 Premiere Pro/After Effects 中：",
+    "menuPath": "窗口 ▸ 扩展 ▸ NetsuRush",
+    "restartHint": "（应用已打开则重启一次）。",
+    "installHint": "点击“安装面板”，然后打开 Premiere Pro/After Effects ▸ 窗口 ▸ 扩展 ▸ NetsuRush。",
+    "diagnose": "诊断",
+    "autoUpdate": "自动管理",
+    "autoUpdateHint": "检测到 Adobe 应用即自动安装面板，之后随 NetsuRush 保持同步",
+    "autoUpdateOn": "已开启",
+    "autoUpdateOff": "已关闭",
+    "updatePending": "此版本 NetsuRush 附带了更新的面板",
+    "updateNow": "立即更新",
+    "restartApps": "面板已更新——重启 {{apps}} 以重新加载。"
+  },
+  "diag": {
+    "verdictOk": "结论：安装正常 ✓（文件夹 + manifest + PlayerDebugMode）。在 Adobe 中打开面板：窗口 ▸ 扩展 ▸ NetsuRush。",
+    "verdictIncomplete": "结论：安装不完整 — 见下方。",
+    "folder": "文件夹：{{dir}}",
+    "manifestPresent": "Manifest 存在：{{yesNo}}",
+    "yes": "是",
+    "no": "否",
+    "files": "文件：{{files}}",
+    "filesEmpty": "（空）",
+    "manifestHead": "Manifest（开头）：",
+    "cepLogFound": "CEP 日志（发现 NetsuRush 错误）：",
+    "cepLogNone": "CEP 日志：无 NetsuRush 错误（正常 — 只有加载出问题时日志才会提到扩展）。"
+  },
+  "status": {
+    "installed": "已安装",
+    "notFound": "未找到",
+    "running": "已启动",
+    "closed": "已关闭",
+    "panelConnected": "面板已连接",
+    "panelOffline": "面板离线",
+    "launch": "启动",
+    "scanProject": "扫描项目",
+    "openPanelHint": "打开面板：窗口 ▸ 扩展 ▸ NetsuRush。",
+    "launchThenOpenHint": "启动应用，然后打开 窗口 ▸ 扩展 ▸ NetsuRush。"
+  },
+  "snapshot": {
+    "timecodes": "时间线 {{tlStart}} → {{tlEnd}} · 源 {{srcIn}} → {{srcOut}}",
+    "copySourcePath": "复制源路径",
+    "copyTimecodes": "复制时间码",
+    "copyName": "复制名称",
+    "copyPath": "复制路径",
+    "sendToNetsulab": "发送到 NetsuLab",
+    "shotsCount": "{{n}} 个镜头",
+    "thTrack": "轨道",
+    "thShot": "镜头",
+    "thTimeline": "时间线",
+    "thSource": "源",
+    "noProject": "未收到项目 — 在应用中打开 NetsuRush 面板，然后点击“发送到 NetsuRush”。",
+    "receivedAt": "接收于 {{time}}",
+    "rushes": "素材",
+    "noFileMedia": "项目中没有文件素材。"
+  },
+  "notice": {
+    "launchFailed": "无法启动",
+    "alreadyOpen": "应用已打开",
+    "panelUnreachable": "面板无法连接",
+    "installFailed": "安装失败",
+    "installedRestart": "面板已安装。重启 {{apps}}，然后 窗口 ▸ 扩展 ▸ NetsuRush。",
+    "installedOpen": "面板已安装。打开 Premiere Pro/After Effects，然后 窗口 ▸ 扩展 ▸ NetsuRush。",
+    "autoUpdateFailed": "无法更改更新设置"
+  },
+  "remote": {
+    "settings": "设置",
+    "reload": "重新加载 NetsuRush",
+    "close": "关闭 NetsuRush"
+  }
+}

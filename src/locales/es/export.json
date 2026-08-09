@@ -1,0 +1,200 @@
+{
+  "settings": {
+    "title": "Ajustes de exportación",
+    "new": "Nuevo",
+    "newProfile": "Nuevo perfil",
+    "duplicate": "Duplicar",
+    "duplicateProfile": "Duplicar el perfil",
+    "deleteProfile": "Eliminar el perfil",
+    "cardButton": "Botón de miniatura",
+    "menuLabel": "Perfil de exportación"
+  },
+  "editor": {
+    "name": "Nombre",
+    "namePlaceholder": "Nombre del perfil",
+    "destination": "Destino",
+    "timeline": "Timeline",
+    "folder": "Carpeta",
+    "folderPlaceholder": "Nombre de la carpeta…",
+    "defaultFolder": "NetsuRush — Cortes",
+    "existingFolders": "Carpetas existentes",
+    "mediaPoolFolders": "Carpetas del Media Pool",
+    "profile": "Perfil",
+    "profileCustom": "Personalizado",
+    "optimization": "Optimización",
+    "speed": "Velocidad",
+    "codec": "Códec",
+    "audio": "Audio",
+    "audioCodec": "Códec de audio",
+    "timelineTarget": "Timeline de destino",
+    "timelineInsertion": "Modo de inserción — {{host}}",
+    "insertionInsert": "Insertar",
+    "insertionOverwrite": "Sobrescribir",
+    "insertionReplace": "Reemplazar",
+    "insertionFit": "Ajustar al relleno",
+    "insertionAbove": "Colocar encima",
+    "insertionEnd": "Añadir al final",
+    "insertionRippleOverwrite": "Sobrescritura con ripple",
+    "aeftInsertion": {
+      "insert": "Insertar y desplazar capas",
+      "replace": "Reemplazar capa",
+      "fit": "Ajustar a la duración de la capa",
+      "above": "Añadir encima de las capas",
+      "end": "Añadir al final de la composición"
+    },
+    "container": "Contenedor",
+    "mergeToOne": "Unir en un archivo",
+    "fileName": "Nombre de los archivos",
+    "fileNamePlaceholder": "{base}_{index}",
+    "insertToken": "Insertar un token",
+    "tokens": {
+      "base": "Nombre base",
+      "source": "Archivo de origen",
+      "index": "N.º de plano",
+      "total": "Número de planos",
+      "start": "Inicio",
+      "end": "Fin",
+      "duration": "Duración",
+      "label": "Etiqueta del plano",
+      "profile": "Nombre del perfil",
+      "codec": "Códec",
+      "container": "Contenedor",
+      "date": "Fecha",
+      "time": "Hora"
+    },
+    "mergeGap": "Negro entre planos",
+    "milliseconds": "ms"
+  },
+  "encoder": {
+    "gpu": "GPU",
+    "nvenc": "NVIDIA NVENC",
+    "amf": "AMD AMF",
+    "qsv": "Intel Quick Sync",
+    "cpu": "CPU"
+  },
+  "speed": {
+    "fast": {
+      "label": "Rápido",
+      "hint": "prioriza la velocidad"
+    },
+    "balanced": {
+      "label": "Equilibrado",
+      "hint": "buen compromiso"
+    },
+    "quality": {
+      "label": "Calidad",
+      "hint": "mejor compresión"
+    },
+    "max": {
+      "label": "Máxima",
+      "hint": "más lento y compacto"
+    }
+  },
+  "toggle": {
+    "yes": "Sí",
+    "no": "No"
+  },
+  "issue": {
+    "binTargetRequired": "Poner nombre a la carpeta de destino",
+    "profileIncomplete": "Perfil incompleto: {{issue}}"
+  },
+  "audio": {
+    "allTracks": "Todas las pistas",
+    "noAudio": "Ninguna (solo vídeo)",
+    "trackLabel": "Pista {{n}}{{lang}} · {{channels}} can. · {{codec}}",
+    "languageGroup": "Idioma",
+    "trackGroup": "Pista",
+    "trackN": "Pista {{n}}",
+    "langResolved": "{{lang}} → Pista {{n}}",
+    "langUnresolved": "{{lang}} → sin pista",
+    "timelineHint": "Resolve importa el audio entero o nada."
+  },
+  "iconPicker": {
+    "search": "Buscar un icono…",
+    "importedImage": "Imagen importada",
+    "removeFromLibrary": "Quitar de la biblioteca",
+    "importImage": "Importar imagen / GIF",
+    "profileIcon": "Icono del perfil",
+    "defaultIcon": "Icono por defecto",
+    "default": "Por defecto",
+    "tabEmojis": "Emojis",
+    "tabIcons": "Iconos",
+    "tabImages": "Imágenes"
+  },
+  "notice": {
+    "cancelled": "Exportación cancelada: no se eligió carpeta de destino.",
+    "merging": "Uniendo…",
+    "exporting": "Exportando…",
+    "exported_one": "{{count}} archivo exportado ({{profile}}) → {{dir}}{{failed}}",
+    "exported_other": "{{count}} archivos exportados ({{profile}}) → {{dir}}{{failed}}",
+    "failedSuffix_one": " · {{count}} fallo",
+    "failedSuffix_other": " · {{count}} fallos",
+    "exportFailed": "error de exportación"
+  },
+  "workflow": {
+    "timeline": "Timeline",
+    "remux": "Remux",
+    "encode": "Recodificar"
+  },
+  "audioMode": {
+    "copy": "Copia",
+    "aac_128": "AAC 128 kbps",
+    "aac": "AAC 192 kbps",
+    "aac_256": "AAC 256 kbps",
+    "aac_320": "AAC 320 kbps",
+    "opus_128": "Opus 128 kbps",
+    "opus": "Opus 160 kbps",
+    "opus_192": "Opus 192 kbps",
+    "mp3_192": "MP3 192 kbps",
+    "mp3": "MP3 320 kbps",
+    "flac": "FLAC",
+    "alac": "ALAC",
+    "pcm16": "PCM 16 bits",
+    "pcm24": "PCM 24 bits"
+  },
+  "audioGroup": {
+    "lossy": "Con pérdida",
+    "lossless": "Sin pérdida"
+  },
+  "codec": {
+    "bitDepth": "{{count}} bits",
+    "profile": "Perfil {{count}}",
+    "losslessArchive": "Sin pérdidas (archivo)",
+    "archive": "archivo"
+  },
+  "lang": {
+    "ja": "Japonés",
+    "en": "Inglés",
+    "fr": "Francés",
+    "es": "Español",
+    "de": "Alemán",
+    "it": "Italiano",
+    "pt": "Portugués",
+    "ru": "Ruso",
+    "zh": "Chino",
+    "ko": "Coreano",
+    "ar": "Árabe",
+    "hi": "Hindi"
+  },
+  "profileName": {
+    "toTimeline": "A la timeline",
+    "fileNoReencode": "Archivo sin recodificar",
+    "mp4H264": "MP4 H.264",
+    "mp4H265_10": "MP4 H.265 10 bits",
+    "prores422hq": "ProRes 422 HQ",
+    "dnxhrHq": "DNxHR HQ",
+    "mkvH265_10": "MKV H.265 10 bits",
+    "webmAv1": "WebM AV1",
+    "prores4444": "ProRes 4444 (alfa)",
+    "dnxhrHqx": "DNxHR HQX 10 bits",
+    "ffv1Archive": "FFV1 — archivo",
+    "generic": "Perfil {{index}}",
+    "fallback": "Perfil de exportación"
+  },
+  "summary": {
+    "timelineImport": "Importar en la timeline",
+    "streamCopy": "Copia de flujo",
+    "merged": " · unido"
+  },
+  "codecUnknown": "Códec desconocido"
+}

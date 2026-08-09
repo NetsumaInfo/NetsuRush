@@ -1,0 +1,126 @@
+{
+  "stream": { "error": "Something went wrong." },
+  "panel": {
+    "copilot": "NetsuRush Copilot",
+    "noCliAgent": "No CLI agent detected — switch to Claude/OpenAI or install claude/codex",
+    "configureKey": "Set an API key to get started"
+  },
+  "composer": {
+    "pickEngine": "Set up an engine (API key or CLI agent) in settings ⚙ to send.",
+    "placeholder": "Ask the AI to drive Resolve…",
+    "attachFiles": "Attach files",
+    "attachTip": "Attach image / file",
+    "attachedFilesPrompt": "Attached files (local paths — read or view them if useful)",
+    "stop": "Stop",
+    "send": "Send"
+  },
+  "header": { "defaultTitle": "New conversation",
+    "conversations": "Conversations",
+    "newConv": "New conversation",
+    "noConv": "No conversations",
+    "settings": "Settings"
+  },
+  "settings": {
+    "apiKeys": "API keys (BYOK)",
+    "noVault": "Encrypted vault unavailable outside the app — keys are kept for this session only.",
+    "hide": "Hide",
+    "show": "Show",
+    "keySet": "set",
+    "keyAbsent": "not set",
+    "cliAgents": "Detected CLI agents",
+    "rescan": "Rescan",
+    "noAgentsPre": "No agents listed — click \"Rescan\". If still nothing, install ",
+    "noAgentsPost": " and make sure they're in the core's PATH.",
+    "detected": "detected",
+    "absent": "not found",
+    "saved": "Saved"
+  },
+  "engine": {
+    "engine": "Engine",
+    "cliAgent": "CLI agent",
+    "agent": "Agent",
+    "model": "Model",
+    "default": "Default",
+    "freeId": "custom id: vendor/model…",
+    "permissions": "Permissions"
+  },
+  "mode": {
+    "readonly": "Read-only",
+    "ask": "Ask",
+    "safe": "Duplicate",
+    "auto": "Auto"
+  },
+  "modeTitle": {
+    "readonly": "Read-only — no writes",
+    "ask": "Only confirms risky actions (files/render/media deletion); timeline edits go through",
+    "safe": "Duplicates the timeline before writing — the original stays untouched",
+    "auto": "Writes straight to the timeline, no confirmation"
+  },
+  "message": {
+    "thinking": "Thinking…",
+    "reasoning": "Reasoning",
+    "hideReasoning": "Hide reasoning",
+    "showReasoning": "Show reasoning",
+    "copyText": "Copy text"
+  },
+  "toolcard": {
+    "running": "running",
+    "failed": "failed",
+    "arguments": "Arguments",
+    "result": "Result",
+    "copyName": "Copy tool name",
+    "copyArgs": "Copy arguments",
+    "copyResult": "Copy result",
+    "collapse": "Collapse",
+    "expand": "Expand"
+  },
+  "tool": {
+    "quoted": " “{{value}}”",
+    "resolveStatus": "Resolve status",
+    "listMediaPool": "Reading the Media Pool",
+    "searchClips": "Search{{q}}",
+    "indexClip": "Indexing footage",
+    "detectScenes": "Shot detection",
+    "cachedScenes": "Reading cached shots",
+    "listTimelines": "Timeline list",
+    "readTimeline": "Reading the timeline",
+    "buildTimeline": "Building timeline{{q}}",
+    "cutTimeline": "Cutting timeline",
+    "probeMedia": "Analyzing media",
+    "makeThumbnail": "Generating a thumbnail",
+    "upscaleMedia": "Upscaling a video",
+    "exportAe": "After Effects export",
+    "importMedia": "Import into the Media Pool",
+    "board": "Reference board{{suffix}}",
+    "page": "Page {{page}}",
+    "resolveApp": "Resolve application",
+    "grabStill": "Grabbing a still",
+    "setTimecode": "Moving the playhead",
+    "viewer": "Resolve viewer",
+    "removeAudio": "Removing audio",
+    "duplicate": "Duplicating the timeline",
+    "addMarker": "Adding a marker",
+    "addTrack": "Adding a track",
+    "deleteTrack": "Deleting a track",
+    "timelineFallback": "Timeline · {{action}}",
+    "mediaPool": "Media Pool · {{action}}",
+    "render": "Render · {{action}}",
+    "timelineItem": "Current shot · {{action}}",
+    "project": "Project · {{action}}",
+    "resolveCall": "Resolve API · {{root}}"
+  },
+  "approval": {
+    "title": "Allow this action?",
+    "allow": "Allow",
+    "deny": "Deny"
+  },
+  "risk": {
+    "read": "read",
+    "write": "write",
+    "destructive": "destructive"
+  },
+  "store": {
+    "convFallback": "Conversation",
+    "error": "error"
+  }
+}

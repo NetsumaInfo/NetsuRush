@@ -1,0 +1,1022 @@
+@import "tailwindcss";
+
+/* Région de titre traitée directement par WebView2/Windows. Le déplacement ne dépend ainsi pas
+   du thread React, qui peut être occupé pendant le montage d'une vue lourde. */
+[data-tauri-drag-region] {
+  app-region: drag;
+  -webkit-app-region: drag;
+}
+
+[data-no-drag],
+[data-no-drag] * {
+  app-region: no-drag;
+  -webkit-app-region: no-drag;
+}
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/caveat";
+/* Typographie du markdown rendu (réponses chat) — shadcn/typeset : une classe `.typeset` pilote
+   tailles/interlignage/flux via `:where()` (spécificité 0 → surchargeable). Voir chat/Markdown.tsx. */
+@import "./typeset.css";
+/* Module Carnet : le CSS tiers (BlockNote flavor Mantine + react-data-grid) est importé en TS dans
+   main.tsx (pipeline Vite normal) — PAS via @import ici : le parseur Lightning CSS de Tailwind v4
+   rejette leur syntaxe. Le thème sombre mappé sur la palette de marque (bn-colors et rdg) vit plus bas. */
+
+@custom-variant dark (&:is(.dark *));
+
+/* Chip sombre des overlays de vignette (numéro, sélection, collection, timeline, durée). rgba EXPLICITE
+   (pas `bg-black/xx` = color-mix Tailwind v4) → s'affiche noir MÊME dans le vieux moteur CEF 99 du
+   panneau Adobe (color-mix = Chrome 111+, absent en CEF 99 → sinon fond transparent = chips invisibles). */
+.nr-chip { background-color: rgba(0, 0, 0, 0.72); }
+
+html,
+body,
+#root {
+  height: 100%;
+  /* Shell desktop (fenêtre principale ET fenêtre détachée frameless) : jamais de scroll au niveau
+     du document → supprime la scrollbar fantôme qui clignote quand on réduit vite la fenêtre. */
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  color-scheme: var(--theme-color-scheme, dark);
+}
+
+/* Accessibilité : neutralise les animations non essentielles si l'OS demande
+   « réduire les animations » (WCAG 2.3.3). La motion fonctionnelle reste lisible. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* scrollbars discrets */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 8px;
+}
+
+/* placeholder des blocs éditables vides (module Script) */
+.script-block:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Inter Variable', sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* Thème sombre = mappe les tokens shadcn sur la palette de marque NetsuRush. */
+.dark {
+  --background: var(--color-bg);
+  --foreground: var(--color-fg);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-fg);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-fg);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-fg);
+  --secondary: var(--color-surface-2);
+  --secondary-foreground: var(--color-fg);
+  --muted: var(--color-surface-2);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-fg);
+  --destructive: var(--color-danger);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-primary);
+  --chart-1: oklch(0.660 0.110 245.000);
+  --chart-2: oklch(0.500 0.080 248.000);
+  --chart-3: oklch(0.620 0.055 244.000);
+  --chart-4: oklch(0.420 0.050 252.000);
+  --chart-5: oklch(0.780 0.030 240.000);
+  --sidebar: var(--color-surface);
+  --sidebar-foreground: var(--color-fg);
+  --sidebar-primary: var(--color-primary);
+  --sidebar-primary-foreground: var(--color-primary-fg);
+  --sidebar-accent: var(--color-accent);
+  --sidebar-accent-foreground: var(--color-fg);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--color-primary);
+}
+
+/* --- Fond d'écran personnalisé (Paramètres › Interface › Thème) -------------------------------
+   La couche vit derrière le contenu (z-index négatif), dans un conteneur `fixed` promu en couche
+   composite : le pan/scroll ne fait que déplacer une texture GPU. `background-attachment: fixed`
+   ferait l'inverse — un repaint plein écran à chaque frame de scroll.
+   Le flou est rendu ICI, par le compositeur, et non cuit dans le fichier : c'est la seule façon
+   qu'un rayon soit CONTINU et suive le curseur à la frappe — une échelle de fichiers encodés impose
+   des paliers et une attente d'encodage à chaque cran. Sur une image fixe le coût est celui d'une
+   rasterisation, payée une fois puis mise en cache par la couche composite. Sur une vidéo il est
+   par frame, ce que le gel pendant les traitements (cf. lib/busyBus) borne au moment où ça compte.
+   Reste interdit : `backdrop-filter`, qui refloute tout ce qui passe derrière, à chaque frame. */
+.nr-wallpaper {
+  position: fixed;
+  /* Débord = deux fois le rayon. Un flou aspire du transparent au-delà des bords de l'élément, ce
+     qui lui dessine un liseré sombre ; le débord le pousse hors de l'écran. */
+  inset: calc(var(--nr-wp-blur, 0px) * -2);
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  will-change: transform;
+}
+
+.nr-wallpaper-media {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Un fond remplit la fenêtre. `contain` laisserait des bandes vides, ce qu'aucun fond ne veut. */
+  object-fit: cover;
+  opacity: var(--nr-wp-opacity, 1);
+  filter: saturate(var(--nr-wp-saturate, 100%)) blur(var(--nr-wp-blur, 0px));
+  transform: var(--nr-wp-transform, none);
+}
+
+/* Panneau qui SURVOLE le contenu (tiroir latéral) : le rendre simplement translucide montrerait
+   l'interface située dessous — boutons, listes — et non le fond. Il repeint donc le fond lui-même,
+   dans un calque `fixed` aligné sur la fenêtre puis rogné par le panneau, donc raccord au pixel avec
+   la couche principale. Image FIXE : sur un fond animé, un second <video> serait un décodeur de plus
+   pour un panneau de 240 px. */
+/* Un panneau est OPAQUE vis-à-vis de l'application et TRANSLUCIDE vis-à-vis du fond d'écran.
+   Ce n'est pas la même chose que « translucide » tout court : rendre les tokens semi-transparents
+   laisse voir l'interface SITUÉE DESSOUS (le tiroir latéral montrait la nav des Paramètres à travers
+   lui, deux textes superposés, plus rien de lisible).
+   Le panneau empile donc, de bas en haut :
+     1. un aplat OPAQUE (`--color-bg`) — la garantie que rien de l'app ne traverse jamais ;
+     2. le fond d'écran, cadré sur la FENÊTRE (`background-attachment: fixed`) et rogné par le
+        panneau, donc raccord avec la couche principale ;
+     3. la couleur de surface à `--nr-ui-opacity` — le seul réglage, et il ne dose QUE le fond.
+   Tout passe par `background-*` sur l'élément lui-même : ni pseudo-élément, ni `position`, ni
+   contexte d'empilement. Aucun risque de conflit avec un composant qui utilise déjà `::before`, et
+   aucun changement de mise en page. */
+html.nr-wallpaper-on.dark {
+  --nr-ui-mix: calc(var(--nr-ui-opacity, 0.6) * 100%);
+  --nr-surface-tint: color-mix(in srgb, var(--color-surface) var(--nr-ui-mix), transparent);
+  --nr-base-tint: color-mix(in srgb, var(--color-bg) var(--nr-ui-mix), transparent);
+}
+
+/* Les CONTRÔLES sont exclus : `Button variant="outline"` porte `bg-background`, un bouton se
+   retrouvait donc à repeindre le fond d'écran dans sa propre boîte. Un contrôle doit rester un aplat
+   franc, c'est ce qui le distingue de la surface qui le porte. `:not(:where(…))` garde la
+   spécificité de la liste à zéro. */
+/* La barre de titre, elle, N'EST PAS exclue : c'est une surface de l'application au même titre que
+   le tiroir, et l'en exclure la laissait en aplat noir au-dessus d'un fond visible partout ailleurs.
+   Le défaut qui avait motivé son exclusion (fond redimensionné à la taille d'un groupe de boutons)
+   vient d'un ancêtre TRANSFORMÉ, qui devient le bloc conteneur d'un `background-attachment: fixed` —
+   corrigé à la source dans App.tsx, où la sous-nav se centre en `flex` et non en `-translate-x-1/2`.
+   Aucun élément portant ces classes ne doit vivre sous un ancêtre transformé. */
+html.nr-wallpaper-on :is(.nr-wp-surface, .bg-card, .bg-sidebar, .bg-background):not(:where(
+  button, a, input, textarea, select, label,
+  [data-slot="button"], [data-slot="toggle-group-item"], [data-slot="toggle"],
+  [data-slot="toggle-group"], [data-slot="tabs-list"], [data-slot="select-trigger"],
+  [data-slot="input"], [data-slot="input-group"], [data-slot="checkbox"]
+)) {
+  background-color: var(--color-bg);
+  /* Le voile `--nr-wp-dim` rejoue l'opacité du fond, que la couche principale applique en `opacity`
+     sur son média : sans lui, le fond serait plus présent DANS les panneaux qu'autour. */
+  background-image:
+    linear-gradient(var(--nr-surface-tint), var(--nr-surface-tint)),
+    linear-gradient(var(--nr-wp-dim, transparent), var(--nr-wp-dim, transparent)),
+    var(--nr-wp-surface-image, none);
+  background-attachment: scroll, scroll, fixed;
+  background-size: auto, auto, cover;
+  background-position: center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+}
+
+/* La teinte du fond de page suit `--color-bg` plutôt que `--color-surface` : ces zones sont le fond
+   de l'app, pas une carte posée dessus. */
+html.nr-wallpaper-on .bg-background:not(:where(button, a, input, textarea, select, [data-slot="button"])) {
+  background-image:
+    linear-gradient(var(--nr-base-tint), var(--nr-base-tint)),
+    linear-gradient(var(--nr-wp-dim, transparent), var(--nr-wp-dim, transparent)),
+    var(--nr-wp-surface-image, none);
+}
+
+/* Sans ceci, le fond opaque du body masquerait entièrement la couche du fond d'écran. */
+html.nr-wallpaper-on body {
+  background: transparent;
+}
+
+/* Module Carnet — éditeur BlockNote thémé sur la palette de marque (fond transparent, posé sur la Card
+   de l'app). Les menus/popovers vivent dans un PORTAL dont la racine `.bn-root.dark` REDÉFINIT les
+   tokens (thème Mantine #1f1f1f) → on cible aussi `.bn-root` avec une spécificité supérieure
+   (double classe), sinon les menus gardent les couleurs Mantine par défaut. */
+.dark .bn-root.bn-root,
+.dark .bn-container,
+.dark .bn-editor {
+  --bn-colors-editor-text: var(--color-fg);
+  --bn-colors-editor-background: transparent;
+  --bn-colors-menu-text: var(--color-fg);
+  --bn-colors-menu-background: var(--color-surface);
+  --bn-colors-tooltip-text: var(--color-fg);
+  --bn-colors-tooltip-background: var(--color-surface-2);
+  --bn-colors-hovered-text: var(--color-fg);
+  --bn-colors-hovered-background: var(--color-surface-2);
+  --bn-colors-selected-text: var(--color-primary-fg);
+  --bn-colors-selected-background: var(--color-primary);
+  --bn-colors-disabled-text: var(--color-muted);
+  --bn-colors-disabled-background: var(--color-surface-2);
+  --bn-colors-border: var(--color-border);
+  --bn-colors-side-menu: var(--color-muted);
+  --bn-colors-shadow: rgba(0, 0, 0, 0.45);
+}
+/* Grille react-data-grid (database) : couleurs de marque. */
+.rdg {
+  --rdg-color: var(--color-fg);
+  --rdg-background-color: var(--color-surface);
+  --rdg-header-background-color: var(--color-surface-2);
+  --rdg-row-hover-background-color: var(--color-accent);
+  --rdg-row-selected-background-color: var(--color-accent);
+  --rdg-border-color: var(--color-border);
+  --rdg-summary-border-color: var(--color-border);
+  --rdg-selection-color: var(--color-primary);
+  --rdg-font-size: 13px;
+  color-scheme: var(--theme-color-scheme, dark);
+  border: none;
+  block-size: 100%;
+}
+/* Database : en-têtes légers, cellules aérées, action de ligne révélée au survol. */
+.rdg-header-row {
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--color-muted);
+  background: var(--color-surface-2);
+}
+.rdg-cell {
+  display: flex;
+  align-items: center;
+  padding-inline: 2px;
+  border-inline-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+  border-block-end-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+}
+.rdg-cell[aria-selected="true"] { box-shadow: inset 0 0 0 1.5px var(--color-primary); border-radius: 4px; }
+.rdg-row:hover { background: var(--color-accent); }
+/* Pied d'agrégats : discret, séparé du corps */
+.rdg-summary-row .rdg-cell { background: var(--color-surface-2); border-block-start: 1px solid var(--color-border); color: var(--color-muted); }
+.rdg .nb-row-actions { opacity: 0; transition: opacity 0.12s ease; }
+.rdg .rdg-row:hover .nb-row-actions { opacity: 1; }
+/* Scrollbars fines de la grille + kanban */
+.rdg::-webkit-scrollbar { width: 9px; height: 9px; }
+.rdg::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-fg) 20%, transparent); border-radius: 8px; }
+/* Bloc « Bascule » replié (data-toggle-open="false") : masque le groupe de blocs enfants indentés.
+   `:has` = Chromium 105+ (WebView2 récent ; l'app ne tourne PAS dans le vieux CEF du panneau Adobe). */
+.bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type="toggle"] [data-toggle-open="false"]) > .bn-block > .bn-block-group {
+  display: none;
+}
+
+/* ============================================================================
+   Thème custom du Carnet (BlockNote flavor Mantine) — menus / barre d'outils /
+   popovers / side-menu sur la palette de marque. Surfaces OPAQUES (pas de flou
+   ni de transparence : ça rendait les menus « muddy » + faisait ramer le repaint).
+   ========================================================================== */
+
+/* Scrollbars fines dans les menus/popovers du Carnet (au lieu des barres OS) */
+.bn-suggestion-menu::-webkit-scrollbar,
+.bn-menu-dropdown ::-webkit-scrollbar,
+.bn-color-picker-dropdown ::-webkit-scrollbar { width: 8px; height: 8px; }
+.bn-suggestion-menu::-webkit-scrollbar-thumb,
+.bn-menu-dropdown ::-webkit-scrollbar-thumb,
+.bn-color-picker-dropdown ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-fg) 22%, transparent);
+  border-radius: 8px;
+}
+.bn-suggestion-menu, .bn-menu-dropdown, .bn-color-picker-dropdown { scrollbar-width: thin; }
+
+/* Menu slash « / » et menu « @ » (SuggestionMenu). Préfixe `.dark` OBLIGATOIRE : le CSS Mantine de
+   BlockNote est injecté APRÈS index.css (import de composant) → à spécificité égale il gagnait, et les
+   menus restaient aux couleurs Mantine par défaut. */
+/* Look palette de commandes (Linear/Raycast) : UNE ligne par item — icône nue, titre, kbd.
+   Les sous-titres sont MASQUÉS : tronqués ils affichaient du texte cassé (« Utilisé pour affi… »)
+   qui ne fait que paraphraser le titre. Largeur fixe compacte. On NE touche PAS
+   max-height/overflow/position : floating-ui (middleware `size` + `autoPlacement`) pose une
+   max-height inline et choisit le côté ; le lui disputer en CSS fait boucler la mesure → le menu
+   flippe/se dédouble au scroll. */
+.dark .bn-suggestion-menu {
+  width: 320px;
+  max-height: min(420px, calc(100vh - 20px)) !important;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.35);
+  padding: 4px;
+}
+/* `flex: none` sur TOUS les enfants du menu : le Root est un Stack Mantine (flex column) borné par
+   la max-height inline de floating-ui → sans ça les enfants se compressent sous leur hauteur de
+   contenu et les rangées se chevauchent au lieu de scroller. */
+.dark .bn-suggestion-menu-label {
+  flex: none;
+  color: color-mix(in srgb, var(--color-muted) 80%, transparent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 8px 3px;
+}
+.dark .bn-suggestion-menu-label:not(:first-child) { margin-top: 6px; }
+/* Densité serrée : surspécifié (`.dark … .bn-suggestion-menu-item` = 0,3,0) pour battre le
+   `.bn-mantine .bn-suggestion-menu-item { height: 52px }` natif (0,2,0), sinon rows restent 52px. */
+.dark .bn-suggestion-menu .bn-suggestion-menu-item {
+  height: 46px;
+  flex: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  gap: 12px;
+  align-items: center;
+}
+.dark .bn-suggestion-menu-item:hover,
+.dark .bn-suggestion-menu-item[aria-selected="true"] {
+  background: color-mix(in srgb, var(--color-fg) 8%, var(--color-surface));
+}
+.dark .bn-mt-suggestion-menu-item-body { min-width: 0; flex: 1; gap: 2px; }
+/* Icône nue (pas de tuile) : neutre au repos, fg quand la rangée est active. */
+.dark .bn-mt-suggestion-menu-item-section:first-child {
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
+  color: var(--color-muted);
+}
+.dark .bn-mt-suggestion-menu-item-section:first-child svg { width: 16px; height: 16px; }
+.dark .bn-suggestion-menu-item:hover .bn-mt-suggestion-menu-item-section:first-child,
+.dark .bn-suggestion-menu-item[aria-selected="true"] .bn-mt-suggestion-menu-item-section:first-child {
+  color: var(--color-fg);
+}
+/* Raccourci : chip discret, mono, sans bordure. */
+.dark .bn-mt-suggestion-menu-item-section:last-child .mantine-Badge-root,
+.dark .bn-mt-suggestion-menu-item-section:last-child [class*="Badge"] {
+  background: color-mix(in srgb, var(--color-fg) 7%, transparent);
+  border: none;
+  color: color-mix(in srgb, var(--color-muted) 85%, transparent);
+  border-radius: 4px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 2px 5px;
+  height: auto;
+}
+.dark .bn-mt-suggestion-menu-item-title {
+  color: var(--color-fg);
+  font-weight: 450;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.dark .bn-mt-suggestion-menu-item-subtitle { display: none; }
+
+/* Barre de mise en forme flottante (sélection de texte) */
+.dark .bn-toolbar {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+}
+.dark .bn-toolbar .bn-button { border-radius: 8px; color: var(--color-fg); }
+.dark .bn-toolbar .bn-button:hover { background: color-mix(in srgb, var(--color-fg) 12%, var(--color-surface)); }
+
+/* Dropdowns / popovers / panneaux (formulaire de lien, sélecteurs, poignée de bloc) */
+.dark .bn-menu-dropdown,
+.dark .bn-form-popover,
+.dark .bn-panel-popover,
+.dark .bn-drag-handle-menu,
+.dark .bn-color-picker-dropdown {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  color: var(--color-fg);
+  padding: 4px;
+}
+/* Items des menus BlockNote (poignée ⋮⋮, sous-menus, sélecteurs) — même langage que dropdown-menu.tsx */
+.dark .bn-menu-dropdown .bn-menu-item,
+.dark .bn-drag-handle-menu .bn-menu-item {
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--color-fg);
+}
+.dark .bn-menu-dropdown .bn-menu-item:hover,
+.dark .bn-drag-handle-menu .bn-menu-item:hover,
+.dark .bn-menu-dropdown .bn-menu-item[data-hovered],
+.dark .bn-drag-handle-menu .bn-menu-item[data-hovered] {
+  background: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface));
+}
+.dark .bn-menu-dropdown .bn-menu-item svg,
+.dark .bn-drag-handle-menu .bn-menu-item svg { color: var(--color-muted); }
+.dark .bn-menu-dropdown [class*="Menu-divider"],
+.dark .bn-drag-handle-menu [class*="Menu-divider"] {
+  border-color: var(--color-border);
+  margin: 4px -4px;
+}
+.dark .bn-menu-dropdown [class*="Menu-label"],
+.dark .bn-drag-handle-menu [class*="Menu-label"] {
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Champs texte des popovers (création de lien, etc.) */
+.dark .bn-combobox-input,
+.dark .bn-mt-input-large,
+.dark .bn-form-popover input {
+  background: color-mix(in srgb, var(--color-fg) 8%, var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-fg);
+}
+
+/* Boutons du side-menu (poignée « ⠿ » + « + ») */
+.dark .bn-side-menu button { border-radius: 8px; color: var(--color-muted); }
+.dark .bn-side-menu button:hover { background: color-mix(in srgb, var(--color-fg) 12%, transparent); color: var(--color-fg); }
+
+/* La marge haute des titres appartient au rythme du document, pas à la ligne de texte. La hauteur
+   BlockNote par défaut centre la poignée sur l'ensemble marge+ligne et la fait descendre. */
+.nb-doc .bn-side-menu[data-block-type="heading"] {
+  height: 30px;
+  transform: translateY(18px);
+}
+
+/* Contenu éditeur : liens, citation, séparateur, code */
+.bn-editor a { color: var(--color-primary); text-underline-offset: 2px; }
+.bn-editor a[href^="nbpage:"] {
+  color: var(--color-primary);
+  text-decoration-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+.bn-editor a[href^="nbpage:"]:hover { background: color-mix(in srgb, var(--color-primary) 14%, transparent); }
+.bn-editor blockquote { border-inline-start: 3px solid var(--color-primary); color: var(--color-muted); }
+.bn-editor code {
+  background: color-mix(in srgb, var(--color-fg) 10%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.88em;
+}
+.bn-editor hr { border-color: var(--color-border); }
+.bn-editor ::selection { background: color-mix(in srgb, var(--color-primary) 32%, transparent); }
+
+/* Scrollbar fine des bandes de galerie (défilement horizontal d'images) */
+.nb-gallery-row { scrollbar-width: thin; }
+.nb-gallery-row::-webkit-scrollbar { height: 8px; }
+.nb-gallery-row::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-fg) 22%, transparent); border-radius: 8px; }
+/* Mention @page inline : pastille cliquable. */
+.nb-page-mention {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-radius: 4px;
+  padding: 0 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nb-page-mention:hover { background: color-mix(in srgb, var(--color-primary) 24%, transparent); }
+/* Mention dont la page cible a disparu (corbeille/supprimée) : grisée, non cliquable. */
+.nb-page-mention-gone {
+  color: var(--color-muted);
+  background: color-mix(in srgb, var(--color-fg) 8%, transparent);
+  text-decoration: line-through;
+  cursor: default;
+}
+.nb-page-mention-gone:hover { background: color-mix(in srgb, var(--color-fg) 8%, transparent); }
+
+/* Ancre de bloc (lien « Copier le lien vers ce bloc ») : flash de surbrillance à l'arrivée. */
+@keyframes nb-anchor-pulse {
+  0% { background: color-mix(in srgb, var(--color-primary) 26%, transparent); }
+  70% { background: color-mix(in srgb, var(--color-primary) 14%, transparent); }
+  100% { background: transparent; }
+}
+.nb-anchor-flash { animation: nb-anchor-pulse 1.8s ease-out; border-radius: 4px; }
+
+/* Correcteur orthographique maison (Carnet + Script) — même grammaire visuelle que le soulignement
+   natif d'un navigateur, pour ne rien réapprendre à l'utilisateur : vaguelette rouge sous le mot.
+   `skip-ink: none` évite les trous sous les jambages (p, g, j) et le curseur « menu » annonce que le
+   clic droit propose les corrections. */
+.nr-spell-bad {
+  text-decoration: underline wavy color-mix(in srgb, var(--color-danger) 78%, transparent);
+  text-decoration-thickness: 1px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 3px;
+  cursor: context-menu;
+}
+.nr-spell-bad:hover {
+  text-decoration-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  border-radius: 2px;
+}
+
+/* Échelle de police du document (Paramètres › Apparence) : la base 16px de BlockNote suit --nb-font-scale. */
+.nb-doc .bn-default-styles { font-size: calc(16px * var(--nb-font-scale, 1)); }
+/* Le conteneur .nb-doc porte la marge latérale (px-*) → on annule le padding interne de BlockNote pour
+   aligner le TEXTE des blocs sur le titre de la page ; les poignées +/⋮⋮ vivent
+   dans la marge du conteneur. Rythme vertical un peu plus aéré. */
+.nb-doc .bn-editor { padding-inline: 0; }
+.nb-doc .bn-block-content { padding-block: 4px; }
+
+/* Ergonomie de sélection façon texte normal : curseur I-beam sur la zone de texte + caret bien
+   visible. Les blocs de texte occupent déjà toute la largeur → cliquer/glisser n'importe où sur la ligne
+   place/sélectionne (pas besoin de viser pile les lettres). */
+.nb-doc .bn-editor { cursor: text; caret-color: var(--color-primary); }
+/* Curseur flèche (pas I-beam) sur les blocs média/interactifs (pas du texte à sélectionner). */
+.nb-doc .bn-block-content[data-content-type="gallery"],
+.nb-doc .bn-block-content[data-content-type="database"],
+.nb-doc .bn-block-content[data-content-type="equation"],
+.nb-doc .bn-block-content[data-content-type="divider"],
+.nb-doc .bn-block-content[data-content-type="video"],
+.nb-doc .bn-block-content[data-content-type="image"],
+.nb-doc .bn-block-content[data-content-type="file"],
+.nb-doc .bn-block-content[data-content-type="youtube"],
+.nb-doc .bn-block-content[data-content-type="embed"],
+.nb-doc .bn-block-content[data-content-type="bookmark"] { cursor: default; }
+
+/* Citation stylée : barre d'accent + texte adouci en léger italique (typo de blockquote classique). */
+.nb-doc .bn-block-content[data-content-type="quote"] {
+  border-left: 3px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+  padding-left: 14px;
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* Équation KaTeX : rendu lisible sur fond sombre (KaTeX hérite de la couleur courante). */
+.nb-doc .katex { color: var(--color-fg); }
+.nb-doc .katex-display { margin: 0.25em 0; }
+
+/* <select> natifs des filtres db : appearance retirée + caret maison + fond/texte/options thémés
+   (l'OS ne styule plus la boîte fermée ; harmonisé avec les inputs du carnet). */
+.nb-sel {
+  appearance: none; -webkit-appearance: none;
+  background-color: var(--color-surface-2);
+  color: var(--color-fg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 2px 20px 2px 6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+}
+.nb-sel:focus { outline: none; border-color: var(--color-primary); }
+.nb-sel option { background: var(--color-surface-2); color: var(--color-fg); }
+
+/* Bande d'onglets (barre de titre) : défilement sans barre visible (sinon un rail gris s'affiche entre
+   le dernier onglet et le bouton +, qui casse l'intégration). */
+.nb-tabstrip { scrollbar-width: none; }
+.nb-tabstrip::-webkit-scrollbar { display: none; }
+
+/* Mention de lien web inline (linkMention) : puce favicon + (site) + titre, cliquable + carte au survol. */
+.nb-link-mention {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 24rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-fg) 7%, transparent);
+  color: var(--color-fg);
+  cursor: pointer;
+  white-space: nowrap;
+  vertical-align: baseline;
+  transition: background 0.12s ease;
+}
+.nb-link-mention:hover { background: color-mix(in srgb, var(--color-fg) 15%, transparent); }
+.nb-link-mention > .truncate { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--color-fg) 28%, transparent); text-underline-offset: 2px; }
+.nb-link-mention-ico { width: 1em; height: 1em; border-radius: 3px; flex-shrink: 0; }
+.nb-link-mention-site { color: var(--color-muted); flex-shrink: 0; }
+
+/* Mention de date inline (dateMention) : pilule discrète + sélecteur natif. */
+.nb-date-mention { position: relative; display: inline-flex; vertical-align: baseline; }
+.nb-date-mention-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+.nb-date-mention-btn:hover { background: color-mix(in srgb, var(--color-primary) 22%, transparent); }
+.nb-date-pop { position: absolute; top: 100%; left: 0; z-index: 50; margin-top: 4px; }
+
+/* Les deux sélecteurs du panneau lecteur partagent une ligne tant qu'elle est
+   assez large. Le conteneur (et non la fenêtre) pilote le breakpoint : le
+   panneau peut donc être redimensionné sans attendre un resize global. */
+.timeline-insertion-container {
+  container: timeline-insertion / inline-size;
+}
+
+.timeline-insertion-row {
+  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, 0.72fr);
+}
+
+.timeline-insertion-target {
+  width: 100%;
+  max-width: none;
+}
+
+@container timeline-insertion (max-width: 420px) {
+  .timeline-insertion-row {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .timeline-insertion-target,
+  .timeline-insertion-select {
+    width: 100%;
+  }
+}
+
+/* Palette de marque NetsuRush — custom properties consommées via var(--color-*) dans tout le
+   renderer. Plusieurs thèmes commutables : le défaut (« Sombre ») vit dans :root, chaque autre
+   thème surcharge via [data-theme="…"] sur <html> (plus spécifique → gagne). Le bloc .dark
+   mappe les tokens shadcn sur ces var(--color-*), donc changer de thème cascade partout. */
+
+/* Thème « Sombre » (défaut) — noir profond légèrement bleuté, accent bleu (zéro violet). */
+:root,
+[data-theme="dark"] {
+  --color-bg: #0a0b0e;
+  --color-surface: #111319;
+  --color-surface-2: #1a1d25;
+  --color-border: #262a34;
+  --color-fg: #e3e4e8;
+  --color-muted: #888d99;
+  --color-primary: #4f86f7;
+  --color-primary-fg: #ffffff;
+  --color-accent: #1a2030;
+  --color-danger: #ef4444;
+  --color-ok: #10b981;
+  --color-warn: #e0a13a;
+  --theme-color-scheme: dark;
+}
+
+/* Crossfade des couleurs au changement de thème : classe posée brièvement sur <html> par
+   setTheme (retirée après ~260ms) → seules les propriétés de couleur transitionnent, pas de
+   coût permanent (évite le piège perf d'un transition global). Neutralisé par reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition,
+  html.theme-transition * {
+    transition:
+      background-color 240ms ease,
+      border-color 240ms ease,
+      color 240ms ease,
+      fill 240ms ease,
+      stroke 240ms ease !important;
+  }
+}
+
+/* Thème « Minuit » — noir franc et surfaces à peine relevées. */
+[data-theme="midnight"] {
+  --color-bg: #000000;
+  --color-surface: #07080a;
+  --color-surface-2: #101216;
+  --color-border: #22262d;
+  --color-fg: #f1f3f5;
+  --color-muted: #9ba2ad;
+  --color-primary: #5b8ef7;
+  --color-primary-fg: #ffffff;
+  --color-accent: #111827;
+  --color-danger: #f05252;
+  --color-ok: #18b982;
+  --color-warn: #e2a849;
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Bleu nuit » (Netsucord) — bleu profond, contraste doux. */
+[data-theme="blue"] {
+  --color-bg: oklch(0.190 0.022 258.000);
+  --color-surface: oklch(0.165 0.018 258.000);
+  --color-surface-2: oklch(0.235 0.020 255.000);
+  --color-border: oklch(1 0 0 / 9%);
+  --color-fg: oklch(0.900 0.006 240.000);
+  --color-muted: oklch(0.620 0.018 248.000);
+  --color-primary: oklch(0.660 0.095 245.000);
+  --color-primary-fg: oklch(0.165 0.018 258.000);
+  --color-accent: oklch(0.275 0.022 255.000);
+  --color-danger: oklch(0.719 0.169 13.428);
+  --color-ok: oklch(0.696 0.150 154.000);
+  --color-warn: oklch(0.770 0.130 75.000);
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Graphite » — gris strictement neutre (chroma 0) pour les écrans où la teinte bleue du
+   thème par défaut dérange, accent bleu acier désaturé. */
+[data-theme="graphite"] {
+  --color-bg: oklch(0.175 0 0);
+  --color-surface: oklch(0.215 0 0);
+  --color-surface-2: oklch(0.265 0 0);
+  --color-border: oklch(0.325 0 0);
+  --color-fg: oklch(0.925 0 0);
+  --color-muted: oklch(0.700 0 0);
+  --color-primary: oklch(0.720 0.075 240);
+  --color-primary-fg: oklch(0.175 0 0);
+  --color-accent: oklch(0.290 0 0);
+  --color-danger: oklch(0.640 0.180 25);
+  --color-ok: oklch(0.700 0.140 155);
+  --color-warn: oklch(0.760 0.130 80);
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Forêt » — vert profond, accent émeraude. */
+[data-theme="forest"] {
+  --color-bg: oklch(0.190 0.022 160);
+  --color-surface: oklch(0.225 0.024 160);
+  --color-surface-2: oklch(0.275 0.026 160);
+  --color-border: oklch(0.340 0.028 160);
+  --color-fg: oklch(0.930 0.010 155);
+  --color-muted: oklch(0.700 0.020 158);
+  --color-primary: oklch(0.740 0.140 158);
+  --color-primary-fg: oklch(0.190 0.030 160);
+  --color-accent: oklch(0.300 0.035 160);
+  --color-danger: oklch(0.650 0.180 25);
+  --color-ok: oklch(0.740 0.140 158);
+  --color-warn: oklch(0.770 0.130 80);
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Braise » — charbon chaud, accent ambre. */
+[data-theme="ember"] {
+  --color-bg: oklch(0.180 0.014 45);
+  --color-surface: oklch(0.218 0.016 42);
+  --color-surface-2: oklch(0.268 0.018 40);
+  --color-border: oklch(0.335 0.020 40);
+  --color-fg: oklch(0.930 0.010 60);
+  --color-muted: oklch(0.705 0.018 50);
+  --color-primary: oklch(0.760 0.140 62);
+  --color-primary-fg: oklch(0.180 0.020 45);
+  --color-accent: oklch(0.300 0.030 45);
+  --color-danger: oklch(0.645 0.185 25);
+  --color-ok: oklch(0.720 0.140 155);
+  --color-warn: oklch(0.780 0.130 80);
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Prune » — violet sourd, accent mauve. */
+[data-theme="plum"] {
+  --color-bg: oklch(0.185 0.028 305);
+  --color-surface: oklch(0.222 0.032 305);
+  --color-surface-2: oklch(0.272 0.036 303);
+  --color-border: oklch(0.340 0.038 302);
+  --color-fg: oklch(0.930 0.012 300);
+  --color-muted: oklch(0.705 0.024 300);
+  --color-primary: oklch(0.740 0.130 305);
+  --color-primary-fg: oklch(0.185 0.030 305);
+  --color-accent: oklch(0.300 0.045 305);
+  --color-danger: oklch(0.650 0.180 25);
+  --color-ok: oklch(0.720 0.140 155);
+  --color-warn: oklch(0.780 0.130 80);
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Contraste élevé » — accessibilité : noir pur, blanc pur, bordures à 4:1 (et non le fin
+   liseré des autres thèmes) pour rester lisible sur un écran mal calibré ou en basse vision. */
+[data-theme="contrast"] {
+  --color-bg: oklch(0 0 0);
+  --color-surface: oklch(0.145 0 0);
+  --color-surface-2: oklch(0.215 0 0);
+  --color-border: oklch(0.560 0 0);
+  --color-fg: oklch(1 0 0);
+  --color-muted: oklch(0.800 0 0);
+  --color-primary: oklch(0.800 0.100 235);
+  --color-primary-fg: oklch(0 0 0);
+  --color-accent: oklch(0.250 0.030 240);
+  --color-danger: oklch(0.700 0.170 25);
+  --color-ok: oklch(0.800 0.170 150);
+  --color-warn: oklch(0.850 0.160 85);
+  --theme-color-scheme: dark;
+}
+
+/* Thème « Clair » — surfaces nettes, neutres légèrement teintés vers le bleu de marque. */
+[data-theme="light"] {
+  --color-bg: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #e9edf3;
+  --color-border: #ccd3dd;
+  --color-fg: #171a20;
+  --color-muted: #5e6673;
+  --color-primary: #2f65c8;
+  --color-primary-fg: #ffffff;
+  --color-accent: #e2eafa;
+  --color-danger: #c93442;
+  --color-ok: #087a55;
+  --color-warn: #946000;
+  --theme-color-scheme: light;
+}
+
+/* Thème « Clair doux » — gris bleuté pour réduire l'éblouissement sans perdre la lisibilité. */
+[data-theme="soft-light"] {
+  --color-bg: #e8edf3;
+  --color-surface: #f7f9fc;
+  --color-surface-2: #dde4ec;
+  --color-border: #bdc8d4;
+  --color-fg: #20252c;
+  --color-muted: #5d6876;
+  --color-primary: #356aa9;
+  --color-primary-fg: #ffffff;
+  --color-accent: #d5e2f2;
+  --color-danger: #bd3846;
+  --color-ok: #147657;
+  --color-warn: #8c5c00;
+  --theme-color-scheme: light;
+}
+
+/* Thème « Papier » — sépia franc (et non un blanc à peine tiédi) pour les longues sessions de
+   lecture/écriture du Carnet, accent terracotta. */
+[data-theme="paper"] {
+  --color-bg: oklch(0.930 0.022 78);
+  --color-surface: oklch(0.962 0.016 80);
+  --color-surface-2: oklch(0.885 0.026 76);
+  --color-border: oklch(0.815 0.030 74);
+  --color-fg: oklch(0.255 0.020 60);
+  --color-muted: oklch(0.470 0.024 62);
+  --color-primary: oklch(0.520 0.110 45);
+  --color-primary-fg: oklch(0.985 0.005 85);
+  --color-accent: oklch(0.878 0.040 68);
+  --color-danger: oklch(0.505 0.170 26);
+  --color-ok: oklch(0.470 0.100 155);
+  --color-warn: oklch(0.520 0.110 75);
+  --theme-color-scheme: light;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Micro-interactions globales — toutes les icônes lucide + tous les éléments
+   cliquables. CSS pur (transform sur le compositor) : zéro JS, zéro coût au
+   repos, neutralisé par prefers-reduced-motion. Couvre toute l'app sans
+   toucher chaque composant.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Toute icône lucide dans un élément cliquable : transition douce + très léger
+   appui au clic. `:not(.animate-spin)` épargne les spinners (sinon le scale
+   écraserait la rotation).
+   AMPLITUDES VOLONTAIREMENT MINUSCULES : un grossissement de 15 % sur une
+   courbe qui DÉPASSE sa cible (back-out) faisait sursauter chaque icône
+   survolée, et l'écrasement à 0,88 au clic se lisait comme un zoom brutal. Le
+   geste doit se sentir, pas se voir — on reste sous la barre des 5 %, sur une
+   courbe qui ne dépasse jamais. */
+button svg.lucide,
+a svg.lucide,
+label svg.lucide,
+[role="button"] svg.lucide,
+[data-slot="button"] svg.lucide {
+  transition: transform 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+button:hover svg.lucide:not(.animate-spin),
+a:hover svg.lucide:not(.animate-spin),
+label:hover svg.lucide:not(.animate-spin),
+[role="button"]:hover svg.lucide:not(.animate-spin),
+[data-slot="button"]:hover svg.lucide:not(.animate-spin) {
+  transform: scale(1.04);
+}
+button:active svg.lucide:not(.animate-spin),
+a:active svg.lucide:not(.animate-spin),
+[role="button"]:active svg.lucide:not(.animate-spin),
+[data-slot="button"]:active svg.lucide:not(.animate-spin) {
+  transform: scale(0.96);
+}
+
+/* Feedback d'appui sur les boutons eux-mêmes : le « flash » devient un
+   enfoncement à peine perceptible. `:not(:disabled)` pour ne pas animer les
+   boutons inactifs. */
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active,
+[data-slot="button"]:not(:disabled):active {
+  transform: scale(0.99);
+  transition: transform 90ms ease-out;
+}
+
+/* Idle « vivant » : les icônes de chargement déjà en .animate-spin tournent ;
+   on ajoute un léger respir aux pastilles de statut au survol de leur ligne. */
+.nr-pulse {
+  animation: thin-pulse 2s ease-in-out infinite;
+}
+
+/* Points de « réflexion » du chat (typing indicator) */
+@keyframes nrdot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-2px); }
+}
+
+/* Écrans de gate (login / accès) : sobres. Halo discret sous le bouton Discord + fondu d'entrée. */
+.neon-btn {
+  box-shadow: 0 10px 26px -16px color-mix(in oklch, #5865F2 60%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gate-in {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: gate-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes gate-in { to { opacity: 1; transform: none; } }
+}

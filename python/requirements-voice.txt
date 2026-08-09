@@ -1,0 +1,9 @@
+# NetsuTalk : transcription, silences et montage par texte.
+faster-whisper>=1.1
+onnx-asr[gpu,hub]>=0.6
+# Silero v5 est le SEUL segmenteur de silences et son modèle ONNX voyage dans le paquet : sans lui,
+# « Couper les silences » échoue à l'import alors que le module a été choisi à l'installation (le
+# bouton n'est pas conditionné à un modèle, contrairement au sélecteur d'ASR).
+silero-vad>=5.1
+soundfile
+librosa>=0.10

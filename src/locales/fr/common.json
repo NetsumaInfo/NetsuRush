@@ -1,0 +1,83 @@
+{
+  "action": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "continue": "Continuer",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "rename": "Renommer",
+    "edit": "Modifier",
+    "copy": "Copier",
+    "reset": "Réinitialiser",
+    "apply": "Appliquer",
+    "open": "Ouvrir",
+    "retry": "Réessayer",
+    "error": "Erreur",
+    "import": "Importer",
+    "decrease": "Diminuer",
+    "increase": "Augmenter",
+    "loading": "Chargement…"
+  },
+  "status": {
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "ok": "OK",
+    "empty": "Rien à afficher"
+  },
+  "color": {
+    "hexValue": "Valeur hexadécimale",
+    "transparent": "Transparent",
+    "choose": "Choisir une couleur",
+    "swatch": "Couleur {{color}}"
+  },
+  "player": {
+    "scenePreview": "Aperçu du plan",
+    "progress": "Barre de progression",
+    "play": "Lecture",
+    "pause": "Pause",
+    "prevFrame": "Image précédente",
+    "nextFrame": "Image suivante",
+    "prevFrameShortcut": "Image préc. (←)",
+    "nextFrameShortcut": "Image suiv. (→)",
+    "soundOn": "Activer le son",
+    "soundOff": "Couper le son",
+    "volume": "Volume",
+    "muted": "Muet",
+    "fullscreen": "Plein écran",
+    "seek": "Se déplacer dans la vidéo"
+  },
+  "fileType": {
+    "video": "Vidéo",
+    "image": "Image",
+    "media": "Médias"
+  },
+  "window": {
+    "reference": "NetsuRush — Référence",
+    "notebook": "NetsuRush — Carnet"
+  },
+  "mock": {
+    "resolveUnavailable": "Resolve est indisponible dans le navigateur.",
+    "appUnavailable": "Fonction indisponible dans le navigateur.",
+    "outsideApp": "Fonction disponible uniquement dans l'application.",
+    "pageNotFound": "Page introuvable",
+    "collectionNotFound": "Collection introuvable",
+    "archiveUnavailable": "Archivage indisponible hors application.",
+    "folderImportUnavailable": "Import de dossier indisponible hors application.",
+    "emptyFolderName": "Le nom du dossier est vide",
+    "invalidFolderName": "Le nom du dossier ne peut pas contenir « / » ni « \\ »",
+    "folder": "Dossier"
+  },
+  "spell": {
+    "title": "Correction orthographique",
+    "unknownWord": "Mot inconnu",
+    "searching": "Recherche de suggestions…",
+    "noSuggestion": "Aucune suggestion",
+    "addToDictionary": "Ajouter au dictionnaire",
+    "ignoreOnce": "Ignorer dans cette session",
+    "replaceAll": "Remplacer les {{count}} occurrences"
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "stream": { "error": "Ein Fehler ist aufgetreten." },
+  "panel": {
+    "copilot": "NetsuRush Copilot",
+    "noCliAgent": "Kein CLI-Agent gefunden — auf Claude/OpenAI wechseln oder claude/codex installieren",
+    "configureKey": "API-Schlüssel einrichten, um zu starten"
+  },
+  "composer": {
+    "pickEngine": "Engine (API-Schlüssel oder CLI-Agent) in den Einstellungen ⚙ wählen, um zu senden.",
+    "placeholder": "Die KI bitten, Resolve zu steuern…",
+    "attachFiles": "Dateien anhängen",
+    "attachTip": "Bild / Datei anhängen",
+    "attachedFilesPrompt": "Angehängte Dateien (lokale Pfade — bei Bedarf lesen oder ansehen)",
+    "stop": "Stopp",
+    "send": "Senden"
+  },
+  "header": { "defaultTitle": "Neue Unterhaltung",
+    "conversations": "Unterhaltungen",
+    "newConv": "Neue Unterhaltung",
+    "noConv": "Keine Unterhaltungen",
+    "settings": "Einstellungen"
+  },
+  "settings": {
+    "apiKeys": "API-Schlüssel (BYOK)",
+    "noVault": "Verschlüsselter Tresor außerhalb der App nicht verfügbar — Schlüssel gelten nur für diese Sitzung.",
+    "hide": "Ausblenden",
+    "show": "Anzeigen",
+    "keySet": "eingerichtet",
+    "keyAbsent": "fehlt",
+    "cliAgents": "Gefundene CLI-Agenten",
+    "rescan": "Neu suchen",
+    "noAgentsPre": "Kein Agent gelistet — auf „Neu suchen“ klicken. Wenn nichts kommt, ",
+    "noAgentsPost": " installieren und prüfen, ob sie im PATH des Core liegen.",
+    "detected": "gefunden",
+    "absent": "fehlt",
+    "saved": "Gespeichert"
+  },
+  "engine": {
+    "engine": "Engine",
+    "cliAgent": "CLI-Agent",
+    "agent": "Agent",
+    "model": "Modell",
+    "default": "Standard",
+    "freeId": "freie ID: vendor/model…",
+    "permissions": "Berechtigungen"
+  },
+  "mode": {
+    "readonly": "Lesen",
+    "ask": "Fragen",
+    "safe": "Kopie",
+    "auto": "Auto"
+  },
+  "modeTitle": {
+    "readonly": "Nur lesen — kein Schreiben",
+    "ask": "Fragt nur bei Riskantem nach (Dateien/Rendern/Medien löschen); Timeline-Schnitt läuft durch",
+    "safe": "Dupliziert die Timeline vor dem Schreiben — das Original bleibt unberührt",
+    "auto": "Schreibt direkt in die Timeline, ohne Rückfrage"
+  },
+  "message": {
+    "thinking": "Denkt nach…",
+    "reasoning": "Gedankengang",
+    "hideReasoning": "Gedankengang ausblenden",
+    "showReasoning": "Gedankengang anzeigen",
+    "copyText": "Text kopieren"
+  },
+  "toolcard": {
+    "running": "läuft",
+    "failed": "fehlgeschlagen",
+    "arguments": "Argumente",
+    "result": "Ergebnis",
+    "copyName": "Tool-Namen kopieren",
+    "copyArgs": "Argumente kopieren",
+    "copyResult": "Ergebnis kopieren",
+    "collapse": "Einklappen",
+    "expand": "Ausklappen"
+  },
+  "tool": {
+    "quoted": " „{{value}}“",
+    "resolveStatus": "Resolve-Status",
+    "listMediaPool": "Media Pool lesen",
+    "searchClips": "Suche{{q}}",
+    "indexClip": "Rohmaterial indexieren",
+    "detectScenes": "Shot-Erkennung",
+    "cachedScenes": "Shots aus Cache lesen",
+    "listTimelines": "Timelines auflisten",
+    "readTimeline": "Timeline lesen",
+    "buildTimeline": "Timeline bauen{{q}}",
+    "cutTimeline": "Timeline schneiden",
+    "probeMedia": "Medium analysieren",
+    "makeThumbnail": "Miniatur erzeugen",
+    "upscaleMedia": "Video hochskalieren",
+    "exportAe": "After Effects Export",
+    "importMedia": "In Media Pool importieren",
+    "board": "Referenz-Board{{suffix}}",
+    "page": "Seite {{page}}",
+    "resolveApp": "Resolve-Anwendung",
+    "grabStill": "Standbild aufnehmen",
+    "setTimecode": "Player bewegen",
+    "viewer": "Resolve-Player",
+    "removeAudio": "Audio entfernen",
+    "duplicate": "Timeline duplizieren",
+    "addMarker": "Marker hinzufügen",
+    "addTrack": "Spur hinzufügen",
+    "deleteTrack": "Spur löschen",
+    "timelineFallback": "Timeline · {{action}}",
+    "mediaPool": "Media Pool · {{action}}",
+    "render": "Rendern · {{action}}",
+    "timelineItem": "Aktuelle Einstellung · {{action}}",
+    "project": "Projekt · {{action}}",
+    "resolveCall": "Resolve-API · {{root}}"
+  },
+  "approval": {
+    "title": "Aktion zulassen?",
+    "allow": "Zulassen",
+    "deny": "Ablehnen"
+  },
+  "risk": {
+    "read": "Lesen",
+    "write": "Schreiben",
+    "destructive": "destruktiv"
+  },
+  "store": {
+    "convFallback": "Unterhaltung",
+    "error": "Fehler"
+  }
+}

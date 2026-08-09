@@ -1,0 +1,123 @@
+{
+  "app": {
+    "modulePreparing": "準備中のモジュールです。近日公開。"
+  },
+  "nav": { "derush": "NetsuCut", "script": "NetsuDraft", "notebook": "NetsuBook", "search": "NetsuSearch", "upscale": "NetsuLab", "reference": "NetsuBoard", "transfer": "NetsuBridge", "voice": "NetsuTalk", "chat": "NetsuPilot", "optimisation": "NetsuBoost" },
+  "sidebar": {
+    "settings": "設定",
+    "hostPicked": "操作対象アプリ"
+  },
+  "status": {
+    "connected": "接続済み",
+    "offline": "オフライン",
+    "connectedLower": "接続済み",
+    "offlineLower": "オフライン",
+    "panelConnected": "パネル接続済み",
+    "panelOffline": "パネルオフライン",
+    "resolveConnected": "Resolve 接続済み",
+    "resolveOffline": "Resolve オフライン",
+    "project": "プロジェクト：{{project}}",
+    "refresh": "状態を更新",
+    "resolveHint": "ブリッジは動作していますが、Resolve が応答しません。<b1>Resolve Studio</b1> でプロジェクトを開き、<b2>環境設定 ▸ システム ▸ 一般 ▸ 外部スクリプティング = ローカル</b2> にして Resolve を再起動してください。",
+    "adobeHint": "{{host}} を開き、<b>ウィンドウ ▸ エクステンション ▸ NetsuRush</b> パネルを開いてください（Adobe タブからインストール）。"
+  },
+  "menu": { "derush": "素材整理", "chat": "チャット",
+    "edit": "編集",
+    "cut": "切り取り",
+    "paste": "貼り付け",
+    "selectAll": "すべて選択",
+    "derushHome": "素材整理ホーム",
+    "reloadRushes": "素材を再読み込み",
+    "cutTimeline": "タイムラインをカット",
+    "section": "セクション",
+    "sectionDecoupage": "カット",
+    "sectionCollections": "コレクション",
+    "sectionTimeline": "ライブタイムライン",
+    "search": "検索",
+    "resultView": "結果の表示",
+    "resultFlat": "フラット",
+    "resultClusters": "グループ",
+    "resultDedup": "重複",
+    "clearRefs": "参照をクリア",
+    "clearChain": "チェーンをクリア",
+    "clearSources": "選択をクリア",
+    "voice": "音声",
+    "listen": "試聴",
+    "listenNone": "元素材",
+    "listenAll": "完成版",
+    "listenSilences": "無音カット",
+    "listenFillers": "フィラーなし",
+    "listenRepeats": "繰り返しなし",
+    "reset": "リセット",
+    "clearChat": "会話を消去",
+    "gotoModule": "モジュールへ移動",
+    "console": "コンソール",
+    "refreshStatus": "状態を更新",
+    "reloadApp": "NetsuRush を再読み込み",
+    "pinned": "ウィンドウをピン留め",
+    "hideSidebar": "サイドバーを隠す",
+    "pinAbove": "最前面にピン留め"
+  },
+  "windowControls": {
+    "unpin": "ウィンドウのピン留めを解除",
+    "pinAbove": "最前面にピン留め",
+    "unpinShort": "ピン留め解除",
+    "minimize": "最小化",
+    "restore": "元のサイズに戻す",
+    "maximize": "最大化"
+  },
+  "errorBadge": {
+    "aria": "エラー {{count}} 件 — コンソールを開く",
+    "open": "コンソールを開く",
+    "markRead": "既読にする"
+  },
+  "errorBoundary": {
+    "title": "NetsuRush の描画がクラッシュしました",
+    "reload": "再読み込み"
+  },
+  "notebook": {
+    "untitled": "無題",
+    "prev": "前へ",
+    "next": "次へ",
+    "closeTab": "タブを閉じる",
+    "closeOthers": "他を閉じる",
+    "allTabs": "すべてのタブ",
+    "newPageTab": "新しいタブでページを作成"
+  },
+  "emoji": {
+    "search": "絵文字を検索…",
+    "none": "「{{q}}」に一致する絵文字はありません。",
+    "cat": {
+      "people": "顔と人",
+      "nature": "動物と自然",
+      "foods": "食べ物と飲み物",
+      "activity": "アクティビティ",
+      "places": "旅行と場所",
+      "objects": "オブジェクト",
+      "symbols": "記号",
+      "flags": "旗"
+    }
+  },
+  "scrollTop": "上へ戻る",
+  "select": {
+    "select": "選択",
+    "deselect": "選択解除"
+  },
+  "power": {
+    "reopenHost": "{{host}} を開き直す",
+    "freeRam": "閉じて RAM を解放",
+    "closeNub": "{{host}} を閉じる（RAM/GPU を解放）",
+    "opInProgress": "処理中…",
+    "hostClosed": "{{host}} は終了済み",
+    "reopenToResume": "「{{project}}」を開いて再開します。",
+    "reopenToResumeNoProject": "開き直して再開します。",
+    "collapse": "折りたたむ",
+    "collapseCorner": "隅に折りたたむ",
+    "closeHostQ": "{{host}} を閉じますか？",
+    "freeRamDesc": "タスク用に RAM と GPU を解放します。終了後はワンクリックでプロジェクトを開き直せます。",
+    "resolveSafeCloseDesc": "RAM と GPU を解放します。終了前に NetsuRush がプロジェクトを保存し、キャッシュを確認します。",
+    "later": "あとで",
+    "closeHost": "{{host}} を閉じる",
+    "failed": "失敗"
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "img": "Bild",
+  "cancel": "Abbrechen",
+  "compare": {
+    "before": "Vorher",
+    "after": "Nachher"
+  },
+  "object": {
+    "name": "Objekt {{n}}"
+  },
+  "studio": {
+    "title": "Roto Studio",
+    "pickSource": "Quelle auswählen, um Roto zu starten.",
+    "play": "Wiedergabe",
+    "pause": "Pause",
+    "playTip": "Wiedergabe (L / Leertaste) — J = rückwärts",
+    "pauseTip": "Pause (K / Leertaste)",
+    "prevFrame": "Vorheriges Bild",
+    "nextFrame": "Nächstes Bild",
+    "inHere": "In-Punkt hier",
+    "inTip": "In-Punkt am aktuellen Bild (I — Umschalt+I löscht). Tracking und Export bleiben im Bereich.",
+    "outHere": "Out-Punkt hier",
+    "outTip": "Out-Punkt am aktuellen Bild (O — Umschalt+O löscht)",
+    "range": "Bereich {{from}}–{{to}}",
+    "clickHint": "Klick = {{mode}} (E schaltet um) · Rechtsklick = ausschließen · Umschalt+Maus = Vorschau · Mausrad = Zoom · J/K/L · I/O · , ; = Tracking-Schritt · 1-9 Objekt",
+    "include": "einschließen",
+    "exclude": "ausschließen",
+    "pointsHere": "· Punkte hier: {{count}}",
+    "showMask": "Maske anzeigen",
+    "hideOverlay": "Overlay ausblenden",
+    "showOverlay": "Overlay einblenden",
+    "testTitle": "Test — {{label}}",
+    "testHint": "Nur Vorschau — nichts wird geschrieben. Passt das Ergebnis, Aktion auf die ganze Einstellung anwenden."
+  },
+  "panels": {
+    "model": "Modell",
+    "noSam": "Kein SAM-Modell installiert — SAM 2.1 unter Einstellungen › Modelle laden.",
+    "display": "Anzeige",
+    "maskRefine": "Maske nachbessern",
+    "output": "Ausgabe",
+    "matteFine": "Feine Matte",
+    "removeObject": "Objekt entfernen",
+    "track": "Verfolgung",
+    "selection": "Auswahl",
+    "mask": "Maske"
+  },
+  "objects": {
+    "title": "Objekte",
+    "add": "Objekt hinzufügen",
+    "addTip": "Objekt zum Freistellen hinzufügen",
+    "include": "Einschließen",
+    "includeTip": "Linksklick FÜGT zur Maske des aktiven Objekts HINZU",
+    "exclude": "Ausschließen",
+    "excludeTip": "Linksklick ENTFERNT aus der Maske (negativer Punkt) — korrigiert Überstände",
+    "nameAria": "Objektname",
+    "removeAria": "{{name}} entfernen",
+    "setActive": "Aktiv setzen",
+    "remove": "Objekt entfernen"
+  },
+  "points": {
+    "title": "Punkte",
+    "allFrames": "Alle Bilder",
+    "allFramesTip": "Punkte aller Bilder auflisten (sonst: aktuelles Bild)",
+    "removeAria": "Diesen Punkt entfernen",
+    "goToFrame": "Zum Bild springen",
+    "removePoint": "Diesen Punkt entfernen"
+  },
+  "track": {
+    "clearFramePoints": "Punkte des Bildes löschen",
+    "trackAll": "Ganze Einstellung tracken",
+    "stepBack": "Schritt ←",
+    "stepBackTip": "Trackt EIN Bild rückwärts und stoppt dort (Bild für Bild)",
+    "stepFwd": "Schritt →",
+    "stepFwdTip": "Trackt EIN Bild vorwärts und stoppt dort (Bild für Bild)",
+    "retrackBack": "Neu tracken ←",
+    "retrackBackTip": "Rückwärts ab dem aktuellen Bild neu tracken (lokale Korrektur)",
+    "retrackFwd": "Neu tracken →",
+    "retrackFwdTip": "Vorwärts ab dem aktuellen Bild neu tracken (lokale Korrektur)",
+    "dedupe": "Deduplizieren",
+    "dedupeTip": "Animation: Fast identische Bilder (Haltebilder) bekommen die GLEICHE Matte — stabile Kontur. Umkehrbar.",
+    "restoreMattesAria": "Mattes wiederherstellen",
+    "restoreMattesTip": "Mattes von vor dem Deduplizieren wiederherstellen",
+    "resetAria": "Tracking zurücksetzen",
+    "resetTip": "Löscht das Tracking (Mattes), BEHÄLT alle Punkte",
+    "upToDate": "Tracking aktuell — Punkte korrigieren und teilweise neu tracken, oder exportieren."
+  },
+  "view": {
+    "outline": "Konturen",
+    "outlineTip": "Zeichnet die Kontur jedes Objekts in seiner Farbe",
+    "bgColorAria": "Hintergrundfarbe",
+    "bgColorTip": "Farbe des Kompositionshintergrunds",
+    "opacity": "Maskendeckkraft"
+  },
+  "viewMode": {
+    "editLabel": "Bearbeiten",
+    "editHint": "Bild + Masken pro Objekt eingefärbt (Arbeitsmodus)",
+    "matteLabel": "Matte",
+    "matteHint": "Nur Schwarzweiß-Maske (Kantenkontrolle)",
+    "alphaLabel": "Alpha",
+    "alphaHint": "Freigestelltes Bild auf Schachbrett (echtes Ergebnis)",
+    "bgcolorLabel": "Farbhintergrund",
+    "bgcolorHint": "Bild auf einer Vollfarbe komponiert (Freistellungskontrolle)"
+  },
+  "post": {
+    "grow": "Erweitern / verkleinern",
+    "feather": "Kante weichzeichnen",
+    "holes": "Löcher füllen",
+    "dots": "Flecken entfernen",
+    "smooth": "Kontur glätten",
+    "border": "Bildränder korrigieren",
+    "gamma": "Dichte (Gamma)",
+    "resetTip": "Doppelklick = zurücksetzen"
+  },
+  "remove": {
+    "steps": "Diffusionsschritte",
+    "stepsTip": "Mehr Schritte = besseres Füllen, langsamer (12 = ausgewogen)",
+    "grow": "Löschrand",
+    "growTip": "Erweitert die Maske vor dem Löschen — deckt Kanten und Schatten des Objekts ab",
+    "plate": "Clean Plate",
+    "plateTip": "Holt den tatsächlich gefilmten Hintergrund aus benachbarten Frames, bevor das Modell ihn erfindet — diese Pixel haben bereits die richtige Farbe und Körnung",
+    "harmonize": "Angleichen",
+    "harmonizeTip": "Gleicht Farbe und Schärfe des rekonstruierten Bereichs an die Umgebung an — ohne das fällt der Flicken auf, selbst wenn der Inhalt stimmt",
+    "grain": "Korn",
+    "grainTip": "Fügt das rund um den Bereich gemessene Korn wieder ein: eine glatte Füllung auf körnigem Material sticht hervor. Bei sauberer Quelle gleich null",
+    "quality": "Qualität",
+    "qualityTip": "Diffusionsauflösung. Höher = schärfere Füllung, aber mehr VRAM; bei Speichermangel wird automatisch die nächstniedrigere Stufe verwendet",
+    "qualityFast": "Schnell",
+    "qualityStandard": "Standard",
+    "qualityMax": "Maximal",
+    "on": "Ein",
+    "off": "Aus",
+    "advanced": "Modelleinstellungen",
+    "seed": "Startwert",
+    "seedTip": "Legt die Zufallsziehung fest. Gleicher Startwert, gleiches Ergebnis — so lässt sich eine gelungene Füllung wiederholen.",
+    "reroll": "Neu ziehen",
+    "rerollTip": "Zieht einen neuen Startwert. Das Erste, was man bei einer misslungenen Füllung versucht.",
+    "window": "Fenster",
+    "windowTip": "Bilder, die das Modell am Stück verarbeitet. Größer = zeitlich stimmiger, mehr Speicher.",
+    "overlap": "Überlappung",
+    "overlapTip": "Bilder, die zwei Fenster teilen und die ineinander übergeblendet werden. Bei null zeigt sich die Naht als Sprung.",
+    "vaeTiling": "Dekodierung kacheln",
+    "vaeTilingTip": "Spart viel Speicher, kann aber Kachelnähte hinterlassen. Abschalten, wenn die Karte mitkommt.",
+    "cpuOffload": "Auf den Prozessor auslagern",
+    "cpuOffloadTip": "Lädt die Gewichte nur für ihren eigenen Durchgang auf die Karte. Deutlich langsamer, passt aber auf eine kleine Karte.",
+    "qualityTiny": "Mini",
+    "qualityUltra": "Ultra"
+  },
+  "engineRow": {
+    "noneInstalled": "Kein {{label}}-Modul installiert",
+    "testAria": "{{label}} am aktuellen Bild testen",
+    "testTip": "Am aktuellen Bild testen — nur Vorschau, nichts wird geschrieben"
+  },
+  "engineHint": {
+    "minimax-remover": "Etwa 6 Diffusionsschritte mit zeitlicher Konsistenz — sauberer bei bewegten Hintergründen.",
+    "diffueraser": "Qualität — Engine-Anbindung ausstehend.",
+    "matanyone": "Speicherbasiertes Tracking — Haare und Kanten.",
+    "matanyone2": "Feinere Details und robuster als v1."
+  },
+  "exportRow": {
+    "allObjects": "Alle Objekte",
+    "exportAria": "Exportieren"
+  },
+  "exportFmt": {
+    "proresLabel": "ProRes 4444 (Alpha)",
+    "proresHint": "Video + Alphakanal — Schnitt (Resolve/AE)",
+    "webmLabel": "WebM VP9 (Alpha)",
+    "webmHint": "Leicht, Alpha — Web/Vorschau",
+    "ffv1Label": "FFV1 (Alpha, verlustfrei)",
+    "ffv1Hint": "Verlustfrei, Alpha — Archiv (MKV)",
+    "matteLabel": "Matte S/W (MP4)",
+    "matteHint": "Nur Schwarzweiß-Maske",
+    "bgcolorLabel": "Farbhintergrund (MP4)",
+    "bgcolorHint": "Objekt auf der Hintergrundfarbe des Anzeigemodus komponiert",
+    "pngLabel": "PNG-Sequenz (Matte)",
+    "pngHint": "Ein Matte-Bild pro Frame"
+  },
+  "sam": {
+    "large": "Bessere Maskenqualität, mehr VRAM.",
+    "base": "Schneller Fallback, wenig VRAM.",
+    "small": "Mittlere Variante: weniger VRAM als Base+, etwas gröbere Masken.",
+    "tiny": "Kleinste SAM-2.1-Variante — für Karten mit knappem VRAM.",
+    "edgetam": "Am leichtesten (56 MB) und am schnellsten. Gröbere Masken als SAM 2.1.",
+    "sam31": "Neueste Generation: hält Objekte, die sich kreuzen oder verschwinden. NVIDIA-GPU erforderlich.",
+    "samurai": "Verfolgt das Objekt auch bei Verdeckung (bewegungsgeführter Speicher). Nutzt die installierten SAM-2.1-Gewichte.",
+    "sam2long": "Für lange Einstellungen: hält mehrere Hypothesen und verwirft die schlechten, der Fehler summiert sich nicht mehr. Nutzt die installierten SAM-2.1-Gewichte."
+  },
+  "timeline": {
+    "inHere": "In-Punkt hier (Bild {{n}})",
+    "outHere": "Out-Punkt hier (Bild {{n}})",
+    "resetRange": "Bereich zurücksetzen"
+  },
+  "viewer": {
+    "zoomSuffix": "× — Doppelklick zum Einpassen"
+  },
+  "test": {
+    "matteImage": "Feine Matte — Bild {{n}}",
+    "removeImage": "Entfernen — Bild {{n}}"
+  },
+  "busy": {
+    "open": "Öffnen…",
+    "segment": "Segmentieren…",
+    "undo": "Rückgängig…",
+    "recalc": "Neu berechnen…",
+    "track": "Tracking",
+    "resetTrack": "Tracking zurücksetzen",
+    "dedupe": "Deduplizierung",
+    "restoreMattes": "Mattes wiederherstellen",
+    "export": "Export",
+    "matteFine": "Feine Matte",
+    "remove": "Entfernen",
+    "testMatte": "Matte-Test (1 Bild)",
+    "testRemove": "Entfernen-Test (1 Bild)"
+  },
+  "note": {
+    "canceled": "{{label}} abgebrochen — bereits getrackte Bilder bleiben.",
+    "output": "{{label}} → {{output}}",
+    "done": "{{label}} fertig.",
+    "unavailable": "{{label}} nicht verfügbar",
+    "restored": "Sitzung aus Cache wiederhergestellt — Punkte und Tracking erhalten.",
+    "dedupeOutput": "Gruppen: {{groups}} · Vereinheitlichte Bilder: {{changed}}"
+  },
+  "errors": {
+    "openFailed": "Öffnen fehlgeschlagen",
+    "segmentFailed": "Segmentieren fehlgeschlagen",
+    "undoFailed": "Rückgängig fehlgeschlagen",
+    "clearFailed": "Löschen fehlgeschlagen",
+    "removePointFailed": "Entfernen fehlgeschlagen",
+    "moveFailed": "Verschieben fehlgeschlagen"
+  },
+  "stage": {
+    "load": "Modell laden…",
+    "extract": "Bilder extrahieren…",
+    "extractwait": "Extraktion abschließen…",
+    "roi": "Nutzbereich zuschneiden…",
+    "refine": "Matte berechnen…",
+    "export": "Kodieren…",
+    "remove": "Entfernen…",
+    "dedupe": "Duplikate analysieren…"
+  },
+  "summary": {
+    "tracked": "aktuell",
+    "notTracked": "noch nicht verfolgt",
+    "matteNone": "nicht berechnet",
+    "matteOn": "aktiv",
+    "matteOff": "berechnet, aus",
+    "remove": "{{steps}} Schritte · Startwert {{seed}}",
+    "select_one": "{{model}} · {{count}} Objekt",
+    "select_other": "{{model}} · {{count}} Objekte",
+    "points_one": "{{count}} Punkt",
+    "points_other": "{{count}} Punkte",
+    "post_one": "{{count}} Einstellung",
+    "post_other": "{{count}} Einstellungen"
+  },
+  "matte": {
+    "run": "Matte berechnen",
+    "test": "Testen",
+    "testTip": "Verfeinert nur das aktuelle Bild und zeigt das Ergebnis — es wird nichts geschrieben.",
+    "useRefined": "Feine Matte verwenden",
+    "useRefinedTip": "Wechselt zwischen verfeinertem Alpha und roher Verfolgungsmaske, ohne neu zu rechnen. Anzeige, Export und Entfernen folgen.",
+    "advanced": "Erweiterte Einstellungen",
+    "size": "Verarbeitungsauflösung",
+    "sizeTip": "Obergrenze der kurzen Seite, die das Modell erhält. Höher = feinere Kanten, aber langsamer und speicherhungriger.",
+    "size480": "480",
+    "size720": "720",
+    "size1080": "1080",
+    "sizeFull": "Max.",
+    "warmup": "Einschwingen",
+    "warmupTip": "Zusätzliche Durchgänge auf jedem Startbild. Die erste Vorhersage geht von einer hartkantigen Maske aus; diese Durchgänge lockern sie.",
+    "combined": "Objekte zusammen verarbeiten",
+    "combinedTip": "Ein Durchgang über die Vereinigung statt einer je Objekt. Deutlich schneller, aber der Export eines einzelnen Objekts fällt auf die rohe Maske zurück.",
+    "batch": "Bilder pro Stapel",
+    "batchTip": "Bilder, die das Modell am Stück verarbeitet. Größer = zeitlich stimmiger, aber der Speicher steigt entsprechend.",
+    "overlap": "Überlappung",
+    "overlapTip": "Bilder, die zwei Stapel teilen. Sie werden neu berechnet und übergeblendet, und der nächste Stapel setzt auf dem vorigen Alpha auf — sonst zeigt sich die Naht."
+  },
+  "mask": {
+    "stepModel": "verfeinert das Alpha",
+    "stepManual": "auf der Verfolgungsmaske",
+    "stepOnRefined": "über der feinen Matte"
+  },
+  "output": {
+    "exportStep": "Exportieren"
+  }
+}

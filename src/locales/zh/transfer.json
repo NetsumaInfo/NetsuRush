@@ -1,0 +1,89 @@
+{
+  "header": {
+    "title": "软件之间的传输",
+    "subtitle": "把一条时间线逐帧精确地复制到另一款剪辑软件。"
+  },
+  "picker": {
+    "source": "来源",
+    "target": "目标",
+    "swap": "交换来源与目标",
+    "offline": "离线：{{hosts}}",
+    "online": "已连接",
+    "hostOffline": "离线",
+    "swapUnavailable": "该组合无法互换"
+  },
+  "sections": {
+    "source": "{{host}} 中的时间线",
+    "target": "{{host}} 中的目标",
+    "options": "选项",
+    "media": "媒体",
+    "outDir": "输出文件夹",
+    "encoding": "编码"
+  },
+  "form": {
+    "refresh": "刷新",
+    "noTimeline": "没有时间线",
+    "timelineOpen": "{{name}}（已打开）",
+    "namePlaceholder": "新建时间线的名称",
+    "modeNew": "新建时间线",
+    "modeAppend": "已有时间线",
+    "videoOnly": "仅视频",
+    "richAe": "After Effects 高级选项",
+    "richAeHint": "应用变换、速度与预合成，而不是简单复制镜头。",
+    "yes": "是",
+    "no": "否",
+    "choose": "选择…",
+    "none": "无"
+  },
+  "preview": {
+    "clips": "已读取镜头",
+    "tracks": "轨道",
+    "duration": "时长",
+    "fps": "帧率",
+    "missing": "找不到 {{count}} 个源文件",
+    "fidelityExact": "预计保持原生等效",
+    "fidelityLimited": "传输前已发现限制",
+    "fidelityCounts": "{{exact}} 项精确 · {{approximated}} 项近似 · {{unsupported}} 项不保证",
+    "animationUnavailable": "无法读取关键帧：源软件拒绝了承载关键帧的导出。传输将使用固定值。",
+    "mediaLess": "{{count}} 个无媒体元素（遮罩、调整图层）：任何软件都无法接收。",
+    "graphics": "{{count}} 个标题：将根据文字和样式在目标软件中重建。"
+  },
+  "phases": {
+    "read": "正在读取时间线",
+    "sources": "正在解析源文件",
+    "build": "正在剪辑",
+    "done": "已完成"
+  },
+  "run": {
+    "label": "传输 {{from}} → {{to}}",
+    "busy": "正在传输…"
+  },
+  "result": {
+    "done": "已在“{{timeline}}”（{{host}}）中放置 {{count}} 个镜头。",
+    "verified": "已回读属性：传输验证成功。",
+    "unverified": "已确认 {{applied}} 项属性 · {{issues}} 项限制或差异。",
+    "tracksClamped": "轨道已收敛：目标软件无法创建足够的轨道。",
+    "missing": "磁盘上找不到 {{count}} 个源文件。",
+    "mediaLess": "{{count}} 个无媒体元素（遮罩、调整图层）：任何软件都无法接收。",
+    "titles": "已重建 {{count}} 个标题。",
+    "titlesRetimed": "{{count}} 个标题沿用模板时长：DaVinci Resolve 未提供设置时长的接口。",
+    "titlesFailed": "{{count}} 个标题未能放置。",
+    "vehicleImport": "由 DaVinci Resolve 读取剪辑：关键帧、音频电平和速度由软件自身应用。",
+    "vehicleApi": "通过脚本逐个放置片段：关键帧来自 NetsuRush 的读取结果。",
+    "exchangeFile": "DaVinci Resolve 拒绝了脚本方式的剪辑。同一文件手动导入可正常工作（包含关键帧和音频电平）：文件 ▸ 导入 ▸ 时间线。"
+  },
+  "mediaModes": {
+    "copy": {
+      "label": "直接链接",
+      "hint": "直接链接原始文件，不写入任何文件。"
+    },
+    "remux": {
+      "label": "重新封装",
+      "hint": "无损更换封装。当目标软件无法读取源封装时很有用。"
+    },
+    "reencode": {
+      "label": "重新编码",
+      "hint": "把每个镜头转码为剪辑编码，并逐帧裁切。"
+    }
+  }
+}

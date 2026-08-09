@@ -1,0 +1,54 @@
+[package]
+name = "app"
+version = "0.3.5"
+description = "NetsuRush — app DaVinci Resolve standalone (derush IA, frame-accurate)"
+authors = ["Haim Faraj"]
+license = "AGPL-3.0-only"
+repository = "https://github.com/NetsumaInfo/NetsuRush"
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.11.3", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+# Coffre chiffré des clés API BYOK du Chat IA (chiffre le snapshot local ; clé dérivée via argon2).
+tauri-plugin-stronghold = "2"
+# Retour OAuth desktop : capte le scheme `netsurush://` (login Discord via Better Auth/Convex).
+tauri-plugin-deep-link = "2"
+# Instance unique : route le deep-link vers l'app déjà ouverte (obligatoire Windows/Linux).
+tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+base64 = "0.22"
+lazy_static = "1.5"
+libloading = "0.8"
+# Windows : accès COM bas niveau au WebView2 (désactivation de la Tracking Prevention,
+# sinon le lecteur YouTube embarqué casse → « Vidéo non disponible »). Versions alignées sur
+# celles que Tauri tire déjà (webview2-com 0.38 / windows-core 0.61) → zéro doublon de crate.
+# `windows` (mêmes 0.61) : reparenting Win32 de la fenêtre app DANS Adobe (SetParent, EnumWindows,
+# AttachThreadInput) — embed « NetsuRush dans After Effects / Premiere ».
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.38"
+windows-core = "0.61"
+windows = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_System_Threading",
+  "Win32_System_Com",
+  "Win32_System_RestartManager",
+  "Win32_Graphics_Gdi",
+] }

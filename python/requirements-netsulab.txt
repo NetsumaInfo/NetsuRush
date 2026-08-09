@@ -1,0 +1,11 @@
+# NetsuLab : upscale, profondeur et détourage.
+realesrgan
+basicsr
+spandrel
+spandrel-extra-arches==0.2.0
+transformers>=4.49
+accelerate
+timm
+einops
+kornia
+rembg[gpu]

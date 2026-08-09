@@ -1,0 +1,89 @@
+{
+  "header": {
+    "title": "Übertragung zwischen Anwendungen",
+    "subtitle": "Kopiert eine Timeline bildgenau von einer Schnittanwendung in eine andere."
+  },
+  "picker": {
+    "source": "Von",
+    "target": "Nach",
+    "swap": "Quelle und Ziel tauschen",
+    "offline": "Offline: {{hosts}}.",
+    "online": "verbunden",
+    "hostOffline": "offline",
+    "swapUnavailable": "Dieses Paar lässt sich nicht umkehren"
+  },
+  "sections": {
+    "source": "Timeline in {{host}}",
+    "target": "Ziel in {{host}}",
+    "options": "Optionen",
+    "media": "Medien",
+    "outDir": "Ausgabeordner",
+    "encoding": "Kodierung"
+  },
+  "form": {
+    "refresh": "Aktualisieren",
+    "noTimeline": "Keine Timeline",
+    "timelineOpen": "{{name}} (geöffnet)",
+    "namePlaceholder": "Name der neuen Timeline",
+    "modeNew": "Neue Timeline",
+    "modeAppend": "Vorhandene Timeline",
+    "videoOnly": "Nur Video",
+    "richAe": "Erweiterte After-Effects-Optionen",
+    "richAeHint": "Transformationen, Geschwindigkeit und Präkompositionen statt einer einfachen Kopie der Clips.",
+    "yes": "Ja",
+    "no": "Nein",
+    "choose": "Auswählen…",
+    "none": "Keiner"
+  },
+  "preview": {
+    "clips": "Gelesene Clips",
+    "tracks": "Spuren",
+    "duration": "Dauer",
+    "fps": "Bildrate",
+    "missing": "{{count}} Quelle(n) nicht gefunden",
+    "fidelityExact": "Native Entsprechung erwartet",
+    "fidelityLimited": "Erwartete Grenzen vor der Übertragung",
+    "fidelityCounts": "{{exact}} exakt · {{approximated}} angenähert · {{unsupported}} nicht garantiert",
+    "animationUnavailable": "Keyframes nicht lesbar: die Quellanwendung hat den Export verweigert, der sie enthält. Die Übertragung setzt feste Werte.",
+    "mediaLess": "{{count}} Element(e) ohne Medien (Matte, Einstellungsebene): keine Anwendung kann sie übernehmen.",
+    "graphics": "{{count}} Titel: werden im Ziel aus Text und Stil neu aufgebaut."
+  },
+  "phases": {
+    "read": "Timeline wird gelesen",
+    "sources": "Quellen werden aufgelöst",
+    "build": "Schnitt",
+    "done": "Fertig"
+  },
+  "run": {
+    "label": "{{from}} → {{to}} übertragen",
+    "busy": "Übertragung läuft…"
+  },
+  "result": {
+    "done": "{{count}} Clip(s) in „{{timeline}}“ ({{host}}) platziert.",
+    "verified": "Eigenschaften zurückgelesen: Übertragung verifiziert.",
+    "unverified": "{{applied}} Eigenschaft(en) bestätigt · {{issues}} Grenze(n) oder Abweichung(en).",
+    "tracksClamped": "Spuren begrenzt: Die Zielanwendung konnte nicht genug davon anlegen.",
+    "missing": "{{count}} Quelle(n) nicht auf der Festplatte gefunden.",
+    "mediaLess": "{{count}} Element(e) ohne Medien (Matte, Einstellungsebene): keine Anwendung kann sie übernehmen.",
+    "titles": "{{count}} Titel neu aufgebaut.",
+    "titlesRetimed": "{{count}} Titel mit der Dauer der Vorlage: DaVinci Resolve bietet keine Möglichkeit, sie zu ändern.",
+    "titlesFailed": "{{count}} Titel konnten nicht gesetzt werden.",
+    "vehicleImport": "Schnitt von DaVinci Resolve gelesen: Keyframes, Audiopegel und Geschwindigkeit werden von der Anwendung selbst gesetzt.",
+    "vehicleApi": "Clips einzeln per Skript gesetzt: die Keyframes stammen aus dem, was NetsuRush gelesen hat.",
+    "exchangeFile": "DaVinci Resolve hat den Schnitt per Skript verweigert. Dieselbe Datei lässt sich von Hand korrekt importieren — samt Keyframes und Audiopegeln: Datei ▸ Importieren ▸ Timeline."
+  },
+  "mediaModes": {
+    "copy": {
+      "label": "Direkte Verknüpfung",
+      "hint": "Originaldateien werden unverändert verknüpft. Keine Datei wird geschrieben."
+    },
+    "remux": {
+      "label": "Neu verpacken",
+      "hint": "Neuer Container, verlustfrei. Nützlich, wenn das Ziel den Quellcontainer nicht liest."
+    },
+    "reencode": {
+      "label": "Neu kodieren",
+      "hint": "Jeder Clip wird in einen Schnittcodec transkodiert und bildgenau geschnitten."
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "title": "NetsuRush の設定",
+  "desc": "必要なダウンロードだけを選んでください。この PC に対応する基盤は自動的にインストールされます。",
+  "progressAria": "設定手順",
+  "models": {
+    "title": "任意のダウンロード",
+    "subtitle": "機能別に分類され、いつでも修復できます。",
+    "search": "モデルを検索…",
+    "none": "ダウンロードしない",
+    "sceneDetection": "シーン分割",
+    "sceneDetectionHint": "NetsuCut に必要な軽量コンポーネントは前提環境に含まれます。",
+    "included": "同梱",
+    "empty": "検索に一致するモデルはありません。",
+    "selected": "{{count}} 件選択",
+    "noExtraSpace": "追加容量なし",
+    "tier": {
+      "light": "軽量",
+      "balanced": "標準",
+      "heavy": "大容量"
+    }
+  },
+  "packs": {
+    "recommended": "推奨パック",
+    "select": "パックを選択"
+  },
+  "scan": {
+    "running": "インストールと GPU を確認中…"
+  },
+  "review": {
+    "title": "インストールの準備完了",
+    "subtitle": "この PC に追加される内容を確認します。",
+    "downloads": "任意の容量",
+    "modelCount": "ダウンロード {{count}} 件",
+    "noOptionalModels": "任意のダウンロードなし",
+    "mandatoryOnly": "基盤とシーン分割のみ",
+    "sceneDetection": "シーン分割を含む"
+  },
+  "detectedBackend": "選択された計算エンジン：{{backend}}",
+  "installFailed": "インストールに失敗しました",
+  "running": "前提環境をインストール中…",
+  "log": "インストールログ",
+  "done": "インストールが完了しました",
+  "restartHint": "新しい環境を読み込むため、NetsuRush を再起動してください。",
+  "restartApp": "アプリを再起動",
+  "installing": "インストール中…",
+  "install": "選択内容をインストール",
+  "repair": "修復して確認",
+  "skip": "インストールせず続行",
+  "update": {
+    "action": "更新",
+    "download": "アップデートをダウンロード"
+  },
+  "adobe": {
+    "title": "Adobe 拡張機能",
+    "detected": "検出: {{apps}}",
+    "hint": "NetsuRush パネルをインストールし、自動的に最新の状態に保ちます。"
+  }
+}

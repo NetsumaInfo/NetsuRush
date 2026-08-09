@@ -1,0 +1,83 @@
+{
+  "header": {
+    "title": "导出到 After Effects",
+    "subtitle": "通过生成的脚本，把时间线还原成 After Effects 合成（位置、轨道、帧精确）。"
+  },
+  "result": {
+    "scriptPrefix": "脚本：{{name}}",
+    "clipsDone": "{{count}} 个镜头 → 合成《{{comp}}》。",
+    "imported": "已导入 After Effects（请查看项目面板）。",
+    "launching": "After Effects 启动中 — 启动后自动导入（需已打开项目）。",
+    "missing": "已跳过 {{count}} 个无文件的镜头。"
+  },
+  "run": {
+    "busy": "导出中…",
+    "label": "导出到 After Effects"
+  },
+  "form": {
+    "refresh": "刷新",
+    "noTimeline": "无时间线",
+    "timelineOpen": "{{name}}（已打开）",
+    "compPlaceholder": "After Effects 合成名称",
+    "individualRender": "逐个镜头单独切分",
+    "individualHint": "每个镜头 = 1 个重新编码的文件，帧精确切分。请在下方选择编码 · 需要输出文件夹。",
+    "yes": "是",
+    "no": "否",
+    "codec": "编码",
+    "container": "容器",
+    "mode": "模式",
+    "nestedFlatten": "内容",
+    "nestedComp": "预合成",
+    "nestedRender": "渲染",
+    "nestedHintComp": "嵌套时间线变成独立预合成（音频包含在内）。",
+    "nestedHintRender": "Resolve 把嵌套时间线渲染成单个文件（还原度高，较慢），作为 1 个图层导入。",
+    "nestedHintFlatten": "嵌套时间线的镜头直接平铺进合成。这些镜头沿用上方的视频模式。",
+    "outputFormat": "输出格式",
+    "audioFormat": "音频格式（纯音频时间线时）",
+    "bitrate": "码率",
+    "handleSeconds": "前 / 后秒数",
+    "precompEach": "每个视频镜头做成预合成",
+    "target": "目标",
+    "targetVideo": "视频",
+    "targetImage": "图像",
+    "targetBoth": "两者",
+    "precompNaming": "预合成命名",
+    "namingFile": "文件名",
+    "namingNumber": "编号",
+    "foldersLabel": "按文件夹整理（素材 / 预合成 / 音频 / 图像）",
+    "none": "无",
+    "choose": "选择…"
+  },
+  "sections": {
+    "timeline": "时间线",
+    "compName": "合成名称",
+    "video": "视频",
+    "transforms": "变换与速度",
+    "nested": "嵌套时间线",
+    "audio": "音频",
+    "handles": "余量",
+    "precomp": "预合成",
+    "organization": "整理",
+    "outDir": "输出文件夹"
+  },
+  "videoModes": {
+    "copy": { "label": "复制", "hint": "使用源文件，在 AE 里切分 — 不转码。" },
+    "remux": { "label": "Remux", "hint": "无损 .mov 容器（-c copy），在 AE 里切分。" },
+    "reencode": { "label": "重新编码", "hint": "每个镜头转码成剪辑编码，含余量。" }
+  },
+  "audioModes": {
+    "copy": "复制",
+    "remux": "Remux",
+    "aac": "AAC",
+    "pcm": "PCM",
+    "none": "无"
+  },
+  "transformModes": {
+    "none": { "label": "无", "hint": "原始素材 — 忽略时间线的变换和速度。" },
+    "ae": { "label": "在 After Effects 中", "hint": "变换和速度加在 AE 图层上，源文件不变。" },
+    "bake": { "label": "重新编码", "hint": "速度烘焙进文件，空间变换留在 AE。" }
+  },
+  "errors": {
+    "timelinesUnavailable": "无法获取时间线"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "header": {
+    "title": "Export vers After Effects",
+    "subtitle": "Reconstruit fidèlement la timeline dans une composition After Effects : positions, pistes et coupes à l’image près."
+  },
+  "result": {
+    "scriptPrefix": "Script : {{name}}",
+    "clipsDone": "{{count}} plan(s) → comp « {{comp}} ».",
+    "imported": "Importé dans After Effects (vérifie le panneau Projet).",
+    "launching": "After Effects se lance — import automatique au démarrage (projet ouvert requis).",
+    "missing": "{{count}} plan(s) sans fichier ignoré(s)."
+  },
+  "run": {
+    "busy": "Export en cours…",
+    "label": "Exporter vers After Effects"
+  },
+  "form": {
+    "refresh": "Rafraîchir",
+    "noTimeline": "Aucune timeline",
+    "timelineOpen": "{{name}} (ouverte)",
+    "compPlaceholder": "Nom de la comp After Effects",
+    "individualRender": "Découpe individuelle séparée",
+    "individualHint": "Réencode chaque plan dans un fichier séparé, coupé à l’image près. Choisis le codec et le dossier de sortie.",
+    "yes": "Oui",
+    "no": "Non",
+    "codec": "Codec",
+    "container": "Conteneur",
+    "mode": "Mode",
+    "nestedFlatten": "Contenu",
+    "nestedComp": "Précompo",
+    "nestedRender": "Rendu",
+    "nestedHintComp": "La timeline imbriquée devient une précompo dédiée (audio inclus dedans).",
+    "nestedHintRender": "Resolve rend la timeline imbriquée en un fichier unique (fidèle, lent), importé comme 1 calque.",
+    "nestedHintFlatten": "Les plans de la timeline imbriquée sont aplatis directement dans la comp. Les plans suivent le mode Vidéo ci-dessus.",
+    "outputFormat": "Format de sortie",
+    "audioFormat": "Format audio (si timeline audio seule)",
+    "bitrate": "Débit",
+    "handleSeconds": "Secondes avant / après",
+    "precompEach": "Chaque plan vidéo en précompo",
+    "target": "Cible",
+    "targetVideo": "Vidéos",
+    "targetImage": "Images",
+    "targetBoth": "Les deux",
+    "precompNaming": "Nom des précomps",
+    "namingFile": "Nom du fichier",
+    "namingNumber": "Numéro",
+    "foldersLabel": "Ranger en dossiers (Rushes / Précomps / Audio / Images)",
+    "none": "Aucun",
+    "choose": "Choisir…"
+  },
+  "sections": {
+    "timeline": "Timeline",
+    "compName": "Nom de la composition",
+    "video": "Vidéo",
+    "transforms": "Transformations & vitesse",
+    "nested": "Timeline imbriquée",
+    "audio": "Audio",
+    "handles": "Poignées",
+    "precomp": "Précomposition",
+    "organization": "Organisation",
+    "outDir": "Dossier de sortie"
+  },
+  "videoModes": {
+    "copy": { "label": "Copie", "hint": "Fichiers source, découpe dans AE — aucun transcode." },
+    "remux": { "label": "Remux", "hint": "Conteneur .mov sans perte (-c copy), découpe dans AE." },
+    "reencode": { "label": "Réencode", "hint": "Chaque plan transcodé en codec montage, poignées incluses." }
+  },
+  "audioModes": {
+    "copy": "Copier",
+    "remux": "Remux",
+    "aac": "AAC",
+    "pcm": "PCM",
+    "none": "Aucun"
+  },
+  "transformModes": {
+    "none": { "label": "Aucune", "hint": "Rush brut — ignore transforms et vitesse de la timeline." },
+    "ae": { "label": "Dans After Effects", "hint": "Transforms + vitesse sur le calque AE, source intacte." },
+    "bake": { "label": "Réencodé", "hint": "Vitesse cuite dans le fichier, transforms spatiales dans AE." }
+  },
+  "errors": {
+    "timelinesUnavailable": "Timelines indisponibles"
+  }
+}

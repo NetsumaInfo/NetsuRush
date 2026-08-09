@@ -1,0 +1,477 @@
+{
+  "notice": {
+    "failed": "Échec"
+  },
+  "panel": {
+    "title": "Optimisation",
+    "diagnose": "Diagnostiquer",
+    "diagError": "Erreur de diagnostic : {{error}}"
+  },
+  "diagnostic": {
+    "offline": "Resolve hors-ligne",
+    "offlineHint": "Exige Resolve Studio ouvert + scripting externe = Local. Le nettoyage cache reste dispo.",
+    "project": "Projet",
+    "timelineLabel": "Timeline : {{name}}",
+    "noTimeline": "Aucune timeline active",
+    "pageLabel": "Page : {{page}}",
+    "version": "Resolve {{version}}",
+    "render": "Rendu",
+    "renderActive": "En cours",
+    "renderIdle": "Inactif",
+    "jobsQueued_one": "{{count}} job en file",
+    "jobsQueued_other": "{{count}} jobs en file",
+    "settingsRead": "Réglages perf lus",
+    "cacheProxyKeys": "{{count}} clés cache/proxy",
+    "cacheFoldersDetected": "{{count}} dossier(s) cache détecté(s)",
+    "noCacheFolder": "Aucun dossier cache auto-détecté",
+    "database": "Base de données",
+    "dbBig": "{{name}} · volumineuse → scinder",
+    "dbHealthy": "{{name}} · taille saine",
+    "dbRemote": "PostgreSQL",
+    "dbMissing": "Introuvable"
+  },
+  "memory": {
+    "title": "Mémoire de session",
+    "measuring": "Mesure en cours — la dérive s'affichera d'ici une minute.",
+    "drift": "Resolve.exe : {{now}} · {{drift}} depuis {{elapsed}}",
+    "driftDown": "Resolve.exe : {{now}} · stable depuis {{elapsed}}",
+    "vram": "VRAM : {{used}} / {{total}} Go",
+    "verdictOk": "Session saine.",
+    "verdictWatch": "Resolve s'alourdit. Recharger le projet rend la RAM des timelines.",
+    "verdictHigh": "Session très chargée. Seul un redémarrage rend la VRAM et le cache Fusion.",
+    "reload": "Recharger le projet",
+    "reloadTitle": "Recharger « {{project}} » ?",
+    "reloadBody": "Sauvegardé, fermé puis rouvert : la RAM des timelines empilées est rendue, tu reviens sur ta page. Aucune perte. Pas en plein rendu.",
+    "reloadDone": "Projet « {{project}} » rechargé.",
+    "restart": "Redémarrer Resolve",
+    "restartTitle": "Redémarrer Resolve ?",
+    "restartBody": "Sauvegardé, fermé, relancé sur « {{project}} » à la page où tu es. Rend la VRAM et le cache Fusion, qu'aucune API ne purge en cours de session. Compte une à deux minutes. Pas en plein rendu.",
+    "restartDone": "Resolve redémarré sur « {{project}} »."
+  },
+  "prefs": {
+    "title": "Réglages Resolve",
+    "subtitle": "Valeurs réelles lues sur disque. L'API de scripting n'écrit pas ces préférences — appliquer ferme et rouvre Resolve.",
+    "unavailable": "Préférences Resolve illisibles : {{error}}",
+    "warn": "à revoir",
+    "advisory": "au cas par cas",
+    "recommended": "Recommandé : {{value}}",
+    "pending_one": "{{count}} changement en attente",
+    "pending_other": "{{count}} changements en attente",
+    "apply": "Appliquer et redémarrer",
+    "reset": "Annuler",
+    "applyTitle": "Appliquer {{count}} changement(s) ?",
+    "applyBody": "Le projet est sauvegardé, la configuration actuelle sauvegardée en secours, Resolve fermé, les préférences écrites, puis Resolve rouvert sur « {{project}} ». Compte une à deux minutes. Pas en plein rendu.",
+    "applyDone_one": "{{count}} réglage appliqué — Resolve redémarré.",
+    "applyDone_other": "{{count}} réglages appliqués — Resolve redémarré.",
+    "applyNoRestart": "Réglages écrits. Resolve n'a pas pu être rouvert : {{error}}",
+    "backups": "Sauvegardes",
+    "backupsHint": "Configuration d'avant chaque application. Restauration possible Resolve fermé.",
+    "restore": "Restaurer",
+    "restoreDone": "Configuration restaurée. Relance Resolve pour la voir prise en compte.",
+    "noBackups": "Aucune sauvegarde — la première application en créera une.",
+    "on": "Activé",
+    "off": "Désactivé",
+    "items": {
+      "loadAllTimelines": {
+        "label": "Charger toutes les timelines à l'ouverture",
+        "where": "Préférences ▸ Utilisateur ▸ Enregistrer et charger",
+        "body": "Activé, toutes les timelines montent en RAM à l'ouverture du projet. Blackmagic le laisse désactivé par défaut pour la vitesse des projets à timelines multiples."
+      },
+      "resolveMemory": {
+        "label": "Plafond mémoire de Resolve",
+        "where": "Préférences ▸ Système ▸ Mémoire et GPU",
+        "body": "Défaut 75 % de la RAM. Le baisser n'accélère pas Resolve : ça réserve la RAM aux autres applis — dont les traitements IA de NetsuRush. Arbitre selon ce que tu fais tourner en même temps."
+      },
+      "fusionMemory": {
+        "label": "Cache mémoire Fusion",
+        "where": "Préférences ▸ Système ▸ Mémoire et GPU",
+        "body": "Part de l'allocation Resolve réservée à Fusion (plafond 80 %). Haut = lecture Fusion plus fluide, moins de RAM pour Montage et Étalonnage."
+      },
+      "gpuMode": {
+        "label": "Mode de traitement GPU",
+        "where": "Préférences ▸ Système ▸ Mémoire et GPU",
+        "body": "Auto choisit déjà CUDA sur NVIDIA. Ne force que si tu constates qu'OpenCL est sélectionné malgré une carte NVIDIA."
+      },
+      "hwDecode": {
+        "label": "Décodage matériel H.264/H.265",
+        "where": "Préférences ▸ Système ▸ Décodage",
+        "body": "Décharge le décodage sur le GPU. Fiable en 8 bits 4:2:0 ; le 4:2:2 et le 4:4:4 dépendent de la carte. Coupe-le si tu vois des artefacts."
+      },
+      "liveSave": {
+        "label": "Enregistrement continu",
+        "where": "Préférences ▸ Utilisateur ▸ Enregistrer et charger",
+        "body": "Sauvegarde à chaque modification. Le manuel le recommande et annonce un impact minime ; les ralentissements rapportés le sont sur stockage réseau ou lent. Sur SSD local, garde-le."
+      },
+      "timelineBackups": {
+        "label": "Sauvegardes de la timeline",
+        "where": "Préférences ▸ Utilisateur ▸ Enregistrer et charger",
+        "body": "Instantanés périodiques en plus des sauvegardes projet. La première de la journée peut traîner, les suivantes sont imperceptibles."
+      }
+    }
+  },
+  "gpu": {
+    "title": "Moniteur GPU / CPU / RAM",
+    "free": "Libérer",
+    "saturated": "{{what}} saturée — risque de crash. Libère ou recharge maintenant.",
+    "vramUnreadable": "Jauge VRAM live indisponible pour ce pilote. Les traitements restent utilisables.",
+    "ramSystem": "RAM système",
+    "resolveRam": "Resolve.exe : {{size}}",
+    "deadKilledSuffix": " · {{count}} figée(s) fermée(s)",
+    "nothingToFree": "Rien à libérer",
+    "ramFreed": "+{{mb}} Mo RAM libérés",
+    "vramFreed": "-{{mb}} Mo VRAM",
+    "residuesCleaned": "Résidus nettoyés"
+  },
+  "process": {
+    "title": "Processus gourmands (PC entier)",
+    "cleanBlocked": "Nettoyer les bloqués",
+    "scan": "Analyser",
+    "colProcess": "Processus",
+    "colAction": "Action",
+    "protected": "(protégé)",
+    "protectedTip": "Process protégé",
+    "kill": "Terminer",
+    "noneListed": "Aucun processus listé (Windows uniquement).",
+    "killed": "{{name}} (PID {{pid}}) terminé.",
+    "noneBlocked": "Aucun processus bloqué à nettoyer.",
+    "cleaned": "{{count}} processus bloqué(s) nettoyé(s).",
+    "killTitle": "Terminer {{name}} ?",
+    "killForced": "Fermeture forcée — travail non sauvé perdu.",
+    "cleanTitle": "Nettoyer {{count}} processus bloqué(s) ?",
+    "cleanBody": "Programmes figés (« Ne répond pas »). Fermeture forcée — travail non sauvé perdu.",
+    "clean": "Nettoyer"
+  },
+  "watchdog": {
+    "title": "Surveillance mémoire",
+    "idle": "En veille — s'active pendant un rendu ou un encodage.",
+    "armed": "Active : {{source}} en cours.",
+    "on": "Activée",
+    "off": "Désactivée",
+    "gauges": "RAM disponible {{ram}} % · VRAM occupée {{vram}} %",
+    "lastPurge": "{{freed}} rendus à la machine ({{count}} tâches allégées).",
+    "suggestTitle": "Libérer n'a pas suffi",
+    "suggestBody": "Ces tâches de fond occupent de la mémoire qu'aucune libération ne rend. Les arrêter est votre décision.",
+    "stopThem_one": "Arrêter cette tâche",
+    "stopThem_other": "Arrêter ces {{count}} tâches",
+    "ignore": "Ignorer",
+    "source": {
+      "export": "un export",
+      "proxy": "un encodage de proxy",
+      "render": "un rendu"
+    }
+  },
+  "noise": {
+    "title": "Tâches de fond inutiles",
+    "subtitle": "Mises à jour, superpositions, synchronisation — actives en permanence, sans usage pendant un montage.",
+    "scan": "Analyser",
+    "none": "Aucune tâche de fond inutile détectée.",
+    "stop_one": "Arrêter ({{count}})",
+    "stop_other": "Arrêter ({{count}})",
+    "stopped_one": "{{count}} tâche arrêtée.",
+    "stopped_other": "{{count}} tâches arrêtées.",
+    "frees": "Libère environ {{size}}",
+    "family": {
+      "updaters": "Mise à jour",
+      "overlays": "Superposition",
+      "sync": "Synchronisation",
+      "social": "Messagerie",
+      "browsers": "Navigateur"
+    }
+  },
+  "snapshot": {
+    "title": "Point de restauration (.drp)",
+    "folder": "Dossier",
+    "create": "Créer un point",
+    "created": "Point de restauration créé ({{size}})."
+  },
+  "cleanup": {
+    "title": "Nettoyer le cache Resolve",
+    "browse": "Parcourir",
+    "rescan": "Réanalyser",
+    "folder": "Dossier : {{path}}",
+    "disk": "Disque : {{free}} libres / {{total}}",
+    "diskFull": "Disque presque plein — risque de gel Resolve.",
+    "noneFound": "Aucun cache Resolve trouvé ici.",
+    "cleanSelection": "Nettoyer la sélection ({{size}})",
+    "confirmTitle": "Supprimer ces caches ?",
+    "confirmBody": "{{size}} libérés. Ferme Resolve d'abord. Contenu supprimé, régénéré au besoin :",
+    "freed": "{{size}} libérés ({{count}} dossier·s).",
+    "cleanFailed": "Échec : {{error}}"
+  },
+  "stop": {
+    "title": "Arrêter des tâches",
+    "stopRender": "Arrêter le rendu",
+    "clearFinished": "Nettoyer les terminés",
+    "clearQueue": "Vider la file",
+    "deleteJob": "Supprimer ce job",
+    "queueEmpty": "File de rendu vide."
+  },
+  "advice": {
+    "heading": "Conseils (à appliquer dans Resolve)",
+    "items": {
+      "cachessd": {
+        "title": "Cache sur SSD rapide",
+        "where": "Réglages projet ▸ Réglages généraux ▸ Dossiers de travail",
+        "body": "Par défaut sur le disque système, qui encaisse déjà l'OS. Un NVMe distinct du disque média se sent tout de suite."
+      },
+      "playproxy": {
+        "title": "Résolution proxy timeline",
+        "where": "Lecture ▸ Résolution proxy timeline",
+        "body": "Demi ou Quart pendant le montage : quatre fois moins de travail GPU en Quart sur du 4K. L'export reste en pleine résolution."
+      },
+      "optimizedmedia": {
+        "title": "Média optimisé",
+        "where": "Clic droit sur les clips ▸ Générer un média optimisé",
+        "body": "Transcode une fois en DNxHR, lit fluide ensuite. Le vrai remède au H.264/H.265 qui rame, bien plus que le cache."
+      },
+      "effectsheavy": {
+        "title": "Effets et étalonnages empilés",
+        "where": "Lecture ▸ Cache de rendu ▸ Intelligent",
+        "body": "C'est la charge par timeline qui coûte, pas le nombre de timelines. Le cache intelligent met en cache les nœuds lourds tout seul."
+      },
+      "mercurygpu": {
+        "title": "Moteur de rendu logiciel",
+        "where": "Fichier ▸ Réglages du projet ▸ Général ▸ Moteur de rendu",
+        "body": "Mercury Playback Engine en mode logiciel fait tout calculer au processeur. Choisir l'accélération GPU si la carte le permet."
+      },
+      "hwdecode": {
+        "title": "Décodage matériel",
+        "where": "Préférences ▸ Média ▸ Décodage accéléré par le matériel",
+        "body": "Sans lui, chaque image H.264, HEVC ou AV1 est décodée par le processeur. C'est la première cause d'une lecture qui saccade."
+      },
+      "previewcodec": {
+        "title": "Codec de prévisualisation",
+        "where": "Séquence ▸ Réglages de séquence ▸ Prévisualisations vidéo",
+        "body": "I-Frame MPEG rend vite mais lit mal ; ProRes ou CineForm lisent bien mais rendent plus lentement. Le bon choix dépend de la carte et du disque."
+      },
+      "cacheotherdisk": {
+        "title": "Cache sur le disque des rushs",
+        "where": "Préférences ▸ Disques de travail",
+        "body": "Cache et médias sur le même volume se disputent la même tête de lecture. Les séparer coûte un réglage et se sent tout de suite."
+      },
+      "diskcachessd": {
+        "title": "Cache disque sur SSD",
+        "where": "Préférences ▸ Mémoire et performances ▸ Cache disque",
+        "body": "Le cache disque d'After Effects se lit à chaque prévisualisation. Sur un disque lent, ou sur celui des rushs, il annule son propre bénéfice."
+      },
+      "diskcacheon": {
+        "title": "Cache disque désactivé",
+        "where": "Préférences ▸ Mémoire et performances ▸ Activer le cache disque",
+        "body": "Décoché, chaque prévisualisation repart de zéro dès que la RAM est pleine. C'est la perte de temps la plus silencieuse d'After Effects."
+      },
+      "mfrcpu": {
+        "title": "Part de CPU trop haute",
+        "where": "Préférences ▸ Mémoire et performances ▸ Rendu multi-images",
+        "body": "After Effects veut environ 4 Go par cœur mobilisé. Au-delà de ce que la RAM peut suivre, ajouter des cœurs ralentit le rendu."
+      },
+      "bitdepth": {
+        "title": "Projet en 32 bits",
+        "where": "Fichier ▸ Réglages du projet ▸ Couleur ▸ Profondeur",
+        "body": "Le 32 bits ne sert qu'aux compositions à forte plage dynamique. Activé par habitude sur des sources 8 bits, il ne coûte que du temps."
+      }
+    }
+  },
+  "boost": {
+    "degraded": {
+      "title": "Extension NetsuRush non connectée",
+      "body": "Les caches disque, l'espace libre et les processus Adobe restent lisibles. Les purges, les réglages et les proxies exigent l'application ouverte avec l'extension NetsuRush."
+    },
+    "status": {
+      "installed": "Installée",
+      "notInstalled": "Introuvable",
+      "running": "Lancée",
+      "stopped": "Fermée",
+      "noProject": "Aucun projet ouvert",
+      "panel": "Extension CEP",
+      "panelConnected": "Connecté",
+      "panelSilent": "Muet",
+      "panelInstalled": "Extension installée — redémarrez l'application",
+      "installPanel": "Installer l'extension",
+      "panelHint": "Ouvrez l'application puis Fenêtre ▸ Extensions ▸ NetsuRush.",
+
+      "uxpHint": "Premiere Pro {{year}} charge UXP en premier : si l'extension n'apparaît pas dans Fenêtre ▸ Extensions, réinstalle-la puis relance l'application.",
+      "caches": "Caches",
+      "cacheFolders_one": "{{count}} dossier détecté",
+      "cacheFolders_other": "{{count}} dossiers détectés",
+      "noCacheFolder": "Aucun dossier de cache trouvé",
+      "disk": "Disque",
+      "diskFree": "libres sur {{total}}",
+      "diskUnknown": "Espace disque inconnu"
+    },
+    "cache": {
+      "title": "Caches disque",
+      "subtitle": "Purge possible uniquement application fermée : y écrire pendant qu'Adobe s'en sert corrompt sa base de cache.",
+      "noneFound": "Aucun cache détecté sur cette machine.",
+      "ageFilter": "Ancienneté",
+      "ageAll": "Tout",
+      "ageDays": "+ de {{days}} j",
+      "shared": "Partagé",
+      "notRegenerable": "Non régénérable",
+      "slowRebuild": "Reconform long",
+      "dbWarning": "Vider la base du cache force Adobe à reconformer tous les médias au prochain lancement : c'est long, et aucun réglage ne l'accélère.",
+      "autoSaveWarning": "Les sauvegardes automatiques sont des versions de votre travail, pas un cache : une fois supprimées, elles ne reviennent pas.",
+      "closePurgeReopen": "Fermer, purger, rouvrir",
+      "cleanSelection": "Supprimer la sélection ({{size}})",
+      "runningHint": "L'application est ouverte : NetsuRush la fermera proprement, purgera, puis rouvrira le projet.",
+      "freed_one": "{{size}} libérés · {{count}} dossier vidé",
+      "freed_other": "{{size}} libérés · {{count}} dossiers vidés",
+      "reopenFailed": "réouverture impossible : {{error}}",
+      "cleanFailed": "Nettoyage impossible : {{error}}",
+      "confirmTitle": "Supprimer ces caches ?",
+      "confirmBody": "{{size}} seront libérés. Les dossiers sont conservés, seul leur contenu part.",
+      "confirmRestartTitle": "Fermer l'application, purger, puis rouvrir ?",
+      "confirmRestartBody": "L'application sera fermée (elle proposera d'enregistrer), {{size}} seront libérés, puis le projet sera rouvert.",
+      "roots": {
+        "mediaCacheFiles": "Fichiers de media cache",
+        "mediaCacheDb": "Base du media cache",
+        "peakFiles": "Formes d'onde audio",
+        "aeDiskCache": "Cache disque After Effects",
+        "autoSave": "Sauvegardes automatiques",
+        "videoPreviews": "Prévisualisations vidéo",
+        "audioPreviews": "Prévisualisations audio",
+        "aeProjectAutoSave": "Sauvegardes du projet"
+      },
+      "kinds": {
+        "mediaCache": "Media cache",
+        "mediaCacheDb": "Base de cache",
+        "peak": "Formes d'onde",
+        "diskCache": "Cache disque",
+        "autoSave": "Sauvegardes automatiques",
+        "previews": "Prévisualisations"
+      }
+    },
+    "procs": {
+      "title": "Processus Adobe",
+      "subtitle": "Premiere Pro et After Effects laissent des auxiliaires vivants après leur fermeture. Chacun est petit, leur somme ne l'est pas.",
+      "summary_one": "{{count}} processus · {{size}}",
+      "summary_other": "{{count}} processus · {{size}}",
+      "scan": "Analyser",
+      "colProcess": "Processus",
+      "colAction": "Action",
+      "protected": "protégé",
+      "protectedTip": "Application hôte en cours d'exécution : la tuer perdrait le montage en cours.",
+      "kill": "Terminer",
+      "none": "Aucun processus Adobe résiduel.",
+      "killed": "{{name}} terminé",
+      "killTitle": "Terminer {{name}} ?",
+      "killForced": "La terminaison est forcée : tout travail non enregistré de ce processus est perdu."
+    },
+    "purge": {
+      "title": "Purges",
+      "subtitle": "Actions exécutées dans l'application par l'extension NetsuRush.",
+      "needsPanel": "Exige l'application ouverte avec l'extension NetsuRush (Fenêtre ▸ Extensions ▸ NetsuRush).",
+      "memoryInUse": "utilisés par After Effects",
+      "targets": {
+        "memory": "Vider la RAM",
+        "image": "Cache d'images",
+        "undo": "Historique d'annulation",
+        "snapshot": "Instantanés",
+        "all": "Tout, disque compris"
+      },
+      "allCachesWarning": "« Tout, disque compris » vide aussi le cache disque : long à reconstruire. After Effects peut demander une confirmation dans sa propre fenêtre.",
+      "deletePreviews": "Supprimer les fichiers de rendu",
+      "experimental": "Expérimental",
+      "qeExperimental": "Premiere Pro n'expose aucune API officielle de purge : cet appel passe par le QE DOM, une interface non documentée qui change d'une version à l'autre. En cas d'échec, la section Caches disque fait le même travail, application fermée.",
+      "compatAeft": "After Effects 2020 (17.0) à 2026 (26.x). Depuis la 24.3, « Tout, disque compris » vide aussi le cache disque.",
+      "compatPpro": "Vérifié de Premiere Pro 2020 (14.0) à 2025 (25.x).",
+
+      "uxpEra": "Premiere Pro {{year}} : Adobe est passé à UXP, ExtendScript n'est plus maintenu et son support s'arrête en septembre 2026. Cet appel peut échouer sans rien dire.",
+
+      "uxpFallback": "La section Caches disque, plus haut, fait le même travail sans aucune API Adobe.",
+      "hygiene": "Hygiène du projet",
+      "hygieneHint": "Agit sur le projet ouvert et reste annulable dans l'application.",
+      "hygieneOps": {
+        "removeUnused": "Retirer les métrages inutilisés",
+        "consolidate": "Regrouper les métrages en double",
+        "consolidateDuplicates": "Regrouper les doublons"
+      },
+      "done": "Terminé",
+      "doneFreed": "{{size}} libérés",
+      "hygieneDone_one": "{{count}} élément retiré",
+      "hygieneDone_other": "{{count}} éléments retirés",
+      "previewsDone": "Fichiers de rendu supprimés",
+      "confirmHeavy": "Le cache disque sera vidé : les prévisualisations devront être recalculées.",
+      "confirmHygiene": "Modifie le projet ouvert. L'opération reste annulable dans l'application."
+    },
+    "prefs": {
+      "title": "Réglages de performance",
+      "subtitle": "Lus et écrits en direct par le panneau : ni fermeture, ni fichier modifié.",
+      "needsPanel": "Exige l'application ouverte avec l'extension NetsuRush (Fenêtre ▸ Extensions ▸ NetsuRush).",
+      "warn": "À corriger",
+      "advisory": "Selon la machine",
+      "volatile": "Non persistant",
+      "writeOnly": "L'application n'expose aucune lecture de ce réglage : sa valeur actuelle est inconnue, seule l'écriture est possible.",
+      "on": "Activé",
+      "off": "Désactivé",
+      "noPath": "Aucun dossier",
+      "none": "Aucun réglage lisible dans cette version.",
+      "apply_one": "Appliquer ({{count}})",
+      "apply_other": "Appliquer ({{count}})",
+      "applied_one": "{{count}} réglage appliqué",
+      "applied_other": "{{count}} réglages appliqués",
+      "applyTitle": "Appliquer les réglages ?",
+      "applyBody_one": "{{count}} réglage sera écrit dans l'application. Le lot est validé en bloc : rien n'est appliqué à moitié.",
+      "applyBody_other": "{{count}} réglages seront écrits dans l'application. Le lot est validé en bloc : rien n'est appliqué à moitié.",
+      "items": {
+        "gpuAccelType": {
+          "label": "Accélération GPU du rendu",
+          "body": "Rester sur le rendu logiciel alors qu'une carte est disponible est une perte sèche sur chaque image."
+        },
+        "bitsPerChannel": {
+          "label": "Profondeur du projet",
+          "body": "32 bits multiplie le coût de chaque image. Souvent activé sans raison sur un projet 8 bits."
+        },
+        "imageCachePct": {
+          "label": "Part du cache d'images",
+          "body": "Part de la mémoire allouée réservée au cache d'images."
+        },
+        "maxMemPct": {
+          "label": "Mémoire maximale",
+          "body": "Part de la RAM de la machine qu'After Effects s'autorise."
+        },
+        "mfrEnabled": {
+          "label": "Rendu multi-images",
+          "body": "Adobe remet ce réglage à zéro à la fin de chaque script : il ne vaut que pour un rendu piloté depuis NetsuRush, pas comme réglage durable."
+        },
+        "mfrMaxCpuPct": {
+          "label": "Part de CPU du rendu multi-images",
+          "body": "After Effects veut environ 4 Go par cœur : monter ce pourcentage sur une machine peu dotée en RAM ralentit au lieu d'accélérer."
+        },
+        "enableProxies": {
+          "label": "Utiliser les proxies",
+          "body": "Bascule globale : Premiere Pro lit les proxies attachés au lieu des sources."
+        },
+        "scratchVideoPreviews": {
+          "label": "Dossier des prévisualisations vidéo",
+          "body": "Le placer sur un SSD rapide, distinct du disque des rushs, est le réglage disque qui paie le plus."
+        },
+        "scratchAudioPreviews": {
+          "label": "Dossier des prévisualisations audio",
+          "body": "Même logique que la vidéo, pour un poids bien moindre."
+        },
+        "scratchAutoSave": {
+          "label": "Dossier des sauvegardes automatiques",
+          "body": "Le mettre sur un autre disque que le projet protège d'une panne du volume."
+        }
+      }
+    },
+    "proxy": {
+      "title": "Proxies attachés",
+      "summary": "{{withProxy}} sur {{total}} rushs ont un proxy",
+      "needsPanel": "Exige Premiere Pro ouvert avec l'extension NetsuRush.",
+      "useProxies": "Lire les proxies",
+      "rescan": "Réanalyser",
+      "has": "Proxy",
+      "missing": "Sans proxy",
+      "cannot": "Non éligible",
+      "encoding": "Encodage {{done}} / {{total}}",
+      "generate_one": "Générer et attacher ({{count}})",
+      "generate_other": "Générer et attacher ({{count}})",
+      "attached_one": "{{count}} proxy attaché",
+      "attached_other": "{{count}} proxies attachés",
+      "attachedPartial": "{{count}} proxies attachés, {{missed}} en échec",
+      "encodeFailed_one": "Encodage impossible pour {{count}} rush",
+      "encodeFailed_other": "Encodage impossible pour {{count}} rushs"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "header": {
+    "title": "Transfer between applications",
+    "subtitle": "Copy a timeline from one editing application to another, frame accurate."
+  },
+  "picker": {
+    "source": "From",
+    "target": "To",
+    "swap": "Swap source and target",
+    "offline": "Offline: {{hosts}}.",
+    "online": "connected",
+    "hostOffline": "offline",
+    "swapUnavailable": "This pair cannot be reversed"
+  },
+  "sections": {
+    "source": "Timeline in {{host}}",
+    "target": "Destination in {{host}}",
+    "options": "Options",
+    "media": "Media",
+    "outDir": "Output folder",
+    "encoding": "Encoding"
+  },
+  "form": {
+    "refresh": "Refresh",
+    "noTimeline": "No timeline",
+    "timelineOpen": "{{name}} (open)",
+    "namePlaceholder": "Name of the new timeline",
+    "modeNew": "New timeline",
+    "modeAppend": "Existing timeline",
+    "videoOnly": "Video only",
+    "richAe": "Advanced After Effects options",
+    "richAeHint": "Transforms, speed and precomps, instead of a plain copy of the shots.",
+    "yes": "Yes",
+    "no": "No",
+    "choose": "Choose…",
+    "none": "None"
+  },
+  "preview": {
+    "clips": "Shots read",
+    "tracks": "Tracks",
+    "duration": "Duration",
+    "fps": "Frame rate",
+    "missing": "{{count}} source(s) not found",
+    "fidelityExact": "Native equivalence expected",
+    "fidelityLimited": "Expected limits before transfer",
+    "fidelityCounts": "{{exact}} exact · {{approximated}} approximate · {{unsupported}} not guaranteed",
+    "animationUnavailable": "Keyframes unreadable: the source application refused the export that carries them. The transfer will place fixed values.",
+    "mediaLess": "{{count}} item(s) without media (matte, adjustment layer): no application can receive them.",
+    "graphics": "{{count}} title(s): rebuilt on the target from their text and style."
+  },
+  "phases": {
+    "read": "Reading the timeline",
+    "sources": "Resolving sources",
+    "build": "Editing",
+    "done": "Done"
+  },
+  "run": {
+    "label": "Transfer {{from}} → {{to}}",
+    "busy": "Transferring…"
+  },
+  "result": {
+    "done": "{{count}} shot(s) placed in “{{timeline}}” ({{host}}).",
+    "verified": "Properties read back: transfer verified.",
+    "unverified": "{{applied}} property/properties confirmed · {{issues}} limit(s) or mismatch(es).",
+    "tracksClamped": "Tracks clamped: the target application could not create enough of them.",
+    "missing": "{{count}} source(s) not found on disk.",
+    "mediaLess": "{{count}} item(s) without media (matte, adjustment layer): no application can receive them.",
+    "titles": "{{count}} title(s) rebuilt.",
+    "titlesRetimed": "{{count}} title(s) kept the template duration: DaVinci Resolve offers no way to set it.",
+    "titlesFailed": "{{count}} title(s) could not be placed.",
+    "vehicleImport": "Edit read by DaVinci Resolve: keyframes, audio levels and speed applied by the application itself.",
+    "vehicleApi": "Clips placed one by one by script: keyframes come from what NetsuRush read.",
+    "exchangeFile": "DaVinci Resolve refused the edit via scripting. The same file imports correctly by hand — keyframes and audio levels included: File ▸ Import ▸ Timeline."
+  },
+  "mediaModes": {
+    "copy": {
+      "label": "Direct links",
+      "hint": "Original files linked as they are. No file written."
+    },
+    "remux": {
+      "label": "Rewrap",
+      "hint": "New container, lossless. Useful when the target cannot read the source one."
+    },
+    "reencode": {
+      "label": "Re-encode",
+      "hint": "Every shot transcoded to an editing codec, cut frame accurate."
+    }
+  }
+}

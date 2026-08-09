@@ -1,0 +1,639 @@
+{
+  "editor": {
+    "uploadFailed": "文件上传失败",
+    "dateToday": "今天日期",
+    "createNamed": "新建“{{name}}”"
+  },
+  "panel": {
+    "scriptNotebook": "脚本笔记本",
+    "untitled": "无标题",
+    "notebookFallback": "笔记本",
+    "notebooks": "笔记本",
+    "noNotebooks": "暂无笔记本",
+    "newNotebook": "新建笔记本",
+    "editNotebook": "编辑此笔记本",
+    "importMarkdown": "导入 Markdown…",
+    "exportNetsu": "导出 (.netsu)",
+    "importNetsu": "导入 (.netsu)",
+    "deleteNotebook": "删除此笔记本",
+    "collapseSidebar": "收起侧边栏 (Ctrl+\\)",
+    "expandSidebar": "显示侧边栏 (Ctrl+\\)",
+    "search": "搜索",
+    "newPage": "新建页面",
+    "pages": "页面",
+    "trash": "回收站",
+    "settings": "设置",
+    "emptyNotebookHint": "先建一个笔记本。",
+    "emptyTitleHasNb": "一张空白页等着你",
+    "emptyTitleNoNb": "欢迎使用笔记本",
+    "emptyBodyHasNb": "笔记、方案、草稿、数据库——想到什么就记什么。",
+    "emptyBodyNoNb": "记事本式的空间：笔记本、嵌套页面、富文本块和数据库。",
+    "createNotebook": "新建笔记本",
+    "confirmDeleteNbTitle": "删除“{{name}}”？",
+    "confirmDeleteNbDesc": "笔记本及其所有页面将被永久删除。",
+    "confirmTrashTitle": "移到回收站？",
+    "confirmTrashDesc": "“{{name}}”及其子页面将移到回收站（可恢复）。",
+    "sendToTrash": "移到回收站",
+    "saveAsProject": "另存为…",
+    "openProject": "打开笔记本…"
+  },
+  "blocks": {
+    "bookmark": {
+      "pastePlaceholder": "粘贴网站链接…"
+    },
+    "embed": {
+      "pastePlaceholder": "粘贴要嵌入的链接（Vimeo、X、TikTok…）",
+      "iframeTitle": "嵌入内容"
+    },
+    "toggle": {
+      "collapse": "收起",
+      "expand": "展开"
+    },
+    "youtube": {
+      "pastePlaceholder": "粘贴 YouTube 链接…"
+    }
+  },
+  "db": {
+    "field": {
+      "checked": "已勾选",
+      "unchecked": "未勾选",
+      "empty": "空"
+    },
+    "option": {
+      "searchOrCreate": "搜索或新建…",
+      "create": "新建“{{label}}”"
+    },
+    "checklist": {
+      "addTask": "添加任务…"
+    }
+  },
+  "navigation": {
+    "notebookRoot": "笔记本根目录",
+    "moveTo": "移动到…",
+    "filterPages": "筛选页面…",
+    "noMatch": "没有匹配的页面。",
+    "backlinks": "反向链接",
+    "siblings": "同级页面",
+    "intermediate": "中间页面",
+    "searchTitle": "搜索笔记本",
+    "searchDescription": "搜索页面标题和内容",
+    "searchPlaceholder": "标题或内容…",
+    "noSearchResult": "没有“{{query}}”的搜索结果",
+    "favorites": "收藏",
+    "recent": "最近"
+  },
+  "actions": {
+    "stats": "{{words}} 个词 · {{chars}} 个字符",
+    "modified": "修改于 {{date}}",
+    "removeFavorite": "从收藏中移除",
+    "addFavorite": "添加到收藏",
+    "documentActions": "文档操作",
+    "openNewTab": "在新标签页中打开",
+    "copyPageLink": "复制页面链接",
+    "duplicate": "创建副本",
+    "exportMarkdown": "导出为 Markdown",
+    "exportHtml": "导出为 HTML",
+    "exportNetsu": "导出为 .netsu（含子页面）"
+  },
+  "trash": {
+    "title": "回收站",
+    "count_one": "已删除 {{count}} 个页面 — 可恢复。",
+    "count_other": "已删除 {{count}} 个页面 — 可恢复。",
+    "description": "删除的页面会显示在这里。",
+    "empty": "回收站为空。",
+    "restore": "恢复",
+    "restoreWithChildren": "恢复（含子页面）",
+    "deleteForever": "永久删除",
+    "confirmAll": "永久删除全部内容？",
+    "cancel": "取消",
+    "deleteAll": "全部删除",
+    "emptyTrash": "清空回收站"
+  },
+  "tree": {
+    "deletedSubpage": "已删除的子页面",
+    "subpage": "子页面",
+    "rename": "重命名",
+    "empty": "没有页面 — 请创建一个"
+  },
+  "tabs": {
+    "prev": "上一页",
+    "next": "下一页",
+    "closeTab": "关闭标签页",
+    "closeOthers": "关闭其他标签页",
+    "all": "所有标签页",
+    "newPage": "在新标签页中创建页面"
+  },
+  "slash": {
+    "groups": {
+      "blocks": "笔记本块",
+      "media": "媒体",
+      "insert": "插入"
+    },
+    "subpage": {
+      "title": "子页面",
+      "desc": "新建子页面并嵌入此处",
+      "aliases": "子页面|页面"
+    },
+    "callout": {
+      "title": "提示框",
+      "desc": "带表情符号的彩色条幅",
+      "aliases": "提示框|便签|信息"
+    },
+    "toggle": {
+      "title": "折叠",
+      "desc": "可折叠区域",
+      "aliases": "折叠|展开"
+    },
+    "database": {
+      "title": "数据库",
+      "desc": "带字段类型的表格和看板",
+      "aliases": "数据库|表格|网格|看板"
+    },
+    "equation": {
+      "title": "公式",
+      "desc": "LaTeX 公式（KaTeX）",
+      "aliases": "公式|数学|latex|katex"
+    },
+    "divider": {
+      "title": "分隔线",
+      "desc": "直线、虚线、点线或星号",
+      "aliases": "分隔线|线|hr|---"
+    },
+    "youtube": {
+      "desc": "嵌入 YouTube 视频",
+      "aliases": "youtube|视频|yt"
+    },
+    "embed": {
+      "title": "嵌入内容",
+      "aliases": "嵌入|iframe|vimeo|twitter|tiktok"
+    },
+    "bookmark": {
+      "title": "书签",
+      "desc": "预览网页链接",
+      "aliases": "书签|链接|网页"
+    },
+    "video": {
+      "title": "视频",
+      "desc": "使用内置播放器播放本地文件或 URL",
+      "aliases": "视频|mp4|影片|素材"
+    },
+    "audio": {
+      "desc": "带波形的内置播放器",
+      "aliases": "音频|声音|mp3|音乐|wav|播客"
+    },
+    "file": {
+      "title": "文件",
+      "desc": "PDF、Word、Excel、ZIP…（PDF 预览）",
+      "aliases": "文件|pdf|doc|文档|zip|excel|word"
+    },
+    "gallery": {
+      "title": "图片画廊",
+      "desc": "在一行中滚动浏览多张图片",
+      "aliases": "画廊|图片|轮播|相册"
+    },
+    "date": {
+      "title": "日期",
+      "desc": "在文本中插入日期",
+      "aliases": "日期|日|日历|今天"
+    }
+  },
+  "dbUi": {
+    "group": {
+      "all": "全部",
+      "none": "无值"
+    },
+    "calc": {
+      "none": "无",
+      "count": "计数",
+      "empty": "空值",
+      "filled": "已填写",
+      "sum": "总和",
+      "avg": "平均值",
+      "median": "中位数",
+      "min": "最小值",
+      "max": "最大值"
+    },
+    "view": {
+      "table": "网格",
+      "kanban": "看板",
+      "gallery": "画廊",
+      "calendar": "日历",
+      "list": "列表"
+    },
+    "rowHeight": {
+      "short": "紧凑",
+      "medium": "中等",
+      "tall": "较高"
+    },
+    "color": {
+      "gray": "灰色",
+      "blue": "蓝色",
+      "green": "绿色",
+      "yellow": "黄色",
+      "orange": "橙色",
+      "red": "红色",
+      "purple": "紫色",
+      "pink": "粉色"
+    },
+    "field": {
+      "text": "文本",
+      "number": "数字",
+      "select": "单选",
+      "multiSelect": "多选",
+      "date": "日期",
+      "checkbox": "复选框",
+      "url": "链接",
+      "checklist": "任务列表",
+      "createdTime": "创建时间",
+      "lastEditedTime": "最后编辑时间"
+    }
+  },
+  "paste": {
+    "mention": {
+      "label": "提及",
+      "desc": "文本中的紧凑标签"
+    },
+    "url": {
+      "label": "链接",
+      "desc": "可点击的行内链接"
+    },
+    "bookmark": {
+      "label": "书签",
+      "desc": "卡片预览"
+    },
+    "embed": {
+      "label": "嵌入内容",
+      "desc": "嵌入式播放器（iframe / YouTube）"
+    }
+  },
+  "fileKind": {
+    "doc": "文档",
+    "sheet": "电子表格",
+    "slide": "演示文稿",
+    "archive": "压缩包",
+    "video": "视频",
+    "image": "图片",
+    "text": "文本",
+    "other": "文件"
+  },
+  "blocksUi": {
+    "preview": "预览",
+    "playbackSpeed": "播放速度",
+    "chooseAudio": "选择音频…",
+    "audioDrop": "MP3、WAV、FLAC… 或拖放到此处",
+    "audioUrl": "…或粘贴音频 URL 后按 Enter",
+    "chooseFile": "选择文件…",
+    "fileDrop": "PDF、Word、Excel、ZIP… 或拖放到此处",
+    "fileUrl": "…或粘贴文件 URL 后按 Enter",
+    "open": "打开",
+    "download": "下载",
+    "play": "播放",
+    "fullscreen": "全屏",
+    "chooseVideo": "选择视频…",
+    "dropFile": "或拖放文件",
+    "videoUrl": "…或粘贴视频 URL 后按 Enter",
+    "changeDivider": "更改分隔线样式",
+    "today": "今天",
+    "clear": "清除"
+  },
+  "equation": {
+    "group": {
+      "structures": "结构",
+      "calculus": "微积分",
+      "matrices": "矩阵与方程组",
+      "chemistry": "化学（mhchem）"
+    },
+    "template": {
+      "fraction": "分数",
+      "squareRoot": "平方根",
+      "nthRoot": "n 次方根",
+      "exponent": "指数",
+      "subscript": "下标",
+      "binomial": "二项式",
+      "sum": "求和",
+      "product": "连乘",
+      "integral": "积分",
+      "limit": "极限",
+      "derivative": "导数",
+      "partialDerivative": "偏导数",
+      "matrix": "2×2 矩阵",
+      "determinant": "行列式",
+      "system": "方程组",
+      "vector": "向量",
+      "molecule": "分子",
+      "reaction": "反应",
+      "equilibrium": "平衡",
+      "ion": "离子"
+    },
+    "empty": "空公式 — 点击输入 LaTeX",
+    "templates": "模板",
+    "error": "LaTeX 错误：{{error}}",
+    "hint": "完整 LaTeX（KaTeX + 化学 \\ce）· Ctrl+Enter 应用 · Escape 取消",
+    "edit": "编辑公式",
+    "input": "公式的 LaTeX 代码"
+  },
+  "gallery": {
+    "chooseImages": "选择图片…",
+    "dropFiles": "或拖放文件",
+    "imageUrl": "…或粘贴图片 URL 后按 Enter",
+    "row": "横向条带",
+    "carousel": "轮播",
+    "grid": "网格",
+    "height": "高度 {{size}}",
+    "imageCount_one": "{{count}} 张图片",
+    "imageCount_other": "{{count}} 张图片",
+    "add": "添加",
+    "remove": "移除",
+    "removeImage": "移除此图片",
+    "caption": "说明…",
+    "openImage": "打开图片"
+  },
+  "dbBasics": {
+    "noDateField": "没有用于放置行的日期字段。",
+    "addDateField": "添加日期字段",
+    "rowDetail": "行详情",
+    "previousRow": "上一行",
+    "nextRow": "下一行",
+    "newProperty": "新建属性",
+    "delete": "删除",
+    "calculation": "计算",
+    "rowActions": "行操作",
+    "rowCount_one": "{{count}} 行",
+    "rowCount_other": "{{count}} 行",
+    "newRow": "新建行"
+  },
+  "dbView": {
+    "viewOptions": "视图选项",
+    "moveLeft": "向左移动",
+    "moveRight": "向右移动",
+    "deleteView": "删除视图",
+    "settings": "设置",
+    "viewSettings": "视图设置",
+    "fields": "字段",
+    "rowHeight": "行高",
+    "groupBy": "分组依据",
+    "noSelectField": "没有单选字段",
+    "addView": "添加视图",
+    "newView": "新建视图",
+    "databaseActions": "数据库操作",
+    "deleteDatabase": "删除数据库",
+    "missingDatabase": "数据库不存在。",
+    "recreate": "重新创建"
+  },
+  "callout": {
+    "basic": "基础",
+    "info": "信息",
+    "tip": "提示",
+    "warning": "注意",
+    "alert": "警告",
+    "changeEmoji": "更改表情符号",
+    "presets": "预设",
+    "background": "背景颜色",
+    "style": "提示框样式"
+  },
+  "window": {
+    "detach": "分离笔记本",
+    "unpin": "取消置顶",
+    "alwaysOnTop": "始终置顶",
+    "stopAlwaysOnTop": "不再置顶",
+    "keepOnTop": "保持置顶",
+    "attach": "附加到主窗口",
+    "minimize": "最小化",
+    "restore": "还原",
+    "maximize": "最大化",
+    "close": "关闭",
+    "title": "窗口",
+    "reload": "重新加载",
+    "closeWindow": "关闭窗口"
+  },
+  "dbFields": {
+    "type": "类型",
+    "numberFormat": "数字格式",
+    "dateFormat": "日期格式",
+    "includeTime": "包含时间",
+    "insertLeft": "在左侧插入",
+    "insertRight": "在右侧插入",
+    "hide": "隐藏",
+    "clearValues": "清除值",
+    "addColumn": "添加列",
+    "newColumn": "新建列",
+    "columnOptions": "列选项",
+    "hideColumn": "隐藏列",
+    "addCard": "添加卡片",
+    "groupHint": "请选择一个单选字段来对卡片分组（设置 › 分组依据）。",
+    "showColumn": "显示列"
+  },
+  "settings": {
+    "title": "笔记本设置",
+    "description": "立即应用，并在所有笔记本之间共享。",
+    "appearance": "外观",
+    "pageWidth": "文档宽度",
+    "fontScale": "字体缩放",
+    "breadcrumb": "文档上方的面包屑导航",
+    "visible": "显示",
+    "hidden": "隐藏",
+    "editor": "编辑器",
+    "autosaveDelay": "自动保存间隔",
+    "confirmTrash": "移入回收站前确认",
+    "yes": "是",
+    "no": "否",
+    "shortcuts": "键盘快捷键",
+    "reset": "重置",
+    "press": "请按键…",
+    "shortcutHint": "点击后按下新的组合键（Escape 取消）",
+    "shortcutConflict": "若快捷键已被使用，将与原操作的快捷键互换。",
+    "width": {
+      "narrow": "窄",
+      "medium": "中等",
+      "wide": "宽",
+      "full": "全宽"
+    },
+    "shortcut": {
+      "newPage": "新建页面",
+      "newTab": "新建标签页",
+      "closeTab": "关闭标签页",
+      "reopenTab": "重新打开已关闭标签页",
+      "nextTab": "下一个标签页",
+      "prevTab": "上一个标签页",
+      "back": "上一页（历史记录）",
+      "forward": "下一页（历史记录）",
+      "search": "搜索笔记本",
+      "settings": "笔记本设置",
+      "save": "保存页面",
+      "trash": "打开回收站",
+      "toggleSidebar": "显示／隐藏侧栏"
+    },
+    "spellcheck": "拼写检查",
+    "spellcheckHint": "为错误加下划线；右键或 Ctrl+. 修正",
+    "spellUnsupported": "该语言没有词典 — 仅原生下划线",
+    "spellOn": "开启",
+    "spellOff": "关闭",
+    "personalDictionary": "个人词典",
+    "personalEmpty": "尚未添加单词",
+    "personalRemove": "从词典中移除"
+  },
+  "filterSort": {
+    "filters": "筛选",
+    "add": "添加",
+    "sort": "排序",
+    "sortBy": "排序依据",
+    "op": {
+      "is": "等于",
+      "isNot": "不等于",
+      "contains": "包含",
+      "notContains": "不包含",
+      "isEmpty": "为空",
+      "notEmpty": "不为空",
+      "gt": ">",
+      "gte": "≥",
+      "lt": "<",
+      "lte": "≤",
+      "checked": "已勾选",
+      "unchecked": "未勾选"
+    }
+  },
+  "lightbox": {
+    "zoomOut": "缩小",
+    "zoomIn": "放大",
+    "pause": "暂停（空格）",
+    "slideshow": "幻灯片（空格）",
+    "previous": "上一张",
+    "next": "下一张"
+  },
+  "icons": {
+    "search": "搜索图标…",
+    "uploading": "正在上传…",
+    "chooseImage": "选择图片",
+    "dropFile": "或拖放文件",
+    "emojis": "表情符号",
+    "icons": "图标",
+    "upload": "导入"
+  },
+  "pageHeader": {
+    "cover": "封面",
+    "change": "更改",
+    "icon": "图标"
+  },
+  "finalPass": {
+    "convertOptions": "转换 / 选项",
+    "convertTo": "转换为",
+    "pasteAs": "粘贴为",
+    "copy": "复制",
+    "copyText": "复制所选文本",
+    "copyLink": "复制链接",
+    "copyPassageLink": "复制此段落的链接",
+    "exitFullscreen": "退出整页视图",
+    "openFullscreen": "以整页方式打开",
+    "deleteColumn": "删除列",
+    "volume": "音量"
+  },
+  "numberLabels": {
+    "number": "数字",
+    "integer": "整数",
+    "percent": "百分比",
+    "euro": "欧元（€）",
+    "dollar": "美元（$）",
+    "audio": "音频"
+  },
+  "preview": {
+    "unavailable": "无法预览",
+    "openPdf": "打开PDF",
+    "loadingPdf": "正在加载PDF…（{{label}}）",
+    "loading": "正在加载…"
+  },
+  "subpage": {
+    "openHint": "打开子页面（中键单击：新标签页）"
+  },
+  "sideMenu": {
+    "changeType": "转换为",
+    "copyBlockLink": "复制区块链接",
+    "turnIntoSubpage": "转换为子页面",
+    "colors": "颜色",
+    "rowHeader": "标题行",
+    "columnHeader": "标题列"
+  },
+  "linkPage": {
+    "tooltip": "链接到页面或URL",
+    "placeholder": "粘贴URL或搜索页面…",
+    "linkTo": "链接到",
+    "hint": "输入URL或页面标题"
+  },
+  "mention": {
+    "block": "区块",
+    "openBlock": "打开并定位到区块",
+    "showChip": "显示为标签",
+    "showCard": "显示为卡片",
+    "refreshLabel": "刷新标签",
+    "deletedPage": "已删除的页面",
+    "blockMissing": "找不到区块（已删除？）",
+    "deletedTitle": "{{title}}（已删除）",
+    "linkedBlock": "已链接区块",
+    "type": {
+      "equation": "公式",
+      "image": "图片",
+      "video": "视频",
+      "audio": "音频",
+      "file": "文件",
+      "gallery": "图片库",
+      "database": "数据库",
+      "youtube": "YouTube视频",
+      "embed": "嵌入内容",
+      "bookmark": "书签",
+      "divider": "分隔线",
+      "subpage": "子页面",
+      "table": "表格",
+      "codeBlock": "代码块"
+    }
+  },
+  "meta": {
+    "name": "笔记本名称",
+    "type": "类型",
+    "languageLabel": "语言",
+    "kind": {
+      "notes": "笔记",
+      "project": "项目",
+      "script": "脚本",
+      "research": "研究",
+      "journal": "日记"
+    },
+    "language": {
+      "fr": "法语",
+      "en": "英语",
+      "es": "西班牙语",
+      "de": "德语",
+      "ja": "日语",
+      "zh": "中文"
+    }
+  },
+  "create": {
+    "title": "创建笔记本",
+    "description": "设置名称、类型和语言，之后可随时修改。",
+    "namePlaceholder": "笔记本名称…",
+    "cancel": "取消",
+    "submit": "创建"
+  },
+  "edit": {
+    "title": "编辑笔记本",
+    "description": "修改此笔记本的名称、类型或语言。",
+    "done": "完成"
+  },
+  "blockTypes": {
+    "paragraph": "文本",
+    "heading1": "标题",
+    "heading2": "副标题",
+    "heading3": "小标题",
+    "bulletList": "项目符号列表",
+    "numberedList": "编号列表",
+    "checkList": "任务列表",
+    "quote": "引用"
+  },
+  "dbDefaults": {
+    "titleField": "名称",
+    "statusField": "状态",
+    "tableView": "网格",
+    "todo": "待办",
+    "inProgress": "进行中",
+    "done": "已完成",
+    "name": "数据库"
+  }
+}

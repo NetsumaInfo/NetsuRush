@@ -1,0 +1,80 @@
+{
+  "title": "Adobe",
+  "subtitle": "Bridge to Premiere Pro and After Effects (2020+): the NetsuRush panel reads the open project and sends it here.",
+  "installPanel": "Install panel",
+  "reinstallPanel": "Reinstall panel",
+  "panel": {
+    "cepTitle": "CEP panel",
+    "installed": "Installed",
+    "notInstalled": "Not installed",
+    "copiedIn": "Copied to",
+    "inApp": "In Premiere Pro/After Effects: ",
+    "menuPath": "Window ▸ Extensions ▸ NetsuRush",
+    "restartHint": " (restart the app if it was already open).",
+    "installHint": "Click \"Install panel\", then open Premiere Pro/After Effects ▸ Window ▸ Extensions ▸ NetsuRush.",
+    "diagnose": "Diagnostics",
+    "autoUpdate": "Automatic management",
+    "autoUpdateHint": "the panel is installed as soon as an Adobe app is detected, then kept in sync with NetsuRush",
+    "autoUpdateOn": "On",
+    "autoUpdateOff": "Off",
+    "updatePending": "A newer panel ships with this version of NetsuRush",
+    "updateNow": "Update now",
+    "restartApps": "Panel updated — restart {{apps}} to reload it."
+  },
+  "diag": {
+    "verdictOk": "VERDICT: Install OK ✓ (folder + manifest + PlayerDebugMode). Open the panel in Adobe: Window ▸ Extensions ▸ NetsuRush.",
+    "verdictIncomplete": "VERDICT: Install incomplete — see below.",
+    "folder": "Folder: {{dir}}",
+    "manifestPresent": "Manifest present: {{yesNo}}",
+    "yes": "YES",
+    "no": "NO",
+    "files": "Files: {{files}}",
+    "filesEmpty": "(empty)",
+    "manifestHead": "Manifest (start):",
+    "cepLogFound": "CEP log (NetsuRush errors found):",
+    "cepLogNone": "CEP log: no NetsuRush ERROR (normal — the log only mentions the extension when it fails to load)."
+  },
+  "status": {
+    "installed": "Installed",
+    "notFound": "Not found",
+    "running": "Running",
+    "closed": "Closed",
+    "panelConnected": "Panel connected",
+    "panelOffline": "Panel offline",
+    "launch": "Launch",
+    "scanProject": "Scan project",
+    "openPanelHint": "Open the panel: Window ▸ Extensions ▸ NetsuRush.",
+    "launchThenOpenHint": "Launch the app, then open Window ▸ Extensions ▸ NetsuRush."
+  },
+  "snapshot": {
+    "timecodes": "Timeline {{tlStart}} → {{tlEnd}} · Source {{srcIn}} → {{srcOut}}",
+    "copySourcePath": "Copy source path",
+    "copyTimecodes": "Copy timecodes",
+    "copyName": "Copy name",
+    "copyPath": "Copy path",
+    "sendToNetsulab": "Send to NetsuLab",
+    "shotsCount": "{{n}} shots",
+    "thTrack": "Track",
+    "thShot": "Shot",
+    "thTimeline": "Timeline",
+    "thSource": "Source",
+    "noProject": "No project received — open the NetsuRush panel in the app, then \"Send to NetsuRush\".",
+    "receivedAt": "received at {{time}}",
+    "rushes": "Footage",
+    "noFileMedia": "No file-based media in the project."
+  },
+  "notice": {
+    "launchFailed": "Couldn't launch",
+    "alreadyOpen": "App already open",
+    "panelUnreachable": "Can't reach the panel",
+    "installFailed": "Install failed",
+    "installedRestart": "Panel installed. RESTART {{apps}}, then Window ▸ Extensions ▸ NetsuRush.",
+    "installedOpen": "Panel installed. Open Premiere Pro/After Effects, then Window ▸ Extensions ▸ NetsuRush.",
+    "autoUpdateFailed": "Could not change the update setting"
+  },
+  "remote": {
+    "settings": "Settings",
+    "reload": "Reload NetsuRush",
+    "close": "Close NetsuRush"
+  }
+}

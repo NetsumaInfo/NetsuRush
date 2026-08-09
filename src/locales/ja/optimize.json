@@ -1,0 +1,477 @@
+{
+  "notice": {
+    "failed": "失敗"
+  },
+  "panel": {
+    "title": "最適化",
+    "diagnose": "診断",
+    "diagError": "診断エラー：{{error}}"
+  },
+  "diagnostic": {
+    "offline": "Resolve オフライン",
+    "offlineHint": "Resolve Studio の起動と外部スクリプティング＝Local が必要です。キャッシュ削除は使えます。",
+    "project": "プロジェクト",
+    "timelineLabel": "タイムライン：{{name}}",
+    "noTimeline": "アクティブなタイムラインなし",
+    "pageLabel": "ページ：{{page}}",
+    "version": "Resolve {{version}}",
+    "render": "レンダリング",
+    "renderActive": "実行中",
+    "renderIdle": "停止中",
+    "jobsQueued_one": "キューに {{count}} ジョブ",
+    "jobsQueued_other": "キューに {{count}} ジョブ",
+    "settingsRead": "パフォーマンス設定を読み込み済み",
+    "cacheProxyKeys": "キャッシュ/プロキシ {{count}} キー",
+    "cacheFoldersDetected": "キャッシュフォルダー {{count}} 件を検出",
+    "noCacheFolder": "キャッシュフォルダーを自動検出できません",
+    "database": "データベース",
+    "dbBig": "{{name}}・肥大化 → 分割を",
+    "dbHealthy": "{{name}}・サイズは良好",
+    "dbRemote": "PostgreSQL",
+    "dbMissing": "見つかりません"
+  },
+  "memory": {
+    "title": "セッションのメモリー",
+    "measuring": "計測中 — 1分ほどで推移を表示します。",
+    "drift": "Resolve.exe：{{now}}・{{elapsed}} で {{drift}}",
+    "driftDown": "Resolve.exe：{{now}}・{{elapsed}} 安定",
+    "vram": "VRAM：{{used}} / {{total}} GB",
+    "verdictOk": "セッションは良好です。",
+    "verdictWatch": "Resolve が重くなっています。プロジェクトを再読み込みするとタイムラインの RAM が戻ります。",
+    "verdictHigh": "セッションがかなり重い状態です。VRAM と Fusion キャッシュは再起動でしか戻りません。",
+    "reload": "プロジェクトを再読み込み",
+    "reloadTitle": "「{{project}}」を再読み込みしますか？",
+    "reloadBody": "保存して閉じ、再度開きます。積み上がったタイムラインの RAM が戻り、元のページに復帰します。データは失われません。レンダリング中は避けてください。",
+    "reloadDone": "プロジェクト「{{project}}」を再読み込みしました。",
+    "restart": "Resolve を再起動",
+    "restartTitle": "Resolve を再起動しますか？",
+    "restartBody": "保存して閉じ、「{{project}}」の同じページで再起動します。セッション中はどの API でも消せない VRAM と Fusion キャッシュが戻ります。1〜2分かかります。レンダリング中は避けてください。",
+    "restartDone": "Resolve を再起動し「{{project}}」を開きました。"
+  },
+  "prefs": {
+    "title": "Resolve の設定",
+    "subtitle": "ディスク上の実際の値です。スクリプティング API はこの環境設定を書き込めないため、適用時は Resolve を閉じて開き直します。",
+    "unavailable": "Resolve の環境設定を読み込めません：{{error}}",
+    "warn": "要確認",
+    "advisory": "状況次第",
+    "recommended": "推奨：{{value}}",
+    "pending_one": "未適用の変更 {{count}} 件",
+    "pending_other": "未適用の変更 {{count}} 件",
+    "apply": "適用して再起動",
+    "reset": "取り消し",
+    "applyTitle": "変更 {{count}} 件を適用しますか？",
+    "applyBody": "プロジェクトを保存し、現在の構成をバックアップし、Resolve を閉じて環境設定を書き込み、「{{project}}」で開き直します。1〜2分かかります。レンダリング中は避けてください。",
+    "applyDone_one": "設定 {{count}} 件を適用 — Resolve を再起動しました。",
+    "applyDone_other": "設定 {{count}} 件を適用 — Resolve を再起動しました。",
+    "applyNoRestart": "設定を書き込みました。Resolve を開き直せません：{{error}}",
+    "backups": "バックアップ",
+    "backupsHint": "適用前の構成です。Resolve を閉じた状態で復元できます。",
+    "restore": "復元",
+    "restoreDone": "構成を復元しました。反映には Resolve を再起動してください。",
+    "noBackups": "バックアップなし — 最初の適用時に作成されます。",
+    "on": "オン",
+    "off": "オフ",
+    "items": {
+      "loadAllTimelines": {
+        "label": "起動時にすべてのタイムラインを読み込む",
+        "where": "環境設定 ▸ ユーザー ▸ 保存および読み込み",
+        "body": "オンにすると、プロジェクトを開いた時点で全タイムラインが RAM に載ります。タイムラインが多いプロジェクトの速度のため、Blackmagic は初期状態でオフにしています。"
+      },
+      "resolveMemory": {
+        "label": "Resolve のメモリー上限",
+        "where": "環境設定 ▸ システム ▸ メモリーおよび GPU",
+        "body": "既定は RAM の 75 %。下げても Resolve は速くなりません。NetsuRush の AI 処理を含む他のアプリに RAM を残すための設定です。同時に動かすものに合わせて決めてください。"
+      },
+      "fusionMemory": {
+        "label": "Fusion メモリーキャッシュ",
+        "where": "環境設定 ▸ システム ▸ メモリーおよび GPU",
+        "body": "Resolve の割り当てのうち Fusion に回す割合（上限 80 %）。高いほど Fusion の再生が滑らかになり、エディットとカラーに残る RAM は減ります。"
+      },
+      "gpuMode": {
+        "label": "GPU 処理モード",
+        "where": "環境設定 ▸ システム ▸ メモリーおよび GPU",
+        "body": "自動でも NVIDIA では CUDA が選ばれます。NVIDIA カードなのに OpenCL が選ばれている場合だけ固定してください。"
+      },
+      "hwDecode": {
+        "label": "H.264/H.265 のハードウェアデコード",
+        "where": "環境設定 ▸ システム ▸ デコードオプション",
+        "body": "デコードを GPU に任せます。8bit 4:2:0 では安定、4:2:2 と 4:4:4 はカード次第。ノイズが出るならオフに。"
+      },
+      "liveSave": {
+        "label": "ライブ保存",
+        "where": "環境設定 ▸ ユーザー ▸ 保存および読み込み",
+        "body": "編集のたびに保存します。マニュアルも推奨し、影響はごくわずかとしています。報告されている遅さはネットワークや低速ストレージでのもの。ローカル SSD ならオンのままで。"
+      },
+      "timelineBackups": {
+        "label": "タイムラインのバックアップ",
+        "where": "環境設定 ▸ ユーザー ▸ 保存および読み込み",
+        "body": "プロジェクト保存に加えて定期的にスナップショットを取ります。その日の最初だけ少し待つことがあり、以降は気づきません。"
+      }
+    }
+  },
+  "gpu": {
+    "title": "GPU / CPU / RAM モニター",
+    "free": "解放",
+    "saturated": "{{what}}が上限間近 — クラッシュの恐れ。今すぐ解放か再読み込みを。",
+    "vramUnreadable": "このドライバーでは VRAM を表示できません。処理機能は引き続き利用できます。",
+    "ramSystem": "システム RAM",
+    "resolveRam": "Resolve.exe：{{size}}",
+    "deadKilledSuffix": " · 応答なし {{count}} 件を終了",
+    "nothingToFree": "解放するものはありません",
+    "ramFreed": "RAM を +{{mb}} MB 解放",
+    "vramFreed": "VRAM -{{mb}} MB",
+    "residuesCleaned": "残留分を削除しました"
+  },
+  "process": {
+    "title": "重いプロセス（PC 全体）",
+    "cleanBlocked": "停止中を整理",
+    "scan": "スキャン",
+    "colProcess": "プロセス",
+    "colAction": "操作",
+    "protected": "（保護）",
+    "protectedTip": "保護されたプロセス",
+    "kill": "終了",
+    "noneListed": "プロセスなし（Windows のみ）。",
+    "killed": "{{name}}（PID {{pid}}）を終了しました。",
+    "noneBlocked": "整理する停止中のプロセスはありません。",
+    "cleaned": "停止中のプロセス {{count}} 件を整理しました。",
+    "killTitle": "{{name}} を終了しますか？",
+    "killForced": "強制終了 — 未保存の作業は失われます。",
+    "cleanTitle": "停止中のプロセス {{count}} 件を整理しますか？",
+    "cleanBody": "フリーズしたプログラム（「応答なし」）です。強制終了 — 未保存の作業は失われます。",
+    "clean": "整理"
+  },
+  "watchdog": {
+    "title": "メモリー監視",
+    "idle": "待機中 — レンダリングまたはエンコード中に有効になります。",
+    "armed": "有効：{{source}}が進行中です。",
+    "on": "オン",
+    "off": "オフ",
+    "gauges": "空きRAM {{ram}} % ・ VRAM使用 {{vram}} %",
+    "lastPurge": "{{freed}} をマシンに返しました（{{count}} 件のタスクを軽量化）。",
+    "suggestTitle": "解放だけでは足りません",
+    "suggestBody": "これらのバックグラウンドタスクは、解放しても戻らないメモリーを占有しています。停止するかどうかはご判断ください。",
+    "stopThem_one": "このタスクを停止",
+    "stopThem_other": "これら {{count}} 件のタスクを停止",
+    "ignore": "無視",
+    "source": {
+      "export": "書き出し",
+      "proxy": "プロキシのエンコード",
+      "render": "レンダリング"
+    }
+  },
+  "noise": {
+    "title": "不要なバックグラウンドタスク",
+    "subtitle": "アップデーター、オーバーレイ、同期 — 常時稼働し、編集中には役立ちません。",
+    "scan": "解析",
+    "none": "不要なバックグラウンドタスクは見つかりませんでした。",
+    "stop_one": "停止（{{count}}）",
+    "stop_other": "停止（{{count}}）",
+    "stopped_one": "{{count}} 件のタスクを停止しました。",
+    "stopped_other": "{{count}} 件のタスクを停止しました。",
+    "frees": "約 {{size}} を解放します",
+    "family": {
+      "updaters": "アップデーター",
+      "overlays": "オーバーレイ",
+      "sync": "同期",
+      "social": "メッセージング",
+      "browsers": "ブラウザー"
+    }
+  },
+  "snapshot": {
+    "title": "復元ポイント（.drp）",
+    "folder": "フォルダー",
+    "create": "復元ポイントを作成",
+    "created": "復元ポイントを作成しました（{{size}}）。"
+  },
+  "cleanup": {
+    "title": "Resolve のキャッシュを削除",
+    "browse": "参照",
+    "rescan": "再スキャン",
+    "folder": "フォルダー：{{path}}",
+    "disk": "ディスク：空き {{free}} / {{total}}",
+    "diskFull": "ディスクがほぼ満杯 — Resolve が固まる恐れ。",
+    "noneFound": "ここに Resolve のキャッシュはありません。",
+    "cleanSelection": "選択項目を削除（{{size}}）",
+    "confirmTitle": "これらのキャッシュを削除しますか？",
+    "confirmBody": "{{size}} 解放されます。先に Resolve を閉じてください。削除される内容（必要時に再生成）：",
+    "freed": "{{size}} 解放（フォルダー {{count}} 件）。",
+    "cleanFailed": "失敗：{{error}}"
+  },
+  "stop": {
+    "title": "タスクを停止",
+    "stopRender": "レンダリングを停止",
+    "clearFinished": "完了分を消去",
+    "clearQueue": "キューを空にする",
+    "deleteJob": "このジョブを削除",
+    "queueEmpty": "レンダーキューは空です。"
+  },
+  "advice": {
+    "heading": "アドバイス（Resolve 側で設定）",
+    "items": {
+      "cachessd": {
+        "title": "キャッシュは高速 SSD に",
+        "where": "プロジェクト設定 ▸ 一般設定 ▸ 作業フォルダー",
+        "body": "既定は OS で手一杯のシステムディスク。素材用とは別の NVMe にするとすぐ効きます。"
+      },
+      "playproxy": {
+        "title": "タイムラインプロキシ解像度",
+        "where": "再生 ▸ タイムラインプロキシ解像度",
+        "body": "編集中は 1/2 か 1/4 に。4K なら 1/4 で GPU の負荷は 1/4。書き出しはフル解像度のままです。"
+      },
+      "optimizedmedia": {
+        "title": "最適化メディア",
+        "where": "クリップを右クリック ▸ 最適化メディアを生成",
+        "body": "一度 DNxHR に変換すれば以降は滑らかに再生。重い H.264/H.265 にはキャッシュよりずっと効きます。"
+      },
+      "effectsheavy": {
+        "title": "エフェクトとカラーの重ね掛け",
+        "where": "再生 ▸ レンダーキャッシュ ▸ スマート",
+        "body": "効くのはタイムラインごとの負荷で、タイムラインの数ではありません。スマートキャッシュが重いノードを自動でキャッシュします。"
+      },
+      "mercurygpu": {
+        "title": "ソフトウェアレンダリングエンジン",
+        "where": "ファイル ▸ プロジェクト設定 ▸ 一般 ▸ レンダラー",
+        "body": "Mercury Playback Engine のソフトウェアモードはすべてを CPU で計算します。対応するカードがあれば GPU アクセラレーションを選んでください。"
+      },
+      "hwdecode": {
+        "title": "ハードウェアデコード",
+        "where": "環境設定 ▸ メディア ▸ ハードウェアアクセラレーションによるデコード",
+        "body": "無効だと H.264 / HEVC / AV1 のすべてのフレームを CPU がデコードします。再生がカクつく一番の原因です。"
+      },
+      "previewcodec": {
+        "title": "プレビューコーデック",
+        "where": "シーケンス ▸ シーケンス設定 ▸ ビデオプレビュー",
+        "body": "I-Frame MPEG はレンダリングが速い一方で再生が苦手、ProRes や CineForm は再生に強い代わりにレンダリングが遅くなります。カードとディスク次第です。"
+      },
+      "cacheotherdisk": {
+        "title": "素材と同じドライブのキャッシュ",
+        "where": "環境設定 ▸ スクラッチディスク",
+        "body": "キャッシュとメディアが同じボリュームにあると同じ読み取りを奪い合います。分けるのは設定ひとつで、効果はすぐ体感できます。"
+      },
+      "diskcachessd": {
+        "title": "ディスクキャッシュを SSD に",
+        "where": "環境設定 ▸ メモリとパフォーマンス ▸ ディスクキャッシュ",
+        "body": "After Effects はプレビューのたびにディスクキャッシュを読みます。遅いドライブや素材用ドライブでは、その利点が相殺されます。"
+      },
+      "diskcacheon": {
+        "title": "ディスクキャッシュが無効",
+        "where": "環境設定 ▸ メモリとパフォーマンス ▸ ディスクキャッシュを有効にする",
+        "body": "オフのままだと、RAM がいっぱいになるたびにプレビューが最初からやり直しになります。After Effects で最も気づかれにくい時間の浪費です。"
+      },
+      "mfrcpu": {
+        "title": "CPU 割合が高すぎる",
+        "where": "環境設定 ▸ メモリとパフォーマンス ▸ マルチフレームレンダリング",
+        "body": "After Effects は使用するコアあたり約 4 GB を必要とします。RAM が追いつかない範囲までコアを増やすと、かえって遅くなります。"
+      },
+      "bitdepth": {
+        "title": "32 bit プロジェクト",
+        "where": "ファイル ▸ プロジェクト設定 ▸ カラー ▸ 深度",
+        "body": "32 bit が役立つのはハイダイナミックレンジのコンポジションだけです。8 bit の素材で習慣的に有効にしても、時間を失うだけです。"
+      }
+    }
+  },
+  "boost": {
+    "degraded": {
+      "title": "NetsuRush 拡張機能が接続されていません",
+      "body": "ディスクキャッシュ、空き容量、Adobe プロセスは引き続き確認できます。消去、設定、プロキシにはアプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。"
+    },
+    "status": {
+      "installed": "インストール済み",
+      "notInstalled": "見つかりません",
+      "running": "実行中",
+      "stopped": "終了",
+      "noProject": "プロジェクトが開かれていません",
+      "panel": "CEP 拡張機能",
+      "panelConnected": "接続済み",
+      "panelSilent": "応答なし",
+      "panelInstalled": "拡張機能をインストールしました。アプリケーションを再起動してください",
+      "installPanel": "拡張機能をインストール",
+      "panelHint": "アプリケーションを開き、ウィンドウ ▸ 拡張機能 ▸ NetsuRush を選択してください。",
+
+      "uxpHint": "Premiere Pro {{year}} は UXP を先に読み込みます。ウィンドウ ▸ 拡張機能 に表示されない場合は、再インストールしてアプリケーションを再起動してください。",
+      "caches": "キャッシュ",
+      "cacheFolders_one": "{{count}} 個のフォルダーを検出",
+      "cacheFolders_other": "{{count}} 個のフォルダーを検出",
+      "noCacheFolder": "キャッシュフォルダーが見つかりません",
+      "disk": "ディスク",
+      "diskFree": "空き / 全体 {{total}}",
+      "diskUnknown": "ディスク容量不明"
+    },
+    "cache": {
+      "title": "ディスクキャッシュ",
+      "subtitle": "消去はアプリケーションを終了した状態でのみ可能です。Adobe が使用中に書き込むとキャッシュデータベースが破損します。",
+      "noneFound": "このマシンではキャッシュが見つかりませんでした。",
+      "ageFilter": "経過日数",
+      "ageAll": "すべて",
+      "ageDays": "{{days}} 日以上",
+      "shared": "共有",
+      "notRegenerable": "再生成不可",
+      "slowRebuild": "再適合に時間",
+      "dbWarning": "キャッシュデータベースを空にすると、次回起動時に Adobe がすべてのメディアを再適合します。時間がかかり、設定では短縮できません。",
+      "autoSaveWarning": "自動保存はキャッシュではなく作業のバージョンです。削除すると戻せません。",
+      "closePurgeReopen": "終了 → 消去 → 再起動",
+      "cleanSelection": "選択項目を削除（{{size}}）",
+      "runningHint": "アプリケーションが開いています。NetsuRush が正しく終了し、消去してから、プロジェクトを再度開きます。",
+      "freed_one": "{{size}} を解放 · {{count}} 個のフォルダーを空にしました",
+      "freed_other": "{{size}} を解放 · {{count}} 個のフォルダーを空にしました",
+      "reopenFailed": "再度開けませんでした：{{error}}",
+      "cleanFailed": "クリーンアップに失敗しました：{{error}}",
+      "confirmTitle": "これらのキャッシュを削除しますか？",
+      "confirmBody": "{{size}} が解放されます。フォルダーは残り、中身のみ削除されます。",
+      "confirmRestartTitle": "アプリケーションを終了し、消去してから再度開きますか？",
+      "confirmRestartBody": "アプリケーションを終了し（保存を確認します）、{{size}} を解放してから、プロジェクトを再度開きます。",
+      "roots": {
+        "mediaCacheFiles": "メディアキャッシュファイル",
+        "mediaCacheDb": "メディアキャッシュデータベース",
+        "peakFiles": "オーディオ波形",
+        "aeDiskCache": "After Effects ディスクキャッシュ",
+        "autoSave": "自動保存",
+        "videoPreviews": "ビデオプレビュー",
+        "audioPreviews": "オーディオプレビュー",
+        "aeProjectAutoSave": "プロジェクトの自動保存"
+      },
+      "kinds": {
+        "mediaCache": "メディアキャッシュ",
+        "mediaCacheDb": "キャッシュデータベース",
+        "peak": "波形",
+        "diskCache": "ディスクキャッシュ",
+        "autoSave": "自動保存",
+        "previews": "プレビュー"
+      }
+    },
+    "procs": {
+      "title": "Adobe プロセス",
+      "subtitle": "Premiere Pro と After Effects は終了後も補助プロセスを残します。個々は小さくても、合計は無視できません。",
+      "summary_one": "{{count}} 個のプロセス · {{size}}",
+      "summary_other": "{{count}} 個のプロセス · {{size}}",
+      "scan": "スキャン",
+      "colProcess": "プロセス",
+      "colAction": "操作",
+      "protected": "保護",
+      "protectedTip": "ホストアプリケーションが実行中です。終了すると編集中の内容が失われます。",
+      "kill": "終了",
+      "none": "残留している Adobe プロセスはありません。",
+      "killed": "{{name}} を終了しました",
+      "killTitle": "{{name}} を終了しますか？",
+      "killForced": "強制終了です。そのプロセスの未保存の作業は失われます。"
+    },
+    "purge": {
+      "title": "消去",
+      "subtitle": "NetsuRush 拡張機能がアプリケーション内で実行する操作です。",
+      "needsPanel": "アプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。",
+      "memoryInUse": "After Effects が使用中",
+      "targets": {
+        "memory": "RAM を消去",
+        "image": "画像キャッシュ",
+        "undo": "取り消し履歴",
+        "snapshot": "スナップショット",
+        "all": "ディスクを含むすべて"
+      },
+      "allCachesWarning": "「ディスクを含むすべて」はディスクキャッシュも消去します。再構築に時間がかかります。After Effects が自身のウィンドウで確認を求める場合があります。",
+      "deletePreviews": "レンダーファイルを削除",
+      "experimental": "実験的",
+      "qeExperimental": "Premiere Pro には公式の消去 API がありません。この呼び出しはバージョンごとに変わる非公開のインターフェース（QE DOM）を使用します。失敗した場合は、アプリケーションを終了して「ディスクキャッシュ」から同じ処理ができます。",
+      "compatAeft": "After Effects 2020（17.0）から 2026（26.x）に対応。24.3 以降は「ディスクを含むすべて」がディスクキャッシュも消去します。",
+      "compatPpro": "Premiere Pro 2020（14.0）から 2025（25.x）で確認済み。",
+
+      "uxpEra": "Premiere Pro {{year}}：Adobe は UXP に移行し、ExtendScript は保守されず 2026 年 9 月にサポートが終了します。この呼び出しは黙って失敗する可能性があります。",
+
+      "uxpFallback": "上の「ディスクキャッシュ」は Adobe の API を一切使わずに同じ処理を行います。",
+      "hygiene": "プロジェクトの整理",
+      "hygieneHint": "開いているプロジェクトに作用し、アプリケーション内で取り消せます。",
+      "hygieneOps": {
+        "removeUnused": "未使用のフッテージを削除",
+        "consolidate": "重複フッテージを統合",
+        "consolidateDuplicates": "重複を統合"
+      },
+      "done": "完了",
+      "doneFreed": "{{size}} を解放しました",
+      "hygieneDone_one": "{{count}} 個の項目を削除しました",
+      "hygieneDone_other": "{{count}} 個の項目を削除しました",
+      "previewsDone": "レンダーファイルを削除しました",
+      "confirmHeavy": "ディスクキャッシュが空になります。プレビューは再計算が必要です。",
+      "confirmHygiene": "開いているプロジェクトを変更します。操作はアプリケーション内で取り消せます。"
+    },
+    "prefs": {
+      "title": "パフォーマンス設定",
+      "subtitle": "パネルが直接読み書きします。アプリの終了もファイルの改変もありません。",
+      "needsPanel": "アプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。",
+      "warn": "要修正",
+      "advisory": "環境依存",
+      "volatile": "非永続",
+      "writeOnly": "この設定を読み取る手段がアプリケーションにありません。現在の値は不明で、書き込みのみ可能です。",
+      "on": "オン",
+      "off": "オフ",
+      "noPath": "フォルダーなし",
+      "none": "このバージョンでは読み取れる設定がありません。",
+      "apply_one": "適用（{{count}}）",
+      "apply_other": "適用（{{count}}）",
+      "applied_one": "{{count}} 件の設定を適用しました",
+      "applied_other": "{{count}} 件の設定を適用しました",
+      "applyTitle": "設定を適用しますか？",
+      "applyBody_one": "{{count}} 件の設定をアプリケーションに書き込みます。一括で検証されるため、中途半端に適用されることはありません。",
+      "applyBody_other": "{{count}} 件の設定をアプリケーションに書き込みます。一括で検証されるため、中途半端に適用されることはありません。",
+      "items": {
+        "gpuAccelType": {
+          "label": "レンダリングの GPU アクセラレーション",
+          "body": "GPU があるのにソフトウェアレンダリングのままだと、1 フレームごとに損をします。"
+        },
+        "bitsPerChannel": {
+          "label": "プロジェクトのビット深度",
+          "body": "32 bit は 1 フレームあたりのコストを大きく増やします。8 bit のプロジェクトで理由もなく有効になっていることがよくあります。"
+        },
+        "imageCachePct": {
+          "label": "画像キャッシュの割合",
+          "body": "割り当てメモリのうち画像キャッシュに充てる割合です。"
+        },
+        "maxMemPct": {
+          "label": "最大メモリ",
+          "body": "After Effects が自身に許可するマシンの RAM の割合です。"
+        },
+        "mfrEnabled": {
+          "label": "マルチフレームレンダリング",
+          "body": "Adobe はスクリプト終了時にこの設定を戻します。NetsuRush から実行するレンダリングにのみ有効で、恒久的な設定にはなりません。"
+        },
+        "mfrMaxCpuPct": {
+          "label": "マルチフレームレンダリングの CPU 割合",
+          "body": "After Effects はコアあたり約 4 GB を要求します。RAM が少ないマシンでこの割合を上げると、速くなるどころか遅くなります。"
+        },
+        "enableProxies": {
+          "label": "プロキシを使用",
+          "body": "全体の切り替えです。Premiere Pro は元素材ではなく添付したプロキシを再生します。"
+        },
+        "scratchVideoPreviews": {
+          "label": "ビデオプレビューのフォルダー",
+          "body": "素材用ドライブとは別の高速 SSD に置くのが、最も効果の大きいディスク設定です。"
+        },
+        "scratchAudioPreviews": {
+          "label": "オーディオプレビューのフォルダー",
+          "body": "ビデオと同じ考え方ですが、容量はずっと小さくて済みます。"
+        },
+        "scratchAutoSave": {
+          "label": "自動保存のフォルダー",
+          "body": "プロジェクトとは別のドライブに置くと、ボリューム障害から守れます。"
+        }
+      }
+    },
+    "proxy": {
+      "title": "添付プロキシ",
+      "summary": "{{total}} 件中 {{withProxy}} 件にプロキシがあります",
+      "needsPanel": "Premiere Pro を開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。",
+      "useProxies": "プロキシで再生",
+      "rescan": "再スキャン",
+      "has": "プロキシ",
+      "missing": "プロキシなし",
+      "cannot": "対象外",
+      "encoding": "エンコード中 {{done}} / {{total}}",
+      "generate_one": "生成して添付（{{count}}）",
+      "generate_other": "生成して添付（{{count}}）",
+      "attached_one": "{{count}} 件のプロキシを添付しました",
+      "attached_other": "{{count}} 件のプロキシを添付しました",
+      "attachedPartial": "{{count}} 件のプロキシを添付、{{missed}} 件が失敗しました",
+      "encodeFailed_one": "{{count}} 件の素材をエンコードできませんでした",
+      "encodeFailed_other": "{{count}} 件の素材をエンコードできませんでした"
+    }
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "img": "img",
+  "cancel": "Annuler",
+  "compare": {
+    "before": "Avant",
+    "after": "Après"
+  },
+  "object": {
+    "name": "Objet {{n}}"
+  },
+  "studio": {
+    "title": "Roto Studio",
+    "pickSource": "Coche une source pour démarrer le roto.",
+    "play": "Lecture",
+    "pause": "Pause",
+    "playTip": "Lecture (L / Espace) — J = arrière",
+    "pauseTip": "Pause (K / Espace)",
+    "prevFrame": "Image précédente",
+    "nextFrame": "Image suivante",
+    "inHere": "Borne d'entrée ici",
+    "inTip": "Borne d'entrée à l'image courante (I — Maj+I efface). Suivi et export se limitent à la plage.",
+    "outHere": "Borne de sortie ici",
+    "outTip": "Borne de sortie à l'image courante (O — Maj+O efface)",
+    "range": "Plage {{from}}–{{to}}",
+    "clickHint": "Clic = {{mode}} (E bascule) · clic droit = exclure · Maj+survol = aperçu · molette = zoom · J/K/L · I/O · , ; = pas de suivi · 1-9 objet",
+    "include": "inclure",
+    "exclude": "exclure",
+    "pointsHere": "· {{count}} point(s) ici",
+    "showMask": "Afficher le masque",
+    "hideOverlay": "Masquer la surimpression",
+    "showOverlay": "Afficher la surimpression",
+    "testTitle": "Test — {{label}}",
+    "testHint": "Aperçu seul — rien n'est écrit. Si le rendu convient, lance l'action sur tout le plan."
+  },
+  "panels": {
+    "model": "Modèle",
+    "noSam": "Aucun modèle SAM installé — télécharge SAM 2.1 dans Paramètres › Modèles.",
+    "display": "Affichage",
+    "maskRefine": "Retouche du masque",
+    "output": "Sortie",
+    "matteFine": "Affinage du masque",
+    "removeObject": "Supprimer l'objet",
+    "track": "Suivi",
+    "selection": "Sélection",
+    "mask": "Masque"
+  },
+  "objects": {
+    "title": "Objets",
+    "add": "Ajouter un objet",
+    "addTip": "Ajouter un objet à isoler",
+    "include": "Inclure",
+    "includeTip": "Le clic gauche AJOUTE au masque de l'objet actif",
+    "exclude": "Exclure",
+    "excludeTip": "Le clic gauche RETIRE du masque (point négatif) — corrige les débordements",
+    "nameAria": "Nom de l'objet",
+    "removeAria": "Retirer {{name}}",
+    "setActive": "Définir actif",
+    "remove": "Supprimer l'objet"
+  },
+  "points": {
+    "title": "Points",
+    "allFrames": "Toutes les images",
+    "allFramesTip": "Lister les points de toutes les images (sinon : image courante)",
+    "removeAria": "Retirer ce point",
+    "goToFrame": "Aller à l'image",
+    "removePoint": "Retirer ce point"
+  },
+  "track": {
+    "clearFramePoints": "Effacer les points de l'image",
+    "trackAll": "Suivre sur tout le plan",
+    "stepBack": "Pas ←",
+    "stepBackTip": "Suit UNE image vers l'arrière puis s'y arrête (contrôle image par image)",
+    "stepFwd": "Pas →",
+    "stepFwdTip": "Suit UNE image vers l'avant puis s'y arrête (contrôle image par image)",
+    "retrackBack": "Re-suivre ←",
+    "retrackBackTip": "Re-propage vers l'arrière depuis l'image courante (correction locale)",
+    "retrackFwd": "Re-suivre →",
+    "retrackFwdTip": "Re-propage vers l'avant depuis l'image courante (correction locale)",
+    "dedupe": "Dédoublonner",
+    "dedupeTip": "Réutiliser le même masque sur les images quasi identiques pour stabiliser le contour. Annulable.",
+    "restoreMattesAria": "Restaurer les mattes",
+    "restoreMattesTip": "Restaurer les mattes d'avant dédoublonnage",
+    "resetAria": "Réinitialiser le suivi",
+    "resetTip": "Efface le suivi (mattes) en GARDANT tous les points",
+    "upToDate": "Suivi à jour — corrige des points puis re-suis en partiel, ou exporte."
+  },
+  "view": {
+    "outline": "Contours",
+    "outlineTip": "Trace le contour de chaque objet dans sa couleur",
+    "bgColorAria": "Couleur de fond",
+    "bgColorTip": "Couleur du fond de composition",
+    "opacity": "Opacité du masque"
+  },
+  "viewMode": {
+    "editLabel": "Édition",
+    "editHint": "Image et masques colorés par objet pour le travail de précision",
+    "matteLabel": "Masque",
+    "matteHint": "Masque noir et blanc seul (contrôle du bord)",
+    "alphaLabel": "Alpha",
+    "alphaHint": "Sujet détouré sur damier pour contrôler la transparence",
+    "bgcolorLabel": "Fond couleur",
+    "bgcolorHint": "Sujet composé sur une couleur unie pour contrôler les contours"
+  },
+  "post": {
+    "grow": "Dilater / éroder",
+    "feather": "Adoucir le bord",
+    "holes": "Boucher les trous",
+    "dots": "Retirer les poussières",
+    "smooth": "Lisser le contour",
+    "border": "Corriger les bords d'image",
+    "gamma": "Densité (gamma)",
+    "resetTip": "Double-clic = réinitialiser"
+  },
+  "remove": {
+    "steps": "Pas de diffusion",
+    "stepsTip": "Plus de pas = meilleur remplissage, plus lent (12 = équilibré)",
+    "grow": "Marge d'effacement",
+    "growTip": "Dilate le masque avant l'effacement — couvre les bords et l'ombre de l'objet",
+    "plate": "Plaque propre",
+    "plateTip": "Va chercher le fond réellement filmé dans les images voisines avant de laisser le modèle l'inventer : ces pixels-là ont la bonne couleur et le bon grain",
+    "harmonize": "Harmonisation",
+    "harmonizeTip": "Recale la couleur et la netteté de la zone reconstruite sur son voisinage — sans ça, la retouche se voit même quand le contenu est juste",
+    "grain": "Grain",
+    "grainTip": "Réinjecte le grain mesuré autour de la zone : un remplissage lisse posé sur une source grainée fait tache. Nul sur une source propre",
+    "quality": "Qualité",
+    "qualityTip": "Résolution de diffusion. Plus haut = remplissage plus net, mais plus de VRAM ; en cas de manque de mémoire, le palier inférieur est utilisé automatiquement",
+    "qualityFast": "Rapide",
+    "qualityStandard": "Standard",
+    "qualityMax": "Max",
+    "on": "Activée",
+    "off": "Désactivée",
+    "advanced": "Réglages du modèle",
+    "seed": "Graine",
+    "seedTip": "Fixe le tirage aléatoire. À graine égale le résultat est identique — c'est ce qui permet de rejouer un remplissage réussi.",
+    "reroll": "Autre tirage",
+    "rerollTip": "Tire une nouvelle graine. Le premier réflexe quand un remplissage rate.",
+    "window": "Fenêtre",
+    "windowTip": "Images traitées d'un bloc par le modèle. Plus grand = plus cohérent dans le temps, plus gourmand en mémoire.",
+    "overlap": "Recouvrement",
+    "overlapTip": "Images communes à deux fenêtres, fondues entre elles. À zéro, la jonction se voit comme un saut.",
+    "vaeTiling": "Découper le décodage",
+    "vaeTilingTip": "Économise beaucoup de mémoire mais peut laisser des raccords. À couper si la carte suit.",
+    "cpuOffload": "Décharger sur le processeur",
+    "cpuOffloadTip": "Ne monte les poids sur la carte que le temps de leur passe. Nettement plus lent, mais passe sur une petite carte.",
+    "qualityTiny": "Mini",
+    "qualityUltra": "Ultra"
+  },
+  "engineRow": {
+    "noneInstalled": "Aucun moteur {{label}} installé",
+    "testAria": "Tester {{label}} sur l'image courante",
+    "testTip": "Tester sur l'image courante — aperçu seul, rien n'est écrit"
+  },
+  "engineHint": {
+    "minimax-remover": "Diffusion en 6 pas environ, cohérente dans le temps — plus propre sur fond animé.",
+    "diffueraser": "Qualité — moteur à câbler.",
+    "matanyone": "Suivi par mémoire — cheveux et bords.",
+    "matanyone2": "Détails fins et meilleure robustesse que la v1."
+  },
+  "exportRow": {
+    "allObjects": "Tous les objets",
+    "exportAria": "Exporter"
+  },
+  "exportFmt": {
+    "proresLabel": "ProRes 4444 (alpha)",
+    "proresHint": "Vidéo + couche alpha — montage (Resolve/AE)",
+    "webmLabel": "WebM VP9 (alpha)",
+    "webmHint": "Léger, avec alpha — web et aperçu",
+    "ffv1Label": "FFV1 (alpha, sans perte)",
+    "ffv1Hint": "Sans perte, alpha — archivage (MKV)",
+    "matteLabel": "Masque N&B (MP4)",
+    "matteHint": "Masque noir et blanc seul",
+    "bgcolorLabel": "Fond couleur (MP4)",
+    "bgcolorHint": "Objet composé sur la couleur de fond du mode d'affichage",
+    "pngLabel": "Séquence PNG (masque)",
+    "pngHint": "Une image de masque par image vidéo"
+  },
+  "sam": {
+    "large": "Meilleure qualité de masque, plus de VRAM.",
+    "base": "Repli rapide, bas VRAM.",
+    "small": "Variante intermédiaire : moins de VRAM que Base+, masques un peu moins fins.",
+    "tiny": "La plus petite variante SAM 2.1 — pour les cartes serrées en VRAM.",
+    "edgetam": "Le plus léger (56 Mo) et le plus rapide. Masques moins fins que SAM 2.1.",
+    "sam31": "Génération la plus récente : tient les objets qui se croisent ou disparaissent. GPU NVIDIA obligatoire.",
+    "samurai": "Suit l'objet même quand il passe derrière autre chose (mémoire guidée par le mouvement). Utilise les poids SAM 2.1 installés.",
+    "sam2long": "Pour les plans longs : garde plusieurs pistes et élague les mauvaises, l'erreur ne s'accumule pas. Utilise les poids SAM 2.1 installés."
+  },
+  "timeline": {
+    "inHere": "Point d'entrée ici (img {{n}})",
+    "outHere": "Point de sortie ici (img {{n}})",
+    "resetRange": "Réinitialiser la plage"
+  },
+  "viewer": {
+    "zoomSuffix": "× — double-clic pour recadrer"
+  },
+  "test": {
+    "matteImage": "Affinage du masque — image {{n}}",
+    "removeImage": "Suppression — image {{n}}"
+  },
+  "busy": {
+    "open": "Ouverture…",
+    "segment": "Segmentation…",
+    "undo": "Annulation…",
+    "recalc": "Recalcul…",
+    "track": "Suivi",
+    "resetTrack": "Réinitialisation du suivi",
+    "dedupe": "Dédoublonnage",
+    "restoreMattes": "Restauration des mattes",
+    "export": "Export",
+    "matteFine": "Affinage du masque",
+    "remove": "Suppression",
+    "testMatte": "Test du masque (1 image)",
+    "testRemove": "Test suppression (1 image)"
+  },
+  "note": {
+    "canceled": "{{label}} annulé — les images déjà suivies restent.",
+    "output": "{{label}} → {{output}}",
+    "done": "{{label}} terminé.",
+    "unavailable": "{{label}} indisponible",
+    "restored": "Session restaurée du cache — points et suivi conservés.",
+    "dedupeOutput": "{{groups}} groupe(s), {{changed}} image(s) unifiée(s)"
+  },
+  "errors": {
+    "openFailed": "ouverture impossible",
+    "segmentFailed": "segmentation impossible",
+    "undoFailed": "annulation impossible",
+    "clearFailed": "effacement impossible",
+    "removePointFailed": "retrait impossible",
+    "moveFailed": "déplacement impossible"
+  },
+  "stage": {
+    "load": "Chargement du modèle…",
+    "extract": "Extraction des images…",
+    "extractwait": "Fin d'extraction…",
+    "roi": "Recadrage de la zone utile…",
+    "refine": "Calcul du masque…",
+    "export": "Encodage…",
+    "remove": "Suppression…",
+    "dedupe": "Analyse des doublons…"
+  },
+  "summary": {
+    "tracked": "suivi à jour",
+    "notTracked": "pas encore suivi",
+    "matteNone": "pas calculé",
+    "matteOn": "actif",
+    "matteOff": "calculé, inactif",
+    "remove": "{{steps}} étapes · graine {{seed}}",
+    "select_one": "{{model}} · {{count}} objet",
+    "select_other": "{{model}} · {{count}} objets",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "post_one": "{{count}} réglage",
+    "post_other": "{{count}} réglages"
+  },
+  "matte": {
+    "run": "Calculer le matte",
+    "test": "Tester",
+    "testTip": "Affine seulement l'image courante et montre le résultat — rien n'est écrit.",
+    "useRefined": "Utiliser le matte fin",
+    "useRefinedTip": "Bascule entre l'alpha affiné et le masque brut du suivi, sans rien recalculer. L'affichage, l'export et la suppression suivent.",
+    "advanced": "Réglages avancés",
+    "size": "Résolution de traitement",
+    "sizeTip": "Plafond du petit côté envoyé au modèle. Plus haut = bords plus fins, mais plus lent et plus gourmand en mémoire.",
+    "size480": "480",
+    "size720": "720",
+    "size1080": "1080",
+    "sizeFull": "Max",
+    "warmup": "Stabilisation",
+    "warmupTip": "Passes supplémentaires sur chaque image d'amorçage. La première prédiction part d'un masque à bords durs ; ces passes la laissent se détendre.",
+    "combined": "Traiter les objets ensemble",
+    "combinedTip": "Une seule passe sur l'union au lieu d'une passe par objet. Bien plus rapide, mais l'export d'un objet seul retombe sur le masque brut.",
+    "batch": "Images par lot",
+    "batchTip": "Images traitées d'un bloc par le modèle. Plus grand = plus cohérent dans le temps, mais la mémoire monte d'autant.",
+    "overlap": "Recouvrement",
+    "overlapTip": "Images communes à deux lots. Elles sont recalculées puis fondues, et le lot suivant repart de l'alpha du précédent — sans ça, la jonction se voit."
+  },
+  "mask": {
+    "stepModel": "affine l'alpha",
+    "stepManual": "sur le masque du suivi",
+    "stepOnRefined": "par-dessus le matte fin"
+  },
+  "output": {
+    "exportStep": "Exporter"
+  }
+}

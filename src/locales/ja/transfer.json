@@ -1,0 +1,89 @@
+{
+  "header": {
+    "title": "アプリケーション間の転送",
+    "subtitle": "タイムラインを別の編集アプリケーションへフレーム単位で複製します。"
+  },
+  "picker": {
+    "source": "転送元",
+    "target": "転送先",
+    "swap": "転送元と転送先を入れ替える",
+    "offline": "オフライン：{{hosts}}",
+    "online": "接続済み",
+    "hostOffline": "オフライン",
+    "swapUnavailable": "この組み合わせは入れ替えられません"
+  },
+  "sections": {
+    "source": "{{host}} のタイムライン",
+    "target": "{{host}} の転送先",
+    "options": "オプション",
+    "media": "メディア",
+    "outDir": "出力フォルダー",
+    "encoding": "エンコード"
+  },
+  "form": {
+    "refresh": "更新",
+    "noTimeline": "タイムラインがありません",
+    "timelineOpen": "{{name}}（開いています）",
+    "namePlaceholder": "作成するタイムラインの名前",
+    "modeNew": "新しいタイムライン",
+    "modeAppend": "既存のタイムライン",
+    "videoOnly": "映像のみ",
+    "richAe": "After Effects の詳細オプション",
+    "richAeHint": "ショットをそのまま複製する代わりに、トランスフォーム・速度・プリコンポジションを適用します。",
+    "yes": "はい",
+    "no": "いいえ",
+    "choose": "選択…",
+    "none": "なし"
+  },
+  "preview": {
+    "clips": "読み込んだショット",
+    "tracks": "トラック",
+    "duration": "長さ",
+    "fps": "フレームレート",
+    "missing": "{{count}} 件のソースが見つかりません",
+    "fidelityExact": "ネイティブ同等性を保持する見込みです",
+    "fidelityLimited": "転送前に制限があります",
+    "fidelityCounts": "正確 {{exact}} · 近似 {{approximated}} · 未保証 {{unsupported}}",
+    "animationUnavailable": "キーフレームを読み取れません：それらを含む書き出しを転送元のアプリケーションが拒否しました。固定値で転送します。",
+    "mediaLess": "メディアのない要素 {{count}} 件（マット、調整レイヤー）：どのアプリケーションも受け取れません。",
+    "graphics": "タイトル {{count}} 件：テキストとスタイルから転送先で作り直します。"
+  },
+  "phases": {
+    "read": "タイムラインを読み込み中",
+    "sources": "ソースを解決中",
+    "build": "編集中",
+    "done": "完了"
+  },
+  "run": {
+    "label": "{{from}} → {{to}} に転送",
+    "busy": "転送中…"
+  },
+  "result": {
+    "done": "{{count}} 件のショットを「{{timeline}}」（{{host}}）に配置しました。",
+    "verified": "プロパティを再読込し、転送を検証しました。",
+    "unverified": "確認済み {{applied}} 件 · 制限または差異 {{issues}} 件。",
+    "tracksClamped": "トラックを制限しました：転送先アプリケーションが十分な数を作成できませんでした。",
+    "missing": "{{count}} 件のソースがディスク上に見つかりません。",
+    "mediaLess": "メディアのない要素 {{count}} 件（マット、調整レイヤー）：どのアプリケーションも受け取れません。",
+    "titles": "タイトル {{count}} 件を作成しました。",
+    "titlesRetimed": "タイトル {{count}} 件はテンプレートの長さのままです：DaVinci Resolve に長さを設定する手段がありません。",
+    "titlesFailed": "タイトル {{count}} 件を配置できませんでした。",
+    "vehicleImport": "DaVinci Resolve が編集を読み込みました：キーフレーム、オーディオレベル、速度はアプリケーション自身が適用します。",
+    "vehicleApi": "スクリプトでクリップを1つずつ配置しました：キーフレームは NetsuRush が読み取った内容です。",
+    "exchangeFile": "DaVinci Resolve がスクリプト経由の編集を拒否しました。同じファイルは手動なら正しく読み込めます（キーフレームとオーディオレベルを含む）：ファイル ▸ 読み込み ▸ タイムライン。"
+  },
+  "mediaModes": {
+    "copy": {
+      "label": "直接リンク",
+      "hint": "元のファイルをそのままリンクします。ファイルは生成しません。"
+    },
+    "remux": {
+      "label": "再ラップ",
+      "hint": "無劣化で新しいコンテナーに入れ替えます。転送先が元のコンテナーを読めない場合に有効です。"
+    },
+    "reencode": {
+      "label": "再エンコード",
+      "hint": "各ショットを編集用コーデックに変換し、フレーム単位で切り出します。"
+    }
+  }
+}

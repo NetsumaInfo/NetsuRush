@@ -1,0 +1,75 @@
+{
+  "transcribing": "文字起こし中…",
+  "button": {
+    "ariaStop": "音声入力を停止",
+    "ariaDictate": "音声入力",
+    "tooltipStop": "停止（テキストを挿入）",
+    "tooltipDictate": "音声入力（話すと入力されます）"
+  },
+  "overlay": {
+    "listening": "認識中…"
+  },
+  "hotkey": {
+    "capturePrompt": "キーの組み合わせを押してください…",
+    "mod": {
+      "ctrl": "Ctrl",
+      "shift": "Shift",
+      "alt": "Alt",
+      "meta": "Meta"
+    },
+    "code": {
+      "space": "スペース",
+      "escape": "Esc",
+      "enter": "Enter",
+      "tab": "Tab"
+    }
+  },
+  "settings": {
+    "title": "音声入力",
+    "intro": "アプリのどこでもショートカットを押しながら話し、離すだけ。文字起こしされたテキストが、直前にいた入力欄やエディターに挿入されます。ボタンは不要で、認識中は小さなバッジが出るだけです。",
+    "enableLabel": "音声入力を有効にする",
+    "enableHint": "グローバルショートカットを待ち受けます。",
+    "enabledOn": "有効",
+    "enabledOff": "無効",
+    "micLabel": "マイク",
+    "micHint": "音声入力に使うオーディオ入力です。",
+    "micDefault": "既定のマイク",
+    "micNumbered": "マイク {{n}}",
+    "hotkeyLabel": "ショートカット（長押し）",
+    "hotkeyHint": "クリックしてキーの組み合わせを押してください。Esc で中止。",
+    "unloadLabel": "モデルを解放するまでの時間",
+    "unloadHint": "この時間だけ未使用ならモデルが VRAM から解放されます（次回は起動から）。",
+    "liveLabel": "リアルタイム表示",
+    "liveHint": "話している間もテキストが表示されます（定期的に文字起こしを更新）。",
+    "liveOn": "有効",
+    "liveOff": "無効",
+    "modelLabel": "文字起こしモデル"
+  },
+  "unload": {
+    "s30": "30 秒",
+    "m1": "1 分",
+    "m5": "5 分",
+    "m15": "15 分",
+    "never": "解放しない"
+  },
+  "model": {
+    "default": "既定",
+    "bundled": "同梱",
+    "installed": "インストール済み",
+    "removeTooltip": "ディスクから削除",
+    "get": "取得"
+  },
+  "cpp": {
+    "engine": "transcribe.cpp エンジン",
+    "ready": " · 使用可能（{{backend}}）",
+    "notInstalled": " · 未インストール",
+    "readyHint": "ネイティブバイナリを検出しました。GGUF モデル（Nemotron）が使えます。",
+    "notInstalledHint": "Nemotron に必要です。transcribe-cli（GitHub のビルド済み）を NR_HOME/bin に置くか、nr.config.json の transcribeCppBin を設定してください。"
+  },
+  "mic": {
+    "busy": "マイクは別のアプリが使用中です。",
+    "denied": "マイクが拒否されました。音声入力にはマイクへのアクセスを許可してください。",
+    "fallback": "選択したマイクが見つからないため、既定のマイクを使用します。",
+    "missing": "利用できるマイクがありません。"
+  }
+}

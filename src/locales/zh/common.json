@@ -1,0 +1,83 @@
+{
+  "action": {
+    "error": "错误",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "close": "关闭",
+    "confirm": "确定",
+    "back": "返回",
+    "continue": "继续",
+    "add": "添加",
+    "remove": "移除",
+    "rename": "重命名",
+    "edit": "编辑",
+    "copy": "复制",
+    "reset": "重置",
+    "apply": "应用",
+    "open": "打开",
+    "retry": "重试",
+    "import": "导入",
+    "decrease": "减少",
+    "increase": "增加",
+    "loading": "加载中…"
+  },
+  "status": {
+    "loading": "加载中…",
+    "error": "错误",
+    "ok": "确定",
+    "empty": "暂无内容"
+  },
+  "color": {
+    "hexValue": "十六进制颜色值",
+    "transparent": "透明",
+    "choose": "选择颜色",
+    "swatch": "颜色 {{color}}"
+  },
+  "player": {
+    "scenePreview": "镜头预览",
+    "progress": "进度条",
+    "play": "播放",
+    "pause": "暂停",
+    "prevFrame": "上一帧",
+    "nextFrame": "下一帧",
+    "prevFrameShortcut": "上一帧（←）",
+    "nextFrameShortcut": "下一帧（→）",
+    "soundOn": "开启声音",
+    "soundOff": "静音",
+    "volume": "音量",
+    "muted": "静音",
+    "fullscreen": "全屏",
+    "seek": "在视频中定位"
+  },
+  "fileType": {
+    "video": "视频",
+    "image": "图像",
+    "media": "媒体"
+  },
+  "window": {
+    "reference": "参考",
+    "notebook": "笔记本"
+  },
+  "mock": {
+    "resolveUnavailable": "浏览器中无法使用 Resolve。",
+    "appUnavailable": "浏览器中无法使用此功能。",
+    "outsideApp": "此功能仅可在应用中使用。",
+    "pageNotFound": "找不到页面",
+    "collectionNotFound": "找不到收藏集",
+    "archiveUnavailable": "无法在应用外归档。",
+    "folderImportUnavailable": "无法在应用外导入文件夹。",
+    "emptyFolderName": "文件夹名为空",
+    "invalidFolderName": "文件夹名不能包含 '/' 或 '\\\\'",
+    "folder": "文件夹"
+  },
+  "spell": {
+    "title": "拼写检查",
+    "unknownWord": "未知单词",
+    "searching": "正在查找建议…",
+    "noSuggestion": "没有建议",
+    "addToDictionary": "添加到词典",
+    "ignoreOnce": "本次会话中忽略",
+    "replaceAll": "替换全部 {{count}} 处"
+  }
+}

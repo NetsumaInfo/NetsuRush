@@ -1,0 +1,83 @@
+{
+  "action": {
+    "error": "エラー",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "close": "閉じる",
+    "confirm": "確定",
+    "back": "戻る",
+    "continue": "続行",
+    "add": "追加",
+    "remove": "取り除く",
+    "rename": "名前を変更",
+    "edit": "編集",
+    "copy": "コピー",
+    "reset": "リセット",
+    "apply": "適用",
+    "open": "開く",
+    "retry": "再試行",
+    "import": "インポート",
+    "decrease": "減らす",
+    "increase": "増やす",
+    "loading": "読み込み中…"
+  },
+  "status": {
+    "loading": "読み込み中…",
+    "error": "エラー",
+    "ok": "OK",
+    "empty": "表示するものがありません"
+  },
+  "color": {
+    "hexValue": "16進カラー値",
+    "transparent": "透明",
+    "choose": "色を選択",
+    "swatch": "色 {{color}}"
+  },
+  "player": {
+    "scenePreview": "ショットのプレビュー",
+    "progress": "進行バー",
+    "play": "再生",
+    "pause": "一時停止",
+    "prevFrame": "前のフレーム",
+    "nextFrame": "次のフレーム",
+    "prevFrameShortcut": "前のフレーム（←）",
+    "nextFrameShortcut": "次のフレーム（→）",
+    "soundOn": "音声をオン",
+    "soundOff": "ミュート",
+    "volume": "音量",
+    "muted": "ミュート",
+    "fullscreen": "全画面",
+    "seek": "動画内を移動"
+  },
+  "fileType": {
+    "video": "動画",
+    "image": "画像",
+    "media": "メディア"
+  },
+  "window": {
+    "reference": "リファレンス",
+    "notebook": "ノート"
+  },
+  "mock": {
+    "resolveUnavailable": "Resolve はブラウザーでは利用できません。",
+    "appUnavailable": "この機能はブラウザーでは利用できません。",
+    "outsideApp": "この機能はアプリ内でのみ利用できます。",
+    "pageNotFound": "ページが見つかりません",
+    "collectionNotFound": "コレクションが見つかりません",
+    "archiveUnavailable": "アプリ外ではアーカイブできません。",
+    "folderImportUnavailable": "アプリ外ではフォルダーをインポートできません。",
+    "emptyFolderName": "フォルダー名が空です",
+    "invalidFolderName": "フォルダー名に '/' または '\\\\' は使用できません",
+    "folder": "フォルダー"
+  },
+  "spell": {
+    "title": "スペルチェック",
+    "unknownWord": "未知の単語",
+    "searching": "候補を検索中…",
+    "noSuggestion": "候補なし",
+    "addToDictionary": "辞書に追加",
+    "ignoreOnce": "このセッションでは無視",
+    "replaceAll": "{{count}} 件すべてを置換"
+  }
+}

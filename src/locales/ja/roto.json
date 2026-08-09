@@ -1,0 +1,284 @@
+{
+  "img": "フレーム",
+  "cancel": "キャンセル",
+  "compare": {
+    "before": "適用前",
+    "after": "適用後"
+  },
+  "object": {
+    "name": "オブジェクト {{n}}"
+  },
+  "studio": {
+    "title": "Roto Studio",
+    "pickSource": "ロトを開始するソースを選択してください。",
+    "play": "再生",
+    "pause": "一時停止",
+    "playTip": "再生（L / スペース）— J = 逆再生",
+    "pauseTip": "一時停止（K / スペース）",
+    "prevFrame": "前のフレーム",
+    "nextFrame": "次のフレーム",
+    "inHere": "ここにイン点",
+    "inTip": "現在のフレームにイン点（I — Shift+I で解除）。トラッキングと書き出しは範囲内のみ。",
+    "outHere": "ここにアウト点",
+    "outTip": "現在のフレームにアウト点（O — Shift+O で解除）",
+    "range": "範囲 {{from}}–{{to}}",
+    "clickHint": "クリック = {{mode}}（E で切替）· 右クリック = 除外 · Shift+ホバー = プレビュー · ホイール = ズーム · J/K/L · I/O · , ; = ステップ · 1-9 オブジェクト",
+    "include": "含める",
+    "exclude": "除外",
+    "pointsHere": "· ここに {{count}} ポイント",
+    "showMask": "マスクを表示",
+    "hideOverlay": "オーバーレイを隠す",
+    "showOverlay": "オーバーレイを表示",
+    "testTitle": "テスト — {{label}}",
+    "testHint": "プレビューのみ — 保存されません。問題なければショット全体に実行してください。"
+  },
+  "panels": {
+    "model": "モデル",
+    "noSam": "SAM モデルが未インストール — 設定 › モデルで SAM 2.1 をダウンロード。",
+    "display": "表示",
+    "maskRefine": "マスクの微調整",
+    "output": "出力",
+    "matteFine": "精細マット",
+    "removeObject": "オブジェクト除去",
+    "track": "追跡",
+    "selection": "選択",
+    "mask": "マスク"
+  },
+  "objects": {
+    "title": "オブジェクト",
+    "add": "オブジェクトを追加",
+    "addTip": "分離するオブジェクトを追加",
+    "include": "含める",
+    "includeTip": "左クリックでアクティブなオブジェクトのマスクに追加",
+    "exclude": "除外",
+    "excludeTip": "左クリックでマスクから除去（除外ポイント）— はみ出しを修正",
+    "nameAria": "オブジェクト名",
+    "removeAria": "{{name}} を削除",
+    "setActive": "アクティブにする",
+    "remove": "オブジェクトを削除"
+  },
+  "points": {
+    "title": "ポイント",
+    "allFrames": "全フレーム",
+    "allFramesTip": "全フレームのポイントを表示（オフ：現在のフレーム）",
+    "removeAria": "このポイントを削除",
+    "goToFrame": "フレームへ移動",
+    "removePoint": "このポイントを削除"
+  },
+  "track": {
+    "clearFramePoints": "フレームのポイントを消去",
+    "trackAll": "ショット全体をトラッキング",
+    "stepBack": "ステップ ←",
+    "stepBackTip": "1 フレーム後方へトラッキングして停止（フレーム単位の制御）",
+    "stepFwd": "ステップ →",
+    "stepFwdTip": "1 フレーム前方へトラッキングして停止（フレーム単位の制御）",
+    "retrackBack": "再トラッキング ←",
+    "retrackBackTip": "現在のフレームから後方へ再伝播（局所修正）",
+    "retrackFwd": "再トラッキング →",
+    "retrackFwdTip": "現在のフレームから前方へ再伝播（局所修正）",
+    "dedupe": "重複を統合",
+    "dedupeTip": "アニメ：ほぼ同じフレーム（止め）に同じマットを適用 — 輪郭が安定。取り消し可能。",
+    "restoreMattesAria": "マットを復元",
+    "restoreMattesTip": "重複統合前のマットを復元",
+    "resetAria": "トラッキングをリセット",
+    "resetTip": "ポイントを全て保持したままトラッキング（マット）を消去",
+    "upToDate": "トラッキングは最新 — ポイントを修正して部分的に再トラッキング、または書き出し。"
+  },
+  "view": {
+    "outline": "輪郭",
+    "outlineTip": "各オブジェクトの輪郭を固有色で描画",
+    "bgColorAria": "背景色",
+    "bgColorTip": "合成の背景色",
+    "opacity": "マスクの不透明度"
+  },
+  "viewMode": {
+    "editLabel": "編集",
+    "editHint": "フレーム + オブジェクト別に着色したマスク（作業モード）",
+    "matteLabel": "マット",
+    "matteHint": "白黒マスクのみ（エッジ確認）",
+    "alphaLabel": "アルファ",
+    "alphaHint": "市松模様で切り抜き表示（実際の結果）",
+    "bgcolorLabel": "背景色",
+    "bgcolorHint": "単色の上に合成（切り抜き確認）"
+  },
+  "post": {
+    "grow": "拡張 / 収縮",
+    "feather": "エッジをぼかす",
+    "holes": "穴を埋める",
+    "dots": "ゴミを除去",
+    "smooth": "輪郭を滑らかに",
+    "border": "画面端を補正",
+    "gamma": "濃度（ガンマ）",
+    "resetTip": "ダブルクリックでリセット"
+  },
+  "remove": {
+    "steps": "拡散ステップ",
+    "stepsTip": "ステップが多いほど補完が良く、遅くなります（12 = 標準）",
+    "grow": "消去マージン",
+    "growTip": "消去前にマスクを拡張 — オブジェクトの輪郭と影をカバー",
+    "plate": "クリーンプレート",
+    "plateTip": "モデルに背景を推測させる前に、前後のフレームに実際に写っている背景を取り込みます。実写のピクセルなので色も粒子も正確です",
+    "harmonize": "なじませる",
+    "harmonizeTip": "再構成した領域の色と解像感を周囲に合わせます。これがないと、内容が正しくても継ぎ目が見えます",
+    "grain": "粒子",
+    "grainTip": "周囲で測定した粒子を戻します。粒子のある素材に滑らかな補完を置くと浮きます。クリーンな素材ではゼロになります",
+    "quality": "画質",
+    "qualityTip": "拡散の解像度。高いほど補完が鮮明ですが VRAM を消費します。メモリが足りない場合は自動的に一段下げます",
+    "qualityFast": "高速",
+    "qualityStandard": "標準",
+    "qualityMax": "最高",
+    "on": "オン",
+    "off": "オフ",
+    "advanced": "モデルの設定",
+    "seed": "シード",
+    "seedTip": "乱数を固定します。同じシードなら結果も同じ — うまくいった補完を再現できます。",
+    "reroll": "引き直す",
+    "rerollTip": "新しいシードを引きます。補完が失敗したとき最初に試すことです。",
+    "window": "ウィンドウ",
+    "windowTip": "モデルが一度に扱うフレーム数。大きいほど時間的に一貫しますが、メモリを使います。",
+    "overlap": "重なり",
+    "overlapTip": "隣り合うウィンドウが共有し、互いに溶け合うフレーム数。0 にすると継ぎ目が跳びとして見えます。",
+    "vaeTiling": "デコードをタイル分割",
+    "vaeTilingTip": "メモリを大きく節約しますが、タイルの継ぎ目が残ることがあります。余裕があれば切ってください。",
+    "cpuOffload": "CPU に退避",
+    "cpuOffloadTip": "各処理の間だけ重みをカードに載せます。かなり遅くなりますが、小さなカードでも動きます。",
+    "qualityTiny": "最小",
+    "qualityUltra": "ウルトラ"
+  },
+  "engineRow": {
+    "noneInstalled": "{{label}}エンジンがインストールされていません",
+    "testAria": "現在のフレームで {{label}} をテスト",
+    "testTip": "現在のフレームでテスト — プレビューのみ、保存されません"
+  },
+  "engineHint": {
+    "minimax-remover": "約6ステップの拡散処理。時間的一貫性があり、動く背景でもきれいに仕上がります。",
+    "diffueraser": "高品質 — エンジン連携は未実装。",
+    "matanyone": "メモリーベースのトラッキング — 髪や輪郭に対応。",
+    "matanyone2": "v1より細部に強く、安定性も向上。"
+  },
+  "exportRow": {
+    "allObjects": "全オブジェクト",
+    "exportAria": "書き出し"
+  },
+  "exportFmt": {
+    "proresLabel": "ProRes 4444（アルファ）",
+    "proresHint": "映像 + アルファチャンネル — 編集（Resolve/AE）",
+    "webmLabel": "WebM VP9（アルファ）",
+    "webmHint": "軽量、アルファ — Web/プレビュー",
+    "ffv1Label": "FFV1（アルファ、ロスレス）",
+    "ffv1Hint": "ロスレス、アルファ — 保存（MKV）",
+    "matteLabel": "白黒マット（MP4）",
+    "matteHint": "白黒マスクのみ",
+    "bgcolorLabel": "背景色（MP4）",
+    "bgcolorHint": "表示モードの背景色の上にオブジェクトを合成",
+    "pngLabel": "PNG シーケンス（マット）",
+    "pngHint": "1 フレームにつきマット画像 1 枚"
+  },
+  "sam": {
+    "large": "マスク品質が高く、VRAM を多く使用。",
+    "base": "高速な代替、VRAM 少。",
+    "small": "中間モデル：Base+ よりVRAMが少なく、マスクはやや粗め。",
+    "tiny": "SAM 2.1 の最小モデル — VRAMが少ない環境向け。",
+    "edgetam": "最軽量（56 MB）かつ最速。マスクは SAM 2.1 より粗め。",
+    "sam31": "最新世代。交差したり消えたりする対象も追い続けます。NVIDIA GPU が必要です。",
+    "samurai": "遮蔽されても対象を追跡します（動きに基づくメモリ）。インストール済みの SAM 2.1 の重みを使用します。",
+    "sam2long": "長いショット向け。複数の候補を保持して悪いものを削るため、誤差が蓄積しません。インストール済みの SAM 2.1 の重みを使用します。"
+  },
+  "timeline": {
+    "inHere": "ここにイン点（フレーム {{n}}）",
+    "outHere": "ここにアウト点（フレーム {{n}}）",
+    "resetRange": "範囲をリセット"
+  },
+  "viewer": {
+    "zoomSuffix": "× — ダブルクリックで全体表示"
+  },
+  "test": {
+    "matteImage": "精細マット — フレーム {{n}}",
+    "removeImage": "除去 — フレーム {{n}}"
+  },
+  "busy": {
+    "open": "開いています…",
+    "segment": "セグメンテーション中…",
+    "undo": "取り消し中…",
+    "recalc": "再計算中…",
+    "track": "トラッキング",
+    "resetTrack": "トラッキングのリセット",
+    "dedupe": "重複の統合",
+    "restoreMattes": "マットの復元",
+    "export": "書き出し",
+    "matteFine": "精細マット",
+    "remove": "除去",
+    "testMatte": "マットテスト（1 フレーム）",
+    "testRemove": "除去テスト（1 フレーム）"
+  },
+  "note": {
+    "canceled": "{{label}} を中止 — トラッキング済みのフレームは残ります。",
+    "output": "{{label}} → {{output}}",
+    "done": "{{label}} が完了しました。",
+    "unavailable": "{{label}} は利用できません",
+    "restored": "キャッシュからセッションを復元 — ポイントとトラッキングを保持。",
+    "dedupeOutput": "{{groups}} グループ、{{changed}} フレームを統合"
+  },
+  "errors": {
+    "openFailed": "開けません",
+    "segmentFailed": "セグメンテーションできません",
+    "undoFailed": "取り消せません",
+    "clearFailed": "消去できません",
+    "removePointFailed": "削除できません",
+    "moveFailed": "移動できません"
+  },
+  "stage": {
+    "load": "モデルを読み込み中…",
+    "extract": "フレームを抽出中…",
+    "extractwait": "抽出の完了待ち…",
+    "roi": "有効範囲を切り抜き中…",
+    "refine": "マットを推論中…",
+    "export": "エンコード中…",
+    "remove": "除去中…",
+    "dedupe": "重複を解析中…"
+  },
+  "summary": {
+    "tracked": "最新",
+    "notTracked": "未追跡",
+    "matteNone": "未計算",
+    "matteOn": "有効",
+    "matteOff": "計算済み・無効",
+    "remove": "{{steps}} ステップ・シード {{seed}}",
+    "select_one": "{{model}}・オブジェクト {{count}} 個",
+    "select_other": "{{model}}・オブジェクト {{count}} 個",
+    "points_one": "ポイント {{count}} 個",
+    "points_other": "ポイント {{count}} 個",
+    "post_one": "設定 {{count}} 件",
+    "post_other": "設定 {{count}} 件"
+  },
+  "matte": {
+    "run": "マットを計算",
+    "test": "テスト",
+    "testTip": "現在のフレームだけを精細化して結果を表示します。何も書き込みません。",
+    "useRefined": "精細マットを使う",
+    "useRefinedTip": "精細化したアルファと追跡の元マスクを、再計算せずに切り替えます。表示・書き出し・除去がこれに従います。",
+    "advanced": "詳細設定",
+    "size": "処理解像度",
+    "sizeTip": "モデルに渡す短辺の上限。高いほど輪郭は細かくなりますが、遅くメモリも増えます。",
+    "size480": "480",
+    "size720": "720",
+    "size1080": "1080",
+    "sizeFull": "最大",
+    "warmup": "安定化",
+    "warmupTip": "各起点フレームで追加する反復。最初の予測は硬い縁のマスクから始まるため、この反復でなじませます。",
+    "combined": "オブジェクトをまとめて処理",
+    "combinedTip": "オブジェクトごとではなく統合マスクを一度で処理します。かなり速い一方、単一オブジェクトの書き出しは元マスクに戻ります。",
+    "batch": "1 バッチの枚数",
+    "batchTip": "モデルが一度に扱う枚数。大きいほど時間的に一貫しますが、その分メモリも増えます。",
+    "overlap": "重なり",
+    "overlapTip": "隣り合うバッチが共有する枚数。再計算して溶け合わせ、次のバッチは前のアルファから始まります。無いと継ぎ目が見えます。"
+  },
+  "mask": {
+    "stepModel": "アルファを精細化",
+    "stepManual": "追跡マスクに対して",
+    "stepOnRefined": "精細マットの上から"
+  },
+  "output": {
+    "exportStep": "書き出し"
+  }
+}

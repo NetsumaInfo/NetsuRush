@@ -1,0 +1,13 @@
+{
+  "gate": {
+    "title": "言語を選択",
+    "subtitle": "設定でいつでも変更できます。",
+    "continue": "続ける"
+  },
+  "settings": {
+    "navLabel": "言語",
+    "title": "言語",
+    "subtitle": "アプリの表示言語です。",
+    "fieldLabel": "表示言語"
+  }
+}

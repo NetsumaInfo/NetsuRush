@@ -1,0 +1,284 @@
+{
+  "img": "frame",
+  "cancel": "Cancel",
+  "compare": {
+    "before": "Before",
+    "after": "After"
+  },
+  "object": {
+    "name": "Object {{n}}"
+  },
+  "studio": {
+    "title": "Roto Studio",
+    "pickSource": "Pick a source to start the roto.",
+    "play": "Play",
+    "pause": "Pause",
+    "playTip": "Play (L / Space) — J = reverse",
+    "pauseTip": "Pause (K / Space)",
+    "prevFrame": "Previous frame",
+    "nextFrame": "Next frame",
+    "inHere": "In point here",
+    "inTip": "In point at the current frame (I — Shift+I clears). Tracking and export stay inside the range.",
+    "outHere": "Out point here",
+    "outTip": "Out point at the current frame (O — Shift+O clears)",
+    "range": "Range {{from}}–{{to}}",
+    "clickHint": "Click = {{mode}} (E toggles) · right-click = exclude · Shift+hover = preview · wheel = zoom · J/K/L · I/O · , ; = track step · 1-9 object",
+    "include": "include",
+    "exclude": "exclude",
+    "pointsHere": "· Points here: {{count}}",
+    "showMask": "Show mask",
+    "hideOverlay": "Hide overlay",
+    "showOverlay": "Show overlay",
+    "testTitle": "Test — {{label}}",
+    "testHint": "Preview only — nothing gets written. If it looks right, run it on the whole shot."
+  },
+  "panels": {
+    "model": "Model",
+    "noSam": "No SAM model installed — download SAM 2.1 in Settings › Models.",
+    "display": "Display",
+    "maskRefine": "Mask tweaks",
+    "output": "Output",
+    "matteFine": "Fine matte",
+    "removeObject": "Remove object",
+    "track": "Tracking",
+    "selection": "Selection",
+    "mask": "Mask"
+  },
+  "objects": {
+    "title": "Objects",
+    "add": "Add object",
+    "addTip": "Add an object to isolate",
+    "include": "Include",
+    "includeTip": "Left click ADDS to the active object's mask",
+    "exclude": "Exclude",
+    "excludeTip": "Left click REMOVES from the mask (negative point) — fixes spill",
+    "nameAria": "Object name",
+    "removeAria": "Remove {{name}}",
+    "setActive": "Set active",
+    "remove": "Remove object"
+  },
+  "points": {
+    "title": "Points",
+    "allFrames": "All frames",
+    "allFramesTip": "List points from all frames (otherwise: current frame)",
+    "removeAria": "Remove this point",
+    "goToFrame": "Go to frame",
+    "removePoint": "Remove this point"
+  },
+  "track": {
+    "clearFramePoints": "Clear frame points",
+    "trackAll": "Track the whole shot",
+    "stepBack": "Step ←",
+    "stepBackTip": "Tracks ONE frame backward then stops (frame-by-frame control)",
+    "stepFwd": "Step →",
+    "stepFwdTip": "Tracks ONE frame forward then stops (frame-by-frame control)",
+    "retrackBack": "Retrack ←",
+    "retrackBackTip": "Re-propagates backward from the current frame (local fix)",
+    "retrackFwd": "Retrack →",
+    "retrackFwdTip": "Re-propagates forward from the current frame (local fix)",
+    "dedupe": "Dedupe",
+    "dedupeTip": "Animation: near-identical frames (holds) get the SAME matte — steady edge. Undoable.",
+    "restoreMattesAria": "Restore mattes",
+    "restoreMattesTip": "Restore the mattes from before deduping",
+    "resetAria": "Reset tracking",
+    "resetTip": "Clears the tracking (mattes) but KEEPS every point",
+    "upToDate": "Tracking is up to date — fix points then retrack partially, or export."
+  },
+  "view": {
+    "outline": "Outlines",
+    "outlineTip": "Draws each object's outline in its own color",
+    "bgColorAria": "Background color",
+    "bgColorTip": "Comp background color",
+    "opacity": "Mask opacity"
+  },
+  "viewMode": {
+    "editLabel": "Edit",
+    "editHint": "Frame + masks tinted per object (work mode)",
+    "matteLabel": "Matte",
+    "matteHint": "Black and white mask only (edge check)",
+    "alphaLabel": "Alpha",
+    "alphaHint": "Frame cut out on checkerboard (real result)",
+    "bgcolorLabel": "Color background",
+    "bgcolorHint": "Frame comped over a solid color (key check)"
+  },
+  "post": {
+    "grow": "Grow / shrink",
+    "feather": "Feather edge",
+    "holes": "Fill holes",
+    "dots": "Remove specks",
+    "smooth": "Smooth outline",
+    "border": "Fix frame edges",
+    "gamma": "Density (gamma)",
+    "resetTip": "Double-click = reset"
+  },
+  "remove": {
+    "steps": "Diffusion steps",
+    "stepsTip": "More steps = better fill, slower (12 = balanced)",
+    "grow": "Erase margin",
+    "growTip": "Grows the mask before erasing — covers the object's edges and shadow",
+    "plate": "Clean plate",
+    "plateTip": "Pulls the background that was actually filmed in nearby frames before letting the model invent it — those pixels already have the right colour and grain",
+    "harmonize": "Harmonise",
+    "harmonizeTip": "Matches the colour and sharpness of the rebuilt area to its surroundings — without it the patch shows even when the content is right",
+    "grain": "Grain",
+    "grainTip": "Adds back the grain measured around the area: a smooth fill on a grainy source stands out. Zero on a clean source",
+    "quality": "Quality",
+    "qualityTip": "Diffusion resolution. Higher = sharper fill but more VRAM; if memory runs out the next step down is used automatically",
+    "qualityFast": "Fast",
+    "qualityStandard": "Standard",
+    "qualityMax": "Max",
+    "on": "On",
+    "off": "Off",
+    "advanced": "Model settings",
+    "seed": "Seed",
+    "seedTip": "Fixes the random draw. Same seed, same result — that is what lets you replay a fill that worked.",
+    "reroll": "Reroll",
+    "rerollTip": "Draws a new seed. The first thing to try when a fill goes wrong.",
+    "window": "Window",
+    "windowTip": "Frames the model handles in one block. Larger = more coherent over time, more memory.",
+    "overlap": "Overlap",
+    "overlapTip": "Frames shared by two windows and blended together. At zero the seam shows as a jump.",
+    "vaeTiling": "Tile decoding",
+    "vaeTilingTip": "Saves a lot of memory but can leave tile seams. Turn off if the card can keep up.",
+    "cpuOffload": "Offload to CPU",
+    "cpuOffloadTip": "Moves weights onto the card only for their own pass. Much slower, but fits a small card.",
+    "qualityTiny": "Tiny",
+    "qualityUltra": "Ultra"
+  },
+  "engineRow": {
+    "noneInstalled": "No {{label}} engine installed",
+    "testAria": "Test {{label}} on the current frame",
+    "testTip": "Test on the current frame — preview only, nothing gets written"
+  },
+  "engineHint": {
+    "minimax-remover": "About 6 diffusion steps with temporal consistency — cleaner on moving backgrounds.",
+    "diffueraser": "Quality — engine integration pending.",
+    "matanyone": "Memory-based tracking — hair and edges.",
+    "matanyone2": "Finer detail and more robust than v1."
+  },
+  "exportRow": {
+    "allObjects": "All objects",
+    "exportAria": "Export"
+  },
+  "exportFmt": {
+    "proresLabel": "ProRes 4444 (alpha)",
+    "proresHint": "Video + alpha channel — editing (Resolve/AE)",
+    "webmLabel": "WebM VP9 (alpha)",
+    "webmHint": "Light, alpha — web/preview",
+    "ffv1Label": "FFV1 (alpha, lossless)",
+    "ffv1Hint": "Lossless, alpha — archiving (MKV)",
+    "matteLabel": "B&W matte (MP4)",
+    "matteHint": "Black and white mask only",
+    "bgcolorLabel": "Color background (MP4)",
+    "bgcolorHint": "Object comped over the display mode's background color",
+    "pngLabel": "PNG sequence (matte)",
+    "pngHint": "One matte image per frame"
+  },
+  "sam": {
+    "large": "Better mask quality, more VRAM.",
+    "base": "Fast fallback, low VRAM.",
+    "small": "Middle variant: less VRAM than Base+, slightly coarser masks.",
+    "tiny": "Smallest SAM 2.1 variant — for VRAM-tight cards.",
+    "edgetam": "Lightest (56 MB) and fastest. Coarser masks than SAM 2.1.",
+    "sam31": "Latest generation: holds objects that cross or disappear. NVIDIA GPU required.",
+    "samurai": "Keeps tracking through occlusions (motion-aware memory). Runs on the installed SAM 2.1 weights.",
+    "sam2long": "For long shots: keeps several hypotheses and prunes the bad ones, so error stops accumulating. Runs on the installed SAM 2.1 weights."
+  },
+  "timeline": {
+    "inHere": "In point here (frame {{n}})",
+    "outHere": "Out point here (frame {{n}})",
+    "resetRange": "Reset range"
+  },
+  "viewer": {
+    "zoomSuffix": "× — double-click to fit"
+  },
+  "test": {
+    "matteImage": "Fine matte — frame {{n}}",
+    "removeImage": "Removal — frame {{n}}"
+  },
+  "busy": {
+    "open": "Opening…",
+    "segment": "Segmenting…",
+    "undo": "Undoing…",
+    "recalc": "Recomputing…",
+    "track": "Tracking",
+    "resetTrack": "Resetting tracking",
+    "dedupe": "Deduping",
+    "restoreMattes": "Restoring mattes",
+    "export": "Export",
+    "matteFine": "Fine matte",
+    "remove": "Removal",
+    "testMatte": "Matte test (1 frame)",
+    "testRemove": "Removal test (1 frame)"
+  },
+  "note": {
+    "canceled": "{{label}} canceled — frames already tracked stay.",
+    "output": "{{label}} → {{output}}",
+    "done": "{{label}} done.",
+    "unavailable": "{{label}} unavailable",
+    "restored": "Session restored from cache — points and tracking kept.",
+    "dedupeOutput": "Groups: {{groups}} · Frames unified: {{changed}}"
+  },
+  "errors": {
+    "openFailed": "can't open",
+    "segmentFailed": "can't segment",
+    "undoFailed": "can't undo",
+    "clearFailed": "can't clear",
+    "removePointFailed": "can't remove",
+    "moveFailed": "can't move"
+  },
+  "stage": {
+    "load": "Loading model…",
+    "extract": "Extracting frames…",
+    "extractwait": "Finishing extraction…",
+    "roi": "Cropping to the working area…",
+    "refine": "Inferring the matte…",
+    "export": "Encoding…",
+    "remove": "Removing…",
+    "dedupe": "Analyzing duplicates…"
+  },
+  "summary": {
+    "tracked": "up to date",
+    "notTracked": "not tracked yet",
+    "matteNone": "not computed",
+    "matteOn": "active",
+    "matteOff": "computed, off",
+    "remove": "{{steps}} steps · seed {{seed}}",
+    "select_one": "{{model}} · {{count}} object",
+    "select_other": "{{model}} · {{count}} objects",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "post_one": "{{count}} setting",
+    "post_other": "{{count}} settings"
+  },
+  "matte": {
+    "run": "Compute matte",
+    "test": "Test",
+    "testTip": "Refines the current frame only and shows the result — nothing is written.",
+    "useRefined": "Use fine matte",
+    "useRefinedTip": "Switch between the refined alpha and the raw tracking mask, without recomputing. Display, export and removal follow.",
+    "advanced": "Advanced settings",
+    "size": "Processing resolution",
+    "sizeTip": "Cap on the short side sent to the model. Higher = finer edges, but slower and more memory.",
+    "size480": "480",
+    "size720": "720",
+    "size1080": "1080",
+    "sizeFull": "Max",
+    "warmup": "Settling passes",
+    "warmupTip": "Extra passes on each seed frame. The first prediction starts from a hard-edged mask; these passes let it relax.",
+    "combined": "Process objects together",
+    "combinedTip": "One pass over the union instead of one per object. Much faster, but exporting a single object falls back to the raw mask.",
+    "batch": "Frames per batch",
+    "batchTip": "Frames the model handles in one block. Larger = more coherent over time, but memory rises with it.",
+    "overlap": "Overlap",
+    "overlapTip": "Frames shared by two batches. They are recomputed then blended, and the next batch starts from the previous alpha — without this the seam shows."
+  },
+  "mask": {
+    "stepModel": "refines the alpha",
+    "stepManual": "on the tracking mask",
+    "stepOnRefined": "on top of the fine matte"
+  },
+  "output": {
+    "exportStep": "Export"
+  }
+}

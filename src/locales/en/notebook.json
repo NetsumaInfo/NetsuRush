@@ -1,0 +1,639 @@
+{
+  "editor": {
+    "uploadFailed": "Upload failed",
+    "dateToday": "Today's date",
+    "createNamed": "Create \"{{name}}\""
+  },
+  "panel": {
+    "scriptNotebook": "Script notebook",
+    "untitled": "Untitled",
+    "notebookFallback": "Notebook",
+    "notebooks": "Notebooks",
+    "noNotebooks": "No notebooks",
+    "newNotebook": "New notebook",
+    "editNotebook": "Edit this notebook",
+    "importMarkdown": "Import Markdown…",
+    "exportNetsu": "Export (.netsu)",
+    "importNetsu": "Import (.netsu)",
+    "deleteNotebook": "Delete this notebook",
+    "collapseSidebar": "Collapse sidebar (Ctrl+\\)",
+    "expandSidebar": "Show sidebar (Ctrl+\\)",
+    "search": "Search",
+    "newPage": "New page",
+    "pages": "Pages",
+    "trash": "Trash",
+    "settings": "Settings",
+    "emptyNotebookHint": "Create a notebook to get started.",
+    "emptyTitleHasNb": "A blank page is waiting",
+    "emptyTitleNoNb": "Welcome to Notebook",
+    "emptyBodyHasNb": "Notes, outlines, drafts, databases — dump your ideas here.",
+    "emptyBodyNoNb": "A notepad: notebooks, nested pages, rich blocks and databases.",
+    "createNotebook": "Create a notebook",
+    "confirmDeleteNbTitle": "Delete \"{{name}}\"?",
+    "confirmDeleteNbDesc": "The notebook and ALL its pages are gone for good.",
+    "confirmTrashTitle": "Send to trash?",
+    "confirmTrashDesc": "\"{{name}}\" and its subpages go to the trash (you can restore them).",
+    "sendToTrash": "Send to trash",
+    "saveAsProject": "Save as…",
+    "openProject": "Open notebook…"
+  },
+  "blocks": {
+    "bookmark": {
+      "pastePlaceholder": "Paste a website link…"
+    },
+    "embed": {
+      "pastePlaceholder": "Paste a link to embed (Vimeo, X, TikTok…)",
+      "iframeTitle": "Embed"
+    },
+    "toggle": {
+      "collapse": "Collapse",
+      "expand": "Expand"
+    },
+    "youtube": {
+      "pastePlaceholder": "Paste a YouTube link…"
+    }
+  },
+  "db": {
+    "field": {
+      "checked": "Checked",
+      "unchecked": "Unchecked",
+      "empty": "Empty"
+    },
+    "option": {
+      "searchOrCreate": "Search or create…",
+      "create": "Create \"{{label}}\""
+    },
+    "checklist": {
+      "addTask": "Add a task…"
+    }
+  },
+  "navigation": {
+    "notebookRoot": "Notebook root",
+    "moveTo": "Move to…",
+    "filterPages": "Filter pages…",
+    "noMatch": "No matching pages.",
+    "backlinks": "Backlinks",
+    "siblings": "Pages at the same level",
+    "intermediate": "Intermediate pages",
+    "searchTitle": "Search notebook",
+    "searchDescription": "Search page titles and content",
+    "searchPlaceholder": "Title or content…",
+    "noSearchResult": "No results for “{{query}}”",
+    "favorites": "Favorites",
+    "recent": "Recent"
+  },
+  "actions": {
+    "stats": "{{words}} words · {{chars}} characters",
+    "modified": "Modified {{date}}",
+    "removeFavorite": "Remove from favorites",
+    "addFavorite": "Add to favorites",
+    "documentActions": "Document actions",
+    "openNewTab": "Open in new tab",
+    "copyPageLink": "Copy page link",
+    "duplicate": "Duplicate",
+    "exportMarkdown": "Export as Markdown",
+    "exportHtml": "Export as HTML",
+    "exportNetsu": "Export as .netsu (with subpages)"
+  },
+  "trash": {
+    "title": "Trash",
+    "count_one": "{{count}} deleted page — can be restored.",
+    "count_other": "{{count}} deleted pages — can be restored.",
+    "description": "Deleted pages appear here.",
+    "empty": "Trash is empty.",
+    "restore": "Restore",
+    "restoreWithChildren": "Restore (with subpages)",
+    "deleteForever": "Delete permanently",
+    "confirmAll": "Delete everything permanently?",
+    "cancel": "Cancel",
+    "deleteAll": "Delete all",
+    "emptyTrash": "Empty trash"
+  },
+  "tree": {
+    "deletedSubpage": "Deleted subpage",
+    "subpage": "Subpage",
+    "rename": "Rename",
+    "empty": "No pages — create one"
+  },
+  "tabs": {
+    "prev": "Previous page",
+    "next": "Next page",
+    "closeTab": "Close tab",
+    "closeOthers": "Close other tabs",
+    "all": "All tabs",
+    "newPage": "New page in a tab"
+  },
+  "slash": {
+    "groups": {
+      "blocks": "Notebook blocks",
+      "media": "Media",
+      "insert": "Insert"
+    },
+    "subpage": {
+      "title": "Subpage",
+      "desc": "New child page embedded here",
+      "aliases": "subpage|child|page"
+    },
+    "callout": {
+      "title": "Callout",
+      "desc": "Colored banner with an emoji",
+      "aliases": "callout|note|info"
+    },
+    "toggle": {
+      "title": "Toggle",
+      "desc": "Collapsible section",
+      "aliases": "toggle|collapsible|accordion"
+    },
+    "database": {
+      "title": "Database",
+      "desc": "Table and kanban with typed columns",
+      "aliases": "database|table|grid|kanban"
+    },
+    "equation": {
+      "title": "Equation",
+      "desc": "LaTeX formula (KaTeX)",
+      "aliases": "equation|math|latex|formula|katex"
+    },
+    "divider": {
+      "title": "Divider",
+      "desc": "Line, dashes, dots, or stars",
+      "aliases": "divider|line|separator|hr|---"
+    },
+    "youtube": {
+      "desc": "Embed a YouTube video",
+      "aliases": "youtube|video|yt"
+    },
+    "embed": {
+      "title": "Embed",
+      "aliases": "embed|iframe|vimeo|twitter|tiktok"
+    },
+    "bookmark": {
+      "title": "Bookmark",
+      "desc": "Preview a web link",
+      "aliases": "bookmark|link|web"
+    },
+    "video": {
+      "title": "Video",
+      "desc": "Local file or URL with a built-in player",
+      "aliases": "video|mp4|movie|clip"
+    },
+    "audio": {
+      "desc": "Integrated waveform player",
+      "aliases": "audio|sound|mp3|music|wav|podcast"
+    },
+    "file": {
+      "title": "File",
+      "desc": "PDF, Word, Excel, ZIP… (PDF preview)",
+      "aliases": "file|pdf|doc|document|zip|excel|word"
+    },
+    "gallery": {
+      "title": "Image gallery",
+      "desc": "Multiple scrollable images in one row",
+      "aliases": "gallery|images|carousel|album"
+    },
+    "date": {
+      "title": "Date",
+      "desc": "Insert a date inline",
+      "aliases": "date|day|calendar|today"
+    }
+  },
+  "dbUi": {
+    "group": {
+      "all": "All",
+      "none": "None"
+    },
+    "calc": {
+      "none": "None",
+      "count": "Count",
+      "empty": "Empty",
+      "filled": "Filled",
+      "sum": "Sum",
+      "avg": "Average",
+      "median": "Median",
+      "min": "Minimum",
+      "max": "Maximum"
+    },
+    "view": {
+      "table": "Grid",
+      "kanban": "Board",
+      "gallery": "Gallery",
+      "calendar": "Calendar",
+      "list": "List"
+    },
+    "rowHeight": {
+      "short": "Compact",
+      "medium": "Medium",
+      "tall": "Tall"
+    },
+    "color": {
+      "gray": "Gray",
+      "blue": "Blue",
+      "green": "Green",
+      "yellow": "Yellow",
+      "orange": "Orange",
+      "red": "Red",
+      "purple": "Purple",
+      "pink": "Pink"
+    },
+    "field": {
+      "text": "Text",
+      "number": "Number",
+      "select": "Select",
+      "multiSelect": "Multi-select",
+      "date": "Date",
+      "checkbox": "Checkbox",
+      "url": "Link",
+      "checklist": "Task list",
+      "createdTime": "Created",
+      "lastEditedTime": "Last edited"
+    }
+  },
+  "paste": {
+    "mention": {
+      "label": "Mention",
+      "desc": "Compact inline chip"
+    },
+    "url": {
+      "label": "Link",
+      "desc": "Clickable inline link"
+    },
+    "bookmark": {
+      "label": "Bookmark",
+      "desc": "Card preview"
+    },
+    "embed": {
+      "label": "Embed",
+      "desc": "Embedded player (iframe / YouTube)"
+    }
+  },
+  "fileKind": {
+    "doc": "Document",
+    "sheet": "Spreadsheet",
+    "slide": "Presentation",
+    "archive": "Archive",
+    "video": "Video",
+    "image": "Image",
+    "text": "Text",
+    "other": "File"
+  },
+  "blocksUi": {
+    "preview": "Preview",
+    "playbackSpeed": "Playback speed",
+    "chooseAudio": "Choose audio…",
+    "audioDrop": "MP3, WAV, FLAC… or drag and drop",
+    "audioUrl": "…or paste an audio URL and press Enter",
+    "chooseFile": "Choose a file…",
+    "fileDrop": "PDF, Word, Excel, ZIP… or drag and drop",
+    "fileUrl": "…or paste a file URL and press Enter",
+    "open": "Open",
+    "download": "Download",
+    "play": "Play",
+    "fullscreen": "Full screen",
+    "chooseVideo": "Choose a video…",
+    "dropFile": "or drag and drop a file",
+    "videoUrl": "…or paste a video URL and press Enter",
+    "changeDivider": "Change divider style",
+    "today": "Today",
+    "clear": "Clear"
+  },
+  "equation": {
+    "group": {
+      "structures": "Structures",
+      "calculus": "Calculus",
+      "matrices": "Matrices and systems",
+      "chemistry": "Chemistry (mhchem)"
+    },
+    "template": {
+      "fraction": "Fraction",
+      "squareRoot": "Square root",
+      "nthRoot": "Nth root",
+      "exponent": "Exponent",
+      "subscript": "Subscript",
+      "binomial": "Binomial",
+      "sum": "Sum",
+      "product": "Product",
+      "integral": "Integral",
+      "limit": "Limit",
+      "derivative": "Derivative",
+      "partialDerivative": "Partial derivative",
+      "matrix": "2×2 matrix",
+      "determinant": "Determinant",
+      "system": "System (cases)",
+      "vector": "Vector",
+      "molecule": "Molecule",
+      "reaction": "Reaction",
+      "equilibrium": "Equilibrium",
+      "ion": "Ion"
+    },
+    "empty": "Empty equation — click to enter LaTeX",
+    "templates": "Templates",
+    "error": "LaTeX error: {{error}}",
+    "hint": "Full LaTeX (KaTeX + chemistry \\ce) · Ctrl+Enter to apply · Escape to cancel",
+    "edit": "Edit the equation",
+    "input": "LaTeX code of the equation"
+  },
+  "gallery": {
+    "chooseImages": "Choose images…",
+    "dropFiles": "or drag and drop files",
+    "imageUrl": "…or paste an image URL and press Enter",
+    "row": "Strip (horizontal scroll)",
+    "carousel": "Carousel",
+    "grid": "Grid",
+    "height": "Height {{size}}",
+    "imageCount_one": "{{count}} image",
+    "imageCount_other": "{{count}} images",
+    "add": "Add",
+    "remove": "Remove",
+    "removeImage": "Remove this image",
+    "caption": "Caption…",
+    "openImage": "Open the image"
+  },
+  "dbBasics": {
+    "noDateField": "No Date field is available for placing rows.",
+    "addDateField": "Add a Date field",
+    "rowDetail": "Row details",
+    "previousRow": "Previous row",
+    "nextRow": "Next row",
+    "newProperty": "New property",
+    "delete": "Delete",
+    "calculation": "Calculation",
+    "rowActions": "Row actions",
+    "rowCount_one": "{{count}} row",
+    "rowCount_other": "{{count}} rows",
+    "newRow": "New row"
+  },
+  "dbView": {
+    "viewOptions": "View options",
+    "moveLeft": "Move left",
+    "moveRight": "Move right",
+    "deleteView": "Delete view",
+    "settings": "Settings",
+    "viewSettings": "View settings",
+    "fields": "Fields",
+    "rowHeight": "Row height",
+    "groupBy": "Group by",
+    "noSelectField": "No Select field",
+    "addView": "Add view",
+    "newView": "New view",
+    "databaseActions": "Database actions",
+    "deleteDatabase": "Delete database",
+    "missingDatabase": "Database is missing.",
+    "recreate": "Recreate"
+  },
+  "callout": {
+    "basic": "Basic",
+    "info": "Info",
+    "tip": "Tip",
+    "warning": "Warning",
+    "alert": "Alert",
+    "changeEmoji": "Change emoji",
+    "presets": "Presets",
+    "background": "Background color",
+    "style": "Callout style"
+  },
+  "window": {
+    "detach": "Detach notebook",
+    "unpin": "Remove from foreground",
+    "alwaysOnTop": "Always on top",
+    "stopAlwaysOnTop": "Stop keeping on top",
+    "keepOnTop": "Keep on top",
+    "attach": "Attach to main window",
+    "minimize": "Minimize",
+    "restore": "Restore",
+    "maximize": "Maximize",
+    "close": "Close",
+    "title": "Window",
+    "reload": "Reload",
+    "closeWindow": "Close window"
+  },
+  "dbFields": {
+    "type": "Type",
+    "numberFormat": "Number format",
+    "dateFormat": "Date format",
+    "includeTime": "Include time",
+    "insertLeft": "Insert left",
+    "insertRight": "Insert right",
+    "hide": "Hide",
+    "clearValues": "Clear values",
+    "addColumn": "Add column",
+    "newColumn": "New column",
+    "columnOptions": "Column options",
+    "hideColumn": "Hide column",
+    "addCard": "Add card",
+    "groupHint": "Choose a Select field to group cards (Settings › Group by).",
+    "showColumn": "Show column"
+  },
+  "settings": {
+    "title": "Notebook settings",
+    "description": "Applied immediately and shared across all notebooks.",
+    "appearance": "Appearance",
+    "pageWidth": "Document width",
+    "fontScale": "Font scale",
+    "breadcrumb": "Breadcrumb above the document",
+    "visible": "Visible",
+    "hidden": "Hidden",
+    "editor": "Editor",
+    "autosaveDelay": "Autosave delay",
+    "confirmTrash": "Confirm before moving to trash",
+    "yes": "Yes",
+    "no": "No",
+    "shortcuts": "Keyboard shortcuts",
+    "reset": "Reset",
+    "press": "Press…",
+    "shortcutHint": "Click, then press the new shortcut (Escape cancels)",
+    "shortcutConflict": "If a shortcut is already used, it is swapped with the action that owned it.",
+    "width": {
+      "narrow": "Narrow",
+      "medium": "Medium",
+      "wide": "Wide",
+      "full": "Full width"
+    },
+    "shortcut": {
+      "newPage": "New page",
+      "newTab": "New tab",
+      "closeTab": "Close tab",
+      "reopenTab": "Reopen closed tab",
+      "nextTab": "Next tab",
+      "prevTab": "Previous tab",
+      "back": "Previous page (history)",
+      "forward": "Next page (history)",
+      "search": "Search notebook",
+      "settings": "Notebook settings",
+      "save": "Save page",
+      "trash": "Open trash",
+      "toggleSidebar": "Show/hide sidebar"
+    },
+    "spellcheck": "Spell checker",
+    "spellcheckHint": "Underlines mistakes; right-click or Ctrl+. to fix",
+    "spellUnsupported": "No dictionary for this language — native underline only",
+    "spellOn": "On",
+    "spellOff": "Off",
+    "personalDictionary": "Personal dictionary",
+    "personalEmpty": "No word added",
+    "personalRemove": "Remove from dictionary"
+  },
+  "filterSort": {
+    "filters": "Filters",
+    "add": "Add",
+    "sort": "Sort",
+    "sortBy": "Sort by",
+    "op": {
+      "is": "is",
+      "isNot": "is not",
+      "contains": "contains",
+      "notContains": "does not contain",
+      "isEmpty": "is empty",
+      "notEmpty": "is not empty",
+      "gt": ">",
+      "gte": "≥",
+      "lt": "<",
+      "lte": "≤",
+      "checked": "checked",
+      "unchecked": "unchecked"
+    }
+  },
+  "lightbox": {
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "pause": "Pause (Space)",
+    "slideshow": "Slideshow (Space)",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "icons": {
+    "search": "Search icons…",
+    "uploading": "Uploading…",
+    "chooseImage": "Choose an image",
+    "dropFile": "or drag and drop a file",
+    "emojis": "Emojis",
+    "icons": "Icons",
+    "upload": "Upload"
+  },
+  "pageHeader": {
+    "cover": "Cover",
+    "change": "Change",
+    "icon": "Icon"
+  },
+  "finalPass": {
+    "convertOptions": "Convert / options",
+    "convertTo": "Convert to",
+    "pasteAs": "Paste as",
+    "copy": "Copy",
+    "copyText": "Copy selected text",
+    "copyLink": "Copy link",
+    "copyPassageLink": "Copy link to this passage",
+    "exitFullscreen": "Exit full page",
+    "openFullscreen": "Open as full page",
+    "deleteColumn": "Delete column",
+    "volume": "Volume"
+  },
+  "numberLabels": {
+    "number": "Number",
+    "integer": "Integer",
+    "percent": "Percentage",
+    "euro": "Euro (€)",
+    "dollar": "Dollar ($)",
+    "audio": "Audio"
+  },
+  "preview": {
+    "unavailable": "Preview unavailable",
+    "openPdf": "open PDF",
+    "loadingPdf": "Loading PDF… ({{label}})",
+    "loading": "Loading…"
+  },
+  "subpage": {
+    "openHint": "Open subpage (middle-click: new tab)"
+  },
+  "sideMenu": {
+    "changeType": "Turn into",
+    "copyBlockLink": "Copy block link",
+    "turnIntoSubpage": "Turn into subpage",
+    "colors": "Colors",
+    "rowHeader": "Header row",
+    "columnHeader": "Header column"
+  },
+  "linkPage": {
+    "tooltip": "Link to a page or URL",
+    "placeholder": "Paste a URL or search for a page…",
+    "linkTo": "Link to",
+    "hint": "Enter a URL or page title"
+  },
+  "mention": {
+    "block": "Block",
+    "openBlock": "Open at block",
+    "showChip": "Show as chip",
+    "showCard": "Show as card",
+    "refreshLabel": "Refresh label",
+    "deletedPage": "Deleted page",
+    "blockMissing": "Block not found (deleted?)",
+    "deletedTitle": "{{title}} (deleted)",
+    "linkedBlock": "linked block",
+    "type": {
+      "equation": "Equation",
+      "image": "Image",
+      "video": "Video",
+      "audio": "Audio",
+      "file": "File",
+      "gallery": "Image gallery",
+      "database": "Database",
+      "youtube": "YouTube video",
+      "embed": "Embed",
+      "bookmark": "Bookmark",
+      "divider": "Divider",
+      "subpage": "Subpage",
+      "table": "Table",
+      "codeBlock": "Code block"
+    }
+  },
+  "meta": {
+    "name": "Notebook name",
+    "type": "Type",
+    "languageLabel": "Language",
+    "kind": {
+      "notes": "Notes",
+      "project": "Project",
+      "script": "Script",
+      "research": "Research",
+      "journal": "Journal"
+    },
+    "language": {
+      "fr": "French",
+      "en": "English",
+      "es": "Spanish",
+      "de": "German",
+      "ja": "Japanese",
+      "zh": "Chinese"
+    }
+  },
+  "create": {
+    "title": "Create notebook",
+    "description": "Give it a name, type, and language. You can change them later.",
+    "namePlaceholder": "Notebook name…",
+    "cancel": "Cancel",
+    "submit": "Create"
+  },
+  "edit": {
+    "title": "Edit notebook",
+    "description": "Change the name, type, or language of this notebook.",
+    "done": "Done"
+  },
+  "blockTypes": {
+    "paragraph": "Text",
+    "heading1": "Heading",
+    "heading2": "Subheading",
+    "heading3": "Small heading",
+    "bulletList": "Bulleted list",
+    "numberedList": "Numbered list",
+    "checkList": "Task list",
+    "quote": "Quote"
+  },
+  "dbDefaults": {
+    "titleField": "Name",
+    "statusField": "Status",
+    "tableView": "Grid",
+    "todo": "To do",
+    "inProgress": "In progress",
+    "done": "Done",
+    "name": "Database"
+  }
+}

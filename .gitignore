@@ -1,0 +1,112 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.tauri/
+*.local
+
+# Build output / TS incremental
+dist
+dist-ssr
+*.tsbuildinfo
+
+# Native addons / binaries (regenerable, never committed)
+build/
+*.node
+
+# Core runtime config (absolute ffmpeg/python paths, written at packaging time — never committed)
+nr.config.json
+
+# Auth/Convex env — local keys (VITE_CONVEX_*, CONVEX_DEPLOYMENT). .env.example is committed.
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Python sidecar
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Vendored ML deps (OmniShotCut clone + weights ~210 MB — regenerable, never committed)
+vendor/
+
+# Local SQLite scene cache (lives in ~/.netsurush, ignored if ever copied here)
+*.db
+
+# Editor directories and files
+.vscode/
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local test media
+nrtest.mp4
+
+# Packaged installer (Tauri build artifact)
+NetsuRush-*-Setup.exe
+
+# Resources staged by scripts/build.ps1 (regenerable — keep only README.txt)
+src-tauri/resources/bin/
+src-tauri/resources/core/
+src-tauri/resources/python/
+src-tauri/resources/scripts/
+src-tauri/resources/adobe-cep/
+src-tauri/resources/dist/
+src-tauri/resources/vendor/
+# Turbo shaders: build.ps1 overwrites this folder from vendor/shaders, otherwise
+# scripts/fetch-shaders.ps1 rebuilds it. The copy tracked here used to be PARTIAL (no ArtCNN R ONNX
+# models).
+src-tauri/resources/shaders/
+# Native player runtime (libmpv + sibling ffmpeg/libplacebo DLLs, ~51 MB, mpv GPL-2.0+).
+# build.ps1 provisions it from vendor/mpv, which scripts/fetch-mpv.ps1 rebuilds.
+src-tauri/resources/windows/
+
+# Temporary test & build artifacts
+output/
+tmp/
+.playwright-cli/
+tmpclaude-*
+nul
+.prototmp/
+
+# Per-tool AI assistant scratch dirs / configs. AGENTS.md and CLAUDE.md are tracked ON PURPOSE:
+# they are the project's architecture doc, not tool settings.
+.cursor/
+.gemini/
+.qoder/
+.claude/
+.codex/
+.agents/
+.impeccable/
+**/.impeccable/
+.code-review-graph/
+.opencode.json
+.mcp.json
+prompts/
+# Product schema generated and consumed by the impeccable tooling. Kept locally, never published.
+PRODUCT.md
+
+# Agent verification build snapshots (packaged app copies, ~250 MB)
+.codex-verify-*/
+
+# Python tool caches
+.pytest_cache/
+
+# Throwaway proof of concept (Resolve bridge, HEVC decoding) — out of type-check, out of build
+core/poc/
+
+# Personal research notes (French, never published): third-party analyses, monetisation,
+# presentation scripts. Kept locally on purpose.
+docs/perso/
