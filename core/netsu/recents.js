@@ -56,13 +56,16 @@ function list(type) {
     .filter((entry) => entry && typeof entry.path === 'string')
     .map((entry) => {
       const filePath = String(entry.path);
+      const entryType = String(entry.type || 'board');
       let modifiedAt = 0;
       let missing = false;
       try { modifiedAt = fs.statSync(filePath).mtimeMs; } catch (_) { missing = true; }
       return {
         path: filePath,
-        title: String(entry.title || path.basename(filePath)),
-        type: String(entry.type || 'board'),
+        title: entryType === 'board'
+          ? path.basename(filePath, path.extname(filePath))
+          : String(entry.title || path.basename(filePath)),
+        type: entryType,
         openedAt: Number(entry.openedAt) || 0,
         modifiedAt,
         missing,

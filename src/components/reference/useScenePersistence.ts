@@ -68,15 +68,16 @@ export function useScenePersistence() {
     const st = useBoard.getState();
     const dest = await api?.saveNetsuPath(`${st.sceneName || "board"}.netsu`);
     if (!dest) return null; // annulé
+    const projectName = fileLabel(dest);
     try {
       const res = await api?.saveProjectAs({
-        scene: { name: st.sceneName, items: persistable(st.items), view: st.view },
+        scene: { name: projectName, items: persistable(st.items), view: st.view },
         destPath: dest,
         fromPath: st.filePath,
         sourceSceneId: st.sceneId,
       });
       if (res?.ok) {
-        useBoard.setState({ filePath: res.path ?? dest, fileReadonly: false, sceneId: null, dirty: false });
+        useBoard.setState({ filePath: res.path ?? dest, fileReadonly: false, sceneId: null, sceneName: fileLabel(res.path ?? dest), dirty: false });
         flash(tr("notice.projectSaved", { name: fileLabel(res.path ?? dest) }), "ok");
       } else {
         flash(tr("notice.failedWith", { error: res?.error || tr("notice.unknown") }), "error");
@@ -99,7 +100,7 @@ export function useScenePersistence() {
       const items = (res.scene.items as BoardItem[]).map((it) => ({ ...it, src: displaySrc(it.kind, it.ref) }));
       useBoard.getState().loadScene({
         id: "",
-        name: res.scene.name,
+        name: fileLabel(res.path ?? srcPath),
         items,
         view: (res.scene.view as BoardView) ?? undefined,
         filePath: res.readonly ? null : (res.path ?? srcPath),

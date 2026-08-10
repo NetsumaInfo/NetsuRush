@@ -120,3 +120,13 @@ test('the board deletion channel refuses non-board netsu documents', () => {
   assert.equal(fs.existsSync(notebookPath), true);
   assert.equal(fs.existsSync(mediaDir), true);
 });
+
+test('board recents display the netsu filename instead of a stale stored scene title', () => {
+  const projectPath = path.join(home, 'Nom du fichier.netsu');
+  fs.writeFileSync(projectPath, 'project');
+  recents.remember({ path: projectPath, title: 'Sans titre', type: 'board' });
+
+  const entry = recents.list('board').find((item) => item.path === path.resolve(projectPath));
+
+  assert.equal(entry.title, 'Nom du fichier');
+});
