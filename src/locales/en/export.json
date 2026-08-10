@@ -62,8 +62,9 @@
       "date": "Date",
       "time": "Time"
     },
-    "mergeGap": "Black between shots",
-    "milliseconds": "ms"
+    "mergeGap": "Black pause",
+    "mergeGapHint": "Duration of the black inserted between each merged shot",
+    "seconds": "s"
   },
   "encoder": {
     "gpu": "GPU",

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem,
 } from "@/components/ui/select";
@@ -32,12 +33,16 @@ import {
   usesEncoding,
   usesFile,
   getExportProfileIssue,
-  MERGE_GAP_MAX_MS,
-  MERGE_GAP_STEP_MS,
 } from "@/features/export/profiles";
 import { NumberSpin } from "@/components/ui/number-spin";
 import { useExportEncodingFields } from "@/features/export/encodingFields";
 import { IconPicker } from "./IconPicker";
+import {
+  BLACK_PAUSE_MAX_SECONDS,
+  BLACK_PAUSE_STEP_SECONDS,
+  millisecondsToSeconds,
+  secondsToMilliseconds,
+} from "./blackPause";
 
 function Row({ label, disabled, children }: { label: string; disabled?: boolean; children: React.ReactNode }) {
   return (
@@ -298,16 +303,21 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
           doit pas se réagencer quand on bascule un interrupteur. */}
       <Row label={t("editor.mergeGap")} disabled={!file || !profile.mergeEnabled}>
         <div className="flex items-center justify-end gap-1.5">
-          <NumberSpin
-            value={profile.mergeGap ?? 0}
-            min={0}
-            max={MERGE_GAP_MAX_MS}
-            step={MERGE_GAP_STEP_MS}
-            ariaLabel={t("editor.mergeGap")}
-            disabled={!file || !profile.mergeEnabled}
-            onCommit={(v) => set({ mergeGap: v })}
-          />
-          <span className="text-[0.75rem] text-muted-foreground">{t("editor.milliseconds")}</span>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <NumberSpin
+                value={millisecondsToSeconds(profile.mergeGap ?? 0)}
+                min={0}
+                max={BLACK_PAUSE_MAX_SECONDS}
+                step={BLACK_PAUSE_STEP_SECONDS}
+                ariaLabel={t("editor.mergeGap")}
+                disabled={!file || !profile.mergeEnabled}
+                onCommit={(v) => set({ mergeGap: secondsToMilliseconds(v) })}
+              />
+            </TooltipTrigger>
+            <TooltipContent side="left">{t("editor.mergeGapHint")}</TooltipContent>
+          </Tooltip>
+          <span className="text-[0.75rem] text-muted-foreground">{t("editor.seconds")}</span>
         </div>
       </Row>
     </div>

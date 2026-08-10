@@ -62,8 +62,9 @@
       "date": "日付",
       "time": "時刻"
     },
-    "mergeGap": "ショット間の黒み",
-    "milliseconds": "ms"
+    "mergeGap": "黒画面の間隔",
+    "mergeGapHint": "結合した各ショットの間に挿入する黒画面の長さ",
+    "seconds": "秒"
   },
   "encoder": {
     "gpu": "GPU",

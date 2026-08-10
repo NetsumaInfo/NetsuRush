@@ -62,8 +62,9 @@
       "date": "日期",
       "time": "时间"
     },
-    "mergeGap": "镜头之间的黑场",
-    "milliseconds": "毫秒"
+    "mergeGap": "黑场间隔",
+    "mergeGapHint": "合并后每个镜头之间插入黑场的时长",
+    "seconds": "秒"
   },
   "encoder": {
     "gpu": "GPU",

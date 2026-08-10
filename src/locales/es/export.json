@@ -62,8 +62,9 @@
       "date": "Fecha",
       "time": "Hora"
     },
-    "mergeGap": "Negro entre planos",
-    "milliseconds": "ms"
+    "mergeGap": "Pausa en negro",
+    "mergeGapHint": "Duración del negro añadido entre cada plano fusionado",
+    "seconds": "s"
   },
   "encoder": {
     "gpu": "GPU",

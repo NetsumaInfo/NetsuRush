@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { clampSteppedNumber } from "./numberSpinValue";
 
 /**
  * Saisie numérique PRÉCISE : champ libre, commit au blur ou à Entrée, bornes min/max, molette ±`step`.
@@ -22,14 +23,15 @@ export function NumberSpin({
   onCommit: (v: number) => void;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
-  const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v)));
+  const clamp = (v: number) => clampSteppedNumber(v, min, max, step);
   const shown = draft ?? String(value);
   return (
     <input
-      type="number" inputMode="numeric" min={min} max={max} step={step}
+      type="text" inputMode="decimal" role="spinbutton"
+      aria-valuemin={min} aria-valuemax={max} aria-valuenow={value}
       aria-label={ariaLabel} value={shown} disabled={disabled}
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => { if (draft != null) { const v = parseInt(draft, 10); onCommit(isNaN(v) ? value : clamp(v)); setDraft(null); } }}
+      onBlur={() => { if (draft != null) { const v = parseFloat(draft); onCommit(isNaN(v) ? value : clamp(v)); setDraft(null); } }}
       // `stopPropagation` : la molette pilote ici la valeur, elle ne doit pas aussi faire défiler la
       // page ni zoomer le board sous-jacent.
       onWheel={(e) => { e.stopPropagation(); if (!disabled) onCommit(clamp(value + (e.deltaY < 0 ? step : -step))); }}

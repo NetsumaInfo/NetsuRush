@@ -62,8 +62,9 @@
       "date": "Datum",
       "time": "Uhrzeit"
     },
-    "mergeGap": "Schwarz zwischen Einstellungen",
-    "milliseconds": "ms"
+    "mergeGap": "Schwarzpause",
+    "mergeGapHint": "Dauer des Schwarzbilds zwischen zusammengeführten Einstellungen",
+    "seconds": "s"
   },
   "encoder": {
     "gpu": "GPU",
