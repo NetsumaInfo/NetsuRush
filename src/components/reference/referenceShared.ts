@@ -200,7 +200,13 @@ export interface BoardItem {
   // Média MANQUANT après import d'un .netsu : le fichier (gros média référencé, non embarqué) n'a pas
   // été retrouvé localement. `ref` est vide ⇒ l'item rend un placeholder « Relocaliser ». Effacé dès
   // qu'on repointe le fichier.
-  missing?: { name: string; size: number; kind: string };
+  missing?: {
+    name: string;
+    size: number;
+    kind: string;
+    locator?: string;
+    frameLocators?: Array<string | null>;
+  };
 }
 
 // Palette de notes (fonds pastel type post-it + transparent).

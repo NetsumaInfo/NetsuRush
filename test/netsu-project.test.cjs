@@ -119,6 +119,68 @@ test('un média sans domicile déménage dans le dossier compagnon, en chemin re
   }
 });
 
+test('un localisateur compagnon introuvable survit à l’ouverture et à l’autosave sans ménage', async () => {
+  const { root, assetsDir, projectsDir, refStore } = workspace();
+  const first = writeFile(assetsDir, '1111111111111111.png', 'première image');
+  const second = writeFile(assetsDir, '2222222222222222.png', 'deuxième image');
+  const file = path.join(projectsDir, 'projet.netsu');
+  const session = sessions.openSession(file, { create: true });
+  const image = (id, ref) => ({ id, kind: 'image', ref, x: 0, y: 0, w: 10, h: 10, z: 0 });
+  try {
+    await saveBoardProject({ session, refStore, scene: { name: 'P', items: [image('a', first), image('b', second)] } });
+    const storedBefore = JSON.parse(session.handle.db.prepare('SELECT data FROM board_items WHERE id = ?').get('a').data);
+    const missingPath = sidecar.resolveSidecar(file, storedBefore.ref);
+    fs.renameSync(missingPath, path.join(root, path.basename(missingPath)));
+
+    const protectedFile = path.join(sidecar.sidecarDirFor(file), 'images', 'protected-deadbeefdead.png');
+    fs.writeFileSync(protectedFile, 'must survive an unresolved save');
+    const opened = readBoardProject({ session, refStore }).scene;
+    const missing = opened.items.find((item) => item.id === 'a');
+    assert.equal(missing.ref, '');
+    assert.equal(missing.missing.locator, storedBefore.ref);
+
+    const saved = await saveBoardProject({ session, refStore, scene: opened });
+    const storedAfter = JSON.parse(session.handle.db.prepare('SELECT data FROM board_items WHERE id = ?').get('a').data);
+    assert.equal(storedAfter.ref, storedBefore.ref);
+    assert.equal(saved.counts.unresolved, 1);
+    assert.equal(fs.existsSync(protectedFile), true);
+  } finally {
+    sessions.closeSession(file);
+  }
+});
+
+test('les localisateurs des frames manquantes survivent à leur index', async () => {
+  const { root, assetsDir, projectsDir, refStore } = workspace();
+  const frames = [
+    writeFile(assetsDir, '3333333333333333.jpg', 'frame une'),
+    writeFile(assetsDir, '4444444444444444.jpg', 'frame deux'),
+  ];
+  const file = path.join(projectsDir, 'sequence.netsu');
+  const session = sessions.openSession(file, { create: true });
+  try {
+    await saveBoardProject({
+      session,
+      refStore,
+      scene: { name: 'P', items: [{ id: 'seq', kind: 'sequence', ref: frames[0], frames, x: 0, y: 0, w: 10, h: 10, z: 0 }] },
+    });
+    const storedBefore = JSON.parse(session.handle.db.prepare('SELECT data FROM board_items WHERE id = ?').get('seq').data);
+    const missingPath = sidecar.resolveSidecar(file, storedBefore.frames[0]);
+    fs.renameSync(missingPath, path.join(root, path.basename(missingPath)));
+
+    const opened = readBoardProject({ session, refStore }).scene;
+    const sequence = opened.items[0];
+    assert.equal(sequence.frames[0], '');
+    assert.equal(sequence.missing.frameLocators[0], storedBefore.frames[0]);
+    assert.equal(sequence.missing.frameLocators[1], null);
+
+    await saveBoardProject({ session, refStore, scene: opened });
+    const storedAfter = JSON.parse(session.handle.db.prepare('SELECT data FROM board_items WHERE id = ?').get('seq').data);
+    assert.deepEqual(storedAfter.frames, storedBefore.frames);
+  } finally {
+    sessions.closeSession(file);
+  }
+});
+
 test('déplacer le projet avec son dossier compagnon ne casse aucun média', async () => {
   const { assetsDir, projectsDir, refStore } = workspace();
   const pasted = writeFile(assetsDir, 'cafecafecafecafe.png', 'image collée');

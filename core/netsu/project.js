@@ -95,7 +95,11 @@ async function tokenizeProjectRef(ctx, rawRef, kindHint, place) {
     const adopted = abs && statOf(abs) ? adoptInto(ctx, abs, spot) : null;
     if (adopted) return { token: adopted.token, adopted: true };
     ctx.keep.add(ref.slice(sidecar.TOKEN.length).split('/').join(path.sep));
-    return { token: ref, adopted: true };
+    return {
+      token: ref,
+      adopted: true,
+      missing: { name: path.basename(ref.slice(sidecar.TOKEN.length)), size: 0, kind: kindHint, locator: ref },
+    };
   }
 
   const abs = path.resolve(ref);
@@ -147,27 +151,49 @@ function sequenceGroup(ctx, item) {
 async function tokenizeProjectItem(ctx, raw) {
   const item = stripTransient(raw);
   const kind = String(item.kind || '');
-  if (!MEDIA_KINDS.has(kind)) return item;
+  if (!MEDIA_KINDS.has(kind)) return { item, unresolved: false };
 
   if (kind === 'sequence') {
     const group = sequenceGroup(ctx, item);
     const tokens = [];
     const frames = Array.isArray(item.frames) ? item.frames : [];
+    const retained = item.missing && Array.isArray(item.missing.frameLocators)
+      ? item.missing.frameLocators
+      : [];
+    const frameLocators = [];
+    let unresolved = 0;
     for (let i = 0; i < frames.length; i += 1) {
-      const out = await tokenizeProjectRef(ctx, frames[i], 'image', { group, index: i });
+      const durableFrame = frames[i] || retained[i] || '';
+      const out = await tokenizeProjectRef(ctx, durableFrame, 'image', { group, index: i });
       tokens.push(out.token);
+      if (out.missing) {
+        unresolved += 1;
+        frameLocators.push(out.missing.locator || durableFrame || null);
+      } else {
+        frameLocators.push(null);
+      }
     }
     item.frames = tokens;
     item.ref = tokens.find(Boolean) || '';
-    delete item.missing;
-    return item;
+    if (unresolved) {
+      item.missing = {
+        name: `Séquence — ${unresolved}/${tokens.length} image(s) manquante(s)`,
+        size: Number(item.missing && item.missing.size) || 0,
+        kind: 'sequence',
+        frameLocators,
+      };
+    } else {
+      delete item.missing;
+    }
+    return { item, unresolved: unresolved > 0 };
   }
 
-  const out = await tokenizeProjectRef(ctx, item.ref, kind, { title: item.title });
+  const durableRef = item.ref || (item.missing && item.missing.locator) || '';
+  const out = await tokenizeProjectRef(ctx, durableRef, kind, { title: item.title });
   item.ref = out.token;
   if (out.missing) item.missing = out.missing;
   else delete item.missing;
-  return item;
+  return { item, unresolved: !!out.missing };
 }
 
 /** Le document board du conteneur, créé au premier enregistrement. */
@@ -265,10 +291,13 @@ async function saveBoardProject({ session, refStore, scene }) {
   const prepared = [];
   const keepMediaIds = new Set();
   let missing = 0;
+  let unresolved = 0;
   let adopted = 0;
 
   for (const raw of scene.items) {
-    const item = await tokenizeProjectItem(ctx, raw);
+    const preparedItem = await tokenizeProjectItem(ctx, raw);
+    const item = preparedItem.item;
+    if (preparedItem.unresolved) unresolved += 1;
     if (item.missing) missing += 1;
     const refs = item.kind === 'sequence' ? item.frames || [] : [item.ref];
     for (const token of refs) {
@@ -288,15 +317,15 @@ async function saveBoardProject({ session, refStore, scene }) {
   // Un enregistrement qui vide le document d'un coup est presque toujours un board pas encore
   // chargé, pas une suppression voulue : les lignes partent (elles se réécrivent), mais les OCTETS
   // du dossier compagnon restent. Le ménage se fera au prochain enregistrement non vide.
-  const wipe = prepared.length === 0 && removed > 0;
-  const swept = wipe ? { removed: 0, bytes: 0 } : sweepUnused(session, docId, ctx.keep, keepMediaIds);
+  const unsafeSweep = unresolved > 0 || (prepared.length === 0 && removed > 0);
+  const swept = unsafeSweep ? { removed: 0, bytes: 0 } : sweepUnused(session, docId, ctx.keep, keepMediaIds);
 
   return {
     ok: true,
     path: session.path,
     rev: session.handle.rev(),
     docId,
-    counts: { items: prepared.length, changed, removed, adopted, missing, freed: swept.bytes },
+    counts: { items: prepared.length, changed, removed, adopted, missing, unresolved, freed: swept.bytes },
     bytes: fs.existsSync(session.path) ? fs.statSync(session.path).size : 0,
   };
 }

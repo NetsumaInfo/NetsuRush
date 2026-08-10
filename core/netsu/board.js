@@ -190,7 +190,10 @@ function resolveToken(ctx, token, kindHint) {
   if (sidecar.isSidecarToken(value)) {
     const resolved = sidecar.resolveSidecar(ctx.handle.path, value);
     if (resolved && fs.existsSync(resolved)) return { path: resolved, missing: null };
-    return { path: '', missing: { name: path.basename(value.slice(sidecar.TOKEN.length)), size: 0, kind: kindHint } };
+    return {
+      path: '',
+      missing: { name: path.basename(value.slice(sidecar.TOKEN.length)), size: 0, kind: kindHint, locator: value },
+    };
   }
 
   if (value.startsWith('asset:')) {
@@ -208,13 +211,18 @@ function resolveToken(ctx, token, kindHint) {
 
   if (value.startsWith('ref:')) {
     const row = ctx.handle.db.prepare('SELECT path, name, size FROM media WHERE id = ?').get(value.slice(4));
-    if (!row) return { path: '', missing: { name: 'média', size: 0, kind: kindHint } };
+    if (!row) return { path: '', missing: { name: 'média', size: 0, kind: kindHint, locator: value } };
     // Même machine, ou fichier retrouvé au même endroit : on réutilise l'original tel quel.
     try {
       const stat = fs.statSync(String(row.path));
       if (stat.isFile() && (!row.size || stat.size === Number(row.size))) return { path: String(row.path), missing: null };
     } catch (_) { /* déplacé ou disque absent → placeholder */ }
-    return { path: '', missing: { name: String(row.name || 'média'), size: Number(row.size) || 0, kind: kindHint } };
+    return {
+      path: '',
+      missing: {
+        name: String(row.name || 'média'), size: Number(row.size) || 0, kind: kindHint, locator: value,
+      },
+    };
   }
 
   return { path: value, missing: null }; // lien distant, id YouTube, data: — rien à résoudre
@@ -226,19 +234,26 @@ function detokenizeItem(ctx, item) {
   if (kind === 'sequence') {
     const tokens = Array.isArray(item.frames) ? item.frames : [];
     const frames = [];
+    const frameLocators = [];
     let missingSize = 0;
+    let missingCount = 0;
     for (const token of tokens) {
       const resolved = resolveToken(ctx, token, 'image');
       frames.push(resolved.path || '');
-      if (!resolved.path && resolved.missing) missingSize += resolved.missing.size || 0;
+      if (!resolved.path && resolved.missing) {
+        missingSize += resolved.missing.size || 0;
+        missingCount += 1;
+        frameLocators.push(resolved.missing.locator || String(token || '') || null);
+      } else {
+        frameLocators.push(null);
+      }
     }
-    const allMissing = tokens.length > 0 && frames.every((p) => !p);
     return {
       ...item,
       frames,
       ref: frames.find(Boolean) || '',
-      missing: allMissing
-        ? { name: `Séquence — ${tokens.length} image(s)`, size: missingSize, kind: 'sequence' }
+      missing: missingCount > 0
+        ? { name: `Séquence — ${missingCount}/${tokens.length} image(s) manquante(s)`, size: missingSize, kind: 'sequence', frameLocators }
         : undefined,
     };
   }
@@ -249,7 +264,11 @@ function detokenizeItem(ctx, item) {
   if (!ref.startsWith('asset:') && !ref.startsWith('ref:') && !sidecar.isSidecarToken(ref)) return item;
   const resolved = resolveToken(ctx, ref, kind);
   if (resolved.path) return { ...item, ref: resolved.path, missing: undefined };
-  return { ...item, ref: '', missing: resolved.missing || item.missing || { name: 'média', size: 0, kind } };
+  return {
+    ...item,
+    ref: '',
+    missing: resolved.missing || item.missing || { name: 'média', size: 0, kind, locator: ref },
+  };
 }
 
 /**
