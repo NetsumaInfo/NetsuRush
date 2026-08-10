@@ -33,6 +33,7 @@ import {
   usesEncoding,
   usesFile,
   getExportProfileIssue,
+  MERGE_GAP_DEFAULT_MS,
 } from "@/features/export/profiles";
 import { NumberSpin } from "@/components/ui/number-spin";
 import { useExportEncodingFields } from "@/features/export/encodingFields";
@@ -306,7 +307,7 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <NumberSpin
-                value={millisecondsToSeconds(profile.mergeGap ?? 0)}
+                value={millisecondsToSeconds(profile.mergeGap ?? MERGE_GAP_DEFAULT_MS)}
                 min={0}
                 max={BLACK_PAUSE_MAX_SECONDS}
                 step={BLACK_PAUSE_STEP_SECONDS}

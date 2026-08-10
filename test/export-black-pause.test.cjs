@@ -35,7 +35,7 @@ test("le réglage de pause noire utilise le tooltip custom et l'unité seconde",
   assert.match(source, /from "\.\/blackPause"/);
   assert.match(source, /<Tooltip>/);
   assert.match(source, /<TooltipTrigger/);
-  assert.match(source, /millisecondsToSeconds\(profile\.mergeGap \?\? 0\)/);
+  assert.match(source, /millisecondsToSeconds\(profile\.mergeGap \?\? MERGE_GAP_DEFAULT_MS\)/);
   assert.match(source, /secondsToMilliseconds\(v\)/);
   assert.match(source, /t\("editor\.seconds"\)/);
   assert.match(source, /<TooltipContent[^>]*>\{t\("editor\.mergeGapHint"\)\}<\/TooltipContent>/);
@@ -68,4 +68,13 @@ test("les six langues nomment la pause noire, son aide et les secondes", () => {
   assert.equal(fr.editor.mergeGap, "Pause noire");
   assert.equal(fr.editor.mergeGapHint, "Durée du noir ajouté entre chaque plan fusionné");
   assert.equal(fr.editor.seconds, "s");
+});
+
+test("la pause noire vaut une seconde par défaut sans remplacer un zéro explicite", () => {
+  const profiles = fs.readFileSync(path.join(root, "src/features/export/profiles.ts"), "utf8");
+  const editor = fs.readFileSync(path.join(root, "src/components/export/ProfileEditor.tsx"), "utf8");
+
+  assert.match(profiles, /MERGE_GAP_DEFAULT_MS = 1000/);
+  assert.match(profiles, /ms == null \? MERGE_GAP_DEFAULT_MS/);
+  assert.match(editor, /profile\.mergeGap \?\? MERGE_GAP_DEFAULT_MS/);
 });

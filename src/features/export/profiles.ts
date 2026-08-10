@@ -500,9 +500,10 @@ export function coerceAudioSelect(sel: AudioSelect | undefined | null): AudioSel
 // de dix secondes le « séparateur » devient un plan à lui seul, ce que la fusion ne promet pas.
 export const MERGE_GAP_MAX_MS = 10000;
 export const MERGE_GAP_STEP_MS = 100;
+export const MERGE_GAP_DEFAULT_MS = 1000;
 
 function coerceMergeGap(ms: number | undefined | null): number {
-  const v = Math.round(Number(ms) || 0);
+  const v = Math.round(ms == null ? MERGE_GAP_DEFAULT_MS : Number(ms) || 0);
   return Math.min(MERGE_GAP_MAX_MS, Math.max(0, v));
 }
 
