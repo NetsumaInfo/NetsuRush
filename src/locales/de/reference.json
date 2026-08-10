@@ -417,6 +417,8 @@
     "projects": "Projekte",
     "openProject": "Projekt öffnen",
     "openProjectHint": ".netsu-Datei öffnen – sie wird zum Arbeitsdokument",
+    "openProjectFile": "Projekt öffnen",
+    "openProjectLocation": "Dateispeicherort öffnen",
     "forgetProject": "Aus der Liste entfernen",
     "projectMissing": "Datei nicht gefunden"
   },

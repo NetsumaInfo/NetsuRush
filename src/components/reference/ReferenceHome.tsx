@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ImageUp, History, Settings2, FileInput, FilePlus2, FolderOpen, FileCheck2, FileWarning, X,
-  Star, Trash2, EyeOff,
+  Star, Trash2, EyeOff, FolderSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
@@ -15,6 +15,10 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ContextMenu, ContextMenuContent, ContextMenuItem,
+  ContextMenuSeparator, ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { SceneThumb } from "./SceneThumb";
 
 const RTF = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
@@ -146,34 +150,52 @@ function ProjectCard({ entry, onOpen, onForget }: {
 }) {
   const { t } = useTranslation("reference");
   const folder = entry.path.slice(0, Math.max(0, entry.path.lastIndexOf(entry.path.includes("\\") ? "\\" : "/")));
+  const reveal = async () => {
+    if (await nr.revealPath(entry.path)) return;
+    if (folder) await nr.openPath(folder);
+  };
   return (
-    <div className="group relative flex flex-col gap-2">
-      <button
-        type="button"
-        aria-label={entry.title}
-        onClick={onOpen}
-        disabled={entry.missing}
-        className={cn(
-          "flex aspect-[4/3] w-full items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors",
-          entry.missing ? "opacity-50" : "group-hover:border-primary/50",
-        )}
-      >
-        {entry.missing ? <FileWarning className="size-7 opacity-70" strokeWidth={1.5} /> : <FileCheck2 className="size-7 opacity-70" strokeWidth={1.5} />}
-      </button>
-      <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={onForget} aria-label={t("home.forgetProject")} className="absolute right-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded bg-card/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100" />}>
-          <X className="size-3.5" />
-        </TooltipTrigger>
-        <TooltipContent>{t("home.forgetProject")}</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={onOpen} disabled={entry.missing} className="min-w-0 text-left" />}>
-          <p className="truncate text-sm font-medium text-foreground">{entry.title}</p>
-          <p className="truncate text-xs text-muted-foreground">{entry.missing ? t("home.projectMissing") : folder}</p>
-        </TooltipTrigger>
-        <TooltipContent>{entry.path}</TooltipContent>
-      </Tooltip>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger render={<div className="group relative flex flex-col gap-2" />}>
+        <button
+          type="button"
+          aria-label={entry.title}
+          onClick={onOpen}
+          disabled={entry.missing}
+          className={cn(
+            "flex aspect-[4/3] w-full items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground transition-colors",
+            entry.missing ? "opacity-50" : "group-hover:border-primary/50",
+          )}
+        >
+          {entry.missing ? <FileWarning className="size-7 opacity-70" strokeWidth={1.5} /> : <FileCheck2 className="size-7 opacity-70" strokeWidth={1.5} />}
+        </button>
+        <Tooltip>
+          <TooltipTrigger render={<button type="button" onClick={onForget} aria-label={t("home.forgetProject")} className="absolute right-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded bg-card/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100" />}>
+            <X className="size-3.5" />
+          </TooltipTrigger>
+          <TooltipContent>{t("home.forgetProject")}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger render={<button type="button" onClick={onOpen} disabled={entry.missing} className="min-w-0 text-left" />}>
+            <p className="truncate text-sm font-medium text-foreground">{entry.title}</p>
+            <p className="truncate text-xs text-muted-foreground">{entry.missing ? t("home.projectMissing") : folder}</p>
+          </TooltipTrigger>
+          <TooltipContent>{entry.path}</TooltipContent>
+        </Tooltip>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem disabled={entry.missing} onClick={onOpen}>
+          <FileCheck2 /> {t("home.openProjectFile")}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => void reveal()}>
+          <FolderSearch /> {t("home.openProjectLocation")}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={onForget}>
+          <X /> {t("home.forgetProject")}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 

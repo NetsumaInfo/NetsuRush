@@ -417,6 +417,8 @@
     "projects": "项目",
     "openProject": "打开项目",
     "openProjectHint": "打开 .netsu 文件 — 它将成为当前工作文档",
+    "openProjectFile": "打开项目",
+    "openProjectLocation": "打开文件位置",
     "forgetProject": "从列表中移除",
     "projectMissing": "找不到文件"
   },

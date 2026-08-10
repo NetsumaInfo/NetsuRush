@@ -126,7 +126,7 @@ git commit -m "feat: reveal local files from NetsuRush"
 - Modify: `src/locales/es/reference.json`
 - Modify: `src/locales/fr/reference.json`
 - Modify: `src/locales/ja/reference.json`
-- Modify: `src/locales/ko/reference.json`
+- Modify: `src/locales/zh/reference.json`
 
 - [ ] **Step 1: Write the failing project-card contract**
 

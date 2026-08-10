@@ -17,3 +17,10 @@ test('file-backed source scenes are filtered from internal recents', () => {
   assert.match(source, /projectSceneIds/);
   assert.match(source, /!projectSceneIds\.has\(s\.id\)/);
 });
+
+test('recent project cards reveal their netsu file from a context menu', () => {
+  assert.match(source, /ContextMenuTrigger/);
+  assert.match(source, /nr\.revealPath\(entry\.path\)/);
+  assert.match(source, /nr\.openPath\(folder\)/);
+  assert.match(source, /t\("home\.openProjectLocation"\)/);
+});
