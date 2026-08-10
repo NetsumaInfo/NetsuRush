@@ -416,6 +416,7 @@ const reference: RefApi = {
     return await save({ defaultPath: defaultName, filters: [{ name: "Board NetsuRush", extensions: ["netsu"] }] });
   },
   openProject: (srcPath) => call("netsu:openProject", [srcPath]),
+  previewProject: (srcPath) => call("netsu:previewProject", [srcPath]),
   saveProject: (filePath, scene) => call("netsu:saveProject", [filePath, scene]),
   saveProjectAs: (opts) => call("netsu:saveProjectAs", [opts]),
   closeProject: (filePath) => call("netsu:closeProject", [filePath]),

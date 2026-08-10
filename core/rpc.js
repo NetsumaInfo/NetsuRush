@@ -946,10 +946,11 @@ function createRpc() {
 
     // --- Projet « .netsu » : le fichier EST le document (ouvert en continu, Ctrl+S incrémental) ---
     "netsu:openProject": ([srcPath]) => netsu.openProject(refStore, srcPath),
+    "netsu:previewProject": ([srcPath]) => netsu.previewProject(refStore, srcPath),
     "netsu:saveProject": ([filePath, scene]) => netsu.saveProject(refStore, filePath, scene),
     "netsu:saveProjectAs": ([opts]) => netsu.saveProjectAs(refStore, opts || {}),
     "netsu:closeProject": ([filePath]) => netsu.closeProject(filePath),
-    "netsu:recents": ([type]) => netsu.recentProjects(type),
+    "netsu:recents": ([type]) => netsu.recentProjects(refStore, type),
     "netsu:forget": ([filePath]) => netsu.forgetProject(filePath),
 
     // --- Module Script : documents/blocs/médias (SQLite ou JSON) + build natif ---

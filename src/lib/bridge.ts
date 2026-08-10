@@ -1320,6 +1320,7 @@ export interface NetsuRecent {
   title: string;
   type: string;
   openedAt: number;
+  modifiedAt?: number;
   missing: boolean;
   sourceSceneId?: string;
 }
@@ -1393,6 +1394,7 @@ export interface RefApi {
   // scène ; `saveProject` réécrit CE fichier de façon incrémentale (aucun réencodage) ; `saveProjectAs`
   // le fait déménager. `readonly` = archive v1, lisible mais pas modifiable en place.
   openProject(srcPath: string): Promise<NetsuProjectRead>;
+  previewProject(srcPath: string): Promise<NetsuImportResult>;
   saveProject(filePath: string, scene: NetsuScene): Promise<NetsuProjectSave>;
   saveProjectAs(opts: { scene: NetsuScene; destPath: string; fromPath?: string | null; sourceSceneId?: string | null }): Promise<NetsuProjectSave>;
   closeProject(filePath: string): Promise<{ ok: boolean; closed?: boolean }>;
@@ -3222,6 +3224,7 @@ const mock: NrApi = {
       // Un projet est un FICHIER : dans le navigateur il n'y en a pas. On répond « indisponible »
       // plutôt que de simuler un enregistrement qui ne laisserait rien sur le disque.
       openProject: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      previewProject: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       saveProject: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       saveProjectAs: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       closeProject: async () => ({ ok: true, closed: false }),

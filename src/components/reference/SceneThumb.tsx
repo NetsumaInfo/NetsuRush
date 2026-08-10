@@ -14,31 +14,29 @@ function ytThumb(ref: string): string | null {
   return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
 }
 
-function SceneThumbInner({ id }: { id: string }) {
-  const [items, setItems] = useState<BoardItem[] | null>(null);
+function normalizeItems(items: unknown[]): BoardItem[] {
+  return (items as BoardItem[])
+    .filter((it) => it.w > 0 && it.h > 0)
+    .sort((a, b) => a.z - b.z)
+    .slice(0, MAX_ITEMS);
+}
+
+function BoardThumb({ items }: { items: BoardItem[] | null }) {
   const [videoThumbs, setVideoThumbs] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    setVideoThumbs({});
+    if (!items) return undefined;
     let alive = true;
-    void (async () => {
-      const sc = await nr.reference?.loadScene(id);
-      if (!alive) return;
-      const list = ((sc?.items as BoardItem[]) ?? [])
-        .filter((it) => it.w > 0 && it.h > 0)
-        .sort((a, b) => a.z - b.z)
-        .slice(0, MAX_ITEMS);
-      setItems(list);
-
-      // Vignettes des vidéos locales (chemin disque) — milieu du clip, cache du process principal.
-      for (const it of list) {
-        if (it.kind !== "video" || /^(https?:|blob:)/i.test(it.ref)) continue;
-        void nr.thumbnail(it.ref).then((r) => {
-          if (alive && typeof r === "string") setVideoThumbs((m) => ({ ...m, [it.id]: nr.mediaUrl(r) }));
-        });
-      }
-    })();
+    // Vignettes des vidéos locales (chemin disque) — milieu du clip, cache du process principal.
+    for (const it of items) {
+      if (it.kind !== "video" || /^(https?:|blob:)/i.test(it.ref)) continue;
+      void nr.thumbnail(it.ref).then((r) => {
+        if (alive && typeof r === "string") setVideoThumbs((m) => ({ ...m, [it.id]: nr.mediaUrl(r) }));
+      });
+    }
     return () => { alive = false; };
-  }, [id]);
+  }, [items]);
 
   if (!items || items.length === 0) {
     return (
@@ -116,4 +114,29 @@ function SceneThumbInner({ id }: { id: string }) {
   );
 }
 
+function SceneThumbInner({ id }: { id: string }) {
+  const [items, setItems] = useState<BoardItem[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void nr.reference?.loadScene(id).then((scene) => {
+      if (alive) setItems(normalizeItems(scene?.items ?? []));
+    });
+    return () => { alive = false; };
+  }, [id]);
+  return <BoardThumb items={items} />;
+}
+
+function ProjectThumbInner({ path }: { path: string }) {
+  const [items, setItems] = useState<BoardItem[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void nr.reference?.previewProject(path).then((result) => {
+      if (alive) setItems(normalizeItems(result?.scene?.items ?? []));
+    });
+    return () => { alive = false; };
+  }, [path]);
+  return <BoardThumb items={items} />;
+}
+
 export const SceneThumb = memo(SceneThumbInner);
+export const ProjectThumb = memo(ProjectThumbInner);
