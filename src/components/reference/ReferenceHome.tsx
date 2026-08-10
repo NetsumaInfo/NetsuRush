@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ImageUp, History, Settings2, FileInput, FilePlus2, FolderOpen, FileCheck2, FileWarning, X,
+  ImageUp, History, Settings2, FileInput, FilePlus2, FolderOpen, FileCheck2, FileWarning,
   Star, Trash2, EyeOff, FolderSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,6 +52,11 @@ function sortScenes(list: RefSceneMeta[], favs: Set<string>): RefSceneMeta[] {
   });
 }
 
+async function revealInternalProject() {
+  const storagePath = await nr.reference?.storagePath();
+  if (storagePath) await nr.openPath(storagePath);
+}
+
 // ---------- Carte de scène ----------
 function SceneCard({
   scene, isFavorite, onOpen, onToggleFavorite, onHide, onDelete,
@@ -64,10 +69,6 @@ function SceneCard({
   onDelete: () => void;
 }) {
   const { t } = useTranslation("reference");
-  const reveal = async () => {
-    const storagePath = await nr.reference?.storagePath();
-    if (storagePath) await nr.openPath(storagePath);
-  };
   return (
     <ContextMenu>
       <ContextMenuTrigger render={<div className="group relative flex flex-col gap-2" />}>
@@ -147,7 +148,7 @@ function SceneCard({
         <ContextMenuItem onClick={onOpen}>
           <FileCheck2 /> {t("home.openProjectFile")}
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => void reveal()}>
+        <ContextMenuItem onClick={() => void revealInternalProject()}>
           <FolderSearch /> {t("home.openProjectLocation")}
         </ContextMenuItem>
         <ContextMenuItem onClick={onToggleFavorite}>
@@ -165,11 +166,24 @@ function SceneCard({
   );
 }
 
-// Carte d'un projet enregistré sur disque. Elle montre le DOSSIER autant que le nom : c'est ce que
-// la bibliothèque interne ne pouvait pas dire, et la raison d'être de l'enregistrement dans un fichier.
-function ProjectCard({ entry, onOpen, onForget }: {
+const projectFavoriteKey = (filePath: string) => `project:${filePath}`;
+
+function sortProjects(list: NetsuRecent[], favs: Set<string>): NetsuRecent[] {
+  return [...list].sort((a, b) => {
+    const af = favs.has(projectFavoriteKey(a.path)) ? 1 : 0;
+    const bf = favs.has(projectFavoriteKey(b.path)) ? 1 : 0;
+    if (af !== bf) return bf - af;
+    return (b.modifiedAt ?? b.openedAt) - (a.modifiedAt ?? a.openedAt);
+  });
+}
+
+// File-backed projects use the same card actions as internal scenes; removal only forgets the recent
+// entry and never deletes the user's .netsu file.
+function ProjectCard({ entry, isFavorite, onOpen, onToggleFavorite, onForget }: {
   entry: NetsuRecent;
+  isFavorite: boolean;
   onOpen: () => void;
+  onToggleFavorite: () => void;
   onForget: () => void;
 }) {
   const { t } = useTranslation("reference");
@@ -195,12 +209,36 @@ function ProjectCard({ entry, onOpen, onForget }: {
             ? <FileWarning className="size-7 opacity-70" strokeWidth={1.5} />
             : <ProjectThumb path={entry.path} />}
         </button>
-        <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={onForget} aria-label={t("home.forgetProject")} className="absolute right-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded bg-card/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100" />}>
-            <X className="size-3.5" />
-          </TooltipTrigger>
-          <TooltipContent>{t("home.forgetProject")}</TooltipContent>
-        </Tooltip>
+
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            type="button"
+            aria-label={isFavorite ? t("actions.removeFavorite") : t("actions.addFavorite")}
+            onClick={onToggleFavorite}
+            className={cn(
+              "inline-flex size-6 items-center justify-center rounded-md backdrop-blur-[2px] transition-colors",
+              isFavorite
+                ? "bg-primary text-primary-foreground"
+                : "bg-black/50 text-white/70 hover:bg-black/70 hover:text-destructive",
+            )}
+          >
+            <Star className="size-3.5" fill={isFavorite ? "currentColor" : "none"} />
+          </button>
+          <button
+            type="button"
+            aria-label={t("home.forgetProject")}
+            onClick={onForget}
+            className="inline-flex size-6 items-center justify-center rounded-md bg-black/50 text-white/70 backdrop-blur-[2px] transition-colors hover:bg-black/70 hover:text-destructive"
+          >
+            <Trash2 className="size-3.5" />
+          </button>
+        </div>
+
+        {isFavorite && (
+          <div className="pointer-events-none absolute left-1.5 top-1.5 flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground opacity-100 transition-opacity group-hover:opacity-0">
+            <Star className="size-3.5" fill="currentColor" />
+          </div>
+        )}
         <Tooltip>
           <TooltipTrigger render={<button type="button" onClick={onOpen} disabled={entry.missing} className="min-w-0 text-left" />}>
             <p className="truncate text-sm font-medium text-foreground">{entry.title}</p>
@@ -222,7 +260,7 @@ function ProjectCard({ entry, onOpen, onForget }: {
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={onForget}>
-          <X /> {t("home.forgetProject")}
+          <Trash2 /> {t("home.forgetProject")}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
@@ -274,7 +312,8 @@ export function ReferenceHome({
   useEffect(() => {
     if (!recents) return undefined;
     let alive = true;
-    void recents().then((list) => { if (alive) setProjects(list); });
+    const initFavs = loadSet(LS_FAV);
+    void recents().then((list) => { if (alive) setProjects(sortProjects(list, initFavs)); });
     return () => { alive = false; };
   }, [recents]);
 
@@ -288,6 +327,7 @@ export function ReferenceHome({
     setFavorites(next);
     saveSet(LS_FAV, next);
     setRecent((r) => sortScenes(r, next));
+    setProjects((p) => sortProjects(p, next));
   }, [favorites]);
 
   const hideScene = useCallback((id: string) => {
@@ -457,7 +497,9 @@ export function ReferenceHome({
               <ProjectCard
                 key={entry.path}
                 entry={entry}
+                isFavorite={favorites.has(projectFavoriteKey(entry.path))}
                 onOpen={() => onOpenRecent(entry.path)}
+                onToggleFavorite={() => toggleFavorite(projectFavoriteKey(entry.path))}
                 onForget={() => void forgetProject(entry.path)}
               />
             ))}

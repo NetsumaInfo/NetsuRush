@@ -32,9 +32,20 @@ test('file-backed and internal projects share thumbnail, modified label, and rig
   assert.match(projectCard, /relDate\(entry\.modifiedAt\s*\?\?\s*entry\.openedAt\)/);
   assert.doesNotMatch(projectCard, /<p[^>]*>\{entry\.missing\s*\?[^:]+:\s*folder\}<\/p>/);
   assert.match(sceneCard, /ContextMenuItem[^]*home\.openProjectFile/);
-  assert.match(sceneCard, /nr\.reference\?\.storagePath\(\)/);
-  assert.match(sceneCard, /nr\.openPath\(storagePath\)/);
+  assert.match(source, /nr\.reference\?\.storagePath\(\)/);
+  assert.match(source, /nr\.openPath\(storagePath\)/);
   assert.match(sceneCard, /home\.openProjectLocation/);
+});
+
+test('file-backed projects use the same favorite and trash overlays as internal projects', () => {
+  const projectCard = source.slice(source.indexOf('function ProjectCard'), source.indexOf('// ---------- Composant principal'));
+  assert.match(projectCard, /isFavorite/);
+  assert.match(projectCard, /onToggleFavorite/);
+  assert.match(projectCard, /actions\.addFavorite/);
+  assert.match(projectCard, /<Star[^>]*fill=\{isFavorite/);
+  assert.match(projectCard, /<Trash2 className="size-3\.5"/);
+  assert.doesNotMatch(projectCard, /<X[\s>]/);
+  assert.match(source, /projectFavoriteKey\(entry\.path\)/);
 });
 
 test('dropping a netsu opens it as a project before media ingestion', () => {
