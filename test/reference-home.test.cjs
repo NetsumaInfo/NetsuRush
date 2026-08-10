@@ -48,6 +48,14 @@ test('file-backed projects use the same favorite and trash overlays as internal 
   assert.match(source, /projectFavoriteKey\(entry\.path\)/);
 });
 
+test('the saved-project trash overlay asks before removing the recent entry', () => {
+  const projectCard = source.slice(source.indexOf('function ProjectCard'), source.indexOf('// ---------- Composant principal'));
+  assert.match(projectCard, /<DropdownMenu>/);
+  assert.match(projectCard, /aria-label=\{t\("home\.deleteOptions"\)\}/);
+  assert.match(projectCard, /<DropdownMenuItem[^]*variant="destructive"[^]*onForget\(\)/);
+  assert.doesNotMatch(projectCard, /<button[^>]*aria-label=\{t\("home\.forgetProject"\)\}[^>]*onClick=\{onForget\}/);
+});
+
 test('dropping a netsu opens it as a project before media ingestion', () => {
   assert.match(source, /\.name\.toLowerCase\(\)\.endsWith\("\.netsu"\)/);
   assert.match(source, /nr\.pathsForFiles\(\[projectFile\]\)/);

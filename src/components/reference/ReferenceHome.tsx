@@ -225,14 +225,29 @@ function ProjectCard({ entry, isFavorite, onOpen, onToggleFavorite, onForget }: 
           >
             <Star className="size-3.5" fill={isFavorite ? "currentColor" : "none"} />
           </button>
-          <button
-            type="button"
-            aria-label={t("home.forgetProject")}
-            onClick={onForget}
-            className="inline-flex size-6 items-center justify-center rounded-md bg-black/50 text-white/70 backdrop-blur-[2px] transition-colors hover:bg-black/70 hover:text-destructive"
-          >
-            <Trash2 className="size-3.5" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={t("home.deleteOptions")}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex size-6 items-center justify-center rounded-md bg-black/50 text-white/70 backdrop-blur-[2px] transition-colors hover:bg-black/70 hover:text-destructive"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              }
+            />
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={(e) => { e.stopPropagation(); onForget(); }}
+              >
+                <Trash2 className="size-4" />
+                {t("home.forgetProject")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {isFavorite && (
