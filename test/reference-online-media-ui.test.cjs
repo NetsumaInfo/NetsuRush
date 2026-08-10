@@ -34,6 +34,11 @@ test('YouTube downloads only in automatic mode and AMVNews stays generic', () =>
   assert.doesNotMatch(source, /amvnews/i);
 });
 
+test('Instagram video extraction falls back to its embed instead of an OpenGraph thumbnail', () => {
+  assert.match(source, /e\.provider !== "instagram"\s*&&\s*await resolvePageAndPlace\(text, at\)/);
+  assert.match(source, /const fb = e \?\?/);
+});
+
 test('every remote image and video keeps the user-entered source URL', () => {
   assert.match(source, /place\("image",\s*url,\s*url,\s*nat,\s*undefined,\s*at,\s*\{\s*sourceUrl\s*\}\)/);
   assert.match(source, /place\("video",\s*url,\s*url,\s*nat,\s*undefined,\s*at,\s*\{\s*sourceUrl\s*\}\)/);

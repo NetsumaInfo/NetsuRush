@@ -422,9 +422,11 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         if (isImageUrl(text)) return await addRemoteMedia(text, "image", at);
 
         // 4. Réseau social reconnu → extraction (qualité pleine, multi-images), repli OpenGraph.
-        //    Lien générique → OpenGraph d'abord (rapide, couvre GIF/image/article), repli extraction.
+        //    Instagram's OpenGraph result is only a poster, so failed video extraction falls back to
+        //    the official embed below. Generic links still try OpenGraph first, then extraction.
         const ok = e
-          ? (await extractAndPlace(text, at)) || (await resolvePageAndPlace(text, at))
+          ? (await extractAndPlace(text, at))
+            || (e.provider !== "instagram" && await resolvePageAndPlace(text, at))
           : prefs.autoDownloadOnline
             ? (await resolvePageAndPlace(text, at)) || (await extractAndPlace(text, at))
             : await resolvePageAndPlace(text, at);
