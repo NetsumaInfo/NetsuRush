@@ -64,6 +64,10 @@ function SceneCard({
   onDelete: () => void;
 }) {
   const { t } = useTranslation("reference");
+  const reveal = async () => {
+    const storagePath = await nr.reference?.storagePath();
+    if (storagePath) await nr.openPath(storagePath);
+  };
   return (
     <ContextMenu>
       <ContextMenuTrigger render={<div className="group relative flex flex-col gap-2" />}>
@@ -142,6 +146,9 @@ function SceneCard({
       <ContextMenuContent>
         <ContextMenuItem onClick={onOpen}>
           <FileCheck2 /> {t("home.openProjectFile")}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => void reveal()}>
+          <FolderSearch /> {t("home.openProjectLocation")}
         </ContextMenuItem>
         <ContextMenuItem onClick={onToggleFavorite}>
           <Star /> {isFavorite ? t("actions.removeFavorite") : t("actions.addFavorite")}

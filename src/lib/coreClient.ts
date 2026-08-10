@@ -395,6 +395,7 @@ const wallpaper: WallpaperApi = {
 
 const reference: RefApi = {
   listScenes: () => call("reference:listScenes"),
+  storagePath: () => call("reference:storagePath"),
   loadScene: (id) => call("reference:loadScene", [id]),
   saveScene: (scene) => call("reference:saveScene", [scene]),
   deleteScene: (id) => call("reference:deleteScene", [id]),

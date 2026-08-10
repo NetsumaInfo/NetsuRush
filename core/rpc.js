@@ -814,6 +814,7 @@ function createRpc() {
 
     // --- Board de référence (saveAsset binaire : transport base64 à finaliser en P4) ---
     "reference:listScenes": () => refStore.listScenes(),
+    "reference:storagePath": () => refStore.storagePath(),
     "reference:loadScene": ([id]) => refStore.loadScene(id),
     "reference:saveScene": ([scene]) => refStore.saveScene(scene),
     "reference:deleteScene": ([id]) => refStore.deleteScene(id),

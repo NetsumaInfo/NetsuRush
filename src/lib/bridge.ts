@@ -1360,6 +1360,7 @@ export interface WallpaperApi {
 
 export interface RefApi {
   listScenes(): Promise<RefSceneMeta[]>;
+  storagePath(): Promise<string>;
   loadScene(id: string): Promise<RefSceneOut | null>;
   saveScene(scene: RefSceneIn): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
   deleteScene(id: string): Promise<{ ok: boolean; error?: string }>;
@@ -3197,6 +3198,7 @@ const mock: NrApi = {
       listScenes: async () =>
         Object.values(read()).map((s) => ({ id: s.id, name: s.name, updatedAt: s.updatedAt }))
           .sort((a, b) => b.updatedAt - a.updatedAt),
+      storagePath: async () => "",
       loadScene: async (id: string) => read()[id] ?? null,
       saveScene: async (scene: RefSceneIn) => {
         const o = read();

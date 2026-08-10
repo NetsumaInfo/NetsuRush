@@ -340,6 +340,7 @@ function createReferenceStore(dataDir) {
 
   return {
     kind, listScenes, loadScene, saveScene, deleteScene, saveAsset, fetchAsset, resolveMedia,
+    storagePath: () => dir,
     assetsDir, assetPath, isAppAsset, removeAsset,
   };
 }

@@ -32,6 +32,9 @@ test('file-backed and internal projects share thumbnail, modified label, and rig
   assert.match(projectCard, /relDate\(entry\.modifiedAt\s*\?\?\s*entry\.openedAt\)/);
   assert.doesNotMatch(projectCard, /<p[^>]*>\{entry\.missing\s*\?[^:]+:\s*folder\}<\/p>/);
   assert.match(sceneCard, /ContextMenuItem[^]*home\.openProjectFile/);
+  assert.match(sceneCard, /nr\.reference\?\.storagePath\(\)/);
+  assert.match(sceneCard, /nr\.openPath\(storagePath\)/);
+  assert.match(sceneCard, /home\.openProjectLocation/);
 });
 
 test('dropping a netsu opens it as a project before media ingestion', () => {
