@@ -115,6 +115,67 @@ function importBoard(refStore, srcPath) {
   }
 }
 
+// Aperçu strictement en lecture : contrairement à openProject, ne crée pas de session et ne modifie
+// pas l'ordre des récents. Le renderer l'utilise uniquement pour dessiner la vignette de la carte.
+function previewProject(refStore, srcPath) {
+  return importBoard(refStore, srcPath);
+}
+
+/** @param {any} scene @returns {Set<string>} */
+function sceneItemIds(scene) {
+  return new Set(((scene && scene.items) || []).map((item) => String(item && item.id || '')).filter(Boolean));
+}
+
+/**
+ * Retrouve la scène interne d'origine d'un ancien Save As. Le nom ne sert qu'à réduire les candidats :
+ * la décision exige un recouvrement fort des IDs d'items, stables quand le board continue d'évoluer.
+ * @param {any} refStore @param {any} projectScene
+ */
+function inferSourceSceneId(refStore, projectScene) {
+  const projectIds = sceneItemIds(projectScene);
+  if (!projectIds.size) return undefined;
+  const title = String(projectScene && projectScene.name || '').trim().toLocaleLowerCase();
+  const minimum = Math.min(3, projectIds.size);
+  let best;
+  for (const meta of refStore.listScenes()) {
+    if (!meta || String(meta.id || '').startsWith('__')) continue;
+    if (String(meta.name || '').trim().toLocaleLowerCase() !== title) continue;
+    const scene = refStore.loadScene(meta.id);
+    const candidateIds = sceneItemIds(scene);
+    let common = 0;
+    for (const id of projectIds) if (candidateIds.has(id)) common += 1;
+    const coverage = common / projectIds.size;
+    if (common < minimum || coverage < 0.8) continue;
+    const extra = Math.max(0, candidateIds.size - common);
+    if (!best || coverage > best.coverage || (coverage === best.coverage && extra < best.extra)) {
+      best = { id: String(meta.id), coverage, extra };
+    }
+  }
+  return best && best.id;
+}
+
+/**
+ * Récents du board avec migration des Save As produits avant sourceSceneId. L'ancienne signature
+ * recentProjects(type) reste acceptée par les tests/appelants qui ne disposent pas du refStore.
+ * @param {any|string} refStoreOrType @param {string} [type]
+ */
+function recentProjects(refStoreOrType, type) {
+  const refStore = refStoreOrType && typeof refStoreOrType.listScenes === 'function' ? refStoreOrType : null;
+  const wantedType = refStore ? type : refStoreOrType;
+  const entries = recents.list(wantedType);
+  if (!refStore || (wantedType && wantedType !== 'board')) return entries;
+  for (const entry of entries) {
+    if (entry.sourceSceneId || entry.missing) continue;
+    const preview = previewProject(refStore, entry.path);
+    if (!preview.ok || !preview.scene) continue;
+    const sourceSceneId = inferSourceSceneId(refStore, preview.scene);
+    if (!sourceSceneId) continue;
+    recents.linkSource(entry.path, sourceSceneId);
+    entry.sourceSceneId = sourceSceneId;
+  }
+  return entries;
+}
+
 /** @template T @param {T[]} items @param {number} limit @param {(item: T) => Promise<void>} fn */
 async function eachWithLimit(items, limit, fn) {
   let cursor = 0;
@@ -284,5 +345,5 @@ function closeAllProjects() {
 module.exports = {
   exportBoard, importBoard, weigh, zipStore, unzip,
   openProject, saveProject, saveProjectAs, closeProject, closeAllProjects,
-  recentProjects: recents.list, forgetProject: recents.forget,
+  previewProject, recentProjects, forgetProject: recents.forget,
 };

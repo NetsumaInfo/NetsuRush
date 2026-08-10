@@ -8,6 +8,7 @@ const home = fs.mkdtempSync(path.join(os.tmpdir(), 'netsu-recents-'));
 process.env.NR_HOME = home;
 const { createReferenceStore } = require('../core/reference');
 const netsu = require('../core/netsu');
+const recents = require('../core/netsu/recents');
 
 test.after(() => netsu.closeAllProjects());
 
@@ -40,4 +41,44 @@ test('failed Save As leaves the internal source untouched', async () => {
   });
   assert.equal(result.ok, false);
   assert.notEqual(refStore.loadScene(source.id), null);
+});
+
+test('legacy Save As identity is recovered from content without hiding an unrelated same-title scene', async () => {
+  const refStore = createReferenceStore(home);
+  const legacy = refStore.saveScene({
+    name: 'Legacy',
+    items: [{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'newer' }],
+    view: null,
+  });
+  const unrelated = refStore.saveScene({
+    name: 'Legacy',
+    items: [{ id: 'x' }, { id: 'y' }, { id: 'z' }],
+    view: null,
+  });
+  const destPath = path.join(home, 'Legacy.netsu');
+  const saved = await netsu.saveProjectAs(refStore, {
+    scene: { name: 'Legacy', items: [{ id: 'a' }, { id: 'b' }, { id: 'c' }], view: null },
+    destPath,
+  });
+  assert.equal(saved.ok, true);
+
+  const absolute = path.resolve(destPath);
+  const before = recents.list('board').find((entry) => entry.path === absolute);
+  assert.ok(before, JSON.stringify(recents.list('board')));
+  assert.equal(before.sourceSceneId, undefined);
+
+  const entry = netsu.recentProjects(refStore, 'board').find((item) => item.path === absolute);
+  assert.equal(entry.sourceSceneId, legacy.id);
+  assert.notEqual(entry.sourceSceneId, unrelated.id);
+  assert.equal(entry.openedAt, before.openedAt);
+  assert.ok(entry.modifiedAt > 0);
+
+  const persisted = recents.list('board').find((item) => item.path === absolute);
+  assert.equal(persisted.sourceSceneId, legacy.id);
+  assert.equal(persisted.openedAt, before.openedAt);
+
+  const preview = netsu.previewProject(refStore, destPath);
+  assert.equal(preview.ok, true);
+  assert.equal(preview.scene.items.length, 3);
+  assert.equal(recents.list('board').find((item) => item.path === absolute).openedAt, before.openedAt);
 });

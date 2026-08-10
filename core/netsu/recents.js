@@ -48,20 +48,27 @@ function keyFor(filePath) {
  * définitivement au premier démarrage sans lui. On ne réécrit donc jamais le fichier ici.
  * @param {string} [type] restreint au type demandé ('board', 'notebook') — un accueil ne propose que
  *                        les documents qu'il sait ouvrir.
- * @returns {{ path: string, title: string, type: string, openedAt: number, missing: boolean }[]}
+ * @returns {{ path: string, title: string, type: string, openedAt: number, modifiedAt: number, missing: boolean, sourceSceneId?: string }[]}
  */
 function list(type) {
   return readAll()
     .filter((entry) => !type || String((entry && entry.type) || 'board') === type)
     .filter((entry) => entry && typeof entry.path === 'string')
-    .map((entry) => ({
-      path: String(entry.path),
-      title: String(entry.title || path.basename(String(entry.path))),
-      type: String(entry.type || 'board'),
-      openedAt: Number(entry.openedAt) || 0,
-      missing: !fs.existsSync(String(entry.path)),
-      sourceSceneId: typeof entry.sourceSceneId === 'string' ? entry.sourceSceneId : undefined,
-    }))
+    .map((entry) => {
+      const filePath = String(entry.path);
+      let modifiedAt = 0;
+      let missing = false;
+      try { modifiedAt = fs.statSync(filePath).mtimeMs; } catch (_) { missing = true; }
+      return {
+        path: filePath,
+        title: String(entry.title || path.basename(filePath)),
+        type: String(entry.type || 'board'),
+        openedAt: Number(entry.openedAt) || 0,
+        modifiedAt,
+        missing,
+        sourceSceneId: typeof entry.sourceSceneId === 'string' ? entry.sourceSceneId : undefined,
+      };
+    })
     .sort((a, b) => b.openedAt - a.openedAt);
 }
 
@@ -101,4 +108,20 @@ function forget(filePath) {
   return list();
 }
 
-module.exports = { list, remember, forget, MAX_ENTRIES, STATE_FILE };
+// Rattache une ancienne entrée à la scène interne dont elle provenait, sans la faire remonter dans
+// « Récent ». Cette migration ne change QUE l'identité : openedAt reste exactement celui du fichier.
+function linkSource(filePath, sourceSceneId) {
+  const key = keyFor(filePath);
+  const id = String(sourceSceneId || '');
+  if (!key || !id) return list();
+  try {
+    writeAll(readAll().map((entry) => (
+      entry && typeof entry.path === 'string' && keyFor(entry.path) === key
+        ? { ...entry, sourceSceneId: id }
+        : entry
+    )));
+  } catch (_) { /* la migration est best-effort, la lecture reste fonctionnelle */ }
+  return list();
+}
+
+module.exports = { list, remember, forget, linkSource, MAX_ENTRIES, STATE_FILE };
