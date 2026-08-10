@@ -430,6 +430,9 @@
     "openProjectFile": "Projekt öffnen",
     "openProjectLocation": "Dateispeicherort öffnen",
     "forgetProject": "Aus der Liste entfernen",
+    "deleteProject": "Vollständig löschen",
+    "deleteProjectTitle": "„{{name}}“ löschen?",
+    "deleteProjectWarning": "Die .netsu-Datei und ihr .medias-Ordner werden endgültig gelöscht. Externe Quelldateien bleiben erhalten.",
     "projectMissing": "Datei nicht gefunden"
   },
   "item": {

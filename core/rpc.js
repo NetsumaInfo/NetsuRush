@@ -954,6 +954,7 @@ function createRpc() {
     "netsu:closeProject": ([filePath]) => netsu.closeProject(filePath),
     "netsu:recents": ([type]) => netsu.recentProjects(refStore, type),
     "netsu:forget": ([filePath]) => netsu.forgetProject(filePath),
+    "netsu:deleteProject": ([filePath]) => netsu.deleteProject(filePath),
 
     // --- Module Script : documents/blocs/médias (SQLite ou JSON) + build natif ---
     "script:recordings": ([dir]) => recordings.listRecordings(dir),

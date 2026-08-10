@@ -423,6 +423,7 @@ const reference: RefApi = {
   closeProject: (filePath) => call("netsu:closeProject", [filePath]),
   recentProjects: (type) => call("netsu:recents", [type]),
   forgetProject: (filePath) => call("netsu:forget", [filePath]),
+  deleteProject: (filePath) => call("netsu:deleteProject", [filePath]),
   // No-op : aucune garde de fermeture (l'autosave protège déjà le board). Conservé pour l'API.
   setDirty: () => {},
   // Depuis la fenêtre principale : ouvre (ou refocus) la fenêtre détachée flottante.

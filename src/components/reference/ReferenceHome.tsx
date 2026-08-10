@@ -20,6 +20,8 @@ import {
   ContextMenuSeparator, ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { ProjectThumb, SceneThumb } from "./SceneThumb";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { useBoard } from "./useReferenceBoard";
 
 const RTF = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
 function relDate(ts: number): string {
@@ -180,20 +182,22 @@ function sortProjects(list: NetsuRecent[], favs: Set<string>): NetsuRecent[] {
 
 // File-backed projects use the same card actions as internal scenes; removal only forgets the recent
 // entry and never deletes the user's .netsu file.
-function ProjectCard({ entry, isFavorite, onOpen, onToggleFavorite, onForget }: {
+function ProjectCard({ entry, isFavorite, onOpen, onToggleFavorite, onForget, onDelete }: {
   entry: NetsuRecent;
   isFavorite: boolean;
   onOpen: () => void;
   onToggleFavorite: () => void;
   onForget: () => void;
+  onDelete: () => void;
 }) {
   const { t } = useTranslation("reference");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const folder = entry.path.slice(0, Math.max(0, entry.path.lastIndexOf(entry.path.includes("\\") ? "\\" : "/")));
   const reveal = async () => {
     if (await nr.revealPath(entry.path)) return;
     if (folder) await nr.openPath(folder);
   };
-  return (
+  return <>
     <ContextMenu>
       <ContextMenuTrigger render={<div className="group relative flex flex-col gap-2" />}>
         <button
@@ -238,13 +242,15 @@ function ProjectCard({ entry, isFavorite, onOpen, onToggleFavorite, onForget }: 
                 </button>
               }
             />
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={(e) => { e.stopPropagation(); onForget(); }}
-              >
-                <Trash2 className="size-4" />
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onForget(); }}>
+                <EyeOff className="size-4" />
                 {t("home.forgetProject")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => setConfirmDelete(true)}>
+                <Trash2 className="size-4" />
+                {t("home.deleteProject")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -276,11 +282,23 @@ function ProjectCard({ entry, isFavorite, onOpen, onToggleFavorite, onForget }: 
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={onForget}>
-          <Trash2 /> {t("home.forgetProject")}
+          <EyeOff /> {t("home.forgetProject")}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem variant="destructive" onClick={() => setConfirmDelete(true)}>
+          <Trash2 /> {t("home.deleteProject")}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
-  );
+    <ConfirmDialog
+      open={confirmDelete}
+      onOpenChange={setConfirmDelete}
+      title={t("home.deleteProjectTitle", { name: entry.title })}
+      description={t("home.deleteProjectWarning")}
+      confirmLabel={t("home.deleteProject")}
+      onConfirm={onDelete}
+    />
+  </>;
 }
 
 // ---------- Composant principal ----------
@@ -336,6 +354,20 @@ export function ReferenceHome({
   const forgetProject = useCallback(async (filePath: string) => {
     setProjects(await (nr.reference?.forgetProject(filePath) ?? Promise.resolve([])));
   }, []);
+
+  const deleteProject = useCallback(async (filePath: string) => {
+    const result = await nr.reference?.deleteProject(filePath);
+    if (!result) return;
+    setProjects(result.recents);
+    if (!result.ok) {
+      useBoard.getState().setNotice({ text: t("notice.failedWith", { error: result.error || t("notice.unknown") }), kind: "error" });
+      return;
+    }
+    const st = useBoard.getState();
+    if (st.filePath?.toLowerCase() === filePath.toLowerCase()) {
+      useBoard.setState({ filePath: null, fileReadonly: false, dirty: st.items.length > 0 });
+    }
+  }, [t]);
 
   const toggleFavorite = useCallback((id: string) => {
     const next = new Set(favorites);
@@ -530,6 +562,7 @@ export function ReferenceHome({
                 onOpen={() => onOpenRecent(entry.path)}
                 onToggleFavorite={() => toggleFavorite(projectFavoriteKey(entry.path))}
                 onForget={() => void forgetProject(entry.path)}
+                onDelete={() => void deleteProject(entry.path)}
               />
             ))}
 

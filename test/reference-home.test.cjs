@@ -52,8 +52,18 @@ test('the saved-project trash overlay asks before removing the recent entry', ()
   const projectCard = source.slice(source.indexOf('function ProjectCard'), source.indexOf('// ---------- Composant principal'));
   assert.match(projectCard, /<DropdownMenu>/);
   assert.match(projectCard, /aria-label=\{t\("home\.deleteOptions"\)\}/);
-  assert.match(projectCard, /<DropdownMenuItem[^]*variant="destructive"[^]*onForget\(\)/);
+  assert.match(projectCard, /<DropdownMenuItem[^]*onForget\(\)[^]*home\.forgetProject/);
   assert.doesNotMatch(projectCard, /<button[^>]*aria-label=\{t\("home\.forgetProject"\)\}[^>]*onClick=\{onForget\}/);
+});
+
+test('saved projects offer permanent deletion behind a destructive confirmation', () => {
+  const projectCard = source.slice(source.indexOf('function ProjectCard'), source.indexOf('// ---------- Composant principal'));
+  assert.match(projectCard, /home\.deleteProject/);
+  assert.match(projectCard, /home\.deleteProjectTitle/);
+  assert.match(projectCard, /home\.deleteProjectWarning/);
+  assert.match(projectCard, /<ConfirmDialog/);
+  assert.match(projectCard, /onConfirm=\{onDelete\}/);
+  assert.match(projectCard, /<DropdownMenuSeparator\s*\/>/);
 });
 
 test('dropping a netsu opens it as a project before media ingestion', () => {

@@ -347,8 +347,45 @@ function closeAllProjects() {
   sessions.closeAll();
 }
 
+/**
+ * Supprime définitivement un projet récent et son dossier compagnon. Les médias externes référencés
+ * par le board ne sont jamais concernés : seul le dossier exact calculé par `sidecarDirFor` part.
+ * Le chemin doit déjà appartenir aux récents et porter l'extension .netsu, afin qu'un renderer
+ * compromis ne puisse pas transformer ce canal en suppression arbitraire.
+ * @param {string} filePath
+ */
+function deleteProject(filePath) {
+  const resolved = path.resolve(String(filePath || ''));
+  const known = recents.list('board').some((entry) => path.resolve(entry.path).toLowerCase() === resolved.toLowerCase());
+  if (path.extname(resolved).toLowerCase() !== '.netsu' || !known) {
+    return { ok: false, error: t('invalidArchive'), recents: recents.list('board') };
+  }
+
+  sessions.closeSession(resolved);
+  const errors = [];
+  for (const target of [resolved, `${resolved}-wal`, `${resolved}-shm`]) {
+    try { fs.rmSync(target, { force: true }); }
+    catch (e) { errors.push(String((e && e.message) || e)); }
+  }
+
+  const mediaDir = sidecar.sidecarDirFor(resolved);
+  try { fs.rmSync(mediaDir, { recursive: true, force: true }); }
+  catch (e) { errors.push(String((e && e.message) || e)); }
+
+  const projectRemoved = !fs.existsSync(resolved);
+  const mediaRemoved = !fs.existsSync(mediaDir);
+  if (projectRemoved) recents.forget(resolved);
+  return {
+    ok: projectRemoved && mediaRemoved && errors.length === 0,
+    projectRemoved,
+    mediaRemoved,
+    recents: recents.list('board'),
+    ...(errors.length ? { error: errors.join(' · ') } : {}),
+  };
+}
+
 module.exports = {
   exportBoard, importBoard, weigh, zipStore, unzip,
   openProject, saveProject, saveProjectAs, closeProject, closeAllProjects,
-  previewProject, recentProjects, forgetProject: recents.forget,
+  previewProject, recentProjects, forgetProject: recents.forget, deleteProject,
 };

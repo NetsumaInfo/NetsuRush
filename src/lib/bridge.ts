@@ -1401,6 +1401,7 @@ export interface RefApi {
   closeProject(filePath: string): Promise<{ ok: boolean; closed?: boolean }>;
   recentProjects(type?: string): Promise<NetsuRecent[]>;
   forgetProject(filePath: string): Promise<NetsuRecent[]>;
+  deleteProject(filePath: string): Promise<{ ok: boolean; projectRemoved?: boolean; mediaRemoved?: boolean; recents: NetsuRecent[]; error?: string }>;
   setDirty(unsaved: boolean): void;
   detach(): void;
   attach(): void;
@@ -3232,6 +3233,7 @@ const mock: NrApi = {
       closeProject: async () => ({ ok: true, closed: false }),
       recentProjects: async () => [],
       forgetProject: async () => [],
+      deleteProject: async () => ({ ok: false, recents: [], error: i18n.t("common:mock.appUnavailable") }),
       setDirty: () => {},
       detach: () => {},
       attach: () => {},

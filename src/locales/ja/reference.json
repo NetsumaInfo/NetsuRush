@@ -430,6 +430,9 @@
     "openProjectFile": "プロジェクトを開く",
     "openProjectLocation": "ファイルの場所を開く",
     "forgetProject": "一覧から削除",
+    "deleteProject": "完全に削除",
+    "deleteProjectTitle": "「{{name}}」を削除しますか？",
+    "deleteProjectWarning": ".netsu ファイルと .medias フォルダーは完全に削除されます。外部のソースメディアは削除されません。",
     "projectMissing": "ファイルが見つかりません"
   },
   "item": {
