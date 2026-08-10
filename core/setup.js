@@ -31,7 +31,7 @@ const PACKAGED = !!process.env.NR_RESOURCE_DIR;
 const FFMPEG_ACCEPTED_VERSIONS = ['9.0', '8.1'];
 // Bump when an update adds a mandatory runtime capability. Existing installs without this marker
 // leave the quick path and run `probeRuntime`, which sends incomplete environments to repair.
-const SETUP_RUNTIME_VERSION = 2;
+const SETUP_RUNTIME_VERSION = 3;
 
 const SETUP_LABELS = {
   fr: { video: 'Prérequis vidéo', ai: 'Prérequis de calcul' },
@@ -184,7 +184,7 @@ function probeRuntime(config = CONFIG) {
     'r={"transnet":False,"torch":False,"gpu":False,"omnishotcut":False,"online":False}',
     'import torch; r["torch"]=True',
     'from transnetv2_pytorch import TransNetV2; r["transnet"]=True',
-    'import yt_dlp, gallery_dl; r["online"]=True',
+    'import yt_dlp, gallery_dl, curl_cffi; r["online"]=True',
     needsOmni ? 'import omnishotcut, decord; r["omnishotcut"]=True' : 'r["omnishotcut"]=True',
     'b=os.environ.get("NETSURUSH_ML_BACKEND", "cpu")',
     'r["actual"]=("rocm" if torch.cuda.is_available() and getattr(torch.version,"hip",None) else ("cuda" if torch.cuda.is_available() else ("xpu" if hasattr(torch,"xpu") and torch.xpu.is_available() else "cpu")))',

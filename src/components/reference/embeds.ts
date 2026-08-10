@@ -38,6 +38,8 @@ export function giphyGifUrl(input: string): string | null {
 export type EmbedProvider =
   | "vimeo" | "dailymotion" | "twitch" | "streamable"
   | "twitter" | "tiktok" | "instagram" | "facebook" | "reddit" | "bluesky"
+  | "threads" | "snapchat" | "pinterest" | "linkedin" | "tumblr" | "flickr"
+  | "bilibili" | "vk" | "kuaishou" | "niconico" | "odysee" | "rumble"
   | "generic";
 
 export interface EmbedInfo {
@@ -119,6 +121,25 @@ export function parseVideoEmbed(input: string, allowGeneric = false): EmbedInfo 
     return { provider: "bluesky", pageUrl: s, size: { w: 480, h: 520 },
       embedUrl: `https://embed.bsky.app/embed/${m[1]}/app.bsky.feed.post/${m[2]}` };
   }
+  // Download-first platforms supported by yt-dlp. Their page URL is kept as a last-resort embed;
+  // normal operation extracts the actual media file.
+  const downloadFirst: [EmbedProvider, RegExp, { w: number; h: number }][] = [
+    ["threads", /threads\.(?:net|com)\//i, { w: 480, h: 600 }],
+    ["snapchat", /snapchat\.com\//i, { w: 400, h: 620 }],
+    ["pinterest", /(?:pinterest\.[^/]+|pin\.it)\//i, { w: 480, h: 600 }],
+    ["linkedin", /(?:linkedin\.com|lnkd\.in)\//i, { w: 500, h: 500 }],
+    ["tumblr", /tumblr\.com\//i, { w: 500, h: 600 }],
+    ["flickr", /(?:flickr\.com|flic\.kr)\//i, { w: 500, h: 420 }],
+    ["bilibili", /(?:bilibili\.com|b23\.tv)\//i, { w: 500, h: 360 }],
+    ["vk", /vk\.com\//i, { w: 500, h: 420 }],
+    ["kuaishou", /kuaishou\.com\//i, { w: 400, h: 620 }],
+    ["niconico", /(?:nicovideo\.jp|nico\.ms)\//i, { w: 500, h: 360 }],
+    ["odysee", /odysee\.com\//i, { w: 500, h: 360 }],
+    ["rumble", /rumble\.com\//i, { w: 500, h: 360 }],
+  ];
+  for (const [provider, pattern, size] of downloadFirst) {
+    if (pattern.test(s)) return { provider, pageUrl: s, embedUrl: s, size };
+  }
 
   if (allowGeneric) return { provider: "generic", pageUrl: s, embedUrl: s };
   return null;
@@ -139,7 +160,11 @@ export const EMBED_PLAYER_PROVIDERS = new Set<EmbedProvider>(["vimeo", "dailymot
 // téléchargement automatique du vrai média. Source unique : la liste réglable des Paramètres
 // (« Télécharger les vidéos en ligne ») et le balayage post-import lisent CETTE liste.
 export const DOWNLOADABLE_EMBED_PROVIDERS: EmbedProvider[] =
-  ["twitter", "tiktok", "instagram", "facebook", "reddit", "bluesky", "generic"];
+  [
+    "twitter", "tiktok", "instagram", "facebook", "reddit", "bluesky",
+    "threads", "snapchat", "pinterest", "linkedin", "tumblr", "flickr",
+    "bilibili", "vk", "kuaishou", "niconico", "odysee", "rumble", "generic",
+  ];
 
 // Une URL pointe-t-elle directement un fichier vidéo / image ? Extension prise du dernier segment
 // du chemin, sinon du paramètre de requête (CDN type pbs.twimg.com/...?format=jpg, ?fm=webp).

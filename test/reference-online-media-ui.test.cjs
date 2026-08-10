@@ -9,6 +9,7 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', '
 const actions = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'boardMediaActions.ts'), 'utf8');
 const persistence = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'useScenePersistence.ts'), 'utf8');
 const toolbar = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'Toolbar.tsx'), 'utf8');
+const prefs = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'boardPrefs.ts'), 'utf8');
 const recoveryFile = path.join(__dirname, '..', 'src', 'components', 'reference', 'boardMediaRecovery.ts');
 
 function loadRecoveryModule() {
@@ -28,10 +29,15 @@ test('online ingestion passes the global linked/download choice to the generic r
   assert.match(source, /res\.path\s*\?\?\s*res\.url/);
 });
 
-test('YouTube downloads only in automatic mode and AMVNews stays generic', () => {
-  assert.match(source, /if\s*\(yt\s*&&\s*!prefs\.autoDownloadOnline\)/);
-  assert.match(source, /if\s*\(yt\s*&&\s*prefs\.autoDownloadOnline\)/);
+test('YouTube stays linked while AMVNews stays generic', () => {
+  assert.match(source, /if \(yt\) \{\s*place\("youtube"/s);
+  assert.doesNotMatch(source, /yt\s*&&\s*prefs\.autoDownloadOnline/);
   assert.doesNotMatch(source, /amvnews/i);
+});
+
+test('online media downloads by default while YouTube stays linked', () => {
+  assert.match(prefs, /autoDownloadOnline:\s*true/);
+  assert.match(prefs, /onlineDefaultsVersion:\s*1/);
 });
 
 test('Instagram video extraction falls back to its embed instead of an OpenGraph thumbnail', () => {

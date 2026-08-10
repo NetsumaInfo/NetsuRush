@@ -519,8 +519,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
 
         <Separator />
 
-        {/* Vidéos en ligne : auto-téléchargement (yt-dlp) — défaut OFF (YouTube/embeds restent en lecteur).
-            En mode auto, la liste des plateformes concernées est réglable (les autres restent en embed). */}
+        {/* Online media downloads by default; YouTube stays linked. Providers remain individually configurable. */}
         <section className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-xs font-semibold text-foreground">{t("settings.downloadOnline")}</h3>

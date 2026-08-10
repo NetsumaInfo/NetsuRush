@@ -135,10 +135,23 @@ test('NetsuBoard link tools are mandatory and verified outside optional module p
   const optional = setup.slice(setup.indexOf('$moduleRequirements'), setup.indexOf('Progress 72'));
   assert.doesNotMatch(optional, /reference\s*=\s*'requirements-reference\.txt'/);
   assert.doesNotMatch(optional, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
-  assert.match(setup, /setupRuntimeVersion\s*=\s*2/);
+  assert.match(setup, /setupRuntimeVersion\s*=\s*3/);
   const coreSetup = fs.readFileSync(path.join(root, 'core', 'setup.js'), 'utf8');
   assert.match(coreSetup, /import yt_dlp, gallery_dl/);
   assert.match(coreSetup, /runtime\.online/);
+});
+
+test('the packaged NetsuBoard runtime includes the current Instagram extractor and impersonation stack', () => {
+  const req = fs.readFileSync(path.join(root, 'python', 'requirements-reference.txt'), 'utf8');
+  const fullReq = fs.readFileSync(path.join(root, 'python', 'requirements.txt'), 'utf8');
+  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
+  const build = fs.readFileSync(path.join(root, 'scripts', 'build.ps1'), 'utf8');
+  const ytDlpPin = /yt-dlp\[default,curl-cffi\]==2026\.8\.4\.234419\.dev0/;
+  assert.match(req, ytDlpPin);
+  assert.match(fullReq, ytDlpPin);
+  assert.match(setup, /import yt_dlp, gallery_dl, curl_cffi/);
+  assert.match(build, /Copy-Item -Recurse -Force \(Join-Path \$root 'python\\\*'\) \$stagePy/);
+  assert.match(build, /ReadAllText\(\(Join-Path \$PSScriptRoot 'setup\.ps1'\)/);
 });
 
 // Le paquet ONNX installé ne prouve pas que son provider existe (CUDA/cuDNN absents, roue CPU

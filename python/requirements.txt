@@ -24,7 +24,7 @@ basicsr
 # Loader générique (modèle "fallin" = CUGAN, et tout .pth/.safetensors OpenModelDB) : Spandrel (MIT).
 spandrel
 # Board de référence : extraction du vrai média derrière liens sociaux / sites vidéo.
-yt-dlp
+yt-dlp[default,curl-cffi]==2026.8.4.234419.dev0
 gallery-dl
 # Module voix (transcribe.py / silence.py) — silences + sous-titres + montage par texte.
 # ⚠️ `faster-whisper` déclare `onnxruntime` SANS extra : pip pose alors la variante CPU PAR-DESSUS

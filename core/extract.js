@@ -89,6 +89,9 @@ async function tryYtdlp(url, cookiesBrowser, outputDir) {
     '-o', outTpl,
     '--print', 'after_move:filepath',
   ];
+  // Instagram changes its public web API frequently. The current extractor plus browser
+  // impersonation keeps this path independent from a locked local Chrome cookie database.
+  if (/https?:\/\/(?:www\.)?instagram\.com\//i.test(url)) args.push('--impersonate', 'chrome');
   const ffDir = ffmpegDir();
   if (ffDir) args.push('--ffmpeg-location', ffDir);
   if (cookiesBrowser) args.push('--cookies-from-browser', cookiesBrowser);

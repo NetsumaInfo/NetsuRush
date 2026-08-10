@@ -420,7 +420,7 @@ if ($LASTEXITCODE -ne 0) {
   $boardLog | ForEach-Object { Info "pip NetsuBoard> $_" }
   Fail (T 'requirementsFailed')
 }
-$boardProbe = & $venvPy -c 'import yt_dlp, gallery_dl' 2>&1
+$boardProbe = & $venvPy -c 'import yt_dlp, gallery_dl, curl_cffi' 2>&1
 if ($LASTEXITCODE -ne 0) {
   $boardProbe | ForEach-Object { Info "probe NetsuBoard> $_" }
   Fail "NetsuBoard est installé mais ses outils de liens sont inutilisables"
@@ -792,7 +792,7 @@ $cfg = [ordered]@{
   # par une comparaison de chaînes, sans lancer ffmpeg : le contrôle rapide est traversé à CHAQUE
   # lancement, un processus de plus s'y paierait à chaque fois.
   ffmpegVersion = $ffCurrent
-  setupRuntimeVersion = 2
+  setupRuntimeVersion = 3
   realesganDir  = $realdir
   mlBackend     = $MlBackend
   onnxBackend   = $OnnxBackend

@@ -148,6 +148,18 @@
     "provider_facebook": "Facebook",
     "provider_reddit": "Reddit",
     "provider_bluesky": "Bluesky",
+    "provider_threads": "Threads",
+    "provider_snapchat": "Snapchat",
+    "provider_pinterest": "Pinterest",
+    "provider_linkedin": "LinkedIn",
+    "provider_tumblr": "Tumblr",
+    "provider_flickr": "Flickr",
+    "provider_bilibili": "Bilibili",
+    "provider_vk": "VK",
+    "provider_kuaishou": "Kuaishou",
+    "provider_niconico": "Niconico",
+    "provider_odysee": "Odysee",
+    "provider_rumble": "Rumble",
     "provider_generic": "其他网站"
   },
   "inspector": {

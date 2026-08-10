@@ -382,20 +382,9 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
 
       // 1. YouTube : lecteur relayé sans habillage par défaut ; extraction locale en mode auto.
       const yt = youtubeId(text);
-      if (yt && !prefs.autoDownloadOnline) {
+      if (yt) {
         place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube");
         return true;
-      }
-      if (yt && prefs.autoDownloadOnline) {
-        const at = centerPoint();
-        const loadingId = addLoading(at, "YouTube");
-        try {
-          if (await extractAndPlace(text, at)) return true;
-          place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube", at);
-          return true;
-        } finally {
-          removeItem(loadingId);
-        }
       }
 
       // 2. Providers nommés : lecteur tant que leur téléchargement auto n'est pas explicitement actif.

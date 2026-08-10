@@ -153,7 +153,10 @@ export function iconForLink(url: string): AnyIcon {
 const BY_PROVIDER: Record<string, AnyIcon> = {
   twitter: XIcon, tiktok: TikTokIcon, instagram: InstagramIcon, facebook: FacebookIcon,
   reddit: RedditIcon, bluesky: BlueskyIcon, vimeo: VimeoIcon, dailymotion: DailymotionIcon,
-  twitch: TwitchIcon, streamable: StreamableIcon,
+  twitch: TwitchIcon, streamable: StreamableIcon, threads: ThreadsIcon, snapchat: SnapchatIcon,
+  pinterest: PinterestIcon, linkedin: LinkedInIcon, tumblr: TumblrIcon, flickr: FlickrIcon,
+  bilibili: BilibiliIcon, vk: VkIcon, kuaishou: KuaishouIcon, niconico: NiconicoIcon,
+  odysee: OdyseeIcon, rumble: RumbleIcon,
 };
 export function iconForProvider(provider: string): AnyIcon {
   return BY_PROVIDER[provider] ?? Globe;

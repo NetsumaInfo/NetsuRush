@@ -79,9 +79,9 @@ export interface BoardPrefs {
   seqHeight: number;         // qualité = hauteur des frames (px)
   seqMaxFrames: number;      // plafond de frames (évite de cribler le disque)
   seqMarginSec: number;      // marge de sécurité gardée avant/après l'in-out (s) — pour réajuster
-  // Vidéos en ligne (YouTube/embeds sociaux) : téléchargées en fichier local seulement si activé.
-  // Défaut OFF → restent en LECTEUR (pas de yt-dlp surprise). Le téléchargement par item reste manuel.
+  // Online media downloads locally by default. YouTube is deliberately excluded and stays linked.
   autoDownloadOnline: boolean;
+  onlineDefaultsVersion: number;
   // Plateformes concernées par ce téléchargement automatique (les autres restent en carte embed).
   autoDownloadProviders: EmbedProvider[];
   // Repasser un média téléchargé en lecteur/carte embed doit-il SUPPRIMER le fichier local ?
@@ -119,7 +119,8 @@ const PREFS_DEFAULT: BoardPrefs = {
   seqHeight: 240,
   seqMaxFrames: 200,
   seqMarginSec: 0,
-  autoDownloadOnline: false,
+  autoDownloadOnline: true,
+  onlineDefaultsVersion: 1,
   autoDownloadProviders: [...DOWNLOADABLE_EMBED_PROVIDERS],
   dropDownloadOnEmbed: false,
   upQuick: false,
@@ -137,6 +138,9 @@ export function readPrefs(): BoardPrefs {
     const v = JSON.parse(localStorage.getItem(PREFS_KEY) || "");
     if (v && typeof v === "object") return {
       ...PREFS_DEFAULT, ...v,
+      // Migrate the former linked-by-default behavior once; subsequent explicit choices are kept.
+      autoDownloadOnline: v.onlineDefaultsVersion === 1 ? v.autoDownloadOnline !== false : true,
+      onlineDefaultsVersion: 1,
       upShader: v.upShader === "anime4k" ? "anime4k_aa_hq"
         : v.upShader === "artcnn_quality" ? "artcnn_c4f32" : v.upShader ?? PREFS_DEFAULT.upShader,
       favFonts: Array.isArray(v.favFonts) ? v.favFonts : [],
