@@ -17,18 +17,21 @@ import { useSceneCardMedia } from "./useSceneCardMedia";
 const ACT_VIS = IS_REMOTE ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100";
 
 function SceneCardImpl({
-  seg, index, clipPath, clipName, srcFrames, cols, cellH, active, selected, play, getProxy, bustProxy, onPlay, onToggle, onAddToTimeline, addLabel, pos, dur,
+  seg, index, clipPath, clipName, srcFrames, active, selected, play, getProxy, bustProxy, onPlay, onToggle, onAddToTimeline, addLabel, pos, dur,
 }: {
-  seg: Segment; index: number; clipPath: string; clipName: string; srcFrames: number; cols: number; cellH: number; active: boolean; selected: boolean; play: boolean;
+  seg: Segment; index: number; clipPath: string; clipName: string; srcFrames: number; active: boolean; selected: boolean; play: boolean;
   getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>; bustProxy: () => void; onPlay: () => void;
   // `mods` porte les modificateurs du clic : Maj = étendre la plage depuis l'ancre, Ctrl = basculer.
   onToggle: (mods?: { shift?: boolean; ctrl?: boolean }) => void;
   onAddToTimeline?: () => Promise<{ ok: boolean; error?: string }>; addLabel?: string; pos: string; dur: string;
 }) {
   const { t } = useTranslation("derush");
-  const { rootRef, thumb, url, showVideo, videoPaused, near, hovered, onVideoError, enter, leave } =
-    useSceneCardMedia({ seg, index, clipPath, cols, play, getProxy, bustProxy });
+  const { rootRef, thumb, url, showVideo, videoPaused, near, interactive, hovered, onVideoError, enter, leave, focusEnter, focusLeave } =
+    useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy });
   const playing = showVideo && !videoPaused;
+  // Habillage de survol : monté seulement quand la carte est SOUS le pointeur (ou au clavier). En
+  // remote, les icônes restent visibles au repos (cf. ACT_VIS) → il faut les monter dès la bande.
+  const chrome = IS_REMOTE ? near : interactive;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
 
@@ -54,6 +57,8 @@ function SceneCardImpl({
           aria-label={selected ? t("sceneCard.ariaDeselect", { n: index + 1 }) : t("sceneCard.ariaSelect", { n: index + 1 })}
           onMouseEnter={enter}
           onMouseLeave={leave}
+          onFocus={focusEnter}
+          onBlur={focusLeave}
           // clic = sélectionner (toggle) ; Maj+clic = plage ; Ctrl+clic = bascule ; double-clic = lecteur
           onClick={(e) => onToggle({ shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey })}
           onDoubleClick={onPlay}
@@ -61,10 +66,10 @@ function SceneCardImpl({
             if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle({ shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey }); }
             else if (e.key === "p" || e.key === "P") { e.preventDefault(); onPlay(); }
           }}
-          // `containIntrinsicSize` = hauteur RÉELLE de la carte → le placeholder hors-vue (content-visibility:auto)
-          // colle à la taille affichée : pas d'oscillation de layout au scroll (rangées blanches en densité forte).
-          style={cellH ? { containIntrinsicSize: `auto ${cellH}px` } : undefined}
-          className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 [content-visibility:auto] [contain-intrinsic-size:auto_200px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}
+          // `nr-grid-card` = content-visibility + hauteur de remplacement lue dans `--nr-cell-h`,
+          // posée UNE fois sur le conteneur de grille (cf. index.css) : la carte ne porte plus de
+          // hauteur en prop, donc un cran de densité ne rerend aucune carte.
+          className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 nr-grid-card outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}
         />
       }>
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
@@ -83,9 +88,10 @@ function SceneCardImpl({
           apparus « après coup » tant qu'ils attendaient l'observateur de proximité — la vignette,
           elle, sort du cache renderer dès le premier rendu, donc l'image arrivait avant ses
           pastilles. Seul l'habillage RÉVÉLÉ AU SURVOL (donc invisible au repos) est différé : c'est
-          lui qui coûte cher (infobulles et popover Base UI, une racine par carte). */}
+          lui qui coûte cher (infobulles et popover Base UI, une racine par carte), et il ne se monte
+          donc QUE pour la carte sous le pointeur — jamais pour la bande entière. */}
       <span className="absolute left-1.5 top-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums">#{index + 1}</span>
-      {near ? (
+      {chrome ? (
         <Tooltip>
           <TooltipTrigger render={<span className="absolute bottom-1.5 right-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums" />}>
             {dur}
@@ -97,9 +103,9 @@ function SceneCardImpl({
       )}
       {/* La pastille de sélection est visible quand la carte est cochée → elle ne peut pas attendre
           la bande, sinon une carte cochée hors bande perdrait sa coche. */}
-      {(near || selected) && <SelectToggle selected={selected} onToggle={() => onToggle()} />}
+      {(chrome || selected) && <SelectToggle selected={selected} onToggle={() => onToggle()} />}
 
-      {near && (<>
+      {chrome && (<>
         {/* ranger ce plan dans une collection (bibliothèque) — directement sur la vignette */}
         <Tooltip>
           <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${ACT_VIS}`} />}>
@@ -126,7 +132,7 @@ function SceneCardImpl({
       </>)}
       </ContextMenuTrigger>
       {/* Clic droit : lire / (dé)sélectionner / envoyer à la timeline. */}
-      {near && (
+      {chrome && (
       <ContextMenuContent className="min-w-48">
         <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>
         <ContextMenuItem onClick={() => onToggle()}>
@@ -151,7 +157,7 @@ function SceneCardImpl({
 // lus via ref dans le hook média) sont volontairement ignorés → 1 seule carte re-rend, pas 494.
 export const SceneCard = memo(SceneCardImpl, (a, b) =>
   a.seg.id === b.seg.id && a.seg.in === b.seg.in && a.seg.out === b.seg.out &&
-  a.index === b.index && a.clipPath === b.clipPath && a.clipName === b.clipName && a.srcFrames === b.srcFrames && a.cols === b.cols && a.cellH === b.cellH &&
+  a.index === b.index && a.clipPath === b.clipPath && a.clipName === b.clipName && a.srcFrames === b.srcFrames &&
   a.active === b.active && a.selected === b.selected && a.play === b.play &&
   a.pos === b.pos && a.dur === b.dur && a.addLabel === b.addLabel && !!a.onAddToTimeline === !!b.onAddToTimeline,
 );

@@ -16,7 +16,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
-import { autoplayCeiling, fmt, gridMetrics, setMaxPlaying, type Segment } from "./cutStudioShared";
+import { autoplayCeiling, fmt, gridContainerStyle, gridMetrics, setMaxPlaying, type Segment } from "./cutStudioShared";
 import { RATE_LADDER } from "./cutShortcuts";
 import { useCutActions } from "./useCutActions";
 import { useCutShortcuts } from "./useCutShortcuts";
@@ -109,7 +109,7 @@ export function CutStudio() {
   // de colonnes ne bouge pas. Le +/- règle ce nombre.
   const gridScrollRef = useRef<HTMLDivElement>(null);
   const [gridW, setGridW] = useState(0);
-  const { actualCols, cellH } = gridMetrics(gridW, cols, narrow);
+  const { actualCols, cell } = gridMetrics(gridW, cols, narrow);
   useEffect(() => {
     const el = gridScrollRef.current;
     if (!el) return;
@@ -439,9 +439,9 @@ export function CutStudio() {
               colonne vienne contre le lecteur : 2 px, la barre de défilement, le trait de poignée. */}
           <div ref={gridScrollRef} style={{ contain: "layout paint" }} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5">
             {segments.length > 0 ? (
-              <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${actualCols}, minmax(0, 1fr))` }}>
+              <div className="grid gap-3" style={gridContainerStyle(actualCols, cell)}>
                 {segments.map((s, i) => (
-                  <SceneCard key={s.id} seg={s} index={i} clipPath={clip.path} clipName={clip.name} srcFrames={srcFrames} cols={actualCols} cellH={cellH}
+                  <SceneCard key={s.id} seg={s} index={i} clipPath={clip.path} clipName={clip.name} srcFrames={srcFrames}
                     active={active?.id === s.id} selected={sel.has(s.id)} play={gridPlay}
                     getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => proxyCache.delete(s.id)} onPlay={() => playScene(s)}
                     onToggle={(mods) => toggleSel(s.id, mods)}

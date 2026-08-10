@@ -33,7 +33,7 @@ import { cutsOfTrack, trackOptions } from "./timelineTracks";
 import { hostBuildTimeline, hostShort } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
 import { timelineBuildOptsFromProfile } from "@/features/export/timelineTarget";
-import { fmt, nextSegId } from "./cutStudioShared";
+import { fmt, gridContainerStyle, nextSegId } from "./cutStudioShared";
 
 // L'identité d'un plan ne suffit pas : sa fin, sa position timeline, son FPS ou même sa source peuvent
 // changer sans modifier `track:index:inFrame`. Cette empreinte pilote la réutilisation exacte du cache.
@@ -616,14 +616,14 @@ export function TimelineLiveView() {
       <div className="flex min-h-0 flex-1 px-4">
       <div ref={grid.gridScrollRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto mr-1 pl-1 pr-2 pb-4 pt-2">
         {loading ? (
-          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${grid.actualCols || grid.cols}, minmax(0, 1fr))` }}>
+          <div className="grid gap-3" style={gridContainerStyle(grid.actualCols || grid.cols, grid.cell)}>
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
           </div>
         ) : items.length ? (
-          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${grid.actualCols || grid.cols}, minmax(0, 1fr))` }}>
+          <div className="grid gap-3" style={gridContainerStyle(grid.actualCols || grid.cols, grid.cell)}>
             {items.map(({ cut, seg }, i) => (
               <ShotCard
-                key={cut.id} seg={seg} index={i} clipPath={cut.path} cols={grid.cols}
+                key={cut.id} seg={seg} index={i} clipPath={cut.path}
                 active={activeCutId === cut.id}
                 selected={sel.has(cut.id)}
                 play={grid.gridPlay}

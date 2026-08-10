@@ -7,15 +7,15 @@ import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
 import { retainPausedVideo } from "@/lib/previewVideoPool";
+import { IS_REMOTE } from "@/lib/remote";
 
-// Bandes d'anticipation, en hauteurs de carte. La vignette est un fichier déjà encodé servi en HTTP
-// (cache disque + ETag) : on peut la demander très loin devant. Le proxy coûte un ffmpeg, donc sa
-// bande reste courte — juste assez pour que l'encode soit terminé à l'arrivée à l'écran.
-const THUMB_ROWS_AHEAD = 8;
-const VIDEO_ROWS_AHEAD = 2.5;
+// Bandes d'anticipation, en PIXELS FIXES. Elles étaient dérivées de la hauteur de cellule, donc un
+// cran de densité changeait la marge de chaque carte : trois désabonnements + trois abonnements par
+// vignette, soit quelques milliers d'opérations d'observateur sur un rush de plusieurs centaines de
+// plans — c'est ce qui figeait le +/-. En pixels, les abonnements survivent au changement.
 const THUMB_MIN_MARGIN_PX = 1200;
-// La bande proxy doit toujours couvrir la bande de LECTURE : en densité forte une rangée fait moins
-// de 100 px, et 2,5 rangées seraient plus étroites que l'avance de lecture ci-dessous.
+// INVARIANT : la bande proxy couvre la bande de LECTURE (sinon une carte réclamerait son créneau de
+// lecture avant que son encode ait été lancé).
 const VIDEO_MIN_MARGIN_PX = 420;
 // AVANCE DE LECTURE. Une carte prend son créneau AVANT d'entrer dans le viewport : le temps qu'elle
 // arrive à l'écran, son proxy est chargé et l'aperçu tourne déjà. Piloter la lecture sur la
@@ -35,7 +35,6 @@ interface SceneCardMediaOpts {
   seg: Segment;
   index: number;
   clipPath: string;
-  cols: number;
   play: boolean;
   getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>;
   bustProxy: () => void;
@@ -52,23 +51,35 @@ interface SceneCardMedia {
   /** La carte est assez proche de l'écran pour mériter son habillage (boutons, menus, pastilles).
    *  Loin de l'écran, une carte ne rend QUE sa vignette : cf. le commentaire dans SceneCard. */
   near: boolean;
+  /** Le pointeur ou le clavier est SUR la carte → son habillage de survol mérite d'exister. */
+  interactive: boolean;
   hovered: boolean;
   onVideoError: () => void;
   enter: () => void;
   leave: () => void;
+  focusEnter: () => void;
+  focusLeave: () => void;
 }
 
 // État + effets « média/visibilité » d'une carte de plan : deux IntersectionObservers (vignette
 // loin, <video> ±1 rangée), vignette en lazy avec retry, créneau de lecture « Lecture auto »
 // échelonné, chargement du proxy à la demande avec retry, survol temporisé.
 export function useSceneCardMedia({
-  seg, index, clipPath, cols, play, getProxy, bustProxy,
+  seg, index, clipPath, play, getProxy, bustProxy,
 }: SceneCardMediaOpts): SceneCardMedia {
   const rootRef = useRef<HTMLDivElement>(null);
 
   const [thumb, setThumb] = useState<string | null>(() => getThumb(clipPath, thumbTime(seg.in, seg.out)));
   const [url, setUrl] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
+  // Présence du pointeur / du clavier sur la carte, SANS le délai de survol (celui-ci ne retient que
+  // la LECTURE). Sert à monter l'habillage révélé au survol — infobulles, popover « Ranger », menu
+  // contextuel : une racine Base UI chacun. Cet habillage suivait la bande vignette (±1200 px, soit
+  // des dizaines de cartes de chaque côté) : traîner le curseur de la barre de défilement montait
+  // puis démontait ces racines pour CHAQUE carte traversée. Un défilement traîné à la souris avance
+  // sur le thread principal — celui-là même que ces montages saturaient, d'où le tremblement.
+  const [pointerOn, setPointerOn] = useState(false);
+  const [focusOn, setFocusOn] = useState(false);
   const [nearThumb, setNearThumb] = useState(false); // vignette (légère) : précharge loin
   const [nearVideo, setNearVideo] = useState(false); // proxy HEVC : précharge visible ±1 rangée
   const [visible, setVisible] = useState(false);     // VRAIMENT à l'écran : pilote le créneau de lecture
@@ -76,9 +87,9 @@ export function useSceneCardMedia({
   const [tries, setTries] = useState(0);
   const [thumbTries, setThumbTries] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Hauteur d'encodage proxy = hauteur RÉELLE de la cellule (× DPR) → on n'encode/décode jamais
-  // plus de pixels que ce qui s'affiche. Mesurée dans l'IO (ci-dessous), lue à la génération.
-  const proxyHRef = useRef(0);
+  // Mesurée au moment de la demande : un changement de densité ne doit pas réinstaller les
+  // observateurs, mais le proxy conserve la résolution réellement affichée.
+  const proxyHeight = () => Math.round((rootRef.current?.clientHeight || 180) * (window.devicePixelRatio || 1));
 
   // getProxy/bustProxy sont recréés à chaque rendu du parent ; on les lit via ref pour ne pas
   // relancer le chargement du proxy / l'invalidation à chaque rendu (deps stables).
@@ -103,21 +114,31 @@ export function useSceneCardMedia({
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
-    const h = el.clientHeight || 180;
-    proxyHRef.current = Math.round(h * (window.devicePixelRatio || 1));
-    // Vignette : bande LARGE. Le fichier est déjà encodé (cache disque, servi en HTTP avec ETag) →
-    // le demander loin devant ne coûte qu'une requête, et l'image est posée bien avant l'arrivée à
-    // l'écran. Hors viewport la demande part en priorité BASSE : le core réserve ainsi ses derniers
-    // ouvriers aux cartes réellement visibles.
-    const stopThumb = observeViewport(el, Math.max(THUMB_MIN_MARGIN_PX, Math.round(h * THUMB_ROWS_AHEAD)), setNearThumb);
     // Proxy : bande COURTE (l'encode coûte un ffmpeg), assez large pour que la préchauffe soit
     // terminée à l'arrivée à l'écran. Le côté qu'on quitte est annulé (proxyCancel).
-    const stopVideo = observeViewport(el, Math.max(VIDEO_MIN_MARGIN_PX, Math.round(h * VIDEO_ROWS_AHEAD)), setNearVideo);
+    const stopVideo = observeViewport(el, VIDEO_MIN_MARGIN_PX, setNearVideo);
     // Bande de LECTURE : courte avance sur le viewport, pour que la carte joue déjà quand elle
     // apparaît. Le plafond de lecture auto compte cette avance (cf. autoplayCeiling).
     const stopVisible = observeViewport(el, PLAY_LEAD_PX, setVisible);
-    return () => { stopThumb(); stopVideo(); stopVisible(); };
-  }, [cols]);
+    return () => { stopVideo(); stopVisible(); };
+  }, []);
+
+  // Vignette : bande LARGE. Le fichier est déjà encodé (cache disque, servi en HTTP avec ETag) →
+  // le demander loin devant ne coûte qu'une requête, et l'image est posée bien avant l'arrivée à
+  // l'écran. Hors viewport la demande part en priorité BASSE : le core réserve ainsi ses derniers
+  // ouvriers aux cartes réellement visibles.
+  //
+  // Observateur RENDU dès que la vignette est posée : il n'a plus rien à déclencher, et son
+  // va-et-vient rerendait la carte à chaque traversée. Sur une grille réchauffée (le batch d'ouverture
+  // pose toutes les vignettes d'un coup), traîner le curseur de la barre ne réveille donc plus qu'une
+  // bande par carte au lieu de trois. En remote, l'habillage suit cette bande faute de survol fiable
+  // (cf. SceneCard) : on la garde.
+  const thumbBandDone = !!thumb && !IS_REMOTE;
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || thumbBandDone) return;
+    return observeViewport(el, THUMB_MIN_MARGIN_PX, setNearThumb);
+  }, [thumbBandDone]);
 
   // Amorçage en LOT : à l'ouverture de la grille, warmResolveThumbs prime le cache pour toutes les
   // cartes en UN RPC. Une carte déjà montée (sans vignette) se réveille ici et lit le cache → affiche
@@ -196,7 +217,7 @@ export function useSceneCardMedia({
     let alive = true;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
     const token = nextProxyToken();
-    getProxyRef.current(proxyHRef.current, token, "high").then((u) => {
+    getProxyRef.current(proxyHeight(), token, "high").then((u) => {
       if (!alive) return;
       if (u) setUrl(u);
       else if (tries < 4) retryTimer = setTimeout(() => alive && setTries((t) => t + 1), 600);
@@ -210,7 +231,7 @@ export function useSceneCardMedia({
   // aperçus « en retard » sur le défilement.
   //
   // Trois garde-fous, chacun ciblant un échec déjà constaté :
-  // 1. la BANDE (≈2,5 rangées) — pré-encoder toute la grille noyait NVENC et laissait une grille noire ;
+  // 1. la BANDE (VIDEO_MIN_MARGIN_PX) — pré-encoder toute la grille noyait NVENC et laissait une grille noire ;
   // 2. le DÉLAI DE STABILISATION — un flick traverse la bande en moins que ça, donc n'émet rien ;
   // 3. le PLAFOND de créneaux (`previewPrefetch`) — le pont /rpc reste libre pour les vignettes.
   const [prefetchReady, setPrefetchReady] = useState(false);
@@ -234,7 +255,7 @@ export function useSceneCardMedia({
     const releaseSlot = () => { const done = release; release = null; done?.(); };
     release = acquirePrefetchSlot(() => {
       token = nextProxyToken();
-      void getProxyRef.current(proxyHRef.current, token, "low")
+      void getProxyRef.current(proxyHeight(), token, "low")
         .then((u) => { if (alive && u) setUrl(u); })
         .finally(releaseSlot);
     });
@@ -253,12 +274,20 @@ export function useSceneCardMedia({
   }
 
   function enter() {
+    setPointerOn(true);
     timer.current = setTimeout(() => setHovered(true), 180);
   }
   function leave() {
+    setPointerOn(false);
     if (timer.current) clearTimeout(timer.current);
     setHovered(false);
   }
+  function focusEnter() { setFocusOn(true); }
+  function focusLeave() { setFocusOn(false); }
 
-  return { rootRef, thumb, url, showVideo, videoPaused, near: nearThumb || hovered, hovered, onVideoError, enter, leave };
+  return {
+    rootRef, thumb, url, showVideo, videoPaused,
+    near: nearThumb || hovered, interactive: pointerOn || focusOn, hovered,
+    onVideoError, enter, leave, focusEnter, focusLeave,
+  };
 }

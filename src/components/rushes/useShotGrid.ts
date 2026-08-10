@@ -72,7 +72,7 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [cols, narrow]);
-  const { cell, actualCols, cellH } = gridMetrics(gridW, cols, narrow);
+  const { cell, actualCols } = gridMetrics(gridW, cols, narrow);
 
   const key = (path: string, start: number, end: number, requireVideo = false) => `${path}|${start.toFixed(3)}|${end.toFixed(3)}|${requireVideo ? "video" : "grid"}|${previewSettingsFingerprint()}`;
 
@@ -244,5 +244,5 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
     genTokensRef.current = [];
   }
 
-  return { cols, setCols, cell, actualCols, cellH, gridPlay, setGridPlay, gridScrollRef, getProxy, bust, warmThumbs, proxyGen, generateProxies, thumbsGen, generateThumbs, cancelGeneration, invalidatePreviewRanges };
+  return { cols, setCols, cell, actualCols, gridPlay, setGridPlay, gridScrollRef, getProxy, bust, warmThumbs, proxyGen, generateProxies, thumbsGen, generateThumbs, cancelGeneration, invalidatePreviewRanges };
 }

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { DetectModel } from "@/lib/bridge";
 import { fmtTime } from "@/lib/utils";
 
@@ -63,18 +64,32 @@ const MIN_CELL = 120;
 const MIN_CELL_NARROW = 96;   // vue étroite : on accepte plus petit pour garder des colonnes
 
 export function gridMetrics(width: number, cols: number, narrow = false) {
-  if (!width) return { cell: 0, actualCols: cols, cellH: 0 };
+  if (!width) return { cell: 0, actualCols: cols };
   const inner = width - GRID_PAD;
   const floor = narrow ? MIN_CELL_NARROW : MIN_CELL;
   const cellFor = (n: number) => (inner - (n - 1) * GRID_GAP) / n;
   let actualCols = Math.max(1, Math.floor(cols));
   while (actualCols > 1 && cellFor(actualCols) < floor) actualCols--;
   const cell = cellFor(actualCols);
-  // Hauteur RÉELLE d'une carte (aspect-video) = largeur de colonne × 9/16. Sert de
-  // `contain-intrinsic-size` aux cartes hors écran : un placeholder de la mauvaise hauteur fait
-  // osciller le layout au scroll (rangées blanches en densité forte).
-  const cellH = Math.round((cell * 9) / 16);
-  return { cell, actualCols, cellH };
+  return { cell, actualCols };
+}
+
+// Style du CONTENEUR de grille : colonnes + hauteur de rangée publiée en variable CSS. Les cartes
+// (`.nr-grid-card`) lisent `--nr-cell-h` par héritage, donc changer de densité met à jour le
+// placeholder hors écran de toutes les cartes SANS en rerendre une seule.
+//
+// La valeur est celle de la MÊME formule que le navigateur applique (`aspect-video` sur une piste
+// `1fr`) et elle n'est PAS arrondie : la hauteur estimée d'une carte hors écran est alors celle
+// qu'elle aura une fois rendue, donc `scrollHeight` ne bouge pas quand une rangée entre à l'écran.
+// C'est ce qui fait sauter la barre de défilement quand l'estimation dérive, même d'un demi-pixel
+// par rangée : sur plusieurs centaines de plans, l'écart cumulé redimensionne le curseur en plein
+// défilement.
+export function gridContainerStyle(actualCols: number, cell: number): CSSProperties {
+  const style: Record<string, string> = { gridTemplateColumns: `repeat(${actualCols}, minmax(0, 1fr))` };
+  // `cell` vaut 0 tant que la largeur n'est pas mesurée : on laisse alors le repli du CSS plutôt que
+  // d'annoncer des rangées de hauteur nulle (toutes les cartes deviendraient « pertinentes » d'un coup).
+  if (cell > 0) style["--nr-cell-h"] = `${((cell * 9) / 16).toFixed(3)}px`;
+  return style as CSSProperties;
 }
 
 // Plafond de lecture auto = miniatures VISIBLES + une rangée tampon (préchargée), écrêté par

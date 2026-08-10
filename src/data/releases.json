@@ -1,5 +1,28 @@
 [
   {
+    "id": "netsurush-0.3.7",
+    "version": "0.3.7",
+    "date": "2026-08-10",
+    "title": {
+      "fr": "NetsuBoard enrichi et grilles plus fluides",
+      "en": "Expanded NetsuBoard and smoother grids"
+    },
+    "highlights": {
+      "fr": [
+        "NetsuBoard importe davantage de médias en ligne, conserve leur provenance et récupère les fichiers déplacés ou manquants.",
+        "Les projets récents sont unifiés, plus faciles à retrouver, révéler et supprimer, avec leurs téléchargements rangés à côté du projet.",
+        "L’export fusionné permet de régler une pause noire entre les plans, avec une durée par défaut d’une seconde.",
+        "Les grandes grilles de plans restent plus fluides pendant le défilement, le survol et les changements de densité."
+      ],
+      "en": [
+        "NetsuBoard imports more online media, preserves its provenance, and recovers moved or missing files.",
+        "Recent projects are unified and easier to find, reveal, and delete, with downloads stored beside each project.",
+        "Merged exports can add a configurable black pause between shots, defaulting to one second.",
+        "Large shot grids remain smoother while scrolling, hovering, and changing thumbnail density."
+      ]
+    }
+  },
+  {
     "id": "netsurush-0.3.6",
     "version": "0.3.6",
     "date": "2026-08-10",

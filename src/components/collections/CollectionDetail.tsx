@@ -23,7 +23,7 @@ import { ShotCard } from "@/components/rushes/ShotCard";
 import { useShotGrid } from "@/components/rushes/useShotGrid";
 import { useTimelineTarget } from "@/components/rushes/useTimelineTarget";
 import { TimelineTargetSelect } from "@/components/rushes/TimelineTargetSelect";
-import { fmt, nextSegId } from "@/components/rushes/cutStudioShared";
+import { fmt, gridContainerStyle, nextSegId } from "@/components/rushes/cutStudioShared";
 import { type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { CollectionGlyph } from "./collectionGlyph";
 import { FolderEditor } from "./FolderEditor";
@@ -237,7 +237,7 @@ export function CollectionDetail({ id }: { id: string }) {
 
   // Colonnes TENUES (cf. gridMetrics) : rétrécir le panneau rétrécit les vignettes, il n'en passe
   // pas une à la ligne.
-  const gridTemplate = `repeat(${grid.actualCols || grid.cols}, minmax(0, 1fr))`;
+  const gridStyle = gridContainerStyle(grid.actualCols || grid.cols, grid.cell);
   // Rang du plan ouvert dans la grille AFFICHÉE (tri/filtre compris) → repère « n/N » du lecteur.
   const openPosition = openShot ? items.findIndex(({ shot }) => shot.id === openShot.id) + 1 : 0;
 
@@ -413,7 +413,7 @@ export function CollectionDetail({ id }: { id: string }) {
           que soit la largeur (cf. gridMetrics). */}
       <div ref={grid.gridScrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5">
         {loading ? (
-          <div className="grid gap-3" style={{ gridTemplateColumns: gridTemplate }}>
+          <div className="grid gap-3" style={gridStyle}>
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
           </div>
         ) : !items.length ? (
@@ -422,13 +422,13 @@ export function CollectionDetail({ id }: { id: string }) {
             <span>{(coll?.shots.length ?? 0) ? tr("detail.noMatch") : tr("detail.emptyFolder")}</span>
           </Card>
         ) : (
-          <div className="grid gap-3" style={{ gridTemplateColumns: gridTemplate }}>
+          <div className="grid gap-3" style={gridStyle}>
             {items.map(({ shot, seg }, i) => {
               const nameKey = labelNameKey(shot.label);
               return (
                 <ShotCard
                   key={seg.id}
-                  seg={seg} index={i} clipPath={shot.path} cols={grid.actualCols} cellH={grid.cellH}
+                  seg={seg} index={i} clipPath={shot.path}
                   active={!!shot.id && openShot?.id === shot.id}
                   selected={!!shot.id && sel.has(shot.id)}
                   play={grid.gridPlay}

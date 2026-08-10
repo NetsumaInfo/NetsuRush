@@ -66,9 +66,9 @@ function startDrag(e: React.DragEvent, m: NrMediaDrag) {
 // aperçu animé au survol via useSceneCardMedia. Draggable vers le board (l'<img> est non-draggable
 // sinon le navigateur drague l'image au lieu de notre payload).
 function MediaCardImpl({
-  clipPath, inSec, outSec, index, cols, proxies, drag, selectable, selected, onActivate, badge, footer,
+  clipPath, inSec, outSec, index, proxies, drag, selectable, selected, onActivate, badge, footer,
 }: {
-  clipPath: string; inSec: number; outSec: number; index: number; cols: number;
+  clipPath: string; inSec: number; outSec: number; index: number;
   proxies: Map<string, string>; drag: NrMediaDrag;
   selectable?: boolean; selected?: boolean; onActivate: () => void; badge?: string; footer?: string;
 }) {
@@ -87,7 +87,7 @@ function MediaCardImpl({
   );
   const bustProxy = useCallback(() => { proxies.delete(key); }, [key, proxies]);
   const { rootRef, thumb, url, showVideo, videoPaused, hovered, onVideoError, enter, leave } =
-    useSceneCardMedia({ seg, index, clipPath, cols, play: false, getProxy, bustProxy });
+    useSceneCardMedia({ seg, index, clipPath, play: false, getProxy, bustProxy });
   const shown = thumb;
 
   return (
@@ -121,7 +121,7 @@ function MediaCardImpl({
 // via ref dans useSceneCardMedia, ou fermeture stable sur index) sont ignorés → 1 seule carte re-rend.
 const MediaCard = memo(MediaCardImpl, (a, b) =>
   a.clipPath === b.clipPath && a.inSec === b.inSec && a.outSec === b.outSec &&
-  a.index === b.index && a.cols === b.cols && a.selected === b.selected &&
+  a.index === b.index && a.selected === b.selected &&
   a.selectable === b.selectable && a.badge === b.badge && a.footer === b.footer &&
   a.proxies === b.proxies,
 );
@@ -254,7 +254,7 @@ function CutsView({ clip, proxies, board, onClose }: {
               {cuts.map((c, i) => (
                 <MediaCard
                   key={`${clip.path}@${c.start}-${c.end}`}
-                  clipPath={clip.path} inSec={c.start} outSec={c.end} index={i} cols={3} proxies={proxies}
+                  clipPath={clip.path} inSec={c.start} outSec={c.end} index={i} proxies={proxies}
                   drag={{ file: clip.path, in: c.start, out: c.end, title: t("media.shotLabel", { name: clip.name, n: i + 1 }) }}
                   selectable selected={sel.has(i)} onActivate={() => toggle(i)}
                   badge={String(i + 1)} footer={fmt(c.end - c.start)}
@@ -321,7 +321,7 @@ function SearchView({ proxies, board }: { proxies: Map<string, string>; board: R
               {hits.map((h, i) => (
                 <MediaCard
                   key={`${h.file_path}#${h.scene_index}`}
-                  clipPath={h.file_path} inSec={h.start_sec} outSec={h.end_sec} index={i} cols={3} proxies={proxies}
+                  clipPath={h.file_path} inSec={h.start_sec} outSec={h.end_sec} index={i} proxies={proxies}
                   drag={{ file: h.file_path, in: h.start_sec, out: h.end_sec, title: `${basename(h.file_path)} · ${fmt(h.start_sec)}` }}
                   selectable selected={sel.has(i)} onActivate={() => toggle(i)}
                   badge={`${Math.round(h.score * 100)}%`} footer={fmt(h.end_sec - h.start_sec)}
@@ -438,7 +438,7 @@ export function MediaPicker({
                     return (
                       <div key={c.path} className="flex flex-col gap-1">
                         <MediaCard
-                          clipPath={c.path} inSec={0} outSec={dur ? Math.min(dur, 8) : 8} index={i} cols={2} proxies={proxies}
+                          clipPath={c.path} inSec={0} outSec={dur ? Math.min(dur, 8) : 8} index={i} proxies={proxies}
                           drag={{ file: c.path, title: c.name }}
                           onActivate={() => setDrill(c)}
                           footer={c.source === "local" ? t("media.local") : undefined}

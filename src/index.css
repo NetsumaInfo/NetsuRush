@@ -30,6 +30,19 @@
    panneau Adobe (color-mix = Chrome 111+, absent en CEF 99 → sinon fond transparent = chips invisibles). */
 .nr-chip { background-color: rgba(0, 0, 0, 0.72); }
 
+/* Carte des grilles d'aperçus (Découpage, Collections, Timeline Live). `content-visibility` est ce
+   qui rend une grille de plusieurs centaines de plans défilable : hors écran, une carte ne fait ni
+   mise en page ni peinture.
+   La hauteur de remplacement vient de `--nr-cell-h`, posée par le CONTENEUR de grille : elle est la
+   hauteur réelle d'une rangée (largeur de colonne × 9/16), donc la barre de défilement mesure la
+   même chose que ce qui sera rendu. Une valeur portée par chaque carte rerendrait les centaines de
+   cartes à chaque cran de densité ; une valeur `auto` (taille mémorisée) resterait figée sur la
+   densité précédente et décalerait la barre. */
+.nr-grid-card {
+  content-visibility: auto;
+  contain-intrinsic-size: var(--nr-cell-h, 200px);
+}
+
 html,
 body,
 #root {

@@ -17,11 +17,10 @@ import { type Segment } from "./cutStudioShared";
 import { useSceneCardMedia } from "./useSceneCardMedia";
 
 function ShotCardImpl({
-  seg, index, clipPath, cols, cellH, active = false, selected, play, getProxy, bustProxy, onPlay, onToggle,
+  seg, index, clipPath, active = false, selected, play, getProxy, bustProxy, onPlay, onToggle,
   rangerShots, onAddToTimeline, onRemove, onTrim, badge, dur, labelColor, labelName, rating, tagCount,
 }: {
-  seg: Segment; index: number; clipPath: string; cols: number; selected: boolean; play: boolean;
-  cellH?: number;                                             // hauteur réelle de la carte (placeholder hors écran)
+  seg: Segment; index: number; clipPath: string; selected: boolean; play: boolean;
   active?: boolean;                                           // plan ouvert dans le lecteur de droite
   getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>;
   bustProxy: () => void; onPlay?: () => void; onToggle: () => void;
@@ -37,8 +36,8 @@ function ShotCardImpl({
   tagCount?: number;                                          // nb de tags
 }) {
   const { t } = useTranslation("derush");
-  const { rootRef, thumb, url, showVideo, videoPaused, near, hovered, onVideoError, enter, leave } =
-    useSceneCardMedia({ seg, index, clipPath, cols, play, getProxy, bustProxy });
+  const { rootRef, thumb, url, showVideo, videoPaused, interactive, hovered, onVideoError, enter, leave, focusEnter, focusLeave } =
+    useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy });
   const playing = showVideo && !videoPaused;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
@@ -62,13 +61,14 @@ function ShotCardImpl({
           aria-pressed={selected}
           onMouseEnter={enter}
           onMouseLeave={leave}
+          onFocus={focusEnter}
+          onBlur={focusLeave}
           onClick={onToggle}
           onDoubleClick={onPlay}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
-          // Placeholder hors écran calé sur la hauteur RÉELLE (cf. SceneCard) : sinon le
-          // content-visibility fait osciller le layout au scroll.
-          style={cellH ? { containIntrinsicSize: `auto ${cellH}px` } : undefined}
-          className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 [content-visibility:auto] [contain-intrinsic-size:auto_200px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}
+          // `nr-grid-card` = content-visibility + hauteur de remplacement héritée du conteneur de
+          // grille (`--nr-cell-h`, cf. index.css et SceneCard).
+          className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 nr-grid-card outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}
         />
       }>
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
@@ -86,14 +86,15 @@ function ShotCardImpl({
       {/* Tout ce qui est VISIBLE AU REPOS (pastille, méta) est rendu sans condition : ça apparaissait
           « après coup » tant que ça attendait l'observateur de proximité, alors que la vignette sort
           du cache renderer dès le premier rendu. Seul l'habillage révélé AU SURVOL est différé —
-          c'est lui qui coûte cher (infobulles + popover Base UI, une racine par carte). */}
+          c'est lui qui coûte cher (infobulles + popover Base UI, une racine par carte), et il ne se
+          monte que pour la carte SOUS LE POINTEUR, jamais pour toute la bande d'anticipation. */}
       {badge && <span className="absolute left-1.5 top-1.5 rounded nr-chip px-1.5 py-0.5 text-[10px] font-medium tabular-nums">{badge}</span>}
 
       {/* sélection — visible dès qu'elle est cochée, donc jamais différée dans ce cas */}
-      {(near || selected) && <SelectToggle selected={selected} onToggle={onToggle} />}
+      {(interactive || selected) && <SelectToggle selected={selected} onToggle={onToggle} />}
 
       {/* barre d'actions (bas-gauche) : ajouter timeline · ranger · retirer */}
-      {near && (
+      {interactive && (
       <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
         {onAddToTimeline && (
           <Tooltip>
@@ -139,7 +140,7 @@ function ShotCardImpl({
       </span>
       </ContextMenuTrigger>
       {/* Clic droit : lire / (dé)sélectionner / timeline / retirer. */}
-      {near && (
+      {interactive && (
       <ContextMenuContent className="min-w-48">
         {onPlay && <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>}
         <ContextMenuItem onClick={onToggle}>
@@ -173,7 +174,7 @@ function ShotCardImpl({
 
 export const ShotCard = memo(ShotCardImpl, (a, b) =>
   a.seg.id === b.seg.id && a.seg.in === b.seg.in && a.seg.out === b.seg.out &&
-  a.index === b.index && a.clipPath === b.clipPath && a.cols === b.cols && a.cellH === b.cellH &&
+  a.index === b.index && a.clipPath === b.clipPath &&
   a.active === b.active && a.selected === b.selected && a.play === b.play && a.badge === b.badge && a.dur === b.dur &&
   a.labelColor === b.labelColor && a.labelName === b.labelName && a.rating === b.rating && a.tagCount === b.tagCount &&
   !!a.onPlay === !!b.onPlay && !!a.onAddToTimeline === !!b.onAddToTimeline && !!a.onRemove === !!b.onRemove && !!a.onTrim === !!b.onTrim,
