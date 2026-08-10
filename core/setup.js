@@ -31,7 +31,7 @@ const PACKAGED = !!process.env.NR_RESOURCE_DIR;
 const FFMPEG_ACCEPTED_VERSIONS = ['9.0', '8.1'];
 // Bump when an update adds a mandatory runtime capability. Existing installs without this marker
 // leave the quick path and run `probeRuntime`, which sends incomplete environments to repair.
-const SETUP_RUNTIME_VERSION = 3;
+const SETUP_RUNTIME_VERSION = 4;
 
 const SETUP_LABELS = {
   fr: { video: 'Prérequis vidéo', ai: 'Prérequis de calcul' },

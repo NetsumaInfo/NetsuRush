@@ -40,7 +40,12 @@ npx convex env set BETTER_AUTH_SECRET "$(openssl rand -base64 32)"
 npx convex env set DISCORD_CLIENT_ID "<client id>"
 npx convex env set DISCORD_CLIENT_SECRET "<client secret>"
 npx convex env set OPEN_BETA "true"   # beta ouverte : tout compte connecté a l'accès
+npx convex env set BUG_WEBHOOK "<url du webhook Discord>"   # relais des rapports de bug
 ```
+
+> Le webhook ne descend sur aucune machine : l'app POSTe sur `/bug/report` et le déploiement
+> forwarde. Changer de salon = relancer cette commande, sans rebuild ni mise à jour des testeurs.
+> `npx convex env set BUG_RELAY_OPEN true` accepte les rapports d'un testeur déconnecté.
 
 > Bascule en **allowlist** plus tard : `npx convex env set OPEN_BETA false`, puis accorde l'accès
 > par utilisateur : `npx convex run access:grantAccess '{"userId":"<id>","role":"member"}'`.

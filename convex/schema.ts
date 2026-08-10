@@ -35,6 +35,21 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_votes", ["votes"]),
 
+  // Trace des rapports de bug relayés vers Discord. Le CONTENU reste dans le salon (embed + pièces
+  // jointes) : ici seulement de quoi retrouver un rapport et plafonner les envois d'un compte.
+  bugReports: defineTable({
+    reportId: v.string(), // NR-XXXX, identique au titre de l'embed Discord
+    userId: v.optional(v.string()), // id Better Auth quand l'envoi est authentifié
+    userName: v.optional(v.string()),
+    severity: v.optional(v.string()),
+    category: v.optional(v.string()),
+    module: v.optional(v.string()),
+    appVersion: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_report", ["reportId"])
+    .index("by_user_created", ["userId", "createdAt"]),
+
   // Un vote par user et par idée.
   ideaVotes: defineTable({
     ideaId: v.id("ideas"),

@@ -125,16 +125,17 @@ const REQUIRES_MISSING = /^(\S+) (\S+) requires (\S+), which is not installed\.$
 /**
  * Traduit la sortie de `pip check` en constats exploitables. PURE.
  *
- * Deux lignes sur six sont ATTENDUES sur une installation saine : `faster-whisper` réclame
- * `onnxruntime` (posé sous le nom `onnxruntime-gpu`, cf. Partie A) et `dghs-imgutils` réclame
- * `opencv-contrib-python` (le venv porte la variante `headless`). Les signaler comme des pannes
- * apprendrait à l'utilisateur à ignorer le diagnostic entier.
+ * Trois lignes sont ATTENDUES sur une installation saine : `faster-whisper` réclame `onnxruntime`
+ * (posé sous le nom `onnxruntime-gpu`, cf. Partie A), `dghs-imgutils` réclame `opencv-contrib-python`
+ * et `omnishotcut` réclame `opencv-python` — le venv porte une SEULE distribution cv2, la variante
+ * `contrib-headless`, qui est le surensemble des deux. Les signaler comme des pannes apprendrait à
+ * l'utilisateur à ignorer le diagnostic entier.
  *
  * @param {string} output
  * @returns {{ package: string, requirement: string, found: string | null, expected: boolean, line: string }[]}
  */
 function readPipCheck(output) {
-  const expectedMissing = new Set(['onnxruntime', 'opencv-contrib-python']);
+  const expectedMissing = new Set(['onnxruntime', 'opencv-contrib-python', 'opencv-python']);
   const findings = [];
   for (const raw of String(output || '').split(/\r?\n/)) {
     const line = raw.trim();

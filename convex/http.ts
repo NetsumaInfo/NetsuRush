@@ -1,5 +1,6 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { authComponent, createAuth } from "./auth";
 
 // Monte les routes Better Auth (`/api/auth/*`) : sign-in social, callbacks OAuth, session…
@@ -56,6 +57,57 @@ http.route({
       status: 200,
       headers: { "content-type": "text/html; charset=utf-8" },
     });
+  }),
+});
+
+// Relais des rapports de bug. L'application n'a JAMAIS l'URL du webhook Discord : elle POSTe ici, et
+// `BUG_WEBHOOK` (variable d'env du déploiement) reste côté serveur — la faire tourner ne demande donc
+// ni build ni mise à jour chez les testeurs. Le corps est retransmis TEL QUEL (multipart embed +
+// pièces jointes construit par le core) : rien à re-parser, rien à re-plafonner ici.
+// Session : le desktop n'a pas de cookies (webview hors domaine Convex), il envoie l'en-tête
+// `Better-Auth-Cookie` du plugin crossDomain, que `getSession` sait lire. `BUG_RELAY_OPEN=true`
+// accepte les envois anonymes — utile pour un testeur déconnecté, à laisser à false autrement.
+http.route({
+  path: "/bug/report",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    const webhook = process.env.BUG_WEBHOOK;
+    if (!webhook) return new Response("relay disabled", { status: 503 });
+
+    const session = await createAuth(ctx)
+      .api.getSession({ headers: req.headers })
+      .catch(() => null);
+    if (!session && process.env.BUG_RELAY_OPEN !== "true") {
+      return new Response("sign in required", { status: 401 });
+    }
+    const userId = session?.user?.id;
+
+    const quota = await ctx.runQuery(internal.bugs.recentCount, { userId });
+    if (!quota.allowed) return new Response("rate limited", { status: 429 });
+
+    const contentType = req.headers.get("content-type");
+    const discord = await fetch(webhook, {
+      method: "POST",
+      headers: contentType ? { "content-type": contentType } : {},
+      body: await req.arrayBuffer(),
+    });
+    if (!discord.ok) {
+      const detail = await discord.text().catch(() => "");
+      return new Response(`discord ${discord.status} ${detail.slice(0, 200)}`, { status: 502 });
+    }
+
+    // Métadonnées en EN-TÊTES : le corps est un multipart opaque qu'on ne veut pas ouvrir ici.
+    const meta = (name: string) => req.headers.get(name) ?? undefined;
+    await ctx.runMutation(internal.bugs.record, {
+      reportId: meta("x-nr-report-id") ?? "NR-?",
+      userId,
+      userName: session?.user?.name,
+      severity: meta("x-nr-severity"),
+      category: meta("x-nr-category"),
+      module: meta("x-nr-module"),
+      appVersion: meta("x-nr-app-version"),
+    });
+    return new Response(null, { status: 204 });
   }),
 });
 

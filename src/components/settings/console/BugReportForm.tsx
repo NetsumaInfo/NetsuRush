@@ -18,6 +18,7 @@ import {
   DEFAULT_SEVERITY, buildReportText, categoryGroup, descriptionKind, needsOwnLabel, redact, reportFileName, severityFor,
   type BugFrequency, type BugSeverity,
 } from "./bugReportShared";
+import { bugRelay, bugRelayConfigured } from "@/lib/bugRelay";
 import { BugReporterField, type ReporterIdentity } from "./BugReporterField";
 import { AttachmentPicker } from "./AttachmentPicker";
 import { SystemSpecsCard } from "./SystemSpecsCard";
@@ -110,12 +111,14 @@ export function BugReportForm() {
 
   useEffect(() => subscribeConsole(setLogs), []);
   useEffect(() => {
+    // Le core ne connaît que le webhook direct : un déploiement Convex suffit pourtant à envoyer
+    // (relais), et lui seul est visible d'ici.
     void nr.bugStatus?.()
       .then((r) => {
-        setConfigured(!!r?.configured);
+        setConfigured(!!r?.configured || bugRelayConfigured());
         setLimits({ files: r?.maxAttachments, mb: r?.maxAttachmentMB });
       })
-      .catch(() => setConfigured(false));
+      .catch(() => setConfigured(bugRelayConfigured()));
   }, []);
 
   const redacted = useMemo(() => redact(serializeConsole(logs)), [logs]);
@@ -125,8 +128,9 @@ export function BugReportForm() {
   const onIdentity = useCallback((next: ReporterIdentity) => setIdentity(next), []);
 
   const label = (key: string) => t(key);
-  function buildRequest(files: BugReportRequest["attachments"]): BugReportRequest {
+  function buildRequest(files: BugReportRequest["attachments"], relay: BugReportRequest["relay"] = null): BugReportRequest {
     return {
+      relay,
       category,
       categoryLabel: label(`bugReport.categories.${category}`),
       categoryDetail: askOwnLabel ? categoryDetail.trim() || null : null,
@@ -175,7 +179,7 @@ export function BugReportForm() {
       const encoded = await Promise.all(
         attachments.map(async (f) => ({ name: f.name, mimeType: f.type || "application/octet-stream", sizeBytes: f.size, dataBase64: await fileToBase64(f) })),
       );
-      const r = await nr.bugReport(buildRequest(encoded));
+      const r = await nr.bugReport(buildRequest(encoded, await bugRelay()));
       setNotice({ ok: r.ok, text: r.ok && r.reportId ? `${r.message} (${r.reportId})` : r.message });
       if (r.ok) {
         setIssue(""); setSteps(""); setExpected(""); setVideoRef(""); setCategoryDetail(""); setAttachments([]);

@@ -2308,6 +2308,8 @@ export interface BugReportRequest {
   errorCount?: number;
   warnCount?: number;
   redactionApplied: boolean;
+  /** Relais Convex (site + session) quand l'app n'a pas de webhook direct. Le core valide le site. */
+  relay?: { site: string; cookie: string } | null;
 }
 export interface BugReportResponse { ok: boolean; message: string; reportId?: string }
 

@@ -12,6 +12,8 @@ Three real breakages, all the same pattern — a model installs a shared depende
 2. `faster-whisper` declares `onnxruntime` with no extra, so pip installed the **CPU** variant over `onnxruntime-gpu` (both distributions share the `onnxruntime/` folder) and all ONNX inference silently moved to the CPU — **7.9× lost** on face recognition, without a single error message.
 3. `dghs-imgutils` requires `numpy<2`, which torch and faiss do not support.
 
+A fourth one is worse, because the package does it itself: `imgutils.utils.onnxruntime` runs `pip install onnxruntime-gpu` at import time when the module is missing. It lands the newest wheel — the CUDA 13 branch — on top of the one built for torch's CUDA, `CUDAExecutionProvider` disappears, and every ONNX model silently moves back to the CPU. Both install paths therefore `import onnxruntime` **before** touching imgutils, so a missing runtime fails the step instead of rebuilding the venv behind our back.
+
 None of the three was visible at install time. Families are what makes them **announceable before the click** instead of discoverable afterwards.
 
 ## One single environment
@@ -72,3 +74,8 @@ scikit-image 0.26.0 has requirement imageio!=2.35.0,>=2.33, but you have imageio
 1. **Any `==` pin on a shared dependency must be removed by `pipPatch`**, never merely bypassed with `--no-deps`: the pin survives in the installed package's metadata and pip honours it on every later resolution.
 2. Any new bound on a shared package goes into its family's `constrains` in `core/venvs.js`. Otherwise the diagnostic stays silent exactly when it is needed.
 3. A model that replaces a shared package declares `exclusiveWith` — that is what triggers the refusal and the confirmation prompt.
+4. Never let a model install decide the torch version. `torch`, `torchvision` and `torchaudio` are one ABI: a wheel pulled from PyPI by a transitive dependency (`silero-vad` asks for `torchaudio>=0.12`) overwrites the one built for the installed torch, and the import then raises `[WinError 127]` in a module the user was not installing. `ensurePipPackage` therefore runs every step under a `PIP_CONSTRAINT` file pinning whichever of the three are already present, and `scripts/setup.ps1` installs all three together from the torch index.
+
+## Installed, missing, or broken
+
+Import failures are read in **three** states, not two (`pyImportState`). A distribution that is absent is `missing`; one that is present but whose import raises — a neighbouring ABI broken, a CUDA DLL gone — is `broken`, and the download path stops there instead of reinstalling. Reinstalling a broken package removes the correct wheel and produces the loop the states exist to prevent: "not installed" → install → still "not installed".

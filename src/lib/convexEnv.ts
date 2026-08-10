@@ -4,3 +4,7 @@
 // pour une fonctionnalité qui n'existe pas quand `VITE_CONVEX_URL` est absent (dev, navigateur,
 // panneau CEP). Lire l'env ici garde ce coût derrière un import dynamique.
 export const convexConfigured = !!(import.meta.env.VITE_CONVEX_URL as string | undefined);
+
+// Site du déploiement (*.convex.site) : routes HTTP, dont le relais des rapports de bug. Distinct de
+// `VITE_CONVEX_URL` (*.convex.cloud), qui sert les fonctions.
+export const convexSiteUrl = (import.meta.env.VITE_CONVEX_SITE_URL as string | undefined) || "";

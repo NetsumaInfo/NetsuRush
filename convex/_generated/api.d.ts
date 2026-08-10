@@ -10,6 +10,7 @@
 
 import type * as access from "../access.js";
 import type * as auth from "../auth.js";
+import type * as bugs from "../bugs.js";
 import type * as discord from "../discord.js";
 import type * as downloads from "../downloads.js";
 import type * as http from "../http.js";
@@ -25,6 +26,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   access: typeof access;
   auth: typeof auth;
+  bugs: typeof bugs;
   discord: typeof discord;
   downloads: typeof downloads;
   http: typeof http;

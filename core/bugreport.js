@@ -1,7 +1,11 @@
 // @ts-check
-// Envoi d'un rapport de bug vers un webhook Discord (configuré HORS dépôt : env NR_BUG_WEBHOOK ou
-// champ `bugWebhook` de nr.config.json). POST côté core (pas de CORS, l'URL ne fuite pas dans le
-// bundle renderer). Le rapport est un EMBED trié : ce que le testeur a écrit d'un côté, ce que la
+// Envoi d'un rapport de bug vers Discord. DEUX voies, dans cet ordre :
+//   1. relais Convex — l'app ne connaît pas le webhook, elle POSTe sur `<site>.convex.site/bug/report`
+//      et le déploiement (env `BUG_WEBHOOK`) forwarde. Rotation de l'URL sans rebuild ni fichier à
+//      changer chez les testeurs, et un webhook qui ne descend sur aucune machine ne peut pas fuiter.
+//   2. webhook direct (env NR_BUG_WEBHOOK ou `bugWebhook` de nr.config.json) — voie de développement,
+//      prioritaire quand elle est renseignée, seule voie possible sans déploiement Convex.
+// POST côté core (pas de CORS, l'URL ne fuite pas dans le bundle renderer). Le rapport est un EMBED trié : ce que le testeur a écrit d'un côté, ce que la
 // machine sait de l'autre (instantané système collecté ici, jamais saisi à la main), plus le journal
 // et les captures en pièces jointes. Pour le debug et les bêta-testeurs : « signaler » en un clic
 // depuis Paramètres › Système › Console.
@@ -32,11 +36,42 @@ function webhookUrl() {
   return process.env.NR_BUG_WEBHOOK || CONFIG.bugWebhook || '';
 }
 
+// Le site du relais vient du renderer (seul à porter `VITE_CONVEX_SITE_URL`, baké au build). Il est
+// donc VÉRIFIÉ ici : sans ce filtre, un renderer détourné pourrait faire poster les rapports —
+// journal et captures compris — sur l'hôte de son choix.
+const CONVEX_SITE = /^https:\/\/[a-z0-9-]+\.convex\.site$/;
+
+/** @param {any} relay @returns {string} */
+function relayUrl(relay) {
+  const site = String((relay && relay.site) || '').replace(/\/+$/, '');
+  return CONVEX_SITE.test(site) ? `${site}/bug/report` : '';
+}
+
+// Une httpAction Convex plafonne la requête à 20 Mo là où Discord accepte 8 pièces de 10 Mo : sur la
+// voie relais on coupe AVANT d'envoyer, sinon le rapport est refusé en bloc et le testeur le perd.
+const RELAY_MAX_BYTES = 18 * 1024 * 1024;
+
+/** @param {any} r @returns {{ attachments: any[], dropped: number }} */
+function fitAttachments(r) {
+  const attachments = Array.isArray(r.attachments) ? r.attachments : [];
+  const kept = [];
+  let total = String(r.consoleLogs || '').length;
+  for (const a of attachments) {
+    const size = Math.ceil(String(a.dataBase64 || '').length * 0.75);
+    if (total + size > RELAY_MAX_BYTES) continue;
+    total += size;
+    kept.push(a);
+  }
+  return { attachments: kept, dropped: attachments.length - kept.length };
+}
+
 function maxAttachmentMB() {
   const configured = Number(CONFIG.bugAttachmentMaxMB);
   return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_MAX_ATTACHMENT_MB;
 }
 
+// `configured` ne juge que la voie DIRECTE : le relais dépend d'une valeur que seul le renderer
+// connaît, c'est donc lui qui complète l'état (il sait s'il a un déploiement Convex).
 function status() {
   return { ok: true, configured: !!webhookUrl(), maxAttachments: MAX_ATTACHMENTS, maxAttachmentMB: maxAttachmentMB() };
 }
@@ -120,29 +155,54 @@ function attachFiles(form, r, ctx, reportId) {
   });
 }
 
-// Discord : message multipart (payload_json + fichiers).
-async function submitBugReport(request) {
-  const url = webhookUrl();
-  if (!url) return { ok: false, message: t('webhookMissing') };
+// Réponse du relais : un code HTTP nu n'apprend rien au testeur, chacun a sa cause et son geste.
+function relayError(code, detail) {
+  if (code === 401) return t('reportSignInRequired');
+  if (code === 429) return t('reportRateLimited');
+  if (code === 503) return t('webhookMissing');
+  return `${t('reportSendFailed')} (HTTP ${code}). ${String(detail).slice(0, 200)}`;
+}
 
+// Discord : message multipart (payload_json + fichiers). Même corps sur les deux voies — le relais
+// Convex le retransmet tel quel, il n'y a donc qu'un seul format de rapport à maintenir.
+async function submitBugReport(request) {
   const r = request || {};
+  const direct = webhookUrl();
+  const relay = direct ? '' : relayUrl(r.relay);
+  if (!direct && !relay) return { ok: false, message: t('webhookMissing') };
+
   const reportId = 'NR-' + Date.now().toString(36).toUpperCase();
   try {
     // Le contexte est recollecté ICI et non repris de la requête : un renderer ne doit pas pouvoir
     // décrire une machine qui n'est pas la sienne, et le formulaire peut être resté ouvert des heures.
     const ctx = await collectBugContext();
+    const fitted = relay ? fitAttachments(r) : { attachments: r.attachments, dropped: 0 };
+    const payload = { ...r, attachments: fitted.attachments };
+    const embed = buildEmbed(payload, ctx, reportId);
+    if (fitted.dropped) addField(embed.fields, 'Pièces jointes', `${fitted.dropped} écartée(s) : rapport trop lourd`, false);
     const form = new G.FormData();
     form.append('payload_json', JSON.stringify({
       username: 'NetsuRush',
       content: r.severity === 'blocker' ? `**${reportId}** — bloquant` : '',
-      embeds: [buildEmbed(r, ctx, reportId)],
+      embeds: [embed],
       allowed_mentions: { parse: [] }, // un `<@id>` ne doit pinger personne dans le salon
     }));
-    attachFiles(form, r, ctx, reportId);
+    attachFiles(form, payload, ctx, reportId);
 
-    const resp = await G.fetch(url, { method: 'POST', body: form });
+    const headers = relay ? {
+      // Le corps est un multipart opaque pour le relais : ce qu'il enregistre passe par les en-têtes.
+      'x-nr-report-id': reportId,
+      'x-nr-severity': String(r.severity || ''),
+      'x-nr-category': String(r.category || ''),
+      'x-nr-module': String(r.module || ''),
+      'x-nr-app-version': String((ctx.app && ctx.app.version) || ''),
+      // Session du plugin crossDomain : la webview desktop n'a pas de cookie sur le domaine Convex.
+      'Better-Auth-Cookie': String((r.relay && r.relay.cookie) || ''),
+    } : undefined;
+    const resp = await G.fetch(relay || direct, { method: 'POST', body: form, headers });
     if (!resp.ok) {
       const txt = await resp.text().catch(() => '');
+      if (relay) return { ok: false, message: relayError(resp.status, txt) };
       return { ok: false, message: `Discord a refusé (HTTP ${resp.status}). ${String(txt).slice(0, 200)}` };
     }
     return { ok: true, message: t('reportSent'), reportId };

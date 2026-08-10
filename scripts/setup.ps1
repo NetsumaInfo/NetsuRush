@@ -356,14 +356,17 @@ if ($needTorch) {
       --index-url https://download.pytorch.org/whl/xpu --retries 5 --timeout 120 2>&1
   } else {
     $torchIndex = if ($MlBackend -eq 'cuda') { 'https://download.pytorch.org/whl/cu124' } else { 'https://download.pytorch.org/whl/cpu' }
-    $torchLog = & $venvPy -m pip install --upgrade torch torchvision --index-url $torchIndex --retries 5 --timeout 120 2>&1
+    # torchaudio fait partie du LOT : installé plus tard par une dépendance (silero-vad tire
+    # `torchaudio>=0.12`), pip prend la dernière roue PyPI, bâtie contre une autre ABI que ce torch —
+    # `import torchaudio` lève alors [WinError 127] et le module Voix ne démarre plus.
+    $torchLog = & $venvPy -m pip install --upgrade torch torchvision torchaudio --index-url $torchIndex --retries 5 --timeout 120 2>&1
   }
   if ($LASTEXITCODE -ne 0) {
     $torchLog | ForEach-Object { Info "pip torch> $_" }
     if ($MlBackend -ne 'cpu') {
       Info "backend $MlBackend indisponible → installation du repli CPU"
       $MlBackend = 'cpu'
-      $torchLog = & $venvPy -m pip install --upgrade --force-reinstall torch torchvision `
+      $torchLog = & $venvPy -m pip install --upgrade --force-reinstall torch torchvision torchaudio `
         --index-url https://download.pytorch.org/whl/cpu --retries 5 --timeout 120 2>&1
     }
     if ($LASTEXITCODE -ne 0) { $torchLog | ForEach-Object { Info "pip torch cpu> $_" }; Fail $CpuTorchFailed[$Lang] }
@@ -745,19 +748,22 @@ if (HasModel 'depth-anything-v2-small') {
 # RÉINSTALLE opencv (échoue avec cv2.pyd verrouillé par un sidecar = WinError 5) ET rétrograde numpy
 # pour tout le venv. On installe donc en 2 TEMPS : imgutils SANS ses deps (il n'exige alors ni opencv
 # ni numpy<2 ; le cv2 déjà présent suffit à `import cv2`), puis ses deps PURES python (aucun conflit).
+# `scikit-learn` fait partie de ces deps : `imgutils.metrics` importe DBSCAN/OPTICS au chargement.
 if (HasModel 'face-anime') { Stage 'faces' (T 'facesPrepare') }
 $imgutilsPkg = if ($MlBackend -eq 'cuda') { 'dghs-imgutils[gpu]' } else { 'dghs-imgutils' }
 if (HasModel 'face-anime') {
   try { & $venvPy -m pip install --no-deps $imgutilsPkg --quiet } catch { Info "imgutils ignoré: $($_.Exception.Message)" }
   try {
-    & $venvPy -m pip install hbutils hfutils emoji pilmoji shapely pyclipper deprecation bchlib piexif pyrfc6266 urlobject --quiet
+    & $venvPy -m pip install hbutils hfutils 'emoji<2.12' pilmoji shapely pyclipper deprecation bchlib piexif pyrfc6266 urlobject scikit-learn --quiet
   } catch { Info "deps imgutils ignorées: $($_.Exception.Message)" }
 }
 # Pré-DL des modèles animé dans le cache HF partagé ($procHf, déjà câblé HF_HOME côté core) :
 # déclenche les VRAIS téléchargements (détecteur v1.4 's' + CCIP) sur une image factice.
 if (HasModel 'face-anime') { try {
   $env:HF_HOME = $procHf
-  & $venvPy -c "from PIL import Image; from imgutils.detect import detect_faces; from imgutils.metrics import ccip_extract_feature; img = Image.new('RGB', (64, 64)); detect_faces(img, level='s', version='v1.4'); ccip_extract_feature(img)"
+  # `import onnxruntime` en tête : sans lui, imgutils installe la dernière roue onnxruntime-gpu
+  # (branche CUDA 13) par-dessus celle bâtie pour le CUDA de torch et l'inférence ONNX retombe sur CPU.
+  & $venvPy -c "import onnxruntime; from PIL import Image; from imgutils.detect import detect_faces; from imgutils.metrics import ccip_extract_feature; img = Image.new('RGB', (64, 64)); detect_faces(img, level='s', version='v1.4'); ccip_extract_feature(img)"
 } catch { Info "modèles visage animé ignorés: $($_.Exception.Message)" } }
 
 # ── 4e. Roto Studio : package SAM 2 (segmentation vidéo interactive) ──────────
@@ -792,7 +798,7 @@ $cfg = [ordered]@{
   # par une comparaison de chaînes, sans lancer ffmpeg : le contrôle rapide est traversé à CHAQUE
   # lancement, un processus de plus s'y paierait à chaque fois.
   ffmpegVersion = $ffCurrent
-  setupRuntimeVersion = 3
+  setupRuntimeVersion = 4
   realesganDir  = $realdir
   mlBackend     = $MlBackend
   onnxBackend   = $OnnxBackend

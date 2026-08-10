@@ -291,11 +291,14 @@ const MANIFEST = /** @type {Record<string, any>} */ ({
   // `opencv-contrib-python` (le venv a déjà cv2 ; réinstaller opencv échoue avec cv2.pyd verrouillé
   // par le sidecar = WinError 5) NI un numpy<2 qui rétrograderait tout le venv ; (2) ses deps PURES
   // python (helpers), qui n'impliquent ni opencv ni conflit numpy. onnxruntime-gpu/pillow/hf-hub déjà là.
+  // `scikit-learn` n'est PAS optionnel : `imgutils.metrics` importe DBSCAN/OPTICS au chargement du
+  // module, donc sans lui le pré-fetch meurt sur `No module named 'sklearn'`. `emoji` est borné comme
+  // le paquet l'exige : non borné, pip pose une 2.15 que `pip check` signale ensuite comme dérive.
   'face-anime': { kind: 'pip', task: 'face', pipCheck: 'imgutils', prefetch: 'face',
                   installSteps: [
                     ['--no-deps', 'dghs-imgutils[gpu]'],
-                    ['hbutils', 'hfutils', 'emoji', 'pilmoji', 'shapely', 'pyclipper',
-                     'deprecation', 'bchlib', 'piexif', 'pyrfc6266', 'urlobject'],
+                    ['hbutils', 'hfutils', 'emoji<2.12', 'pilmoji', 'shapely', 'pyclipper',
+                     'deprecation', 'bchlib', 'piexif', 'pyrfc6266', 'urlobject', 'scikit-learn'],
                   ] },
 
   // -- upscale Real-CUGAN / Spandrel (url direct → REALESRGAN_DIR) --
@@ -1152,14 +1155,35 @@ async function ensureVendor(m, id, emit) {
   return { ok: true };
 }
 
-// Le module python `mod` est-il importable dans le venv des sidecars ? (test rapide, ~1 s).
-function pyHasModules(mods) {
+// Un `import` a TROIS issues, pas deux : présent, absent, ou présent MAIS INCHARGEABLE (ABI torch
+// cassée, DLL CUDA absente → [WinError 127]). Les deux dernières confondues, l'app réinstalle un
+// paquet déjà là — et la réinstallation retire justement la roue correcte : « pas installé » →
+// installe → toujours « pas installé ». `find_spec` sépare les deux : distribution absente = MISSING,
+// import qui lève = BROKEN, avec le message python remonté tel quel pour le diagnostic.
+const PY_IMPORT_PROBE = 'import importlib,importlib.util,sys\n'
+  + 'for n in sys.argv[1:]:\n'
+  + '    try: spec = importlib.util.find_spec(n)\n'
+  + '    except Exception: spec = None\n'
+  + '    if spec is None: sys.exit(3)\n'
+  + '    try: importlib.import_module(n)\n'
+  + '    except Exception as e: print(f"{n}: {type(e).__name__}: {e}"); sys.exit(4)\n';
+
+/** @param {string[]} mods @returns {Promise<{ state: 'ok'|'missing'|'broken', detail: string }>} */
+function pyImportState(mods) {
   return new Promise((resolve) => {
     let done = false;
-    const p = spawn(PYTHON, ['-c', `import ${mods.join(',')}`], { env: DETECT_ENV });
-    p.on('close', (code) => { if (!done) { done = true; resolve(code === 0); } });
-    p.on('error', () => { if (!done) { done = true; resolve(false); } });
+    let out = '';
+    const finish = (state, detail = '') => { if (!done) { done = true; resolve({ state, detail }); } };
+    const p = spawn(PYTHON, ['-c', PY_IMPORT_PROBE, ...mods], { env: DETECT_ENV });
+    p.stdout.on('data', (b) => { out += b.toString(); });
+    p.on('close', (code) => finish(code === 0 ? 'ok' : code === 4 ? 'broken' : 'missing', out.trim()));
+    p.on('error', () => finish('missing'));
   });
+}
+
+// Le module python `mod` est-il importable dans le venv des sidecars ? (test rapide, ~1 s).
+function pyHasModules(mods) {
+  return pyImportState(mods).then((r) => r.state === 'ok');
 }
 
 function pyRuntimeReady(m, checks) {
@@ -1189,6 +1213,32 @@ function bindCancelable(ctrl, p) {
   ctrl.cancelCurrent = cancel;
   if (ctrl.canceled) cancel();
   return () => { if (ctrl.cancelCurrent === cancel) ctrl.cancelCurrent = null; };
+}
+
+// Le trio torch/torchvision/torchaudio est une ABI, pas trois paquets : une roue prise sur PyPI par
+// une dépendance transitive (silero-vad demande `torchaudio>=0.12`) écrase celle bâtie pour ce torch,
+// et l'import lève [WinError 127] — la panne apparaît DANS UN AUTRE MODULE que celui installé. On
+// contraint donc chaque `pip install` de modèle aux versions DÉJÀ posées : pip choisit la roue en
+// place, ou échoue en le disant. Fichier écrit une fois par démarrage du core, à partir du venv réel.
+let torchConstraint;
+async function torchConstraintFile() {
+  if (torchConstraint !== undefined) return torchConstraint;
+  torchConstraint = null;
+  const code = 'import importlib.metadata as m\n'
+    + 'for n in ("torch","torchvision","torchaudio"):\n'
+    + '    try: print(n+"=="+m.version(n))\n'
+    + '    except Exception: pass\n';
+  const pins = await new Promise((resolve) => {
+    let out = '';
+    const p = spawn(PYTHON, ['-c', code], { env: DETECT_ENV, windowsHide: true });
+    p.stdout.on('data', (b) => { out += b.toString(); });
+    p.on('close', (c) => resolve(c === 0 ? out.trim() : ''));
+    p.on('error', () => resolve(''));
+  });
+  if (!pins) return torchConstraint;
+  const file = path.join(os.tmpdir(), 'nr-pip-constraints.txt');
+  try { await fsp.writeFile(file, `${pins}\n`, 'utf8'); torchConstraint = file; } catch (_) {}
+  return torchConstraint;
 }
 
 // Lance UN `pip install --no-input <args...>` dans le venv. Le process ET ses enfants CMake sont
@@ -1334,8 +1384,18 @@ async function ensurePipPackage(m, id, emit, ctrl) {
   if (!m.pip && !m.installSteps) return { ok: true };
   const checks = Array.isArray(m.pipCheck) ? m.pipCheck : (m.pipCheck ? [m.pipCheck] : []);
   if (await pyRuntimeReady(m, checks)) return { ok: true, skipped: true };
+  // Paquet en place mais inchargeable : réinstaller ne répare pas la cause (une ABI voisine cassée)
+  // et fait perdre la roue correcte. On s'arrête en NOMMANT l'erreur python.
+  if (checks.length && !m.pipProbe) {
+    const probe = await pyImportState(checks);
+    if (probe.state === 'broken') return { ok: false, error: `${t('pyRuntimeBroken')} : ${probe.detail}` };
+  }
   emit({ id, pct: null, stage: 'install' });
-  const env = { ...DETECT_ENV, SAM2_BUILD_CUDA: '0', SAM2_BUILD_ALLOW_ERRORS: '1' };
+  const constraint = await torchConstraintFile();
+  const env = {
+    ...DETECT_ENV, SAM2_BUILD_CUDA: '0', SAM2_BUILD_ALLOW_ERRORS: '1',
+    ...(constraint ? { PIP_CONSTRAINT: constraint } : {}),
+  };
   let pipTarget = m.pip;
   let preparedWork = null;
   // Une source à corriger (pyproject cassé) ou dont le paquet vit dans un sous-dossier doit être
@@ -1369,8 +1429,13 @@ async function ensurePipPackage(m, id, emit, ctrl) {
 
 // Pré-fetch des modèles d'un package auto-téléchargeant (imgutils visage) : appelle la lib sur une
 // image factice → elle écrit ses ONNX dans le cache HF (même résolution qu'au runtime). Best-effort.
+// `import onnxruntime` D'ABORD, jamais par confort : à l'import, imgutils fait `pip install
+// onnxruntime-gpu` tout seul quand le module manque, ce qui pose la DERNIÈRE roue (branche CUDA 13)
+// par-dessus celle bâtie pour le CUDA de torch — l'`CUDAExecutionProvider` disparaît alors sans autre
+// trace qu'un log, et toute l'inférence ONNX repasse sur le CPU. Import préalable = l'étape échoue au
+// lieu de saboter le venv.
 const PREFETCH_SNIPPETS = {
-  face: "from PIL import Image;from imgutils.detect import detect_faces;from imgutils.metrics import "
+  face: "import onnxruntime;from PIL import Image;from imgutils.detect import detect_faces;from imgutils.metrics import "
       + "ccip_extract_feature;i=Image.new('RGB',(64,64));detect_faces(i,level='s',version='v1.4');ccip_extract_feature(i)",
 };
 

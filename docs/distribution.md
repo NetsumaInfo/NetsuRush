@@ -38,6 +38,15 @@ A login gate over the shell (after the setup gate, main window only; the detache
 - **The three accesses to the auth chain are DYNAMIC** (provider in an async subtree, the login gate `lazy`, the deep-link module imported inside the effect). Statically imported, `convex/react` + `better-auth` landed in the entry chunk of **every** renderer — including the CEP panel on an old Chromium — and removing them cut ~140 KB raw / 48 KB gzipped from startup parsing. **Do not reintroduce a static import** of the auth or Convex client from the app entry points.
 - The renderer references Convex functions through `anyApi`, so it does not import generated files that do not exist before the first `convex dev` run, and `npm run build` stays green.
 
+## Bug report relay (`convex/http.ts` → `core/bugreport.js`)
+
+Reports reach a Discord channel, but **the app never carries the webhook URL**. It POSTs the multipart message to `POST <deployment>.convex.site/bug/report`, and the deployment forwards it using `BUG_WEBHOOK`, a server-side environment variable. Rotating the channel is `npx convex env set BUG_WEBHOOK …` — no rebuild, nothing to change on a tester's machine — and a URL that never ships cannot be extracted from the bundle to spam the channel.
+
+- **Two paths, direct first.** `NR_BUG_WEBHOOK` (env) or `bugWebhook` (`nr.config.json`) posts straight to Discord; it is the development path and the only one that works without a deployment. Note that `scripts/setup.ps1` **rewrites `nr.config.json` wholesale**, so a hand-added `bugWebhook` does not survive a repair — another reason the relay is the distributed path.
+- **The site URL comes from the renderer** (`VITE_CONVEX_SITE_URL`, baked at build; the core has no build-time env of its own) and is therefore **validated core-side** against `https://<name>.convex.site`. Without that check a tampered renderer could redirect reports — logs and screenshots included — to any host.
+- **Session** travels as the `Better-Auth-Cookie` header of the crossDomain plugin, since the desktop webview holds no cookie on the Convex domain. No session → 401, unless `BUG_RELAY_OPEN=true` accepts anonymous reports. Quota: 10 reports per account per hour (`convex/bugs.ts`), recorded **after** Discord accepts, so failed sends do not consume it.
+- **A Convex HTTP action caps the request at 20 MB** where Discord allows 8 × 10 MB: the relay path drops the attachments that do not fit **before** sending and says so in the embed, rather than losing the whole report to a rejection.
+
 ## Discord Rich Presence (`core/discordRpc.js`)
 
 Shows the active module on the user's Discord profile. **Not verified in CI** (needs Discord running).

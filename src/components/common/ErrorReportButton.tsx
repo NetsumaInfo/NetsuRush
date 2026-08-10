@@ -8,6 +8,7 @@ import { nr, type BugContext, type BugReportRequest } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { countLevels, getConsoleSnapshot, serializeConsole } from "@/lib/appConsole";
+import { bugRelay } from "@/lib/bugRelay";
 import { buildReportText, redact, reportFileName } from "@/components/settings/console/bugReportShared";
 import { loadedDiscordProfile } from "@/components/settings/useDiscordProfile";
 import { useApp } from "@/store";
@@ -75,6 +76,7 @@ export function ErrorReportButton({
       errorCount: counts.errors,
       warnCount: counts.warns,
       redactionApplied: true,
+      relay: await bugRelay(),
     };
 
     try {

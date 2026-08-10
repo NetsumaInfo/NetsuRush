@@ -135,7 +135,11 @@ test('NetsuBoard link tools are mandatory and verified outside optional module p
   const optional = setup.slice(setup.indexOf('$moduleRequirements'), setup.indexOf('Progress 72'));
   assert.doesNotMatch(optional, /reference\s*=\s*'requirements-reference\.txt'/);
   assert.doesNotMatch(optional, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
-  assert.match(setup, /setupRuntimeVersion\s*=\s*3/);
+  // Le marqueur écrit par le script doit être CELUI que le core attend : une version en retard fait
+  // repasser toutes les installations saines par l'écran de réparation, une version en avance laisse
+  // un venv incomplet sur le chemin rapide. Comparaison des deux sources plutôt qu'un littéral.
+  const { SETUP_RUNTIME_VERSION } = require(path.join(root, 'core', 'setup.js'));
+  assert.match(setup, new RegExp(`setupRuntimeVersion\\s*=\\s*${SETUP_RUNTIME_VERSION}\\b`));
   const coreSetup = fs.readFileSync(path.join(root, 'core', 'setup.js'), 'utf8');
   assert.match(coreSetup, /import yt_dlp, gallery_dl/);
   assert.match(coreSetup, /runtime\.online/);
