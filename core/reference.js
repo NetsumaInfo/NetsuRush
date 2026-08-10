@@ -54,6 +54,7 @@ function download(url, redirects) {
       res.on('end', () => resolve({
         buf: Buffer.concat(chunks),
         type: String(res.headers['content-type'] || '').split(';')[0].trim().toLowerCase(),
+        finalUrl: u.toString(),
       }));
     });
     req.on('error', reject);
@@ -81,15 +82,43 @@ function parseMetaTags(html) {
   return map;
 }
 
-// URL du média principal d'une page via OpenGraph / Twitter Card (vidéo prioritaire sur image),
-// résolue en absolu contre la page. Couvre les GIF (giphy/tenor), imgur, articles, CDN… null sinon.
+function absoluteHttpUrl(value, baseUrl) {
+  try {
+    const url = new URL(decodeEntities(value), baseUrl);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null;
+  } catch (_) { return null; }
+}
+
+// Média principal d'une page via OpenGraph / Twitter Card (vidéo prioritaire sur image), avec son
+// type explicite pour que le mode lié n'ait pas besoin de télécharger les octets afin de le deviner.
 function parseOgMedia(html, baseUrl) {
-  const m = parseMetaTags(html);
-  const VIDEO_KEYS = ['og:video:secure_url', 'og:video:url', 'og:video', 'twitter:player:stream'];
-  const IMAGE_KEYS = ['og:image:secure_url', 'og:image:url', 'og:image', 'twitter:image', 'twitter:image:src'];
-  const abs = (u) => { try { return new URL(u, baseUrl).toString(); } catch (_) { return null; } };
-  for (const k of VIDEO_KEYS) if (m[k]) { const u = abs(m[k]); if (u) return u; }
-  for (const k of IMAGE_KEYS) if (m[k]) { const u = abs(m[k]); if (u) return u; }
+  const meta = parseMetaTags(html);
+  const candidates = [
+    ...['og:video:secure_url', 'og:video:url', 'og:video', 'twitter:player:stream']
+      .map((key) => ({ key, kind: 'video' })),
+    ...['og:image:secure_url', 'og:image:url', 'og:image', 'twitter:image', 'twitter:image:src']
+      .map((key) => ({ key, kind: 'image' })),
+  ];
+  for (const candidate of candidates) {
+    if (!meta[candidate.key]) continue;
+    const url = absoluteHttpUrl(meta[candidate.key], baseUrl);
+    if (url) return { url, kind: candidate.kind };
+  }
+  return null;
+}
+
+// Repli générique pour les pages qui servent un lecteur HTML5 sans métadonnée OpenGraph (AMV et
+// hébergeurs vidéo indépendants). On respecte l'ordre des sources : la page choisit sa préférence.
+function parseHtmlVideo(html, baseUrl) {
+  const videoTags = html.match(/<video\b[^>]*>/gi) || [];
+  const sourceTags = html.match(/<source\b[^>]*>/gi) || [];
+  for (const tag of [...videoTags, ...sourceTags]) {
+    const type = (tag.match(/type\s*=\s*["']([^"']+)["']/i) || [])[1] || '';
+    if (type && !type.toLowerCase().startsWith('video/')) continue;
+    const src = (tag.match(/src\s*=\s*["']([^"']+)["']/i) || [])[1];
+    const url = src && absoluteHttpUrl(src, baseUrl);
+    if (url) return { url, kind: 'video' };
+  }
   return null;
 }
 
@@ -218,23 +247,31 @@ function createReferenceStore(dataDir) {
     }
   }
 
+  function persistDownloaded(downloaded, sourceUrl) {
+    const type = String(downloaded.type || '');
+    let ext = MIME_EXT[type];
+    if (!ext) {
+      const candidate = (new URL(sourceUrl).pathname.split('.').pop() || '').toLowerCase();
+      if (EXT_OK.has(candidate)) ext = candidate;
+    }
+    if (!ext) return { ok: false, error: t('unsupportedType') + ': ' + type };
+    const saved = saveAsset(downloaded.buf, ext);
+    if (!saved.ok) return saved;
+    return {
+      ok: true,
+      path: saved.path,
+      kind: type.startsWith('video/') || VIDEO_EXTS.has(ext) ? 'video' : 'image',
+    };
+  }
+
   // Télécharge un média distant (URL CDN signée Discord, hotlink protégé, lien expirant…) côté core
   // — pas de CORS/référrer côté WebView — puis le persiste en asset disque (durable, content-hash).
   // Renvoie le chemin + le `kind` détecté (image/vidéo) pour que le renderer pose le bon item.
   async function fetchAsset(url) {
     try {
       if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: 'URL invalide' };
-      const { buf, type } = await download(url);
-      let ext = MIME_EXT[type];
-      if (!ext) {
-        const m = (new URL(url).pathname.split('.').pop() || '').toLowerCase();
-        if (EXT_OK.has(m)) ext = m;
-      }
-    if (!ext) return { ok: false, error: t('unsupportedType') + ': ' + (type || '') };
-      const r = saveAsset(buf, ext);
-      if (!r.ok) return r;
-      const kind = type.startsWith('video/') || VIDEO_EXTS.has(ext) ? 'video' : 'image';
-      return { ok: true, path: r.path, kind };
+      const downloaded = await download(url);
+      return persistDownloaded(downloaded, downloaded.finalUrl || url);
     } catch (e) {
       return { ok: false, error: String(e) };
     }
@@ -245,26 +282,27 @@ function createReferenceStore(dataDir) {
   // direct, CDN, hotlinks) ; 2) sinon c'est une page HTML → on lit l'OpenGraph/Twitter Card pour
   // trouver l'URL du média (giphy/tenor/imgur/articles…) et on la télécharge. Une seule requête
   // pour un média direct, deux pour une page. Repli renderer : extraction yt-dlp puis carte embed.
-  async function resolveMedia(url) {
+  async function resolveMedia(url, options = {}) {
     try {
       if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: 'URL invalide' };
-      const { buf, type } = await download(url);
+      const first = await download(url);
+      const downloadMedia = options.download !== false;
       // 1. Réponse déjà un média direct → persiste sans re-télécharger.
-      if (type && !type.startsWith('text/')) {
-        let ext = MIME_EXT[type];
-        if (!ext) { const e = (new URL(url).pathname.split('.').pop() || '').toLowerCase(); if (EXT_OK.has(e)) ext = e; }
-        if (ext) {
-          const r = saveAsset(buf, ext);
-          if (r.ok) return { ok: true, path: r.path, kind: type.startsWith('video/') || VIDEO_EXTS.has(ext) ? 'video' : 'image' };
-        }
+      const directKind = first.type.startsWith('video/') ? 'video'
+        : first.type.startsWith('image/') ? 'image' : null;
+      if (directKind) {
+        if (!downloadMedia) return { ok: true, url: first.finalUrl, kind: directKind };
+        return persistDownloaded(first, first.finalUrl || url);
       }
-      // 2. Page HTML/XML → OpenGraph → vrai média → on le télécharge.
-      if (!type || type.includes('html') || type.includes('xml')) {
-        const media = parseOgMedia(buf.toString('utf8'), url);
+      // 2. Page HTML/XML → OpenGraph ou lecteur HTML5 → lien distant ou asset selon le réglage.
+      if (!first.type || first.type.includes('html') || first.type.includes('xml')) {
+        const html = first.buf.toString('utf8');
+        const media = parseOgMedia(html, first.finalUrl || url) || parseHtmlVideo(html, first.finalUrl || url);
         if (media) {
-          const r = await fetchAsset(media);
+          if (!downloadMedia) return { ok: true, url: media.url, kind: media.kind };
+          const r = await fetchAsset(media.url);
           if (r.ok) return r;
-      return { ok: false, error: t('openGraphFailed') + ': ' + (r.error || '') };
+          return { ok: false, error: t('openGraphFailed') + ': ' + (r.error || '') };
         }
       }
       return { ok: false, error: t('noMediaDetected') };

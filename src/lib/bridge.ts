@@ -1321,6 +1321,14 @@ export interface NetsuRecent {
   missing: boolean;
 }
 
+export interface ResolvedOnlineMedia {
+  ok: boolean;
+  path?: string;
+  url?: string;
+  kind?: "image" | "video";
+  error?: string;
+}
+
 /** Une entrée de la bibliothèque de fonds d'écran, telle que la renvoie le core. */
 export interface WallpaperEntry {
   id: string;
@@ -1355,7 +1363,7 @@ export interface RefApi {
   fetchAsset(url: string): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
   // Résout le vrai média de N'IMPORTE quel lien (fichier direct, ou page web via OpenGraph) → asset
   // disque. Catch-all générique : GIF (giphy/tenor), imgur, articles, CDN sans extension propre.
-  resolveMedia(url: string): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
+  resolveMedia(url: string, options?: { download?: boolean }): Promise<ResolvedOnlineMedia>;
   // Upscale un item média (image/vidéo locale) → nouveau fichier asset. NON destructif : ne supprime
   // jamais l'ancien fichier (le board garde de quoi revenir en arrière).
   upscaleItem(opts: { path: string; kind: "image" | "video"; in?: number; out?: number; engine?: "ia" | "turbo"; model: UpscaleModel; shader?: ShaderModel; scale: 1 | 2 | 4; denoise?: number }): Promise<{ ok: boolean; path?: string; width?: number; height?: number; error?: string }>;
@@ -3194,7 +3202,7 @@ const mock: NrApi = {
       deleteScene: async (id: string) => { const o = read(); delete o[id]; write(o); return { ok: true }; },
       saveAsset: async () => ({ ok: false, error: "mock" }),
       fetchAsset: async () => ({ ok: false, error: "mock" }),
-      resolveMedia: async () => ({ ok: false, error: "mock" }),
+      resolveMedia: async (_url, _options) => ({ ok: false, error: "mock" }),
       upscaleItem: async () => ({ ok: false, error: "mock" }),
       dropAsset: async () => ({ ok: true, removed: false }),
       extractMedia: async () => ({ ok: false, error: "mock" }),

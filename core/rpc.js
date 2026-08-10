@@ -825,7 +825,7 @@ function createRpc() {
     // Télécharge un média distant côté core (sans CORS) puis le persiste en asset disque.
     "reference:fetchAsset": ([url]) => refStore.fetchAsset(url),
     // Résout le vrai média de N'IMPORTE quel lien (fichier direct ou page via OpenGraph) → asset.
-    "reference:resolveMedia": ([url]) => refStore.resolveMedia(url),
+    "reference:resolveMedia": ([url, options]) => refStore.resolveMedia(url, options || {}),
     // Extrait le VRAI média d'un lien (réseaux sociaux & co) via yt-dlp / gallery-dl.
     "reference:extractMedia": ([url]) => extract.extractMedia(url),
     // Décompose une vidéo locale en frames image → assets disque → liste de chemins.
