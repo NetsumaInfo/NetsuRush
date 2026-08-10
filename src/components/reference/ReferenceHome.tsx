@@ -1,6 +1,5 @@
-// Écran d'accueil du board (onglet Référence) : zone de dépôt, bouton « Nouveau projet », grille
-// « Projets » (les .netsu enregistrés sur disque, avec leur dossier) et grille « Récent » (scènes de
-// la bibliothèque interne) avec favoris (localStorage) et options de suppression par carte.
+// Écran d'accueil du board (onglet Référence) : zone de dépôt, bouton « Nouveau projet » et grille
+// « Récent » unique (session, fichiers .netsu et scènes internes non converties).
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -265,7 +264,10 @@ export function ReferenceHome({
     if (files.length) onNewFiles(files);
   };
 
-  const visible = recent.filter((s) => !hidden.has(s.id));
+  const projectSceneIds = new Set(
+    projects.map((entry) => entry.sourceSceneId).filter((id): id is string => !!id),
+  );
+  const visible = recent.filter((s) => !hidden.has(s.id) && !projectSceneIds.has(s.id));
 
   return (
     <div
@@ -368,25 +370,8 @@ export function ReferenceHome({
         </div>
       </div>
 
-      {/* Section Projets : les .netsu enregistrés sur disque, avec leur dossier. */}
-      {onOpenRecent && projects.length > 0 && (
-        <div className="border-t border-border bg-card/40 px-8 py-6">
-          <h2 className="mb-4 text-sm font-semibold text-foreground">{t("home.projects")}</h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
-            {projects.map((entry) => (
-              <ProjectCard
-                key={entry.path}
-                entry={entry}
-                onOpen={() => onOpenRecent(entry.path)}
-                onForget={() => void forgetProject(entry.path)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Section Récent */}
-      {(hasSession || visible.length > 0) && (
+      {(hasSession || projects.length > 0 || visible.length > 0) && (
         <div className="border-t border-border bg-card/40 px-8 py-6">
           <h2 className="mb-4 text-sm font-semibold text-foreground">{t("home.recent")}</h2>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
@@ -407,6 +392,16 @@ export function ReferenceHome({
                 </button>
               </div>
             )}
+
+            {/* Projets .netsu récents — ouverts comme documents, jamais réimportés en scènes. */}
+            {onOpenRecent && projects.map((entry) => (
+              <ProjectCard
+                key={entry.path}
+                entry={entry}
+                onOpen={() => onOpenRecent(entry.path)}
+                onForget={() => void forgetProject(entry.path)}
+              />
+            ))}
 
             {/* Scènes récentes */}
             {visible.map((s) => (
