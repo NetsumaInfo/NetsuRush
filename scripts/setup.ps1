@@ -412,13 +412,26 @@ if ($LASTEXITCODE -ne 0) {
 }
 Info "TransNetV2 prêt"
 
+$boardReq = Join-Path $pyScripts 'requirements-reference.txt'
+if (-not (Test-Path $boardReq)) { Fail "pack NetsuBoard introuvable: $boardReq" }
+Stage 'deps' "$(T 'depsInstall') · NetsuBoard"
+$boardLog = & $venvPy -m pip install -r $boardReq --retries 5 --timeout 120 2>&1
+if ($LASTEXITCODE -ne 0) {
+  $boardLog | ForEach-Object { Info "pip NetsuBoard> $_" }
+  Fail (T 'requirementsFailed')
+}
+$boardProbe = & $venvPy -c 'import yt_dlp, gallery_dl' 2>&1
+if ($LASTEXITCODE -ne 0) {
+  $boardProbe | ForEach-Object { Info "probe NetsuBoard> $_" }
+  Fail "NetsuBoard est installé mais ses outils de liens sont inutilisables"
+}
+
 # Packs installés uniquement pour les pages retenues au premier lancement. Les poids restent séparés :
 # activer une page ne télécharge jamais automatiquement ses modèles optionnels.
 $moduleRequirements = [ordered]@{
   search    = 'requirements-search.txt'
   upscale   = 'requirements-netsulab.txt'
   voice     = 'requirements-voice.txt'
-  reference = 'requirements-reference.txt'
 }
 foreach ($moduleId in $moduleRequirements.Keys) {
   if (-not (HasModule $moduleId)) { continue }
@@ -514,7 +527,6 @@ $packProbes = [ordered]@{
   search    = 'import transformers, sentencepiece, accelerate, faiss'
   upscale   = "import sys; sys.path.insert(0, r'$pyScripts'); from upscaler.backends import _patch_basicsr; _patch_basicsr(); import realesrgan, basicsr, spandrel, rembg"
   voice     = 'import faster_whisper, onnx_asr, silero_vad, soundfile, librosa'
-  reference = 'import yt_dlp, gallery_dl'
 }
 foreach ($moduleId in $packProbes.Keys) {
   if (-not (HasModule $moduleId)) { continue }
@@ -780,6 +792,7 @@ $cfg = [ordered]@{
   # par une comparaison de chaînes, sans lancer ffmpeg : le contrôle rapide est traversé à CHAQUE
   # lancement, un processus de plus s'y paierait à chaque fois.
   ffmpegVersion = $ffCurrent
+  setupRuntimeVersion = 2
   realesganDir  = $realdir
   mlBackend     = $MlBackend
   onnxBackend   = $OnnxBackend

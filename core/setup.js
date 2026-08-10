@@ -29,6 +29,9 @@ const PACKAGED = !!process.env.NR_RESOURCE_DIR;
 // test/packaging.test.cjs. La première est la cible, la seconde le repli légitime des postes sans
 // extracteur 7z ; l'accepter ici évite qu'une installation valide redemande le setup en boucle.
 const FFMPEG_ACCEPTED_VERSIONS = ['9.0', '8.1'];
+// Bump when an update adds a mandatory runtime capability. Existing installs without this marker
+// leave the quick path and run `probeRuntime`, which sends incomplete environments to repair.
+const SETUP_RUNTIME_VERSION = 2;
 
 const SETUP_LABELS = {
   fr: { video: 'Prérequis vidéo', ai: 'Prérequis de calcul' },
@@ -156,6 +159,7 @@ function readInstalledConfig() {
 // et l'écran de réparation.
 function quickSetupReady(config = CONFIG, options = {}) {
   if ((!PACKAGED && !options.ignorePackageGate) || !config || !config.setupCompletedAt) return false;
+  if (Number(config.setupRuntimeVersion) !== SETUP_RUNTIME_VERSION) return false;
   if (!exists(config.python) || !exists(config.ffmpeg)) return false;
   if (config.ffprobe && !exists(config.ffprobe)) return false;
   // La VERSION de ffmpeg se juge ici, pas seulement dans `ffmpegReady`. `setupStatus` court-circuite
@@ -171,15 +175,16 @@ function quickSetupReady(config = CONFIG, options = {}) {
 
 function probeRuntime(config = CONFIG) {
   if (!PACKAGED) return true;
-  if (!exists(config.python)) return { ok: false, transnet: false, torch: false, gpu: false, omnishotcut: false, siglip: false, error: 'python absent' };
+  if (!exists(config.python)) return { ok: false, transnet: false, torch: false, gpu: false, omnishotcut: false, siglip: false, online: false, error: 'python absent' };
   const selected = Array.isArray(config.setupModels) ? config.setupModels : [];
   const needsOmni = selected.includes('omnishotcut');
   const needsSiglip = selected.some((id) => id.startsWith('siglip2-'));
   const code = [
     'import json, os',
-    'r={"transnet":False,"torch":False,"gpu":False,"omnishotcut":False}',
+    'r={"transnet":False,"torch":False,"gpu":False,"omnishotcut":False,"online":False}',
     'import torch; r["torch"]=True',
     'from transnetv2_pytorch import TransNetV2; r["transnet"]=True',
+    'import yt_dlp, gallery_dl; r["online"]=True',
     needsOmni ? 'import omnishotcut, decord; r["omnishotcut"]=True' : 'r["omnishotcut"]=True',
     'b=os.environ.get("NETSURUSH_ML_BACKEND", "cpu")',
     'r["actual"]=("rocm" if torch.cuda.is_available() and getattr(torch.version,"hip",None) else ("cuda" if torch.cuda.is_available() else ("xpu" if hasattr(torch,"xpu") and torch.xpu.is_available() else "cpu")))',
@@ -195,9 +200,9 @@ function probeRuntime(config = CONFIG) {
     const parsed = result.status === 0 ? JSON.parse(String(result.stdout || '').trim()) : {};
     const siglip = !needsSiglip || exists(config.siglipDir);
     const omniWeight = !needsOmni || exists(config.omnishotCkpt);
-    return { ...parsed, siglip, omnishotcut: !!parsed.omnishotcut && omniWeight, ok: !!parsed.transnet && !!parsed.torch && !!parsed.gpu && !!parsed.omnishotcut && siglip, error: result.status === 0 ? null : String(result.stderr || '').trim() };
+    return { ...parsed, siglip, omnishotcut: !!parsed.omnishotcut && omniWeight, ok: !!parsed.transnet && !!parsed.torch && !!parsed.gpu && !!parsed.omnishotcut && !!parsed.online && siglip, error: result.status === 0 ? null : String(result.stderr || '').trim() };
   } catch (_) {
-    return { ok: false, transnet: false, torch: false, gpu: false, omnishotcut: false, siglip: false, error: String(_) };
+    return { ok: false, transnet: false, torch: false, gpu: false, omnishotcut: false, siglip: false, online: false, error: String(_) };
   }
 }
 
@@ -208,7 +213,7 @@ async function setupStatus() {
   const venv = PACKAGED ? exists(installed.python) : venvReady();
   // Le chemin nominal est uniquement une vérification de fichiers. probeRuntime lance Python et
   // importe torch/les modèles : réservé au premier lancement ou à une réparation nécessaire.
-  const runtime = quickReady ? { ok: true, transnet: true, torch: true, gpu: true, omnishotcut: true, siglip: true, actual: installed.mlBackend || 'cpu' } : probeRuntime(installed);
+  const runtime = quickReady ? { ok: true, transnet: true, torch: true, gpu: true, omnishotcut: true, siglip: true, online: true, actual: installed.mlBackend || 'cpu' } : probeRuntime(installed);
   const transnet = runtime === true || !!runtime.transnet;
   const ffmpeg = quickReady ? true : ffmpegReady(installed);
   const weights = exists(installed.omnishotCkpt) || exists(path.join(NR_HOME, 'models'));
@@ -222,10 +227,11 @@ async function setupStatus() {
   const installedModels = Array.isArray(installed.setupModels) ? installed.setupModels : [];
   const modelsReady = runtime === true || (!!runtime.omnishotcut && !!runtime.siglip);
   const gpuReady = runtime === true || !!runtime.gpu;
+  const onlineReady = runtime === true || !!runtime.online;
   return {
     // « prêt » = de quoi faire tourner les fonctions cœur. TransNetV2 est dans le socle pip ; tous
     // les autres modèles sont optionnels et gérés séparément.
-    ready: venv && transnet && ffmpeg && modelsReady && gpuReady,
+    ready: venv && transnet && ffmpeg && modelsReady && gpuReady && onlineReady,
     venv, transnet, ffmpeg, weights,
     hardware,
     mlBackend,
@@ -241,6 +247,7 @@ async function setupStatus() {
       ...(installedModels.includes('omnishotcut') ? [{ id: 'omnishotcut', label: `${labels.ai} · OmniShotCut`, done: runtime === true || !!runtime.omnishotcut }] : []),
       ...(installedModels.some((id) => id.startsWith('siglip2-')) ? [{ id: 'siglip', label: `${labels.ai} · SigLIP 2`, done: runtime === true || !!runtime.siglip }] : []),
       { id: 'ffmpeg', label: `${labels.video} · ${videoEngineName(hardware.primaryVendor)}`, done: ffmpeg },
+      { id: 'online', label: 'NetsuBoard · yt-dlp', done: onlineReady },
     ],
   };
 }
@@ -400,5 +407,5 @@ module.exports = {
   mlEngineName, videoEngineName, sanitizeSetupOptions, quickSetupReady, probeRuntime, setupStatus, runSetup,
   // Exportés pour les tests : `test/packaging.test.cjs` vérifie que cette liste ne diverge pas de
   // $FfmpegAccepted dans scripts/setup.ps1, `test/setup-selection.test.cjs` exerce la comparaison.
-  FFMPEG_ACCEPTED_VERSIONS, ffmpegVersionAccepted,
+  SETUP_RUNTIME_VERSION, FFMPEG_ACCEPTED_VERSIONS, ffmpegVersionAccepted,
 };

@@ -119,11 +119,26 @@ test('first-run setup imports each selected module pack before declaring success
   const probes = setup.slice(setup.indexOf('$packProbes'), setup.indexOf('Progress 72'));
   assert.match(probes, /search\s*=\s*'import transformers, sentencepiece, accelerate, faiss'/);
   assert.match(probes, /voice\s*=\s*'import faster_whisper, onnx_asr, silero_vad, soundfile, librosa'/);
-  assert.match(probes, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
+  assert.doesNotMatch(probes, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
   assert.match(probes, /_patch_basicsr\(\); import realesrgan, basicsr, spandrel, rembg/);
   assert.match(probes, /Fail "Le module \$moduleId est installé mais inutilisable/);
   // Sondé APRÈS la normalisation ONNX : rembg tirerait sinon le runtime qu'on s'apprête à remplacer.
   assert.ok(setup.indexOf('ONNX Runtime $OnnxBackend') < setup.indexOf('$packProbes'));
+});
+
+test('NetsuBoard link tools are mandatory and verified outside optional module packs', () => {
+  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
+  const mandatory = setup.slice(setup.indexOf('$boardReq'), setup.indexOf('$moduleRequirements'));
+  assert.match(mandatory, /requirements-reference\.txt/);
+  assert.match(mandatory, /pip install -r \$boardReq/);
+  assert.match(mandatory, /import yt_dlp, gallery_dl/);
+  const optional = setup.slice(setup.indexOf('$moduleRequirements'), setup.indexOf('Progress 72'));
+  assert.doesNotMatch(optional, /reference\s*=\s*'requirements-reference\.txt'/);
+  assert.doesNotMatch(optional, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
+  assert.match(setup, /setupRuntimeVersion\s*=\s*2/);
+  const coreSetup = fs.readFileSync(path.join(root, 'core', 'setup.js'), 'utf8');
+  assert.match(coreSetup, /import yt_dlp, gallery_dl/);
+  assert.match(coreSetup, /runtime\.online/);
 });
 
 // Le paquet ONNX installé ne prouve pas que son provider existe (CUDA/cuDNN absents, roue CPU

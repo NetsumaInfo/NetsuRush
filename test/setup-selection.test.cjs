@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { sanitizeSetupOptions, quickSetupReady } = require('../core/setup');
+const { sanitizeSetupOptions, quickSetupReady, SETUP_RUNTIME_VERSION } = require('../core/setup');
 const { MANIFEST } = require('../core/models');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -62,8 +62,26 @@ test('quick setup check accepts a completed install using existing paths', () =>
     // AUCUN processus. Sans elle, il interrogerait le binaire — ici `process.execPath`, donc node,
     // qui n'annonce évidemment pas « ffmpeg version ».
     ffmpegVersion: '9.0',
+    setupRuntimeVersion: SETUP_RUNTIME_VERSION,
     setupModels: [],
   }, { ignorePackageGate: true }), true);
+});
+
+test('quick setup rejects installs created before mandatory NetsuBoard link tools', () => {
+  const executable = process.execPath;
+  const base = {
+    setupCompletedAt: new Date().toISOString(),
+    python: executable,
+    ffmpeg: executable,
+    ffprobe: executable,
+    ffmpegVersion: '9.0',
+    setupModels: [],
+  };
+  assert.equal(quickSetupReady(base, { ignorePackageGate: true }), false);
+  assert.equal(
+    quickSetupReady({ ...base, setupRuntimeVersion: SETUP_RUNTIME_VERSION }, { ignorePackageGate: true }),
+    true,
+  );
 });
 
 // `setupStatus` lit `quickReady ? true : ffmpegReady(...)` : une version périmée doit être refusée
@@ -76,6 +94,7 @@ test('quick setup check rejects an install whose ffmpeg version is no longer acc
     python: executable,
     ffmpeg: executable,
     ffprobe: executable,
+    setupRuntimeVersion: SETUP_RUNTIME_VERSION,
     setupModels: [],
   };
   const ready = (ffmpegVersion) => quickSetupReady({ ...base, ffmpegVersion }, { ignorePackageGate: true });
