@@ -35,7 +35,7 @@ export const INTERP_MODELS: { id: InterpModel; label: string; hint?: string }[] 
 ];
 
 export const INTERP_FACTORS = [2, 3, 4] as const;
-export type InterpFactor = (typeof INTERP_FACTORS)[number];
+type InterpFactor = (typeof INTERP_FACTORS)[number];
 
 // fps cible courants (utilisés quand l'option « fps cible » est activée).
 export const INTERP_TARGET_FPS = [24, 25, 30, 48, 50, 60, 72, 90, 120, 144, 165, 240] as const;

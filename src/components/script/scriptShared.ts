@@ -7,7 +7,7 @@ import { MEDIA_COLORS } from "./editor/mediaColors";
 import { useScriptPrefs } from "./scriptPrefs";
 import i18n from "@/i18n";
 
-export type { MediaColor, MediaTrack, ScriptBlock, ScriptBlockMedia, ScriptBlockType, ScriptDoc, ScriptDocMeta };
+export type { MediaColor, ScriptBlock, ScriptBlockMedia, ScriptBlockType, ScriptDoc, ScriptDocMeta };
 export { MEDIA_COLORS };
 
 export const SCRIPT_AUDIO_DIR_KEY = "nr-script-audiodir";
@@ -27,7 +27,7 @@ export type ScriptView = "all" | "no-audio" | "text-only";
 
 // Couleur du prochain média : mode « auto » = première couleur libre (sinon cycle) ; mode « role »
 // = couleur par défaut des préférences (étiquettes posées à la main, ex. bleu = interview).
-export function nextColor(existing: ScriptBlockMedia[]): MediaColor {
+function nextColor(existing: ScriptBlockMedia[]): MediaColor {
   const prefs = useScriptPrefs.getState().prefs;
   if (prefs.colorMode === "role") return prefs.defaultColor;
   const used = new Set(existing.map((m) => m.color));
@@ -35,7 +35,7 @@ export function nextColor(existing: ScriptBlockMedia[]): MediaColor {
 }
 
 // Prochaine piste libre du bon type (V* pour la vidéo, A* pour l'audio).
-export function nextTrack(existing: ScriptBlockMedia[], kind: ScriptBlockMedia["kind"]): MediaTrack {
+function nextTrack(existing: ScriptBlockMedia[], kind: ScriptBlockMedia["kind"]): MediaTrack {
   const prefix = kind === "audio" ? "A" : "V";
   const slots: MediaTrack[] = kind === "audio" ? ["A1", "A2", "A3"] : ["V1", "V2", "V3"];
   const used = new Set(existing.filter((m) => m.track.startsWith(prefix)).map((m) => m.track));
@@ -118,7 +118,7 @@ export function filterSlash(query: string, multiHeadings = false): SlashCommand[
 //  • bloc texte seul (voix off) ou média de durée inconnue → repli sur le temps de LECTURE
 //    (≈200 mots/min) ; c'est l'estimation de la narration en attendant un vrai plan.
 // Les titres ne durent rien (séparateurs de section).
-export const WPM = 200;
+const WPM = 200;
 
 export function stripHtml(html: string): string {
   const d = document.createElement("div");
@@ -126,7 +126,7 @@ export function stripHtml(html: string): string {
   return (d.textContent || "").trim();
 }
 
-export function countWords(text: string): number {
+function countWords(text: string): number {
   const d = document.createElement("div");
   d.innerHTML = text || "";
   // Les @mentions sont de la MÉTADONNÉE, pas du texte narré : exclues du minutage.
@@ -139,7 +139,7 @@ export function countWords(text: string): number {
 const NON_NARRATED = new Set<ScriptBlockType>(["heading", "storyboard", "divider", "callout"]);
 
 // Mots narrés d'un bloc (titres, storyboards, encadrés, séparateurs exclus).
-export function narrationWords(b: ScriptBlock): number {
+function narrationWords(b: ScriptBlock): number {
   return NON_NARRATED.has(b.type) ? 0 : countWords(b.text);
 }
 
@@ -164,7 +164,7 @@ export function mediaDurationSec(media: ScriptBlockMedia | null): number | null 
 }
 
 // Durée RÉELLE d'un bloc dans la timeline : plus long plan VIDÉO trimé ; sinon estimation lecture.
-export function blockDurationSec(b: ScriptBlock): number {
+function blockDurationSec(b: ScriptBlock): number {
   if (b.type === "heading" || b.type === "storyboard" || b.type === "divider" || b.type === "callout") return 0;
   const vids = b.media.filter((m) => m.kind === "video").map(mediaDurationSec).filter((d): d is number => d != null);
   if (vids.length) return Math.max(...vids);

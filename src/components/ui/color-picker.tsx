@@ -69,7 +69,7 @@ const CHECKER =
   "[background:repeating-conic-gradient(#777_0_25%,#bbb_0_50%)] [background-size:8px_8px]"
 
 // Pastille d'affichage d'une couleur (gère "transparent").
-export function ColorSwatch({ value, className }: { value: string; className?: string }) {
+function ColorSwatch({ value, className }: { value: string; className?: string }) {
   const transparent = !value || value === "transparent"
   return (
     <span

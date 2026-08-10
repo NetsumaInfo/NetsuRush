@@ -39,7 +39,8 @@ test('collection cards also reserve inline playback for hover or autoplay', () =
     path.join(__dirname, '..', 'src', 'components', 'collections', 'CollectionDetail.tsx'),
     'utf8',
   );
-  assert.match(collection, /play=\{!trimShot && grid\.gridPlay\}/);
+  assert.match(collection, /play=\{grid\.gridPlay\}/);
+  assert.doesNotMatch(collection, /trimShot|setTrimShot|TrimDialog/);
   assert.doesNotMatch(collection, /playingId|setPlayingId/);
 });
 

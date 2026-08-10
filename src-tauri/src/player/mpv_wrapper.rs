@@ -121,6 +121,25 @@ impl MpvPlayer {
     }
 
     pub fn load_file(&self, path: &str) -> Result<(), String> {
+        // No start position: clear any leftover `start` from a previous load_file_at.
+        let _ = self.set_property_string("start", "none");
+        let cmd = format!("loadfile \"{}\"", path.replace('\\', "/"));
+        self.execute_command(&cmd)
+    }
+
+    /// Load a file and open it AT `position` seconds.
+    ///
+    /// `loadfile` is asynchronous: a `seek` issued right after it is applied to
+    /// the file still loaded (or rejected outright), so the opening frame was
+    /// never the requested one — the player showed a leftover frame and looked
+    /// frozen. The `start` option is consumed by mpv when the new file is
+    /// initialized, so the position is applied exactly once, without a race.
+    pub fn load_file_at(&self, path: &str, position: f64) -> Result<(), String> {
+        if position > 0.0 {
+            self.set_property_string("start", &format!("{:.3}", position))?;
+        } else {
+            let _ = self.set_property_string("start", "none");
+        }
         let cmd = format!("loadfile \"{}\"", path.replace('\\', "/"));
         self.execute_command(&cmd)
     }
@@ -143,8 +162,19 @@ impl MpvPlayer {
     }
 
     pub fn seek(&self, position: f64) -> Result<(), String> {
-        let cmd = format!("seek {} absolute", position);
+        // `exact` : sans lui mpv suit l'option `hr-seek` et peut s'arrêter sur l'image clé la plus
+        // proche — inutilisable pour poser des bornes à l'image près.
+        let cmd = format!("seek {} absolute+exact", position);
         self.execute_command(&cmd)
+    }
+
+    /// Force mpv to render the CURRENT frame again, without moving.
+    ///
+    /// Resizing the video output window drops the presented frame; while paused mpv has no next
+    /// frame to draw, so the surface stays black until playback resumes. A null exact seek lands
+    /// on the same frame and makes mpv render it.
+    pub fn redraw(&self) -> Result<(), String> {
+        self.execute_command("seek 0 relative+exact")
     }
 
     pub fn seek_relative(&self, offset: f64) -> Result<(), String> {
@@ -194,6 +224,11 @@ impl MpvPlayer {
             parse(self.get_property_string_safe("ab-loop-a")),
             parse(self.get_property_string_safe("ab-loop-b")),
         )
+    }
+
+    /// Absolute path of the file mpv currently has loaded ("" when idle).
+    pub fn get_loaded_path(&self) -> String {
+        self.get_property_string_safe("path")
     }
 
     pub fn get_time_pos(&self) -> f64 {

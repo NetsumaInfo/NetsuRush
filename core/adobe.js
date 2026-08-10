@@ -58,8 +58,6 @@ const PANEL_TTL_MS = 12000; // heartbeat panneau toutes les 5 s
 // Recopier une timeline entière ou dérouler un script d'export peut demander plusieurs minutes
 // (centaines de plans, imports de sources) : les 2 min du job standard y suffisent rarement.
 const PLACE_TIMEOUT_MS = 600000;
-const EXT_ID = adobePanel.EXT_ID;
-
 /** Cherche l'exécutable d'une app Adobe (même logique que findAfterFx d'aeExport.js). */
 function findAdobeExe(app, CONFIG) {
   const cfgKey = app === "ppro" ? "premierePro" : "afterFx";

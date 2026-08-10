@@ -11,8 +11,7 @@ import { cn } from "@/lib/utils";
 import { NOTE_COLORS, FONT_FAMILIES, loadSystemFonts } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
 
-export const TEXT_COLORS = ["#1f2937", "#ffffff", "#ef4444", "#f59e0b", "#10b981", "#3b82f6"];
-export const FONT_SIZES = [12, 14, 16, 18, 24, 32, 48, 64];
+const TEXT_COLORS = ["#1f2937", "#ffffff", "#ef4444", "#f59e0b", "#10b981", "#3b82f6"];
 
 export function IconToggle({ on, onClick, label, children }: {
   on?: boolean; onClick: () => void; label: string; children: React.ReactNode;

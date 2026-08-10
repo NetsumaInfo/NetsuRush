@@ -47,7 +47,7 @@ export function dashArray(dash: DashStyle | undefined, w: number): string | unde
   return `${Math.max(0.01, w * 0.01)} ${w * 2}`; // dotted : segment ~nul + linecap rond → points
 }
 
-export function distToSeg(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+function distToSeg(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
   const dx = x2 - x1, dy = y2 - y1;
   const l2 = dx * dx + dy * dy;
   if (l2 === 0) return Math.hypot(px - x1, py - y1);

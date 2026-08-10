@@ -12,10 +12,10 @@ import type { AppState } from "./index";
 import i18n from "@/i18n";
 
 // Navigation interne de l'onglet Collections : liste des dossiers ↔ détail d'un dossier.
-export type CollectionsView = "list" | "detail";
+type CollectionsView = "list" | "detail";
 
 // Patch de méta d'une collection (création OU mise à jour).
-export interface CollectionSavePatch {
+interface CollectionSavePatch {
   id?: string;
   name: string;
   color?: string | null;

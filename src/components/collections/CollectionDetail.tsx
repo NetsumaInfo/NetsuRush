@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,13 +23,12 @@ import { ShotCard } from "@/components/rushes/ShotCard";
 import { useShotGrid } from "@/components/rushes/useShotGrid";
 import { useTimelineTarget } from "@/components/rushes/useTimelineTarget";
 import { TimelineTargetSelect } from "@/components/rushes/TimelineTargetSelect";
-import { fmt, nextSegId, onGridScroll } from "@/components/rushes/cutStudioShared";
+import { fmt, nextSegId } from "@/components/rushes/cutStudioShared";
 import { type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { CollectionGlyph } from "./collectionGlyph";
 import { FolderEditor } from "./FolderEditor";
 import { ShotInspector } from "./ShotInspector";
 import { CollectionSidePanel } from "./CollectionSidePanel";
-import { TrimDialog } from "./TrimDialog";
 import {
   collectTags, sortShots, filterShots, labelColor, labelNameKey, loadShotSort, saveShotSort,
   EMPTY_FILTER, SORT_KEYS, SORT_LABELS, type CollSortKey, type ShotFilter,
@@ -50,11 +50,12 @@ export function CollectionDetail({ id }: { id: string }) {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
-  const [notice, setNotice] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  // Seules les ERREURS restent affichées : elles décrivent un état à corriger. Les retours de
+  // réussite passent par une pastille qui s'efface d'elle-même (cf. `toast`).
+  const [error, setError] = useState<string | null>(null);
   const [sidePanel, setSidePanel] = useState<boolean>(() => typeof localStorage !== "undefined" && localStorage.getItem("nr.coll.side") === "1");
   const toggleSide = (v: boolean) => { setSidePanel(v); try { localStorage.setItem("nr.coll.side", v ? "1" : "0"); } catch { /* noop */ } };
   const [archiving, setArchiving] = useState(false);
-  const [trimShot, setTrimShot] = useState<CollectionShot | null>(null);
   // Plan OUVERT dans le lecteur de droite. Indépendant de la sélection, comme au Découpage :
   // un clic (dé)sélectionne, un double-clic ouvre — sinon on ne peut plus lire un plan sans
   // vider la sélection, ni garder une sélection en regardant un plan.
@@ -169,7 +170,7 @@ export function CollectionDetail({ id }: { id: string }) {
     await nr.collections?.removeShot(coll.id, shotId);
     setSel((prev) => { const n = new Set(prev); n.delete(shotId); return n; });
     setOpenShot((cur) => (cur?.id === shotId ? null : cur));
-    setNotice({ kind: "ok", text: tr("detail.removed", { name: s?.name || tr("detail.shotWord") }) });
+    toast.ok(tr("detail.removed", { name: s?.name || tr("detail.shotWord") }));
     await reload();
     await loadCollections();
   }
@@ -180,7 +181,7 @@ export function CollectionDetail({ id }: { id: string }) {
     const last = undoStack[undoStack.length - 1];
     setUndoStack((st) => st.slice(0, -1));
     await nr.collections?.addShots(coll.id, [last]);
-    setNotice({ kind: "ok", text: tr("detail.restored", { name: last.name || tr("detail.shotWord") }) });
+    toast.ok(tr("detail.restored", { name: last.name || tr("detail.shotWord") }));
     await reload();
     await loadCollections();
   }
@@ -200,26 +201,26 @@ export function CollectionDetail({ id }: { id: string }) {
 
   async function addOne(s: CollectionShot) {
     const r = await target.build(coll?.name || "Collection", [block(s)]);
-    if (!r.ok && r.error) setNotice({ kind: "err", text: r.error });
+    if (!r.ok && r.error) setError(r.error);
     return { ok: r.ok, error: r.error };
   }
   async function toTimeline() {
     const list = selectedShots();
     if (!list.length || !coll) return;
-    setNotice(null); setBusy(tr("detail.mounting"));
+    setError(null); setBusy(tr("detail.mounting"));
     const r = await target.build(coll.name, list.map(block));
     setBusy(null);
-    if (r.ok) setNotice({ kind: "ok", text: tr("detail.toTimelineOk", { count: r.count ?? list.length, timeline: r.timeline }) });
-    else setNotice({ kind: "err", text: r.error || tr("detail.timelineFailed") });
+    if (r.ok) toast.ok(tr("detail.toTimelineOk", { count: r.count ?? list.length, timeline: r.timeline }));
+    else setError(r.error || tr("detail.timelineFailed"));
   }
 
   async function archiveNow() {
     if (!coll || archiving) return;
-    setArchiving(true); setNotice(null);
+    setArchiving(true); setError(null);
     const r = await archiveCollection(coll.id, {});
     setArchiving(false);
-    if (r.ok) { setNotice({ kind: "ok", text: tr("detail.archived") }); await reload(); }
-    else setNotice({ kind: "err", text: r.error || tr("detail.archiveFailed") });
+    if (r.ok) { toast.ok(tr("detail.archived")); await reload(); }
+    else setError(r.error || tr("detail.archiveFailed"));
   }
 
   // Le lecteur n'ouvre AUCUN plan de lui-même : ouvrir la collection lançait la lecture en boucle
@@ -234,9 +235,9 @@ export function CollectionDetail({ id }: { id: string }) {
     if (!sidePanel) toggleSide(true);
   }
 
-  const gridTemplate = grid.cell
-    ? `repeat(auto-fill, minmax(${Math.floor(grid.cell)}px, 1fr))`
-    : `repeat(${grid.cols}, minmax(0, 1fr))`;
+  // Colonnes TENUES (cf. gridMetrics) : rétrécir le panneau rétrécit les vignettes, il n'en passe
+  // pas une à la ligne.
+  const gridTemplate = `repeat(${grid.actualCols || grid.cols}, minmax(0, 1fr))`;
   // Rang du plan ouvert dans la grille AFFICHÉE (tri/filtre compris) → repère « n/N » du lecteur.
   const openPosition = openShot ? items.findIndex(({ shot }) => shot.id === openShot.id) + 1 : 0;
 
@@ -308,7 +309,7 @@ export function CollectionDetail({ id }: { id: string }) {
       {/* Colonne GAUCHE : barre d'outils de la grille PUIS la grille — exactement la disposition du
           Découpage. Ces outils vivaient dans l'entête de la vue, donc au-dessus du lecteur, qui
           démarrait deux rangées plus bas que sa grille pour des réglages qui ne le concernent pas. */}
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col pr-1">
         <div className="flex shrink-0 flex-wrap items-center gap-2 py-1.5">
           {(coll?.shots.length ?? 0) > 0 && (<>
             {/* Champ de recherche COURT : il partage sa ligne avec les tags et tous les outils de
@@ -408,9 +409,9 @@ export function CollectionDetail({ id }: { id: string }) {
           </Tooltip>
         </div>
 
-      {/* Grille : même géométrie que le Découpage — la densité est une CIBLE, `auto-fill` décide du
-          nombre réel de colonnes selon la largeur restante. */}
-      <div ref={grid.gridScrollRef} onScroll={onGridScroll} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1 pb-4 pt-1.5">
+      {/* Grille : même géométrie que le Découpage — la densité EST le nombre de colonnes, tenu quelle
+          que soit la largeur (cf. gridMetrics). */}
+      <div ref={grid.gridScrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5">
         {loading ? (
           <div className="grid gap-3" style={{ gridTemplateColumns: gridTemplate }}>
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
@@ -430,13 +431,12 @@ export function CollectionDetail({ id }: { id: string }) {
                   seg={seg} index={i} clipPath={shot.path} cols={grid.actualCols} cellH={grid.cellH}
                   active={!!shot.id && openShot?.id === shot.id}
                   selected={!!shot.id && sel.has(shot.id)}
-                  play={!trimShot && grid.gridPlay}
+                  play={grid.gridPlay}
                   getProxy={(h, tok, prio) => grid.getProxy(shot.path, seg.in, seg.out, prio ?? "high", h, tok)}
                   bustProxy={() => grid.bust(shot.path, seg.in, seg.out)}
                   onPlay={() => openInPlayer(shot)}
                   onToggle={() => toggle(shot.id)}
                   onAddToTimeline={connected ? () => addOne(shot) : undefined}
-                  onTrim={() => setTrimShot(shot)}
                   onRemove={() => removeShot(shot.id)}
                   rangerShots={[shot]}
                   dur={fmt(shot.out - shot.in)}
@@ -460,22 +460,23 @@ export function CollectionDetail({ id }: { id: string }) {
           <div role="separator" aria-orientation="vertical" aria-label={tr("detail.resize")} tabIndex={0}
             onMouseDown={startPanelDrag}
             onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); setPanelW((w) => Math.min(600, w + 20)); } else if (e.key === "ArrowRight") { e.preventDefault(); setPanelW((w) => Math.max(260, w - 20)); } }}
-            className="group relative mx-1 flex w-3 shrink-0 self-stretch cursor-col-resize items-center justify-center outline-none focus-visible:bg-primary/10">
-            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-colors group-hover:bg-primary" />
-            <GripVertical className="relative h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            className="group relative w-px shrink-0 self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+            {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
+                restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
+            <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
           )}
           {/* Rognage ouvert → lecteur du panneau suspendu (sinon il continue de tourner derrière la modale). */}
           <CollectionSidePanel
             width={asideW}
             narrow={narrow}
-            shot={trimShot ? null : openShot}
+            shot={openShot}
             position={openPosition}
             total={items.length}
             name={coll?.name || "collection"}
             exportClips={panelExportClips}
             onTimelineImport={toTimeline}
-            onTrim={() => openShot && setTrimShot(openShot)}
             getProxy={(p, i, o, prio) => grid.getProxy(p, i, o, prio, undefined, undefined, true)}
             playerApi={playerApi}
           />
@@ -488,20 +489,16 @@ export function CollectionDetail({ id }: { id: string }) {
 
       {/* Bandeau d'état en PIED de vue, comme au Découpage : au-dessus de la grille il repoussait
           les vignettes vers le bas à chaque message. */}
-      {(busy || notice || undoStack.length > 0) && (
+      {(busy || error || undoStack.length > 0) && (
         <div className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-1.5 text-xs">
           {busy && <span className="flex items-center gap-1.5 text-muted-foreground"><Spinner /> {busy}</span>}
-          {!busy && notice && <span className={notice.kind === "ok" ? "text-[var(--color-ok)]" : "text-destructive"}>{notice.text}</span>}
+          {!busy && error && <span className="text-destructive">{error}</span>}
           {undoStack.length > 0 && (
             <button type="button" onClick={() => void undoRemove()} className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <Undo2 className="size-3" /> {tr("detail.undoRemove")}
             </button>
           )}
         </div>
-      )}
-
-      {trimShot && trimShot.id && (
-        <TrimDialog shot={trimShot} onSave={(patch) => patchShot(trimShot.id!, patch)} onClose={() => setTrimShot(null)} />
       )}
 
       {meta && <FolderEditor open={editing} onOpenChange={(v) => { setEditing(v); if (!v) void reload(); }} editing={meta} />}

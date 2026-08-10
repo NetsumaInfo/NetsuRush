@@ -28,8 +28,8 @@ export const LANGUAGES: LangDef[] = [
   { code: "zh", label: "中文" },
 ];
 
-export const SUPPORTED: LangCode[] = LANGUAGES.map((l) => l.code);
-export const FALLBACK_LANG: LangCode = "fr";
+const SUPPORTED: LangCode[] = LANGUAGES.map((l) => l.code);
+const FALLBACK_LANG: LangCode = "fr";
 export const LANG_STORAGE_KEY = "nr-lang";
 
 // Namespaces = un fichier JSON par feature et par langue (src/locales/<lang>/<ns>.json).

@@ -53,8 +53,9 @@ function ResultCardImpl({
   // Plan sérialisé pour « Ranger dans une collection » (identique au bouton du pied).
   const shots = [{ path: hit.file_path, name: basename(hit.file_path), in: hit.start_sec, out: hit.end_sec, inFrame: hit.start_frame, outFrame: hit.end_frame, srcFrames: hit.src_frames, fps: hit.fps }];
 
-  const { rootRef, thumb, thumbErr, hovered, setHovered, url, showVideo, resetUrl } =
+  const { rootRef, thumb, thumbErr, hovered, setHovered, url, showVideo, videoPaused, near, resetUrl } =
     useResultPreview({ filePath: hit.file_path, thumbAt, index, play, getProxy, bustProxy });
+  const playing = showVideo && !videoPaused;
 
   function onVideoError() { bustProxy(); resetUrl(); }
 
@@ -73,7 +74,7 @@ function ResultCardImpl({
       }>
       <div className="relative aspect-video bg-muted">
         {!thumb && !thumbErr && <Skeleton className="absolute inset-0 rounded-none" />}
-        {thumb && <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+        {thumb && <img src={thumb} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
         {thumbErr && !thumb && (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <Film className="h-7 w-7 opacity-40" />
@@ -85,42 +86,57 @@ function ResultCardImpl({
             label={t("resultCard.previewAria")}
             onError={onVideoError}
             audible={hovered}
+            paused={videoPaused}
             className="absolute inset-0 h-full w-full bg-black object-cover"
           />
         )}
-        {!showVideo && (
+        {!playing && (
           <Play className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />
         )}
 
         {/* case de sélection (toujours visible si cochée, sinon au survol) — coin haut-gauche
-            car le haut-droite porte déjà le timecode */}
-        <SelectToggle selected={selected} onToggle={onToggle} className="left-2 top-2 right-auto" />
+            car le haut-droite porte déjà le timecode. Cochée, elle est visible : jamais différée. */}
+        {(near || selected) && <SelectToggle selected={selected} onToggle={onToggle} className="left-2 top-2 right-auto" />}
 
-        <span className="absolute bottom-2 left-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+        {/* Pastilles en `nr-chip` (fond opaque), JAMAIS en `backdrop-blur` : un backdrop-filter
+            posé sur une <video> qui joue force le compositeur à recopier et flouter le fond à
+            CHAQUE image décodée, pour chaque carte. Avec une grille en lecture auto c'était le
+            premier poste de coût du défilement. */}
+        <span className="nr-chip absolute bottom-2 left-2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white">
           {tc(hit.start_sec)}
         </span>
-        <span className="absolute right-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+        <span className="nr-chip absolute right-2 top-2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white">
           {Math.round(hit.score * 100)}%
         </span>
         {hit.char && (
-          <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white backdrop-blur"
-            style={{ background: hit.char.color || "rgba(0,0,0,.65)" }}>
+          <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white"
+            style={{ background: hit.char.color || "rgba(0,0,0,.8)" }}>
             {hit.char.name}
           </span>
         )}
         {hit.aesthetic != null && hit.aesthetic < 0 && (
-          <Tooltip>
-            <TooltipTrigger render={<span className="nr-chip absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-warn)] backdrop-blur" />}>
+          near ? (
+            <Tooltip>
+              <TooltipTrigger render={<span className="nr-chip absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-warn)]" />}>
+                <Aperture className="h-3 w-3" /> {t("resultCard.blurry")}
+              </TooltipTrigger>
+              <TooltipContent>{t("resultCard.blurryTooltip")}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="nr-chip absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-warn)]">
               <Aperture className="h-3 w-3" /> {t("resultCard.blurry")}
-            </TooltipTrigger>
-            <TooltipContent>{t("resultCard.blurryTooltip")}</TooltipContent>
-          </Tooltip>
+            </span>
+          )
         )}
       </div>
 
       {/* Pied compact : nom pleine largeur (1 ligne) ; les actions n'apparaissent qu'au survol,
-          en OVERLAY (fondu gauche) → zéro troncature du nom au repos, zéro décalage de layout. */}
+          en OVERLAY (fondu gauche) → zéro troncature du nom au repos, zéro décalage de layout.
+          Le pied garde sa hauteur même loin de l'écran (elle entre dans la taille mémorisée par
+          `content-visibility`) ; seul son contenu interactif est différé. */}
       <div className="relative flex h-8 items-center px-2.5">
+        {!near && <div className="min-w-0 flex-1 truncate text-xs font-medium">{basename(hit.file_path)}</div>}
+        {near && (<>
         <Tooltip>
           <TooltipTrigger render={<div className="min-w-0 flex-1 truncate text-xs font-medium" />}>
             {basename(hit.file_path)}
@@ -185,10 +201,12 @@ function ResultCardImpl({
           <TooltipContent>{t("resultCard.addToTimeline")}</TooltipContent>
         </Tooltip>
         </div>
+        </>)}
       </div>
       </ContextMenuTrigger>
 
       {/* Clic droit : mêmes actions que les boutons du survol, toutes accessibles d'un geste. */}
+      {near && (
       <ContextMenuContent className="min-w-52">
         <ContextMenuCheckboxItem checked={selected} onClick={onToggle}>
           <CheckSquare /> {t("resultCard.select")}
@@ -216,6 +234,7 @@ function ResultCardImpl({
           <Copy /> {t("resultCard.copyPath")}
         </ContextMenuItem>
       </ContextMenuContent>
+      )}
     </ContextMenu>
   );
 }

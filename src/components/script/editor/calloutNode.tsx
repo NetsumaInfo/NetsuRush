@@ -10,7 +10,7 @@ import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent, type NodeViewP
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Palette du Carnet (DB_COLORS) — mêmes teintes que les encadrés du module notebook.
-export const CALLOUT_COLORS: Record<string, string> = {
+const CALLOUT_COLORS: Record<string, string> = {
   blue: "#4f86f7",
   green: "#10b981",
   yellow: "#eab308",

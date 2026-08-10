@@ -54,5 +54,9 @@
     "title": "Adobe 扩展",
     "detected": "已检测到：{{apps}}",
     "hint": "安装 NetsuRush 面板并自动保持更新。"
+  },
+  "issues": {
+    "detected_one": "安装过程中检测到 {{count}} 个问题。",
+    "detected_other": "安装过程中检测到 {{count}} 个问题。"
   }
 }

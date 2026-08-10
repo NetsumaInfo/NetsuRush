@@ -1,6 +1,7 @@
-// Indicateur d'erreur GLOBAL : petite pastille rouge flottante (coin bas-droit), visible depuis
-// N'IMPORTE QUELLE page dès qu'une erreur est journalisée (console.error, exception non gérée, rejet de
-// promesse, ou log core/python de niveau error). Clic → ouvre Paramètres › Console sur l'erreur.
+// Indicateur d'erreur GLOBAL : petite pastille rouge, visible depuis N'IMPORTE QUELLE page dès qu'une
+// erreur est journalisée (console.error, exception non gérée, rejet de promesse, ou log core/python de
+// niveau error). Clic → ouvre Paramètres › Console sur l'erreur. Le positionnement vient de la colonne
+// flottante du coin bas-droit qui l'accueille (cf. `App`), partagée avec les pastilles d'état.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Terminal, Check } from "lucide-react";
@@ -30,7 +31,7 @@ export function ErrorBadge() {
             type="button"
             onClick={() => { openConsole(); markConsoleSeen(); }}
             aria-label={t("errorBadge.aria", { count })}
-            className="fixed bottom-4 right-4 z-50 flex items-center gap-1.5 rounded-full bg-destructive px-3 py-2 text-xs font-medium text-destructive-foreground shadow-lg ring-1 ring-black/20 transition-transform hover:scale-105 active:scale-95"
+            className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-destructive px-3 py-2 text-xs font-medium text-destructive-foreground shadow-lg ring-1 ring-black/20 transition-transform hover:scale-105 active:scale-95"
           />
         }
       >

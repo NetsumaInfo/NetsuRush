@@ -23,6 +23,10 @@
 
 **Updates are one icon in the title bar**, left of the window controls, mounted in the window controls so it appears in the same corner during setup, on the gates and in the app — one reflex. It is absent when no version is waiting. It goes through the Tauri updater, so it stays clickable when the core is dead, which is exactly when the install screen is the only reachable one.
 
+- **The startup probe is deliberately faint** (`scheduleUpdateBootstrapCheck`): once per session whatever the number of mounts, deferred 6 s off the boot path, then run inside a `requestIdleCallback`, and silent on failure — an unreachable repository leaves the app in `idle` with no badge and no error. One HTTPS request for a ~1 kB manifest, no polling, no disk write.
+- **Download and install are two distinct steps** (`update.download()` then `update.install()`), so nothing restarts under a user who only wanted the bytes. Clicking the icon downloads; the icon then turns into a labelled **Update** button that installs and relaunches.
+- **The percentage is exact**: the store publishes the raw `downloaded / contentLength` float with no rounding and no artificial 99 % ceiling, and the UI renders it to one decimal — an integer percentage sits still for seconds on a large installer and then jumps. Progress events are coalesced to one store write per 80 ms so the title bar does not re-render per HTTP chunk.
+
 ## Authentication (`convex/` + `src/components/auth/`)
 
 A login gate over the shell (after the setup gate, main window only; the detached board and the remote panel are not gated). **Not verified at runtime** — needs a Convex deployment and an OAuth application. Setup steps: `auth-setup.md`.

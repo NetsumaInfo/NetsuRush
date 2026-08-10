@@ -13,6 +13,11 @@ import { CollectionGlyph, DEFAULT_COLLECTION_COLOR } from "./collectionGlyph";
 import { loadCollFavs, saveCollFavs } from "./collectionShared";
 import { cn } from "@/lib/utils";
 
+// Ce bouton est posé sur CHAQUE carte de plan : une grille de derush en monte plusieurs centaines.
+// Le déclencheur ne fait donc rien d'autre que porter l'état ouvert/fermé — aucun abonnement au
+// store, aucune lecture de localStorage, aucun filtrage de collections tant qu'il est fermé. Tout ça
+// vivait ici et re-tournait à chaque rendu de carte (le défilement en provoque beaucoup), et la
+// moindre écriture dans le store des collections re-rendait toutes les cartes de la grille.
 export function AddToCollection({
   shots, className, stopPropagation = true,
 }: {
@@ -20,6 +25,24 @@ export function AddToCollection({
   className?: string;               // style du déclencheur (bouton-icône)
   stopPropagation?: boolean;        // évite de déclencher le clic de la carte sous le bouton
 }) {
+  const { t } = useTranslation("collections");
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger
+        aria-label={t("range.trigger")}
+        onClick={(e) => { if (stopPropagation) e.stopPropagation(); }}
+        className={cn("inline-flex items-center justify-center rounded transition-colors", className)}
+      >
+        <FolderPlus className="h-3.5 w-3.5" />
+      </Popover.Trigger>
+      {open && <CollectionPicker shots={shots} close={() => setOpen(false)} />}
+    </Popover.Root>
+  );
+}
+
+// Contenu du popover : monté seulement à l'ouverture.
+function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: () => void }) {
   const { t } = useTranslation(["collections", "common"]);
   const { collections, loadCollections, rangeShots, createCollection } = useApp(
     useShallow((s) => ({
@@ -28,7 +51,6 @@ export function AddToCollection({
     })),
   );
 
-  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);   // id en cours de rangement
   const [done, setDone] = useState<string | null>(null);   // id rangé (coche éphémère)
   const [creating, setCreating] = useState(false);
@@ -36,7 +58,7 @@ export function AddToCollection({
   const [q, setQ] = useState("");
   const [favs, setFavs] = useState<string[]>(loadCollFavs);
 
-  useEffect(() => { if (open) { void loadCollections(); setFavs(loadCollFavs()); } }, [open, loadCollections]);
+  useEffect(() => { void loadCollections(); setFavs(loadCollFavs()); }, [loadCollections]);
 
   const toggleFav = (id: string) => setFavs((f) => { const n = f.includes(id) ? f.filter((x) => x !== id) : [...f, id]; saveCollFavs(n); return n; });
 
@@ -54,7 +76,7 @@ export function AddToCollection({
     setBusy(id);
     const r = await rangeShots(id, shots);
     setBusy(null);
-    if (r.ok) { setDone(id); setTimeout(() => { setDone(null); setOpen(false); }, 700); }
+    if (r.ok) { setDone(id); setTimeout(() => { setDone(null); close(); }, 700); }
   }
   async function createAndRange() {
     const n = name.trim();
@@ -63,7 +85,7 @@ export function AddToCollection({
     const id = await createCollection({ name: n, color: DEFAULT_COLLECTION_COLOR });
     if (id) await rangeShots(id, shots);
     setBusy(null);
-    setName(""); setCreating(false); setOpen(false);
+    setName(""); setCreating(false); close();
   }
 
   const Row = (c: CollectionMeta) => (
@@ -85,14 +107,6 @@ export function AddToCollection({
   );
 
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger
-        aria-label={t("range.trigger")}
-        onClick={(e) => { if (stopPropagation) e.stopPropagation(); }}
-        className={cn("inline-flex items-center justify-center rounded transition-colors", className)}
-      >
-        <FolderPlus className="h-3.5 w-3.5" />
-      </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="top" sideOffset={6} className="z-50 outline-none">
           <Popover.Popup
@@ -141,6 +155,5 @@ export function AddToCollection({
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
-    </Popover.Root>
   );
 }

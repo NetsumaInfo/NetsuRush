@@ -9,8 +9,6 @@ import { useApp } from "@/store";
 import { NBPAGE_LINK_PREFIX } from "./notebookShared";
 import i18n from "@/i18n";
 
-export { NBPAGE_LINK_PREFIX };
-
 // Normalise une saisie en URL web : http(s)://… tel quel, sinon www./domaine.tld → https://…
 function toWebUrl(raw: string): string | null {
   const s = raw.trim();

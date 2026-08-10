@@ -12,14 +12,11 @@
 // bouton de profil, progression) : les deux vues lisent et écrivent le profil ACTIF, donc les réglages
 // ne peuvent pas diverger d'un module à l'autre.
 import { useEffect, useState } from "react";
-import { Crop } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type CollectionShot, type ExportClipInput } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { ExportButton } from "@/components/export/ExportButton";
 import { ExportAudioSelect } from "@/components/export/ExportAudioSelect";
@@ -46,7 +43,7 @@ function useShotProxy(
 }
 
 export function CollectionSidePanel({
-  width, narrow, shot, position, total, name, exportClips, onTimelineImport, onTrim, getProxy, playerApi,
+  width, narrow, shot, position, total, name, exportClips, onTimelineImport, getProxy, playerApi,
 }: {
   width: number;
   /** Vue étroite (panneau CEP, fenêtre épinglée) : le lecteur passe en tête, pleine largeur. */
@@ -59,7 +56,6 @@ export function CollectionSidePanel({
   name: string;
   exportClips: () => ExportClipInput[];
   onTimelineImport: () => void;
-  onTrim: () => void;
   getProxy: (path: string, inSec: number, outSec: number, prio: "high" | "low") => Promise<string | null>;
   playerApi: React.MutableRefObject<ScenePlayerApi | null>;
 }) {
@@ -74,7 +70,7 @@ export function CollectionSidePanel({
   return (
     <aside style={narrow ? undefined : { width }}
       className={"flex min-h-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-3 "
-        + (narrow ? "max-h-[55%] w-full pl-0" : "h-full shrink-0 pl-1")}>
+        + (narrow ? "max-h-[55%] w-full pl-0" : "h-full shrink-0 pl-5")}>
       <Card className="shrink-0 overflow-hidden p-0">
         <div className="relative aspect-video">
           {/* shortcuts={false} : la vue pilote déjà le clavier (Ctrl+Z = annuler un retrait). */}
@@ -85,20 +81,11 @@ export function CollectionSidePanel({
         </div>
       </Card>
 
-      {/* Identité du plan ouvert + rognage. Le bouton vivait seul sur une ligne vide, sans rien
-          dire du plan qu'il allait modifier. */}
+      {/* Identité du plan ouvert : nom et durée du plan qu'on est en train de regarder. */}
       {shot && (
-        <div className="flex items-center gap-2 px-0.5">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-xs font-medium leading-tight">{shot.name}</div>
-            <div className="text-[11px] leading-tight tabular-nums text-muted-foreground">{fmt(shot.out - shot.in)}</div>
-          </div>
-          <Tooltip>
-            <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={onTrim} aria-label={t("sidePanel.trim")} />}>
-              <Crop className="size-4" />
-            </TooltipTrigger>
-            <TooltipContent>{t("sidePanel.trim")}</TooltipContent>
-          </Tooltip>
+        <div className="min-w-0 px-0.5">
+          <div className="truncate text-xs font-medium leading-tight">{shot.name}</div>
+          <div className="text-[11px] leading-tight tabular-nums text-muted-foreground">{fmt(shot.out - shot.in)}</div>
         </div>
       )}
 

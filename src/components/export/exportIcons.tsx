@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { LucideGlyph } from "@/components/common/LucideGlyph";
 import type { ExportProfile, ExportWorkflow } from "@/features/export/profiles";
 
-export const EXPORT_ICON_CHOICES: { name: string; Icon: LucideIcon }[] = [
+const EXPORT_ICON_CHOICES: { name: string; Icon: LucideIcon }[] = [
   { name: "Clapperboard", Icon: Clapperboard },
   { name: "Download", Icon: Download },
   { name: "Film", Icon: Film },
@@ -38,7 +38,7 @@ const ICON_MAP: Record<string, LucideIcon> = Object.fromEntries(
   EXPORT_ICON_CHOICES.map((c) => [c.name, c.Icon]),
 );
 
-export function defaultExportIconName(workflow: ExportWorkflow): string {
+function defaultExportIconName(workflow: ExportWorkflow): string {
   if (workflow === "timeline_import") return "Clapperboard";
   if (workflow === "video_remux") return "Copy";
   return "Download";

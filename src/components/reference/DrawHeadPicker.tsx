@@ -18,7 +18,7 @@ const HEADS: { v: ArrowHead; labelKey: string }[] = [
 ];
 
 // Glyphe : un segment horizontal terminé par la pointe. `flip` = pointe à gauche (extrémité de départ).
-export function HeadGlyph({ type, flip }: { type: ArrowHead; flip?: boolean }) {
+function HeadGlyph({ type, flip }: { type: ArrowHead; flip?: boolean }) {
   const s = { stroke: "currentColor", strokeWidth: 1.6, fill: "none", strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   const head = (() => {
     if (type === "none") return null;

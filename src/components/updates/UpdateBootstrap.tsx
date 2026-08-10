@@ -1,25 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import releases from "@/data/releases.json";
-import { useUpdater } from "@/store/updater";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+// Nouveautés de la version INSTALLÉE, affichées une fois après une mise à jour. La recherche d'une
+// version plus récente ne vit PAS ici : elle appartient à `UpdateButton` (cf. le store), présent
+// aussi sur les écrans d'installation où ce dialogue n'existe pas.
 export function UpdateBootstrap() {
   const { t, i18n } = useTranslation("settings");
-  const autoCheck = useUpdater((state) => state.autoCheck);
-  const check = useUpdater((state) => state.check);
   const language = i18n.language.startsWith("fr") ? "fr" : "en";
   const latest = useMemo(() => releases[0], []);
   const [open, setOpen] = useState(() => {
     try { return !!latest && localStorage.getItem("nr.release.seen") !== latest.id; } catch { return false; }
   });
-
-  useEffect(() => {
-    if (!autoCheck) return;
-    const timer = window.setTimeout(() => { void check(); }, 4_000);
-    return () => window.clearTimeout(timer);
-  }, [autoCheck, check]);
 
   function close() {
     try { localStorage.setItem("nr.release.seen", latest.id); } catch { /* noop */ }

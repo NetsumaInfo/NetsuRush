@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { nr } from "@/lib/bridge";
 import type { BoardHandle } from "./ReferenceBoard";
 
-export interface PushPayload {
+interface PushPayload {
   type: "path";
   path: string;
   title?: string;

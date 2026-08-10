@@ -9,9 +9,8 @@ import { DiscordIcon } from "@/components/DiscordIcon";
 import { nr } from "@/lib/bridge";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/release";
+import { DISCORD_INVITE } from "@/lib/community";
 import { LicenseNotice } from "./LicenseNotice";
-
-const DISCORD_INVITE = "https://discord.gg/Vq7K6mWNX5";
 
 interface SocialLink {
   id: string;

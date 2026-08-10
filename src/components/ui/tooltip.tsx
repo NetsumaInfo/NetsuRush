@@ -124,5 +124,3 @@ export {
   TooltipTrigger,
   TooltipContent,
 }
-
-export default TooltipRoot

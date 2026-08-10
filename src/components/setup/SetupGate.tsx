@@ -33,6 +33,7 @@ import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
+import { ErrorReportButton } from "@/components/common/ErrorReportButton";
 
 type Phase = "checking" | "configure" | "running" | "error" | "restart" | "done";
 type ConfigureStep = "language" | "models" | "review";
@@ -84,6 +85,10 @@ export function SetupGate({ children }: { children: ReactNode }) {
   const [prog, setProg] = useState<SetupProgress>({});
   const [log, setLog] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // Incidents NON bloquants remontés par le core pendant le provisionnement (`stage: "error"` :
+  // un pack qui rate, un moteur écarté). L'installation continue et peut se terminer « réussie »,
+  // donc rien n'alerterait : sans ça, la trace part avec le redémarrage.
+  const [issues, setIssues] = useState<string[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -187,6 +192,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
     setError(null);
     setProg({ pct: 0 });
     setLog([]);
+    setIssues([]);
     const off = nr.onSetupProgress((progress) => {
       setProg((previous) => ({ ...previous, ...progress }));
       const entry = progress.stage === "error"
@@ -197,6 +203,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
             ? `▶ ${progress.label}`
             : null;
       if (entry != null) setLog((previous) => [...previous.slice(-499), entry]);
+      if (progress.stage === "error") setIssues((previous) => [...previous, progress.label ?? progress.line ?? "?"]);
     });
     try {
       const result = await nr.setupRun({ modules: modulesForModels(models), models, adobePanel: adobePanel && adobeApps.length > 0 });
@@ -410,8 +417,36 @@ export function SetupGate({ children }: { children: ReactNode }) {
               </>
             )}
             {phase === "error" && (
-              <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
-                <TriangleAlert className="size-4 shrink-0" /><span className="break-words">{error}</span>
+              <div className="flex flex-col gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+                <div className="flex items-start gap-2">
+                  <TriangleAlert className="size-4 shrink-0" /><span className="break-words">{error}</span>
+                </div>
+                {/* Une installation qui échoue laisse l'app inutilisable : le rapport doit partir d'ICI,
+                    les Paramètres étant derrière l'écran bloqué. */}
+                <ErrorReportButton
+                  className="self-start"
+                  error={[error ?? "", ...issues, ...log.slice(-20)].filter(Boolean).join("\n")}
+                  subject="Échec de l'installation (téléchargement des dépendances)"
+                  module="setup"
+                  moduleLabel="Installation"
+                />
+              </div>
+            )}
+            {/* Incident SANS arrêt de l'installation. Le bouton n'existe que dans ce cas : les écrans
+                de configuration et une installation propre n'ont rien à signaler, et une aide au
+                dépannage posée en permanence sur le premier écran ferait douter avant même le début. */}
+            {phase !== "error" && issues.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3 rounded-md border border-[var(--color-warn)]/40 bg-[var(--color-warn)]/10 p-3">
+                <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+                  {t("setup:issues.detected", { count: issues.length })}
+                </p>
+                <ErrorReportButton
+                  error={[...issues, ...log.slice(-20)].join("\n")}
+                  subject="Incident pendant l'installation (installation poursuivie)"
+                  module="setup"
+                  moduleLabel="Installation"
+                  severity="major"
+                />
               </div>
             )}
             {log.length > 0 && phase !== "restart" && (

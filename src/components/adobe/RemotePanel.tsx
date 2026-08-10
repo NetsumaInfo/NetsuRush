@@ -16,6 +16,7 @@ import { BrandIcon } from "@/components/BrandIcon";
 import { panelCommand, signalPanelReady } from "@/lib/remote";
 import { useHostSync } from "@/hooks/useHostSync";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -129,6 +130,12 @@ export function RemotePanel() {
       <ViewContextMenu remote>
         <MainContent />
       </ViewContextMenu>
+
+      {/* Mêmes pastilles d'état que dans l'app : le panneau CEP rend les mêmes vues, donc les mêmes
+          messages de fin de tâche. */}
+      <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+        <Toaster />
+      </div>
     </div>
   );
 }

@@ -14,12 +14,12 @@ import {
 import { readPrefs, PREFS_KEY, type NotebookPrefs } from "@/components/notebook/notebookPrefs";
 import i18n from "@/i18n";
 
-export interface NbOpenOpts {
+interface NbOpenOpts {
   blockId?: string;   // ancre : scroller/surligner ce bloc à l'arrivée
   newTab?: boolean;   // ouvrir dans un nouvel onglet (Alt-clic / clic-milieu)
 }
 
-export interface NbCreateOpts {
+interface NbCreateOpts {
   title?: string;
   blocks?: NoteBlock[];
   newTab?: boolean;

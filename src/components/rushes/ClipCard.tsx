@@ -22,7 +22,7 @@ import { TimelineSendDialog } from "./TimelineSendDialog";
 // arrivent donc en drop HTML5 normal, et leur chemin disque se résout via nr.pathsForFiles.
 export const CLIP_DND = "text/nr-clip";
 
-export function Thumb({ path, dim }: { path: string; dim?: boolean }) {
+function Thumb({ path, dim }: { path: string; dim?: boolean }) {
   const [src, setSrc] = useState<string | null>(() => getThumb(path));
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -128,7 +128,7 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
                 type="button"
                 aria-label={t("mediaTree.sendToTimeline")}
                 onClick={(e) => { e.stopPropagation(); setPicker(true); }}
-                className="absolute right-1.5 top-1.5 flex items-center rounded-md bg-black/70 p-1.5 text-white opacity-0 backdrop-blur-sm transition-all hover:bg-primary group-hover:opacity-100" />}>
+                className="absolute right-1.5 top-1.5 flex items-center rounded-md bg-black/75 p-1.5 text-white opacity-0 transition-all hover:bg-primary group-hover:opacity-100" />}>
                 <Clapperboard className="h-3.5 w-3.5" />
               </TooltipTrigger>
               <TooltipContent>{t("mediaTree.sendToTimeline")}</TooltipContent>

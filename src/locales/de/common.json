@@ -79,5 +79,17 @@
     "addToDictionary": "Zum Wörterbuch hinzufügen",
     "ignoreOnce": "In dieser Sitzung ignorieren",
     "replaceAll": "Alle {{count}} Vorkommen ersetzen"
+  },
+  "beta": {
+    "title": "Modul in der Beta",
+    "body": "Funktionen fehlen noch, andere ändern sich. Ich suche Tester: sag mir, was kaputt ist und was dir fehlt.",
+    "discord": "Discord beitreten",
+    "feedback": "Problem melden",
+    "dismiss": "Ausblenden"
+  },
+  "report": {
+    "action": "Fehler melden",
+    "sent": "Gesendet, danke!",
+    "saved": "Senden fehlgeschlagen. Nachricht gespeichert."
   }
 }

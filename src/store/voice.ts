@@ -12,7 +12,7 @@ import { hostBuildTimeline } from "@/lib/host";
 import { basename } from "@/lib/utils";
 import type { AppState } from "./index";
 
-export interface VoiceClipRef {
+interface VoiceClipRef {
   path: string;
   name: string;
   source: "mediapool" | "local";

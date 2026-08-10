@@ -13,7 +13,7 @@ const MIN_REFERENCE_PEAK = 0.08;
 const MAX_GAIN = 14;
 
 // Amplitude max d'une plage temporelle dans une enveloppe (échantillonnage par colonne de pixels).
-export function sampleMax(src: number[], srcStart: number, srcEnd: number, t0: number, t1: number): number {
+function sampleMax(src: number[], srcStart: number, srcEnd: number, t0: number, t1: number): number {
   const n = src.length;
   const span = srcEnd - srcStart;
   if (n === 0 || span <= 0) return 0;
@@ -26,19 +26,19 @@ export function sampleMax(src: number[], srcStart: number, srcEnd: number, t0: n
   return m;
 }
 
-export function normalizeGain(src: number[], srcStart: number, srcEnd: number, viewStart: number, viewEnd: number): number {
+function normalizeGain(src: number[], srcStart: number, srcEnd: number, viewStart: number, viewEnd: number): number {
   const peak = sampleMax(src, srcStart, srcEnd, viewStart, viewEnd);
   return Math.min(MAX_GAIN, 1 / Math.max(MIN_REFERENCE_PEAK, peak));
 }
 
 // Pas de graduation « rond » le plus proche : ~8 repères dans la fenêtre, jamais moins d'une frame.
 const TICK_STEPS = [0.04, 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800];
-export function tickStep(span: number): number {
+function tickStep(span: number): number {
   const target = span / 8;
   return TICK_STEPS.find((s) => s >= target) ?? TICK_STEPS[TICK_STEPS.length - 1];
 }
 
-export function tickLabel(sec: number): string {
+function tickLabel(sec: number): string {
   const total = Math.max(0, sec);
   const m = Math.floor(total / 60);
   const s = total % 60;

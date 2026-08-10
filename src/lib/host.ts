@@ -20,11 +20,6 @@ export function isAdobeHost(id: HostId): id is AdobeApp {
   return id === "ppro" || id === "aeft";
 }
 
-// Titre d'état « hôte non connecté » adapté à l'HÔTE ACTIF — plus de « Resolve » codé en dur quand
-// on pilote Premiere/After Effects (bug de l'onglet Derush hors ligne).
-export function hostOfflineTitle(id: HostId): string {
-  return `${hostShort(id)} non connecté`;
-}
 // Indice d'action contextualisé : Resolve = pont natif + Media Pool ; Adobe = panneau CEP.
 export function hostOfflineHint(id: HostId): string {
   return id === "resolve"

@@ -39,7 +39,7 @@ export function NbCheck({ checked, onChange, title }: { checked: boolean; onChan
 }
 
 // ---- Étiquette d'option (select / multiSelect) -----------------------------------------------
-export function OptionBadge({ option }: { option: SelectOption }) {
+function OptionBadge({ option }: { option: SelectOption }) {
   const { bg, fg } = colorOf(option.color);
   return (
     <span className="inline-block max-w-full truncate rounded px-1.5 py-0.5 text-xs" style={{ backgroundColor: bg, color: fg }}>

@@ -88,7 +88,6 @@ export function logAt(level: LogLevel, source: string, message: string): void {
 }
 export const logError = (source: string, message: string) => logAt("error", source, message);
 export const logWarn = (source: string, message: string) => logAt("warn", source, message);
-export const logInfo = (source: string, message: string) => logAt("log", source, message);
 
 /** Met en forme une valeur attrapée : garde le nom et la pile quand c'en est une. */
 export function describeError(e: unknown): string {

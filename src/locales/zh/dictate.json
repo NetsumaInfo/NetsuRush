@@ -1,11 +1,5 @@
 {
   "transcribing": "转录中…",
-  "button": {
-    "ariaStop": "停止语音输入",
-    "ariaDictate": "语音输入",
-    "tooltipStop": "停止（插入文本）",
-    "tooltipDictate": "语音输入（说话即成文）"
-  },
   "overlay": {
     "listening": "正在聆听…"
   },

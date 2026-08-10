@@ -32,7 +32,6 @@
     "none": "暂无合集"
   },
   "sidePanel": {
-    "trim": "裁剪镜头",
     "export": "导出"
   },
   "range": {
@@ -97,41 +96,6 @@
     "gallery": "画廊",
     "grid": "网格",
     "compact": "紧凑"
-  },
-  "trim": {
-    "theShot": "该镜头",
-    "title": "裁剪《{{name}}》",
-    "play": "播放",
-    "pause": "暂停",
-    "playKey": "播放（空格）",
-    "pauseKey": "暂停（空格）",
-    "playSelection": "播放选区",
-    "playSelectionHint": "播放选区（起点 → 终点）",
-    "gotoStart": "跳到起点",
-    "prevFrame": "上一帧",
-    "prevFrameHint": "上一帧（← · Shift = −1 秒）",
-    "nextFrame": "下一帧",
-    "nextFrameHint": "下一帧（→ · Shift = +1 秒）",
-    "gotoEnd": "跳到终点",
-    "markIn": "设为起点",
-    "markOut": "设为终点",
-    "zoomOut": "缩小",
-    "zoomOutHint": "缩小（窗口 ×2）",
-    "zoomIn": "放大",
-    "zoomInHint": "放大（窗口 ÷2）",
-    "fitSelection": "适配选区",
-    "fitAll": "整段素材",
-    "images": "图像序列",
-    "wave": "波形",
-    "waveHint": "音频波形",
-    "none": "无",
-    "image": "第 {{n}} 帧",
-    "duration": "时长",
-    "framesShort": "{{n}} 帧",
-    "startLabel": "起点",
-    "endLabel": "终点",
-    "reset": "重置",
-    "apply": "应用裁剪"
   },
   "detail": {
     "shotWord": "镜头",

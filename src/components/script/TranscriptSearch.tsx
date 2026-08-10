@@ -59,7 +59,7 @@ export function useTranscriptHits(query: string) {
 }
 
 // Snippet avec les mots trouvés en surbrillance.
-export function HitSnippet({ hit }: { hit: TranscriptHit }) {
+function HitSnippet({ hit }: { hit: TranscriptHit }) {
   const words = hit.snippet.split(/\s+/);
   return (
     <span className="hit-snippet">

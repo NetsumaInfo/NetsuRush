@@ -58,7 +58,7 @@ function nameOf(p: string): string {
   return p.replace(/\\/g, "/").split("/").pop() || p;
 }
 
-export function outputBaseName(sourceName: string, naming: OutputNaming): string {
+function outputBaseName(sourceName: string, naming: OutputNaming): string {
   const original = sourceName.replace(/\.[^.]+$/, "");
   const value = naming.value.trim();
   if (naming.mode === "prefix") return `${value}${original}`;

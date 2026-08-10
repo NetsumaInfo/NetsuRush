@@ -16,7 +16,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
-import { autoplayCeiling, fmt, gridMetrics, setMaxPlaying, onGridScroll, type Segment } from "./cutStudioShared";
+import { autoplayCeiling, fmt, gridMetrics, setMaxPlaying, type Segment } from "./cutStudioShared";
 import { RATE_LADDER } from "./cutShortcuts";
 import { useCutActions } from "./useCutActions";
 import { useCutShortcuts } from "./useCutShortcuts";
@@ -34,6 +34,7 @@ import { TimelineInsertionSelect } from "./TimelineInsertionSelect";
 import { modelUsesPreset } from "@/lib/detection";
 import { DetectionAdvancedSettings } from "./DetectionAdvancedSettings";
 import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls";
+import { toast } from "@/components/ui/toast";
 
 // Seuils de mise en page (px) : sous NARROW_W la vue passe en colonne, et la grille garde toujours
 // au moins MIN_GRID_W — sinon la barre d'outils n'a plus de place et ses boutons s'empilent.
@@ -55,7 +56,7 @@ export function CutStudio() {
   const {
     info, duration, segments, srcFrames, detecting, cacheLoading, progress,
     active, activeUrl,
-    msg, setMsg, err, setErr, preset, setPreset, model, setModel,
+    err, setErr, preset, setPreset, model, setModel,
     proxyCache, getProxy, playScene, detect,
     hasEdits, clearEdits, undoEdit, redoEdit,
   } = det;
@@ -104,13 +105,11 @@ export function CutStudio() {
   // Plafond de lecture = nombre de miniatures VISIBLES (+1 rangée tampon) → toutes les visibles
   // jouent, la rangée suivante est préchargée. Recalculé à chaque resize de la zone défilante et
   // à chaque changement de colonnes. Carte = aspect-video (h = largeur × 9/16), grille gap-3 (12px).
-  // Grille RESPONSIVE : `cols` n'est plus un nombre FIXE de colonnes (qui rendait les cartes géantes
-  // sur grand écran et débordantes sur petit) mais une CIBLE de densité. On dérive une largeur de
-  // cellule bornée (140–320px) = largeur/cols, et la grille fait `auto-fill` → le nombre réel de
-  // colonnes s'adapte à la largeur de la fenêtre. Le +/- ajuste le zoom des vignettes.
+  // Grille à COLONNES TENUES (cf. gridMetrics) : rétrécir la zone rétrécit les vignettes, le nombre
+  // de colonnes ne bouge pas. Le +/- règle ce nombre.
   const gridScrollRef = useRef<HTMLDivElement>(null);
   const [gridW, setGridW] = useState(0);
-  const { cell, actualCols, cellH } = gridMetrics(gridW, cols, narrow);
+  const { actualCols, cellH } = gridMetrics(gridW, cols, narrow);
   useEffect(() => {
     const el = gridScrollRef.current;
     if (!el) return;
@@ -146,13 +145,11 @@ export function CutStudio() {
     srcFrames,
     targetList,
     hasSelection: () => selectedList().length > 0,
-    setMsg,
     setErr,
   });
   const { busy, exported, createTimeline, appendSelection, addToTimeline, importBack } = exp;
   const { download, busy: dlBusy } = useExport();
   const exportProgress = useApp((s) => s.exportProgress);
-  const exportNotice = useApp((s) => s.exportNotice);
   const exportError = useApp((s) => s.exportError);
   const exportProfiles = useApp((s) => s.exportProfiles);
   const cardActionProfileId = useApp((s) => s.cardActionProfileId);
@@ -171,7 +168,6 @@ export function CutStudio() {
     cardIsTimeline
       ? addToTimeline(s)
       : download({ clips: [{ input: clip.path, start: s.in, end: s.out }], baseName: exportBaseName, profileId: cardActionProfileId });
-  useEffect(() => { if (exportNotice) setMsg(exportNotice); }, [exportNotice, setMsg]);
   useEffect(() => { if (exportError) setErr(exportError); }, [exportError, setErr]);
 
   // Navigation de plan en plan depuis le lecteur (flèches) : part du plan actif, sinon du premier.
@@ -242,7 +238,7 @@ export function CutStudio() {
       const cardW = gridMetrics(el.clientWidth, cols, narrow).cell;
       height = Math.round(((cardW * 9) / 16) * (window.devicePixelRatio || 1));
     }
-    setMsg(null); setErr(null);
+    setErr(null);
     genAbortRef.current = false;
     genTokensRef.current = [];
     let done = 0, idx = 0;
@@ -259,8 +255,8 @@ export function CutStudio() {
     };
     await Promise.all(Array.from({ length: 6 }, worker));
     setProxyGen(null);
-    if (genAbortRef.current) { setMsg(t("cutStudio.genStopped", { done, total: list.length })); genAbortRef.current = false; }
-    else setMsg(t("cutStudio.proxiesReady", { count: list.length }));
+    if (genAbortRef.current) { toast.info(t("cutStudio.genStopped", { done, total: list.length })); genAbortRef.current = false; }
+    else toast.ok(t("cutStudio.proxiesReady", { count: list.length }));
   }
 
   // Pré-génère les vignettes de la grille. Pool BORNÉ (8 ouvriers) + ARRÊT, comme les proxys : un
@@ -270,7 +266,7 @@ export function CutStudio() {
     if (thumbsGen) { thumbsAbortRef.current = true; return; }
     const list = targetList();
     if (!list.length) return;
-    setMsg(null); setErr(null);
+    setErr(null);
     thumbsAbortRef.current = false;
     let done = 0, idx = 0;
     setThumbsGen({ done, total: list.length });
@@ -283,8 +279,8 @@ export function CutStudio() {
     };
     await Promise.all(Array.from({ length: 8 }, worker));
     setThumbsGen(null);
-    if (thumbsAbortRef.current) { setMsg(t("cutStudio.thumbsStopped", { done, total: list.length })); thumbsAbortRef.current = false; }
-    else setMsg(t("cutStudio.thumbsReady", { count: list.length }));
+    if (thumbsAbortRef.current) { toast.info(t("cutStudio.thumbsStopped", { done, total: list.length })); thumbsAbortRef.current = false; }
+    else toast.ok(t("cutStudio.thumbsReady", { count: list.length }));
   }
 
   const selCount = selectedList().length;
@@ -438,12 +434,12 @@ export function CutStudio() {
               </>)}
             </div>
           )}
-          {/* zone défilante : seule la grille bouge (padding pour ne pas rogner hover/anneau).
-              onScroll → mesure la vélocité ; un flick met les aperçus en pause, un scroll lent les
-              laisse lire (pause de l'élément <video>, jamais de son montage → lecture auto fiable). */}
-          <div ref={gridScrollRef} onScroll={onGridScroll} style={{ contain: "layout paint" }} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1 pb-4 pt-1.5">
+          {/* Zone défilante : seule la grille bouge. Retrait ASYMÉTRIQUE assumé — la gouttière gauche
+              garde son écart d'origine (4 px), la droite est réduite au minimum pour que la dernière
+              colonne vienne contre le lecteur : 2 px, la barre de défilement, le trait de poignée. */}
+          <div ref={gridScrollRef} style={{ contain: "layout paint" }} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5">
             {segments.length > 0 ? (
-              <div className="grid gap-3" style={{ gridTemplateColumns: cell ? `repeat(auto-fill, minmax(${Math.floor(cell)}px, 1fr))` : `repeat(${cols}, minmax(0, 1fr))` }}>
+              <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${actualCols}, minmax(0, 1fr))` }}>
                 {segments.map((s, i) => (
                   <SceneCard key={s.id} seg={s} index={i} clipPath={clip.path} clipName={clip.name} srcFrames={srcFrames} cols={actualCols} cellH={cellH}
                     active={active?.id === s.id} selected={sel.has(s.id)} play={gridPlay}
@@ -482,9 +478,11 @@ export function CutStudio() {
             if (e.key === "ArrowLeft") { e.preventDefault(); setPanelW((w) => Math.min(560, w + 20)); }
             else if (e.key === "ArrowRight") { e.preventDefault(); setPanelW((w) => Math.max(260, w - 20)); }
           }}
-          className="group relative mx-1 flex w-3 shrink-0 touch-none self-stretch cursor-col-resize items-center justify-center outline-none focus-visible:bg-primary/10">
-          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-colors group-hover:bg-primary" />
-          <GripVertical className="relative h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+          {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
+              restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
+          <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+          <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
         )}
 
@@ -493,7 +491,7 @@ export function CutStudio() {
             CSS), donc le moindre enfant trop large sortait une scrollbar horizontale en bas. */}
         <aside ref={panelRef} style={narrow ? undefined : { width: asideW }}
           className={"flex min-h-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-3 "
-            + (narrow ? "max-h-[55%] w-full pl-0" : "h-full shrink-0 pl-1")}>
+            + (narrow ? "max-h-[55%] w-full pl-0" : "h-full shrink-0 pl-5")}>
           <Card className="shrink-0 overflow-hidden p-0">
             <div className="relative aspect-video">
               {/* shortcuts={false} : NetsuCut pilote le clavier (←/→ = plan préc/suiv, M = fusionner)
@@ -535,16 +533,14 @@ export function CutStudio() {
 
           {/* break-words : un chemin de fichier long dans une erreur pousserait la largeur du panneau. */}
           {busy && <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Spinner /> {busy}</p>}
-          {msg && <p className="break-words text-xs text-[var(--color-ok)]">{msg}</p>}
           {err && <p className="break-words text-xs text-destructive">{err}</p>}
         </aside>
         </div>)}
       </div>
       {/* messages d'état repris hors panneau quand le lecteur est masqué (sinon plus de retour visuel) */}
-      {!showPanel && (busy || msg || err) && (
+      {!showPanel && (busy || err) && (
         <div className="shrink-0 border-t border-border px-4 py-1.5 text-xs">
           {busy && <span className="flex items-center gap-1.5 text-muted-foreground"><Spinner /> {busy}</span>}
-          {!busy && msg && <span className="text-[var(--color-ok)]">{msg}</span>}
           {!busy && err && <span className="text-destructive">{err}</span>}
         </div>
       )}

@@ -15,7 +15,7 @@ const STORAGE_KEY = "nr-search-frames.v1";
 const RANK: Record<string, number> = { single: 1, adaptive: 2, precise: 3 };
 const FORMAT: Record<SamplingFrames, string> = { 1: "single", 2: "adaptive", 3: "precise" };
 
-export function normalizeFrames(value: unknown): SamplingFrames {
+function normalizeFrames(value: unknown): SamplingFrames {
   return value === 1 || value === 3 ? value : DEFAULT_FRAMES;
 }
 

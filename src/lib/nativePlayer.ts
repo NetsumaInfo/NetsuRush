@@ -8,6 +8,10 @@ export interface NativePlayerStatus {
   duration: number;
   volume: number;
   speed: number;
+  /** Fichier réellement chargé dans mpv (absent sur un binaire antérieur à l'arbitrage). */
+  path?: string;
+  /** Possesseur courant du lecteur unique (voir `claim`). */
+  claim?: number;
 }
 
 const call = <T>(command: string, args?: Record<string, unknown>) => invoke<T>(command, args);
@@ -15,6 +19,10 @@ const call = <T>(command: string, args?: Record<string, unknown>) => invoke<T>(c
 export const nativePlayer = {
   available: () => call<boolean>("player_is_available"),
   load: (path: string) => call<void>("player_load", { path }),
+  /** Charge le fichier DÉJÀ positionné : `loadfile` est async, un seek envoyé juste après rate. */
+  loadAt: (path: string, position: number) => call<void>("player_load_at", { path, position }),
+  /** Prend possession du lecteur unique et renvoie le nouveau jeton. */
+  claim: () => call<number>("player_claim"),
   play: () => call<void>("player_play"),
   pause: () => call<void>("player_pause"),
   togglePause: () => call<void>("player_toggle_pause"),

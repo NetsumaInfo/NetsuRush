@@ -48,9 +48,6 @@ export const notebookSchema = BlockNoteSchema.create({
   },
 });
 
-// Type de l'éditeur pour typer les composants qui le manipulent (props, menus).
-export type NotebookEditor = typeof notebookSchema.BlockNoteEditor;
-
 // Insère un nouveau bloc, ou remplace le bloc courant s'il est un paragraphe vide.
 export function insertOrUpdate(editor: BlockNoteEditor<any, any, any>, block: any) {
   const cur = editor.getTextCursorPosition().block;

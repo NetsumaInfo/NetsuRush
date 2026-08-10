@@ -66,21 +66,6 @@ export function folderTrail(folders: LibraryFolder[], folderId: string | null): 
   return out;
 }
 
-// Dossiers enfants directs (parentId null = racine).
-export function childFolders(folders: LibraryFolder[], parentId: string | null): LibraryFolder[] {
-  return folders.filter((f) => (f.parentId ?? null) === parentId);
-}
-
-// Ids d'un dossier ET de toute sa descendance → garde anti-cycle du glisser-déposer (on ne range pas
-// un dossier dans lui-même). Même rôle que subtreeIds du Carnet (notebookShared).
-export function subtreeIds(folders: LibraryFolder[], rootId: string): string[] {
-  const out = [rootId];
-  for (let i = 0; i < out.length; i++) {
-    for (const f of folders) if (f.parentId === out[i] && !out.includes(f.id)) out.push(f.id);
-  }
-  return out;
-}
-
 // Chemin d'arbre d'un dossier : « Importés/Anime/OP ». folderId null = la racine seule.
 export function folderPath(folders: LibraryFolder[], folderId: string | null): string {
   const trail = folderTrail(folders, folderId).map((f) => f.name);

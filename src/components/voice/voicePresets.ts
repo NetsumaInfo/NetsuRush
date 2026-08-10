@@ -5,12 +5,12 @@
 // preset : ils composent avec, ils n'en font pas partie.
 import type { SilenceParams, HesitationParams } from "@/lib/bridge";
 
-export type VoicePresetId = "doux" | "equilibre" | "agressif";
+type VoicePresetId = "doux" | "equilibre" | "agressif";
 
 // Un preset règle les curseurs de SEGMENTATION. Les couches d'affinage indépendantes (confirmation
 // anti-bruit NOVA, marge de fin, recalage sur les creux, porte de bruit) restent des réglages
 // globaux : elles composent avec n'importe quel preset au lieu d'être réécrites par chacun.
-export type PresetSilence = Omit<
+type PresetSilence = Omit<
   Required<SilenceParams>,
   "nova_confirm" | "nova_min_conf" | "pad_end_ms" | "snap_ms" | "noise_gate"
 >;

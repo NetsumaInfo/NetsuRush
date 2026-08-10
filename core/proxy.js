@@ -7,7 +7,6 @@ const path = require('path');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { ffBin, getProxyDir, fsp, fileReady } = require('./config');
-const { probeMedia } = require('./ffmpeg');
 const { cacheIndex } = require('./cacheIndex');
 const { getCapabilities } = require('./export/capabilities');
 const { selectProxyEncoder, proxyVideoArgs, proxyContainerArgs, isHardwareBusy } = require('./proxyEncoder');

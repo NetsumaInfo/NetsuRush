@@ -79,5 +79,17 @@
     "addToDictionary": "Ajouter au dictionnaire",
     "ignoreOnce": "Ignorer dans cette session",
     "replaceAll": "Remplacer les {{count}} occurrences"
+  },
+  "beta": {
+    "title": "Module en bêta",
+    "body": "Des fonctions manquent encore, d'autres vont changer. Je cherche des testeurs : dis-moi ce qui casse et ce qu'il te manque.",
+    "discord": "Rejoindre le Discord",
+    "feedback": "Signaler un souci",
+    "dismiss": "Masquer"
+  },
+  "report": {
+    "action": "Signaler l'erreur",
+    "sent": "Envoyé, merci !",
+    "saved": "Envoi raté. Message enregistré."
   }
 }

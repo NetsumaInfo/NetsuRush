@@ -10,8 +10,8 @@ import type { Node as PmNode } from "prosemirror-model";
 import { spell } from "./spellClient";
 import { badRanges, tokenize, wordsOf, type SpellLang, type SpellToken } from "./spellShared";
 
-export const SPELL_PLUGIN_KEY = new PluginKey<DecorationSet>("nrSpellcheck");
-export const SPELL_ERROR_CLASS = "nr-spell-bad";
+const SPELL_PLUGIN_KEY = new PluginKey<DecorationSet>("nrSpellcheck");
+const SPELL_ERROR_CLASS = "nr-spell-bad";
 
 // Attendre l'accalmie : re-vérifier à chaque frappe ferait clignoter les soulignements sous le curseur.
 const IDLE_MS = 400;
@@ -62,7 +62,7 @@ function decorate(ranges: readonly SpellToken[], doc: PmNode): DecorationSet {
 }
 
 /** Mot fautif contenant `pos`, d'après les soulignements déjà posés. */
-export function badWordAt(state: EditorState, pos: number): { from: number; to: number; word: string } | null {
+function badWordAt(state: EditorState, pos: number): { from: number; to: number; word: string } | null {
   const set = SPELL_PLUGIN_KEY.getState(state);
   const hit = set?.find(pos, pos)[0];
   if (!hit) return null;
@@ -89,7 +89,7 @@ export function occurrencesOf(doc: PmNode, word: string): { from: number; to: nu
 }
 
 // ---- Plugin ------------------------------------------------------------------------------------
-export function spellPlugin(options: SpellPluginOptions): Plugin<DecorationSet> {
+function spellPlugin(options: SpellPluginOptions): Plugin<DecorationSet> {
   return new Plugin<DecorationSet>({
     key: SPELL_PLUGIN_KEY,
     state: {
@@ -182,7 +182,7 @@ export function spellPlugin(options: SpellPluginOptions): Plugin<DecorationSet> 
 }
 
 /** Rectangle écran couvrant [from, to) — l'ancre de l'infobulle, recalculée au scroll. */
-export function rectBetween(view: EditorView, from: number, to: number): DOMRect | null {
+function rectBetween(view: EditorView, from: number, to: number): DOMRect | null {
   try {
     const start = view.coordsAtPos(from);
     const end = view.coordsAtPos(to);

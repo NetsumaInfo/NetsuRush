@@ -129,7 +129,7 @@ function mapBlock(b: NoteBlock, ctx: ExportContext): AnyBlock[] {
   }
 }
 
-export function prepareForExport(blocks: NoteBlock[], ctx: ExportContext = {}): NoteBlock[] {
+function prepareForExport(blocks: NoteBlock[], ctx: ExportContext = {}): NoteBlock[] {
   const out: AnyBlock[] = [];
   for (const b of blocks || []) {
     if (!b || typeof b !== "object") continue;
@@ -143,7 +143,7 @@ export async function blocksToMarkdown(blocks: NoteBlock[], ctx: ExportContext =
   return headless().blocksToMarkdownLossy(prepareForExport(blocks, ctx) as never);
 }
 
-export async function blocksToHtml(blocks: NoteBlock[], ctx: ExportContext = {}): Promise<string> {
+async function blocksToHtml(blocks: NoteBlock[], ctx: ExportContext = {}): Promise<string> {
   return headless().blocksToHTMLLossy(prepareForExport(blocks, ctx) as never);
 }
 

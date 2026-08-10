@@ -52,7 +52,7 @@ function normalize(w: string): string {
 }
 
 // Hésitations LEXICALES : mots « euh/heu/hmm… » (catégories activées + mots perso) → spans.
-export function lexicalFillerSpans(words: VoiceWord[], hp?: LexParams): FillerSpan[] {
+function lexicalFillerSpans(words: VoiceWord[], hp?: LexParams): FillerSpan[] {
   return fillerIndices(words, hp).map((i) => ({ start: words[i].start, end: words[i].end, conf: 1 }));
 }
 
@@ -71,7 +71,7 @@ const DRAGGABLE = new Set([
 //  3. N'IMPORTE quel mot ~2× plus long que sa durée attendue (≈ 0.075 s/lettre) ET ≥ 0.55 s absolu —
 //     attrape les prolongations sur mots pleins (« alorssss », « doncccc », « ouiiii ») sans flaguer
 //     les mots longs normaux (« magnifiquement » : ratio ≈ 1, ignoré).
-export function prolongationSpans(words: VoiceWord[], params: HesitationParams = HES_DEFAULT): FillerSpan[] {
+function prolongationSpans(words: VoiceWord[], params: HesitationParams = HES_DEFAULT): FillerSpan[] {
   const sens = params.sensitivity ?? 0.5;
   const minAbs = (params.min_ms ?? 400) / 1000;          // durée mini absolue (curseur)
   const maxAbs = (params.max_ms ?? 1500) / 1000;         // au-dessus = vrai mot long, pas une traînée
@@ -95,7 +95,7 @@ export function prolongationSpans(words: VoiceWord[], params: HesitationParams =
 // plausible (« et », « un », « en »…) avec une confiance faible. Signature fiable : mot court, conf
 // basse, ENTOURÉ de trous des deux côtés (une vraie syllabe de phrase colle à ses voisines). Modulé
 // par la sensibilité (seuil de confiance plus permissif quand on monte) ; OFF sous ~35 %.
-export function lowConfSpans(words: VoiceWord[], params: HesitationParams = HES_DEFAULT): FillerSpan[] {
+function lowConfSpans(words: VoiceWord[], params: HesitationParams = HES_DEFAULT): FillerSpan[] {
   const sens = params.sensitivity ?? 0.5;
   if (sens < 0.35) return [];
   const confMax = 0.25 + sens * 0.3; // 0.36..0.55 : + sensible = tolère une confiance moins mauvaise
@@ -127,7 +127,7 @@ const MARKER_WORDS = new Set([
 ]);
 
 // Spans des tics/marqueurs (méthode optionnelle). Mots normalisés (minuscule, sans accents).
-export function discourseMarkerSpans(words: VoiceWord[]): FillerSpan[] {
+function discourseMarkerSpans(words: VoiceWord[]): FillerSpan[] {
   const norm = words.map((w) => normalize(w.word));
   const out: FillerSpan[] = [];
   let i = 0;

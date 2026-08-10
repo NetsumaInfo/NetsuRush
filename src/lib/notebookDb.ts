@@ -27,7 +27,7 @@ function isEmptyVal(v: unknown): boolean {
 }
 
 // Un seul prédicat de filtre, tolérant aux types (le champ dicte la sémantique via l'opérateur choisi).
-export function matchFilter(row: DbRow, _field: DbField | undefined, cond: FilterCond): boolean {
+function matchFilter(row: DbRow, _field: DbField | undefined, cond: FilterCond): boolean {
   const v = cellValue(row, cond.fieldId);
   switch (cond.op) {
     case "isEmpty": return isEmptyVal(v);
@@ -52,7 +52,7 @@ export function matchFilter(row: DbRow, _field: DbField | undefined, cond: Filte
   }
 }
 
-export function applyFilters(rows: DbRow[], fields: DbField[], filters: FilterCond[]): DbRow[] {
+function applyFilters(rows: DbRow[], fields: DbField[], filters: FilterCond[]): DbRow[] {
   if (!filters.length) return rows;
   const fieldMap = new Map(fields.map((f) => [f.id, f]));
   // AND de toutes les conditions (V1 ; groupes OR différés).
@@ -73,7 +73,7 @@ function compare(a: unknown, b: unknown, field: DbField | undefined): number {
   return asText(a).localeCompare(asText(b), "fr", { numeric: true });
 }
 
-export function applySorts(rows: DbRow[], fields: DbField[], sorts: SortRule[]): DbRow[] {
+function applySorts(rows: DbRow[], fields: DbField[], sorts: SortRule[]): DbRow[] {
   if (!sorts.length) return rows;
   const fieldMap = new Map(fields.map((f) => [f.id, f]));
   // Copie avant tri (ne jamais muter le tableau du store).

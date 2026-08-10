@@ -2,7 +2,6 @@
 
 // Menu contextuel (clic droit) — flavor Base UI (jamais Radix). Mêmes styles que dropdown-menu.
 
-import * as React from "react"
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu"
 import { ChevronRightIcon, CheckIcon } from "lucide-react"
 
@@ -163,16 +162,6 @@ function ContextMenuSeparator({
   )
 }
 
-function ContextMenuShortcut({ className, ...props }: React.ComponentProps<"span">) {
-  return (
-    <span
-      data-slot="context-menu-shortcut"
-      className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
-
 export {
   ContextMenu,
   ContextMenuTrigger,
@@ -182,7 +171,6 @@ export {
   ContextMenuCheckboxItem,
   ContextMenuLabel,
   ContextMenuSeparator,
-  ContextMenuShortcut,
   ContextMenuSub,
   ContextMenuSubTrigger,
   ContextMenuSubContent,

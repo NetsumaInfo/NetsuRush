@@ -37,8 +37,6 @@ import {
 } from "./boardPrefs";
 import { type ArrangeMode, computeArrange } from "./boardArrange";
 
-// Types persistés/arrangement réexportés (consommés ailleurs depuis "./useReferenceBoard").
-export type { BoardBg, SaveOpts, BoardPrefs } from "./boardPrefs";
 export type { ArrangeMode } from "./boardArrange";
 
 export interface BoardState {

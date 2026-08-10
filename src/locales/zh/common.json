@@ -79,5 +79,17 @@
     "addToDictionary": "添加到词典",
     "ignoreOnce": "本次会话中忽略",
     "replaceAll": "替换全部 {{count}} 处"
+  },
+  "beta": {
+    "title": "测试版模块",
+    "body": "还有功能缺失，也会继续调整。招募测试者：告诉我哪里坏了、你还缺什么。",
+    "discord": "加入 Discord",
+    "feedback": "报告问题",
+    "dismiss": "隐藏"
+  },
+  "report": {
+    "action": "报告错误",
+    "sent": "已发送，谢谢！",
+    "saved": "发送失败。消息已保存。"
   }
 }

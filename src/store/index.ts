@@ -22,7 +22,7 @@ import { createOutboxSlice, type OutboxSlice } from "./outbox";
 import { createPowerSlice, type PowerSlice } from "./power";
 import { createStorageSlice, type StorageSlice } from "./storage";
 
-export type { TabId, DerushView, DerushSection, ThemeId } from "./types";
+export type { TabId, DerushSection } from "./types";
 
 export type AppState = ShellSlice & DerushSlice & CollectionsSlice & LibrarySlice & SearchSlice & CharacterSlice & SettingsSlice & ChatSlice & OptimizeSlice & VoiceSlice & ProcessSlice & NetsulabSlice & ExportSlice & AdobeSlice & NotebookSlice & OutboxSlice & PowerSlice & StorageSlice;
 

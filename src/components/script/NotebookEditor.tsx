@@ -11,7 +11,6 @@ import { BubbleMenu } from "@tiptap/react/menus";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { TextSelection } from "@tiptap/pm/state";
 import { AudioLines, Bold, FileText, Italic, List, ListOrdered, Strikethrough, Underline } from "lucide-react";
-import { onGridScroll } from "@/components/rushes/cutStudioShared";
 import { spell } from "@/lib/spell/spellClient";
 import type { SpellTarget } from "@/lib/spell/spellPlugin";
 import type { SpellLang } from "@/lib/spell/spellShared";
@@ -261,7 +260,6 @@ export function NotebookEditor() {
   return (
     <div
       className={`editor-area ${hideTodos ? "hide-todos" : ""} rail-${prefs.railStyle} ${prefs.hlVisible ? "" : "hide-hl"}`}
-      onScroll={onGridScroll}
       onClick={focusDocumentEnd}
       // Survol d'un texte surligné → l'item du RAIL correspondant s'illumine (sens texte → média ;
       // le sens média → texte est géré par les NodeViews). Délégation : les spans naissent/meurent

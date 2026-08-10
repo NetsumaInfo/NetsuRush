@@ -6,6 +6,7 @@ import { hostBuildTimeline, hostImport } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
 import { timelineBuildOptsFromProfile, type TimelineBuildOpts } from "@/features/export/timelineTarget";
 import { type Segment } from "./cutStudioShared";
+import { toast } from "@/components/ui/toast";
 
 // Montage piloté par le profil d'export ACTIF : timeline visée, dossier de rangement, vidéo seule.
 // Les TROIS chemins (créer / envoyer la sélection / ajouter un plan) passent par ici — sinon le
@@ -24,7 +25,6 @@ interface CutExportOpts {
   srcFrames: number;
   targetList: () => Segment[];
   hasSelection?: () => boolean;
-  setMsg: (m: string | null) => void;
   setErr: (m: string | null) => void;
 }
 
@@ -44,7 +44,7 @@ interface CutExport {
 // timeline frame-accurate, import retour au Media Pool. La gestion des caches vit dans
 // Paramètres › Stockage (purge ciblée par rush) — plus de purge globale depuis ici.
 export function useCutExport({
-  clipPath, clipName, srcFrames, targetList, hasSelection, setMsg, setErr,
+  clipPath, clipName, srcFrames, targetList, hasSelection, setErr,
 }: CutExportOpts): CutExport {
   const { t } = useTranslation("derush");
   const [busy, setBusy] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export function useCutExport({
     const base = clipName.replace(/\.[^.]+$/, "");
     // Extraction en masse = tâche lourde (ffmpeg) → propose de fermer le logiciel de montage.
     if (list.length >= 5) useApp.getState().offerCloseForRam();
-    setBusy(t("export.extracting")); setErr(null); setMsg(null);
+    setBusy(t("export.extracting")); setErr(null);
     const done: string[] = [];
     for (let i = 0; i < list.length; i++) {
       const out = `${dir}${sep}${base}_${String(i + 1).padStart(3, "0")}.mp4`;
@@ -72,7 +72,7 @@ export function useCutExport({
     }
     setBusy(null);
     setExported((e) => [...e, ...done]);
-    setMsg(t("export.extracted", { count: done.length, dir }));
+    toast.ok(t("export.extracted", { count: done.length, dir }));
   }
 
   async function createTimeline() {
@@ -80,7 +80,7 @@ export function useCutExport({
     const list = targetList();
     if (!list.length) return;
     const name = tlName.trim() || t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") });
-    setBusy(t("export.creatingTimeline")); setErr(null); setMsg(null);
+    setBusy(t("export.creatingTimeline")); setErr(null);
     const host = useApp.getState().activeHost;
     // Action explicite « Créer une timeline » → toujours une nouvelle, quelle que soit la cible du profil.
     const r = await hostBuildTimeline(host, {
@@ -88,7 +88,7 @@ export function useCutExport({
       segments: list.map((s) => ({ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame })),
     });
     setBusy(null);
-    r.ok ? setMsg(t("export.timelineCreated", { name: r.timeline, count: r.count })) : setErr(r.error || t("shared.failedTimeline"));
+    r.ok ? toast.ok(t("export.timelineCreated", { name: r.timeline, count: r.count })) : setErr(r.error || t("shared.failedTimeline"));
   }
 
   // Envoie la SÉLECTION vers la timeline visée par le profil en un seul appel (frame-accurate).
@@ -98,14 +98,14 @@ export function useCutExport({
     const list = targetList();
     if (!list.length) return;
     const name = tlName.trim() || t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") });
-    setBusy(t("export.sendingTimeline")); setErr(null); setMsg(null);
+    setBusy(t("export.sendingTimeline")); setErr(null);
     const host = useApp.getState().activeHost;
     const r = await hostBuildTimeline(host, {
       name, input: clipPath, srcFrames, ...activeTimelineOpts(),
       segments: list.map((s) => ({ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame })),
     });
     setBusy(null);
-    if (r.ok) setMsg(`${t("export.sentTimeline", { count: r.count ?? list.length, name: r.timeline })}${r.created ? t("export.createdSuffix") : ""}${r.fpsMismatch ? t("export.fpsSuffix") : ""}`);
+    if (r.ok) toast.ok(`${t("export.sentTimeline", { count: r.count ?? list.length, name: r.timeline })}${r.created ? t("export.createdSuffix") : ""}${r.fpsMismatch ? t("export.fpsSuffix") : ""}`);
     else setErr(r.error || t("export.sendFailed"));
   }
 
@@ -119,7 +119,7 @@ export function useCutExport({
       name, input: clipPath, srcFrames, ...activeTimelineOpts(), mode: "append",
       segments: [{ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame }],
     });
-    if (r.ok) setMsg(`${t("export.shotAdded", { name: r.timeline })}${r.created ? t("export.createdSuffix") : ""}${r.fpsMismatch ? t("export.fpsSuffix") : ""}`);
+    if (r.ok) toast.ok(`${t("export.shotAdded", { name: r.timeline })}${r.created ? t("export.createdSuffix") : ""}${r.fpsMismatch ? t("export.fpsSuffix") : ""}`);
     else setErr(r.error || t("export.addFailed"));
     return r;
   }
@@ -131,7 +131,7 @@ export function useCutExport({
     const r = await hostImport(host, exported);
     setBusy(null);
     const dest = host === "resolve" ? "Media Pool" : t("export.destProject");
-    r.ok ? setMsg(t("export.imported", { count: r.count ?? exported.length, dest })) : setErr(r.error || t("shared.failedImport"));
+    r.ok ? toast.ok(t("export.imported", { count: r.count ?? exported.length, dest })) : setErr(r.error || t("shared.failedImport"));
   }
 
   return { busy, exported, tlName, setTlName, extract, createTimeline, appendSelection, addToTimeline, importBack };

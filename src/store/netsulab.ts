@@ -7,7 +7,7 @@ import { type PipelineOpKind } from "@/lib/bridge";
 import { type UpSource } from "@/components/upscale/upscaleShared";
 
 // Étape d'une chaîne ordonnée (transform vidéo→vidéo). `settings` = réglages figés de l'étape.
-export interface NlChainStep { id: string; kind: PipelineOpKind; settings: Record<string, unknown>; }
+interface NlChainStep { id: string; kind: PipelineOpKind; settings: Record<string, unknown>; }
 
 let _stepSeq = 0;
 const stepId = () => `step-${Date.now().toString(36)}-${(_stepSeq++).toString(36)}`;

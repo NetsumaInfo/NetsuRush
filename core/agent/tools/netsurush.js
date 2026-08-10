@@ -9,12 +9,12 @@ const path = require('path');
 
 /**
  * @param {{
- *   resolveMod:any, timeline:any, sidecars:any, thumbs:any, proxy:any, ffmpeg:any,
+ *   resolveMod:any, timeline:any, sidecars:any, thumbs:any, ffmpeg:any,
  *   aeExporter:any, ev:any, guarded:(fn:any)=>any, rOp:(fn:any)=>any
  * }} deps
  */
 function createNetsuRushTools(deps) {
-  const { resolveMod, timeline, sidecars, thumbs, proxy, ffmpeg, aeExporter, ev, guarded, rOp } = deps;
+  const { resolveMod, timeline, sidecars, thumbs, ffmpeg, aeExporter, ev, guarded, rOp } = deps;
 
   /** @type {import('./registry').ToolDef[]} */
   const tools = [

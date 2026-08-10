@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ScenePlayer } from "@/components/player/ScenePlayer";
@@ -32,12 +33,12 @@ import { cutsOfTrack, trackOptions } from "./timelineTracks";
 import { hostBuildTimeline, hostShort } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
 import { timelineBuildOptsFromProfile } from "@/features/export/timelineTarget";
-import { fmt, nextSegId, onGridScroll } from "./cutStudioShared";
+import { fmt, nextSegId } from "./cutStudioShared";
 
 // L'identité d'un plan ne suffit pas : sa fin, sa position timeline, son FPS ou même sa source peuvent
 // changer sans modifier `track:index:inFrame`. Cette empreinte pilote la réutilisation exacte du cache.
 // Le nom de piste en fait partie : renommer une piste ne change aucun plan, mais doit repeindre le bandeau.
-export function timelineCutsSignature(cuts: TimelineCut[]): string {
+function timelineCutsSignature(cuts: TimelineCut[]): string {
   return JSON.stringify(cuts.map((cut) => [
     cut.path, cut.track, cut.trackName ?? "", cut.tlStart, cut.inFrame, cut.outFrame, cut.fps, cut.srcFrames,
   ]));
@@ -83,12 +84,13 @@ export function TimelineLiveView() {
   const [activeCutId, setActiveCutId] = useState<string | null>(null);
   const [activeUrl, setActiveUrl] = useState<string | null>(null);
   const previewRequestRef = useRef(0);
-  const [notice, setNotice] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  // Seules les ERREURS restent affichées : la timeline illisible explique une grille vide. Les retours
+  // de réussite passent par une pastille qui s'efface d'elle-même (cf. `toast`).
+  const [error, setError] = useState<string | null>(null);
   const exportProfiles = useApp((s) => s.exportProfiles);
   const activeExportProfileId = useApp((s) => s.activeExportProfileId);
   const exportBusy = useApp((s) => s.exportBusy);
   const exportProgress = useApp((s) => s.exportProgress);
-  const exportNotice = useApp((s) => s.exportNotice);
   const exportError = useApp((s) => s.exportError);
   const activeProfile = getActiveExportProfile(exportProfiles, activeExportProfileId);
 
@@ -258,7 +260,7 @@ export function TimelineLiveView() {
       cutsSigRef.current = null;
       cutsRef.current = [];
     }
-    setNotice(null);
+    setError(null);
     // Adobe : les plans sont déjà là (snapshot du panneau). Rien à demander à l'hôte, donc pas de
     // skeleton ni de stale-while-revalidate — on peint et on s'arrête.
     if (adobe.active) {
@@ -305,10 +307,10 @@ export function TimelineLiveView() {
         // Jamais de génération massive automatique de proxys : ils restent à la demande (lecture/survol)
         // ou via le bouton explicite. Les miniatures arrivent par petits lots de priorité basse.
         grid.warmThumbs(thumbs);
-      } else { cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setNotice({ kind: "err", text: r.error || t("timelineLive.readFailed") }); }
+      } else { cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setError(r.error || t("timelineLive.readFailed")); }
     } catch (e) {
       if (!isCurrent()) return;
-      cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setNotice({ kind: "err", text: String(e) });
+      cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setError(String(e));
     } finally {
       if (isCurrent()) setLoading(false);
     }
@@ -396,15 +398,15 @@ export function TimelineLiveView() {
   async function addOne(c: TimelineCut) {
     // Un clic de carte ne doit jamais créer une timeline par plan : même contrat que NetsuCut.
     const r = await sendToProfile([c], true);
-    if (!r.ok && r.error) setNotice({ kind: "err", text: r.error });
+    if (!r.ok && r.error) setError(r.error);
     return { ok: r.ok, error: r.error };
   }
   async function exportToTimeline() {
     if (!selectedCuts.length) return;
-    setNotice(null);
+    setError(null);
     const r = await sendToProfile(selectedCuts);
-    if (r.ok) setNotice({ kind: "ok", text: t("timelineLive.added", { count: r.count ?? selectedCuts.length, name: r.timeline }) });
-    else setNotice({ kind: "err", text: r.error || t("shared.failedTimeline") });
+    if (r.ok) toast.ok(t("timelineLive.added", { count: r.count ?? selectedCuts.length, name: r.timeline }));
+    else setError(r.error || t("shared.failedTimeline"));
   }
 
   async function playCut(c: TimelineCut) {
@@ -612,13 +614,13 @@ export function TimelineLiveView() {
       </div>
 
       <div className="flex min-h-0 flex-1 px-4">
-      <div ref={grid.gridScrollRef} onScroll={onGridScroll} className="min-h-0 min-w-0 flex-1 overflow-y-auto px-1 pb-4 pt-2">
+      <div ref={grid.gridScrollRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto mr-1 pl-1 pr-2 pb-4 pt-2">
         {loading ? (
-          <div className="grid gap-3 px-3" style={{ gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))` }}>
+          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${grid.actualCols || grid.cols}, minmax(0, 1fr))` }}>
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
           </div>
         ) : items.length ? (
-          <div className="grid gap-3 px-3" style={{ gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))` }}>
+          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${grid.actualCols || grid.cols}, minmax(0, 1fr))` }}>
             {items.map(({ cut, seg }, i) => (
               <ShotCard
                 key={cut.id} seg={seg} index={i} clipPath={cut.path} cols={grid.cols}
@@ -653,12 +655,14 @@ export function TimelineLiveView() {
               if (e.key === "ArrowLeft") { e.preventDefault(); setPanelW((w) => Math.min(560, w + 20)); }
               else if (e.key === "ArrowRight") { e.preventDefault(); setPanelW((w) => Math.max(260, w - 20)); }
             }}
-            className="group relative mx-1 flex w-3 shrink-0 touch-none self-stretch cursor-col-resize items-center justify-center outline-none focus-visible:bg-primary/10">
-            <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border transition-colors group-hover:bg-primary" />
-            <GripVertical className="relative h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+            {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
+                restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
+            <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
 
-          <aside ref={panelRef} style={{ width: panelW }} className="flex h-full min-h-0 shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-3 pl-1">
+          <aside ref={panelRef} style={{ width: panelW }} className="flex h-full min-h-0 shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-3 pl-5">
             <Card className="shrink-0 overflow-hidden p-0">
               <div className="relative aspect-video">
                 <ScenePlayer src={activeUrl} loop defaultVolume={0.2} />
@@ -693,7 +697,6 @@ export function TimelineLiveView() {
             </div>
 
             {exportBusy && <p className="break-words text-xs text-muted-foreground">{exportBusy}</p>}
-            {exportNotice && <p className="break-words text-xs text-[var(--color-ok)]">{exportNotice}</p>}
             {exportError && <p className="break-words text-xs text-destructive">{exportError}</p>}
           </aside>
         </div>
@@ -701,9 +704,9 @@ export function TimelineLiveView() {
       </div>
 
       {/* Bandeau d'état en PIED de vue, comme au Découpage et dans Collections. */}
-      {notice && (
+      {error && (
         <div className="shrink-0 border-t border-border px-4 py-1.5 text-xs">
-          <span className={notice.kind === "ok" ? "text-[var(--color-ok)]" : "text-destructive"}>{notice.text}</span>
+          <span className="text-destructive">{error}</span>
         </div>
       )}
     </div>

@@ -34,7 +34,7 @@ function parseHex(value: string): [number, number, number] | null {
 }
 
 /** Luminance relative (WCAG) : sert à choisir un texte lisible SUR la couleur choisie. */
-export function relativeLuminance(color: string): number | null {
+function relativeLuminance(color: string): number | null {
   const rgb = parseHex(color);
   if (!rgb) return null;
   const [r, g, b] = rgb.map((c) => {

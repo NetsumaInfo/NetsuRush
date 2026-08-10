@@ -2,7 +2,7 @@
 // suivants SANS réseau, l'app reste utilisable tant que ce tampon a moins de 7 jours. Au-delà,
 // re-login exigé (donc reconnexion Internet). Honore « gardé, re-login si offline ~1 semaine ».
 const KEY = "nr.auth.lastAuthAt";
-export const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function stampAuth(now: number = Date.now()): void {
   try {
@@ -20,7 +20,7 @@ export function clearAuthStamp(): void {
   }
 }
 
-export function lastAuthAt(): number | null {
+function lastAuthAt(): number | null {
   try {
     const v = localStorage.getItem(KEY);
     const n = v ? Number(v) : NaN;

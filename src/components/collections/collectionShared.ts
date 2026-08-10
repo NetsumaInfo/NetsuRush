@@ -35,10 +35,6 @@ const FAV_KEY = "nr.coll.fav:v1";
 export const loadCollFavs = (): string[] => { try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; } };
 export const saveCollFavs = (a: string[]) => { try { localStorage.setItem(FAV_KEY, JSON.stringify(a)); } catch { /* noop */ } };
 
-// Modes d'affichage de la grille de plans (boutons de la barre d'outils).
-export type CollShotView = "gallery" | "grid" | "compact" | "list";
-export const SHOT_VIEWS: CollShotView[] = ["gallery", "grid", "compact", "list"];
-
 export type CollSortKey = "added-desc" | "added-asc" | "name" | "dur-desc" | "dur-asc" | "rating-desc";
 // Valeurs = clés i18n (ns « collections ») résolues au rendu.
 export const SORT_LABELS: Record<CollSortKey, string> = {
@@ -85,10 +81,6 @@ export function filterShots(list: CollectionShot[], f: ShotFilter): CollectionSh
   });
 }
 
-export function isFilterActive(f: ShotFilter): boolean {
-  return !!(f.q.trim() || f.tags.length || f.minRating || f.label);
-}
-
 // Toutes les étiquettes présentes dans une collection (pour les suggestions + le filtre).
 export function collectTags(list: CollectionShot[]): string[] {
   const set = new Set<string>();
@@ -101,7 +93,7 @@ export function collectTags(list: CollectionShot[]): string[] {
 // ---------------------------------------------------------------------------
 // Vue « Liste » retirée (peu intéressante) → Galerie (mosaïque) / Grille / Compact.
 export type CollListView = "gallery" | "grid" | "compact";
-export const LIST_VIEWS: CollListView[] = ["gallery", "grid", "compact"];
+const LIST_VIEWS: CollListView[] = ["gallery", "grid", "compact"];
 
 export type CollListSort = "recent" | "name" | "count-desc" | "count-asc";
 // Valeurs = clés i18n (ns « collections ») résolues au rendu.
@@ -138,13 +130,7 @@ export function loadListSort(): CollListSort {
 export function saveListSort(v: CollListSort) { try { localStorage.setItem(LIST_SORT_PREF_KEY, v); } catch { /* noop */ } }
 
 // Préférences de vue persistées (partagées entre dossiers).
-const VIEW_KEY = "nr.coll.view";
 const SORT_KEY = "nr.coll.sort";
-export function loadShotView(): CollShotView {
-  const v = (typeof localStorage !== "undefined" && localStorage.getItem(VIEW_KEY)) as CollShotView | null;
-  return v && SHOT_VIEWS.includes(v) ? v : "grid";
-}
-export function saveShotView(v: CollShotView) { try { localStorage.setItem(VIEW_KEY, v); } catch { /* noop */ } }
 export function loadShotSort(): CollSortKey {
   const v = (typeof localStorage !== "undefined" && localStorage.getItem(SORT_KEY)) as CollSortKey | null;
   return v && SORT_KEYS.includes(v) ? v : "added-desc";
@@ -166,13 +152,6 @@ export function folderTrail(folders: CollectionFolder[], id: string | null): Col
 export function childFolders(folders: CollectionFolder[], parentId: string | null): CollectionFolder[] {
   return folders.filter((f) => (f.parentId ?? null) === parentId).sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
 }
-// Groupes (collTags) présents dans une liste de collections → puces de filtre.
-export function collectGroups(list: CollectionMeta[]): string[] {
-  const set = new Set<string>();
-  for (const c of list) for (const t of c.collTags ?? []) set.add(t);
-  return [...set].sort((a, b) => a.localeCompare(b, "fr"));
-}
-
 // Préférences d'AFFICHAGE des cartes de collection (résumé du contenu) — persistées.
 export interface CollDisplay { labels: boolean; tags: boolean; description: boolean }
 const DISPLAY_KEY = "nr.coll.display:v1";

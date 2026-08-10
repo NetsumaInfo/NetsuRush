@@ -41,7 +41,7 @@ export function updateHlMarks(editor: Editor, mediaId: string, color: MediaColor
 }
 
 // Y a-t-il du texte lié à ce média ? (pastille grise = hors montage sinon.)
-export function hasLink(editor: Editor, mediaId: string): boolean {
+function hasLink(editor: Editor, mediaId: string): boolean {
   const markType = editor.state.schema.marks.mediaHl;
   if (!markType) return false;
   let linked = false;
@@ -54,7 +54,7 @@ export function hasLink(editor: Editor, mediaId: string): boolean {
 
 // État « lié » suivi par abonnement aux transactions : ProseMirror RÉUTILISE la NodeView quand les
 // attrs sont identiques (delete+insert, re-stamp…) → un calcul au render se figerait.
-export function useLinked(editor: Editor, mediaId: string): boolean {
+function useLinked(editor: Editor, mediaId: string): boolean {
   const [linked, setLinked] = useState(false);
   useEffect(() => {
     if (!mediaId) return;

@@ -17,7 +17,7 @@ export interface MentionChar {
 }
 
 // Un personnage cité + ce qui a réellement été tapé (le texte peut porter un préfixe du nom).
-export interface MentionMatch extends MentionChar {
+interface MentionMatch extends MentionChar {
   token: string;   // texte tapé après le @
   start: number;   // index du @ dans la requête
   end: number;     // index après le dernier caractère consommé (espace de séparation compris)

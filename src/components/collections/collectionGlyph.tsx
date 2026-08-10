@@ -10,7 +10,7 @@ import { nr } from "@/lib/bridge";
 import { LucideGlyph } from "@/components/common/LucideGlyph";
 
 // Jeu d'icônes proposé au choix (clé = identifiant persisté dans `icon.name`).
-export const COLLECTION_ICONS: Record<string, LucideIcon> = {
+const COLLECTION_ICONS: Record<string, LucideIcon> = {
   folder: Folder, star: Star, heart: Heart, bookmark: Bookmark, film: Film, slate: Slate,
   camera: Camera, video: Video, sparkles: Sparkles, zap: Zap, flame: Flame, music: Music,
   mic: Mic, tag: Tag, sword: Sword, ghost: Ghost, leaf: Leaf, crown: Crown, eye: Eye,
@@ -18,7 +18,6 @@ export const COLLECTION_ICONS: Record<string, LucideIcon> = {
   wand: Wand2, clapper: Clapperboard,
 };
 
-export const COLLECTION_ICON_KEYS = Object.keys(COLLECTION_ICONS);
 export const DEFAULT_COLLECTION_COLOR = "#3b82f6";
 
 // Le carré est BLOC (jamais `inline-*`) : posé en enfant direct d'un conteneur non-flex (la plaque

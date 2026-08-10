@@ -1,4 +1,5 @@
 use crate::state::AppState;
+use std::sync::atomic::Ordering;
 use tauri::State;
 
 use super::shared::{with_player, PlayerStatus, TrackItem, TrackListResult};
@@ -9,6 +10,29 @@ pub fn player_load(state: State<'_, AppState>, path: String) -> Result<(), Strin
         &state,
         "Player not initialized. Make sure mpv-2.dll is available.",
         |p| p.load_file(&path),
+    )
+}
+
+/// Take ownership of the shared player and return the new claim id.
+///
+/// Called by a surface right before it loads its own media. Surfaces holding an older claim see it
+/// in `player_get_status` and stop driving the player.
+#[tauri::command]
+pub fn player_claim(state: State<'_, AppState>) -> u64 {
+    state.player_claim.fetch_add(1, Ordering::SeqCst) + 1
+}
+
+/// Load a file already positioned at `position` seconds (see `load_file_at`).
+#[tauri::command]
+pub fn player_load_at(
+    state: State<'_, AppState>,
+    path: String,
+    position: f64,
+) -> Result<(), String> {
+    with_player(
+        &state,
+        "Player not initialized. Make sure mpv-2.dll is available.",
+        |p| p.load_file_at(&path, position),
     )
 }
 
@@ -110,6 +134,7 @@ pub fn player_get_loop_state(state: State<'_, AppState>) -> Result<LoopState, St
 
 #[tauri::command]
 pub fn player_get_status(state: State<'_, AppState>) -> Result<PlayerStatus, String> {
+    let claim = state.player_claim.load(Ordering::SeqCst);
     let player = state.player.lock().map_err(|e| e.to_string())?;
     match &*player {
         Some(p) => Ok(PlayerStatus {
@@ -118,6 +143,8 @@ pub fn player_get_status(state: State<'_, AppState>) -> Result<PlayerStatus, Str
             duration: p.get_duration(),
             volume: p.get_volume(),
             speed: p.get_speed(),
+            path: p.get_loaded_path(),
+            claim,
         }),
         None => Ok(PlayerStatus {
             is_playing: false,
@@ -125,6 +152,8 @@ pub fn player_get_status(state: State<'_, AppState>) -> Result<PlayerStatus, Str
             duration: 0.0,
             volume: 80.0,
             speed: 1.0,
+            path: String::new(),
+            claim,
         }),
     }
 }

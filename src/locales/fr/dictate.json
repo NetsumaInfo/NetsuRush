@@ -1,11 +1,5 @@
 {
   "transcribing": "Transcription…",
-  "button": {
-    "ariaStop": "Arrêter la dictée",
-    "ariaDictate": "Dicter",
-    "tooltipStop": "Arrêter (insère le texte)",
-    "tooltipDictate": "Dicter (parle, ça écrit)"
-  },
   "overlay": {
     "listening": "Écoute…"
   },

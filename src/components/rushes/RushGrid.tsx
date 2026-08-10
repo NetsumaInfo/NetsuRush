@@ -17,7 +17,7 @@ import { MediaTree } from "./MediaTree";
 import { SortSelect, FoldersToggle } from "./BrowserControls";
 import { TimelineDrop } from "./TimelineDrop";
 import { BatchDetectBar, BatchDetectProgress } from "./BatchDetect";
-import { onGridScroll, PRESETS } from "./cutStudioShared";
+import { PRESETS } from "./cutStudioShared";
 
 export function RushGrid() {
   const { t } = useTranslation("derush");
@@ -154,7 +154,7 @@ export function RushGrid() {
         </Tooltip>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4" onScroll={onGridScroll}>
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
       {selectMode && (
         <BatchDetectBar
           total={filtered.length}

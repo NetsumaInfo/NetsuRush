@@ -24,6 +24,7 @@ import { BrandIcon } from "@/components/BrandIcon";
 import { BetaBadge } from "@/components/BetaBadge";
 import { UpdateBootstrap } from "@/components/updates/UpdateBootstrap";
 import { Spinner } from "@/components/ui/spinner";
+import { Toaster } from "@/components/ui/toast";
 import { loadExportCapabilities } from "@/features/export/capabilities";
 import { GateFrame } from "@/components/auth/GateFrame";
 
@@ -261,7 +262,12 @@ function Shell() {
           <MainContent />
         </ViewContextMenu>
       </div>
-      <ErrorBadge />
+      {/* Colonne flottante du coin bas-droit : les pastilles d'état transitoires s'empilent au-dessus
+          de l'indicateur d'erreur, qui reste ancré au bas. */}
+      <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+        <Toaster />
+        <ErrorBadge />
+      </div>
       <PowerPrompt />
       <UpdateBootstrap />
     </div>

@@ -260,13 +260,3 @@ pub fn from_cstr(ptr: *const c_char) -> String {
     }
     unsafe { CStr::from_ptr(ptr).to_string_lossy().into_owned() }
 }
-
-// Build a null-terminated array of C strings for mpv_command
-pub fn build_command_args(args: &[&str]) -> Vec<*const c_char> {
-    let cstrings: Vec<CString> = args.iter().map(|s| to_cstring(s)).collect();
-    let mut ptrs: Vec<*const c_char> = cstrings.iter().map(|s| s.as_ptr()).collect();
-    ptrs.push(ptr::null());
-    // We need to keep cstrings alive, so we leak them
-    std::mem::forget(cstrings);
-    ptrs
-}

@@ -1,15 +1,8 @@
 // Préférences du module Carnet (persistées localStorage, partagées entre carnets) : apparence de la
 // page, comportement de l'éditeur et raccourcis clavier rebindables. Structure miroir de boardPrefs.
 import { DEFAULT_NOTEBOOK_SHORTCUT_KEYS } from "./notebookShortcuts";
-import i18n from "@/i18n";
 
 export type NbPageWidth = "narrow" | "medium" | "wide" | "full";
-export const PAGE_WIDTH_LABELS: Record<NbPageWidth, string> = {
-  get narrow() { return i18n.t("notebook:settings.width.narrow"); },
-  get medium() { return i18n.t("notebook:settings.width.medium"); },
-  get wide() { return i18n.t("notebook:settings.width.wide"); },
-  get full() { return i18n.t("notebook:settings.width.full"); },
-};
 // Classe Tailwind du conteneur d'édition selon la largeur choisie.
 export const PAGE_WIDTH_CLASS: Record<NbPageWidth, string> = {
   narrow: "max-w-2xl", medium: "max-w-3xl", wide: "max-w-5xl", full: "max-w-none",
@@ -32,7 +25,7 @@ export const SIDEBAR_MAX = 380;
 
 export const PREFS_KEY = "nr-nb-prefs";
 
-export const PREFS_DEFAULT: NotebookPrefs = {
+const PREFS_DEFAULT: NotebookPrefs = {
   shortcutKeys: { ...DEFAULT_NOTEBOOK_SHORTCUT_KEYS },
   pageWidth: "medium",
   fontScale: 1,

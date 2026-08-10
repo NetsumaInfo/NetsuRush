@@ -1,9 +1,9 @@
 // Canal de publication de l'app. SOURCE UNIQUE du badge « BETA » (barre de titre, écran de
 // connexion, panneau CEP, À propos) : passer à "stable" fait disparaître le badge partout d'un
 // seul coup, sans chasser les libellés dans les composants.
-export type ReleaseChannel = "beta" | "stable";
+type ReleaseChannel = "beta" | "stable";
 
-export const RELEASE_CHANNEL: ReleaseChannel = "beta";
+const RELEASE_CHANNEL: ReleaseChannel = "beta";
 
 export const IS_PRERELEASE = RELEASE_CHANNEL === "beta";
 
@@ -13,5 +13,3 @@ export const CHANNEL_LABEL = "beta";
 
 // Injectée par vite (define) depuis package.json → une seule version à faire évoluer.
 export const APP_VERSION = __APP_VERSION__;
-
-export const VERSION_LABEL = IS_PRERELEASE ? `v${APP_VERSION} ${CHANNEL_LABEL}` : `v${APP_VERSION}`;

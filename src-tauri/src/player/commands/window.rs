@@ -11,10 +11,20 @@ pub fn player_set_geometry(
     width: i32,
     height: i32,
 ) -> Result<(), String> {
-    with_child_window(&state, |cw| {
-        cw.set_geometry(x, y, width, height);
-        Ok(())
-    })
+    let moved = with_child_window(&state, |cw| Ok(cw.set_geometry(x, y, width, height)))?;
+    if moved {
+        // mpv suit la fenêtre parente et redimensionne sa sortie vidéo : l'image présentée est
+        // perdue, et en PAUSE aucune image suivante ne vient la remplacer — surface NOIRE. On lui
+        // redemande donc l'image courante.
+        if let Ok(player) = state.player.lock() {
+            if let Some(p) = player.as_ref() {
+                if p.get_paused() {
+                    let _ = p.redraw();
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]

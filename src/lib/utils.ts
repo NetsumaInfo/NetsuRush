@@ -15,7 +15,7 @@ export function basename(p: string): string {
 // toute 1re frame (souvent une transition/fondu/flou de coupe → vignette trompeuse). ~3-4 frames à
 // 24 fps. Source UNIQUE : sert aussi de clé de cache (path@time.toFixed(2)) → écriture et lecture
 // DOIVENT passer la même valeur, donc tous les appels passent par thumbTime().
-export const THUMB_LEAD = 0.15;
+const THUMB_LEAD = 0.15;
 
 // Instant « AUTO » : le core choisit une frame REPRÉSENTATIVE (≈10 % de la durée) au lieu du début
 // du fichier. À passer pour un CLIP ENTIER (pas d'in-point utile) : les rushs ouvrent presque

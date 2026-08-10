@@ -881,9 +881,9 @@ async function adaptiveRequest(daemon, payload, onProgress, resolved) {
 const samePath = (a, b) => path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
 
 async function runUpscale(event, opts) {
-  const { input, model = 'light', scale = 4, codec = 'x264', denoise, tile = 0, tilePad = 10, prePad = 0,
+  const { input, model = 'light', scale = 4, denoise, tile = 0, tilePad = 10, prePad = 0,
     cleanupNoise = 0, cleanupEdges = 0,
-    fp32 = false, quality = 20, preset = 'medium', bitDepth = 8, profile = null, audio = 'copy', abr = 192, audioTrack = 0,
+    fp32 = false, quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, segments, whole, importBack, baseName, outputName, savePath } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
@@ -969,7 +969,7 @@ function processJobs(opts) {
 // Interpolation de frames (RIFE) : 1 job (rush/plage) ou N jobs (plans). 1 fichier de sortie par job.
 async function runInterpolate(event, opts) {
   const { input, model = 'rife-v4.6', factor = 2, targetFps, slowmo = false, dedup = false,
-    codec = 'x264', quality = 20, preset = 'medium', bitDepth = 8, profile = null, audio = 'copy', abr = 192, audioTrack = 0,
+    quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, importBack, baseName, outputName } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
@@ -1017,7 +1017,7 @@ async function runInterpolate(event, opts) {
 // Estimation de profondeur (Depth-Anything / DPT) : carte de profondeur 8/16-bit, colormap au choix.
 async function runDepth(event, opts) {
   const { input, model = 'depth-anything-v2-small', bits = 8, colormap = 'gray', dedup = false,
-    codec = 'x264', quality = 20, preset = 'medium', bitDepth = 8, profile = null, audio = 'copy', abr = 192, audioTrack = 0,
+    quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, importBack, baseName, outputName } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };

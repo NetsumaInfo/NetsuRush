@@ -1,11 +1,5 @@
 {
   "transcribing": "Transcribiendo…",
-  "button": {
-    "ariaStop": "Detener el dictado",
-    "ariaDictate": "Dictar",
-    "tooltipStop": "Detener (inserta el texto)",
-    "tooltipDictate": "Dictar (al hablar, se escribe)"
-  },
   "overlay": {
     "listening": "Escuchando…"
   },

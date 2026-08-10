@@ -32,7 +32,6 @@
     "none": "コレクションなし"
   },
   "sidePanel": {
-    "trim": "ショットをトリミング",
     "export": "書き出し"
   },
   "range": {
@@ -97,41 +96,6 @@
     "gallery": "ギャラリー",
     "grid": "グリッド",
     "compact": "コンパクト"
-  },
-  "trim": {
-    "theShot": "ショット",
-    "title": "「{{name}}」をトリミング",
-    "play": "再生",
-    "pause": "一時停止",
-    "playKey": "再生（Space）",
-    "pauseKey": "一時停止（Space）",
-    "playSelection": "選択範囲を再生",
-    "playSelectionHint": "選択範囲を再生（始点→終点）",
-    "gotoStart": "先頭へ",
-    "prevFrame": "前のフレーム",
-    "prevFrameHint": "前のフレーム（← · Shift = −1 秒）",
-    "nextFrame": "次のフレーム",
-    "nextFrameHint": "次のフレーム（→ · Shift = +1 秒）",
-    "gotoEnd": "末尾へ",
-    "markIn": "ここを始点に",
-    "markOut": "ここを終点に",
-    "zoomOut": "ズームアウト",
-    "zoomOutHint": "ズームアウト（表示幅 ×2）",
-    "zoomIn": "ズームイン",
-    "zoomInHint": "ズームイン（表示幅 ÷2）",
-    "fitSelection": "選択範囲に合わせる",
-    "fitAll": "素材全体",
-    "images": "画像シーケンス",
-    "wave": "波形",
-    "waveHint": "オーディオ波形",
-    "none": "なし",
-    "image": "画像 {{n}}",
-    "duration": "長さ",
-    "framesShort": "{{n}} フレーム",
-    "startLabel": "始点",
-    "endLabel": "終点",
-    "reset": "リセット",
-    "apply": "トリミングを適用"
   },
   "detail": {
     "shotWord": "ショット",

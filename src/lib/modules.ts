@@ -18,7 +18,7 @@ export type ModuleId = (typeof MODULE_IDS)[number];
 
 export const REQUIRED_MODULES: readonly ModuleId[] = ["derush"];
 
-export const MODULE_MODEL_TASKS: Partial<Record<ModuleId, readonly ModelTask[]>> = {
+const MODULE_MODEL_TASKS: Partial<Record<ModuleId, readonly ModelTask[]>> = {
   derush: ["detect"],
   search: ["search", "face"],
   upscale: ["upscale", "restore", "interpolate", "depth", "matte-video", "matte-image", "segment", "object-removal"],
@@ -47,7 +47,7 @@ export function modulesForModels(models: readonly string[]): ModuleId[] {
   return MODULE_IDS.filter((id) => needed.has(id));
 }
 
-export const MODULE_PREFS_KEY = "nr.modules.v2";
+const MODULE_PREFS_KEY = "nr.modules.v2";
 
 export interface ModulePreferences {
   order: ModuleId[];
@@ -58,7 +58,7 @@ function isModuleId(value: unknown): value is ModuleId {
   return typeof value === "string" && (MODULE_IDS as readonly string[]).includes(value);
 }
 
-export function normalizeModuleOrder(value: unknown): ModuleId[] {
+function normalizeModuleOrder(value: unknown): ModuleId[] {
   const provided = Array.isArray(value) ? value.filter(isModuleId) : [];
   return [...new Set([...provided, ...MODULE_IDS])];
 }

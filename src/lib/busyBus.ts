@@ -18,7 +18,7 @@ const IDLE_MS = 2500;
  * `roto:setView` ou `search:status` partagent le préfixe de vrais jobs sans rien coûter, et geler le
  * fond au moindre clic serait un défaut visible.
  */
-export const HEAVY_CHANNELS = new Set([
+const HEAVY_CHANNELS = new Set([
   // Traitements NetsuLab (upscale, interpolation, profondeur, détourage) et leurs essais 1 image.
   "upscale:run", "upscale:shaderRun", "upscale:testFrame",
   "process:depth", "process:interpolate", "process:removeBg", "process:testFrame",
@@ -92,10 +92,6 @@ export function pingHeavyActivity(): void {
   lastActivity = Date.now();
   publish(true);
   scheduleIdleCheck();
-}
-
-export function isBusy(): boolean {
-  return busy;
 }
 
 export function subscribeBusy(listener: Listener): () => void {

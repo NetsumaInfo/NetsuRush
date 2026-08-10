@@ -10,7 +10,6 @@ import { CutStudio } from "./CutStudio";
 import { CutTimelineView } from "./CutTimelineView";
 import { TimelineLiveView } from "./TimelineLiveView";
 import { CollectionsView } from "@/components/collections/CollectionsView";
-import { onGridScroll } from "./cutStudioShared";
 
 export function DerushTab() {
   const { section, selected, derushView, cutTimelineOpen, activeHost, loadClips } = useApp(
@@ -34,7 +33,7 @@ export function DerushTab() {
           ? <CutStudio />
           : cutTimelineOpen
             ? <CutTimelineView />
-            : <div className="h-full overflow-auto" onScroll={onGridScroll}>{derushView === "home" ? <DerushHome /> : <RushGrid />}</div>
+            : <div className="h-full overflow-auto">{derushView === "home" ? <DerushHome /> : <RushGrid />}</div>
       )}
       {section === "collections" && <CollectionsView />}
       {section === "timeline" && <TimelineLiveView />}

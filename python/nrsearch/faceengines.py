@@ -15,7 +15,6 @@ import os
 
 import numpy as np
 
-DOMAINS = ("anime", "real")
 ENGINE_TAGS = {"anime": "ccip-caformer-24-randaug-pruned", "real": "sface-2021dec"}
 
 CCIP_MODEL = ENGINE_TAGS["anime"]

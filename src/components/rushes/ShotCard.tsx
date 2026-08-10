@@ -37,8 +37,9 @@ function ShotCardImpl({
   tagCount?: number;                                          // nb de tags
 }) {
   const { t } = useTranslation("derush");
-  const { rootRef, thumb, url, showVideo, hovered, onVideoError, enter, leave } =
+  const { rootRef, thumb, url, showVideo, videoPaused, near, hovered, onVideoError, enter, leave } =
     useSceneCardMedia({ seg, index, clipPath, cols, play, getProxy, bustProxy });
+  const playing = showVideo && !videoPaused;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
   async function doAdd(e: { stopPropagation: () => void }) {
@@ -71,23 +72,28 @@ function ShotCardImpl({
         />
       }>
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
-      {thumb && <img src={thumb} alt={t("shared.shotPreview", { n: index + 1 })} className="absolute inset-0 h-full w-full object-cover" />}
-      {showVideo && <PreviewVideo url={url!} label={t("shared.shotPreview", { n: index + 1 })} onError={onVideoError} audible={hovered} />}
+      {thumb && <img src={thumb} alt={t("shared.shotPreview", { n: index + 1 })} decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
+      {showVideo && <PreviewVideo url={url!} label={t("shared.shotPreview", { n: index + 1 })} onError={onVideoError} audible={hovered} paused={videoPaused} />}
       <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20">
         {/* L'aperçu dans la carte reste réservé au survol/à la lecture auto. Ce bouton ouvre le lecteur. */}
-        {onPlay && !showVideo && (
+        {onPlay && !playing && (
           <button type="button" aria-label={t("shotCard.playShot", { n: index + 1 })} onClick={(e) => { e.stopPropagation(); onPlay(); }}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-90">
             <Play className="h-7 w-7 drop-shadow" />
           </button>
         )}
       </div>
+      {/* Tout ce qui est VISIBLE AU REPOS (pastille, méta) est rendu sans condition : ça apparaissait
+          « après coup » tant que ça attendait l'observateur de proximité, alors que la vignette sort
+          du cache renderer dès le premier rendu. Seul l'habillage révélé AU SURVOL est différé —
+          c'est lui qui coûte cher (infobulles + popover Base UI, une racine par carte). */}
       {badge && <span className="absolute left-1.5 top-1.5 rounded nr-chip px-1.5 py-0.5 text-[10px] font-medium tabular-nums">{badge}</span>}
 
-      {/* sélection */}
-      <SelectToggle selected={selected} onToggle={onToggle} />
+      {/* sélection — visible dès qu'elle est cochée, donc jamais différée dans ce cas */}
+      {(near || selected) && <SelectToggle selected={selected} onToggle={onToggle} />}
 
       {/* barre d'actions (bas-gauche) : ajouter timeline · ranger · retirer */}
+      {near && (
       <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
         {onAddToTimeline && (
           <Tooltip>
@@ -116,6 +122,7 @@ function ShotCardImpl({
           </Tooltip>
         )}
       </div>
+      )}
 
       {/* Méta du plan en UN SEUL chip (bas-droite, même emplacement que la durée au Découpage) :
           label couleur · note · tags · durée. Quatre marques flottantes se disputaient la vignette,
@@ -132,6 +139,7 @@ function ShotCardImpl({
       </span>
       </ContextMenuTrigger>
       {/* Clic droit : lire / (dé)sélectionner / timeline / retirer. */}
+      {near && (
       <ContextMenuContent className="min-w-48">
         {onPlay && <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>}
         <ContextMenuItem onClick={onToggle}>
@@ -158,6 +166,7 @@ function ShotCardImpl({
           </>
         )}
       </ContextMenuContent>
+      )}
     </ContextMenu>
   );
 }

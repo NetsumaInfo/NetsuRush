@@ -34,7 +34,7 @@ interface AudioFolderSectionProps {
   query?: string;
 }
 
-export function AudioFolderSection({ kind, embedded = false, query = "" }: AudioFolderSectionProps) {
+function AudioFolderSection({ kind, embedded = false, query = "" }: AudioFolderSectionProps) {
   const { t } = useTranslation("script");
   const recording = kind === "recording";
   const dirKey = recording ? SCRIPT_RECORDINGS_DIR_KEY : SCRIPT_AUDIO_DIR_KEY;

@@ -5,6 +5,3 @@ import { ConvexReactClient } from "convex/react";
 const url = import.meta.env.VITE_CONVEX_URL as string | undefined;
 
 export const convexClient = url ? new ConvexReactClient(url) : null;
-// Réexporté depuis `convexEnv` : ce module-ci tire `convex/react`, donc les chemins de boot doivent
-// lire le témoin là-bas (sans dépendance) — pas ici.
-export { convexConfigured } from "./convexEnv";

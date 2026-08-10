@@ -8,7 +8,7 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 // navigateur affiche une vraie page qui relance l'app via `netsurush://auth?ott=…` puis invite à
 // fermer l'onglet (fini le « charge à l'infini »). Repli scheme direct si le site n'est pas défini.
 const SITE = import.meta.env.VITE_CONVEX_SITE_URL as string | undefined;
-export const AUTH_CALLBACK = SITE ? `${SITE}/auth/done` : "netsurush://auth";
+const AUTH_CALLBACK = SITE ? `${SITE}/auth/done` : "netsurush://auth";
 
 /**
  * Lance le login Discord : ouvre le NAVIGATEUR SYSTÈME sur l'URL d'autorisation (jamais dans la

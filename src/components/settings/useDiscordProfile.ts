@@ -39,3 +39,12 @@ export function useDiscordProfile(): DiscordProfile | null {
 
   return profile;
 }
+
+/**
+ * Profil DÉJÀ chargé cette session, sans hook ni appel réseau : le rapport d'erreur en un clic part
+ * depuis des écrans (installation, mise à jour) qui ne sont pas forcément sous le provider Convex.
+ * `null` = auteur anonyme, jamais une attente.
+ */
+export function loadedDiscordProfile(): DiscordProfile | null {
+  return cache ?? null;
+}

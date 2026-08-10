@@ -6,7 +6,6 @@ import torch.nn as nn
 from torch.nn import init
 import torch.nn.functional as F
 from einops import rearrange
-from einops.layers.torch import Rearrange
 
 from .linear import Linear_
 

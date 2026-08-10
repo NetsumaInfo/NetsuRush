@@ -4,8 +4,6 @@
 // / 日本語). On normalise ces variantes vers un CODE canonique (ISO 639-1) pour choisir toujours la
 // même piste quel que soit l'étiquetage. Le repli ML (deviner à l'oreille) vit côté sidecar : ce
 // module ne fait que la normalisation + la sélection sur des métadonnées déjà sondées.
-const { language } = require('./i18n');
-
 /**
  * @typedef {object} AudioTrackInfo
  * @property {number} index   index relatif (a:N)
@@ -100,20 +98,4 @@ function pickTrackByLanguage(tracks, code) {
   return -1;
 }
 
-/** Libellé lisible d'un code (« ja » → « Japonais »), ou le code brut si inconnu. @param {string} code */
-function languageLabel(code) {
-  const l = LANGUAGES.find((x) => x.code === code);
-  if (!l) return String(code || '');
-  const labels = {
-    fr: ['Japonais','Anglais','Français','Espagnol','Allemand','Italien','Portugais','Russe','Chinois','Coréen','Arabe','Hindi'],
-    en: ['Japanese','English','French','Spanish','German','Italian','Portuguese','Russian','Chinese','Korean','Arabic','Hindi'],
-    es: ['Japonés','Inglés','Francés','Español','Alemán','Italiano','Portugués','Ruso','Chino','Coreano','Árabe','Hindi'],
-    de: ['Japanisch','Englisch','Französisch','Spanisch','Deutsch','Italienisch','Portugiesisch','Russisch','Chinesisch','Koreanisch','Arabisch','Hindi'],
-    ja: ['日本語','英語','フランス語','スペイン語','ドイツ語','イタリア語','ポルトガル語','ロシア語','中国語','韓国語','アラビア語','ヒンディー語'],
-    zh: ['日语','英语','法语','西班牙语','德语','意大利语','葡萄牙语','俄语','中文','韩语','阿拉伯语','印地语'],
-  };
-  const index = LANGUAGES.indexOf(l);
-  return labels[language()][index] || l.label;
-}
-
-module.exports = { LANGUAGES, normalizeLang, trackLangCode, pickTrackByLanguage, languageLabel };
+module.exports = { LANGUAGES, normalizeLang, trackLangCode, pickTrackByLanguage };

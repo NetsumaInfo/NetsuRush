@@ -115,7 +115,7 @@ async function main() {
     const dir = modelDir(selectedSearch);
     if (dir) saveConfig({ siglipDir: dir, siglipModel: selectedSearch, siglipModelId: selectedSearch });
   }
-  saveConfig({ setupModules: selectedModules, setupModels: selected, setupCompletedAt: new Date().toISOString(), home: NR_HOME });
+  saveConfig({ setupModules: selectedModules, setupModels: selected, setupCompletedAt: new Date().toISOString() });
   emit({ pct: 100, stage: 'done', count });
 }
 

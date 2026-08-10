@@ -1,6 +1,6 @@
 // Vocabulaire partagé de Paramètres › Stockage : icône et famille de chaque type de cache.
 // `fmtBytes` vient d'optimizeShared — même problème, même formateur (pas de second exemplaire).
-import { HardDrive, Image, Film, AudioLines, FlaskConical, Lasso, Scissors, Captions, Sparkles, Images, SmilePlus } from "lucide-react";
+import { Image, Film, AudioLines, FlaskConical, Lasso, Scissors, Captions, Sparkles, Images, SmilePlus } from "lucide-react";
 import type { ComponentType, CSSProperties } from "react";
 import { CACHE_KIND_LIST, type CacheKind } from "@/lib/bridge";
 
@@ -24,31 +24,29 @@ export const KIND_ICON: Record<CacheKind, IconCmp> = {
   faces: SmilePlus,
 };
 
-export const STORAGE_ICON = HardDrive;
-
 /** Types stockés en base plutôt qu'en fichiers. Ils n'ont pas de suivi d'usage par entrée → pas
  *  d'auto-purge possible (l'UI le dit au lieu de proposer un réglage inerte). Miroir de
  *  cacheDb.DB_KINDS (core). */
-export const DB_KINDS: CacheKind[] = ["scenes", "transcripts", "embeddings", "indexThumbs", "faces"];
+const DB_KINDS: CacheKind[] = ["scenes", "transcripts", "embeddings", "indexThumbs", "faces"];
 export const isDbKind = (k: CacheKind) => DB_KINDS.includes(k);
 
 /** Types en base qui appartiennent quand même à la famille des APERÇUS : leur contenu se refabrique
  *  en quelques secondes d'ffmpeg, sans modèle ni GPU. Les ranger avec les analyses coûteuses laissait
  *  croire qu'on perdait des heures de calcul en vidant 150 Mo de vignettes. Miroir de
  *  cacheDb.REUSABLE_DB_KINDS (core, qui fait foi). */
-export const DB_REUSABLE_KINDS: CacheKind[] = ["indexThumbs"];
+const DB_REUSABLE_KINDS: CacheKind[] = ["indexThumbs"];
 
 /** Analyses coûteuses à recalculer : les types en base moins ceux qui relèvent des aperçus. */
 export const isDurableKind = (k: CacheKind) => isDbKind(k) && !DB_REUSABLE_KINDS.includes(k);
 
 /** Fichiers de travail utiles seulement pendant l'app ouverte. Le core les place sous une racine
  * unique supprimée à la fermeture et au boot suivant après crash. */
-export const SESSION_KINDS: CacheKind[] = ["voice", "upscaleTest", "roto"];
+const SESSION_KINDS: CacheKind[] = ["voice", "upscaleTest", "roto"];
 export const isSessionKind = (k: CacheKind) => SESSION_KINDS.includes(k);
 
 /** Types dont la régénération coûte cher (heures de GPU) → confirmation renforcée avant purge.
  *  `indexThumbs` en est EXCLU : un simple passage d'indexation les régénère à l'ffmpeg, sans modèle. */
-export const EXPENSIVE_KINDS: CacheKind[] = ["embeddings", "faces", "transcripts"];
+const EXPENSIVE_KINDS: CacheKind[] = ["embeddings", "faces", "transcripts"];
 export const isExpensive = (kinds: CacheKind[] | undefined) => !!kinds && kinds.some((k) => EXPENSIVE_KINDS.includes(k));
 
 /** Teinte d'un type : icône de sa rangée et segment de la barre de répartition.
@@ -74,7 +72,3 @@ export const KIND_TINT: Record<CacheKind, string> = {
   transcripts: "var(--color-ok)",
   faces: "var(--color-fg)",
 };
-
-const GB = 1024 * 1024 * 1024;
-export const gbToBytes = (gb: number) => gb * GB;
-export const bytesToGb = (b: number) => b / GB;

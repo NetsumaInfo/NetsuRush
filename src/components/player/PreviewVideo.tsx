@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApp } from "@/store";
 import { IS_REMOTE } from "@/lib/remote";
-import { subscribeScrollFast, getScrollFast } from "@/components/rushes/cutStudioShared";
 
 // Aperçu vidéo hover/lecture-auto PARTAGÉ par les grilles rush (SceneCard) et recherche (ResultCard).
-// Monté seulement quand la carte joue → seuls ces éléments s'abonnent au signal de scroll.
 // `play()` est appelé EXPLICITEMENT (pas seulement `autoPlay`) : dans WebView2 un <video autoPlay>
 // fraîchement monté ne démarre pas toujours seul → sans ce play() l'aperçu restait figé (bug search).
-// Pendant un flick (scroll rapide) on PAUSE l'élément (décode gelé → scroll fluide) ; scroll lent ou
-// arrêt → reprise. L'élément reste monté : la lecture démarre toujours, jamais bloquée par le scroll.
+// La lecture n'est JAMAIS suspendue par le défilement : les aperçus continuent de jouer pendant
+// qu'on parcourt la grille. Une pause au flick avait été essayée — elle rendait la grille figée
+// pendant le scroll, exactement ce qu'on ne veut pas. La fluidité vient d'ailleurs : DOM léger hors
+// écran, aucun backdrop-filter au-dessus d'une vidéo, nombre de lectures plafonné.
 export function PreviewVideo({
-  url, label, onError, className, audible = false,
+  url, label, onError, className, audible = false, paused = false,
 }: {
   url: string;
   label: string;
@@ -19,6 +19,11 @@ export function PreviewVideo({
   // Cette carte est-elle SURVOLÉE ? Le son ne joue QUE sur la carte sous la souris : les aperçus en
   // lecture automatique (jusqu'à ~24 simultanés) restent muets → pas de cacophonie. Défaut muet.
   audible?: boolean;
+  // La carte ne doit plus jouer (sortie d'écran, créneau rendu) mais on garde l'élément MONTÉ :
+  // détruire puis recréer un élément média coûte un chargement + une init de décodeur, et au
+  // défilement ça se produisait des dizaines de fois par seconde. Ici on met en pause et on
+  // s'efface derrière la vignette. Cf. useSceneCardMedia.
+  paused?: boolean;
 }) {
   let decodedUrl = url;
   try { decodedUrl = decodeURIComponent(url); } catch { /* malformed proxy URL: inspect raw value */ }
@@ -32,7 +37,6 @@ export function PreviewVideo({
   // est synchrone avant la peinture → aucune frame intermédiaire avec l'ancien `ready` (zéro flash).
   const [prevUrl, setPrevUrl] = useState(url);
   if (url !== prevUrl) { setPrevUrl(url); setReady(false); }
-  const fast = useSyncExternalStore(subscribeScrollFast, getScrollFast);
   const hoverVolume = useApp((s) => s.hoverVolume);
   const hoverMuted = useApp((s) => s.hoverMuted);
   // Volume des grands lecteurs à 0 = MUET GLOBAL de l'app : il coupe aussi les aperçus au survol.
@@ -49,11 +53,14 @@ export function PreviewVideo({
     // `muted` est piloté impérativement (l'attribut JSX reste constant = autoplay toujours autorisé).
     v.volume = hoverVolume;
     v.muted = !wantSound;
-    if (fast) { v.pause(); return; }
+    // Rejouer un élément DÉJÀ en lecture relance inutilement le pipeline : on ne touche à l'état de
+    // lecture que sur un vrai changement (l'effet re-tourne aussi pour un simple réglage de volume).
+    if (paused) { if (!v.paused) v.pause(); return; }
+    if (!v.paused) return;
     const p = v.play();
     // Chromium peut bloquer un autoplay AVEC son → repli muet puis relecture (jamais d'aperçu figé).
     if (p && typeof p.catch === "function") p.catch(() => { v.muted = true; v.play().catch(() => {}); });
-  }, [fast, wantSound, hoverVolume, animatedWebp]);
+  }, [paused, wantSound, hoverVolume, animatedWebp]);
   if (animatedWebp) {
     return (
       <img
@@ -64,7 +71,7 @@ export function PreviewVideo({
         alt={label}
         onError={onError}
         onLoad={() => setReady(true)}
-        style={{ opacity: ready ? 1 : 0 }}
+        style={{ opacity: ready && !paused ? 1 : 0 }}
         className={className ?? "absolute inset-0 h-full w-full object-cover"}
       />
     );
@@ -82,9 +89,10 @@ export function PreviewVideo({
       // de plus AVANT la première image, à chaque carte qui démarre. L'élément n'est monté que
       // lorsqu'on a DÉCIDÉ de lire (cf. showVideo) — il n'y a donc rien à économiser à ne pas charger.
       preload="auto"
+      disablePictureInPicture
       onError={onError}
       onLoadedData={() => setReady(true)}
-      style={{ opacity: ready ? 1 : 0 }}
+      style={{ opacity: ready && !paused ? 1 : 0 }}
       className={`transition-opacity duration-150 ${className ?? "absolute inset-0 h-full w-full object-cover"}`}
     />
   );

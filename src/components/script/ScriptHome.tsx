@@ -18,6 +18,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { isTyping } from "@/lib/shortcuts";
 import type { ScriptDocMeta } from "@/lib/bridge";
 import { ScriptSettings } from "./ScriptSettings";
+import { BetaNotice } from "@/components/common/BetaNotice";
 import { fmtDuration } from "./scriptShared";
 import type { useScriptPersistence } from "./useScriptPersistence";
 import { DocCard } from "./home/DocCard";
@@ -104,6 +105,8 @@ export function ScriptHome({ project, scope, onSetScope, persistence }: Props) {
           </Tooltip>
         </div>
       </header>
+
+      <BetaNotice module="script" />
 
       {showSettings && (
         <section className="rounded-lg border border-border bg-card px-4 py-2">

@@ -6,8 +6,6 @@ export { basename };
 
 const PAGE = 80;   // plans affichés par lot (vignettes chargées paresseusement → modal instantané)
 
-export type ShotBrowser = ReturnType<typeof useShotBrowser>;
-
 // État + logique de navigation des plans (médias indexés → clip → grille paginée).
 // Extrait du composant pour garder ReferencePicker fin (état regroupé hors du corps).
 export function useShotBrowser() {

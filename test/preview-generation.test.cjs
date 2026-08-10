@@ -310,7 +310,7 @@ test('offers thumbnails a single quality step instead of a height, and keeps the
 test('never shows a stale native player surface after its React owner is gone', () => {
   const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'player', 'useNativePlayerSurface.ts'), 'utf8');
   assert.match(source, /const ownsSurface = \(\) => alive && lease === nativeSurfaceLease/);
-  assert.match(source, /if \(ownsSurface\(\)\) return nativePlayer\.show\(\)/);
+  assert.match(source, /if \(!ownsSurface\(\)\) return;[\s\S]*return nativePlayer\.show\(\)/);
   assert.doesNotMatch(source, /\.then\(\(\) => nativePlayer\.show\(\)\)/);
 });
 

@@ -79,5 +79,17 @@
     "addToDictionary": "Add to dictionary",
     "ignoreOnce": "Ignore in this session",
     "replaceAll": "Replace all {{count}} occurrences"
+  },
+  "beta": {
+    "title": "Module in beta",
+    "body": "Features are still missing, others will change. I'm looking for testers: tell me what breaks and what you need.",
+    "discord": "Join the Discord",
+    "feedback": "Report a problem",
+    "dismiss": "Hide"
+  },
+  "report": {
+    "action": "Report this error",
+    "sent": "Sent, thanks!",
+    "saved": "Sending failed. Message saved."
   }
 }

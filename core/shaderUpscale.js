@@ -267,8 +267,8 @@ async function mapConcurrent(items, limit, fn) {
 // de sortie par job. Le renderer parallélise les sources ; ici, une source unique peut paralléliser
 // ses plans avec la même limite explicite de concurrence.
 async function runShaderUpscale(event, opts) {
-  const { input, shader = 'artcnn_c4f32', scale = 2, codec = 'hevc_nvenc',
-    quality = 20, preset = 'slow', bitDepth = 8, profile = null, audio = 'copy', abr = 192, audioTrack = 0,
+  const { input, shader = 'artcnn_c4f32', scale = 2,
+    quality = 20, preset = 'slow', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true,
     outDir, segments, whole, importBack, baseName, outputName, savePath, parallel = false, concurrency = 2 } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };

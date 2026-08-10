@@ -32,7 +32,6 @@
     "none": "No collection"
   },
   "sidePanel": {
-    "trim": "Trim shot",
     "export": "Export"
   },
   "range": {
@@ -97,41 +96,6 @@
     "gallery": "Gallery",
     "grid": "Grid",
     "compact": "Compact"
-  },
-  "trim": {
-    "theShot": "the shot",
-    "title": "Trim \"{{name}}\"",
-    "play": "Play",
-    "pause": "Pause",
-    "playKey": "Play (Space)",
-    "pauseKey": "Pause (Space)",
-    "playSelection": "Play selection",
-    "playSelectionHint": "Play selection (in → out)",
-    "gotoStart": "Go to start",
-    "prevFrame": "Previous frame",
-    "prevFrameHint": "Prev. frame (← · Shift = −1 s)",
-    "nextFrame": "Next frame",
-    "nextFrameHint": "Next frame (→ · Shift = +1 s)",
-    "gotoEnd": "Go to end",
-    "markIn": "Mark in",
-    "markOut": "Mark out",
-    "zoomOut": "Zoom out",
-    "zoomOutHint": "Zoom out (window ×2)",
-    "zoomIn": "Zoom in",
-    "zoomInHint": "Zoom in (window ÷2)",
-    "fitSelection": "Fit selection",
-    "fitAll": "Whole clip",
-    "images": "Image sequence",
-    "wave": "Waveform",
-    "waveHint": "Audio waveform",
-    "none": "None",
-    "image": "frame {{n}}",
-    "duration": "Duration",
-    "framesShort": "{{n}} fr",
-    "startLabel": "In",
-    "endLabel": "Out",
-    "reset": "Reset",
-    "apply": "Apply trim"
   },
   "detail": {
     "shotWord": "Shot",

@@ -12,10 +12,10 @@ import { hostBuildTimeline, isAdobeHost } from "@/lib/host";
 import { useApp } from "@/store";
 import { coerceTimelineTarget, getActiveExportProfile } from "@/features/export/profiles";
 
-export type TargetValue = string;
+type TargetValue = string;
 
 /** Bloc de montage : un plan d'une source, borné en frames (`outFrame` absent = jusqu'à la fin). */
-export interface TimelineBlock {
+interface TimelineBlock {
   filePath: string;
   inFrame?: number;
   outFrame?: number | null;

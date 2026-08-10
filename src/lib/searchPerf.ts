@@ -34,7 +34,7 @@ export const MAX_PATCHES_CHOICES = [128, 192, 256, 384, 512, 768, 1024];
 
 const STORAGE_KEY = "nr-search-perf.v1";
 
-export function normalizeSearchPerf(raw: unknown): SearchPerfSettings {
+function normalizeSearchPerf(raw: unknown): SearchPerfSettings {
   const value = (raw && typeof raw === "object" ? raw : {}) as Partial<SearchPerfSettings>;
   const patches = Number(value.maxPatches);
   return {

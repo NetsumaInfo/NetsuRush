@@ -10,7 +10,6 @@ import {
   TextCursorInput, SquareStack, RefreshCw, Trash2,
 } from "lucide-react";
 import { NAV } from "@/components/nav";
-import { onGridScroll } from "@/components/rushes/cutStudioShared";
 import { useApp, type TabId } from "@/store";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
@@ -145,7 +144,7 @@ function ViewItems({ tab }: { tab: TabId }) {
 // `remote` = rendu dans le panneau CEP Adobe (iframe) : pas de fenêtre OS à épingler ni de rail
 // latéral → ces items disparaissent, remplacés par un « Recharger » (seul moyen de recharger l'app
 // dans l'iframe sans repasser par la barre du panneau).
-export function SharedAppItems({ tab, remote = false }: { tab: TabId; remote?: boolean }) {
+function SharedAppItems({ tab, remote = false }: { tab: TabId; remote?: boolean }) {
   const { t } = useTranslation("shell");
   const s = useApp.getState();
   return (
@@ -189,7 +188,7 @@ export function ViewContextMenu({ children, remote = false }: { children: ReactN
   return (
     <ContextMenu>
       <ContextMenuTrigger
-        render={<main className="min-h-0 min-w-0 flex-1 overflow-auto" onScroll={onGridScroll} />}
+        render={<main className="min-h-0 min-w-0 flex-1 overflow-auto" />}
         onContextMenuCapture={(e: React.MouseEvent) => {
           const ed = editableFrom(e.target);
           elRef.current = ed;

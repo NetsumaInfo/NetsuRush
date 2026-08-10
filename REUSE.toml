@@ -41,7 +41,6 @@ path = [
   "README.md",
   "docs/licensing.md",
   "docs/the-anime-scripter-models.md",
-  "build-exe.bat",
   "run.bat"
 ]
 precedence = "override"

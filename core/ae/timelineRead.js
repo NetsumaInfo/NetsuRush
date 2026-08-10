@@ -166,7 +166,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
   }
 
   // Lit la fenêtre source d'un plan de timeline imbriquée (frames de la timeline imbriquée).
-  async function nestedWindow(it, sub, tlS, tlE) {
+  async function nestedWindow(it, sub) {
     const subStart = parseInt(await sub.GetStartFrame(), 10) || 0;
     let pSrcIn = parseInt(await it.GetSourceStartFrame(), 10);
     if (!Number.isFinite(pSrcIn)) { try { pSrcIn = parseInt(await it.GetLeftOffset(), 10); } catch (_) {} }
@@ -205,7 +205,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
             const nm = await safeName(it);
             const sub = depth < 2 ? await findTimelineByName(nm) : null;
             if (sub && nm !== (await srcTl.GetName())) {
-              const { subStart, winStart } = await nestedWindow(it, sub, tlS, tlE);
+              const { subStart, winStart } = await nestedWindow(it, sub);
               // Mode 'render' (1er niveau). Timeline imbriquée rendue EN ENTIER par Resolve en 1 fichier
               // (vidéo OU audio seule), au format choisi. Fallback : aplatir ses plans si le rendu échoue.
               if (nestedMode === 'render' && !group && !place) {

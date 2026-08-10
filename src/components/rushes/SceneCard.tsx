@@ -26,8 +26,9 @@ function SceneCardImpl({
   onAddToTimeline?: () => Promise<{ ok: boolean; error?: string }>; addLabel?: string; pos: string; dur: string;
 }) {
   const { t } = useTranslation("derush");
-  const { rootRef, thumb, url, showVideo, hovered, onVideoError, enter, leave } =
+  const { rootRef, thumb, url, showVideo, videoPaused, near, hovered, onVideoError, enter, leave } =
     useSceneCardMedia({ seg, index, clipPath, cols, play, getProxy, bustProxy });
+  const playing = showVideo && !videoPaused;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
 
@@ -69,46 +70,63 @@ function SceneCardImpl({
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
       {/* la vignette reste la couche de fond : quand la <video> se démonte (Lecture auto coupée),
           elle est déjà là dessous → aucun flash noir. La <video> se superpose le temps de jouer. */}
-      {thumb && <img src={thumb} alt={t("shared.shotPreview", { n: index + 1 })} className="absolute inset-0 h-full w-full object-cover" />}
+      {thumb && <img src={thumb} alt={t("shared.shotPreview", { n: index + 1 })} decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
+
       {showVideo && (
-        <PreviewVideo url={url!} label={t("shared.shotPreview", { n: index + 1 })} onError={onVideoError} audible={hovered} />
+        <PreviewVideo url={url!} label={t("shared.shotPreview", { n: index + 1 })} onError={onVideoError} audible={hovered} paused={videoPaused} />
       )}
       <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20">
-        {!showVideo && <Play className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />}
+        {!playing && <Play className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />}
       </div>
-      <span className="absolute left-1.5 top-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums">#{index + 1}</span>
-      <SelectToggle selected={selected} onToggle={() => onToggle()} />
-      {/* ranger ce plan dans une collection (bibliothèque) — directement sur la vignette */}
-      <Tooltip>
-        <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${ACT_VIS}`} />}>
-          <AddToCollection
-            shots={[{ path: clipPath, name: clipName, in: seg.in, out: seg.out, inFrame: seg.inFrame, outFrame: seg.outFrame, srcFrames }]}
-            className="nr-chip shadow-md p-1 text-white/80 hover:text-primary"
-          />
-        </TooltipTrigger>
-        <TooltipContent>{t("shared.rangeInCollection")}</TooltipContent>
-      </Tooltip>
 
-      {/* ajouter ce plan à la timeline ouverte (reste visible tant qu'un ajout est en cours/terminé) */}
-      {onAddToTimeline && (
+      {/* Tout ce qui est VISIBLE AU REPOS est rendu sans condition : le numéro et la durée sont
+          apparus « après coup » tant qu'ils attendaient l'observateur de proximité — la vignette,
+          elle, sort du cache renderer dès le premier rendu, donc l'image arrivait avant ses
+          pastilles. Seul l'habillage RÉVÉLÉ AU SURVOL (donc invisible au repos) est différé : c'est
+          lui qui coûte cher (infobulles et popover Base UI, une racine par carte). */}
+      <span className="absolute left-1.5 top-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums">#{index + 1}</span>
+      {near ? (
         <Tooltip>
-          <TooltipTrigger render={<button type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
-            className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : ACT_VIS} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
-            {adding === "busy" ? <Spinner className="size-3.5" />
-              : adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
-              : <Download className="h-3.5 w-3.5" />}
+          <TooltipTrigger render={<span className="absolute bottom-1.5 right-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums" />}>
+            {dur}
           </TooltipTrigger>
-          <TooltipContent>{addLabel ?? t("shared.sendToTimeline")}</TooltipContent>
+          <TooltipContent>{t("sceneCard.startAt", { pos })}</TooltipContent>
         </Tooltip>
+      ) : (
+        <span className="absolute bottom-1.5 right-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums">{dur}</span>
       )}
-      <Tooltip>
-        <TooltipTrigger render={<span className="absolute bottom-1.5 right-1.5 rounded nr-chip shadow-md px-1.5 py-0.5 text-[10px] font-medium tabular-nums" />}>
-          {dur}
-        </TooltipTrigger>
-        <TooltipContent>{t("sceneCard.startAt", { pos })}</TooltipContent>
-      </Tooltip>
+      {/* La pastille de sélection est visible quand la carte est cochée → elle ne peut pas attendre
+          la bande, sinon une carte cochée hors bande perdrait sa coche. */}
+      {(near || selected) && <SelectToggle selected={selected} onToggle={() => onToggle()} />}
+
+      {near && (<>
+        {/* ranger ce plan dans une collection (bibliothèque) — directement sur la vignette */}
+        <Tooltip>
+          <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${ACT_VIS}`} />}>
+            <AddToCollection
+              shots={[{ path: clipPath, name: clipName, in: seg.in, out: seg.out, inFrame: seg.inFrame, outFrame: seg.outFrame, srcFrames }]}
+              className="nr-chip shadow-md p-1 text-white/80 hover:text-primary"
+            />
+          </TooltipTrigger>
+          <TooltipContent>{t("shared.rangeInCollection")}</TooltipContent>
+        </Tooltip>
+
+        {/* ajouter ce plan à la timeline ouverte (reste visible tant qu'un ajout est en cours/terminé) */}
+        {onAddToTimeline && (
+          <Tooltip>
+            <TooltipTrigger render={<button type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
+              className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : ACT_VIS} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
+              {adding === "busy" ? <Spinner className="size-3.5" />
+                : adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                : <Download className="h-3.5 w-3.5" />}
+            </TooltipTrigger>
+            <TooltipContent>{addLabel ?? t("shared.sendToTimeline")}</TooltipContent>
+          </Tooltip>
+        )}
+      </>)}
       </ContextMenuTrigger>
       {/* Clic droit : lire / (dé)sélectionner / envoyer à la timeline. */}
+      {near && (
       <ContextMenuContent className="min-w-48">
         <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>
         <ContextMenuItem onClick={() => onToggle()}>
@@ -123,6 +141,7 @@ function SceneCardImpl({
           </>
         )}
       </ContextMenuContent>
+      )}
     </ContextMenu>
   );
 }

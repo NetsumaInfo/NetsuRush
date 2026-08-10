@@ -74,10 +74,6 @@ def torch_device(torch: Any, forced: str | None = None) -> str:
     return "cpu"
 
 
-def accelerated_torch(torch: Any, forced: str | None = None) -> bool:
-    return torch_backend(torch, forced) != "cpu"
-
-
 def empty_torch_cache(torch: Any, backend: str | None = None) -> None:
     active = backend or torch_backend(torch)
     try:

@@ -38,7 +38,7 @@ export function subscribeThumbs(cb: () => void): () => void {
 }
 // Insère un lot de vignettes (path,time → url) et notifie UNE seule fois (pas par entrée) → les
 // cartes abonnées re-lisent le cache en O(cartes), pas O(cartes × entrées).
-export function primeThumbs(entries: { path: string; uri: string; time?: number }[]): void {
+function primeThumbs(entries: { path: string; uri: string; time?: number }[]): void {
   let added = false;
   for (const e of entries) {
     const k = key(e.path, e.time);

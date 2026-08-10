@@ -16,7 +16,7 @@ const fsp = require('node:fs/promises');
 const fs = require('node:fs');
 const ffmpeg = require('../ffmpeg');
 const { CONFIG, NR_HOME } = require('../config');
-const { videoEncodeArgs, hwCandidates, listCodecs, hwVendor } = require('./encodeArgs');
+const { videoEncodeArgs, hwCandidates, listCodecs } = require('./encodeArgs');
 
 // Incrémenter à chaque changement des arguments d'encodage ou de la logique de sonde → invalide les
 // caches déjà écrits chez les utilisateurs.

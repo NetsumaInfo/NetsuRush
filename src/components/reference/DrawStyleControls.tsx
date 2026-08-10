@@ -9,7 +9,7 @@ import { NumberSpin } from "./inspectorControls";
 import type { DashStyle, RouteStyle } from "./referenceShared";
 
 // Paliers de largeur (px écran) — fin / moyen / épais.
-export const WIDTH_PRESETS = [2, 5, 9];
+const WIDTH_PRESETS = [2, 5, 9];
 
 function Item({ value, label, children }: { value: string; label: string; children: React.ReactNode }) {
   return (

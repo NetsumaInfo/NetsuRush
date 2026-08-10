@@ -1,6 +1,6 @@
 import type { PreviewGenerationSettings, ThumbPreset } from "@/lib/bridge";
 
-export const PREVIEW_SETTINGS_KEY = "nr.preview-generation.v2";
+const PREVIEW_SETTINGS_KEY = "nr.preview-generation.v2";
 export const PREVIEW_SETTINGS_EVENT = "nr:preview-settings";
 
 export const DEFAULT_PREVIEW_SETTINGS: PreviewGenerationSettings = {
@@ -20,7 +20,7 @@ export const DEFAULT_PREVIEW_SETTINGS: PreviewGenerationSettings = {
 };
 
 const HEIGHTS = new Set([360, 480, 520, 720]);
-export const THUMB_PRESETS: ThumbPreset[] = ["light", "balanced", "sharp"];
+const THUMB_PRESETS: ThumbPreset[] = ["light", "balanced", "sharp"];
 const THUMB_PRESET_SET = new Set<string>(THUMB_PRESETS);
 
 // Les miniatures se réglaient par {hauteur, qualité} ; elles se règlent par CRAN. Un réglage déjà
@@ -39,7 +39,7 @@ type PartialPreviewSettings = {
   thumbnail?: Partial<PreviewGenerationSettings["thumbnail"]> & { height?: unknown; quality?: unknown };
 };
 
-export function normalizePreviewSettings(value: unknown): PreviewGenerationSettings {
+function normalizePreviewSettings(value: unknown): PreviewGenerationSettings {
   const raw: PartialPreviewSettings = value && typeof value === "object" ? value as PartialPreviewSettings : {};
   const proxy = raw.proxy ?? {};
   const thumbnail = raw.thumbnail ?? {};

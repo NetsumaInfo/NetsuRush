@@ -24,7 +24,7 @@ export interface MediaSpec {
 
 // Mode d'ouverture du panneau Footages : navigation libre, onglet Vidéos, onglet Audio (source
 // UNIQUE d'ajout de médias — plus aucun picker à droite), ou recherche par paroles.
-export type FootagesMode = "browse" | "videos" | "audio" | "paroles";
+type FootagesMode = "browse" | "videos" | "audio" | "paroles";
 
 interface ScriptState {
   doc: ScriptDoc | null;

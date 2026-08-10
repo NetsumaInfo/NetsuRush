@@ -10,7 +10,7 @@ export type SpellLang = "fr" | "en";
 // Langues avec dictionnaire embarqué. Les autres (es/de/ja/zh) retombent sur le correcteur natif :
 // les dictionnaires Hunspell correspondants sont sous licence GPL, incompatible avec la distribution
 // de l'app — mieux vaut un soulignement natif qu'un dictionnaire qu'on n'a pas le droit d'embarquer.
-export const SPELL_LANGS: readonly SpellLang[] = ["fr", "en"] as const;
+const SPELL_LANGS: readonly SpellLang[] = ["fr", "en"] as const;
 
 export function supportedSpellLang(language: string | null | undefined): SpellLang | null {
   const base = String(language || "").slice(0, 2).toLowerCase();

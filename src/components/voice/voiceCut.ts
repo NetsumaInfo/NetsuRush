@@ -8,7 +8,7 @@ import { combineFillerSpans, repetitionSpans } from "./voiceFillers";
 export interface CutSegment { in: number; out: number }
 
 // Fusionne les plages triées qui se touchent ou se chevauchent (gap ≤ epsilon).
-export function mergeSpans(spans: { in: number; out: number }[], epsilon = 0.04): CutSegment[] {
+function mergeSpans(spans: { in: number; out: number }[], epsilon = 0.04): CutSegment[] {
   const sorted = [...spans].filter((s) => s.out > s.in).sort((a, b) => a.in - b.in);
   const out: CutSegment[] = [];
   for (const s of sorted) {
@@ -20,7 +20,7 @@ export function mergeSpans(spans: { in: number; out: number }[], epsilon = 0.04)
 }
 
 // Suppression des silences : on conserve les segments PARLÉS (Silero).
-export function speechSegments(speech: VoiceSpan[]): CutSegment[] {
+function speechSegments(speech: VoiceSpan[]): CutSegment[] {
   return mergeSpans(speech.map((s) => ({ in: s.start, out: s.end })));
 }
 
@@ -118,10 +118,6 @@ export type CutType = "speech" | "silence" | "filler" | "repeat";
 export const CUT_RESOLVE_COLOR: Record<CutType, string> = {
   speech: "Green", silence: "Navy", filler: "Orange", repeat: "Teal",
 };
-export const CUT_TYPE_LABEL: Record<CutType, string> = {
-  speech: "Parole", silence: "Silence", filler: "Hésitation", repeat: "Répétition",
-};
-
 // Partitionne [0,dur] en segments NON CHEVAUCHANTS typés (priorité repeat>filler>silence>speech) →
 // timeline DaVinci où chaque clip porte la couleur de son type. On garde TOUT le clip, juste découpé
 // et coloré : on supprime/édite ensuite dans Resolve à l'œil.

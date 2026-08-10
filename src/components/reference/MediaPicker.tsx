@@ -12,7 +12,7 @@ import { SelectCheck } from "@/components/common/selectable";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type Clip, type DetectModel, type Scene, type SearchHit } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { MODELS, PRESETS, fmt, onGridScroll, type Segment } from "@/components/rushes/cutStudioShared";
+import { MODELS, PRESETS, fmt, type Segment } from "@/components/rushes/cutStudioShared";
 import { DetectionAdvancedSettings } from "@/components/rushes/DetectionAdvancedSettings";
 import { DetectionModelSelect } from "@/components/rushes/DetectionControls";
 import { detectionOptionsFor, detectionThreshold } from "@/lib/detection";
@@ -86,7 +86,7 @@ function MediaCardImpl({
     [clipPath, inSec, outSec, key, proxies],
   );
   const bustProxy = useCallback(() => { proxies.delete(key); }, [key, proxies]);
-  const { rootRef, thumb, url, showVideo, hovered, onVideoError, enter, leave } =
+  const { rootRef, thumb, url, showVideo, videoPaused, hovered, onVideoError, enter, leave } =
     useSceneCardMedia({ seg, index, clipPath, cols, play: false, getProxy, bustProxy });
   const shown = thumb;
 
@@ -107,8 +107,8 @@ function MediaCardImpl({
       )}
     >
       {!shown && <Skeleton className="absolute inset-0 rounded-none" />}
-      {shown && <img src={shown} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />}
-      {showVideo && <PreviewVideo url={url!} label="" onError={onVideoError} audible={hovered} />}
+      {shown && <img src={shown} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
+      {showVideo && <PreviewVideo url={url!} label="" onError={onVideoError} audible={hovered} paused={videoPaused} />}
       {badge && <span className="absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">{badge}</span>}
       {footer && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tabular-nums text-white">{footer}</span>}
       {selectable && selected && <SelectCheck />}
@@ -249,7 +249,7 @@ function CutsView({ clip, proxies, board, onClose }: {
           {/* Le défilement vit sur un wrapper SÉPARÉ ; la grille reste auto-height. Une grille à la
               fois flex-1 ET scroller casse l'estimation content-visibility (rangées effondrées →
               cartes en lamelles). */}
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1" onScroll={onGridScroll}>
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <div className="grid grid-cols-3 gap-2">
               {cuts.map((c, i) => (
                 <MediaCard
@@ -316,7 +316,7 @@ function SearchView({ proxies, board }: { proxies: Map<string, string>; board: R
       ) : (
         <>
           <div className="px-0.5 text-xs text-muted-foreground">{t("media.results", { count: hits.length })}{sel.size ? t("media.selectedSuffix", { count: sel.size }) : ""}</div>
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1" onScroll={onGridScroll}>
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <div className="grid grid-cols-3 gap-2">
               {hits.map((h, i) => (
                 <MediaCard
@@ -431,7 +431,7 @@ export function MediaPicker({
             {filtered.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">{t("media.noRushes")}</p>
             ) : (
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1" onScroll={onGridScroll}>
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
                 <div className="grid grid-cols-2 gap-2">
                   {filtered.map((c, i) => {
                     const dur = parseDur(c.duration);

@@ -32,7 +32,6 @@
     "none": "Keine Sammlung"
   },
   "sidePanel": {
-    "trim": "Einstellung zuschneiden",
     "export": "Export"
   },
   "range": {
@@ -97,41 +96,6 @@
     "gallery": "Galerie",
     "grid": "Raster",
     "compact": "Kompakt"
-  },
-  "trim": {
-    "theShot": "die Einstellung",
-    "title": "„{{name}}“ zuschneiden",
-    "play": "Wiedergabe",
-    "pause": "Pause",
-    "playKey": "Wiedergabe (Leertaste)",
-    "pauseKey": "Pause (Leertaste)",
-    "playSelection": "Auswahl abspielen",
-    "playSelectionHint": "Auswahl abspielen (Anfang → Ende)",
-    "gotoStart": "Zum Anfang",
-    "prevFrame": "Vorheriges Bild",
-    "prevFrameHint": "Bild zurück (← · Umschalt = −1 s)",
-    "nextFrame": "Nächstes Bild",
-    "nextFrameHint": "Bild vor (→ · Umschalt = +1 s)",
-    "gotoEnd": "Zum Ende",
-    "markIn": "Anfang hier",
-    "markOut": "Ende hier",
-    "zoomOut": "Auszoomen",
-    "zoomOutHint": "Auszoomen (Fenster ×2)",
-    "zoomIn": "Einzoomen",
-    "zoomInHint": "Einzoomen (Fenster ÷2)",
-    "fitSelection": "Auswahl einpassen",
-    "fitAll": "Ganzes Rohmaterial",
-    "images": "Bildsequenz",
-    "wave": "Waveform",
-    "waveHint": "Audio-Waveform",
-    "none": "Keine",
-    "image": "Bild {{n}}",
-    "duration": "Dauer",
-    "framesShort": "{{n}} Bd.",
-    "startLabel": "Anfang",
-    "endLabel": "Ende",
-    "reset": "Zurücksetzen",
-    "apply": "Zuschnitt anwenden"
   },
   "detail": {
     "shotWord": "Einstellung",

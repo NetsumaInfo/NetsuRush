@@ -8,10 +8,10 @@ import {
   type ConsoleEntry, type LogLevel,
 } from "./appLog";
 
-export type { ConsoleEntry, LogLevel };
+export type { ConsoleEntry };
 export {
   getConsoleSnapshot, subscribeConsole, subscribeErrorCount, markConsoleSeen, serializeConsole,
-  countLevels, logError, logWarn, logInfo, logCaught, describeError,
+  countLevels, logCaught,
 } from "./appLog";
 
 let initialized = false;

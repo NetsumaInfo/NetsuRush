@@ -15,7 +15,7 @@ export type SettingsPage = "account" | "interface" | "media" | "ai" | "export" |
 
 type Icon = ComponentType<{ className?: string }>;
 
-export interface SettingsTabDef {
+interface SettingsTabDef {
   id: string;
   icon: Icon;
   /** Rendu pleine largeur, hors de la colonne de lecture (pont Adobe : cartes de statut + snapshot). */

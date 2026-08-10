@@ -98,7 +98,7 @@ export interface BoardPrefs {
   drawKeys: DrawKeys;      // raccourcis clavier des outils de dessin (personnalisables) — outil → lettre
   shortcutKeys: ShortcutKeys; // raccourcis-commandes du board (personnalisables) — action → combo
 }
-export const PREFS_DEFAULT: BoardPrefs = {
+const PREFS_DEFAULT: BoardPrefs = {
   favFonts: [],
   defaultFont: HANDWRITING_FONT,
   defaultFontSize: 28,

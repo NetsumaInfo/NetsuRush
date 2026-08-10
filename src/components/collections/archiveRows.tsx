@@ -92,7 +92,7 @@ export function ArchivePane({
 }
 
 /** Réglages effectifs : les défauts de NetsuLab, écrasés par ce que la collection a enregistré. */
-export const archiveUpSettings = (value: CollectionArchiveUpscale | undefined): UpSettings =>
+const archiveUpSettings = (value: CollectionArchiveUpscale | undefined): UpSettings =>
   ({ ...DEFAULT_SETTINGS, ...value });
 
 /** Bouton Activé/Désactivé de l'upscale — vit dans l'en-tête du volet, comme celui de l'archive. */

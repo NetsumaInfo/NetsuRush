@@ -9,6 +9,11 @@ pub struct PlayerStatus {
     pub duration: f64,
     pub volume: f64,
     pub speed: f64,
+    /// File mpv currently has loaded. A surface compares it with its own media: the single player
+    /// is shared, so it can be showing someone else's clip under this surface.
+    pub path: String,
+    /// Current owner of the player (see `AppState::player_claim`).
+    pub claim: u64,
 }
 
 #[derive(Debug, Serialize)]

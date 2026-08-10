@@ -18,7 +18,7 @@ export type ModelTask =
   | "matte-video" | "matte-image" | "segment" | "object-removal";
 
 // Licence : permissive (usage commercial OK) vs NC (non-commercial, add-on optionnel badgé).
-export type ModelLicense =
+type ModelLicense =
   | "MIT" | "Apache-2.0" | "BSD" | "BSD-3-Clause" | "WTFPL"
   | "CC-BY-4.0" | "CC-BY-NC-4.0" | "CC-BY-NC-SA-4.0"
   | "CC-BY" | "OpenRAIL" | "OpenMDW" | "GPL-3.0" | "NC"
@@ -28,10 +28,10 @@ export type ModelLicense =
   | "bundled" | "unknown";
 
 // Tier : light (bas VRAM, défaut sûr) / balanced (défaut recommandé) / heavy (gros GPU, opt-in).
-export type ModelTier = "light" | "balanced" | "heavy";
+type ModelTier = "light" | "balanced" | "heavy";
 
 // Type de contenu préféré (pré-réglé par le sélecteur anime/réel/mix). undefined = agnostique.
-export type ModelContent = "anime" | "real" | "any";
+type ModelContent = "anime" | "real" | "any";
 
 export interface ModelEntry {
   id: string;
@@ -289,10 +289,6 @@ export const TASK_ORDER: ModelTask[] = [
 
 export const modelById = (id: string): ModelEntry | undefined => MODEL_REGISTRY.find((m) => m.id === id);
 export const modelsForTask = (task: ModelTask): ModelEntry[] => MODEL_REGISTRY.filter((m) => m.task === task);
-// Sélection courante d'une tâche : ce qu'on montre avant d'ouvrir le mode avancé.
-export const curatedModels = (models: readonly ModelEntry[]): ModelEntry[] => models.filter((m) => !m.advanced);
-// Noyau minimal pré-coché à l'install (l'app doit pouvoir faire quelque chose).
-export const minBaseModels = (): ModelEntry[] => MODEL_REGISTRY.filter((m) => m.minBase);
 
 export const fmtSize = (bytes: number): string =>
   bytes >= GB ? `${(bytes / GB).toFixed(1)} Go` : `${Math.round(bytes / MB)} Mo`;

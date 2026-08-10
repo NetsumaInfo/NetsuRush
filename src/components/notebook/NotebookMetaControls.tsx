@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { NotebookKind, NotebookLanguage, NotebookMeta } from "./notebookShared";
 
-export const NOTEBOOK_KINDS: NotebookKind[] = ["notes", "project", "script", "research", "journal"];
-export const NOTEBOOK_LANGUAGES: NotebookLanguage[] = ["fr", "en", "es", "de", "ja", "zh"];
+const NOTEBOOK_KINDS: NotebookKind[] = ["notes", "project", "script", "research", "journal"];
+const NOTEBOOK_LANGUAGES: NotebookLanguage[] = ["fr", "en", "es", "de", "ja", "zh"];
 
-export const NotebookMetaControls = forwardRef<HTMLInputElement, { notebook: NotebookMeta }>(function NotebookMetaControls({ notebook }, ref) {
+const NotebookMetaControls = forwardRef<HTMLInputElement, { notebook: NotebookMeta }>(function NotebookMetaControls({ notebook }, ref) {
   const { t } = useTranslation("notebook");
   const rename = useApp((s) => s.nbRenameNotebook);
   const [title, setTitle] = useState(notebook.title);

@@ -13,10 +13,6 @@ import {
 } from "@/lib/modules";
 import { defaultSettingsTabs, settingsPageDef, type SettingsPage } from "@/features/settings/nav";
 
-// La carte des Paramètres (pages + onglets) vit dans features/settings/nav : le store n'en garde que
-// la sélection. Réexport pour les composants qui typaient déjà `SettingsPage` depuis le store.
-export type { SettingsPage };
-
 export interface ShellSlice {
   tab: TabId;
   setTab: (t: TabId) => void;

@@ -532,6 +532,8 @@ pub fn run() {
             nr_attach_file_paths,
             nr_core_port,
             player::commands::control::player_load,
+            player::commands::control::player_load_at,
+            player::commands::control::player_claim,
             player::commands::control::player_play,
             player::commands::control::player_pause,
             player::commands::control::player_toggle_pause,

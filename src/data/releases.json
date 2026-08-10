@@ -1,5 +1,28 @@
 [
   {
+    "id": "netsurush-0.3.6",
+    "version": "0.3.6",
+    "date": "2026-08-10",
+    "title": {
+      "fr": "Améliorations et fiabilité",
+      "en": "Improvements and reliability"
+    },
+    "highlights": {
+      "fr": [
+        "La stabilité du lecteur natif, des aperçus vidéo et des interactions avec les médias a été renforcée.",
+        "Les collections, la recherche, les transferts vers les logiciels hôtes et plusieurs réglages gagnent en fiabilité.",
+        "Le suivi des mises à jour et les messages d'installation sont plus clairs pendant les opérations longues.",
+        "Un grand nettoyage retire les composants, styles, dépendances et API internes devenus inutiles."
+      ],
+      "en": [
+        "Native player, video preview, and media interaction stability has been improved.",
+        "Collections, search, host transfers, and several settings are now more reliable.",
+        "Update progress and installation messages are clearer during long operations.",
+        "A large cleanup removes obsolete components, styles, dependencies, and internal APIs."
+      ]
+    }
+  },
+  {
     "id": "netsurush-0.3.5",
     "version": "0.3.5",
     "date": "2026-08-09",

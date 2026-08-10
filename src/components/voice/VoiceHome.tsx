@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { BetaNotice } from "@/components/common/BetaNotice";
 import { VOICE_PRESETS, matchVoicePreset } from "./voicePresets";
 import { VoiceClipList } from "./VoiceClipList";
 import { VoiceBatchBar } from "./VoiceBatchBar";
@@ -103,6 +104,8 @@ export function VoiceHome({
           </Button>
         </div>
       </div>
+
+      <BetaNotice module="voice" />
 
       {/* Préréglage appliqué au lot (mêmes curseurs que l'éditeur — affinables dedans). */}
       <div className="space-y-1.5">

@@ -82,7 +82,6 @@ export interface ExportSlice {
   exportBusy: string | null;
   exportProgress: number;
   exportError: string | null;
-  exportNotice: string | null;
 
   setActiveExportProfile: (id: string) => void;
   setCardActionProfile: (id: string) => void;
@@ -101,7 +100,6 @@ export interface ExportSlice {
 
   setExportProgress: (pct: number) => void;
   setExportBusy: (m: string | null) => void;
-  setExportNotice: (m: string | null) => void;
   setExportError: (m: string | null) => void;
 }
 
@@ -127,7 +125,6 @@ export const createExportSlice: StateCreator<AppState, [], [], ExportSlice> = (s
     exportBusy: null,
     exportProgress: 0,
     exportError: null,
-    exportNotice: null,
 
     setActiveExportProfile: (id) => {
       if (!get().exportProfiles.some((p) => p.id === id)) return;
@@ -204,7 +201,6 @@ export const createExportSlice: StateCreator<AppState, [], [], ExportSlice> = (s
 
     setExportProgress: (pct) => set({ exportProgress: pct }),
     setExportBusy: (exportBusy) => set({ exportBusy }),
-    setExportNotice: (exportNotice) => set({ exportNotice }),
     setExportError: (exportError) => set({ exportError }),
   };
 };

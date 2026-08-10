@@ -81,7 +81,3 @@ export const SectionFold = Extension.create({
     return [plugin];
   },
 });
-
-// À appeler après un changement de foldedIds venu d'AILLEURS que le chevron (chargement de doc…)
-// pour reconstruire les décorations sans mutation du doc.
-export const FOLD_REFRESH_META = REFRESH;

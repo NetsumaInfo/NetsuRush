@@ -63,24 +63,28 @@ impl MpvChildWindow {
     }
 
     /// Position the embedded child. x/y are client-area coordinates of the parent window.
-    pub fn set_geometry(&self, x: i32, y: i32, w: i32, h: i32) {
+    /// Returns true when the window was actually moved (mpv resizes its own video output window
+    /// in response, which blanks the current frame — the caller may need to force a redraw).
+    pub fn set_geometry(&self, x: i32, y: i32, w: i32, h: i32) -> bool {
         if w > 0 && h > 0 {
             if !self.is_valid_window() {
-                return;
+                return false;
             }
             if self.is_fullscreen() || self.is_detached() {
-                return;
+                return false;
             }
             unsafe {
                 if let Ok(mut saved) = self.saved_geometry.lock() {
                     if *saved == (x, y, w, h) {
-                        return;
+                        return false;
                     }
                     *saved = (x, y, w, h);
                 }
                 MoveWindow(self.hwnd, x, y, w, h, 1);
+                return true;
             }
         }
+        false
     }
 
     /// Set absolute geometry when in detached mode (screen coordinates).

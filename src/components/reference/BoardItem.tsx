@@ -383,7 +383,7 @@ function TextNote({ item, editing }: { item: Item; editing: boolean }) {
 }
 
 // Style de rognage : l'élément média (taille 1/crop) translaté pour ne montrer que la région crop.
-export function cropStyle(c: NonNullable<Item["crop"]>): React.CSSProperties {
+function cropStyle(c: NonNullable<Item["crop"]>): React.CSSProperties {
   return {
     position: "absolute",
     left: 0,

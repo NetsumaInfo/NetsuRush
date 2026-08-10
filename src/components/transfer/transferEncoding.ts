@@ -12,8 +12,6 @@
 //  - Opus, MP3, FLAC, ALAC : Opus n'est pas muxé en MOV et aucun des trois logiciels ne le lit ;
 //    MP3 traîne un délai d'encodeur qui décale le son ; FLAC et ALAC ne sont pas importés par Premiere.
 import {
-  EXPORT_AUDIO_OPTIONS,
-  EXPORT_CONTAINER_OPTIONS,
   type ExportAudioMode,
   type ExportCodec,
   type ExportContainer,
@@ -32,9 +30,6 @@ export const NLE_CONTAINERS: ReadonlySet<ExportContainer> = new Set<ExportContai
 export const NLE_AUDIO: ReadonlySet<ExportAudioMode> = new Set<ExportAudioMode>([
   "copy", "aac_128", "aac", "aac_256", "aac_320", "pcm16", "pcm24",
 ]);
-
-export const NLE_CONTAINER_OPTIONS = EXPORT_CONTAINER_OPTIONS.filter((o) => NLE_CONTAINERS.has(o.value));
-export const NLE_AUDIO_OPTIONS = EXPORT_AUDIO_OPTIONS.filter((o) => NLE_AUDIO.has(o.value));
 
 type Option<T> = { value: T; label: string };
 type Group<T> = { options: Option<T>[] };

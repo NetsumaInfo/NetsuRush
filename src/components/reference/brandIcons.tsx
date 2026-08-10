@@ -14,7 +14,6 @@ import {
   siDribbble, siArtstation, siDeviantart, siFlickr, siPixiv, siSinaweibo, siBilibili,
   siVk, siKuaishou, siNiconico, siOdysee, siRumble, siPatreon, siLine, siWechat,
 } from "simple-icons";
-import type { BoardItem } from "./referenceShared";
 
 type SimplePath = { title: string; path: string };
 type IconProps = { className?: string; size?: number };
@@ -51,43 +50,43 @@ const StreamableIcon = glyph({
 });
 
 // Logos uniformes (glyphes pleins) — exportés au cas où d'autres vues veulent l'icône directe.
-export const YouTubeIcon = glyph(siYoutube);
-export const XIcon = glyph(siX);
-export const InstagramIcon = glyph(siInstagram);
-export const FacebookIcon = glyph(siFacebook);
-export const TikTokIcon = glyph(siTiktok);
-export const RedditIcon = glyph(siReddit);
-export const VimeoIcon = glyph(siVimeo);
-export const DailymotionIcon = glyph(siDailymotion);
-export const TwitchIcon = glyph(siTwitch);
-export const BlueskyIcon = glyph(siBluesky);
-export const ThreadsIcon = glyph(siThreads);
-export const SnapchatIcon = glyph(siSnapchat);
-export const PinterestIcon = glyph(siPinterest);
-export const TumblrIcon = glyph(siTumblr);
-export const MastodonIcon = glyph(siMastodon);
-export const DiscordIcon = glyph(siDiscord);
-export const TelegramIcon = glyph(siTelegram);
-export const WhatsAppIcon = glyph(siWhatsapp);
-export const SpotifyIcon = glyph(siSpotify);
-export const SoundCloudIcon = glyph(siSoundcloud);
-export const GitHubIcon = glyph(siGithub);
-export const BehanceIcon = glyph(siBehance);
-export const DribbbleIcon = glyph(siDribbble);
-export const ArtStationIcon = glyph(siArtstation);
-export const DeviantArtIcon = glyph(siDeviantart);
-export const FlickrIcon = glyph(siFlickr);
-export const PixivIcon = glyph(siPixiv);
-export const WeiboIcon = glyph(siSinaweibo);
-export const BilibiliIcon = glyph(siBilibili);
-export const VkIcon = glyph(siVk);
-export const KuaishouIcon = glyph(siKuaishou);
-export const NiconicoIcon = glyph(siNiconico);
-export const OdyseeIcon = glyph(siOdysee);
-export const RumbleIcon = glyph(siRumble);
-export const PatreonIcon = glyph(siPatreon);
-export const LineIcon = glyph(siLine);
-export const WeChatIcon = glyph(siWechat);
+const YouTubeIcon = glyph(siYoutube);
+const XIcon = glyph(siX);
+const InstagramIcon = glyph(siInstagram);
+const FacebookIcon = glyph(siFacebook);
+const TikTokIcon = glyph(siTiktok);
+const RedditIcon = glyph(siReddit);
+const VimeoIcon = glyph(siVimeo);
+const DailymotionIcon = glyph(siDailymotion);
+const TwitchIcon = glyph(siTwitch);
+const BlueskyIcon = glyph(siBluesky);
+const ThreadsIcon = glyph(siThreads);
+const SnapchatIcon = glyph(siSnapchat);
+const PinterestIcon = glyph(siPinterest);
+const TumblrIcon = glyph(siTumblr);
+const MastodonIcon = glyph(siMastodon);
+const DiscordIcon = glyph(siDiscord);
+const TelegramIcon = glyph(siTelegram);
+const WhatsAppIcon = glyph(siWhatsapp);
+const SpotifyIcon = glyph(siSpotify);
+const SoundCloudIcon = glyph(siSoundcloud);
+const GitHubIcon = glyph(siGithub);
+const BehanceIcon = glyph(siBehance);
+const DribbbleIcon = glyph(siDribbble);
+const ArtStationIcon = glyph(siArtstation);
+const DeviantArtIcon = glyph(siDeviantart);
+const FlickrIcon = glyph(siFlickr);
+const PixivIcon = glyph(siPixiv);
+const WeiboIcon = glyph(siSinaweibo);
+const BilibiliIcon = glyph(siBilibili);
+const VkIcon = glyph(siVk);
+const KuaishouIcon = glyph(siKuaishou);
+const NiconicoIcon = glyph(siNiconico);
+const OdyseeIcon = glyph(siOdysee);
+const RumbleIcon = glyph(siRumble);
+const PatreonIcon = glyph(siPatreon);
+const LineIcon = glyph(siLine);
+const WeChatIcon = glyph(siWechat);
 
 // Domaine enregistrable (ou hôte complet) → icône du réseau. Les sous-domaines sont gérés par
 // `endsWith` côté lookup, donc on ne liste que le domaine racine.
@@ -158,11 +157,4 @@ const BY_PROVIDER: Record<string, AnyIcon> = {
 };
 export function iconForProvider(provider: string): AnyIcon {
   return BY_PROVIDER[provider] ?? Globe;
-}
-
-// Icône d'un item lié. YouTube est un kind à part (ref = id vidéo, pas une URL) → icône directe ;
-// sinon (embed) on déduit du domaine de `ref` (= URL de la page d'origine).
-export function providerIcon(item: Pick<BoardItem, "kind" | "ref">): AnyIcon {
-  if (item.kind === "youtube") return YouTubeIcon;
-  return iconForLink(item.ref);
 }

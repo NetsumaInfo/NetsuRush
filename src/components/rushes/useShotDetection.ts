@@ -7,6 +7,7 @@ import { thumbTime } from "@/lib/utils";
 import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { detectionOptionsFor, detectionOptionsKey, detectionThreshold } from "@/lib/detection";
 import { createSmoothProgress } from "@/lib/smoothProgress";
+import { toast } from "@/components/ui/toast";
 import {
   nextSegId, modelLabel, resetPlaySlots, PRESETS, MODELS, type Segment,
 } from "./cutStudioShared";
@@ -77,8 +78,6 @@ export interface ShotDetection {
   setActive: React.Dispatch<React.SetStateAction<Segment | null>>;
   activeUrl: string | null;
   setActiveUrl: React.Dispatch<React.SetStateAction<string | null>>;
-  msg: string | null;
-  setMsg: React.Dispatch<React.SetStateAction<string | null>>;
   err: string | null;
   setErr: React.Dispatch<React.SetStateAction<string | null>>;
   preset: number;
@@ -137,7 +136,6 @@ export function useShotDetection(clipPath: string): ShotDetection {
   const optionsScope = useMemo(() => detectionOptionsKey(model, detectionOptions), [model, detectionOptions]);
   const threshold = detectionThreshold(model, PRESETS[preset].thr, detectionOptions);
   const [srcFrames, setSrcFrames] = useState(0);
-  const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const [active, setActive] = useState<Segment | null>(null);
@@ -239,7 +237,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
 
   async function detect() {
     useApp.getState().offerCloseForRam();
-    setDetecting(true); setProgress(0); setErr(null); setMsg(null);
+    setDetecting(true); setProgress(0); setErr(null);
     proxyCache.clear();
     proxyPendingRef.current.clear();
     // Filtre par chemin : plusieurs détections tournent en parallèle (batch/board) → ne prend que
@@ -261,7 +259,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
       if (segs.length === 0 && dur > 0) segs = [{ id: nextSegId(), in: 0, out: dur }];
       segs = applyEdits(segs, editsRef.current);   // rejoue les fusions/retraits gardés
       setSegments(segs);
-      setMsg(t("detection.shotsWithModel", { count: segs.length, model: modelLabel(model) }));
+      toast.ok(t("detection.shotsWithModel", { count: segs.length, model: modelLabel(model) }));
       warmThumbs(segs, r.fps || (r.frames && dur ? r.frames / dur : 0));
     } catch (e) { setErr(String(e)); }
     finally { off(); track.stop(); setDetecting(false); }
@@ -324,7 +322,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
     resetPlaySlots();
     // Vide l'état du clip précédent avant le rechargement async du cache (clip/modèle changé).
     setSegments([]); setActive(null); setActiveUrl(null);
-    setMsg(null); setErr(null);
+    setErr(null);
     setCacheLoading(true);
     (async () => {
       const [exact, eres] = await Promise.all([
@@ -422,7 +420,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
   return {
     info, duration, segments, setSegments, srcFrames, detecting, cacheLoading, progress,
     active, setActive, activeUrl, setActiveUrl,
-    msg, setMsg, err, setErr, preset, setPreset, model, setModel,
+    err, setErr, preset, setPreset, model, setModel,
     proxyCache, getProxy, playScene, detect,
     hasEdits, recordMerge, recordRemoval, clearEdits, undoEdit, redoEdit, canUndo, canRedo,
   };

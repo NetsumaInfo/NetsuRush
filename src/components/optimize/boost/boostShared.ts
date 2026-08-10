@@ -12,7 +12,7 @@ export type { AdobeApp };
 /** Première génération où Premiere Pro fait d'UXP le standard : ExtendScript n'y reçoit plus de
  *  travaux et son support s'arrête en septembre 2026, donc tout ce qui passe par le QE DOM peut
  *  cesser de répondre d'un build à l'autre. After Effects n'a pas d'UXP et n'est pas concerné. */
-export const UXP_ERA_YEAR = 2026;
+const UXP_ERA_YEAR = 2026;
 
 const FIRST_YEAR_ALIGNED_MAJOR = 22; // depuis 22.x, le numéro majeur EST le millésime moins 2000
 const YEAR_IN_PATH = /\b(20\d\d)\b/;

@@ -46,12 +46,12 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
           {f.thumb
             ? <img src={f.thumb} alt="" className="h-full w-full object-cover" />
             : <div className="flex h-full items-center justify-center text-muted-foreground"><ScanFace className="h-8 w-8 opacity-40" /></div>}
-          <span className="absolute right-1 top-1 rounded bg-black/55 px-1 text-[10px] tabular-nums text-white/90 backdrop-blur">{f.count}</span>
+          <span className="absolute right-1 top-1 rounded bg-black/70 px-1 text-[10px] tabular-nums text-white/90">{f.count}</span>
           {f.char ? (
             <span className="absolute inset-x-0 bottom-0 truncate px-1.5 py-1 text-center text-xs font-semibold text-white"
               style={{ background: f.char.color || "rgba(0,0,0,.72)" }}>{f.char.name}</span>
           ) : (
-            <span className="absolute bottom-1 left-1 rounded bg-black/50 px-1 py-px text-[9px] leading-none text-white/70 backdrop-blur">
+            <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1 py-px text-[9px] leading-none text-white/70">
               {f.domain === "anime" ? t("domain.anime") : t("domain.real")}
             </span>
           )}

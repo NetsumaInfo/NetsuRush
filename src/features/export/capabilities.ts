@@ -77,11 +77,11 @@ export function useExportCapabilities(): ExportCapabilities {
   return caps;
 }
 
-export function isCodecSupported(caps: ExportCapabilities, codec: ExportCodec): boolean {
+function isCodecSupported(caps: ExportCapabilities, codec: ExportCodec): boolean {
   return !caps.codecs || caps.codecs.has(codec);
 }
 
-export function supportedCodecOptions(caps: ExportCapabilities): { value: ExportCodec; label: string }[] {
+function supportedCodecOptions(caps: ExportCapabilities): { value: ExportCodec; label: string }[] {
   return EXPORT_CODEC_OPTIONS.filter((o) => isCodecSupported(caps, o.value));
 }
 
@@ -91,7 +91,7 @@ const MODE_SUFFIX: Partial<Record<ExportEncoderMode, string>> = {
   qsv: "_qsv",
 };
 
-export function isCodecSupportedForEncoder(
+function isCodecSupportedForEncoder(
   caps: ExportCapabilities,
   codec: ExportCodec,
   mode: ExportEncoderMode,

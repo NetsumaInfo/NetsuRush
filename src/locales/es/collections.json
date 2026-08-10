@@ -32,7 +32,6 @@
     "none": "Ninguna colección"
   },
   "sidePanel": {
-    "trim": "Recortar el plano",
     "export": "Exportación"
   },
   "range": {
@@ -97,41 +96,6 @@
     "gallery": "Galería",
     "grid": "Cuadrícula",
     "compact": "Compacto"
-  },
-  "trim": {
-    "theShot": "el plano",
-    "title": "Recortar «{{name}}»",
-    "play": "Reproducir",
-    "pause": "Pausa",
-    "playKey": "Reproducir (Espacio)",
-    "pauseKey": "Pausa (Espacio)",
-    "playSelection": "Reproducir la selección",
-    "playSelectionHint": "Reproducir la selección (inicio → fin)",
-    "gotoStart": "Ir al inicio",
-    "prevFrame": "Fotograma anterior",
-    "prevFrameHint": "Fotograma ant. (← · Mayús = −1 s)",
-    "nextFrame": "Fotograma siguiente",
-    "nextFrameHint": "Fotograma sig. (→ · Mayús = +1 s)",
-    "gotoEnd": "Ir al final",
-    "markIn": "Inicio aquí",
-    "markOut": "Fin aquí",
-    "zoomOut": "Alejar",
-    "zoomOutHint": "Alejar (ventana ×2)",
-    "zoomIn": "Acercar",
-    "zoomInHint": "Acercar (ventana ÷2)",
-    "fitSelection": "Ajustar a la selección",
-    "fitAll": "Todo el clip",
-    "images": "Secuencia de imágenes",
-    "wave": "Waveform",
-    "waveHint": "Waveform de audio",
-    "none": "Ninguno",
-    "image": "imagen {{n}}",
-    "duration": "Duración",
-    "framesShort": "{{n}} fot",
-    "startLabel": "Inicio",
-    "endLabel": "Fin",
-    "reset": "Restablecer",
-    "apply": "Aplicar el recorte"
   },
   "detail": {
     "shotWord": "Plano",

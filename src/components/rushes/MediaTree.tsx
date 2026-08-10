@@ -10,11 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useApp } from "@/store";
 import { nr, type Clip, type LibraryFolder } from "@/lib/bridge";
-import { ClipCard, ClipGrid, CLIP_DND } from "./ClipCard";
+import { ClipGrid, CLIP_DND } from "./ClipCard";
 import { FolderNameDialog } from "@/components/collections/FolderNameDialog";
 import { LIB_ROOT, folderPath, buildClipTree, countTreeClips, type ClipTreeNode } from "./libraryShared";
-
-export { ClipCard, ClipGrid };
 
 type TreeNode = ClipTreeNode;
 

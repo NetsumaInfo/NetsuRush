@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Bot } from "lucide-react";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
+import { BetaNotice } from "@/components/common/BetaNotice";
 import { ChatHeader } from "./ChatHeader";
 import { ChatSettings } from "./ChatSettings";
 import { ChatComposer } from "./ChatComposer";
@@ -50,6 +51,7 @@ export function ChatPanel() {
     <div className="flex h-full flex-col">
       <ChatHeader onSettings={() => setShowSettings((s) => !s)} />
       {showSettings && <ChatSettings onClose={() => setShowSettings(false)} />}
+      <BetaNotice module="chat" className="mx-4 mt-4" />
 
       <div ref={scrollRef} className="flex-1 overflow-auto">
         {messages.length === 0 ? (

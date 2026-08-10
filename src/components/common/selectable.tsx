@@ -44,7 +44,11 @@ export function SelectToggle({ selected, onToggle, label, className }: {
         "absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full border transition outline-none focus-visible:ring-2 focus-visible:ring-primary",
         selected
           ? "border-primary bg-primary text-primary-foreground opacity-100"
-          : "border-white/70 bg-black/40 text-white/85 opacity-0 backdrop-blur group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100",
+          // Fond opaque, pas de `backdrop-blur` : cette pastille est posée sur des vignettes qui
+          // JOUENT (grilles Derush / Collections / Recherche). Un backdrop-filter au-dessus d'une
+          // <video> fait recopier et flouter le fond à chaque image décodée, par carte → défilement
+          // haché dès que la lecture auto est active.
+          : "border-white/70 bg-black/65 text-white/85 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100",
         className,
       )}
     >

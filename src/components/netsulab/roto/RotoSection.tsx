@@ -10,7 +10,7 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 // Cinq étapes, dans l'ordre du travail. Neuf tiroirs éparpillaient les mêmes réglages : le modèle
 // de segmentation, les objets et les points décrivent UNE seule chose (ce qu'on isole), et le
 // modèle de matte et les curseurs de retouche façonnent UN seul alpha, l'un après l'autre.
-export const ROTO_SECTIONS = ["select", "track", "view", "mask", "output"] as const;
+const ROTO_SECTIONS = ["select", "track", "view", "mask", "output"] as const;
 export type RotoSectionId = (typeof ROTO_SECTIONS)[number];
 
 const LS_KEY = "nr.roto.sections";

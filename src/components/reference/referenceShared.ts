@@ -377,16 +377,15 @@ export {
   youtubeId,
   giphyGifUrl,
   parseVideoEmbed,
-  embedSrc,
   EMBED_PLAYER_PROVIDERS,
   DOWNLOADABLE_EMBED_PROVIDERS,
   isVideoUrl,
   isImageUrl,
 } from "./embeds";
-export type { EmbedProvider, EmbedInfo } from "./embeds";
+export type { EmbedProvider } from "./embeds";
 
 // --- Mesure du ratio natif (partagée ingestion / envoi externe) ------------------------------
-export const MAX_INITIAL = 420; // côté max d'un item fraîchement posé (px board)
+const MAX_INITIAL = 420; // côté max d'un item fraîchement posé (px board)
 
 export function fitSize(natW: number, natH: number, max = MAX_INITIAL): { w: number; h: number } {
   if (!natW || !natH) return { w: max, h: Math.round(max * 0.5625) };

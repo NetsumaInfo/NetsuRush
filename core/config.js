@@ -9,8 +9,6 @@ const os = require('os');
 
 const fsp = fs.promises;
 
-const PLUGIN_ID = 'com.netsurush.app';
-
 // Dossier de données ÉCRIVABLE de l'app (config + runtime provisionné au 1er lancement). En bundle
 // l'installeur NSIS `currentUser` pose le code en lecture seule → nr.config.json (chemins absolus du
 // venv/ffmpeg/poids) et le runtime téléchargé vivent ici, hors du dossier d'install. Surchargeable
@@ -259,7 +257,7 @@ async function fileReady(p) {
 const yieldLoop = () => new Promise((r) => setImmediate(r));
 
 module.exports = {
-  PLUGIN_ID, CONFIG, ffBin, transcribeCli, ML_BACKEND, ONNX_BACKEND, TRANSCRIBE_BACKEND,
+  CONFIG, ffBin, transcribeCli, ML_BACKEND, ONNX_BACKEND, TRANSCRIBE_BACKEND,
   PYTHON, RESOLVE_PYTHON, DETECT_ENV, COOKIES_BROWSER,
   VOICE_DIR, DATA_DIR, UPSCALE_TEST_DIR, ROTO_DIR, SEQ_DIR, SESSION_CACHE_ROOT,
   SHADER_DIR, RTX_DIR, RTX_EXE, RTX_DLLS, rtxBin, NR_HOME, CONFIG_PATH, WALLPAPER_DIR,

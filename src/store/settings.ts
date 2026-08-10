@@ -193,7 +193,7 @@ function readLang(): LangCode {
   return detectDefaultLang();
 }
 
-export function applyTheme(theme: ThemeId): void {
+function applyTheme(theme: ThemeId): void {
   if (typeof document === "undefined") return;
   document.documentElement.setAttribute("data-theme", theme);
 }

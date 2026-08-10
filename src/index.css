@@ -64,11 +64,9 @@ html {
   }
 }
 
-/* scrollbars discrets */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-}
+/* Barres de défilement discrètes. On passe UNIQUEMENT par les pseudo-éléments `::-webkit-*` :
+   déclarer `scrollbar-width`/`scrollbar-color` fait gagner le rendu standard de Chromium, qui
+   ignore alors ces règles et rend une barre plus large, avec ses boutons fléchés. */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -77,12 +75,16 @@ html {
   background: var(--color-border);
   border-radius: 8px;
 }
-
-/* placeholder des blocs éditables vides (module Script) */
-.script-block:empty::before {
-  content: attr(data-placeholder);
-  color: var(--color-muted);
-  pointer-events: none;
+/* Styler `::-webkit-scrollbar` sans toucher aux boutons laisse Chromium dessiner les flèches
+   natives en haut et en bas de la piste : deux carrés qui élargissent la gouttière et rongent la
+   largeur de la grille. */
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 @theme inline {
@@ -264,7 +266,7 @@ html.nr-wallpaper-on.dark {
    vient d'un ancêtre TRANSFORMÉ, qui devient le bloc conteneur d'un `background-attachment: fixed` —
    corrigé à la source dans App.tsx, où la sous-nav se centre en `flex` et non en `-translate-x-1/2`.
    Aucun élément portant ces classes ne doit vivre sous un ancêtre transformé. */
-html.nr-wallpaper-on :is(.nr-wp-surface, .bg-card, .bg-sidebar, .bg-background):not(:where(
+html.nr-wallpaper-on :is(.nr-wp-surface, .bg-card, .bg-background):not(:where(
   button, a, input, textarea, select, label,
   [data-slot="button"], [data-slot="toggle-group-item"], [data-slot="toggle"],
   [data-slot="toggle-group"], [data-slot="tabs-list"], [data-slot="select-trigger"],
@@ -994,12 +996,6 @@ button:not(:disabled):active,
 [data-slot="button"]:not(:disabled):active {
   transform: scale(0.99);
   transition: transform 90ms ease-out;
-}
-
-/* Idle « vivant » : les icônes de chargement déjà en .animate-spin tournent ;
-   on ajoute un léger respir aux pastilles de statut au survol de leur ligne. */
-.nr-pulse {
-  animation: thin-pulse 2s ease-in-out infinite;
 }
 
 /* Points de « réflexion » du chat (typing indicator) */

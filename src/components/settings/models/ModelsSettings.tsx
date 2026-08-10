@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ErrorReportButton } from "@/components/common/ErrorReportButton";
 import { useModelManager, type ModelManager } from "./useModelManager";
 import { useSearchModel, type SearchModelPicker } from "./useSearchModel";
 import { isModelCompatible, useCompatibility } from "@/hooks/useCompatibility";
@@ -242,7 +243,17 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
             <TooltipContent>{hint}</TooltipContent>
           </Tooltip>
         )}
-        {err && <p className="mt-0.5 flex items-center gap-1 text-xs text-destructive"><AlertTriangle className="h-3 w-3" /> {err}</p>}
+        {err && (
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <p className="flex min-w-0 items-center gap-1 text-xs text-destructive"><AlertTriangle className="h-3 w-3 shrink-0" /> {err}</p>
+            <ErrorReportButton
+              error={err}
+              subject={`Échec du téléchargement du modèle « ${m.label} » (${m.id})`}
+              module="settings"
+              moduleLabel="Paramètres"
+            />
+          </div>
+        )}
       </div>
 
       <div className="shrink-0 text-right text-xs tabular-nums text-muted-foreground">

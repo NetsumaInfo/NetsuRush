@@ -12,7 +12,7 @@ import type { AppState } from "./index";
 import { basename, type DerushView, type DerushSection } from "./types";
 
 // Un rush dans la file de découpe en lot.
-export interface BatchDetectItem {
+interface BatchDetectItem {
   path: string;
   name: string;
   status: "pending" | "running" | "done" | "error";
@@ -20,7 +20,7 @@ export interface BatchDetectItem {
   scenes?: number;        // nb de plans détectés (status done)
   error?: string;
 }
-export interface BatchDetectState {
+interface BatchDetectState {
   items: BatchDetectItem[];
   running: boolean;
   model: DetectModel;

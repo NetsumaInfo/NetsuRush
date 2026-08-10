@@ -5,8 +5,8 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import type { DOMOutputSpec } from "@tiptap/pm/model";
 
-export const DIVIDER_STYLES = ["line", "dashed", "dots", "stars"] as const;
-export type DividerStyle = (typeof DIVIDER_STYLES)[number];
+const DIVIDER_STYLES = ["line", "dashed", "dots", "stars"] as const;
+type DividerStyle = (typeof DIVIDER_STYLES)[number];
 
 export const DividerNode = Node.create({
   name: "divider",

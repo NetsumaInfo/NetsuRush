@@ -13,6 +13,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { nr } from "@/lib/bridge";
+import { BetaNotice } from "@/components/common/BetaNotice";
 import { Section, Row } from "@/components/ae/aeShared";
 import { hostShort } from "@/lib/host";
 import { useTransfer } from "./useTransfer";
@@ -46,6 +47,8 @@ export function TransferPanel() {
         </h1>
         <p className="text-xs text-muted-foreground">{t("header.subtitle")}</p>
       </header>
+
+      <BetaNotice module="transfer" />
 
       <TransferHostPicker
         from={from} to={to} setFrom={setFrom} setTo={setTo}

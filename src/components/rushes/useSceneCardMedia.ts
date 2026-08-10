@@ -6,6 +6,7 @@ import { acquirePlaySlot, type Segment } from "./cutStudioShared";
 import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
+import { retainPausedVideo } from "@/lib/previewVideoPool";
 
 // Bandes d'anticipation, en hauteurs de carte. La vignette est un fichier déjà encodé servi en HTTP
 // (cache disque + ETag) : on peut la demander très loin devant. Le proxy coûte un ffmpeg, donc sa
@@ -13,10 +14,22 @@ import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
 const THUMB_ROWS_AHEAD = 8;
 const VIDEO_ROWS_AHEAD = 2.5;
 const THUMB_MIN_MARGIN_PX = 1200;
+// La bande proxy doit toujours couvrir la bande de LECTURE : en densité forte une rangée fait moins
+// de 100 px, et 2,5 rangées seraient plus étroites que l'avance de lecture ci-dessous.
+const VIDEO_MIN_MARGIN_PX = 420;
+// AVANCE DE LECTURE. Une carte prend son créneau AVANT d'entrer dans le viewport : le temps qu'elle
+// arrive à l'écran, son proxy est chargé et l'aperçu tourne déjà. Piloter la lecture sur la
+// visibilité STRICTE (ce qui était fait) laissait voir une vignette figée le temps du créneau, du
+// chargement et du premier décodage — la grille avait l'air arrêtée pendant qu'on défilait.
+const PLAY_LEAD_PX = 320;
 // Une carte doit rester dans la bande ce temps-là avant qu'on encode son proxy. Un défilement rapide
 // traverse la bande en bien moins : aucune demande n'est émise pendant un flick, donc le pont /rpc
 // reste libre pour les vignettes, qui sont ce qu'on regarde en défilant.
 const PREFETCH_SETTLE_MS = 220;
+// Délai avant de DÉMONTER la <video> d'une carte sortie de la bande : un aller-retour de molette la
+// ramène en bien moins, et détruire/recréer un élément média coûte un chargement + une init de
+// décodeur.
+const VIDEO_RELEASE_MS = 400;
 
 interface SceneCardMediaOpts {
   seg: Segment;
@@ -32,7 +45,13 @@ interface SceneCardMedia {
   rootRef: React.RefObject<HTMLDivElement | null>;
   thumb: string | null;
   url: string | null;
+  /** L'élément <video> est MONTÉ (il peut être en pause : cf. `videoPaused`). */
   showVideo: boolean;
+  /** Monté mais à l'arrêt → masqué derrière la vignette. */
+  videoPaused: boolean;
+  /** La carte est assez proche de l'écran pour mériter son habillage (boutons, menus, pastilles).
+   *  Loin de l'écran, une carte ne rend QUE sa vignette : cf. le commentaire dans SceneCard. */
+  near: boolean;
   hovered: boolean;
   onVideoError: () => void;
   enter: () => void;
@@ -93,10 +112,10 @@ export function useSceneCardMedia({
     const stopThumb = observeViewport(el, Math.max(THUMB_MIN_MARGIN_PX, Math.round(h * THUMB_ROWS_AHEAD)), setNearThumb);
     // Proxy : bande COURTE (l'encode coûte un ffmpeg), assez large pour que la préchauffe soit
     // terminée à l'arrivée à l'écran. Le côté qu'on quitte est annulé (proxyCancel).
-    const stopVideo = observeViewport(el, Math.round(h * VIDEO_ROWS_AHEAD), setNearVideo);
-    // Strict (marge 0) → ne pilote la LECTURE que pour les cartes réellement à l'écran : la marge
-    // hors-vue ne vole pas de créneau aux visibles (sinon < toutes les visibles joueraient).
-    const stopVisible = observeViewport(el, 0, setVisible);
+    const stopVideo = observeViewport(el, Math.max(VIDEO_MIN_MARGIN_PX, Math.round(h * VIDEO_ROWS_AHEAD)), setNearVideo);
+    // Bande de LECTURE : courte avance sur le viewport, pour que la carte joue déjà quand elle
+    // apparaît. Le plafond de lecture auto compte cette avance (cf. autoplayCeiling).
+    const stopVisible = observeViewport(el, PLAY_LEAD_PX, setVisible);
     return () => { stopThumb(); stopVideo(); stopVisible(); };
   }, [cols]);
 
@@ -144,7 +163,31 @@ export function useSceneCardMedia({
   // La carte JOUE : survol (immédiat) ou créneau de lecture auto accordé (staggerReady, échelonné
   // HAUT D'ABORD).
   const wantVideo = nearVideo && (hovered || (play && staggerReady));
-  const showVideo = wantVideo && !!url;
+
+  // La <video> reste MONTÉE tant que la carte est dans la bande proxy, même quand elle cesse de
+  // jouer. Elle était démontée dès la sortie d'écran (ou dès le créneau rendu) : au défilement, la
+  // grille détruisait et recréait plusieurs dizaines d'éléments média par seconde — chacun un
+  // chargement HTTP plus une init de décodeur sur le thread principal. C'est ce qui hachait le
+  // défilement. Ici on met en PAUSE (l'élément s'efface derrière la vignette, cf. PreviewVideo) et
+  // on ne démonte qu'à la vraie sortie de bande, après un court délai anti-aller-retour.
+  const [held, setHeld] = useState(false);
+  if (wantVideo && url && !held) setHeld(true);
+  if (held && !url) setHeld(false);
+  useEffect(() => {
+    if (!held || nearVideo) return;
+    const t = setTimeout(() => setHeld(false), VIDEO_RELEASE_MS);
+    return () => clearTimeout(t);
+  }, [held, nearVideo]);
+
+  const showVideo = held && !!url;
+  const videoPaused = !wantVideo;
+
+  // Plafond global des <video> retenues en pause : Chromium cesse silencieusement de créer des
+  // lecteurs média au-delà d'une certaine quantité par frame.
+  useEffect(() => {
+    if (!showVideo || !videoPaused) return;
+    return retainPausedVideo(() => setHeld(false));
+  }, [showVideo, videoPaused]);
 
   // Génère/récupère le proxy (cache) en HAUTE priorité (la carte est dans le focus). Perte de focus /
   // démontage → proxyCancel (kill l'encode / jette de la file) → le créneau NVENC repart aux visibles.
@@ -217,5 +260,5 @@ export function useSceneCardMedia({
     setHovered(false);
   }
 
-  return { rootRef, thumb, url, showVideo, hovered, onVideoError, enter, leave };
+  return { rootRef, thumb, url, showVideo, videoPaused, near: nearThumb || hovered, hovered, onVideoError, enter, leave };
 }

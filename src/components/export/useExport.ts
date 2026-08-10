@@ -1,11 +1,13 @@
 // Hook partagé du flux « Télécharger » : applique le PROFIL ACTIF à une liste de plans.
 // Utilisé par le Derush (CutStudio) et la Recherche (SearchResults). Choisit le dossier de
-// sortie, appelle nr.exportClips, suit la progression SSE et remonte les messages d'état (store).
+// sortie, appelle nr.exportClips, suit la progression SSE, annonce la réussite en pastille et garde
+// l'erreur dans le store (les vues l'affichent tant qu'elle n'est pas levée).
 import { useEffect } from "react";
 import i18n from "@/i18n";
 import { useApp } from "@/store";
 import { nr, type ExportClipInput } from "@/lib/bridge";
 import { getActiveExportProfile, getExportProfileIssues } from "@/features/export/profiles";
+import { toast } from "@/components/ui/toast";
 
 interface DownloadArgs {
   clips: ExportClipInput[];
@@ -27,7 +29,6 @@ export function useExport() {
   const progress = useApp((s) => s.exportProgress);
   const setExportBusy = useApp((s) => s.setExportBusy);
   const setExportProgress = useApp((s) => s.setExportProgress);
-  const setExportNotice = useApp((s) => s.setExportNotice);
   const setExportError = useApp((s) => s.setExportError);
 
   useEffect(() => nr.onExportProgress((p) => setExportProgress(p.pct)), [setExportProgress]);
@@ -58,7 +59,6 @@ export function useExport() {
     // Tâche lourde → propose de fermer le logiciel de montage (libérer RAM/GPU).
     useApp.getState().offerCloseForRam();
     setExportError(null);
-    setExportNotice(null);
     setExportProgress(0);
     setExportBusy(shouldMerge ? i18n.t("export:notice.merging") : i18n.t("export:notice.exporting"));
 
@@ -68,7 +68,7 @@ export function useExport() {
     if (r.ok) {
       const n = r.files?.length ?? 0;
       const failed = r.failed ? i18n.t("export:notice.failedSuffix", { count: r.failed }) : "";
-      setExportNotice(i18n.t("export:notice.exported", { count: n, profile: profile.name, dir, failed }));
+      toast.ok(i18n.t("export:notice.exported", { count: n, profile: profile.name, dir, failed }));
       return { ok: true };
     }
     setExportError(r.error || i18n.t("export:notice.exportFailed"));

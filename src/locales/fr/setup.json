@@ -54,5 +54,9 @@
     "title": "Extension Adobe",
     "detected": "Détecté : {{apps}}",
     "hint": "installe le panneau NetsuRush et le garde à jour automatiquement."
+  },
+  "issues": {
+    "detected_one": "{{count}} problème détecté pendant l'installation.",
+    "detected_other": "{{count}} problèmes détectés pendant l'installation."
   }
 }

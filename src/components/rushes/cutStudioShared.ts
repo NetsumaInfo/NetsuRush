@@ -49,34 +49,46 @@ export const fmt = (t: number) => fmtTime(t, { hours: true });
 
 // Géométrie de la grille de plans — PARTAGÉE par le Découpage et les Collections (une seule
 // définition, sinon les deux grilles dérivent l'une de l'autre à la première retouche).
-// `cols` n'est PAS un nombre de colonnes mais une CIBLE de densité : on en dérive une largeur de
-// cellule bornée, la grille fait `auto-fill`, donc le nombre réel de colonnes suit la largeur
-// disponible (lecteur latéral ouvert, panneau CEP ~560 px, fenêtre épinglée).
-export const GRID_GAP = 12;   // gap-3
-const GRID_PAD = 8;           // px-1 de la zone défilante
+//
+// `cols` est un NOMBRE DE COLONNES, tenu quelle que soit la largeur : rétrécir la fenêtre ou ouvrir
+// le lecteur latéral rétrécit les vignettes, il n'en renvoie pas une à la ligne. La grille faisait
+// avant `auto-fill` sur une largeur de cellule bornée : la dernière carte tombait à la ligne dès
+// qu'on pinçait le panneau, et le réglage de densité ne décidait plus de rien.
+//
+// Seul garde-fou : une cellule ne descend pas sous MIN_CELL (illisible). En dessous on retire des
+// colonnes — c'est ce qui garde le panneau CEP (~560 px) et la fenêtre épinglée utilisables.
+const GRID_GAP = 12;   // gap-3
+const GRID_PAD = 12;          // pl-1 pr-2 de la zone défilante
+const MIN_CELL = 120;
+const MIN_CELL_NARROW = 96;   // vue étroite : on accepte plus petit pour garder des colonnes
 
 export function gridMetrics(width: number, cols: number, narrow = false) {
   if (!width) return { cell: 0, actualCols: cols, cellH: 0 };
   const inner = width - GRID_PAD;
-  // Vue étroite : cellule plafonnée (~190 px) pour TOUJOURS garder plusieurs colonnes, sinon une
-  // densité basse donne une carte géante pleine largeur.
-  const cell = narrow
-    ? Math.max(130, Math.min(190, inner / cols))
-    : Math.max(140, Math.min(320, inner / cols));
-  const actualCols = Math.max(1, Math.floor((inner + GRID_GAP) / (cell + GRID_GAP)));
+  const floor = narrow ? MIN_CELL_NARROW : MIN_CELL;
+  const cellFor = (n: number) => (inner - (n - 1) * GRID_GAP) / n;
+  let actualCols = Math.max(1, Math.floor(cols));
+  while (actualCols > 1 && cellFor(actualCols) < floor) actualCols--;
+  const cell = cellFor(actualCols);
   // Hauteur RÉELLE d'une carte (aspect-video) = largeur de colonne × 9/16. Sert de
   // `contain-intrinsic-size` aux cartes hors écran : un placeholder de la mauvaise hauteur fait
   // osciller le layout au scroll (rangées blanches en densité forte).
-  const cellH = Math.round((((inner - (actualCols - 1) * GRID_GAP) / actualCols) * 9) / 16);
+  const cellH = Math.round((cell * 9) / 16);
   return { cell, actualCols, cellH };
 }
 
-// Plafond de lecture auto = miniatures VISIBLES + une rangée tampon (préchargée).
+// Plafond de lecture auto = miniatures VISIBLES + une rangée tampon (préchargée), écrêté par
+// `MAX_PLAYING_HARD` dans setMaxPlaying.
 export function autoplayCeiling(width: number, height: number, cols: number, narrow = false): number {
   const { cell, actualCols } = gridMetrics(width, cols, narrow);
   if (!cell || !height) return 0;
-  const rows = Math.max(1, Math.ceil(height / ((cell * 9) / 16 + GRID_GAP)));
-  return actualCols * (rows + 1);
+  const rowH = (cell * 9) / 16 + GRID_GAP;
+  const rows = Math.max(1, Math.ceil(height / rowH));
+  // + les rangées de l'AVANCE DE LECTURE (au-dessus ET au-dessous du viewport, cf. PLAY_LEAD_PX
+  // dans useSceneCardMedia) : sans elles, les cartes anticipées prendraient les créneaux des
+  // cartes visibles au lieu de s'ajouter.
+  const lead = Math.ceil(320 / rowH);
+  return actualCols * (rows + 2 * lead);
 }
 
 // Gestionnaire de créneaux de lecture pour « Tout lire » : limite le nombre de <video> qui
@@ -88,6 +100,12 @@ export function autoplayCeiling(width: number, height: number, cols: number, nar
 // Décodage = NVDEC matériel (≠ limite stricte de sessions NVENC à l'encode) → plusieurs décodes
 // 720p courts en parallèle passent.
 let maxPlaying = 24;
+// PLAFOND DUR, indépendant du nombre de miniatures qui tiennent à l'écran. Le plafond calculé peut
+// dépasser 80 en densité forte sur grand écran ; Chromium cesse de créer des lecteurs média au-delà
+// d'une limite par frame (et bien avant ça le décodage sature : un décodeur + une piste audio par
+// aperçu). Aux densités usuelles le calcul reste dessous — ça n'écrête que les cas extrêmes, et
+// alors les cartes du haut jouent (file triée par index), les autres gardent leur vignette.
+const MAX_PLAYING_HARD = 32;
 const GRANT_MS = 30;
 let playingActive = 0;
 type PlaySlot = { order: number; granted: boolean; grant: () => void };
@@ -95,7 +113,7 @@ let slotQueue: PlaySlot[] = [];
 let slotTimer: ReturnType<typeof setInterval> | null = null;
 // Recalcule le plafond (page visible) ; relance le pump car de nouveaux créneaux peuvent s'ouvrir.
 export function setMaxPlaying(n: number) {
-  maxPlaying = Math.max(1, Math.floor(n));
+  maxPlaying = Math.min(MAX_PLAYING_HARD, Math.max(1, Math.floor(n)));
   pumpSlots();
 }
 function pumpSlots() {
@@ -127,44 +145,4 @@ export function resetPlaySlots() {
   if (slotTimer) { clearInterval(slotTimer); slotTimer = null; }
   slotQueue = [];
   playingActive = 0;
-}
-
-// Pause des aperçus quand on défile VITE (flick) ; lecture conservée en scroll lent (repérage).
-// Basé sur la VÉLOCITÉ (px/ms), pas un simple on/off : un scroll lent ne coupe pas la lecture.
-// On expose juste un flag `fast` ; côté carte on met en PAUSE l'élément <video> (qui reste monté) —
-// on ne gate JAMAIS son montage (sinon la lecture auto risquerait de ne plus démarrer si le flag
-// se coince). Auto-réparant : un timer remet `fast=false` dès l'arrêt du scroll.
-let scrollFast = false;
-let lastTop = 0;
-let lastTs = 0;
-let fastTimer: ReturnType<typeof setTimeout> | null = null;
-const fastSubs = new Set<() => void>();
-const FAST_PX_PER_MS = 2.2;   // ~2200 px/s : flick = pause, scroll de lecture = continue
-function setFast(v: boolean) {
-  if (v === scrollFast) return;
-  scrollFast = v;
-  fastSubs.forEach((f) => f());
-}
-export function notifyScroll(scrollTop: number, ts: number): void {
-  const dy = Math.abs(scrollTop - lastTop);
-  const dt = ts - lastTs;
-  lastTop = scrollTop;
-  lastTs = ts;
-  // dt borné : on ignore le 1er event après une pause (dt énorme) pour éviter un faux « rapide ».
-  if (dt > 0 && dt < 200) setFast(dy / dt > FAST_PX_PER_MS);
-  if (fastTimer) clearTimeout(fastTimer);
-  fastTimer = setTimeout(() => setFast(false), 120);   // arrêt/ralentissement du scroll → reprise
-}
-export function subscribeScrollFast(cb: () => void): () => void {
-  fastSubs.add(cb);
-  return () => { fastSubs.delete(cb); };
-}
-export function getScrollFast(): boolean {
-  return scrollFast;
-}
-// Handler `onScroll` prêt à câbler sur n'importe quel conteneur défilant d'une grille d'aperçus
-// (CutStudio, recherche IA, board picker) → émet la vélocité pour le flick-pause. Comportement
-// identique au handler inline historique de CutStudio.
-export function onGridScroll(e: { currentTarget: { scrollTop: number } }): void {
-  notifyScroll(e.currentTarget.scrollTop, performance.now());
 }

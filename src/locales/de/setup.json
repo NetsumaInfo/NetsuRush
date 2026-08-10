@@ -54,5 +54,9 @@
     "title": "Adobe-Erweiterung",
     "detected": "Erkannt: {{apps}}",
     "hint": "installiert das NetsuRush-Bedienfeld und hält es automatisch aktuell."
+  },
+  "issues": {
+    "detected_one": "{{count}} Problem bei der Installation erkannt.",
+    "detected_other": "{{count}} Probleme bei der Installation erkannt."
   }
 }

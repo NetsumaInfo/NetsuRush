@@ -32,7 +32,6 @@
     "none": "Aucune collection"
   },
   "sidePanel": {
-    "trim": "Rogner le plan",
     "export": "Export"
   },
   "range": {
@@ -97,41 +96,6 @@
     "gallery": "Galerie",
     "grid": "Grille",
     "compact": "Compact"
-  },
-  "trim": {
-    "theShot": "le plan",
-    "title": "Rogner « {{name}} »",
-    "play": "Lecture",
-    "pause": "Pause",
-    "playKey": "Lecture (Espace)",
-    "pauseKey": "Pause (Espace)",
-    "playSelection": "Lire la sélection",
-    "playSelectionHint": "Lire la sélection (début → fin)",
-    "gotoStart": "Aller au début",
-    "prevFrame": "Image précédente",
-    "prevFrameHint": "Image préc. (← · Maj = −1 s)",
-    "nextFrame": "Image suivante",
-    "nextFrameHint": "Image suiv. (→ · Maj = +1 s)",
-    "gotoEnd": "Aller à la fin",
-    "markIn": "Début ici",
-    "markOut": "Fin ici",
-    "zoomOut": "Zoom arrière",
-    "zoomOutHint": "Zoom arrière (fenêtre ×2)",
-    "zoomIn": "Zoom avant",
-    "zoomInHint": "Zoom avant (fenêtre ÷2)",
-    "fitSelection": "Cadrer la sélection",
-    "fitAll": "Tout le rush",
-    "images": "Séquence d'images",
-    "wave": "Forme d’onde",
-    "waveHint": "Forme d’onde audio",
-    "none": "Aucun",
-    "image": "image {{n}}",
-    "duration": "Durée",
-    "framesShort": "{{n}} img",
-    "startLabel": "Début",
-    "endLabel": "Fin",
-    "reset": "Réinitialiser",
-    "apply": "Appliquer le rognage"
   },
   "detail": {
     "shotWord": "Plan",

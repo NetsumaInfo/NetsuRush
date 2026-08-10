@@ -117,10 +117,6 @@ export function codecLabel(codec: UpscaleCodec, status: CompatibilityStatus | nu
   }
   return codec;
 }
-export const UP_CODEC_ITEMS = UP_FAMILIES.flatMap((f) =>
-  UP_VARIANTS[f.id].map((v) => ({ value: v.id, label: v.label })),
-);
-
 const isHardwareCodec = (codec: UpscaleCodec): boolean => /^(?:h264|hevc)_(?:gpu|nvenc|amf|qsv)$/.test(codec);
 const encoderVendor = (codec: UpscaleCodec): "nvidia" | "amd" | "intel" | null => {
   if (codec.endsWith("_nvenc")) return "nvidia";
@@ -153,110 +149,9 @@ export function variantsFor(family: UpscaleFamily, status: CompatibilityStatus |
   });
 }
 
-// Codecs réglables (CPU + moteurs matériels explicites) → exposent qualité, vitesse, profil codec.
-export const ENCODER_CODECS = new Set<UpscaleCodec>([
-  "x264", "x265", "h264_gpu", "hevc_gpu", "h264_nvenc", "h264_amf", "h264_qsv", "hevc_nvenc", "hevc_amf", "hevc_qsv",
-]);
 export const GPU_CODECS = new Set<UpscaleCodec>([
   "h264_gpu", "hevc_gpu", "h264_nvenc", "h264_amf", "h264_qsv", "hevc_nvenc", "hevc_amf", "hevc_qsv",
 ]);
-
-// Profils codec RÉELS (-profile:v) par codec réglable — miroir de python/upscaler/codecs.py.PROFILES.
-// Le profil porte le sous-échantillonnage chroma + la profondeur → remplace le toggle 8/10-bit
-// (un seul sélecteur). NVENC H.264 = pas de 10-bit ; NVENC HEVC = 4:2:0 seul (matériel).
-export const UP_PROFILES: Partial<Record<UpscaleCodec, { value: string; label: string }[]>> = {
-  x264: [
-    { value: "baseline", label: "Baseline · 8-bit 4:2:0" },
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "high", label: "High · 8-bit 4:2:0" },
-    { value: "high10", label: "High 10 · 10-bit 4:2:0" },
-    { value: "high422", label: "High 4:2:2 · 10-bit" },
-    { value: "high444", label: "High 4:4:4 · 10-bit" },
-  ],
-  h264_nvenc: [
-    { value: "baseline", label: "Baseline · 8-bit 4:2:0" },
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "high", label: "High · 8-bit 4:2:0" },
-    { value: "high444", label: "High 4:4:4 · 8-bit" },
-  ],
-  h264_gpu: [
-    { value: "baseline", label: "Baseline · 8-bit 4:2:0" },
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "high", label: "High · 8-bit 4:2:0" },
-  ],
-  h264_amf: [
-    { value: "baseline", label: "Baseline · 8-bit 4:2:0" },
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "high", label: "High · 8-bit 4:2:0" },
-  ],
-  h264_qsv: [
-    { value: "baseline", label: "Baseline · 8-bit 4:2:0" },
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "high", label: "High · 8-bit 4:2:0" },
-  ],
-  x265: [
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "main10", label: "Main 10 · 10-bit 4:2:0" },
-    { value: "main12", label: "Main 12 · 12-bit 4:2:0" },
-    { value: "main422-10", label: "Main 4:2:2 · 10-bit" },
-    { value: "main422-12", label: "Main 4:2:2 · 12-bit" },
-    { value: "main444-8", label: "Main 4:4:4 · 8-bit" },
-    { value: "main444-10", label: "Main 4:4:4 · 10-bit" },
-    { value: "main444-12", label: "Main 4:4:4 · 12-bit" },
-  ],
-  hevc_nvenc: [
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "main10", label: "Main 10 · 10-bit 4:2:0" },
-    { value: "rext444-8", label: "Main 4:4:4 · 8-bit (rext)" },
-    { value: "rext444-10", label: "Main 4:4:4 · 10-bit (rext)" },
-  ],
-  hevc_gpu: [
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "main10", label: "Main 10 · 10-bit 4:2:0" },
-    { value: "rext444-8", label: "Main 4:4:4 · 8-bit (RExt)" },
-    { value: "rext444-10", label: "Main 4:4:4 · 10-bit (RExt)" },
-  ],
-  hevc_amf: [
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "main10", label: "Main 10 · 10-bit 4:2:0" },
-  ],
-  hevc_qsv: [
-    { value: "main", label: "Main · 8-bit 4:2:0" },
-    { value: "main10", label: "Main 10 · 10-bit 4:2:0" },
-  ],
-};
-const DEFAULT_PROFILE: Partial<Record<UpscaleCodec, string>> = {
-  x264: "high", h264_gpu: "high", h264_nvenc: "high", h264_amf: "high", h264_qsv: "high",
-  x265: "main", hevc_gpu: "main", hevc_nvenc: "main", hevc_amf: "main", hevc_qsv: "main",
-};
-export const profilesFor = (codec: UpscaleCodec) => UP_PROFILES[codec] ?? [];
-export function compatibleProfilesFor(codec: UpscaleCodec, status: CompatibilityStatus | null) {
-  const all = profilesFor(codec);
-  if (!status || !GPU_CODECS.has(codec)) return all;
-  const keyFor = (profile: string) => codec.startsWith("h264_")
-    ? `h264_${profile}`
-    : profile === "rext444-8" ? "h265_rext444_8"
-      : profile === "rext444-10" ? "h265_rext444_10" : `h265_${profile}`;
-  return all.filter((entry) => {
-    const key = keyFor(entry.value);
-    if (!key) return false;
-    const encoders = status.encoding.upscaleProfileEncoderOptions[key] ?? [];
-    if (codec.endsWith("_gpu")) return encoders.some((encoder) => detectedEncoder(encoder, status));
-    return encoders.includes(codec) && !!encoderVendor(codec)
-      && status.hardware.primaryVendor === encoderVendor(codec);
-  });
-}
-export const defaultProfile = (codec: UpscaleCodec) => DEFAULT_PROFILE[codec] ?? "";
-// Profil valide pour ce codec, sinon son défaut — appelé au changement de codec (les profils diffèrent).
-export function coerceProfile(codec: UpscaleCodec, profile: string): string {
-  return profilesFor(codec).some((o) => o.value === profile) ? profile : defaultProfile(codec);
-}
-// Profondeur (8/10) impliquée par le profil → garde `bitDepth` cohérent pour les chemins legacy.
-// bitDepth est un union 8|10 (legacy) ; 12-bit → 10 (le backend lit le pix_fmt du profil, pas bitDepth).
-export function profileDepth(codec: UpscaleCodec, profile: string): 8 | 10 {
-  const l = profilesFor(codec).find((o) => o.value === profile)?.label ?? "";
-  return l.includes("8-bit") ? 8 : 10;
-}
 
 export function familyOf(codec: UpscaleCodec): UpscaleFamily {
   if (codec === "x264" || codec.startsWith("h264_")) return "h264";
@@ -269,7 +164,7 @@ export const UP_SCALES: (1 | 2 | 4)[] = [1, 2, 4];
 
 // Moteur d'upscale : IA (Real-ESRGAN/CUGAN, lent, qualité max) ou Turbo (shader GLSL libplacebo,
 // GPU temps réel, qualité « suffisante »). Le moteur Turbo réutilise échelle/codec/audio/export.
-export type UpEngine = "ia" | "turbo";
+type UpEngine = "ia" | "turbo";
 
 // Panier « temps réel » : tout ce qui tourne sur GPU sans passer par un gros réseau lent, quelle que
 // soit la technique derrière (shader GLSL libplacebo, poids ArtCNN R en ONNX, ou le CLI NVIDIA
@@ -291,7 +186,7 @@ export const SHADER_MODELS: { id: ShaderModel; label: string; hint: string }[] =
 ];
 
 // RTX VSR n'agrandit qu'en ×2 (contrainte du SDK) et n'accepte pas les sources ≥ 1440p.
-export const RTX_SHADER: ShaderModel = "rtx_vsr";
+const RTX_SHADER: ShaderModel = "rtx_vsr";
 export const isRtxShader = (shader: ShaderModel) => shader === RTX_SHADER;
 // RTX VSR a besoin du CLI ET des bibliothèques NVIDIA, mais les deux forment UNE entrée de catalogue
 // (cf. lib/modelRegistry) : le gestionnaire ne déclare « installé » que lorsque les deux sont là.
@@ -367,34 +262,10 @@ export const TURBO_SHARP: { value: TurboSharp; label: string }[] = [
   { value: "sharp", label: "Net" },
 ];
 
-// Vitesse d'encodage x264/x265 en langage clair (le preset technique reste sous le capot).
-// Plus lent = meilleure compression à qualité égale. "Équilibré" = défaut.
-export const UP_SPEEDS: { value: string; label: string; hint: string }[] = [
-  { value: "veryfast", label: "Rapide", hint: "encode vite, fichier plus gros" },
-  { value: "medium", label: "Équilibré", hint: "bon compromis" },
-  { value: "slow", label: "Qualité", hint: "plus lent, plus compact" },
-  { value: "veryslow", label: "Maximale", hint: "le plus compact, très lent" },
-];
-export function speedLabel(preset: string): string {
-  return UP_SPEEDS.find((s) => s.value === preset)?.label ?? "Équilibré";
-}
-
-// Qualité d'encodage = profils par usage (comme les profils codec, pas des adjectifs).
-// La valeur reste le CRF CPU / contrôle de qualité matériel envoyé à ffmpeg.
-export const UP_QUALITIES: { value: number; label: string; hint: string }[] = [
-  { value: 14, label: "Master", hint: "CRF 14 — archivage, sans perte visible, fichier lourd" },
-  { value: 18, label: "Diffusion HQ", hint: "CRF 18 — YouTube/réseaux, haute qualité (recommandé)" },
-  { value: 22, label: "Diffusion", hint: "CRF 22 — web standard, bon compromis poids" },
-  { value: 26, label: "Web léger", hint: "CRF 26 — partage rapide, fichier réduit" },
-  { value: 30, label: "Aperçu", hint: "CRF 30 — brouillon/preview, le plus léger" },
-];
-
 // Snap une valeur persistée (ancien réglage libre) sur le palier le plus proche ; égalité → meilleure qualité.
-export function nearestOf(values: number[], v: number): number {
+function nearestOf(values: number[], v: number): number {
   return values.reduce((best, q) => (Math.abs(q - v) < Math.abs(best - v) ? q : best), values[0]);
 }
-export const nearestQuality = (v: number) => nearestOf(UP_QUALITIES.map((q) => q.value), v);
-
 // Débruitage (modèle « Réel léger », 0..1) en paliers nommés.
 export const UP_DENOISE: { value: number; label: string }[] = [
   { value: 0, label: "Aucun" },
@@ -414,19 +285,8 @@ export const UP_GRAINS: { value: number; label: string }[] = [
 ];
 export const nearestGrain = (v: number) => nearestOf(UP_GRAINS.map((g) => g.value), v);
 
-// Audio : copier tel quel, réencoder (aac/ac3/flac/pcm), ou aucun.
-export const UP_AUDIO: { id: AudioMode; label: string }[] = [
-  { id: "copy", label: "Copier" },
-  { id: "aac", label: "AAC" },
-  { id: "ac3", label: "AC3" },
-  { id: "flac", label: "FLAC" },
-  { id: "pcm", label: "PCM" },
-  { id: "none", label: "Aucun" },
-];
-
 // Débit (kbps) pour les codecs audio à perte (aac/ac3).
 export const UP_ABR: number[] = [128, 192, 256, 320];
-export const LOSSY_AUDIO = new Set<AudioMode>(["aac", "ac3"]);
 
 // Tile : 0 = auto. Valeurs explicites pour borner la VRAM (anti-OOM en 4K).
 export const UP_TILES: { value: number; label: string }[] = [

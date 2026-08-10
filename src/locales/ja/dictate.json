@@ -1,11 +1,5 @@
 {
   "transcribing": "文字起こし中…",
-  "button": {
-    "ariaStop": "音声入力を停止",
-    "ariaDictate": "音声入力",
-    "tooltipStop": "停止（テキストを挿入）",
-    "tooltipDictate": "音声入力（話すと入力されます）"
-  },
   "overlay": {
     "listening": "認識中…"
   },

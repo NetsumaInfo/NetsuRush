@@ -50,9 +50,6 @@ export type FieldType =
   | "text" | "number" | "select" | "multiSelect" | "date" | "checkbox" | "url" | "checklist"
   | "createdTime" | "lastEditedTime";
 
-// Horodatages auto (ne s'éditent pas ; la valeur vient des métadonnées de la ligne).
-export const TIMESTAMP_TYPES: FieldType[] = ["createdTime", "lastEditedTime"];
-
 export interface SelectOption {
   id: string;
   label: string;

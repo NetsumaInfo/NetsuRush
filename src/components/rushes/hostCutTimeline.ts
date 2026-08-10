@@ -22,7 +22,7 @@ import type { HostId } from "@/store/types";
 // le flux Resolve : 0..90 détection, 90..100 analyse.
 const DETECT_SHARE = 90;
 
-export interface HostCutProgress {
+interface HostCutProgress {
   file: string;
   done: number;
   total: number;

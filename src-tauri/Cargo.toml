@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.3.5"
+version = "0.3.6"
 description = "NetsuRush — app DaVinci Resolve standalone (derush IA, frame-accurate)"
 authors = ["Haim Faraj"]
 license = "AGPL-3.0-only"

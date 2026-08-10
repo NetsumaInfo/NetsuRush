@@ -23,7 +23,7 @@ export const MAX_BLUR_PX = 100;
  * Marches d'APPROXIMATION pour l'image que les panneaux repeignent : celle-là doit être floutée
  * dans le fichier (cf. core/wallpaper/encode.js). Miroir exact de BLUR_STEPS côté core.
  */
-export const WALLPAPER_SURFACE_BLUR_STEPS = [0, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64, 72, 80, 90, 100];
+const WALLPAPER_SURFACE_BLUR_STEPS = [0, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64, 72, 80, 90, 100];
 
 /** Rayon en px → marche encodée la plus proche, pour l'image des panneaux. */
 export function surfaceBlurStep(px: number): number {
@@ -256,7 +256,7 @@ export function fitStyle(config: WallpaperConfig): WallpaperMediaStyle {
 }
 
 /** Réglages numériques qui n'agissent QUE par variables CSS, donc réglables pendant un glissement. */
-export const WALLPAPER_LIVE_KEYS = ["blur", "opacity", "saturate", "uiOpacity"] as const;
+const WALLPAPER_LIVE_KEYS = ["blur", "opacity", "saturate", "uiOpacity"] as const;
 export type WallpaperLiveKey = (typeof WALLPAPER_LIVE_KEYS)[number];
 
 /**

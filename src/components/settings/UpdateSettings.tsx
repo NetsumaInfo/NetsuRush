@@ -1,7 +1,8 @@
-import { Download, RefreshCw } from "lucide-react";
+import { Download, Loader2, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUpdater } from "@/store/updater";
 import { UpdateStatusLine } from "@/components/updates/UpdateStatusLine";
+import { ErrorReportButton } from "@/components/common/ErrorReportButton";
 import releases from "@/data/releases.json";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,15 @@ export function UpdateSettings() {
   const autoCheck = useUpdater((state) => state.autoCheck);
   const setAutoCheck = useUpdater((state) => state.setAutoCheck);
   const check = useUpdater((state) => state.check);
+  const download = useUpdater((state) => state.download);
   const install = useUpdater((state) => state.install);
   const language = i18n.language.startsWith("fr") ? "fr" : "en";
+  const busy = phase === "checking" || phase === "downloading" || phase === "installing";
+  // Même pourcentage exact que dans la barre de titre : une décimale, jamais d'arrondi à l'entier.
+  const percent = progress == null
+    ? null
+    : new Intl.NumberFormat(i18n.language, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 })
+        .format(Math.min(100, progress) / 100);
 
   return (
     <section className="flex flex-col gap-5">
@@ -42,14 +50,33 @@ export function UpdateSettings() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
           <UpdateStatusLine phase={phase} info={info} />
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={phase === "checking" || phase === "downloading"} onClick={() => void check()}>
+            <Button variant="outline" size="sm" disabled={busy || phase === "downloaded"} onClick={() => void check()}>
               <RefreshCw className={phase === "checking" ? "size-3.5 animate-spin" : "size-3.5"} /> {t("updates.check")}
             </Button>
-            {phase === "available" && <Button size="sm" onClick={() => void install()}><Download className="size-3.5" /> {t("updates.install")}</Button>}
+            {phase === "available" && <Button size="sm" onClick={() => void download()}><Download className="size-3.5" /> {t("updates.download")}</Button>}
+            {/* Téléchargement terminé : l'action restante n'est plus « installer » mais « redémarrer ».
+                Le dire évite de cliquer sans savoir que l'application va se fermer. */}
+            {phase === "downloaded" && <Button size="sm" onClick={() => void install()}><RefreshCw className="size-3.5" /> {t("updates.restart")}</Button>}
+            {phase === "installing" && <Button size="sm" disabled><Loader2 className="size-3.5 animate-spin" /> {t("updates.installing")}</Button>}
           </div>
         </div>
-        {phase === "downloading" && <Progress value={progress} />}
-        {error && <p className="break-words text-xs text-destructive">{error}</p>}
+        {(phase === "downloading" || phase === "downloaded") && (
+          <div className="flex items-center gap-3">
+            <Progress className="min-w-0 flex-1" value={progress} />
+            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{percent}</span>
+          </div>
+        )}
+        {error && (
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="min-w-0 flex-1 break-words text-xs text-destructive">{error}</p>
+            <ErrorReportButton
+              error={error}
+              subject={`Échec de la mise à jour${info?.version ? ` vers la v${info.version}` : ""}`}
+              module="settings"
+              moduleLabel="Paramètres"
+            />
+          </div>
+        )}
         {info?.body && <p className="whitespace-pre-line text-xs text-muted-foreground">{info.body}</p>}
       </Card>
 

@@ -1,7 +1,7 @@
 // Modèle partagé du Roto Studio : objets multi (id + couleur) et formats d'export.
 // ROTO_COLORS = MIROIR de PALETTE dans python/nrroto/overlay.py (l'overlay est rendu côté python).
 
-export const ROTO_COLORS = ["#22c55e", "#3b82f6", "#f97316", "#e11d48", "#a855f7", "#eab308"];
+const ROTO_COLORS = ["#22c55e", "#3b82f6", "#f97316", "#e11d48", "#a855f7", "#eab308"];
 
 export const colorOf = (obj: number) => ROTO_COLORS[(obj - 1) % ROTO_COLORS.length];
 
@@ -18,11 +18,6 @@ export const SAM_MODELS: { id: string; label: string; hintKey: string }[] = [
   { id: "sam2.1-tiny", label: "SAM 2.1 Hiera Tiny", hintKey: "sam.tiny" },
   { id: "edgetam", label: "EdgeTAM", hintKey: "sam.edgetam" },
 ];
-
-// SAMURAI et SAM2Long ne posent pas de poids : ils REMPLACENT le paquet python de SAM 2 par leur
-// propre version. Un seul peut occuper la place à la fois — le catalogue le dit avant le clic, le
-// core l'applique au téléchargement (cf. `exclusive` dans lib/modelRegistry).
-export const SAM_FORKS = new Set(["samurai", "sam2long"]);
 
 export interface RotoObject {
   id: number;        // id SAM (1..n), stable pour la session

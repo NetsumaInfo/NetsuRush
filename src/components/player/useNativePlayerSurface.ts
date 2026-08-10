@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { isTauriRuntime, nativePlayer, type NativePlayerStatus } from "@/lib/nativePlayer";
 
-export interface NativePlayerSurfaceApi {
+interface NativePlayerSurfaceApi {
   play: () => Promise<void>;
   pause: () => Promise<void>;
   toggle: () => Promise<void>;
@@ -29,8 +29,13 @@ interface Options {
 let nativeSurfaceLease = 0;
 
 // Frames de stabilisation après activation d'une surface : le temps qu'une entrée de modale
-// (~100 ms d'animation) pose sa géométrie définitive, sans jamais installer de boucle permanente.
+// (~100 ms d'animation) pose sa géométrie définitive.
 const SETTLE_FRAMES = 12;
+// Veille pendant toute la vie de la surface. Ni ResizeObserver ni IntersectionObserver ne voient
+// une boîte qui se DÉPLACE sans changer de taille (modale recentrée quand son contenu grandit,
+// panneau qui glisse) : la fenêtre mpv restait alors sur ses anciennes coordonnées, donc invisible
+// ou à côté de sa surface. Une mesure toutes les 400 ms coûte un getBoundingClientRect.
+const WATCH_MS = 400;
 
 /**
  * Garde la fenêtre mpv alignée sur sa surface DOM, y compris quand la fenêtre
@@ -44,6 +49,8 @@ export function useNativePlayerGeometry(surfaceRef: RefObject<HTMLDivElement | n
     const lease = ++nativeSurfaceLease;
     let raf = 0;
     let alive = true;
+    let shown = false;      // mpv affiché pour CETTE surface (repli à false dès qu'on le masque)
+    let lastKey = "";       // dernière géométrie appliquée ("" = à réappliquer)
     const unlisten: Array<() => void> = [];
     const ownsSurface = () => alive && lease === nativeSurfaceLease;
 
@@ -62,23 +69,38 @@ export function useNativePlayerGeometry(surfaceRef: RefObject<HTMLDivElement | n
         && rect.top < window.innerHeight
         && rect.left < window.innerWidth;
       if (!visible) {
-        nativePlayer.pause().catch(() => {});
-        nativePlayer.hide().catch(() => {});
+        // Masquage UNIQUEMENT si mpv était affiché ici : une surface mesurée à 0 × 0 avant sa mise
+        // en page (entrée de modale) ne doit pas éteindre le lecteur d'une autre vue.
+        if (shown) {
+          shown = false;
+          lastKey = "";
+          nativePlayer.pause().catch(() => {});
+          nativePlayer.hide().catch(() => {});
+        }
         return;
       }
       const dpr = window.devicePixelRatio || 1;
-      nativePlayer.setGeometry(
-        Math.round(rect.left * dpr), Math.round(rect.top * dpr),
-        Math.round(rect.width * dpr), Math.round(rect.height * dpr),
-      ).then(() => {
-        if (ownsSurface()) return nativePlayer.show();
-      }).catch(() => {});
+      const x = Math.round(rect.left * dpr), y = Math.round(rect.top * dpr);
+      const w = Math.round(rect.width * dpr), h = Math.round(rect.height * dpr);
+      const key = `${x}:${y}:${w}:${h}`;
+      // IDEMPOTENCE OBLIGATOIRE : chaque `setGeometry`/`show` fait un SetWindowPos sur la fenêtre
+      // parente de mpv, que mpv suit (hook sur le parent) en redimensionnant sa propre fenêtre de
+      // sortie vidéo. En PAUSE, ce reconfigure vide l'image et mpv ne redessine qu'à la frame
+      // suivante — donc un écran NOIR. Les anciens déclencheurs (animations de modale, défilement,
+      // veille périodique) rejouaient la même géométrie en boucle et noircissaient le lecteur.
+      // On ne touche donc à la fenêtre native que si le rectangle a VRAIMENT changé.
+      if (shown && key === lastKey) return;
+      lastKey = key;
+      nativePlayer.setGeometry(x, y, w, h).then(() => {
+        if (!ownsSurface()) return;
+        shown = true;
+        return nativePlayer.show();
+      }).catch(() => { lastKey = ""; });
     };
     const schedule = () => { if (ownsSurface() && !raf) raf = requestAnimationFrame(updateGeometry); };
-    // Remesure sur QUELQUES frames après l'activation. Une surface qui apparaît dans une modale est
-    // mesurée avant sa mise en page : `rect` vaut alors 0 × 0, `updateGeometry` masque mpv, et plus
-    // rien ne le rallume — un ResizeObserver ne voit pas une boîte qui n'a jamais changé de taille.
-    // C'était le lecteur NOIR du rognage. Bornée (SETTLE_FRAMES) : jamais de boucle rAF permanente.
+    // Remesure sur QUELQUES frames après l'activation : une surface qui apparaît dans une modale est
+    // mesurée avant sa mise en page, `rect` vaut alors 0 × 0 et le premier calcul ne vaut rien. Ces
+    // passes ne REJOUENT rien : `updateGeometry` n'agit que si le rectangle a réellement changé.
     let settle = 0;
     const settleTick = () => {
       if (!ownsSurface() || settle >= SETTLE_FRAMES) return;
@@ -104,6 +126,10 @@ export function useNativePlayerGeometry(surfaceRef: RefObject<HTMLDivElement | n
     document.addEventListener("animationcancel", schedule, true);
     window.visualViewport?.addEventListener("resize", schedule);
     window.visualViewport?.addEventListener("scroll", schedule);
+    // Veille : rattrape les DÉPLACEMENTS de surface, invisibles pour les deux observers. Elle ne
+    // fait que MESURER — repositionner mpv « au cas où » est exactement ce qu'il ne faut pas faire
+    // (cf. le commentaire de `updateGeometry` sur le reconfigure de mpv).
+    const watch = setInterval(schedule, WATCH_MS);
     settleTick();
 
     void import("@tauri-apps/api/window").then(async ({ getCurrentWindow }) => {
@@ -117,6 +143,7 @@ export function useNativePlayerGeometry(surfaceRef: RefObject<HTMLDivElement | n
       const shouldHide = ownsSurface();
       alive = false;
       if (shouldHide) nativeSurfaceLease++;
+      clearInterval(watch);
       observer.disconnect();
       intersection.disconnect();
       window.removeEventListener("resize", schedule);
@@ -137,6 +164,13 @@ export function useNativePlayerGeometry(surfaceRef: RefObject<HTMLDivElement | n
       }
     };
   }, [active, surfaceRef]);
+}
+
+// Comparaison de chemins tolérante : mpv rend ses séparateurs en avant, et la casse d'un chemin
+// Windows n'est pas significative.
+function samePath(a: string, b: string): boolean {
+  const norm = (v: string) => v.split("\\").join("/").toLowerCase();
+  return norm(a) === norm(b);
 }
 
 function isNativeDiskPath(path?: string): boolean {
@@ -168,6 +202,8 @@ export function useNativePlayerSurface({
   const [mode, setMode] = useState<boolean | null>(() => (isNativeDiskPath(path) && isTauriRuntime ? null : false));
   const endedRef = useRef(false);
   const loadingSinceRef = useRef<number | null>(null);
+  const claimRef = useRef<number | null>(null);        // jeton de possession du lecteur unique
+  const lastReloadRef = useRef(0);                     // anti-boucle du rattrapage de fichier
   const callbacksRef = useRef({ onTime, onDuration, onPlayingChange, onEnded, onError });
   const transportOptionsRef = useRef({ startAt, autoPlay });
   // Les lecteurs passent souvent des callbacks inline. On garde leur dernière version après chaque
@@ -195,9 +231,23 @@ export function useNativePlayerSurface({
     let active = true;
     endedRef.current = false;
     loadingSinceRef.current = performance.now();
-    nativePlayer.pause()
-      .then(() => nativePlayer.load(path))
-      .then(() => transportOptionsRef.current.startAt > 0 ? nativePlayer.seek(transportOptionsRef.current.startAt) : undefined)
+    // Position d'ouverture passée AU CHARGEMENT (`start`) : `loadfile` est asynchrone, donc un
+    // `seek` envoyé dans la foulée s'appliquait au fichier encore chargé — la surface montrait une
+    // image sans rapport avec le plan, figée jusqu'au premier vrai seek de l'utilisateur.
+    const startPos = transportOptionsRef.current.startAt;
+    // On PREND possession avant de charger : le lecteur mpv est unique pour toute l'application et
+    // plusieurs surfaces peuvent être montées en même temps (autres panneaux, autres fenêtres, donc
+    // autres contextes JS). Sans jeton partagé, la dernière surface à réagir gardait SON média sous
+    // la surface d'une autre — le rognage lisait la vidéo ouverte ailleurs.
+    nativePlayer.claim()
+      .then((id) => { if (active) claimRef.current = id; })
+      .catch(() => {})
+      .then(() => nativePlayer.pause())
+      // Repli sur `load` + `seek` quand la commande manque : le binaire Tauri en cours d'exécution
+      // peut précéder ce code (le renderer est rechargé à chaud, pas la coquille Rust). Sans lui,
+      // l'échec de la commande éteignait la surface native entière.
+      .then(() => nativePlayer.loadAt(path, startPos).catch(() => nativePlayer.load(path)
+        .then(() => (startPos > 0 ? nativePlayer.seek(startPos) : undefined))))
       .then(() => transportOptionsRef.current.autoPlay ? nativePlayer.play() : nativePlayer.pause())
       .catch(() => {
         if (active) {
@@ -217,13 +267,33 @@ export function useNativePlayerSurface({
   }, [mode, loop]);
 
   useEffect(() => {
-    if (mode !== true) return;
+    if (mode !== true || !path) return;
     let active = true;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const poll = async () => {
       try {
         const status: NativePlayerStatus = await nativePlayer.status();
         if (!active) return;
+        // Le lecteur est-il encore à NOUS ? Une surface dépossédée ne rapporte plus le temps d'un
+        // média qui n'est pas le sien et ne touche plus au transport.
+        if (status.claim != null && claimRef.current != null && status.claim !== claimRef.current) {
+          if (active) timer = setTimeout(poll, 250);
+          return;
+        }
+        // mpv a-t-il bien NOTRE fichier ? Une commande de chargement perdue (ou écrasée par une
+        // autre fenêtre) laissait la surface afficher un autre média, sans que rien ne le rattrape.
+        if (status.path && !samePath(status.path, path)) {
+          if (performance.now() - lastReloadRef.current > 1500) {
+            lastReloadRef.current = performance.now();
+            const startPos = transportOptionsRef.current.startAt;
+            void nativePlayer.loadAt(path, startPos)
+              .catch(() => nativePlayer.load(path).then(() => (startPos > 0 ? nativePlayer.seek(startPos) : undefined)))
+              .then(() => (transportOptionsRef.current.autoPlay ? nativePlayer.play() : nativePlayer.pause()))
+              .catch(() => {});
+          }
+          if (active) timer = setTimeout(poll, 100);
+          return;
+        }
         const time = Number.isFinite(status.current_time) ? Math.max(0, status.current_time) : 0;
         const duration = Number.isFinite(status.duration) ? Math.max(0, status.duration) : 0;
         if (duration > 0 || time > 0) loadingSinceRef.current = null;
@@ -254,7 +324,7 @@ export function useNativePlayerSurface({
     };
     void poll();
     return () => { active = false; if (timer) clearTimeout(timer); };
-  }, [mode, loop]);
+  }, [mode, loop, path]);
 
   const play = useCallback(() => nativePlayer.play(), []);
   const pause = useCallback(() => nativePlayer.pause(), []);

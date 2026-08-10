@@ -76,7 +76,7 @@ export type ExportSpeed = "fast" | "balanced" | "quality" | "max";
 //  - "language" : garder la piste de la langue choisie (tag/titre normalisés côté core ; secours IA
 //                 silencieux si une piste n'est pas étiquetée) ;
 //  - "track"    : garder une piste précise par numéro (a:N).
-export type AudioSelectMode = "auto" | "language" | "track";
+type AudioSelectMode = "auto" | "language" | "track";
 
 export interface AudioSelect {
   mode: AudioSelectMode;
@@ -107,7 +107,7 @@ export const AUDIO_TRACK_SLOTS = 4;
 // « new » = toujours une nouvelle, « tl:<nom> » = une existante par son nom. MÊME encodage que
 // useTimelineTarget → le popover de destination se réutilise tel quel, sans conversion.
 export type TimelineTargetValue = string;
-export const DEFAULT_TIMELINE_TARGET: TimelineTargetValue = "open";
+const DEFAULT_TIMELINE_TARGET: TimelineTargetValue = "open";
 
 export function coerceTimelineTarget(v: string | undefined | null): TimelineTargetValue {
   if (v === "open" || v === "new") return v;
@@ -441,7 +441,7 @@ export const DEFAULT_EXPORT_PROFILES: ExportProfile[] = [
   },
 ];
 
-export const DEFAULT_EXPORT_PROFILE = DEFAULT_EXPORT_PROFILES[0];
+const DEFAULT_EXPORT_PROFILE = DEFAULT_EXPORT_PROFILES[0];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -501,7 +501,7 @@ export function coerceAudioSelect(sel: AudioSelect | undefined | null): AudioSel
 export const MERGE_GAP_MAX_MS = 10000;
 export const MERGE_GAP_STEP_MS = 100;
 
-export function coerceMergeGap(ms: number | undefined | null): number {
+function coerceMergeGap(ms: number | undefined | null): number {
   const v = Math.round(Number(ms) || 0);
   return Math.min(MERGE_GAP_MAX_MS, Math.max(0, v));
 }
@@ -511,7 +511,7 @@ export function coerceExportContainer(container: string | undefined | null): Exp
   return "mp4";
 }
 
-export function coerceExportWorkflow(workflow: string | undefined | null): ExportWorkflow {
+function coerceExportWorkflow(workflow: string | undefined | null): ExportWorkflow {
   if (workflow === "timeline_import" || workflow === "video_remux" || workflow === "video_encode") return workflow;
   return "video_remux";
 }
@@ -652,7 +652,7 @@ export function getActiveExportProfile(profiles: ExportProfile[], activeProfileI
   return profiles.find((p) => p.id === activeProfileId) ?? profiles[0] ?? DEFAULT_EXPORT_PROFILE;
 }
 
-export function normalizeExportIcon(icon: ExportIcon | undefined | null): ExportIcon | undefined {
+function normalizeExportIcon(icon: ExportIcon | undefined | null): ExportIcon | undefined {
   if (!icon || typeof icon !== "object") return undefined;
   if (icon.type === "image" && typeof icon.src === "string" && icon.src) return { type: "image", src: icon.src };
   if (icon.type === "emoji" && typeof icon.ch === "string" && icon.ch) return { type: "emoji", ch: icon.ch };

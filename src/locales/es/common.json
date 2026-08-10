@@ -79,5 +79,17 @@
     "addToDictionary": "Añadir al diccionario",
     "ignoreOnce": "Ignorar en esta sesión",
     "replaceAll": "Reemplazar las {{count}} apariciones"
+  },
+  "beta": {
+    "title": "Módulo en beta",
+    "body": "Aún faltan funciones y otras van a cambiar. Busco probadores: dime qué falla y qué te falta.",
+    "discord": "Unirse al Discord",
+    "feedback": "Informar de un problema",
+    "dismiss": "Ocultar"
+  },
+  "report": {
+    "action": "Informar del error",
+    "sent": "Enviado, ¡gracias!",
+    "saved": "El envío falló. Mensaje guardado."
   }
 }
