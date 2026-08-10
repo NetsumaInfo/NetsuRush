@@ -24,3 +24,19 @@ test('recent project cards reveal their netsu file from a context menu', () => {
   assert.match(source, /nr\.openPath\(folder\)/);
   assert.match(source, /t\("home\.openProjectLocation"\)/);
 });
+
+test('file-backed and internal projects share thumbnail, modified label, and right-click open behavior', () => {
+  const sceneCard = source.slice(source.indexOf('function SceneCard'), source.indexOf('// Carte d\'un projet'));
+  const projectCard = source.slice(source.indexOf('function ProjectCard'), source.indexOf('// ---------- Composant principal'));
+  assert.match(projectCard, /<ProjectThumb path=\{entry\.path\}/);
+  assert.match(projectCard, /relDate\(entry\.modifiedAt\s*\?\?\s*entry\.openedAt\)/);
+  assert.doesNotMatch(projectCard, /<p[^>]*>\{entry\.missing\s*\?[^:]+:\s*folder\}<\/p>/);
+  assert.match(sceneCard, /ContextMenuItem[^]*home\.openProjectFile/);
+});
+
+test('dropping a netsu opens it as a project before media ingestion', () => {
+  assert.match(source, /\.name\.toLowerCase\(\)\.endsWith\("\.netsu"\)/);
+  assert.match(source, /nr\.pathsForFiles\(\[projectFile\]\)/);
+  assert.match(source, /onOpenRecent\(projectPath\)/);
+  assert.ok(source.indexOf('.endsWith(".netsu")') < source.indexOf('f.type.startsWith("image/")'));
+});

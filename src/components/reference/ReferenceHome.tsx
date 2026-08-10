@@ -19,7 +19,7 @@ import {
   ContextMenu, ContextMenuContent, ContextMenuItem,
   ContextMenuSeparator, ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { SceneThumb } from "./SceneThumb";
+import { ProjectThumb, SceneThumb } from "./SceneThumb";
 
 const RTF = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
 function relDate(ts: number): string {
@@ -65,7 +65,8 @@ function SceneCard({
 }) {
   const { t } = useTranslation("reference");
   return (
-    <div className="group relative flex flex-col gap-2">
+    <ContextMenu>
+      <ContextMenuTrigger render={<div className="group relative flex flex-col gap-2" />}>
       {/* Vignette — div cliquable (pas un <button> : il contient des boutons d'action) */}
       <div
         role="button"
@@ -133,11 +134,27 @@ function SceneCard({
       </div>
 
       {/* Nom + date */}
-      <button type="button" onClick={onOpen} className="min-w-0 text-left">
-        <p className="truncate text-sm font-medium text-foreground">{scene.name}</p>
-        <p className="truncate text-xs text-muted-foreground">{t("home.modified", { date: relDate(scene.updatedAt) })}</p>
-      </button>
-    </div>
+        <button type="button" onClick={onOpen} className="min-w-0 text-left">
+          <p className="truncate text-sm font-medium text-foreground">{scene.name}</p>
+          <p className="truncate text-xs text-muted-foreground">{t("home.modified", { date: relDate(scene.updatedAt) })}</p>
+        </button>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={onOpen}>
+          <FileCheck2 /> {t("home.openProjectFile")}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={onToggleFavorite}>
+          <Star /> {isFavorite ? t("actions.removeFavorite") : t("actions.addFavorite")}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={onHide}>
+          <EyeOff /> {t("home.hideFromList")}
+        </ContextMenuItem>
+        <ContextMenuItem variant="destructive" onClick={onDelete}>
+          <Trash2 /> {t("home.deleteScene")}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -167,7 +184,9 @@ function ProjectCard({ entry, onOpen, onForget }: {
             entry.missing ? "opacity-50" : "group-hover:border-primary/50",
           )}
         >
-          {entry.missing ? <FileWarning className="size-7 opacity-70" strokeWidth={1.5} /> : <FileCheck2 className="size-7 opacity-70" strokeWidth={1.5} />}
+          {entry.missing
+            ? <FileWarning className="size-7 opacity-70" strokeWidth={1.5} />
+            : <ProjectThumb path={entry.path} />}
         </button>
         <Tooltip>
           <TooltipTrigger render={<button type="button" onClick={onForget} aria-label={t("home.forgetProject")} className="absolute right-1.5 top-1.5 inline-flex size-6 items-center justify-center rounded bg-card/90 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100" />}>
@@ -178,7 +197,11 @@ function ProjectCard({ entry, onOpen, onForget }: {
         <Tooltip>
           <TooltipTrigger render={<button type="button" onClick={onOpen} disabled={entry.missing} className="min-w-0 text-left" />}>
             <p className="truncate text-sm font-medium text-foreground">{entry.title}</p>
-            <p className="truncate text-xs text-muted-foreground">{entry.missing ? t("home.projectMissing") : folder}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {entry.missing
+                ? t("home.projectMissing")
+                : t("home.modified", { date: relDate(entry.modifiedAt ?? entry.openedAt) })}
+            </p>
           </TooltipTrigger>
           <TooltipContent>{entry.path}</TooltipContent>
         </Tooltip>
@@ -277,10 +300,17 @@ export function ReferenceHome({
     saveSet(LS_FAV, next);
   }, [favorites]);
 
-  const onDrop = (e: React.DragEvent) => {
+  const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setOver(false);
-    const files = Array.from(e.dataTransfer.files).filter(
+    const dropped = Array.from(e.dataTransfer.files);
+    const projectFile = dropped.find((file) => file.name.toLowerCase().endsWith(".netsu"));
+    if (projectFile && onOpenRecent) {
+      const [projectPath] = await nr.pathsForFiles([projectFile]);
+      if (projectPath) onOpenRecent(projectPath);
+      return;
+    }
+    const files = dropped.filter(
       (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
     );
     if (files.length) onNewFiles(files);
