@@ -127,15 +127,28 @@ function pipeUpstream(url, req, res, onExpired, redirects = 0) {
   res.on("close", () => upReq.destroy());
 }
 
+function logResolveFailure(id, error) {
+  const detail = String(error || "unknown error").replace(/[\r\n]+/g, " ").slice(0, 800);
+  console.error(`ytstream: resolve ${id} failed: ${detail}`);
+}
+
 // GET/HEAD `/ytstream?id=<videoId>` — relaie le flux avec les plages d'octets (seek et trim en
 // dépendent). Le renouvellement d'URL est transparent : le renderer ne voit qu'une source stable.
 async function serveYoutube(req, res, id) {
   if (!validId(id)) { res.writeHead(400).end("bad id"); return; }
   const first = await resolveStream(id);
-  if (!first.ok || !first.url) { res.writeHead(502).end("resolve failed"); return; }
+  if (!first.ok || !first.url) {
+    logResolveFailure(id, first.error);
+    res.writeHead(502).end("resolve failed");
+    return;
+  }
   pipeUpstream(first.url, req, res, async () => {
     const again = await resolveStream(id, true);
-    if (!again.ok || !again.url) { if (!res.headersSent) res.writeHead(502).end("resolve failed"); return; }
+    if (!again.ok || !again.url) {
+      logResolveFailure(id, again.error);
+      if (!res.headersSent) res.writeHead(502).end("resolve failed");
+      return;
+    }
     pipeUpstream(again.url, req, res, null);
   });
 }
