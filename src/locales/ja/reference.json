@@ -401,8 +401,6 @@
     "delete": "シーンを削除"
   },
   "home": {
-    "importBoard": "ボードを読み込む",
-    "importNetsu": ".netsu を読み込む",
     "deleteOptions": "削除オプション",
     "hideFromList": "一覧から隠す",
     "deleteScene": "シーンを削除",

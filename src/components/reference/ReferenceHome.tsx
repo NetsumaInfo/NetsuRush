@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ImageUp, History, Settings2, FileInput, FilePlus2, FolderOpen, FileCheck2, FileWarning,
+  ImageUp, History, Settings2, FilePlus2, FolderOpen, FileCheck2, FileWarning,
   Star, Trash2, EyeOff, FolderSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ function relDate(ts: number): string {
 
 const LS_FAV = "nr-ref-favorites";
 const LS_HIDDEN = "nr-ref-hidden";
+const MEDIA_PATH_RE = /\.(?:bmp|dpx|exr|gif|jpe?g|png|tiff?|webp|avi|flv|m2ts|m4v|mkv|mov|mp4|mpeg?|mxf|ts|webm|wmv)$/i;
 
 function loadSet(key: string): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(key) ?? "[]") as string[]); }
@@ -274,8 +275,8 @@ export function ReferenceHome({
   onOpen,
   onNew,
   onNewFiles,
+  onNewPaths,
   onSettings,
-  onImport,
   onOpenProject,
   onOpenRecent,
   recents,
@@ -285,8 +286,8 @@ export function ReferenceHome({
   onOpen: (id: string) => void;
   onNew: () => void;
   onNewFiles: (files: File[]) => void;
+  onNewPaths: (paths: string[]) => void;
   onSettings: () => void;
-  onImport?: () => void;
   onOpenProject?: () => void;
   onOpenRecent?: (filePath: string) => void;
   recents?: () => Promise<NetsuRecent[]>;
@@ -347,15 +348,45 @@ export function ReferenceHome({
     saveSet(LS_FAV, next);
   }, [favorites]);
 
+  const openDroppedProject = useCallback((paths: string[]): boolean => {
+    const projectPath = paths.find((filePath) => filePath.toLowerCase().endsWith(".netsu"));
+    if (!projectPath || !onOpenRecent) return false;
+    void onOpenRecent(projectPath);
+    return true;
+  }, [onOpenRecent]);
+
+  // Tauri handles operating-system file drops before the DOM. Keep the browser drop handler below
+  // for development, and use the native event in the packaged application where real paths exist.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return undefined;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    void import("@tauri-apps/api/webview")
+      .then(({ getCurrentWebview }) => getCurrentWebview().onDragDropEvent(({ payload }) => {
+        if (payload.type === "enter") {
+          setOver(payload.paths.some((filePath) => filePath.toLowerCase().endsWith(".netsu") || MEDIA_PATH_RE.test(filePath)));
+          return;
+        }
+        if (payload.type === "leave") { setOver(false); return; }
+        if (payload.type !== "drop") return;
+        setOver(false);
+        if (openDroppedProject(payload.paths)) return;
+        const mediaPaths = payload.paths.filter((filePath) => MEDIA_PATH_RE.test(filePath));
+        if (mediaPaths.length) onNewPaths(mediaPaths);
+      }))
+      .then((stop) => { if (disposed) stop(); else unlisten = stop; })
+      .catch(() => {});
+    return () => { disposed = true; unlisten?.(); };
+  }, [onNewPaths, openDroppedProject]);
+
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setOver(false);
     const dropped = Array.from(e.dataTransfer.files);
     const projectFile = dropped.find((file) => file.name.toLowerCase().endsWith(".netsu"));
-    if (projectFile && onOpenRecent) {
+    if (projectFile) {
       const [projectPath] = await nr.pathsForFiles([projectFile]);
-      if (projectPath) onOpenRecent(projectPath);
-      return;
+      if (projectPath && openDroppedProject([projectPath])) return;
     }
     const files = dropped.filter(
       (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
@@ -375,7 +406,7 @@ export function ReferenceHome({
       onDragLeave={(e) => { if (e.target === e.currentTarget) setOver(false); }}
       onDrop={onDrop}
     >
-      {/* Ouvrir un projet .netsu (le fichier devient le document) / importer une archive (copie) */}
+      {/* A .netsu file is always opened as the working project. */}
       <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
         {onOpenProject && (
           <Tooltip>
@@ -392,23 +423,6 @@ export function ReferenceHome({
               <FolderOpen className="size-4" /> {t("home.openProject")}
             </TooltipTrigger>
             <TooltipContent>{t("home.openProjectHint")}</TooltipContent>
-          </Tooltip>
-        )}
-        {onImport && (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  aria-label={t("home.importBoard")}
-                  onClick={onImport}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                />
-              }
-            >
-              <FileInput className="size-4" /> {t("home.importNetsu")}
-            </TooltipTrigger>
-            <TooltipContent>{t("home.importBoard")}</TooltipContent>
           </Tooltip>
         )}
       </div>

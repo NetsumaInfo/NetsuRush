@@ -401,8 +401,6 @@
     "delete": "Eliminar la escena"
   },
   "home": {
-    "importBoard": "Importar un tablero",
-    "importNetsu": "Importar .netsu",
     "deleteOptions": "Opciones de eliminación",
     "hideFromList": "Ocultar de la lista",
     "deleteScene": "Eliminar la escena",

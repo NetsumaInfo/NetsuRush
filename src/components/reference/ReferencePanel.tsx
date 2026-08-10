@@ -66,14 +66,6 @@ export function ReferencePanel() {
     setMode("board");
   };
 
-  // Importe une archive .netsu → scène ouverte sur le board.
-  const onImport = async () => {
-    const src = await nr.reference?.chooseNetsu();
-    if (!src) return;
-    await persistence.importBoard(src);
-    setMode("board");
-  };
-
   // Ingestion différée : le board n'existe qu'en mode "board" → on attend son montage.
   useEffect(() => {
     if (mode !== "board" || !pending || !boardRef.current) return;
@@ -119,8 +111,8 @@ export function ReferencePanel() {
           onOpen={onOpenScene}
           onNew={() => startNew({})}
           onNewFiles={(files) => startNew({ files })}
+          onNewPaths={(paths) => startNew({ paths })}
           onSettings={() => setSettingsDlg(true)}
-          onImport={persistence.available ? () => void onImport() : undefined}
           onOpenProject={persistence.available ? project.openProject : undefined}
           onOpenRecent={persistence.available ? project.openRecent : undefined}
           recents={persistence.recentProjects}

@@ -401,8 +401,6 @@
     "delete": "Supprimer la scène"
   },
   "home": {
-    "importBoard": "Importer un board",
-    "importNetsu": "Importer .netsu",
     "deleteOptions": "Options de suppression",
     "hideFromList": "Masquer de la liste",
     "deleteScene": "Supprimer la scène",

@@ -401,8 +401,6 @@
     "delete": "删除场景"
   },
   "home": {
-    "importBoard": "导入画板",
-    "importNetsu": "导入 .netsu",
     "deleteOptions": "删除选项",
     "hideFromList": "从列表隐藏",
     "deleteScene": "删除场景",

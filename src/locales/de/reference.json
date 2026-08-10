@@ -401,8 +401,6 @@
     "delete": "Szene löschen"
   },
   "home": {
-    "importBoard": "Board importieren",
-    "importNetsu": ".netsu importieren",
     "deleteOptions": "Löschoptionen",
     "hideFromList": "Aus der Liste ausblenden",
     "deleteScene": "Szene löschen",

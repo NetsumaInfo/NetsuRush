@@ -52,5 +52,16 @@ test('dropping a netsu opens it as a project before media ingestion', () => {
   assert.match(source, /\.name\.toLowerCase\(\)\.endsWith\("\.netsu"\)/);
   assert.match(source, /nr\.pathsForFiles\(\[projectFile\]\)/);
   assert.match(source, /onOpenRecent\(projectPath\)/);
+  assert.match(source, /getCurrentWebview\(\)\.onDragDropEvent/);
+  assert.match(source, /payload\.type !== "drop"/);
+  assert.match(source, /openDroppedProject\(payload\.paths\)/);
   assert.ok(source.indexOf('.endsWith(".netsu")') < source.indexOf('f.type.startsWith("image/")'));
+});
+
+test('the home exposes one netsu project opener and no archive import action', () => {
+  const home = source.slice(source.indexOf('// ---------- Composant principal ----------'));
+  assert.equal((home.match(/onClick=\{onOpenProject\}/g) || []).length, 1);
+  assert.doesNotMatch(home, /onImport/);
+  assert.doesNotMatch(home, /home\.importNetsu/);
+  assert.doesNotMatch(home, /home\.importBoard/);
 });
