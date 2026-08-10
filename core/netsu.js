@@ -123,7 +123,12 @@ function previewProject(refStore, srcPath) {
 
 /** @param {any} scene @returns {Set<string>} */
 function sceneItemIds(scene) {
-  return new Set(((scene && scene.items) || []).map((item) => String(item && item.id || '')).filter(Boolean));
+  const ids = new Set();
+  for (const item of (scene && scene.items) || []) {
+    const id = String(item && item.id || '');
+    if (id) ids.add(id);
+  }
+  return ids;
 }
 
 /**
