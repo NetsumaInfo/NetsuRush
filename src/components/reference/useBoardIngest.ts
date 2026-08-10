@@ -252,18 +252,18 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
 
   // URL d'image distante.
   const addImageUrl = useCallback(
-    async (url: string, at?: { x: number; y: number }) => {
+    async (url: string, at?: { x: number; y: number }, sourceUrl = url) => {
       const nat = await probeImage(url);
-      place("image", url, url, nat, undefined, at);
+      place("image", url, url, nat, undefined, at, { sourceUrl });
     },
     [place],
   );
 
   // URL distante d'un fichier vidéo direct (.mp4/.webm…) → item vidéo natif (hotlink direct).
   const addVideoFileUrl = useCallback(
-    async (url: string, at?: { x: number; y: number }) => {
+    async (url: string, at?: { x: number; y: number }, sourceUrl = url) => {
       const nat = await probeVideo(url);
-      place("video", url, url, nat, undefined, at);
+      place("video", url, url, nat, undefined, at, { sourceUrl });
     },
     [place],
   );
@@ -272,9 +272,14 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
   // CÔTÉ CORE (pas de CORS/référrer dans la WebView) et on persiste en asset disque (durable).
   // Repli : hotlink direct si le core est indispo ou refuse le download.
   const addRemoteMedia = useCallback(
-    async (url: string, hint?: "image" | "video", at?: { x: number; y: number }): Promise<boolean> => {
+    async (
+      url: string,
+      hint?: "image" | "video",
+      at?: { x: number; y: number },
+      sourceUrl = url,
+    ): Promise<boolean> => {
       if ((hint === "video" || isVideoUrl(url)) && !useBoard.getState().prefs.autoDownloadOnline) {
-        await addVideoFileUrl(url, at);
+        await addVideoFileUrl(url, at, sourceUrl);
         return true;
       }
       if (nr.reference?.fetchAsset) {
@@ -283,15 +288,15 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
           if (res.ok && res.path && res.kind) {
             const src = displaySrc(res.kind, res.path);
             const nat = await probeNat(res.kind, src);
-            place(res.kind, res.path, src, nat, undefined, at);
+            place(res.kind, res.path, src, nat, undefined, at, { sourceUrl });
             return true;
           }
         } catch {
           /* repli hotlink direct ci-dessous */
         }
       }
-      if (hint === "video" || isVideoUrl(url)) { await addVideoFileUrl(url, at); return true; }
-      if (hint === "image" || isImageUrl(url)) { await addImageUrl(url, at); return true; }
+      if (hint === "video" || isVideoUrl(url)) { await addVideoFileUrl(url, at, sourceUrl); return true; }
+      if (hint === "image" || isImageUrl(url)) { await addImageUrl(url, at, sourceUrl); return true; }
       return false;
     },
     [place, addVideoFileUrl, addImageUrl],
@@ -402,7 +407,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       try {
         // 3a. Giphy → URL CDN directe du GIF (la page bloque le scraping) → download image animée.
         const gif = giphyGifUrl(text);
-        if (gif) return await addRemoteMedia(gif, "image", at);
+        if (gif) return await addRemoteMedia(gif, "image", at, text);
 
         // 3b. Fichier média direct (.mp4/.gif/.png…, ou ?format=jpg) → download des octets.
         if (isVideoUrl(text)) return await addRemoteMedia(text, "video", at);

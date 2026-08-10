@@ -15,3 +15,10 @@ test('YouTube downloads only in automatic mode and AMVNews stays generic', () =>
   assert.match(source, /if\s*\(yt\s*&&\s*prefs\.autoDownloadOnline\)/);
   assert.doesNotMatch(source, /amvnews/i);
 });
+
+test('every remote image and video keeps the user-entered source URL', () => {
+  assert.match(source, /place\("image",\s*url,\s*url,\s*nat,\s*undefined,\s*at,\s*\{\s*sourceUrl\s*\}\)/);
+  assert.match(source, /place\("video",\s*url,\s*url,\s*nat,\s*undefined,\s*at,\s*\{\s*sourceUrl\s*\}\)/);
+  assert.match(source, /place\(res\.kind,\s*res\.path,\s*src,\s*nat,\s*undefined,\s*at,\s*\{\s*sourceUrl\s*\}\)/);
+  assert.match(source, /addRemoteMedia\(gif,\s*"image",\s*at,\s*text\)/);
+});
