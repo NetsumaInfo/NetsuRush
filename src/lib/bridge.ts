@@ -2620,6 +2620,7 @@ export interface NrApi {
   ytStreamUrl(videoId: string): string;
   openExternal(url: string): Promise<boolean>;
   openPath(path: string): Promise<boolean>;
+  revealPath(path: string): Promise<boolean>;
   // Épingle la fenêtre principale au-dessus des autres (always-on-top), pour la garder visible
   // dans un coin de l'écran tout en travaillant dans Resolve. No-op hors Tauri.
   setAlwaysOnTop(on: boolean): void;
@@ -3172,6 +3173,7 @@ const mock: NrApi = {
   ytStreamUrl: (id) => "nrmedia://ytstream?id=" + encodeURIComponent(id),
   openExternal: async (url) => { try { window.open(url, "_blank", "noopener"); } catch { /* noop */ } return true; },
   openPath: async () => false,
+  revealPath: async () => false,
   setAlwaysOnTop: () => {},
   setWindowSize: () => {},
   // Le fond d'écran exige ffmpeg : sans backend, la bibliothèque est vide et l'import échoue

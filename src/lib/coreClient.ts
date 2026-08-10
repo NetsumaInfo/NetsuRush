@@ -360,6 +360,18 @@ async function openPath(path: string): Promise<boolean> {
   }
 }
 
+// Ouvre l'Explorateur sur le dossier contenant le chemin et sélectionne l'élément exact.
+async function revealPath(path: string): Promise<boolean> {
+  if (!path || !isTauri) return false;
+  try {
+    const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+    await revealItemInDir(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function abToB64(ab: ArrayBuffer): string {
   const bytes = new Uint8Array(ab);
   let bin = "";
@@ -904,6 +916,7 @@ export function makeCoreClient(): NrApi {
     ytStreamUrl: (id) => `${BASE}/ytstream?id=${encodeURIComponent(id)}${tkParam}`,
     openExternal: (url) => openUrl(url),
     openPath: (p) => openPath(p),
+    revealPath: (p) => revealPath(p),
     setAlwaysOnTop: (on) => {
       void (async () => {
         if (!isTauri) return;
