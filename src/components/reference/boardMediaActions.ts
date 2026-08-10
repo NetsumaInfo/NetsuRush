@@ -6,6 +6,13 @@ import { nr } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { displaySrc, fitSize, parseVideoEmbed, probeNat, youtubeId } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
+import {
+  originalOnlineSource,
+  recoverableOnlineItems,
+  runSequentialRecovery,
+} from "./boardMediaRecovery";
+
+export { recoverableOnlineItems } from "./boardMediaRecovery";
 
 const tr = (key: string, opts?: Record<string, unknown>) => i18n.t(`reference:${key}`, opts);
 
@@ -55,25 +62,32 @@ export async function recoverMedia(id: string): Promise<boolean> {
   const st = useBoard.getState();
   const it = st.items.find((i) => i.id === id);
   if (!it) return false;
-  if (it.kind === "embed") { await downloadMediaFromEmbed(id); return true; }
-  if (it.kind !== "image" && it.kind !== "video") return false;
-  const link = it.sourceUrl || (/^https?:/i.test(it.ref) ? it.ref : "");
+  if (it.kind === "embed") return downloadMediaFromEmbed(id);
+  if (it.kind !== "image" && it.kind !== "video" && it.kind !== "sequence") return false;
+  const link = originalOnlineSource(it) || (/^https?:/i.test(it.ref) ? it.ref : "");
   if (!link) return false;
   st.setNotice({ kind: "ok", sticky: true, text: tr("notice.recoveringMedia") });
   try {
     let path: string | null = null;
-    let kind: "image" | "video" = it.kind;
-    const r = await nr.reference?.resolveMedia?.(link);
-    if (r?.ok && r.path) { path = r.path; kind = r.kind ?? it.kind; }
-    else {
-      const e = await nr.reference?.extractMedia?.(link);
-      if (e?.ok && e.items?.length) { path = e.items[0].path; kind = e.items[0].kind; }
+    let kind: "image" | "video" = it.kind === "image" ? "image" : "video";
+    const extracted = await nr.reference?.extractMedia?.(link);
+    if (extracted?.ok && extracted.items?.length) {
+      const first = kind === "video"
+        ? extracted.items.find((entry) => entry.kind === "video") ?? extracted.items[0]
+        : extracted.items[0];
+      path = first.path;
+      kind = first.kind;
+    } else {
+      const resolved = await nr.reference?.resolveMedia?.(link);
+      if (resolved?.ok && resolved.path) { path = resolved.path; kind = resolved.kind ?? kind; }
     }
     if (!path) { st.setNotice({ kind: "error", text: tr("notice.mediaUnrecoverable") }); return false; }
     const src = displaySrc(kind, path);
     const nat = await probeNat(kind, src);
     st.patchItem(id, {
-      kind, ref: path, src, missing: undefined, sourceUrl: it.sourceUrl || link,
+      kind, ref: path, src, missing: undefined, sourceUrl: link,
+      frames: undefined, frame: undefined, fps: undefined, speed: undefined, seqPlay: undefined,
+      seqIn: undefined, seqOut: undefined, prevMedia: undefined,
       ...(nat.w && nat.h ? { natW: nat.w, natH: nat.h } : {}),
     });
     st.setNotice(null);
@@ -82,6 +96,25 @@ export async function recoverMedia(id: string): Promise<boolean> {
     st.setNotice({ kind: "error", text: tr("notice.recoverFailed") });
     return false;
   }
+}
+
+export async function recoverAllOnlineMedia() {
+  const items = recoverableOnlineItems(useBoard.getState().items);
+  const result = await runSequentialRecovery(
+    items,
+    (item) => recoverMedia(item.id),
+    (current, total) => {
+      useBoard.getState().setNotice({
+        kind: "ok",
+        sticky: true,
+        text: tr("notice.recoveringOnline", { current, total }),
+      });
+    },
+  );
+  useBoard.getState().setNotice(
+    result.recovered ? { kind: "ok", text: tr("notice.mediaRecovered", { count: result.recovered }) } : null,
+  );
+  return result;
 }
 
 // Balaye le board après import : ré-extrait en média local les embeds des plateformes CHOISIES dans

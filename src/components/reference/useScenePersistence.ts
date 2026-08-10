@@ -7,7 +7,7 @@ import { nr, type NetsuExportOpts, type NetsuWeight } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { useBoard } from "./useReferenceBoard";
 import { type BoardItem, type BoardView, displaySrc } from "./referenceShared";
-import { recoverOnlineEmbeds } from "./boardMediaActions";
+import { recoverAllOnlineMedia, recoverOnlineEmbeds } from "./boardMediaActions";
 
 // Scènes réservées (non listées) : handoff vers la fenêtre détachée, autosave de session.
 const HANDOFF_ID = "__handoff__";
@@ -109,9 +109,14 @@ export function useScenePersistence() {
       // « Enregistrer sous » donnera un vrai fichier de projet.
       useBoard.setState({ sceneId: null, dirty: !!res.readonly });
       flash(tr(res.readonly ? "notice.projectOpenedLegacy" : "notice.projectOpened", { name: fileLabel(srcPath) }), "ok");
+      if (!res.readonly) {
+        void recoverAllOnlineMedia().then(async (result) => {
+          if (result.recovered > 0) await saveProject();
+        });
+      }
       return true;
     },
-    [api],
+    [api, saveProject],
   );
 
   const recentProjects = useCallback(() => api?.recentProjects("board") ?? Promise.resolve([]), [api]);
