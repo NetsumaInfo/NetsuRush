@@ -2,6 +2,7 @@
 
 > Application de bureau autonome qui pilote les logiciels de montage **de l'extérieur**.
 > Hub de post-production : derush, recherche de plans, traitements GPU, référence, transfert.
+> Puis, en phase 2 : découverte de tutoriels et échange communautaire autour de DaVinci Resolve.
 
 ## 1. Vision
 
@@ -13,6 +14,33 @@ d'autres projets de la communauté, jamais leur code.
 Le pari : ces tâches n'ont pas besoin de vivre *dans* le NLE. Les faire à l'extérieur permet de
 servir Resolve, Premiere et After Effects avec la même application, et de ne dépendre d'aucun
 runtime imposé par un éditeur.
+
+### 1.1 Deux actes
+
+**Acte 1 — l'outillage local (en cours).** Les modules de la section 3 : tout tourne sur la
+machine de l'utilisateur, sans compte obligatoire au-delà du gate bêta, sans serveur à payer.
+C'est le périmètre à stabiliser avant tout le reste.
+
+**Acte 2 — la découverte et la communauté (planifié).** DaVinci Resolve souffre d'un problème
+que Premiere et After Effects n'ont pas : le savoir existe, mais il est *introuvable*. Les
+tutoriels sont dispersés sur des petites chaînes YouTube mal référencées ; les scripts, macros
+Fusion, DCTL, PowerGrades et plugins vivent dans quelques poches de communauté (forums,
+Discord, dépôts isolés) que personne ne trouve en arrivant. Pourtant, la force propre de
+Resolve est justement la facilité à *créer* et *partager* des presets et des outils.
+
+NetsuRush ajoute donc deux surfaces adossées à un serveur du projet :
+
+- **NetsuLearn** — découverte de tutoriels : page d'accueil éditoriale (populaires par thème,
+  dernières sorties, chaînes qui montent), annuaire de chaînes par spécialité, et recherche
+  qui rend une requête métier (« tracker un masque en Fusion ») sur le tutoriel adapté.
+- **NetsuHub** — échange communautaire : scripts, macros, presets, plugins, avec une aide à
+  l'installation dans Resolve, plus un forum de demandes (tutoriel manquant, preset cherché,
+  entraide).
+
+L'acte 2 coûte de l'argent (serveur, bande passante, modération) : **il n'est engagé qu'une fois
+l'acte 1 stabilisé et l'intérêt réel des utilisateurs mesuré.** Conception, coûts, sécurité et
+questions ouvertes : [`community-hub.md`](community-hub.md). Modèle économique et licence :
+`perso/communaute-et-monetisation.md`.
 
 ## 2. Contraintes et faits techniques
 
@@ -48,9 +76,13 @@ runtime imposé par un éditeur.
 | Optimisation | **NetsuBoost** | Diagnostic et libération des ressources de l'hôte | livré |
 | Transfert | **NetsuBridge** | Recopie d'une timeline d'un logiciel vers un autre | livré, runtime Adobe non testé |
 | Export AE | — | Export d'une timeline vers After Effects (`.jsx`) | livré |
+| Tutoriels | **NetsuLearn** | Fil éditorial, annuaire de chaînes par spécialité, recherche de tutoriels Resolve | planifié (phase 2) |
+| Communauté | **NetsuHub** | Scripts, macros Fusion, presets et plugins ; installation assistée dans Resolve ; forum de demandes | planifié (phase 2) |
 
 Les modules marqués « runtime non testé » compilent et passent leurs tests, mais exigent un
 logiciel tiers, un GPU ou des modèles téléchargés pour être exercés de bout en bout.
+Les modules « planifié (phase 2) » ne sont **pas** commencés : ils dépendent d'un serveur du
+projet et d'un signal d'adoption. Voir [`community-hub.md`](community-hub.md).
 
 ## 4. Architecture
 
@@ -86,8 +118,12 @@ Trois règles ont chacune corrigé un bug réel et ne doivent pas être cassées
 ## 6. Hors périmètre
 
 - macOS et Linux (le lecteur natif, le panneau CEP et le packaging sont Windows).
-- Backend cloud de partage de presets.
 - DaVinci Resolve en version gratuite, pour les fonctions projet.
+- **Phase 1 uniquement** : tout ce qui exige un serveur du projet — catalogue de presets, fil de
+  tutoriels, forum, comptes au-delà du gate bêta. Ce n'est pas abandonné, c'est l'acte 2
+  ([`community-hub.md`](community-hub.md)).
+- **Définitivement hors périmètre** : héberger ou réencoder la vidéo des tutoriels (on renvoie
+  vers YouTube via le lecteur officiel), et exécuter automatiquement du code communautaire.
 
 ## 7. Risques
 
@@ -100,6 +136,16 @@ Trois règles ont chacune corrigé un bug réel et ne doivent pas être cassées
   ordonnanceur central et des portails d'encodage.
 - **Licences** : les modèles et poids tiers ont leurs propres conditions, parfois non
   commerciales. Voir `docs/licensing.md`.
+
+Risques propres à l'acte 2 (détaillés dans [`community-hub.md`](community-hub.md)) :
+
+- **Dépendance à YouTube** : quota de l'API Data v3 et clé qui doit rester côté serveur (Convex).
+  Les vidéos se regardent dans le **lecteur embarqué officiel** : la vue compte pour le créateur
+  et la chaîne est mise en avant — l'app n'héberge et ne réencode jamais la vidéo.
+- **Coût récurrent du serveur**, sans revenu garanti : c'est la raison du gate sur l'adoption.
+- **Chaîne d'approvisionnement** : un script, un DCTL ou une macro Fusion communautaire est du
+  code exécuté par Resolve. L'app ne l'exécute jamais d'elle-même.
+- **Modération** : c'est le mur où meurent les plateformes de partage solo.
 
 ## 8. Stack
 

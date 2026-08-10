@@ -44,6 +44,7 @@ NetsuRush is a standalone desktop app (Tauri shell + Node "core" service) that d
 |---|---|
 | Setup, branch and PR rules | `CONTRIBUTING.md` |
 | Product vision, modules, risks | `docs/prd.md` |
+| Phase-2 tutorial discovery and community hub (design only) | `docs/community-hub.md` |
 | Runtime layout, IPC, UI system, theming, settings map | `docs/architecture.md` |
 | Rules that break correctness if violated | `docs/invariants.md` |
 | Per-module notes (board, `.netsu`, voice, models, roto) | `docs/modules.md` |
