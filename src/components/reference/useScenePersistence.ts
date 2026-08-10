@@ -73,6 +73,7 @@ export function useScenePersistence() {
         scene: { name: st.sceneName, items: persistable(st.items), view: st.view },
         destPath: dest,
         fromPath: st.filePath,
+        sourceSceneId: st.sceneId,
       });
       if (res?.ok) {
         useBoard.setState({ filePath: res.path ?? dest, fileReadonly: false, sceneId: null, dirty: false });

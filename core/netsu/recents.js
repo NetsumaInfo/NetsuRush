@@ -60,6 +60,7 @@ function list(type) {
       type: String(entry.type || 'board'),
       openedAt: Number(entry.openedAt) || 0,
       missing: !fs.existsSync(String(entry.path)),
+      sourceSceneId: typeof entry.sourceSceneId === 'string' ? entry.sourceSceneId : undefined,
     }))
     .sort((a, b) => b.openedAt - a.openedAt);
 }
@@ -67,19 +68,25 @@ function list(type) {
 /**
  * Note un projet comme le plus récent. Un même fichier ne figure qu'une fois : la clé est le chemin
  * résolu en minuscules, sinon deux graphies du même fichier occuperaient deux lignes sous Windows.
- * @param {{ path: string, title?: string, type?: string }} entry
+ * @param {{ path: string, title?: string, type?: string, sourceSceneId?: string }} entry
  */
 function remember(entry) {
   const filePath = String((entry && entry.path) || '');
   if (!filePath) return list();
   const key = keyFor(filePath);
-  const kept = readAll().filter((e) => e && typeof e.path === 'string' && keyFor(e.path) !== key);
+  const all = readAll();
+  const previous = all.find((e) => e && typeof e.path === 'string' && keyFor(e.path) === key);
+  const kept = all.filter((e) => e && typeof e.path === 'string' && keyFor(e.path) !== key);
+  const sourceSceneId = typeof entry.sourceSceneId === 'string'
+    ? entry.sourceSceneId
+    : typeof previous?.sourceSceneId === 'string' ? previous.sourceSceneId : undefined;
   const next = [
     {
       path: path.resolve(filePath),
       title: String((entry && entry.title) || path.basename(filePath)),
       type: String((entry && entry.type) || 'board'),
       openedAt: Date.now(),
+      ...(sourceSceneId ? { sourceSceneId } : {}),
     },
     ...kept,
   ].slice(0, MAX_ENTRIES);

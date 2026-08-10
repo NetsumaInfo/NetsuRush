@@ -234,9 +234,9 @@ async function saveProject(refStore, filePath, scene) {
  * « Enregistrer sous… » : le projet DÉMÉNAGE. Le fichier de destination est reparti de zéro (le
  * sélecteur a déjà demandé confirmation d'écrasement) et l'ancien document n'est refermé qu'APRÈS
  * une écriture réussie — sinon un disque plein laisserait l'utilisateur sans aucun document ouvert.
- * @param {any} refStore @param {{ scene: any, destPath: string, fromPath?: string }} args
+ * @param {any} refStore @param {{ scene: any, destPath: string, fromPath?: string, sourceSceneId?: string }} args
  */
-async function saveProjectAs(refStore, { scene, destPath, fromPath }) {
+async function saveProjectAs(refStore, { scene, destPath, fromPath, sourceSceneId }) {
   try {
     if (!destPath) return { ok: false, error: t('destinationMissing') };
     sessions.closeSession(destPath);
@@ -252,8 +252,19 @@ async function saveProjectAs(refStore, { scene, destPath, fromPath }) {
     if (fromPath && path.resolve(fromPath).toLowerCase() !== session.path.toLowerCase()) {
       sessions.closeSession(fromPath);
     }
-    recents.remember({ path: session.path, title: (scene && scene.name) || '', type: 'board' });
-    return { ...res, sidecarDir: sidecar.sidecarDirFor(session.path) };
+    const convertedSceneId = typeof sourceSceneId === 'string' && sourceSceneId ? sourceSceneId : undefined;
+    recents.remember({
+      path: session.path,
+      title: (scene && scene.name) || '',
+      type: 'board',
+      sourceSceneId: convertedSceneId,
+    });
+    const sourceCleanup = convertedSceneId ? refStore.deleteScene(convertedSceneId) : { ok: true };
+    return {
+      ...res,
+      sidecarDir: sidecar.sidecarDirFor(session.path),
+      ...(convertedSceneId ? { sourceSceneId: convertedSceneId, sourceCleanup } : {}),
+    };
   } catch (e) {
     sessions.closeSession(destPath);
     return { ok: false, error: String((e && e.message) || e) };

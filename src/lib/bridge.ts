@@ -1310,6 +1310,8 @@ export interface NetsuProjectSave {
   bytes?: number;
   sidecarDir?: string;      // dossier compagnon des médias, à côté du fichier
   counts?: { items: number; changed: number; removed: number; adopted: number; missing: number; freed: number };
+  sourceSceneId?: string;
+  sourceCleanup?: { ok: boolean; error?: string };
   error?: string;
 }
 /** Un projet récemment ouvert. `missing` = le fichier n'est plus à ce chemin (disque débranché…). */
@@ -1319,6 +1321,7 @@ export interface NetsuRecent {
   type: string;
   openedAt: number;
   missing: boolean;
+  sourceSceneId?: string;
 }
 
 export interface ResolvedOnlineMedia {
@@ -1391,7 +1394,7 @@ export interface RefApi {
   // le fait déménager. `readonly` = archive v1, lisible mais pas modifiable en place.
   openProject(srcPath: string): Promise<NetsuProjectRead>;
   saveProject(filePath: string, scene: NetsuScene): Promise<NetsuProjectSave>;
-  saveProjectAs(opts: { scene: NetsuScene; destPath: string; fromPath?: string | null }): Promise<NetsuProjectSave>;
+  saveProjectAs(opts: { scene: NetsuScene; destPath: string; fromPath?: string | null; sourceSceneId?: string | null }): Promise<NetsuProjectSave>;
   closeProject(filePath: string): Promise<{ ok: boolean; closed?: boolean }>;
   recentProjects(type?: string): Promise<NetsuRecent[]>;
   forgetProject(filePath: string): Promise<NetsuRecent[]>;
