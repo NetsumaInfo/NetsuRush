@@ -20,6 +20,7 @@ const crypto = require('node:crypto');
 const blobs = require('./blobs');
 const levels = require('./levels');
 const sidecar = require('./sidecar');
+const relocate = require('./relocate');
 const { embedItem, describeSource } = require('./embed');
 
 const DOC_TYPE = 'board';
@@ -181,14 +182,15 @@ async function writeBoardDoc({ handle, refStore, scene, docId, defaults, freezeL
 
 /**
  * Un token → un chemin local exploitable, ou un placeholder relocalisable.
- * @returns {{ path: string, missing?: { name: string, size: number, kind: string }|null }}
+ * @returns {{ path: string, missing?: { name: string, size: number, kind: string,
+ *             locator?: string, frameLocators?: (string|null)[] }|null }}
  */
 function resolveToken(ctx, token, kindHint) {
   const value = String(token || '');
   // Média du dossier compagnon : chemin RELATIF au fichier, donc résolu depuis lui et non depuis un
   // magasin global — c'est ce qui permet de déplacer un projet avec ses médias.
   if (sidecar.isSidecarToken(value)) {
-    const resolved = sidecar.resolveSidecar(ctx.handle.path, value);
+    const resolved = relocate.findCompanionFile(ctx.handle.path, value);
     if (resolved && fs.existsSync(resolved)) return { path: resolved, missing: null };
     return {
       path: '',
@@ -217,6 +219,8 @@ function resolveToken(ctx, token, kindHint) {
       const stat = fs.statSync(String(row.path));
       if (stat.isFile() && (!row.size || stat.size === Number(row.size))) return { path: String(row.path), missing: null };
     } catch (_) { /* déplacé ou disque absent → placeholder */ }
+    const moved = relocate.findReferencedFile(ctx.handle.path, row);
+    if (moved) return { path: moved, missing: null };
     return {
       path: '',
       missing: {

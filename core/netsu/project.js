@@ -78,7 +78,8 @@ function adoptInto(ctx, absPath, place) {
  * @param {any} ctx @param {string} rawRef @param {string} kindHint
  * @param {{ title?: string, group?: string, index?: number }} [place]
  * @returns {Promise<{ token: string, adopted?: boolean, referenced?: boolean,
- *                     missing?: { name: string, size: number, kind: string } }>}
+ *                     missing?: { name: string, size: number, kind: string,
+ *                       locator?: string, frameLocators?: (string|null)[] } }>}
  */
 async function tokenizeProjectRef(ctx, rawRef, kindHint, place) {
   const ref = String(rawRef || '');

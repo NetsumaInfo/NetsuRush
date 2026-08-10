@@ -257,6 +257,91 @@ test('un lien distant reste un lien : un projet ne recopie pas ce qui se retél�
   }
 });
 
+test('un projet renommé retrouve son média dans un unique dossier compagnon voisin', async () => {
+  const { assetsDir, projectsDir, refStore } = workspace();
+  const pasted = writeFile(assetsDir, '5555555555555555.png', 'image à relocaliser');
+  const original = path.join(projectsDir, 'original.netsu');
+  const first = sessions.openSession(original, { create: true });
+  try {
+    await saveBoardProject({
+      session: first,
+      refStore,
+      scene: { name: 'P', items: [{ id: 'i', kind: 'image', ref: pasted, x: 0, y: 0, w: 10, h: 10, z: 0 }] },
+    });
+  } finally {
+    sessions.closeSession(original);
+  }
+
+  const renamed = path.join(projectsDir, 'renamed.netsu');
+  fs.renameSync(original, renamed);
+  const reopened = sessions.openSession(renamed, { create: false });
+  try {
+    const item = readBoardProject({ session: reopened, refStore }).scene.items[0];
+    assert.equal(item.missing, undefined);
+    assert.equal(fs.existsSync(item.ref), true);
+    assert.equal(item.ref.startsWith(sidecar.sidecarDirFor(original)), true);
+  } finally {
+    sessions.closeSession(renamed);
+  }
+});
+
+test('deux dossiers compagnons candidats restent volontairement ambigus', async () => {
+  const { assetsDir, projectsDir, refStore } = workspace();
+  const pasted = writeFile(assetsDir, '6666666666666666.png', 'image ambiguë');
+  const original = path.join(projectsDir, 'original.netsu');
+  const first = sessions.openSession(original, { create: true });
+  try {
+    await saveBoardProject({
+      session: first,
+      refStore,
+      scene: { name: 'P', items: [{ id: 'i', kind: 'image', ref: pasted, x: 0, y: 0, w: 10, h: 10, z: 0 }] },
+    });
+  } finally {
+    sessions.closeSession(original);
+  }
+
+  fs.cpSync(sidecar.sidecarDirFor(original), path.join(projectsDir, 'duplicate.medias'), { recursive: true });
+  const renamed = path.join(projectsDir, 'renamed.netsu');
+  fs.renameSync(original, renamed);
+  const reopened = sessions.openSession(renamed, { create: false });
+  try {
+    const item = readBoardProject({ session: reopened, refStore }).scene.items[0];
+    assert.equal(item.ref, '');
+    assert.match(item.missing.locator, /^sidecar:/);
+  } finally {
+    sessions.closeSession(renamed);
+  }
+});
+
+test('un rush déplacé sous la racine netsu est reconnu par taille et empreinte de tête', async () => {
+  const { root, projectsDir, refStore } = workspace();
+  const rush = writeFile(root, 'A001.mov', Buffer.alloc(1024, 7));
+  const file = path.join(projectsDir, 'projet.netsu');
+  const first = sessions.openSession(file, { create: true });
+  try {
+    await saveBoardProject({
+      session: first,
+      refStore,
+      scene: { name: 'P', items: [{ id: 'v', kind: 'video', ref: rush, x: 0, y: 0, w: 10, h: 10, z: 0 }] },
+    });
+  } finally {
+    sessions.closeSession(file);
+  }
+
+  const movedDir = path.join(projectsDir, 'media');
+  fs.mkdirSync(movedDir, { recursive: true });
+  const moved = path.join(movedDir, path.basename(rush));
+  fs.renameSync(rush, moved);
+  const reopened = sessions.openSession(file, { create: false });
+  try {
+    const item = readBoardProject({ session: reopened, refStore }).scene.items[0];
+    assert.equal(path.resolve(item.ref), path.resolve(moved));
+    assert.equal(item.missing, undefined);
+  } finally {
+    sessions.closeSession(file);
+  }
+});
+
 test('un token compagnon ne peut pas désigner un fichier hors du dossier', () => {
   // Un .netsu reçu d'un tiers ne doit pas pouvoir pointer ailleurs sur la machine.
   const file = 'C:/projets/p.netsu';

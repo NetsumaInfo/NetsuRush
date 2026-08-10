@@ -218,4 +218,4 @@ function writeItemMedia(db, docId, itemId, plan, shas) {
   );
 }
 
-module.exports = { describeSource, embedItem, recordMedia, mediaIdOf, HEAD_BYTES };
+module.exports = { describeSource, embedItem, recordMedia, mediaIdOf, headSha, HEAD_BYTES };
