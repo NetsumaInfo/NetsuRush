@@ -273,6 +273,10 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
   // Repli : hotlink direct si le core est indispo ou refuse le download.
   const addRemoteMedia = useCallback(
     async (url: string, hint?: "image" | "video", at?: { x: number; y: number }): Promise<boolean> => {
+      if ((hint === "video" || isVideoUrl(url)) && !useBoard.getState().prefs.autoDownloadOnline) {
+        await addVideoFileUrl(url, at);
+        return true;
+      }
       if (nr.reference?.fetchAsset) {
         try {
           const res = await nr.reference.fetchAsset(url);
@@ -316,9 +320,12 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     async (url: string, at?: { x: number; y: number }): Promise<boolean> => {
       if (!nr.reference?.resolveMedia) return false;
       try {
-        const res = await nr.reference.resolveMedia(url);
-        if (res.ok && res.path && res.kind) {
-          await placeExtracted([{ path: res.path, kind: res.kind }], url, at);
+        const res = await nr.reference.resolveMedia(url, {
+          download: useBoard.getState().prefs.autoDownloadOnline,
+        });
+        const locator = res.path ?? res.url;
+        if (res.ok && locator && res.kind) {
+          await placeExtracted([{ path: locator, kind: res.kind }], url, at);
           return true;
         }
       } catch {
@@ -358,14 +365,32 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       const m = input.match(/https?:\/\/[^\s<>"']+/);
       const text = m ? m[0] : input.trim();
       if (!/^https?:\/\//i.test(text)) return false;
+      const prefs = useBoard.getState().prefs;
 
-      // 1. YouTube → embed lecteur (boucle Player API).
+      // 1. YouTube : lecteur relayé sans habillage par défaut ; extraction locale en mode auto.
       const yt = youtubeId(text);
-      if (yt) { place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube"); return true; }
+      if (yt && !prefs.autoDownloadOnline) {
+        place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube");
+        return true;
+      }
+      if (yt && prefs.autoDownloadOnline) {
+        const at = centerPoint();
+        const loadingId = addLoading(at, "YouTube");
+        try {
+          if (await extractAndPlace(text, at)) return true;
+          place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube", at);
+          return true;
+        } finally {
+          removeItem(loadingId);
+        }
+      }
 
-      // 2. Lecteurs vidéo propres (Vimeo/Dailymotion/Twitch/Streamable) → embed jouable (pas de DL).
+      // 2. Providers nommés : lecteur tant que leur téléchargement auto n'est pas explicitement actif.
       const e = parseVideoEmbed(text, false);
-      if (e && EMBED_PLAYER_PROVIDERS.has(e.provider)) {
+      const shouldDownloadProvider = !!e
+        && prefs.autoDownloadOnline
+        && prefs.autoDownloadProviders.includes(e.provider);
+      if (e && (EMBED_PLAYER_PROVIDERS.has(e.provider) || !shouldDownloadProvider)) {
         place("embed", e.pageUrl, e.embedUrl, e.size ?? { w: 480, h: 270 }, e.provider);
         return true;
       }
@@ -387,7 +412,9 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         //    Lien générique → OpenGraph d'abord (rapide, couvre GIF/image/article), repli extraction.
         const ok = e
           ? (await extractAndPlace(text, at)) || (await resolvePageAndPlace(text, at))
-          : (await resolvePageAndPlace(text, at)) || (await extractAndPlace(text, at));
+          : prefs.autoDownloadOnline
+            ? (await resolvePageAndPlace(text, at)) || (await extractAndPlace(text, at))
+            : await resolvePageAndPlace(text, at);
         if (ok) return true;
 
         // 5. Échec → repli carte embed ancrée (social, ou générique si autorisé).
