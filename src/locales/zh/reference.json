@@ -501,6 +501,8 @@
     "recoverFailed": "恢复失败",
     "recoveringOnline": "正在恢复在线媒体…（{{current}}/{{total}}）",
     "mediaRecovered": "已恢复 {{count}} 个媒体",
+    "redownloadAll": "全部重新下载（{{count}}）",
+    "recoveryResult": "已恢复 {{recovered}} 个，失败 {{failed}} 个",
     "downloadingVideo": "正在下载视频…",
     "videoDownloaded": "视频已下载",
     "downloadImpossible": "无法下载",

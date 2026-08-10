@@ -501,6 +501,8 @@
     "recoverFailed": "復元に失敗しました",
     "recoveringOnline": "オンラインメディアを復元中…（{{current}}/{{total}}）",
     "mediaRecovered": "{{count}} 件のメディアを復元",
+    "redownloadAll": "すべて再ダウンロード（{{count}}）",
+    "recoveryResult": "{{recovered}} 件復元、{{failed}} 件失敗",
     "downloadingVideo": "動画をダウンロード中…",
     "videoDownloaded": "動画をダウンロードしました",
     "downloadImpossible": "ダウンロードできません",

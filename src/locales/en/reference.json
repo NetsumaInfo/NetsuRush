@@ -501,6 +501,8 @@
     "recoverFailed": "Recovery failed",
     "recoveringOnline": "Recovering online media… ({{current}}/{{total}})",
     "mediaRecovered": "{{count}} media recovered",
+    "redownloadAll": "Redownload all ({{count}})",
+    "recoveryResult": "{{recovered}} recovered, {{failed}} failed",
     "downloadingVideo": "Downloading the video…",
     "videoDownloaded": "Video downloaded",
     "downloadImpossible": "Can't download",

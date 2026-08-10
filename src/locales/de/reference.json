@@ -501,6 +501,8 @@
     "recoverFailed": "Wiederherstellen fehlgeschlagen",
     "recoveringOnline": "Online-Medien werden geholt… ({{current}}/{{total}})",
     "mediaRecovered": "Wiederhergestellte Medien: {{count}}",
+    "redownloadAll": "Alle erneut herunterladen ({{count}})",
+    "recoveryResult": "{{recovered}} wiederhergestellt, {{failed}} fehlgeschlagen",
     "downloadingVideo": "Video wird geladen…",
     "videoDownloaded": "Video geladen",
     "downloadImpossible": "Download nicht möglich",

@@ -8,6 +8,7 @@ const ts = require('typescript');
 const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'useBoardIngest.ts'), 'utf8');
 const actions = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'boardMediaActions.ts'), 'utf8');
 const persistence = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'useScenePersistence.ts'), 'utf8');
+const toolbar = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'Toolbar.tsx'), 'utf8');
 const recoveryFile = path.join(__dirname, '..', 'src', 'components', 'reference', 'boardMediaRecovery.ts');
 
 function loadRecoveryModule() {
@@ -22,7 +23,8 @@ function loadRecoveryModule() {
 }
 
 test('online ingestion passes the global linked/download choice to the generic resolver', () => {
-  assert.match(source, /resolveMedia\(url,\s*\{\s*download:\s*useBoard\.getState\(\)\.prefs\.autoDownloadOnline,?\s*\}\)/);
+  assert.match(source, /resolveMedia\(url,\s*\{[^}]*download:\s*useBoard\.getState\(\)\.prefs\.autoDownloadOnline/s);
+  assert.match(source, /projectPath:\s*useBoard\.getState\(\)\.filePath\s*\|\|\s*undefined/);
   assert.match(source, /res\.path\s*\?\?\s*res\.url/);
 });
 
@@ -77,4 +79,19 @@ test('opening a project automatically recovers missing web media and saves repla
   assert.match(actions, /frames:\s*undefined/);
   assert.match(persistence, /recoverAllOnlineMedia\(\)/);
   assert.match(persistence, /if \(result\.recovered > 0\) await saveProject\(\)/);
+});
+
+test('project recovery downloads directly into its companion folder', () => {
+  assert.match(actions, /const target = \{ projectPath: st\.filePath \|\| undefined, title:/);
+  assert.match(actions, /extractMedia\?\.\(link,\s*target\)/);
+  assert.match(actions, /resolveMedia\?\.\(link,\s*target\)/);
+  assert.match(actions, /extractFrames\(\{[^}]*projectPath:\s*st\.filePath \|\| undefined,[^}]*title:/s);
+});
+
+test('the toolbar offers a compact retry action beside recovery notices', () => {
+  assert.match(toolbar, /recoverableOnlineItems\(items\)\.length/);
+  assert.match(toolbar, /recoverAllOnlineMedia\(\)/);
+  assert.match(toolbar, /notice\.redownloadAll/);
+  assert.match(toolbar, /<RotateCw/);
+  assert.match(toolbar, /if \(result\.recovered > 0\) onSave\?\.\(\)/);
 });

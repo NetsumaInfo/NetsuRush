@@ -43,6 +43,7 @@ const { createNbFile } = require("./nbfile"); // partage commun .netsu du Carnet
 const recordings = require("./recordings"); // dossier d'enregistrements voix off (module Script)
 const netsu = require("./netsu"); // format de partage « .netsu » (board → conteneur SQLite type-routé)
 const extract = require("./extract"); // yt-dlp / gallery-dl : extraction du vrai média d'un lien
+const netsuSidecar = require("./netsu/sidecar");
 const { createAeExport } = require("./aeExport");
 const { createTransfer } = require("./transfer");
 const { createAdobeBridge } = require("./adobe"); // pont Adobe : panneau CEP Premiere/AE ↔ core
@@ -824,11 +825,11 @@ function createRpc() {
       return refStore.saveAsset(buf, ext);
     },
     // Télécharge un média distant côté core (sans CORS) puis le persiste en asset disque.
-    "reference:fetchAsset": ([url]) => refStore.fetchAsset(url),
+    "reference:fetchAsset": ([url, options]) => refStore.fetchAsset(url, options || {}),
     // Résout le vrai média de N'IMPORTE quel lien (fichier direct ou page via OpenGraph) → asset.
     "reference:resolveMedia": ([url, options]) => refStore.resolveMedia(url, options || {}),
     // Extrait le VRAI média d'un lien (réseaux sociaux & co) via yt-dlp / gallery-dl.
-    "reference:extractMedia": ([url]) => extract.extractMedia(url),
+    "reference:extractMedia": ([url, options]) => extract.extractMedia(url, options || {}),
     // Décompose une vidéo locale en frames image → assets disque → liste de chemins.
     "reference:extractFrames": ([opts]) => extractBoardFrames(opts),
     "reference:push": ([payload]) => {
@@ -998,13 +999,25 @@ function createRpc() {
   // SEQ_DIR (purgé au boot) → liste de chemins pour bâtir un item séquence. `in/out` (s) = plage de
   // boucle. Pas de persistance durable : un aperçu ne doit pas remplir le disque (cf. SEQ_DIR).
   async function extractBoardFrames(opts) {
-    const { path: src, fps, max, height, in: inSec, out: outSec } = opts || {};
+    const { path: src, fps, max, height, in: inSec, out: outSec, projectPath, title } = opts || {};
     if (!src) return { ok: false, error: t("sourceMissing") };
     if (/^(https?:|data:|blob:)/i.test(String(src))) return { ok: false, error: t("localMediaRequired") };
     try {
       const { frames, fps: usedFps } = await ffmpeg.extractFrames(src, { fps, max, height, start: inSec, end: outSec });
       if (!frames.length) return { ok: false, error: t("noFrames") };
-      return { ok: true, frames, fps: usedFps };
+      if (!projectPath) return { ok: true, frames, fps: usedFps };
+      const index = netsuSidecar.indexSidecar(projectPath);
+      const group = netsuSidecar.slugify(title || "sequence");
+      const organized = [];
+      for (let frameIndex = 0; frameIndex < frames.length; frameIndex += 1) {
+        const adopted = netsuSidecar.adopt(projectPath, frames[frameIndex], {
+          place: { kind: "image", group, index: frameIndex },
+          index,
+        });
+        if (adopted.ok && adopted.path) organized.push(adopted.path);
+      }
+      if (!organized.length) return { ok: false, error: t("noFrames") };
+      return { ok: true, frames: organized, fps: usedFps };
     } catch (e) {
       return { ok: false, error: String(e.stderr || e) };
     }

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   ImagePlus, Video, Globe, Type, Frame, Film, Pencil, Clapperboard, ZoomIn, ZoomOut, Maximize, FilePlus2,
   Save, SaveAll, FileCheck2, FolderOpen, Share2, PictureInPicture2, Minimize2, Pin, PinOff, Play, Pause,
-  Settings2, Home, Undo2, Redo2,
+  Settings2, Home, Undo2, Redo2, RotateCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
@@ -16,6 +16,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { useBoard } from "./useReferenceBoard";
 import { fileLabel } from "./useScenePersistence";
 import { AddLinkDialog } from "./AddLinkDialog";
+import { recoverAllOnlineMedia, recoverableOnlineItems } from "./boardMediaActions";
 import type { BoardHandle } from "./ReferenceBoard";
 
 function IconBtn({ icon: Icon, label, onClick, disabled, active }: {
@@ -69,6 +70,7 @@ export function Toolbar({
   const filePath = useBoard((s) => s.filePath);
   const dirty = useBoard((s) => s.dirty);
   const notice = useBoard((s) => s.notice);
+  const items = useBoard((s) => s.items);
   const frozen = useBoard((s) => s.frozen);
   const toggleFrozen = useBoard((s) => s.toggleFrozen);
   const drawMode = useBoard((s) => s.drawMode);
@@ -79,6 +81,8 @@ export function Toolbar({
   const canUndo = useBoard((s) => s.past.length > 0);
   const canRedo = useBoard((s) => s.future.length > 0);
   const [ytOpen, setYtOpen] = useState(false);
+  const [recovering, setRecovering] = useState(false);
+  const recoverableCount = recoverableOnlineItems(items).length;
 
   // Choisir un autre outil/ajout quitte le mode dessin (revient au curseur normal).
   const leaveDraw = () => { if (useBoard.getState().drawMode) setDrawMode(false); };
@@ -96,6 +100,20 @@ export function Toolbar({
     leaveDraw();
     const paths = await nr.chooseImages();
     if (paths?.length) board.current?.addSequence(paths);
+  };
+  const retryMissing = async () => {
+    if (recovering) return;
+    setRecovering(true);
+    try {
+      const result = await recoverAllOnlineMedia();
+      if (result.recovered > 0) onSave?.();
+      useBoard.getState().setNotice({
+        kind: result.failed ? "error" : "ok",
+        text: t("notice.recoveryResult", result),
+      });
+    } finally {
+      setRecovering(false);
+    }
   };
 
   return (
@@ -174,6 +192,18 @@ export function Toolbar({
             <span className={cn("truncate", notice.kind === "error" ? "text-destructive" : "text-[var(--color-ok)]")}>
               · {notice.text}
             </span>
+          )}
+          {recoverableCount > 0 && (
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={recovering}
+              onClick={() => void retryMissing()}
+              aria-label={t("notice.redownloadAll", { count: recoverableCount })}
+            >
+              <RotateCw className={cn(recovering && "animate-spin")} />
+              {t("notice.redownloadAll", { count: recoverableCount })}
+            </Button>
           )}
         </div>
       </div>

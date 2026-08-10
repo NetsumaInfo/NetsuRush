@@ -501,6 +501,8 @@
     "recoverFailed": "Échec de la récupération",
     "recoveringOnline": "Récupération des médias en ligne… ({{current}}/{{total}})",
     "mediaRecovered": "{{count}} média(s) récupéré(s)",
+    "redownloadAll": "Retélécharger tout ({{count}})",
+    "recoveryResult": "{{recovered}} récupéré(s), {{failed}} échec(s)",
     "downloadingVideo": "Téléchargement de la vidéo…",
     "videoDownloaded": "Vidéo téléchargée",
     "downloadImpossible": "Téléchargement impossible",

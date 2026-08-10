@@ -2,7 +2,8 @@
 // Extraction du VRAI média derrière un lien (réseaux sociaux + ~1800 sites) via yt-dlp (vidéo) et
 // gallery-dl (images), installés dans le venv (.venv). On télécharge le fichier dans le dossier
 // d'assets du board (durable) puis on renvoie le(s) chemin(s) + le type au renderer, qui pose un
-// item vidéo/image NATIF (pas une carte embed). Repli côté renderer : carte embed si échec.
+// item vidéo/image NATIF (pas une carte embed). Pour un projet ouvert, la destination est directement
+// son dossier compagnon organisé ; le magasin global ne sert que pour un board sans fichier.
 //
 // Stratégie (jusqu'à 2 passes : sans cookies puis avec, le contenu public marche sans login) :
 //   1. yt-dlp → meilleure vidéo mp4 (merge HLS/DASH via ffmpeg) ;
@@ -15,6 +16,8 @@ const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { PYTHON, DETECT_ENV, DATA_DIR, ffBin, COOKIES_BROWSER } = require('./config');
 const { t } = require('./i18n');
+const sidecar = require('./netsu/sidecar');
+const downloadTarget = require('./netsu/downloadTarget');
 
 // Python qui porte yt-dlp/gallery-dl : le venv local en priorité (dev, où `python` du PATH n'est
 // pas forcément le venv), sinon l'interpréteur configuré (packaging / CONFIG.python).
@@ -74,8 +77,8 @@ async function checkTools() {
 }
 
 // yt-dlp : meilleure vidéo mp4 → fichier(s) dans ASSETS_DIR. Renvoie les chemins vidéo écrits.
-async function tryYtdlp(url, cookiesBrowser) {
-  const outTpl = path.join(ASSETS_DIR, 'nr-yt-%(id)s.%(ext)s');
+async function tryYtdlp(url, cookiesBrowser, outputDir) {
+  const outTpl = path.join(outputDir, 'nr-yt-%(id)s.%(ext)s');
   const args = [
     '-m', 'yt_dlp', url,
     '-f', 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b',
@@ -98,8 +101,8 @@ async function tryYtdlp(url, cookiesBrowser) {
 }
 
 // gallery-dl : images (post photo, carrousel) → un sous-dossier dédié, puis on liste les fichiers.
-async function tryGallery(url, cookiesBrowser) {
-  const sub = path.join(ASSETS_DIR, `nr-gl-${crypto.randomBytes(5).toString('hex')}`);
+async function tryGallery(url, cookiesBrowser, outputDir) {
+  const sub = path.join(outputDir, `nr-gl-${crypto.randomBytes(5).toString('hex')}`);
   ensureDir(sub);
   const args = [
     '-m', 'gallery_dl', '-q', '-D', sub,
@@ -122,9 +125,14 @@ async function tryGallery(url, cookiesBrowser) {
 }
 
 // Extrait le média derrière `url`. Passe sans cookies d'abord (public), puis avec (contenu connecté).
-async function extractMedia(url) {
+/** @param {string} url @param {{ projectPath?: string, title?: string }} [options] */
+async function extractMedia(url, options = {}) {
   if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: 'URL invalide' };
-  ensureDir(ASSETS_DIR);
+  const projectPath = String(options.projectPath || '');
+  const videoDir = projectPath ? downloadTarget.bucketDir(projectPath, 'video') : ASSETS_DIR;
+  const imageDir = projectPath ? downloadTarget.bucketDir(projectPath, 'image') : ASSETS_DIR;
+  ensureDir(videoDir);
+  ensureDir(imageDir);
   const tools = await checkTools();
   if (!tools.yt.ok && !tools.gl.ok) {
     return { ok: false, error: t('extractToolsMissing') };
@@ -133,18 +141,35 @@ async function extractMedia(url) {
   const errors = [];
   for (const ck of browsers) {
     if (tools.yt.ok) {
-      const v = await tryYtdlp(url, ck);
-      if (v.ok) return v;
+      const v = await tryYtdlp(url, ck, videoDir);
+      if (v.ok) return projectPath ? organizeProjectItems(projectPath, v.items, options.title) : v;
       if (v.error) errors.push(v.error);
     }
     if (tools.gl.ok) {
-      const g = await tryGallery(url, ck);
-      if (g.ok) return g;
+      const g = await tryGallery(url, ck, imageDir);
+      if (g.ok) return projectPath ? organizeProjectItems(projectPath, g.items, options.title) : g;
       if (g.error) errors.push(g.error);
     }
   }
   const tail = errors.find(Boolean);
   return { ok: false, error: tail || 'aucun média extractible (compte privé, lien non supporté, ou outil à jour requis)' };
+}
+
+function organizeProjectItems(projectPath, items, title) {
+  const index = sidecar.indexSidecar(projectPath);
+  const organized = [];
+  for (const item of items || []) {
+    const adopted = sidecar.adopt(projectPath, item.path, {
+      place: { kind: item.kind, title: title || path.basename(item.path, path.extname(item.path)) },
+      index,
+    });
+    if (!adopted.ok || !adopted.path) continue;
+    if (path.resolve(adopted.path) !== path.resolve(item.path) && sidecar.isInSidecar(projectPath, item.path)) {
+      try { fs.rmSync(item.path, { force: true }); } catch (_) {}
+    }
+    organized.push({ path: adopted.path, kind: item.kind });
+  }
+  return organized.length ? { ok: true, items: organized } : { ok: false, error: 'échec du rangement du média' };
 }
 
 module.exports = { extractMedia };

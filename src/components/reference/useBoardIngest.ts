@@ -284,7 +284,10 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       }
       if (nr.reference?.fetchAsset) {
         try {
-          const res = await nr.reference.fetchAsset(url);
+          const res = await nr.reference.fetchAsset(url, {
+            projectPath: useBoard.getState().filePath || undefined,
+            title: hostTitle(sourceUrl),
+          });
           if (res.ok && res.path && res.kind) {
             const src = displaySrc(res.kind, res.path);
             const nat = await probeNat(res.kind, src);
@@ -327,6 +330,8 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       try {
         const res = await nr.reference.resolveMedia(url, {
           download: useBoard.getState().prefs.autoDownloadOnline,
+          projectPath: useBoard.getState().filePath || undefined,
+          title: hostTitle(url),
         });
         const locator = res.path ?? res.url;
         if (res.ok && locator && res.kind) {
@@ -347,7 +352,10 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     async (url: string, at?: { x: number; y: number }): Promise<boolean> => {
       if (!nr.reference?.extractMedia) return false;
       try {
-        const res = await nr.reference.extractMedia(url);
+        const res = await nr.reference.extractMedia(url, {
+          projectPath: useBoard.getState().filePath || undefined,
+          title: hostTitle(url),
+        });
         if (res.ok && res.items?.length) {
           await placeExtracted(res.items, url, at);
           return true;

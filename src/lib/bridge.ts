@@ -1365,20 +1365,20 @@ export interface RefApi {
   saveScene(scene: RefSceneIn): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
   deleteScene(id: string): Promise<{ ok: boolean; error?: string }>;
   saveAsset(bytes: ArrayBuffer, ext: string): Promise<{ ok: boolean; path?: string; error?: string }>;
-  fetchAsset(url: string): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
+  fetchAsset(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
   // Résout le vrai média de N'IMPORTE quel lien (fichier direct, ou page web via OpenGraph) → asset
   // disque. Catch-all générique : GIF (giphy/tenor), imgur, articles, CDN sans extension propre.
-  resolveMedia(url: string, options?: { download?: boolean }): Promise<ResolvedOnlineMedia>;
+  resolveMedia(url: string, options?: { download?: boolean; projectPath?: string; title?: string }): Promise<ResolvedOnlineMedia>;
   // Upscale un item média (image/vidéo locale) → nouveau fichier asset. NON destructif : ne supprime
   // jamais l'ancien fichier (le board garde de quoi revenir en arrière).
   upscaleItem(opts: { path: string; kind: "image" | "video"; in?: number; out?: number; engine?: "ia" | "turbo"; model: UpscaleModel; shader?: ShaderModel; scale: 1 | 2 | 4; denoise?: number }): Promise<{ ok: boolean; path?: string; width?: number; height?: number; error?: string }>;
   // Supprime un fichier UNIQUEMENT s'il est un asset de l'app (cleanup d'un upscale annulé). Sûr.
   dropAsset(path: string): Promise<{ ok: boolean; removed?: boolean; error?: string }>;
-  extractMedia(url: string): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
+  extractMedia(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
   // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
   // `fps` omis ou ≤ 0 = cadence de la source ; la réponse renvoie celle réellement employée.
-  extractFrames(opts: { path: string; fps?: number; max?: number; height?: number; in?: number; out?: number }): Promise<{ ok: boolean; frames?: string[]; fps?: number; error?: string }>;
+  extractFrames(opts: { path: string; fps?: number; max?: number; height?: number; in?: number; out?: number; projectPath?: string; title?: string }): Promise<{ ok: boolean; frames?: string[]; fps?: number; error?: string }>;
   // Partage « .netsu » : exporte la scène (items + vue) dans une archive à `destPath` selon `opts`
   // (mode complet / léger / liens, seuil d'embarquement, gel des liens distants). Importe une archive
   // → scène reconstruite (tokens d'assets → chemins locaux ; gros médias non retrouvés = placeholders).

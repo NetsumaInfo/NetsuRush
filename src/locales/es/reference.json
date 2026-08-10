@@ -501,6 +501,8 @@
     "recoverFailed": "Error al recuperar",
     "recoveringOnline": "Recuperando los medios en línea… ({{current}}/{{total}})",
     "mediaRecovered": "Archivos multimedia recuperados: {{count}}",
+    "redownloadAll": "Volver a descargar todo ({{count}})",
+    "recoveryResult": "{{recovered}} recuperados, {{failed}} fallidos",
     "downloadingVideo": "Descargando el vídeo…",
     "videoDownloaded": "Vídeo descargado",
     "downloadImpossible": "No se pudo descargar",

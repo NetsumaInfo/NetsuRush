@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const http = require('http');
 const https = require('https');
 const { t } = require('./i18n');
+const downloadTarget = require('./netsu/downloadTarget');
 
 // Téléchargement d'octets distants (CDN, ex. Discord) plafonné — 512 Mo.
 const MAX_ASSET = 512 * 1024 * 1024;
@@ -247,7 +248,7 @@ function createReferenceStore(dataDir) {
     }
   }
 
-  function persistDownloaded(downloaded, sourceUrl) {
+  function persistDownloaded(downloaded, sourceUrl, options = {}) {
     const type = String(downloaded.type || '');
     let ext = MIME_EXT[type];
     if (!ext) {
@@ -255,23 +256,35 @@ function createReferenceStore(dataDir) {
       if (EXT_OK.has(candidate)) ext = candidate;
     }
     if (!ext) return { ok: false, error: t('unsupportedType') + ': ' + type };
+    const kind = type.startsWith('video/') || VIDEO_EXTS.has(ext) ? 'video' : 'image';
+    if (options.projectPath) {
+      try {
+        return {
+          ok: true,
+          path: downloadTarget.writeBuffer(String(options.projectPath), kind, String(options.title || 'media'), downloaded.buf, ext),
+          kind,
+        };
+      } catch (e) {
+        return { ok: false, error: String(e) };
+      }
+    }
     const saved = saveAsset(downloaded.buf, ext);
     if (!saved.ok) return saved;
     return {
       ok: true,
       path: saved.path,
-      kind: type.startsWith('video/') || VIDEO_EXTS.has(ext) ? 'video' : 'image',
+      kind,
     };
   }
 
   // Télécharge un média distant (URL CDN signée Discord, hotlink protégé, lien expirant…) côté core
   // — pas de CORS/référrer côté WebView — puis le persiste en asset disque (durable, content-hash).
   // Renvoie le chemin + le `kind` détecté (image/vidéo) pour que le renderer pose le bon item.
-  async function fetchAsset(url) {
+  async function fetchAsset(url, options = {}) {
     try {
       if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: 'URL invalide' };
       const downloaded = await download(url);
-      return persistDownloaded(downloaded, downloaded.finalUrl || url);
+      return persistDownloaded(downloaded, downloaded.finalUrl || url, options);
     } catch (e) {
       return { ok: false, error: String(e) };
     }
@@ -292,7 +305,7 @@ function createReferenceStore(dataDir) {
         : first.type.startsWith('image/') ? 'image' : null;
       if (directKind) {
         if (!downloadMedia) return { ok: true, url: first.finalUrl, kind: directKind };
-        return persistDownloaded(first, first.finalUrl || url);
+        return persistDownloaded(first, first.finalUrl || url, options);
       }
       // 2. Page HTML/XML → OpenGraph ou lecteur HTML5 → lien distant ou asset selon le réglage.
       if (!first.type || first.type.includes('html') || first.type.includes('xml')) {
@@ -300,7 +313,7 @@ function createReferenceStore(dataDir) {
         const media = parseOgMedia(html, first.finalUrl || url) || parseHtmlVideo(html, first.finalUrl || url);
         if (media) {
           if (!downloadMedia) return { ok: true, url: media.url, kind: media.kind };
-          const r = await fetchAsset(media.url);
+          const r = await fetchAsset(media.url, options);
           if (r.ok) return r;
           return { ok: false, error: t('openGraphFailed') + ': ' + (r.error || '') };
         }

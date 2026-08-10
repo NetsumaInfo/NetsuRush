@@ -70,7 +70,8 @@ export async function recoverMedia(id: string): Promise<boolean> {
   try {
     let path: string | null = null;
     let kind: "image" | "video" = it.kind === "image" ? "image" : "video";
-    const extracted = await nr.reference?.extractMedia?.(link);
+    const target = { projectPath: st.filePath || undefined, title: it.title || it.id };
+    const extracted = await nr.reference?.extractMedia?.(link, target);
     if (extracted?.ok && extracted.items?.length) {
       const first = kind === "video"
         ? extracted.items.find((entry) => entry.kind === "video") ?? extracted.items[0]
@@ -78,10 +79,32 @@ export async function recoverMedia(id: string): Promise<boolean> {
       path = first.path;
       kind = first.kind;
     } else {
-      const resolved = await nr.reference?.resolveMedia?.(link);
+      const resolved = await nr.reference?.resolveMedia?.(link, target);
       if (resolved?.ok && resolved.path) { path = resolved.path; kind = resolved.kind ?? kind; }
     }
     if (!path) { st.setNotice({ kind: "error", text: tr("notice.mediaUnrecoverable") }); return false; }
+    if (it.kind === "sequence" && kind === "video" && nr.reference?.extractFrames) {
+      const sequence = await nr.reference.extractFrames({
+        path,
+        fps: it.fps,
+        max: it.frames?.length || 300,
+        projectPath: st.filePath || undefined,
+        title: it.title || it.id,
+      });
+      if (sequence.ok && sequence.frames?.length) {
+        st.patchItem(id, {
+          kind: "sequence",
+          ref: sequence.frames[0],
+          frames: sequence.frames,
+          frame: Math.min(it.frame || 0, sequence.frames.length - 1),
+          fps: sequence.fps || it.fps,
+          missing: undefined,
+          sourceUrl: link,
+        });
+        st.setNotice(null);
+        return true;
+      }
+    }
     const src = displaySrc(kind, path);
     const nat = await probeNat(kind, src);
     st.patchItem(id, {
@@ -173,7 +196,10 @@ export async function downloadYoutube(id: string): Promise<boolean> {
   const url = `https://www.youtube.com/watch?v=${it.ref}`;
   st.setNotice({ kind: "ok", sticky: true, text: tr("notice.downloadingVideo") });
   try {
-    const res = await nr.reference.extractMedia(url);
+    const res = await nr.reference.extractMedia(url, {
+      projectPath: st.filePath || undefined,
+      title: it.title || "YouTube",
+    });
     const first = res.ok ? res.items?.find((m) => m.kind === "video") ?? res.items?.[0] : undefined;
     if (first) {
       const src = displaySrc(first.kind, first.path);
@@ -204,7 +230,10 @@ export async function downloadMediaFromEmbed(id: string): Promise<boolean> {
   const url = it.sourceUrl || it.ref;
   st.setNotice({ kind: "ok", sticky: true, text: tr("notice.recoveringMedia") });
   try {
-    const res = await nr.reference.extractMedia(url);
+    const res = await nr.reference.extractMedia(url, {
+      projectPath: st.filePath || undefined,
+      title: it.title || "media",
+    });
     if (res.ok && res.items?.length) {
       const [first, ...rest] = res.items;
       const src = displaySrc(first.kind, first.path);
