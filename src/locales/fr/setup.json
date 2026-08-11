@@ -1,14 +1,12 @@
 {
   "title": "Configuration de NetsuRush",
-  "desc": "Choisis les téléchargements utiles. Le socle compatible avec ce PC s'installe automatiquement.",
+  "desc": "Le socle s'installe seul. Le reste est optionnel.",
   "progressAria": "Étapes de configuration",
   "models": {
     "title": "Téléchargements optionnels",
-    "subtitle": "Classés par fonctionnalité et réparables à tout moment.",
     "search": "Rechercher un modèle…",
     "none": "Aucun téléchargement",
     "sceneDetection": "Découpage des scènes",
-    "sceneDetectionHint": "Le composant léger nécessaire à NetsuCut est inclus dans les prérequis.",
     "included": "Inclus",
     "empty": "Aucun modèle ne correspond à cette recherche.",
     "selected": "{{count}} sélectionné(s)",
@@ -28,7 +26,6 @@
   },
   "review": {
     "title": "Prêt à installer",
-    "subtitle": "Vérifie ce qui sera ajouté à ce PC.",
     "downloads": "Espace optionnel",
     "modelCount": "{{count}} téléchargement(s)",
     "noOptionalModels": "Aucun téléchargement optionnel",
@@ -58,5 +55,12 @@
   "issues": {
     "detected_one": "{{count}} problème détecté pendant l'installation.",
     "detected_other": "{{count}} problèmes détectés pendant l'installation."
+  },
+  "dl": {
+    "done": "terminé",
+    "failed": "échec",
+    "retry": "reprise…",
+    "skipped": "déjà présent",
+    "working": "en cours…"
   }
 }

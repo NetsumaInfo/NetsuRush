@@ -10,6 +10,7 @@
   Idempotent : chaque étape saute si déjà faite. Réexécutable sans risque.
   Sortie pilotée par marqueurs consommés par core/setup.js :
     STAGE:<id>|<label>   PROGRESS:<0-100>   ERROR:<message>
+    DL:<état>|<octets reçus>|<octets attendus>|<nom>   (état : download|work|retry|error|done|skip)
 
   Usage : powershell -ExecutionPolicy Bypass -File setup.ps1 -NrHome <dir> -Resource <dir>
 #>
@@ -101,6 +102,29 @@ function Progress([int]$pct) { Write-Output "PROGRESS:$pct" }
 function Info([string]$msg) { Write-Output $msg }
 function Fail([string]$msg) { Write-Output "ERROR:$msg"; exit 1 }
 
+# Progression d'UN téléchargement. Écrit directement sur stdout et NON dans le pipeline PowerShell :
+# appelée depuis une fonction dont la valeur de retour est capturée (Invoke-Pip), un `Write-Output`
+# partirait dans cette valeur au lieu d'atteindre le flux lu par le core.
+# `total = 0` = taille inconnue, l'interface affiche alors une barre indéterminée.
+function Dl([string]$state, [long]$done, [long]$total, [string]$name) {
+  [Console]::Out.WriteLine(('DL:{0}|{1}|{2}|{3}' -f $state, [Math]::Max(0, $done), [Math]::Max(0, $total), $name))
+}
+
+# Taille annoncée par le serveur, 0 si elle est indisponible (HEAD refusé, réponse sans
+# Content-Length). Une seule requête d'en-têtes, redirections suivies.
+function Get-RemoteSize([string]$url) {
+  if (-not $CurlExe) { return 0 }
+  try {
+    $headArgs = @('-sIL', '--connect-timeout', '15', '-o', 'NUL', '-w', '%{content_length_download}', $url)
+    if ($SysProxy) { $headArgs = @('--proxy', $SysProxy) + $headArgs }
+    $out = (& $CurlExe @headArgs 2>$null | Select-Object -Last 1)
+    if ($LASTEXITCODE -ne 0) { return 0 }
+    $size = 0.0
+    if ([double]::TryParse(([string]$out).Trim(), [ref]$size)) { return [long]$size }
+    return 0
+  } catch { return 0 }
+}
+
 # TLS 1.2 explicite : certaines machines testeur ont un .NET par défaut en TLS 1.0/1.1 → github/pytorch
 # refusent la poignée de main (« The request was aborted: Could not create SSL/TLS secure channel »).
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
@@ -131,10 +155,12 @@ if ($CurlExe -and -not $env:HTTPS_PROXY -and -not $env:https_proxy) {
 # Retries RESUME the accumulated .part instead of restarting: on an unstable link a multi-gigabyte
 # archive used to start over from byte zero every time it dropped, and never completed.
 function Download([string]$url, [string]$dest) {
-  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Info "déjà présent: $(Split-Path $dest -Leaf)"; return }
+  $label = Split-Path $dest -Leaf
+  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Dl 'skip' 0 0 $label; Info "déjà présent: $label"; return }
   $dir = Split-Path $dest -Parent
   if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir -ErrorAction Stop | Out-Null }
   $tmp = "$dest.part"
+  $expected = Get-RemoteSize $url
   $attempts = 4
   for ($n = 1; $n -le $attempts; $n++) {
     $before = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
@@ -144,21 +170,40 @@ function Download([string]$url, [string]$dest) {
         # absorbs drops inside curl itself, before control ever returns to this loop.
         $curlArgs = @('-sSL', '--fail', '--retry', '3', '--retry-delay', '2', '--connect-timeout', '30', '-C', '-', '-o', $tmp, $url)
         if ($SysProxy) { $curlArgs = @('--proxy', $SysProxy) + $curlArgs }
-        $curlLog = & $CurlExe @curlArgs 2>&1
-        if ($LASTEXITCODE -ne 0) { throw "curl $LASTEXITCODE : $curlLog" }
+        # curl est lancé en ARRIÈRE-PLAN pour que la taille du .part puisse être relevée pendant le
+        # transfert : c'est la seule mesure d'avancement disponible sur un binaire silencieux, et
+        # sans elle une archive de plusieurs gigaoctets ne produit aucun signe de vie.
+        $errFile = "$tmp.err"
+        Remove-Item -Force $errFile -ErrorAction SilentlyContinue
+        $quoted = ($curlArgs | ForEach-Object { '"' + $_ + '"' }) -join ' '
+        Dl 'download' $before $expected $label
+        $proc = Start-Process -FilePath $CurlExe -ArgumentList $quoted -NoNewWindow -PassThru -RedirectStandardError $errFile
+        while (-not $proc.HasExited) {
+          Start-Sleep -Milliseconds 400
+          $got = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
+          Dl 'download' $got $expected $label
+        }
+        $proc.WaitForExit()
+        $curlLog = if (Test-Path $errFile) { (Get-Content -Raw -ErrorAction SilentlyContinue $errFile) } else { '' }
+        Remove-Item -Force $errFile -ErrorAction SilentlyContinue
+        if ($proc.ExitCode -ne 0) { throw "curl $($proc.ExitCode) : $curlLog" }
       } else {
+        Dl 'work' 0 0 $label
         # IWR cannot resume: a previous attempt's partial would be overwritten anyway.
         Remove-Item -Force $tmp -ErrorAction SilentlyContinue
         Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing -ErrorAction Stop
       }
       Move-Item -Force $tmp $dest -ErrorAction Stop
+      $final = (Get-Item $dest).Length
+      Dl 'done' $final ([Math]::Max($final, $expected)) $label
       return
     } catch {
       $after = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
       # No byte gained (server refused the Range, dead URL, immediate drop): keeping the partial
       # would make every retry resume at the same dead point. Start clean instead.
       if ($after -le $before) { Remove-Item -Force $tmp -ErrorAction SilentlyContinue }
-      if ($n -eq $attempts) { throw }
+      if ($n -eq $attempts) { Dl 'error' $after $expected $label; throw }
+      Dl 'retry' $after $expected $label
       Info "téléchargement échoué ($(Split-Path $url -Leaf)), tentative $n/$attempts : $($_.Exception.Message)"
       Start-Sleep -Seconds ($n * 3)
     }
@@ -168,15 +213,47 @@ function Download([string]$url, [string]$dest) {
 # Fournit un fichier : déjà présent → rien ; copie bundlée (resources/vendor) présente → copie (offline) ;
 # sinon télécharge. Évite tout aller-réseau quand l'asset est embarqué dans l'installeur.
 function Provide([string]$local, [string]$url, [string]$dest) {
-  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Info "déjà présent: $(Split-Path $dest -Leaf)"; return }
+  $label = Split-Path $dest -Leaf
+  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Dl 'skip' 0 0 $label; Info "déjà présent: $label"; return }
   if ($local -and (Test-Path $local) -and ((Get-Item $local).Length -gt 0)) {
     $dir = Split-Path $dest -Parent
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+    Dl 'work' 0 0 $label
     Copy-Item -Force $local $dest
-    Info "copié (bundle): $(Split-Path $dest -Leaf)"
+    Dl 'skip' 0 0 $label
+    Info "copié (bundle): $label"
     return
   }
   Download $url $dest
+}
+
+# pip en STREAMING. Les appels captés (`$log = & pip … 2>&1`) ne rendent la main qu'à la fin : sur
+# torch (~2,5 Go) l'écran restait figé plusieurs minutes sans le moindre octet affiché, et les
+# testeurs concluaient que rien ne se téléchargeait. `--progress-bar raw` fait écrire à pip des
+# lignes « Progress <reçu> of <total> » lisibles hors terminal, converties ici en marqueurs DL.
+# Rend la fin du journal pip (pour le compte rendu d'échec) ; $LASTEXITCODE reste celui de pip.
+function Invoke-Pip([string[]]$pipArgs, [string]$tag) {
+  $tail = New-Object System.Collections.Generic.List[string]
+  $name = $tag
+  Dl 'work' 0 0 $tag
+  & $venvPy -m pip @pipArgs --progress-bar raw 2>&1 | ForEach-Object {
+    $line = [string]$_
+    $tail.Add($line)
+    if ($tail.Count -gt 300) { $tail.RemoveAt(0) }
+    if ($line -match '^\s*Downloading\s+(\S+)') {
+      # pip annonce une URL sur un index, un nom de fichier sur un cache local.
+      $leaf = [uri]::UnescapeDataString(($matches[1] -split '[\\/]')[-1] -replace '\?.*$', '')
+      $name = if ($leaf) { $leaf } else { $tag }
+      Dl 'download' 0 0 $name
+      return
+    }
+    if ($line -match '^\s*Progress\s+(\d+)\s+of\s+(\d+)') { Dl 'download' ([long]$matches[1]) ([long]$matches[2]) $name; return }
+    if ($line -match '^\s*(Installing collected packages|Building wheel|Preparing metadata|Getting requirements)') { $name = $tag; Dl 'work' 0 0 $tag; return }
+  }
+  if ($LASTEXITCODE -eq 0) { Dl 'done' 0 0 $tag } else { Dl 'error' 0 0 $tag }
+  # Tableau et non List : les appelants concatènent deux journaux avec `+=`, ce qu'une List ne sait
+  # pas faire (aucun op_Addition).
+  return , $tail.ToArray()
 }
 
 # Extrait une archive 7z. bsdtar (livré dans System32 depuis Windows 10 1803) lit le 7z nativement
@@ -378,34 +455,35 @@ if ($needTorch) {
   # d'échec (sinon le message « installation de torch CUDA échouée » est opaque pour le debug).
   if ($MlBackend -eq 'rocm') {
     $rocmRoot = 'https://repo.radeon.com/rocm/windows/rocm-rel-7.2.1'
-    $torchLog = & $venvPy -m pip install --no-cache-dir `
-      "$rocmRoot/rocm_sdk_core-7.2.1-py3-none-win_amd64.whl" `
-      "$rocmRoot/rocm_sdk_devel-7.2.1-py3-none-win_amd64.whl" `
-      "$rocmRoot/rocm_sdk_libraries_custom-7.2.1-py3-none-win_amd64.whl" `
-      "$rocmRoot/rocm-7.2.1.tar.gz" --retries 5 --timeout 120 2>&1
+    $torchLog = Invoke-Pip @('install', '--no-cache-dir',
+      "$rocmRoot/rocm_sdk_core-7.2.1-py3-none-win_amd64.whl",
+      "$rocmRoot/rocm_sdk_devel-7.2.1-py3-none-win_amd64.whl",
+      "$rocmRoot/rocm_sdk_libraries_custom-7.2.1-py3-none-win_amd64.whl",
+      "$rocmRoot/rocm-7.2.1.tar.gz", '--retries', '5', '--timeout', '120') 'PyTorch ROCm'
     if ($LASTEXITCODE -eq 0) {
-      $torchLog += & $venvPy -m pip install --no-cache-dir `
-        "$rocmRoot/torch-2.9.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl" `
-        "$rocmRoot/torchaudio-2.9.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl" `
-        "$rocmRoot/torchvision-0.24.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl" --retries 5 --timeout 120 2>&1
+      $torchLog += Invoke-Pip @('install', '--no-cache-dir',
+        "$rocmRoot/torch-2.9.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl",
+        "$rocmRoot/torchaudio-2.9.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl",
+        "$rocmRoot/torchvision-0.24.1%2Brocm7.2.1-cp312-cp312-win_amd64.whl", '--retries', '5', '--timeout', '120') 'PyTorch ROCm'
     }
   } elseif ($MlBackend -eq 'xpu') {
-    $torchLog = & $venvPy -m pip install --upgrade --force-reinstall torch torchvision torchaudio `
-      --index-url https://download.pytorch.org/whl/xpu --retries 5 --timeout 120 2>&1
+    $torchLog = Invoke-Pip @('install', '--upgrade', '--force-reinstall', 'torch', 'torchvision', 'torchaudio',
+      '--index-url', 'https://download.pytorch.org/whl/xpu', '--retries', '5', '--timeout', '120') 'PyTorch XPU'
   } else {
     $torchIndex = if ($MlBackend -eq 'cuda') { 'https://download.pytorch.org/whl/cu124' } else { 'https://download.pytorch.org/whl/cpu' }
     # torchaudio fait partie du LOT : installé plus tard par une dépendance (silero-vad tire
     # `torchaudio>=0.12`), pip prend la dernière roue PyPI, bâtie contre une autre ABI que ce torch —
     # `import torchaudio` lève alors [WinError 127] et le module Voix ne démarre plus.
-    $torchLog = & $venvPy -m pip install --upgrade torch torchvision torchaudio --index-url $torchIndex --retries 5 --timeout 120 2>&1
+    $torchLog = Invoke-Pip @('install', '--upgrade', 'torch', 'torchvision', 'torchaudio',
+      '--index-url', $torchIndex, '--retries', '5', '--timeout', '120') $torchLabel
   }
   if ($LASTEXITCODE -ne 0) {
     $torchLog | ForEach-Object { Info "pip torch> $_" }
     if ($MlBackend -ne 'cpu') {
       Info "backend $MlBackend indisponible → installation du repli CPU"
       $MlBackend = 'cpu'
-      $torchLog = & $venvPy -m pip install --upgrade --force-reinstall torch torchvision torchaudio `
-        --index-url https://download.pytorch.org/whl/cpu --retries 5 --timeout 120 2>&1
+      $torchLog = Invoke-Pip @('install', '--upgrade', '--force-reinstall', 'torch', 'torchvision', 'torchaudio',
+        '--index-url', 'https://download.pytorch.org/whl/cpu', '--retries', '5', '--timeout', '120') 'PyTorch CPU'
     }
     if ($LASTEXITCODE -ne 0) { $torchLog | ForEach-Object { Info "pip torch cpu> $_" }; Fail $CpuTorchFailed[$Lang] }
   }
@@ -433,7 +511,7 @@ if (Test-Path $req) {
     [IO.File]::WriteAllText($reqCpu, $reqText, [Text.UTF8Encoding]::new($false))
     $reqInstall = $reqCpu
   }
-  $depsLog = & $venvPy -m pip install -r $reqInstall --retries 5 --timeout 120 2>&1
+  $depsLog = Invoke-Pip @('install', '-r', $reqInstall, '--retries', '5', '--timeout', '120') (T 'depsInstall')
   if ($reqCpu) { Remove-Item -Force $reqCpu -ErrorAction SilentlyContinue }
   if ($LASTEXITCODE -ne 0) {
     $depsLog | ForEach-Object { Info "pip deps> $_" }
@@ -456,7 +534,7 @@ Info "TransNetV2 prêt"
 $boardReq = Join-Path $pyScripts 'requirements-reference.txt'
 if (-not (Test-Path $boardReq)) { Fail "pack NetsuBoard introuvable: $boardReq" }
 Stage 'deps' "$(T 'depsInstall') · NetsuBoard"
-$boardLog = & $venvPy -m pip install -r $boardReq --retries 5 --timeout 120 2>&1
+$boardLog = Invoke-Pip @('install', '-r', $boardReq, '--retries', '5', '--timeout', '120') 'NetsuBoard'
 if ($LASTEXITCODE -ne 0) {
   $boardLog | ForEach-Object { Info "pip NetsuBoard> $_" }
   Fail (T 'requirementsFailed')
@@ -489,7 +567,7 @@ foreach ($moduleId in $moduleRequirements.Keys) {
     [IO.File]::WriteAllText($moduleReqCpu, $moduleReqText, [Text.UTF8Encoding]::new($false))
     $moduleReqInstall = $moduleReqCpu
   }
-  $moduleLog = & $venvPy -m pip install -r $moduleReqInstall --retries 5 --timeout 120 2>&1
+  $moduleLog = Invoke-Pip @('install', '-r', $moduleReqInstall, '--retries', '5', '--timeout', '120') $moduleId
   if ($moduleReqCpu) { Remove-Item -Force $moduleReqCpu -ErrorAction SilentlyContinue }
   if ($LASTEXITCODE -ne 0) {
     $moduleLog | ForEach-Object { Info "pip $moduleId> $_" }
@@ -511,7 +589,9 @@ Info "Suppression d'objet prête"
 # `search` en fait partie : la recherche par visage infère en ONNX (YuNet/SFace réels, imgutils+CCIP
 # animés). Sans ce provisionnement, une installation derush+recherche n'avait AUCUN onnxruntime, et
 # imgutils s'en installait un tout seul au premier usage — la mauvaise branche CUDA, tout sur CPU.
-if ((HasModule 'voice') -or (HasModule 'upscale') -or (HasModule 'search')) {
+# `face-anime` est listé À PART : le modèle est installable depuis Paramètres › Modèles sans que le
+# module recherche soit coché, et son moteur (détecteur anime + CCIP) n'infère qu'en ONNX.
+if ((HasModule 'voice') -or (HasModule 'upscale') -or (HasModule 'search') -or (HasModel 'face-anime')) {
   Stage 'deps' "ONNX Runtime $OnnxBackend"
   & $venvPy -m pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml *> $null
   # La ROUE doit correspondre au CUDA de torch : à partir de 1.23, `onnxruntime-gpu` est bâti pour
@@ -519,12 +599,12 @@ if ((HasModule 'voice') -or (HasModule 'upscale') -or (HasModule 'search')) {
   # paquet s'installe quand même, annonce `CUDAExecutionProvider`… et chaque session retombe sur CPU.
   # `$OnnxCuda12Pin` suit donc la dernière branche CUDA 12 tant que torch est en cu124.
   $onnxPackage = if ($OnnxBackend -eq 'cuda') { $OnnxCuda12Pin } elseif ($OnnxBackend -eq 'directml') { 'onnxruntime-directml' } else { 'onnxruntime' }
-  $onnxLog = & $venvPy -m pip install $onnxPackage --retries 5 --timeout 120 2>&1
+  $onnxLog = Invoke-Pip @('install', $onnxPackage, '--retries', '5', '--timeout', '120') "ONNX Runtime $OnnxBackend"
   if ($LASTEXITCODE -ne 0 -and $OnnxBackend -ne 'cpu') {
     $onnxLog | ForEach-Object { Info "pip onnx> $_" }
     Info "ONNX $OnnxBackend indisponible → repli CPU"
     $OnnxBackend = 'cpu'
-    $onnxLog = & $venvPy -m pip install onnxruntime --retries 5 --timeout 120 2>&1
+    $onnxLog = Invoke-Pip @('install', 'onnxruntime', '--retries', '5', '--timeout', '120') 'ONNX Runtime CPU'
   }
   if ($LASTEXITCODE -ne 0) { $onnxLog | ForEach-Object { Info "pip onnx cpu> $_" }; Fail (T 'requirementsFailed') }
   # Le paquet installé ne prouve pas que le provider EXISTE (CUDA/cuDNN absent, roue CPU réinstallée
@@ -561,6 +641,13 @@ print(','.join(ort.InferenceSession(m, providers=[sys.argv[2], 'CPUExecutionProv
       $OnnxBackend = 'cpu'
     }
   }
+  # Le code de sortie de pip ne prouve pas que le module est LÀ : une installation « réussie » qui
+  # n'a rien posé (roue refusée, désinstallation restée à moitié faite) laissait un venv sans
+  # `onnxruntime` alors que nr.config.json annonçait un backend ONNX. L'échec ne se voyait qu'au
+  # premier modèle qui l'importe — visages animés, Parakeet, détourage — sous la forme d'un
+  # `ModuleNotFoundError` opaque, très loin de l'installation. On le constate donc ici.
+  & $venvPy -c "import onnxruntime" *> $null
+  if ($LASTEXITCODE -ne 0) { Fail "ONNX Runtime installé sans succès : ``import onnxruntime`` échoue dans le venv" }
 }
 
 # Vérification RÉELLE des packs retenus. « Successfully installed » ne prouve rien : un paquet peut
@@ -677,12 +764,12 @@ if (HasModel 'omnishotcut') {
     if (-not (Test-Path (Join-Path $omniPkg 'pyproject.toml'))) {
       Fail "OmniShotCut introuvable dans le bundle : $omniPkg"
     }
-    $decordLog = & $venvPy -m pip install decord --retries 5 --timeout 120 2>&1
+    $decordLog = Invoke-Pip @('install', 'decord', '--retries', '5', '--timeout', '120') 'decord'
     if ($LASTEXITCODE -ne 0) {
       $decordLog | ForEach-Object { Info "pip decord> $_" }
       Fail "OmniShotCut incomplet : decord n'est pas installable"
     }
-    $omniLog = & $venvPy -m pip install $omniPkg --no-deps --retries 5 --timeout 120 2>&1
+    $omniLog = Invoke-Pip @('install', $omniPkg, '--no-deps', '--retries', '5', '--timeout', '120') 'OmniShotCut'
     if ($LASTEXITCODE -ne 0) {
       $omniLog | ForEach-Object { Info "pip OmniShotCut> $_" }
       Fail "OmniShotCut absent ou non installable"
@@ -700,7 +787,7 @@ Progress 98
 # ── 4c. Modèles voix (best-effort) : faster-whisper turbo + Parakeet v3 ONNX + cuDNN 9 ──
 if (HasModule 'voice') { Stage 'voice' (T 'voicePrepare') }
 if (HasModel 'silero-vad') {
-  $sileroLog = & $venvPy -m pip install 'silero-vad>=5.1' --retries 5 --timeout 120 2>&1
+  $sileroLog = Invoke-Pip @('install', 'silero-vad>=5.1', '--retries', '5', '--timeout', '120') 'silero-vad'
   if ($LASTEXITCODE -ne 0) { $sileroLog | ForEach-Object { Info "pip silero> $_" }; Fail (T 'requirementsFailed') }
 }
 # cuDNN 9 / cuBLAS servent uniquement au chemin NVIDIA. Le moteur CPU de faster-whisper reste

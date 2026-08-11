@@ -130,7 +130,7 @@ test('NetsuBoard link tools are mandatory and verified outside optional module p
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
   const mandatory = setup.slice(setup.indexOf('$boardReq'), setup.indexOf('$moduleRequirements'));
   assert.match(mandatory, /requirements-reference\.txt/);
-  assert.match(mandatory, /pip install -r \$boardReq/);
+  assert.match(mandatory, /Invoke-Pip @\('install', '-r', \$boardReq/);
   assert.match(mandatory, /import yt_dlp, gallery_dl/);
   const optional = setup.slice(setup.indexOf('$moduleRequirements'), setup.indexOf('Progress 72'));
   assert.doesNotMatch(optional, /reference\s*=\s*'requirements-reference\.txt'/);
@@ -183,13 +183,33 @@ test('first-run setup downgrades the ONNX backend when its provider is missing',
 // s'installe pourtant sans erreur et annonce CUDA — puis tout retombe sur processeur en silence.
 test('first-run setup pins onnxruntime-gpu to the CUDA branch torch was built for', () => {
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
-  const pin = setup.match(/\$OnnxCuda12Pin = 'onnxruntime-gpu==(\d+)\.(\d+)\.\d+'/);
+  const pin = setup.match(/\$OnnxCuda12Pin = '(onnxruntime-gpu==(\d+)\.(\d+)\.\d+)'/);
   assert.ok(pin, 'le pin onnxruntime-gpu doit être explicite');
-  const [, major, minor] = pin.map(Number);
-  assert.ok(major === 1 && minor <= 22, `roue CUDA 13 (${pin[1]}.${pin[2]}) incompatible avec torch cu124`);
+  const major = Number(pin[2]);
+  const minor = Number(pin[3]);
+  assert.ok(major === 1 && minor <= 22, `roue CUDA 13 (${major}.${minor}) incompatible avec torch cu124`);
   // Le pin n'a de sens que tant que torch est installé depuis l'index cu124.
   assert.match(setup, /download\.pytorch\.org\/whl\/cu124/);
-  assert.ok(setup.indexOf('$OnnxCuda12Pin') < setup.indexOf('pip install $onnxPackage'));
+  assert.ok(setup.indexOf('$OnnxCuda12Pin') < setup.indexOf("Invoke-Pip @('install', $onnxPackage"));
+  // Le gestionnaire de modèles pose le MÊME runtime quand le venv n'en a aucun : deux pins
+  // différents remettraient une roue CUDA 13 par-dessus celle du setup, ce que le pin évite.
+  const models = fs.readFileSync(path.join(root, 'core', 'models.js'), 'utf8');
+  assert.ok(models.includes(`'${pin[1]}'`), 'core/models.js doit reprendre le pin de setup.ps1');
+});
+
+// Une installation sans les modules voix/traitements/recherche n'a AUCUN onnxruntime : le modèle de
+// visages animés doit donc le poser lui-même au lieu de mourir sur `No module named 'onnxruntime'`.
+test('anime face model installs its own ONNX Runtime when the venv has none', () => {
+  const models = fs.readFileSync(path.join(root, 'core', 'models.js'), 'utf8');
+  const entry = models.slice(models.indexOf("'face-anime': {"), models.indexOf("'face-anime': {") + 700);
+  assert.match(entry, /pipCheck: \['imgutils', 'onnxruntime'\]/);
+  assert.ok(entry.indexOf('ONNX_RUNTIME_PIP') < entry.indexOf('dghs-imgutils'),
+    'le runtime ONNX doit être posé avant imgutils, sinon imgutils s\'en installe un tout seul');
+  // Même déclencheur côté première installation.
+  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
+  assert.match(setup, /HasModule 'search'\) -or \(HasModel 'face-anime'\)/);
+  // Le module doit être VU dans le venv : pip peut sortir en 0 sans rien avoir posé.
+  assert.match(setup, /import onnxruntime" \*> \$null/);
 });
 
 // Le disque plein se manifestait par un échec pip opaque après une heure de téléchargement.
@@ -311,7 +331,7 @@ test('installed runtime is scanned, repairable, and verified before restart', ()
   assert.match(setup, /NETSURUSH_ML_BACKEND/);
   assert.match(gate, /setup:repair/);
   assert.match(gate, /GateFrame/);
-  assert.match(gate, /RECOMMENDED_MODELS = \["omnishotcut", "siglip2-so400m"\]/);
+  assert.match(gate, /RECOMMENDED_MODELS = \["omnishotcut", "siglip2-so400m", "anime", "tas-rife4\.25", "face-real", "face-anime"\]/);
   assert.match(gate, /type="search"/);
   assert.match(gate, /@tauri-apps\/plugin-process/);
   assert.match(gate, /await relaunch\(\)/);

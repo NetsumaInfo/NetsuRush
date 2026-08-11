@@ -1,14 +1,12 @@
 {
   "title": "Configure NetsuRush",
-  "desc": "Choose the downloads you need. The compatible foundation for this PC is installed automatically.",
+  "desc": "The foundation installs itself. The rest is optional.",
   "progressAria": "Configuration steps",
   "models": {
     "title": "Optional downloads",
-    "subtitle": "Grouped by feature and repairable at any time.",
     "search": "Search models…",
     "none": "No downloads",
     "sceneDetection": "Scene cutting",
-    "sceneDetectionHint": "The lightweight component required by NetsuCut is included with the prerequisites.",
     "included": "Included",
     "empty": "No model matches this search.",
     "selected": "{{count}} selected",
@@ -28,7 +26,6 @@
   },
   "review": {
     "title": "Ready to install",
-    "subtitle": "Review what will be added to this PC.",
     "downloads": "Optional space",
     "modelCount": "{{count}} download(s)",
     "noOptionalModels": "No optional downloads",
@@ -58,5 +55,12 @@
   "issues": {
     "detected_one": "{{count}} problem detected during installation.",
     "detected_other": "{{count}} problems detected during installation."
+  },
+  "dl": {
+    "done": "complete",
+    "failed": "failed",
+    "retry": "retrying…",
+    "skipped": "already there",
+    "working": "in progress…"
   }
 }

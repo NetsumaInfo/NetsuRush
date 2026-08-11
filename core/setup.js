@@ -322,9 +322,13 @@ async function runSetup(ev, options = {}) {
       const line = raw.trim();
       if (!line) return;
       // Marqueurs émis par setup.ps1 : STAGE:<id>|<label>  ·  PROGRESS:<0-100>  ·  ERROR:<msg>
+      //   ·  DL:<état>|<octets reçus>|<octets attendus>|<nom>
       const mStage = line.match(/^STAGE:([^|]+)\|?(.*)$/);
       const mProg = line.match(/^PROGRESS:(\d+)/);
       const mErr = line.match(/^ERROR:(.*)$/);
+      const mDl = line.match(/^DL:([a-z]+)\|(\d+)\|(\d+)\|(.*)$/);
+      // Suivi par élément = état vivant, pas une ligne de journal de plus.
+      if (mDl) { send({ dl: { state: mDl[1], done: Number(mDl[2]), total: Number(mDl[3]), name: mDl[4].trim() } }); return; }
       if (mErr) { errTail = mErr[1].trim(); send({ stage: 'error', label: errTail }); return; }
       if (mStage) { send({ stage: mStage[1].trim(), label: (mStage[2] || '').trim() }); return; }
       if (mProg) { send({ pct: Math.round(Math.min(100, parseInt(mProg[1], 10)) * 0.78) }); return; }
@@ -368,6 +372,14 @@ async function runSetup(ev, options = {}) {
             const pct = progress.stage === 'done' && !progress.id
               ? 100
               : Math.min(99, 78 + Math.round(((index + modelPct / 100) / count) * 21));
+            // Les modèles rapportent déjà leurs octets : on les relaie sous la forme de setup.ps1.
+            if (progress.id) {
+              const state = progress.stage === 'error' ? 'error'
+                : progress.stage === 'done' ? 'done'
+                  : progress.stage === 'canceled' ? 'skip'
+                    : progress.stage === 'download' ? 'download' : 'work';
+              send({ dl: { state, done: Number(progress.done) || 0, total: Number(progress.total) || 0, name: progress.id } });
+            }
             send({ pct, stage: 'models', label: progress.id || t('setupDone') });
           } catch { send({ line }); }
         }

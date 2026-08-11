@@ -1147,11 +1147,21 @@ export interface SetupStatus {
   home: string;      // dossier de données écrivable (NR_HOME)
   items: SetupItem[];
 }
+// Suivi d'UN élément téléchargé (archive, roue pip, modèle). `total: 0` = taille inconnue :
+// l'interface montre alors une barre indéterminée plutôt qu'un pourcentage inventé.
+export interface SetupDownload {
+  name: string;
+  state: "download" | "work" | "retry" | "error" | "done" | "skip";
+  done: number;   // octets reçus
+  total: number;  // octets attendus, 0 si le serveur ne l'annonce pas
+}
+
 export interface SetupProgress {
   pct?: number;      // 0..100
   stage?: string;    // python | venv | torch | deps | ffmpeg | weights | config | done | error
   label?: string;    // libellé lisible de l'étape
   line?: string;     // ligne brute (sortie pip/ffmpeg) hors marqueurs
+  dl?: SetupDownload; // état vivant d'un téléchargement, hors journal
 }
 
 export interface CompatibilityStatus {

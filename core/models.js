@@ -130,6 +130,17 @@ const OMNISHOTCUT_PIP = path.join(
 // chemin n'existe pas à l'écriture du manifeste) et `installSteps`.
 const PIP_TARGET = '@pipTarget';
 
+// Runtime ONNX pour un venv qui n'en a aucun (installation sans voix/traitements/recherche). Même
+// pin CUDA 12 que setup.ps1, verrouillé par packaging.test.cjs : `onnxruntime-gpu` >= 1.23 vise
+// CUDA 13 et réclame une DLL absente d'un venv torch cu124.
+const ONNX_RUNTIME_PIP = DETECT_ENV.NETSURUSH_ONNX_BACKEND === 'cuda'
+  ? 'onnxruntime-gpu==1.20.2'
+  : DETECT_ENV.NETSURUSH_ONNX_BACKEND === 'directml'
+    ? 'onnxruntime-directml'
+    : DETECT_ENV.NETSURUSH_ONNX_BACKEND === 'openvino'
+      ? 'onnxruntime-openvino'
+      : 'onnxruntime';
+
 // Un poids `.pth` seul n'est PAS un modèle utilisable. Ces métadonnées sont partagées par tous les
 // modèles du même moteur : le bouton Télécharger répare aussi le package Python manquant dans le venv.
 const REAL_ESRGAN_RUNTIME = {
@@ -300,8 +311,11 @@ const MANIFEST = /** @type {Record<string, any>} */ ({
   // `scikit-learn` n'est PAS optionnel : `imgutils.metrics` importe DBSCAN/OPTICS au chargement du
   // module, donc sans lui le pré-fetch meurt sur `No module named 'sklearn'`. `emoji` est borné comme
   // le paquet l'exige : non borné, pip pose une 2.15 que `pip check` signale ensuite comme dérive.
-  'face-anime': { kind: 'pip', task: 'face', pipCheck: 'imgutils', prefetch: 'face',
+  // `onnxruntime` exécute le détecteur et CCIP : il fait partie du contrat, sinon imgutils s'en pose
+  // un tout seul — ou l'installation meurt sur `No module named 'onnxruntime'`.
+  'face-anime': { kind: 'pip', task: 'face', pipCheck: ['imgutils', 'onnxruntime'], prefetch: 'face',
                   installSteps: [
+                    [ONNX_RUNTIME_PIP],
                     ['--no-deps', 'dghs-imgutils[gpu]'],
                     ['hbutils', 'hfutils', 'emoji<2.12', 'pilmoji', 'shapely', 'pyclipper',
                      'deprecation', 'bchlib', 'piexif', 'pyrfc6266', 'urlobject', 'scikit-learn'],

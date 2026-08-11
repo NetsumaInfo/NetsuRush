@@ -1,14 +1,12 @@
 {
   "title": "NetsuRush konfigurieren",
-  "desc": "Wähle nur die benötigten Downloads. Die passende Grundlage für diesen PC wird automatisch installiert.",
+  "desc": "Die Grundlage installiert sich selbst. Der Rest ist optional.",
   "progressAria": "Konfigurationsschritte",
   "models": {
     "title": "Optionale Downloads",
-    "subtitle": "Nach Funktion gruppiert und jederzeit reparierbar.",
     "search": "Modelle suchen…",
     "none": "Keine Downloads",
     "sceneDetection": "Szenenschnitt",
-    "sceneDetectionHint": "Die leichte NetsuCut-Komponente ist in den Voraussetzungen enthalten.",
     "included": "Enthalten",
     "empty": "Kein Modell entspricht der Suche.",
     "selected": "{{count}} ausgewählt",
@@ -28,7 +26,6 @@
   },
   "review": {
     "title": "Bereit zur Installation",
-    "subtitle": "Prüfe, was diesem PC hinzugefügt wird.",
     "downloads": "Optionaler Speicher",
     "modelCount": "{{count}} Download(s)",
     "noOptionalModels": "Keine optionalen Downloads",
@@ -58,5 +55,12 @@
   "issues": {
     "detected_one": "{{count}} Problem bei der Installation erkannt.",
     "detected_other": "{{count}} Probleme bei der Installation erkannt."
+  },
+  "dl": {
+    "done": "fertig",
+    "failed": "fehlgeschlagen",
+    "retry": "neuer Versuch…",
+    "skipped": "bereits vorhanden",
+    "working": "läuft…"
   }
 }

@@ -1,14 +1,12 @@
 {
   "title": "NetsuRush の設定",
-  "desc": "必要なダウンロードだけを選んでください。この PC に対応する基盤は自動的にインストールされます。",
+  "desc": "基盤は自動でインストールされます。他は任意です。",
   "progressAria": "設定手順",
   "models": {
     "title": "任意のダウンロード",
-    "subtitle": "機能別に分類され、いつでも修復できます。",
     "search": "モデルを検索…",
     "none": "ダウンロードしない",
     "sceneDetection": "シーン分割",
-    "sceneDetectionHint": "NetsuCut に必要な軽量コンポーネントは前提環境に含まれます。",
     "included": "同梱",
     "empty": "検索に一致するモデルはありません。",
     "selected": "{{count}} 件選択",
@@ -28,7 +26,6 @@
   },
   "review": {
     "title": "インストールの準備完了",
-    "subtitle": "この PC に追加される内容を確認します。",
     "downloads": "任意の容量",
     "modelCount": "ダウンロード {{count}} 件",
     "noOptionalModels": "任意のダウンロードなし",
@@ -58,5 +55,12 @@
   "issues": {
     "detected_one": "インストール中に {{count}} 件の問題を検出しました。",
     "detected_other": "インストール中に {{count}} 件の問題を検出しました。"
+  },
+  "dl": {
+    "done": "完了",
+    "failed": "失敗",
+    "retry": "再試行中…",
+    "skipped": "インストール済み",
+    "working": "実行中…"
   }
 }

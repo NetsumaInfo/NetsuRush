@@ -1,14 +1,12 @@
 {
   "title": "配置 NetsuRush",
-  "desc": "只需选择需要的下载项。适配本机的基础环境会自动安装。",
+  "desc": "基础环境自动安装，其余可选。",
   "progressAria": "配置步骤",
   "models": {
     "title": "可选下载",
-    "subtitle": "按功能分组，可随时修复。",
     "search": "搜索模型…",
     "none": "不下载",
     "sceneDetection": "场景切分",
-    "sceneDetectionHint": "NetsuCut 所需的轻量组件已包含在基础环境中。",
     "included": "已包含",
     "empty": "没有匹配的模型。",
     "selected": "已选择 {{count}} 项",
@@ -28,7 +26,6 @@
   },
   "review": {
     "title": "可以安装",
-    "subtitle": "确认将添加到此电脑的内容。",
     "downloads": "可选空间",
     "modelCount": "{{count}} 项下载",
     "noOptionalModels": "无可选下载",
@@ -58,5 +55,12 @@
   "issues": {
     "detected_one": "安装过程中检测到 {{count}} 个问题。",
     "detected_other": "安装过程中检测到 {{count}} 个问题。"
+  },
+  "dl": {
+    "done": "完成",
+    "failed": "失败",
+    "retry": "正在重试…",
+    "skipped": "已存在",
+    "working": "进行中…"
   }
 }
