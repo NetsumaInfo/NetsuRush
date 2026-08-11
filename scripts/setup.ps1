@@ -178,6 +178,12 @@ function Download([string]$url, [string]$dest) {
         $quoted = ($curlArgs | ForEach-Object { '"' + $_ + '"' }) -join ' '
         Dl 'download' $before $expected $label
         $proc = Start-Process -FilePath $CurlExe -ArgumentList $quoted -NoNewWindow -PassThru -RedirectStandardError $errFile
+        # `Start-Process -PassThru` ne CONSERVE PAS le handle du processus : une fois curl sorti,
+        # `.ExitCode` rend $null, et le test `-ne 0` était donc toujours vrai — tous les
+        # téléchargements échouaient, y compris ceux dont le fichier arrivait complet, et l'erreur
+        # affichée était « curl  : » (code et journal vides). Lire `.Handle` AVANT la sortie force
+        # PowerShell à le mettre en cache : c'est la seule façon de relire un code de sortie fiable.
+        $null = $proc.Handle
         while (-not $proc.HasExited) {
           Start-Sleep -Milliseconds 400
           $got = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
@@ -186,7 +192,15 @@ function Download([string]$url, [string]$dest) {
         $proc.WaitForExit()
         $curlLog = if (Test-Path $errFile) { (Get-Content -Raw -ErrorAction SilentlyContinue $errFile) } else { '' }
         Remove-Item -Force $errFile -ErrorAction SilentlyContinue
-        if ($proc.ExitCode -ne 0) { throw "curl $($proc.ExitCode) : $curlLog" }
+        $code = $proc.ExitCode
+        # Ceinture et bretelles : si le handle a malgré tout été perdu, on JUGE SUR LE FICHIER plutôt
+        # que d'inventer un échec. Un fichier complet (taille annoncée atteinte, ou non nul quand le
+        # serveur n'annonce rien) vaut succès.
+        if ($null -eq $code) {
+          $got = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
+          $code = if ($got -gt 0 -and ($expected -le 0 -or $got -ge $expected)) { 0 } else { 1 }
+        }
+        if ($code -ne 0) { throw "curl $code : $curlLog" }
       } else {
         Dl 'work' 0 0 $label
         # IWR cannot resume: a previous attempt's partial would be overwritten anyway.
@@ -256,32 +270,13 @@ function Invoke-Pip([string[]]$pipArgs, [string]$tag) {
   return , $tail.ToArray()
 }
 
-# Extrait une archive 7z. bsdtar (livré dans System32 depuis Windows 10 1803) lit le 7z nativement
-# via libarchive : le chercher AVANT 7-Zip supprime toute dépendance externe. L'ancienne version ne
-# testait que `Get-Command 7z`, si bien qu'une machine avec 7-Zip installé mais hors PATH sautait
-# quand même la voie gyan et retombait sur un build deux majeures en arrière.
-# Rend le NOM de l'extracteur qui a réussi, chaîne vide sinon. Surtout : n'appelle PAS Info, car
-# `Info` écrit dans le pipeline — son message partirait dans la valeur de retour de la fonction au
-# lieu d'atteindre le flux de progression lu par le core. Le compte rendu se fait donc à l'appel.
-function Expand-SevenZip([string]$archive, [string]$dest) {
-  if (-not (Test-Path $dest)) { New-Item -ItemType Directory -Force -Path $dest | Out-Null }
-  $bsdtar = Join-Path $env:SystemRoot 'System32\tar.exe'
-  if (Test-Path $bsdtar) {
-    & $bsdtar -xf $archive -C $dest 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) { return 'bsdtar' }
-  }
-  # 7-Zip n'est PAS toujours dans le PATH : on sonde aussi ses emplacements d'installation standard.
-  $candidates = @('7z') + @(
-    (Join-Path $env:ProgramFiles '7-Zip\7z.exe'),
-    (Join-Path ${env:ProgramFiles(x86)} '7-Zip\7z.exe')
-  )
-  foreach ($exe in $candidates) {
-    if ($exe -ne '7z' -and -not (Test-Path $exe)) { continue }
-    if ($exe -eq '7z' -and -not (Get-Command 7z -ErrorAction SilentlyContinue)) { continue }
-    & $exe x $archive "-o$dest" -y 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) { return '7-Zip' }
-  }
-  return ''
+# Checks a downloaded file against a pinned SHA-256, and throws when they differ. An empty expected
+# value means the asset has no published checksum yet: the check is skipped rather than failing, so
+# a fresh mirror can be wired before it is published. Callers treat a throw as "use the fallback".
+function Test-Sha256([string]$file, [string]$expected) {
+  if (-not $expected) { return }
+  $got = (Get-FileHash -Path $file -Algorithm SHA256 -ErrorAction Stop).Hash
+  if ($got -ne $expected.ToUpperInvariant()) { throw "SHA-256 inattendu (obtenu $got, attendu $expected)" }
 }
 
 # Pose un binaire à la place d'un autre. Windows verrouille un exécutable EN COURS d'utilisation :
@@ -335,16 +330,23 @@ $ffExe = Join-Path $ffDir 'ffmpeg.exe'
 $ffProbe = Join-Path $ffDir 'ffprobe.exe'
 
 # Version ffmpeg ÉPINGLÉE — source unique, lue par le provisionnement ET par test/packaging.test.cjs.
-# `ffmpeg-release-full.7z` de gyan est une cible MOUVANTE : elle est passée à 9.0 le 4 août 2026 sans
-# qu'une ligne du dépôt ne change, pendant que le repli restait sur 7.1 — deux majeures d'écart entre
-# deux machines pour le même commit. Une URL versionnée rend l'installation reproductible et fait
-# d'une montée de version une décision, pas un effet de bord.
+# Une URL versionnée rend l'installation reproductible et fait d'une montée de version une décision,
+# pas un effet de bord.
+#
+# The archive is a GitHub release asset of this repository, served by GitHub's CDN. The upstream
+# source (gyan.dev) is a single host with no CDN: it is what made the install screen crawl, not the
+# size of the file. scripts/ffmpeg-mirror.ps1 builds that asset — a plain zip, ffmpeg + ffprobe and
+# their DLLs only — and prints the checksum pinned below.
 $FfmpegVersion = '9.0'
-$FfmpegUrl = "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FfmpegVersion-full_build.7z"
-# Repli quand aucun extracteur 7z n'est disponible : BtbN ne publie qu'en zip, et n'a pas encore de
-# build 9.0 (seulement master, 7.1 et 8.1). On prend 8.1 — stable, une majeure en arrière — et JAMAIS
-# master : ses builds embarquent un libplacebo/Vulkan parfois incapable de s'initialiser, ce qui casse
-# le moteur d'upscale Turbo (cf. core/shaderUpscale.js).
+$FfmpegTag = "ffmpeg-$FfmpegVersion-win64"
+$FfmpegUrl = "https://github.com/NetsumaInfo/NetsuRush/releases/download/$FfmpegTag/$FfmpegTag.zip"
+# SHA-256 of the published asset, uppercase hex. Empty = asset not published yet, the check is
+# skipped and a mismatch simply falls back below. Written by `ffmpeg-mirror.ps1 -Apply`.
+$FfmpegSha256 = '288400E58A62DE90472AF085696E632957DBC8005F09C2A149C788F005B54B93'
+# Repli quand le miroir est absent ou corrompu : BtbN publie en zip sur GitHub (même CDN), mais n'a
+# pas de build 9.0 (seulement master, 7.1 et 8.1). On prend 8.1 — stable, une majeure en arrière — et
+# JAMAIS master : ses builds embarquent un libplacebo/Vulkan parfois incapable de s'initialiser, ce
+# qui casse le moteur d'upscale Turbo (cf. core/shaderUpscale.js).
 $FfmpegFallbackVersion = '8.1'
 $FfmpegFallbackUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n$FfmpegFallbackVersion-latest-win64-gpl-$FfmpegFallbackVersion.zip"
 # Versions qu'une installation DÉJÀ en place peut garder. Le repli est légitime : sans lui dans cette
@@ -688,31 +690,40 @@ if (-not (Test-FfmpegVersionValue $ffCurrent $FfmpegAccepted)) {
   Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
   New-Item -ItemType Directory -Force -Path $stage | Out-Null
 
-  $extractor = ''
-  $sevenZip = Join-Path $runtime "ffmpeg-$FfmpegVersion.7z"
+  # Both sources are zip files on GitHub's CDN, so `Expand-Archive` is enough — no bsdtar, no 7-Zip,
+  # and no branch that silently drops a machine two majors behind because an extractor was missing.
+  $mirrored = $false
+  $zip = Join-Path $runtime "$FfmpegTag.zip"
   try {
-    Download $FfmpegUrl $sevenZip
-    $extractor = Expand-SevenZip $sevenZip $stage
-    if ($extractor) { Info "archive ffmpeg $FfmpegVersion extraite ($extractor)" }
-    else { Info 'aucun extracteur 7z utilisable (bsdtar/7-Zip) : repli sur le build zip' }
-  } catch {
-    Info "build gyan $FfmpegVersion ignoré: $($_.Exception.Message)"
-  }
-  Remove-Item -Force $sevenZip -ErrorAction SilentlyContinue
-
-  if (-not $extractor) {
-    $zip = Join-Path $runtime 'ffmpeg.zip'
-    Info "repli sur le build zip $FfmpegFallbackVersion"
-    Download $FfmpegFallbackUrl $zip
+    Download $FfmpegUrl $zip
+    Test-Sha256 $zip $FfmpegSha256
     Expand-Archive -Path $zip -DestinationPath $stage -Force -ErrorAction Stop
-    Remove-Item -Force $zip -ErrorAction SilentlyContinue
+    $mirrored = $true
+    Info "miroir ffmpeg $FfmpegVersion extrait"
+  } catch {
+    Info "miroir ffmpeg $FfmpegVersion ignoré: $($_.Exception.Message)"
+  }
+  Remove-Item -Force $zip -ErrorAction SilentlyContinue
+
+  if (-not $mirrored) {
+    $fallbackZip = Join-Path $runtime 'ffmpeg.zip'
+    Info "repli sur le build zip $FfmpegFallbackVersion"
+    Download $FfmpegFallbackUrl $fallbackZip
+    Expand-Archive -Path $fallbackZip -DestinationPath $stage -Force -ErrorAction Stop
+    Remove-Item -Force $fallbackZip -ErrorAction SilentlyContinue
   }
 
   $bin = Get-ChildItem -Path $stage -Recurse -Filter ffmpeg.exe | Select-Object -First 1
   if (-not $bin) { Fail (T 'ffmpegExtract') }
   New-Item -ItemType Directory -Force -Path $ffDir | Out-Null
-  Install-Binary $bin.FullName $ffExe
-  Install-Binary (Join-Path $bin.Directory.FullName 'ffprobe.exe') $ffProbe
+  # Everything that sits NEXT TO ffmpeg.exe is installed, not just the two executables: a shared
+  # build (what the mirror ships, so ffprobe costs 300 kB instead of a second full static binary)
+  # only runs with its av*.dll alongside. A static build simply has no DLL to copy, so the same
+  # loop covers the fallback. ffplay is dropped — the app never launches it.
+  Get-ChildItem -Path $bin.Directory.FullName -File |
+    Where-Object { $_.Name -ne 'ffplay.exe' } |
+    ForEach-Object { Install-Binary $_.FullName (Join-Path $ffDir $_.Name) }
+  if (-not (Test-Path $ffProbe)) { Fail (T 'ffmpegExtract') }
   Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
   # Les extractions des versions antérieures du setup restaient sur le disque (~300 Mo par build).
   Get-ChildItem -Path $runtime -Directory -Filter 'ffmpeg-*' -ErrorAction SilentlyContinue |

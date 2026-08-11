@@ -231,9 +231,10 @@ test('first-run setup verifies the mandatory TransNetV2 import', () => {
   assert.match(coreSetup, /ready: venv && transnet && ffmpeg && modelsReady && gpuReady/);
 });
 
-// La version de ffmpeg est ÉPINGLÉE. `ffmpeg-release-full.7z` de gyan est une cible mouvante : elle
-// est passée de 7.x à 9.0 sans qu'une ligne du dépôt ne change, pendant que le repli restait sur 7.1
-// — deux majeures d'écart entre deux postes pour le même commit. Ce test verrouille l'épinglage et
+// La version de ffmpeg est ÉPINGLÉE, et l'archive vient du MIROIR NetsuRush (asset d'une release du
+// dépôt, servi par le CDN de GitHub). L'ancienne source, gyan.dev, était un hôte unique sans CDN —
+// le téléchargement dominait la durée de l'installation — et publiait une cible mouvante passée de
+// 7.x à 9.0 sans qu'une ligne du dépôt ne change. Ce test verrouille l'épinglage, la source, et
 // l'accord entre les deux listes de versions acceptées (PowerShell provisionne, Node contrôle) ;
 // sans lui elles divergent en silence et l'écran d'installation revient en boucle.
 test('the ffmpeg version is pinned and agreed on by the provisioner and the gate', () => {
@@ -243,16 +244,33 @@ test('the ffmpeg version is pinned and agreed on by the provisioner and the gate
   assert.ok(pinned, 'setup.ps1 doit déclarer $FfmpegVersion');
   assert.ok(fallback, 'setup.ps1 doit déclarer $FfmpegFallbackVersion');
 
-  // L'URL doit porter la version, jamais l'alias « dernière version en date ».
-  assert.ok(setup.includes(`ffmpeg-$FfmpegVersion-full_build.7z`), 'l\'URL gyan doit être versionnée');
-  // On vise l'URL, pas le nom : le commentaire qui explique l'épinglage cite l'alias mouvant.
-  assert.doesNotMatch(setup, /gyan\.dev\/ffmpeg\/builds\/ffmpeg-release-full\.7z/, 'l\'URL gyan mouvante ne doit pas revenir');
+  // Source principale : le miroir du dépôt, sur une URL qui porte la version.
+  assert.ok(setup.includes('$FfmpegTag = "ffmpeg-$FfmpegVersion-win64"'), 'le tag du miroir doit être versionné');
+  assert.ok(setup.includes('https://github.com/NetsumaInfo/NetsuRush/releases/download/$FfmpegTag/$FfmpegTag.zip'),
+    'l\'archive doit venir du miroir NetsuRush');
+  const mirrorScript = fs.readFileSync(path.join(root, 'scripts', 'ffmpeg-mirror.ps1'), 'utf8');
+  assert.match(mirrorScript, /gh release create[^\n]+--prerelease/,
+    'la release auxiliaire doit rester une prerelease pour ne pas masquer latest.json');
+  // On vise l'URL, pas le nom : le commentaire qui explique le miroir cite la source amont.
+  assert.doesNotMatch(setup, /https:\/\/www\.gyan\.dev/, 'le téléchargement direct depuis gyan.dev ne doit pas revenir (hôte lent, cible mouvante)');
   assert.doesNotMatch(setup, /ffmpeg-master-latest/, 'un build git-master casse libplacebo (upscale Turbo)');
 
-  // Extraction : bsdtar d'abord (livré avec Windows), 7-Zip ensuite, y compris hors PATH.
-  assert.match(setup, /System32\\tar\.exe/, 'bsdtar doit être tenté en premier');
-  assert.match(setup, /7-Zip\\7z\.exe/, '7-Zip doit être sondé hors PATH');
-  assert.match(setup, /function Expand-SevenZip/);
+  // L'asset publié est vérifié par empreinte. Vide = pas encore publié (contrôle sauté), sinon 64
+  // caractères hexadécimaux : une valeur tronquée passerait sinon inaperçue jusqu'à la production.
+  const sha = /\$FfmpegSha256 = '([0-9A-Fa-f]*)'/.exec(setup);
+  assert.ok(sha, 'setup.ps1 doit déclarer $FfmpegSha256');
+  assert.ok(sha[1].length === 0 || sha[1].length === 64, '$FfmpegSha256 doit être vide ou un SHA-256 complet');
+  assert.match(setup, /function Test-Sha256/, 'l\'empreinte doit être vérifiée avant extraction');
+
+  // Les deux sources sont des zip : plus aucun extracteur externe, donc plus de branche capable de
+  // laisser un poste deux majeures en arrière parce que 7-Zip manquait.
+  assert.doesNotMatch(setup, /function Expand-SevenZip/, 'la voie 7z doit rester supprimée');
+  assert.doesNotMatch(setup, /7-Zip\\7z\.exe/, 'aucun extracteur externe ne doit être requis');
+  assert.match(setup, /Expand-Archive -Path \$zip -DestinationPath \$stage/, 'le miroir s\'extrait avec Expand-Archive');
+
+  // Un build partagé n'est utilisable qu'avec ses DLL : installer les deux seuls .exe donnerait un
+  // ffmpeg qui ne démarre pas. Tout ce qui accompagne ffmpeg.exe est donc posé.
+  assert.match(setup, /Where-Object \{ \$_\.Name -ne 'ffplay\.exe' \}/, 'les DLL voisines de ffmpeg.exe doivent être installées');
 
   // Une installation déjà en place doit être RELUE, sinon aucun poste ne monte jamais de version.
   assert.match(setup, /function Get-FfmpegVersion/);
@@ -277,13 +295,23 @@ test('the ffmpeg version is pinned and agreed on by the provisioner and the gate
   assert.deepEqual(FFMPEG_ACCEPTED_VERSIONS, [pinned[1], fallback[1]],
     'core/setup.js et setup.ps1 doivent accepter les mêmes versions');
 
-  // Le repli DOIT rester accepté : sinon un poste sans extracteur 7z installe la version de repli,
-  // la voit refusée au démarrage suivant, et retombe indéfiniment sur l'écran d'installation.
+  // Le repli DOIT rester accepté : sinon un poste qui n'a pas pu joindre le miroir installe la
+  // version de repli, la voit refusée au démarrage suivant, et retombe indéfiniment sur l'écran
+  // d'installation.
   assert.ok(ffmpegVersionAccepted(fallback[1]), 'la version de repli doit être acceptée');
   assert.ok(ffmpegVersionAccepted(pinned[1]), 'la version épinglée doit être acceptée');
   assert.ok(ffmpegVersionAccepted(`${pinned[1]}.1`), 'un correctif de la version épinglée doit être accepté');
   assert.ok(!ffmpegVersionAccepted('7.1'), 'une version héritée doit être remplacée');
   assert.ok(!ffmpegVersionAccepted(null), 'un build git sans version stable doit être remplacé');
+
+  // `Start-Process -PassThru` ne conserve pas le handle du processus : sans cette lecture, `.ExitCode`
+  // rend $null une fois curl sorti, `-ne 0` est vrai, et TOUS les téléchargements échouent — y compris
+  // ceux dont le fichier est arrivé complet, avec pour seule trace « curl  : ». Mesuré sur poste
+  // Windows 11 : ExitCode vide sans la ligne, 0 avec.
+  const download = /function Download\([\s\S]*?\n}/.exec(setup);
+  assert.ok(download, 'setup.ps1 doit déclarer Download');
+  assert.match(download[0], /\$null = \$proc\.Handle/, 'le handle doit être mis en cache avant la sortie de curl');
+  assert.match(download[0], /if \(\$null -eq \$code\)/, 'un code de sortie perdu doit être jugé sur le fichier, pas supposé en échec');
 
   // `setupStatus` lit `quickReady ? true : ffmpegReady(...)`. Contrôler la version UNIQUEMENT dans
   // `ffmpegReady` la rendait inatteignable sur une installation déjà complète — donc sur toute la

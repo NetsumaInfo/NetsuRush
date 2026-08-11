@@ -26,6 +26,10 @@ The native video player relies on **libmpv** and the **FFmpeg** libraries shippe
 
 Those licences are **distinct from NetsuRush's AGPL-3.0-only** and are not absorbed by it. Any redistribution of those binaries — in particular the `.exe` installer, which embeds them — must ship their licence texts and make the **corresponding source** available, or state precisely where to obtain it. The release package therefore contains those licence texts plus the exact mpv and FFmpeg revisions used for the build.
 
+## Mirrored ffmpeg CLI
+
+The `ffmpeg`/`ffprobe` command-line binaries used by the core are a **separate** GPL build from the libraries shipped with mpv, and NetsuRush now mirrors them as a release asset instead of linking to a third-party host. Mirroring makes the project the distributor, so the same obligation applies: [`scripts/ffmpeg-mirror.ps1`](../scripts/ffmpeg-mirror.ps1) writes a `SOURCES.md` inside the archive naming the upstream build and the matching source tarball, and downloads that tarball so **both assets go into the same release**. Publishing the binary without its sources is not an option.
+
 Before publishing an installer or an image containing a new dependency: check its licence, keep its copyright notice, and add its text to the third-party licence artefacts if needed. Never present a third-party component as covered by NetsuRush's AGPL.
 
 ## Rules that keep the project redistributable

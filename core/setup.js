@@ -26,8 +26,9 @@ const PACKAGED = !!process.env.NR_RESOURCE_DIR;
 
 // Versions ffmpeg qu'une installation packagée peut garder — MIROIR de $FfmpegAccepted dans
 // scripts/setup.ps1 (version épinglée + repli zip), l'égalité des deux listes étant verrouillée par
-// test/packaging.test.cjs. La première est la cible, la seconde le repli légitime des postes sans
-// extracteur 7z ; l'accepter ici évite qu'une installation valide redemande le setup en boucle.
+// test/packaging.test.cjs. La première est la cible (le miroir NetsuRush), la seconde le repli
+// légitime quand ce miroir est injoignable ; l'accepter ici évite qu'une installation valide
+// redemande le setup en boucle.
 const FFMPEG_ACCEPTED_VERSIONS = ['9.0', '8.1'];
 // Bump when an update adds a mandatory runtime capability. Existing installs without this marker
 // leave the quick path and run `probeRuntime`, which sends incomplete environments to repair.
@@ -129,7 +130,7 @@ function ffmpegVersionOk(config) {
 // La version est vérifiée parce qu'une installation antérieure a pu poser un build git-master ou une
 // 7.1 : sans ce contrôle, `exists()` suffisait à la conserver pour toujours et aucun poste déjà
 // installé ne recevrait jamais la version épinglée. Le repli étant dans la liste acceptée, un poste
-// sans extracteur 7z ne peut pas retomber en boucle sur l'écran d'installation. Ce chemin LENT
+// qui a dû s'y rabattre ne retombe pas en boucle sur l'écran d'installation. Ce chemin LENT
 // interroge le binaire et ignore `config.ffmpegVersion` : un fichier de configuration peut mentir.
 function ffmpegReady(config = CONFIG) {
   if (!PACKAGED) return true;
