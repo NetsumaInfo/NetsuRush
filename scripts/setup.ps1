@@ -105,8 +105,31 @@ function Fail([string]$msg) { Write-Output "ERROR:$msg"; exit 1 }
 # refusent la poignée de main (« The request was aborted: Could not create SSL/TLS secure channel »).
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
 
+# curl.exe ships in System32 since Windows 10 1803. Prefer it over Invoke-WebRequest: the Windows
+# PowerShell 5.1 implementation copies the stream through managed code in tiny chunks and caps at a
+# few MB/s whatever the link is worth — on the setup archives that gap is measured in tens of
+# minutes. IWR stays as the fallback when the binary is missing.
+$CurlExe = Join-Path $env:SystemRoot 'System32\curl.exe'
+if (-not (Test-Path $CurlExe)) { $CurlExe = '' }
+
+# curl does not read the WinINET proxy (the one from Internet Options), unlike IWR. On a corporate
+# machine with no http_proxy/https_proxy in the environment it would go direct and fail where the
+# previous code worked, so resolve the system proxy and hand it over explicitly.
+$SysProxy = ''
+if ($CurlExe -and -not $env:HTTPS_PROXY -and -not $env:https_proxy) {
+  try {
+    $probe = [Uri]'https://huggingface.co'
+    $resolved = [Net.WebRequest]::GetSystemWebProxy().GetProxy($probe)
+    if ($resolved -and $resolved.AbsoluteUri -ne $probe.AbsoluteUri -and $resolved.Host -ne $probe.Host) {
+      $SysProxy = $resolved.AbsoluteUri
+    }
+  } catch {}
+}
+
 # Téléchargement robuste : saute si la cible existe déjà et n'est pas vide. Retente sur coupure réseau
-# (gros fichiers sur le réseau du testeur : reset/timeout fréquents) avec backoff. Reprend le .part.
+# (gros fichiers sur le réseau du testeur : reset/timeout fréquents) avec backoff.
+# Retries RESUME the accumulated .part instead of restarting: on an unstable link a multi-gigabyte
+# archive used to start over from byte zero every time it dropped, and never completed.
 function Download([string]$url, [string]$dest) {
   if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Info "déjà présent: $(Split-Path $dest -Leaf)"; return }
   $dir = Split-Path $dest -Parent
@@ -114,12 +137,27 @@ function Download([string]$url, [string]$dest) {
   $tmp = "$dest.part"
   $attempts = 4
   for ($n = 1; $n -le $attempts; $n++) {
+    $before = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
     try {
-      Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing -ErrorAction Stop
+      if ($CurlExe) {
+        # -C - resumes at the .part size (and starts from zero when it does not exist). --retry
+        # absorbs drops inside curl itself, before control ever returns to this loop.
+        $curlArgs = @('-sSL', '--fail', '--retry', '3', '--retry-delay', '2', '--connect-timeout', '30', '-C', '-', '-o', $tmp, $url)
+        if ($SysProxy) { $curlArgs = @('--proxy', $SysProxy) + $curlArgs }
+        $curlLog = & $CurlExe @curlArgs 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "curl $LASTEXITCODE : $curlLog" }
+      } else {
+        # IWR cannot resume: a previous attempt's partial would be overwritten anyway.
+        Remove-Item -Force $tmp -ErrorAction SilentlyContinue
+        Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing -ErrorAction Stop
+      }
       Move-Item -Force $tmp $dest -ErrorAction Stop
       return
     } catch {
-      Remove-Item -Force $tmp -ErrorAction SilentlyContinue
+      $after = if (Test-Path $tmp) { (Get-Item $tmp).Length } else { 0 }
+      # No byte gained (server refused the Range, dead URL, immediate drop): keeping the partial
+      # would make every retry resume at the same dead point. Start clean instead.
+      if ($after -le $before) { Remove-Item -Force $tmp -ErrorAction SilentlyContinue }
       if ($n -eq $attempts) { throw }
       Info "téléchargement échoué ($(Split-Path $url -Leaf)), tentative $n/$attempts : $($_.Exception.Message)"
       Start-Sleep -Seconds ($n * 3)
@@ -470,7 +508,10 @@ Info "Suppression d'objet prête"
 
 # Un SEUL package ONNX Runtime à la fois : CUDA NVIDIA, DirectML AMD/Intel/DirectX 12, ou CPU.
 # Les extras requirements installent d'abord une base cohérente ; on normalise ensuite le provider.
-if ((HasModule 'voice') -or (HasModule 'upscale')) {
+# `search` en fait partie : la recherche par visage infère en ONNX (YuNet/SFace réels, imgutils+CCIP
+# animés). Sans ce provisionnement, une installation derush+recherche n'avait AUCUN onnxruntime, et
+# imgutils s'en installait un tout seul au premier usage — la mauvaise branche CUDA, tout sur CPU.
+if ((HasModule 'voice') -or (HasModule 'upscale') -or (HasModule 'search')) {
   Stage 'deps' "ONNX Runtime $OnnxBackend"
   & $venvPy -m pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml *> $null
   # La ROUE doit correspondre au CUDA de torch : à partir de 1.23, `onnxruntime-gpu` est bâti pour

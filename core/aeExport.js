@@ -11,6 +11,8 @@ const { AUDIO_PRODUCES, isImagePath } = require('./ae/codecs');
 const { resolveInstalledCodec, gpuFamily } = require('./adaptiveCodec');
 const { readTimelineEdit } = require('./ae/timelineRead');
 const { prepareMedia } = require('./ae/prepareMedia');
+const { upscaleStep, aeEncoding } = require('./ae/upscaleStep');
+const { codecExt } = require('./utils');
 const { genAeScript } = require('./ae/jsx');
 const { t } = require('./i18n');
 
@@ -47,6 +49,15 @@ function launchAe(afterFx, jsxPath, logPath) {
 }
 
 const isAeRunning = () => isImageRunning('AfterFX.exe');
+
+/**
+ * Transform NEUTRE d'un plan dont le cadrage est déjà cuit dans le fichier : le média arrive à la
+ * taille de la timeline, donc l'ajustement d'`applyXf` vaut 1 et le calque se pose plein cadre.
+ */
+const BAKED_XF = {
+  zoomX: 1, zoomY: 1, pan: 0, tilt: 0, rot: 0, anchorX: 0, anchorY: 0, opacity: 100,
+  cropL: 0, cropR: 0, cropT: 0, cropB: 0, flipX: 0, flipY: 0,
+};
 
 /** Fin du journal du script (le .jsx n'ouvre jamais de modale : il écrit tout ici). */
 function tailLog(logPath, lines = 12) {
@@ -88,15 +99,17 @@ function createAeExport(deps) {
         transformMode = 'none',   // none | ae | bake
         nestedMode = 'flatten',   // flatten = contenu | comp = timeline en précompo | render
         audioRenderFmt = 'wav',   // format du rendu si timeline imbriquée audio seule
-        individualRender = false, // découpe individuelle séparée : 1 fichier par plan, coupé du rush original
         deliver = 'auto',         // auto = panneau CEP si AE est joignable, sinon lancement | panel | launch
       } = opts;
 
       const bake = transformMode === 'bake';
       const transforms = transformMode !== 'none';
-      // Réencode forcé si : bake (vitesse cuite) OU découpe individuelle (seul moyen d'une coupe EXACTE
-      // à la frame — `-c copy` ne coupe que sur keyframe, cf. limite ffmpeg). Sinon le mode vidéo choisi.
-      const vMode = (bake || individualRender) ? 'reencode' : videoMode;
+      // L'upscale REMPLACE les pixels : ni la copie ni le réencapsulage ne peuvent le faire, donc
+      // l'option impose la production d'un fichier — comme à l'archivage d'une collection.
+      const grow = !!(opts.upscale && opts.upscale.enabled);
+      // Le bake cuit la vitesse dans le fichier : il IMPOSE lui aussi le réencode, seul moyen d'une
+      // coupe exacte à la frame (`-c copy` ne coupe que sur keyframe, cf. limite ffmpeg).
+      const vMode = (bake || grow) ? 'reencode' : videoMode;
       const family = gpuFamily(String(requestedCodec));
       const adaptive = await resolveInstalledCodec(
         String(requestedCodec), family === 'hevc' ? 'main10' : family === 'h264' ? 'high' : null,
@@ -113,22 +126,33 @@ function createAeExport(deps) {
       const outDir = opts.outDir || null;
       if (outDir) { try { fs.mkdirSync(outDir, { recursive: true }); } catch (_) {} }
 
-      const edit = await readTimelineEdit(resolve, timelineName, { nestedMode, outDir, codec: resolveCodec, audio, audioRenderFmt, event });
+      // Images clés lues seulement quand les transforms voyagent : sans elles l'export XML de
+      // Resolve serait un aller-retour disque pour rien.
+      const edit = await readTimelineEdit(resolve, timelineName, { nestedMode, outDir, codec: resolveCodec, audio, audioRenderFmt, event, animation: transforms, bakeTransforms: bake });
       if (!edit.ok) return edit;
       if (!edit.items.length) {
         return { ok: false, error: t('noUsableClips'), missing: edit.missing };
       }
 
-      // Fichiers produits sur disque (dossier obligatoire) : réencode/remux, découpe individuelle,
-      // timeline imbriquée rendue, ou audio réencodé.
-      // `nestedMode: 'render'` compte aussi : Resolve écrit alors un fichier par timeline imbriquée.
-      // Sans lui dans le test, l'absence de dossier ne remontait qu'au fond de readTimelineEdit.
+      // Fichiers produits sur disque (dossier obligatoire) : réencode/remux, timeline imbriquée
+      // rendue, ou audio réencodé. `nestedMode: 'render'` compte aussi — Resolve écrit alors un
+      // fichier par timeline imbriquée.
       const audioProduces = AUDIO_PRODUCES.has(audio) && edit.items.some((c) => c.kind === 'audio');
       if ((vMode !== 'copy' || nestedMode === 'render' || audioProduces) && !outDir) {
         return { ok: false, error: t('chooseOutputFolder') };
       }
 
-      const prepared = await prepareMedia(deps, event, edit, { videoMode: vMode, codec: mediaCodec, audio, abr, handleSec, outDir, videoContainer, audioContainer, bake, fps: edit.fps });
+      // Conteneurs rabattus faute de pouvoir porter les flux (ProRes en MP4, PCM en M4A) : la
+      // préparation les remplit, le résultat les dit — un conteneur changé en silence livrerait
+      // autre chose que ce qui a été demandé.
+      const containerNotes = [];
+      // Upscale : moteur de NetsuLab, réglages du panneau, exécutants liés à CET événement pour
+      // que la progression parte sur le même canal que le reste de l'export.
+      const upscale = upscaleStep(opts.upscale, {
+        runUpscale: deps.runUpscale ? (args) => deps.runUpscale(event, args) : undefined,
+        runTurbo: deps.runTurbo ? (args) => deps.runTurbo(event, args) : undefined,
+      }, aeEncoding(requestedCodec, audio, abr), codecExt(mediaCodec));
+      const prepared = await prepareMedia(deps, event, edit, { videoMode: vMode, codec: mediaCodec, audio, abr, handleSec, outDir, videoContainer, audioContainer, bake, upscale, fps: edit.fps, compW: edit.width, compH: edit.height, notes: containerNotes });
 
       const groupsById = {};
       for (const g of (edit.groups || [])) groupsById[g.id] = g;
@@ -140,14 +164,24 @@ function createAeExport(deps) {
         const refFps = g ? g.fps : edit.fps;
         const posSec = (c.tlStart - refStart) / refFps;
         const occSec = (c.tlEnd - c.tlStart) / refFps;   // durée d'occupation (vérité)
-        const xf = transforms ? c.xf : null;
+        // Cadrage déjà cuit dans le fichier (mode « Réencodé ») : le calque ne doit plus RIEN
+        // reposer, sinon zoom et décalage s'appliquent une seconde fois. Seule l'opacité survit —
+        // elle ne se cuit pas dans un fichier sans transparence.
+        const xf = !transforms ? null
+          : c.xfBaked ? { ...BAKED_XF, opacity: (c.xf && c.xf.opacity) != null ? c.xf.opacity : 100 }
+          : c.xf;
+        // Les images clés sont datées en frames DEPUIS LE DÉBUT DU PLAN, sur la base de temps de la
+        // comp qui l'accueille : le calque doit emporter son origine et sa cadence pour les poser.
+        const anim = transforms ? c.anim || null : null;
+        const keys = anim ? { anim, keyStart: posSec, keyFps: refFps } : null;
         // Image = vrai still OU freeze (1 frame extraite en .png) → AE la tient sur toute l'occupation.
         const image = isImagePath(c.file || c.path) || !!c.freezeStill;
         const group = c.group || undefined;
 
         // bake : fichier déjà à la vitesse timeline → pose 1:1, pas de remap.
         if (c.baked) {
-          return { file: c.file, name: c.name || undefined, kind: c.kind, xf, occSec, image, group,
+          return { file: c.file, name: c.name || undefined, kind: c.kind, xf, xfBaked: !!c.xfBaked,
+            ...keys, occSec, image, group,
             startTime: posSec, inPoint: posSec, outPoint: posSec + (c.bakedDur || occSec) };
         }
 
@@ -161,7 +195,7 @@ function createAeExport(deps) {
         if (retime) {
           const fIn = (c.fileInFrame || 0) / c.fpsClip;
           const fOut = ((c.fileInFrame || 0) + (c.srcOut - c.srcIn + 1)) / c.fpsClip;
-          return { file: c.file, name: c.name || undefined, kind: c.kind, xf, occSec, image, group,
+          return { file: c.file, name: c.name || undefined, kind: c.kind, xf, ...keys, occSec, image, group,
             retime: true, posSec, remapIn: c.reverse ? fOut : fIn, remapOut: c.reverse ? fIn : fOut,
             outPoint: posSec + occSec };
         }
@@ -171,6 +205,7 @@ function createAeExport(deps) {
           name: c.name || undefined,
           kind: c.kind,
           xf,
+          ...keys,
           occSec,
           image,
           group,
@@ -221,7 +256,8 @@ function createAeExport(deps) {
       try { fs.writeFileSync(logPath, ''); } catch (_) {}
       fs.writeFileSync(jsxPath, genAeScript(payload, logPath), 'utf8');
 
-      const done = { comp: name, clips: layers.length, outDir, script: jsxPath, missing: edit.missing };
+      const done = { comp: name, clips: layers.length, outDir, script: jsxPath, missing: edit.missing,
+        animated: edit.animated || 0, containerFallbacks: containerNotes.length };
 
       // Livraison par le panneau CEP : le script est déroulé dans l'After Effects DÉJÀ ouvert.
       // « AfterFX.exe -r » suppose au contraire qu'AE tourne avec un projet prêt — sinon le script

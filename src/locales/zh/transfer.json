@@ -15,25 +15,29 @@
   "sections": {
     "source": "{{host}} 中的时间线",
     "target": "{{host}} 中的目标",
+    "targetComp": "{{host}} 中的合成",
     "options": "选项",
     "media": "媒体",
     "outDir": "输出文件夹",
-    "encoding": "编码"
+    "encoding": "编码",
+    "upscale": "超分辨率"
   },
   "form": {
     "refresh": "刷新",
     "noTimeline": "没有时间线",
     "timelineOpen": "{{name}}（已打开）",
     "namePlaceholder": "新建时间线的名称",
+    "compPlaceholder": "新建合成的名称",
     "modeNew": "新建时间线",
     "modeAppend": "已有时间线",
     "videoOnly": "仅视频",
     "richAe": "After Effects 高级选项",
-    "richAeHint": "应用变换、速度与预合成，而不是简单复制镜头。",
+    "richAeHint": "重建变换、速度和预合成，而不是简单复制镜头。媒体与编码随后在下方面板中设置。",
     "yes": "是",
     "no": "否",
     "choose": "选择…",
-    "none": "无"
+    "none": "无",
+    "upscaleForcesReencode": "超分会重建像素：无论上方选择为何，都会执行“重新编码”。"
   },
   "preview": {
     "clips": "已读取镜头",
@@ -46,7 +50,8 @@
     "fidelityCounts": "{{exact}} 项精确 · {{approximated}} 项近似 · {{unsupported}} 项不保证",
     "animationUnavailable": "无法读取关键帧：源软件拒绝了承载关键帧的导出。传输将使用固定值。",
     "mediaLess": "{{count}} 个无媒体元素（遮罩、调整图层）：任何软件都无法接收。",
-    "graphics": "{{count}} 个标题：将根据文字和样式在目标软件中重建。"
+    "graphics": "{{count}} 个标题：将根据文字和样式在目标软件中重建。",
+    "graphicsUnsupported": "{{count}} 个标题：目标软件无法重建，将不会转移。"
   },
   "phases": {
     "read": "正在读取时间线",
@@ -62,6 +67,9 @@
     "done": "已在“{{timeline}}”（{{host}}）中放置 {{count}} 个镜头。",
     "verified": "已回读属性：传输验证成功。",
     "unverified": "已确认 {{applied}} 项属性 · {{issues}} 项限制或差异。",
+    "animated": "{{count}} 个镜头带关键帧。",
+    "animatedNone": "未读取到关键帧：DaVinci Resolve 不通过脚本公开关键帧，只有其 XML 导出携带。",
+    "containerFallback": "{{count}} 个文件写为 MOV：MP4 无法承载 ProRes、DNxHR 或 PCM。",
     "tracksClamped": "轨道已收敛：目标软件无法创建足够的轨道。",
     "missing": "磁盘上找不到 {{count}} 个源文件。",
     "mediaLess": "{{count}} 个无媒体元素（遮罩、调整图层）：任何软件都无法接收。",

@@ -23,7 +23,7 @@
     "upscaleMode": "When",
     "upscaleModeNow": "Immediate",
     "upscaleModeIdle": "GPU idle",
-    "upscaleNeedsEncode": "Enlarging replaces pixels: stream copy is not possible.",
+    "upscaleNeedsEncode": "Upscaling replaces pixels: stream copy is impossible.",
     "queueRunning": "Archiving now",
     "queuePending": "Waiting for an idle GPU"
   },

@@ -31,16 +31,29 @@ async function removeQuietly(filePath) {
 }
 
 /**
- * Timeline Resolve → document lu depuis son propre export FCP7 XML.
- * @returns {Promise<{ ok: true, doc: import('./types').TransferDoc } | { ok: false, reason: string }>}
+ * Écrit l'export FCP7 XML de la timeline et RENVOIE son chemin. Le fichier survit à l'appel : c'est
+ * lui que Premiere importe quand le transfert emprunte la voie native (seule voie qui pose un titre,
+ * qu'aucune API Premiere ne sait créer).
+ * @returns {Promise<{ ok: true, path: string } | { ok: false, reason: string }>}
  */
-async function readTimelineXml(resolve, timeline) {
+async function exportTimelineXml(resolve, timeline) {
   const exportType = await exportConstant(resolve, "EXPORT_FCP_7_XML");
   if (exportType === null) return { ok: false, reason: "exportConstantMissing" };
   const filePath = tempXmlPath();
   let exported = false;
   try { exported = !!(await timeline.Export(filePath, exportType)); } catch (_) { exported = false; }
   if (!exported) { await removeQuietly(filePath); return { ok: false, reason: "timelineExportRefused" }; }
+  return { ok: true, path: filePath };
+}
+
+/**
+ * Timeline Resolve → document lu depuis son propre export FCP7 XML.
+ * @returns {Promise<{ ok: true, doc: import('./types').TransferDoc } | { ok: false, reason: string }>}
+ */
+async function readTimelineXml(resolve, timeline) {
+  const written = await exportTimelineXml(resolve, timeline);
+  if (written.ok !== true) return written;
+  const filePath = written.path;
   let source = "";
   try { source = await fsp.readFile(filePath, "utf8"); } catch (_) { source = ""; }
   await removeQuietly(filePath);
@@ -50,4 +63,4 @@ async function readTimelineXml(resolve, timeline) {
   return { ok: true, doc: read };
 }
 
-module.exports = { readTimelineXml, exportConstant };
+module.exports = { readTimelineXml, exportTimelineXml, exportConstant };

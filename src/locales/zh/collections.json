@@ -23,7 +23,7 @@
     "upscaleMode": "时机",
     "upscaleModeNow": "立即",
     "upscaleModeIdle": "GPU 空闲时",
-    "upscaleNeedsEncode": "放大会替换像素，无法使用流复制。",
+    "upscaleNeedsEncode": "超分会重建像素：无法进行流复制。",
     "queueRunning": "正在归档",
     "queuePending": "等待 GPU 空闲"
   },

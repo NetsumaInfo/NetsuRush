@@ -19,12 +19,11 @@
     "noTimeline": "无时间线",
     "timelineOpen": "{{name}}（已打开）",
     "compPlaceholder": "After Effects 合成名称",
-    "individualRender": "逐个镜头单独切分",
-    "individualHint": "每个镜头 = 1 个重新编码的文件，帧精确切分。请在下方选择编码 · 需要输出文件夹。",
     "yes": "是",
     "no": "否",
     "codec": "编码",
     "container": "容器",
+    "bakeForcesReencode": "速度已烘焙：无论上方模式如何，镜头都会被重新编码。",
     "mode": "模式",
     "nestedFlatten": "内容",
     "nestedComp": "预合成",
@@ -46,7 +45,9 @@
     "namingNumber": "编号",
     "foldersLabel": "按文件夹整理（素材 / 预合成 / 音频 / 图像）",
     "none": "无",
-    "choose": "选择…"
+    "choose": "选择…",
+    "outDirWhy": "将在此写入的文件：{{reasons}}。",
+    "upscaleForcesReencode": "超分会重建像素：无论上方选择为何，都会执行“重新编码”。"
   },
   "sections": {
     "timeline": "时间线",
@@ -55,15 +56,24 @@
     "transforms": "变换与速度",
     "nested": "嵌套时间线",
     "audio": "音频",
-    "handles": "余量",
     "precomp": "预合成",
     "organization": "整理",
-    "outDir": "输出文件夹"
+    "outDir": "输出文件夹",
+    "upscale": "超分辨率"
   },
   "videoModes": {
-    "copy": { "label": "复制", "hint": "使用源文件，在 AE 里切分 — 不转码。" },
-    "remux": { "label": "Remux", "hint": "无损 .mov 容器（-c copy），在 AE 里切分。" },
-    "reencode": { "label": "重新编码", "hint": "每个镜头转码成剪辑编码，含余量。" }
+    "copy": {
+      "label": "复制",
+      "hint": "使用源文件，在 AE 里切分 — 不转码。"
+    },
+    "remux": {
+      "label": "Remux",
+      "hint": "无损 .mov 容器（-c copy），在 AE 里切分。"
+    },
+    "reencode": {
+      "label": "重新编码",
+      "hint": "每个镜头转码为剪辑编码，按帧精确剪切，包含余量。"
+    }
   },
   "audioModes": {
     "copy": "复制",
@@ -73,11 +83,27 @@
     "none": "无"
   },
   "transformModes": {
-    "none": { "label": "无", "hint": "原始素材 — 忽略时间线的变换和速度。" },
-    "ae": { "label": "在 After Effects 中", "hint": "变换和速度加在 AE 图层上，源文件不变。" },
-    "bake": { "label": "重新编码", "hint": "速度烘焙进文件，空间变换留在 AE。" }
+    "none": {
+      "label": "无",
+      "hint": "原始素材 — 忽略时间线的变换和速度。"
+    },
+    "ae": {
+      "label": "在 After Effects 中",
+      "hint": "变换和速度加在 AE 图层上，源文件不变。"
+    },
+    "bake": {
+      "label": "重新编码",
+      "hint": "使用上方所选编码，将速度与画面构图按时间线尺寸烘焙进文件。画面外为黑色，除非该编码带 Alpha 通道。带关键帧的构图由 DaVinci Resolve 渲染，包含关键帧：忠实，但每个镜头渲染一次。"
+    }
   },
   "errors": {
     "timelinesUnavailable": "无法获取时间线"
+  },
+  "outDirReasons": {
+    "reencode": "重新编码的镜头",
+    "remux": "重新封装的镜头",
+    "bake": "烘焙的速度",
+    "nestedRender": "由 Resolve 渲染的嵌套时间线",
+    "audio": "导出的音频轨道"
   }
 }

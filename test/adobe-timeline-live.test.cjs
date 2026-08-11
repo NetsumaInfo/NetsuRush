@@ -224,7 +224,13 @@ test('Premiere lit Motion et ses images clés par matchName, indépendamment de 
     pproParam('Anchor Point', "Point d’ancrage", [320 / 1920, 240 / 1080]),
   ]);
   const opacity = pproComponent('AE.ADBE Opacity', 'Opacité', [pproParam('Opacity', 'Opacité', 50)]);
-  const item = { start: { seconds: 2 }, components: Object.assign({ numItems: 2 }, [opacity, motion]), nodeId: 'clip-1' };
+  // Les clés d'un plan Premiere se comptent depuis son point d'ENTRÉE SOURCE, pas depuis sa place
+  // sur la timeline : ici le plan est posé à 5 s et entre à 2 s dans sa source, et ses deux clés
+  // (2 s et 3 s) sont donc les images 0 et 25 du plan. Relu tel quel sur Premiere 26.3.
+  const item = {
+    start: { seconds: 5 }, inPoint: { seconds: 2 },
+    components: Object.assign({ numItems: 2 }, [opacity, motion]), nodeId: 'clip-1',
+  };
   const out = nrPproReadProperties(item, { frameSizeHorizontal: 1920, frameSizeVertical: 1080 }, fps, 'video');
 
   // Tolérance : la conversion fraction → pixels passe par un flottant, et une position sub-pixel

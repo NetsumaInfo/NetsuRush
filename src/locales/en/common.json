@@ -82,7 +82,25 @@
   },
   "beta": {
     "title": "Module in beta",
-    "body": "Features are still missing, others will change. I'm looking for testers: tell me what breaks and what you need.",
+    "body": "Features are still missing, others will change. I'm looking for testers: tell me what doesn't work and what you need.",
+    "modules": {
+      "script": {
+        "title": "Still a prototype",
+        "body": "NetsuDraft is very incomplete and barely tested: a lot is missing or doesn't work yet. Tell me what you would need first."
+      },
+      "chat": {
+        "title": "Not working yet",
+        "body": "NetsuPilot is still in development: it does nothing useful yet. Follow its progress on Discord."
+      },
+      "voice": {
+        "title": "Not tested enough yet",
+        "body": "NetsuTalk works, but it has had very little real-world use. Let me know if anything behaves oddly."
+      },
+      "transfer": {
+        "title": "Not tested on every version",
+        "body": "NetsuBridge has only been tested on a few versions of Resolve, Premiere Pro and After Effects: depending on yours, the copy may work, work only in part, or not work at all. Tell me your version and what doesn't work."
+      }
+    },
     "discord": "Join the Discord",
     "feedback": "Report a problem",
     "dismiss": "Hide"

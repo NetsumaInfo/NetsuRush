@@ -15,25 +15,29 @@
   "sections": {
     "source": "Timeline dans {{host}}",
     "target": "Destination dans {{host}}",
+    "targetComp": "Composition dans {{host}}",
     "options": "Options",
     "media": "Médias",
     "outDir": "Dossier de sortie",
-    "encoding": "Encodage"
+    "encoding": "Encodage",
+    "upscale": "Upscale"
   },
   "form": {
     "refresh": "Rafraîchir",
     "noTimeline": "Aucune timeline",
     "timelineOpen": "{{name}} (ouverte)",
     "namePlaceholder": "Nom de la timeline créée",
+    "compPlaceholder": "Nom de la composition créée",
     "modeNew": "Nouvelle timeline",
     "modeAppend": "Timeline existante",
     "videoOnly": "Vidéo seulement",
     "richAe": "Options After Effects avancées",
-    "richAeHint": "Transforms, vitesse et précompositions, au lieu d’une simple recopie des plans.",
+    "richAeHint": "Transforms, vitesse et précompositions, au lieu d’une simple recopie des plans. Les médias et l’encodage se règlent alors dans le panneau ci-dessous.",
     "yes": "Oui",
     "no": "Non",
     "choose": "Choisir…",
-    "none": "Aucun"
+    "none": "Aucun",
+    "upscaleForcesReencode": "L’upscale remplace les pixels : le mode Réencode s’applique quel que soit le choix ci-dessus."
   },
   "preview": {
     "clips": "Plans lus",
@@ -46,7 +50,8 @@
     "fidelityCounts": "{{exact}} exactes · {{approximated}} approchées · {{unsupported}} non garanties",
     "animationUnavailable": "Images clés illisibles : le logiciel source a refusé l’export qui les porte. Le transfert posera les valeurs fixes.",
     "mediaLess": "{{count}} élément(s) sans média (cache, calque d’effet) : aucun logiciel ne peut les recevoir.",
-    "graphics": "{{count}} titre(s) : recréés chez la cible depuis leur texte et leur style."
+    "graphics": "{{count}} titre(s) : recréés chez la cible depuis leur texte et leur style.",
+    "graphicsUnsupported": "{{count}} titre(s) : la cible ne sait pas les recréer, ils ne seront pas transférés."
   },
   "phases": {
     "read": "Lecture de la timeline",
@@ -62,6 +67,9 @@
     "done": "{{count}} plan(s) posé(s) dans « {{timeline}} » ({{host}}).",
     "verified": "Propriétés relues : transfert vérifié.",
     "unverified": "{{applied}} propriété(s) confirmée(s) · {{issues}} limite(s) ou écart(s).",
+    "animated": "{{count}} plan(s) avec images clés.",
+    "animatedNone": "Aucune image clé lue : DaVinci Resolve n’en expose pas par script, seul son export XML les porte.",
+    "containerFallback": "{{count}} fichier(s) écrit(s) en MOV : le MP4 ne porte ni ProRes, ni DNxHR, ni PCM.",
     "tracksClamped": "Pistes rabattues : le logiciel cible n’a pas pu en créer assez.",
     "missing": "{{count}} source(s) introuvable(s) sur le disque.",
     "mediaLess": "{{count}} élément(s) sans média (cache, calque d’effet) : aucun logiciel ne peut les recevoir.",

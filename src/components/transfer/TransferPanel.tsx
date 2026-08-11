@@ -28,7 +28,7 @@ export function TransferPanel() {
   const { t } = useTranslation("transfer");
   const ctl = useTransfer();
   const {
-    from, to, setFrom, setTo, swap, swappable, rich,
+    from, to, setFrom, setTo, swap, swappable, rich, advanced,
     sources, targets, loadSources,
     timelineName, setTimelineName, target, setTarget,
     name, setName, mode, setMode, videoOnly, setVideoOnly,
@@ -37,7 +37,7 @@ export function TransferPanel() {
   } = ctl;
 
   const setOptions = useCallback((opts: Parameters<typeof setAeOptions>[0]) => setAeOptions(opts), [setAeOptions]);
-  const canRun = !!timelineName && !busy && !needsDir && (mode !== "append" || !!target);
+  const canRun = !!timelineName && !busy && !needsDir && (advanced || mode !== "append" || !!target);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-7">
@@ -90,16 +90,27 @@ export function TransferPanel() {
           )}
         </Section>
 
-        <Section title={t("sections.target", { host: hostShort(to) })}>
-          <ToggleGroup
-            value={[mode]}
-            onValueChange={(v) => { const next = v[0]; if (next === "new" || next === "append") setMode(next); }}
-            disabled={busy}
-          >
-            <ToggleGroupItem value="new" className="flex-1">{t("form.modeNew")}</ToggleGroupItem>
-            <ToggleGroupItem value="append" className="flex-1">{t("form.modeAppend")}</ToggleGroupItem>
-          </ToggleGroup>
-          {mode === "new" ? (
+        {/* Le pipeline AE avancé crée toujours une composition neuve : le choix « timeline
+            existante » n'y a aucun sens, et le nom saisi devient celui de la comp. */}
+        <Section title={t(advanced ? "sections.targetComp" : "sections.target", { host: hostShort(to) })}>
+          {!advanced && (
+            <ToggleGroup
+              value={[mode]}
+              onValueChange={(v) => { const next = v[0]; if (next === "new" || next === "append") setMode(next); }}
+              disabled={busy}
+            >
+              <ToggleGroupItem value="new" className="flex-1">{t("form.modeNew")}</ToggleGroupItem>
+              <ToggleGroupItem value="append" className="flex-1">{t("form.modeAppend")}</ToggleGroupItem>
+            </ToggleGroup>
+          )}
+          {advanced ? (
+            <Input
+              value={name}
+              disabled={busy}
+              placeholder={timelineName ?? t("form.compPlaceholder")}
+              onChange={(e) => setName(e.target.value)}
+            />
+          ) : mode === "new" ? (
             <Input
               value={name}
               disabled={busy}
@@ -127,14 +138,19 @@ export function TransferPanel() {
           )}
         </Section>
 
-        <TransferMediaOptions ctl={ctl} />
+        {/* Traitement des médias, encodage et dossier de sortie : le panneau AE avancé porte ses
+            propres réglages et le core ignore alors ceux-ci — on ne les montre pas en double. */}
+        {!advanced && <TransferMediaOptions ctl={ctl} />}
 
         <Section title={t("sections.options")}>
-          <Row label={t("form.videoOnly")}>
-            <Toggle pressed={videoOnly} onPressedChange={setVideoOnly} disabled={busy}>
-              {videoOnly ? t("form.yes") : t("form.no")}
-            </Toggle>
-          </Row>
+          {/* « Vidéo seulement » ne traverse pas le pipeline AE avancé : là-bas, c'est Audio ▸ Aucun. */}
+          {!advanced && (
+            <Row label={t("form.videoOnly")}>
+              <Toggle pressed={videoOnly} onPressedChange={setVideoOnly} disabled={busy}>
+                {videoOnly ? t("form.yes") : t("form.no")}
+              </Toggle>
+            </Row>
+          )}
           {rich && (
             <Row label={t("form.richAe")}>
               <Toggle pressed={richAe} onPressedChange={setRichAe} disabled={busy}>
@@ -205,6 +221,20 @@ export function TransferPanel() {
               // différents indiscernables.
               <p className="mt-1 text-muted-foreground">
                 {t(result.vehicle === "import" ? "result.vehicleImport" : "result.vehicleApi")}
+              </p>
+            )}
+            {/* L'API de Resolve ne lit aucune image clé : sans ce compte, un montage animé arrivé
+                figé sur ses valeurs fixes ressemblait à un transfert réussi. */}
+            {advanced && (
+              <p className="mt-1 text-muted-foreground">
+                {result.animated
+                  ? t("result.animated", { count: result.animated })
+                  : t("result.animatedNone")}
+              </p>
+            )}
+            {!!result.containerFallbacks && (
+              <p className="mt-1 text-muted-foreground">
+                {t("result.containerFallback", { count: result.containerFallbacks })}
               </p>
             )}
             {result.tracksClamped && <p className="mt-1 text-muted-foreground">{t("result.tracksClamped")}</p>}

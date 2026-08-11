@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { nr } from "@/lib/bridge";
 import type {
   AeExportOpts, TransferHost, TransferMediaMode, TransferPreview, TransferProgress, TransferResult,
+  TransferUpscale,
 } from "@/lib/bridge";
 import type {
   ExportAudioMode, ExportCodec, ExportContainer, ExportEncoderMode, ExportSpeed,
 } from "@/features/export/profiles";
+import { aeProducesFiles } from "@/components/ae/aeShared";
 import { canSwap, defaultTarget, hasRichAeOptions, isSupportedPair, loadPair, savePair } from "./transferShared";
 
 interface HostTimelines {
@@ -53,6 +55,7 @@ export function useTransfer() {
   const [encoderMode, setEncoderMode] = useState<ExportEncoderMode>("cpu");
   const [speed, setSpeed] = useState<ExportSpeed>("balanced");
   const [outDir, setOutDir] = useState<string | null>(null);
+  const [upscale, setUpscale] = useState<TransferUpscale>({});
 
   const [preview, setPreview] = useState<TransferPreview | null>(null);
   const [previewBusy, setPreviewBusy] = useState(false);
@@ -77,6 +80,30 @@ export function useTransfer() {
 
   useEffect(() => { void loadSources(); }, [loadSources]);
   useEffect(() => { void loadTargets(); }, [loadTargets]);
+
+  // Côté Adobe il n'y a PAS de poller : le panneau republie sur événement, et rien d'autre ne
+  // rafraîchit la liste. Une séquence supprimée puis rendue par Ctrl+Z laissait donc NetsuBridge sur
+  // « aucune timeline » alors qu'elle était revenue. On redemande un scan à l'ouverture et à chaque
+  // changement d'hôte, et on recharge dès que le panneau republie.
+  useEffect(() => {
+    for (const host of new Set([from, to])) {
+      if (host === "ppro" || host === "aeft") void nr.adobeScan(host).catch(() => {});
+    }
+  }, [from, to]);
+
+  useEffect(() => nr.onAdobeUpdate((p) => {
+    if (busy) return; // pendant le montage, la liste attend
+    if (p.app === from) void loadSources();
+    if (p.app === to) void loadTargets();
+  }), [from, to, busy, loadSources, loadTargets]);
+
+  // Une timeline renommée/créée/supprimée dans Resolve laissait la liste — et donc le nom envoyé au
+  // transfert — sur un état qui n'existe plus. Le poller du core diffuse déjà le changement.
+  useEffect(() => nr.onResolveChanged((c) => {
+    if (busy || (!c.timelines && !c.status)) return; // pendant le montage, la liste attend
+    if (from === "resolve") void loadSources();
+    if (to === "resolve") void loadTargets();
+  }), [from, to, busy, loadSources, loadTargets]);
 
   // Aperçu : ce que NetsuRush a réellement lu. Sans lui, un transfert qui échoue ne dit pas si le
   // problème vient de la lecture ou du montage.
@@ -122,8 +149,30 @@ export function useTransfer() {
   }, []);
 
   const rich = hasRichAeOptions(from, to);
-  const producesFiles = mediaMode !== "copy" || (audioMode !== "copy" && audioMode !== "none");
-  const needsDir = producesFiles && !outDir;
+  /**
+   * Le pipeline AE avancé REMPLACE le transfert générique : le core ne lit alors ni le traitement
+   * des médias, ni l'encodage, ni le dossier de sortie, ni le mode de destination de cette page.
+   * Ces réglages disparaissent donc de l'écran quand il conduit.
+   */
+  const advanced = rich && richAe;
+
+  // Fichiers écrits, et donc dossier obligatoire : par les réglages de CE panneau, ou par ceux du
+  // panneau AE quand c'est lui qui conduit. Le second cas gate le bouton Transférer, sinon le refus
+  // ne tomberait qu'au fond du core.
+  // L'upscale REMPLACE les pixels : ni la copie ni le réencapsulage ne savent le faire. Le mode de
+  // média affiché suit donc l'option, comme le core l'impose de son côté.
+  const growing = !advanced && !!upscale.enabled;
+  const effectiveMediaMode: TransferMediaMode = growing ? "reencode" : mediaMode;
+
+  const producesFiles = advanced
+    ? !!aeOptions && aeProducesFiles({
+        videoMode: aeOptions.videoMode,
+        transformMode: aeOptions.transformMode ?? "none",
+        nestedMode: aeOptions.nestedMode ?? "flatten",
+        audio: aeOptions.audio,
+      })
+    : effectiveMediaMode !== "copy" || (audioMode !== "copy" && audioMode !== "none");
+  const needsDir = producesFiles && !(advanced ? aeOptions?.outDir : outDir);
 
   const chooseOut = useCallback(async () => {
     const dir = await nr.chooseDir();
@@ -140,12 +189,15 @@ export function useTransfer() {
         from, to,
         timelineName: timelineName ?? undefined,
         name: name.trim() || undefined,
-        mode,
-        target: mode === "append" ? target ?? undefined : undefined,
+        // Le pipeline AE avancé crée TOUJOURS une composition : pas de mode ni de cible à envoyer.
+        mode: advanced ? "new" : mode,
+        target: !advanced && mode === "append" ? target ?? undefined : undefined,
         videoOnly,
-        mediaMode, codec, audio: audioMode, container, encoderMode, speed,
+        mediaMode: effectiveMediaMode, codec, audio: audioMode, container, encoderMode, speed,
         outDir: outDir ?? undefined,
-        ae: rich && richAe && aeOptions ? aeOptions : undefined,
+        upscale: growing ? upscale : undefined,
+        // Le champ de destination de la page EST le nom de la composition.
+        ae: advanced && aeOptions ? { ...aeOptions, compName: name.trim() || undefined } : undefined,
       }));
     } catch (e) {
       setResult({ ok: false, error: String(e) });
@@ -153,14 +205,15 @@ export function useTransfer() {
       setBusy(false);
       setProgress(null);
     }
-  }, [from, to, timelineName, name, mode, target, videoOnly, mediaMode, codec, audioMode, container, encoderMode, speed, outDir, rich, richAe, aeOptions]);
+  }, [from, to, timelineName, name, mode, target, videoOnly, effectiveMediaMode, codec, audioMode, container, encoderMode, speed, outDir, advanced, aeOptions, growing, upscale]);
 
   return {
-    from, to, setFrom, setTo, swap, swappable: canSwap(from, to), rich,
+    from, to, setFrom, setTo, swap, swappable: canSwap(from, to), rich, advanced,
     sources, targets, loadSources, loadTargets,
     timelineName, setTimelineName, target, setTarget,
     name, setName, mode, setMode, videoOnly, setVideoOnly,
-    mediaMode, setMediaMode, codec, audioMode, container, encoderMode, speed, applyEncoding,
+    mediaMode: effectiveMediaMode, setMediaMode, codec, audioMode, container, encoderMode, speed, applyEncoding,
+    upscale, setUpscale, growing,
     outDir, chooseOut, producesFiles, needsDir,
     richAe, setRichAe, setAeOptions,
     preview, previewBusy, busy, progress, result, run,

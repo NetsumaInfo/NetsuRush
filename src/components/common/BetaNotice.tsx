@@ -1,5 +1,6 @@
-// Bandeau « module en bêta » : dit qu'une partie des fonctions manque encore, et demande des
-// testeurs. Posé en tête des modules incomplets (NetsuDraft, NetsuTalk, NetsuBridge, NetsuPilot).
+// Bandeau « module en bêta » : dit où en est le module et demande des testeurs. Le texte vient de
+// `beta.modules.<module>` — chaque module dit sa propre maturité (prototype, pas encore
+// fonctionnel, pas assez testé) et retombe sur `beta.title`/`beta.body` s'il n'a pas de texte.
 // Masquable, et la décision est retenue PAR MODULE : masquer l'avertissement de NetsuPilot ne dit
 // rien de NetsuBridge, dont la maturité est différente.
 import { useState } from "react";
@@ -44,8 +45,12 @@ export function BetaNotice({ module, className }: { module: string; className?: 
     >
       <FlaskConical className="mt-0.5 size-4 shrink-0 text-[var(--color-warn)]" />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-[var(--color-warn)]">{t("beta.title")}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t("beta.body")}</p>
+        <p className="text-sm font-medium text-[var(--color-warn)]">
+          {t([`beta.modules.${module}.title`, "beta.title"])}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t([`beta.modules.${module}.body`, "beta.body"])}
+        </p>
         <div className="mt-2.5 flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => void nr.openExternal(DISCORD_INVITE)}>
             <DiscordIcon className="size-3.5 text-[#5865F2]" /> {t("beta.discord")}

@@ -19,12 +19,11 @@
     "noTimeline": "Keine Timeline",
     "timelineOpen": "{{name}} (offen)",
     "compPlaceholder": "Name der After-Effects-Comp",
-    "individualRender": "Jeden Shot einzeln schneiden",
-    "individualHint": "Jede Einstellung ergibt eine neu kodierte, framegenau geschnittene Datei. Codec unten wählen · Ausgabeordner erforderlich.",
     "yes": "Ja",
     "no": "Nein",
     "codec": "Codec",
     "container": "Container",
+    "bakeForcesReencode": "Geschwindigkeit eingebrannt: Shots werden neu kodiert, unabhängig vom Modus oben.",
     "mode": "Modus",
     "nestedFlatten": "Inhalt",
     "nestedComp": "Vorkomp",
@@ -46,7 +45,9 @@
     "namingNumber": "Nummer",
     "foldersLabel": "In Ordner sortieren (Rohmaterial / Vorkomps / Audio / Bilder)",
     "none": "Keins",
-    "choose": "Wählen…"
+    "choose": "Wählen…",
+    "outDirWhy": "Hier geschriebene Dateien: {{reasons}}.",
+    "upscaleForcesReencode": "Upscale ersetzt die Pixel: „Neu kodieren“ gilt unabhängig von der Wahl oben."
   },
   "sections": {
     "timeline": "Timeline",
@@ -55,15 +56,24 @@
     "transforms": "Transformationen & Tempo",
     "nested": "Verschachtelte Timeline",
     "audio": "Audio",
-    "handles": "Handles",
     "precomp": "Vorkomposition",
     "organization": "Organisation",
-    "outDir": "Ausgabeordner"
+    "outDir": "Ausgabeordner",
+    "upscale": "Upscale"
   },
   "videoModes": {
-    "copy": { "label": "Kopie", "hint": "Quelldateien, Schnitt in AE — kein Transkodieren." },
-    "remux": { "label": "Remux", "hint": "Verlustfreier .mov-Container (-c copy), Schnitt in AE." },
-    "reencode": { "label": "Neu kodieren", "hint": "Jeder Shot in Schnitt-Codec transkodiert, inkl. Handles." }
+    "copy": {
+      "label": "Kopie",
+      "hint": "Quelldateien, Schnitt in AE — kein Transkodieren."
+    },
+    "remux": {
+      "label": "Remux",
+      "hint": "Verlustfreier .mov-Container (-c copy), Schnitt in AE."
+    },
+    "reencode": {
+      "label": "Neu kodieren",
+      "hint": "Jeder Shot in Schnitt-Codec transkodiert, framegenau geschnitten, inkl. Handles."
+    }
   },
   "audioModes": {
     "copy": "Kopieren",
@@ -73,11 +83,27 @@
     "none": "Keins"
   },
   "transformModes": {
-    "none": { "label": "Keine", "hint": "Rohes Material — Transformationen und Tempo der Timeline werden ignoriert." },
-    "ae": { "label": "In After Effects", "hint": "Transformationen + Tempo auf der AE-Ebene, Quelle bleibt unangetastet." },
-    "bake": { "label": "Neu kodiert", "hint": "Tempo in die Datei eingerechnet, räumliche Transformationen in AE." }
+    "none": {
+      "label": "Keine",
+      "hint": "Rohes Material — Transformationen und Tempo der Timeline werden ignoriert."
+    },
+    "ae": {
+      "label": "In After Effects",
+      "hint": "Transformationen + Tempo auf der AE-Ebene, Quelle bleibt unangetastet."
+    },
+    "bake": {
+      "label": "Neu kodiert",
+      "hint": "Geschwindigkeit und Bildausschnitt in die Datei eingebrannt, mit dem oben gewählten Codec, in Timeline-Größe. Außerhalb des Bilds: Schwarz, außer der Codec hat einen Alphakanal. Ein ANIMIERTER Bildausschnitt wird von DaVinci Resolve gerendert, samt Keyframes: originalgetreu, aber ein Render pro Shot."
+    }
   },
   "errors": {
     "timelinesUnavailable": "Timelines nicht verfügbar"
+  },
+  "outDirReasons": {
+    "reencode": "neu kodierte Shots",
+    "remux": "neu verpackte Shots",
+    "bake": "eingebrannte Geschwindigkeit",
+    "nestedRender": "von Resolve gerenderte verschachtelte Timelines",
+    "audio": "extrahierte Audiospuren"
   }
 }

@@ -110,11 +110,11 @@ export function useScenePersistence() {
       // « Enregistrer sous » donnera un vrai fichier de projet.
       useBoard.setState({ sceneId: null, dirty: !!res.readonly });
       flash(tr(res.readonly ? "notice.projectOpenedLegacy" : "notice.projectOpened", { name: fileLabel(srcPath) }), "ok");
-      if (!res.readonly) {
-        void recoverAllOnlineMedia().then(async (result) => {
-          if (result.recovered > 0) await saveProject();
-        });
-      }
+      // Remise en état des médias en ligne, sans rien demander. Une archive v1 en a autant besoin
+      // qu'un projet — elle n'a simplement pas de fichier où réécrire le résultat.
+      void recoverAllOnlineMedia().then(async (result) => {
+        if (result.recovered > 0 && !res.readonly) await saveProject();
+      });
       return true;
     },
     [api, saveProject],
@@ -272,11 +272,17 @@ export function useScenePersistence() {
       if (!id) useBoard.setState({ sceneId: null });
       const c = res.counts;
       flash(c ? tr("notice.imported", { count: c.items }) : tr("notice.boardImported"), "ok");
-      // Récupère en arrière-plan les embeds sociaux (iframe souvent noire) → média local durable —
-      // SEULEMENT si l'auto-téléchargement est activé (Paramètres). Défaut OFF : aucun yt-dlp surprise.
-      if (useBoard.getState().prefs.autoDownloadOnline) {
-        void recoverOnlineEmbeds().then((n) => { if (n) void saveAuto(); });
-      }
+      // Un board reçu d'ailleurs arrive avec des médias en ligne qui ne pointent plus sur rien : la
+      // remise en état est lancée SEULE, comme à l'ouverture d'un projet. Attendre un bouton laissait
+      // l'archive s'ouvrir sur des tuiles mortes alors que tout est retrouvable depuis les liens.
+      void recoverAllOnlineMedia().then(async (result) => {
+        if (result.recovered > 0) await saveAuto();
+        // Puis les embeds sociaux (iframe souvent noire) → média local durable, mais SEULEMENT si
+        // l'auto-téléchargement est activé (Paramètres). Défaut OFF : aucun yt-dlp surprise.
+        if (!useBoard.getState().prefs.autoDownloadOnline) return;
+        const n = await recoverOnlineEmbeds();
+        if (n) await saveAuto();
+      });
       return id ?? null;
     },
     [api, saveAuto],

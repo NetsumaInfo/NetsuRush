@@ -23,7 +23,7 @@
     "upscaleMode": "Wann",
     "upscaleModeNow": "Sofort",
     "upscaleModeIdle": "GPU frei",
-    "upscaleNeedsEncode": "Vergrößern ersetzt Pixel: Stream-Copy ist nicht möglich.",
+    "upscaleNeedsEncode": "Upscale ersetzt die Pixel: Stream-Kopie ist unmöglich.",
     "queueRunning": "Wird gerade archiviert",
     "queuePending": "Wartet auf eine freie GPU"
   },

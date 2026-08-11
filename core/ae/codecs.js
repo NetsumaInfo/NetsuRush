@@ -41,7 +41,72 @@ function audioCodecArgs(mode, abr) {
 function audioOut(mode, abr, container) {
   const ext = container || (mode === 'pcm' ? 'wav' : 'm4a');   // conteneurs importables par AE
   if (mode === 'remux' || mode === 'copy') return { ext, args: ['-c:a', 'copy'] };
+  // L'AIFF ne porte pas de PCM little-endian : `-c:a pcm_s16le` y est refusé par le muxeur.
+  if (mode === 'pcm' && ext === 'aiff') return { ext, args: ['-c:a', 'pcm_s16be'] };
   return { ext, args: audioCodecArgs(mode, abr) };
+}
+
+/**
+ * Ce qu'un conteneur accepte RÉELLEMENT au muxage. Le remux ne convertit rien (`-c copy`) : c'est
+ * le flux SOURCE qui doit entrer dans le conteneur, pas le codec choisi dans le panneau. Le MP4 est
+ * le conteneur strict — il refuse ProRes, DNxHD et le PCM, que le MOV porte tous. Un rush ProRes
+ * réencapsulé en MP4 est refusé au muxage.
+ */
+const MP4_VIDEO = new Set(['h264', 'hevc', 'h265', 'av1', 'mpeg4', 'vp9']);
+const MP4_AUDIO = new Set(['aac', 'mp3', 'ac3', 'eac3', 'alac', 'opus']);
+
+function containerAccepts(ext, videoCodec, audioCodec) {
+  if (ext !== 'mp4' && ext !== 'm4a') return true;   // MOV : tout passe
+  if (videoCodec && !MP4_VIDEO.has(videoCodec)) return false;
+  if (audioCodec && !MP4_AUDIO.has(audioCodec)) return false;
+  return true;
+}
+
+/**
+ * Id d'encodeur du panneau → nom de FLUX (ce que ffprobe lit dans le fichier produit) : sans elle,
+ * `x264` et `h264_nvenc` passent pour des codecs inconnus, donc refusés du MP4 — le conteneur
+ * naturel du H.264.
+ */
+function streamCodecName(codec) {
+  const id = String(codec || '');
+  if (id === 'x264' || id.startsWith('h264_')) return 'h264';
+  if (id === 'x265' || id.startsWith('hevc_') || id.startsWith('h265_')) return 'hevc';
+  if (id.startsWith('prores')) return 'prores';
+  if (id.startsWith('dnx')) return 'dnxhd';
+  return id;
+}
+
+/**
+ * Codec audio réellement écrit, selon le traitement demandé et ce que porte la source. Deux
+ * vocabulaires arrivent ici : celui de l'export AE (`aac`, `pcm`) et celui des profils d'export
+ * (`aac_192`, `pcm_s16`) — d'où la comparaison par préfixe et non par égalité.
+ */
+function outAudioCodec(mode, sourceCodec) {
+  const id = String(mode || '');
+  if (id === 'none') return null;
+  if (id === 'copy' || id === 'remux') return sourceCodec || null;   // le flux source tel quel
+  if (id.startsWith('pcm')) return 'pcm_s16le';
+  if (id.startsWith('aac')) return 'aac';
+  if (id.startsWith('ac3') || id.startsWith('eac3')) return 'ac3';
+  if (id.startsWith('alac')) return 'alac';
+  if (id.startsWith('flac')) return 'flac';
+  return sourceCodec || null;
+}
+
+/**
+ * Conteneur d'un fichier VIDÉO produit, rabattu sur le MOV quand le MP4 ne peut pas porter les flux.
+ * `videoCodec` = codec réellement écrit (source en remux, codec choisi en réencode).
+ */
+function videoOutExt(wanted, videoCodec, audioCodec) {
+  const ext = wanted || 'mov';
+  return containerAccepts(ext, videoCodec, audioCodec) ? ext : 'mov';
+}
+
+/** Idem pour une piste son dédiée : le PCM d'un rush ProRes va en WAV, jamais en M4A. */
+function audioOutExt(wanted, audioCodec) {
+  const ext = wanted || 'm4a';
+  if (containerAccepts(ext, null, audioCodec)) return ext;
+  return /^pcm/.test(String(audioCodec)) ? 'wav' : 'mov';
 }
 
 // atempo borné [0.5, 2.0] → chaîne pour un facteur de vitesse quelconque.
@@ -85,4 +150,5 @@ const isImagePath = (p) => IMG_EXT.has(path.extname(p || '').slice(1).toLowerCas
 module.exports = {
   FIXED_CODECS, videoCodecArgs, audioCodecArgs, audioOut, atempoChain, uniquePath,
   AUDIO_PRODUCES, IMG_EXT, isImagePath, codecExt, aeFormat,
+  containerAccepts, outAudioCodec, videoOutExt, audioOutExt, streamCodecName,
 };

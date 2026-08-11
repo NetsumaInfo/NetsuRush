@@ -66,6 +66,19 @@ export async function recoverMedia(id: string): Promise<boolean> {
   if (it.kind !== "image" && it.kind !== "video" && it.kind !== "sequence") return false;
   const link = originalOnlineSource(it) || (/^https?:/i.test(it.ref) ? it.ref : "");
   if (!link) return false;
+  // Média YouTube dont le fichier n'est plus là (board reçu d'ailleurs, dossier compagnon nettoyé) :
+  // on rend la CARTE YouTube au lieu de retélécharger. C'est exactement l'état qu'aurait l'item si
+  // le lien venait d'être reposé sur le board — lecture immédiate par le flux relayé, à sa place et
+  // à sa taille — et « Télécharger » reste à un clic pour qui veut le fichier.
+  const yt = youtubeId(link);
+  if (yt && it.kind !== "sequence") {
+    st.patchItem(id, {
+      kind: "youtube", ref: yt, src: yt,
+      sourceUrl: undefined, missing: undefined, crop: undefined, localMedia: undefined,
+      natW: undefined, natH: undefined,
+    });
+    return true;
+  }
   st.setNotice({ kind: "ok", sticky: true, text: tr("notice.recoveringMedia") });
   try {
     let path: string | null = null;

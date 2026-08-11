@@ -5,14 +5,19 @@
 
 const { listTimelines } = require("../timeline");
 const { docFromAdobeSequence, normalizeDoc, docSummary } = require("./doc");
-const { readResolveDoc } = require("./readResolve");
+const { readResolveDoc, exportResolveTimelineXml } = require("./readResolve");
 const { graftPremiereAnimation, exportSequenceXml, removeQuietly } = require("./premiereXml");
 const { importResolveTimeline } = require("./importResolve");
 const { appendResolveDoc } = require("./writeResolveAppend");
 const { prepareDoc } = require("./prepare");
+const { prepareForPremiere } = require("./xmeml/premiereText");
 const { assessTransfer } = require("./equivalence");
 const { RESOLVE_FUSION_RUNTIME } = require("./capabilities");
 const { transferReport } = require("./lossReport");
+const fsp = require("fs/promises");
+const path = require("path");
+const fs = require("fs");
+const { panelSourceDir } = require("../adobePanel");
 const { t } = require("../i18n");
 
 const HOSTS = ["resolve", "ppro", "aeft"];
@@ -105,10 +110,23 @@ function adobePayload(doc, opts) {
     timing: c.timing,
     deferred: c.deferred,
   }));
+  // Les titres voyagent À PART des plans : ils n'ont ni fichier ni bornes source, et la cible les
+  // recrée depuis un modèle. Temps en secondes, comme les plans (contrat du pont Adobe).
+  const graphics = (doc.graphics || []).map((g) => ({
+    track: g.track,
+    name: g.name,
+    text: g.text,
+    font: g.font,
+    size: g.size,
+    tlStart: g.tlStart / fps,
+    tlEnd: g.tlEnd / fps,
+  }));
   return {
     name: opts.name || doc.timeline || "NetsuRush",
     mode: opts.mode === "append" ? "append" : "new",
     timelineName: opts.target || undefined,
+    graphics,
+    mogrt: opts.mogrt || undefined,
     fps,
     width: doc.width,
     height: doc.height,
@@ -162,7 +180,60 @@ function hasKeyframes(doc) {
   });
 }
 
-function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, ev: sseEvent }) {
+/**
+ * Journalise CE QUI S'EST PERDU, propriété par propriété. L'écran de fin ne montre que des compteurs :
+ * « 12 appliquées, 3 problèmes » ne dit ni quelle propriété ni pourquoi, alors que le writer, lui,
+ * rend un motif par item (paramètre introuvable, relecture indisponible, valeur relue différente).
+ * Sans cette trace, diagnostiquer une animation manquante demandait de rejouer le transfert à la main.
+ */
+function logFidelityLosses(fidelity) {
+  const items = (fidelity && fidelity.items) || [];
+  const lost = items.filter((item) => item && item.status !== "applied");
+  if (!lost.length) return;
+  console.warn("[transfer] fidélité :", JSON.stringify(fidelity.actual));
+  for (const item of lost.slice(0, 60)) {
+    console.warn(`[transfer]   plan ${item.clip} ${item.property} ${item.status}${item.reason ? " (" + item.reason + ")" : ""}`);
+  }
+  if (lost.length > 60) console.warn(`[transfer]   … ${lost.length - 60} autres`);
+}
+
+/**
+ * Modèle de titre livré avec le panneau. Aucune API Premiere ne crée un titre à partir de rien :
+ * `importMGT` pose un vrai graphique essentiel depuis ce `.mogrt`, dont on ne remplace que le texte
+ * — le style vient du modèle. Absent, les titres sont déclarés perdus plutôt que fabriqués de
+ * travers (l'import du générateur FCP7 hérité rendait un corps et un multi-ligne faux).
+ */
+function titleTemplatePath() {
+  try {
+    const file = path.join(panelSourceDir(), "assets", "netsurush-title.mogrt");
+    return fs.existsSync(file) ? file : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
+ * L'import natif VERS PREMIERE se DEMANDE, il n'est plus la voie par défaut. Il applique bien
+ * lui-même images clés et vitesse, mais trois défauts mesurés le disqualifient comme défaut :
+ * l'importeur crée SES PROPRES éléments de projet — les mêmes rushs réapparaissent en double, et
+ * aucune API ne rebranche après coup un plan de séquence sur un élément existant — et le titre qu'il
+ * pose est un générateur FCP7 hérité, dont ni le corps ni le multi-ligne ne suivent. La pose par
+ * script fait mieux sur les trois depuis qu'elle sait poser un titre par `.mogrt`.
+ *
+ * Il reste offert (`vehicle: "import"`) : c'est la seule voie qui rende un montage entier sans que
+ * NetsuRush n'écrive quoi que ce soit, donc le recours quand une écriture par script déçoit.
+ */
+function canImportToPremiere(from, opts) {
+  return from === "resolve"
+    && opts.vehicle === "import"
+    && opts.mode !== "append"
+    && !opts.target
+    && !opts.videoOnly
+    && (!opts.mediaMode || opts.mediaMode === "copy");
+}
+
+
+function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, runUpscale, runTurbo, ev: sseEvent }) {
   /**
    * Accès à l'hôte Premiere pour la lecture d'animation. `ev` est le shim SSE partagé du core :
    * la lecture n'a pas d'événement propre, mais le job panneau passe par le même canal diffusé.
@@ -270,6 +341,60 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, ev: ss
   }
 
   /**
+   * Écriture dans Premiere. L'import du fichier d'échange d'abord, la pose plan par plan ensuite :
+   * un import refusé ne doit pas coûter le transfert.
+   */
+  async function writePremiere(ev, doc, opts) {
+    // Le modèle de titre part avec la charge utile : le panneau est une COPIE dans %APPDATA%, il ne
+    // sait pas où NetsuRush range ses ressources.
+    const byApi = () => adobeBridge.placeTimeline(ev, "ppro",
+      adobePayload(doc, { ...opts, mogrt: titleTemplatePath() || undefined }));
+    if (!canImportToPremiere(opts.from, opts)) return byApi();
+    const resolve = await getResolve();
+    if (!resolve) return byApi();
+
+    emit(ev, "import", 0, 1);
+    const exported = await exportResolveTimelineXml(resolve, opts.timelineName || null);
+    if (exported.ok !== true) {
+      console.warn("[transfer] export d'échange indisponible, pose par l'API :", exported.reason);
+      return byApi();
+    }
+    // Retouche du fichier AVANT l'import : Resolve écrit les retours à la ligne d'un titre en
+    // référence de caractère, que l'importeur de Premiere affiche telle quelle à l'image.
+    try {
+      const source = await fsp.readFile(exported.path, "utf8");
+      const prepared = prepareForPremiere(source);
+      if (prepared.newlines) {
+        await fsp.writeFile(exported.path, prepared.text, "utf8");
+        console.log(`[transfer] ${prepared.newlines} retour(s) à la ligne de titre décodé(s) pour Premiere`);
+      }
+    } catch (error) {
+      console.warn("[transfer] fichier d'échange non retouché :", (error && error.message) || error);
+    }
+    let result;
+    try {
+      result = await adobeBridge.importTimeline(ev, "ppro", {
+        path: exported.path,
+        name: opts.name || doc.timeline || undefined,
+      });
+    } catch (error) {
+      await removeQuietly(exported.path);
+      throw error;
+    }
+    emit(ev, "import", 1, 1);
+    if (result && result.ok) {
+      await removeQuietly(exported.path);
+      return { ...result, vehicle: "import" };
+    }
+    // Le fichier SURVIT au refus : l'import à la main (Fichier ▸ Importer) reste possible, et lui
+    // seul apporte le titre.
+    console.warn("[transfer] import refusé par Premiere, pose par l'API :", result && result.error);
+    console.warn("[transfer] fichier d'échange conservé (Fichier ▸ Importer) :", exported.path);
+    const fallback = await byApi();
+    return { ...fallback, exchangeFile: exported.path, vehicle: "api" };
+  }
+
+  /**
    * Transfère une timeline vers l'hôte cible.
    * @param {{ from?:string, to?:string, timelineName?:string, name?:string, mode?:'new'|'append',
    *           target?:string, videoOnly?:boolean, ae?:object,
@@ -292,6 +417,7 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, ev: ss
       const result = {
         ok: ae.ok, timeline: ae.comp, count: ae.clips, created: true,
         from, to, source: source.timeline, missing: ae.missing, error: ae.error,
+        animated: ae.animated, containerFallbacks: ae.containerFallbacks,
       };
       return { ...result, fidelity: transferReport(assessTransfer(source, to, targetCapabilities(to, opts)), result) };
     }
@@ -303,16 +429,20 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, ev: ss
     emit(ev, "read", 1, 1);
 
     // Liens directs, réencapsulage ou réencodage : le document repart avec les fichiers produits.
-    const prepared = await prepareDoc({ run: runFfmpeg }, ev, read, opts);
+    const prepared = await prepareDoc({ run: runFfmpeg, runUpscale, runTurbo }, ev, read, opts);
     if (!isDoc(prepared)) return prepared;
     const doc = prepared;
 
     const assessment = assessTransfer(doc, to, targetCapabilities(to, opts));
     const result = to === "resolve"
       ? await writeResolve(ev, doc, opts)
-      : await adobeBridge.placeTimeline(ev, to, adobePayload(doc, opts));
+      : (to === "ppro"
+        ? await writePremiere(ev, doc, opts)
+        : await adobeBridge.placeTimeline(ev, to, adobePayload(doc, opts)));
 
     emit(ev, "done", 1, 1);
+    const fidelity = transferReport(assessment, result);
+    logFidelityLosses(fidelity);
     return {
       ...result,
       from,
@@ -320,11 +450,11 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, ev: ss
       source: doc.timeline,
       missing: result.missing || doc.missing,
       mediaLess: doc.mediaLess,
-      fidelity: transferReport(assessment, result),
+      fidelity,
     };
   }
 
   return { listSources, readDoc, summary, run };
 }
 
-module.exports = { createTransfer, adobePayload, adobeSources, transferSummary, isSupportedPair, HOSTS, TRANSFER_TARGETS };
+module.exports = { createTransfer, canImportToPremiere, adobePayload, adobeSources, transferSummary, isSupportedPair, HOSTS, TRANSFER_TARGETS };

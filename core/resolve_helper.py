@@ -94,20 +94,33 @@ def unwrap(a):
     return a
 
 
+def resolve_target(handle):
+    """Resolve a call target, telling the two failure modes apart: no connection at all vs a handle
+    the registry no longer holds (a concurrent `reset` purged it, or the helper respawned). The
+    second one is a caller bug — bracket the operation (beginResolveOp) — and used to be reported
+    as a connection failure, which sent debugging the wrong way."""
+    if handle is None:
+        if RESOLVE is None:
+            raise RuntimeError("Resolve non connecté")
+        return RESOLVE
+    target = REGISTRY.get(handle)
+    if target is None:
+        raise RuntimeError(
+            "handle %s périmé : registre purgé pendant l'opération (op Resolve non bracketée) "
+            "ou helper relancé" % handle
+        )
+    return target
+
+
 def do_attr(handle, name):
     """Lecture d'un ATTRIBUT (non appelable) : les constantes d'export de Resolve
     (EXPORT_FCP_7_XML, EXPORT_AAF...) ne sont pas des méthodes, et le proxy JS ne sait forwarder
     que des appels. Les coder en dur côté JS les figerait sur une version de Resolve."""
-    target = RESOLVE if handle is None else REGISTRY.get(handle)
-    if target is None:
-        raise RuntimeError("handle invalide ou Resolve non connecté")
-    return wrap(getattr(target, name))
+    return wrap(getattr(resolve_target(handle), name))
 
 
 def do_invoke(handle, method, args):
-    target = RESOLVE if handle is None else REGISTRY.get(handle)
-    if target is None:
-        raise RuntimeError("handle invalide ou Resolve non connecté")
+    target = resolve_target(handle)
     fn = getattr(target, method)
     res = fn(*[unwrap(a) for a in (args or [])])
     return wrap(res)

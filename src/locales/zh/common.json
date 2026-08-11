@@ -82,7 +82,25 @@
   },
   "beta": {
     "title": "测试版模块",
-    "body": "还有功能缺失，也会继续调整。招募测试者：告诉我哪里坏了、你还缺什么。",
+    "body": "还有一些功能没做完，也有一些会调整。我在找测试者：告诉我哪里用不了、你还缺什么。",
+    "modules": {
+      "script": {
+        "title": "还只是雏形",
+        "body": "NetsuDraft 还很不完整，几乎没怎么测试过：很多功能没做完，也有不少用不了。先告诉我你最需要什么。"
+      },
+      "chat": {
+        "title": "暂时还用不了",
+        "body": "NetsuPilot 仍在开发中，目前还没有可用的功能。进展会在 Discord 上同步。"
+      },
+      "voice": {
+        "title": "测试还不够",
+        "body": "NetsuTalk 可以用，但在真实工作里几乎没试过。要是哪里不对劲，告诉我。"
+      },
+      "transfer": {
+        "title": "没有在所有版本上试过",
+        "body": "NetsuBridge 只在少数几个 Resolve、Premiere Pro 和 After Effects 版本上试过：换个版本，复制可能完全正常，也可能只成功一部分，或者完全用不了。告诉我你的版本和哪里不对。"
+      }
+    },
     "discord": "加入 Discord",
     "feedback": "报告问题",
     "dismiss": "隐藏"

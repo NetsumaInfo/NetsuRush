@@ -23,7 +23,7 @@
     "upscaleMode": "Cuándo",
     "upscaleModeNow": "Inmediato",
     "upscaleModeIdle": "GPU libre",
-    "upscaleNeedsEncode": "Ampliar reemplaza los píxeles: la copia de flujo no es posible.",
+    "upscaleNeedsEncode": "El escalado reemplaza los píxeles: la copia de flujo es imposible.",
     "queueRunning": "Archivando ahora",
     "queuePending": "Esperando una GPU libre"
   },

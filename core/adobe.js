@@ -173,6 +173,15 @@ function createAdobeBridge({ CONFIG, broadcast }) {
     return runHostJob(ev, app, 'placeTimeline', payload || {}, PLACE_TIMEOUT_MS);
   }
 
+  /**
+   * Fait IMPORTER par l'hôte un fichier d'échange comme séquence. Voie native : l'importeur pose ce
+   * qu'aucune écriture par script n'atteint — un titre, que Premiere ne sait pas créer autrement.
+   */
+  function importTimeline(ev, app, payload) {
+    if (!APPS.includes(app)) return Promise.resolve({ ok: false, error: t('unknownApp') });
+    return runHostJob(ev, app, 'importTimeline', payload || {}, PLACE_TIMEOUT_MS);
+  }
+
   /** Fait exporter par l'hôte sa séquence en FCP7 XML : la seule sortie qui porte les images clés. */
   function exportXml(ev, app, filePath, timelineName) {
     if (!APPS.includes(app)) return Promise.resolve({ ok: false, error: t('unknownApp') });
@@ -400,7 +409,7 @@ function createAdobeBridge({ CONFIG, broadcast }) {
     return out;
   }
 
-  return { panelHello, panelLog, ingest, snapshot, status, launch, close, cmd, installPanel, setPanelAutoUpdate, syncPanel, buildTimeline, placeTimeline, runScript, exportXml, importMedia, boost, jobResult, diagnose };
+  return { panelHello, panelLog, ingest, snapshot, status, launch, close, cmd, installPanel, setPanelAutoUpdate, syncPanel, buildTimeline, placeTimeline, importTimeline, runScript, exportXml, importMedia, boost, jobResult, diagnose };
 }
 
 module.exports = { createAdobeBridge, findAdobeExe };

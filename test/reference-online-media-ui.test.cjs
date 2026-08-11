@@ -89,7 +89,24 @@ test('opening a project automatically recovers missing web media and saves repla
   assert.match(actions, /sourceUrl:\s*url/);
   assert.match(actions, /frames:\s*undefined/);
   assert.match(persistence, /recoverAllOnlineMedia\(\)/);
-  assert.match(persistence, /if \(result\.recovered > 0\) await saveProject\(\)/);
+  assert.match(persistence, /if \(result\.recovered > 0 && !res\.readonly\) await saveProject\(\)/);
+});
+
+// Un board reçu s'ouvre sur des liens morts : la remise en état part seule, jamais sur un bouton.
+test('importing an archive recovers its web media without waiting for a button', () => {
+  const importBoard = persistence.slice(persistence.indexOf('const importBoard'));
+  assert.match(importBoard, /recoverAllOnlineMedia\(\)/);
+  assert.ok(importBoard.indexOf('recoverAllOnlineMedia()') < importBoard.indexOf('prefs.autoDownloadOnline'));
+});
+
+// Un plan YouTube perdu revient en CARTE, pas en téléchargement : même état que si le lien venait
+// d'être reposé sur le board, et zéro octet transféré pour l'afficher.
+test('a missing YouTube-sourced item returns to its YouTube card', () => {
+  const recover = actions.slice(actions.indexOf('export async function recoverMedia'), actions.indexOf('export async function recoverAllOnlineMedia'));
+  assert.match(recover, /const yt = youtubeId\(link\)/);
+  assert.match(recover, /kind: "youtube", ref: yt, src: yt/);
+  assert.match(recover, /it\.kind !== "sequence"/);
+  assert.ok(recover.indexOf('const yt = youtubeId(link)') < recover.indexOf('extractMedia'));
 });
 
 test('project recovery downloads directly into its companion folder', () => {

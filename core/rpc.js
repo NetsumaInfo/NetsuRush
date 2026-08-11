@@ -102,8 +102,14 @@ function createRpc() {
   const adobeBridge = createAdobeBridge({ CONFIG, broadcast });
   // Livraison de l'export AE par le panneau CEP quand After Effects est joignable : le script est
   // déroulé dans le projet OUVERT, au lieu de relancer AfterFX.exe en espérant qu'il soit prêt.
+  // Upscale pendant un transfert : les MÊMES exécutants que NetsuLab et que l'archivage d'une
+  // collection. Un quatrième chemin vers les moteurs les ferait diverger.
+  const growDeps = {
+    runUpscale: (ev2, args) => sidecars.runUpscale(ev2, args),
+    runTurbo: (ev2, args) => turbo.runTurbo(sidecars, ev2, args),
+  };
   const aeExporter = createAeExport({
-    getResolve: resolveMod.getResolve, run: ffmpeg.run, CONFIG,
+    getResolve: resolveMod.getResolve, run: ffmpeg.run, CONFIG, ...growDeps,
     runAeScript: (ev2, jsxPath) => adobeBridge.runScript(ev2, 'aeft', jsxPath),
     aePanelConnected: async () => {
       const state = await adobeBridge.status();
@@ -111,17 +117,23 @@ function createRpc() {
     },
   });
   // Transfert de timeline entre hôtes (Resolve ⇄ Premiere ⇄ After Effects).
-  const transferDeps = { getResolve: resolveMod.getResolve, adobeBridge, aeExporter, runFfmpeg: ffmpeg.run, ev };
+  const transferDeps = { getResolve: resolveMod.getResolve, adobeBridge, aeExporter, runFfmpeg: ffmpeg.run, ...growDeps, ev };
   let transfer = createTransfer(transferDeps);
   // En DEV, `core/transfer/**` se recharge sans redémarrer la fenêtre : le module ne tient ni
   // socket ni daemon, seulement des fonctions et des deps injectées. Les handlers lisent la
   // variable, donc ils voient l'objet reconstruit sans qu'on retouche la table `H`.
-  watchModules(path.join(__dirname, "transfer"), () => {
-    // `require` À NOUVEAU, et pas la fonction capturée en tête de fichier : celle-ci vient du
-    // cache d'AVANT la purge, donc la reconstruire ne rechargeait rien. Le compteur tombait à
-    // « 0 module(s) » aux rechargements suivants, faute d'avoir jamais repeuplé le cache.
-    transfer = require("./transfer").createTransfer(transferDeps);
-  }, { label: "transfert de timeline" });
+  // `require` À NOUVEAU, et pas la fonction capturée en tête de fichier : celle-ci vient du
+  // cache d'AVANT la purge, donc la reconstruire ne rechargeait rien. Le compteur tombait à
+  // « 0 module(s) » aux rechargements suivants, faute d'avoir jamais repeuplé le cache.
+  const reloadTransfer = () => { transfer = require("./transfer").createTransfer(transferDeps); };
+  // `core/ae/` est purgé avec : la lecture de timeline Resolve y vit (`ae/timelineRead`) et les
+  // modules de transfert en capturent les fonctions au chargement — purger l'un sans l'autre
+  // laissait l'ancien code tourner, redémarrage compris dans la facture.
+  const aeDir = path.join(__dirname, "ae");
+  watchModules(path.join(__dirname, "transfer"), reloadTransfer,
+    { label: "transfert de timeline", also: [aeDir] });
+  watchModules(aeDir, reloadTransfer,
+    { label: "lecture de timeline", also: [path.join(__dirname, "transfer")] });
   // Réglages du renderer PARTAGÉS entre origines (app Tauri / panneau CEP / fenêtres détachées).
   const prefs = createPrefs({ broadcast });
   // Le panneau CEP est une COPIE dans %APPDATA% : une mise à jour de NetsuRush ne la touche pas.
@@ -675,7 +687,11 @@ function createRpc() {
     "ae:export": guarded(([opts]) => aeExporter.aeExport(ev, opts)),
 
     // --- Transfert de timeline entre hôtes (Resolve ⇄ Premiere ⇄ After Effects) ---
-    "transfer:sources": ([opts]) => transfer.listSources(opts || {}),
+    // Bracketé comme les autres lectures Resolve : la liste des timelines part du même registre de
+    // handles que l'aperçu, et les deux se déclenchent ENSEMBLE au changement d'hôte (useTransfer).
+    // Sans bracket, l'aperçu entrait à la profondeur 0 et purgeait le registre en plein parcours de
+    // la liste → « handle invalide ou Resolve non connecté ».
+    "transfer:sources": rOp(([opts]) => transfer.listSources(opts || {})),
     "transfer:read": guarded(([opts]) => transfer.summary(opts || {})),
     "transfer:run": guarded(([opts]) => transfer.run(ev, opts || {})),
 
@@ -966,7 +982,8 @@ function createRpc() {
       if (cached) return { connected: false, cached: true, project: snap.project, clips: cached.clips || [], error: null };
       return r;
     }),
-    "script:importMedia": ([paths]) => resolveMod.importMediaTree(paths),
+    // Écrit dans le Media Pool → même bracket que resolve:import (registre de handles + poller).
+    "script:importMedia": guarded(([paths]) => resolveMod.importMediaTree(paths)),
     "script:listDocs": ([proj]) => scriptStore.listDocs(proj),
     "script:loadDoc": ([id]) => scriptStore.loadDoc(id),
     "script:saveDoc": ([doc]) => scriptStore.saveDoc(doc),

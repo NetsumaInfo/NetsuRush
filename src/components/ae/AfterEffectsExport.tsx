@@ -11,8 +11,7 @@ import { AeOptionsForm } from "./AeOptionsForm";
 export function AfterEffectsExport() {
   const { t } = useTranslation("ae");
   const ae = useAeExport();
-  const { timelineName, outDir, producesFiles, busy, progress, result, run } = ae;
-  const needsDir = producesFiles && !outDir;
+  const { timelineName, needsDir, busy, progress, result, run } = ae;
   const canRun = !!timelineName && !busy && !needsDir;
 
   return (

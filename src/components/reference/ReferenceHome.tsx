@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
+import { logError } from "@/lib/appLog";
 import type { NetsuRecent, RefSceneMeta } from "@/lib/bridge";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -36,7 +37,6 @@ function relDate(ts: number): string {
 
 const LS_FAV = "nr-ref-favorites";
 const LS_HIDDEN = "nr-ref-hidden";
-const MEDIA_PATH_RE = /\.(?:bmp|dpx|exr|gif|jpe?g|png|tiff?|webp|avi|flv|m2ts|m4v|mkv|mov|mp4|mpeg?|mxf|ts|webm|wmv)$/i;
 
 function loadSet(key: string): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(key) ?? "[]") as string[]); }
@@ -308,7 +308,6 @@ export function ReferenceHome({
   onOpen,
   onNew,
   onNewFiles,
-  onNewPaths,
   onSettings,
   onOpenProject,
   onOpenRecent,
@@ -319,7 +318,6 @@ export function ReferenceHome({
   onOpen: (id: string) => void;
   onNew: () => void;
   onNewFiles: (files: File[]) => void;
-  onNewPaths: (paths: string[]) => void;
   onSettings: () => void;
   onOpenProject?: () => void;
   onOpenRecent?: (filePath: string) => void;
@@ -329,6 +327,9 @@ export function ReferenceHome({
   const [recent, setRecent] = useState<RefSceneMeta[]>([]);
   const [projects, setProjects] = useState<NetsuRecent[]>([]);
   const [over, setOver] = useState(false);
+  // L'accueil n'a pas de barre d'outils : sans ce relais, une ouverture de projet ratée (dépôt,
+  // carte récente) ne dirait rien du tout — la notice partait dans un store que personne n'affiche.
+  const notice = useBoard((s) => s.notice);
   const [favorites, setFavorites] = useState<Set<string>>(() => loadSet(LS_FAV));
   const [hidden, setHidden] = useState<Set<string>>(() => loadSet(LS_HIDDEN));
 
@@ -402,30 +403,9 @@ export function ReferenceHome({
     return true;
   }, [onOpenRecent]);
 
-  // Tauri handles operating-system file drops before the DOM. Keep the browser drop handler below
-  // for development, and use the native event in the packaged application where real paths exist.
-  useEffect(() => {
-    if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return undefined;
-    let disposed = false;
-    let unlisten: (() => void) | undefined;
-    void import("@tauri-apps/api/webview")
-      .then(({ getCurrentWebview }) => getCurrentWebview().onDragDropEvent(({ payload }) => {
-        if (payload.type === "enter") {
-          setOver(payload.paths.some((filePath) => filePath.toLowerCase().endsWith(".netsu") || MEDIA_PATH_RE.test(filePath)));
-          return;
-        }
-        if (payload.type === "leave") { setOver(false); return; }
-        if (payload.type !== "drop") return;
-        setOver(false);
-        if (openDroppedProject(payload.paths)) return;
-        const mediaPaths = payload.paths.filter((filePath) => MEDIA_PATH_RE.test(filePath));
-        if (mediaPaths.length) onNewPaths(mediaPaths);
-      }))
-      .then((stop) => { if (disposed) stop(); else unlisten = stop; })
-      .catch(() => {});
-    return () => { disposed = true; unlisten?.(); };
-  }, [onNewPaths, openDroppedProject]);
-
+  // `dragDropEnabled` est à false (cf. src-tauri/tauri.conf.json) : les fichiers lâchés depuis
+  // l'Explorateur arrivent en DnD HTML5 ordinaire, jamais en événement Tauri. Le chemin disque, lui,
+  // n'est pas dans l'objet `File` — il se résout par le pont WebView2 (`nr.pathsForFiles`).
   const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setOver(false);
@@ -434,6 +414,11 @@ export function ReferenceHome({
     if (projectFile) {
       const [projectPath] = await nr.pathsForFiles([projectFile]);
       if (projectPath && openDroppedProject([projectPath])) return;
+      // Un projet lâché ne doit JAMAIS retomber en silence : sans chemin (pont indisponible) ou sans
+      // action d'ouverture, on le dit, plutôt que de laisser l'accueil immobile.
+      logError("board:home", `dépôt .netsu sans ouverture — ${projectFile.name} (chemin: ${projectPath || "non résolu"})`);
+      useBoard.getState().setNotice({ kind: "error", text: t("notice.dropProjectFailed", { name: projectFile.name }) });
+      return;
     }
     const files = dropped.filter(
       (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
@@ -527,6 +512,17 @@ export function ReferenceHome({
             <FilePlus2 className="size-4" />
             {t("home.createEmpty")}
           </button>
+
+          {notice && (
+            <p
+              className={cn(
+                "max-w-full text-xs",
+                notice.kind === "error" ? "text-destructive" : "text-[var(--color-ok)]",
+              )}
+            >
+              {notice.text}
+            </p>
+          )}
         </div>
       </div>
 

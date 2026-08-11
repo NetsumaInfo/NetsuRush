@@ -76,12 +76,24 @@ async function checkTools() {
   return toolCheckPromise;
 }
 
+// Vidéo destinée à un LECTEUR DE BOARD, pas à un montage : H.264 en 1080p au plus. Le même plan
+// existe en AV1 et en VP9, souvent en 4K — la WebView les décode en logiciel, un 2160p AV1 rend un
+// carré noir (MEDIA_ERR_DECODE) pour cent fois le poids d'un 1080p avc1. Le repli garde une sortie
+// même quand la plateforme n'a rien en avc1.
+const YTDLP_FORMAT = [
+  'bv*[vcodec^=avc1][height<=1080]+ba[ext=m4a]',
+  'b[vcodec^=avc1][height<=1080]',
+  'bv*[ext=mp4][height<=1080]+ba[ext=m4a]',
+  'b[ext=mp4]',
+  'b',
+].join('/');
+
 // yt-dlp : meilleure vidéo mp4 → fichier(s) dans ASSETS_DIR. Renvoie les chemins vidéo écrits.
 async function tryYtdlp(url, cookiesBrowser, outputDir) {
   const outTpl = path.join(outputDir, 'nr-yt-%(id)s.%(ext)s');
   const args = [
     '-m', 'yt_dlp', url,
-    '-f', 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b',
+    '-f', YTDLP_FORMAT,
     '--merge-output-format', 'mp4',
     '--no-playlist', '--no-warnings', '--no-progress', '--no-simulate',
     '--socket-timeout', '30', '--max-filesize', '1024m',

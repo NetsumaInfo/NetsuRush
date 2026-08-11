@@ -65,8 +65,23 @@ http.route({
 // ni build ni mise à jour chez les testeurs. Le corps est retransmis TEL QUEL (multipart embed +
 // pièces jointes construit par le core) : rien à re-parser, rien à re-plafonner ici.
 // Session : le desktop n'a pas de cookies (webview hors domaine Convex), il envoie l'en-tête
-// `Better-Auth-Cookie` du plugin crossDomain, que `getSession` sait lire. `BUG_RELAY_OPEN=true`
-// accepte les envois anonymes — utile pour un testeur déconnecté, à laisser à false autrement.
+// `Better-Auth-Cookie` du plugin crossDomain, que `getSession` sait lire. Elle est FACULTATIVE : un
+// bug doit pouvoir remonter même déconnecté (c'est souvent la connexion elle-même qui casse). Sans
+// compte, le plafond horaire retombe sur l'IP appelante, qui sert de clé de quota et n'est PAS
+// enregistrée avec le rapport.
+// Clé de plafond d'un envoi anonyme : empreinte SALÉE de l'IP appelante. Salée et tronquée parce que
+// le but est de compter, pas d'identifier — l'IP brute ne doit ni transiter en base ni être
+// reconstructible depuis elle. Sans en-tête d'IP, tous les anonymes partagent un même compteur.
+async function anonQuotaKey(req: Request): Promise<string> {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || "unknown";
+  const salt = process.env.BUG_QUOTA_SALT ?? process.env.BETTER_AUTH_SECRET ?? "netsurush";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}:${ip}`));
+  const hex = Array.from(new Uint8Array(digest.slice(0, 8)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `ip:${hex}`;
+}
+
 http.route({
   path: "/bug/report",
   method: "POST",
@@ -77,12 +92,10 @@ http.route({
     const session = await createAuth(ctx)
       .api.getSession({ headers: req.headers })
       .catch(() => null);
-    if (!session && process.env.BUG_RELAY_OPEN !== "true") {
-      return new Response("sign in required", { status: 401 });
-    }
     const userId = session?.user?.id;
+    const quotaKey = userId ?? (await anonQuotaKey(req));
 
-    const quota = await ctx.runQuery(internal.bugs.recentCount, { userId });
+    const quota = await ctx.runQuery(internal.bugs.recentCount, { quotaKey });
     if (!quota.allowed) return new Response("rate limited", { status: 429 });
 
     const contentType = req.headers.get("content-type");
@@ -102,6 +115,7 @@ http.route({
       reportId: meta("x-nr-report-id") ?? "NR-?",
       userId,
       userName: session?.user?.name,
+      quotaKey,
       severity: meta("x-nr-severity"),
       category: meta("x-nr-category"),
       module: meta("x-nr-module"),

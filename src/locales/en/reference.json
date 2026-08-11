@@ -539,6 +539,7 @@
     "projectOpened": "“{{name}}” opened",
     "projectOpenedLegacy": "“{{name}}” opened (old format — save it as a project to edit in place)",
     "openFailedWith": "Could not open: {{error}}",
+    "dropProjectFailed": "Could not open \"{{name}}\" — use \"Open a project\".",
     "noProjectFile": "This board is not linked to a file"
   }
 }

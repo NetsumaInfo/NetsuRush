@@ -5,9 +5,11 @@ import { useAeExport } from "@/components/ae/useAeExport";
 import { AeOptionsForm } from "@/components/ae/AeOptionsForm";
 import type { AeExportOpts } from "@/lib/bridge";
 
+// La timeline source ET le nom de la composition sont choisis par NetsuBridge : le core réinjecte
+// la timeline au lancement, et la destination de la page EST le nom de la comp. Les redemander ici
+// posait deux fois la même question, avec deux réponses possibles.
 export function TransferAeOptions({ onChange }: { onChange: (opts: AeExportOpts) => void }) {
   const ae = useAeExport();
-  // La timeline source est choisie par NetsuBridge : le core la réinjecte au moment de lancer.
   useEffect(() => { onChange(ae.options); }, [ae.options, onChange]);
-  return <AeOptionsForm ae={ae} hideTimeline />;
+  return <AeOptionsForm ae={ae} hideTimeline hideCompName />;
 }

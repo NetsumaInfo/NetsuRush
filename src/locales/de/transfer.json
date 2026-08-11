@@ -15,25 +15,29 @@
   "sections": {
     "source": "Timeline in {{host}}",
     "target": "Ziel in {{host}}",
+    "targetComp": "Komposition in {{host}}",
     "options": "Optionen",
     "media": "Medien",
     "outDir": "Ausgabeordner",
-    "encoding": "Kodierung"
+    "encoding": "Kodierung",
+    "upscale": "Upscale"
   },
   "form": {
     "refresh": "Aktualisieren",
     "noTimeline": "Keine Timeline",
     "timelineOpen": "{{name}} (geöffnet)",
     "namePlaceholder": "Name der neuen Timeline",
+    "compPlaceholder": "Name der neuen Komposition",
     "modeNew": "Neue Timeline",
     "modeAppend": "Vorhandene Timeline",
     "videoOnly": "Nur Video",
     "richAe": "Erweiterte After-Effects-Optionen",
-    "richAeHint": "Transformationen, Geschwindigkeit und Präkompositionen statt einer einfachen Kopie der Clips.",
+    "richAeHint": "Transformationen, Geschwindigkeit und Präkompositionen statt einer einfachen Kopie der Clips. Medien und Kodierung werden dann im Panel unten eingestellt.",
     "yes": "Ja",
     "no": "Nein",
     "choose": "Auswählen…",
-    "none": "Keiner"
+    "none": "Keiner",
+    "upscaleForcesReencode": "Upscale ersetzt die Pixel: „Neu kodieren“ gilt unabhängig von der Wahl oben."
   },
   "preview": {
     "clips": "Gelesene Clips",
@@ -46,7 +50,8 @@
     "fidelityCounts": "{{exact}} exakt · {{approximated}} angenähert · {{unsupported}} nicht garantiert",
     "animationUnavailable": "Keyframes nicht lesbar: die Quellanwendung hat den Export verweigert, der sie enthält. Die Übertragung setzt feste Werte.",
     "mediaLess": "{{count}} Element(e) ohne Medien (Matte, Einstellungsebene): keine Anwendung kann sie übernehmen.",
-    "graphics": "{{count}} Titel: werden im Ziel aus Text und Stil neu aufgebaut."
+    "graphics": "{{count}} Titel: werden im Ziel aus Text und Stil neu aufgebaut.",
+    "graphicsUnsupported": "{{count}} Titel: Das Ziel kann sie nicht neu aufbauen, sie werden nicht übertragen."
   },
   "phases": {
     "read": "Timeline wird gelesen",
@@ -62,6 +67,9 @@
     "done": "{{count}} Clip(s) in „{{timeline}}“ ({{host}}) platziert.",
     "verified": "Eigenschaften zurückgelesen: Übertragung verifiziert.",
     "unverified": "{{applied}} Eigenschaft(en) bestätigt · {{issues}} Grenze(n) oder Abweichung(en).",
+    "animated": "{{count}} Shot(s) mit Keyframes.",
+    "animatedNone": "Keine Keyframes gelesen: DaVinci Resolve gibt per Skript keine aus, nur sein XML-Export trägt sie.",
+    "containerFallback": "{{count}} Datei(en) als MOV geschrieben: MP4 trägt weder ProRes noch DNxHR oder PCM.",
     "tracksClamped": "Spuren begrenzt: Die Zielanwendung konnte nicht genug davon anlegen.",
     "missing": "{{count}} Quelle(n) nicht auf der Festplatte gefunden.",
     "mediaLess": "{{count}} Element(e) ohne Medien (Matte, Einstellungsebene): keine Anwendung kann sie übernehmen.",

@@ -19,12 +19,11 @@
     "noTimeline": "No timeline",
     "timelineOpen": "{{name}} (open)",
     "compPlaceholder": "After Effects comp name",
-    "individualRender": "Separate file per shot",
-    "individualHint": "Each shot becomes one re-encoded file with frame-accurate cuts. Pick the codec below · output folder required.",
     "yes": "Yes",
     "no": "No",
     "codec": "Codec",
     "container": "Container",
+    "bakeForcesReencode": "Speed baked in: shots are re-encoded whatever the mode above.",
     "mode": "Mode",
     "nestedFlatten": "Contents",
     "nestedComp": "Precomp",
@@ -46,7 +45,9 @@
     "namingNumber": "Number",
     "foldersLabel": "Sort into folders (Footage / Precomps / Audio / Images)",
     "none": "None",
-    "choose": "Choose…"
+    "choose": "Choose…",
+    "outDirWhy": "Files written here: {{reasons}}.",
+    "upscaleForcesReencode": "Upscaling replaces pixels: Re-encode applies whatever is picked above."
   },
   "sections": {
     "timeline": "Timeline",
@@ -55,15 +56,24 @@
     "transforms": "Transforms & speed",
     "nested": "Nested timeline",
     "audio": "Audio",
-    "handles": "Handles",
     "precomp": "Precomp",
     "organization": "Organization",
-    "outDir": "Output folder"
+    "outDir": "Output folder",
+    "upscale": "Upscale"
   },
   "videoModes": {
-    "copy": { "label": "Copy", "hint": "Source files, cut in AE — no transcode." },
-    "remux": { "label": "Remux", "hint": "Lossless .mov container (-c copy), cut in AE." },
-    "reencode": { "label": "Re-encode", "hint": "Each shot transcoded to an edit codec, handles included." }
+    "copy": {
+      "label": "Copy",
+      "hint": "Source files, cut in AE — no transcode."
+    },
+    "remux": {
+      "label": "Remux",
+      "hint": "Lossless .mov container (-c copy), cut in AE."
+    },
+    "reencode": {
+      "label": "Re-encode",
+      "hint": "Each shot transcoded to an edit codec, cut frame-accurately, handles included."
+    }
   },
   "audioModes": {
     "copy": "Copy",
@@ -73,11 +83,27 @@
     "none": "None"
   },
   "transformModes": {
-    "none": { "label": "None", "hint": "Raw footage — ignores timeline transforms and speed." },
-    "ae": { "label": "In After Effects", "hint": "Transforms + speed on the AE layer, source untouched." },
-    "bake": { "label": "Re-encoded", "hint": "Speed baked into the file, spatial transforms in AE." }
+    "none": {
+      "label": "None",
+      "hint": "Raw footage — ignores timeline transforms and speed."
+    },
+    "ae": {
+      "label": "In After Effects",
+      "hint": "Transforms + speed on the AE layer, source untouched."
+    },
+    "bake": {
+      "label": "Re-encoded",
+      "hint": "Speed and framing baked into the file, with the codec chosen above, at timeline size. Outside the frame: black, unless that codec carries an alpha channel. An ANIMATED framing is rendered by DaVinci Resolve, keyframes included: faithful, but one render per shot."
+    }
   },
   "errors": {
     "timelinesUnavailable": "Timelines unavailable"
+  },
+  "outDirReasons": {
+    "reencode": "re-encoded shots",
+    "remux": "remuxed shots",
+    "bake": "baked speed",
+    "nestedRender": "nested timelines rendered by Resolve",
+    "audio": "extracted audio tracks"
   }
 }

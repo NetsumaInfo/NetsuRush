@@ -18,7 +18,19 @@ const { PYTHON, DETECT_ENV } = require("./config");
 
 // Board muet → un flux VIDÉO SEUL suffit et évite le merge ffmpeg. Repli progressif (piste audio
 // incluse) pour les vidéos sans DASH mp4.
-const FORMAT = "bv*[ext=mp4][height<=1080]/bv*[height<=1080]/b[ext=mp4]/b";
+//
+// Deux filtres portent cette sélection, et sans eux le `<video>` reste noir :
+//   `protocol^=https` écarte les formats servis en HLS — le « Premium 1080p » (itag 616) n'existe
+//   qu'en m3u8, `-g` rend alors un MANIFESTE, que WebView2 ne sait pas lire (pas de HLS natif).
+//   `vcodec^=avc1` d'abord : le même 1080p existe en VP9 et en AV1, décodés en logiciel dans la
+//   WebView — un board qui joue dix vidéos à la fois ne les tient pas.
+const FORMAT = [
+  "bv*[protocol^=https][vcodec^=avc1][height<=1080]",
+  "bv*[protocol^=https][ext=mp4][height<=1080]",
+  "bv*[protocol^=https][height<=1080]",
+  "b[protocol^=https][ext=mp4]",
+  "b[protocol^=https]",
+].join("/");
 const RESOLVE_TIMEOUT_MS = 45000;
 const UPSTREAM_TIMEOUT_MS = 20000;
 // Marge sous la durée de vie réelle de l'URL : on renouvelle avant que googlevideo ne réponde 403.
@@ -64,7 +76,12 @@ function runYtdlp(id) {
     child.on("error", (e) => { clearTimeout(killer); resolve({ ok: false, error: String(e) }); });
     child.on("close", (code) => {
       clearTimeout(killer);
-      const url = out.split(/\r?\n/).map((s) => s.trim()).find((s) => /^https:\/\//.test(s));
+      // Un manifeste (HLS/DASH) qui passerait malgré le filtre de protocole vaut un échec : mieux
+      // vaut le repli sur le lecteur intégré qu'un `<video>` muré sur une source illisible.
+      const url = out
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .find((s) => /^https:\/\//.test(s) && !/\.m3u8|\/manifest\//i.test(s));
       if (code === 0 && url) resolve({ ok: true, url });
       else resolve({ ok: false, error: err.trim() || `yt-dlp code ${code}` });
     });

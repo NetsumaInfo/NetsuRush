@@ -70,10 +70,16 @@ test('dropping a netsu opens it as a project before media ingestion', () => {
   assert.match(source, /\.name\.toLowerCase\(\)\.endsWith\("\.netsu"\)/);
   assert.match(source, /nr\.pathsForFiles\(\[projectFile\]\)/);
   assert.match(source, /onOpenRecent\(projectPath\)/);
-  assert.match(source, /getCurrentWebview\(\)\.onDragDropEvent/);
-  assert.match(source, /payload\.type !== "drop"/);
-  assert.match(source, /openDroppedProject\(payload\.paths\)/);
   assert.ok(source.indexOf('.endsWith(".netsu")') < source.indexOf('f.type.startsWith("image/")'));
+});
+
+// `dragDropEnabled` reste à false : le drag-drop Tauri ne se déclenche jamais, et un board déposé
+// qui n'aboutit pas doit se voir — l'accueil n'a aucune barre d'outils pour porter la notice.
+test('the home drop path stays on the DOM event and reports a failed project open', () => {
+  assert.doesNotMatch(source, /onDragDropEvent/);
+  assert.match(source, /logError\("board:home"/);
+  assert.match(source, /setNotice\(\{ kind: "error", text: t\("notice\.dropProjectFailed"/);
+  assert.match(source, /const notice = useBoard\(\(s\) => s\.notice\)/);
 });
 
 test('the home exposes one netsu project opener and no archive import action', () => {

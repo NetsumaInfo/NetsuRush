@@ -12,11 +12,12 @@ All calls are defensively `await`ed: the bridge returns promises. Frame math sta
 
 ### Frame-accurate timeline — DO NOT BREAK
 
-`buildTimeline` (`core/timeline.js`) references the **original MediaPoolItem** with in/out frames. Never re-export a file and re-import it — that shifted every cut. Three cumulative rules:
+`buildTimeline` (`core/timeline.js`) references the **original MediaPoolItem** with in/out frames. Never re-export a file and re-import it — that shifted every cut. Four cumulative rules:
 
 1. **`endFrame` is INCLUSIVE** on the Resolve side (official doc: startFrame 0 / endFrame 23 = 24 frames). TransNetV2 already returns inclusive values; ffmpeg/seconds convert as `round(sec*fps) - 1`.
-2. **Before `CreateEmptyTimeline`, call `proj.SetSetting('timelineFrameRate', clipFPS)`** — otherwise the timeline takes the *project* rate (e.g. 24) instead of the clip's (e.g. 23.976), Resolve reconforms, and cuts drift. This was *the* "not accurate" bug.
-3. **Frame-space remap**: compare `item.GetClipProperty('Frames')` (Resolve's truth) with the detector's frame count; if they differ, remap linearly `round(f*(resF-1)/(detF-1))` to absorb the decoding offset.
+2. **`GetSourceEndFrame` is INCLUSIVE too.** Measured on Resolve Studio 21.0.3 with whole, untrimmed clips: a 96-frame file filling 96 timeline frames reports `ssf=0, sef=95`. Reading it as exclusive costs the LAST FRAME of every clip and fabricates a 95/96 speed on a clip that was never retimed — false retimes everywhere, real ones drowned in them. `srcOut = sef`; reverse (`ssf > sef`) covers `[sef, ssf]`; `ssf == sef` is a freeze holding one frame. Locked by `test/resolve-source-range.test.cjs`.
+3. **Before `CreateEmptyTimeline`, call `proj.SetSetting('timelineFrameRate', clipFPS)`** — otherwise the timeline takes the *project* rate (e.g. 24) instead of the clip's (e.g. 23.976), Resolve reconforms, and cuts drift. This was *the* "not accurate" bug.
+4. **Frame-space remap**: compare `item.GetClipProperty('Frames')` (Resolve's truth) with the detector's frame count; if they differ, remap linearly `round(f*(resF-1)/(detF-1))` to absorb the decoding offset.
 
 `AppendToTimeline([{ mediaPoolItem, startFrame, endFrame }, …])` receives the mapped segments. Re-import goes through `MediaStorage.AddItemListToMediaPool(paths)`.
 

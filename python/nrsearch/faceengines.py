@@ -53,6 +53,12 @@ class AnimeEngine:
     def available(self):
         if self._ok is None:
             try:
+                # `import onnxruntime` D'ABORD : quand le module manque, imgutils lance lui-même
+                # `pip install onnxruntime-gpu` à l'import et pose la dernière roue (branche CUDA 13)
+                # par-dessus celle bâtie pour le CUDA de torch. Le CUDAExecutionProvider disparaît
+                # alors et TOUTE l'inférence ONNX du venv repasse sur CPU, sans erreur. Sans runtime,
+                # le domaine animé est simplement indisponible.
+                import onnxruntime  # noqa: F401
                 import imgutils.detect  # noqa: F401
                 import imgutils.metrics  # noqa: F401
                 self._ok = True

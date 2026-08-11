@@ -15,25 +15,29 @@
   "sections": {
     "source": "Timeline in {{host}}",
     "target": "Destination in {{host}}",
+    "targetComp": "Composition in {{host}}",
     "options": "Options",
     "media": "Media",
     "outDir": "Output folder",
-    "encoding": "Encoding"
+    "encoding": "Encoding",
+    "upscale": "Upscale"
   },
   "form": {
     "refresh": "Refresh",
     "noTimeline": "No timeline",
     "timelineOpen": "{{name}} (open)",
     "namePlaceholder": "Name of the new timeline",
+    "compPlaceholder": "Name of the new composition",
     "modeNew": "New timeline",
     "modeAppend": "Existing timeline",
     "videoOnly": "Video only",
     "richAe": "Advanced After Effects options",
-    "richAeHint": "Transforms, speed and precomps, instead of a plain copy of the shots.",
+    "richAeHint": "Transforms, speed and precomps, instead of a plain copy of the shots. Media and encoding are then set in the panel below.",
     "yes": "Yes",
     "no": "No",
     "choose": "Choose…",
-    "none": "None"
+    "none": "None",
+    "upscaleForcesReencode": "Upscaling replaces pixels: Re-encode applies whatever is picked above."
   },
   "preview": {
     "clips": "Shots read",
@@ -46,7 +50,8 @@
     "fidelityCounts": "{{exact}} exact · {{approximated}} approximate · {{unsupported}} not guaranteed",
     "animationUnavailable": "Keyframes unreadable: the source application refused the export that carries them. The transfer will place fixed values.",
     "mediaLess": "{{count}} item(s) without media (matte, adjustment layer): no application can receive them.",
-    "graphics": "{{count}} title(s): rebuilt on the target from their text and style."
+    "graphics": "{{count}} title(s): rebuilt on the target from their text and style.",
+    "graphicsUnsupported": "{{count}} title(s): the target cannot rebuild them, they will not be transferred."
   },
   "phases": {
     "read": "Reading the timeline",
@@ -62,6 +67,9 @@
     "done": "{{count}} shot(s) placed in “{{timeline}}” ({{host}}).",
     "verified": "Properties read back: transfer verified.",
     "unverified": "{{applied}} property/properties confirmed · {{issues}} limit(s) or mismatch(es).",
+    "animated": "{{count}} shot(s) with keyframes.",
+    "animatedNone": "No keyframe read: DaVinci Resolve exposes none through scripting, only its XML export carries them.",
+    "containerFallback": "{{count}} file(s) written as MOV: MP4 carries neither ProRes, DNxHR nor PCM.",
     "tracksClamped": "Tracks clamped: the target application could not create enough of them.",
     "missing": "{{count}} source(s) not found on disk.",
     "mediaLess": "{{count}} item(s) without media (matte, adjustment layer): no application can receive them.",

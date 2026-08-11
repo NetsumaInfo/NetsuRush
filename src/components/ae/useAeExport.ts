@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { nr } from "@/lib/bridge";
 import { swrRead } from "@/lib/swr";
-import type { AeVideoMode, AeAudioMode, AeVideoContainer, AeAudioContainer, AePrecompNaming, AePrecompTarget, AeTransformMode, AeNestedMode, AeAudioRenderFmt, UpscaleCodec, AeExportOpts, AeExportResult, AeProgress } from "@/lib/bridge";
+import type { AeVideoMode, AeAudioMode, AeVideoContainer, AeAudioContainer, AePrecompNaming, AePrecompTarget, AeTransformMode, AeNestedMode, AeAudioRenderFmt, UpscaleCodec, AeExportOpts, AeExportResult, AeProgress, TransferUpscale } from "@/lib/bridge";
+import { aeOutputReasons, audioContainersFor, videoContainersFor } from "./aeShared";
 import i18n from "@/i18n";
-
-// Modes audio qui produisent un fichier (sinon = lien du fichier source).
-const AUDIO_PRODUCES = new Set<AeAudioMode>(["remux", "aac", "pcm"]);
 
 interface TimelineEntry {
   name: string;
@@ -29,12 +27,14 @@ export function useAeExport() {
   const [precompTarget, setPrecompTarget] = useState<AePrecompTarget>("video");
   const [folders, setFolders] = useState(false);
   const [transformMode, setTransformMode] = useState<AeTransformMode>("none");
-  const [nestedMode, setNestedMode] = useState<AeNestedMode>("render");
+  // Défaut aligné sur le core : `render` ferait rendre chaque timeline imbriquée par Resolve, donc
+  // exigerait un dossier de sortie sans que rien d'autre n'écrive.
+  const [nestedMode, setNestedMode] = useState<AeNestedMode>("flatten");
   const [audioRenderFmt, setAudioRenderFmt] = useState<AeAudioRenderFmt>("wav");
-  const [individualRender, setIndividualRender] = useState(false);
   const [videoContainer, setVideoContainer] = useState<AeVideoContainer>("mov");
   const [audioContainer, setAudioContainer] = useState<AeAudioContainer>("m4a");
   const [outDir, setOutDir] = useState<string | null>(null);
+  const [upscale, setUpscale] = useState<TransferUpscale>({});
 
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<AeProgress | null>(null);
@@ -59,18 +59,35 @@ export function useAeExport() {
 
   useEffect(() => nr.onAeProgress((p) => setProgress(p)), []);
 
+  // Les conteneurs SUIVENT le codec et le traitement audio : un choix fait dans un mode ne doit pas
+  // rester appliqué dans un autre, où il donnerait un couple que ffmpeg refuse (ProRes en .mp4,
+  // PCM en .m4a).
+  useEffect(() => {
+    const allowed = videoContainersFor(codec, videoMode);
+    setVideoContainer((prev) => (allowed.includes(prev) ? prev : allowed[0]));
+  }, [codec, videoMode]);
+
+  useEffect(() => {
+    setAudioContainer((prev) => (audioContainersFor(audio).includes(prev) ? prev : audioContainersFor(audio)[0]));
+  }, [audio]);
+
   const chooseOut = useCallback(async () => {
     const dir = await nr.chooseDir();
     if (dir) setOutDir(dir);
     return dir;
   }, []);
 
+  // L'upscale REMPLACE les pixels : ni la copie ni le réencapsulage ne savent le faire. L'option
+  // impose donc le réencodage — le core applique la même règle, l'UI ne fait que la montrer.
+  const growing = !!upscale.enabled;
+  const effectiveVideoMode: AeVideoMode = growing ? "reencode" : videoMode;
+
   // Options prêtes à envoyer — partagées avec NetsuBridge, qui déclenche le même pipeline depuis la
   // page de transfert sans dupliquer la construction du payload.
   const options = useMemo<AeExportOpts>(() => ({
     timelineName,
     compName: compName.trim() || undefined,
-    videoMode,
+    videoMode: effectiveVideoMode,
     codec,
     audio,
     abr,
@@ -82,11 +99,11 @@ export function useAeExport() {
     transformMode,
     nestedMode,
     audioRenderFmt,
-    individualRender,
     videoContainer,
     audioContainer,
     outDir: outDir || undefined,
-  }), [timelineName, compName, videoMode, codec, audio, abr, handleSec, precomp, precompNaming, precompTarget, folders, transformMode, nestedMode, audioRenderFmt, individualRender, videoContainer, audioContainer, outDir]);
+    upscale: upscale.enabled ? upscale : undefined,
+  }), [timelineName, compName, effectiveVideoMode, codec, audio, abr, handleSec, precomp, precompNaming, precompTarget, folders, transformMode, nestedMode, audioRenderFmt, videoContainer, audioContainer, outDir, upscale]);
 
   const run = useCallback(async () => {
     setBusy(true);
@@ -102,22 +119,24 @@ export function useAeExport() {
     }
   }, [options]);
 
-  // Vidéo réencodée/remuxée/rendue, timeline imbriquée rendue, OU audio produit → fichiers sur disque.
-  const audioProduces = AUDIO_PRODUCES.has(audio);
-  const producesFiles = videoMode !== "copy" || nestedMode === "render" || individualRender || audioProduces;
+  // Ce qui écrit sur le disque, et POURQUOI : le panneau le dit au lieu de réclamer un dossier sans
+  // motif. Table unique partagée avec NetsuBridge (aeShared).
+  const outputReasons = aeOutputReasons({ videoMode: effectiveVideoMode, transformMode, nestedMode, audio });
+  const producesFiles = outputReasons.length > 0;
+  const needsDir = producesFiles && !outDir;
 
   return {
     timelines, timelinesError, timelineName, setTimelineName, loadTimelines,
     compName, setCompName,
-    videoMode, setVideoMode, codec, setCodec, audio, setAudio, abr, setAbr,
+    videoMode: effectiveVideoMode, setVideoMode, codec, setCodec, audio, setAudio, abr, setAbr,
+    upscale, setUpscale, growing,
     handleSec, setHandleSec, precomp, setPrecomp,
     precompNaming, setPrecompNaming, precompTarget, setPrecompTarget, folders, setFolders,
     transformMode, setTransformMode,
     nestedMode, setNestedMode,
     audioRenderFmt, setAudioRenderFmt,
-    individualRender, setIndividualRender,
     videoContainer, setVideoContainer, audioContainer, setAudioContainer,
-    outDir, chooseOut, producesFiles, options,
+    outDir, chooseOut, producesFiles, outputReasons, needsDir, options,
     busy, progress, result, run,
   };
 }

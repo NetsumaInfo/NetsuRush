@@ -82,7 +82,25 @@
   },
   "beta": {
     "title": "Modul in der Beta",
-    "body": "Funktionen fehlen noch, andere ändern sich. Ich suche Tester: sag mir, was kaputt ist und was dir fehlt.",
+    "body": "Es fehlen noch Funktionen, andere ändern sich. Ich suche Tester: sag mir, was nicht funktioniert und was dir fehlt.",
+    "modules": {
+      "script": {
+        "title": "Noch ein Prototyp",
+        "body": "NetsuDraft ist sehr unvollständig und kaum getestet: vieles fehlt oder funktioniert noch nicht. Sag mir, was du zuerst brauchst."
+      },
+      "chat": {
+        "title": "Funktioniert noch nicht",
+        "body": "NetsuPilot ist noch in Entwicklung: es tut bisher nichts Nützliches. Verfolge den Fortschritt auf Discord."
+      },
+      "voice": {
+        "title": "Noch zu wenig getestet",
+        "body": "NetsuTalk funktioniert, wurde aber kaum im echten Einsatz verwendet. Sag mir Bescheid, wenn sich etwas seltsam verhält."
+      },
+      "transfer": {
+        "title": "Nicht auf allen Versionen getestet",
+        "body": "NetsuBridge wurde nur mit wenigen Versionen von Resolve, Premiere Pro und After Effects getestet: je nach deiner Version funktioniert die Übernahme ganz, nur teilweise oder gar nicht. Nenn mir deine Version und was nicht funktioniert."
+      }
+    },
     "discord": "Discord beitreten",
     "feedback": "Problem melden",
     "dismiss": "Ausblenden"

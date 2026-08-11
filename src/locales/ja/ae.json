@@ -19,12 +19,11 @@
     "noTimeline": "タイムラインなし",
     "timelineOpen": "{{name}}（開いています）",
     "compPlaceholder": "After Effects のコンポ名",
-    "individualRender": "ショットごとに個別書き出し",
-    "individualHint": "1 ショット＝1 ファイルを再エンコードし、フレーム単位でカット。下でコーデックを選択 · 出力フォルダーが必要です。",
     "yes": "はい",
     "no": "いいえ",
     "codec": "コーデック",
     "container": "コンテナ",
+    "bakeForcesReencode": "速度を焼き込み：上のモードに関わらずショットは再エンコードされます。",
     "mode": "モード",
     "nestedFlatten": "中身",
     "nestedComp": "プリコンポ",
@@ -46,7 +45,9 @@
     "namingNumber": "番号",
     "foldersLabel": "フォルダーに整理（素材 / プリコンポ / オーディオ / 画像）",
     "none": "なし",
-    "choose": "選択…"
+    "choose": "選択…",
+    "outDirWhy": "ここに書き出されるファイル：{{reasons}}。",
+    "upscaleForcesReencode": "アップスケールはピクセルを作り直すため、上の選択に関わらず「再エンコード」が適用されます。"
   },
   "sections": {
     "timeline": "タイムライン",
@@ -55,15 +56,24 @@
     "transforms": "トランスフォームと速度",
     "nested": "ネストされたタイムライン",
     "audio": "オーディオ",
-    "handles": "ハンドル",
     "precomp": "プリコンポ",
     "organization": "整理",
-    "outDir": "出力フォルダー"
+    "outDir": "出力フォルダー",
+    "upscale": "アップスケール"
   },
   "videoModes": {
-    "copy": { "label": "コピー", "hint": "ソースファイルのまま、カットは AE 側 — 変換なし。" },
-    "remux": { "label": "リマックス", "hint": "ロスレスの .mov コンテナ（-c copy）、カットは AE 側。" },
-    "reencode": { "label": "再エンコード", "hint": "各ショットを編集用コーデックに変換、ハンドル込み。" }
+    "copy": {
+      "label": "コピー",
+      "hint": "ソースファイルのまま、カットは AE 側 — 変換なし。"
+    },
+    "remux": {
+      "label": "リマックス",
+      "hint": "ロスレスの .mov コンテナ（-c copy）、カットは AE 側。"
+    },
+    "reencode": {
+      "label": "再エンコード",
+      "hint": "各ショットを編集用コーデックに変換し、フレーム単位で正確にカット（ハンドル込み）。"
+    }
   },
   "audioModes": {
     "copy": "コピー",
@@ -73,11 +83,27 @@
     "none": "なし"
   },
   "transformModes": {
-    "none": { "label": "なし", "hint": "素材そのまま — タイムラインのトランスフォームと速度を無視。" },
-    "ae": { "label": "After Effects 側", "hint": "トランスフォームと速度を AE のレイヤーに、ソースはそのまま。" },
-    "bake": { "label": "再エンコード", "hint": "速度をファイルに焼き込み、空間トランスフォームは AE 側。" }
+    "none": {
+      "label": "なし",
+      "hint": "素材そのまま — タイムラインのトランスフォームと速度を無視。"
+    },
+    "ae": {
+      "label": "After Effects 側",
+      "hint": "トランスフォームと速度を AE のレイヤーに、ソースはそのまま。"
+    },
+    "bake": {
+      "label": "再エンコード",
+      "hint": "上で選んだコーデックのまま、速度とフレーミングをタイムラインのサイズでファイルに焼き込みます。枠外は黒（そのコーデックがアルファを持つ場合を除く）。アニメーションされたフレーミングは DaVinci Resolve がキーフレームごとレンダリングします（忠実ですが、ショットごとに 1 回のレンダリング）。"
+    }
   },
   "errors": {
     "timelinesUnavailable": "タイムラインを取得できません"
+  },
+  "outDirReasons": {
+    "reencode": "再エンコードしたショット",
+    "remux": "リマックスしたショット",
+    "bake": "焼き込んだ速度",
+    "nestedRender": "Resolve がレンダリングする入れ子タイムライン",
+    "audio": "書き出したオーディオトラック"
   }
 }

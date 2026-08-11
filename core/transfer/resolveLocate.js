@@ -55,13 +55,14 @@ async function timelineSnapshots(timeline, counts) {
   return out;
 }
 
+// `GetSourceEndFrame` est INCLUSIF (cf. `core/ae/timelineRead`), donc du même bord que `srcOut`.
 function sourceMatches(candidate, clip) {
   if (!Number.isFinite(candidate.sourceStart) || !Number.isFinite(candidate.sourceEnd)) return true;
   if (clip.timing && clip.timing.reverse) {
-    return candidate.sourceStart === clip.srcOut + 1 && candidate.sourceEnd === clip.srcIn;
+    return candidate.sourceStart === clip.srcOut && candidate.sourceEnd === clip.srcIn;
   }
   if (clip.timing && clip.timing.freeze) return candidate.sourceStart === candidate.sourceEnd;
-  return candidate.sourceStart === clip.srcIn && candidate.sourceEnd === clip.srcOut + 1;
+  return candidate.sourceStart === clip.srcIn && candidate.sourceEnd === clip.srcOut;
 }
 
 /** Média, piste et position : ce qu'une pose ne peut pas avoir changé. */

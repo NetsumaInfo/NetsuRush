@@ -41,6 +41,9 @@ export default defineSchema({
     reportId: v.string(), // NR-XXXX, identique au titre de l'embed Discord
     userId: v.optional(v.string()), // id Better Auth quand l'envoi est authentifié
     userName: v.optional(v.string()),
+    // Clé du plafond horaire : id du compte, ou empreinte salée de l'IP pour un envoi anonyme
+    // (l'IP elle-même n'est jamais écrite).
+    quotaKey: v.optional(v.string()),
     severity: v.optional(v.string()),
     category: v.optional(v.string()),
     module: v.optional(v.string()),
@@ -48,7 +51,7 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_report", ["reportId"])
-    .index("by_user_created", ["userId", "createdAt"]),
+    .index("by_quota_created", ["quotaKey", "createdAt"]),
 
   // Un vote par user et par idée.
   ideaVotes: defineTable({

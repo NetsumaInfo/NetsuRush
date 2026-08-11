@@ -15,25 +15,29 @@
   "sections": {
     "source": "Línea de tiempo en {{host}}",
     "target": "Destino en {{host}}",
+    "targetComp": "Composición en {{host}}",
     "options": "Opciones",
     "media": "Medios",
     "outDir": "Carpeta de salida",
-    "encoding": "Codificación"
+    "encoding": "Codificación",
+    "upscale": "Escalado"
   },
   "form": {
     "refresh": "Actualizar",
     "noTimeline": "Ninguna línea de tiempo",
     "timelineOpen": "{{name}} (abierta)",
     "namePlaceholder": "Nombre de la línea de tiempo creada",
+    "compPlaceholder": "Nombre de la composición creada",
     "modeNew": "Nueva línea de tiempo",
     "modeAppend": "Línea de tiempo existente",
     "videoOnly": "Solo vídeo",
     "richAe": "Opciones avanzadas de After Effects",
-    "richAeHint": "Transformaciones, velocidad y precomposiciones, en lugar de una copia simple de los planos.",
+    "richAeHint": "Transformaciones, velocidad y precomposiciones, en lugar de una copia simple de los planos. Los medios y la codificación se ajustan entonces en el panel de abajo.",
     "yes": "Sí",
     "no": "No",
     "choose": "Elegir…",
-    "none": "Ninguna"
+    "none": "Ninguna",
+    "upscaleForcesReencode": "El escalado reemplaza los píxeles: se aplica Recodificar sea cual sea la opción de arriba."
   },
   "preview": {
     "clips": "Planos leídos",
@@ -46,7 +50,8 @@
     "fidelityCounts": "{{exact}} exactas · {{approximated}} aproximadas · {{unsupported}} no garantizadas",
     "animationUnavailable": "No se pueden leer los fotogramas clave: la aplicación de origen rechazó la exportación que los contiene. La transferencia usará valores fijos.",
     "mediaLess": "{{count}} elemento(s) sin medios (máscara, capa de ajuste): ninguna aplicación puede recibirlos.",
-    "graphics": "{{count}} título(s): se recrean en el destino a partir de su texto y su estilo."
+    "graphics": "{{count}} título(s): se recrean en el destino a partir de su texto y su estilo.",
+    "graphicsUnsupported": "{{count}} título(s): el destino no sabe recrearlos, no se transferirán."
   },
   "phases": {
     "read": "Leyendo la línea de tiempo",
@@ -62,6 +67,9 @@
     "done": "{{count}} plano(s) colocado(s) en «{{timeline}}» ({{host}}).",
     "verified": "Propiedades releídas: transferencia verificada.",
     "unverified": "{{applied}} propiedad(es) confirmada(s) · {{issues}} límite(s) o diferencia(s).",
+    "animated": "{{count}} plano(s) con fotogramas clave.",
+    "animatedNone": "No se leyó ningún fotograma clave: DaVinci Resolve no los expone por script, solo su exportación XML los lleva.",
+    "containerFallback": "{{count}} archivo(s) escrito(s) en MOV: el MP4 no admite ProRes, DNxHR ni PCM.",
     "tracksClamped": "Pistas ajustadas: la aplicación de destino no pudo crear suficientes.",
     "missing": "{{count}} fuente(s) no encontrada(s) en el disco.",
     "mediaLess": "{{count}} elemento(s) sin medios (máscara, capa de ajuste): ninguna aplicación puede recibirlos.",

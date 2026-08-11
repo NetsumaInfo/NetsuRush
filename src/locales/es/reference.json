@@ -539,6 +539,7 @@
     "projectOpened": "«{{name}}» abierto",
     "projectOpenedLegacy": "«{{name}}» abierto (formato antiguo: guárdalo como proyecto para editarlo)",
     "openFailedWith": "No se pudo abrir: {{error}}",
+    "dropProjectFailed": "No se pudo abrir «{{name}}»: usa «Abrir un proyecto».",
     "noProjectFile": "Este tablero no está vinculado a ningún archivo"
   }
 }

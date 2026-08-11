@@ -16,14 +16,14 @@
   "archive": {
     "profileName": "Archive",
     "onDisk": "Archiver sur disque",
-    "upscaleHint": "Agrandit chaque plan pendant l’archivage. Impose le ré-encodage.",
+    "upscaleHint": "Upscale chaque plan pendant l’archivage. Impose le réencodage.",
     "videoFormat": "Format vidéo",
     "upscaleShort": "Upscale",
     "upscaleAudioNote": "La piste par langue ne s’applique pas à l’upscale.",
     "upscaleMode": "Quand",
     "upscaleModeNow": "Immédiat",
     "upscaleModeIdle": "GPU libre",
-    "upscaleNeedsEncode": "Agrandir remplace les pixels : la copie de flux est impossible.",
+    "upscaleNeedsEncode": "L’upscale remplace les pixels : la copie de flux est impossible.",
     "queueRunning": "Archivage en cours",
     "queuePending": "En attente d’un GPU libre"
   },

@@ -539,6 +539,7 @@
     "projectOpened": "已打开“{{name}}”",
     "projectOpenedLegacy": "已打开“{{name}}”（旧格式：另存为项目后即可编辑）",
     "openFailedWith": "无法打开：{{error}}",
+    "dropProjectFailed": "无法打开「{{name}}」，请使用「打开项目」。",
     "noProjectFile": "此看板未关联任何文件"
   }
 }

@@ -19,12 +19,11 @@
     "noTimeline": "Aucune timeline",
     "timelineOpen": "{{name}} (ouverte)",
     "compPlaceholder": "Nom de la comp After Effects",
-    "individualRender": "Découpe individuelle séparée",
-    "individualHint": "Réencode chaque plan dans un fichier séparé, coupé à l’image près. Choisis le codec et le dossier de sortie.",
     "yes": "Oui",
     "no": "Non",
     "codec": "Codec",
     "container": "Conteneur",
+    "bakeForcesReencode": "Vitesse cuite : les plans sont réencodés, quel que soit le mode ci-dessus.",
     "mode": "Mode",
     "nestedFlatten": "Contenu",
     "nestedComp": "Précompo",
@@ -46,7 +45,9 @@
     "namingNumber": "Numéro",
     "foldersLabel": "Ranger en dossiers (Rushes / Précomps / Audio / Images)",
     "none": "Aucun",
-    "choose": "Choisir…"
+    "choose": "Choisir…",
+    "outDirWhy": "Fichiers écrits ici : {{reasons}}.",
+    "upscaleForcesReencode": "L’upscale remplace les pixels : le mode Réencode s’applique quel que soit le choix ci-dessus."
   },
   "sections": {
     "timeline": "Timeline",
@@ -55,15 +56,24 @@
     "transforms": "Transformations & vitesse",
     "nested": "Timeline imbriquée",
     "audio": "Audio",
-    "handles": "Poignées",
     "precomp": "Précomposition",
     "organization": "Organisation",
-    "outDir": "Dossier de sortie"
+    "outDir": "Dossier de sortie",
+    "upscale": "Upscale"
   },
   "videoModes": {
-    "copy": { "label": "Copie", "hint": "Fichiers source, découpe dans AE — aucun transcode." },
-    "remux": { "label": "Remux", "hint": "Conteneur .mov sans perte (-c copy), découpe dans AE." },
-    "reencode": { "label": "Réencode", "hint": "Chaque plan transcodé en codec montage, poignées incluses." }
+    "copy": {
+      "label": "Copie",
+      "hint": "Fichiers source, découpe dans AE — aucun transcode."
+    },
+    "remux": {
+      "label": "Remux",
+      "hint": "Conteneur .mov sans perte (-c copy), découpe dans AE."
+    },
+    "reencode": {
+      "label": "Réencode",
+      "hint": "Chaque plan transcodé en codec montage, coupé à l’image près, poignées incluses."
+    }
   },
   "audioModes": {
     "copy": "Copier",
@@ -73,11 +83,27 @@
     "none": "Aucun"
   },
   "transformModes": {
-    "none": { "label": "Aucune", "hint": "Rush brut — ignore transforms et vitesse de la timeline." },
-    "ae": { "label": "Dans After Effects", "hint": "Transforms + vitesse sur le calque AE, source intacte." },
-    "bake": { "label": "Réencodé", "hint": "Vitesse cuite dans le fichier, transforms spatiales dans AE." }
+    "none": {
+      "label": "Aucune",
+      "hint": "Rush brut — ignore transforms et vitesse de la timeline."
+    },
+    "ae": {
+      "label": "Dans After Effects",
+      "hint": "Transforms + vitesse sur le calque AE, source intacte."
+    },
+    "bake": {
+      "label": "Réencodé",
+      "hint": "Vitesse et cadrage cuits dans le fichier, avec le codec choisi ci-dessus, à la taille de la timeline. Hors cadre : noir, sauf si ce codec porte une couche alpha. Un cadrage ANIMÉ est rendu par DaVinci Resolve, images clés comprises : fidèle, mais un rendu par plan."
+    }
   },
   "errors": {
     "timelinesUnavailable": "Timelines indisponibles"
+  },
+  "outDirReasons": {
+    "reencode": "plans réencodés",
+    "remux": "plans réencapsulés",
+    "bake": "vitesse cuite",
+    "nestedRender": "timelines imbriquées rendues par Resolve",
+    "audio": "pistes audio extraites"
   }
 }

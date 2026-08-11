@@ -1,19 +1,20 @@
 import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
-// Un compte ne doit pas pouvoir noyer le salon : au-delà de ce nombre de rapports par heure, le
-// relais répond 429 et n'appelle pas Discord. Un envoi anonyme (relais ouvert) est compté à part
-// sous la clé `undefined`, donc plafonné lui aussi.
+// Personne ne doit pouvoir noyer le salon : au-delà de ce nombre de rapports par heure pour une même
+// clé, le relais répond 429 et n'appelle pas Discord. La clé est l'id du compte quand l'envoi est
+// authentifié, sinon l'empreinte de l'IP — un envoi anonyme est donc plafonné lui aussi, sans que
+// tous les anonymes se partagent le même compteur.
 const MAX_PER_HOUR = 10;
 const HOUR_MS = 60 * 60 * 1000;
 
 export const recentCount = internalQuery({
-  args: { userId: v.optional(v.string()) },
-  handler: async (ctx, { userId }) => {
+  args: { quotaKey: v.optional(v.string()) },
+  handler: async (ctx, { quotaKey }) => {
     const since = Date.now() - HOUR_MS;
     const rows = await ctx.db
       .query("bugReports")
-      .withIndex("by_user_created", (q) => q.eq("userId", userId).gt("createdAt", since))
+      .withIndex("by_quota_created", (q) => q.eq("quotaKey", quotaKey).gt("createdAt", since))
       .collect();
     return { count: rows.length, allowed: rows.length < MAX_PER_HOUR, max: MAX_PER_HOUR };
   },
@@ -26,6 +27,7 @@ export const record = internalMutation({
     reportId: v.string(),
     userId: v.optional(v.string()),
     userName: v.optional(v.string()),
+    quotaKey: v.optional(v.string()),
     severity: v.optional(v.string()),
     category: v.optional(v.string()),
     module: v.optional(v.string()),

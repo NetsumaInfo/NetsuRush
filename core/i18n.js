@@ -38,7 +38,6 @@ const EXTRA = {
   webhookMissing: ['Webhook non configuré','Webhook is not configured','El webhook no está configurado','Webhook ist nicht konfiguriert','Webhook が設定されていません','Webhook 未配置'],
   reportSent: ['Rapport envoyé. Merci !','Report sent. Thank you!','Informe enviado. ¡Gracias!','Bericht gesendet. Vielen Dank!','レポートを送信しました。ありがとうございます！','报告已发送，谢谢！'],
   reportSendFailed: ['Échec de l’envoi du rapport','Could not send the report','No se pudo enviar el informe','Bericht konnte nicht gesendet werden','レポートを送信できませんでした','报告发送失败'],
-  reportSignInRequired: ['Connecte-toi pour envoyer un rapport','Sign in to send a report','Inicia sesión para enviar un informe','Melde dich an, um einen Bericht zu senden','レポートを送信するにはサインインしてください','请先登录再发送报告'],
   reportRateLimited: ['Trop de rapports envoyés récemment. Réessaie dans une heure.','Too many reports sent recently. Try again in an hour.','Demasiados informes enviados. Vuelve a intentarlo en una hora.','Zu viele Berichte gesendet. Versuche es in einer Stunde erneut.','送信が多すぎます。1 時間後にお試しください。','最近发送的报告过多，请一小时后再试。'],
   collectionEmpty: ['Collection vide','Empty collection','Colección vacía','Leere Sammlung','コレクションが空です','合集为空'],
   exportProfileMissing: ['Aucun profil d’export','No export profile selected','No se ha seleccionado ningún perfil de exportación','Kein Exportprofil ausgewählt','書き出しプロファイルが選択されていません','未选择导出配置'],

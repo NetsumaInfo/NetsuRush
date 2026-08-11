@@ -10,6 +10,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem,
 } from "@/components/ui/select";
 import { Section, Row } from "@/components/ae/aeShared";
+import { UpscalePane } from "@/components/upscale/UpscalePane";
 import { useExportEncodingFields } from "@/features/export/encodingFields";
 import {
   EXPORT_SPEED_OPTIONS, getExportCodecLabel,
@@ -29,6 +30,7 @@ export function TransferMediaOptions({ ctl }: { ctl: TransferCtl }) {
   const { t: tExport } = useTranslation("export");
   const {
     mediaMode, setMediaMode, codec, audioMode, container, encoderMode, speed, applyEncoding,
+    upscale, setUpscale, growing,
     outDir, chooseOut, producesFiles, needsDir, busy,
   } = ctl;
 
@@ -54,14 +56,24 @@ export function TransferMediaOptions({ ctl }: { ctl: TransferCtl }) {
         <ToggleGroup
           value={[mediaMode]}
           onValueChange={(v) => { const next = v[0] as TransferMediaMode | undefined; if (next) setMediaMode(next); }}
-          disabled={busy}
+          disabled={busy || growing}
         >
           {MEDIA_MODES.map((m) => (
             <ToggleGroupItem key={m} value={m} className="flex-1">{t(`mediaModes.${m}.label`)}</ToggleGroupItem>
           ))}
         </ToggleGroup>
         <p className="text-[11px] text-muted-foreground">{t(`mediaModes.${mediaMode}.hint`)}</p>
+        {growing && <p className="text-[11px] text-amber-400">{t("form.upscaleForcesReencode")}</p>}
       </Section>
+
+      <UpscalePane
+        value={upscale}
+        onChange={(patch) => setUpscale((u) => ({ ...u, ...patch }))}
+        label={t("sections.upscale")}
+        onLabel={t("form.yes")}
+        offLabel={t("form.no")}
+        disabled={busy}
+      />
 
       {/* Lignes toujours présentes, grisées hors de leur flux : l'UI ne saute pas quand on change de mode. */}
       <Section title={t("sections.encoding")}>

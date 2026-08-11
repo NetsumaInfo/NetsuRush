@@ -284,6 +284,7 @@
         else if (p.cmd === "placeTimeline") { doJob(p, "NR_placeTimeline", "jobPlace"); }
         else if (p.cmd === "runScript") { doJob(p, "NR_runScript", "jobScript"); }
         else if (p.cmd === "exportXml") { doJob(p, "NR_exportXml", "jobExportXml"); }
+        else if (p.cmd === "importTimeline") { doJob(p, "NR_importTimeline", "jobImport"); }
         else if (p.cmd === "import") { doJob(p, "NR_import", "jobImport"); }
         else if (p.cmd === "boost") { doJob(p, "NR_boost", "jobBoost"); }
       };

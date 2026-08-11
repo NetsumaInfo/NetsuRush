@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 const logbus = require('../core/logbus');
-const { buildEmbed } = require('../core/bugreport');
+const { buildEmbeds } = require('../core/bugreport');
 const { formatBugContext } = require('../core/bugContext');
 
 function reset() { logbus.clear(); }
@@ -113,41 +113,93 @@ function baseRequest(over = {}) {
   };
 }
 
-test('embed : respecte les plafonds Discord même avec des textes démesurés', () => {
-  const embed = buildEmbed(baseRequest({
+/** Somme comptée par Discord : titres, descriptions, champs et pieds de TOUS les embeds. */
+function totalChars(embeds) {
+  return embeds.reduce((n, e) => n
+    + String(e.title || '').length
+    + String(e.description || '').length
+    + String((e.footer && e.footer.text) || '').length
+    + (e.fields || []).reduce((m, f) => m + f.name.length + f.value.length, 0), 0);
+}
+
+test('embeds : respectent les plafonds Discord même avec des textes démesurés', () => {
+  const embeds = buildEmbeds(baseRequest({
     issueText: 'x'.repeat(10000),
     stepsText: 'y'.repeat(5000),
     expectedText: 'z'.repeat(5000),
   }), CONTEXT, 'NR-TEST');
-  assert.ok(embed.description.length <= 3800, 'description tronquée');
-  assert.ok(embed.fields.length <= 25);
-  assert.ok(embed.title.length <= 256);
-  for (const f of embed.fields) {
-    assert.ok(f.value.length <= 1024, `champ ${f.name} trop long (${f.value.length})`);
-    assert.ok(f.value.trim().length > 0, `champ ${f.name} vide`);
+  assert.ok(embeds.length <= 10);
+  assert.ok(totalChars(embeds) <= 6000, `budget global dépassé (${totalChars(embeds)})`);
+  for (const e of embeds) {
+    assert.ok(String(e.title || '').length <= 256);
+    assert.ok(String(e.description || '').length <= 4096);
+    assert.ok((e.fields || []).length <= 25);
+    for (const f of e.fields || []) {
+      assert.ok(f.value.length <= 1024, `champ ${f.name} trop long (${f.value.length})`);
+      assert.ok(f.value.trim().length > 0, `champ ${f.name} vide`);
+      assert.ok(f.name.trim().length > 0, 'champ sans nom');
+    }
   }
 });
 
-test('embed : aucun champ vide quand le formulaire est minimal', () => {
-  const embed = buildEmbed(
+test('embeds : un rapport complet se répartit sur quatre embeds triés', () => {
+  const embeds = buildEmbeds(baseRequest({
+    stepsText: 'Ouvrir Derush, lancer la détection.',
+    expectedText: 'La détection va au bout.',
+  }), CONTEXT, 'NR-FULL');
+  assert.deepStrictEqual(
+    embeds.map((e) => e.title),
+    ['NR-FULL · Plantage', 'Reproduction', 'Machine', 'Journal et pièces jointes'],
+  );
+  // La machine se lit en champs, plus dans un pavé de code.
+  const machine = embeds[2];
+  assert.ok(machine.fields.some((f) => f.name === 'GPU' && f.value.includes('RTX 3060')));
+  assert.ok(machine.fields.some((f) => f.name === 'Pilotes' && f.value.includes('560.1')));
+  assert.ok(!JSON.stringify(machine).includes('```'), 'plus de bloc de code');
+});
+
+test('embeds : la reproduction disparaît quand le testeur n’a rien rempli', () => {
+  const titles = buildEmbeds(baseRequest(), CONTEXT, 'NR-BARE').map((e) => e.title);
+  assert.ok(!titles.includes('Reproduction'));
+});
+
+test('embeds : aucun champ vide quand le formulaire est minimal', () => {
+  const embeds = buildEmbeds(
     { category: 'other', severity: 'minor', frequency: 'once', issueText: '', consoleLogCount: 0 },
     CONTEXT,
     'NR-MIN',
   );
-  assert.strictEqual(embed.description, '(aucune description)');
-  assert.ok(embed.fields.every((f) => f.value.trim().length > 0));
+  assert.strictEqual(embeds[0].description, '(aucune description)');
+  for (const e of embeds) assert.ok((e.fields || []).every((f) => f.value.trim().length > 0));
 });
 
-test('embed : la couleur suit la sévérité', () => {
-  const blocker = buildEmbed(baseRequest({ severity: 'blocker' }), CONTEXT, 'NR-1');
-  const minor = buildEmbed(baseRequest({ severity: 'minor' }), CONTEXT, 'NR-2');
-  assert.notStrictEqual(blocker.color, minor.color);
+test('embeds : la couleur de sévérité ne porte que sur le premier', () => {
+  const blocker = buildEmbeds(baseRequest({ severity: 'blocker' }), CONTEXT, 'NR-1');
+  const minor = buildEmbeds(baseRequest({ severity: 'minor' }), CONTEXT, 'NR-2');
+  assert.notStrictEqual(blocker[0].color, minor[0].color);
+  assert.deepStrictEqual(blocker.slice(1).map((e) => e.color), minor.slice(1).map((e) => e.color));
 });
 
-test('embed : la mention du testeur ne ping personne', () => {
-  const embed = buildEmbed(baseRequest({ contact: { discordId: '123', discordName: 'haim' } }), CONTEXT, 'NR-3');
-  const tester = embed.fields.find((f) => f.name === 'Testeur');
+test('embeds : la mention du testeur ne ping personne', () => {
+  const embeds = buildEmbeds(baseRequest({ contact: { discordId: '123', discordName: 'haim' } }), CONTEXT, 'NR-3');
+  const tester = embeds[0].fields.find((f) => f.name === 'Testeur');
   assert.strictEqual(tester.value, '<@123> (haim)');
+});
+
+test('embeds : les pièces jointes sont listées avec leur taille', () => {
+  const embeds = buildEmbeds(baseRequest({
+    attachments: [{ name: 'capture.png', dataBase64: 'A'.repeat(4096) }],
+    attachmentsDropped: 2,
+  }), CONTEXT, 'NR-ATT');
+  const evidence = embeds[embeds.length - 1];
+  assert.ok(evidence.fields.some((f) => f.name === 'Captures (1)' && /capture\.png · 3 Ko/.test(f.value)));
+  assert.ok(evidence.fields.some((f) => f.name === 'Écartées' && f.value.includes('2 pièce')));
+});
+
+test('embeds : instantané machine absent — le message part quand même', () => {
+  const embeds = buildEmbeds(baseRequest(), { ok: false }, 'NR-NOCTX');
+  const machine = embeds.find((e) => e.title === 'Machine');
+  assert.match(machine.description, /indisponible/);
 });
 
 test('contexte : formaté sans lever, même partiel', () => {

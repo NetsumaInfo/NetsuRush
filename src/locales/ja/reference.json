@@ -539,6 +539,7 @@
     "projectOpened": "「{{name}}」を開きました",
     "projectOpenedLegacy": "「{{name}}」を開きました（旧形式：名前を付けて保存すると編集できます）",
     "openFailedWith": "開けませんでした: {{error}}",
+    "dropProjectFailed": "「{{name}}」を開けませんでした。「プロジェクトを開く」をお使いください。",
     "noProjectFile": "このボードはファイルに紐づいていません"
   }
 }

@@ -282,3 +282,50 @@ test('un calque de mouvement n’ajoute pas son nom au titre', () => {
   assert.strictEqual(graphics[0].size, 597);
   assert.strictEqual(graphics[0].font, 'Tahoma');
 });
+
+// --- Titres RESOLVE : `<generatoritem>`, pas un clip graphique Premiere ------------------------
+// Resolve exporte un Text+ comme générateur FCP7 (texte, police et corps en clair). L'API de script
+// ne rend rien de tout cela : sans cette lecture, un titre quittait Resolve sans laisser de trace.
+
+const { parseXmeml } = require('../core/transfer/xmeml');
+
+const RESOLVE_TITLE = `<generatoritem id="Text 0"><name>Text</name><duration>250</duration>${RATE}`
+  + '<in>0</in><out>125</out><start>165</start><end>290</end><enabled>TRUE</enabled>'
+  + '<effect><name>Text</name><effectid>Text</effectid><effecttype>generator</effecttype>'
+  + '<mediatype>video</mediatype><effectcategory>Text</effectcategory>'
+  + '<parameter><name>Text</name><parameterid>str</parameterid><value>test beta&#xd;yes</value></parameter>'
+  + '<parameter><name>Font</name><parameterid>fontname</parameterid><value>Tahoma</value></parameter>'
+  + '<parameter><name>Size</name><parameterid>fontsize</parameterid><value>298</value></parameter>'
+  + `${RATE}<duration>125</duration></effect></generatoritem>`;
+
+function resolveSequence(videoTracks) {
+  return '<xmeml version="5"><sequence><name>2</name><duration>290</duration>' + RATE
+    + '<media><video><format><samplecharacteristics><width>1920</width><height>1080</height>'
+    + `${RATE}</samplecharacteristics></format>${videoTracks}</video></media></sequence></xmeml>`;
+}
+
+test('Resolve : un générateur de texte devient un titre du document, sur SA piste', () => {
+  const clip = `<clipitem id="c1"><name>2.mov</name><start>35</start><end>194</end><in>0</in><out>159</out>${RATE}`
+    + `<file id="f1"><name>2.mov</name><pathurl>file://localhost/C:/rush/2.mov</pathurl>${RATE}</file></clipitem>`;
+  const read = parseXmeml(resolveSequence(`<track>${clip}</track><track></track><track>${RESOLVE_TITLE}</track>`), { host: 'resolve' });
+
+  assert.strictEqual(read.ok, true);
+  assert.strictEqual(read.clips.length, 1, 'un générateur n’est pas un plan : il n’a ni fichier ni bornes source');
+  assert.strictEqual(read.graphics.length, 1);
+  assert.deepStrictEqual(read.graphics[0], {
+    track: 3, name: 'Text', tlStart: 165, tlEnd: 290, text: 'test beta\nyes', font: 'Tahoma', size: 298,
+  });
+});
+
+test('Resolve : un générateur sans texte n’invente pas un titre vide', () => {
+  const clip = `<clipitem id="c1"><name>2.mov</name><start>0</start><end>50</end><in>0</in><out>50</out>${RATE}`
+    + `<file id="f1"><name>2.mov</name><pathurl>file://localhost/C:/rush/2.mov</pathurl>${RATE}</file></clipitem>`;
+  const solid = '<generatoritem id="Solid 0"><name>Solid Color</name><start>0</start><end>50</end>'
+    + '<effect><name>Solid</name><effectid>Solid</effectid><effecttype>generator</effecttype>'
+    + '<parameter><name>Color</name><parameterid>color</parameterid><value>0</value></parameter>'
+    + '</effect></generatoritem>';
+  const read = parseXmeml(resolveSequence(`<track>${clip}${solid}</track>`), { host: 'resolve' });
+
+  assert.strictEqual(read.ok, true);
+  assert.strictEqual(read.graphics.length, 0);
+});

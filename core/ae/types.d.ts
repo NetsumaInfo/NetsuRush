@@ -21,6 +21,12 @@ export interface ClipItem {
   tlEnd: number;
   /** Transform Resolve (vidéo seulement), `null` si identité/indispo. */
   xf: Record<string, number> | null;
+  /**
+   * Propriétés ANIMÉES lues dans l'export FCP7 XML (l'API n'expose aucune image clé), dans la
+   * convention du document d'échange : position en pixels de timeline depuis le centre (Y vers le
+   * bas), échelle en facteur, ancrage en pixels source depuis le coin haut-gauche.
+   */
+  anim?: Record<string, { value: any; keyframes: { frame: number; value: any; interpolation?: string }[] }>;
   /** Objet TimelineItem conservé uniquement pendant la projection vers le document NetsuBridge. */
   nativeItem?: any;
   group?: string;
@@ -58,8 +64,13 @@ export interface EditOk {
   startFrame: number;
   endFrame: number;
   items: ClipItem[];
+  /** Plans dont le FICHIER est absent : une source à retrouver sur le disque. */
   missing: string[];
+  /** Éléments sans média par nature (titres Text+, générateurs Fusion) : rien à retrouver. */
+  generators?: string[];
   groups: Group[];
+  /** Plans dont au moins une propriété animée a été greffée depuis l'export FCP7 XML. */
+  animated?: number;
 }
 
 /** Résultat de `readTimelineEdit` : succès complet ou échec `{ ok:false, error }`. */
@@ -77,4 +88,6 @@ export interface PreparedClip extends ClipItem {
   baked?: boolean;
   /** Durée d'occupation du plan baked (secondes). */
   bakedDur?: number;
+  /** Cadrage (zoom/pan/rotation/recadrage/miroir) rendu DANS le fichier : rien à reposer dans AE. */
+  xfBaked?: boolean;
 }

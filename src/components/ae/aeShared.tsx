@@ -2,9 +2,9 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem } from "@/components/ui/select";
-import { UP_VARIANTS, UP_FAMILIES, GPU_CODECS, codecLabel, familyOf, variantsFor } from "@/components/upscale/upscaleShared";
+import { UP_FAMILIES, GPU_CODECS, codecLabel, familyOf, variantsFor } from "@/components/upscale/upscaleShared";
 import { cn } from "@/lib/utils";
-import type { AeVideoMode, AeAudioMode, AeVideoContainer, AeAudioContainer, AeTransformMode, AeAudioRenderFmt, UpscaleCodec } from "@/lib/bridge";
+import type { AeVideoMode, AeAudioMode, AeVideoContainer, AeAudioContainer, AeNestedMode, AeTransformMode, AeAudioRenderFmt, UpscaleCodec } from "@/lib/bridge";
 import { useCompatibility } from "@/hooks/useCompatibility";
 
 // label/hint = clés i18n (ns « ae »), résolues au rendu via t() par le consommateur.
@@ -25,9 +25,61 @@ export const AUDIO_MODES: { id: AeAudioMode; label: string }[] = [
 export const AE_LOSSY = new Set<AeAudioMode>(["aac"]);
 export const AUDIO_PRODUCES = new Set<AeAudioMode>(["remux", "aac", "pcm"]);
 
-// Conteneurs importables par After Effects uniquement.
-export const VIDEO_CONTAINERS: AeVideoContainer[] = ["mov", "mp4"];
-export const AUDIO_CONTAINERS: AeAudioContainer[] = ["m4a", "wav", "aiff"];
+/**
+ * Conteneurs qui portent RÉELLEMENT ce qui va être écrit. En remux le flux source est recopié tel
+ * quel (`-c:v copy`) : le codec choisi ne s'applique pas et les deux conteneurs restent ouverts.
+ * Sur un réencode en revanche, ProRes et DNxHR n'existent qu'en MOV — les offrir en MP4 laissait
+ * choisir un couple que ffmpeg refuse, d'autant que le conteneur restait appliqué depuis un mode
+ * où la ligne était cachée.
+ */
+export function videoContainersFor(codec: UpscaleCodec, videoMode: AeVideoMode): AeVideoContainer[] {
+  if (videoMode === "remux") return ["mov", "mp4"];
+  const family = familyOf(codec);
+  return family === "prores" || family === "dnxhr" ? ["mov"] : ["mov", "mp4"];
+}
+
+/**
+ * Conteneurs qui acceptent le traitement audio choisi. `pcm` ne rentre ni en M4A ni dans un flux
+ * copié ; `copy`/`remux`/`aac` sortent un flux AAC, que seul le M4A porte.
+ */
+export function audioContainersFor(audio: AeAudioMode): AeAudioContainer[] {
+  return audio === "pcm" ? ["wav", "aiff"] : ["m4a"];
+}
+
+/** Sous-ensemble d'options qui décide, à lui seul, de ce qui est écrit sur le disque. */
+export interface AeOutputShape {
+  videoMode: AeVideoMode;
+  transformMode: AeTransformMode;
+  nestedMode: AeNestedMode;
+  audio: AeAudioMode;
+}
+
+/**
+ * Pourquoi un dossier de sortie est nécessaire — la liste, pas un simple booléen : le panneau doit
+ * pouvoir DIRE ce qui écrit, sinon le dossier est réclamé sans raison visible.
+ * `bake` cuit la vitesse dans un fichier : c'est un réencode, il comptait pour rien ici et le refus
+ * ne tombait qu'au lancement, côté core.
+ */
+export function aeOutputReasons(o: AeOutputShape): string[] {
+  const reasons: string[] = [];
+  if (o.videoMode === "reencode") reasons.push("reencode");
+  else if (o.videoMode === "remux") reasons.push("remux");
+  if (o.transformMode === "bake") reasons.push("bake");
+  if (o.nestedMode === "render") reasons.push("nestedRender");
+  if (AUDIO_PRODUCES.has(o.audio)) reasons.push("audio");
+  return reasons;
+}
+
+export const aeProducesFiles = (o: AeOutputShape) => aeOutputReasons(o).length > 0;
+
+/** Un réencode plan par plan a lieu (ffmpeg) → codec, poignées et conteneur vidéo ont un effet. */
+export const aeReencodes = (o: AeOutputShape) => o.videoMode === "reencode" || o.transformMode === "bake";
+
+/** Un fichier VIDÉO est écrit → le conteneur vidéo s'applique. */
+export const aeWritesVideo = (o: AeOutputShape) => o.videoMode !== "copy" || o.transformMode === "bake";
+
+/** Le codec sert : réencode ffmpeg des plans, ou rendu Resolve d'une timeline imbriquée. */
+export const aeUsesCodec = (o: AeOutputShape) => aeReencodes(o) || o.nestedMode === "render";
 // Format du rendu Resolve quand la timeline imbriquée est audio seule.
 export const AUDIO_RENDER_FORMATS: { id: AeAudioRenderFmt; label: string }[] = [
   { id: "wav", label: "WAV (PCM)" },
@@ -40,8 +92,6 @@ export const TRANSFORM_MODES: { id: AeTransformMode; label: string; hint: string
   { id: "ae", label: "transformModes.ae.label", hint: "transformModes.ae.hint" },
   { id: "bake", label: "transformModes.bake.label", hint: "transformModes.bake.hint" },
 ];
-
-export const MONTAGE = [...UP_VARIANTS.prores, ...UP_VARIANTS.dnxhr];
 
 // Format de sortie déduit du codec (le rendu Resolve / réencode produit toujours un conteneur AE-safe).
 export const renderFmt = (codec: UpscaleCodec) => (["h264", "hevc"].includes(familyOf(codec)) ? "MP4" : "MOV");
@@ -69,7 +119,7 @@ export function Row({ label, disabled, children }: { label: string; disabled?: b
 }
 
 // Sélecteur de codec groupé par famille (ProRes / DNxHR = MOV · H.264 / HEVC = MP4).
-export function CodecRow({ codec, setCodec, busy }: { codec: UpscaleCodec; setCodec: (c: UpscaleCodec) => void; busy: boolean }) {
+export function CodecRow({ codec, setCodec, busy, disabled }: { codec: UpscaleCodec; setCodec: (c: UpscaleCodec) => void; busy: boolean; disabled?: boolean }) {
   const { t } = useTranslation("ae");
   const { status } = useCompatibility();
   const items = UP_FAMILIES.flatMap((family) => variantsFor(family.id, status))
@@ -81,8 +131,8 @@ export function CodecRow({ codec, setCodec, busy }: { codec: UpscaleCodec; setCo
     }
   }, [status, codec, setCodec]);
   return (
-    <Row label={t("form.codec")}>
-      <Select value={codec} onValueChange={(v) => setCodec(v as UpscaleCodec)} items={items} disabled={busy}>
+    <Row label={t("form.codec")} disabled={disabled}>
+      <Select value={codec} onValueChange={(v) => setCodec(v as UpscaleCodec)} items={items} disabled={busy || disabled}>
         <SelectTrigger className="w-[58%]"><SelectValue>{codecLabel(codec, status)}</SelectValue></SelectTrigger>
         <SelectContent>
           {UP_FAMILIES.map((f) => (

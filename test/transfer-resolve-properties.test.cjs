@@ -10,11 +10,12 @@ const clip = (over = {}) => ({
 });
 const placement = { startFrame: 10, endFrame: 33, recordFrame: 1100, trackIndex: 2, mediaType: 1 };
 
+// `sourceEnd` = GetSourceEndFrame, INCLUSIF comme `srcOut` (mesuré sur Resolve 21.0.3).
 test('le fingerprint Resolve tient compte du type, de la piste, du chemin et des frames', () => {
   const item = {};
   const snapshots = [
-    { item, kind: 'video', track: 2, path: 'c:/a.mov', start: 1100, end: 1124, sourceStart: 10, sourceEnd: 34 },
-    { item: {}, kind: 'video', track: 1, path: 'c:/a.mov', start: 1100, end: 1124, sourceStart: 10, sourceEnd: 34 },
+    { item, kind: 'video', track: 2, path: 'c:/a.mov', start: 1100, end: 1124, sourceStart: 10, sourceEnd: 33 },
+    { item: {}, kind: 'video', track: 1, path: 'c:/a.mov', start: 1100, end: 1124, sourceStart: 10, sourceEnd: 33 },
   ];
   assert.equal(normalizePath('C:\\A.MOV'), 'c:/a.mov');
   assert.deepEqual(candidatesFor(snapshots, clip(), placement), [snapshots[0]]);
@@ -22,7 +23,7 @@ test('le fingerprint Resolve tient compte du type, de la piste, du chemin et des
 });
 
 test('deux candidats identiques sont ambigus, aucun n’est choisi', () => {
-  const candidate = { kind: 'video', track: 2, path: 'c:/a.mov', start: 1100, end: 1124, sourceStart: 10, sourceEnd: 34 };
+  const candidate = { kind: 'video', track: 2, path: 'c:/a.mov', start: 1100, end: 1124, sourceStart: 10, sourceEnd: 33 };
   const found = locateResolveClip([{ ...candidate, item: {} }, { ...candidate, item: {} }], clip(), placement);
   assert.equal(found.ok, false);
   assert.equal(found.reason, 'ambiguousTimelineItem');

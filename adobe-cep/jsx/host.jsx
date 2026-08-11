@@ -104,6 +104,28 @@ function NR_exportXml(payload) {
   }
 }
 
+/* Importe une timeline d'échange (FCP7 XML) comme séquence. payload = { path, name }. Premiere
+ * seulement : c'est son importeur qui pose les titres, qu'aucune API ne sait créer. */
+function NR_importTimeline(payload) {
+  try {
+    if (BridgeTalk.appName !== "premierepro") {
+      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "import de timeline non supporté par After Effects" });
+    }
+    // Ce dispatcher est le `ScriptPath` du manifeste : il peut diverger de ses voisins rechargés par
+    // le panneau. On NOMME la fonction absente plutôt que de laisser filer une ReferenceError.
+    if (typeof NR_ppro_importTimeline !== "function") {
+      return NRJSON.stringify({ ok: false, errorCode: "HOST_STALE", error: "NR_ppro_importTimeline absent : scripts hôtes périmés" });
+    }
+    return NR_ppro_importTimeline(payload);
+  } catch (e) {
+    try {
+      return NRJSON.stringify({ ok: false, error: String(e) });
+    } catch (e2) {
+      return '{"ok":false,"error":"import timeline failed"}';
+    }
+  }
+}
+
 /* Importe des fichiers dans le projet de l'hôte. payload = { paths:[...] }. */
 function NR_import(payload) {
   try {

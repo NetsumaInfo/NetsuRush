@@ -608,11 +608,18 @@ export interface AeExportOpts {
   transformMode?: AeTransformMode; // transforms + vitesse : aucune / dans AE / cuite
   nestedMode?: AeNestedMode;       // timeline imbriquée : contenu aplati ou précompo dédiée
   audioRenderFmt?: AeAudioRenderFmt; // format du rendu si timeline imbriquée audio seule
-  individualRender?: boolean;      // découpe individuelle séparée : 1 fichier par plan, coupé du rush original (ffmpeg)
   videoContainer?: AeVideoContainer;  // conteneur vidéo (remux/reencode)
   audioContainer?: AeAudioContainer;  // conteneur audio des pistes son dédiées
   outDir?: string;                // dossier des fichiers produits (remux/reencode) ; défaut = tmp
+  upscale?: TransferUpscale;      // agrandir les plans au passage (impose le réencodage)
   deliver?: AeDeliver;            // comment le .jsx atteint After Effects
+}
+
+// Agrandissement pendant un transfert = EXACTEMENT les réglages de modèle de NetsuLab
+// (`UpSettings`), comme à l'archivage d'une collection : les trois écrans doivent se comporter
+// pareil. Import de TYPE seulement : rien de `upscaleShared` n'atterrit dans le bundle du bridge.
+export interface TransferUpscale extends Partial<import("@/components/upscale/upscaleShared").UpSettings> {
+  enabled?: boolean;
 }
 
 // auto = panneau CEP si AE est joignable (script joué dans le projet OUVERT), sinon AfterFX.exe -r.
@@ -625,6 +632,8 @@ export interface AeExportResult {
   outDir?: string | null;
   script?: string;                // chemin du .jsx généré
   missing?: string[];             // plans ignorés (sans fichier : titres, générateurs)
+  animated?: number;              // plans dont les images clés ont été lues dans l'export FCP7 XML
+  containerFallbacks?: number;    // fichiers écrits en MOV faute d'un MP4 capable de porter les flux
   aeRunning?: boolean;            // AE déjà ouvert (import immédiat) vs lancé (import au démarrage)
   delivered?: AeDeliver;          // voie réellement empruntée
   log?: string;                   // fin du journal du script (livraison par le panneau)
@@ -749,6 +758,7 @@ export interface TransferOpts {
   encoderMode?: ExportEncoderMode;
   speed?: ExportSpeed;
   outDir?: string;                // obligatoire dès que des fichiers sont produits
+  upscale?: TransferUpscale;      // agrandir les plans au passage (impose le réencodage)
   ae?: AeExportOpts;              // Resolve → AE : bascule sur le pipeline riche (transforms, précompos…)
 }
 
@@ -773,6 +783,8 @@ export interface TransferResult {
   titles?: number;                // titres recréés chez la cible
   titlesRetimed?: number;         // titres dont la durée du modèle diffère de l'originale
   titlesFailed?: number;          // titres que l'hôte a refusé de poser
+  animated?: number;              // plans dont les images clés ont traversé (pipeline AE avancé)
+  containerFallbacks?: number;    // fichiers écrits en MOV faute d'un MP4 capable de porter les flux
   fidelity?: TransferFidelity;
   error?: string;
 }

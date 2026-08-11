@@ -212,6 +212,9 @@ function docFromResolveEdit(edit) {
     endFrame: num(edit.endFrame, 0),
     clips,
     missing: [...(edit.missing || [])],
+    // Titres et générateurs Fusion : sans média par nature, donc jamais des sources « introuvables ».
+    // Leur contenu, lui, arrive par l'export XML (cf. readResolve).
+    mediaLess: [...(edit.generators || [])],
   });
 }
 

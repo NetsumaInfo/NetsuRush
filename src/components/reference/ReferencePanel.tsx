@@ -111,7 +111,6 @@ export function ReferencePanel() {
           onOpen={onOpenScene}
           onNew={() => startNew({})}
           onNewFiles={(files) => startNew({ files })}
-          onNewPaths={(paths) => startNew({ paths })}
           onSettings={() => setSettingsDlg(true)}
           onOpenProject={persistence.available ? project.openProject : undefined}
           onOpenRecent={persistence.available ? project.openRecent : undefined}

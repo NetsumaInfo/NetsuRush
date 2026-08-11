@@ -37,7 +37,10 @@ function purge(dir) {
  * Surveille un dossier de `core/` et rappelle `rebuild` après chaque modification.
  * @param {string} dir dossier absolu à surveiller
  * @param {() => void} rebuild reconstruit ce qui dépend des modules purgés
- * @param {{ label?: string }} [opts]
+ * @param {{ label?: string, also?: string[] }} [opts] `also` : autres dossiers à purger au passage.
+ *   Purger le seul dossier surveillé ne suffit pas quand ses modules ONT DÉJÀ capturé les fonctions
+ *   d'un voisin (`const { f } = require("../autre")`) : le voisin rechargé, l'ancien exemplaire
+ *   reste tenu par la référence capturée, et la modification n'a aucun effet visible.
  * @returns {() => void} arrête la surveillance
  */
 function watchModules(dir, rebuild, opts = {}) {
@@ -51,7 +54,8 @@ function watchModules(dir, rebuild, opts = {}) {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         timer = null;
-        const count = purge(dir);
+        let count = purge(dir);
+        for (const other of opts.also || []) count += purge(other);
         try {
           rebuild();
           console.log(`[dev] ${label} rechargé (${count} module(s)) — pas besoin de redémarrer.`);

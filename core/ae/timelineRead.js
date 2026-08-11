@@ -2,9 +2,9 @@
 // Lecture de la timeline Resolve pour l'export AE : parcours des pistes, fenêtres source frame-accurate,
 // timelines imbriquées (render / comp / flatten), transforms. Produit { items, groups, fps, dims… }.
 
-const path = require('path');
-const fs = require('fs');
 const { renderRange } = require('../aeRender');
+const { readTimelineXml } = require('../transfer/resolveXml');
+const { graftAnimation } = require('./animation');
 const { sanitizeName: sanitize } = require('../utils');
 const { t } = require('../i18n');
 
@@ -24,9 +24,14 @@ async function mediaStartTcFrames(mpi, fps) {
 
 // In/out SOURCE d'un plan, en frames 0-based depuis le DÉBUT DU FICHIER (ce que ffmpeg -ss attend).
 // PRIMAIRE = GetSourceStartFrame/GetSourceEndFrame (officiels Resolve 19.0.2+) : 0-based fiables, et ils
-// encodent le retime — `ssf == sef` = FREEZE (1 frame tenue), `ssf > sef` = REVERSE, `sef` est EXCLUSIF
-// (forward : srcSpan = sef - ssf = durée timeline). GetLeftOffset est en fallback seulement (il dérive
-// — décalé de plusieurs frames — et renvoie un timecode garbage, ex 86400, sur les freeze).
+// encodent le retime — `ssf == sef` = FREEZE (1 frame tenue), `ssf > sef` = REVERSE.
+//
+// `sef` est INCLUSIF. Mesuré sur Resolve Studio 21.0.3, sur des plans posés ENTIERS et non rognés :
+// un fichier de 96 images occupant 96 images de timeline rend `ssf=0, sef=95`. Le lire comme exclusif
+// coûtait la DERNIÈRE IMAGE de chaque plan et inventait une vitesse de 95/96 sur un plan qui n'est pas
+// retimé — assez pour noyer les vraies accélérations dans un bruit de fond de faux retimes.
+// GetLeftOffset est en fallback seulement (il dérive — décalé de plusieurs frames — et renvoie un
+// timecode garbage, ex 86400, sur les freeze).
 // Renvoie { srcIn, srcOut (inclusifs), freeze, reverse, srcSpan, retimed }.
 async function sourceRange(it, tlStart, tlEnd, tcFrames = 0, maxFrame = Infinity) {
   const span = Math.max(1, tlEnd - tlStart);
@@ -37,9 +42,9 @@ async function sourceRange(it, tlStart, tlEnd, tcFrames = 0, maxFrame = Infinity
   let sef = deTc(await rd('GetSourceEndFrame'));
   if (Number.isFinite(ssf) && Number.isFinite(sef) && ssf >= 0 && sef >= 0) {
     let srcIn, srcOut, reverse = false, freeze = false;
-    if (ssf === sef) { srcIn = srcOut = ssf; freeze = true; }                 // freeze : 1 frame tenue
-    else if (ssf > sef) { srcIn = sef; srcOut = ssf - 1; reverse = true; }    // reverse (sef exclusif)
-    else { srcIn = ssf; srcOut = sef - 1; }                                   // forward (sef exclusif)
+    if (ssf === sef) { srcIn = srcOut = ssf; freeze = true; }             // freeze : 1 frame tenue
+    else if (ssf > sef) { srcIn = sef; srcOut = ssf; reverse = true; }    // reverse : plage [sef, ssf]
+    else { srcIn = ssf; srcOut = sef; }                                   // forward : plage [ssf, sef]
     if (Number.isFinite(maxFrame)) {
       srcIn = Math.max(0, Math.min(srcIn, maxFrame));
       srcOut = Math.max(srcIn, Math.min(srcOut, maxFrame));
@@ -82,6 +87,28 @@ async function readTransform(it) {
   } catch (_) { return null; }
 }
 
+/**
+ * Un plan RENDU par Resolve (cuisson d'un cadrage animé) devient un média final : le fichier porte
+ * déjà le cadrage, la vitesse et les images clés, à la cadence et à la taille de la timeline. Il ne
+ * doit donc plus rien traverser — ni remux, ni réencode, ni transform reposé sur le calque, ni
+ * time-remap : chacun de ces traitements appliquerait une seconde fois ce qui est déjà dans l'image.
+ * Ses bornes source repartent de zéro : la longueur du rush d'origine ne s'applique plus.
+ */
+function adoptRenderedClip(clip, file, fps) {
+  clip.path = file;
+  clip.rendered = true;
+  clip.xf = null;
+  delete clip.anim;
+  clip.fpsClip = fps;
+  clip.srcFrames = 0;
+  clip.srcIn = 0;
+  clip.srcOut = clip.tlEnd - clip.tlStart - 1;
+  clip.freeze = false;
+  clip.reverse = false;
+  clip.retimed = false;
+  return clip;
+}
+
 async function safeName(it) { try { return await it.GetName(); } catch (_) { return ''; } }
 
 // Dimensions de la SOURCE ("1920x1080"). Le point d'ancrage s'y rapporte : sans elles, il n'y a
@@ -101,7 +128,9 @@ async function mediaResolution(mpi) {
  * @returns {Promise<import('./types').EditResult>}
  */
 async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
-  const { nestedMode, outDir, codec, audio, audioRenderFmt, event, includeLinkedAudio } = renderOpts;
+  const {
+    nestedMode, outDir, codec, audio, audioRenderFmt, event, includeLinkedAudio, animation, bakeTransforms,
+  } = renderOpts;
   const pm = await resolve.GetProjectManager();
   const proj = pm ? await pm.GetCurrentProject() : null;
   if (!proj) return { ok: false, error: t('noProject') };
@@ -129,6 +158,8 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
   const items = [];
   /** @type {string[]} */
   const missing = [];
+  // Éléments SANS média par nature (titres Fusion, générateurs) : tenus à part des sources absentes.
+  const generators = [];
   /** @type {import('./types').Group[]} */
   const groups = [];   // timelines imbriquées en mode 'comp' (chacune → précompo AE dédiée)
 
@@ -144,6 +175,42 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
       : null;
     return renderRange(proj, { timeline: timelineObj, markIn, markOut, outDir,
       customName: cn, codec, exportAudio: audio !== 'none', audioOnly, audioFmt: audioRenderFmt || 'wav', onStatus });
+  }
+
+  /**
+   * Rend la plage d'UN plan par Resolve, cadrage et images clés compris. Les autres pistes vidéo
+   * sont coupées le temps du rendu : sans ça, le rendu d'une plage rend la COMPOSITION de toute la
+   * pile, et un plan de V1 se retrouverait cuit dans le fichier d'un plan de V2. L'état des pistes
+   * est restauré quoi qu'il arrive — le projet de l'utilisateur n'a pas à garder la trace du passage.
+   * Le son n'est pas exporté : celui de la plage est un MÉLANGE, pas l'audio de ce plan ; il reste
+   * porté par les pistes audio lues à part.
+   */
+  async function renderClipRange(clip) {
+    const count = parseInt(await tl.GetTrackCount('video'), 10) || 0;
+    const enabled = [];
+    for (let i = 1; i <= count; i++) {
+      try { enabled.push(!!(await tl.GetIsTrackEnabled('video', i))); } catch (_) { enabled.push(true); }
+    }
+    try {
+      for (let i = 1; i <= count; i++) {
+        if (i !== clip.track) { try { await tl.SetTrackEnable('video', i, false); } catch (_) {} }
+      }
+      const name = `${sanitize(clip.name || 'plan')}_bake`;
+      const cn = (name.replace(/[^\x20-\x7E]+/g, '_').replace(/\s+/g, '_') || 'bake') + `_${clip.tlStart}`;
+      const onStatus = event && event.sender
+        ? (st) => event.sender.send('ae:progress', { phase: 'Cuisson Resolve', done: 0, total: 0, pct: (st && st.CompletionPercentage) || 0 })
+        : null;
+      return await renderRange(proj, { timeline: tl, markIn: clip.tlStart, markOut: clip.tlEnd - 1,
+        outDir, customName: cn, codec, exportAudio: false, onStatus });
+    } catch (e) {
+      // Un rendu refusé ne coûte que la cuisson : le cadrage repart sur le calque AE, et on le dit.
+      console.warn(`[ae] cuisson Resolve impossible pour ${clip.name || clip.path} :`, e && e.message);
+      return null;
+    } finally {
+      for (let i = 1; i <= count; i++) {
+        try { await tl.SetTrackEnable('video', i, enabled[i - 1]); } catch (_) {}
+      }
+    }
   }
 
   // La timeline a-t-elle au moins un plan vidéo ? (sinon = timeline audio seule → rendu audio).
@@ -254,7 +321,17 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
             } else missing.push(nm || 'plan');
             continue;
           }
-          if (!mpi || !fp) { missing.push((await safeName(it)) || 'plan'); continue; }
+          if (!mpi || !fp) {
+            // AUCUN MediaPoolItem = titre Text+, générateur ou cache : l'élément n'a jamais eu de
+            // média, ce n'est pas une source INTROUVABLE (là, l'item garde son MediaPoolItem et
+            // c'est son chemin qui manque). Les confondre faisait lire « 1 source introuvable :
+            // Texte » sur une timeline saine. `GetFusionCompCount()` ne sert à rien ici : mesuré à
+            // 0 sur un Text+ posé, comme sur un plan ordinaire.
+            const label = (await safeName(it)) || 'plan';
+            if (!mpi) generators.push(label);
+            else missing.push(label);
+            continue;
+          }
           if (skipPaths && skipPaths.has(fp)) continue;
 
           const fpsClip = type === 'video' ? (parseFloat(await mpi.GetClipProperty('FPS')) || fps) : fps;
@@ -277,20 +354,46 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
             group: group || undefined, freeze, reverse, retimed,
             nested: !!(place || group),   // issu d'une timeline imbriquée (pas de remux)
           });
-          if (type === 'video' && outDir && !place) {
-            try {
-              fs.appendFileSync(path.join(outDir, '_netsurush_cut_debug.txt'),
-                `${nm} | fps=${fpsClip} Frames=${srcFrames} | srcIn=${srcIn} srcOut=${srcOut} span=${srcOut - srcIn + 1} | tl=${tlS}-${tlE} (occ=${tlE - tlS}) | freeze=${freeze} reverse=${reverse} retimed=${retimed}\n`);
-            } catch (_) {}
-          }
         } catch (_) {}
       }
     }
   }
   await collect(tl, 'video', null, 0, null, null);
+
+  // Images clés : l'API n'en lit aucune, l'export FCP7 XML de Resolve est la seule source. Il ne
+  // construit rien — la structure reste celle lue ci-dessus, seules les courbes sont greffées.
+  let animated = 0;
+  if (animation) {
+    try {
+      const read = await readTimelineXml(resolve, tl);
+      if (read.ok === true) animated = graftAnimation(read.doc, items).animated;
+      else console.warn('[ae] images clés indisponibles :', read.reason);
+    } catch (e) {
+      console.warn('[ae] lecture des images clés impossible :', e && e.message);
+    }
+  }
+
+  // Cuisson d'un cadrage ANIMÉ : ffmpeg n'a pas de transformation affine variable dans le temps,
+  // Resolve rend au contraire le plan exactement tel qu'il l'affiche — images clés comprises. C'est
+  // le même moteur que les timelines imbriquées. Réservé aux plans animés : un cadrage fixe reste
+  // sur la voie ffmpeg, sans lancer un rendu Resolve par plan.
+  const bakedByResolve = new Set();
+  if (bakeTransforms && outDir) {
+    for (const clip of items) {
+      if (clip.kind !== 'video' || clip.group || clip.nested || clip.rendered || !clip.anim) continue;
+      const file = await renderClipRange(clip);
+      if (!file) continue;
+      bakedByResolve.add(clip.path);
+      adoptRenderedClip(clip, file, fps);
+    }
+  }
+
   const videoPaths = new Set();
-  for (const item of items) if (!item.group) videoPaths.add(item.path);
+  // Un plan rendu par Resolve sort SANS son : son audio lié doit donc rester une piste à part,
+  // au lieu d'être écarté comme doublon de l'audio embarqué qu'il n'a plus.
+  for (const item of items) if (!item.group && !bakedByResolve.has(item.path)) videoPaths.add(item.path);
   await collect(tl, 'audio', includeLinkedAudio ? null : videoPaths, 0, null, null);
+
   try { if (origTl) await proj.SetCurrentTimeline(origTl); } catch (_) {}
   if (renderErr && !items.length) return { ok: false, error: renderErr };
 
@@ -299,7 +402,10 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
   if (endFrame <= startFrame && items.length) {
     endFrame = items.reduce((m, c) => Math.max(m, c.tlEnd), startFrame);
   }
-  return { ok: true, timeline: await tl.GetName(), fps, width, height, startFrame, endFrame, items, missing, groups };
+  return { ok: true, timeline: await tl.GetName(), fps, width, height, startFrame, endFrame, items, missing, generators, groups, animated };
 }
 
-module.exports = { readTimelineEdit };
+// `sourceRange` est exporté pour être testé seul : c'est lui qui porte l'invariant de frame-math
+// (bornes source inclusives), et le vérifier au travers d'un faux Resolve complet ne prouverait rien
+// de plus tout en coûtant un simulacre d'API entier.
+module.exports = { readTimelineEdit, sourceRange, adoptRenderedClip };

@@ -19,12 +19,11 @@
     "noTimeline": "Sin timeline",
     "timelineOpen": "{{name}} (abierta)",
     "compPlaceholder": "Nombre de la composición de After Effects",
-    "individualRender": "Corte individual separado",
-    "individualHint": "Cada plano genera un archivo recodificado con precisión de fotograma. Elige el códec abajo · se necesita una carpeta de salida.",
     "yes": "Sí",
     "no": "No",
     "codec": "Códec",
     "container": "Contenedor",
+    "bakeForcesReencode": "Velocidad fijada: los planos se recodifican, sea cual sea el modo de arriba.",
     "mode": "Modo",
     "nestedFlatten": "Contenido",
     "nestedComp": "Precomposición",
@@ -46,7 +45,9 @@
     "namingNumber": "Número",
     "foldersLabel": "Ordenar en carpetas (Clips / Precomposiciones / Audio / Imágenes)",
     "none": "Ninguno",
-    "choose": "Elegir…"
+    "choose": "Elegir…",
+    "outDirWhy": "Archivos escritos aquí: {{reasons}}.",
+    "upscaleForcesReencode": "El escalado reemplaza los píxeles: se aplica Recodificar sea cual sea la opción de arriba."
   },
   "sections": {
     "timeline": "Timeline",
@@ -55,15 +56,24 @@
     "transforms": "Transformaciones y velocidad",
     "nested": "Timeline anidada",
     "audio": "Audio",
-    "handles": "Márgenes",
     "precomp": "Precomposición",
     "organization": "Organización",
-    "outDir": "Carpeta de salida"
+    "outDir": "Carpeta de salida",
+    "upscale": "Escalado"
   },
   "videoModes": {
-    "copy": { "label": "Copia", "hint": "Archivos fuente, corte en AE — sin transcodificar." },
-    "remux": { "label": "Remux", "hint": "Contenedor .mov sin pérdidas (-c copy), corte en AE." },
-    "reencode": { "label": "Recodificar", "hint": "Cada plano transcodificado a códec de edición, márgenes incluidos." }
+    "copy": {
+      "label": "Copia",
+      "hint": "Archivos fuente, corte en AE — sin transcodificar."
+    },
+    "remux": {
+      "label": "Remux",
+      "hint": "Contenedor .mov sin pérdidas (-c copy), corte en AE."
+    },
+    "reencode": {
+      "label": "Recodificar",
+      "hint": "Cada plano transcodificado a códec de edición, cortado con precisión de fotograma, márgenes incluidos."
+    }
   },
   "audioModes": {
     "copy": "Copiar",
@@ -73,11 +83,27 @@
     "none": "Ninguno"
   },
   "transformModes": {
-    "none": { "label": "Ninguna", "hint": "Clip original — ignora transformaciones y velocidad de la timeline." },
-    "ae": { "label": "En After Effects", "hint": "Transformaciones y velocidad en la capa de AE, fuente intacta." },
-    "bake": { "label": "Recodificado", "hint": "Velocidad aplicada al archivo, transformaciones espaciales en AE." }
+    "none": {
+      "label": "Ninguna",
+      "hint": "Clip original — ignora transformaciones y velocidad de la timeline."
+    },
+    "ae": {
+      "label": "En After Effects",
+      "hint": "Transformaciones y velocidad en la capa de AE, fuente intacta."
+    },
+    "bake": {
+      "label": "Recodificado",
+      "hint": "Velocidad y encuadre fijados en el archivo, con el códec elegido arriba, al tamaño de la línea de tiempo. Fuera del cuadro: negro, salvo que ese códec tenga canal alfa. Un encuadre ANIMADO lo renderiza DaVinci Resolve, con sus fotogramas clave: fiel, pero un render por plano."
+    }
   },
   "errors": {
     "timelinesUnavailable": "Timelines no disponibles"
+  },
+  "outDirReasons": {
+    "reencode": "planos recodificados",
+    "remux": "planos reencapsulados",
+    "bake": "velocidad fijada",
+    "nestedRender": "líneas de tiempo anidadas renderizadas por Resolve",
+    "audio": "pistas de audio extraídas"
   }
 }

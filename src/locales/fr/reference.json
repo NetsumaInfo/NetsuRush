@@ -539,6 +539,7 @@
     "projectOpened": "« {{name}} » ouvert",
     "projectOpenedLegacy": "« {{name}} » ouvert (ancien format : enregistre-le sous pour en faire un projet)",
     "openFailedWith": "Échec de l'ouverture : {{error}}",
+    "dropProjectFailed": "Impossible d'ouvrir « {{name}} » — utilisez « Ouvrir un projet ».",
     "noProjectFile": "Ce board n'est lié à aucun fichier"
   }
 }

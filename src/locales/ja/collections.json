@@ -23,7 +23,7 @@
     "upscaleMode": "実行時期",
     "upscaleModeNow": "即時",
     "upscaleModeIdle": "GPU 空き時",
-    "upscaleNeedsEncode": "拡大はピクセルを置き換えます。ストリームコピーはできません。",
+    "upscaleNeedsEncode": "アップスケールはピクセルを作り直すため、ストリームコピーはできません。",
     "queueRunning": "保管中",
     "queuePending": "GPU の空き待ち"
   },

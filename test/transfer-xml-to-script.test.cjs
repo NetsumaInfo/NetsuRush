@@ -123,6 +123,13 @@ test('la charge utile du panneau porte les images clés, pas seulement les borne
 
 // ---- Premiere Pro ------------------------------------------------------------------------------
 
+/** Premiere écrit ses clés en SECONDES (nombre) et les rend en objets `Time` : le faux fait pareil. */
+const paramSeconds = (time) => {
+  if (typeof time === 'number') return time;
+  if (time && typeof time.seconds === 'number') return time.seconds;
+  return Number(time && time.ticks) / TICKS_PER_SEC;
+};
+
 function fakeParam(displayName, initial) {
   let value = initial;
   let varying = false;
@@ -135,17 +142,17 @@ function fakeParam(displayName, initial) {
     setTimeVarying: (next) => { varying = next; return true; },
     setValue: (next) => { value = next; return true; },
     getValue: () => value,
-    getKeys: () => keys.slice(),
-    addKey: (time) => { keys.push(time); return true; },
+    getKeys: () => keys.map((seconds) => ({ seconds, ticks: String(Math.round(seconds * TICKS_PER_SEC)) })),
+    addKey: (time) => { keys.push(paramSeconds(time)); return true; },
     removeKey: (time) => {
-      const index = keys.findIndex((key) => key.ticks === time.ticks);
+      const index = keys.indexOf(paramSeconds(time));
       if (index >= 0) keys.splice(index, 1);
-      keyValues.delete(time.ticks);
+      keyValues.delete(paramSeconds(time));
       return true;
     },
-    setValueAtKey: (time, next) => { keyValues.set(time.ticks, next); value = next; return true; },
-    getValueAtKey: (time) => (keyValues.has(time.ticks) ? keyValues.get(time.ticks) : value),
-    getValueAtTime: (time) => (keyValues.has(time.ticks) ? keyValues.get(time.ticks) : value),
+    setValueAtKey: (time, next) => { keyValues.set(paramSeconds(time), next); value = next; return true; },
+    getValueAtKey: (time) => (keyValues.has(paramSeconds(time)) ? keyValues.get(paramSeconds(time)) : value),
+    getValueAtTime: (time) => (keyValues.has(paramSeconds(time)) ? keyValues.get(paramSeconds(time)) : value),
     keys,
     keyValues,
   };
@@ -264,15 +271,17 @@ test('Premiere reçoit le mouvement en images clés, aux bons instants et aux bo
   // Premiere compte sa trajectoire en FRACTION de l'image depuis le coin haut-gauche : sur une
   // image 1920×1080, −480 px depuis le centre valent 480/1920 = 0,25, et le centre vertical 0,5.
   const positions = [...params.position.keyValues.entries()]
-    .map(([ticks, value]) => [Number(ticks) / TICKS_PER_SEC, plain(value)])
+    .map(([seconds, value]) => [seconds, plain(value)])
     .sort((a, b) => a[0] - b[0]);
-  assert.deepEqual(positions, [[0, [0.25, 0.5]], [2, [0.75, 0.5]]]);
+  // Les instants se comptent depuis le point d'ENTRÉE SOURCE du plan (image 10 à 25 i/s = 0,4 s),
+  // jamais depuis sa place sur la timeline : c'est l'axe dans lequel Premiere range ses clés.
+  assert.deepEqual(positions, [[0.4, [0.25, 0.5]], [2.4, [0.75, 0.5]]]);
   assert.equal(params.position.isTimeVarying(), true);
-  // Opacité : 0 → 100 % entre 0 s et 1 s.
+  // Opacité : 0 → 100 % sur la première seconde du plan.
   const opacities = [...params.opacity.keyValues.entries()]
-    .map(([ticks, value]) => [Number(ticks) / TICKS_PER_SEC, value])
+    .map(([seconds, value]) => [seconds, value])
     .sort((a, b) => a[0] - b[0]);
-  assert.deepEqual(opacities, [[0, 0], [1, 100]]);
+  assert.deepEqual(opacities, [[0.4, 0], [1.4, 100]]);
   // Le rapport doit CONFIRMER la pose par relecture, pas la supposer.
   const keyReport = out.report.items.find((i) => i.property === 'video.position.keyframes');
   assert.equal(keyReport.status, 'applied');

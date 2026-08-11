@@ -539,6 +539,7 @@
     "projectOpened": "„{{name}}“ geöffnet",
     "projectOpenedLegacy": "„{{name}}“ geöffnet (altes Format – als Projekt speichern, um es zu bearbeiten)",
     "openFailedWith": "Öffnen fehlgeschlagen: {{error}}",
+    "dropProjectFailed": "„{{name}}\" konnte nicht geöffnet werden – nutze „Projekt öffnen\".",
     "noProjectFile": "Dieses Board ist mit keiner Datei verknüpft"
   }
 }

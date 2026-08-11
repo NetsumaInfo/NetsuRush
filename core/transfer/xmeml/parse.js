@@ -133,6 +133,38 @@ function readClipItem(node, kind, track, sequence, registry) {
 }
 
 /**
+ * `<generatoritem>` de texte → titre du document. C'est la SEULE sortie qui rende le contenu d'un
+ * Text+ Resolve : l'API de script ne liste pas les éléments Fusion d'une timeline et n'expose ni
+ * leur texte ni leur police, si bien qu'un titre disparaissait sans un mot du transfert.
+ * @returns {import('../types').TransferGraphic | null}
+ */
+function readGeneratorItem(node, track) {
+  const effect = childNamed(node, "effect");
+  if (!effect) return null;
+  if (childText(effect, "effecttype").toLowerCase() !== "generator") return null;
+  const params = {};
+  for (const parameter of childrenNamed(effect, "parameter")) {
+    params[childText(parameter, "parameterid").toLowerCase()] = childText(parameter, "value");
+  }
+  // `str` est l'identifiant du paramètre porteur du texte dans le générateur Text FCP7.
+  const text = String(params.str || params.text || "").replace(/\r/g, "\n").trim();
+  if (!text) return null;
+  const start = childNumber(node, "start", -1);
+  const end = childNumber(node, "end", -1);
+  if (start < 0 || end <= start) return null;
+  const size = Number(params.fontsize);
+  return {
+    track,
+    name: childText(node, "name") || "Texte",
+    tlStart: start,
+    tlEnd: end,
+    text,
+    font: params.fontname || undefined,
+    size: Number.isFinite(size) && size > 0 ? size : undefined,
+  };
+}
+
+/**
  * `<sequence>` du document, quel que soit son emballage (`project`/`bin`/racine). Le nom est visé
  * quand on le connaît : un export Premiere embarque aussi les séquences IMBRIQUÉES, et prendre la
  * première venue donnerait l'animation d'un autre montage. Parcours en largeur, donc la séquence
@@ -167,7 +199,7 @@ function sequenceDimensions(sequence, fallbackFps) {
   };
 }
 
-function collectTracks(media, kind, sequence, registry) {
+function collectTracks(media, kind, sequence, registry, graphics) {
   const container = media ? childNamed(media, kind === "audio" ? "audio" : "video") : null;
   if (!container) return [];
   const clips = [];
@@ -175,6 +207,11 @@ function collectTracks(media, kind, sequence, registry) {
     for (const item of childrenNamed(track, "clipitem")) {
       const clip = readClipItem(item, kind, index + 1, sequence, registry);
       if (clip) clips.push(clip);
+    }
+    if (!graphics) return;
+    for (const item of childrenNamed(track, "generatoritem")) {
+      const graphic = readGeneratorItem(item, index + 1);
+      if (graphic) graphics.push(graphic);
     }
   });
   return clips;
@@ -194,9 +231,11 @@ function parseXmeml(source, opts = {}) {
   const sequence = { ...dimensions, host };
   const registry = new Map();
   const media = childNamed(sequenceNode, "media");
+  /** @type {import('../types').TransferGraphic[]} */
+  const graphics = [];
   const clips = [
-    ...collectTracks(media, "video", sequence, registry),
-    ...collectTracks(media, "audio", sequence, registry),
+    ...collectTracks(media, "video", sequence, registry, graphics),
+    ...collectTracks(media, "audio", sequence, registry, null),
   ];
   if (!clips.length) return { ok: false, error: "xmemlNoClips" };
   return {
@@ -210,6 +249,7 @@ function parseXmeml(source, opts = {}) {
     startFrame: 0,
     endFrame: childNumber(sequenceNode, "duration", 0) || clips.reduce((max, clip) => Math.max(max, clip.tlEnd), 0),
     clips,
+    graphics,
     missing: [],
   };
 }

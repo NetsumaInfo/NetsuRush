@@ -1,5 +1,28 @@
 [
   {
+    "id": "netsurush-0.3.8",
+    "version": "0.3.8",
+    "date": "2026-08-11",
+    "title": {
+      "fr": "Transferts créatifs plus fidèles",
+      "en": "More faithful creative transfers"
+    },
+    "highlights": {
+      "fr": [
+        "Les transferts entre Resolve, Premiere Pro et After Effects préservent davantage les animations, titres, plages source et propriétés des plans.",
+        "After Effects gagne une préparation média plus robuste, des transformations recalculées et une étape d’upscale intégrée au transfert.",
+        "Premiere Pro reçoit les titres via un modèle Motion Graphics inclus dans le panneau Adobe de NetsuRush.",
+        "NetsuBoard, les rapports de bugs, les modèles et plusieurs flux de médias gagnent des correctifs de fiabilité et de sécurité."
+      ],
+      "en": [
+        "Transfers between Resolve, Premiere Pro, and After Effects preserve more animations, titles, source ranges, and clip properties.",
+        "After Effects gains more robust media preparation, recalculated transforms, and an integrated upscale transfer step.",
+        "Premiere Pro receives titles through a Motion Graphics template bundled with the NetsuRush Adobe panel.",
+        "NetsuBoard, bug reports, models, and several media workflows receive reliability and security fixes."
+      ]
+    }
+  },
+  {
     "id": "netsurush-0.3.7",
     "version": "0.3.7",
     "date": "2026-08-10",

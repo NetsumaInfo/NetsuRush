@@ -18,7 +18,8 @@ export async function bugRelay(): Promise<BugRelay | null> {
     const { authClient } = await import("./authClient");
     return { site: convexSiteUrl, cookie: authClient.getCookie() || "" };
   } catch {
-    // Session illisible : le relais tranche (401 « connecte-toi »), l'app n'a pas à le deviner.
+    // Session illisible : on envoie quand même, le relais accepte les rapports anonymes. La session
+    // ne sert qu'à nommer le testeur dans l'embed et à lui donner son propre plafond horaire.
     return { site: convexSiteUrl, cookie: "" };
   }
 }

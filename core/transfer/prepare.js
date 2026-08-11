@@ -5,6 +5,7 @@
 // le bouton Télécharger — l'onglet ne réinvente pas une seconde table de codecs.
 
 const { prepareMedia } = require("../ae/prepareMedia");
+const { upscaleStep } = require("../ae/upscaleStep");
 const { videoEncodeArgs, audioEncodeArgs, containerTagArgs } = require("../export/encodeArgs");
 const { pickGpuEncoder } = require("../export/encoder");
 const { t } = require("../i18n");
@@ -54,18 +55,21 @@ function progressBridge(ev) {
 }
 
 /**
- * @param {{ run: (bin: string, args: string[]) => Promise<any> }} deps
+ * @param {{ run: (bin: string, args: string[]) => Promise<any>, runUpscale?: Function, runTurbo?: Function }} deps
  * @param {any} ev
  * @param {import('./types').TransferDoc} doc
  * @param {{ mediaMode?: 'copy'|'remux'|'reencode', codec?: string, audio?: string, container?: string,
- *           encoderMode?: string, speed?: string, outDir?: string|null }} opts
+ *           encoderMode?: string, speed?: string, outDir?: string|null, upscale?: any }} opts
  * @returns {Promise<import('./types').TransferDoc | { ok:false, error:string }>}
  */
 async function prepareDoc(deps, ev, doc, opts = {}) {
-  const mediaMode = opts.mediaMode || "copy";
+  // L'upscale REMPLACE les pixels : ni la copie ni le réencapsulage ne peuvent le faire. L'option
+  // impose donc le réencodage, exactement comme à l'archivage d'une collection.
+  const grow = !!(opts.upscale && opts.upscale.enabled);
+  const mediaMode = grow ? "reencode" : (opts.mediaMode || "copy");
   const audio = opts.audio || DEFAULTS.audio;
   if (mediaMode === "copy" && !reencodesAudio(audio)) return doc;
-  if (producesFiles({ mediaMode, audio }) && !opts.outDir) {
+  if ((grow || producesFiles({ mediaMode, audio })) && !opts.outDir) {
     return { ok: false, error: t("chooseOutputFolder") };
   }
 
@@ -81,6 +85,15 @@ async function prepareDoc(deps, ev, doc, opts = {}) {
   const prepared = await prepareMedia(deps, progressBridge(ev), edit, {
     videoMode: mediaMode,
     audio,
+    // Même moteur, mêmes réglages qu'ailleurs ; seul le vocabulaire d'encodage est celui des
+    // profils d'export, que le moteur accepte tel quel.
+    upscale: upscaleStep(opts.upscale, {
+      runUpscale: deps.runUpscale ? (args) => deps.runUpscale(ev, args) : undefined,
+      runTurbo: deps.runTurbo ? (args) => deps.runTurbo(ev, args) : undefined,
+    }, {
+      exportCodec: codec, encoderMode: opts.encoderMode, speed: opts.speed || DEFAULTS.speed,
+      container, audioMode: audio,
+    }, container),
     handleSec: 0,          // un transfert recopie les coupes telles quelles : aucune poignée
     outDir: opts.outDir,
     bake: false,           // la vitesse d'un plan est portée par l'hôte cible, pas cuite dans le fichier

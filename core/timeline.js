@@ -930,18 +930,20 @@ async function readTimelineCutsViaProxy(opts = {}) {
           const { fps, srcFrames, name } = meta;
           const maxFrame = srcFrames > 0 ? srcFrames - 1 : Number.MAX_SAFE_INTEGER;
 
-          // in/out SOURCE en frames. GetSourceEndFrame est EXCLUSIF (Resolve 19+) → outFrame = sef-1
-          // (inclusif, invariant timeline). Repli GetLeftOffset + span timeline si l'API manque.
+          // in/out SOURCE en frames. GetSourceEndFrame est INCLUSIF (mesuré sur Resolve 21.0.3 :
+          // un fichier de 96 images posé entier rend ssf=0, sef=95) → outFrame = sef, l'invariant
+          // « bornes inclusives » de la timeline est déjà le sien. Le lire comme exclusif retirait
+          // la dernière image de chaque plan découpé. Repli GetLeftOffset + span si l'API manque.
           let ssf = parseInt(await it.GetSourceStartFrame(), 10);
           let sef = parseInt(await it.GetSourceEndFrame(), 10);
           if (Number.isNaN(ssf) || Number.isNaN(sef)) {
             const lo = parseInt(await it.GetLeftOffset(), 10) || 0;
             const span = (parseInt(await it.GetDuration(), 10) || 0);
             ssf = lo;
-            sef = lo + span; // exclusif
+            sef = lo + Math.max(0, span - 1); // inclusif, comme l'API
           }
           const inFrame = Math.max(0, Math.min(maxFrame, ssf));
-          const outFrame = Math.max(inFrame, Math.min(maxFrame, sef - 1)); // inclusif
+          const outFrame = Math.max(inFrame, Math.min(maxFrame, sef)); // inclusif
           cuts.push({
             id: `${t}:${cuts.length}:${inFrame}`,
             path: fp,

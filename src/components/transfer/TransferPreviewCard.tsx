@@ -40,6 +40,11 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
   const duration = previewDuration(preview);
   const missing = preview.missing ?? [];
   const mediaLess = preview.mediaLess ?? [];
+  // La cible sait-elle ÉCRIRE un titre ? Le relevé de capacités le dit déjà, propriété par
+  // propriété : rien à redire ici sur qui sait quoi.
+  const titlesRebuildable = !preview.fidelity?.items?.some(
+    (item) => item.property === "text" && item.status === "unsupported",
+  );
   return (
     <Card className="block space-y-3 p-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -83,10 +88,14 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
       )}
       {(preview.graphics ?? 0) > 0 && (
         // Un titre ne VOYAGE pas : il est recréé chez la cible. Le dire évite de chercher un
-        // fichier qui n'a jamais existé, et prépare aux écarts de police.
+        // fichier qui n'a jamais existé, et prépare aux écarts de police. Quand la cible ne sait
+        // PAS écrire de titre (Premiere : aucune API n'en crée), promettre une recréation ferait
+        // chercher un titre qui n'arrivera jamais.
         <div className="flex items-start gap-2 border-t border-border pt-3 text-xs">
           <Type className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-          <p className="min-w-0 text-[11px] text-muted-foreground">{t("preview.graphics", { count: preview.graphics })}</p>
+          <p className="min-w-0 text-[11px] text-muted-foreground">
+            {t(titlesRebuildable ? "preview.graphics" : "preview.graphicsUnsupported", { count: preview.graphics })}
+          </p>
         </div>
       )}
       {mediaLess.length > 0 && (

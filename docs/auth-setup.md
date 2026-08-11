@@ -45,7 +45,9 @@ npx convex env set BUG_WEBHOOK "<url du webhook Discord>"   # relais des rapport
 
 > Le webhook ne descend sur aucune machine : l'app POSTe sur `/bug/report` et le déploiement
 > forwarde. Changer de salon = relancer cette commande, sans rebuild ni mise à jour des testeurs.
-> `npx convex env set BUG_RELAY_OPEN true` accepte les rapports d'un testeur déconnecté.
+> Le relais n'exige aucune connexion : un testeur déconnecté peut envoyer un rapport. `npx convex env
+> set BUG_QUOTA_SALT "<chaîne aléatoire>"` sale l'empreinte d'IP qui sert de clé de plafond aux
+> envois anonymes (facultatif).
 
 > Bascule en **allowlist** plus tard : `npx convex env set OPEN_BETA false`, puis accorde l'accès
 > par utilisateur : `npx convex run access:grantAccess '{"userId":"<id>","role":"member"}'`.

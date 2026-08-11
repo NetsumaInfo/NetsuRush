@@ -159,10 +159,16 @@ const SEARCH_RUNTIME = {
 // déclare nous-mêmes ce que l'inférence importe vraiment, le provider ONNX restant choisi par le
 // setup selon le matériel. Même patron que MATANYONE_DEPS ci-dessus, même cause racine.
 const WHISPER_DEPS = ['ctranslate2>=4,<5', 'tokenizers>=0.13,<1', 'av>=11', 'tqdm', HF_HUB_FLOOR];
+// Lecture et rééchantillonnage du WAV de travail : `soundfile` pour la découpe des silences,
+// `librosa` en plus pour les hésitations acoustiques. Ils n'appartiennent à AUCUN modèle — ils
+// arrivaient donc uniquement avec le pack `voice` du premier lancement, et sur une installation qui
+// n'avait pas coché ce module, « Couper les silences » échouait à l'import SANS que rien, dans
+// l'application, ne sache les poser. Rattachés ici aux entrées qui les font tourner.
+const AUDIO_IO_DEPS = ['soundfile', 'librosa>=0.10'];
 const WHISPER_RUNTIME = {
   pip: 'faster-whisper>=1.1',
-  pipCheck: 'faster_whisper',
-  installSteps: [WHISPER_DEPS, ['--no-deps', 'faster-whisper>=1.1']],
+  pipCheck: ['faster_whisper', 'soundfile'],
+  installSteps: [[...WHISPER_DEPS, ...AUDIO_IO_DEPS], ['--no-deps', 'faster-whisper>=1.1']],
 };
 const DEPTH_RUNTIME = {
   pip: 'transformers>=4.49',
@@ -518,8 +524,9 @@ const MANIFEST = /** @type {Record<string, any>} */ ({
 for (const id of ['siglip2-base', 'siglip2-so400m', 'siglip2-giant']) Object.assign(MANIFEST[id], SEARCH_RUNTIME);
 for (const id of ['whisper-small', 'whisper-medium', 'whisper-turbo', 'whisper-large-v3']) Object.assign(MANIFEST[id], WHISPER_RUNTIME);
 Object.assign(MANIFEST['parakeet-v3'], {
-  pip: 'onnx-asr[hub]>=0.6', pipCheck: ['onnx_asr', 'onnxruntime'],
-  installSteps: [[DETECT_ENV.NETSURUSH_ONNX_BACKEND === 'cuda' ? 'onnx-asr[gpu,hub]>=0.6' : 'onnx-asr[cpu,hub]>=0.6']],
+  pip: 'onnx-asr[hub]>=0.6', pipCheck: ['onnx_asr', 'onnxruntime', 'soundfile'],
+  installSteps: [[DETECT_ENV.NETSURUSH_ONNX_BACKEND === 'cuda' ? 'onnx-asr[gpu,hub]>=0.6' : 'onnx-asr[cpu,hub]>=0.6',
+                  ...AUDIO_IO_DEPS]],
 });
 for (const id of [
   'depth-anything-v2-small', 'depth-anything-v2-base', 'depth-anything-v2-large',
@@ -547,7 +554,11 @@ Object.assign(MANIFEST.transnetv2, {
   pip: 'transnetv2-pytorch', pipCheck: 'transnetv2_pytorch', installSteps: [['transnetv2-pytorch']],
 });
 Object.assign(MANIFEST['silero-vad'], {
-  pip: 'silero-vad', pipCheck: 'silero_vad', installSteps: [['silero-vad']],
+  // `soundfile` voyage avec : `vad_silero` lit le WAV de travail par lui, donc un Silero seul
+  // n'aurait pas suffi à faire marcher « Couper les silences ». `librosa` sert aux hésitations
+  // acoustiques, servies par le même sidecar.
+  pip: 'silero-vad', pipCheck: ['silero_vad', 'soundfile', 'librosa'],
+  installSteps: [['silero-vad', ...AUDIO_IO_DEPS]],
 });
 // Depth Anything 3 : package PyPI officiel (Apache-2.0). Ce n'est PAS un modèle transformers — les
 // dépôts DA3 déclarent `library_name: depth-anything-3` et `pipeline('depth-estimation')` échoue
@@ -1001,9 +1012,30 @@ function diskUsage() {
   return { ok: true, totalBytes: total, byTask };
 }
 
-// Téléchargements en cours par id → permet l'ANNULATION (bouton UI). `ctrl` = { canceled, req,
-// cancelCurrent } : cancelCurrent() détruit la requête + le flux + efface le .tmp du fichier courant.
+// Téléchargements en cours par id → permet l'ANNULATION (bouton UI). `ctrl` = { canceled,
+// cancelCurrent, cancels }: `cancelCurrent` holds the current child process (pip, extraction),
+// `cancels` every network stream in flight — an HF repo is pulled over several connections at once.
 const activeDownloads = new Map();
+
+// Attempts per file before giving up. Each one RESUMES the partial, so they cost no re-downloaded
+// bytes.
+const DOWNLOAD_ATTEMPTS = 4;
+
+// Files of one HF repo pulled in parallel. The CDN throttles per connection: a single sequential
+// stream left the link half idle, and repos made of many small files paid a full round-trip each.
+// Past 4 the gain flattens while disk contention grows.
+const HF_PARALLEL = 4;
+
+// Registers a concurrent cancellation point. A single slot was enough while one file came down at a
+// time; in parallel each new stream would overwrite the previous one and cancelling would only ever
+// reach the last.
+function addCancel(ctrl, fn) {
+  if (!ctrl) return () => {};
+  if (!ctrl.cancels) ctrl.cancels = new Set();
+  ctrl.cancels.add(fn);
+  if (ctrl.canceled) { try { fn(); } catch { /* */ } }
+  return () => { if (ctrl.cancels) ctrl.cancels.delete(fn); };
+}
 
 // Annule un téléchargement en cours. L'appelant reçoit `stage:'canceled'` via le SSE de progression.
 function cancelDownload(id) {
@@ -1012,46 +1044,104 @@ function cancelDownload(id) {
   const ctrl = activeDownloads.get(id);
   if (!ctrl) return { ok: false, id, error: t('noDownload') };
   ctrl.canceled = true;
-  try { if (ctrl.cancelCurrent) ctrl.cancelCurrent(); else if (ctrl.req) ctrl.req.destroy(); } catch { /* */ }
+  if (ctrl.cancels) for (const fn of [...ctrl.cancels]) { try { fn(); } catch { /* */ } }
+  try { if (ctrl.cancelCurrent) ctrl.cancelCurrent(); } catch { /* */ }
   return { ok: true, id };
 }
 
-// Télécharge une URL vers `dest` (suivi des redirections GitHub/HF), .tmp → rename atomique.
-// `onProg(done, total)` en octets. Résout dest, rejette sur erreur HTTP. `ctrl` = annulation optionnelle.
-function downloadUrl(url, dest, onProg, depth = 0, ctrl) {
+// Opens the HTTP stream of a URL, following redirects (GitHub → S3, HF → CDN). `headers` carries the
+// resume Range; it must survive the redirects, otherwise every resume starts over from zero.
+function httpsStream(url, headers, depth = 0) {
   return new Promise((resolve, reject) => {
     if (depth > 6) return reject(new Error('trop de redirections'));
-    if (ctrl && ctrl.canceled) return reject(new Error('CANCELED'));
-    const tmp = dest + '.tmp';
-    const req = https.get(url, (res) => {
+    const req = https.get(url, { headers }, (res) => {
       const code = res.statusCode || 0;
       if (code >= 300 && code < 400 && res.headers.location) {
         res.resume();
         const next = new URL(res.headers.location, url).toString();
-        return resolve(downloadUrl(next, dest, onProg, depth + 1, ctrl));
+        try { req.destroy(); } catch { /* */ }
+        return resolve(httpsStream(next, headers, depth + 1));
       }
-      if (code !== 200) { res.resume(); return reject(new Error(`HTTP ${code} sur ${url}`)); }
-      const total = parseInt(res.headers['content-length'] || '0', 10) || 0;
-      let done = 0;
-      const out = fs.createWriteStream(tmp);
-      // Point d'annulation : détruit tout et efface le fichier partiel.
-      if (ctrl) ctrl.cancelCurrent = () => {
+      resolve({ req, res, code });
+    });
+    req.on('error', reject);
+  });
+}
+
+// One download attempt, optionally resumed at `from` bytes. Appends to the existing .tmp when the
+// server honours the Range (206), overwrites it otherwise.
+function downloadAttempt(url, tmp, from, onProg, ctrl) {
+  return new Promise((resolve, reject) => {
+    const headers = { 'User-Agent': 'NetsuRush' };
+    if (from > 0) headers.Range = `bytes=${from}-`;
+    httpsStream(url, headers).then(({ req, res, code }) => {
+      if (code !== 200 && code !== 206) {
+        res.resume();
+        const err = /** @type {Error & { fatal?: boolean }} */ (new Error(`HTTP ${code} sur ${url}`));
+        // A client error does not heal by retrying: dead URL, private repo, quota. 408/429 do —
+        // the server is explicitly asking to wait. So does 416: the partial overshoots the
+        // resource, and the next attempt starts from zero since this one gained nothing.
+        if (code >= 400 && code < 500 && code !== 408 && code !== 429 && code !== 416) err.fatal = true;
+        return reject(err);
+      }
+      // Range asked but 200 answered = the server ignores it and sends the WHOLE file. Appending to
+      // the partial would yield a corrupt file of plausible size, so start over from zero.
+      const resumed = from > 0 && code === 206;
+      const start = resumed ? from : 0;
+      const len = parseInt(res.headers['content-length'] || '0', 10) || 0;
+      const total = len ? start + len : 0;
+      let done = start;
+      const out = fs.createWriteStream(tmp, { flags: resumed ? 'a' : 'w' });
+      const unbind = addCancel(ctrl, () => {
         try { req.destroy(); } catch { /* */ }
         try { out.destroy(); } catch { /* */ }
-        try { fs.unlinkSync(tmp); } catch { /* */ }
-      };
+      });
+      const fail = (e) => { unbind(); try { out.destroy(); } catch { /* */ } reject(ctrl && ctrl.canceled ? new Error('CANCELED') : e); };
       res.on('data', (c) => { done += c.length; if (onProg) onProg(done, total); });
+      res.on('error', fail);
+      out.on('error', fail);
       res.pipe(out);
       out.on('finish', () => out.close(() => {
-        if (ctrl) ctrl.cancelCurrent = null;
-        if (ctrl && ctrl.canceled) { try { fs.unlinkSync(tmp); } catch { /* */ } return reject(new Error('CANCELED')); }
-        try { fs.renameSync(tmp, dest); resolve(dest); } catch (e) { reject(e); }
+        unbind();
+        if (ctrl && ctrl.canceled) return reject(new Error('CANCELED'));
+        // Silent drop: the stream closes before the announced length. Without this check the
+        // truncated .tmp would be renamed into a "valid" file and the model would fail at load.
+        if (total && done < total) return reject(new Error(`flux tronqué (${done}/${total} octets)`));
+        resolve();
       }));
-      out.on('error', (e) => { try { fs.unlinkSync(tmp); } catch { /* */ } reject(ctrl && ctrl.canceled ? new Error('CANCELED') : e); });
-    });
-    if (ctrl) ctrl.req = req;
-    req.on('error', (e) => reject(ctrl && ctrl.canceled ? new Error('CANCELED') : e));
+    }, reject);
   });
+}
+
+// Télécharge une URL vers `dest`, .tmp → rename atomique. `onProg(done, total)` en octets. Résout
+// dest, rejette sur erreur HTTP. `ctrl` = annulation optionnelle.
+// Network drops are retried by RESUMING the partial (Range): on multi-gigabyte weights, restarting
+// from zero on every reset turned an unstable link into a download that never finished.
+async function downloadUrl(url, dest, onProg, depth = 0, ctrl) {
+  const tmp = dest + '.tmp';
+  let lastErr = null;
+  for (let attempt = 1; attempt <= DOWNLOAD_ATTEMPTS; attempt++) {
+    if (ctrl && ctrl.canceled) throw new Error('CANCELED');
+    let from = 0;
+    try { from = fs.statSync(tmp).size; } catch { from = 0; }
+    try {
+      await downloadAttempt(url, tmp, from, onProg, ctrl);
+      fs.renameSync(tmp, dest);
+      return dest;
+    } catch (e) {
+      if (ctrl && ctrl.canceled) { try { fs.unlinkSync(tmp); } catch { /* */ } throw new Error('CANCELED'); }
+      lastErr = e;
+      let after = 0;
+      try { after = fs.statSync(tmp).size; } catch { after = 0; }
+      // No byte gained (Range refused, 416, immediate drop): the partial is useless and would make
+      // every retry resume at the same dead point. Start clean instead.
+      if (after <= from) { try { fs.unlinkSync(tmp); } catch { /* */ } }
+      if (e && e.fatal) break;
+      if (attempt < DOWNLOAD_ATTEMPTS) await new Promise((r) => setTimeout(r, attempt * 1000));
+    }
+  }
+  try { fs.unlinkSync(tmp); } catch { /* */ }
+  throw lastErr;
 }
 
 // GET JSON (suit les redirections). Sert à lire l'arbre de fichiers d'un dépôt HF (tailles).
@@ -1110,32 +1200,55 @@ async function downloadHf(id, m, emit, ctrl) {
     files = [pool[0]];
   }
   const total = files.reduce((s, f) => s + (f.size || 0), 0);
+  // Cumulative progress over CONCURRENT files: `done` counts the finished ones, `live` holds the
+  // advance of each download in flight. A single counter no longer holds — files do not progress
+  // one after the other any more.
   let done = 0;
+  const live = new Map();
   let lastPct = -1;
+  const bump = () => {
+    let cur = done;
+    for (const v of live.values()) cur += v;
+    const pct = total ? Math.min(99, Math.round((cur / total) * 100)) : null;
+    // Network chunks land far faster than React can paint them. One event per percent avoids
+    // hundreds of identical rerenders on big models — all the more so with four streams at once.
+    if (pct !== null && pct === lastPct) return;
+    if (pct !== null) lastPct = pct;
+    emit({ id, pct, done: cur, total, stage: 'download' });
+  };
   emit({ id, pct: 0, done, total, stage: 'download' });
-  for (const f of files) {
-    if (ctrl && ctrl.canceled) return { ok: false, id, canceled: true };
-    const out = path.join(dest, f.out || f.path);
-    try { await fsp.mkdir(path.dirname(out), { recursive: true }); } catch { /* */ }
-    if (fs.existsSync(out) && f.size && fs.statSync(out).size === f.size) { done += f.size; continue; }
-    const base = done;
-    const url = `https://huggingface.co/${f.repo || m.repo}/resolve/main/${f.path.split('/').map(encodeURIComponent).join('/')}`;
-    try {
-      await downloadUrl(url, out, (fileDone) => {
-        // pct cumulé = (octets des fichiers finis + octets du fichier courant) / total.
-        const pct = total ? Math.min(99, Math.round(((base + fileDone) / total) * 100)) : null;
-        // Les chunks réseau arrivent beaucoup plus vite que React ne peut les afficher. Un seul
-        // événement par pourcentage évite des centaines de rerenders identiques sur les gros modèles.
-        if (pct !== null && pct === lastPct) return;
-        if (pct !== null) lastPct = pct;
-        emit({ id, pct, done: base + fileDone, total, stage: 'download' });
-      }, 0, ctrl);
-    } catch (e) {
-      if (ctrl && ctrl.canceled) return { ok: false, id, canceled: true };
-      return { ok: false, id, error: `${t('downloadFailed')} (${f.path}) : ${e}` };
+
+  let next = 0;
+  /** @type {string|null} */
+  let failure = null;
+  const worker = async () => {
+    for (;;) {
+      if (failure || (ctrl && ctrl.canceled)) return;
+      const i = next++;
+      if (i >= files.length) return;
+      const f = files[i];
+      const out = path.join(dest, f.out || f.path);
+      try { await fsp.mkdir(path.dirname(out), { recursive: true }); } catch { /* */ }
+      if (fs.existsSync(out) && f.size && fs.statSync(out).size === f.size) { done += f.size; bump(); continue; }
+      const url = `https://huggingface.co/${f.repo || m.repo}/resolve/main/${f.path.split('/').map(encodeURIComponent).join('/')}`;
+      try {
+        await downloadUrl(url, out, (fileDone) => { live.set(i, fileDone); bump(); }, 0, ctrl);
+        live.delete(i);
+        done += (f.size || 0);
+        bump();
+      } catch (e) {
+        live.delete(i);
+        if (ctrl && ctrl.canceled) return;
+        // First failure wins: the other workers stop on their next turn instead of going on pulling
+        // bytes for a model that is already lost.
+        if (!failure) failure = `${t('downloadFailed')} (${f.path}) : ${e}`;
+        return;
+      }
     }
-    done += (f.size || 0);
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(HF_PARALLEL, files.length) }, () => worker()));
+  if (ctrl && ctrl.canceled) return { ok: false, id, canceled: true };
+  if (failure) return { ok: false, id, error: failure };
   return { ok: true, id };
 }
 
@@ -1215,17 +1328,23 @@ function bindCancelable(ctrl, p) {
   return () => { if (ctrl.cancelCurrent === cancel) ctrl.cancelCurrent = null; };
 }
 
-// Le trio torch/torchvision/torchaudio est une ABI, pas trois paquets : une roue prise sur PyPI par
-// une dépendance transitive (silero-vad demande `torchaudio>=0.12`) écrase celle bâtie pour ce torch,
-// et l'import lève [WinError 127] — la panne apparaît DANS UN AUTRE MODULE que celui installé. On
-// contraint donc chaque `pip install` de modèle aux versions DÉJÀ posées : pip choisit la roue en
+// Deux familles de paquets ne se choisissent PAS au coup par coup, parce qu'une roue mal assortie ne
+// casse pas le modèle qu'on installe mais un AUTRE, plus tard :
+//   · torch / torchvision / torchaudio = une seule ABI. `silero-vad` demande `torchaudio>=0.12`, pip
+//     prend la dernière de PyPI, et l'import lève [WinError 127].
+//   · onnxruntime, onnxruntime-gpu, onnxruntime-directml écrivent dans le MÊME dossier `onnxruntime/`.
+//     `rembg[gpu]` et `onnx-asr[gpu,hub]` réclament `onnxruntime-gpu` sans borne : la roue posée est
+//     la branche CUDA 13, son provider réclame une DLL absente d'un venv cu124, et TOUTE l'inférence
+//     ONNX (visages, Parakeet, détourage) repasse sur processeur sans un seul message.
+// Chaque `pip install` de modèle est donc contraint aux versions DÉJÀ posées : pip garde la roue en
 // place, ou échoue en le disant. Fichier écrit une fois par démarrage du core, à partir du venv réel.
 let torchConstraint;
 async function torchConstraintFile() {
   if (torchConstraint !== undefined) return torchConstraint;
   torchConstraint = null;
   const code = 'import importlib.metadata as m\n'
-    + 'for n in ("torch","torchvision","torchaudio"):\n'
+    + 'for n in ("torch","torchvision","torchaudio",'
+    + '"onnxruntime","onnxruntime-gpu","onnxruntime-directml","onnxruntime-openvino"):\n'
     + '    try: print(n+"=="+m.version(n))\n'
     + '    except Exception: pass\n';
   const pins = await new Promise((resolve) => {
@@ -1520,7 +1639,7 @@ async function downloadModel(id, emit, replace = false) {
   // La vue Paramètres peut être démontée/remontée pendant un téléchargement. Dans ce cas un clic
   // tardif sur « Reprendre » rejoint simplement l'opération réelle au lieu d'afficher une erreur.
   if (activeDownloads.has(id)) return { ok: true, id, active: true };
-  const ctrl = { canceled: false, req: null, cancelCurrent: null, progress: { pct: 0, stage: 'download' } };
+  const ctrl = { canceled: false, cancels: new Set(), cancelCurrent: null, progress: { pct: 0, stage: 'download' } };
   activeDownloads.set(id, ctrl);
   const report = (progress) => {
     ctrl.progress = progress;
