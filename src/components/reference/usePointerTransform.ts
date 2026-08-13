@@ -9,6 +9,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type Geom, MIN_SIZE } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
+import { rotatedBBox } from "./boardArrange";
+import { snapMove, snapValue, snapCandidates, type SnapGuide, type SnapRect } from "./boardSnap";
+import { clearLive, setLiveGeom, setLiveGuides } from "./boardLive";
 
 export type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 type Mode = { type: "move" } | { type: "rotate" } | { type: "resize"; handle: ResizeHandle };
@@ -23,6 +26,9 @@ interface Drag {
   scx: number; // centre item à l'ÉCRAN (px) — pivot de rotation (invariant pan/zoom)
   scy: number;
   scale: number; // zoom du board FIGÉ au début du geste (cf. commentaire d'en-tête)
+  // Aimant : voisins et seuil FIGÉS au début du geste (une seule lecture du store, pas une par frame).
+  snap: { others: SnapRect[]; cands: { x: number[]; y: number[] }; threshold: number; stick: number } | null;
+  live: boolean; // publier la géométrie vivante (des tracés sont liés à cet item)
 }
 
 const RAD = Math.PI / 180;
@@ -37,7 +43,16 @@ const HANDLE_DIR: Record<ResizeHandle, { dx: number; dy: number }> = {
 export function usePointerTransform(
   geom: Geom,
   onCommit: (g: Geom) => void,
-  opts?: { keepAspect?: boolean; captureRef?: React.RefObject<HTMLElement | null> },
+  opts?: {
+    keepAspect?: boolean;
+    captureRef?: React.RefObject<HTMLElement | null>;
+    // Id de l'item manipulé : active l'aimant (les autres items deviennent des cibles d'accrochage)
+    // et la publication de géométrie vivante quand des tracés lui sont liés.
+    id?: string;
+    // Items EMMENÉS par celui-ci (contenu d'un cadre) : ils ne peuvent pas être cibles d'aimant.
+    // Fonction acceptée pour ne calculer la liste qu'au début du geste, pas à chaque rendu.
+    groupIds?: string[] | (() => string[]);
+  },
 ) {
   const [override, setOverride] = useState<Geom | null>(null);
   const drag = useRef<Drag | null>(null);
@@ -71,6 +86,42 @@ export function usePointerTransform(
       // le pan/zoom du board (l'angle est invariant par translation/échelle uniforme).
       const r = cap.getBoundingClientRect();
       const g = latest.current;
+      const st = useBoard.getState();
+      const scale = st.view.scale;
+
+      // Cibles de l'aimant : tous les autres items, sauf ceux qui partent avec (multi-sélection),
+      // le calque de dessin, et les cadres de pose. Lues UNE fois : la scène ne bouge pas pendant
+      // le geste, et relire N items par frame coûterait plus cher que le geste lui-même.
+      let snap: Drag["snap"] = null;
+      if (opts?.id && st.prefs.snap && mode.type !== "rotate") {
+        // Ce qui part AVEC l'item ne peut pas servir de cible : la multi-sélection déplacée en bloc,
+        // et le contenu d'un cadre (un cadre emmène ce qu'il contient).
+        const group = st.selectedIds.length > 1 && st.selectedIds.includes(opts.id) ? st.selectedIds : [opts.id];
+        const carried = typeof opts.groupIds === "function" ? opts.groupIds() : opts.groupIds ?? [];
+        const skip = new Set([...group, ...carried]);
+        const others = st.items
+          .filter((it) => !skip.has(it.id) && it.kind !== "draw" && it.w > 0 && it.h > 0)
+          .map((it) => {
+            const b = rotatedBBox(it);
+            return { x: b.x, y: b.y, w: b.w, h: b.h };
+          });
+        if (others.length) {
+          snap = {
+            others,
+            cands: snapCandidates(others),
+            threshold: (st.prefs.snapThreshold ?? 8) / scale,
+            stick: st.prefs.snapStick ?? 0,
+          };
+        }
+      }
+
+      // Publication vivante seulement si un tracé est réellement lié à cet item (sinon, zéro coût).
+      const anchored = opts?.id
+        ? (st.items.find((it) => it.kind === "draw")?.shapes ?? []).some(
+            (s) => s.own === opts.id || s.a1?.id === opts.id || s.a2?.id === opts.id,
+          )
+        : false;
+
       drag.current = {
         mode,
         startX: e.clientX,
@@ -80,11 +131,13 @@ export function usePointerTransform(
         cy: g.y + g.h / 2,
         scx: r.left + r.width / 2,
         scy: r.top + r.height / 2,
-        scale: useBoard.getState().view.scale,
+        scale,
+        snap,
+        live: anchored,
       };
       useBoard.getState().beginNavigation();
     },
-    [opts?.captureRef],
+    [opts?.captureRef, opts?.id, opts?.groupIds],
   );
 
   const onPointerMove = useCallback(
@@ -97,7 +150,18 @@ export function usePointerTransform(
       const o = d.origin;
 
       if (d.mode.type === "move") {
-        schedule({ ...o, x: o.x + dxs, y: o.y + dys });
+        let g: Geom = { ...o, x: o.x + dxs, y: o.y + dys };
+        // Aimant : accrochage bords / centres / coins, et collage bord à bord. Alt = geste libre.
+        if (d.snap && !e.altKey) {
+          const b = rotatedBBox(g);
+          const res = snapMove(b, d.snap.others, d.snap.threshold, d.snap.stick);
+          if (res.dx || res.dy) g = { ...g, x: g.x + res.dx, y: g.y + res.dy };
+          setLiveGuides(res.guides);
+        } else if (d.snap) {
+          setLiveGuides([]);
+        }
+        schedule(g);
+        if (d.live && opts?.id) setLiveGeom({ [opts.id]: g });
         return;
       }
 
@@ -106,8 +170,10 @@ export function usePointerTransform(
         const a0 = Math.atan2(d.startY - d.scy, d.startX - d.scx);
         const a1 = Math.atan2(e.clientY - d.scy, e.clientX - d.scx);
         let deg = o.rotation + (a1 - a0) / RAD;
-        if (e.shiftKey) deg = Math.round(deg / 15) * 15; // snap 15°
-        schedule({ ...o, rotation: deg });
+        if (e.shiftKey || e.ctrlKey) deg = Math.round(deg / 15) * 15; // snap 15°
+        const g = { ...o, rotation: deg };
+        schedule(g);
+        if (d.live && opts?.id) setLiveGeom({ [opts.id]: g });
         return;
       }
 
@@ -141,9 +207,34 @@ export function usePointerTransform(
       const offY = offLocalX * sin + offLocalY * cos;
       const ncx = d.cx + offX;
       const ncy = d.cy + offY;
-      schedule({ rotation: o.rotation, w: nw, h: nh, x: ncx - nw / 2, y: ncy - nh / 2 });
+      let g: Geom = { rotation: o.rotation, w: nw, h: nh, x: ncx - nw / 2, y: ncy - nh / 2 };
+
+      // Aimant au redimensionnement : seuls les bords TIRÉS s'accrochent, et seulement sur un item
+      // non tourné (sur un item pivoté, « le bord droit » n'a plus d'axe propre — on laisse libre).
+      if (d.snap && !e.altKey && !o.rotation) {
+        const guides: SnapGuide[] = [];
+        const { cands } = d.snap;
+        if (dir.dx > 0) {
+          const s = snapValue(g.x + g.w, cands.x, d.snap.threshold);
+          if (s.at != null) { g = { ...g, w: Math.max(MIN_SIZE, s.value - g.x) }; guides.push({ axis: "x", at: s.at, from: g.y, to: g.y + g.h }); }
+        } else if (dir.dx < 0) {
+          const s = snapValue(g.x, cands.x, d.snap.threshold);
+          if (s.at != null) { const right = g.x + g.w; g = { ...g, x: s.value, w: Math.max(MIN_SIZE, right - s.value) }; guides.push({ axis: "x", at: s.at, from: g.y, to: g.y + g.h }); }
+        }
+        if (dir.dy > 0) {
+          const s = snapValue(g.y + g.h, cands.y, d.snap.threshold);
+          if (s.at != null) { g = { ...g, h: Math.max(MIN_SIZE, s.value - g.y) }; guides.push({ axis: "y", at: s.at, from: g.x, to: g.x + g.w }); }
+        } else if (dir.dy < 0) {
+          const s = snapValue(g.y, cands.y, d.snap.threshold);
+          if (s.at != null) { const bottom = g.y + g.h; g = { ...g, y: s.value, h: Math.max(MIN_SIZE, bottom - s.value) }; guides.push({ axis: "y", at: s.at, from: g.x, to: g.x + g.w }); }
+        }
+        setLiveGuides(guides);
+      }
+
+      schedule(g);
+      if (d.live && opts?.id) setLiveGeom({ [opts.id]: g });
     },
-    [schedule, opts?.keepAspect],
+    [schedule, opts?.keepAspect, opts?.id],
   );
 
   const onPointerUp = useCallback(
@@ -162,6 +253,8 @@ export function usePointerTransform(
         onCommit(g);
         setOverride(null);
       }
+      // Le store fait de nouveau foi : guides éteints, géométrie vivante rendue.
+      clearLive();
       useBoard.getState().endNavigation();
     },
     [onCommit, override, opts?.captureRef],
@@ -172,6 +265,7 @@ export function usePointerTransform(
       if (raf.current != null) cancelAnimationFrame(raf.current);
       if (drag.current) {
         drag.current = null;
+        clearLive();
         useBoard.getState().endNavigation();
       }
     },

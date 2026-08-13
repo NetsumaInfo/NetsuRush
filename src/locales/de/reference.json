@@ -21,7 +21,17 @@
     "unpin": "Lösen",
     "settings": "Einstellungen",
     "addFavorite": "Zu Favoriten",
-    "removeFavorite": "Aus Favoriten"
+    "removeFavorite": "Aus Favoriten",
+    "copy": "Kopieren",
+    "cut": "Ausschneiden",
+    "grayscale": "Graustufen",
+    "reset": "Zurücksetzen",
+    "resetScale": "Originalgröße",
+    "resetRotation": "Drehung",
+    "resetFlip": "Spiegelungen",
+    "resetCrop": "Zuschnitt",
+    "resetAll": "Alles zurücksetzen",
+    "fitSelection": "Auswahl einpassen"
   },
   "toolbar": {
     "home": "Start",
@@ -40,7 +50,9 @@
     "openScene": "Szene öffnen",
     "share": "Teilen",
     "unsaved": "Nicht gespeichert",
-    "saveAs": "Speichern unter…"
+    "saveAs": "Speichern unter…",
+    "snapOn": "Magnet aktivieren",
+    "snapOff": "Magnet deaktivieren"
   },
   "settings": {
     "tabLook": "Aussehen",
@@ -160,7 +172,15 @@
     "provider_niconico": "Niconico",
     "provider_odysee": "Odysee",
     "provider_rumble": "Rumble",
-    "provider_generic": "Andere Websites"
+    "provider_generic": "Andere Websites",
+    "snapTitle": "Magnet",
+    "snapEnabled": "An anderen Elementen ausrichten",
+    "snapThreshold": "Fangabstand (px)",
+    "snapStick": "Abstand beim Anlegen",
+    "arrangeTitle": "Ordnen",
+    "autoArrangeOnImport": "Importierte Stapel automatisch ordnen",
+    "autoAnchorDraw": "Zeichnungen automatisch mit Medien verbinden",
+    "paletteSize": "Farben pro extrahierter Palette"
   },
   "inspector": {
     "ytPlayer": "YouTube-Player",
@@ -287,7 +307,18 @@
     "zoomIn": "Vergrößern",
     "zoomOut": "Verkleinern",
     "saveAs": "Speichern unter",
-    "openProject": "Projekt öffnen"
+    "openProject": "Projekt öffnen",
+    "copy": "Kopieren",
+    "cut": "Ausschneiden",
+    "fitSelection": "Auswahl einpassen",
+    "normalizeHeight": "Gleiche Höhe",
+    "normalizeWidth": "Gleiche Breite",
+    "normalizeArea": "Gleiche Fläche",
+    "arrangeDefault": "Auswahl ordnen",
+    "resetAll": "Alles zurücksetzen",
+    "grayscale": "Graustufen",
+    "toFront": "In den Vordergrund",
+    "toBack": "In den Hintergrund"
   },
   "drawStyle": {
     "thin": "Dünner Strich",
@@ -314,7 +345,10 @@
     "fill": "Füllen",
     "fillLabel": "Füllung",
     "rounded": "Abgerundete Ecken",
-    "duplicate": "Duplizieren (Strg+D)"
+    "duplicate": "Duplizieren (Strg+D)",
+    "unlink": "Vom Medium lösen",
+    "relink": "Mit Medium verbinden",
+    "linkedTo": "Mit {{count}} Element(en) verbunden"
   },
   "media": {
     "browse": "Durchsuchen",
@@ -367,7 +401,8 @@
     "backHome": "Zurück zum Start",
     "alwaysOnTop": "Immer im Vordergrund",
     "openProject": "Projekt öffnen…",
-    "relocateMissing": "Fehlende Medien neu verknüpfen ({{count}})"
+    "relocateMissing": "Fehlende Medien neu verknüpfen ({{count}})",
+    "folder": "Ordner…"
   },
   "linkDialog": {
     "title": "Online-Video hinzufügen",
@@ -509,7 +544,10 @@
     "clipboardEmpty": "Zwischenablage leer oder nicht unterstützt",
     "clipboardEmptyLink": "Zwischenablage leer oder Link unbekannt",
     "emptyTitle": "Bilder, Videos oder einen YouTube-Link hierher ziehen",
-    "emptyHint": "Einfügen (Strg+V) · Mausrad zum Zoomen · Hintergrund ziehen zum Navigieren"
+    "emptyHint": "Einfügen (Strg+V) · Mausrad zum Zoomen · Hintergrund ziehen zum Navigieren",
+    "pastedItems": "{{count}} Element(e) eingefügt",
+    "copiedDone": "{{count}} Element(e) kopiert",
+    "cutDone": "{{count}} Element(e) ausgeschnitten"
   },
   "notice": {
     "recoveringMedia": "Medium wird wiederhergestellt…",
@@ -547,5 +585,60 @@
     "relocating": "Medien im Ordner werden gesucht… ({{count}})",
     "relocated": "{{count}}/{{total}} Medien neu verknüpft",
     "relocatedNone": "Keine Medien in diesem Ordner erkannt"
+  },
+  "tidy": {
+    "title": "Ordnen",
+    "layout": "Anordnung",
+    "layoutPack": "Optimal",
+    "layoutGrid": "Raster",
+    "layoutRow": "Zeile",
+    "layoutCol": "Spalte",
+    "uniform": "Größe angleichen",
+    "uniformNone": "Keine",
+    "uniformHeight": "Gleiche Höhe",
+    "uniformWidth": "Gleiche Breite",
+    "uniformArea": "Gleiche Fläche",
+    "gap": "Abstand",
+    "sort": "Reihenfolge",
+    "sortCurrent": "Aktuell",
+    "sortName": "Nach Name",
+    "apply": "Ordnen"
+  },
+  "palette": {
+    "defaultTitle": "Palette",
+    "extract": "Palette extrahieren",
+    "copied": "{{hex}} kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen",
+    "empty": "Keine Farben",
+    "working": "Farben werden extrahiert…",
+    "done": "{{count}} Farben extrahiert",
+    "doneSkipped": "{{count}} Farben extrahiert · {{skipped}} Medien übersprungen",
+    "failed": "Keine verwertbaren Farben",
+    "noSource": "Keine verwertbaren Medien in der Auswahl",
+    "sourcesGone": "Die Quellmedien sind nicht mehr auf dem Board",
+    "regenerate": "Neu berechnen",
+    "size": "Farben",
+    "showHex": "Werte anzeigen"
+  },
+  "exportImage": {
+    "menu": "Als Bild exportieren…",
+    "title": "Board exportieren",
+    "subtitle": "Das Board als Bild oder SVG rendern.",
+    "width": "Breite",
+    "height": "Höhe",
+    "selectionOnly": "Nur Auswahl ({{count}})",
+    "transparent": "Transparenter Hintergrund",
+    "export": "Exportieren",
+    "done": "Board exportiert",
+    "failed": "Export fehlgeschlagen: {{error}}",
+    "hint": "Gerendert wird der Board-Inhalt: Videos mit ihrem aktuellen Bild, Online-Player als Karte."
+  },
+  "ingest": {
+    "folderUnavailable": "Ordnerimport nicht verfügbar",
+    "folderScanning": "Ordner wird gelesen…",
+    "folderEmpty": "Keine Medien in diesem Ordner",
+    "folderDone": "{{count}} Medien importiert",
+    "folderDoneTruncated": "{{count}} Medien importiert (Ordner gekürzt)",
+    "folderNoPath": "Ordnerpfad nicht gefunden"
   }
 }

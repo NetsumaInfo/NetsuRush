@@ -8,7 +8,7 @@ import i18n from "@/i18n";
 import { comboFromEvent, isCompleteCombo, type ShortcutMap } from "@/lib/shortcuts";
 import { embedSrc } from "./embeds";
 
-export type ItemKind = "image" | "video" | "youtube" | "embed" | "text" | "frame" | "draw" | "sequence";
+export type ItemKind = "image" | "video" | "youtube" | "embed" | "text" | "frame" | "draw" | "sequence" | "palette";
 
 // Ce qu'un fichier .netsu garde des médias. L'ordre est celui du plus léger au plus lourd : il est
 // repris tel quel par le dialogue de partage, les réglages du board et l'inspecteur d'item.
@@ -51,20 +51,33 @@ export const DEFAULT_DRAW_KEYS: DrawKeys = Object.fromEntries(DRAW_TOOL_DEFS.map
 // l'événement clavier via `comboFromEvent`. Les Paramètres éditent `prefs.shortcutKeys`.
 export type ShortcutAction =
   | "delete" | "deselect" | "selectAll" | "duplicate"
-  | "undo" | "redo" | "save" | "saveAs" | "openProject" | "fit" | "zoomIn" | "zoomOut";
+  | "undo" | "redo" | "save" | "saveAs" | "openProject" | "fit" | "zoomIn" | "zoomOut"
+  | "copy" | "cut" | "fitSelection" | "grayscale" | "resetAll" | "toFront" | "toBack"
+  | "normalizeHeight" | "normalizeWidth" | "normalizeArea" | "arrangeDefault";
 export const SHORTCUT_DEFS: { action: ShortcutAction; labelKey: string; combo: string }[] = [
   { action: "delete", labelKey: "shortcut.delete", combo: "Delete" },
   { action: "deselect", labelKey: "shortcut.deselect", combo: "Escape" },
   { action: "selectAll", labelKey: "shortcut.selectAll", combo: "Ctrl+A" },
   { action: "duplicate", labelKey: "shortcut.duplicate", combo: "Ctrl+D" },
+  { action: "copy", labelKey: "shortcut.copy", combo: "Ctrl+C" },
+  { action: "cut", labelKey: "shortcut.cut", combo: "Ctrl+X" },
   { action: "undo", labelKey: "shortcut.undo", combo: "Ctrl+Z" },
   { action: "redo", labelKey: "shortcut.redo", combo: "Ctrl+Shift+Z" },
   { action: "save", labelKey: "shortcut.save", combo: "Ctrl+S" },
   { action: "saveAs", labelKey: "shortcut.saveAs", combo: "Ctrl+Shift+S" },
   { action: "openProject", labelKey: "shortcut.openProject", combo: "Ctrl+O" },
   { action: "fit", labelKey: "shortcut.fit", combo: "Ctrl+0" },
+  { action: "fitSelection", labelKey: "shortcut.fitSelection", combo: "Shift+F" },
   { action: "zoomIn", labelKey: "shortcut.zoomIn", combo: "Ctrl+=" },
   { action: "zoomOut", labelKey: "shortcut.zoomOut", combo: "Ctrl+-" },
+  { action: "normalizeHeight", labelKey: "shortcut.normalizeHeight", combo: "Shift+H" },
+  { action: "normalizeWidth", labelKey: "shortcut.normalizeWidth", combo: "Shift+W" },
+  { action: "normalizeArea", labelKey: "shortcut.normalizeArea", combo: "Shift+S" },
+  { action: "arrangeDefault", labelKey: "shortcut.arrangeDefault", combo: "Shift+O" },
+  { action: "resetAll", labelKey: "shortcut.resetAll", combo: "R" },
+  { action: "grayscale", labelKey: "shortcut.grayscale", combo: "G" },
+  { action: "toFront", labelKey: "shortcut.toFront", combo: "PageUp" },
+  { action: "toBack", labelKey: "shortcut.toBack", combo: "PageDown" },
 ];
 export type ShortcutKeys = ShortcutMap;
 export const DEFAULT_SHORTCUT_KEYS: ShortcutKeys = Object.fromEntries(SHORTCUT_DEFS.map((d) => [d.action, d.combo]));
@@ -87,6 +100,15 @@ export type RouteStyle = "straight" | "curved" | "elbow";
 // `h1`/`h2` = pointe à l'extrémité de départ / d'arrivée (line + arrow ; défaut arrow → h2 "arrow").
 // `dash` = style du trait ; `route` = type de tracé (line/arrow). `op` = opacité 0–1 (undefined = 1,
 // le surligneur trace à ~0,45). `r` = coins arrondis (rect seulement).
+// Ancre d'un tracé sur un item : id de l'item + position NORMALISÉE dans son repère (0..1, rotation
+// et miroirs compris). Reconvertie en coordonnées monde à chaque rendu → le tracé suit l'item quand
+// il est déplacé, redimensionné, tourné ou mis en miroir. Item disparu ⇒ ancre effacée, tracé figé.
+export interface ShapeAnchor {
+  id: string;
+  fx: number;
+  fy: number;
+}
+
 export interface DrawShape {
   id: string;
   t: "pen" | "line" | "arrow" | "rect" | "ellipse" | "diamond" | "text";
@@ -102,6 +124,14 @@ export interface DrawShape {
   route?: RouteStyle;
   op?: number;
   r?: boolean;
+  // Liaison à un média (accrochage automatique en fin de tracé) :
+  // `own` = forme entièrement posée SUR un item → tous ses points sont exprimés dans son repère et
+  // elle le suit en bloc. `a1`/`a2` = extrémités ancrées d'une ligne/flèche (une flèche tracée d'une
+  // image vers une autre est tenue par ses deux bouts). Absents = forme libre, en coordonnées monde.
+  own?: string;
+  ownPts?: number[];
+  a1?: ShapeAnchor;
+  a2?: ShapeAnchor;
 }
 
 // Item du board. `ref` = localisateur DURABLE (persisté) : chemin disque, URL distante, ou
@@ -136,6 +166,8 @@ export interface BoardItem {
   embed?: NetsuEmbed;
   title?: string;
   opacity?: number;
+  // Rendu en niveaux de gris (juger les valeurs sans se laisser porter par la couleur). Persisté.
+  grayscale?: boolean;
   // Miroir horizontal / vertical.
   flipH?: boolean;
   flipV?: boolean;
@@ -168,6 +200,12 @@ export interface BoardItem {
   underline?: boolean;
   // Dessin (kind === "draw", item singleton board-wide) : formes libres en coords monde.
   shapes?: DrawShape[];
+  // Palette (kind === "palette") : couleurs extraites d'une sélection de médias. `colors` = liste
+  // hex dans l'ordre d'affichage, `sourceIds` = items d'origine (bouton « régénérer » tant qu'ils
+  // existent), `showHex` = afficher la valeur sous chaque pastille.
+  colors?: string[];
+  sourceIds?: string[];
+  showHex?: boolean;
   // Séquence d'images (kind === "sequence") : `frames` = refs DURABLES de
   // chaque frame (chemins disque / URLs), affichées une à la fois. `frame` = index courant (persisté,
   // rouvre sur la même image). `fps` = cadence de base (défaut 12), `speed` = multiplicateur de vitesse
@@ -295,6 +333,31 @@ export function makeFrameItem(x: number, y: number, opts?: { color?: string; fil
 // board (DrawLayer) alignés au pan/zoom. Persisté via la liste d'items.
 export function makeDrawItem(): BoardItem {
   return { id: uid(), kind: "draw", ref: "", src: "", x: 0, y: 0, w: 0, h: 0, rotation: 0, z: 0, shapes: [] };
+}
+
+// Bloc palette : bande de pastilles posée sur le board. La hauteur suit le nombre de couleurs
+// seulement par sa largeur (une seule rangée) ; l'utilisateur reste libre de le redimensionner.
+export const PALETTE_SWATCH = 64;   // côté d'une pastille à la pose (px monde)
+export const PALETTE_HEIGHT = 96;   // hauteur du bloc à la pose (pastille + valeur hex)
+
+export function makePaletteItem(x: number, y: number, colors: string[], sourceIds?: string[]): BoardItem {
+  const n = Math.max(1, colors.length);
+  return {
+    id: uid(),
+    kind: "palette",
+    ref: "",
+    src: "",
+    x,
+    y,
+    w: n * PALETTE_SWATCH,
+    h: PALETTE_HEIGHT,
+    rotation: 0,
+    z: 0,
+    colors,
+    sourceIds,
+    showHex: true,
+    title: i18n.t("reference:palette.defaultTitle"),
+  };
 }
 
 
@@ -434,7 +497,7 @@ const NATIVE_VIDEO = new Set(["mp4", "m4v", "mov", "webm"]);
 // Localisateur durable → URL d'affichage. Chemin disque → core HTTP (/media Range-aware, ou /stream
 // remux pour les conteneurs non lus) ; URL http(s)/data/blob → telle quelle ; youtube → YoutubeItem.
 export function displaySrc(kind: ItemKind, ref: string): string {
-  if (kind === "text" || kind === "frame" || kind === "draw") return "";
+  if (kind === "text" || kind === "frame" || kind === "draw" || kind === "palette") return "";
   // Séquence : pas de src unique (chaque frame calcule son src d'affichage via seqFrameSrc).
   if (kind === "sequence") return "";
   if (kind === "youtube") return ref;

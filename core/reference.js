@@ -419,4 +419,58 @@ function sanitizeFile(s) {
   return String(s || 'asset').replace(/[\\/:*?"<>|]+/g, '_');
 }
 
-module.exports = { createReferenceStore };
+// Extensions d'image acceptées à l'import d'un dossier (mêmes familles que le board côté renderer).
+const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'avif']);
+// Extensions vidéo : VIDEO_EXTS couvre les conteneurs lus par le board, complété ici par ceux que
+// ffmpeg remuxe à la volée (le board sait déjà les afficher via /stream).
+const IMPORT_VIDEO_EXTS = new Set([...VIDEO_EXTS, 'wmv', 'flv', 'mts', 'm2ts', 'ts', '3gp']);
+
+// Parcours RÉCURSIF d'un dossier déposé sur le board. Renvoie les médias trouvés avec leur
+// sous-dossier RELATIF : l'import s'en sert pour poser un cadre par dossier. Plafonné, parce qu'un
+// dossier de rushes peut contenir des dizaines de milliers de fichiers et qu'un board n'est pas un
+// explorateur — au-delà, on tronque et on le DIT (`truncated`).
+function scanFolder(dir, options) {
+  const opts = options || {};
+  const cap = Math.max(1, Math.min(5000, Number(opts.cap) || 1000));
+  const root = path.resolve(String(dir || ''));
+  /** @type {{path: string, rel: string, name: string, kind: string}[]} */
+  const files = [];
+  let truncated = false;
+
+  const stack = [root];
+  while (stack.length) {
+    const current = stack.pop();
+    let entries;
+    try { entries = fs.readdirSync(current, { withFileTypes: true }); } catch (_) { continue; }
+    entries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    for (const e of entries) {
+      const full = path.join(current, e.name);
+      if (e.isDirectory()) { stack.push(full); continue; }
+      const ext = path.extname(e.name).slice(1).toLowerCase();
+      const kind = IMAGE_EXTS.has(ext) ? 'image' : IMPORT_VIDEO_EXTS.has(ext) ? 'video' : null;
+      if (!kind) continue;
+      if (files.length >= cap) { truncated = true; continue; }
+      const rel = path.relative(root, path.dirname(full));
+      files.push({ path: full, rel: rel.split(path.sep).join('/'), name: e.name, kind });
+    }
+  }
+
+  files.sort((a, b) => (a.rel === b.rel ? a.name.localeCompare(b.name, undefined, { numeric: true }) : a.rel.localeCompare(b.rel)));
+  return { ok: true, root, name: path.basename(root), files, truncated, count: files.length };
+}
+
+// Écriture d'un fichier exporté (image PNG/JPG en base64, SVG en texte). Réservée aux exports du
+// board : le chemin vient d'un dialogue d'enregistrement natif, donc choisi par l'utilisateur.
+function writeExportFile(filePath, data, encoding) {
+  try {
+    const target = path.resolve(String(filePath || ''));
+    const buf = encoding === 'base64' ? Buffer.from(String(data || ''), 'base64') : Buffer.from(String(data || ''), 'utf8');
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, buf);
+    return { ok: true, path: target, bytes: buf.length };
+  } catch (e) {
+    return { ok: false, error: String((e && e.message) || e) };
+  }
+}
+
+module.exports = { createReferenceStore, scanFolder, writeExportFile };

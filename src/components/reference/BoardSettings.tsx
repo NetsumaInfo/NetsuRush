@@ -341,6 +341,56 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
 
         <Separator />
 
+        {/* Aimant : accrochage d'un item déplacé sur les bords, centres et coins des voisins. */}
+        <section className="flex flex-col gap-3">
+          <h3 className="text-xs font-semibold text-foreground">{t("settings.snapTitle")}</h3>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-foreground">{t("settings.snapEnabled")}</span>
+            <Seg active={prefs.snap} onClick={() => setPrefs({ snap: !prefs.snap })}>
+              {prefs.snap ? t("settings.enabled") : t("settings.disabled")}
+            </Seg>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="mr-1 text-xs text-muted-foreground">{t("settings.snapThreshold")}</span>
+            {[4, 8, 14, 20].map((v) => (
+              <Seg key={v} active={prefs.snapThreshold === v} onClick={() => setPrefs({ snapThreshold: v })}>{v}</Seg>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="mr-1 text-xs text-muted-foreground">{t("settings.snapStick")}</span>
+            {[0, 4, 8, 16].map((v) => (
+              <Seg key={v} active={prefs.snapStick === v} onClick={() => setPrefs({ snapStick: v })}>{v}</Seg>
+            ))}
+          </div>
+        </section>
+
+        <Separator />
+
+        {/* Rangement de groupe + accrochage des tracés + palette */}
+        <section className="flex flex-col gap-3">
+          <h3 className="text-xs font-semibold text-foreground">{t("settings.arrangeTitle")}</h3>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-foreground">{t("settings.autoArrangeOnImport")}</span>
+            <Seg active={prefs.autoArrangeOnImport} onClick={() => setPrefs({ autoArrangeOnImport: !prefs.autoArrangeOnImport })}>
+              {prefs.autoArrangeOnImport ? t("settings.enabled") : t("settings.disabled")}
+            </Seg>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-foreground">{t("settings.autoAnchorDraw")}</span>
+            <Seg active={prefs.autoAnchorDraw} onClick={() => setPrefs({ autoAnchorDraw: !prefs.autoAnchorDraw })}>
+              {prefs.autoAnchorDraw ? t("settings.enabled") : t("settings.disabled")}
+            </Seg>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="mr-1 text-xs text-muted-foreground">{t("settings.paletteSize")}</span>
+            {[4, 6, 8, 12].map((v) => (
+              <Seg key={v} active={prefs.paletteSize === v} onClick={() => setPrefs({ paletteSize: v })}>{v}</Seg>
+            ))}
+          </div>
+        </section>
+
+        <Separator />
+
         {/* Comportement */}
         <section className="flex items-center justify-between gap-3">
           <h3 className="text-xs font-semibold text-foreground">{t("settings.fitOnOpen")}</h3>

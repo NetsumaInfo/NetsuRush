@@ -34,8 +34,41 @@ import {
   makeFrameItem,
 } from "./referenceShared";
 import { shapeBBox } from "./drawGeometry";
+import { boundsOf, rotatedBBox } from "./boardArrange";
+import { useLive } from "./boardLive";
+import { itemToPngBlob } from "./boardRender";
 
 const clampScale = (s: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s));
+
+// Guides de l'aimant : traits d'un pixel ÉCRAN (épaisseur indépendante du zoom) montrant l'axe sur
+// lequel l'item vient de s'accrocher. Abonné au canal vivant : hors geste, ce composant ne rend rien
+// et ne re-rend jamais — un board qui n'aimante pas ne paie rien.
+function SnapGuides({ view }: { view: BoardView }) {
+  const { guides } = useLive();
+  if (!guides.length) return null;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30">
+      {guides.map((g, i) => {
+        const a = view.tx + g.at * view.scale;
+        const b = view.ty + g.at * view.scale;
+        const from = g.axis === "x" ? view.ty + g.from * view.scale : view.tx + g.from * view.scale;
+        const to = g.axis === "x" ? view.ty + g.to * view.scale : view.tx + g.to * view.scale;
+        const pad = 24; // dépassement pour que le guide reste lisible quand les bords coïncident
+        return (
+          <div
+            key={`${g.axis}-${i}`}
+            className="absolute bg-primary/80"
+            style={
+              g.axis === "x"
+                ? { left: a, top: from - pad, width: 1, height: to - from + pad * 2 }
+                : { top: b, left: from - pad, height: 1, width: to - from + pad * 2 }
+            }
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 export interface BoardHandle {
   addFiles: (files: FileList | File[]) => void;
@@ -45,11 +78,19 @@ export interface BoardHandle {
   addCut: (path: string, inSec: number, outSec: number, title?: string) => void;
   addCuts: (path: string, cuts: { in: number; out: number; title?: string }[]) => void;
   addSequence: (paths: string[]) => void;
+  // Import GROUPÉ d'un dossier : un cadre par dossier, contenu rangé, une seule entrée d'annulation.
+  addFolder: (dirPath: string) => void;
   addPaste: (data: DataTransfer) => Promise<boolean>;
   pasteClipboard: () => void;
+  // Colle le presse-papiers INTERNE (items copiés dans le board) au centre du viewport.
+  pasteItems: () => number;
   addText: () => void;
   addFrame: () => void;
   fit: () => void;
+  fitSelection: () => void;
+  // Copier / couper la sélection : presse-papiers interne (tous les items) + presse-papiers système
+  // (PNG du premier média, ou texte d'une note) pour pouvoir coller dans un autre logiciel.
+  copySelection: (cut?: boolean) => Promise<void>;
   reset: () => void;
   zoomBy: (factor: number) => void;
 }
@@ -96,6 +137,8 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   // n'est commité qu'au pointerup. Sinon chaque pointermove (souris 125–1000 Hz) déclenchait un
   // setView → re-render React de tout le board + repaint plein écran du fond en points = saccades.
   const liveView = useRef<BoardView | null>(null);
+  // Vue d'avant un zoom au double-clic : re-double-cliquer le même item y revient exactement.
+  const zoomBack = useRef<{ id: string; view: BoardView } | null>(null);
   const rafId = useRef<number | null>(null);
   const zoomResumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Taille du viewport tenue à jour par ResizeObserver : le culling la lit à chaque frame de pan,
@@ -225,6 +268,7 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   const zoomAt = useCallback(
     (px: number, py: number, factor: number) => {
       holdMediaForZoom();
+      zoomBack.current = null; // vue navigée à la main → le retour du double-clic n'a plus de sens
       const v = useBoard.getState().view;
       const ns = clampScale(v.scale * factor);
       const bx = (px - v.tx) / v.scale;
@@ -305,6 +349,7 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     const wasPanning = gesture.current === "pan";
     if (rafId.current != null) { cancelAnimationFrame(rafId.current); rafId.current = null; }
     if (gesture.current === "pan" && liveView.current) {
+      zoomBack.current = null; // vue navigée à la main → plus de retour au double-clic
       setView(liveView.current); // commit unique : les abonnés React se resynchronisent ici
     }
     if (gesture.current === "marquee" && marqueeRef.current) {
@@ -328,22 +373,29 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     if (wasPanning) useBoard.getState().endNavigation();
   }, [selectMany, setView]);
 
-  // Cadre tous les items dans le viewport (« fit »).
-  const fit = useCallback(() => {
-    const its = useBoard.getState().items;
+  // Cadre un ensemble d'items dans le viewport. Sans liste → tout le board ; la mesure porte sur
+  // l'emprise TOURNÉE, sinon une image pivotée déborderait du cadrage.
+  const fitItems = useCallback((subset?: string[]) => {
+    const all = useBoard.getState().items.filter((it) => it.kind !== "draw");
+    const its = subset?.length ? all.filter((it) => subset.includes(it.id)) : all;
     const r = rect();
     if (!its.length || !r) return;
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const it of its) {
-      minX = Math.min(minX, it.x); minY = Math.min(minY, it.y);
-      maxX = Math.max(maxX, it.x + it.w); maxY = Math.max(maxY, it.y + it.h);
-    }
+    const b = boundsOf(its);
+    if (!(b.w > 0) || !(b.h > 0)) return;
     const pad = 60;
-    const s = clampScale(Math.min((r.width - pad) / (maxX - minX), (r.height - pad) / (maxY - minY)));
-    const tx = (r.width - (maxX - minX) * s) / 2 - minX * s;
-    const ty = (r.height - (maxY - minY) * s) / 2 - minY * s;
-    setView({ tx, ty, scale: s });
+    const s = clampScale(Math.min((r.width - pad) / b.w, (r.height - pad) / b.h));
+    setView({
+      tx: (r.width - b.w * s) / 2 - b.x * s,
+      ty: (r.height - b.h * s) / 2 - b.y * s,
+      scale: s,
+    });
   }, [setView]);
+  const fit = useCallback(() => fitItems(), [fitItems]);
+  // Cadrer la SÉLECTION (repli sur tout le board si rien n'est sélectionné).
+  const fitSelection = useCallback(() => {
+    const sel = useBoard.getState().selectedIds;
+    fitItems(sel.length ? sel : undefined);
+  }, [fitItems]);
 
   // Recadrer tous les items à l'ouverture d'une scène (Paramètres). Un tick après le montage des items.
   useEffect(() => {
@@ -353,18 +405,30 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   }, [sceneId, fitOnOpen, fit]);
 
   // Double-clic sur un média → centre l'item dans le viewport et zoome pour le cadrer.
-  // La demande arrive via le store (focusReq) ; on la consomme puis on la remet à null.
+  // RE-double-clic sur le MÊME item → retour exact à la vue d'avant (transform mémorisée). La
+  // mémoire est invalidée dès qu'on pan/zoome à la main : le retour ne ramène jamais à une vue
+  // périmée. La demande arrive via le store (focusReq) ; on la consomme puis on la remet à null.
   useEffect(() => {
     if (!focusReq) return;
     const it = useBoard.getState().items.find((i) => i.id === focusReq);
     const r = rect();
     useBoard.getState().requestFocus(null);
     if (!it || !r) return;
+    const back = zoomBack.current;
+    if (back && back.id === focusReq) {
+      zoomBack.current = null;
+      setView(back.view);
+      return;
+    }
+    const b = rotatedBBox(it);
     const pad = 80;
-    const s = clampScale(Math.min((r.width - pad) / it.w, (r.height - pad) / it.h));
-    const tx = r.width / 2 - (it.x + it.w / 2) * s;
-    const ty = r.height / 2 - (it.y + it.h / 2) * s;
-    setView({ tx, ty, scale: s });
+    const s = clampScale(Math.min((r.width - pad) / b.w, (r.height - pad) / b.h));
+    zoomBack.current = { id: focusReq, view: useBoard.getState().view };
+    setView({
+      tx: r.width / 2 - b.cx * s,
+      ty: r.height / 2 - b.cy * s,
+      scale: s,
+    });
   }, [focusReq, setView]);
 
   useImperativeHandle(
@@ -377,6 +441,7 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
       addCut: ingest.addCut,
       addCuts: ingest.addCuts,
       addSequence: (paths: string[]) => void ingest.addSequence(paths),
+      addFolder: (dirPath: string) => void ingest.addFolder(dirPath),
       addPaste: ingest.addPaste,
       // Coller depuis le menu contextuel : pas de DataTransfer → on lit le presse-papier async.
       pasteClipboard: async () => {
@@ -396,6 +461,10 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
           if (text) { void ingest.addUrl(text); return; }
         } catch { /* presse-papier inaccessible */ }
         useBoard.getState().setNotice({ kind: "error", text: t("board.clipboardEmpty") });
+      },
+      pasteItems: () => {
+        const c = centerPoint();
+        return useBoard.getState().pasteClipboard(c.x, c.y);
       },
       addText: () => {
         const c = centerPoint();
@@ -417,13 +486,34 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         addItem(makeFrameItem(c.x - 320, c.y - 210, { color: p.defaultFrameColor, fillMode: p.defaultFrameFill }));
       },
       fit,
+      fitSelection,
+      copySelection: async (cut = false) => {
+        const st = useBoard.getState();
+        const picked = st.items.filter((it) => st.selectedIds.includes(it.id) && it.kind !== "draw");
+        if (!picked.length) return;
+        const n = cut ? st.cutSelection() : st.copySelection();
+        // Hors de l'app, un seul élément voyage : le premier média en PNG (rognage, miroirs et gris
+        // cuits dedans), sinon le texte de la note. Le presse-papiers interne, lui, garde tout.
+        try {
+          const media = picked.find((it) => it.kind === "image" || it.kind === "video" || it.kind === "sequence");
+          if (media) {
+            const blob = await itemToPngBlob(media);
+            if (blob) await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+          } else if (picked[0].kind === "text" && picked[0].text) {
+            await navigator.clipboard.writeText(picked[0].text);
+          }
+        } catch {
+          // WebView2 peut refuser l'écriture hors geste utilisateur : le collage interne marche quand même.
+        }
+        st.setNotice({ kind: "ok", text: t(cut ? "board.cutDone" : "board.copiedDone", { count: n }) });
+      },
       reset: () => setView({ tx: 0, ty: 0, scale: 1 } satisfies BoardView),
       zoomBy: (factor: number) => {
         const r = rect();
         if (r) zoomAt(r.width / 2, r.height / 2, factor);
       },
     }),
-    [ingest.addFiles, ingest.addVideoUrl, ingest.addUrl, ingest.addPath, ingest.addCut, ingest.addCuts, ingest.addSequence, ingest.addPaste, addItem, centerPoint, fit, setView, zoomAt, t],
+    [ingest.addFiles, ingest.addVideoUrl, ingest.addUrl, ingest.addPath, ingest.addCut, ingest.addCuts, ingest.addSequence, ingest.addPaste, addItem, centerPoint, fit, fitSelection, setView, zoomAt, t],
   );
 
   // Le chemin disque n'est pas dans l'objet `File` : il se résout par le pont WebView2. Sans chemin
@@ -469,6 +559,29 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         const dropped = Array.from(e.dataTransfer.files);
         const projectFile = dropped.find((f) => f.name.toLowerCase().endsWith(".netsu"));
         if (projectFile) { void openDroppedProject(projectFile); return; }
+        // Un DOSSIER lâché s'importe en groupe (un cadre par dossier). Un dossier arrive comme une
+        // entrée sans type MIME ; `webkitGetAsEntry` tranche quand le navigateur le renseigne.
+        const entries = Array.from(e.dataTransfer.items ?? []);
+        const folders = dropped.filter((f, i) => {
+          const entry = entries[i]?.webkitGetAsEntry?.();
+          return entry ? entry.isDirectory : !f.type && !f.size;
+        });
+        const r = rect();
+        const dropAt = screenToBoard(useBoard.getState().view, e.clientX - (r?.left ?? 0), e.clientY - (r?.top ?? 0));
+        if (folders.length) {
+          void (async () => {
+            const paths = await nr.pathsForFiles(folders);
+            const usable = paths.filter(Boolean) as string[];
+            if (!usable.length) {
+              useBoard.getState().setNotice({ kind: "error", text: t("ingest.folderNoPath") });
+              return;
+            }
+            for (const p of usable) await ingest.addFolder(p, dropAt);
+          })();
+          const files = dropped.filter((f) => !folders.includes(f));
+          if (files.length) ingest.addFiles(files);
+          return;
+        }
         if (dropped.length) ingest.addFiles(dropped);
         else void ingest.addPaste(e.dataTransfer);
       }}
@@ -528,6 +641,9 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
           />
         ))}
       </div>
+
+      {/* Guides de l'aimant : lignes fines tracées pendant un geste, dans le repère board. */}
+      <SnapGuides view={view} />
 
       {/* calque de dessin maison (SVG plein board, suit le pan/zoom) + barre du mode dessin */}
       <DrawLayer />

@@ -21,7 +21,17 @@
     "unpin": "取消固定",
     "settings": "设置",
     "addFavorite": "加入收藏",
-    "removeFavorite": "取消收藏"
+    "removeFavorite": "取消收藏",
+    "copy": "复制",
+    "cut": "剪切",
+    "grayscale": "黑白",
+    "reset": "重置",
+    "resetScale": "原始尺寸",
+    "resetRotation": "旋转",
+    "resetFlip": "镜像",
+    "resetCrop": "裁剪",
+    "resetAll": "全部重置",
+    "fitSelection": "适配所选"
   },
   "toolbar": {
     "home": "首页",
@@ -40,7 +50,9 @@
     "openScene": "打开场景",
     "share": "分享",
     "unsaved": "未保存",
-    "saveAs": "另存为…"
+    "saveAs": "另存为…",
+    "snapOn": "启用吸附",
+    "snapOff": "关闭吸附"
   },
   "settings": {
     "tabLook": "外观",
@@ -160,7 +172,15 @@
     "provider_niconico": "Niconico",
     "provider_odysee": "Odysee",
     "provider_rumble": "Rumble",
-    "provider_generic": "其他网站"
+    "provider_generic": "其他网站",
+    "snapTitle": "吸附",
+    "snapEnabled": "吸附到其他元素",
+    "snapThreshold": "吸附距离（px）",
+    "snapStick": "贴合间距",
+    "arrangeTitle": "整理",
+    "autoArrangeOnImport": "自动整理导入的批次",
+    "autoAnchorDraw": "自动把绘制与媒体关联",
+    "paletteSize": "每个调色板的颜色数"
   },
   "inspector": {
     "ytPlayer": "YouTube 播放器",
@@ -287,7 +307,18 @@
     "zoomIn": "放大",
     "zoomOut": "缩小",
     "saveAs": "另存为",
-    "openProject": "打开项目"
+    "openProject": "打开项目",
+    "copy": "复制",
+    "cut": "剪切",
+    "fitSelection": "适配所选",
+    "normalizeHeight": "等高",
+    "normalizeWidth": "等宽",
+    "normalizeArea": "等面积",
+    "arrangeDefault": "整理所选",
+    "resetAll": "全部重置",
+    "grayscale": "黑白",
+    "toFront": "移到最前",
+    "toBack": "移到最后"
   },
   "drawStyle": {
     "thin": "细线",
@@ -314,7 +345,10 @@
     "fill": "填充",
     "fillLabel": "填充",
     "rounded": "圆角",
-    "duplicate": "复制（Ctrl+D）"
+    "duplicate": "复制（Ctrl+D）",
+    "unlink": "解除与媒体的关联",
+    "relink": "关联到媒体",
+    "linkedTo": "已关联 {{count}} 个元素"
   },
   "media": {
     "browse": "浏览",
@@ -367,7 +401,8 @@
     "backHome": "返回首页",
     "alwaysOnTop": "总在最前",
     "openProject": "打开项目…",
-    "relocateMissing": "重新定位缺失的媒体（{{count}}）"
+    "relocateMissing": "重新定位缺失的媒体（{{count}}）",
+    "folder": "文件夹…"
   },
   "linkDialog": {
     "title": "添加在线视频",
@@ -509,7 +544,10 @@
     "clipboardEmpty": "剪贴板为空或不支持",
     "clipboardEmptyLink": "剪贴板为空或链接无法识别",
     "emptyTitle": "把图片、视频或 YouTube 链接拖到这里",
-    "emptyHint": "粘贴（Ctrl+V）· 滚轮缩放 · 拖动背景平移"
+    "emptyHint": "粘贴（Ctrl+V）· 滚轮缩放 · 拖动背景平移",
+    "pastedItems": "已粘贴 {{count}} 个元素",
+    "copiedDone": "已复制 {{count}} 个元素",
+    "cutDone": "已剪切 {{count}} 个元素"
   },
   "notice": {
     "recoveringMedia": "正在恢复媒体…",
@@ -547,5 +585,60 @@
     "relocating": "正在文件夹中查找媒体…（{{count}}）",
     "relocated": "已重新定位 {{count}}/{{total}} 个媒体",
     "relocatedNone": "此文件夹中未识别到媒体"
+  },
+  "tidy": {
+    "title": "整理",
+    "layout": "排布",
+    "layoutPack": "最优",
+    "layoutGrid": "网格",
+    "layoutRow": "一行",
+    "layoutCol": "一列",
+    "uniform": "统一尺寸",
+    "uniformNone": "不统一",
+    "uniformHeight": "等高",
+    "uniformWidth": "等宽",
+    "uniformArea": "等面积",
+    "gap": "间距",
+    "sort": "顺序",
+    "sortCurrent": "当前顺序",
+    "sortName": "按名称",
+    "apply": "整理"
+  },
+  "palette": {
+    "defaultTitle": "调色板",
+    "extract": "提取调色板",
+    "copied": "已复制 {{hex}}",
+    "copyFailed": "复制失败",
+    "empty": "没有颜色",
+    "working": "正在提取颜色…",
+    "done": "已提取 {{count}} 种颜色",
+    "doneSkipped": "已提取 {{count}} 种颜色 · 跳过 {{skipped}} 个媒体",
+    "failed": "没有可用的颜色",
+    "noSource": "所选中没有可用的媒体",
+    "sourcesGone": "原始媒体已不在板上",
+    "regenerate": "重新生成",
+    "size": "颜色数量",
+    "showHex": "显示色值"
+  },
+  "exportImage": {
+    "menu": "导出为图片…",
+    "title": "导出板面",
+    "subtitle": "将板面渲染为图片或 SVG。",
+    "width": "宽度",
+    "height": "高度",
+    "selectionOnly": "仅所选（{{count}}）",
+    "transparent": "透明背景",
+    "export": "导出",
+    "done": "板面已导出",
+    "failed": "导出失败：{{error}}",
+    "hint": "渲染基于板面内容：视频导出当前帧，在线播放器导出为卡片。"
+  },
+  "ingest": {
+    "folderUnavailable": "文件夹导入不可用",
+    "folderScanning": "正在读取文件夹…",
+    "folderEmpty": "该文件夹中没有媒体",
+    "folderDone": "已导入 {{count}} 个媒体",
+    "folderDoneTruncated": "已导入 {{count}} 个媒体（文件夹被截断）",
+    "folderNoPath": "找不到文件夹路径"
   }
 }

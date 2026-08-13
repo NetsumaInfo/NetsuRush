@@ -22,8 +22,10 @@ import {
   probeImage,
   probeVideo,
   probeNat,
+  makeFrameItem,
 } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
+import { boundsOf, computeArrange } from "./boardArrange";
 
 // Longest side of a freshly posed YouTube card. Kept apart from the media posing size (Settings):
 // a YouTube card is a player, not a reference image the user sizes to taste.
@@ -236,6 +238,131 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       for (const f of Array.from(files)) void addFile(f);
     },
     [addFile],
+  );
+
+  // Dossier déposé sur le board : import GROUPÉ. Le core parcourt l'arborescence, on pose un cadre
+  // par dossier (le dossier racine, plus un sous-cadre par sous-dossier qui contient des médias) et
+  // on range son contenu selon le mode de rangement courant.
+  //
+  // Deux temps, pour ne pas figer l'app sur un dossier de rushes : les items apparaissent tout de
+  // suite à une taille provisoire (une seule entrée d'annulation pour tout l'import), puis les ratios
+  // réels sont mesurés en arrière-plan, appliqués sans polluer l'historique, et le lot est re-rangé.
+  const addFolder = useCallback(
+    async (dirPath: string, at?: { x: number; y: number }) => {
+      const st = useBoard.getState();
+      if (!nr.reference?.scanFolder) {
+        st.setNotice({ kind: "error", text: i18n.t("reference:ingest.folderUnavailable") });
+        return;
+      }
+      st.setNotice({ kind: "ok", text: i18n.t("reference:ingest.folderScanning"), sticky: true });
+      const scan = await nr.reference.scanFolder(dirPath, {});
+      if (!scan.ok || !scan.count) {
+        useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.folderEmpty") });
+        return;
+      }
+
+      const prefs = useBoard.getState().prefs;
+      const box = prefs.mediaMaxSize;
+      const origin = at ?? centerPoint();
+
+      // Un groupe par sous-dossier ; l'ordre des groupes suit celui du scan (déjà trié).
+      const groups = new Map<string, typeof scan.files>();
+      for (const f of scan.files) {
+        const key = f.rel || "";
+        const list = groups.get(key);
+        if (list) list.push(f);
+        else groups.set(key, [f]);
+      }
+
+      const created: { id: string; kind: ItemKind; ref: string; src: string }[] = [];
+      const batch: BoardItem[] = [];
+      const frames: { id: string; childIds: string[] }[] = [];
+      let cursorY = origin.y;
+
+      for (const [rel, files] of groups) {
+        const cols = Math.ceil(Math.sqrt(files.length));
+        const gap = prefs.arrangeGap;
+        const cell = box + gap;
+        const childIds: string[] = [];
+        const frameId = `${Date.now().toString(36)}-${rel || "root"}-f`;
+        const startY = cursorY + 48; // place pour l'étiquette du cadre
+
+        files.forEach((f, i) => {
+          const kind: ItemKind = f.kind === "video" ? "video" : "image";
+          const src = displaySrc(kind, f.path);
+          // Taille provisoire : carré pour une image, 16:9 pour une vidéo. Le vrai ratio arrive juste après.
+          const w = box;
+          const h = kind === "video" ? Math.round((box * 9) / 16) : box;
+          const id = `${frameId}-${i}`;
+          childIds.push(id);
+          created.push({ id, kind, ref: f.path, src });
+          batch.push({
+            id,
+            kind,
+            ref: f.path,
+            src,
+            x: origin.x + (i % cols) * cell,
+            y: startY + Math.floor(i / cols) * cell,
+            w,
+            h,
+            rotation: 0,
+            z: 0,
+            title: f.name,
+          });
+        });
+
+        const rows = Math.ceil(files.length / cols);
+        const frame = makeFrameItem(origin.x - 24, cursorY, { color: prefs.defaultFrameColor, fillMode: prefs.defaultFrameFill });
+        frame.id = frameId;
+        frame.text = rel ? `${scan.name}/${rel}` : scan.name;
+        frame.w = cols * cell - gap + 48;
+        frame.h = rows * cell - gap + 72;
+        batch.push(frame);
+        frames.push({ id: frameId, childIds });
+        cursorY += frame.h + 64;
+      }
+
+      // Une seule entrée d'annulation : cadres + médias arrivent ensemble, un Ctrl+Z annule l'import.
+      useBoard.getState().addItems(batch, false);
+      useBoard.getState().setNotice({
+        kind: "ok",
+        text: scan.truncated
+          ? i18n.t("reference:ingest.folderDoneTruncated", { count: created.length })
+          : i18n.t("reference:ingest.folderDone", { count: created.length }),
+      });
+
+      // Mesure des ratios réels, par petits paquets (un board de 300 vidéos ne doit pas ouvrir 300
+      // décodeurs d'un coup), puis rangement final SANS nouvelle entrée d'historique.
+      const CONCURRENCY = 6;
+      for (let i = 0; i < created.length; i += CONCURRENCY) {
+        await Promise.all(
+          created.slice(i, i + CONCURRENCY).map(async (c) => {
+            const nat = await probeNat(c.kind, c.src);
+            if (!nat.w || !nat.h) return;
+            const size = fitSize(nat.w, nat.h, box);
+            useBoard.getState().patchItem(c.id, { natW: nat.w, natH: nat.h, w: size.w, h: size.h }, false);
+          }),
+        );
+      }
+
+      // Re-rangement de chaque cadre avec les vraies proportions, puis ajustement du cadre lui-même.
+      for (const f of frames) {
+        const state = useBoard.getState();
+        const kids = state.items.filter((it) => f.childIds.includes(it.id));
+        if (kids.length < 2) continue;
+        const pos = computeArrange(kids, prefs.arrangeLayout, { gap: prefs.arrangeGap, sort: prefs.arrangeSort });
+        const moved = state.items.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id) } : it));
+        const bounds = boundsOf(moved.filter((it) => f.childIds.includes(it.id)));
+        useBoard.setState({
+          items: moved.map((it) =>
+            it.id === f.id
+              ? { ...it, x: bounds.x - 24, y: bounds.y - 40, w: bounds.w + 48, h: bounds.h + 64 }
+              : it,
+          ),
+        });
+      }
+    },
+    [centerPoint],
   );
 
   // Lien vidéo en ligne. YouTube → kind "youtube" (boucle Player API) ; Vimeo/Dailymotion/Twitch/
@@ -463,5 +590,5 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     [addFile, addUrl],
   );
 
-  return { addPath, addCut, addCuts, addSequence, addFiles, addVideoUrl, addUrl, addImageUrl, addPaste };
+  return { addPath, addCut, addCuts, addSequence, addFiles, addFolder, addVideoUrl, addUrl, addImageUrl, addPaste };
 }

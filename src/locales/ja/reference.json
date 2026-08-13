@@ -21,7 +21,17 @@
     "unpin": "ピン留め解除",
     "settings": "設定",
     "addFavorite": "お気に入りに追加",
-    "removeFavorite": "お気に入りから削除"
+    "removeFavorite": "お気に入りから削除",
+    "copy": "コピー",
+    "cut": "切り取り",
+    "grayscale": "グレースケール",
+    "reset": "リセット",
+    "resetScale": "元のサイズ",
+    "resetRotation": "回転",
+    "resetFlip": "反転",
+    "resetCrop": "トリミング",
+    "resetAll": "すべてリセット",
+    "fitSelection": "選択範囲に合わせる"
   },
   "toolbar": {
     "home": "ホーム",
@@ -40,7 +50,9 @@
     "openScene": "シーンを開く",
     "share": "共有",
     "unsaved": "未保存",
-    "saveAs": "名前を付けて保存…"
+    "saveAs": "名前を付けて保存…",
+    "snapOn": "スナップを有効化",
+    "snapOff": "スナップを無効化"
   },
   "settings": {
     "tabLook": "外観",
@@ -160,7 +172,15 @@
     "provider_niconico": "Niconico",
     "provider_odysee": "Odysee",
     "provider_rumble": "Rumble",
-    "provider_generic": "その他のサイト"
+    "provider_generic": "その他のサイト",
+    "snapTitle": "スナップ",
+    "snapEnabled": "他の要素にスナップ",
+    "snapThreshold": "スナップ距離 (px)",
+    "snapStick": "吸着時の間隔",
+    "arrangeTitle": "整列",
+    "autoArrangeOnImport": "読み込んだまとまりを自動で整列",
+    "autoAnchorDraw": "描画をメディアに自動連結",
+    "paletteSize": "パレットあたりの色数"
   },
   "inspector": {
     "ytPlayer": "YouTube プレーヤー",
@@ -287,7 +307,18 @@
     "zoomIn": "拡大",
     "zoomOut": "縮小",
     "saveAs": "名前を付けて保存",
-    "openProject": "プロジェクトを開く"
+    "openProject": "プロジェクトを開く",
+    "copy": "コピー",
+    "cut": "切り取り",
+    "fitSelection": "選択範囲に合わせる",
+    "normalizeHeight": "高さを揃える",
+    "normalizeWidth": "幅を揃える",
+    "normalizeArea": "面積を揃える",
+    "arrangeDefault": "選択を整列",
+    "resetAll": "すべてリセット",
+    "grayscale": "グレースケール",
+    "toFront": "最前面へ",
+    "toBack": "最背面へ"
   },
   "drawStyle": {
     "thin": "細い線",
@@ -314,7 +345,10 @@
     "fill": "塗りつぶす",
     "fillLabel": "塗り",
     "rounded": "角を丸く",
-    "duplicate": "複製（Ctrl+D）"
+    "duplicate": "複製（Ctrl+D）",
+    "unlink": "メディアとの連結を解除",
+    "relink": "メディアに連結",
+    "linkedTo": "{{count}} 件に連結中"
   },
   "media": {
     "browse": "参照",
@@ -367,7 +401,8 @@
     "backHome": "ホームに戻る",
     "alwaysOnTop": "常に最前面",
     "openProject": "プロジェクトを開く…",
-    "relocateMissing": "見つからないメディアの場所を指定（{{count}}）"
+    "relocateMissing": "見つからないメディアの場所を指定（{{count}}）",
+    "folder": "フォルダー…"
   },
   "linkDialog": {
     "title": "オンライン動画を追加",
@@ -509,7 +544,10 @@
     "clipboardEmpty": "クリップボードが空か、未対応の形式です",
     "clipboardEmptyLink": "クリップボードが空か、リンクを認識できません",
     "emptyTitle": "画像・動画・YouTube のリンクをここにドラッグ",
-    "emptyHint": "貼り付け（Ctrl+V）· ホイールで拡大縮小 · 背景をドラッグで移動"
+    "emptyHint": "貼り付け（Ctrl+V）· ホイールで拡大縮小 · 背景をドラッグで移動",
+    "pastedItems": "{{count}} 件を貼り付けました",
+    "copiedDone": "{{count}} 件をコピーしました",
+    "cutDone": "{{count}} 件を切り取りました"
   },
   "notice": {
     "recoveringMedia": "メディアを復元中…",
@@ -547,5 +585,60 @@
     "relocating": "フォルダー内のメディアを検索中…（{{count}}）",
     "relocated": "{{count}}/{{total}} 件のメディアの場所を指定",
     "relocatedNone": "このフォルダーで認識できるメディアはありません"
+  },
+  "tidy": {
+    "title": "整列",
+    "layout": "配置",
+    "layoutPack": "最適",
+    "layoutGrid": "グリッド",
+    "layoutRow": "横一列",
+    "layoutCol": "縦一列",
+    "uniform": "サイズを揃える",
+    "uniformNone": "なし",
+    "uniformHeight": "高さを揃える",
+    "uniformWidth": "幅を揃える",
+    "uniformArea": "面積を揃える",
+    "gap": "間隔",
+    "sort": "順序",
+    "sortCurrent": "現在の順",
+    "sortName": "名前順",
+    "apply": "整列する"
+  },
+  "palette": {
+    "defaultTitle": "パレット",
+    "extract": "パレットを抽出",
+    "copied": "{{hex}} をコピーしました",
+    "copyFailed": "コピーできません",
+    "empty": "色がありません",
+    "working": "色を抽出中…",
+    "done": "{{count}} 色を抽出しました",
+    "doneSkipped": "{{count}} 色を抽出 ・ {{skipped}} 件のメディアを除外",
+    "failed": "使える色がありません",
+    "noSource": "選択に使えるメディアがありません",
+    "sourcesGone": "元のメディアはボード上にありません",
+    "regenerate": "再生成",
+    "size": "色数",
+    "showHex": "値を表示"
+  },
+  "exportImage": {
+    "menu": "画像として書き出し…",
+    "title": "ボードを書き出す",
+    "subtitle": "ボードを画像または SVG として描き出します。",
+    "width": "幅",
+    "height": "高さ",
+    "selectionOnly": "選択のみ（{{count}}）",
+    "transparent": "背景を透過",
+    "export": "書き出す",
+    "done": "ボードを書き出しました",
+    "failed": "書き出しに失敗しました: {{error}}",
+    "hint": "描画はボードの内容から行われます。動画は現在のフレーム、オンラインプレーヤーはカードとして書き出されます。"
+  },
+  "ingest": {
+    "folderUnavailable": "フォルダーの読み込みは利用できません",
+    "folderScanning": "フォルダーを読み込み中…",
+    "folderEmpty": "このフォルダーにメディアがありません",
+    "folderDone": "{{count}} 件のメディアを読み込みました",
+    "folderDoneTruncated": "{{count}} 件を読み込みました（フォルダーは途中まで）",
+    "folderNoPath": "フォルダーのパスが見つかりません"
   }
 }

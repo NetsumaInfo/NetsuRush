@@ -16,6 +16,7 @@ import { registerPlayer } from "./playhead";
 import { shapeBBox, shifted } from "./drawGeometry";
 import { YoutubeItem } from "./YoutubeItem";
 import { EmbedItem } from "./EmbedItem";
+import { PaletteContent } from "./PaletteItem";
 
 // Récupération auto d'un média cassé/noir (lien distant mort ou média extrait d'un post) : une seule
 // tentative par item (anti-boucle), uniquement si un lien d'origine existe (sourceUrl ou ref http).
@@ -427,6 +428,19 @@ function cropStyle(c: NonNullable<Item["crop"]>): React.CSSProperties {
 }
 
 // Cadre (conteneur titré) : rectangle dont le CONTOUR prend la couleur choisie + titre en haut-gauche.
+// Items emmenés par un cadre : ceux dont le CENTRE tombe dedans (même test qu'au commit de
+// déplacement). Lu à la demande, au début d'un geste — jamais pendant le rendu.
+function frameContentIds(frame: Item): string[] {
+  const inside = (cx: number, cy: number) =>
+    cx >= frame.x && cx <= frame.x + frame.w && cy >= frame.y && cy <= frame.y + frame.h;
+  return useBoard
+    .getState()
+    .items.filter(
+      (it) => it.kind !== "frame" && it.kind !== "draw" && it.id !== frame.id && inside(it.x + it.w / 2, it.y + it.h / 2),
+    )
+    .map((it) => it.id);
+}
+
 // Déplacer le cadre déplace les items qu'il contient (cf. commit de déplacement plus bas).
 function FrameContent({ item }: { item: Item }) {
   const { t } = useTranslation("reference");
@@ -622,6 +636,7 @@ function ItemContent({ item, editing, live, onYtFallback }: { item: Item; editin
   if (item.missing) return <MissingContent item={item} />;
   if (item.kind === "text") return <TextNote item={item} editing={editing} />;
   if (item.kind === "frame") return <FrameContent item={item} />;
+  if (item.kind === "palette") return <PaletteContent item={item} />;
   if (item.kind === "image") return <ImageContent item={item} />;
   if (item.kind === "video") return <VideoContent item={item} />;
   if (item.kind === "sequence") return <SequenceContent item={item} />;
@@ -711,6 +726,10 @@ export const BoardItem = memo(function BoardItem({
         || (item.kind === "embed"
             && EMBED_PLAYER_PROVIDERS.has(parseVideoEmbed(item.ref, true)?.provider ?? "generic")),
       captureRef: wrapRef,
+      // Aimant + géométrie vivante (tracés liés) : le moteur de gestes a besoin de savoir QUI il
+      // manipule. Un cadre emmène son contenu, qui ne peut donc pas lui servir de cible d'accrochage.
+      id: item.id,
+      groupIds: item.kind === "frame" ? () => frameContentIds(item) : undefined,
     },
   );
   const g = t.geom;
@@ -769,8 +788,8 @@ export const BoardItem = memo(function BoardItem({
           className="h-full w-full"
           style={
             promote
-              ? { transform: `${flip} translateZ(0)`, willChange: "transform", backfaceVisibility: "hidden" }
-              : { transform: flip }
+              ? { transform: `${flip} translateZ(0)`, willChange: "transform", backfaceVisibility: "hidden", filter: item.grayscale ? "grayscale(1)" : undefined }
+              : { transform: flip, filter: item.grayscale ? "grayscale(1)" : undefined }
           }
         >
           <ItemContent item={item} editing={editing} live={live} onYtFallback={setYtFallback} />

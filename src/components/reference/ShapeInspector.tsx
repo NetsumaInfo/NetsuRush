@@ -2,24 +2,28 @@
 // opacité, pointes (flèche/ligne), remplissage + coins arrondis (formes fermées), duplication,
 // suppression.
 import { useTranslation } from "react-i18next";
-import { Copy, PaintBucket, Radius, Trash2 } from "lucide-react";
+import { Copy, Link2, Link2Off, PaintBucket, Radius, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DrawHeadPicker } from "./DrawHeadPicker";
 import { DrawStyleControls } from "./DrawStyleControls";
 import { routeOf } from "./drawGeometry";
+import { anchorCount } from "./drawAnchor";
 import type { DrawShape } from "./referenceShared";
 
 const INSP_COLORS = ["#f43f5e", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#ffffff", "#111827"];
 
-export function ShapeInspector({ shape, scale, onPatch, onDuplicate, onDelete }: {
+export function ShapeInspector({ shape, scale, onPatch, onDuplicate, onDelete, onUnlink, onRelink }: {
   shape: DrawShape; scale: number; onPatch: (p: Partial<DrawShape>) => void; onDuplicate: () => void; onDelete: () => void;
+  // Liaison aux médias : délier fige le tracé là où il est, relier retente l'accrochage automatique.
+  onUnlink: () => void; onRelink: () => void;
 }) {
   const { t } = useTranslation("reference");
   const isConnector = shape.t === "line" || shape.t === "arrow";
   const isClosed = shape.t === "rect" || shape.t === "ellipse" || shape.t === "diamond";
   const filled = !!shape.fill && shape.fill !== "none";
+  const links = anchorCount(shape);
   return (
     <div
       className="pointer-events-auto absolute bottom-4 left-1/2 z-30 -translate-x-1/2"
@@ -91,6 +95,20 @@ export function ShapeInspector({ shape, scale, onPatch, onDuplicate, onDelete }:
         )}
 
         <Separator orientation="vertical" className="h-6" />
+        {/* Liaison au(x) média(s) : un tracé lié suit l'image qu'il annote. */}
+        <Tooltip>
+          <TooltipTrigger render={
+            <Button
+              variant={links ? "default" : "ghost"} size="icon-sm" aria-pressed={links > 0}
+              aria-label={links ? t("shape.unlink") : t("shape.relink")}
+              onClick={links ? onUnlink : onRelink}
+            />
+          }>
+            {links ? <Link2 /> : <Link2Off />}
+          </TooltipTrigger>
+          <TooltipContent>{links ? t("shape.linkedTo", { count: links }) : t("shape.relink")}</TooltipContent>
+        </Tooltip>
+
         <Button variant="ghost" size="icon-sm" aria-label={t("shape.duplicate")} onClick={onDuplicate}>
           <Copy />
         </Button>

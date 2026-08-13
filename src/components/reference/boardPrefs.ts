@@ -97,7 +97,25 @@ export interface BoardPrefs {
   upDenoise: number;       // débruitage par défaut (0..1) — n'agit que sur les modèles IA qui le gèrent
   drawKeys: DrawKeys;      // raccourcis clavier des outils de dessin (personnalisables) — outil → lettre
   shortcutKeys: ShortcutKeys; // raccourcis-commandes du board (personnalisables) — action → combo
+  // Aimant : accrochage d'un item déplacé sur les bords, centres et coins des voisins.
+  snap: boolean;
+  snapThreshold: number;   // distance d'accrochage en pixels ÉCRAN (÷ zoom avant usage)
+  snapStick: number;       // écart conservé au collage bord à bord (0 = les médias se touchent)
+  // Rangement d'une sélection (sélecteur « Ranger »). Mémorisé pour que le geste suivant reparte
+  // du même réglage, et sert aussi de mode appliqué à l'import d'un dossier.
+  arrangeLayout: ArrangeLayout;
+  arrangeUniform: "none" | "height" | "width" | "area";
+  arrangeGap: number;      // écart entre items (unités monde), 0–200
+  arrangeSort: "none" | "name";
+  autoArrangeOnImport: boolean; // ranger automatiquement un lot importé (dossier, sélection multiple)
+  // Accrochage automatique des tracés aux médias (flèche entre deux images, trait posé sur une image).
+  autoAnchorDraw: boolean;
+  paletteSize: number;     // nombre de couleurs extraites par défaut (3–12)
 }
+
+// Dispositions proposées par le sélecteur de rangement (sous-ensemble d'ArrangeMode : les
+// alignements et répartitions restent des boutons directs, ils ne « rangent » pas une planche).
+export type ArrangeLayout = "pack" | "grid" | "row" | "col";
 const PREFS_DEFAULT: BoardPrefs = {
   favFonts: [],
   defaultFont: HANDWRITING_FONT,
@@ -131,6 +149,16 @@ const PREFS_DEFAULT: BoardPrefs = {
   upDenoise: 0.5,
   drawKeys: DEFAULT_DRAW_KEYS,
   shortcutKeys: DEFAULT_SHORTCUT_KEYS,
+  snap: true,
+  snapThreshold: 8,
+  snapStick: 0,
+  arrangeLayout: "pack",
+  arrangeUniform: "none",
+  arrangeGap: 16,
+  arrangeSort: "none",
+  autoArrangeOnImport: true,
+  autoAnchorDraw: true,
+  paletteSize: 6,
 };
 export const PREFS_KEY = "nr-ref-prefs";
 export function readPrefs(): BoardPrefs {

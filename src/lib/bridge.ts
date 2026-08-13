@@ -1402,6 +1402,11 @@ export interface RefApi {
   // Ménage du magasin d'assets : ce que plus aucune scène ne réclame et qui a passé le délai de
   // grâce s'en va. `graceMs` n'est là que pour les tests — l'app utilise le défaut du core.
   sweepAssets(opts?: { graceMs?: number }): Promise<{ ok: boolean; removed: number; bytes: number; kept: number; error?: string }>;
+  // Dossier déposé sur le board : médias trouvés récursivement, avec leur sous-dossier RELATIF pour
+  // que l'import reconstruise un cadre par dossier. `truncated` quand le plafond a coupé la liste.
+  scanFolder(dir: string, opts?: { cap?: number }): Promise<{ ok: boolean; root: string; name: string; files: { path: string; rel: string; name: string; kind: "image" | "video" }[]; truncated: boolean; count: number }>;
+  // Écrit un export du board (PNG/JPG en base64, SVG en texte) vers un chemin choisi par l'utilisateur.
+  writeFile(path: string, data: string, encoding: "base64" | "utf8"): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
   extractMedia(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
   // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
@@ -3284,6 +3289,8 @@ const mock: NrApi = {
       upscaleItem: async () => ({ ok: false, error: "mock" }),
       dropAsset: async () => ({ ok: true, removed: false }),
       sweepAssets: async () => ({ ok: true, removed: 0, bytes: 0, kept: 0 }),
+      scanFolder: async (dir: string) => ({ ok: false, root: dir, name: "", files: [], truncated: false, count: 0 }),
+      writeFile: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       extractMedia: async () => ({ ok: false, error: "mock" }),
       extractFrames: async () => ({ ok: false, error: "mock" }),
       exportBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),

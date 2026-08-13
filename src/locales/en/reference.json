@@ -21,7 +21,17 @@
     "unpin": "Unpin",
     "settings": "Settings",
     "addFavorite": "Add to favorites",
-    "removeFavorite": "Remove from favorites"
+    "removeFavorite": "Remove from favorites",
+    "copy": "Copy",
+    "cut": "Cut",
+    "grayscale": "Grayscale",
+    "reset": "Reset",
+    "resetScale": "Original size",
+    "resetRotation": "Rotation",
+    "resetFlip": "Mirrors",
+    "resetCrop": "Crop",
+    "resetAll": "Reset all",
+    "fitSelection": "Fit selection"
   },
   "toolbar": {
     "home": "Home",
@@ -40,7 +50,9 @@
     "openScene": "Open scene",
     "share": "Share",
     "unsaved": "Unsaved",
-    "saveAs": "Save as…"
+    "saveAs": "Save as…",
+    "snapOn": "Enable snapping",
+    "snapOff": "Disable snapping"
   },
   "settings": {
     "tabLook": "Look",
@@ -160,7 +172,15 @@
     "provider_niconico": "Niconico",
     "provider_odysee": "Odysee",
     "provider_rumble": "Rumble",
-    "provider_generic": "Other sites"
+    "provider_generic": "Other sites",
+    "snapTitle": "Snapping",
+    "snapEnabled": "Snap to other items",
+    "snapThreshold": "Snap distance (px)",
+    "snapStick": "Stick gap",
+    "arrangeTitle": "Tidying",
+    "autoArrangeOnImport": "Tidy imported batches automatically",
+    "autoAnchorDraw": "Link drawings to media automatically",
+    "paletteSize": "Colors per extracted palette"
   },
   "inspector": {
     "ytPlayer": "YouTube player",
@@ -287,7 +307,18 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "saveAs": "Save as",
-    "openProject": "Open project"
+    "openProject": "Open project",
+    "copy": "Copy",
+    "cut": "Cut",
+    "fitSelection": "Fit selection",
+    "normalizeHeight": "Same height",
+    "normalizeWidth": "Same width",
+    "normalizeArea": "Same area",
+    "arrangeDefault": "Tidy selection",
+    "resetAll": "Reset all",
+    "grayscale": "Grayscale",
+    "toFront": "Bring to front",
+    "toBack": "Send to back"
   },
   "drawStyle": {
     "thin": "Thin stroke",
@@ -314,7 +345,10 @@
     "fill": "Fill",
     "fillLabel": "Fill",
     "rounded": "Rounded corners",
-    "duplicate": "Duplicate (Ctrl+D)"
+    "duplicate": "Duplicate (Ctrl+D)",
+    "unlink": "Unlink from media",
+    "relink": "Link to media",
+    "linkedTo": "Linked to {{count}} item(s)"
   },
   "media": {
     "browse": "Browse",
@@ -367,7 +401,8 @@
     "backHome": "Back to home",
     "alwaysOnTop": "Always on top",
     "openProject": "Open project…",
-    "relocateMissing": "Relocate missing media ({{count}})"
+    "relocateMissing": "Relocate missing media ({{count}})",
+    "folder": "Folder…"
   },
   "linkDialog": {
     "title": "Add an online video",
@@ -509,7 +544,10 @@
     "clipboardEmpty": "Clipboard empty or not supported",
     "clipboardEmptyLink": "Clipboard empty or link not recognized",
     "emptyTitle": "Drag images, videos or a YouTube link here",
-    "emptyHint": "Paste (Ctrl+V) · wheel to zoom · drag the background to navigate"
+    "emptyHint": "Paste (Ctrl+V) · wheel to zoom · drag the background to navigate",
+    "pastedItems": "{{count}} item(s) pasted",
+    "copiedDone": "{{count}} item(s) copied",
+    "cutDone": "{{count}} item(s) cut"
   },
   "notice": {
     "recoveringMedia": "Recovering media…",
@@ -547,5 +585,60 @@
     "relocating": "Searching the folder for media… ({{count}})",
     "relocated": "{{count}}/{{total}} media relocated",
     "relocatedNone": "No media recognised in this folder"
+  },
+  "tidy": {
+    "title": "Tidy",
+    "layout": "Layout",
+    "layoutPack": "Optimal",
+    "layoutGrid": "Grid",
+    "layoutRow": "Row",
+    "layoutCol": "Column",
+    "uniform": "Match size",
+    "uniformNone": "None",
+    "uniformHeight": "Same height",
+    "uniformWidth": "Same width",
+    "uniformArea": "Same area",
+    "gap": "Gap",
+    "sort": "Order",
+    "sortCurrent": "Current",
+    "sortName": "By name",
+    "apply": "Tidy"
+  },
+  "palette": {
+    "defaultTitle": "Palette",
+    "extract": "Extract palette",
+    "copied": "{{hex}} copied",
+    "copyFailed": "Copy failed",
+    "empty": "No colors",
+    "working": "Extracting colors…",
+    "done": "{{count}} colors extracted",
+    "doneSkipped": "{{count}} colors extracted · {{skipped}} media skipped",
+    "failed": "No usable colors",
+    "noSource": "No usable media in the selection",
+    "sourcesGone": "Source media are no longer on the board",
+    "regenerate": "Regenerate",
+    "size": "Colors",
+    "showHex": "Show values"
+  },
+  "exportImage": {
+    "menu": "Export as image…",
+    "title": "Export board",
+    "subtitle": "Render the board as an image or SVG.",
+    "width": "Width",
+    "height": "Height",
+    "selectionOnly": "Selection only ({{count}})",
+    "transparent": "Transparent background",
+    "export": "Export",
+    "done": "Board exported",
+    "failed": "Export failed: {{error}}",
+    "hint": "The render comes from the board content: videos export their current frame, online players export as a card."
+  },
+  "ingest": {
+    "folderUnavailable": "Folder import unavailable",
+    "folderScanning": "Reading folder…",
+    "folderEmpty": "No media in this folder",
+    "folderDone": "{{count}} media imported",
+    "folderDoneTruncated": "{{count}} media imported (folder truncated)",
+    "folderNoPath": "Folder path not found"
   }
 }

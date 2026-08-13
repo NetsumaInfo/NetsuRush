@@ -4,19 +4,18 @@
 import { useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ImagePlus, Video, Globe, Type, Frame, Film, Pencil, Clapperboard, ZoomIn, ZoomOut, Maximize, FilePlus2,
+  ImagePlus, Type, Frame, Pencil, Clapperboard, ZoomIn, ZoomOut, Maximize, FilePlus2,
   Save, SaveAll, FileCheck2, FolderOpen, Share2, PictureInPicture2, Minimize2, Pin, PinOff, Play, Pause,
-  Settings2, Home, Undo2, Redo2, RotateCw,
+  Settings2, Home, Undo2, Redo2, RotateCw, Magnet, Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useBoard } from "./useReferenceBoard";
 import { fileLabel } from "./useScenePersistence";
-import { AddLinkDialog } from "./AddLinkDialog";
 import { recoverAllOnlineMedia, recoverableOnlineItems } from "./boardMediaActions";
+import { TidyMenu } from "./TidyMenu";
 import type { BoardHandle } from "./ReferenceBoard";
 
 function IconBtn({ icon: Icon, label, onClick, disabled, active }: {
@@ -80,27 +79,14 @@ export function Toolbar({
   const redo = useBoard((s) => s.redo);
   const canUndo = useBoard((s) => s.past.length > 0);
   const canRedo = useBoard((s) => s.future.length > 0);
-  const [ytOpen, setYtOpen] = useState(false);
   const [recovering, setRecovering] = useState(false);
   const recoverableCount = recoverableOnlineItems(items).length;
+  const snap = useBoard((s) => s.prefs.snap);
+  const setPrefs = useBoard((s) => s.setPrefs);
+  const selCount = useBoard((s) => s.selectedIds.length);
 
   // Choisir un autre outil/ajout quitte le mode dessin (revient au curseur normal).
   const leaveDraw = () => { if (useBoard.getState().drawMode) setDrawMode(false); };
-  const pickImages = async () => {
-    leaveDraw();
-    const paths = await nr.chooseImages();
-    paths?.forEach((p) => board.current?.addPath(p));
-  };
-  const pickVideos = async () => {
-    leaveDraw();
-    const paths = await nr.chooseFiles();
-    paths?.forEach((p) => board.current?.addPath(p));
-  };
-  const pickSequence = async () => {
-    leaveDraw();
-    const paths = await nr.chooseImages();
-    if (paths?.length) board.current?.addSequence(paths);
-  };
   const retryMissing = async () => {
     if (recovering) return;
     setRecovering(true);
@@ -135,10 +121,8 @@ export function Toolbar({
           <Separator orientation="vertical" className="mx-1 h-5" />
         </>
       )}
-      <IconBtn icon={ImagePlus} label={t("toolbar.addImage")} onClick={pickImages} />
-      <IconBtn icon={Video} label={t("toolbar.addVideo")} onClick={pickVideos} />
-      <IconBtn icon={Film} label={t("toolbar.addSequence")} onClick={pickSequence} />
-      <IconBtn icon={Globe} label={t("toolbar.addLink")} onClick={() => { leaveDraw(); setYtOpen(true); }} />
+      {/* Ajouter une image / une vidéo / une séquence / un lien ne vit plus ici : glisser-déposer
+          pour les fichiers, Ctrl+V pour un lien, et le clic droit garde les quatre entrées. */}
       <IconBtn icon={Type} label={t("toolbar.addText")} onClick={() => { leaveDraw(); board.current?.addText(); }} />
       <IconBtn icon={Frame} label={t("toolbar.addFrame")} onClick={() => { leaveDraw(); board.current?.addFrame(); }} />
       <IconBtn
@@ -153,6 +137,21 @@ export function Toolbar({
 
       <IconBtn icon={Undo2} label={t("actions.undo")} onClick={undo} disabled={!canUndo} />
       <IconBtn icon={Redo2} label={t("actions.redo")} onClick={redo} disabled={!canRedo} />
+
+      <Separator orientation="vertical" className="mx-1 h-5" />
+
+      {/* Aimant : accrochage bords/centres/coins et collage bord à bord. Alt le suspend le temps
+          d'un geste ; ce bouton, lui, l'éteint durablement. */}
+      <IconBtn icon={Magnet} label={snap ? t("toolbar.snapOff") : t("toolbar.snapOn")} active={snap} onClick={() => setPrefs({ snap: !snap })} />
+      {/* Ranger la sélection : disposition + uniformisation de taille, en une entrée d'annulation. */}
+      <TidyMenu
+        disabled={selCount < 2}
+        trigger={
+          <Button variant="ghost" size="icon-sm" disabled={selCount < 2} aria-label={t("tidy.title")}>
+            <Wand2 />
+          </Button>
+        }
+      />
 
       <Separator orientation="vertical" className="mx-1 h-5" />
 
@@ -231,7 +230,6 @@ export function Toolbar({
         )}
       </div>
 
-      <AddLinkDialog board={board} open={ytOpen} onOpenChange={setYtOpen} />
     </div>
   );
 }

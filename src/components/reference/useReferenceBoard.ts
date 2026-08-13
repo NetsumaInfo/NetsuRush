@@ -35,9 +35,25 @@ import {
   readPlaceFrame,
   readPrefs,
 } from "./boardPrefs";
-import { type ArrangeMode, computeArrange } from "./boardArrange";
+import {
+  type ArrangeMode,
+  type ArrangeOpts,
+  type NormalizeMode,
+  computeArrange,
+  computeNormalize,
+} from "./boardArrange";
 
 export type { ArrangeMode } from "./boardArrange";
+
+// Réglages d'un rangement de groupe : disposition + uniformisation de taille appliquées ENSEMBLE
+// (une seule entrée d'annulation), avec l'écart et l'ordre choisis dans le sélecteur.
+export interface TidyOpts extends ArrangeOpts {
+  layout: ArrangeMode;
+  uniform?: NormalizeMode | "none";
+}
+
+// Portée d'une réinitialisation de transformation.
+export type ResetKind = "scale" | "rotation" | "flip" | "crop" | "all";
 
 export interface BoardState {
   sceneId: string | null;
@@ -75,6 +91,7 @@ export interface BoardState {
   save: SaveOpts;              // réglages d'enregistrement auto (Paramètres)
   placeFrame: boolean;         // cadre « zone de pose » (contour du contenu) — activable (Paramètres)
   prefs: BoardPrefs;           // préférences persistées (favoris polices, défauts notes, navigation)
+  clipCount: number;           // nombre d'items dans le presse-papiers interne (état des menus)
   dirty: boolean;              // modifications non sauvegardées
   // `sticky` : notice de progression (opération en cours) — pas d'auto-effacement, remplacée
   // par la notice de fin (succès/échec) de l'opération.
@@ -99,6 +116,24 @@ export interface BoardState {
   // `tag` : coalesce les appels répétés (nudge clavier maintenu) en UNE entrée d'annulation.
   moveBy: (ids: string[], dx: number, dy: number, record?: boolean, tag?: string) => void;
   arrange: (mode: ArrangeMode) => void;
+  // Rangement complet de la sélection : uniformisation de taille PUIS disposition, en une entrée.
+  tidy: (opts: TidyOpts) => void;
+  // Uniformise la taille de la sélection (même hauteur / largeur / surface), centres conservés.
+  normalize: (mode: NormalizeMode) => void;
+  // Réinitialise les transformations de la sélection (échelle native, rotation, miroirs, rognage).
+  reset: (kind: ResetKind) => void;
+  // Applique un patch à TOUTE la sélection en une entrée d'historique (opacité, gris, couleur…).
+  patchSelected: (patch: Partial<BoardItem>, tag?: string) => void;
+  // Bascule les niveaux de gris sur la sélection (si un seul item est déjà gris, on éteint tout).
+  toggleGrayscale: () => void;
+  // Ajoute plusieurs items d'un coup (import de dossier, collage multiple) — une seule entrée.
+  addItems: (items: BoardItem[], select?: boolean) => string[];
+  // Presse-papiers INTERNE du board : survit au changement de scène (copier ici, coller là-bas).
+  copySelection: () => number;
+  cutSelection: () => number;
+  pasteClipboard: (x: number, y: number) => number;
+  bringSelectedToFront: () => void;
+  sendSelectedToBack: () => void;
   setEditing: (id: string | null) => void;
   requestFocus: (id: string | null) => void;
   setCropping: (id: string | null) => void;
@@ -183,6 +218,10 @@ function resetHistoryCtl() {
 // Timer d'auto-effacement de la notice (hors store : ne déclenche aucun re-render).
 let noticeTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Presse-papiers INTERNE : vit hors du store pour survivre au chargement d'une autre scène — on
+// copie dans un board, on colle dans un autre. `clipCount` en reflète la taille pour l'UI.
+let internalClipboard: BoardItem[] = [];
+
 // Recale la sélection/édition sur un jeu d'items restauré (undo/redo) : retire les références mortes.
 function reconcile(items: BoardItem[], s: BoardState) {
   const ids = new Set(items.map((i) => i.id));
@@ -221,6 +260,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   save: readSave(),
   placeFrame: readPlaceFrame(),
   prefs: readPrefs(),
+  clipCount: 0,
   dirty: false,
   notice: null,
 
@@ -419,16 +459,170 @@ export const useBoard = create<BoardState>((set, get) => ({
       };
     }),
 
-  arrange: (mode) =>
+  arrange: (mode) => get().tidy({ layout: mode }),
+
+  // Uniformisation PUIS disposition : les deux passes partagent un seul instantané d'historique,
+  // sinon « ranger » coûterait deux Ctrl+Z pour un seul geste utilisateur.
+  tidy: ({ layout, uniform, gap, sort }) =>
     set((s) => {
-      const sel = s.items.filter((it) => s.selectedIds.includes(it.id));
-      if (sel.length < 2) return {};
-      const pos = computeArrange(sel, mode);
+      const picked = s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw");
+      if (picked.length < 2) return {};
       recordHistory(s.items, null);
+
+      let sel = picked;
+      let items = s.items;
+      if (uniform && uniform !== "none") {
+        const size = computeNormalize(sel, uniform);
+        if (size.size) {
+          items = items.map((it) => (size.has(it.id) ? { ...it, ...size.get(it.id)! } : it));
+          sel = items.filter((it) => size.has(it.id) || sel.some((p) => p.id === it.id));
+        }
+      }
+
+      const pos = computeArrange(sel, layout, { gap, sort });
+      if (!pos.size && items === s.items) return {};
       return {
-        items: s.items.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id) } : it)),
+        items: items.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id) } : it)),
         dirty: true,
       };
+    }),
+
+  normalize: (mode) =>
+    set((s) => {
+      const sel = s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw");
+      const size = computeNormalize(sel, mode);
+      if (!size.size) return {};
+      recordHistory(s.items, null);
+      return {
+        items: s.items.map((it) => (size.has(it.id) ? { ...it, ...size.get(it.id)! } : it)),
+        dirty: true,
+      };
+    }),
+
+  // Réinitialisations : toujours à CENTRE CONSTANT. « scale » = retour à la taille native 1:1 (sans
+  // ratio natif connu, l'item est laissé tel quel) ; « crop » restaure aussi le ratio d'origine,
+  // puisque notre rognage est exprimé en fractions du média et déforme donc la boîte affichée.
+  reset: (kind) =>
+    set((s) => {
+      const ids = new Set(s.selectedIds);
+      if (!ids.size) return {};
+      const all = kind === "all";
+      let touched = false;
+      const items = s.items.map((it) => {
+        if (!ids.has(it.id) || it.kind === "draw") return it;
+        const next: BoardItem = { ...it };
+        const cx = it.x + it.w / 2;
+        const cy = it.y + it.h / 2;
+        if ((all || kind === "rotation") && it.rotation) next.rotation = 0;
+        if ((all || kind === "flip") && (it.flipH || it.flipV)) { next.flipH = false; next.flipV = false; }
+        if ((all || kind === "crop") && it.crop) {
+          next.crop = undefined;
+          if (it.natW && it.natH) next.h = (next.w * it.natH) / it.natW;
+        }
+        if ((all || kind === "scale") && it.natW && it.natH) { next.w = it.natW; next.h = it.natH; }
+        next.x = cx - next.w / 2;
+        next.y = cy - next.h / 2;
+        if (next.w !== it.w || next.h !== it.h || next.x !== it.x || next.y !== it.y
+          || next.rotation !== it.rotation || next.flipH !== it.flipH || next.flipV !== it.flipV
+          || next.crop !== it.crop) touched = true;
+        return next;
+      });
+      if (!touched) return {};
+      recordHistory(s.items, null);
+      return { items, dirty: true };
+    }),
+
+  patchSelected: (patch, tag) =>
+    set((s) => {
+      const ids = new Set(s.selectedIds);
+      if (!ids.size) return {};
+      recordHistory(s.items, tag ?? null);
+      return {
+        items: s.items.map((it) => (ids.has(it.id) ? { ...it, ...patch } : it)),
+        dirty: true,
+      };
+    }),
+
+  // Un seul item déjà en gris suffit à ce que la bascule ÉTEIGNE tout : l'action reste prévisible
+  // sur une sélection mixte (on ne se retrouve jamais avec la moitié de la planche en gris).
+  toggleGrayscale: () =>
+    set((s) => {
+      const sel = s.items.filter((it) => s.selectedIds.includes(it.id));
+      if (!sel.length) return {};
+      const on = !sel.some((it) => it.grayscale);
+      recordHistory(s.items, null);
+      const ids = new Set(sel.map((it) => it.id));
+      return {
+        items: s.items.map((it) => (ids.has(it.id) ? { ...it, grayscale: on } : it)),
+        dirty: true,
+      };
+    }),
+
+  addItems: (list, select = true) => {
+    if (!list.length) return [];
+    const ids: string[] = [];
+    set((s) => {
+      recordHistory(s.items, null);
+      let z = topZ(s.items);
+      const added = list.map((it) => {
+        const id = it.id || uid();
+        ids.push(id);
+        return { ...it, id, z: it.z ?? ++z } as BoardItem;
+      });
+      return {
+        items: [...s.items, ...added],
+        ...(select ? { selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, drawSel: null } : {}),
+        dirty: true,
+      };
+    });
+    return ids;
+  },
+
+  copySelection: () => {
+    const s = get();
+    const picked = s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw");
+    internalClipboard = picked.map((it) => ({ ...it }));
+    set({ clipCount: internalClipboard.length });
+    return internalClipboard.length;
+  },
+
+  cutSelection: () => {
+    const n = get().copySelection();
+    if (n) get().removeSelected();
+    return n;
+  },
+
+  // Colle le presse-papiers interne en gardant les positions RELATIVES du groupe copié, recentré
+  // sur le point demandé (curseur). Les items collés deviennent la sélection.
+  pasteClipboard: (x, y) => {
+    if (!internalClipboard.length) return 0;
+    const src = internalClipboard;
+    const minX = Math.min(...src.map((it) => it.x));
+    const minY = Math.min(...src.map((it) => it.y));
+    const maxX = Math.max(...src.map((it) => it.x + it.w));
+    const maxY = Math.max(...src.map((it) => it.y + it.h));
+    const dx = x - (minX + maxX) / 2;
+    const dy = y - (minY + maxY) / 2;
+    get().addItems(src.map((it) => ({ ...it, id: uid(), x: it.x + dx, y: it.y + dy })));
+    return src.length;
+  },
+
+  bringSelectedToFront: () =>
+    set((s) => {
+      const ids = new Set(s.selectedIds);
+      if (!ids.size) return {};
+      recordHistory(s.items, null);
+      let z = topZ(s.items);
+      return { items: s.items.map((it) => (ids.has(it.id) ? { ...it, z: ++z } : it)), dirty: true };
+    }),
+
+  sendSelectedToBack: () =>
+    set((s) => {
+      const ids = new Set(s.selectedIds);
+      if (!ids.size) return {};
+      recordHistory(s.items, null);
+      let z = bottomZ(s.items);
+      return { items: s.items.map((it) => (ids.has(it.id) ? { ...it, z: --z } : it)), dirty: true };
     }),
 
   setEditing: (id) => { resetCoalesce(); set({ editingId: id }); },

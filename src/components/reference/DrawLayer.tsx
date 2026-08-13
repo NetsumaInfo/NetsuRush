@@ -10,10 +10,12 @@
 // PAS sur `view`). Pendant le pan, seul le `transform` du <svg> change (déplacement composite GPU,
 // comme la couche d'items) : on ne re-réconcilie PAS toutes les formes à chaque frame → plus de lag.
 
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { useBoard } from "./useReferenceBoard";
-import { screenToBoard, uid, type DrawShape } from "./referenceShared";
+import { screenToBoard, uid, type BoardItem, type DrawShape } from "./referenceShared";
 import { shapeBBox, hitShape, shifted, handlesFor, editShape, penPath, connectorPath } from "./drawGeometry";
+import { attachShape, detachShape, indexItems, reanchorShape, resolveShapes } from "./drawAnchor";
+import { useLive } from "./boardLive";
 import { ShapeView } from "./ShapeView";
 import { ShapeInspector } from "./ShapeInspector";
 
@@ -98,7 +100,25 @@ export function DrawLayer() {
   const edit = useRef<{ id: string; k: string; recorded: boolean } | null>(null);
   const drawing = useRef(false);
 
-  const shapes = drawItem?.shapes ?? EMPTY_SHAPES;
+  // Formes LIÉES à un média : leurs coordonnées stockées sont exprimées dans le repère de l'item,
+  // et reconverties ici depuis sa géométrie courante. Pendant un geste, la géométrie vit dans le
+  // canal vivant (l'item n'a pas encore été commité) → une flèche suit l'image en direct.
+  const stored = drawItem?.shapes ?? EMPTY_SHAPES;
+  const boardItems = useBoard((s) => s.items);
+  const live = useLive();
+  const anchoredItems = useMemo<BoardItem[]>(() => {
+    const geoms = live.geom;
+    if (!Object.keys(geoms).length) return boardItems;
+    return boardItems.map((it) => (geoms[it.id] ? { ...it, ...geoms[it.id] } : it));
+  }, [boardItems, live.geom]);
+  const shapes = useMemo(() => resolveShapes(stored, anchoredItems), [stored, anchoredItems]);
+
+  // Écriture des formes : ce qui est lié est RÉ-ANCRÉ avant d'être stocké (sinon un tracé déplacé à
+  // la main reviendrait à sa position d'origine au rendu suivant).
+  const writeShapes = useCallback((next: DrawShape[], record = true, tag?: string) => {
+    const byId = indexItems(useBoard.getState().items);
+    useBoard.getState().drawSetShapes(next.map((s) => reanchorShape(s, byId)), record, tag);
+  }, []);
   // Mode sélection actif : hors dessin, ou outil « sélection » du mode dessin.
   const selectMode = !drawMode || pen.tool === "select";
 
@@ -108,7 +128,12 @@ export function DrawLayer() {
   }, []);
   const worldPoint = (e: React.PointerEvent) => worldFromXY(e.clientX, e.clientY);
   const wWorld = () => pen.width / useBoard.getState().view.scale;
-  const getShapes = () => useBoard.getState().items.find((i) => i.kind === "draw")?.shapes ?? [];
+  // Formes RÉSOLUES (coordonnées monde) : c'est sur elles que portent hit-test et mutations ;
+  // `writeShapes` se charge de les ré-ancrer avant stockage.
+  const getShapes = () => {
+    const st = useBoard.getState();
+    return resolveShapes(st.items.find((i) => i.kind === "draw")?.shapes ?? [], st.items);
+  };
 
   // --- Déplacement / édition d'une forme (partagé wrapper mode dessin ET cibles hors dessin) ----
   // Stable (refs + getState uniquement) → permet de mémoïser les cibles transparentes.
@@ -118,7 +143,7 @@ export function DrawLayer() {
       const ed = edit.current;
       const straight = 6 / useBoard.getState().view.scale;
       const next = getShapes().map((s) => (s.id === ed.id ? editShape(s, ed.k, x, y, straight) : s));
-      useBoard.getState().drawSetShapes(next, !ed.recorded);
+      writeShapes(next, !ed.recorded);
       ed.recorded = true;
       return true;
     }
@@ -127,7 +152,7 @@ export function DrawLayer() {
       const dx = x - d.lx, dy = y - d.ly;
       d.lx = x; d.ly = y;
       const next = getShapes().map((s) => (s.id === d.id ? shifted(s, dx, dy) : s));
-      useBoard.getState().drawSetShapes(next, !d.recorded);
+      writeShapes(next, !d.recorded);
       d.recorded = true;
       return true;
     }
@@ -179,7 +204,7 @@ export function DrawLayer() {
     if (tool === "eraser") {
       drawing.current = true;
       const thr = (pen.width + 12) / view.scale;
-      useBoard.getState().drawSetShapes(getShapes().filter((s) => !hitShape(s, x, y, thr)));
+      writeShapes(getShapes().filter((s) => !hitShape(s, x, y, thr)));
       return;
     }
     // formes tracées. Opacité : réglage libre du pen ; le surligneur force ~0,45 si laissé opaque.
@@ -200,7 +225,7 @@ export function DrawLayer() {
     const { x, y } = worldPoint(e);
     if (pen.tool === "eraser") {
       const thr = (pen.width + 12) / view.scale;
-      useBoard.getState().drawSetShapes(getShapes().filter((s) => !hitShape(s, x, y, thr)));
+      writeShapes(getShapes().filter((s) => !hitShape(s, x, y, thr)));
       return;
     }
     const shift = e.shiftKey;
@@ -237,7 +262,13 @@ export function DrawLayer() {
     endGesture();
     if (draft) {
       const ok = draft.t === "pen" ? draft.p.length >= 4 : Math.hypot(draft.p[2] - draft.p[0], draft.p[3] - draft.p[1]) > 3 / view.scale;
-      if (ok) useBoard.getState().drawSetShapes([...getShapes(), draft]);
+      // Accrochage automatique : une flèche tracée d'une image vers une autre est tenue par ses deux
+      // bouts ; un trait posé sur une image lui appartient. Débrayable dans les Paramètres.
+      if (ok) {
+        const st = useBoard.getState();
+        const shaped = st.prefs.autoAnchorDraw ? attachShape(draft, st.items) : draft;
+        writeShapes([...getShapes(), shaped]);
+      }
       setDraft(null);
     }
   };
@@ -315,14 +346,23 @@ export function DrawLayer() {
         <ShapeInspector
           shape={selShape}
           scale={view.scale}
-          onPatch={(patch) => useBoard.getState().drawSetShapes(getShapes().map((s) => (s.id === selShape.id ? { ...s, ...patch } : s)))}
+          onPatch={(patch) => writeShapes(getShapes().map((s) => (s.id === selShape.id ? { ...s, ...patch } : s)))}
           onDuplicate={() => {
             const off = 16 / useBoard.getState().view.scale;
             const copy = { ...shifted(selShape, off, off), id: uid() };
-            useBoard.getState().drawSetShapes([...getShapes(), copy]);
+            writeShapes([...getShapes(), copy]);
             selectDrawShape(copy.id);
           }}
-          onDelete={() => { useBoard.getState().drawSetShapes(getShapes().filter((s) => s.id !== selShape.id)); selectDrawShape(null); }}
+          onDelete={() => { writeShapes(getShapes().filter((s) => s.id !== selShape.id)); selectDrawShape(null); }}
+          // Délier fige le tracé en coordonnées monde ; relier retente l'accrochage automatique.
+          onUnlink={() => {
+            const byId = indexItems(useBoard.getState().items);
+            writeShapes(getShapes().map((s) => (s.id === selShape.id ? detachShape(s, byId) : s)));
+          }}
+          onRelink={() => {
+            const its = useBoard.getState().items;
+            writeShapes(getShapes().map((s) => (s.id === selShape.id ? attachShape(s, its) : s)));
+          }}
         />
       )}
     </div>

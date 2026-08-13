@@ -21,7 +21,17 @@
     "unpin": "Quitar fijación",
     "settings": "Ajustes",
     "addFavorite": "Añadir a favoritos",
-    "removeFavorite": "Quitar de favoritos"
+    "removeFavorite": "Quitar de favoritos",
+    "copy": "Copiar",
+    "cut": "Cortar",
+    "grayscale": "Escala de grises",
+    "reset": "Restablecer",
+    "resetScale": "Tamaño original",
+    "resetRotation": "Rotación",
+    "resetFlip": "Espejos",
+    "resetCrop": "Recorte",
+    "resetAll": "Restablecer todo",
+    "fitSelection": "Encuadrar la selección"
   },
   "toolbar": {
     "home": "Inicio",
@@ -40,7 +50,9 @@
     "openScene": "Abrir una escena",
     "share": "Compartir",
     "unsaved": "Sin guardar",
-    "saveAs": "Guardar como…"
+    "saveAs": "Guardar como…",
+    "snapOn": "Activar el imán",
+    "snapOff": "Desactivar el imán"
   },
   "settings": {
     "tabLook": "Apariencia",
@@ -160,7 +172,15 @@
     "provider_niconico": "Niconico",
     "provider_odysee": "Odysee",
     "provider_rumble": "Rumble",
-    "provider_generic": "Otros sitios"
+    "provider_generic": "Otros sitios",
+    "snapTitle": "Imán",
+    "snapEnabled": "Ajustar a los demás elementos",
+    "snapThreshold": "Distancia de ajuste (px)",
+    "snapStick": "Separación al pegar",
+    "arrangeTitle": "Ordenación",
+    "autoArrangeOnImport": "Ordenar automáticamente los lotes importados",
+    "autoAnchorDraw": "Vincular automáticamente los trazos a los medios",
+    "paletteSize": "Colores por paleta extraída"
   },
   "inspector": {
     "ytPlayer": "Reproductor de YouTube",
@@ -287,7 +307,18 @@
     "zoomIn": "Acercar",
     "zoomOut": "Alejar",
     "saveAs": "Guardar como",
-    "openProject": "Abrir un proyecto"
+    "openProject": "Abrir un proyecto",
+    "copy": "Copiar",
+    "cut": "Cortar",
+    "fitSelection": "Encuadrar la selección",
+    "normalizeHeight": "Misma altura",
+    "normalizeWidth": "Misma anchura",
+    "normalizeArea": "Misma superficie",
+    "arrangeDefault": "Ordenar la selección",
+    "resetAll": "Restablecer todo",
+    "grayscale": "Escala de grises",
+    "toFront": "Traer al frente",
+    "toBack": "Enviar al fondo"
   },
   "drawStyle": {
     "thin": "Trazo fino",
@@ -314,7 +345,10 @@
     "fill": "Rellenar",
     "fillLabel": "Relleno",
     "rounded": "Esquinas redondeadas",
-    "duplicate": "Duplicar (Ctrl+D)"
+    "duplicate": "Duplicar (Ctrl+D)",
+    "unlink": "Desvincular del medio",
+    "relink": "Vincular al medio",
+    "linkedTo": "Vinculado a {{count}} elemento(s)"
   },
   "media": {
     "browse": "Explorar",
@@ -367,7 +401,8 @@
     "backHome": "Volver al inicio",
     "alwaysOnTop": "Siempre al frente",
     "openProject": "Abrir un proyecto…",
-    "relocateMissing": "Relocalizar archivos multimedia que faltan ({{count}})"
+    "relocateMissing": "Relocalizar archivos multimedia que faltan ({{count}})",
+    "folder": "Carpeta…"
   },
   "linkDialog": {
     "title": "Añadir un vídeo en línea",
@@ -509,7 +544,10 @@
     "clipboardEmpty": "Portapapeles vacío o no compatible",
     "clipboardEmptyLink": "Portapapeles vacío o enlace no reconocido",
     "emptyTitle": "Arrastra imágenes, vídeos o un enlace de YouTube aquí",
-    "emptyHint": "Pegar (Ctrl+V) · rueda para zoom · arrastrar el fondo para navegar"
+    "emptyHint": "Pegar (Ctrl+V) · rueda para zoom · arrastrar el fondo para navegar",
+    "pastedItems": "{{count}} elemento(s) pegado(s)",
+    "copiedDone": "{{count}} elemento(s) copiado(s)",
+    "cutDone": "{{count}} elemento(s) cortado(s)"
   },
   "notice": {
     "recoveringMedia": "Recuperando el medio…",
@@ -547,5 +585,60 @@
     "relocating": "Buscando archivos multimedia en la carpeta… ({{count}})",
     "relocated": "{{count}}/{{total}} archivos multimedia relocalizados",
     "relocatedNone": "Ningún archivo multimedia reconocido en esta carpeta"
+  },
+  "tidy": {
+    "title": "Ordenar",
+    "layout": "Disposición",
+    "layoutPack": "Óptima",
+    "layoutGrid": "Cuadrícula",
+    "layoutRow": "Fila",
+    "layoutCol": "Columna",
+    "uniform": "Igualar el tamaño",
+    "uniformNone": "Ninguna",
+    "uniformHeight": "Misma altura",
+    "uniformWidth": "Misma anchura",
+    "uniformArea": "Misma superficie",
+    "gap": "Separación",
+    "sort": "Orden",
+    "sortCurrent": "Actual",
+    "sortName": "Por nombre",
+    "apply": "Ordenar"
+  },
+  "palette": {
+    "defaultTitle": "Paleta",
+    "extract": "Extraer la paleta",
+    "copied": "{{hex}} copiado",
+    "copyFailed": "No se pudo copiar",
+    "empty": "Sin colores",
+    "working": "Extrayendo colores…",
+    "done": "{{count}} colores extraídos",
+    "doneSkipped": "{{count}} colores extraídos · {{skipped}} medios omitidos",
+    "failed": "Ningún color utilizable",
+    "noSource": "Ningún medio utilizable en la selección",
+    "sourcesGone": "Los medios de origen ya no están en el tablero",
+    "regenerate": "Regenerar",
+    "size": "Colores",
+    "showHex": "Mostrar los valores"
+  },
+  "exportImage": {
+    "menu": "Exportar como imagen…",
+    "title": "Exportar el tablero",
+    "subtitle": "Renderiza el tablero como imagen o SVG.",
+    "width": "Anchura",
+    "height": "Altura",
+    "selectionOnly": "Solo la selección ({{count}})",
+    "transparent": "Fondo transparente",
+    "export": "Exportar",
+    "done": "Tablero exportado",
+    "failed": "No se pudo exportar: {{error}}",
+    "hint": "El render parte del contenido del tablero: los vídeos salen con su fotograma actual y los reproductores en línea como tarjeta."
+  },
+  "ingest": {
+    "folderUnavailable": "Importación de carpeta no disponible",
+    "folderScanning": "Leyendo la carpeta…",
+    "folderEmpty": "No hay medios en esta carpeta",
+    "folderDone": "{{count}} medios importados",
+    "folderDoneTruncated": "{{count}} medios importados (carpeta truncada)",
+    "folderNoPath": "No se encontró la ruta de la carpeta"
   }
 }

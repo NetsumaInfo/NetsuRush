@@ -7,6 +7,7 @@ import {
   AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd,
   AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, LayoutGrid, MoreHorizontal,
+  Wand2, Palette, Contrast, RotateCcw,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +25,9 @@ import { useBoard, type ArrangeMode } from "./useReferenceBoard";
 import { FONT_FAMILIES, HANDWRITING_FONT, EMBED_LEVELS, type BoardItem, type BoardLink } from "./referenceShared";
 import { playerSeek, playerTime } from "./playhead";
 import { IconToggle, IconAction, ColorControl, MiniSelect, FontPicker, NumberSpin } from "./inspectorControls";
+import { Button } from "@/components/ui/button";
+import { TidyMenu } from "./TidyMenu";
+import { extractPaletteToBoard } from "./boardPaletteActions";
 
 // Libellés des modes de lecture (résolus au rendu via i18n).
 const PLAY_KEY: Record<PlayMode, string> = {
@@ -507,6 +511,8 @@ export function ArrangeBar({ count }: { count: number }) {
   const arrange = useBoard((s) => s.arrange);
   const removeSelected = useBoard((s) => s.removeSelected);
   const groupSequence = useBoard((s) => s.groupSequence);
+  const toggleGrayscale = useBoard((s) => s.toggleGrayscale);
+  const reset = useBoard((s) => s.reset);
   const selectedIds = useBoard((s) => s.selectedIds);
   const items = useBoard((s) => s.items);
   // Groupable en séquence : ≥2 items sélectionnés, tous des images. Mémoïsé pour éviter le
@@ -530,6 +536,21 @@ export function ArrangeBar({ count }: { count: number }) {
           <IconAction label={t("arrange.groupSequence")} onClick={() => groupSequence(selectedIds)}><Film /></IconAction>
         </>
       )}
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+      {/* Ranger : disposition + uniformisation de taille, choisies dans le sélecteur, appliquées
+          ensemble (une seule entrée d'annulation). */}
+      <TidyMenu
+        trigger={
+          <Button variant="ghost" size="icon-sm" aria-label={t("tidy.title")}>
+            <Wand2 />
+          </Button>
+        }
+      />
+      <IconAction label={t("palette.extract")} onClick={() => void extractPaletteToBoard()}><Palette /></IconAction>
+      <IconAction label={t("actions.grayscale")} onClick={() => toggleGrayscale()}><Contrast /></IconAction>
+      <IconAction label={t("actions.resetAll")} onClick={() => reset("all")}><RotateCcw /></IconAction>
+
       <Separator orientation="vertical" className="h-6" />
       <IconAction label={t("arrange.deleteSelection")} onClick={removeSelected}>
         <Trash2 className="text-destructive" />

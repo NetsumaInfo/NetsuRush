@@ -1,11 +1,14 @@
 // Raccourcis globaux du board (partagés entre la page onglet et la fenêtre détachée). Liste de
 // référence (aussi affichée dans Paramètres ▸ Raccourcis) :
-//   Coller (Ctrl/⌘+V) · Supprimer la sélection (Suppr/Retour) · Désélectionner (Échap) ·
-//   Tout sélectionner (Ctrl/⌘+A) · Dupliquer (Ctrl/⌘+D) · Annuler (Ctrl/⌘+Z) ·
-//   Rétablir (Ctrl/⌘+Maj+Z ou Ctrl+Y) · Enregistrer (Ctrl/⌘+S) · Enregistrer sous (Ctrl/⌘+Maj+S) ·
-//   Ouvrir un projet (Ctrl/⌘+O) · Déplacer la sélection (Flèches,
-//   Maj = ×10) · Tout cadrer (Ctrl/⌘+0) · Zoom (Ctrl/⌘+= / Ctrl/⌘+-, ou molette) ·
-//   Pan : Espace+glissé ou clic-milieu.
+//   Copier (Ctrl/⌘+C) · Couper (Ctrl/⌘+X) · Coller (Ctrl/⌘+V) · Supprimer la sélection (Suppr) ·
+//   Désélectionner (Échap) · Tout sélectionner (Ctrl/⌘+A) · Dupliquer (Ctrl/⌘+D) ·
+//   Annuler (Ctrl/⌘+Z) · Rétablir (Ctrl/⌘+Maj+Z) · Enregistrer (Ctrl/⌘+S) ·
+//   Enregistrer sous (Ctrl/⌘+Maj+S) · Ouvrir un projet (Ctrl/⌘+O) ·
+//   Déplacer la sélection (Flèches, Maj = ×10) · Tout cadrer (Ctrl/⌘+0) ·
+//   Cadrer la sélection (Maj+F) · Zoom (Ctrl/⌘+= / Ctrl/⌘+-, ou molette) ·
+//   Même hauteur (Maj+H) · Même largeur (Maj+W) · Même surface (Maj+S) · Ranger (Maj+O) ·
+//   Tout réinitialiser (R) · Niveaux de gris (G) · Premier plan (Pg↑) · Arrière-plan (Pg↓) ·
+//   Pan : Espace+glissé ou clic-milieu · Aimant : Alt = désactivé le temps du geste.
 
 import { useEffect } from "react";
 import i18n from "@/i18n";
@@ -27,6 +30,16 @@ export function useBoardShortcuts(
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
       if (isTyping(document.activeElement) || !e.clipboardData) return;
+      // Le presse-papiers SYSTÈME gagne quand il porte un média (on vient de copier une image dans un
+      // navigateur) ; sinon on colle le presse-papiers INTERNE, qui lui garde toute une sélection.
+      const hasMedia = Array.from(e.clipboardData.items ?? []).some((it) => it.type.startsWith("image/") || it.type.startsWith("video/"))
+        || (e.clipboardData.files?.length ?? 0) > 0;
+      if (!hasMedia && useBoard.getState().clipCount) {
+        e.preventDefault();
+        const n = boardRef.current?.pasteItems() ?? 0;
+        if (n) useBoard.getState().setNotice({ kind: "ok", text: i18n.t("reference:board.pastedItems", { count: n }) });
+        return;
+      }
       // Rien d'exploitable (presse-papiers vide, lien irrésoluble) → feedback au lieu du silence.
       void boardRef.current?.addPaste(e.clipboardData).then((ok) => {
         if (ok === false) useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:board.clipboardEmptyLink") });
@@ -56,6 +69,9 @@ export function useBoardShortcuts(
       // Raccourcis-commandes REBINDABLES : combo courant → action (via prefs.shortcutKeys).
       const keys = st.prefs.shortcutKeys;
       const combo = comboFromEvent(e);
+      // En mode dessin, les LETTRES NUES appartiennent aux outils (stylo, gomme…) : on ne leur vole
+      // pas la touche. Les combos avec modificateur (Ctrl+Z, Ctrl+S…) restent actifs partout.
+      if (st.drawMode && !(e.ctrlKey || e.metaKey || e.altKey) && combo.length === 1) return;
       const action = (Object.keys(keys) as ShortcutAction[]).find((a) => keys[a] === combo);
       if (!action) return;
 
@@ -126,6 +142,58 @@ export function useBoardShortcuts(
         case "zoomOut":
           e.preventDefault();
           boardRef.current?.zoomBy(0.8);
+          break;
+        case "fitSelection":
+          e.preventDefault();
+          boardRef.current?.fitSelection();
+          break;
+        case "copy":
+          if (!st.selectedIds.length) break;
+          e.preventDefault();
+          void boardRef.current?.copySelection(false);
+          break;
+        case "cut":
+          if (!st.selectedIds.length) break;
+          e.preventDefault();
+          void boardRef.current?.copySelection(true);
+          break;
+        case "grayscale":
+          if (!st.selectedIds.length) break;
+          e.preventDefault();
+          st.toggleGrayscale();
+          break;
+        case "resetAll":
+          if (!st.selectedIds.length) break;
+          e.preventDefault();
+          st.reset("all");
+          break;
+        case "normalizeHeight":
+          e.preventDefault();
+          st.normalize("height");
+          break;
+        case "normalizeWidth":
+          e.preventDefault();
+          st.normalize("width");
+          break;
+        case "normalizeArea":
+          e.preventDefault();
+          st.normalize("area");
+          break;
+        case "arrangeDefault": {
+          e.preventDefault();
+          const p = st.prefs;
+          st.tidy({ layout: p.arrangeLayout, uniform: p.arrangeUniform, gap: p.arrangeGap, sort: p.arrangeSort });
+          break;
+        }
+        case "toFront":
+          if (!st.selectedIds.length) break;
+          e.preventDefault();
+          st.bringSelectedToFront();
+          break;
+        case "toBack":
+          if (!st.selectedIds.length) break;
+          e.preventDefault();
+          st.sendSelectedToBack();
           break;
       }
     };

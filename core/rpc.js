@@ -28,7 +28,7 @@ const dictate = require("./dictate"); // dictée vocale push-to-talk (réutilise
 const voice = require("./voice"); // module voix : transcription + silences (sous-titres, montage texte)
 const exportMod = require("./export"); // export fichier piloté par profil (remux/encode, GPU/CPU, merge)
 const audioLang = require("./audioLang"); // normalisation des étiquettes de langue des pistes audio
-const { createReferenceStore } = require("./reference");
+const { createReferenceStore, scanFolder, writeExportFile } = require("./reference");
 const wallpaper = require("./wallpaper");
 const { createCollectionStore } = require("./collections"); // dossiers de plans gardés (bibliothèque)
 const { createCollectionArchive } = require("./collectionArchive"); // archivage disque d'une collection + changement de dossier
@@ -869,6 +869,11 @@ function createRpc() {
     "reference:dropAsset": ([p]) => refStore.removeAsset(p),
     // Ménage du magasin d'assets (Paramètres du board) : ce que plus aucune scène ne réclame part.
     "reference:sweepAssets": ([opts]) => refStore.sweepAssets(opts || {}),
+    // Dossier déposé sur le board : médias trouvés récursivement, avec leur sous-dossier relatif
+    // (l'import en fait un cadre par dossier). Plafonné, et le dit quand il tronque.
+    "reference:scanFolder": ([dir, opts]) => scanFolder(dir, opts || {}),
+    // Export du board (PNG/JPG en base64, SVG en texte) vers un chemin choisi par l'utilisateur.
+    "reference:writeFile": ([filePath, data, encoding]) => writeExportFile(filePath, data, encoding),
 
     // --- Fond d'écran de l'interface (Paramètres › Interface › Thème) ---
     // L'import copie la source dans la bibliothèque et cuit la variante de base ; les marches de flou

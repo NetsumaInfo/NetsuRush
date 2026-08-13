@@ -60,6 +60,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/caveat": "^5.2.8",
     "@fontsource-variable/inter": "^5.2.8",
+    "@material/material-color-utilities": "^0.4.0",
     "@number-flow/react": "^0.6.0",
     "@tauri-apps/plugin-deep-link": "^2.4.9",
     "@tauri-apps/plugin-dialog": "^2.7.1",

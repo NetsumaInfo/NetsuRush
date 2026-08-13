@@ -21,7 +21,17 @@
     "unpin": "Désépingler",
     "settings": "Paramètres",
     "addFavorite": "Ajouter aux favoris",
-    "removeFavorite": "Retirer des favoris"
+    "removeFavorite": "Retirer des favoris",
+    "copy": "Copier",
+    "cut": "Couper",
+    "grayscale": "Niveaux de gris",
+    "reset": "Réinitialiser",
+    "resetScale": "Taille d'origine",
+    "resetRotation": "Rotation",
+    "resetFlip": "Miroirs",
+    "resetCrop": "Rognage",
+    "resetAll": "Tout réinitialiser",
+    "fitSelection": "Cadrer la sélection"
   },
   "toolbar": {
     "home": "Accueil",
@@ -40,7 +50,9 @@
     "openScene": "Ouvrir une scène",
     "share": "Partager",
     "unsaved": "Non enregistré",
-    "saveAs": "Enregistrer sous…"
+    "saveAs": "Enregistrer sous…",
+    "snapOn": "Activer l'aimant",
+    "snapOff": "Désactiver l'aimant"
   },
   "settings": {
     "tabLook": "Apparence",
@@ -160,7 +172,15 @@
     "provider_niconico": "Niconico",
     "provider_odysee": "Odysee",
     "provider_rumble": "Rumble",
-    "provider_generic": "Autres sites"
+    "provider_generic": "Autres sites",
+    "snapTitle": "Aimant",
+    "snapEnabled": "Accrocher aux autres éléments",
+    "snapThreshold": "Distance d'accrochage (px)",
+    "snapStick": "Écart au collage",
+    "arrangeTitle": "Rangement",
+    "autoArrangeOnImport": "Ranger automatiquement un lot importé",
+    "autoAnchorDraw": "Lier automatiquement les tracés aux médias",
+    "paletteSize": "Couleurs extraites par palette"
   },
   "inspector": {
     "ytPlayer": "Lecteur YouTube",
@@ -287,7 +307,18 @@
     "zoomIn": "Zoomer",
     "zoomOut": "Dézoomer",
     "saveAs": "Enregistrer sous",
-    "openProject": "Ouvrir un projet"
+    "openProject": "Ouvrir un projet",
+    "copy": "Copier",
+    "cut": "Couper",
+    "fitSelection": "Cadrer la sélection",
+    "normalizeHeight": "Même hauteur",
+    "normalizeWidth": "Même largeur",
+    "normalizeArea": "Même surface",
+    "arrangeDefault": "Ranger la sélection",
+    "resetAll": "Tout réinitialiser",
+    "grayscale": "Niveaux de gris",
+    "toFront": "Premier plan",
+    "toBack": "Arrière-plan"
   },
   "drawStyle": {
     "thin": "Trait fin",
@@ -314,7 +345,10 @@
     "fill": "Remplir",
     "fillLabel": "Remplissage",
     "rounded": "Coins arrondis",
-    "duplicate": "Dupliquer (Ctrl+D)"
+    "duplicate": "Dupliquer (Ctrl+D)",
+    "unlink": "Délier du média",
+    "relink": "Lier au média",
+    "linkedTo": "Lié à {{count}} élément(s)"
   },
   "media": {
     "browse": "Parcourir",
@@ -367,7 +401,8 @@
     "backHome": "Retour à l'accueil",
     "alwaysOnTop": "Toujours au premier plan",
     "openProject": "Ouvrir un projet…",
-    "relocateMissing": "Relocaliser les médias manquants ({{count}})"
+    "relocateMissing": "Relocaliser les médias manquants ({{count}})",
+    "folder": "Dossier…"
   },
   "linkDialog": {
     "title": "Ajouter une vidéo en ligne",
@@ -509,7 +544,10 @@
     "clipboardEmpty": "Presse-papiers vide ou non pris en charge",
     "clipboardEmptyLink": "Presse-papiers vide ou lien non reconnu",
     "emptyTitle": "Glisse des images, vidéos ou un lien YouTube ici",
-    "emptyHint": "Coller (Ctrl+V) · molette pour zoomer · glisser le fond pour naviguer"
+    "emptyHint": "Coller (Ctrl+V) · molette pour zoomer · glisser le fond pour naviguer",
+    "pastedItems": "{{count}} élément(s) collé(s)",
+    "copiedDone": "{{count}} élément(s) copié(s)",
+    "cutDone": "{{count}} élément(s) coupé(s)"
   },
   "notice": {
     "recoveringMedia": "Récupération du média…",
@@ -547,5 +585,60 @@
     "relocating": "Recherche des médias dans le dossier… ({{count}})",
     "relocated": "{{count}}/{{total}} média(s) relocalisé(s)",
     "relocatedNone": "Aucun média reconnu dans ce dossier"
+  },
+  "tidy": {
+    "title": "Ranger",
+    "layout": "Disposition",
+    "layoutPack": "Optimal",
+    "layoutGrid": "Grille",
+    "layoutRow": "Ligne",
+    "layoutCol": "Colonne",
+    "uniform": "Uniformiser la taille",
+    "uniformNone": "Aucune",
+    "uniformHeight": "Même hauteur",
+    "uniformWidth": "Même largeur",
+    "uniformArea": "Même surface",
+    "gap": "Écart",
+    "sort": "Ordre",
+    "sortCurrent": "Actuel",
+    "sortName": "Par nom",
+    "apply": "Ranger"
+  },
+  "palette": {
+    "defaultTitle": "Palette",
+    "extract": "Extraire la palette",
+    "copied": "{{hex}} copié",
+    "copyFailed": "Copie impossible",
+    "empty": "Aucune couleur",
+    "working": "Extraction des couleurs…",
+    "done": "{{count}} couleurs extraites",
+    "doneSkipped": "{{count}} couleurs extraites · {{skipped}} média(s) ignoré(s)",
+    "failed": "Aucune couleur exploitable",
+    "noSource": "Aucun média exploitable dans la sélection",
+    "sourcesGone": "Les médias d'origine ne sont plus sur le board",
+    "regenerate": "Régénérer",
+    "size": "Couleurs",
+    "showHex": "Afficher les valeurs"
+  },
+  "exportImage": {
+    "menu": "Exporter en image…",
+    "title": "Exporter le board",
+    "subtitle": "Rendu de la planche en image ou en SVG.",
+    "width": "Largeur",
+    "height": "Hauteur",
+    "selectionOnly": "Sélection seule ({{count}})",
+    "transparent": "Fond transparent",
+    "export": "Exporter",
+    "done": "Board exporté",
+    "failed": "Export impossible : {{error}}",
+    "hint": "Le rendu repart du contenu du board : les vidéos sortent sur leur image courante, les lecteurs en ligne en cartouche."
+  },
+  "ingest": {
+    "folderUnavailable": "Import de dossier indisponible",
+    "folderScanning": "Lecture du dossier…",
+    "folderEmpty": "Aucun média dans ce dossier",
+    "folderDone": "{{count}} médias importés",
+    "folderDoneTruncated": "{{count}} médias importés (dossier tronqué)",
+    "folderNoPath": "Chemin du dossier introuvable"
   }
 }
