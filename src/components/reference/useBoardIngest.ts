@@ -23,6 +23,7 @@ import {
   probeVideo,
   probeNat,
   makeFrameItem,
+  topZ,
 } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
 import { boundsOf, computeArrange } from "./boardArrange";
@@ -279,13 +280,26 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       const frames: { id: string; childIds: string[] }[] = [];
       let cursorY = origin.y;
 
+      // Plan d'empilement explicite : le CADRE passe sous son contenu. Sans ça, tout arriverait au
+      // même z et le cadre, ajouté après ses médias, les recouvrirait — il capterait leurs clics.
+      let z = topZ(useBoard.getState().items);
+
       for (const [rel, files] of groups) {
         const cols = Math.ceil(Math.sqrt(files.length));
+        const rows = Math.ceil(files.length / cols);
         const gap = prefs.arrangeGap;
         const cell = box + gap;
         const childIds: string[] = [];
         const frameId = `${Date.now().toString(36)}-${rel || "root"}-f`;
         const startY = cursorY + 48; // place pour l'étiquette du cadre
+
+        const frame = makeFrameItem(origin.x - 24, cursorY, { color: prefs.defaultFrameColor, fillMode: prefs.defaultFrameFill });
+        frame.id = frameId;
+        frame.text = rel ? `${scan.name}/${rel}` : scan.name;
+        frame.w = cols * cell - gap + 48;
+        frame.h = rows * cell - gap + 72;
+        frame.z = ++z;
+        batch.push(frame);
 
         files.forEach((f, i) => {
           const kind: ItemKind = f.kind === "video" ? "video" : "image";
@@ -306,18 +320,11 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
             w,
             h,
             rotation: 0,
-            z: 0,
+            z: ++z,
             title: f.name,
           });
         });
 
-        const rows = Math.ceil(files.length / cols);
-        const frame = makeFrameItem(origin.x - 24, cursorY, { color: prefs.defaultFrameColor, fillMode: prefs.defaultFrameFill });
-        frame.id = frameId;
-        frame.text = rel ? `${scan.name}/${rel}` : scan.name;
-        frame.w = cols * cell - gap + 48;
-        frame.h = rows * cell - gap + 72;
-        batch.push(frame);
         frames.push({ id: frameId, childIds });
         cursorY += frame.h + 64;
       }

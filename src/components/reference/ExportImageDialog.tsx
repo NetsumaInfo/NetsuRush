@@ -60,15 +60,20 @@ export function ExportImageDialog({ open, onOpenChange }: { open: boolean; onOpe
         ? getComputedStyle(document.documentElement).getPropertyValue("--color-bg").trim() || "#0b0b0e"
         : null;
 
+      // Sans pont applicatif (mode navigateur), il n'y a pas d'écriture disque : le dire plutôt que
+      // laisser l'assertion exploser sur un objet absent.
+      const write = nr.reference?.writeFile;
+      if (!write) throw new Error(t("exportImage.noBridge"));
+
       if (format === "svg") {
         const svg = await renderBoardSvg(items, { background: resolved, only });
-        const res = await nr.reference!.writeFile(dest, svg, "utf8");
+        const res = await write(dest, svg, "utf8");
         if (!res.ok) throw new Error(res.error || "write failed");
       } else {
         const canvas = await renderBoardCanvas(items, { width, background: resolved, only });
         const dataUrl = canvas.toDataURL(format === "jpg" ? "image/jpeg" : "image/png", 0.92);
         const b64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
-        const res = await nr.reference!.writeFile(dest, b64, "base64");
+        const res = await write(dest, b64, "base64");
         if (!res.ok) throw new Error(res.error || "write failed");
       }
       setNotice({ kind: "ok", text: t("exportImage.done") });

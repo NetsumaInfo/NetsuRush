@@ -631,7 +631,8 @@
     "export": "Export",
     "done": "Board exported",
     "failed": "Export failed: {{error}}",
-    "hint": "The render comes from the board content: videos export their current frame, online players export as a card."
+    "hint": "The render comes from the board content: videos export their current frame, online players export as a card.",
+    "noBridge": "Disk writing is unavailable outside the app"
   },
   "ingest": {
     "folderUnavailable": "Folder import unavailable",

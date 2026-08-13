@@ -631,7 +631,8 @@
     "export": "Exportieren",
     "done": "Board exportiert",
     "failed": "Export fehlgeschlagen: {{error}}",
-    "hint": "Gerendert wird der Board-Inhalt: Videos mit ihrem aktuellen Bild, Online-Player als Karte."
+    "hint": "Gerendert wird der Board-Inhalt: Videos mit ihrem aktuellen Bild, Online-Player als Karte.",
+    "noBridge": "Schreiben auf die Festplatte ist außerhalb der App nicht verfügbar"
   },
   "ingest": {
     "folderUnavailable": "Ordnerimport nicht verfügbar",

@@ -631,7 +631,8 @@
     "export": "Exportar",
     "done": "Tablero exportado",
     "failed": "No se pudo exportar: {{error}}",
-    "hint": "El render parte del contenido del tablero: los vídeos salen con su fotograma actual y los reproductores en línea como tarjeta."
+    "hint": "El render parte del contenido del tablero: los vídeos salen con su fotograma actual y los reproductores en línea como tarjeta.",
+    "noBridge": "La escritura en disco no está disponible fuera de la aplicación"
   },
   "ingest": {
     "folderUnavailable": "Importación de carpeta no disponible",

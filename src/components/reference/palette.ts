@@ -132,7 +132,10 @@ export async function extractPalette(items: BoardItem[], count: number): Promise
     const px = await samplePixels(usable[i], budget);
     if (!px || !px.length) { skipped++; continue; }
     sampled++;
-    pixels.push(...px);
+    // Concaténation par boucle : `push(...px)` passerait des dizaines de milliers d'arguments d'un
+    // coup (un média échantillonné en fait jusqu'à ~48 000), ce qui heurte la limite d'arguments
+    // d'un appel de fonction — la palette planterait sur les grandes sélections, pas les petites.
+    for (let k = 0; k < px.length; k++) pixels.push(px[k]);
   }
   if (!pixels.length) return { colors: [], skipped, sampled: 0 };
 

@@ -631,7 +631,8 @@
     "export": "Exporter",
     "done": "Board exporté",
     "failed": "Export impossible : {{error}}",
-    "hint": "Le rendu repart du contenu du board : les vidéos sortent sur leur image courante, les lecteurs en ligne en cartouche."
+    "hint": "Le rendu repart du contenu du board : les vidéos sortent sur leur image courante, les lecteurs en ligne en cartouche.",
+    "noBridge": "Écriture disque indisponible hors de l'application"
   },
   "ingest": {
     "folderUnavailable": "Import de dossier indisponible",

@@ -420,13 +420,10 @@ export async function renderBoardCanvas(items: BoardItem[], opts: RenderOptions 
   ctx.scale(scale, scale);
   ctx.translate(margin - bounds.x, margin - bounds.y);
 
-  const layer = items.find((it) => it.kind === "draw");
-  const shapes = shapesOf(items);
-  const drawBehind = false; // le calque de dessin d'un export suit l'ordre visible : au-dessus.
-
-  if (drawBehind) shapes.forEach((s) => paintShape(ctx, s));
   for (const item of visibleItems(items, opts.only)) await paintItem(ctx, item);
-  if (!drawBehind && layer && !opts.only) shapes.forEach((s) => paintShape(ctx, s));
+  // Le calque de dessin passe au-dessus des items (son plan à l'écran dépend d'un réglage de vue,
+  // pas du document) ; un export de la sélection seule ne l'emporte pas.
+  if (!opts.only) shapesOf(items).forEach((s) => paintShape(ctx, s));
 
   return canvas;
 }
