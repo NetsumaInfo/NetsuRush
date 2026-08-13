@@ -177,9 +177,12 @@ function createLibraryStore(dataDir, deps = {}) {
     return it;
   }
 
-  async function addPaths(paths) {
+  // `folderId` : dossier de bibliothèque d'accueil (drop sur une rangée de dossier). Null = racine
+  // « Importés », le comportement du sélecteur de fichiers.
+  async function addPaths(paths, folderId) {
     try {
       if (!Array.isArray(paths) || !paths.length) return { ok: true, added: 0 };
+      const dest = folderId && readFolders().some((f) => f.id === folderId) ? folderId : null;
       const known = new Set(listItems().map((i) => i.path.toLowerCase()));
       let added = 0;
       for (const p of paths) {
@@ -187,14 +190,14 @@ function createLibraryStore(dataDir, deps = {}) {
         let stat;
         try { stat = fs.statSync(p); } catch (_) { continue; }
         if (stat.isDirectory()) {
-          const result = await addDir(p);
+          const result = await addDir(p, dest);
           if (!result.ok) return result;
           added += result.added || 0;
           continue;
         }
         if (!stat.isFile() || !isMediaPath(p) || known.has(String(p).toLowerCase())) continue;
         known.add(String(p).toLowerCase());
-        const it = await makeItem(p, null);
+        const it = await makeItem(p, dest);
         backend.put(it.id, it.name, encode(it), Date.now());
         added++;
       }
@@ -203,8 +206,8 @@ function createLibraryStore(dataDir, deps = {}) {
   }
 
   // Importe un dossier : scan récursif des rushs, l'arborescence disque est recréée en sous-dossiers
-  // de bibliothèque (le dossier lâché devient un dossier racine).
-  async function addDir(root) {
+  // de bibliothèque (le dossier lâché devient un dossier racine, ou un enfant de `parentId`).
+  async function addDir(root, intoId) {
     try {
     if (!root || !fs.existsSync(root)) return { ok: false, error: t('folderMissing') };
       /** @type {{full: string, rel: string}[]} */
@@ -213,6 +216,9 @@ function createLibraryStore(dataDir, deps = {}) {
       if (!files.length) return { ok: true, added: 0, folders: 0 };
 
       const folders = readFolders();
+      // Dossier d'accueil : la racine par défaut, sinon le dossier visé (drop sur une rangée). Un id
+      // inconnu retombe sur la racine — jamais un dossier fantôme.
+      const base = intoId && folders.some((f) => f.id === intoId) ? intoId : null;
       // DEUX index séparés : `byRel` est indexé sur le chemin relatif au dossier importé, `byAcc` sur le
       // chemin absolu dans l'arbre de bibliothèque. Les mélanger dans une seule Map les fait se percuter
       // dès qu'un chemin relatif vaut le nom du dossier racine (importer « Rushs\Anime » qui contient un
@@ -223,8 +229,10 @@ function createLibraryStore(dataDir, deps = {}) {
       const ensure = (rel) => {
         if (byRel.has(rel)) return byRel.get(rel);
         const parts = rel ? rel.split(path.sep).filter(Boolean) : [];
-        let parentId = null;
-        let acc = '';
+        let parentId = base;
+        // Clé d'accumulation préfixée du dossier d'accueil : deux imports du même nom sous des parents
+        // différents ne doivent pas se confondre dans `byAcc`.
+        let acc = base ? `${base}:` : '';
         // Le dossier racine porte le nom du dossier choisi, puis un niveau par segment relatif.
         for (const name of [path.basename(root), ...parts]) {
           acc = acc ? `${acc}/${name}` : name;

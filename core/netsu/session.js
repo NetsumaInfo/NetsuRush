@@ -45,7 +45,7 @@ function openSession(filePath, opts) {
     handle,
     /** @type {Map<string, { id: string, size: number, mtime: number }>} */
     mediaIds: new Map(),
-    /** @type {Map<string, string>} */
+    /** @type {Map<string, Map<string, string>>} document ⇒ (item ⇒ dernier JSON écrit) */
     itemJson: new Map(),
     openedAt: Date.now(),
   };

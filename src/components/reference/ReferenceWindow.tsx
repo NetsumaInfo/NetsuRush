@@ -99,7 +99,7 @@ export function ReferenceWindow() {
           pinned={pinned}
           onTogglePin={togglePin}
         >
-          <ReferenceBoard ref={boardRef} />
+          <ReferenceBoard ref={boardRef} onOpenProjectFile={persistence.available ? (p) => void project.openRecent(p) : undefined} />
           <Inspector />
           <SequencePlayer />
         </BoardContextMenu>

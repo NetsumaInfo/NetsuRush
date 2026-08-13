@@ -15,11 +15,17 @@ import { useSceneCardMedia } from "./useSceneCardMedia";
 // En remote (panneau Adobe) : le survol est peu fiable → les icônes d'action (sélection, collection,
 // envoi timeline) restent TOUJOURS visibles. Ailleurs = apparition au survol (design d'origine).
 const ACT_VIS = IS_REMOTE ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100";
+const ACT_ALWAYS = "opacity-100";
 
 function SceneCardImpl({
-  seg, index, clipPath, clipName, srcFrames, active, selected, play, getProxy, bustProxy, onPlay, onToggle, onAddToTimeline, addLabel, pos, dur,
+  seg, index, clipPath, clipName, srcFrames, active, selected, play, getProxy, bustProxy, peekProxy, onPlay, onToggle, onAddToTimeline, addLabel, pos, dur, alwaysChrome,
 }: {
   seg: Segment; index: number; clipPath: string; clipName: string; srcFrames: number; active: boolean; selected: boolean; play: boolean;
+  /** Lecture synchrone du cache d'URL de la grille : la carte monte sa <video> sans attendre une promesse. */
+  peekProxy?: () => string | null;
+  // Fenêtre épinglée : le survol y est trop instable (petite fenêtre, défilement) → les icônes de la
+  // vignette restent posées, comme en remote, au lieu d'apparaître/disparaître pendant le scroll.
+  alwaysChrome?: boolean;
   getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>; bustProxy: () => void; onPlay: () => void;
   // `mods` porte les modificateurs du clic : Maj = étendre la plage depuis l'ancre, Ctrl = basculer.
   onToggle: (mods?: { shift?: boolean; ctrl?: boolean }) => void;
@@ -27,11 +33,12 @@ function SceneCardImpl({
 }) {
   const { t } = useTranslation("derush");
   const { rootRef, thumb, url, showVideo, videoPaused, near, interactive, hovered, onVideoError, enter, leave, focusEnter, focusLeave } =
-    useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy });
+    useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy, peekProxy });
   const playing = showVideo && !videoPaused;
   // Habillage de survol : monté seulement quand la carte est SOUS le pointeur (ou au clavier). En
   // remote, les icônes restent visibles au repos (cf. ACT_VIS) → il faut les monter dès la bande.
-  const chrome = IS_REMOTE ? near : interactive;
+  const chrome = IS_REMOTE || alwaysChrome ? near : interactive;
+  const actVis = alwaysChrome ? ACT_ALWAYS : ACT_VIS;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
 
@@ -108,7 +115,7 @@ function SceneCardImpl({
       {chrome && (<>
         {/* ranger ce plan dans une collection (bibliothèque) — directement sur la vignette */}
         <Tooltip>
-          <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${ACT_VIS}`} />}>
+          <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${actVis}`} />}>
             <AddToCollection
               shots={[{ path: clipPath, name: clipName, in: seg.in, out: seg.out, inFrame: seg.inFrame, outFrame: seg.outFrame, srcFrames }]}
               className="nr-chip shadow-md p-1 text-white/80 hover:text-primary"
@@ -121,7 +128,7 @@ function SceneCardImpl({
         {onAddToTimeline && (
           <Tooltip>
             <TooltipTrigger render={<button type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
-              className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : ACT_VIS} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
+              className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : actVis} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
               {adding === "busy" ? <Spinner className="size-3.5" />
                 : adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
                 : <Download className="h-3.5 w-3.5" />}
@@ -159,5 +166,6 @@ export const SceneCard = memo(SceneCardImpl, (a, b) =>
   a.seg.id === b.seg.id && a.seg.in === b.seg.in && a.seg.out === b.seg.out &&
   a.index === b.index && a.clipPath === b.clipPath && a.clipName === b.clipName && a.srcFrames === b.srcFrames &&
   a.active === b.active && a.selected === b.selected && a.play === b.play &&
-  a.pos === b.pos && a.dur === b.dur && a.addLabel === b.addLabel && !!a.onAddToTimeline === !!b.onAddToTimeline,
+  a.pos === b.pos && a.dur === b.dur && a.addLabel === b.addLabel && !!a.onAddToTimeline === !!b.onAddToTimeline &&
+  !!a.alwaysChrome === !!b.alwaysChrome,
 );

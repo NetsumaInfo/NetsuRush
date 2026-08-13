@@ -3,6 +3,7 @@
 // Tauri standalone. Même interface que le bridge Electron (window.nr) → composants inchangés.
 // Dialogs / openExternal passent par les plugins Tauri (chargés à la demande, seulement sous Tauri).
 
+import { convertFileSrc } from "@tauri-apps/api/core";
 import type { NrApi, RefApi, WallpaperApi, ScriptApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, SnapshotApi, CacheApi } from "./bridge";
 import i18n from "@/i18n";
 import { logError } from "@/lib/appLog";
@@ -10,6 +11,33 @@ import { readPreviewSettings } from "@/lib/previewSettings";
 import { beginHeavyCall, isHeavyChannel } from "@/lib/busyBus";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+// URL d'un fichier local servie par la coquille Rust (protocole `asset`), ou null hors Tauri.
+// Import STATIQUE volontaire : la fonction est synchrone (elle alimente un `src=` en plein rendu),
+// un import à la demande imposerait une promesse à chaque vignette. Le module ne touche à rien à
+// l'évaluation — il lit `__TAURI_INTERNALS__` seulement à l'appel — donc il reste inerte en CEP.
+//
+// `convertFileSrc` fabrique l'URL côté JS : elle réussit MÊME si la coquille ne sert pas le
+// protocole (binaire compilé avant l'activation d'`assetProtocol`). On sonde donc une fois : un
+// protocole absent échoue au niveau réseau (fetch rejeté), un protocole présent répond — 404 ou 403
+// pour un chemin bidon, mais la réponse existe. `no-cors` rend le verdict indépendant des en-têtes
+// CORS : seule l'existence du protocole est testée. Tant que la sonde n'a pas répondu, on reste sur
+// le serveur HTTP : une grille qui charge trop tôt est plus lente, jamais vide.
+let assetProtocolOk = false;
+if (isTauri) {
+  void fetch(convertFileSrc("nr-asset-probe"), { mode: "no-cors" })
+    .then(() => { assetProtocolOk = true; })
+    .catch(() => { assetProtocolOk = false; });
+}
+
+function assetSrc(filePath: string): string | null {
+  if (!isTauri || !assetProtocolOk || !filePath) return null;
+  try {
+    return convertFileSrc(filePath);
+  } catch {
+    return null;   // coquille sans protocole asset → l'appelant retombe sur le serveur HTTP
+  }
+}
 
 // ---- Adresse du core ----
 // Le port n'est plus figé : la coquille Tauri en choisit un LIBRE au lancement (8730 pris par une
@@ -122,7 +150,8 @@ async function resolveFilePaths(files: File[]): Promise<string[]> {
   if (!wv?.postMessageWithAdditionalObjects) return blank;
   const id = ++pathSeq;
   return new Promise<string[]>((resolve) => {
-    // Runtime WebView2 trop ancien (< 1.0.1587) ou objet refusé : on rend des chemins vides plutôt
+    // Runtime WebView2 trop ancien (ICoreWebView2File et AdditionalObjects arrivent en 1.0.1774.30)
+    // ou objet refusé (seuls des `File` sont acceptés) : on rend des chemins vides plutôt
     // que de laisser l'appelant suspendu — l'import par sélecteur natif reste la voie de repli.
     const timer = setTimeout(() => { pathWaiters.delete(id); resolve(blank); }, 4000);
     pathWaiters.set(id, (paths) => { clearTimeout(timer); resolve(paths.length === files.length ? paths : blank); });
@@ -404,10 +433,13 @@ const reference: RefApi = {
   resolveMedia: (url, options) => call("reference:resolveMedia", [url, options || {}]),
   upscaleItem: (opts) => call("reference:upscaleItem", [opts]),
   dropAsset: (p) => call("reference:dropAsset", [p]),
+  sweepAssets: (opts) => call("reference:sweepAssets", [opts || {}]),
   extractMedia: (url, options) => call("reference:extractMedia", [url, options || {}]),
   extractFrames: (opts) => call("reference:extractFrames", [opts]),
   exportBoard: (scene, destPath, opts) => call("netsu:export", [scene, destPath, opts]),
   importBoard: (srcPath) => call("netsu:import", [srcPath]),
+  onShareProgress: (cb) => on("netsu:progress", cb as (p: unknown) => void),
+  relocateFrom: (dirPath, wanted) => call("netsu:relocateFrom", [dirPath, wanted]),
   weigh: (scene, opts) => call("netsu:weigh", [scene, opts]),
   chooseNetsu: () =>
     dlgOpen({ multiple: false, filters: [{ name: "Board NetsuRush", extensions: ["netsu"] }] }) as Promise<string | null>,
@@ -520,8 +552,8 @@ const collections: CollectionsApi = {
 
 const library: LibraryApi = {
   list: () => call("library:list"),
-  addPaths: (paths) => call("library:addPaths", [paths]),
-  addDir: (dir) => call("library:addDir", [dir]),
+  addPaths: (paths, folderId) => call("library:addPaths", [paths, folderId ?? null]),
+  addDir: (dir, folderId) => call("library:addDir", [dir, folderId ?? null]),
   remove: (id) => call("library:remove", [id]),
   removeMany: (ids) => call("library:removeMany", [ids]),
   restore: (undo) => call("library:restore", [undo]),
@@ -728,6 +760,9 @@ export function makeCoreClient(): NrApi {
     prefsGet: () => call("prefs:get"),
     prefsSet: (patch) => call("prefs:set", [patch]),
     onPrefsChanged: (cb) => on("prefs:changed", cb as (p: unknown) => void),
+    uiStateGet: () => call("uistate:get"),
+    uiStateSet: (patch) => call("uistate:set", [patch]),
+    onUiStateChanged: (cb) => on("uistate:changed", cb as (p: unknown) => void),
     configSetLang: (lang) => call("config:setLang", [lang]),
     discordState: () => call("discord:state"),
     discordSetPrefs: (patch) => call("discord:setPrefs", [patch]),
@@ -777,6 +812,14 @@ export function makeCoreClient(): NrApi {
       const automaticCodec = isRemote ? remoteProxyCodec() : isTauri ? standaloneProxyCodec() : undefined;
       const codec = request.codec ?? (request.settings.format === "hevc" ? automaticCodec : undefined);
       return call("ffmpeg:proxy", [{ ...request, ...(codec ? { codec } : {}) }]);
+    },
+    // Même résolution de codec que `proxy` : un chemin résolu sous un codec et lu sous un autre
+    // servirait un fichier que le moteur ne sait pas décoder.
+    proxyResolve: (items, opts) => {
+      const settings = opts?.settings ?? readPreviewSettings().proxy;
+      const automaticCodec = isRemote ? remoteProxyCodec() : isTauri ? standaloneProxyCodec() : undefined;
+      const codec = opts?.codec ?? (settings.format === "hevc" ? automaticCodec : undefined);
+      return call("ffmpeg:proxyResolve", [items, { ...opts, settings, ...(codec ? { codec } : {}) }]);
     },
     proxyCancel: (token) => { call("ffmpeg:proxyCancel", [token]).catch(() => {}); },
     proxyCancelMany: (tokens) => { call("ffmpeg:proxyCancelMany", [tokens]).catch(() => {}); },
@@ -916,6 +959,7 @@ export function makeCoreClient(): NrApi {
     pathsForFiles: (files) => resolveFilePaths(files),
     saveFile: (defaultName) => dlgSave(defaultName),
     mediaUrl: (p) => `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
+    assetUrl: (p) => assetSrc(p) ?? `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
     ytStreamUrl: (id) => `${BASE}/ytstream?id=${encodeURIComponent(id)}${tkParam}`,
     openExternal: (url) => openUrl(url),
     openPath: (p) => openPath(p),

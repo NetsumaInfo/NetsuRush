@@ -11,7 +11,14 @@
 // MAX_PAUSED, la plus ancienne est démontée. FIFO : la plus ancienne est celle qu'on a le moins de
 // chances de revoir en remontant le défilement.
 
-const MAX_PAUSED = 16;
+// Budget partagé avec la lecture : Chromium refuse de créer un WebMediaPlayer au-delà d'environ 75
+// par frame, et `MAX_PLAYING_HARD` (cutStudioShared) en réserve déjà 56. Les deux plafonds doivent
+// donc rester sous cette borne ENSEMBLE — sinon les dernières cartes d'un écran dense ne jouent
+// jamais, sans la moindre erreur.
+// Compte aussi les <video> montées EN AVANCE (bande de préchauffe de useSceneCardMedia) : elles sont
+// en pause tant que le créneau de lecture n'est pas accordé, et c'est précisément ce stock d'éléments
+// déjà décodés qui fait démarrer une carte à l'instant où elle entre à l'écran.
+const MAX_PAUSED = 18;
 
 const retained: (() => void)[] = [];
 

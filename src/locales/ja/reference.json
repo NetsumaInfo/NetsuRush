@@ -366,7 +366,8 @@
     "openScene": "シーンを開く…",
     "backHome": "ホームに戻る",
     "alwaysOnTop": "常に最前面",
-    "openProject": "プロジェクトを開く…"
+    "openProject": "プロジェクトを開く…",
+    "relocateMissing": "見つからないメディアの場所を指定（{{count}}）"
   },
   "linkDialog": {
     "title": "オンライン動画を追加",
@@ -381,7 +382,8 @@
     "freezeHint": "そのままだと、元ページが消えた日にボードからも消えます。",
     "weighing": "サイズを見積もり中…",
     "export": "書き出し",
-    "exporting": "書き出し中…"
+    "exporting": "書き出し中…",
+    "progress": "共有中… {{done}}/{{total}}"
   },
   "upscale": {
     "title": "メディアをアップスケール",
@@ -444,7 +446,8 @@
     "downloading": "ダウンロード中…",
     "mediaFallback": "メディア",
     "interactiveActive": "操作中 — 他をクリックで移動",
-    "interactiveHint": "ダブルクリックで操作"
+    "interactiveHint": "ダブルクリックで操作",
+    "relocateAll": "すべての場所を指定（{{count}}）"
   },
   "sequence": {
     "loop": "ループ",
@@ -540,6 +543,9 @@
     "projectOpenedLegacy": "「{{name}}」を開きました（旧形式：名前を付けて保存すると編集できます）",
     "openFailedWith": "開けませんでした: {{error}}",
     "dropProjectFailed": "「{{name}}」を開けませんでした。「プロジェクトを開く」をお使いください。",
-    "noProjectFile": "このボードはファイルに紐づいていません"
+    "noProjectFile": "このボードはファイルに紐づいていません",
+    "relocating": "フォルダー内のメディアを検索中…（{{count}}）",
+    "relocated": "{{count}}/{{total}} 件のメディアの場所を指定",
+    "relocatedNone": "このフォルダーで認識できるメディアはありません"
   }
 }

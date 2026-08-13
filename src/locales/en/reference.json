@@ -366,7 +366,8 @@
     "openScene": "Open scene…",
     "backHome": "Back to home",
     "alwaysOnTop": "Always on top",
-    "openProject": "Open project…"
+    "openProject": "Open project…",
+    "relocateMissing": "Relocate missing media ({{count}})"
   },
   "linkDialog": {
     "title": "Add an online video",
@@ -381,7 +382,8 @@
     "freezeHint": "Otherwise they vanish from the board the day their page goes down.",
     "weighing": "Estimating size…",
     "export": "Export",
-    "exporting": "Exporting…"
+    "exporting": "Exporting…",
+    "progress": "Sharing… {{done}}/{{total}}"
   },
   "upscale": {
     "title": "Upscale media",
@@ -444,7 +446,8 @@
     "downloading": "Downloading…",
     "mediaFallback": "media",
     "interactiveActive": "Interactive — click elsewhere to move",
-    "interactiveHint": "Double-click to interact"
+    "interactiveHint": "Double-click to interact",
+    "relocateAll": "Relocate all ({{count}})"
   },
   "sequence": {
     "loop": "Loop",
@@ -540,6 +543,9 @@
     "projectOpenedLegacy": "“{{name}}” opened (old format — save it as a project to edit in place)",
     "openFailedWith": "Could not open: {{error}}",
     "dropProjectFailed": "Could not open \"{{name}}\" — use \"Open a project\".",
-    "noProjectFile": "This board is not linked to a file"
+    "noProjectFile": "This board is not linked to a file",
+    "relocating": "Searching the folder for media… ({{count}})",
+    "relocated": "{{count}}/{{total}} media relocated",
+    "relocatedNone": "No media recognised in this folder"
   }
 }

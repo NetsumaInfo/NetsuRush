@@ -55,7 +55,7 @@ export function useShotBrowser() {
         const next = { ...prev };
         for (const f of files) {
           const si = indexOfTime.get(Number(f.time).toFixed(2));
-          if (f.file && si != null) next[si] = nr.mediaUrl(f.file);
+          if (f.file && si != null) next[si] = nr.assetUrl(f.file);
         }
         return next;
       });

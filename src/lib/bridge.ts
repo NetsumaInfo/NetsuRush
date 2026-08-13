@@ -1308,7 +1308,10 @@ export interface NetsuWeight {
   items?: { id: string; kind: string; bytes: number; long: boolean }[];
   error?: string;
 }
-export interface NetsuScene { name: string; items: unknown[]; view?: unknown }
+// `retain` = localisateurs que le board peut encore réclamer sans qu'ils soient posés : médias
+// retenus par l'historique d'annulation. Le core les met à l'abri de son ménage de fin
+// d'enregistrement — sans quoi supprimer un item effacerait ses octets avant le Ctrl+Z suivant.
+export interface NetsuScene { name: string; items: unknown[]; view?: unknown; retain?: string[] }
 export interface NetsuImportResult {
   ok: boolean;
   scene?: { name: string; items: unknown[]; view: unknown | null };
@@ -1396,6 +1399,9 @@ export interface RefApi {
   upscaleItem(opts: { path: string; kind: "image" | "video"; in?: number; out?: number; engine?: "ia" | "turbo"; model: UpscaleModel; shader?: ShaderModel; scale: 1 | 2 | 4; denoise?: number }): Promise<{ ok: boolean; path?: string; width?: number; height?: number; error?: string }>;
   // Supprime un fichier UNIQUEMENT s'il est un asset de l'app (cleanup d'un upscale annulé). Sûr.
   dropAsset(path: string): Promise<{ ok: boolean; removed?: boolean; error?: string }>;
+  // Ménage du magasin d'assets : ce que plus aucune scène ne réclame et qui a passé le délai de
+  // grâce s'en va. `graceMs` n'est là que pour les tests — l'app utilise le défaut du core.
+  sweepAssets(opts?: { graceMs?: number }): Promise<{ ok: boolean; removed: number; bytes: number; kept: number; error?: string }>;
   extractMedia(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
   // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
@@ -1406,6 +1412,11 @@ export interface RefApi {
   // → scène reconstruite (tokens d'assets → chemins locaux ; gros médias non retrouvés = placeholders).
   exportBoard(scene: NetsuScene, destPath: string, opts: NetsuExportOpts): Promise<NetsuExportResult>;
   importBoard(srcPath: string): Promise<NetsuImportResult>;
+  // Avancement d'un partage, item par item : un board fourni encode ses clips pendant des minutes.
+  onShareProgress(cb: (p: { done: number; total: number; title: string }) => void): () => void;
+  // Relocalisation EN LOT : un dossier, et tous les médias manquants qu'on y reconnaît sans
+  // ambiguïté (même nom, même taille). Les homonymes de même taille ne sont jamais devinés.
+  relocateFrom(dirPath: string, wanted: { id: string; name: string; size?: number }[]): Promise<{ ok: boolean; found: { id: string; path: string }[]; scanned: number; error?: string }>;
   // Poids estimé du board à chaque niveau, sans rien encoder → l'utilisateur voit ce qu'il fabrique
   // avant de lancer l'export.
   weigh(scene: NetsuScene, opts: NetsuExportOpts): Promise<NetsuWeight>;
@@ -1840,10 +1851,12 @@ export interface LibraryUndo {
 }
 export interface LibraryApi {
   list(): Promise<LibraryItem[]>;
-  // Ajoute des fichiers (sondés + dédoublonnés par chemin). Atterrissent à la racine.
-  addPaths(paths: string[]): Promise<{ ok: boolean; added?: number; error?: string }>;
-  // Importe un dossier : scan récursif des rushs, l'arborescence disque devient des sous-dossiers.
-  addDir(dir: string): Promise<{ ok: boolean; added?: number; folders?: number; error?: string }>;
+  // Ajoute des fichiers (sondés + dédoublonnés par chemin). `folderId` = dossier d'accueil (drop sur
+  // une rangée) ; absent ou inconnu → racine « Importés ».
+  addPaths(paths: string[], folderId?: string | null): Promise<{ ok: boolean; added?: number; error?: string }>;
+  // Importe un dossier : scan récursif des rushs, l'arborescence disque devient des sous-dossiers
+  // du dossier d'accueil (`folderId`) ou de la racine.
+  addDir(dir: string, folderId?: string | null): Promise<{ ok: boolean; added?: number; folders?: number; error?: string }>;
   // Retire l'entrée UNIQUEMENT — ne touche jamais au fichier sur le disque. Vaut pour TOUTE la
   // famille remove/removeMany/deleteFolder : la bibliothèque n'est qu'un index de chemins.
   remove(id: string): Promise<{ ok: boolean; undo?: LibraryUndo; error?: string }>;
@@ -2405,6 +2418,12 @@ export interface NrApi {
   prefsGet(): Promise<{ ok: boolean; prefs: Record<string, unknown> }>;
   prefsSet(patch: Record<string, unknown>): Promise<{ ok: boolean; error?: string }>;
   onPrefsChanged(cb: (p: { patch: Record<string, unknown> }) => void): () => void;
+  // Miroir DURABLE du localStorage (cf. core/uistate.js). Le profil WebView2 n'est pas un stockage
+  // sûr : recréé ou nettoyé, il ramenait toute l'interface à ses valeurs par défaut. Sac
+  // clé→valeur opaque ; `null` dans un patch supprime la clé.
+  uiStateGet(): Promise<{ ok: boolean; state: Record<string, string> }>;
+  uiStateSet(patch: Record<string, string | null>): Promise<{ ok: boolean; error?: string }>;
+  onUiStateChanged(cb: (p: { patch: Record<string, string | null> }) => void): () => void;
   configSetLang(lang: string): Promise<{ ok: boolean; error?: string }>;
   // Rich Presence Discord. Le core tient la connexion, le throttle de 15 s et l'état persisté ; le
   // renderer se contente de lire l'état, pousser les réglages et signaler le contexte courant.
@@ -2472,6 +2491,13 @@ export interface NrApi {
   // `path` = rush concerné (découpe en lot N en parallèle → route le pct vers le bon item) ; null en simple.
   onScenesProgress(cb: (p: { path: string | null; pct: number }) => void): () => void;
   proxy(opts: { input: string; start: number; end: number; priority?: "high" | "low"; height?: number; token?: number; codec?: "h264" | "hevc"; requireVideo?: boolean; requireAudio?: boolean; settings?: PreviewGenerationSettings["proxy"] }): Promise<{ ok: boolean; path?: string; error?: string; cancelled?: boolean }>;
+  // Résout en UN appel les proxies DÉJÀ encodés d'un lot de plans (aucun ffmpeg, aucune file) :
+  // `file` vaut null quand la plage n'est pas en cache. Une grille amorce ainsi son cache d'URL à
+  // l'ouverture au lieu de laisser chaque carte réclamer le sien au défilement — cf. core/proxy.js.
+  proxyResolve(
+    items: { input: string; start: number; end: number }[],
+    opts?: { height?: number; codec?: "h264" | "hevc"; settings?: PreviewGenerationSettings["proxy"] },
+  ): Promise<{ input: string; start: number; end: number; file: string | null }[]>;
   proxyCancel(token: number): void;
   proxyCancelMany(tokens: number[]): void;
   proxyCancelAll(): void;
@@ -2643,6 +2669,18 @@ export interface NrApi {
   pathsForFiles(files: File[]): Promise<string[]>;
   saveFile(defaultName?: string): Promise<string | null>;
   mediaUrl(filePath: string): string;
+  // URL d'un fichier local pour les GRILLES d'aperçus (vignettes + proxys de lecture).
+  //
+  // `mediaUrl` sort du serveur HTTP du core, qui porte AUSSI /rpc et le flux SSE. Chromium n'ouvre
+  // que 6 connexions HTTP/1.1 par origine : une prise par /events, quelques-unes par les RPC en vol,
+  // et il reste ~4 créneaux pour des dizaines de <video>. C'est ce qui laisse la moitié d'une grille
+  // figée sur sa vignette même quand TOUS les proxys sont déjà encodés — le fichier existe, il
+  // attend juste un créneau de connexion.
+  //
+  // Sous Tauri on passe donc par le protocole ASSET (`convertFileSrc`) : la requête est interceptée
+  // dans le processus par la coquille Rust, sans socket ni pool de connexions. Hors Tauri (panneau
+  // CEP, navigateur) il n'existe pas → repli sur `mediaUrl`.
+  assetUrl(filePath: string): string;
   // Flux d'une vidéo YouTube relayé par le core (yt-dlp résout, le core relaie) : source d'un
   // `<video>` ordinaire, donc AUCUN habillage YouTube — cf. core/ytstream.js.
   ytStreamUrl(videoId: string): string;
@@ -3010,6 +3048,10 @@ const mock: NrApi = {
   prefsGet: async () => ({ ok: true, prefs: {} }),
   prefsSet: async () => ({ ok: true }),
   onPrefsChanged: () => () => {},
+  // Hors app (navigateur nu) : pas de disque, le localStorage local reste la seule persistance.
+  uiStateGet: async () => ({ ok: true, state: {} }),
+  uiStateSet: async () => ({ ok: true }),
+  onUiStateChanged: () => () => {},
   configSetLang: async (lang) => {
     if (typeof localStorage !== "undefined") localStorage.setItem("nr-lang", lang);
     return { ok: true };
@@ -3063,6 +3105,7 @@ const mock: NrApi = {
   clearCutEdits: async () => ({ ok: false }),
   onScenesProgress: () => () => {},
   proxy: async () => ({ ok: false, error: "mock" }),
+  proxyResolve: async (items) => items.map((i) => ({ ...i, file: null })),
   proxyCancel: () => {},
   proxyCancelMany: () => {},
   proxyCancelAll: () => {},
@@ -3198,6 +3241,7 @@ const mock: NrApi = {
   pathsForFiles: async (files) => files.map(() => ""),
   saveFile: async () => null,
   mediaUrl: (p) => "nrmedia://media?p=" + encodeURIComponent(p),
+  assetUrl: (p) => "nrmedia://media?p=" + encodeURIComponent(p),
   ytStreamUrl: (id) => "nrmedia://ytstream?id=" + encodeURIComponent(id),
   openExternal: async (url) => { try { window.open(url, "_blank", "noopener"); } catch { /* noop */ } return true; },
   openPath: async () => false,
@@ -3239,10 +3283,13 @@ const mock: NrApi = {
       resolveMedia: async (_url, _options) => ({ ok: false, error: "mock" }),
       upscaleItem: async () => ({ ok: false, error: "mock" }),
       dropAsset: async () => ({ ok: true, removed: false }),
+      sweepAssets: async () => ({ ok: true, removed: 0, bytes: 0, kept: 0 }),
       extractMedia: async () => ({ ok: false, error: "mock" }),
       extractFrames: async () => ({ ok: false, error: "mock" }),
       exportBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       importBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      onShareProgress: () => () => {},
+      relocateFrom: async () => ({ ok: false, found: [], scanned: 0, error: i18n.t("common:mock.appUnavailable") }),
       // Forme COMPLÈTE mais vide : le dialogue d'export rend ses quatre niveaux à 0 o au lieu de
       // tomber sur des `undefined` dans le navigateur.
       weigh: async () => ({ ok: true, level: "preview" as const, total: 0, perLevel: { link: 0, preview: 0, margin: 0, full: 0 }, items: [] }),
@@ -3684,15 +3731,16 @@ const mock: NrApi = {
     };
     return {
       list: async () => read().sort((a, b) => b.addedAt - a.addedAt),
-      addPaths: async (paths: string[]) => {
+      addPaths: async (paths: string[], folderId?: string | null) => {
         const all = read();
+        const dest = folderId && readFolders().some((f) => f.id === folderId) ? folderId : null;
         const known = new Set(all.map((i) => i.path.toLowerCase()));
         let added = 0;
         for (const p of paths) {
           if (!p || known.has(p.toLowerCase())) continue;
           known.add(p.toLowerCase());
           all.push({
-            id: uid(), name: basename(p), path: p, folderId: null,
+            id: uid(), name: basename(p), path: p, folderId: dest,
             duration: null, fps: null, resolution: null, format: null, addedAt: Date.now(),
           });
           added++;

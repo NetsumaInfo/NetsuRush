@@ -19,6 +19,7 @@ export type ThumbShot = { path: string; in: number; out?: number; inFrame?: numb
 type GenerationState = { started: number; done: number; failed: number; total: number };
 
 const WARM_THUMB_CHUNK = 8;
+const WARM_PROXY_DEBOUNCE_MS = 150;
 function waitForThumbIdle(): Promise<void> {
   return new Promise((resolve) => {
     if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(() => resolve(), { timeout: 1000 });
@@ -34,6 +35,8 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
   // possède alors l'encodage et tous les consommateurs reçoivent exactement le même résultat.
   const proxyPendingRef = useRef<Map<string, Promise<string | null>>>(new Map());
   const warmVersionRef = useRef(0);
+  const warmProxyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current); }, []);
   const cols = useApp((s) => s.cutCols);
   const setColsStore = useApp((s) => s.setCutCols);
   // Enveloppe compatible `Dispatch<SetStateAction<number>>` : les appelants gardent `setCols((c) => c + 1)`.
@@ -87,7 +90,7 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
     const request = nr.proxy({ input: path, start, end, priority, height, token, requireVideo })
       .then((r) => {
         if (!r.ok || !r.path) return null;
-        const u = nr.mediaUrl(r.path);
+        const u = nr.assetUrl(r.path);
         proxyCache.current.set(k, u);
         return u;
       })
@@ -96,6 +99,39 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
     return request;
   }
   const bust = (path: string, start: number, end: number) => proxyCache.current.delete(key(path, start, end));
+
+  /** URL du proxy si elle est DÉJÀ en cache, en lecture synchrone : la carte peut monter sa <video>
+   *  dans son premier rendu au lieu d'attendre une promesse. */
+  const peekProxy = (path: string, start: number, end: number) => proxyCache.current.get(key(path, start, end)) ?? null;
+
+  // Amorce le cache d'URL avec les proxies DÉJÀ encodés, en UN appel (aucun ffmpeg, aucune file).
+  // Sans lui, chaque carte réclame son proxy au core en entrant dans la bande, même pour un fichier
+  // déjà sur disque, et se fait annuler en ressortant : au défilement la grille reste sur ses
+  // vignettes. `height` doit être le palier réellement encodé (il entre dans la clé de cache).
+  const warmProxies = useCallback((list: ProxyShot[], height?: number) => {
+    const missing = list.filter((s) => !proxyCache.current.has(key(s.path, s.in, s.out)));
+    if (!missing.length) return;
+    // Anti-rafale : la hauteur de cellule vient d'un ResizeObserver et des boutons de densité, donc
+    // l'appelant nous relance à chaque pixel pendant un redimensionnement. Côté core, chaque
+    // résolution lit le dossier de proxies — une rafale mettrait le service à genoux pendant que la
+    // grille se réagence. Une liste déjà résolue sort plus haut sans même armer le minuteur.
+    if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current);
+    warmProxyTimer.current = setTimeout(() => {
+      warmProxyTimer.current = null;
+      void nr.proxyResolve(missing.map((s) => ({ input: s.path, start: s.in, end: s.out })), { height })
+        .then((rows) => {
+          for (const row of rows) {
+            if (!row.file) continue;
+            const k = key(row.input, row.start, row.end);
+            if (!proxyCache.current.has(k)) proxyCache.current.set(k, nr.assetUrl(row.file));
+          }
+        })
+        .catch(() => { /* best-effort : repli sur l'encode à la demande */ });
+    }, WARM_PROXY_DEBOUNCE_MS);
+    // Dépendances vides : `key` est recréé à chaque rendu mais lit l'empreinte des réglages À
+    // L'APPEL, donc la fermeture reste juste. L'inclure relancerait la résolution à chaque rendu
+    // du parent — c'est-à-dire à chaque sélection de carte.
+  }, []);
 
   // Réutilise d'abord le cache existant, puis génère les manquantes par PETITS lots pendant les creux.
   // Un nouvel appel/remount annule logiquement l'ancien parcours : aucun poll ni fan-out global.
@@ -244,5 +280,5 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
     genTokensRef.current = [];
   }
 
-  return { cols, setCols, cell, actualCols, gridPlay, setGridPlay, gridScrollRef, getProxy, bust, warmThumbs, proxyGen, generateProxies, thumbsGen, generateThumbs, cancelGeneration, invalidatePreviewRanges };
+  return { cols, setCols, cell, actualCols, gridPlay, setGridPlay, gridScrollRef, getProxy, bust, peekProxy, warmThumbs, warmProxies, proxyGen, generateProxies, thumbsGen, generateThumbs, cancelGeneration, invalidatePreviewRanges };
 }

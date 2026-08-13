@@ -14,7 +14,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link2, Film, Maximize2, HardDrive, TriangleAlert } from "lucide-react";
-import type { NetsuLevel, NetsuQuality, NetsuExportOpts, NetsuWeight } from "@/lib/bridge";
+import { nr, type NetsuLevel, type NetsuQuality, type NetsuExportOpts, type NetsuWeight } from "@/lib/bridge";
 import { fmtBytes } from "@/lib/utils";
 import {
   Dialog,
@@ -74,6 +74,7 @@ export function ExportDialog({
   const [busy, setBusy] = useState(false);
   const [weight, setWeight] = useState<NetsuWeight | null>(null);
   const [weighing, setWeighing] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   // Rouvrir le dialogue repart des réglages du board : le choix d'un partage précédent ne doit pas
   // rester collé à l'écran suivant.
@@ -101,13 +102,22 @@ export function ExportDialog({
     };
   }, [open, level, quality, marginSec, onWeigh]);
 
+  // Le partage encode ses clips un par un : sans ce compte-rendu, un board fourni laisse
+  // l'utilisateur devant un bouton figé sans savoir s'il reste dix items ou deux cents.
+  useEffect(() => {
+    if (!busy) return undefined;
+    return nr.reference?.onShareProgress((p) => setProgress({ done: p.done, total: p.total }));
+  }, [busy]);
+
   const run = useCallback(async () => {
     setBusy(true);
+    setProgress(null);
     try {
       await onExport({ level, quality, marginSec, freezeLinks: freeze });
       onOpenChange(false);
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }, [onExport, onOpenChange, level, quality, marginSec, freeze]);
 
@@ -222,7 +232,12 @@ export function ExportDialog({
 
         <DialogFooter className="items-center">
           <p className="mr-auto flex items-center gap-2 text-xs text-muted-foreground" aria-live="polite">
-            {weighing ? (
+            {busy && progress ? (
+              <>
+                <Spinner className="size-3" />
+                {t("export.progress", { done: progress.done, total: progress.total })}
+              </>
+            ) : weighing ? (
               <>
                 <Spinner className="size-3" />
                 {t("export.weighing")}

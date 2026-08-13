@@ -366,7 +366,8 @@
     "openScene": "打开场景…",
     "backHome": "返回首页",
     "alwaysOnTop": "总在最前",
-    "openProject": "打开项目…"
+    "openProject": "打开项目…",
+    "relocateMissing": "重新定位缺失的媒体（{{count}}）"
   },
   "linkDialog": {
     "title": "添加在线视频",
@@ -381,7 +382,8 @@
     "freezeHint": "否则原网页一失效，画板上的图也会跟着消失。",
     "weighing": "正在估算大小…",
     "export": "导出",
-    "exporting": "导出中…"
+    "exporting": "导出中…",
+    "progress": "共享中… {{done}}/{{total}}"
   },
   "upscale": {
     "title": "媒体超分辨率",
@@ -444,7 +446,8 @@
     "downloading": "下载中…",
     "mediaFallback": "媒体",
     "interactiveActive": "交互中 — 点击别处可移动",
-    "interactiveHint": "双击进入交互"
+    "interactiveHint": "双击进入交互",
+    "relocateAll": "全部重新定位（{{count}}）"
   },
   "sequence": {
     "loop": "循环",
@@ -540,6 +543,9 @@
     "projectOpenedLegacy": "已打开“{{name}}”（旧格式：另存为项目后即可编辑）",
     "openFailedWith": "无法打开：{{error}}",
     "dropProjectFailed": "无法打开「{{name}}」，请使用「打开项目」。",
-    "noProjectFile": "此看板未关联任何文件"
+    "noProjectFile": "此看板未关联任何文件",
+    "relocating": "正在文件夹中查找媒体…（{{count}}）",
+    "relocated": "已重新定位 {{count}}/{{total}} 个媒体",
+    "relocatedNone": "此文件夹中未识别到媒体"
   }
 }

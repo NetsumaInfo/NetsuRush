@@ -381,6 +381,8 @@ export function kindFromPath(p: string): ItemKind | null {
 // du board importent ces symboles depuis "./referenceShared").
 export {
   youtubeId,
+  isYoutubeShorts,
+  youtubeNatSize,
   giphyGifUrl,
   parseVideoEmbed,
   EMBED_PLAYER_PROVIDERS,
@@ -439,10 +441,16 @@ export function displaySrc(kind: ItemKind, ref: string): string {
   if (kind === "embed") return embedSrc(ref);
   if (!ref) return "";
   if (isRemoteRef(ref)) return ref;
-  // Vidéo locale : mp4/mov/webm → /media (seek + boucle natifs OK) ; mkv & co → /stream copy.
+  // Vidéo locale : mp4/mov/webm lisibles tels quels ; mkv & co passent par /stream copy, un remux
+  // ffmpeg en direct — celui-là ne peut pas sortir du serveur HTTP, il n'existe pas comme fichier.
   if (kind === "video") {
     const ext = ref.split(".").pop()?.toLowerCase() || "";
     if (!NATIVE_VIDEO.has(ext)) return nr.streamUrl(ref, 0, "copy");
   }
-  return nr.mediaUrl(ref);
+  // Tout le reste est un FICHIER sur le disque → protocole asset de la coquille. Le serveur HTTP du
+  // core partage son origine avec /rpc et le flux d'événements, et un webview n'ouvre que 6
+  // connexions par origine : un board qui monte des dizaines de médias les mettait tous en file
+  // derrière quatre créneaux libres. Le protocole asset est intercepté dans le processus, sans
+  // socket. Hors Tauri (navigateur, panneau CEP), `assetUrl` retombe de lui-même sur /media.
+  return nr.assetUrl(ref);
 }

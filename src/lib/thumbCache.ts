@@ -55,7 +55,7 @@ export async function warmResolveThumbs(items: { path: string; time: number }[])
   try {
     const res = await nr.thumbsResolve(items);
     const entries: { path: string; uri: string; time?: number }[] = [];
-    for (const r of res || []) if (r && r.file) entries.push({ path: r.path, uri: nr.mediaUrl(r.file), time: r.time });
+    for (const r of res || []) if (r && r.file) entries.push({ path: r.path, uri: nr.assetUrl(r.file), time: r.time });
     if (entries.length) primeThumbs(entries);
   } catch { /* best-effort : repli sur le chargement lazy par carte */ }
 }

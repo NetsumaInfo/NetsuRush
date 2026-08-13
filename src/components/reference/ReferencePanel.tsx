@@ -90,7 +90,7 @@ export function ReferencePanel() {
           onDetach={nr.reference ? () => void onDetach() : undefined}
           onSettings={() => setSettingsDlg(true)}
         >
-          <ReferenceBoard ref={boardRef} />
+          <ReferenceBoard ref={boardRef} onOpenProjectFile={persistence.available ? (p) => void project.openRecent(p) : undefined} />
           <Inspector />
           <SequencePlayer />
         </BoardContextMenu>
@@ -145,7 +145,7 @@ export function ReferencePanel() {
         onDetach={nr.reference ? () => void onDetach() : undefined}
         onSettings={() => setSettingsDlg(true)}
       >
-        <ReferenceBoard ref={boardRef} />
+        <ReferenceBoard ref={boardRef} onOpenProjectFile={persistence.available ? (p) => void project.openRecent(p) : undefined} />
         <Inspector />
         <SequencePlayer />
       </BoardContextMenu>

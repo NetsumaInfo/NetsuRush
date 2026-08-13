@@ -30,7 +30,7 @@ export const LazyThumb = memo(function LazyThumb({
     if (cached) { setSrc(cached); return; }
     let alive = true;
     nr.thumbnail(path, time)
-      .then((r) => { if (alive && typeof r === "string") { const u = nr.mediaUrl(r); cacheThumb(path, u, time); setSrc(u); } })
+      .then((r) => { if (alive && typeof r === "string") { const u = nr.assetUrl(r); cacheThumb(path, u, time); setSrc(u); } })
       .catch(() => {});
     return () => { alive = false; };
   }, [near, path, src, time]);

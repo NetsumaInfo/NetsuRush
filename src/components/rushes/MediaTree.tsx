@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useApp } from "@/store";
 import { nr, type Clip, type LibraryFolder } from "@/lib/bridge";
 import { ClipGrid, CLIP_DND } from "./ClipCard";
+import { hasOsFiles, importDroppedFiles } from "./libraryDrop";
 import { FolderNameDialog } from "@/components/collections/FolderNameDialog";
 import { LIB_ROOT, folderPath, buildClipTree, countTreeClips, type ClipTreeNode } from "./libraryShared";
 
@@ -61,6 +62,12 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation(); setOver(false);
+    // Fichiers de l'Explorateur lâchés SUR une rangée : ils se rangent dans CE dossier, pas à la
+    // racine. `stopPropagation` ci-dessus empêche la page de les reprendre pour la racine.
+    if (hasOsFiles(e.dataTransfer)) {
+      void importDroppedFiles(Array.from(e.dataTransfer.files), folder?.id ?? null);
+      return;
+    }
     const id = e.dataTransfer.getData(CLIP_DND);
     if (!id) return;
     const it = libraryItems.find((x) => x.id === id);
@@ -82,7 +89,13 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
             // keydown bulle ici et le preventDefault annule son activation native (Entrée replierait le
             // dossier au lieu d'ouvrir le dialogue).
             onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } }}
-            onDragOver={(e) => { if (e.dataTransfer.types.includes(CLIP_DND)) { e.preventDefault(); setOver(true); } }}
+            onDragOver={(e) => {
+              if (!e.dataTransfer.types.includes(CLIP_DND) && !hasOsFiles(e.dataTransfer)) return;
+              e.preventDefault(); e.stopPropagation();
+              // Fichiers de l'Explorateur = ajout (copie) ; carte déjà en bibliothèque = rangement.
+              e.dataTransfer.dropEffect = hasOsFiles(e.dataTransfer) ? "copy" : "move";
+              setOver(true);
+            }}
             onDragLeave={() => setOver(false)}
             onDrop={onDrop}
             style={{ paddingLeft: depth * 14 + 4 }}

@@ -76,6 +76,9 @@ export function useSharedPrefs(): void {
   // aussitôt en écriture (et deux renderers ouverts se renverraient la balle indéfiniment).
   const applying = useRef(false);
   const lastPushed = useRef<string | null>(null);
+  // Tant que l'état du core n'est pas revenu, une mutation du store (un module qui écrit son défaut
+  // au montage) écrirait ces DÉFAUTS sur le disque et effacerait les réglages de l'utilisateur.
+  const hydrated = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -108,12 +111,13 @@ export function useSharedPrefs(): void {
       // réglages de l'app à son prochain démarrage.
       if (Object.keys(stored).length) receive(stored);
       else if (!IS_REMOTE) push(snapshot(useApp.getState()));
-    }).catch(() => { /* core injoignable : réglages locaux, comme avant */ });
+      hydrated.current = true;
+    }).catch(() => { hydrated.current = true; /* core injoignable : réglages locaux, comme avant */ });
 
     const offRemote = nr.onPrefsChanged((p) => { if (alive && p?.patch) receive(p.patch as Partial<SharedPrefs>); });
 
     const offStore = useApp.subscribe((state) => {
-      if (applying.current) return;
+      if (applying.current || !hydrated.current) return;
       const next = snapshot(state);
       if (JSON.stringify(next) === lastPushed.current) return;
       if (timer) clearTimeout(timer);

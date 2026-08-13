@@ -25,7 +25,7 @@ export interface NormalizedDetectOptions {
 }
 
 export const DEFAULT_DETECT_OPTIONS: NormalizedDetectOptions = {
-  minSceneFrames: 2,
+  minSceneFrames: 6,
   omnishotcut: {
     mode: "clean_shot",
     overlapWindowLength: 20,
@@ -52,7 +52,7 @@ export function normalizeDetectOptions(value?: DetectOptions | null): Normalized
   const omni = value?.omnishotcut;
   const auto = value?.autoshot;
   return {
-    minSceneFrames: Math.round(finite(value?.minSceneFrames, 2, 1, 300)),
+    minSceneFrames: Math.round(finite(value?.minSceneFrames, 6, 1, 300)),
     omnishotcut: {
       mode: omni?.mode === "default" ? "default" : "clean_shot",
       overlapWindowLength: Math.round(finite(omni?.overlapWindowLength, 20, 0, 239)),

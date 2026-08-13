@@ -9,8 +9,9 @@ import {
   FilePlus2, Save, SaveAll, FileSymlink, FolderOpen, ClipboardPaste, BoxSelect, Play, Pause, Grid2x2, Square,
   Copy, FlipHorizontal, FlipVertical, Crop, BringToFront, SendToBack, Trash2,
   PictureInPicture2, Minimize2, Home, Pin, Layers, Download, AppWindow, Undo2, Redo2, Settings2,
+  FolderSearch,
 } from "lucide-react";
-import { convertToEmbed, downloadMediaFromEmbed } from "./boardMediaActions";
+import { convertToEmbed, downloadMediaFromEmbed, relocateMissingMedia } from "./boardMediaActions";
 import { iconForLink } from "./brandIcons";
 import { nr } from "@/lib/bridge";
 import {
@@ -64,6 +65,8 @@ export function BoardContextMenu({
   const background = useBoard((s) => s.background);
   const canUndo = useBoard((s) => s.past.length > 0);
   const canRedo = useBoard((s) => s.future.length > 0);
+  // Board reçu d'ailleurs : ses rushs référencés sont ailleurs sur le disque de celui qui l'ouvre.
+  const missingCount = useBoard((s) => s.items.filter((i) => !!i.missing && i.kind !== "sequence").length);
   const [ytOpen, setYtOpen] = useState(false);
 
   const store = useBoard.getState;
@@ -182,6 +185,11 @@ export function BoardContextMenu({
           <ContextMenuItem disabled={!canRedo} onClick={() => store().redo()}>
             <Redo2 /> {t("actions.redo")}
           </ContextMenuItem>
+          {missingCount > 0 && (
+            <ContextMenuItem onClick={() => void relocateMissingMedia()}>
+              <FolderSearch /> {t("boardMenu.relocateMissing", { count: missingCount })}
+            </ContextMenuItem>
+          )}
 
           <ContextMenuSeparator />
 

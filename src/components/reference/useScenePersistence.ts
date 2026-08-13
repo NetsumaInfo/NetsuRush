@@ -23,6 +23,42 @@ const persistable = (items: BoardItem[]) => items.filter((it) => !it.loading);
 const exportable = (items: BoardItem[]) =>
   persistable(items).map(({ localMedia: _localMedia, ...it }) => it);
 
+// Localisateurs que le board peut encore réclamer alors qu'aucun item posé ne les porte : ceux que
+// retient l'HISTORIQUE d'annulation. Supprimer une image déclenche un autosave une demi-seconde
+// plus tard ; sans cette liste, le ménage du core emporte ses octets et le Ctrl+Z suivant rend une
+// tuile vide. Les liens distants sont ignorés : ils ne coûtent rien et ne s'effacent pas.
+function retainedRefs(): string[] {
+  const st = useBoard.getState();
+  const out = new Set<string>();
+  const add = (ref?: string) => { if (ref && !/^(https?:|data:|blob:)/i.test(ref)) out.add(ref); };
+  for (const snapshot of [...st.past, ...st.future, st.items]) {
+    for (const item of snapshot) {
+      add(item.ref);
+      item.frames?.forEach(add);
+      add(item.prevMedia?.ref);
+      add(item.localMedia?.ref);
+    }
+  }
+  return [...out];
+}
+
+// Scène telle qu'elle part au core pour un ENREGISTREMENT (par opposition à un partage).
+const savable = (name: string) => {
+  const st = useBoard.getState();
+  return { name, items: persistable(st.items), view: st.view, retain: retainedRefs() };
+};
+
+// Un item relu : la `src` d'affichage se recalcule depuis le localisateur durable — pour l'item
+// lui-même comme pour le média d'avant un upscale, dont le bouton « revenir en arrière » a besoin.
+const hydrate = (items: BoardItem[]): BoardItem[] =>
+  items.map((it) => ({
+    ...it,
+    src: displaySrc(it.kind, it.ref),
+    ...(it.prevMedia?.ref
+      ? { prevMedia: { ...it.prevMedia, src: displaySrc(it.prevMedia.kind ?? it.kind, it.prevMedia.ref) } }
+      : {}),
+  }));
+
 // Feedback de sauvegarde dans la barre d'outils (l'auto-effacement est géré par setNotice).
 function flash(text: string, kind: "ok" | "error") {
   useBoard.getState().setNotice({ text, kind });
@@ -48,7 +84,7 @@ export function useScenePersistence() {
     const st = useBoard.getState();
     if (!st.filePath) return { ok: false, error: tr("notice.noProjectFile") };
     try {
-      const res = await api?.saveProject(st.filePath, { name: st.sceneName, items: persistable(st.items), view: st.view });
+      const res = await api?.saveProject(st.filePath, savable(st.sceneName));
       if (res?.ok) {
         useBoard.setState({ dirty: false });
         flash(tr("notice.projectSaved", { name: fileLabel(st.filePath) }), "ok");
@@ -71,7 +107,7 @@ export function useScenePersistence() {
     const projectName = fileLabel(dest);
     try {
       const res = await api?.saveProjectAs({
-        scene: { name: projectName, items: persistable(st.items), view: st.view },
+        scene: { ...savable(projectName) },
         destPath: dest,
         fromPath: st.filePath,
         sourceSceneId: st.sceneId,
@@ -97,7 +133,7 @@ export function useScenePersistence() {
         flash(tr("notice.openFailedWith", { error: res?.error || tr("notice.unknown") }), "error");
         return false;
       }
-      const items = (res.scene.items as BoardItem[]).map((it) => ({ ...it, src: displaySrc(it.kind, it.ref) }));
+      const items = hydrate(res.scene.items as BoardItem[]);
       useBoard.getState().loadScene({
         id: "",
         name: fileLabel(res.path ?? srcPath),
@@ -155,7 +191,7 @@ export function useScenePersistence() {
     async (id: string) => {
       const sc = await api?.loadScene(id);
       if (!sc) return;
-      const items = (sc.items as BoardItem[]).map((it) => ({ ...it, src: displaySrc(it.kind, it.ref) }));
+      const items = hydrate(sc.items as BoardItem[]);
       useBoard.getState().loadScene({
         id: sc.id,
         name: sc.name,
@@ -184,7 +220,7 @@ export function useScenePersistence() {
     const st = useBoard.getState();
     if (st.filePath && !st.fileReadonly) {
       try {
-        const res = await api?.saveProject(st.filePath, { name: st.sceneName, items: persistable(st.items), view: st.view });
+        const res = await api?.saveProject(st.filePath, savable(st.sceneName));
         if (res && !res.ok) throw new Error(res.error || tr("notice.unknown"));
         useBoard.setState({ dirty: false });
         autoErrShown = false;
@@ -216,7 +252,7 @@ export function useScenePersistence() {
   const loadAuto = useCallback(async () => {
     const sc = await api?.loadScene(AUTOSAVE_ID);
     if (!sc || !(sc.items as BoardItem[]).length) return false;
-    const items = (sc.items as BoardItem[]).map((it) => ({ ...it, src: displaySrc(it.kind, it.ref) }));
+    const items = hydrate(sc.items as BoardItem[]);
     useBoard.getState().loadScene({ id: AUTOSAVE_ID, name: sc.name, items, view: (sc.view as BoardView) ?? undefined });
     useBoard.setState({ sceneId: null, dirty: false }); // board de travail anonyme
     return true;
@@ -265,7 +301,7 @@ export function useScenePersistence() {
         flash(res?.type ? tr("notice.typeUnsupported", { type: res.type }) : tr("notice.importFailedWith", { error: res?.error || tr("notice.unknown") }), "error");
         return null;
       }
-      const items = (res.scene.items as BoardItem[]).map((it) => ({ ...it, src: displaySrc(it.kind, it.ref) }));
+      const items = hydrate(res.scene.items as BoardItem[]);
       const saved = await api?.saveScene({ name: res.scene.name, items, view: res.scene.view });
       const id = saved?.ok ? saved.id : undefined;
       useBoard.getState().loadScene({ id: id ?? "", name: res.scene.name, items, view: (res.scene.view as BoardView) ?? undefined });

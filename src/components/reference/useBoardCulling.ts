@@ -16,6 +16,18 @@ const CULL_MIN_ITEMS = 40;
 // Marge pré-montée autour du viewport, en fraction de sa taille, de chaque côté.
 const CULL_MARGIN = 0.75;
 
+// PLAFOND DE LECTEURS MÉDIA. La zone couvre 2,5× le viewport en largeur ET en hauteur, soit 6,25×
+// son aire : sur un board dense elle contient facilement plusieurs centaines d'items. Or Chromium
+// cesse de créer un lecteur média au-delà d'environ 75 par frame, et le fait SANS erreur — passé ce
+// seuil, des vidéos restent noires au hasard, sans rien dans la console.
+//
+// On borne donc les seuls items qui consomment un lecteur, en gardant les PLUS PROCHES du centre du
+// viewport. Les images, notes et cadres ne comptent pas : ils ne coûtent qu'une couche de rendu. Le
+// plafond dépasse largement ce qu'un écran affiche, donc ce qui tombe est pris dans la marge, jamais
+// sous les yeux — et un item écarté n'est pas monté du tout, ce qui vaut mieux qu'un carré noir.
+const MEDIA_BUDGET = 48;
+const MEDIA_KINDS = new Set(["video", "sequence", "youtube", "embed"]);
+
 interface Rect { x: number; y: number; w: number; h: number }
 
 const contains = (outer: Rect, inner: Rect) =>
@@ -66,8 +78,22 @@ export function useBoardCulling(items: BoardItem[], selectedIds: string[], editi
 
   const visible = useMemo(() => {
     if (!zone || items.length < CULL_MIN_ITEMS) return items;
-    return items.filter(
+    const kept = items.filter(
       (it) => overlaps(zone, it) || it.id === editingId || selectedIds.includes(it.id),
+    );
+    const media = kept.filter((it) => MEDIA_KINDS.has(it.kind));
+    if (media.length <= MEDIA_BUDGET) return kept;
+    // Au-delà du budget : on garde les médias les plus proches du centre du viewport (le centre de la
+    // zone, à la marge près). L'item édité ou sélectionné n'est jamais lâché — un geste en cours ne
+    // doit pas voir son sujet disparaître.
+    const cx = zone.x + zone.w / 2;
+    const cy = zone.y + zone.h / 2;
+    const dist = (it: BoardItem) => Math.hypot(it.x + it.w / 2 - cx, it.y + it.h / 2 - cy);
+    const budgeted = new Set(
+      media.slice().sort((a, b) => dist(a) - dist(b)).slice(0, MEDIA_BUDGET).map((it) => it.id),
+    );
+    return kept.filter(
+      (it) => !MEDIA_KINDS.has(it.kind) || budgeted.has(it.id) || it.id === editingId || selectedIds.includes(it.id),
     );
   }, [items, zone, selectedIds, editingId]);
 

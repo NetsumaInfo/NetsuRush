@@ -30,8 +30,9 @@
 // d'un enregistrement à l'autre : un Ctrl+S ne doit pas remuer le disque.
 
 const fs = require('node:fs');
+const fsp = require('node:fs/promises');
 const path = require('node:path');
-const { hashFile } = require('./blobs');
+const { hashFile, hashFileAsync } = require('./blobs');
 
 const TOKEN = 'sidecar:';
 // Suffixe du dossier. Volontairement lisible : l'utilisateur doit comprendre au premier coup d'œil
@@ -171,6 +172,13 @@ function fingerprint(filePath) {
   return (hashFromName(filePath) || hashFile(filePath).sha).slice(0, HASH_HEX);
 }
 
+/** Même empreinte, lue sans bloquer le core (un rush non nommé par son contenu se relit en entier). */
+async function fingerprintAsync(filePath) {
+  const named = hashFromName(filePath);
+  if (named) return named.slice(0, HASH_HEX);
+  return (await hashFileAsync(filePath)).sha.slice(0, HASH_HEX);
+}
+
 /** @param {string} kind @param {string} ext @returns {string} */
 function bucketFor(kind, ext) {
   if (kind === 'image' || kind === 'video') return BUCKETS[kind];
@@ -248,47 +256,88 @@ function indexSidecar(netsuPath) {
  */
 function adopt(netsuPath, filePath, opts) {
   try {
-    const stat = fs.statSync(filePath);
-    if (!stat.isFile()) return { ok: false, error: `pas un fichier : ${filePath}` };
-    const dir = sidecarDirFor(netsuPath);
-    const options = opts || {};
-    const hash = fingerprint(filePath);
-    // À plat, le nom de contenu du fichier source est repris TEL QUEL quand il en porte déjà un :
-    // le Carnet a des tokens qui citent ce nom, le raccourcir les casserait.
-    const flatName = hashFromName(filePath)
-      ? path.basename(filePath)
-      : `${hash}.${extOf(filePath)}`;
-    const relative = options.place
-      ? placeFor({ ...options.place, sourcePath: filePath, hash })
-      : flatName;
-
-    const known = options.index ? options.index.get(hash) : null;
-    // Déjà rangé au bon endroit : rien à faire. Le nom lisible peut différer (l'item a été renommé
-    // depuis) — le déplacer à chaque enregistrement coûterait une écriture disque pour un détail
-    // cosmétique, et ferait clignoter le dossier ouvert dans l'explorateur.
-    if (known && path.dirname(known) === path.dirname(relative) && fs.existsSync(path.join(dir, known))) {
-      return { ok: true, token: sidecarToken(known), path: path.join(dir, known), relative: known, bytes: stat.size };
-    }
-
-    const dest = path.join(dir, relative);
-    if (!fs.existsSync(dest)) {
-      fs.mkdirSync(path.dirname(dest), { recursive: true });
-      const from = known ? path.join(dir, known) : null;
-      if (from && fs.existsSync(from)) {
-        fs.renameSync(from, dest); // même contenu, autre rangement : on déplace, on ne recopie pas
+    const plan = planAdoption(netsuPath, filePath, opts, fingerprint(filePath));
+    if (plan.settled) return plan.settled;
+    if (!fs.existsSync(plan.dest)) {
+      fs.mkdirSync(path.dirname(plan.dest), { recursive: true });
+      if (plan.from && fs.existsSync(plan.from)) {
+        fs.renameSync(plan.from, plan.dest); // même contenu, autre rangement : on déplace, pas de copie
       } else {
         // Écriture en `.part` puis renommage : un enregistrement interrompu ne doit pas laisser un
         // média tronqué SOUS SON NOM DE CONTENU, qui le ferait passer pour valide à jamais.
-        const part = `${dest}.part`;
+        const part = `${plan.dest}.part`;
         fs.copyFileSync(filePath, part);
-        fs.renameSync(part, dest);
+        fs.renameSync(part, plan.dest);
       }
     }
-    if (options.index) options.index.set(hash, relative);
-    return { ok: true, token: sidecarToken(relative), path: dest, relative, bytes: stat.size };
+    return plan.done();
   } catch (e) {
     return { ok: false, error: String((e && e.message) || e) };
   }
+}
+
+/**
+ * Même adoption, sans bloquer le core. La copie d'un rush de plusieurs Go passe par le pool d'I/O
+ * au lieu de figer la boucle d'événements — pendant un enregistrement, l'app doit continuer à
+ * servir ses aperçus. Voie normale du projet ; `adopt` reste pour les appelants synchrones.
+ * @param {string} netsuPath @param {string} filePath
+ * @param {{ place?: { kind?: string, title?: string, group?: string, index?: number },
+ *           index?: Map<string, string> }} [opts]
+ * @returns {Promise<{ ok: boolean, token?: string, path?: string, relative?: string, bytes?: number, error?: string }>}
+ */
+async function adoptAsync(netsuPath, filePath, opts) {
+  try {
+    const plan = planAdoption(netsuPath, filePath, opts, await fingerprintAsync(filePath));
+    if (plan.settled) return plan.settled;
+    if (!fs.existsSync(plan.dest)) {
+      await fsp.mkdir(path.dirname(plan.dest), { recursive: true });
+      if (plan.from && fs.existsSync(plan.from)) {
+        await fsp.rename(plan.from, plan.dest);
+      } else {
+        const part = `${plan.dest}.part`;
+        await fsp.copyFile(filePath, part);
+        await fsp.rename(part, plan.dest);
+      }
+    }
+    return plan.done();
+  } catch (e) {
+    return { ok: false, error: String((e && e.message) || e) };
+  }
+}
+
+/**
+ * Où va ce fichier et que reste-t-il à faire. `settled` = déjà rangé, rien à écrire ; sinon `dest`
+ * (et `from` quand le contenu est déjà là sous un autre rangement) puis `done()` pour l'index.
+ * Partagé par les deux adoptions : une seule règle de placement, deux façons d'écrire les octets.
+ */
+function planAdoption(netsuPath, filePath, opts, hash) {
+  const stat = fs.statSync(filePath);
+  if (!stat.isFile()) throw new Error(`pas un fichier : ${filePath}`);
+  const dir = sidecarDirFor(netsuPath);
+  const options = opts || {};
+  // À plat, le nom de contenu du fichier source est repris TEL QUEL quand il en porte déjà un :
+  // le Carnet a des tokens qui citent ce nom, le raccourcir les casserait.
+  const flatName = hashFromName(filePath) ? path.basename(filePath) : `${hash}.${extOf(filePath)}`;
+  const relative = options.place ? placeFor({ ...options.place, sourcePath: filePath, hash }) : flatName;
+  const known = options.index ? options.index.get(hash) : null;
+
+  // Déjà rangé au bon endroit : rien à faire. Le nom lisible peut différer (l'item a été renommé
+  // depuis) — le déplacer à chaque enregistrement coûterait une écriture disque pour un détail
+  // cosmétique, et ferait clignoter le dossier ouvert dans l'explorateur.
+  if (known && path.dirname(known) === path.dirname(relative) && fs.existsSync(path.join(dir, known))) {
+    return {
+      settled: { ok: true, token: sidecarToken(known), path: path.join(dir, known), relative: known, bytes: stat.size },
+    };
+  }
+  return {
+    settled: null,
+    dest: path.join(dir, relative),
+    from: known ? path.join(dir, known) : null,
+    done: () => {
+      if (options.index) options.index.set(hash, relative);
+      return { ok: true, token: sidecarToken(relative), path: path.join(dir, relative), relative, bytes: stat.size };
+    },
+  };
 }
 
 /**
@@ -330,5 +379,5 @@ function pruneEmptyDirs(dir) {
 module.exports = {
   TOKEN, DIR_SUFFIX, BUCKETS, SEQ_ROOT,
   sidecarDirFor, isSidecarToken, sidecarToken, resolveSidecar, isInSidecar, isInAnySidecar,
-  slugify, indexSidecar, adopt, sweep,
+  slugify, indexSidecar, adopt, adoptAsync, sweep,
 };

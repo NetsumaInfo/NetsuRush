@@ -70,12 +70,32 @@ export function readPreviewSettings(): PreviewGenerationSettings {
 export function writePreviewSettings(settings: PreviewGenerationSettings): PreviewGenerationSettings {
   const next = normalizePreviewSettings(settings);
   if (typeof localStorage !== "undefined") localStorage.setItem(PREVIEW_SETTINGS_KEY, JSON.stringify(next));
+  // Avant l'événement : un abonné qui relit l'empreinte dans son écouteur doit voir la nouvelle.
+  fingerprintCache = null;
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(PREVIEW_SETTINGS_EVENT));
   return next;
 }
 
-export function previewSettingsFingerprint(settings = readPreviewSettings()): string {
+function buildFingerprint(settings: PreviewGenerationSettings): string {
   const p = settings.proxy;
   const t = settings.thumbnail;
   return `${p.format}-${p.engine}-${p.preset}-${p.height}-${p.audio ? 1 : 0}|${t.format}-${t.preset}`;
+}
+
+// Empreinte des réglages en CACHE. Sans argument, cette fonction lisait localStorage et parsait son
+// JSON à chaque appel — or elle entre dans la clé de cache proxy des grilles, donc dans le rendu de
+// CHAQUE carte : défiler une grille de plusieurs centaines de plans revenait à faire des centaines
+// d'accès localStorage synchrones sur le thread qui fait avancer le défilement. Les réglages ne
+// changent que par `writePreviewSettings`, qui invalide ici ; l'événement couvre les autres fenêtres
+// de l'app (board, carnet), qui ont leur propre contexte JS.
+let fingerprintCache: string | null = null;
+function invalidateFingerprint() { fingerprintCache = null; }
+if (typeof window !== "undefined") {
+  window.addEventListener(PREVIEW_SETTINGS_EVENT, invalidateFingerprint);
+  window.addEventListener("storage", (e) => { if (!e.key || e.key === PREVIEW_SETTINGS_KEY) invalidateFingerprint(); });
+}
+
+export function previewSettingsFingerprint(settings?: PreviewGenerationSettings): string {
+  if (settings) return buildFingerprint(settings);   // réglages fournis : jamais mis en cache
+  return (fingerprintCache ??= buildFingerprint(readPreviewSettings()));
 }

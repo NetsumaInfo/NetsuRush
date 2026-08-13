@@ -57,6 +57,7 @@ export function SequencePlayer() {
   const item = useBoard((s) => s.items.find((i) => i.id === s.selectedId) ?? null);
   const view = useBoard((s) => s.view);
   const patchItem = useBoard((s) => s.patchItem);
+  const commitSeqFrame = useBoard((s) => s.commitSeqFrame);
   const removeItem = useBoard((s) => s.removeItem);
   const duplicateItem = useBoard((s) => s.duplicateItem);
   const bringToFront = useBoard((s) => s.bringToFront);
@@ -66,7 +67,11 @@ export function SequencePlayer() {
 
   const frames = item?.frames ?? [];
   const total = frames.length;
-  const cur = item ? Math.min(Math.max(item.frame ?? 0, 0), Math.max(0, total - 1)) : 0;
+  // Frame VIVANTE d'abord : pendant la lecture elle vit hors du document (cf. `seqFrames`) pour ne
+  // pas recréer `items` à chaque image. Le sélecteur ne rend qu'un nombre — la pellicule suit sans
+  // que le board entier soit réveillé.
+  const liveFrame = useBoard((s) => (item ? s.seqFrames[item.id] : undefined));
+  const cur = item ? Math.min(Math.max(liveFrame ?? item.frame ?? 0, 0), Math.max(0, total - 1)) : 0;
 
   // Centre la vignette active dans la pellicule au fil de la lecture.
   useEffect(() => {
@@ -80,7 +85,11 @@ export function SequencePlayer() {
 
   const speed = item.speed ?? 1;
   const playing = item.seqPlay ?? true; // défaut = lecture
-  const goto = (n: number) => patchItem(item.id, { frame: (n + total) % total, seqPlay: false }, false);
+  // Saut manuel : écrit la position DANS le document et oublie la frame vivante, qui la masquerait.
+  const goto = (n: number) => {
+    commitSeqFrame(item.id, (n + total) % total);
+    patchItem(item.id, { seqPlay: false }, false);
+  };
   const cycleSpeed = () => patchItem(item.id, { speed: SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length] ?? 1 }, false);
   // Type de boucle (playMode) + portée de boucle [seqIn, seqOut] (index de frames ; défaut = toutes).
   const loopMode = (item.playMode ?? "loop") as SeqLoop;

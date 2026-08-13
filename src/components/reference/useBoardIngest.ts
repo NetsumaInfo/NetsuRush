@@ -12,6 +12,7 @@ import {
   displaySrc,
   kindFromPath,
   youtubeId,
+  youtubeNatSize,
   giphyGifUrl,
   parseVideoEmbed,
   EMBED_PLAYER_PROVIDERS,
@@ -23,6 +24,10 @@ import {
   probeNat,
 } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
+
+// Longest side of a freshly posed YouTube card. Kept apart from the media posing size (Settings):
+// a YouTube card is a player, not a reference image the user sizes to taste.
+const YT_MAX = 480;
 
 // Hôte d'un lien → titre court d'un média extrait (ex. "x.com", "tiktok.com").
 function hostTitle(url: string): string {
@@ -93,10 +98,12 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       at?: { x: number; y: number },
       extra?: Partial<BoardItem>,
     ) => {
-      // YouTube = 16:9 fixe ; embed = taille conseillée du provider (socials = portrait/haut),
-      // repli 480×270 ; média = ratio natif mesuré, borné par la taille de pose (Paramètres).
+      // YouTube = ratio annoncé par le lien (16:9, ou 9:16 pour un Short), borné à YT_MAX — d'où le
+      // 480×270 historique en paysage et 270×480 en portrait ; embed = taille conseillée du provider
+      // (socials = portrait/haut), repli 480×270 ; média = ratio natif mesuré, borné par la taille de
+      // pose (Paramètres).
       const { w, h } =
-        kind === "youtube" ? { w: 480, h: 270 }
+        kind === "youtube" ? fitSize(nat.w || 1920, nat.h || 1080, YT_MAX)
         : kind === "embed" ? { w: nat.w || 480, h: nat.h || 270 }
         : fitSize(nat.w, nat.h, useBoard.getState().prefs.mediaMaxSize);
       const c = at ?? centerPoint();
@@ -237,7 +244,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     (input: string, opts?: { allowGenericEmbed?: boolean }): boolean => {
       const yt = youtubeId(input);
       if (yt) {
-        place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube");
+        place("youtube", yt, yt, youtubeNatSize(input), "YouTube");
         return true;
       }
       const e = parseVideoEmbed(input, opts?.allowGenericEmbed ?? false);
@@ -383,7 +390,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       // 1. YouTube : lecteur relayé sans habillage par défaut ; extraction locale en mode auto.
       const yt = youtubeId(text);
       if (yt) {
-        place("youtube", yt, yt, { w: 480, h: 270 }, "YouTube");
+        place("youtube", yt, yt, youtubeNatSize(text), "YouTube");
         return true;
       }
 

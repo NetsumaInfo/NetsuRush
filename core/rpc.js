@@ -48,6 +48,7 @@ const { createAeExport } = require("./aeExport");
 const { createTransfer } = require("./transfer");
 const { createAdobeBridge } = require("./adobe"); // pont Adobe : panneau CEP Premiere/AE ↔ core
 const { createPrefs } = require("./prefs"); // réglages renderer partagés entre origines
+const { createUiState } = require("./uistate"); // miroir durable du localStorage du renderer
 const { createAdobeBoost } = require("./adobeBoost"); // NetsuBoost côté Premiere/AE (caches, réglages, proxies)
 const { createResolveWatch } = require("./resolve-watch");
 const { createOutbox } = require("./outbox"); // « cache projet » : file d'envois différés (hôte fermé)
@@ -136,6 +137,9 @@ function createRpc() {
     { label: "lecture de timeline", also: [path.join(__dirname, "transfer")] });
   // Réglages du renderer PARTAGÉS entre origines (app Tauri / panneau CEP / fenêtres détachées).
   const prefs = createPrefs({ broadcast });
+  // Miroir durable du localStorage : le profil WebView2 n'est pas un stockage sûr (recréé, nettoyé,
+  // ou simplement d'une autre origine) et l'utilisateur y perdait tous ses réglages.
+  const uiState = createUiState({ broadcast });
   // Le panneau CEP est une COPIE dans %APPDATA% : une mise à jour de NetsuRush ne la touche pas.
   // On la resynchronise au démarrage (différé, jamais bloquant) quand elle est en retard.
   setTimeout(() => { adobeBridge.syncPanel().catch(() => {}); }, 1500);
@@ -410,6 +414,9 @@ function createRpc() {
       if (result.ok && patch && patch.searchPerf) sidecars.refreshPerfEnv();
       return result;
     },
+    // --- Miroir durable du localStorage du renderer (cf. core/uistate.js) ---
+    "uistate:get": () => uiState.get(),
+    "uistate:set": ([patch]) => uiState.set(patch || {}),
     "config:setLang": ([lang]) => {
       const code = String(lang || "fr").toLowerCase().split(/[-_]/)[0];
       return saveConfig({ lang: ["fr", "en", "es", "de", "ja", "zh"].includes(code) ? code : "fr" });
@@ -568,6 +575,9 @@ function createRpc() {
     "cut:saveEdits": ([p, model, edits, optionsKey]) => cutEditsStore.saveEdits(p, model, edits, optionsKey),
     "cut:clearEdits": ([p, model, optionsKey]) => cutEditsStore.clearEdits(p, model, optionsKey),
     "ffmpeg:proxy": ([opts]) => proxy.proxySegment(opts),
+    // Lot de plans → chemins des proxies DÉJÀ en cache (aucun encode). Amorce le cache d'URL du
+    // renderer à l'ouverture d'une grille : les cartes n'émettent plus un RPC chacune au défilement.
+    "ffmpeg:proxyResolve": ([items, opts]) => proxy.proxyResolve(items, opts || {}),
     "ffmpeg:proxyCancel": ([token]) => {
       proxy.proxyCancel(token);
       return null;
@@ -857,6 +867,8 @@ function createRpc() {
     "reference:upscaleItem": ([opts]) => upscaleBoardItem(ev, opts),
     // Supprime un fichier UNIQUEMENT s'il est un asset de l'app (cleanup d'un upscale annulé).
     "reference:dropAsset": ([p]) => refStore.removeAsset(p),
+    // Ménage du magasin d'assets (Paramètres du board) : ce que plus aucune scène ne réclame part.
+    "reference:sweepAssets": ([opts]) => refStore.sweepAssets(opts || {}),
 
     // --- Fond d'écran de l'interface (Paramètres › Interface › Thème) ---
     // L'import copie la source dans la bibliothèque et cuit la variante de base ; les marches de flou
@@ -944,8 +956,8 @@ function createRpc() {
     // Bibliothèque de rushs importés. Aucun appel Resolve → ni guarded() ni rOp() (contrairement aux
     // canaux resolve:*) : ces lectures/écritures marchent logiciel fermé, c'est tout l'intérêt.
     "library:list": () => libraryStore.listItems(),
-    "library:addPaths": ([paths]) => libraryStore.addPaths(paths),
-    "library:addDir": ([dir]) => libraryStore.addDir(dir),
+    "library:addPaths": ([paths, folderId]) => libraryStore.addPaths(paths, folderId),
+    "library:addDir": ([dir, folderId]) => libraryStore.addDir(dir, folderId),
     "library:remove": ([id]) => libraryStore.removeItem(id),
     "library:removeMany": ([ids]) => libraryStore.removeItems(ids),
     "library:restore": ([undo]) => libraryStore.restore(undo),
@@ -958,9 +970,17 @@ function createRpc() {
     "library:relinkDir": ([dir]) => libraryStore.relinkDir(dir),
 
     // --- Partage « .netsu » : export (board courant → archive) / import (archive → scène) ---
-    "netsu:export": ([scene, destPath, opts]) => netsu.exportBoard(refStore, scene, destPath, opts || {}),
+    // L'export encode ses clips un par un : il rend compte item par item, sinon un board fourni
+    // laisse l'utilisateur devant un bouton figé pendant plusieurs minutes.
+    "netsu:export": ([scene, destPath, opts]) =>
+      netsu.exportBoard(refStore, scene, destPath, {
+        ...(opts || {}),
+        onProgress: (p) => broadcast("netsu:progress", p),
+      }),
     "netsu:import": ([srcPath]) => netsu.importBoard(refStore, srcPath),
     "netsu:weigh": ([scene, opts]) => netsu.weigh(scene, opts || {}),
+    // Relocalisation EN LOT : un dossier, tous les médias manquants qu'on y reconnaît.
+    "netsu:relocateFrom": ([dirPath, wanted]) => netsu.relocateFrom(dirPath, wanted || []),
 
     // --- Projet « .netsu » : le fichier EST le document (ouvert en continu, Ctrl+S incrémental) ---
     "netsu:openProject": ([srcPath]) => netsu.openProject(refStore, srcPath),
@@ -1047,6 +1067,23 @@ function createRpc() {
     const { path: src, kind, in: inSec, out: outSec, engine = "ia", model = "fallin", shader = "artcnn_c4f32", scale = 2, denoise } = opts || {};
     if (!src) return { ok: false, error: t("sourceMissing") };
     if (/^(https?:|data:|blob:)/i.test(String(src))) return { ok: false, error: t("localMediaRequired") };
+
+    // Un upscale coûte des minutes de GPU. Le registre répond d'abord : même source, mêmes bornes,
+    // mêmes réglages ⇒ le fichier existe déjà (l'archivage des collections s'en sert depuis
+    // toujours ; refaire le calcul pour le board était la même dépense pour rien).
+    const ledgerKey = upLedger.fingerprint({
+      ...upLedger.statSource(String(src)),
+      src: String(src),
+      in: inSec, out: outSec,
+      encode: { workflow: `board_${kind === "image" ? "image" : "video"}` },
+      upscale: { enabled: true, engine, model, shader, scale, denoise },
+    });
+    const known = upLedger.lookup(ledgerKey);
+    if (known) return { ok: true, path: known.file, cached: true };
+    const remember = (out) => {
+      if (out) upLedger.record(ledgerKey, out, { engine, model: engine === "turbo" ? shader : model, scale });
+      return out;
+    };
     const base = `up_${Date.now().toString(36)}`;
 
     // Moteur Turbo (shader GPU libplacebo) — vidéo uniquement (les shaders ciblent le flux vidéo).
@@ -1058,7 +1095,7 @@ function createRpc() {
         whole: !segs, segments: segs, importBack: false, baseName: base,
       });
       if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || "échec upscale turbo" };
-      return { ok: true, path: r.outputs[0] };
+      return { ok: true, path: remember(r.outputs[0]) };
     }
 
     if (kind === "image") {
@@ -1069,7 +1106,7 @@ function createRpc() {
         ? await sidecars.runUpscaleGif({ input: src, out, model, scale, denoise })
         : await sidecars.runUpscaleImage({ input: src, out, model, scale, denoise });
       if (!r || !r.ok || !r.output) return { ok: false, error: (r && r.error) || "échec upscale image" };
-      return { ok: true, path: r.output, width: r.width, height: r.height };
+      return { ok: true, path: remember(r.output), width: r.width, height: r.height };
     }
 
     const segments = inSec != null && outSec != null ? [{ in: inSec, out: outSec }] : undefined;
@@ -1078,7 +1115,7 @@ function createRpc() {
       outDir: refStore.assetsDir, whole: !segments, segments, importBack: false, baseName: base,
     });
     if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || "échec upscale vidéo" };
-    return { ok: true, path: r.outputs[0] };
+    return { ok: true, path: remember(r.outputs[0]) };
   }
 
   // Préchauffe SigLIP dès le démarrage du core, en fond : le chargement du modèle (plusieurs
@@ -1091,6 +1128,18 @@ function createRpc() {
     sidecars.queryReq("warm", {}).catch(() => { /* recherche indisponible : chargement paresseux */ });
   }, PREWARM_DELAY_MS);
   prewarmTimer.unref?.();
+
+  // Ménage du magasin d'assets du board, AU DÉMARRAGE et à ce moment-là seulement : aucun board
+  // n'est encore ouvert, donc aucun fichier affiché ne peut disparaître sous les yeux de personne.
+  // Sans ça, sorties d'upscale, frames extraites et médias téléchargés s'empilent pour toujours.
+  const ASSET_SWEEP_DELAY_MS = 20000;
+  const assetSweepTimer = setTimeout(() => {
+    const swept = refStore.sweepAssets({});
+    if (swept.ok && swept.removed) {
+      logbus.emit("core", "info", `[board] ${swept.removed} asset(s) inutilisés retirés (${Math.round(swept.bytes / 1048576)} Mo)`);
+    }
+  }, ASSET_SWEEP_DELAY_MS);
+  assetSweepTimer.unref?.();
 
   function handle(req, res, u) {
     // SSE : flux d'événements de progression

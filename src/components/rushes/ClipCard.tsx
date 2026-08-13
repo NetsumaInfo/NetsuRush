@@ -32,7 +32,7 @@ function Thumb({ path, dim }: { path: string; dim?: boolean }) {
     nr.thumbnail(path)
       .then((r) => {
         if (!alive) return;
-        if (typeof r === "string") { const u = nr.mediaUrl(r); setThumb(path, u); setSrc(u); } else setFailed(true);
+        if (typeof r === "string") { const u = nr.assetUrl(r); setThumb(path, u); setSrc(u); } else setFailed(true);
       })
       .catch(() => alive && setFailed(true));
     return () => { alive = false; };

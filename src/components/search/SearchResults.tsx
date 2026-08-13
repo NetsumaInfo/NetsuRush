@@ -16,7 +16,7 @@ import { ResultCard } from "@/components/search/ResultCard";
 import { hitKey, grid } from "@/components/search/searchHelpers";
 import { sendPathToBoard } from "@/components/reference/boardActions";
 import { ExportButton } from "@/components/export/ExportButton";
-import { setMaxPlaying, resetPlaySlots } from "@/components/rushes/cutStudioShared";
+import { setMaxPlaying, resetPlaySlots, MAX_PLAYING_HARD } from "@/components/rushes/cutStudioShared";
 import { previewSettingsFingerprint } from "@/lib/previewSettings";
 import { warmResolveThumbs } from "@/lib/thumbCache";
 import { thumbTime } from "@/lib/utils";
@@ -66,7 +66,11 @@ export function SearchResults() {
   // la lecture auto). On remonte AUSSI le plafond de lecture simultanée : le pool est partagé avec la
   // grille derush (cutStudioShared) et CutStudio a pu le laisser bas → toutes les cartes visibles
   // jouent sous « Tout lire » (la visibilité stricte borne déjà le nombre réel de <video> montées).
-  useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); proxies.clear(); resetPlaySlots(); setMaxPlaying(30); }, [searchHits, proxies]);
+  // Plafond au maximum tenable : cette grille est en colonnes CSS (2 → 6 selon la largeur), il n'y a
+  // donc pas de géométrie à mesurer pour en déduire un nombre de cartes visibles. À 30, un grand
+  // écran en 6 colonnes laissait ses dernières rangées figées sur leur vignette sous « Tout lire ».
+  // La borne réelle reste la bande de lecture : seules les cartes qui l'atteignent réclament un créneau.
+  useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); proxies.clear(); resetPlaySlots(); setMaxPlaying(MAX_PLAYING_HARD); }, [searchHits, proxies]);
 
   // Amorçage des vignettes DÉJÀ générées en UN appel (rien n'est encodé ici) : les résultats
   // portent souvent des rushs déjà découpés, dont les vignettes sont sur le disque. Sans ce
@@ -76,13 +80,40 @@ export function SearchResults() {
     void warmResolveThumbs(searchHits.map((h) => ({ path: h.file_path, time: thumbTime(h.start_sec, h.end_sec) })));
   }, [searchHits]);
 
+  // Même chose pour les PROXIES : résolus en UN appel, sans rien encoder. Sans ce pré-passage, chaque
+  // carte qui entre dans la bande réclame le sien au core (file d'encodage, sidecar réécrit) puis se
+  // fait annuler en ressortant — des centaines d'allers-retours pour des fichiers déjà sur le disque,
+  // pendant lesquels la grille reste sur ses vignettes. Aucune hauteur n'est passée : cette grille est
+  // en colonnes CSS (pas de cellule mesurée), et le core essaie le palier par défaut puis ses voisins
+  // (cf. proxyResolve) — un aperçu au palier d'à côté vaut mieux qu'une vignette figée.
+  useEffect(() => {
+    if (!searchHits.length) return;
+    const range = (h: SearchHit) => ({ input: h.file_path, start: h.start_sec, end: Math.min(h.end_sec, h.start_sec + 10) });
+    let alive = true;
+    void nr.proxyResolve(searchHits.map(range))
+      .then((rows) => {
+        if (!alive) return;
+        const byRange = new Map(rows.filter((r) => r.file).map((r) => [`${r.input}|${r.start}|${r.end}`, r.file as string]));
+        const fingerprint = previewSettingsFingerprint();
+        for (const h of searchHits) {
+          const r = range(h);
+          const file = byRange.get(`${r.input}|${r.start}|${r.end}`);
+          const k = `${hitKey(h)}|${fingerprint}`;
+          // Premier écrit gagne : une lecture réelle a pu remplir l'entrée entre-temps.
+          if (file && !proxies.has(k)) proxies.set(k, nr.assetUrl(file));
+        }
+      })
+      .catch(() => { /* best-effort : repli sur l'encode à la demande */ });
+    return () => { alive = false; };
+  }, [searchHits, proxies]);
+
   async function getProxy(h: SearchHit, height?: number, token?: number, priority: "high" | "low" = "high"): Promise<string | null> {
     const k = `${hitKey(h)}|${previewSettingsFingerprint()}`;
     const c = proxies.get(k);
     if (c) return c;
     const end = Math.min(h.end_sec, h.start_sec + 10);   // aperçu court (≤10s)
     const r = await nr.proxy({ input: h.file_path, start: h.start_sec, end, priority, height, token });
-    if (r.ok && r.path) { const u = nr.mediaUrl(r.path); proxies.set(k, u); return u; }
+    if (r.ok && r.path) { const u = nr.assetUrl(r.path); proxies.set(k, u); return u; }
     return null;
   }
   function toggleSel(k: string) {
@@ -117,6 +148,7 @@ export function SearchResults() {
         key={k} hit={h} index={i} selected={sel.has(k)} play={playAll}
         onToggle={() => toggleSel(k)} onDownload={() => sendHitsToTimeline([h])}
         getProxy={(ph, tok, prio) => getProxy(h, ph, tok, prio)} bustProxy={() => proxies.delete(proxyKey)}
+        peekProxy={() => proxies.get(proxyKey) ?? null}
         onFindSimilar={(thumb) => findSimilar(h, thumb)}
         onAddRef={(thumb) => addRef({ file_path: h.file_path, scene_index: h.scene_index, thumb })}
         refActive={refKeys.has(`${h.file_path}#${h.scene_index}`)}

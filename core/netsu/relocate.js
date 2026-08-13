@@ -84,4 +84,43 @@ function findReferencedFile(netsuPath, row) {
   return matches.length === 1 ? matches[0] : '';
 }
 
-module.exports = { MAX_ENTRIES, findCompanionFile, findReferencedFile };
+/**
+ * Retrouve d'un coup, dans un dossier choisi par l'utilisateur, les médias qu'un board reçu ne
+ * sait plus où prendre. Un partage « lien » ou « aperçu » arrive avec autant de placeholders que de
+ * rushs référencés : les relocaliser un par un est une corvée qui ne dit rien de plus que « ils
+ * sont tous là, dans ce dossier ».
+ *
+ * Un candidat compte s'il porte le même NOM et la même TAILLE. Deux fichiers homonymes de même
+ * taille rendent la réponse ambiguë : on n'en propose alors aucun plutôt que de deviner.
+ * @param {string} dirPath
+ * @param {{ id: string, name: string, size?: number }[]} wanted
+ * @returns {{ ok: boolean, found: { id: string, path: string }[], scanned: number, error?: string }}
+ */
+function matchIn(dirPath, wanted) {
+  const root = path.resolve(String(dirPath || ''));
+  if (!root || !fs.existsSync(root)) return { ok: false, found: [], scanned: 0, error: 'dossier introuvable' };
+  const files = walkBounded(root);
+  /** @type {Map<string, string[]>} */
+  const byName = new Map();
+  for (const file of files) {
+    const key = path.basename(file).toLowerCase();
+    const list = byName.get(key);
+    if (list) list.push(file);
+    else byName.set(key, [file]);
+  }
+
+  const found = [];
+  for (const want of Array.isArray(wanted) ? wanted : []) {
+    const name = String(want && want.name || '').toLowerCase();
+    if (!name) continue;
+    const size = Number(want && want.size) || 0;
+    const candidates = (byName.get(name) || []).filter((candidate) => {
+      if (!size) return true;
+      try { return fs.statSync(candidate).size === size; } catch (_) { return false; }
+    });
+    if (candidates.length === 1) found.push({ id: String(want.id), path: candidates[0] });
+  }
+  return { ok: true, found, scanned: files.length };
+}
+
+module.exports = { MAX_ENTRIES, findCompanionFile, findReferencedFile, matchIn };

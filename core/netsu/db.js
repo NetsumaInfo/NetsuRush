@@ -80,7 +80,13 @@ function initMeta(db, appVersion) {
 
 /** @param {any} db @param {boolean} fresh */
 function prepareDatabase(db, fresh) {
-  if (fresh) db.exec(`PRAGMA page_size = ${PAGE_SIZE}`); // AVANT toute écriture, sinon sans effet
+  if (fresh) {
+    db.exec(`PRAGMA page_size = ${PAGE_SIZE}`); // AVANT toute écriture, sinon sans effet
+    // Un board perd des médias autant qu'il en gagne : sans ça, les pages libérées par un blob
+    // supprimé restent réservées et le fichier ne rétrécit plus jamais. INCREMENTAL plutôt que FULL
+    // pour que la restitution se fasse quand on le demande (après un ménage), pas à chaque commit.
+    db.exec('PRAGMA auto_vacuum = INCREMENTAL');
+  }
   db.exec('PRAGMA journal_mode = WAL');
   db.exec('PRAGMA synchronous = NORMAL');
   db.exec('PRAGMA foreign_keys = ON');
@@ -125,18 +131,38 @@ function makeHandle(db, filePath) {
    * ne doit jamais faire croire aux autres fenêtres que le document a changé.
    * @template T @param {(db: any) => T} fn @returns {{ rev: number, result: T }}
    */
-  const tx = (fn) => {
+  /**
+   * Écriture SANS révision. Une même action utilisateur peut demander des centaines de commits —
+   * les tranches d'un média de plusieurs Go —, et faire croire aux autres fenêtres à des centaines
+   * de changements de document les ferait recharger en boucle. `tx` reste la voie normale.
+   * @template T @param {(db: any) => T} fn @returns {{ result: T }}
+   */
+  const write = (fn) => {
     db.exec('BEGIN IMMEDIATE');
     try {
       const result = fn(db);
-      const next = rev() + 1;
-      writeMeta(db, META_KEYS.rev, next);
       db.exec('COMMIT');
-      return { rev: next, result };
+      return { result };
     } catch (e) {
       try { db.exec('ROLLBACK'); } catch (_) { /* transaction déjà défaite */ }
       throw e;
     }
+  };
+
+  const tx = (fn) => {
+    let next = rev();
+    const { result } = write((d) => {
+      const out = fn(d);
+      next = rev() + 1;
+      writeMeta(d, META_KEYS.rev, next);
+      return out;
+    });
+    return { rev: next, result };
+  };
+
+  /** Rend au système les pages libérées par un ménage (sans effet si auto_vacuum n'est pas posé). */
+  const reclaim = () => {
+    try { db.exec('PRAGMA incremental_vacuum'); } catch (_) { /* base sans auto_vacuum : rien à rendre */ }
   };
 
   /** Replie le journal WAL dans le fichier principal (sinon le `-wal` grossit sans fin). */
@@ -169,6 +195,8 @@ function makeHandle(db, filePath) {
     path: filePath,
     rev,
     tx,
+    write,
+    reclaim,
     checkpoint,
     seal,
     close,

@@ -37,8 +37,9 @@ export interface LibrarySlice {
   libraryNotice: string | null;
 
   loadLibrary: () => Promise<void>;
-  importFiles: (paths: string[]) => Promise<{ ok: boolean; added?: number; error?: string }>;
-  importFolder: (dir: string) => Promise<{ ok: boolean; added?: number; error?: string }>;
+  // `folderId` : dossier d'accueil (drop sur une rangée de dossier). Omis → racine « Importés ».
+  importFiles: (paths: string[], folderId?: string | null) => Promise<{ ok: boolean; added?: number; error?: string }>;
+  importFolder: (dir: string, folderId?: string | null) => Promise<{ ok: boolean; added?: number; error?: string }>;
   moveLibraryItem: (id: string, folderId: string | null) => Promise<void>;
   removeLibraryItem: (id: string) => Promise<void>;
   removeLibraryItems: (ids: string[]) => Promise<void>;
@@ -76,10 +77,10 @@ export const createLibrarySlice: StateCreator<AppState, [], [], LibrarySlice> = 
     }
   },
 
-  importFiles: async (paths) => {
+  importFiles: async (paths, folderId) => {
     if (!nr.library || !paths.length) return { ok: true, added: 0 };
     set({ libraryError: null });
-    const r = await nr.library.addPaths(paths);
+    const r = await nr.library.addPaths(paths, folderId ?? null);
     if (r.ok) {
       await get().loadLibrary();
       set({ derushView: "browser" });
@@ -87,10 +88,10 @@ export const createLibrarySlice: StateCreator<AppState, [], [], LibrarySlice> = 
     return r;
   },
 
-  importFolder: async (dir) => {
+  importFolder: async (dir, folderId) => {
     if (!nr.library || !dir) return { ok: true, added: 0 };
     set({ libraryError: null });
-    const r = await nr.library.addDir(dir);
+    const r = await nr.library.addDir(dir, folderId ?? null);
     if (r.ok) {
       await get().loadLibrary();
       set({ derushView: "browser" });

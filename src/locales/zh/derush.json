@@ -226,8 +226,6 @@
     "shotCount": "{{count}} 个镜头",
     "selSuffix": " · 已选 {{count}}",
     "mergeTip": "合并所选的 {{count}} 个镜头（永久保留）",
-    "sendSelectionToOpen": "把所选发送到已打开的时间线",
-    "sendAllToOpen": "把全部镜头发送到已打开的时间线",
     "hidePlayer": "隐藏播放器",
     "showPlayer": "显示播放器",
     "detectPrompt": "点击“检测”切分镜头。",

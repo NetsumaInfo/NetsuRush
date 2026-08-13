@@ -17,13 +17,15 @@ import { type Segment } from "./cutStudioShared";
 import { useSceneCardMedia } from "./useSceneCardMedia";
 
 function ShotCardImpl({
-  seg, index, clipPath, active = false, selected, play, getProxy, bustProxy, onPlay, onToggle,
-  rangerShots, onAddToTimeline, onRemove, onTrim, badge, dur, labelColor, labelName, rating, tagCount,
+  seg, index, clipPath, active = false, selected, play, getProxy, bustProxy, peekProxy, onPlay, onToggle,
+  rangerShots, onAddToTimeline, onRemove, onTrim, badge, dur, labelColor, labelName, rating, tagCount, alwaysChrome,
 }: {
   seg: Segment; index: number; clipPath: string; selected: boolean; play: boolean;
   active?: boolean;                                           // plan ouvert dans le lecteur de droite
   getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>;
   bustProxy: () => void; onPlay?: () => void; onToggle: () => void;
+  /** Lecture synchrone du cache d'URL de la grille : la carte monte sa <video> sans attendre une promesse. */
+  peekProxy?: () => string | null;
   rangerShots: CollectionShot[];                              // plan(s) à ranger via le bouton « Ranger »
   onAddToTimeline?: () => Promise<{ ok: boolean; error?: string }>; // ajouter à la timeline (destination choisie)
   onRemove?: () => void;                                      // retirer (vue détail d'une collection)
@@ -34,11 +36,14 @@ function ShotCardImpl({
   labelName?: string;                                        // nom du label (lecture d'écran)
   rating?: number;                                           // note 0-5
   tagCount?: number;                                          // nb de tags
+  // Fenêtre épinglée : survol trop instable (petite fenêtre, défilement) → l'habillage reste posé.
+  alwaysChrome?: boolean;
 }) {
   const { t } = useTranslation("derush");
-  const { rootRef, thumb, url, showVideo, videoPaused, interactive, hovered, onVideoError, enter, leave, focusEnter, focusLeave } =
-    useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy });
+  const { rootRef, thumb, url, showVideo, videoPaused, near, interactive, hovered, onVideoError, enter, leave, focusEnter, focusLeave } =
+    useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy, peekProxy });
   const playing = showVideo && !videoPaused;
+  const chrome = alwaysChrome ? near : interactive;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
   async function doAdd(e: { stopPropagation: () => void }) {
@@ -91,11 +96,11 @@ function ShotCardImpl({
       {badge && <span className="absolute left-1.5 top-1.5 rounded nr-chip px-1.5 py-0.5 text-[10px] font-medium tabular-nums">{badge}</span>}
 
       {/* sélection — visible dès qu'elle est cochée, donc jamais différée dans ce cas */}
-      {(interactive || selected) && <SelectToggle selected={selected} onToggle={onToggle} />}
+      {(chrome || selected) && <SelectToggle selected={selected} onToggle={onToggle} />}
 
       {/* barre d'actions (bas-gauche) : ajouter timeline · ranger · retirer */}
-      {interactive && (
-      <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
+      {chrome && (
+      <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" || alwaysChrome ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
         {onAddToTimeline && (
           <Tooltip>
             <TooltipTrigger render={<button type="button" aria-label={t("shared.addToTimeline")} onClick={doAdd}
@@ -140,7 +145,7 @@ function ShotCardImpl({
       </span>
       </ContextMenuTrigger>
       {/* Clic droit : lire / (dé)sélectionner / timeline / retirer. */}
-      {interactive && (
+      {chrome && (
       <ContextMenuContent className="min-w-48">
         {onPlay && <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>}
         <ContextMenuItem onClick={onToggle}>
@@ -177,5 +182,6 @@ export const ShotCard = memo(ShotCardImpl, (a, b) =>
   a.index === b.index && a.clipPath === b.clipPath &&
   a.active === b.active && a.selected === b.selected && a.play === b.play && a.badge === b.badge && a.dur === b.dur &&
   a.labelColor === b.labelColor && a.labelName === b.labelName && a.rating === b.rating && a.tagCount === b.tagCount &&
-  !!a.onPlay === !!b.onPlay && !!a.onAddToTimeline === !!b.onAddToTimeline && !!a.onRemove === !!b.onRemove && !!a.onTrim === !!b.onTrim,
+  !!a.onPlay === !!b.onPlay && !!a.onAddToTimeline === !!b.onAddToTimeline && !!a.onRemove === !!b.onRemove && !!a.onTrim === !!b.onTrim &&
+  !!a.alwaysChrome === !!b.alwaysChrome,
 );

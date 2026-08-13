@@ -180,6 +180,85 @@ function snapProxyHeight(h) {
   return 720;
 }
 
+// Chemin de cache d'un proxy — clé versionnée (codec+encodeur+params+hauteur) : changer de GPU
+// régénère un fichier propre. Fonction PURE : elle ne lit ni n'écrit rien, ce qui permet de résoudre
+// un lot entier de plans sans toucher à la file d'encodage (cf. proxyResolve).
+function proxyOutPath(input, start, end, vc, encoder, preset, audio, height, extension) {
+  const key = crypto.createHash('md5')
+    .update(`${input}|${start}|${end}|${vc}-${encoder}-${preset}-${audio ? 'audio' : 'mute'}-v4-${height}`)
+    .digest('hex');
+  return path.join(getProxyDir(), `${key}.${extension}`);
+}
+
+// Réglages d'encodage effectifs (mêmes règles que proxySegment) : codec, moteur matériel retenu et
+// son repli CPU, préréglage, audio.
+async function proxyProfile(settings, codec) {
+  const configured = settings?.format === 'webm' ? 'vp8' : settings?.format === 'h264' ? 'h264' : 'hevc';
+  const vc = codec === 'h264' || codec === 'hevc' ? codec : configured;
+  const configuredEngine = settings?.engine === 'nvenc' || settings?.engine === 'amf' || settings?.engine === 'qsv' || settings?.engine === 'cpu' ? settings.engine : 'auto';
+  const preset = settings?.preset === 'level2' || settings?.preset === 'level3' ? settings.preset : 'level1';
+  const audio = settings?.audio !== false;
+  // `selectProxyEncoder` n'ouvre jamais `caps` quand le moteur CPU est imposé : sonder le matériel
+  // reviendrait à lancer des encodes ffmpeg de test pour une réponse déjà connue.
+  let caps = { h264Encoder: null, h265Encoder: null, codecEncoderOptions: {} };
+  if (configuredEngine !== 'cpu') {
+    try { caps = await getCapabilities(); } catch (_) { /* sonde indisponible → repli CPU */ }
+  }
+  const hardware = selectProxyEncoder(vc, caps, configuredEngine);
+  const cpu = selectProxyEncoder(vc, { h264Encoder: null, h265Encoder: null }, configuredEngine === 'cpu' ? 'cpu' : 'auto');
+  return { vc, preset, audio, encoders: hardware.encoder === cpu.encoder ? [hardware] : [hardware, cpu] };
+}
+
+// Paliers à essayer pour une hauteur donnée : celui de la grille d'abord, puis les autres du plus
+// proche au plus loin. Un proxy encodé pour une autre densité reste parfaitement lisible (un peu
+// plus doux au pire) ; le refuser laisserait la carte figée sur sa vignette le temps d'un ffmpeg
+// complet — exactement ce qu'on cherche à supprimer. La lecture prime sur le palier exact.
+function tierOrder(wanted) {
+  return [wanted, ...PROXY_TIERS.filter((t) => t !== wanted).sort((a, b) => Math.abs(a - wanted) - Math.abs(b - wanted))];
+}
+
+// Résout en UN appel les proxies DÉJÀ encodés d'une liste de plans. Aucun ffmpeg, aucune écriture,
+// aucun passage par la file : c'est un simple `stat` par candidat.
+//
+// Sans ça, une carte de grille ne peut pas connaître l'URL de son aperçu sans demander « ffmpeg:proxy »
+// au core — même quand le fichier existe déjà. Au défilement, chaque carte qui entre à l'écran émet
+// donc son RPC, passe par proxyGate, réécrit son sidecar, puis se fait annuler quand elle ressort :
+// des centaines d'allers-retours pour des fichiers qui étaient tous là. Résultat visible : la grille
+// reste sur ses vignettes pendant qu'on défile. Le renderer amorce désormais son cache d'URL en un
+// appel à l'ouverture (comme `thumbsResolve` pour les vignettes) et les cartes n'ont plus rien à
+// demander. Une plage sans proxy en cache renvoie `file: null` et repart sur l'encode à la demande.
+async function proxyResolve(items, opts = {}) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return [];
+  const settings = opts.settings || null;
+  const { vc, preset, audio, encoders } = await proxyProfile(settings, opts.codec);
+  const tiers = tierOrder(snapProxyHeight(settings?.height ?? opts.height));
+  // UN SEUL `readdir` pour tout le lot, au lieu d'un `stat` par candidat : un rush de plusieurs
+  // centaines de plans × plusieurs paliers × deux encodeurs, ça ferait des milliers d'appels disque
+  // (chacun traversant l'antivirus sous Windows) pour une réponse déjà contenue dans le nom des
+  // fichiers. Un nom présent = fichier COMPLET : l'encodage écrit un `.tmp` puis renomme.
+  const dir = getProxyDir();
+  let present;
+  try { present = new Set(await fsp.readdir(dir)); } catch (_) { present = new Set(); }
+  return list.map((item) => {
+    const base = { input: item?.input, start: item?.start, end: item?.end, file: null };
+    if (!item || !item.input) return base;
+    for (const height of tiers) {
+      for (const enc of encoders) {
+        const file = proxyOutPath(item.input, item.start, item.end, vc, enc.encoder, preset, audio, height, enc.extension);
+        if (!present.has(path.basename(file))) continue;
+        // Résoudre EST l'usage : c'est la seule trace qu'un proxy sert encore. Sans elle, la grille
+        // lirait des fichiers que le nettoyage automatique (LRU sur `used`, cf. cachePolicy) croirait
+        // abandonnés — les proxies d'un rush qu'on regarde tous les jours finiraient purgés. Le
+        // marquage est tamponné puis écrit en une transaction, donc un lot entier ne coûte rien.
+        cacheIndex().touch(file);
+        return { ...base, file };
+      }
+    }
+    return base;
+  });
+}
+
 // ffmpeg ANNULABLE : spawn (vs execFile) pour pouvoir tuer le process si la carte quitte l'écran.
 // Le child est enregistré par token le temps de l'encode → proxyCancel(token) peut le SIGKILL.
 // Error enrichie d'un encode ffmpeg annulable : `stderr` (sortie ffmpeg) + `cancelled` (kill volontaire).
@@ -279,11 +358,7 @@ async function proxySegment({ input, start, end, priority, height, token, codec,
   if (resolved.vendor === 'cpu') proxyMax = Math.min(proxyMax, PROXY_MAX_LO);
   return proxyGate(async () => {
     try {
-      // clé versionnée (codec+encodeur+params+hauteur) : changer de GPU régénère un fichier propre.
-      const makeOut = (enc) => {
-        const key = crypto.createHash('md5').update(`${input}|${start}|${end}|${vc}-${enc.encoder}-${preset}-${audio ? 'audio' : 'mute'}-v4-${h}`).digest('hex');
-        return path.join(getProxyDir(), `${key}.${enc.extension}`);
-      };
+      const makeOut = (enc) => proxyOutPath(input, start, end, vc, enc.encoder, preset, audio, h, enc.extension);
       let activeEncoder = resolved;
       let out = makeOut(activeEncoder);
       if (!(await fileReady(out))) {
@@ -361,4 +436,4 @@ function proxyForget(files) {
   proxyMetaReady = null;
 }
 
-module.exports = { proxySegment, proxyCancel, proxyCancelMany, proxyCancelAll, proxyActiveCount, proxyFrameSource, cleanProxies, proxyForget };
+module.exports = { proxySegment, proxyResolve, proxyCancel, proxyCancelMany, proxyCancelAll, proxyActiveCount, proxyFrameSource, cleanProxies, proxyForget };

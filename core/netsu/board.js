@@ -82,6 +82,8 @@ async function tokenizeLocal(ctx, item, itemId, filePath, kindHint) {
     itemId,
     item: { ...item, kind: kindHint || item.kind },
     filePath,
+    // Un fichier écrit pour être ENVOYÉ ne transporte pas les chemins de la machine d'origine.
+    keepPath: false,
     ...options,
   });
 
@@ -102,9 +104,24 @@ async function tokenizeLocal(ctx, item, itemId, filePath, kindHint) {
   return { token: `ref:${result.mediaId}`, bytes: result.bytes, bundled: false, referenced: true };
 }
 
+/**
+ * Ce qu'un PARTAGE garde du média d'avant (upscale annulable, séquence dépliée). Ses octets sont
+ * ceux d'un fichier qui vit chez l'expéditeur : les embarquer doublerait le poids du fichier pour
+ * une version que personne ne regarde, et recopier son chemin absolu ne ferait que publier
+ * l'arborescence de l'expéditeur au profit d'un bouton « revenir en arrière » qui ne marcherait
+ * pas. Reste le LIEN d'origine quand il y en a un — lui, le destinataire peut le suivre.
+ */
+function shareablePrevMedia(prev) {
+  const source = prev && typeof prev === 'object' ? String(prev.sourceUrl || '') : '';
+  return /^https?:/i.test(source) ? { sourceUrl: source } : undefined;
+}
+
 /** Un item, prêt à être écrit : tokens posés, champs transitoires retirés. */
 async function tokenizeItem(ctx, raw) {
   const item = stripTransient(raw);
+  const shareablePrev = shareablePrevMedia(item.prevMedia);
+  if (shareablePrev) item.prevMedia = shareablePrev;
+  else delete item.prevMedia;
   const kind = String(item.kind || '');
   if (!MEDIA_KINDS.has(kind)) return { item, bytes: 0, bundled: 0, referenced: 0 };
 
@@ -139,9 +156,10 @@ async function tokenizeItem(ctx, raw) {
  * Écrit une scène de board dans le conteneur.
  * @param {{ handle: any, refStore: any, scene: any, docId?: string,
  *           defaults?: { level?: unknown, quality?: unknown, marginSec?: unknown },
- *           freezeLinks?: boolean }} args
+ *           freezeLinks?: boolean,
+ *           onProgress?: (p: { done: number, total: number, title: string }) => void }} args
  */
-async function writeBoardDoc({ handle, refStore, scene, docId, defaults, freezeLinks }) {
+async function writeBoardDoc({ handle, refStore, scene, docId, defaults, freezeLinks, onProgress }) {
   const ctx = {
     handle,
     refStore,
@@ -166,7 +184,12 @@ async function writeBoardDoc({ handle, refStore, scene, docId, defaults, freezeL
   });
 
   const counts = { items: 0, bundled: 0, referenced: 0, bytes: 0 };
-  for (const raw of scene.items || []) {
+  const all = scene.items || [];
+  // Un partage encode ses clips un par un : sans compte-rendu, l'utilisateur regarde un bouton
+  // « export en cours » pendant plusieurs minutes sans savoir s'il reste dix items ou deux cents.
+  const report = typeof onProgress === 'function' ? onProgress : null;
+  for (const raw of all) {
+    if (report) report({ done: counts.items, total: all.length, title: String(raw && raw.title || '') });
     const { item, bytes, bundled, referenced } = await tokenizeItem(ctx, raw);
     handle.tx((db) => {
       db.prepare('INSERT INTO board_items (doc_id, id, data, z, updated_at) VALUES (?, ?, ?, ?, ?)')
@@ -177,6 +200,7 @@ async function writeBoardDoc({ handle, refStore, scene, docId, defaults, freezeL
     counts.referenced += referenced;
     counts.bytes += bytes;
   }
+  if (report) report({ done: counts.items, total: all.length, title: '' });
   return { docId: ctx.docId, counts };
 }
 
@@ -232,8 +256,28 @@ function resolveToken(ctx, token, kindHint) {
   return { path: value, missing: null }; // lien distant, id YouTube, data: — rien à résoudre
 }
 
-/** @param {any} ctx @param {any} item */
-function detokenizeItem(ctx, item) {
+/**
+ * Rend au média d'avant (upscale annulable) un chemin lisible. Il est rangé comme les autres dans
+ * un projet, donc écrit en token : sans cette étape le bouton « revenir en arrière » pointerait sur
+ * la chaîne `sidecar:…` au lieu d'un fichier. Introuvable et sans lien d'origine, il disparaît —
+ * mieux vaut pas de bouton qu'un bouton qui casse l'item.
+ * @param {any} ctx @param {any} item
+ */
+function restorePrevMedia(ctx, item) {
+  const prev = item && item.prevMedia;
+  if (!prev || typeof prev !== 'object') return item;
+  const ref = String(prev.ref || '');
+  if (!ref) return item; // partage : il ne reste que le lien d'origine, rien à résoudre
+  const resolved = resolveToken(ctx, ref, String(prev.kind || item.kind || ''));
+  if (resolved.path) return { ...item, prevMedia: { ...prev, ref: resolved.path, src: '' } };
+  if (prev.sourceUrl) return { ...item, prevMedia: { sourceUrl: prev.sourceUrl } };
+  const { prevMedia: _gone, ...rest } = item;
+  return rest;
+}
+
+/** @param {any} ctx @param {any} raw */
+function detokenizeItem(ctx, raw) {
+  const item = restorePrevMedia(ctx, raw);
   const kind = String(item.kind || '');
   if (kind === 'sequence') {
     const tokens = Array.isArray(item.frames) ? item.frames : [];

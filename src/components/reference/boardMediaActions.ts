@@ -134,6 +134,49 @@ export async function recoverMedia(id: string): Promise<boolean> {
   }
 }
 
+// Items dont le média local est introuvable et qu'un dossier peut rendre d'un coup. Les séquences
+// en sont exclues : leur placeholder résume des dizaines de frames (« 12/30 images manquantes »),
+// il ne désigne aucun fichier — elles gardent la relocalisation par item, qui rechoisit les images.
+export const relocatableItems = () =>
+  useBoard.getState().items.filter((it) => !!it.missing && it.kind !== "sequence");
+
+// Relocalisation EN LOT : un board reçu en « lien » ou « aperçu » arrive avec autant de
+// placeholders que de rushs référencés. Les reprendre un par un ne dit rien de plus que « ils sont
+// tous dans ce dossier » — alors on demande le dossier, une fois.
+export async function relocateMissingMedia(): Promise<number> {
+  const api = nr.reference;
+  const targets = relocatableItems();
+  const st = useBoard.getState();
+  if (!api?.relocateFrom || !targets.length) return 0;
+  const dir = await nr.chooseDir();
+  if (!dir) return 0;
+
+  st.setNotice({ kind: "ok", sticky: true, text: tr("notice.relocating", { count: targets.length }) });
+  const res = await api.relocateFrom(
+    dir,
+    targets.map((it) => ({ id: it.id, name: it.missing?.name || "", size: it.missing?.size })),
+  );
+  if (!res?.ok) {
+    st.setNotice({ kind: "error", text: tr("notice.failedWith", { error: res?.error || tr("notice.unknown") }) });
+    return 0;
+  }
+  for (const hit of res.found) {
+    const item = useBoard.getState().items.find((i) => i.id === hit.id);
+    if (!item) continue;
+    useBoard.getState().patchItem(item.id, {
+      ref: hit.path,
+      src: displaySrc(item.kind, hit.path),
+      missing: undefined,
+    });
+  }
+  useBoard.getState().setNotice(
+    res.found.length
+      ? { kind: "ok", text: tr("notice.relocated", { count: res.found.length, total: targets.length }) }
+      : { kind: "error", text: tr("notice.relocatedNone") },
+  );
+  return res.found.length;
+}
+
 export async function recoverAllOnlineMedia() {
   const items = recoverableOnlineItems(useBoard.getState().items);
   const result = await runSequentialRecovery(

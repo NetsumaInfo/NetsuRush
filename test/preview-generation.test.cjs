@@ -3,10 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { selectProxyEncoder, proxyVideoArgs, proxyContainerArgs } = require('../core/proxyEncoder');
 const { normalizeThumbSettings, thumbKey, thumbKeyFromSuffix, thumbArgs } = require('../core/thumbs');
 const { THUMB_PRESETS, thumbKeySuffix, thumbKeyVariants, resolveThumbSettings } = require('../core/thumbPresets');
-const { proxyFrameSource } = require('../core/proxy');
+const { proxyFrameSource, proxyResolve } = require('../core/proxy');
 const { createCacheAdmin } = require('../core/cacheAdmin');
 const { getProxyDir, getThumbDir, setCacheDir } = require('../core/config');
 
@@ -331,4 +332,84 @@ test('binds the NetsuLab player lifecycle to the selected source', () => {
   assert.match(source, /<UpscalePlayer\s+key=\{activeKey\}/);
   assert.match(source, /if \(active\) return;[\s\S]*nativePlayer\.stop\(\)[\s\S]*nativePlayer\.hide\(\)/);
   assert.match(player, /if \(!playSignal \|\| !visible\) return;[\s\S]*if \(alive\) return nativePlayer\.play\(\)/);
+});
+
+// `proxyResolve` doit chercher EXACTEMENT là où `proxySegment` écrit : une clé qui dérive ne
+// renvoie rien, sans erreur, et chaque carte de grille repart demander son proxy au core au
+// défilement — le cache d'URL du renderer ne se remplit jamais.
+function expectedProxyPath({ input, start, end, codec, encoder, preset, audio, height, extension }) {
+  const key = crypto.createHash('md5')
+    .update(`${input}|${start}|${end}|${codec}-${encoder}-${preset}-${audio ? 'audio' : 'mute'}-v4-${height}`)
+    .digest('hex');
+  return path.join(getProxyDir(), `${key}.${extension}`);
+}
+
+test('resolves already encoded proxies in one pass and reports the missing ones', async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nr-proxy-resolve-'));
+  t.after(() => {
+    setCacheDir(null);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  setCacheDir(root);
+
+  const input = path.join(root, 'rush.mkv');
+  // Moteur CPU imposé : le chemin ne dépend plus du GPU de la machine qui exécute le test (et la
+  // sonde matérielle n'est pas lancée du tout).
+  const settings = { engine: 'cpu', format: 'h264', preset: 'level1', audio: true };
+  const cached = expectedProxyPath({
+    input, start: 4, end: 6.5, codec: 'h264', encoder: 'libx264',
+    preset: 'level1', audio: true, height: 480, extension: 'mp4',
+  });
+  fs.writeFileSync(cached, 'proxy');
+
+  const rows = await proxyResolve(
+    [{ input, start: 4, end: 6.5 }, { input, start: 6.5, end: 9 }],
+    { height: 470, settings },   // 470 → palier 480, celui de l'encodage
+  );
+
+  assert.equal(rows.length, 2);
+  assert.deepEqual(rows[0], { input, start: 4, end: 6.5, file: cached });
+  assert.equal(rows[1].file, null);
+});
+
+test('prefers the grid height tier but still plays a proxy encoded for another one', async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nr-proxy-tier-'));
+  t.after(() => {
+    setCacheDir(null);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  setCacheDir(root);
+
+  const input = path.join(root, 'rush.mkv');
+  const settings = { engine: 'cpu', format: 'h264', preset: 'level1', audio: true };
+  const at = (height) => expectedProxyPath({
+    input, start: 0, end: 2, codec: 'h264', encoder: 'libx264',
+    preset: 'level1', audio: true, height, extension: 'mp4',
+  });
+  fs.writeFileSync(at(360), 'proxy');
+
+  // Seul le 360 existe : une grille en 520 le lit quand meme (jouer prime sur le palier exact).
+  const [reused] = await proxyResolve([{ input, start: 0, end: 2 }], { height: 500, settings });
+  assert.equal(reused.file, at(360));
+
+  // Des que le palier demande existe, c'est lui qui gagne.
+  fs.writeFileSync(at(520), 'proxy');
+  const [exact] = await proxyResolve([{ input, start: 0, end: 2 }], { height: 500, settings });
+  assert.equal(exact.file, at(520));
+});
+
+test('resolves an empty list without touching the disk', async () => {
+  assert.deepEqual(await proxyResolve([], {}), []);
+  assert.deepEqual(await proxyResolve(null, {}), []);
+});
+
+// Le nettoyage automatique des proxies est un LRU sur `used` (cf. cachePolicy), et `used` ne bouge
+// que par `cacheIndex().touch`. Depuis que la grille lit les proxies en cache SANS repasser par
+// `proxySegment`, la résolution est le seul endroit qui prouve qu'un fichier sert encore : sans ce
+// marquage, les proxies d'un rush regardé tous les jours seraient purgés comme abandonnés.
+// L'index vit dans DATA_DIR (pas dans le dossier de cache de test), d'où l'assertion sur le source.
+test('resolving a cached proxy counts as using it', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'core', 'proxy.js'), 'utf8');
+  const resolveBody = src.slice(src.indexOf('async function proxyResolve'));
+  assert.match(resolveBody.slice(0, resolveBody.indexOf('\n}\n')), /cacheIndex\(\)\.touch\(file\)/);
 });

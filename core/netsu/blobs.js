@@ -17,6 +17,7 @@
 // fichier de projet.
 
 const fs = require('node:fs');
+const fsp = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
@@ -209,16 +210,112 @@ function removeBlob(db, sha) {
   db.prepare('DELETE FROM blobs WHERE sha = ?').run(sha);
 }
 
+/**
+ * Retire les octets que plus personne ne réclame et rend les pages libérées. Sans ce ménage, un
+ * fichier ne fait que grossir : ouvrir un board reçu puis l'enregistrer recopie ses médias dans le
+ * dossier compagnon, et les blobs d'origine resteraient là, invisibles et payés au poids.
+ * @param {any} handle @param {Set<string>} keep empreintes encore référencées
+ * @returns {{ removed: number, bytes: number }}
+ */
+function sweepBlobs(handle, keep) {
+  const rows = handle.db.prepare('SELECT sha, size FROM blobs').all();
+  const orphans = rows.filter((row) => !keep.has(String(row.sha)));
+  if (!orphans.length) return { removed: 0, bytes: 0 };
+  let bytes = 0;
+  handle.write((db) => {
+    for (const row of orphans) {
+      removeBlob(db, String(row.sha));
+      bytes += Number(row.size) || 0;
+    }
+  });
+  handle.reclaim();
+  return { removed: orphans.length, bytes };
+}
+
+// --- Variantes ASYNCHRONES ---------------------------------------------------------------------
+// Le core est mono-thread : hacher puis recopier 4 Go en lecture synchrone, c'est geler l'app
+// entière (aperçus, serveur de médias, autres modules) le temps du transfert. Les versions ci-
+// dessous font les mêmes octets, mais rendent la main entre deux tranches. Les versions synchrones
+// restent pour les appelants qui ne peuvent pas attendre (rebase du Carnet).
+
+/** @param {string} filePath @returns {Promise<{ sha: string, size: number }>} */
+async function hashFileAsync(filePath) {
+  const stat = await fsp.stat(filePath);
+  const hash = crypto.createHash('sha256');
+  const buf = Buffer.allocUnsafe(CHUNK_BYTES);
+  const file = await fsp.open(filePath, 'r');
+  try {
+    for (let offset = 0; offset < stat.size; ) {
+      const { bytesRead } = await file.read(buf, 0, CHUNK_BYTES, offset);
+      if (bytesRead <= 0) break;
+      hash.update(buf.subarray(0, bytesRead));
+      offset += bytesRead;
+    }
+  } finally {
+    await file.close();
+  }
+  return { sha: hash.digest('hex'), size: stat.size };
+}
+
+/**
+ * Range un fichier du disque sans bloquer le core. Une transaction PAR TRANCHE (via `write`, donc
+ * sans révision) : le fichier reste cohérent à tout instant, et un échec en cours de route retire
+ * le blob à moitié écrit plutôt que de le laisser passer pour valide.
+ * @param {any} handle @param {string} filePath @param {string} [ext]
+ * @returns {Promise<{ sha: string, size: number }>}
+ */
+async function putFileAsync(handle, filePath, ext) {
+  const extension = String(ext || path.extname(filePath).slice(1) || 'bin').toLowerCase();
+  const { sha, size } = await hashFileAsync(filePath);
+  if (hasBlob(handle.db, sha)) return { sha, size };
+
+  if (size <= CHUNK_BYTES) {
+    const buf = await fsp.readFile(filePath);
+    handle.write((db) => {
+      db.prepare('INSERT INTO blobs (sha, ext, size, chunked, data) VALUES (?, ?, ?, 0, ?)')
+        .run(sha, extension, size, buf);
+    });
+    return { sha, size };
+  }
+
+  handle.write((db) => {
+    db.prepare('INSERT INTO blobs (sha, ext, size, chunked, data) VALUES (?, ?, ?, 1, NULL)')
+      .run(sha, extension, size);
+  });
+  const buf = Buffer.allocUnsafe(CHUNK_BYTES);
+  const file = await fsp.open(filePath, 'r');
+  try {
+    for (let offset = 0, idx = 0; offset < size; idx += 1) {
+      const { bytesRead } = await file.read(buf, 0, CHUNK_BYTES, offset);
+      if (bytesRead <= 0) break;
+      const slice = buf.subarray(0, bytesRead);
+      handle.write((db) => {
+        db.prepare('INSERT INTO blob_chunks (sha, idx, data) VALUES (?, ?, ?)').run(sha, idx, slice);
+      });
+      offset += bytesRead;
+    }
+  } catch (e) {
+    try { handle.write((db) => removeBlob(db, sha)); } catch (_) { /* base déjà en vrac : rien à sauver */ }
+    throw e;
+  } finally {
+    await file.close();
+  }
+  return { sha, size };
+}
+
 module.exports = {
   CHUNK_BYTES,
   sha256,
   putBuffer,
   putFile,
+  putFileAsync,
   hashFile,
+  hashFileAsync,
   getBuffer,
   readRange,
   extractTo,
   removeBlob,
+  sweepBlobs,
   blobInfo,
   hasBlob,
 };

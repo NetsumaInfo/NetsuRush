@@ -11,7 +11,9 @@ const source = fs.readFileSync(
 test('Save As uses the chosen netsu filename as the project name everywhere', () => {
   const saveAs = source.slice(source.indexOf('const saveProjectAs'), source.indexOf('// Ouvre un projet'));
   assert.match(saveAs, /const projectName = fileLabel\(dest\)/);
-  assert.match(saveAs, /scene: \{ name: projectName,/);
+  // La scène part par `savable`, qui porte aussi les médias retenus par l'historique : ce qui
+  // compte ici est que le nom envoyé soit celui du FICHIER choisi, pas celui du board d'avant.
+  assert.match(saveAs, /scene: \{ \.\.\.savable\(projectName\) \}/);
   assert.match(saveAs, /sceneName: fileLabel\(res\.path \?\? dest\)/);
 });
 

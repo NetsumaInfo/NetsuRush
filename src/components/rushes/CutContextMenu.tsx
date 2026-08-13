@@ -14,8 +14,8 @@ import type { DetectModel } from "@/lib/bridge";
 import { modelUsesPreset } from "@/lib/detection";
 
 // Toutes les actions du studio de découpe regroupées en un clic droit (sur toute la colonne grille).
-// En mode compact (fenêtre épinglée) c'est la SEULE surface d'action — la barre de détection et les
-// boutons secondaires de la barre d'outils sont masqués pour ne garder que les vignettes.
+// En mode compact (fenêtre épinglée) il porte aussi les réglages de détection, dont l'entête est
+// masqué faute de place ; la barre d'outils, elle, reste entière.
 export interface CutMenuProps {
   children: ReactNode;
   segmentsCount: number;
@@ -62,7 +62,10 @@ export function CutContextMenu(p: CutMenuProps) {
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger render={<div className="flex min-w-0 flex-1 flex-col pr-1" />}>
+      {/* min-h-0 : en colonne (vue étroite / fenêtre épinglée) la hauteur auto de cette colonne vaut
+          celle de TOUTES les vignettes → elle débordait, la page entière défilait et la barre
+          d'outils partait vers le haut. Bornée, seule la grille interne défile. */}
+      <ContextMenuTrigger render={<div className="flex min-h-0 min-w-0 flex-1 flex-col pr-1" />}>
         {p.children}
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-52">

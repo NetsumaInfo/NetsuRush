@@ -81,10 +81,18 @@ export function PreviewVideo({
       ref={ref}
       src={url}
       aria-label={label}
-      autoPlay
+      // Une carte montée EN AVANCE (bande de préchauffe) arrive ici `paused` : sans ce garde,
+      // l'attribut la ferait démarrer dès qu'elle peut, et l'effet ci-dessous la remettrait en pause
+      // juste après — du décodage pur perte, pour chaque carte préchauffée. `preload="auto"` charge
+      // et prépare le décodeur sans jouer, ce qui est exactement le but. Le démarrage réel passe de
+      // toute façon par le `play()` explicite (WebView2 ne suit pas toujours l'attribut).
+      autoPlay={!paused}
       loop
       muted
       playsInline
+      // Chaque élément média s'enregistre sinon auprès du contrôleur de lecture distante ; sur une
+      // grille qui en monte des dizaines, autant ne pas payer ce que l'aperçu n'utilise jamais.
+      disableRemotePlayback
       // `preload="none"` retardait le fetch du proxy jusqu'à l'appel de play() : un aller-retour HTTP
       // de plus AVANT la première image, à chaque carte qui démarre. L'élément n'est monté que
       // lorsqu'on a DÉCIDÉ de lire (cf. showVideo) — il n'y a donc rien à économiser à ne pas charger.

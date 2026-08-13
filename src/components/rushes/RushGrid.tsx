@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Home, FileVideo, FolderInput, Scissors, Search, ListChecks, Undo2 } from "lucide-react";
+import { Home, FileVideo, FolderInput, FolderPlus, Scissors, Search, ListChecks, Undo2 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { RefreshIcon } from "@/components/ui/animated-icons";
 import { useApp } from "@/store";
@@ -14,6 +14,9 @@ import { SORT_KEYS, SORT_LABEL_KEYS, sortClips, loadSortKey, saveSortKey, type S
 import { hostOfflineHint } from "@/lib/host";
 import { comboFromEvent, isTyping } from "@/lib/shortcuts";
 import { MediaTree } from "./MediaTree";
+import { FolderNameDialog } from "@/components/collections/FolderNameDialog";
+import { LIB_ROOT } from "./libraryShared";
+import { hasOsFiles, importDroppedFiles } from "./libraryDrop";
 import { SortSelect, FoldersToggle } from "./BrowserControls";
 import { TimelineDrop } from "./TimelineDrop";
 import { BatchDetectBar, BatchDetectProgress } from "./BatchDetect";
@@ -35,6 +38,8 @@ export function RushGrid() {
   const undoCombo = useApp((s) => s.cutKeys.undo);
   const libraryItems = useApp((s) => s.libraryItems);
   const removeLibraryItems = useApp((s) => s.removeLibraryItems);
+  const saveLibraryFolder = useApp((s) => s.saveLibraryFolder);
+  const setLibraryFocus = useApp((s) => s.setLibraryFocus);
 
   // Annulation d'un retrait au clavier. Même combo que l'annulation du studio (« annuler », partout le
   // même sens) : les deux vues ne sont jamais montées en même temps, donc aucun conflit.
@@ -57,6 +62,8 @@ export function RushGrid() {
   const [batchPreset, setBatchPreset] = useState(() => useApp.getState().cutPreset);
   const [sortKey, setSortKey] = useState<SortKey>(loadSortKey);
   const [folders, setFolders] = useState(true);   // affichage par dossiers Media Pool ↔ liste à plat
+  const [newFolder, setNewFolder] = useState(false);
+  const [over, setOver] = useState(false);        // survol d'un dépôt de fichiers de l'Explorateur
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -98,8 +105,39 @@ export function RushGrid() {
     if (dir) void importFolder(dir);
   }
 
+  // Nouveau dossier de bibliothèque, à la racine « Importés » : il est créé VIDE et déplié dans la
+  // foulée, prêt à recevoir un dépôt ou un import. Les sous-dossiers, eux, se créent depuis la rangée
+  // du parent (MediaTree), là où la hiérarchie est visible.
+  async function createFolder(name: string) {
+    setNewFolder(false);
+    await saveLibraryFolder({ name, parentId: null });
+    setLibraryFocus(`${LIB_ROOT}/${name}`);
+  }
+
+  // Dépôt depuis l'Explorateur n'importe où sur la page : les rushs rejoignent la racine. Une rangée
+  // de dossier intercepte le sien avant nous (stopPropagation), donc viser un dossier range dedans.
+  function onDropFiles(e: React.DragEvent) {
+    if (!hasOsFiles(e.dataTransfer)) return;   // drag interne d'une carte
+    e.preventDefault();
+    setOver(false);
+    void importDroppedFiles(Array.from(e.dataTransfer.files), null);
+  }
+
   return (
-    <div className="flex h-full flex-col">
+    <div
+      className="relative flex h-full flex-col"
+      onDragOver={(e) => {
+        if (!hasOsFiles(e.dataTransfer)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        setOver(true);
+      }}
+      onDragLeave={(e) => { if (e.target === e.currentTarget) setOver(false); }}
+      // Capture : une rangée de dossier arrête la propagation du drop (elle range chez elle) — sans
+      // ce passage en amont, le liseré de la page resterait allumé après un dépôt sur un dossier.
+      onDropCapture={() => setOver(false)}
+      onDrop={onDropFiles}
+    >
       <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={backHome} aria-label={t("rushGrid.home")} />}>
@@ -126,6 +164,12 @@ export function RushGrid() {
             <TooltipContent>{selectMode ? t("rushGrid.exitSelect") : t("rushGrid.selectBatch")}</TooltipContent>
           </Tooltip>
         )}
+        <Tooltip>
+          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => setNewFolder(true)} aria-label={t("library.newFolder")} />}>
+            <FolderPlus className="h-4 w-4" />
+          </TooltipTrigger>
+          <TooltipContent>{t("library.newFolder")}</TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={pickFiles} aria-label={t("rushGrid.import")} />}>
             <FileVideo className="h-4 w-4" />
@@ -225,6 +269,16 @@ export function RushGrid() {
 
       <TimelineDrop />
       </div>
+      {/* Cible de dépôt : un liseré sur toute la page, jamais un voile — le voile masquerait les
+          rangées de dossiers, qui sont justement les cibles fines du même geste. */}
+      {over && <div className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-inset ring-primary" />}
+      <FolderNameDialog
+        open={newFolder}
+        initial=""
+        title={t("library.newFolder")}
+        onSubmit={(name) => void createFolder(name)}
+        onCancel={() => setNewFolder(false)}
+      />
     </div>
   );
 }

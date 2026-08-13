@@ -226,8 +226,6 @@
     "shotCount": "{{count}} ショット",
     "selSuffix": " · {{count}} 選択",
     "mergeTip": "選択した {{count}} ショットを結合（元に戻せません）",
-    "sendSelectionToOpen": "選択を開いているタイムラインへ送信",
-    "sendAllToOpen": "すべてのショットを開いているタイムラインへ送信",
     "hidePlayer": "プレイヤーを隠す",
     "showPlayer": "プレイヤーを表示",
     "detectPrompt": "「検出」でショットをカット。",

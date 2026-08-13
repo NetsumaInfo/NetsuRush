@@ -15,6 +15,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { nr } from "@/lib/bridge";
+import { logError } from "@/lib/appLog";
 import { useBoard } from "./useReferenceBoard";
 import { useBoardIngest } from "./useBoardIngest";
 import { useBoardCulling } from "./useBoardCulling";
@@ -52,7 +54,13 @@ export interface BoardHandle {
   zoomBy: (factor: number) => void;
 }
 
-export const ReferenceBoard = forwardRef<BoardHandle>(function ReferenceBoard(_props, ref) {
+export interface ReferenceBoardProps {
+  // Ouvre un projet `.netsu` lâché sur la board. Absent = persistance indisponible : le fichier est
+  // alors refusé avec un message, jamais avalé en silence comme un média.
+  onOpenProjectFile?: (filePath: string) => void;
+}
+
+export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(function ReferenceBoard({ onOpenProjectFile }, ref) {
   const { t } = useTranslation("reference");
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useBoard((s) => s.items);
@@ -418,6 +426,19 @@ export const ReferenceBoard = forwardRef<BoardHandle>(function ReferenceBoard(_p
     [ingest.addFiles, ingest.addVideoUrl, ingest.addUrl, ingest.addPath, ingest.addCut, ingest.addCuts, ingest.addSequence, ingest.addPaste, addItem, centerPoint, fit, setView, zoomAt, t],
   );
 
+  // Le chemin disque n'est pas dans l'objet `File` : il se résout par le pont WebView2. Sans chemin
+  // (pont indisponible) ou sans action d'ouverture, on le DIT — un projet lâché ne retombe jamais en
+  // silence, exactement comme sur l'accueil du board.
+  const openDroppedProject = useCallback(
+    async (file: File) => {
+      const [filePath] = await nr.pathsForFiles([file]);
+      if (filePath && onOpenProjectFile) { onOpenProjectFile(filePath); return; }
+      logError("board:canvas", `dépôt .netsu sans ouverture — ${file.name} (chemin: ${filePath || "non résolu"})`);
+      useBoard.getState().setNotice({ kind: "error", text: t("notice.dropProjectFailed", { name: file.name }) });
+    },
+    [onOpenProjectFile, t],
+  );
+
   return (
     <div
       ref={containerRef}
@@ -443,7 +464,12 @@ export const ReferenceBoard = forwardRef<BoardHandle>(function ReferenceBoard(_p
           } catch { /* payload illisible */ }
           return;
         }
-        if (e.dataTransfer.files.length) ingest.addFiles(e.dataTransfer.files);
+        // Un `.netsu` lâché est un PROJET, pas un média : il s'ouvre. Sans ce test il partait en
+        // ingestion, où `kindFromPath` ne le reconnaît pas — le fichier disparaissait sans un mot.
+        const dropped = Array.from(e.dataTransfer.files);
+        const projectFile = dropped.find((f) => f.name.toLowerCase().endsWith(".netsu"));
+        if (projectFile) { void openDroppedProject(projectFile); return; }
+        if (dropped.length) ingest.addFiles(dropped);
         else void ingest.addPaste(e.dataTransfer);
       }}
       className={cn(

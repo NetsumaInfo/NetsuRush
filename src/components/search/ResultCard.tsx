@@ -27,7 +27,7 @@ function tc(sec: number): string {
 // Carte de résultat (qualité grille derush) : vignette du cache PARTAGÉ avec le découpage → aperçu
 // proxy HEVC au survol ou « Tout lire ». Sélection + ajout à la timeline ouverte (append).
 function ResultCardImpl({
-  hit, index, selected, play, onToggle, onDownload, getProxy, bustProxy,
+  hit, index, selected, play, onToggle, onDownload, getProxy, bustProxy, peekProxy,
   onFindSimilar, onAddRef, refActive, confirmChar, onConfirmChar, onSendBoard,
 }: {
   hit: SearchHit;
@@ -38,6 +38,8 @@ function ResultCardImpl({
   onDownload: () => void;       // ajoute ce plan à la timeline ouverte (mode append, frame-accurate)
   getProxy: (height?: number, token?: number, priority?: "high" | "low") => Promise<string | null>;
   bustProxy: () => void;
+  /** Lecture synchrone du cache d'URL de la vue : la carte monte sa <video> sans attendre une promesse. */
+  peekProxy?: () => string | null;
   // Reçoivent la vignette AFFICHÉE : le bac de références montre exactement l'image cliquée, et
   // la carte est le seul endroit qui la connaisse (le backend ne renvoie plus d'image).
   onFindSimilar?: (thumb: string | null) => void;
@@ -54,7 +56,7 @@ function ResultCardImpl({
   const shots = [{ path: hit.file_path, name: basename(hit.file_path), in: hit.start_sec, out: hit.end_sec, inFrame: hit.start_frame, outFrame: hit.end_frame, srcFrames: hit.src_frames, fps: hit.fps }];
 
   const { rootRef, thumb, thumbErr, hovered, setHovered, url, showVideo, videoPaused, near, resetUrl } =
-    useResultPreview({ filePath: hit.file_path, thumbAt, index, play, getProxy, bustProxy });
+    useResultPreview({ filePath: hit.file_path, thumbAt, index, play, getProxy, bustProxy, peekProxy });
   const playing = showVideo && !videoPaused;
 
   function onVideoError() { bustProxy(); resetUrl(); }

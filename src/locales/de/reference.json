@@ -366,7 +366,8 @@
     "openScene": "Szene öffnen…",
     "backHome": "Zurück zum Start",
     "alwaysOnTop": "Immer im Vordergrund",
-    "openProject": "Projekt öffnen…"
+    "openProject": "Projekt öffnen…",
+    "relocateMissing": "Fehlende Medien neu verknüpfen ({{count}})"
   },
   "linkDialog": {
     "title": "Online-Video hinzufügen",
@@ -381,7 +382,8 @@
     "freezeHint": "Sonst verschwinden sie vom Board, sobald ihre Seite offline geht.",
     "weighing": "Größe wird geschätzt…",
     "export": "Exportieren",
-    "exporting": "Export…"
+    "exporting": "Export…",
+    "progress": "Teilen… {{done}}/{{total}}"
   },
   "upscale": {
     "title": "Medium hochskalieren",
@@ -444,7 +446,8 @@
     "downloading": "Wird geladen…",
     "mediaFallback": "Medium",
     "interactiveActive": "Interaktiv — daneben klicken zum Bewegen",
-    "interactiveHint": "Doppelklick zum Interagieren"
+    "interactiveHint": "Doppelklick zum Interagieren",
+    "relocateAll": "Alle neu verknüpfen ({{count}})"
   },
   "sequence": {
     "loop": "Schleife",
@@ -540,6 +543,9 @@
     "projectOpenedLegacy": "„{{name}}“ geöffnet (altes Format – als Projekt speichern, um es zu bearbeiten)",
     "openFailedWith": "Öffnen fehlgeschlagen: {{error}}",
     "dropProjectFailed": "„{{name}}\" konnte nicht geöffnet werden – nutze „Projekt öffnen\".",
-    "noProjectFile": "Dieses Board ist mit keiner Datei verknüpft"
+    "noProjectFile": "Dieses Board ist mit keiner Datei verknüpft",
+    "relocating": "Medien im Ordner werden gesucht… ({{count}})",
+    "relocated": "{{count}}/{{total}} Medien neu verknüpft",
+    "relocatedNone": "Keine Medien in diesem Ordner erkannt"
   }
 }

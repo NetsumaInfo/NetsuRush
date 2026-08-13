@@ -226,8 +226,6 @@
     "shotCount": "{{count}} Shots",
     "selSuffix": " · {{count}} ausgew.",
     "mergeTip": "Die {{count}} gewählten Shots zusammenführen (dauerhaft)",
-    "sendSelectionToOpen": "Auswahl an die offene Timeline senden",
-    "sendAllToOpen": "Alle Shots an die offene Timeline senden",
     "hidePlayer": "Player ausblenden",
     "showPlayer": "Player einblenden",
     "detectPrompt": "„Erkennen“ schneidet die Shots.",

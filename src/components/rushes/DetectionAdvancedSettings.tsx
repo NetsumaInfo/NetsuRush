@@ -71,7 +71,7 @@ function NumberSetting({ label, hint, value, min, max, step = 1, onChange }: {
         max={max}
         step={step}
         onChange={(event) => setClampedValue(event.currentTarget.value)}
-        className="h-8 text-right text-xs"
+        className="h-8 text-right text-xs [&::-webkit-inner-spin-button]:ml-2"
       />
     </label>
   );

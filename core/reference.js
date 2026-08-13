@@ -134,6 +134,10 @@ function uid() {
   return crypto.randomBytes(6).toString('hex');
 }
 
+// Âge en dessous duquel un asset n'est jamais ramassé. Deux semaines couvrent largement la vie
+// d'un fichier posé sur un board pas encore enregistré, sans laisser des Go d'upscales oubliés.
+const ASSET_GRACE_MS = 14 * 24 * 60 * 60 * 1000;
+
 // --- Backend SQLite (node:sqlite, expérimental mais sans compilation native) -------------------
 // IMPORTANT : on prépare un StatementSync NEUF à chaque appel (jamais mémorisé au niveau du store).
 // Un statement conservé peut être finalisé par le GC entre deux appels → « statement has been
@@ -351,10 +355,62 @@ function createReferenceStore(dataDir) {
     }
   }
 
+  // Tous les localisateurs d'une scène : média affiché, frames d'une séquence, média d'avant un
+  // upscale, fichier gardé derrière un embed. Manquer une de ces cases ferait effacer un fichier
+  // encore utilisé — la liste est la seule chose qui protège les octets du ménage ci-dessous.
+  function sceneRefs(scene, into) {
+    for (const item of (scene && scene.items) || []) {
+      for (const value of [item.ref, ...(Array.isArray(item.frames) ? item.frames : [])]) {
+        if (value) into.add(path.resolve(String(value)).toLowerCase());
+      }
+      for (const nested of [item.prevMedia, item.localMedia]) {
+        if (nested && nested.ref) into.add(path.resolve(String(nested.ref)).toLowerCase());
+      }
+    }
+    return into;
+  }
+
+  /**
+   * Vide le magasin d'assets de ce que plus aucune scène ne réclame. Ce dossier reçoit tout ce que
+   * l'app fabrique pour un board — image collée, média téléchargé, frames extraites, SORTIE
+   * D'UPSCALE (des centaines de Mo par plan) — et, jusqu'ici, rien n'en sortait jamais.
+   *
+   * Deux garde-fous, parce qu'un asset peut être utilisé sans qu'aucune scène ne le dise (board
+   * ouvert depuis un fichier .netsu, dont les items pointent en mémoire sur le magasin) :
+   *   1. le DÉLAI DE GRÂCE — un fichier récent n'est jamais touché ;
+   *   2. l'appel se fait au démarrage du core, avant qu'un board ait pu être ouvert.
+   * @param {{ graceMs?: number }} [opts]
+   * @returns {{ ok: boolean, removed: number, bytes: number, kept: number, error?: string }}
+   */
+  function sweepAssets(opts) {
+    const graceMs = Number((opts || {}).graceMs);
+    const grace = Number.isFinite(graceMs) && graceMs >= 0 ? graceMs : ASSET_GRACE_MS;
+    try {
+      const used = new Set();
+      for (const meta of listScenes()) sceneRefs(loadScene(meta.id), used);
+      const now = Date.now();
+      let removed = 0;
+      let bytes = 0;
+      let kept = 0;
+      for (const name of fs.readdirSync(assetsDir)) {
+        const file = path.join(assetsDir, name);
+        let stat;
+        try { stat = fs.statSync(file); } catch (_) { continue; }
+        if (!stat.isFile()) continue;
+        if (used.has(file.toLowerCase()) || now - stat.mtimeMs < grace) { kept += 1; continue; }
+        try { fs.rmSync(file, { force: true }); removed += 1; bytes += stat.size; }
+        catch (_) { kept += 1; /* fichier verrouillé : il repassera au prochain démarrage */ }
+      }
+      return { ok: true, removed, bytes, kept };
+    } catch (e) {
+      return { ok: false, removed: 0, bytes: 0, kept: 0, error: String(e) };
+    }
+  }
+
   return {
     kind, listScenes, loadScene, saveScene, deleteScene, saveAsset, fetchAsset, resolveMedia,
     storagePath: () => dir,
-    assetsDir, assetPath, isAppAsset, removeAsset,
+    assetsDir, assetPath, isAppAsset, removeAsset, sweepAssets,
   };
 }
 

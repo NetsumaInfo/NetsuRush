@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft, Scissors, FolderInput, CheckSquare, Square,
-  Combine, Film, Play, Clapperboard, Minus, Plus, LayoutGrid, GripVertical, Image as ImageIcon, Zap,
+  Combine, Film, Play, Minus, Plus, LayoutGrid, GripVertical, Image as ImageIcon, Zap,
   PanelRightClose, PanelRightOpen,
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
@@ -48,8 +48,9 @@ export function CutStudio() {
   );
   const clip = selected!;
   const isLocal = clip.source === "local";
-  // Fenêtre épinglée → mode compact : vignettes seules (lecteur masqué, barre d'outils allégée) pour
-  // tenir dans un coin de l'écran. L'import se fait via le bouton télécharger de chaque vignette.
+  // Fenêtre épinglée → mode compact : entête de détection et lecteur masqués pour tenir dans un coin
+  // de l'écran. La barre d'outils reste ENTIÈRE (sélection, aperçus, lecture, export) : c'est la
+  // seule surface cliquable qui reste, la reléguer au clic droit rendait l'épinglé inutilisable.
   const compact = pinned;
 
   const det = useShotDetection(clip.path);
@@ -57,7 +58,7 @@ export function CutStudio() {
     info, duration, segments, srcFrames, detecting, cacheLoading, progress,
     active, activeUrl,
     err, setErr, preset, setPreset, model, setModel,
-    proxyCache, getProxy, playScene, detect,
+    proxyCache, getProxy, warmProxies, playScene, detect,
     hasEdits, clearEdits, undoEdit, redoEdit,
   } = det;
 
@@ -128,6 +129,15 @@ export function CutStudio() {
     ro.observe(el);
     return () => ro.disconnect();
   }, [cols, narrow, panelW, resizingRef]);
+
+  // Résout d'un coup les proxies DÉJÀ encodés de tous les plans → chaque carte connaît l'URL de son
+  // aperçu avant même d'entrer à l'écran, donc le défilement ne déclenche plus un RPC par carte.
+  // Relancé sur un changement de densité : le palier de hauteur entre dans la clé de cache, une
+  // cellule plus grande vise donc d'autres fichiers.
+  useEffect(() => {
+    if (!segments.length || !cell) return;
+    warmProxies(segments, Math.round(((cell * 9) / 16) * (window.devicePixelRatio || 1)));
+  }, [segments, cell, warmProxies]);
 
   const selectedList = () => segments.filter((s) => sel.has(s.id));
   // Les aperçus peuvent cibler tout le rush, mais les actions d'export exigent une sélection.
@@ -360,15 +370,6 @@ export function CutStudio() {
                 </Tooltip>
               )}
               <div className="flex-1" />
-              {connected && !isLocal && (
-                <Tooltip>
-                  <TooltipTrigger render={<Button size="sm" onClick={appendSelection} disabled={!!busy || selCount === 0} className="h-8 w-8 p-0 text-xs" />}>
-                    <Clapperboard className="size-3.5" />
-                  </TooltipTrigger>
-                  <TooltipContent>{selCount ? t("cutStudio.sendSelectionToOpen") : t("cutStudio.sendAllToOpen")}</TooltipContent>
-                </Tooltip>
-              )}
-              {!compact && (<>
               <Tooltip>
                 <TooltipTrigger render={
                   <Button size="sm" variant="outline" onClick={generateThumbs}
@@ -405,7 +406,6 @@ export function CutStudio() {
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.autoplayPreviews")}</TooltipContent>
               </Tooltip>
-              </>)}
               <Tooltip>
                 <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
                   <LayoutGrid className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -415,9 +415,9 @@ export function CutStudio() {
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.thumbSize")}</TooltipContent>
               </Tooltip>
-              {!compact && (<>
-              {/* Duo d'export compact : le panneau de droite est refermable, l'export ne doit pas
-                  disparaître avec lui. Même contrôle que Collections et Timeline Live. */}
+              {/* Trio d'export compact (profil + insertion + réglages) : le panneau de droite est
+                  refermable et absent en épinglé, l'export ne doit pas disparaître avec lui. Même
+                  contrôle que Collections et Timeline Live. */}
               <ExportButton
                 clips={exportInputs}
                 baseName={exportBaseName}
@@ -425,13 +425,14 @@ export function CutStudio() {
                 disabled={selCount === 0 || !!busy}
                 compact
               />
+              {!compact && (
                 <Tooltip>
                   <TooltipTrigger render={<Button size="sm" variant="outline" onClick={() => setPlayerOpen((v) => !v)} className="h-8 text-xs text-muted-foreground" />}>
                     {playerOpen ? <PanelRightClose className="size-3.5" /> : <PanelRightOpen className="size-3.5" />}
                   </TooltipTrigger>
                   <TooltipContent>{playerOpen ? t("cutStudio.hidePlayer") : t("cutStudio.showPlayer")}</TooltipContent>
                 </Tooltip>
-              </>)}
+              )}
             </div>
           )}
           {/* Zone défilante : seule la grille bouge. Retrait ASYMÉTRIQUE assumé — la gouttière gauche
@@ -443,10 +444,11 @@ export function CutStudio() {
                 {segments.map((s, i) => (
                   <SceneCard key={s.id} seg={s} index={i} clipPath={clip.path} clipName={clip.name} srcFrames={srcFrames}
                     active={active?.id === s.id} selected={sel.has(s.id)} play={gridPlay}
-                    getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => proxyCache.delete(s.id)} onPlay={() => playScene(s)}
+                    getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => proxyCache.delete(s.id)} peekProxy={() => proxyCache.get(s.id) ?? null} onPlay={() => playScene(s)}
                     onToggle={(mods) => toggleSel(s.id, mods)}
                     onAddToTimeline={showCardBtn ? () => runCardAction(s) : undefined}
                     addLabel={cardProfile.name}
+                    alwaysChrome={compact}
                     pos={fmt(s.in)} dur={fmt(s.out - s.in)} />
                 ))}
               </div>

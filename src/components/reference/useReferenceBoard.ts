@@ -48,6 +48,13 @@ export interface BoardState {
   filePath: string | null;
   fileReadonly: boolean;       // archive .netsu v1 : lisible, pas enregistrable en place
   items: BoardItem[];
+  // Frame VIVANTE des séquences en lecture, hors du document. Elle vivait dans `items`, donc chaque
+  // frame de chaque séquence recréait le tableau ENTIER : sur un board de plusieurs centaines de
+  // médias, dix séquences à 12 images/s suffisaient à re-rendre tout le board 120 fois par seconde
+  // (culling refiltré, barre d'outils, panneau, tous réveillés) — le coût dominant d'un gros board.
+  // Ici, avancer d'une frame n'écrit qu'une entrée : seuls la séquence concernée et sa barre de
+  // lecture se re-rendent. La position DOCUMENT reste `item.frame`, réécrite à l'arrêt de la lecture.
+  seqFrames: Record<string, number>;
   view: BoardView;
   background: BoardBg;
   selectedId: string | null;   // item primaire (inspecteur)
@@ -82,6 +89,7 @@ export interface BoardState {
   removeSelected: () => void;
   duplicateItem: (id: string) => void;
   setSeqFrame: (id: string, frame: number) => void;
+  commitSeqFrame: (id: string, frame: number) => void;
   groupSequence: (ids: string[]) => void;
   addSequenceFrom: (sourceId: string | null, frames: string[], dims?: { w: number; h: number }, fps?: number) => void;
   selectAll: () => void;
@@ -200,6 +208,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   editingId: null,
   focusReq: null,
   croppingId: null,
+  seqFrames: {},
   frozen: false,
   navigating: false,
   navigationHolds: 0,
@@ -289,8 +298,20 @@ export const useBoard = create<BoardState>((set, get) => ({
   // Frame courante d'une séquence (lecteur). NE marque PAS `dirty` : l'avance auto à 12 fps
   // déclencherait l'autosave en boucle et persisterait un index mi-animation. La frame réelle est
   // capturée au prochain enregistrement (action utilisateur).
+  // Avance de lecture : n'écrit QUE la frame vivante (cf. `seqFrames`). Ni `items`, ni `dirty`.
   setSeqFrame: (id, frame) =>
-    set((s) => ({ items: s.items.map((it) => (it.id === id ? { ...it, frame } : it)) })),
+    set((s) => (s.seqFrames[id] === frame ? s : { seqFrames: { ...s.seqFrames, [id]: frame } })),
+
+  // Fixe la frame vivante DANS le document (fin de lecture, saut manuel) puis oublie l'entrée vivante
+  // — sans quoi elle masquerait la valeur du document au rendu suivant.
+  commitSeqFrame: (id, frame) =>
+    set((s) => {
+      const { [id]: _live, ...rest } = s.seqFrames;
+      return {
+        seqFrames: rest,
+        items: s.items.map((it) => (it.id === id ? { ...it, frame } : it)),
+      };
+    }),
 
   // Fusionne ≥2 items image sélectionnés en une séquence (frames = leurs refs, ordre gauche→droite).
   // La séquence prend la géométrie du 1er item ; les sources sont retirées.
@@ -550,6 +571,7 @@ export const useBoard = create<BoardState>((set, get) => ({
       filePath: scene.filePath ?? null,
       fileReadonly: !!scene.fileReadonly,
       items: scene.items,
+      seqFrames: {},   // positions vivantes de la scène précédente : jamais reportées sur la nouvelle
       view: scene.view ?? INITIAL_VIEW,
       selectedId: null,
       selectedIds: [],

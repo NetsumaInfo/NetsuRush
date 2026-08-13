@@ -45,6 +45,7 @@ export function CollectionDetail({ id }: { id: string }) {
   const { closeCollection, connected, loadCollections, collectionTags, loadCollectionTags, archiveCollection } = useApp(
     useShallow((s) => ({ closeCollection: s.closeCollection, connected: hostConnected(s), loadCollections: s.loadCollections, collectionTags: s.collectionTags, loadCollectionTags: s.loadCollectionTags, archiveCollection: s.archiveCollection })),
   );
+  const pinned = useApp((s) => s.pinned);
   const [coll, setColl] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState<Set<string>>(new Set());
@@ -121,6 +122,18 @@ export function CollectionDetail({ id }: { id: string }) {
     } finally { setLoading(false); }
   }
   useEffect(() => { void reload(); void loadCollectionTags(); setSel(new Set()); setFilter(EMPTY_FILTER); /* eslint-disable-next-line */ }, [id]);
+
+  // Proxies déjà encodés résolus d'un coup : les cartes connaissent l'URL de leur aperçu avant
+  // d'arriver à l'écran, donc le défilement n'émet plus un RPC par carte. Refait sur changement de
+  // densité (le palier de hauteur entre dans la clé de cache).
+  useEffect(() => {
+    const shots = coll?.shots ?? [];
+    if (!shots.length || !grid.cell) return;
+    grid.warmProxies(
+      shots.map((s) => ({ path: s.path, in: s.in, out: s.out })),
+      Math.round(((grid.cell * 9) / 16) * (window.devicePixelRatio || 1)),
+    );
+  }, [coll, grid.cell, grid.warmProxies]);
 
   // Id de segment STABLE par plan (clé + état de lecture) → les cartes ne remontent pas.
   const segIds = useRef(new Map<string, number>());
@@ -434,11 +447,13 @@ export function CollectionDetail({ id }: { id: string }) {
                   play={grid.gridPlay}
                   getProxy={(h, tok, prio) => grid.getProxy(shot.path, seg.in, seg.out, prio ?? "high", h, tok)}
                   bustProxy={() => grid.bust(shot.path, seg.in, seg.out)}
+                  peekProxy={() => grid.peekProxy(shot.path, seg.in, seg.out)}
                   onPlay={() => openInPlayer(shot)}
                   onToggle={() => toggle(shot.id)}
                   onAddToTimeline={connected ? () => addOne(shot) : undefined}
                   onRemove={() => removeShot(shot.id)}
                   rangerShots={[shot]}
+                  alwaysChrome={pinned}
                   dur={fmt(shot.out - shot.in)}
                   labelColor={labelColor(shot.label)}
                   labelName={nameKey ? tr(nameKey) : undefined}

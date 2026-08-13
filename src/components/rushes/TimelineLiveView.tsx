@@ -48,6 +48,7 @@ export function TimelineLiveView() {
   const { t } = useTranslation("derush");
   const connected = useApp((s) => !!s.status?.connected);
   const activeHost = useApp((s) => s.activeHost);
+  const pinned = useApp((s) => s.pinned);
   // Projet courant : passé au core comme indice → un switch invalide son cache de vignettes (sinon il
   // resservait les timelines de l'ancien projet) et déclenche un rescan.
   const project = useApp((s) => s.status?.project ?? null);
@@ -80,6 +81,16 @@ export function TimelineLiveView() {
   const sel = useMemo(() => new Set(selArr), [selArr]);
   const [cuts, setCuts] = useState<TimelineCut[]>([]);
   const cutsRef = useRef<TimelineCut[]>([]);
+  // Proxies déjà encodés résolus en UN appel dès que les plans (ou la densité) changent : chaque
+  // carte trouve l'URL de son aperçu dans le cache au lieu de la réclamer au core en entrant à
+  // l'écran — c'est ce qui laissait la grille sur ses vignettes pendant un défilement.
+  useEffect(() => {
+    if (!cuts.length || !grid.cell) return;
+    grid.warmProxies(
+      cuts.map((c) => ({ path: c.path, in: c.in, out: c.out })),
+      Math.round(((grid.cell * 9) / 16) * (window.devicePixelRatio || 1)),
+    );
+  }, [cuts, grid.cell, grid.warmProxies]);
   const [loading, setLoading] = useState(false);
   const [activeCutId, setActiveCutId] = useState<string | null>(null);
   const [activeUrl, setActiveUrl] = useState<string | null>(null);
@@ -629,10 +640,12 @@ export function TimelineLiveView() {
                 play={grid.gridPlay}
                 getProxy={(h, tok, prio) => grid.getProxy(cut.path, seg.in, seg.out, prio ?? "high", h, tok)}
                 bustProxy={() => grid.bust(cut.path, seg.in, seg.out)}
+                peekProxy={() => grid.peekProxy(cut.path, seg.in, seg.out)}
                 onPlay={() => void playCut(cut)}
                 onToggle={() => toggle(cut.id)}
                 onAddToTimeline={() => addOne(cut)}
                 rangerShots={[toShot(cut)]}
+                alwaysChrome={pinned}
                 badge={`#${i + 1}`}
                 dur={fmt(cut.out - cut.in)}
               />

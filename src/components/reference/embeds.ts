@@ -16,6 +16,18 @@ export function youtubeId(input: string): string | null {
   return m ? m[1] : null;
 }
 
+// A `/shorts/` link is the one form that states the video is vertical before anything is loaded, so
+// it decides the size the item is POSED at. It is only a hint: a Short shared as a plain `watch?v=`
+// link looks landscape here, and the true ratio is re-measured on the relayed stream (BoardItem).
+export function isYoutubeShorts(input: string): boolean {
+  return /youtube\.com\/shorts\//i.test(input.trim());
+}
+
+// Native size assumed for a freshly posed YouTube item — 9:16 for a Short, 16:9 otherwise.
+export function youtubeNatSize(input: string): { w: number; h: number } {
+  return isYoutubeShorts(input) ? { w: 1080, h: 1920 } : { w: 1920, h: 1080 };
+}
+
 // Giphy : la page (giphy.com/gifs/NOM-ID, /clips/, /stickers/, /embed|media/ID) bloque le scraping
 // HTML (403 Cloudflare) → on construit directement l'URL du GIF sur le CDN média i.giphy.com, qui
 // se télécharge sans souci. Renvoie l'URL .gif directe, ou null si ce n'est pas un lien giphy connu.

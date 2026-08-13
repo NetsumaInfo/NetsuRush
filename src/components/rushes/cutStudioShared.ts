@@ -92,17 +92,23 @@ export function gridContainerStyle(actualCols: number, cell: number): CSSPropert
   return style as CSSProperties;
 }
 
-// Plafond de lecture auto = miniatures VISIBLES + une rangée tampon (préchargée), écrêté par
+// AVANCE DE LECTURE, en pixels : une carte prend son créneau AVANT d'entrer dans le viewport, donc
+// son aperçu tourne déjà quand elle apparaît. Source UNIQUE — `useSceneCardMedia` en fait sa bande
+// d'observation et `autoplayCeiling` compte les rangées correspondantes. Les deux ont divergé une
+// fois : le plafond ignorait des rangées qui réclamaient pourtant un créneau, et les cartes du bas
+// n'en obtenaient jamais.
+export const PLAY_LEAD_PX = 400;
+
+// Plafond de lecture auto = miniatures VISIBLES + les rangées d'avance, écrêté par
 // `MAX_PLAYING_HARD` dans setMaxPlaying.
 export function autoplayCeiling(width: number, height: number, cols: number, narrow = false): number {
   const { cell, actualCols } = gridMetrics(width, cols, narrow);
   if (!cell || !height) return 0;
   const rowH = (cell * 9) / 16 + GRID_GAP;
   const rows = Math.max(1, Math.ceil(height / rowH));
-  // + les rangées de l'AVANCE DE LECTURE (au-dessus ET au-dessous du viewport, cf. PLAY_LEAD_PX
-  // dans useSceneCardMedia) : sans elles, les cartes anticipées prendraient les créneaux des
-  // cartes visibles au lieu de s'ajouter.
-  const lead = Math.ceil(320 / rowH);
+  // + les rangées de l'AVANCE DE LECTURE (au-dessus ET au-dessous du viewport) : sans elles, les
+  // cartes anticipées prendraient les créneaux des cartes visibles au lieu de s'ajouter.
+  const lead = Math.ceil(PLAY_LEAD_PX / rowH);
   return actualCols * (rows + 2 * lead);
 }
 
@@ -115,34 +121,58 @@ export function autoplayCeiling(width: number, height: number, cols: number, nar
 // Décodage = NVDEC matériel (≠ limite stricte de sessions NVENC à l'encode) → plusieurs décodes
 // 720p courts en parallèle passent.
 let maxPlaying = 24;
-// PLAFOND DUR, indépendant du nombre de miniatures qui tiennent à l'écran. Le plafond calculé peut
-// dépasser 80 en densité forte sur grand écran ; Chromium cesse de créer des lecteurs média au-delà
-// d'une limite par frame (et bien avant ça le décodage sature : un décodeur + une piste audio par
-// aperçu). Aux densités usuelles le calcul reste dessous — ça n'écrête que les cas extrêmes, et
-// alors les cartes du haut jouent (file triée par index), les autres gardent leur vignette.
-const MAX_PLAYING_HARD = 32;
-const GRANT_MS = 30;
+// PLAFOND DUR, indépendant du nombre de miniatures qui tiennent à l'écran. La seule limite réelle
+// est celle de Chromium (~75 lecteurs média par frame) : au-delà, une <video> n'est plus créée du
+// tout, sans erreur. On borne donc l'ENSEMBLE des éléments montés, lecture + pause retenue
+// (cf. previewVideoPool.MAX_PAUSED), pas le seul nombre de cartes visibles.
+//
+// À 32, une grille dense sur grand écran dépassait le plafond AVANT même d'avoir couvert le
+// viewport : les cartes du bas restaient sur leur vignette en permanence, ce qui se lit comme
+// « tout ne se met pas en lecture ». Le transport n'est plus le facteur limitant (les aperçus
+// passent par le protocole asset de la coquille, pas par les 6 connexions HTTP par origine du
+// webview), donc le plafond peut enfin suivre ce que la grille affiche.
+export const MAX_PLAYING_HARD = 52;
+// L'échelonnement existe pour ne pas créer trente éléments média dans la même frame. Il ne doit pas
+// devenir la limite : à un créneau toutes les 30 ms, remplir un écran après un arrêt de défilement
+// prenait plus d'une seconde — on voyait la grille « rattraper » rangée par rangée.
+//
+// Rythme sur la FRAME (requestAnimationFrame) et non sur un minuteur : un `setInterval` fait son
+// travail entre deux frames, donc en concurrence directe avec le défilement, et son premier tick
+// arrivait jusqu'à un intervalle complet après la demande — un retard pur, sur la carte même qu'on
+// regarde. En rAF, le premier créneau tombe à la frame suivante et les montages s'alignent sur la
+// peinture.
+const GRANT_BURST = 4;
 let playingActive = 0;
 type PlaySlot = { order: number; granted: boolean; grant: () => void };
 let slotQueue: PlaySlot[] = [];
-let slotTimer: ReturnType<typeof setInterval> | null = null;
+let slotFrame: number | null = null;
 // Recalcule le plafond (page visible) ; relance le pump car de nouveaux créneaux peuvent s'ouvrir.
 export function setMaxPlaying(n: number) {
   maxPlaying = Math.min(MAX_PLAYING_HARD, Math.max(1, Math.floor(n)));
   pumpSlots();
 }
 function pumpSlots() {
-  if (slotTimer) return;
-  slotTimer = setInterval(() => {
-    if (!slotQueue.length) { if (slotTimer) { clearInterval(slotTimer); slotTimer = null; } return; }
-    if (playingActive >= maxPlaying) return;
+  if (slotFrame != null || typeof requestAnimationFrame !== "function") return;
+  slotFrame = requestAnimationFrame(() => {
+    slotFrame = null;
+    if (!slotQueue.length || playingActive >= maxPlaying) return;
     slotQueue.sort((a, b) => a.order - b.order);
-    const s = slotQueue.shift();
-    if (!s) return;
-    playingActive++;
-    s.granted = true;
-    s.grant();
-  }, GRANT_MS);
+    let granted = 0;
+    while (granted < GRANT_BURST && playingActive < maxPlaying) {
+      const s = slotQueue.shift();
+      if (!s) break;
+      playingActive++;
+      granted++;
+      s.granted = true;
+      s.grant();
+    }
+    // On ne redemande une frame QUE si ce tour a servi quelque chose et qu'il reste du monde. Plafond
+    // atteint = on s'arrête net : redemander une frame ferait tourner un tri par frame, pour rien,
+    // aussi longtemps que la grille reste ouverte — du travail sur le thread principal qui ne peut que
+    // gêner le défilement qu'il est censé servir. Les deux événements capables de rouvrir un créneau
+    // (libération d'un slot, changement de plafond) rappellent `pumpSlots` eux-mêmes.
+    if (granted && slotQueue.length) pumpSlots();
+  });
 }
 export function acquirePlaySlot(order: number, grant: () => void): () => void {
   const slot: PlaySlot = { order, granted: false, grant };
@@ -157,7 +187,7 @@ export function acquirePlaySlot(order: number, grant: () => void): () => void {
 // Réinitialise l'état (module-level) : sinon, fermer puis rouvrir un rush déjà découpé hérite
 // d'un compteur faussé (playingActive bloqué) → « Lecture auto » qui ne lance plus les aperçus.
 export function resetPlaySlots() {
-  if (slotTimer) { clearInterval(slotTimer); slotTimer = null; }
+  if (slotFrame != null) { cancelAnimationFrame(slotFrame); slotFrame = null; }
   slotQueue = [];
   playingActive = 0;
 }

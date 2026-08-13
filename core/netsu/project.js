@@ -27,6 +27,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { t } = require('../i18n');
 const sidecar = require('./sidecar');
+const blobs = require('./blobs');
 const { describeSource, recordMedia } = require('./embed');
 const { readBoardDoc, stripTransient, isRemoteRef, DOC_TYPE, MEDIA_KINDS } = require('./board');
 
@@ -64,8 +65,8 @@ function statOf(absPath) {
  * par core/netsu/sidecar.js à partir de `place` ; l'index de session lui évite de recopier ou de
  * déplacer un contenu déjà en place.
  */
-function adoptInto(ctx, absPath, place) {
-  const adopted = sidecar.adopt(ctx.netsuPath, absPath, { place, index: ctx.index });
+async function adoptInto(ctx, absPath, place) {
+  const adopted = await sidecar.adoptAsync(ctx.netsuPath, absPath, { place, index: ctx.index });
   if (!adopted.ok || !adopted.token || !adopted.relative) return null;
   ctx.keep.add(adopted.relative);
   return adopted;
@@ -93,7 +94,7 @@ async function tokenizeProjectRef(ctx, rawRef, kindHint, place) {
     // le dossier compagnon n'ait des sous-dossiers, sans recopier un seul octet (le fichier est
     // DÉPLACÉ). Introuvable, le token est gardé tel quel plutôt que remplacé par un item mort.
     const abs = sidecar.resolveSidecar(ctx.netsuPath, ref);
-    const adopted = abs && statOf(abs) ? adoptInto(ctx, abs, spot) : null;
+    const adopted = abs && statOf(abs) ? await adoptInto(ctx, abs, spot) : null;
     if (adopted) return { token: adopted.token, adopted: true };
     ctx.keep.add(ref.slice(sidecar.TOKEN.length).split('/').join(path.sep));
     return {
@@ -113,7 +114,7 @@ async function tokenizeProjectRef(ctx, rawRef, kindHint, place) {
   // média récupéré d'un lien), ou média du dossier compagnon d'un AUTRE projet (« Enregistrer
   // sous… ») : sa place est auprès de CE fichier, pas dans un magasin global ni chez le voisin.
   if (sidecar.isInAnySidecar(abs) || ctx.refStore.isAppAsset(abs)) {
-    const adopted = adoptInto(ctx, abs, spot);
+    const adopted = await adoptInto(ctx, abs, spot);
     if (adopted) return { token: adopted.token, adopted: true };
     return { token: '', missing: { name: path.basename(abs), size: stat.size, kind: kindHint } };
   }
@@ -148,9 +149,31 @@ function sequenceGroup(ctx, item) {
   return name;
 }
 
+/**
+ * Le média d'AVANT (upscale annulable) est un média du projet à part entière : il est rangé et
+ * gardé comme les autres. Sans ça, son fichier n'entrait dans aucun `keep` et le ménage de fin
+ * d'enregistrement l'effaçait — le bouton « revenir en arrière » restait affiché en pointant sur
+ * un fichier que l'app venait elle-même de supprimer.
+ * @param {any} ctx @param {any} item
+ */
+async function tokenizeProjectPrev(ctx, item) {
+  const prev = item.prevMedia;
+  if (!prev || typeof prev !== 'object') return;
+  const ref = String(prev.ref || '');
+  if (!ref) return;
+  const out = await tokenizeProjectRef(ctx, ref, String(prev.kind || item.kind || ''), {
+    title: `${item.title || 'media'}-original`,
+  });
+  // Le `src` d'affichage est recalculé au chargement : le garder figerait une URL de service morte.
+  if (out.token) item.prevMedia = { ...prev, ref: out.token, src: '' };
+  else if (prev.sourceUrl) item.prevMedia = { sourceUrl: prev.sourceUrl };
+  else delete item.prevMedia;
+}
+
 /** Un item de la scène, prêt à être écrit : tokens posés, champs transitoires retirés. */
 async function tokenizeProjectItem(ctx, raw) {
   const item = stripTransient(raw);
+  await tokenizeProjectPrev(ctx, item);
   const kind = String(item.kind || '');
   if (!MEDIA_KINDS.has(kind)) return { item, unresolved: false };
 
@@ -197,6 +220,26 @@ async function tokenizeProjectItem(ctx, raw) {
   return { item, unresolved: !!out.missing };
 }
 
+/**
+ * Met à l'abri du ménage les médias que le board garde sous le coude : historique d'annulation,
+ * fichier mémorisé derrière un embed. Ce sont des chemins ou des tokens déjà rangés — on ne les
+ * adopte pas (rien à recopier), on empêche seulement de les effacer.
+ * @param {any} ctx @param {unknown} retain
+ */
+function retainHistory(ctx, retain) {
+  if (!Array.isArray(retain)) return;
+  const dir = sidecar.sidecarDirFor(ctx.netsuPath);
+  for (const entry of retain) {
+    const value = String(entry || '');
+    if (!value) continue;
+    const abs = sidecar.isSidecarToken(value)
+      ? sidecar.resolveSidecar(ctx.netsuPath, value)
+      : path.resolve(value);
+    if (!abs || !sidecar.isInSidecar(ctx.netsuPath, abs)) continue; // hors du dossier : rien à protéger
+    ctx.keep.add(path.relative(dir, abs));
+  }
+}
+
 /** Le document board du conteneur, créé au premier enregistrement. */
 function ensureDoc(session, title, view) {
   const existing = session.handle.db
@@ -218,12 +261,15 @@ function ensureDoc(session, title, view) {
  * @returns {{ changed: number, removed: number }}
  */
 function commitItems(session, docId, prepared) {
-  const stored = new Map(
+  // Le cache de session porte le dernier JSON écrit : tant qu'il est chaud, un enregistrement ne
+  // relit rien. Il n'est reconstruit qu'après une ouverture (ou un changement de document).
+  const stored = session.itemJson.get(docId) || new Map(
     session.handle.db
       .prepare('SELECT id, data FROM board_items WHERE doc_id = ?')
       .all(docId)
       .map((row) => [String(row.id), String(row.data)]),
   );
+  session.itemJson.set(docId, stored);
 
   const now = Date.now();
   let changed = 0;
@@ -237,6 +283,7 @@ function commitItems(session, docId, prepared) {
          ON CONFLICT(doc_id, id) DO UPDATE SET data = excluded.data, z = excluded.z, updated_at = excluded.updated_at`,
       ).run(docId, id, json, z, now);
     });
+    stored.set(id, json);
     changed += 1;
   }
 
@@ -248,25 +295,46 @@ function commitItems(session, docId, prepared) {
         db.prepare('DELETE FROM item_media WHERE doc_id = ? AND item_id = ?').run(docId, id);
       }
     });
+    for (const id of gone) stored.delete(id);
   }
   return { changed, removed: gone.length };
 }
 
-/** Retire les médias que plus aucun item ne réclame — sinon un projet ne fait que grossir. */
-function sweepUnused(session, docId, keep, keepMediaIds) {
+/**
+ * Retire ce que plus aucun item ne réclame — sinon un projet ne fait que grossir.
+ *
+ * Trois magasins à tenir, et un seul arbitre : les tokens des items.
+ *   `media`   → la fiche d'un rush resté chez l'utilisateur ;
+ *   `blobs`   → des octets DANS le fichier. Un projet n'en fabrique pas : il n'en hérite que d'un
+ *               partage ouvert puis enregistré, dont les médias viennent d'être recopiés dans le
+ *               dossier compagnon. Les garder ferait payer deux fois le même plan, pour toujours ;
+ *   compagnon → les fichiers rangés à côté (cf. core/netsu/sidecar.js).
+ * @returns {{ removed: number, bytes: number, blobs: number, blobBytes: number }}
+ */
+function sweepUnused(session, docId, keep, keepMediaIds, keepShas) {
   const rows = session.handle.db.prepare('SELECT id FROM media').all();
   const orphans = rows.map((r) => String(r.id)).filter((id) => !keepMediaIds.has(id));
   if (orphans.length) {
     session.handle.tx((db) => {
-      for (const id of orphans) {
-        // Un média encore embarqué par un partage précédent garde sa ligne : ses octets sont dans
-        // le fichier, l'oublier les rendrait inatteignables sans les libérer.
-        const used = db.prepare('SELECT 1 FROM item_media WHERE doc_id = ? AND media_id = ? LIMIT 1').get(docId, id);
-        if (!used) db.prepare('DELETE FROM media WHERE id = ?').run(id);
+      for (const id of orphans) db.prepare('DELETE FROM media WHERE id = ?').run(id);
+    });
+  }
+  // Les lignes d'embarquement d'un partage précédent décrivent des octets qu'on s'apprête à rendre :
+  // les laisser derrière ferait pointer le document sur des blobs supprimés.
+  const stale = session.handle.db
+    .prepare('SELECT item_id, poster_sha, clip_sha FROM item_media WHERE doc_id = ?')
+    .all(docId)
+    .filter((row) => ![row.poster_sha, row.clip_sha].filter(Boolean).every((sha) => keepShas.has(String(sha))));
+  if (stale.length) {
+    session.handle.tx((db) => {
+      for (const row of stale) {
+        db.prepare('DELETE FROM item_media WHERE doc_id = ? AND item_id = ?').run(docId, String(row.item_id));
       }
     });
   }
-  return sidecar.sweep(session.path, keep);
+  const freedBlobs = blobs.sweepBlobs(session.handle, keepShas);
+  const swept = sidecar.sweep(session.path, keep);
+  return { ...swept, blobs: freedBlobs.removed, blobBytes: freedBlobs.bytes };
 }
 
 /**
@@ -291,6 +359,7 @@ async function saveBoardProject({ session, refStore, scene }) {
   };
   const prepared = [];
   const keepMediaIds = new Set();
+  const keepShas = new Set();
   let missing = 0;
   let unresolved = 0;
   let adopted = 0;
@@ -301,9 +370,11 @@ async function saveBoardProject({ session, refStore, scene }) {
     if (preparedItem.unresolved) unresolved += 1;
     if (item.missing) missing += 1;
     const refs = item.kind === 'sequence' ? item.frames || [] : [item.ref];
+    if (item.prevMedia && item.prevMedia.ref) refs.push(item.prevMedia.ref);
     for (const token of refs) {
       const value = String(token || '');
       if (value.startsWith('ref:')) keepMediaIds.add(value.slice(4));
+      else if (value.startsWith('asset:')) keepShas.add(value.slice(6));
       else if (sidecar.isSidecarToken(value)) adopted += 1;
     }
     prepared.push({
@@ -313,20 +384,30 @@ async function saveBoardProject({ session, refStore, scene }) {
     });
   }
 
+  // Ce que le board peut encore réclamer sans que le fichier le sache : les médias retenus par
+  // l'historique d'annulation. Supprimer une image lance un autosave une demi-seconde plus tard ;
+  // sans cette liste, le ménage emporte ses octets et le Ctrl+Z d'après rend un item vide.
+  retainHistory(ctx, scene.retain);
+
   const docId = ensureDoc(session, scene.name, scene.view);
   const { changed, removed } = commitItems(session, docId, prepared);
   // Un enregistrement qui vide le document d'un coup est presque toujours un board pas encore
   // chargé, pas une suppression voulue : les lignes partent (elles se réécrivent), mais les OCTETS
   // du dossier compagnon restent. Le ménage se fera au prochain enregistrement non vide.
   const unsafeSweep = unresolved > 0 || (prepared.length === 0 && removed > 0);
-  const swept = unsafeSweep ? { removed: 0, bytes: 0 } : sweepUnused(session, docId, ctx.keep, keepMediaIds);
+  const swept = unsafeSweep
+    ? { removed: 0, bytes: 0, blobs: 0, blobBytes: 0 }
+    : sweepUnused(session, docId, ctx.keep, keepMediaIds, keepShas);
 
   return {
     ok: true,
     path: session.path,
     rev: session.handle.rev(),
     docId,
-    counts: { items: prepared.length, changed, removed, adopted, missing, unresolved, freed: swept.bytes },
+    counts: {
+      items: prepared.length, changed, removed, adopted, missing, unresolved,
+      freed: swept.bytes + swept.blobBytes, freedBlobs: swept.blobs,
+    },
     bytes: fs.existsSync(session.path) ? fs.statSync(session.path).size : 0,
   };
 }

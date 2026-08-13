@@ -64,6 +64,7 @@ function applyEdits(segs: Segment[], edits: CutEdits): Segment[] {
 }
 
 const EMPTY_EDITS: CutEdits = { merges: [], removed: [] };
+const WARM_PROXY_DEBOUNCE_MS = 150;
 
 export interface ShotDetection {
   info: MediaInfo | null;
@@ -86,6 +87,8 @@ export interface ShotDetection {
   setModel: React.Dispatch<React.SetStateAction<DetectModel>>;
   proxyCache: Map<number, string>;
   getProxy: (s: Segment, priority?: "high" | "low", height?: number, token?: number) => Promise<string | null>;
+  /** Résout en UN appel les proxies déjà en cache et remplit `proxyCache` (aucun encode). */
+  warmProxies: (list: Segment[], height?: number) => void;
   playScene: (s: Segment) => Promise<void>;
   detect: () => Promise<void>;
   // Édits persistés du rush POUR LE MODÈLE COURANT : fusions (union de plans) et retraits.
@@ -152,6 +155,8 @@ export function useShotDetection(clipPath: string): ShotDetection {
   const pastRef = useRef<CutEdits[]>([]);
   const futureRef = useRef<CutEdits[]>([]);
   const warmPollsRef = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
+  const warmProxyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current); }, []);
   useEffect(() => () => {
     warmPollsRef.current.forEach((timer) => clearInterval(timer));
     warmPollsRef.current.clear();
@@ -172,7 +177,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
     const request = nr.proxy({ input: clipPath, start: s.in, end: s.out, priority, height, token })
       .then((r) => {
         if (!r.ok || !r.path) return null;
-        const u = nr.mediaUrl(r.path);
+        const u = nr.assetUrl(r.path);
         proxyCache.set(s.id, u);
         return u;
       })
@@ -185,6 +190,42 @@ export function useShotDetection(clipPath: string): ShotDetection {
   // lecture auto, cf. useSceneCardMedia) → le scroll ne déclenche aucun ffmpeg, pas de saturation
   // CPU/GPU à la réouverture. Les vignettes (cache disque, servies en nrmedia://) remplissent la
   // grille ; l'encode proxy suit la lecture, focalisé et dans l'ordre.
+
+  // Amorce le cache d'URL des proxies DÉJÀ encodés, en UN appel — pendant symétrique de
+  // `warmResolveThumbs` pour les vignettes.
+  //
+  // Sans lui, une carte ne peut pas connaître l'URL de son aperçu sans demander « ffmpeg:proxy » au
+  // core, MÊME quand le fichier est déjà sur disque : chaque carte qui entre dans la bande émet son
+  // RPC, passe par la file d'encodage, réécrit son sidecar, puis se fait annuler en ressortant. Au
+  // défilement ça fait des centaines d'allers-retours pour des fichiers tous présents, et la grille
+  // reste sur ses vignettes — le symptôme « ça ne joue pas quand je scrolle ». Ici, tout est résolu
+  // d'un coup : la carte trouve son URL dans le cache et monte sa <video> sans rien demander.
+  //
+  // `height` doit être le palier RÉELLEMENT utilisé à l'encodage (il entre dans la clé de cache) :
+  // l'appelant passe la hauteur de cellule mesurée, comme la pré-génération.
+  const warmProxies = useCallback((list: Segment[], height?: number) => {
+    const missing = list.filter((s) => !proxyCache.has(s.id));
+    if (!missing.length) return;
+    const items = missing.map((s) => ({ input: clipPath, start: s.in, end: s.out }));
+    // Anti-rafale : la hauteur de cellule vient d'un ResizeObserver et des boutons de densité, donc
+    // l'appelant nous relance à chaque pixel pendant un redimensionnement. Côté core, chaque
+    // résolution lit le dossier de proxies — une rafale mettrait le service à genoux pendant que la
+    // grille se réagence. Une liste déjà résolue sort plus haut sans même armer le minuteur.
+    if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current);
+    warmProxyTimer.current = setTimeout(() => {
+      warmProxyTimer.current = null;
+      void nr.proxyResolve(items, { height })
+        .then((rows) => {
+          const byRange = new Map(rows.filter((r) => r.file).map((r) => [`${r.start}|${r.end}`, r.file as string]));
+          for (const s of missing) {
+            const file = byRange.get(`${s.in}|${s.out}`);
+            // Le cache peut avoir été rempli entre-temps par une lecture réelle : premier écrit gagne.
+            if (file && !proxyCache.has(s.id)) proxyCache.set(s.id, nr.assetUrl(file));
+          }
+        })
+        .catch(() => { /* best-effort : les cartes repartent sur l'encode à la demande */ });
+    }, WARM_PROXY_DEBOUNCE_MS);
+  }, [clipPath, proxyCache]);
 
   // Pré-génère toutes les vignettes en un seul passage ffmpeg (réouverture à froid = aussi
   // rapide que juste après la détection, où le fichier est chaud dans le cache disque de l'OS).
@@ -421,7 +462,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
     info, duration, segments, setSegments, srcFrames, detecting, cacheLoading, progress,
     active, setActive, activeUrl, setActiveUrl,
     err, setErr, preset, setPreset, model, setModel,
-    proxyCache, getProxy, playScene, detect,
+    proxyCache, getProxy, warmProxies, playScene, detect,
     hasEdits, recordMerge, recordRemoval, clearEdits, undoEdit, redoEdit, canUndo, canRedo,
   };
 }

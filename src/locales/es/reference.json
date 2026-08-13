@@ -366,7 +366,8 @@
     "openScene": "Abrir una escena…",
     "backHome": "Volver al inicio",
     "alwaysOnTop": "Siempre al frente",
-    "openProject": "Abrir un proyecto…"
+    "openProject": "Abrir un proyecto…",
+    "relocateMissing": "Relocalizar archivos multimedia que faltan ({{count}})"
   },
   "linkDialog": {
     "title": "Añadir un vídeo en línea",
@@ -381,7 +382,8 @@
     "freezeHint": "Si no, desaparecerán del tablero el día que caiga su página.",
     "weighing": "Calculando el peso…",
     "export": "Exportar",
-    "exporting": "Exportando…"
+    "exporting": "Exportando…",
+    "progress": "Compartiendo… {{done}}/{{total}}"
   },
   "upscale": {
     "title": "Escalar el medio",
@@ -444,7 +446,8 @@
     "downloading": "Descargando…",
     "mediaFallback": "medio",
     "interactiveActive": "Interactivo — clic fuera para mover",
-    "interactiveHint": "Doble clic para interactuar"
+    "interactiveHint": "Doble clic para interactuar",
+    "relocateAll": "Relocalizar todo ({{count}})"
   },
   "sequence": {
     "loop": "Bucle",
@@ -540,6 +543,9 @@
     "projectOpenedLegacy": "«{{name}}» abierto (formato antiguo: guárdalo como proyecto para editarlo)",
     "openFailedWith": "No se pudo abrir: {{error}}",
     "dropProjectFailed": "No se pudo abrir «{{name}}»: usa «Abrir un proyecto».",
-    "noProjectFile": "Este tablero no está vinculado a ningún archivo"
+    "noProjectFile": "Este tablero no está vinculado a ningún archivo",
+    "relocating": "Buscando archivos multimedia en la carpeta… ({{count}})",
+    "relocated": "{{count}}/{{total}} archivos multimedia relocalizados",
+    "relocatedNone": "Ningún archivo multimedia reconocido en esta carpeta"
   }
 }

@@ -58,7 +58,7 @@ function MosaicThumb({ shot }: { shot: CollectionPreviewShot }) {
     if (cached) { setSrc(cached); return; }
     let alive = true;
     nr.thumbnail(shot.path, shot.in)
-      .then((r) => { if (alive && typeof r === "string") { const u = nr.mediaUrl(r); setThumb(shot.path, u, shot.in); setSrc(u); } })
+      .then((r) => { if (alive && typeof r === "string") { const u = nr.assetUrl(r); setThumb(shot.path, u, shot.in); setSrc(u); } })
       .catch(() => {});
     return () => { alive = false; };
   }, [shot.path, shot.in]);

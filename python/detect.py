@@ -13,8 +13,9 @@ Commandes :
                                                             modèles gardés chauds entre les jobs
 
 Progression (stderr) : PROGRESS:<pct> sur une échelle ABSOLUE MONOTONE 0..100 par job
-(load 2..5, extraction 5..55, inférence 55..98). Les marqueurs STAGE:* ne portent que la
-phase (libellé), jamais un pourcentage.
+(load 2..5, puis 5..98 ; transnetv2 décode et infère en un seul passage, les autres moteurs
+extraient de 5 à 55 puis infèrent de 55 à 98). Les marqueurs STAGE:* ne portent que la phase
+(libellé), jamais un pourcentage.
 
 Sortie stdout = 1 ligne JSON :
   {"scenes":[{"start":s,"end":s,"startFrame":f,"endFrame":f(inclusif)}],
@@ -131,7 +132,7 @@ def file_mtime(p):
 
 def _canonical_options(model, threshold, options=None):
     raw = options if isinstance(options, dict) else {}
-    min_frames = max(1, min(300, int(raw.get("minSceneFrames", 2) if raw.get("minSceneFrames") is not None else 2)))
+    min_frames = max(1, min(300, int(raw.get("minSceneFrames", 6) if raw.get("minSceneFrames") is not None else 6)))
     out = {"minSceneFrames": min_frames}
     if model == "omnishotcut":
         omni = raw.get("omnishotcut") if isinstance(raw.get("omnishotcut"), dict) else {}
@@ -210,34 +211,10 @@ def cmd_get(path, model, threshold=None, options=None):
             "cached": True, "error": None}
 
 
-class _ProgressTqdm:
-    """Shim de tqdm : émet PROGRESS:<pct> sur stderr → barre de progression réelle."""
-    def __init__(self, *a, total=0, **k):
-        self.total = total or 0
-        self.n = 0
-        self._last = -1
-
-    def update(self, delta=1):
-        self.n += delta
-        if self.total:
-            _progress(55 + 43 * min(self.n, self.total) / self.total)  # prédiction = 55..98 % (extraction = 5..55)
-
-    def close(self):
-        pass
-
-    def set_description(self, *a, **k):
-        pass
-
-
-def _transnet_frames(path):
-    """Décode la vidéo en 48×27 via un pipe ffmpeg STREAMÉ (lecture par lots) → émet PROGRESS pendant
-    l'extraction (la barre bouge, le watchdog reste nourri) au lieu du gros decode silencieux et
-    bloquant de predict_video (la cause du 'Bloqué · découpe' sur les longs films)."""
+def _frame_count_estimate(path):
+    """Nombre de frames estimé (durée × fps) — sans lire tout le fichier."""
     import subprocess
-
-    import numpy as np
-    nb = 0
-    try:  # estimation rapide du nb de frames (durée × fps) — sans lire tout le fichier
+    try:
         meta = subprocess.run(
             [ffprobe_bin(), "-v", "error", "-select_streams", "v:0",
              "-show_entries", "stream=avg_frame_rate:format=duration", "-of", "json", path],
@@ -247,30 +224,80 @@ def _transnet_frames(path):
         fr = ((j.get("streams") or [{}])[0]).get("avg_frame_rate", "0/1") or "0/1"
         num, den = (fr.split("/") + ["1"])[:2]
         fps_est = (float(num) / float(den)) if float(den or 0) else 0.0
-        nb = int(dur * fps_est) if dur and fps_est else 0
+        return int(dur * fps_est) if dur and fps_est else 0
     except Exception:  # noqa: BLE001
-        nb = 0
+        return 0
+
+
+def _iter_frame_chunks(path, on_frames=None):
+    """Décode la vidéo en 48×27 via un pipe ffmpeg STREAMÉ et rend des LOTS de frames.
+
+    Décodage logiciel volontaire : `-hwaccel cuda` décode plus vite mais doit redescendre chaque
+    frame en pleine résolution sur le PCIe avant le downscale (mesuré 2,3× PLUS LENT ici), et le
+    chemin tout-GPU `scale_cuda` change les pixels donc les détections.
+
+    `on_frames(count)` est appelé après chaque lot (progression)."""
+    import subprocess
+
+    import numpy as np
     FRAME = 48 * 27 * 3
     p = subprocess.Popen(
         [ffmpeg_bin(), "-nostdin", "-i", path, "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", "48x27", "pipe:"],
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    chunks = []
     got = 0
     try:
         while True:
             buf = p.stdout.read(FRAME * 256)  # ~256 frames par lecture
             if not buf:
                 break
-            chunks.append(buf)
-            got += len(buf) // FRAME
-            if nb:
-                _progress(5 + 50 * min(got, nb) / nb)  # extraction = 5..55 %
+            chunk = np.frombuffer(buf, np.uint8).reshape([-1, 27, 48, 3])
+            got += len(chunk)
+            if on_frames:
+                on_frames(got)
+            yield chunk
     finally:
         try: p.stdout.close()
         except Exception: pass
         p.wait()
-    data = b"".join(chunks)
-    return np.frombuffer(data, np.uint8).reshape([-1, 27, 48, 3])
+
+
+def _prefetch(chunks, depth=8):
+    """Décode en avance sur un thread. Le tube ffmpeg ne fait que 64 Kio : sans ce thread, le
+    décodeur se bloque dès la première inférence et l'entrelacement ne sert plus à rien."""
+    import queue
+    done = object()
+    q = queue.Queue(maxsize=depth)
+
+    def pump():
+        try:
+            for chunk in chunks:
+                q.put(chunk)
+        except BaseException as exc:  # noqa: BLE001 - relayée telle quelle au consommateur
+            q.put(exc)
+        else:
+            q.put(done)
+
+    threading.Thread(target=pump, daemon=True).start()
+    while True:
+        item = q.get()
+        if item is done:
+            return
+        if isinstance(item, BaseException):
+            raise item
+        yield item
+
+
+def _transnet_frames(path):
+    """Toutes les frames 48×27 en RAM (moteurs qui ne savent pas consommer un flux)."""
+    import numpy as np
+    nb = _frame_count_estimate(path)
+    chunks = list(_iter_frame_chunks(
+        path,
+        on_frames=(lambda got: _progress(5 + 50 * min(got, nb) / nb)) if nb else None,
+    ))  # extraction = 5..55 %
+    if not chunks:
+        return np.zeros((0, 27, 48, 3), np.uint8)
+    return np.concatenate(chunks) if len(chunks) > 1 else chunks[0]
 
 
 _MODELS = {}  # modèles gardés chauds entre les jobs (mode serve)
@@ -278,9 +305,7 @@ _MODELS = {}  # modèles gardés chauds entre les jobs (mode serve)
 
 def _get_transnet():
     if "transnetv2" not in _MODELS:
-        import transnetv2_pytorch.transnetv2_pytorch as _tmod
         from transnetv2_pytorch import TransNetV2
-        _tmod.tqdm = _ProgressTqdm  # progression réelle pendant la prédiction
 
         import torch
         from nrdevice import torch_device
@@ -315,6 +340,105 @@ def _get_autoshot():
     return _MODELS["autoshot"]
 
 
+_WINDOW, _STRIDE, _HEAD = 100, 50, 25  # fenêtrage EXACT de TransNetV2.predict_frames
+
+
+def _transnet_windows(chunks):
+    """Rend les fenêtres de 100 frames (pas de 50) du flux padé, au fil du décodage.
+
+    Reproduit à l'identique le fenêtrage de `predict_frames` (25 copies de la 1re frame en tête,
+    queue complétée par la dernière), mais SANS matérialiser la vidéo entière : sur un film de 2 h
+    le tableau complet pèse ~670 Mo, et surtout il forçait à attendre la fin du décodage avant la
+    moindre inférence. Ici le GPU travaille pendant que ffmpeg décode."""
+    import numpy as np
+    buf = None
+    total = 0
+    last = None
+    for chunk in chunks:
+        if not len(chunk):
+            continue
+        if buf is None:
+            buf = np.repeat(chunk[:1], _HEAD, axis=0)
+        last = chunk[-1:]
+        total += len(chunk)
+        buf = np.concatenate((buf, chunk))
+        while len(buf) >= _WINDOW:
+            yield buf[:_WINDOW]
+            buf = buf[_STRIDE:]
+    if buf is None:
+        return
+    tail = _HEAD + _STRIDE - (total % _STRIDE or _STRIDE)
+    buf = np.concatenate((buf, np.repeat(last, tail, axis=0)))
+    while len(buf) >= _WINDOW:
+        yield buf[:_WINDOW]
+        buf = buf[_STRIDE:]
+
+
+def _infer_batch_size(dev, torch):
+    """Fenêtres groupées par appel. Le modèle tourne sur des tenseurs 100×27×48 : à une fenêtre par
+    appel le GPU est à l'arrêt entre deux lancements de noyaux. Mesuré (RTX 3070 Ti, 6000 frames) :
+    1 → 4,62 s, 4 → 2,46 s, 8 → 2,62 s, 16 → 2,74 s. 4 = ~650 Mo de VRAM, le palier utile.
+
+    Le groupe retombe à 1 si la VRAM libre est courte : Resolve, un modèle de recherche chargé ou
+    deux détections lancées en parallèle partagent la même carte."""
+    forced = os.environ.get("NETSURUSH_TRANSNET_BATCH", "").strip()
+    if forced.isdigit() and int(forced) > 0:
+        return int(forced)
+    if dev == "cpu":
+        return 1
+    try:
+        free, _total = torch.cuda.mem_get_info()
+        if free < 1_500_000_000:
+            return 1
+    except Exception:  # noqa: BLE001 - xpu ou API absente : le repli OOM couvre le cas
+        pass
+    return 4
+
+
+def _transnet_predict(model, windows, dev, nframes_hint):
+    """Scores par frame, fenêtres groupées. Chaque fenêtre reste indépendante dans le modèle
+    (FrameSimilarity et ColorHistograms travaillent par élément de batch) : grouper ne change que
+    l'ordre des réductions flottantes — écart mesuré 7e-07, sans effet sur un seuil à 0,296."""
+    import numpy as np
+    import torch
+    from nrdevice import empty_torch_cache
+    size = _infer_batch_size(dev, torch)
+    scores = []
+    group = []
+    done = 0
+
+    def flush(batch_windows):
+        batch = torch.from_numpy(np.stack(batch_windows)).to(dev)
+        with torch.inference_mode():
+            single, _all = model.predict_raw(batch)
+        return single[:, _HEAD:_HEAD + _STRIDE, 0].reshape(-1).cpu().numpy()
+
+    def run(batch_windows):
+        nonlocal size
+        try:
+            return [flush(batch_windows)]
+        except torch.cuda.OutOfMemoryError:  # repli fenêtre par fenêtre plutôt qu'un job perdu
+            empty_torch_cache(torch)
+            size = 1
+            return [flush([window]) for window in batch_windows]
+
+    for window in windows:
+        group.append(window)
+        if len(group) < size:
+            continue
+        for part in run(group):
+            scores.append(part)
+            done += len(part)
+        group = []
+        if nframes_hint:
+            _progress(5 + 90 * min(done, nframes_hint) / nframes_hint)
+    if group:
+        scores.extend(run(group))
+    if not scores:
+        return np.zeros((0,), np.float32)
+    return np.concatenate(scores)
+
+
 def _detect_transnet(path, threshold):
     from transnetv2_pytorch import TransNetV2
 
@@ -325,14 +449,21 @@ def _detect_transnet(path, threshold):
     _progress(2)
     model = _get_transnet()  # chaud dès le 2e job (mode serve)
     _progress(5)
-    frames = _transnet_frames(path)  # extraction streamée (PROGRESS 5..55), plus de blocage silencieux
     sys.stderr.write("STAGE:infer\n"); sys.stderr.flush()
-    nframes = int(frames.shape[0])
-    video = torch.from_numpy(frames.copy()).to(dev)
-    # redirect stdout→stderr : aucun print du package ne pollue notre JSON.
-    with contextlib.redirect_stdout(sys.stderr):
-        single, _all = model.predict_frames(video, quiet=False)  # prédiction (PROGRESS 55..98)
-    arr = single.detach().cpu().numpy().squeeze()
+    nb = _frame_count_estimate(path)
+    counted = [0]
+
+    def seen(got):
+        counted[0] = got
+
+    # Décodage et inférence dans le MÊME passage : on paie max(décodage, inférence), pas la somme.
+    chunks = _prefetch(_iter_frame_chunks(path, on_frames=seen))
+    arr = _transnet_predict(model, _transnet_windows(chunks), dev, nb)
+    nframes = counted[0]
+    if not nframes:  # fichier illisible : sans ça la sortie contient un plan fantôme [0, -1]
+        raise ValueError("aucune frame décodée")
+    arr = arr[:nframes]
+    _progress(96)
     fps = float(model.get_video_fps(path))
     if not fps or fps != fps:  # NaN guard
         fps = 24.0
@@ -497,7 +628,7 @@ def cmd_detect(path, threshold, model, options=None):
     except Exception as exc:  # noqa: BLE001
         return {"scenes": [], "model": model, "error": str(exc)}
 
-    min_frames = int(normalized.get("minSceneFrames", 2))
+    min_frames = int(normalized.get("minSceneFrames", 6))
     scenes = _postprocess_scenes(scenes, fps, max(1, min_frames))
 
     duration = (nframes / fps) if fps else 0.0

@@ -435,6 +435,10 @@ fn nr_attach_file_paths(app: AppHandle, label: String) -> bool {
     }
 
     let emitter = app.clone();
+    // Réponse adressée à LA fenêtre qui a posé la question : les compteurs de requête sont locaux à
+    // chaque renderer, donc un `emit` diffusé ferait résoudre la demande n°1 du board détaché avec
+    // les chemins de la demande n°1 de la fenêtre principale.
+    let target = label.clone();
     let attached = window.with_webview(move |webview| unsafe {
         let Ok(core) = webview.controller().CoreWebView2() else {
             return;
@@ -457,7 +461,8 @@ fn nr_attach_file_paths(app: AppHandle, label: String) -> bool {
                     return Ok(()); // message d'un autre émetteur
                 };
                 let paths = dropped_paths(&args);
-                let _ = emitter.emit(
+                let _ = emitter.emit_to(
+                    target.as_str(),
                     "nr://file-paths",
                     serde_json::json!({ "id": id, "paths": paths }),
                 );

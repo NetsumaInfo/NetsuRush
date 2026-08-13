@@ -226,8 +226,6 @@
     "shotCount": "Planos: {{count}}",
     "selSuffix": " · {{count}} sel.",
     "mergeTip": "Fusionar los planos seleccionados ({{count}}, cambio permanente)",
-    "sendSelectionToOpen": "Enviar la selección a la timeline abierta",
-    "sendAllToOpen": "Enviar todos los planos a la timeline abierta",
     "hidePlayer": "Ocultar el reproductor",
     "showPlayer": "Mostrar el reproductor",
     "detectPrompt": "«Detectar» para cortar los planos.",

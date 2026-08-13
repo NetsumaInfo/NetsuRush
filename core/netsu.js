@@ -26,6 +26,7 @@ const { saveBoardProject, readBoardProject } = require('./netsu/project');
 const sessions = require('./netsu/session');
 const recents = require('./netsu/recents');
 const sidecar = require('./netsu/sidecar');
+const relocate = require('./netsu/relocate');
 const levels = require('./netsu/levels');
 
 // Modes de l'archive v1 → niveaux v2. Un ancien appelant (préférence enregistrée, panneau pas
@@ -47,6 +48,26 @@ function readDefaults(opts) {
   };
 }
 
+// Une écriture à la fois PAR FICHIER. L'autosave part toutes les demi-secondes ; un enregistrement
+// qui recopie un rush dure plus longtemps que ça. Deux passes concurrentes sur le même document
+// feraient tourner le ménage de l'une (liste des médias à garder déjà périmée) pendant que l'autre
+// range ses fichiers — le premier effacerait ce que la seconde vient d'adopter.
+/** @type {Map<string, Promise<any>>} */
+const writeChains = new Map();
+
+/** @template T @param {string} filePath @param {() => Promise<T>} task @returns {Promise<T>} */
+function queued(filePath, task) {
+  const key = path.resolve(String(filePath || '')).toLowerCase();
+  const previous = writeChains.get(key) || Promise.resolve();
+  const run = previous.then(task, task);
+  const tail = run.then(() => {}, () => {});
+  writeChains.set(key, tail);
+  // La file se referme quand plus personne n'attend derrière : sinon la table garde une entrée par
+  // fichier touché depuis le démarrage.
+  void tail.then(() => { if (writeChains.get(key) === tail) writeChains.delete(key); });
+  return run;
+}
+
 /** Supprime les journaux laissés à côté d'un conteneur (fermeture propre = ils n'existent plus). */
 function dropJournals(filePath) {
   for (const suffix of ['-wal', '-shm']) {
@@ -61,14 +82,21 @@ function dropJournals(filePath) {
  * finale plutôt que dans un temporaire recopié évite de passer deux fois plusieurs Go sur le disque.
  * @param {any} refStore @param {any} scene @param {string} destPath @param {any} opts
  */
-async function exportBoard(refStore, scene, destPath, opts) {
-  if (!scene || !Array.isArray(scene.items)) return { ok: false, error: t('sceneInvalid') };
-  if (!destPath) return { ok: false, error: t('destinationMissing') };
+function exportBoard(refStore, scene, destPath, opts) {
+  if (!scene || !Array.isArray(scene.items)) return Promise.resolve({ ok: false, error: t('sceneInvalid') });
+  if (!destPath) return Promise.resolve({ ok: false, error: t('destinationMissing') });
+  return queued(destPath, () => writeExport(refStore, scene, destPath, opts));
+}
 
+/** @param {any} refStore @param {any} scene @param {string} destPath @param {any} opts */
+async function writeExport(refStore, scene, destPath, opts) {
   const defaults = readDefaults(opts);
   const partPath = `${destPath}.part`;
   let handle = null;
   try {
+    // Partager PAR-DESSUS un document ouvert : la base doit être refermée avant qu'on efface son
+    // fichier, sinon la session continue d'écrire dans un fichier qui n'existe plus.
+    sessions.closeSession(destPath);
     dropJournals(partPath);
     try { fs.rmSync(partPath, { force: true }); } catch (_) { /* pas de reste d'un export interrompu */ }
     handle = openNetsu(partPath);
@@ -78,6 +106,7 @@ async function exportBoard(refStore, scene, destPath, opts) {
       scene,
       defaults,
       freezeLinks: !!(opts && opts.freezeLinks),
+      onProgress: opts && opts.onProgress,
     });
     handle.close();
     handle = null;
@@ -284,16 +313,18 @@ function openProject(refStore, srcPath) {
  * pendant la séance) plutôt que de renvoyer une erreur que l'utilisateur ne saurait pas corriger.
  * @param {any} refStore @param {string} filePath @param {any} scene
  */
-async function saveProject(refStore, filePath, scene) {
-  try {
-    if (!filePath) return { ok: false, error: t('destinationMissing') };
-    const session = sessions.getSession(filePath) || sessions.openSession(filePath, { create: true });
-    const res = await saveBoardProject({ session, refStore, scene });
-    if (res.ok) recents.remember({ path: session.path, title: (scene && scene.name) || '', type: 'board' });
-    return res;
-  } catch (e) {
-    return { ok: false, error: String((e && e.message) || e) };
-  }
+function saveProject(refStore, filePath, scene) {
+  if (!filePath) return Promise.resolve({ ok: false, error: t('destinationMissing') });
+  return queued(filePath, async () => {
+    try {
+      const session = sessions.getSession(filePath) || sessions.openSession(filePath, { create: true });
+      const res = await saveBoardProject({ session, refStore, scene });
+      if (res.ok) recents.remember({ path: session.path, title: (scene && scene.name) || '', type: 'board' });
+      return res;
+    } catch (e) {
+      return { ok: false, error: String((e && e.message) || e) };
+    }
+  });
 }
 
 /**
@@ -302,9 +333,15 @@ async function saveProject(refStore, filePath, scene) {
  * une écriture réussie — sinon un disque plein laisserait l'utilisateur sans aucun document ouvert.
  * @param {any} refStore @param {{ scene: any, destPath: string, fromPath?: string, sourceSceneId?: string }} args
  */
-async function saveProjectAs(refStore, { scene, destPath, fromPath, sourceSceneId }) {
+function saveProjectAs(refStore, args) {
+  const destPath = args && args.destPath;
+  if (!destPath) return Promise.resolve({ ok: false, error: t('destinationMissing') });
+  return queued(destPath, () => writeProjectAs(refStore, args));
+}
+
+/** @param {any} refStore @param {{ scene: any, destPath: string, fromPath?: string, sourceSceneId?: string }} args */
+async function writeProjectAs(refStore, { scene, destPath, fromPath, sourceSceneId }) {
   try {
-    if (!destPath) return { ok: false, error: t('destinationMissing') };
     sessions.closeSession(destPath);
     dropJournals(destPath);
     fs.rmSync(destPath, { force: true });
@@ -384,8 +421,18 @@ function deleteProject(filePath) {
   };
 }
 
+/**
+ * Relocalise EN LOT : l'utilisateur désigne un dossier, on y retrouve tous les médias manquants
+ * qu'on peut identifier sans ambiguïté. Le renderer envoie ce qu'il affiche en placeholder (nom +
+ * taille lus dans le fichier) et repointe les items sur ce qui revient.
+ * @param {string} dirPath @param {{ id: string, name: string, size?: number }[]} wanted
+ */
+function relocateFrom(dirPath, wanted) {
+  return relocate.matchIn(dirPath, wanted);
+}
+
 module.exports = {
   exportBoard, importBoard, weigh, zipStore, unzip,
   openProject, saveProject, saveProjectAs, closeProject, closeAllProjects,
-  previewProject, recentProjects, forgetProject: recents.forget, deleteProject,
+  previewProject, recentProjects, forgetProject: recents.forget, deleteProject, relocateFrom,
 };

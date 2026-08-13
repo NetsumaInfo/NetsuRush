@@ -3,13 +3,13 @@
 // Gestes via usePointerTransform (capture sur le wrapper). Multi-sélection (Shift) → déplacement de
 // groupe au relâchement. Notes texte éditables (double-clic). Miroir (flipH/flipV) sur le contenu.
 
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Trash2, FileQuestion, FolderSearch, Loader2, ImageOff, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nr, nextProxyToken } from "@/lib/bridge";
 import { type BoardItem as Item, type BoardLink, parseVideoEmbed, EMBED_PLAYER_PROVIDERS, displaySrc, isRemoteRef } from "./referenceShared";
-import { recoverMedia } from "./boardMediaActions";
+import { recoverMedia, relocateMissingMedia } from "./boardMediaActions";
 import { usePointerTransform, type ResizeHandle } from "./usePointerTransform";
 import { useBoard } from "./useReferenceBoard";
 import { registerPlayer } from "./playhead";
@@ -31,6 +31,8 @@ function triggerRecover(it: Item) {
 
 // Séquence d'images : taille du bloc de préchargement (frames gardées décodées en avance).
 const PRELOAD_BLOCK = 24;
+// Pas minimal entre deux reculs d'une vidéo en aller-retour (cf. la boucle ping-pong).
+const BACKSTEP_MS = 66;
 
 const HANDLES: ResizeHandle[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
 const HANDLE_POS: Record<ResizeHandle, string> = {
@@ -42,8 +44,14 @@ const HANDLE_POS: Record<ResizeHandle, string> = {
 
 // Vidéo qui boucle sur [trimIn, trimOut] si défini, sinon boucle entière. `streamSrc` force la
 // source (flux YouTube relayé par le core) : pas de proxy dans ce cas, et une erreur de lecture
-// remonte à l'appelant au lieu de déclencher la récupération de média.
-function VideoContent({ item, streamSrc, onStreamError }: { item: Item; streamSrc?: string; onStreamError?: () => void }) {
+// remonte à l'appelant au lieu de déclencher la récupération de média. `onNatSize` reports the
+// decoded dimensions — the only place a relayed stream states its true ratio.
+function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
+  item: Item;
+  streamSrc?: string;
+  onStreamError?: () => void;
+  onNatSize?: (w: number, h: number) => void;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const patchItem = useBoard((s) => s.patchItem);
   const mediaSuspended = useBoard((s) => s.frozen || (s.navigating && s.prefs.pauseMediaWhileNavigating));
@@ -69,7 +77,7 @@ function VideoContent({ item, streamSrc, onStreamError }: { item: Item; streamSr
     let alive = true;
     const token = nextProxyToken();
     nr.proxy({ input: item.ref, start: trimIn, end: trimOut!, priority: "high", height: Math.round(item.h || 240), token, requireVideo: true })
-      .then((r) => { if (alive && r.ok && r.path) setProxUrl(nr.mediaUrl(r.path)); });
+      .then((r) => { if (alive && r.ok && r.path) setProxUrl(nr.assetUrl(r.path)); });
     return () => { alive = false; nr.proxyCancel(token); };
   }, [useProxy, item.ref, item.h, trimIn, trimOut]);
 
@@ -88,18 +96,26 @@ function VideoContent({ item, streamSrc, onStreamError }: { item: Item; streamSr
     const v = ref.current;
     if (!v || !playing || playMode !== "pingpong") return;
     const lo = useProxy ? 0 : trimIn;
-    let raf = 0, prev = 0, dir: 1 | -1 = 1;
+    let raf = 0, prev = 0, back = 0, dir: 1 | -1 = 1;
     const tick = (ts: number) => {
       const dt = prev ? (ts - prev) / 1000 : 0;
       prev = ts;
       const hi = useProxy ? v.duration || 0 : trimOut ?? v.duration ?? 0;
       if (dir === 1) {
         if (v.paused) v.play().catch(() => {});
-        if (hi && v.currentTime >= hi) { dir = -1; v.pause(); }
+        if (hi && v.currentTime >= hi) { dir = -1; v.pause(); back = 0; }
       } else {
         if (!v.paused) v.pause();
-        const next = v.currentTime - dt;
-        if (next <= lo) { v.currentTime = lo; dir = 1; } else v.currentTime = next;
+        // Marche arrière : écrire `currentTime` force un décodage depuis la keyframe précédente, bien
+        // plus cher qu'une lecture normale. À la cadence de l'écran, N items en aller-retour font N
+        // seeks à chaque frame — sur un board qui en porte des dizaines, le décodeur ne suit plus.
+        // Un pas toutes les BACKSTEP_MS donne le même rendu à l'œil pour une fraction du coût.
+        back += dt * 1000;
+        if (back >= BACKSTEP_MS) {
+          const next = v.currentTime - back / 1000;
+          back = 0;
+          if (next <= lo) { v.currentTime = lo; dir = 1; } else v.currentTime = next;
+        }
       }
       raf = requestAnimationFrame(tick);
     };
@@ -149,6 +165,10 @@ function VideoContent({ item, streamSrc, onStreamError }: { item: Item; streamSr
         const d = e.currentTarget.duration;
         // chargé mais noir → récupère (ou, pour un flux relayé, repli sur le lecteur intégré)
         if (!useProxy && !e.currentTarget.videoWidth) { if (onStreamError) onStreamError(); else triggerRecover(item); }
+        // A proxy is a re-encoded excerpt: its dimensions are the proxy's, not the source's.
+        if (!useProxy && e.currentTarget.videoWidth && e.currentTarget.videoHeight) {
+          onNatSize?.(e.currentTarget.videoWidth, e.currentTarget.videoHeight);
+        }
         if (!useProxy && d && isFinite(d) && Math.abs(d - (item.dur ?? 0)) > 0.5) patchItem(item.id, { dur: d }, false);
         seekIn();
       }}
@@ -170,10 +190,14 @@ function VideoContent({ item, streamSrc, onStreamError }: { item: Item; streamSr
 function SequenceContent({ item }: { item: Item }) {
   const mediaSuspended = useBoard((s) => s.frozen || (s.navigating && s.prefs.pauseMediaWhileNavigating));
   const setSeqFrame = useBoard((s) => s.setSeqFrame);
+  const commitSeqFrame = useBoard((s) => s.commitSeqFrame);
   const patchItem = useBoard((s) => s.patchItem);
   const frames = useMemo(() => item.frames ?? [], [item.frames]);
   const count = frames.length;
-  const cur = Math.min(Math.max(item.frame ?? 0, 0), Math.max(0, count - 1));
+  // Frame vivante d'abord (hors document, cf. `seqFrames`) : ce sélecteur ne rend qu'un nombre, donc
+  // la séquence voisine qui avance ne re-rend pas celle-ci.
+  const liveFrame = useBoard((s) => s.seqFrames[item.id]);
+  const cur = Math.min(Math.max(liveFrame ?? item.frame ?? 0, 0), Math.max(0, count - 1));
   const playing = (item.seqPlay ?? true) && !mediaSuspended; // défaut = lecture (autoplay au retour sur le board)
   const dirRef = useRef<1 | -1>(1);  // sens courant en mode aller-retour
   const posRef = useRef(0);          // position FLOTTANTE (frame fractionnaire) pour un pacing fluide
@@ -201,7 +225,8 @@ function SequenceContent({ item }: { item: Item }) {
       if (!prev) prev = ts;
       const dt = (ts - prev) / 1000;
       prev = ts;
-      const it = useBoard.getState().items.find((i) => i.id === item.id);
+      const st = useBoard.getState();
+      const it = st.items.find((i) => i.id === item.id);
       if (!it) { raf = requestAnimationFrame(step); return; }
       const lo = Math.min(Math.max(it.seqIn ?? 0, 0), count - 1);
       const hi = Math.min(Math.max(it.seqOut ?? count - 1, lo), count - 1);
@@ -216,21 +241,27 @@ function SequenceContent({ item }: { item: Item }) {
         else if (pos <= lo) { pos = lo; dirRef.current = 1; }
       } else if (mode === "off") {
         pos += rate * dt;
-        if (pos >= hi) { posRef.current = hi; setSeqFrame(item.id, hi); patchItem(item.id, { seqPlay: false }, false); return; }
+        if (pos >= hi) { posRef.current = hi; commitSeqFrame(item.id, hi); patchItem(item.id, { seqPlay: false }, false); return; }
       } else {
         pos += rate * dt;
         if (span > 0 && pos >= lo + span) pos = lo + ((pos - lo) % span); // boucle
       }
       posRef.current = pos;
       const idx = Math.min(hi, Math.max(lo, Math.floor(pos)));
-      if (idx !== (it.frame ?? -1)) setSeqFrame(item.id, idx);
+      if (idx !== (st.seqFrames[item.id] ?? it.frame ?? -1)) setSeqFrame(item.id, idx);
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    // Fin de lecture (pause, gel, démontage) → la dernière position rejoint le DOCUMENT : la scène se
+    // rouvre là où on l'a laissée, et l'entrée vivante disparaît (sinon elle masquerait `item.frame`).
+    return () => {
+      cancelAnimationFrame(raf);
+      const live = useBoard.getState().seqFrames[item.id];
+      if (live != null) commitSeqFrame(item.id, live);
+    };
     // item.frame exclu volontairement : il est ÉCRIT par cet effet (sinon relance à chaque frame).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, count, item.id, setSeqFrame, patchItem]);
+  }, [playing, count, item.id, setSeqFrame, commitSeqFrame, patchItem]);
 
   // Aucune frame, OU frame courante manquante (importée d'un .netsu sans le fichier) → placeholder.
   if (!count || !frames[cur]) {
@@ -441,6 +472,9 @@ function humanSize(n: number): string {
 function MissingContent({ item }: { item: Item }) {
   const { t } = useTranslation("reference");
   const patchItem = useBoard((s) => s.patchItem);
+  // Compté sans allouer : ce sélecteur retourne un NOMBRE, donc il ne réveille son composant que
+  // lorsque le compte change (un `filter().length` recrée un tableau à chaque commit du store).
+  const missingCount = useBoard((s) => s.items.reduce((n, i) => (i.missing && i.kind !== "sequence" ? n + 1 : n), 0));
   const relocate = async () => {
     // Séquence : re-choix multi-images → reconstruit `frames` (ordre de sélection).
     if (item.kind === "sequence") {
@@ -467,6 +501,18 @@ function MissingContent({ item }: { item: Item }) {
       >
         <FolderSearch className="size-3.5" /> {t("item.relocate")}
       </button>
+      {/* Un board reçu arrive rarement avec UN seul trou : proposer le dossier entier depuis la
+          première tuile évite de répéter le même geste autant de fois qu'il y a de rushs. */}
+      {missingCount > 1 && (
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={() => void relocateMissingMedia()}
+          className="text-[10px] text-muted-foreground underline-offset-2 hover:underline"
+        >
+          {t("item.relocateAll", { count: missingCount })}
+        </button>
+      )}
     </div>
   );
 }
@@ -482,20 +528,91 @@ function LoadingContent({ item }: { item: Item }) {
   );
 }
 
+// Image fixe — ou ANIMÉE (GIF, WebP animé : l'ingestion Giphy en pose beaucoup). Un `<img>` animé ne
+// s'arrête jamais : ni « Tout figer », ni la pause pendant la navigation ne l'atteignent, et un board
+// qui en porte des dizaines décode en permanence sans que le bouton de gel n'y change rien. Sous gel,
+// on peint donc la frame courante dans un <canvas> et on montre celui-ci.
+//
+// Le gel TRANSITOIRE (pan/zoom) est volontairement ignoré : basculer <img>/<canvas> à chaque geste
+// coûterait plus que ce qu'il économise. Seul le gel EXPLICITE, celui que l'utilisateur a demandé,
+// arrête l'animation. Dessiner une image d'une autre origine (Giphy) teinte le canvas — sans
+// importance, on l'affiche, on n'en relit jamais les pixels.
+const ANIMATED_IMAGE_RE = /\.(gif|webp|avif|apng)(?:$|[?#])/i;
+
+function ImageContent({ item }: { item: Item }) {
+  const frozen = useBoard((s) => s.frozen);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animated = ANIMATED_IMAGE_RE.test(item.src ?? "");
+  const [painted, setPainted] = useState(false);
+
+  useEffect(() => {
+    if (!animated || !frozen) { setPainted(false); return; }
+    const img = imgRef.current;
+    const canvas = canvasRef.current;
+    if (!img || !canvas || !img.naturalWidth) return;
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    try {
+      canvas.getContext("2d")?.drawImage(img, 0, 0);
+      setPainted(true);
+    } catch { /* peinture refusée : on laisse le <img> animé plutôt qu'un carré vide */ }
+  }, [animated, frozen, item.src]);
+
+  const onErr = () => triggerRecover(item);
+  const onLd = (e: React.SyntheticEvent<HTMLImageElement>) => { if (!e.currentTarget.naturalWidth) triggerRecover(item); };
+  const cls = item.crop ? "block select-none" : "block h-full w-full select-none object-cover";
+  const style = item.crop ? cropStyle(item.crop) : undefined;
+  const media = (
+    <>
+      <img
+        ref={imgRef} src={item.src} alt={item.title ?? ""} draggable={false}
+        onError={onErr} onLoad={onLd} className={cls} style={{ ...style, ...(painted ? { display: "none" } : null) }}
+      />
+      {animated && <canvas ref={canvasRef} aria-hidden className={cls} style={{ ...style, ...(painted ? null : { display: "none" }) }} />}
+    </>
+  );
+  return item.crop ? <div className="relative h-full w-full overflow-hidden">{media}</div> : media;
+}
+
 // YouTube joué comme une vidéo ordinaire : le flux est relayé par le core (yt-dlp le résout), donc
 // plus d'iframe — ni gros bouton lecture au rebouclage, ni écran de fin, et le trim/ping-pong sont
 // ceux d'une vidéo locale. Repli sur le lecteur intégré si le relais échoue (vidéo privée, restreinte,
 // yt-dlp absent) : son habillage vaut mieux qu'un carré noir.
 function YoutubeContent({ item, live, onFallback }: { item: Item; live: boolean; onFallback: (on: boolean) => void }) {
   const [embedded, setEmbedded] = useState(false);
+  const patchItem = useBoard((s) => s.patchItem);
   // Nouvelle vidéo sur le même item → on retente le flux direct.
   useEffect(() => { setEmbedded(false); onFallback(false); }, [item.ref, onFallback]);
+
+  // A YouTube card is posed before anything is known of the video — 16:9, or 9:16 when the link says
+  // `/shorts/`. The relayed stream is where the TRUE ratio finally shows up (a Short shared as a
+  // plain `watch?v=` link is landscape until here), so the card is reshaped around its own centre at
+  // constant area: a vertical video stops being cropped inside a landscape box. Runs at most once
+  // per ratio — the geometry then matches, and resizing keeps the aspect locked. A cropped item is
+  // left alone: its box deliberately differs from the source ratio.
+  const fitNatSize = useCallback((vw: number, vh: number) => {
+    const it = useBoard.getState().items.find((i) => i.id === item.id);
+    if (!it) return;
+    const patch: Partial<Item> = {};
+    if (it.natW !== vw || it.natH !== vh) { patch.natW = vw; patch.natH = vh; }
+    const ratio = vw / vh;
+    if (!it.crop && it.w > 0 && it.h > 0 && Math.abs(it.w / it.h - ratio) > 0.01) {
+      const w = Math.round(Math.sqrt(it.w * it.h * ratio));
+      const h = Math.round(w / ratio);
+      Object.assign(patch, { w, h, x: it.x + (it.w - w) / 2, y: it.y + (it.h - h) / 2 });
+    }
+    // `record: false` — a measurement is not a user edit, it must not eat an undo step.
+    if (Object.keys(patch).length) patchItem(item.id, patch, false);
+  }, [item.id, patchItem]);
+
   if (embedded) return <YoutubeItem item={item} interactive={live} />;
   return (
     <VideoContent
       item={item}
       streamSrc={nr.ytStreamUrl(item.ref)}
       onStreamError={() => { setEmbedded(true); onFallback(true); }}
+      onNatSize={fitNatSize}
     />
   );
 }
@@ -505,18 +622,7 @@ function ItemContent({ item, editing, live, onYtFallback }: { item: Item; editin
   if (item.missing) return <MissingContent item={item} />;
   if (item.kind === "text") return <TextNote item={item} editing={editing} />;
   if (item.kind === "frame") return <FrameContent item={item} />;
-  if (item.kind === "image") {
-    const onErr = () => triggerRecover(item);
-    const onLd = (e: React.SyntheticEvent<HTMLImageElement>) => { if (!e.currentTarget.naturalWidth) triggerRecover(item); };
-    if (item.crop) {
-      return (
-        <div className="relative h-full w-full overflow-hidden">
-          <img src={item.src} alt={item.title ?? ""} draggable={false} onError={onErr} onLoad={onLd} className="block select-none" style={cropStyle(item.crop)} />
-        </div>
-      );
-    }
-    return <img src={item.src} alt={item.title ?? ""} draggable={false} onError={onErr} onLoad={onLd} className="block h-full w-full select-none object-cover" />;
-  }
+  if (item.kind === "image") return <ImageContent item={item} />;
   if (item.kind === "video") return <VideoContent item={item} />;
   if (item.kind === "sequence") return <SequenceContent item={item} />;
   // Embed / YouTube : `live` (double-clic) rend l'iframe cliquable (play, scroll, liens). Sinon

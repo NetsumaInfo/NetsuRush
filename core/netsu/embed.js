@@ -74,15 +74,24 @@ function mediaIdOf(source) {
   return { id: crypto.createHash('sha256').update(`${head}|${source.size}`).digest('hex').slice(0, 32), head };
 }
 
-/** @param {any} db @param {ReturnType<typeof describeSource> extends Promise<infer T> ? T : never} source */
-function recordMedia(db, source) {
+/**
+ * Décrit le média d'origine dans le conteneur. `keepPath` dit si le CHEMIN ABSOLU a le droit d'y
+ * entrer : dans un projet oui, c'est ce qui retrouve le rush d'une séance à l'autre ; dans un
+ * fichier PARTAGÉ non — il ne dirait rien au destinataire (sa machine n'a pas cette arborescence)
+ * et publierait le nom de session et le rangement de disque de l'expéditeur. La relocalisation
+ * n'en a pas besoin : elle travaille sur nom + taille + empreinte de tête.
+ * @param {any} db @param {ReturnType<typeof describeSource> extends Promise<infer T> ? T : never} source
+ * @param {{ keepPath?: boolean }} [opts]
+ */
+function recordMedia(db, source, opts) {
   const { id, head } = mediaIdOf(source);
+  const keepPath = !opts || opts.keepPath !== false;
   db.prepare(
     `INSERT INTO media (id, path, name, size, mtime, head_sha, duration, width, height)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET path = excluded.path, name = excluded.name,
        mtime = excluded.mtime, duration = excluded.duration`,
-  ).run(id, source.path, source.name, source.size, source.mtime, head, source.duration, source.width, source.height);
+  ).run(id, keepPath ? source.path : '', source.name, source.size, source.mtime, head, source.duration, source.width, source.height);
   return id;
 }
 
@@ -131,11 +140,11 @@ async function withTempDir(fn) {
 }
 
 /** Poster : une image fixe qui permet d'afficher l'item même sans son média. */
-async function embedPoster(db, source, atSecond) {
+async function embedPoster(handle, source, atSecond) {
   try {
     const file = await thumbnail(source.path, atSecond, 'high', { height: POSTER_HEIGHT });
     if (!file || !fs.existsSync(file)) return null;
-    return blobs.putFile(db, file).sha;
+    return (await blobs.putFileAsync(handle, file)).sha;
   } catch (_) {
     return null; // un poster manquant dégrade l'affichage, il ne doit pas faire rater l'export
   }
@@ -146,11 +155,11 @@ async function embedPoster(db, source, atSecond) {
  * par exemple) : on range les octets sans écrire de ligne `item_media`, qui n'a qu'une entrée par
  * item et serait écrasée à chaque frame.
  * @param {{ handle: any, docId: string, itemId?: string|null, item: any, filePath: string,
- *           level?: unknown, quality?: unknown, marginSec?: unknown }} args
+ *           level?: unknown, quality?: unknown, marginSec?: unknown, keepPath?: boolean }} args
  * @returns {Promise<{ mode: string, level: string, bytes: number, mediaId: string|null,
  *                     posterSha: string|null, clipSha: string|null, long: boolean, error?: string }>}
  */
-async function embedItem({ handle, docId, itemId, item, filePath, level, quality, marginSec }) {
+async function embedItem({ handle, docId, itemId, item, filePath, level, quality, marginSec, keepPath }) {
   const idle = {
     mode: 'none', level: levels.normalizeLevel(level), bytes: 0,
     mediaId: null, posterSha: null, clipSha: null, long: false,
@@ -164,7 +173,7 @@ async function embedItem({ handle, docId, itemId, item, filePath, level, quality
   // On replanifie AVEC la durée réelle : sans elle, la marge d'un plan collé à la fin du média
   // déborderait et ffmpeg rendrait un fichier vide.
   const plan = levels.planEmbed(item, { level, quality, marginSec, duration: source.duration });
-  const mediaId = handle.tx((db) => recordMedia(db, source)).result;
+  const mediaId = handle.tx((db) => recordMedia(db, source, { keepPath })).result;
   const base = { ...idle, mode: plan.mode, level: plan.level, mediaId, long: plan.long };
   const remember = (shas) => {
     if (!itemId) return;
@@ -172,7 +181,7 @@ async function embedItem({ handle, docId, itemId, item, filePath, level, quality
   };
 
   if (plan.mode === 'link') {
-    const posterSha = await embedPoster(handle.db, source, POSTER_OFFSET_SEC);
+    const posterSha = await embedPoster(handle, source, POSTER_OFFSET_SEC);
     const posterInfo = posterSha ? blobs.blobInfo(handle.db, posterSha) : null;
     remember({ posterSha, clipSha: null });
     return { ...base, posterSha, bytes: posterInfo ? posterInfo.size : 0 };
@@ -180,16 +189,16 @@ async function embedItem({ handle, docId, itemId, item, filePath, level, quality
 
   if (plan.mode === 'file') {
     const ext = path.extname(source.path).slice(1).toLowerCase();
-    const { sha } = handle.tx((db) => blobs.putFile(db, source.path, ext)).result;
+    const { sha } = await blobs.putFileAsync(handle, source.path, ext);
     remember({ posterSha: null, clipSha: sha });
     return { ...base, clipSha: sha, bytes: source.size };
   }
 
   const clip = plan.clip;
-  const posterSha = await embedPoster(handle.db, source, clip.start + POSTER_OFFSET_SEC);
+  const posterSha = await embedPoster(handle, source, clip.start + POSTER_OFFSET_SEC);
   const clipSha = await withTempDir(async (dir) => {
     const { file, ext } = await encodeClip(source.path, clip, dir);
-    return handle.tx((db) => blobs.putFile(db, file, ext)).result.sha;
+    return (await blobs.putFileAsync(handle, file, ext)).sha;
   });
   remember({ posterSha, clipSha });
   const clipSize = blobs.blobInfo(handle.db, clipSha);
