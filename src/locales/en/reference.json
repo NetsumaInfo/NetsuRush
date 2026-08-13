@@ -590,6 +590,7 @@
   "tidy": {
     "title": "Tidy",
     "layout": "Layout",
+    "layoutBlock": "Block",
     "layoutPack": "Optimal",
     "layoutGrid": "Grid",
     "layoutRow": "Row",
@@ -641,7 +642,6 @@
     "folderEmpty": "No media in this folder",
     "folderDone": "{{count}} media imported",
     "folderDoneTruncated": "{{count}} media imported (folder truncated)",
-    "folderNoPath": "Folder path not found",
     "progress": "Importing {{done}}/{{total}}…",
     "reading": "Reading {{count}} files…",
     "done": "{{count}} media imported",

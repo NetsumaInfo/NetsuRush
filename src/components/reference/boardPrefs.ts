@@ -115,7 +115,7 @@ export interface BoardPrefs {
 
 // Dispositions proposées par le sélecteur de rangement (sous-ensemble d'ArrangeMode : les
 // alignements et répartitions restent des boutons directs, ils ne « rangent » pas une planche).
-export type ArrangeLayout = "pack" | "grid" | "row" | "col";
+export type ArrangeLayout = "block" | "pack" | "grid" | "row" | "col";
 const PREFS_DEFAULT: BoardPrefs = {
   favFonts: [],
   defaultFont: HANDWRITING_FONT,
@@ -152,7 +152,7 @@ const PREFS_DEFAULT: BoardPrefs = {
   snap: true,
   snapThreshold: 8,
   snapStick: 0,
-  arrangeLayout: "pack",
+  arrangeLayout: "block",
   arrangeUniform: "none",
   arrangeGap: 16,
   arrangeSort: "none",

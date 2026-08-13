@@ -6,7 +6,7 @@
 
 import { useTranslation } from "react-i18next";
 import { Popover } from "@base-ui/react/popover";
-import { Columns3, Grid2x2, LayoutGrid, Rows3, Wand2 } from "lucide-react";
+import { Blocks, Columns3, Grid2x2, LayoutGrid, Rows3, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -14,7 +14,8 @@ import { useBoard } from "./useReferenceBoard";
 import type { ArrangeLayout } from "./boardPrefs";
 
 const LAYOUTS: { value: ArrangeLayout; labelKey: string; icon: typeof LayoutGrid }[] = [
-  { value: "pack", labelKey: "tidy.layoutPack", icon: LayoutGrid },
+  { value: "block", labelKey: "tidy.layoutBlock", icon: LayoutGrid },
+  { value: "pack", labelKey: "tidy.layoutPack", icon: Blocks },
   { value: "grid", labelKey: "tidy.layoutGrid", icon: Grid2x2 },
   { value: "row", labelKey: "tidy.layoutRow", icon: Columns3 },
   { value: "col", labelKey: "tidy.layoutCol", icon: Rows3 },
@@ -65,9 +66,10 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
       </Tooltip>
       <Popover.Portal>
         <Popover.Positioner side="bottom" sideOffset={8} className="z-50 outline-none">
-          <Popover.Popup className="w-72 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none">
+          <Popover.Popup className="w-80 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none">
             <p className="mb-2 text-xs font-medium text-muted-foreground">{t("tidy.layout")}</p>
-            <div className="flex gap-1.5">
+            {/* Grille de 3 : cinq dispositions ne tiennent pas sur une ligne sans tronquer les libellés. */}
+            <div className="grid grid-cols-3 gap-1.5">
               {LAYOUTS.map((l) => (
                 <Choice
                   key={l.value}

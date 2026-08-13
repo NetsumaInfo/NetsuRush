@@ -590,6 +590,7 @@
   "tidy": {
     "title": "整列",
     "layout": "配置",
+    "layoutBlock": "ブロック",
     "layoutPack": "最適",
     "layoutGrid": "グリッド",
     "layoutRow": "横一列",
@@ -641,7 +642,6 @@
     "folderEmpty": "このフォルダーにメディアがありません",
     "folderDone": "{{count}} 件のメディアを読み込みました",
     "folderDoneTruncated": "{{count}} 件を読み込みました（フォルダーは途中まで）",
-    "folderNoPath": "フォルダーのパスが見つかりません",
     "progress": "読み込み中 {{done}}/{{total}}…",
     "reading": "{{count}} 件のファイルを読み込み中…",
     "done": "{{count}} 件のメディアを読み込みました",

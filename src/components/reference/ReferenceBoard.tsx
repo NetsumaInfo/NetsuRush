@@ -71,7 +71,7 @@ function SnapGuides({ view }: { view: BoardView }) {
 }
 
 export interface BoardHandle {
-  addFiles: (files: FileList | File[]) => void;
+  addFiles: (files: FileList | File[], at?: { x: number; y: number }) => void;
   addVideoUrl: (url: string, opts?: { allowGenericEmbed?: boolean }) => boolean;
   addUrl: (url: string, opts?: { allowGenericEmbed?: boolean }) => Promise<boolean>;
   addPath: (path: string, title?: string) => void;
@@ -479,10 +479,28 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         addItem(note);
         useBoard.getState().setEditing(note.id);
       },
-      // Cadre : centré sur le viewport, posé en fond (z bas, géré par makeFrameItem).
+      // Cadre. Sur une SÉLECTION, il l'encadre : le cadre épouse les limites des éléments choisis et
+      // passe SOUS eux — sinon il les recouvre et capte leurs clics. Un cadre porte son contenu quand
+      // on le déplace, donc encadrer une sélection revient à la grouper. Sans sélection, cadre vide
+      // au centre du viewport.
       addFrame: () => {
+        const st = useBoard.getState();
+        const p = st.prefs;
+        const picked = st.items.filter(
+          (it) => st.selectedIds.includes(it.id) && it.kind !== "draw" && it.kind !== "frame",
+        );
+        if (picked.length) {
+          const PAD = 28;
+          const TOP = 52; // place pour l'étiquette du cadre, au-dessus du contenu
+          const b = boundsOf(picked);
+          const frame = makeFrameItem(b.x - PAD, b.y - TOP, { color: p.defaultFrameColor, fillMode: p.defaultFrameFill });
+          frame.w = b.w + PAD * 2;
+          frame.h = b.h + TOP + PAD;
+          frame.z = Math.min(...picked.map((it) => it.z)) - 1;
+          addItem(frame);
+          return;
+        }
         const c = centerPoint();
-        const p = useBoard.getState().prefs;
         addItem(makeFrameItem(c.x - 320, c.y - 210, { color: p.defaultFrameColor, fillMode: p.defaultFrameFill }));
       },
       fit,
@@ -559,23 +577,25 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         const dropped = Array.from(e.dataTransfer.files);
         const projectFile = dropped.find((f) => f.name.toLowerCase().endsWith(".netsu"));
         if (projectFile) { void openDroppedProject(projectFile); return; }
-        // Un DOSSIER lâché s'importe en groupe (un cadre par dossier). La coquille ne sait rendre le
-        // chemin disque que d'un FICHIER : on parcourt donc le dossier via l'API Entries du drop, et
-        // on résout ensuite le chemin de chaque fichier trouvé. Les entrées doivent être lues AVANT
-        // tout `await` — le DataTransfer est vidé dès que le gestionnaire rend la main.
+        // Un DOSSIER lâché s'importe en groupe (un cadre par dossier). On garde l'entrée ET l'objet
+        // `File` que le drop place à côté : c'est LUI qui porte le chemin disque du dossier, donc la
+        // voie rapide (parcours par le core, zéro copie). Tout doit être lu AVANT le moindre `await`
+        // — le DataTransfer est vidé dès que le gestionnaire rend la main.
         const dirs = Array.from(e.dataTransfer.items ?? [])
-          .map((it) => it.webkitGetAsEntry?.())
-          .filter((entry): entry is FileSystemDirectoryEntry => !!entry && entry.isDirectory);
+          .map((it) => ({ entry: it.webkitGetAsEntry?.(), file: it.getAsFile?.() ?? null }))
+          .filter((d): d is { entry: FileSystemDirectoryEntry; file: File | null } => !!d.entry && d.entry.isDirectory);
         const r = rect();
         const dropAt = screenToBoard(useBoard.getState().view, e.clientX - (r?.left ?? 0), e.clientY - (r?.top ?? 0));
         if (dirs.length) {
-          void (async () => { for (const dir of dirs) await ingest.addDroppedEntry(dir, dropAt); })();
           // Un dossier n'a pas de contenu exploitable dans `files` : on ne garde que les vrais fichiers.
           const files = dropped.filter((f) => f.type || f.size);
-          if (files.length) ingest.addFiles(files);
+          void (async () => {
+            for (const dir of dirs) await ingest.addDroppedEntry(dir.entry, dir.file, dropAt);
+            if (files.length) ingest.addFiles(files, dropAt);
+          })();
           return;
         }
-        if (dropped.length) ingest.addFiles(dropped);
+        if (dropped.length) ingest.addFiles(dropped, dropAt);
         else void ingest.addPaste(e.dataTransfer);
       }}
       className={cn(

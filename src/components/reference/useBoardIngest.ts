@@ -61,6 +61,36 @@ function gridLayout(
   }));
 }
 
+// Exécute `run` sur toute la liste avec au plus `limit` tâches en vol. Vraie file d'attente, pas des
+// paquets successifs : un décodage lent ne bloque plus les suivants (un `Promise.all` par tranche
+// laissait 5 ouvriers inactifs le temps que la 6e vidéo réponde).
+async function pool<T>(items: T[], limit: number, run: (item: T, index: number) => Promise<void>): Promise<void> {
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      for (let i = next++; i < items.length; i = next++) await run(items[i], i);
+    }),
+  );
+}
+
+// Au-delà, un média sans chemin disque n'est PAS recopié dans les assets : dupliquer des dizaines de
+// gigaoctets pour un dossier de rushes lâché est pire que la perte de la source au rechargement.
+const ASSET_COPY_MAX = 512 * 1024 * 1024;
+
+// Une entrée de lot : soit un chemin disque (voie normale, zéro copie), soit un objet File quand la
+// coquille n'a pas su rendre le chemin (navigateur, dossier déposé sur un runtime sans le pont).
+type BatchEntry = { path?: string; file?: File; rel: string; name: string; kind: "image" | "video" };
+
+// Nature d'un fichier de lot : extension d'abord, type MIME en secours (un fichier venu du
+// navigateur ou d'une archive arrive parfois sans extension exploitable).
+function entryKind(nameOrPath: string, mime = ""): "image" | "video" | null {
+  const k = kindFromPath(nameOrPath);
+  if (k === "image" || k === "video") return k;
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  return null;
+}
+
 // Extension de fichier à partir d'un type MIME de blob (presse-papier/drop), avec quelques alias.
 function extFromMime(mime: string, kind: ItemKind): string {
   const sub = (mime.split("/")[1] || "").toLowerCase();
@@ -204,9 +234,9 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
 
   // Item depuis un objet File (navigateur, presse-papier, ou drop sans chemin résoluble).
   const addFile = useCallback(
-    async (file: File) => {
+    async (file: File, at?: { x: number; y: number }) => {
       const [path] = await nr.pathsForFiles([file]);
-      if (path) return addPath(path, file.name);
+      if (path) return addPath(path, file.name, at);
       const kind: ItemKind | null = file.type.startsWith("image/")
         ? "image"
         : file.type.startsWith("video/")
@@ -221,7 +251,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
           if (res.ok && res.path) {
             const src = displaySrc(kind, res.path);
             const nat = await probeNat(kind, src);
-            return place(kind, res.path, src, nat, file.name);
+            return place(kind, res.path, src, nat, file.name, at);
           }
         } catch {
           /* repli objectURL ci-dessous */
@@ -229,20 +259,23 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       }
       const url = URL.createObjectURL(file);
       const nat = await probeNat(kind, url);
-      place(kind, url, url, nat, file.name);
+      place(kind, url, url, nat, file.name, at);
     },
     [addPath, place],
   );
 
-  // Un LOT posé en BLOC : jamais une pile au même point. Les médias sont rangés en grille (et
-  // regroupés dans un cadre par sous-dossier quand l'import vient d'un dossier), en UNE entrée
-  // d'annulation. Deux temps, pour ne pas figer l'app sur un dossier de rushes : les items
-  // apparaissent tout de suite à une taille provisoire, puis les ratios réels sont mesurés en
-  // arrière-plan — avec une progression VISIBLE, parce qu'un import muet de trente vidéos passe
-  // pour une app plantée — et le lot est re-rangé sans polluer l'historique.
+  // Un LOT posé en BLOC : jamais une pile au même point. Les médias sont rangés (et regroupés dans
+  // un cadre par sous-dossier quand l'import vient d'un dossier), en UNE entrée d'annulation.
+  //
+  // Trois temps, pour ne jamais figer l'app sur un dossier de rushes :
+  //   1. tous les items apparaissent D'UN COUP à une taille provisoire — l'import est perçu instantané ;
+  //   2. les ratios réels (et, pour un fichier sans chemin, la copie en asset durable) sont mesurés
+  //      en arrière-plan par une file d'attente, avec une progression VISIBLE ;
+  //   3. le lot est rangé une seule fois, à ses vraies proportions, chaque groupe empilé sous le
+  //      précédent d'après ses limites MESURÉES — sinon deux dossiers se recouvrent.
   const addBatch = useCallback(
     async (
-      list: { path: string; rel: string; name: string; kind: "image" | "video" }[],
+      list: BatchEntry[],
       opts: { rootName?: string; frames?: boolean; at?: { x: number; y: number } } = {},
     ) => {
       if (!list.length) return;
@@ -252,9 +285,11 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       const gap = prefs.arrangeGap;
       const cell = box + gap;
       const origin = opts.at ?? centerPoint();
+      const FRAME_PAD = 24;
+      const FRAME_TOP = 44; // hauteur de l'étiquette du cadre
 
       // Un groupe par sous-dossier (ordre du scan, déjà trié).
-      const groups = new Map<string, typeof list>();
+      const groups = new Map<string, BatchEntry[]>();
       for (const f of list) {
         const key = f.rel || "";
         const bucket = groups.get(key);
@@ -266,8 +301,8 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       // même z et le cadre, ajouté après ses médias, les recouvrirait — il capterait leurs clics.
       let z = topZ(store.items);
       const batch: BoardItem[] = [];
-      const created: { id: string; kind: ItemKind; src: string }[] = [];
-      const groupIds: { id: string | null; childIds: string[] }[] = [];
+      const created: { id: string; kind: ItemKind; src: string; file?: File }[] = [];
+      const groupPlan: { id: string | null; childIds: string[] }[] = [];
       const stamp = Date.now().toString(36);
       let cursorY = origin.y;
 
@@ -277,31 +312,33 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         const rows = Math.ceil(files.length / cols);
         const childIds: string[] = [];
         const groupKey = `${stamp}-${gi++}`;
-        const startY = opts.frames ? cursorY + 48 : cursorY; // place pour l'étiquette du cadre
+        const startY = opts.frames ? cursorY + FRAME_TOP : cursorY;
 
         let frameId: string | null = null;
         if (opts.frames) {
-          const frame = makeFrameItem(origin.x - 24, cursorY, { color: prefs.defaultFrameColor, fillMode: prefs.defaultFrameFill });
+          const frame = makeFrameItem(origin.x - FRAME_PAD, cursorY, { color: prefs.defaultFrameColor, fillMode: prefs.defaultFrameFill });
           frameId = `${groupKey}-f`;
           frame.id = frameId;
           frame.text = rel ? `${opts.rootName ?? ""}/${rel}` : opts.rootName ?? rel;
-          frame.w = cols * cell - gap + 48;
-          frame.h = rows * cell - gap + 72;
+          frame.w = cols * cell - gap + FRAME_PAD * 2;
+          frame.h = rows * cell - gap + FRAME_TOP + FRAME_PAD;
           frame.z = ++z;
           batch.push(frame);
         }
 
         files.forEach((f, i) => {
           const kind: ItemKind = f.kind === "video" ? "video" : "image";
-          const src = displaySrc(kind, f.path);
+          // Sans chemin disque, on affiche depuis un objectURL : c'est INSTANTANÉ (zéro octet copié
+          // avant que l'image soit à l'écran). L'asset durable est écrit ensuite, en arrière-plan.
+          const src = f.path ? displaySrc(kind, f.path) : URL.createObjectURL(f.file!);
           // Taille provisoire : carré pour une image, 16:9 pour une vidéo. Le vrai ratio arrive juste après.
           const id = `${groupKey}-${i}`;
           childIds.push(id);
-          created.push({ id, kind, src });
+          created.push({ id, kind, src, file: f.path ? undefined : f.file });
           batch.push({
             id,
             kind,
-            ref: f.path,
+            ref: f.path ?? src,
             src,
             x: origin.x + (i % cols) * cell,
             y: startY + Math.floor(i / cols) * cell,
@@ -313,49 +350,82 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
           });
         });
 
-        groupIds.push({ id: frameId, childIds });
-        cursorY = startY + rows * cell + (opts.frames ? 64 : 32);
+        groupPlan.push({ id: frameId, childIds });
+        cursorY = startY + rows * cell + (opts.frames ? FRAME_PAD + 32 : 32);
       }
 
       useBoard.getState().addItems(batch, false);
 
-      // Mesure des ratios réels, par petits paquets (un lot de 300 vidéos ne doit pas ouvrir 300
-      // décodeurs d'un coup). La notice tient l'utilisateur au courant pendant toute la mesure.
-      const CONCURRENCY = 6;
+      // Mesure des ratios (et copie en asset des fichiers sans chemin), file d'attente bornée : un
+      // lot de 300 vidéos ne doit pas ouvrir 300 décodeurs d'un coup.
       let done = 0;
       const total = created.length;
-      useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.progress", { done, total }) });
-      for (let i = 0; i < created.length; i += CONCURRENCY) {
-        await Promise.all(
-          created.slice(i, i + CONCURRENCY).map(async (c) => {
-            const nat = await probeNat(c.kind, c.src);
-            if (nat.w && nat.h) {
-              const size = fitSize(nat.w, nat.h, box);
-              useBoard.getState().patchItem(c.id, { natW: nat.w, natH: nat.h, w: size.w, h: size.h }, false);
-            }
-            done++;
-          }),
-        );
-        useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.progress", { done, total }) });
-      }
-
-      // Re-rangement de chaque groupe avec les vraies proportions, puis ajustement du cadre.
-      if (prefs.autoArrangeOnImport) {
-        for (const g of groupIds) {
-          const state = useBoard.getState();
-          const kids = state.items.filter((it) => g.childIds.includes(it.id));
-          if (kids.length < 2) continue;
-          const pos = computeArrange(kids, prefs.arrangeLayout, { gap: prefs.arrangeGap, sort: prefs.arrangeSort });
-          const moved = state.items.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id) } : it));
-          const bounds = boundsOf(moved.filter((it) => g.childIds.includes(it.id)));
-          useBoard.setState({
-            items: g.id
-              ? moved.map((it) => (it.id === g.id
-                ? { ...it, x: bounds.x - 24, y: bounds.y - 40, w: bounds.w + 48, h: bounds.h + 64 }
-                : it))
-              : moved,
-          });
+      const tick = () => useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.progress", { done, total }) });
+      tick();
+      await pool(created, 8, async (c) => {
+        const nat = await probeNat(c.kind, c.src);
+        if (nat.w && nat.h) {
+          const size = fitSize(nat.w, nat.h, box);
+          useBoard.getState().patchItem(c.id, { natW: nat.w, natH: nat.h, w: size.w, h: size.h }, false);
         }
+        if (c.file && nr.reference?.saveAsset && c.file.size <= ASSET_COPY_MAX) {
+          try {
+            const res = await nr.reference.saveAsset(await c.file.arrayBuffer(), extFromMime(c.file.type, c.kind));
+            if (res.ok && res.path) {
+              const durable = displaySrc(c.kind, res.path);
+              useBoard.getState().patchItem(c.id, { ref: res.path, src: durable }, false);
+              URL.revokeObjectURL(c.src);
+            }
+          } catch {
+            // Écriture refusée : l'objectURL tient la session, la source d'origine reste sur disque.
+          }
+        }
+        done++;
+        tick();
+      });
+
+      // Rangement final, en UN seul rendu : chaque groupe est disposé à ses vraies proportions, puis
+      // recollé sous le précédent d'après ses limites mesurées, et son cadre ajusté au résultat.
+      const state = useBoard.getState();
+      const byId = new Map(state.items.map((it) => [it.id, it]));
+      const next = new Map<string, BoardItem>();
+      let stackY = origin.y;
+      for (const g of groupPlan) {
+        const kids = g.childIds.map((id) => byId.get(id)).filter((it): it is BoardItem => !!it);
+        if (!kids.length) continue;
+        let placed = kids;
+        if (prefs.autoArrangeOnImport && kids.length > 1) {
+          const pos = computeArrange(kids, prefs.arrangeLayout, { gap: prefs.arrangeGap, sort: prefs.arrangeSort });
+          if (pos.size) placed = kids.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id)! } : it));
+        }
+        const b = boundsOf(placed);
+        const top = stackY + (g.id ? FRAME_TOP : 0);
+        const dx = origin.x - b.x;
+        const dy = top - b.y;
+        placed = placed.map((it) => ({ ...it, x: it.x + dx, y: it.y + dy }));
+        placed.forEach((it) => next.set(it.id, it));
+        if (g.id) {
+          const fb = boundsOf(placed);
+          const frame = byId.get(g.id);
+          if (frame) {
+            next.set(g.id, {
+              ...frame,
+              x: fb.x - FRAME_PAD, y: fb.y - FRAME_TOP,
+              w: fb.w + FRAME_PAD * 2, h: fb.h + FRAME_TOP + FRAME_PAD,
+            });
+          }
+        }
+        stackY = top + b.h + (g.id ? FRAME_PAD : 0) + 32;
+      }
+      if (next.size) {
+        // Le lot entier est CENTRÉ sur le point d'arrivée (curseur du dépôt, sinon centre du
+        // viewport) : ancré par son coin, un import un peu large partait hors de l'écran.
+        const all = [...next.values()];
+        const tb = boundsOf(all);
+        const dx = origin.x - (tb.x + tb.w / 2);
+        const dy = origin.y - (tb.y + tb.h / 2);
+        for (const it of all) next.set(it.id, { ...it, x: it.x + dx, y: it.y + dy });
+        useBoard.setState({ items: state.items.map((it) => next.get(it.id) ?? it) });
       }
 
       useBoard.getState().setNotice({ kind: "ok", text: i18n.t("reference:ingest.done", { count: total }) });
@@ -363,60 +433,74 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     [centerPoint],
   );
 
-  // Fichiers déposés ou choisis : posés EN BLOC (grille), pas empilés au même point. Ceux dont le
-  // chemin disque se résout passent par le lot ; les autres (navigateur, presse-papiers) retombent
-  // sur la voie unitaire, qui les écrit en asset avant de les poser.
+  // Fichiers déposés ou choisis : posés EN BLOC, jamais un par un et jamais empilés au même point.
+  // Les chemins disque se résolvent en UN aller-retour ; ceux qui manquent (navigateur, runtime sans
+  // le pont) rejoignent LE MÊME lot par leur objet File — même pose immédiate, même rangement, même
+  // progression. L'ancienne voie de repli les traitait en série et les posait tous au centre du
+  // viewport : import interminable et planche illisible.
   const addFiles = useCallback(
-    (files: FileList | File[]) => {
+    (files: FileList | File[], at?: { x: number; y: number }) => {
       const all = Array.from(files);
       if (!all.length) return;
-      if (all.length === 1) { void addFile(all[0]); return; }
+      if (all.length === 1) { void addFile(all[0], at); return; }
       void (async () => {
         useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.reading", { count: all.length }) });
         const paths = await nr.pathsForFiles(all);
-        const batch: { path: string; rel: string; name: string; kind: "image" | "video" }[] = [];
-        const leftovers: File[] = [];
+        const list: BatchEntry[] = [];
+        const others: File[] = [];
         all.forEach((f, i) => {
           const p = paths[i];
-          const kind = p ? kindFromPath(p) : null;
-          if (p && (kind === "image" || kind === "video")) batch.push({ path: p, rel: "", name: f.name, kind });
-          else leftovers.push(f);
+          const kind = entryKind(p || f.name, f.type);
+          if (!kind) { others.push(f); return; }
+          list.push(p ? { path: p, rel: "", name: f.name, kind } : { file: f, rel: "", name: f.name, kind });
         });
-        if (batch.length) await addBatch(batch);
+        if (list.length) await addBatch(list, { at });
         else useBoard.getState().setNotice(null);
-        for (const f of leftovers) await addFile(f);
+        for (const f of others) await addFile(f, at);
       })();
     },
     [addFile, addBatch],
   );
 
   // Dossier CHOISI (menu) : le core parcourt l'arborescence, puis le lot est posé en cadres.
+  // Renvoie false si le core n'a rien pu rendre — le dépôt d'un dossier s'en sert pour basculer sur
+  // son parcours navigateur au lieu d'abandonner (le core d'une session pas encore redémarrée ne
+  // connaît pas encore ce canal).
   const addFolder = useCallback(
-    async (dirPath: string, at?: { x: number; y: number }) => {
+    async (dirPath: string, at?: { x: number; y: number }): Promise<boolean> => {
       if (!nr.reference?.scanFolder) {
         useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.folderUnavailable") });
-        return;
+        return false;
       }
       useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.folderScanning") });
-      const scan = await nr.reference.scanFolder(dirPath, {});
+      const scan = await nr.reference.scanFolder(dirPath, {}).catch(() => null);
+      if (!scan) return false;
       if (!scan.ok || !scan.count) {
         useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.folderEmpty") });
-        return;
+        return false;
       }
       await addBatch(scan.files, { rootName: scan.name, frames: true, at });
       if (scan.truncated) {
         useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.folderTruncated", { count: scan.count }) });
       }
+      return true;
     },
     [addBatch],
   );
 
-  // Dossier DÉPOSÉ : la coquille ne rend le chemin disque que d'un `File`, jamais d'un dossier. On
-  // parcourt donc l'arborescence côté navigateur (API Entries du drop), puis on résout le chemin de
-  // chaque FICHIER trouvé — ce que le pont sait faire. Le sous-dossier d'origine devient le cadre.
+  // Dossier DÉPOSÉ. Trois voies, dans cet ordre, pour qu'un dossier lâché finisse TOUJOURS sur la
+  // planche :
+  //   1. le chemin disque du dossier lui-même (la coquille le rend pour l'objet `File` que le drop
+  //      place à côté de l'entrée) → le core parcourt l'arborescence, zéro octet copié ;
+  //   2. sinon, parcours côté navigateur (API Entries du drop) puis chemin de chaque FICHIER trouvé ;
+  //   3. et ce qui ne se résout pas part quand même, par son objet File.
   const addDroppedEntry = useCallback(
-    async (entry: FileSystemDirectoryEntry, at?: { x: number; y: number }) => {
+    async (entry: FileSystemDirectoryEntry, dirFile?: File | null, at?: { x: number; y: number }) => {
       useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.folderScanning") });
+      if (dirFile && nr.reference?.scanFolder) {
+        const [dirPath] = await nr.pathsForFiles([dirFile]).catch(() => [""]);
+        if (dirPath && await addFolder(dirPath, at)) return;
+      }
       const found: { file: File; rel: string }[] = [];
 
       const readAll = (reader: FileSystemDirectoryReader): Promise<FileSystemEntry[]> =>
@@ -452,19 +536,22 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       }
 
       const paths = await nr.pathsForFiles(found.map((f) => f.file));
-      const list: { path: string; rel: string; name: string; kind: "image" | "video" }[] = [];
+      const list: BatchEntry[] = [];
       found.forEach((f, i) => {
         const p = paths[i];
-        const kind = p ? kindFromPath(p) : null;
-        if (p && (kind === "image" || kind === "video")) list.push({ path: p, rel: f.rel, name: f.file.name, kind });
+        const kind = entryKind(p || f.file.name, f.file.type);
+        if (!kind) return;
+        list.push(p
+          ? { path: p, rel: f.rel, name: f.file.name, kind }
+          : { file: f.file, rel: f.rel, name: f.file.name, kind });
       });
       if (!list.length) {
-        useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.folderNoPath") });
+        useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.folderEmpty") });
         return;
       }
       await addBatch(list, { rootName: entry.name, frames: true, at });
     },
-    [addBatch],
+    [addBatch, addFolder],
   );
 
   // Lien vidéo en ligne. YouTube → kind "youtube" (boucle Player API) ; Vimeo/Dailymotion/Twitch/

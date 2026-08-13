@@ -8,10 +8,11 @@ import { MIN_SIZE, type BoardItem } from "./referenceShared";
 export type ArrangeMode =
   | "left" | "hcenter" | "right" | "top" | "vcenter" | "bottom"
   | "hdist" | "vdist" | "grid"
-  | "pack" | "row" | "col";
+  | "block" | "pack" | "row" | "col";
 
-// Position cible (partielle : seul l'axe concerné par le mode est touché).
-export type ArrangePos = { x?: number; y?: number };
+// Géométrie cible (partielle : un mode d'alignement ne touche qu'un axe, un mode de rangement peut
+// aussi redimensionner — « bloc » ramène toute la planche à une échelle commune).
+export type ArrangePos = { x?: number; y?: number; w?: number; h?: number };
 
 // Sous-ensemble géométrique nécessaire (compatible BoardItem).
 type Box = Pick<BoardItem, "id" | "x" | "y" | "w" | "h">;
@@ -177,6 +178,82 @@ function packRects(sizes: { w: number; h: number }[], maxWidth: number): { pos: 
   return { pos, w, h };
 }
 
+// Rangement « bloc » : LIGNES JUSTIFIÉES, comme une galerie photo. Chaque ligne est remplie jusqu'à
+// la largeur cible puis étirée EXACTEMENT à cette largeur, si bien que la planche est un rectangle
+// plein — aucun trou, aucun chevauchement — où chaque média garde son ratio et pèse visuellement
+// autant que les autres. C'est le seul mode qui redimensionne : ranger un lot d'images sans les
+// remettre à l'échelle laisse une vignette 200 px à côté d'une affiche 4000 px, et on ne voit rien.
+//
+// L'aire totale de la sélection est conservée : la planche rangée occupe la même surface qu'avant,
+// elle ne saute pas d'échelle sous le curseur.
+function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name"): Map<string, ArrangePos> {
+  const out = new Map<string, ArrangePos>();
+  const sorted = sort === "name" ? sortByName(sel) : [...sel];
+  const boxes = sorted
+    .map((it) => ({ it, b: rotatedBBox(it) }))
+    .filter(({ b }) => b.w > 0 && b.h > 0);
+  const n = boxes.length;
+  if (n < 2) return out;
+
+  const ratios = boxes.map(({ b }) => b.w / b.h);
+  const sumR = ratios.reduce((t, r) => t + r, 0);
+  const area = boxes.reduce((t, { b }) => t + b.w * b.h, 0);
+  // Hauteur de ligne de référence : celle qui redonne l'aire d'origine une fois tout le monde à la
+  // même hauteur (Σ ratio × H² = aire).
+  const baseH = Math.max(MIN_SIZE, Math.sqrt(area / sumR));
+  // Nombre d'items par ligne visant une planche un peu plus large que haute (les écrans le sont) :
+  // colonnes² × ratio moyen ≈ 1,4 × n.
+  const perRow = Math.max(1, Math.ceil(Math.sqrt((1.4 * n * n) / sumR)));
+  const targetW = perRow * (sumR / n) * baseH + gap * (perRow - 1);
+
+  // Remplissage glouton : on ferme la ligne dès qu'elle DÉPASSE la largeur cible (la justification
+  // la ramènera dessus), ce qui donne des lignes régulières même avec des ratios très différents.
+  const rows: { idx: number[]; sum: number }[] = [];
+  let row: { idx: number[]; sum: number } = { idx: [], sum: 0 };
+  ratios.forEach((r, i) => {
+    row.idx.push(i);
+    row.sum += r;
+    if (row.sum * baseH + gap * (row.idx.length - 1) >= targetW) { rows.push(row); row = { idx: [], sum: 0 }; }
+  });
+  if (row.idx.length) rows.push(row);
+
+  // Chaque ligne est justifiée à `targetW`, SAUF la dernière si elle n'a pas débordé : l'étirer
+  // ferait exploser une ligne d'un seul média jusqu'à la largeur de toute la planche.
+  const heights = rows.map((r, k) => {
+    const inner = targetW - gap * (r.idx.length - 1);
+    const fit = inner / r.sum;
+    const last = k === rows.length - 1;
+    return Math.max(MIN_SIZE, last ? Math.min(fit, baseH) : fit);
+  });
+
+  const blockH = heights.reduce((t, h) => t + h, 0) + gap * (rows.length - 1);
+  const bb = boxes.map(({ b }) => b);
+  const minX = Math.min(...bb.map((b) => b.x));
+  const maxX = Math.max(...bb.map((b) => b.x + b.w));
+  const minY = Math.min(...bb.map((b) => b.y));
+  const maxY = Math.max(...bb.map((b) => b.y + b.h));
+  const originX = (minX + maxX) / 2 - targetW / 2;
+  let y = (minY + maxY) / 2 - blockH / 2;
+
+  rows.forEach((r, k) => {
+    const rowH = heights[k];
+    let x = originX;
+    for (const i of r.idx) {
+      const { it, b } = boxes[i];
+      // Échelle UNIFORME appliquée à la géométrie stockée : l'emprise tournée suit exactement, donc
+      // un média incliné se range sur ce qu'il occupe vraiment à l'écran.
+      const k2 = rowH / b.h;
+      const w = Math.max(MIN_SIZE, it.w * k2);
+      const h = Math.max(MIN_SIZE, it.h * k2);
+      const bw = b.w * k2;
+      out.set(it.id, { x: x + bw / 2 - w / 2, y: y + rowH / 2 - h / 2, w, h });
+      x += bw + gap;
+    }
+    y += rowH + gap;
+  });
+  return out;
+}
+
 // Calcule les nouvelles positions des items sélectionnés selon le mode. <2 items → map vide.
 // Les positions renvoyées sont celles du rectangle STOCKÉ (x/y de l'item), calculées depuis son
 // emprise tournée : un item à 45° se range sur ce qu'il occupe vraiment à l'écran.
@@ -185,6 +262,7 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
   if (sel.length < 2) return pos;
 
   const gap = Math.max(0, opts.gap ?? DEFAULT_GAP);
+  if (mode === "block") return computeBlock(sel, gap, opts.sort);
   const box = new Map(sel.map((i) => [i.id, rotatedBBox(i)]));
   const bb = (i: ArrangeBox) => box.get(i.id)!;
   // Décalage entre l'origine stockée et l'origine de l'emprise (nul si l'item n'est pas tourné).

@@ -117,6 +117,81 @@ test('row and column order by name when asked', () => {
   assert.deepEqual(order, ['z', 'y', 'x']);
 });
 
+// Chevauchement de deux emprises tournées (0 ou moins = elles ne se touchent que par un bord).
+function overlaps(A, B) {
+  const a = arrange.rotatedBBox(A);
+  const b = arrange.rotatedBBox(B);
+  const x = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+  const y = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+  return x > 1e-6 && y > 1e-6;
+}
+
+test('block layout justifies rows and keeps every ratio', () => {
+  // Des ratios très différents : c'est là que le rangement doit remettre tout le monde à l'échelle.
+  const sel = [
+    box('a', 0, 0, 4000, 3000), box('b', 0, 0, 200, 200), box('c', 0, 0, 1920, 1080),
+    box('d', 0, 0, 300, 900), box('e', 0, 0, 640, 480), box('f', 0, 0, 1000, 1000),
+    box('g', 0, 0, 800, 450),
+  ];
+  const gap = 16;
+  const pos = arrange.computeArrange(sel, 'block', { gap });
+  assert.equal(pos.size, sel.length);
+
+  const placed = sel.map((it) => ({ ...it, ...pos.get(it.id) }));
+  for (const it of placed) {
+    const src = sel.find((s) => s.id === it.id);
+    assert.ok(Math.abs(it.w / it.h - src.w / src.h) < 1e-6, `${it.id} a perdu son ratio`);
+  }
+  for (let i = 0; i < placed.length; i++) {
+    for (let j = i + 1; j < placed.length; j++) {
+      assert.ok(!overlaps(placed[i], placed[j]), `${placed[i].id} chevauche ${placed[j].id}`);
+    }
+  }
+  // Lignes justifiées : les items d'une même ligne partagent leur hauteur, et toutes les lignes
+  // pleines font EXACTEMENT la même largeur (c'est ce qui donne un rectangle et non un escalier).
+  const rows = [];
+  for (const it of [...placed].sort((a, b) => a.y - b.y || a.x - b.x)) {
+    const row = rows.find((r) => Math.abs(r[0].y - it.y) < 1);
+    if (row) row.push(it); else rows.push([it]);
+  }
+  assert.ok(rows.length > 1, 'échantillon trop petit pour vérifier la justification');
+  const widths = rows
+    .slice(0, -1) // la dernière ligne n'est pas étirée : elle ferait exploser un média isolé
+    .map((r) => Math.max(...r.map((it) => it.x + it.w)) - Math.min(...r.map((it) => it.x)));
+  assert.ok(Math.max(...widths) - Math.min(...widths) < 1, 'lignes non justifiées à la même largeur');
+});
+
+test('block layout preserves the total area of the selection', () => {
+  const sel = [
+    box('a', 0, 0, 400, 300), box('b', 0, 0, 100, 400),
+    box('c', 0, 0, 900, 300), box('d', 0, 0, 250, 250),
+  ];
+  const before = sel.reduce((t, it) => t + it.w * it.h, 0);
+  const pos = arrange.computeArrange(sel, 'block', { gap: 0 });
+  const after = sel.reduce((t, it) => { const p = pos.get(it.id); return t + p.w * p.h; }, 0);
+  // Tolérance large : la justification de la dernière ligne fait forcément varier un peu la surface.
+  assert.ok(after > before * 0.6 && after < before * 1.4, `aire ${after} loin de ${before}`);
+});
+
+test('no layout ever stacks two items on top of each other', () => {
+  // Suite pseudo-aléatoire déterministe : mêmes cas à chaque exécution.
+  let seed = 12345;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  for (const mode of ['block', 'pack', 'grid', 'row', 'col']) {
+    for (const count of [2, 3, 7, 12, 25]) {
+      const sel = Array.from({ length: count }, (_, i) =>
+        box(`i${i}`, rnd() * 2000 - 1000, rnd() * 2000 - 1000, 60 + rnd() * 900, 60 + rnd() * 900));
+      const pos = arrange.computeArrange(sel, mode, { gap: 12 });
+      const placed = sel.map((it) => ({ ...it, ...pos.get(it.id) }));
+      for (let i = 0; i < placed.length; i++) {
+        for (let j = i + 1; j < placed.length; j++) {
+          assert.ok(!overlaps(placed[i], placed[j]), `${mode}/${count} : ${placed[i].id} chevauche ${placed[j].id}`);
+        }
+      }
+    }
+  }
+});
+
 test('arranging keeps the selection centred where it was', () => {
   const sel = [box('a', 0, 0, 100, 100), box('b', 400, 300, 100, 100)];
   const before = arrange.boundsOf(sel);

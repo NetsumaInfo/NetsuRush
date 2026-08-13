@@ -590,6 +590,7 @@
   "tidy": {
     "title": "整理",
     "layout": "排布",
+    "layoutBlock": "区块",
     "layoutPack": "最优",
     "layoutGrid": "网格",
     "layoutRow": "一行",
@@ -641,7 +642,6 @@
     "folderEmpty": "该文件夹中没有媒体",
     "folderDone": "已导入 {{count}} 个媒体",
     "folderDoneTruncated": "已导入 {{count}} 个媒体（文件夹被截断）",
-    "folderNoPath": "找不到文件夹路径",
     "progress": "正在导入 {{done}}/{{total}}…",
     "reading": "正在读取 {{count}} 个文件…",
     "done": "已导入 {{count}} 个媒体",

@@ -590,6 +590,7 @@
   "tidy": {
     "title": "Ranger",
     "layout": "Disposition",
+    "layoutBlock": "Bloc",
     "layoutPack": "Optimal",
     "layoutGrid": "Grille",
     "layoutRow": "Ligne",
@@ -641,7 +642,6 @@
     "folderEmpty": "Aucun média dans ce dossier",
     "folderDone": "{{count}} médias importés",
     "folderDoneTruncated": "{{count}} médias importés (dossier tronqué)",
-    "folderNoPath": "Chemin du dossier introuvable",
     "progress": "Import {{done}}/{{total}}…",
     "reading": "Lecture de {{count}} fichiers…",
     "done": "{{count}} médias importés",
