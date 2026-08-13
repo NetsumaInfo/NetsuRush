@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Contrast, Hash, RefreshCw } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw } from "lucide-react";
 import { nr } from "@/lib/bridge";
 import { Separator } from "@/components/ui/separator";
 import { useBoard } from "./useReferenceBoard";
@@ -15,7 +15,7 @@ import { TrimControls, TextControls, FrameControls, ArrangeBar, PlayModeControls
 import { displaySrc, probeImage, youtubeId, isRemoteRef } from "./referenceShared";
 import { convertToEmbed, downloadMediaFromEmbed, downloadYoutube } from "./boardMediaActions";
 import { quickUpscale } from "./boardUpscale";
-import { regeneratePalette } from "./boardPaletteActions";
+import { extractPaletteToBoard, regeneratePalette } from "./boardPaletteActions";
 import { UpscaleItemDialog } from "./UpscaleItemDialog";
 import { iconForLink } from "./brandIcons";
 
@@ -136,11 +136,12 @@ export function Inspector() {
             </IconAction>
           </>
         )}
-        {/* Niveaux de gris : juger les valeurs d'une référence sans se laisser porter par la couleur. */}
-        {isMedia && (
-          <IconToggle on={!!item.grayscale} label={t("actions.grayscale")} onClick={() => patchItem(item.id, { grayscale: !item.grayscale })}>
-            <Contrast />
-          </IconToggle>
+        {/* Palette : extraire les couleurs de CE média et poser le bloc juste dessous. (Les séquences
+            ont leur propre barre et ne passent pas par cet inspecteur.) */}
+        {(item.kind === "image" || item.kind === "video") && (
+          <IconAction label={t("palette.extract")} onClick={() => void extractPaletteToBoard()}>
+            <Palette />
+          </IconAction>
         )}
         {trimmable && (
           <>

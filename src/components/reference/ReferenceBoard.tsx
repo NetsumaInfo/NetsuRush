@@ -559,26 +559,19 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         const dropped = Array.from(e.dataTransfer.files);
         const projectFile = dropped.find((f) => f.name.toLowerCase().endsWith(".netsu"));
         if (projectFile) { void openDroppedProject(projectFile); return; }
-        // Un DOSSIER lâché s'importe en groupe (un cadre par dossier). Un dossier arrive comme une
-        // entrée sans type MIME ; `webkitGetAsEntry` tranche quand le navigateur le renseigne.
-        const entries = Array.from(e.dataTransfer.items ?? []);
-        const folders = dropped.filter((f, i) => {
-          const entry = entries[i]?.webkitGetAsEntry?.();
-          return entry ? entry.isDirectory : !f.type && !f.size;
-        });
+        // Un DOSSIER lâché s'importe en groupe (un cadre par dossier). La coquille ne sait rendre le
+        // chemin disque que d'un FICHIER : on parcourt donc le dossier via l'API Entries du drop, et
+        // on résout ensuite le chemin de chaque fichier trouvé. Les entrées doivent être lues AVANT
+        // tout `await` — le DataTransfer est vidé dès que le gestionnaire rend la main.
+        const dirs = Array.from(e.dataTransfer.items ?? [])
+          .map((it) => it.webkitGetAsEntry?.())
+          .filter((entry): entry is FileSystemDirectoryEntry => !!entry && entry.isDirectory);
         const r = rect();
         const dropAt = screenToBoard(useBoard.getState().view, e.clientX - (r?.left ?? 0), e.clientY - (r?.top ?? 0));
-        if (folders.length) {
-          void (async () => {
-            const paths = await nr.pathsForFiles(folders);
-            const usable = paths.filter(Boolean) as string[];
-            if (!usable.length) {
-              useBoard.getState().setNotice({ kind: "error", text: t("ingest.folderNoPath") });
-              return;
-            }
-            for (const p of usable) await ingest.addFolder(p, dropAt);
-          })();
-          const files = dropped.filter((f) => !folders.includes(f));
+        if (dirs.length) {
+          void (async () => { for (const dir of dirs) await ingest.addDroppedEntry(dir, dropAt); })();
+          // Un dossier n'a pas de contenu exploitable dans `files` : on ne garde que les vrais fichiers.
+          const files = dropped.filter((f) => f.type || f.size);
           if (files.length) ingest.addFiles(files);
           return;
         }

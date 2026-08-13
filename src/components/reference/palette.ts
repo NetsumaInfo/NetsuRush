@@ -3,15 +3,18 @@
 // Moteur : quantizer Celebi + scoring de @material/material-color-utilities (Apache-2.0, sans
 // dépendance) — quantification en espace HCT, perceptuellement juste, très au-dessus d'un median-cut
 // RGB classique. Par-dessus, ce qui est PROPRE au board :
-//   - on échantillonne ce qui est VU (rognage, miroirs et niveaux de gris appliqués), pas le fichier ;
+//   - on échantillonne ce qui est VU (rognage appliqué, frame courante d'une vidéo), pas le fichier ;
 //   - plusieurs médias sont agrégés en une seule quantification, chacun pondéré par sa surface
 //     AFFICHÉE : une grande référence pèse plus qu'une vignette posée à côté ;
 //   - le budget de pixels est plafonné, donc le coût ne dépend pas du poids des images.
 //
-// Limite connue : un média dont les pixels ne sont pas lisibles (iframe YouTube/embed, ou source
-// distante qui teinte le canvas) est ignoré et compté dans `skipped`.
+// Le point dur est la LECTURE des pixels : la coquille affiche les médias via son protocole d'asset,
+// qui teinte le canvas et interdit `getImageData`. L'échantillonnage repasse donc par le serveur HTTP
+// du core (`Access-Control-Allow-Origin: *`) en `crossOrigin="anonymous"`. Reste ignoré ce dont les
+// pixels sont vraiment hors d'atteinte : une iframe YouTube ou une carte embed.
 
 import { QuantizerCelebi, Score, Hct, hexFromArgb, argbFromRgb } from "@material/material-color-utilities";
+import { nr } from "@/lib/bridge";
 import type { BoardItem } from "./referenceShared";
 
 export const PALETTE_MIN = 3;
@@ -31,20 +34,61 @@ export interface PaletteResult {
   sampled: number;   // médias réellement échantillonnés
 }
 
-// Élément vivant de l'item à l'écran : c'est la source la plus fidèle (frame courante d'une vidéo,
-// image déjà décodée) et elle évite un second téléchargement.
+// Élément vivant de l'item à l'écran. Fidèle (frame courante d'une vidéo, image déjà décodée) mais
+// chargé sans `crossOrigin` : le TEINDRAIT le canvas et `getImageData` lèverait. On ne s'en sert
+// donc qu'en dernier recours, et l'échec de lecture est rattrapé plus bas.
 function liveMedia(id: string): HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | null {
   const root = document.querySelector(`[data-board-item="${CSS.escape(id)}"]`);
   return root?.querySelector("video, img, canvas") ?? null;
 }
 
-function loadImage(src: string): Promise<HTMLImageElement | null> {
+// Source LISIBLE par un canvas : le serveur HTTP du core répond avec `Access-Control-Allow-Origin: *`,
+// donc une image chargée là en `crossOrigin="anonymous"` ne teinte pas le canvas — contrairement au
+// protocole d'asset de la coquille, qui sert l'affichage mais interdit la relecture des pixels.
+function readableSrc(ref: string): string {
+  if (!ref) return "";
+  if (/^(https?:|data:|blob:)/i.test(ref)) return ref;
+  try {
+    return nr.mediaUrl(ref);
+  } catch {
+    return "";
+  }
+}
+
+function loadImage(src: string, anonymous: boolean): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    if (anonymous) img.crossOrigin = "anonymous";
     img.decoding = "async";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;
+  });
+}
+
+// Vidéo décodée hors écran, positionnée sur la frame voulue, en `crossOrigin="anonymous"` pour que
+// ses pixels restent lisibles. Bornée dans le temps : une source lente ne bloque pas l'extraction.
+function loadVideoFrame(src: string, at: number): Promise<HTMLVideoElement | null> {
+  return new Promise((resolve) => {
+    const v = document.createElement("video");
+    v.crossOrigin = "anonymous";
+    v.preload = "auto";
+    v.muted = true;
+    let done = false;
+    const finish = (ok: boolean) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(ok ? v : null);
+    };
+    const timer = setTimeout(() => finish(false), 8000);
+    v.onerror = () => finish(false);
+    v.onseeked = () => finish(true);
+    v.onloadeddata = () => {
+      if (at > 0 && at < (v.duration || Infinity)) v.currentTime = at;
+      else finish(true);
+    };
+    v.src = src;
   });
 }
 
@@ -76,7 +120,6 @@ function pixelsFrom(el: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement,
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) return null;
   // Le miroir ne change pas l'ensemble des couleurs : inutile de le reproduire ici.
-  if (item.grayscale) ctx.filter = "grayscale(1)";
   try {
     ctx.drawImage(el, sx, sy, sw, sh, 0, 0, dw, dh);
   } catch {
@@ -99,18 +142,31 @@ function pixelsFrom(el: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement,
   return out;
 }
 
-// Récupère les pixels d'un item (élément vivant si présent, sinon chargement direct de la source).
+// Pixels d'un item. L'ordre compte : on passe D'ABORD par une source relisible (serveur HTTP du
+// core, en anonyme), parce que l'élément affiché vient du protocole d'asset et teint le canvas —
+// `getImageData` lèverait et le média serait compté comme ignoré. L'élément vivant ne sert que de
+// repli, pour les sources déjà libres de droit de lecture (data:, blob:, http distant déjà affiché).
 async function samplePixels(item: BoardItem, budget: number): Promise<number[] | null> {
   if (!SAMPLEABLE.has(item.kind)) return null;
+
+  const ref = item.kind === "sequence" ? item.frames?.[item.frame ?? 0] ?? item.ref : item.ref;
+  const src = readableSrc(ref);
+  if (src) {
+    const el = item.kind === "video"
+      ? await loadVideoFrame(src, item.trimIn ?? 0)
+      : await loadImage(src, true);
+    if (el) {
+      const px = pixelsFrom(el, item, budget);
+      if (px && px.length) return px;
+    }
+  }
+
   const live = liveMedia(item.id);
   if (live) {
     const px = pixelsFrom(live, item, budget);
     if (px && px.length) return px;
   }
-  if (!item.src) return null;
-  const img = await loadImage(item.src);
-  if (!img) return null;
-  return pixelsFrom(img, item, budget);
+  return null;
 }
 
 // Extrait la palette d'une sélection. `count` = nombre de couleurs souhaité (borné 3–12).

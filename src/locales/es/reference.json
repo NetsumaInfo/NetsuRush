@@ -318,7 +318,8 @@
     "resetAll": "Restablecer todo",
     "grayscale": "Escala de grises",
     "toFront": "Traer al frente",
-    "toBack": "Enviar al fondo"
+    "toBack": "Enviar al fondo",
+    "extractPalette": "Extraer la paleta"
   },
   "drawStyle": {
     "thin": "Trazo fino",
@@ -640,6 +641,10 @@
     "folderEmpty": "No hay medios en esta carpeta",
     "folderDone": "{{count}} medios importados",
     "folderDoneTruncated": "{{count}} medios importados (carpeta truncada)",
-    "folderNoPath": "No se encontró la ruta de la carpeta"
+    "folderNoPath": "No se encontró la ruta de la carpeta",
+    "progress": "Importando {{done}}/{{total}}…",
+    "reading": "Leyendo {{count}} archivos…",
+    "done": "{{count}} medios importados",
+    "folderTruncated": "Carpeta demasiado grande: importados los primeros {{count}} medios"
   }
 }

@@ -318,7 +318,8 @@
     "resetAll": "すべてリセット",
     "grayscale": "グレースケール",
     "toFront": "最前面へ",
-    "toBack": "最背面へ"
+    "toBack": "最背面へ",
+    "extractPalette": "パレットを抽出"
   },
   "drawStyle": {
     "thin": "細い線",
@@ -640,6 +641,10 @@
     "folderEmpty": "このフォルダーにメディアがありません",
     "folderDone": "{{count}} 件のメディアを読み込みました",
     "folderDoneTruncated": "{{count}} 件を読み込みました（フォルダーは途中まで）",
-    "folderNoPath": "フォルダーのパスが見つかりません"
+    "folderNoPath": "フォルダーのパスが見つかりません",
+    "progress": "読み込み中 {{done}}/{{total}}…",
+    "reading": "{{count}} 件のファイルを読み込み中…",
+    "done": "{{count}} 件のメディアを読み込みました",
+    "folderTruncated": "フォルダーが大きすぎます：先頭 {{count}} 件を読み込みました"
   }
 }

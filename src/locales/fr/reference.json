@@ -318,7 +318,8 @@
     "resetAll": "Tout réinitialiser",
     "grayscale": "Niveaux de gris",
     "toFront": "Premier plan",
-    "toBack": "Arrière-plan"
+    "toBack": "Arrière-plan",
+    "extractPalette": "Extraire la palette"
   },
   "drawStyle": {
     "thin": "Trait fin",
@@ -640,6 +641,10 @@
     "folderEmpty": "Aucun média dans ce dossier",
     "folderDone": "{{count}} médias importés",
     "folderDoneTruncated": "{{count}} médias importés (dossier tronqué)",
-    "folderNoPath": "Chemin du dossier introuvable"
+    "folderNoPath": "Chemin du dossier introuvable",
+    "progress": "Import {{done}}/{{total}}…",
+    "reading": "Lecture de {{count}} fichiers…",
+    "done": "{{count}} médias importés",
+    "folderTruncated": "Dossier trop grand : {{count}} premiers médias importés"
   }
 }

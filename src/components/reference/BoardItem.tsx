@@ -788,8 +788,8 @@ export const BoardItem = memo(function BoardItem({
           className="h-full w-full"
           style={
             promote
-              ? { transform: `${flip} translateZ(0)`, willChange: "transform", backfaceVisibility: "hidden", filter: item.grayscale ? "grayscale(1)" : undefined }
-              : { transform: flip, filter: item.grayscale ? "grayscale(1)" : undefined }
+              ? { transform: `${flip} translateZ(0)`, willChange: "transform", backfaceVisibility: "hidden" }
+              : { transform: flip }
           }
         >
           <ItemContent item={item} editing={editing} live={live} onYtFallback={setYtFallback} />

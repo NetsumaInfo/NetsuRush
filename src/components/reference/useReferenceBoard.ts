@@ -124,8 +124,6 @@ export interface BoardState {
   reset: (kind: ResetKind) => void;
   // Applique un patch à TOUTE la sélection en une entrée d'historique (opacité, gris, couleur…).
   patchSelected: (patch: Partial<BoardItem>, tag?: string) => void;
-  // Bascule les niveaux de gris sur la sélection (si un seul item est déjà gris, on éteint tout).
-  toggleGrayscale: () => void;
   // Ajoute plusieurs items d'un coup (import de dossier, collage multiple) — une seule entrée.
   addItems: (items: BoardItem[], select?: boolean) => string[];
   // Presse-papiers INTERNE du board : survit au changement de scène (copier ici, coller là-bas).
@@ -539,21 +537,6 @@ export const useBoard = create<BoardState>((set, get) => ({
       recordHistory(s.items, tag ?? null);
       return {
         items: s.items.map((it) => (ids.has(it.id) ? { ...it, ...patch } : it)),
-        dirty: true,
-      };
-    }),
-
-  // Un seul item déjà en gris suffit à ce que la bascule ÉTEIGNE tout : l'action reste prévisible
-  // sur une sélection mixte (on ne se retrouve jamais avec la moitié de la planche en gris).
-  toggleGrayscale: () =>
-    set((s) => {
-      const sel = s.items.filter((it) => s.selectedIds.includes(it.id));
-      if (!sel.length) return {};
-      const on = !sel.some((it) => it.grayscale);
-      recordHistory(s.items, null);
-      const ids = new Set(sel.map((it) => it.id));
-      return {
-        items: s.items.map((it) => (ids.has(it.id) ? { ...it, grayscale: on } : it)),
         dirty: true,
       };
     }),

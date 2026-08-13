@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   ImagePlus, Type, Frame, Pencil, Clapperboard, ZoomIn, ZoomOut, Maximize, FilePlus2,
   Save, SaveAll, FileCheck2, FolderOpen, Share2, PictureInPicture2, Minimize2, Pin, PinOff, Play, Pause,
-  Settings2, Home, Undo2, Redo2, RotateCw, Magnet, Wand2,
+  Settings2, Home, Undo2, Redo2, RotateCw, Magnet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,6 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { useBoard } from "./useReferenceBoard";
 import { fileLabel } from "./useScenePersistence";
 import { recoverAllOnlineMedia, recoverableOnlineItems } from "./boardMediaActions";
-import { TidyMenu } from "./TidyMenu";
 import type { BoardHandle } from "./ReferenceBoard";
 
 function IconBtn({ icon: Icon, label, onClick, disabled, active }: {
@@ -83,7 +82,6 @@ export function Toolbar({
   const recoverableCount = recoverableOnlineItems(items).length;
   const snap = useBoard((s) => s.prefs.snap);
   const setPrefs = useBoard((s) => s.setPrefs);
-  const selCount = useBoard((s) => s.selectedIds.length);
 
   // Choisir un autre outil/ajout quitte le mode dessin (revient au curseur normal).
   const leaveDraw = () => { if (useBoard.getState().drawMode) setDrawMode(false); };
@@ -143,18 +141,6 @@ export function Toolbar({
       {/* Aimant : accrochage bords/centres/coins et collage bord à bord. Alt le suspend le temps
           d'un geste ; ce bouton, lui, l'éteint durablement. */}
       <IconBtn icon={Magnet} label={snap ? t("toolbar.snapOff") : t("toolbar.snapOn")} active={snap} onClick={() => setPrefs({ snap: !snap })} />
-      {/* Ranger la sélection : disposition + uniformisation de taille, en une entrée d'annulation. */}
-      <TidyMenu
-        disabled={selCount < 2}
-        trigger={
-          <Button variant="ghost" size="icon-sm" disabled={selCount < 2} aria-label={t("tidy.title")}>
-            <Wand2 />
-          </Button>
-        }
-      />
-
-      <Separator orientation="vertical" className="mx-1 h-5" />
-
       <IconBtn icon={ZoomOut} label={t("actions.zoomOut")} onClick={() => board.current?.zoomBy(0.8)} />
       <IconBtn icon={ZoomIn} label={t("actions.zoomIn")} onClick={() => board.current?.zoomBy(1.25)} />
       <IconBtn icon={Maximize} label={t("actions.fitAll")} onClick={() => board.current?.fit()} />

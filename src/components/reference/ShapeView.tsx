@@ -36,7 +36,9 @@ export function ShapeView({ s }: { s: DrawShape }) {
   if (s.t === "line" || s.t === "arrow") {
     const [x1, y1, x2, y2] = s.p;
     const { d, startAng, endAng } = connectorPath(s);
-    const len = Math.max(s.w * 3.5, Math.hypot(x2 - x1, y2 - y1) * 0.18);
+    // Pointe proportionnelle au TRAIT, pas à la longueur : une flèche liée à deux médias grandit en
+    // longueur quand ils s'écartent, sa pointe reste de la même taille (bornée à 8× l'épaisseur).
+    const len = Math.min(s.w * 8, Math.max(s.w * 3.5, Math.hypot(x2 - x1, y2 - y1) * 0.18));
     // flèche : pointe par défaut à l'arrivée si aucune n'est définie ; ligne : aucune par défaut.
     const h2 = s.h2 ?? (s.t === "arrow" ? "arrow" : "none");
     const h1 = s.h1 ?? "none";

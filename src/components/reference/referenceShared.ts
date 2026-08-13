@@ -52,7 +52,7 @@ export const DEFAULT_DRAW_KEYS: DrawKeys = Object.fromEntries(DRAW_TOOL_DEFS.map
 export type ShortcutAction =
   | "delete" | "deselect" | "selectAll" | "duplicate"
   | "undo" | "redo" | "save" | "saveAs" | "openProject" | "fit" | "zoomIn" | "zoomOut"
-  | "copy" | "cut" | "fitSelection" | "grayscale" | "resetAll" | "toFront" | "toBack"
+  | "copy" | "cut" | "fitSelection" | "extractPalette" | "resetAll" | "toFront" | "toBack"
   | "normalizeHeight" | "normalizeWidth" | "normalizeArea" | "arrangeDefault";
 export const SHORTCUT_DEFS: { action: ShortcutAction; labelKey: string; combo: string }[] = [
   { action: "delete", labelKey: "shortcut.delete", combo: "Delete" },
@@ -75,7 +75,7 @@ export const SHORTCUT_DEFS: { action: ShortcutAction; labelKey: string; combo: s
   { action: "normalizeArea", labelKey: "shortcut.normalizeArea", combo: "Shift+S" },
   { action: "arrangeDefault", labelKey: "shortcut.arrangeDefault", combo: "Shift+O" },
   { action: "resetAll", labelKey: "shortcut.resetAll", combo: "R" },
-  { action: "grayscale", labelKey: "shortcut.grayscale", combo: "G" },
+  { action: "extractPalette", labelKey: "shortcut.extractPalette", combo: "G" },
   { action: "toFront", labelKey: "shortcut.toFront", combo: "PageUp" },
   { action: "toBack", labelKey: "shortcut.toBack", combo: "PageDown" },
 ];
@@ -166,8 +166,6 @@ export interface BoardItem {
   embed?: NetsuEmbed;
   title?: string;
   opacity?: number;
-  // Rendu en niveaux de gris (juger les valeurs sans se laisser porter par la couleur). Persisté.
-  grayscale?: boolean;
   // Miroir horizontal / vertical.
   flipH?: boolean;
   flipV?: boolean;

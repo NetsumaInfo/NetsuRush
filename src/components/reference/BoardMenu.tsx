@@ -107,9 +107,6 @@ export function BoardContextMenu({
               <ContextMenuItem onClick={() => void board.current?.copySelection(true)}>
                 <Scissors /> {t("actions.cut")}
               </ContextMenuItem>
-              <ContextMenuCheckboxItem checked={!!item.grayscale} onClick={() => store().toggleGrayscale()}>
-                {t("actions.grayscale")}
-              </ContextMenuCheckboxItem>
               <ContextMenuSub>
                 <ContextMenuSubTrigger><RotateCcw /> {t("actions.reset")}</ContextMenuSubTrigger>
                 <ContextMenuSubContent>

@@ -6,6 +6,7 @@
 // Les tracés liés à un média sont résolus AVANT rendu (cf. drawAnchor) : l'export montre ce que
 // l'utilisateur voit, pas les coordonnées stockées.
 
+import { nr } from "@/lib/bridge";
 import type { BoardItem, DrawShape } from "./referenceShared";
 import { rotatedBBox } from "./boardArrange";
 import { resolveShapes } from "./drawAnchor";
@@ -75,13 +76,51 @@ function liveMedia(id: string): HTMLImageElement | HTMLVideoElement | HTMLCanvas
   return root?.querySelector("video, img, canvas") ?? null;
 }
 
-function loadImage(src: string): Promise<HTMLImageElement | null> {
+// Source relisible par un canvas : le serveur HTTP du core autorise la lecture cross-origin, le
+// protocole d'asset de la coquille non (il teinte le canvas, et `toBlob`/`toDataURL` lèvent alors).
+function readableSrc(ref: string): string {
+  if (!ref) return "";
+  if (/^(https?:|data:|blob:)/i.test(ref)) return ref;
+  try {
+    return nr.mediaUrl(ref);
+  } catch {
+    return "";
+  }
+}
+
+function loadImage(src: string, anonymous: boolean): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    if (anonymous) img.crossOrigin = "anonymous";
     img.decoding = "async";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;
+  });
+}
+
+// Vidéo hors écran calée sur la frame voulue, lisible par le canvas.
+function loadVideoFrame(src: string, at: number): Promise<HTMLVideoElement | null> {
+  return new Promise((resolve) => {
+    const v = document.createElement("video");
+    v.crossOrigin = "anonymous";
+    v.preload = "auto";
+    v.muted = true;
+    let done = false;
+    const finish = (ok: boolean) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(ok ? v : null);
+    };
+    const timer = setTimeout(() => finish(false), 8000);
+    v.onerror = () => finish(false);
+    v.onseeked = () => finish(true);
+    v.onloadeddata = () => {
+      if (at > 0 && at < (v.duration || Infinity)) v.currentTime = at;
+      else finish(true);
+    };
+    v.src = src;
   });
 }
 
@@ -92,13 +131,19 @@ function naturalSize(el: CanvasImageSource): { w: number; h: number } {
   return { w: 0, h: 0 };
 }
 
-// Élément peignable d'un média : l'élément vivant si l'item est monté (frame courante d'une vidéo),
-// sinon un chargement direct de la source.
+// Élément peignable d'un média. On passe d'abord par une source RELISIBLE (serveur HTTP du core, en
+// anonyme) : l'élément affiché, lui, vient du protocole d'asset et teindrait le canvas — l'export
+// entier échouerait alors à la conversion finale. L'élément vivant reste le repli.
 async function mediaSource(item: BoardItem): Promise<CanvasImageSource | null> {
+  const ref = item.kind === "sequence" ? item.frames?.[item.frame ?? 0] ?? item.ref : item.ref;
+  const src = readableSrc(ref);
+  if (src) {
+    const el = item.kind === "video" ? await loadVideoFrame(src, item.trimIn ?? 0) : await loadImage(src, true);
+    if (el && naturalSize(el).w) return el;
+  }
   const live = liveMedia(item.id);
   if (live && naturalSize(live).w) return live;
-  if (!item.src) return null;
-  return await loadImage(item.src);
+  return null;
 }
 
 // ── Rendu canvas ─────────────────────────────────────────────────────────────
@@ -283,7 +328,6 @@ async function paintItem(ctx: CanvasRenderingContext2D, item: BoardItem): Promis
       const sy = crop ? crop.y * nat.h : 0;
       const sw = crop ? Math.max(1, crop.w * nat.w) : nat.w;
       const sh = crop ? Math.max(1, crop.h * nat.h) : nat.h;
-      if (item.grayscale) ctx.filter = "grayscale(1)";
       try {
         ctx.drawImage(src, sx, sy, sw, sh, 0, 0, item.w, item.h);
       } catch {
@@ -359,7 +403,7 @@ function paintShape(ctx: CanvasRenderingContext2D, s: DrawShape): void {
     ctx.stroke(new Path2D(d));
     ctx.setLineDash([]);
     const [x1, y1, x2, y2] = s.p;
-    const len = Math.max(s.w * 3.5, Math.hypot(x2 - x1, y2 - y1) * 0.18);
+    const len = Math.min(s.w * 8, Math.max(s.w * 3.5, Math.hypot(x2 - x1, y2 - y1) * 0.18));
     paintHead(ctx, s.h1 ?? "none", x1, y1, startAng, len, s.c, s.w);
     paintHead(ctx, s.h2 ?? (s.t === "arrow" ? "arrow" : "none"), x2, y2, endAng, len, s.c, s.w);
   } else if (s.t === "rect") {
@@ -473,7 +517,6 @@ async function mediaDataUrl(item: BoardItem): Promise<string | null> {
   canvas.height = Math.max(1, Math.round(sh));
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  if (item.grayscale) ctx.filter = "grayscale(1)";
   try {
     ctx.drawImage(src, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/png");

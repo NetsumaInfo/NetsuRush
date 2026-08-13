@@ -318,7 +318,8 @@
     "resetAll": "Reset all",
     "grayscale": "Grayscale",
     "toFront": "Bring to front",
-    "toBack": "Send to back"
+    "toBack": "Send to back",
+    "extractPalette": "Extract palette"
   },
   "drawStyle": {
     "thin": "Thin stroke",
@@ -640,6 +641,10 @@
     "folderEmpty": "No media in this folder",
     "folderDone": "{{count}} media imported",
     "folderDoneTruncated": "{{count}} media imported (folder truncated)",
-    "folderNoPath": "Folder path not found"
+    "folderNoPath": "Folder path not found",
+    "progress": "Importing {{done}}/{{total}}…",
+    "reading": "Reading {{count}} files…",
+    "done": "{{count}} media imported",
+    "folderTruncated": "Folder too large: first {{count}} media imported"
   }
 }

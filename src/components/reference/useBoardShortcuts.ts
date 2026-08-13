@@ -2,12 +2,13 @@
 // référence (aussi affichée dans Paramètres ▸ Raccourcis) :
 //   Copier (Ctrl/⌘+C) · Couper (Ctrl/⌘+X) · Coller (Ctrl/⌘+V) · Supprimer la sélection (Suppr) ·
 //   Désélectionner (Échap) · Tout sélectionner (Ctrl/⌘+A) · Dupliquer (Ctrl/⌘+D) ·
+//   Supprimer marche AUSSI avec Retour arrière, hors de toute liaison configurable ·
 //   Annuler (Ctrl/⌘+Z) · Rétablir (Ctrl/⌘+Maj+Z) · Enregistrer (Ctrl/⌘+S) ·
 //   Enregistrer sous (Ctrl/⌘+Maj+S) · Ouvrir un projet (Ctrl/⌘+O) ·
 //   Déplacer la sélection (Flèches, Maj = ×10) · Tout cadrer (Ctrl/⌘+0) ·
 //   Cadrer la sélection (Maj+F) · Zoom (Ctrl/⌘+= / Ctrl/⌘+-, ou molette) ·
 //   Même hauteur (Maj+H) · Même largeur (Maj+W) · Même surface (Maj+S) · Ranger (Maj+O) ·
-//   Tout réinitialiser (R) · Niveaux de gris (G) · Premier plan (Pg↑) · Arrière-plan (Pg↓) ·
+//   Tout réinitialiser (R) · Extraire la palette (G) · Premier plan (Pg↑) · Arrière-plan (Pg↓) ·
 //   Pan : Espace+glissé ou clic-milieu · Aimant : Alt = désactivé le temps du geste.
 
 import { useEffect } from "react";
@@ -15,7 +16,8 @@ import i18n from "@/i18n";
 import { useBoard } from "./useReferenceBoard";
 import { shifted } from "./drawGeometry";
 import { isTyping, comboFromEvent } from "@/lib/shortcuts";
-import { uid, type ShortcutAction } from "./referenceShared";
+import { uid, SHORTCUT_DEFS } from "./referenceShared";
+import { extractPaletteToBoard } from "./boardPaletteActions";
 import type { BoardHandle } from "./ReferenceBoard";
 
 const ARROWS: Record<string, [number, number]> = {
@@ -72,7 +74,13 @@ export function useBoardShortcuts(
       // En mode dessin, les LETTRES NUES appartiennent aux outils (stylo, gomme…) : on ne leur vole
       // pas la touche. Les combos avec modificateur (Ctrl+Z, Ctrl+S…) restent actifs partout.
       if (st.drawMode && !(e.ctrlKey || e.metaKey || e.altKey) && combo.length === 1) return;
-      const action = (Object.keys(keys) as ShortcutAction[]).find((a) => keys[a] === combo);
+      // Ordre de résolution FIXE (celui de la liste de référence) : si deux actions se retrouvent sur
+      // le même combo — un rebind maladroit dans les Paramètres — c'est toujours la même qui gagne,
+      // et jamais l'ordre d'insertion d'un objet enregistré au fil du temps.
+      let action = SHORTCUT_DEFS.map((d) => d.action).find((a) => keys[a] === combo);
+      // Filet de sécurité NON rebindable : Retour arrière supprime aussi. Supprimer sa sélection ne
+      // doit jamais dépendre d'un réglage — c'est le geste le plus fréquent du board.
+      if (!action && (e.key === "Backspace" || e.key === "Delete")) action = "delete";
       if (!action) return;
 
       switch (action) {
@@ -157,10 +165,9 @@ export function useBoardShortcuts(
           e.preventDefault();
           void boardRef.current?.copySelection(true);
           break;
-        case "grayscale":
-          if (!st.selectedIds.length) break;
+        case "extractPalette":
           e.preventDefault();
-          st.toggleGrayscale();
+          void extractPaletteToBoard();
           break;
         case "resetAll":
           if (!st.selectedIds.length) break;

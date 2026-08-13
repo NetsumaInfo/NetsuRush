@@ -7,7 +7,7 @@ import {
   AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd,
   AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, LayoutGrid, MoreHorizontal,
-  Wand2, Palette, Contrast, RotateCcw,
+  Wand2, Palette, RotateCcw,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
@@ -511,7 +511,6 @@ export function ArrangeBar({ count }: { count: number }) {
   const arrange = useBoard((s) => s.arrange);
   const removeSelected = useBoard((s) => s.removeSelected);
   const groupSequence = useBoard((s) => s.groupSequence);
-  const toggleGrayscale = useBoard((s) => s.toggleGrayscale);
   const reset = useBoard((s) => s.reset);
   const selectedIds = useBoard((s) => s.selectedIds);
   const items = useBoard((s) => s.items);
@@ -548,7 +547,6 @@ export function ArrangeBar({ count }: { count: number }) {
         }
       />
       <IconAction label={t("palette.extract")} onClick={() => void extractPaletteToBoard()}><Palette /></IconAction>
-      <IconAction label={t("actions.grayscale")} onClick={() => toggleGrayscale()}><Contrast /></IconAction>
       <IconAction label={t("actions.resetAll")} onClick={() => reset("all")}><RotateCcw /></IconAction>
 
       <Separator orientation="vertical" className="h-6" />

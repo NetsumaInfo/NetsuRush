@@ -318,7 +318,8 @@
     "resetAll": "Alles zurücksetzen",
     "grayscale": "Graustufen",
     "toFront": "In den Vordergrund",
-    "toBack": "In den Hintergrund"
+    "toBack": "In den Hintergrund",
+    "extractPalette": "Palette extrahieren"
   },
   "drawStyle": {
     "thin": "Dünner Strich",
@@ -640,6 +641,10 @@
     "folderEmpty": "Keine Medien in diesem Ordner",
     "folderDone": "{{count}} Medien importiert",
     "folderDoneTruncated": "{{count}} Medien importiert (Ordner gekürzt)",
-    "folderNoPath": "Ordnerpfad nicht gefunden"
+    "folderNoPath": "Ordnerpfad nicht gefunden",
+    "progress": "Import {{done}}/{{total}}…",
+    "reading": "{{count}} Dateien werden gelesen…",
+    "done": "{{count}} Medien importiert",
+    "folderTruncated": "Ordner zu groß: die ersten {{count}} Medien wurden importiert"
   }
 }
