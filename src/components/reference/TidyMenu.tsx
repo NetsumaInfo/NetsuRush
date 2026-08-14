@@ -29,8 +29,8 @@ const UNIFORMS: { value: "none" | "height" | "width" | "area"; labelKey: string 
   { value: "area", labelKey: "tidy.uniformArea" },
 ];
 
-function Choice({ active, label, onClick, children }: {
-  active: boolean; label: string; onClick: () => void; children?: React.ReactNode;
+function Choice({ active, label, onClick, disabled, children }: {
+  active: boolean; label: string; onClick: () => void; disabled?: boolean; children?: React.ReactNode;
 }) {
   return (
     <Button
@@ -38,6 +38,7 @@ function Choice({ active, label, onClick, children }: {
       size="sm"
       className="h-8 flex-1 gap-1.5 px-2 text-xs"
       onClick={onClick}
+      disabled={disabled}
       aria-pressed={active}
     >
       {children}
@@ -70,6 +71,10 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
 
   // Tout réglage s'APPLIQUE aussitôt : un panneau où l'on clique « Grille » sans que rien ne bouge
   // se lit comme un bouton mort — il fallait penser à valider ensuite pour voir quoi que ce soit.
+  // « Bloc » est la mosaïque justifiée : c'est elle qui décide de l'échelle, donc l'uniformisation
+  // de taille n'a rien à y faire.
+  const blockScales = prefs.arrangeLayout === "block";
+
   const run = (over: Partial<typeof prefs> = {}) => {
     const p = { ...useBoard.getState().prefs, ...over };
     if (Object.keys(over).length) setPrefs(over);
@@ -107,17 +112,24 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
               ))}
             </div>
 
+            {/* La mosaïque « Bloc » fixe elle-même l'échelle de chaque ligne : lui demander en plus
+                une taille commune n'aurait aucun effet visible. Plutôt que de laisser quatre boutons
+                sans effet, on les désactive et on dit pourquoi. */}
             <p className="mb-2 mt-3 text-xs font-medium text-muted-foreground">{t("tidy.uniform")}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {UNIFORMS.map((u) => (
-                <Choice
-                  key={u.value}
-                  active={prefs.arrangeUniform === u.value}
-                  label={t(u.labelKey)}
-                  onClick={() => run({ arrangeUniform: u.value })}
-                />
-              ))}
-            </div>
+            <Tooltip>
+              <TooltipTrigger render={<div className="flex flex-wrap gap-1.5" />}>
+                {UNIFORMS.map((u) => (
+                  <Choice
+                    key={u.value}
+                    active={prefs.arrangeUniform === u.value}
+                    label={t(u.labelKey)}
+                    disabled={blockScales}
+                    onClick={() => run({ arrangeUniform: u.value })}
+                  />
+                ))}
+              </TooltipTrigger>
+              {blockScales && <TooltipContent>{t("tidy.uniformBlock")}</TooltipContent>}
+            </Tooltip>
 
             <div className="mt-3 flex items-center justify-between text-xs font-medium text-muted-foreground">
               <span>{t("tidy.gap")}</span>

@@ -107,6 +107,10 @@ export interface BoardPrefs {
   arrangeUniform: "none" | "height" | "width" | "area";
   arrangeGap: number;      // écart entre items (unités monde), 0–200
   arrangeSort: "none" | "name";
+  // Version des DÉFAUTS de rangement. Ranger sans uniformiser laissait une vignette à côté d'une
+  // affiche : le geste ne rangeait rien de visible. Le passage à « même hauteur » doit atteindre les
+  // installations existantes, dont les préférences portent encore l'ancien défaut.
+  arrangeDefaultsVersion?: number;
   autoArrangeOnImport: boolean; // ranger automatiquement un lot importé (dossier, sélection multiple)
   // Accrochage automatique des tracés aux médias (flèche entre deux images, trait posé sur une image).
   autoAnchorDraw: boolean;
@@ -153,9 +157,10 @@ const PREFS_DEFAULT: BoardPrefs = {
   snapThreshold: 8,
   snapStick: 0,
   arrangeLayout: "block",
-  arrangeUniform: "none",
+  arrangeUniform: "height",
   arrangeGap: 16,
   arrangeSort: "none",
+  arrangeDefaultsVersion: 1,
   autoArrangeOnImport: true,
   autoAnchorDraw: true,
   paletteSize: 6,
@@ -169,6 +174,10 @@ export function readPrefs(): BoardPrefs {
       // Migrate the former linked-by-default behavior once; subsequent explicit choices are kept.
       autoDownloadOnline: v.onlineDefaultsVersion === 1 ? v.autoDownloadOnline !== false : true,
       onlineDefaultsVersion: 1,
+      // Uniformisation de taille au rangement : imposée une fois aux réglages d'avant, puis c'est
+      // le choix de l'utilisateur qui prime.
+      arrangeUniform: v.arrangeDefaultsVersion === 1 ? v.arrangeUniform ?? PREFS_DEFAULT.arrangeUniform : PREFS_DEFAULT.arrangeUniform,
+      arrangeDefaultsVersion: 1,
       upShader: v.upShader === "anime4k" ? "anime4k_aa_hq"
         : v.upShader === "artcnn_quality" ? "artcnn_c4f32" : v.upShader ?? PREFS_DEFAULT.upShader,
       favFonts: Array.isArray(v.favFonts) ? v.favFonts : [],

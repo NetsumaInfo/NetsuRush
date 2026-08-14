@@ -7,7 +7,7 @@ import {
   AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd,
   AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, LayoutGrid, MoreHorizontal,
-  Wand2, Palette, RotateCcw,
+  Wand2, Palette, RotateCcw, Magnet,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,6 +28,9 @@ import { IconToggle, IconAction, ColorControl, MiniSelect, FontPicker, NumberSpi
 import { Button } from "@/components/ui/button";
 import { TidyMenu } from "./TidyMenu";
 import { extractPaletteToBoard } from "./boardPaletteActions";
+
+// Écart repris en quittant le mode collé (le défaut du sélecteur de rangement).
+const DEFAULT_TIDY_GAP = 16;
 
 // Libellés des modes de lecture (résolus au rendu via i18n).
 const PLAY_KEY: Record<PlayMode, string> = {
@@ -509,6 +512,9 @@ const ARRANGE: { mode: ArrangeMode; labelKey: string; icon: typeof Crop }[] = [
 export function ArrangeBar({ count }: { count: number }) {
   const { t } = useTranslation("reference");
   const arrange = useBoard((s) => s.arrange);
+  const tidy = useBoard((s) => s.tidy);
+  const setPrefs = useBoard((s) => s.setPrefs);
+  const gap = useBoard((s) => s.prefs.arrangeGap);
   const removeSelected = useBoard((s) => s.removeSelected);
   const groupSequence = useBoard((s) => s.groupSequence);
   const reset = useBoard((s) => s.reset);
@@ -546,6 +552,26 @@ export function ArrangeBar({ count }: { count: number }) {
           </Button>
         }
       />
+      {/* Collé : à portée de clic DANS la barre de sélection, pas seulement au fond du sélecteur.
+          C'est un aller-retour permanent quand on compose une planche — on veut voir tout de suite
+          la même sélection serrée puis aérée. Bascule l'écart ET range aussitôt. */}
+      <IconToggle
+        on={gap === 0}
+        label={gap === 0 ? t("tidy.gapSome") : t("tidy.gapNone")}
+        onClick={() => {
+          const p = useBoard.getState().prefs;
+          const next = p.arrangeGap === 0 ? DEFAULT_TIDY_GAP : 0;
+          setPrefs({ arrangeGap: next, ...(next === 0 ? { arrangeLayout: "block" as const } : {}) });
+          tidy({
+            layout: next === 0 ? "block" : p.arrangeLayout,
+            uniform: p.arrangeUniform,
+            gap: next,
+            sort: p.arrangeSort,
+          });
+        }}
+      >
+        <Magnet />
+      </IconToggle>
       <IconAction label={t("palette.extract")} onClick={() => void extractPaletteToBoard()}><Palette /></IconAction>
       <IconAction label={t("actions.resetAll")} onClick={() => reset("all")}><RotateCcw /></IconAction>
 
