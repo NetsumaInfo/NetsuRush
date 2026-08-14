@@ -9,9 +9,11 @@ const esbuild = require('esbuild');
 const Module = require('node:module');
 
 const root = path.join(__dirname, '..');
+const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const rel = 'src/components/reference/boardImageLod.ts';
-// Le module tire React, le pont et le store : on ne garde que la décision pure.
-const src = fs.readFileSync(path.join(root, rel), 'utf8')
+// Le module tire React, le pont et le store : on ne garde que la décision pure. L'abonnement à la
+// purge du cache (onThumbsCleared) vient d'un import strippé → stub inerte.
+const src = 'const onThumbsCleared = () => {};\n' + fs.readFileSync(path.join(root, rel), 'utf8')
   .replace(/^import[^;]*;$/gm, '')
   .replace(/export function useImageLod[\s\S]*$/m, '');
 const js = esbuild.transformSync(src, { loader: 'ts', format: 'cjs' }).code;
@@ -112,11 +114,41 @@ test('a remounted item starts on the right source, not on the full one', () => {
   const raw = fs.readFileSync(path.join(root, rel), 'utf8');
   assert.match(raw, /function firstSrc\(item: BoardItem\): string/);
   assert.match(raw, /useState\(\(\) => firstSrc\(item\)\)/);
-  // …mais seulement sur une vignette DÉJÀ peinte : l'échec d'une vignette n'est pas rattrapé (la
-  // récupération est réservée à la source pleine), donc une entrée de cache purgée entre-temps
-  // laisserait une case cassée que rien ne remplace.
-  assert.match(raw, /decoded\.has\(thumb\)/);
+  // …jugé au seuil de SORTIE : au seuil d'entrée, chaque remontage reconvertissait toute la bande
+  // morte (180–360 px écran) en sources pleines — un gros bitmap décodé par remontage, pour rien.
+  assert.match(raw, /lodEligible\(item, zoomCeil\(useBoard\.getState\(\)\.view\.scale\), true\)/);
   assert.match(raw, /decoded\.add\(src\)/);
+});
+
+// Une vignette morte au chargement (cache purgé sur disque entre-temps) ne doit JAMAIS laisser une
+// case cassée : repli immédiat sur la source pleine et oubli de l'entrée. C'est ce repli qui permet
+// à firstSrc de faire confiance au cache sans exiger un décodage préalable.
+test('a dead thumbnail falls back to the full source instead of leaving a broken box', () => {
+  const raw = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.match(raw, /resolved\.delete\(item\.ref\)/);
+  assert.match(raw, /setShown\(item\.src\)/);
+  assert.match(read('src/components/reference/BoardItem.tsx'), /if \(!lod\.onError\(\)\) triggerRecover\(item\)/,
+    'l’erreur du <img> doit passer par le repli du LOD avant la récupération de média');
+});
+
+// Un échec de RPC vignette (timeout pendant la tempête d'un premier dézoom) ne doit pas être
+// mémorisé : cacher le null désactivait le LOD de ce média pour toute la session.
+test('a transient thumbnail failure is retried, not cached for the session', () => {
+  const raw = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.match(raw, /if \(src\) resolved\.set\(ref, src\)/);
+});
+
+// Chaque RPC est un fetch sur l'origine du core (~6 connexions max par origine dans Chromium) :
+// sans plafond, un premier dézoom empile des centaines de fetches et l'annulation d'un encodage de
+// proxy attend derrière. L'amorçage groupé règle le cas nominal en UN RPC.
+test('thumbnail requests are capped in flight and primed in one batch', () => {
+  const raw = fs.readFileSync(path.join(root, rel), 'utf8');
+  const max = Number(/const THUMB_INFLIGHT_MAX = (\d+)/.exec(raw)[1]);
+  assert.ok(max >= 1 && max < 6, `${max} demandes en vol : sous les 6 sockets de l'origine`);
+  assert.match(raw, /export function primeBoardThumbs/);
+  assert.match(raw, /thumbsResolve/);
+  assert.match(read('src/components/reference/ReferenceBoard.tsx'), /primeBoardThumbs\(/,
+    'le board doit amorcer les vignettes à l’ouverture de scène');
 });
 
 // LE clignotement. Affecter `src` vide le <img> à l'instant même : Chromium ne repeint qu'après
@@ -125,9 +157,11 @@ test('a remounted item starts on the right source, not on the full one', () => {
 test('the displayed source only changes once the new one is decoded', () => {
   const raw = fs.readFileSync(path.join(root, rel), 'utf8');
   assert.match(raw, /img\.decode\?\.\(\)/, 'la cible doit être DÉCODÉE, pas seulement chargée');
-  // Un seul chemin doit pouvoir changer la source affichée, et il passe par preload().
+  // Trois chemins seulement changent la source affichée : l'échange après décodage (preload), la
+  // remise à zéro de fichier, et le repli d'erreur d'une vignette morte — qui va VERS la source
+  // pleine, le seul échange sûr sans préchargement.
   const swaps = raw.match(/setShown\(/g) ?? [];
-  assert.equal(swaps.length, 2, 'un échange après décodage, plus la remise à zéro de fichier');
+  assert.equal(swaps.length, 3, 'échange décodé + remise à zéro + repli d’erreur, rien d’autre');
   assert.match(raw, /void preload\(target\)\.then\(\(ok\) => \{[\s\S]*?setShown\(target\)/,
     'l’échange doit vivre DANS la résolution du préchargement');
 });

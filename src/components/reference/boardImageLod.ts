@@ -26,8 +26,9 @@
 //  2. Les seuils d'entrée et de sortie diffèrent. Avec un seuil unique, un aller-retour de molette
 //     autour de la valeur faisait basculer la planche à chaque cran.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { nr } from "@/lib/bridge";
+import { onThumbsCleared } from "@/lib/thumbCache";
 import { useBoard } from "./useReferenceBoard";
 import { displaySrc, type BoardItem } from "./referenceShared";
 
@@ -44,9 +45,14 @@ const LOD_LEAVE_SCREEN_H = 360;
 // Un média animé garde sa source : une vignette n'est qu'une image fixe, l'animation serait perdue.
 const ANIMATED_RE = /\.(gif|webp|avif|apng)(?:$|[?#])/i;
 
-// ref disque → source d'affichage réduite (null = pas de vignette disponible pour cette source).
-const resolved = new Map<string, string | null>();
+// ref disque → source d'affichage réduite. Seuls les SUCCÈS y entrent : un échec ponctuel (timeout
+// pendant la tempête d'un premier dézoom) mémorisé désactiverait le LOD de ce média à vie.
+const resolved = new Map<string, string>();
 const inflight = new Map<string, Promise<string | null>>();
+
+// Une purge du cache de vignettes (Paramètres) supprime les fichiers sur disque : sans invalidation,
+// `resolved` continuerait de servir des URL mortes — cases cassées jusqu'au redémarrage.
+onThumbsCleared(() => { resolved.clear(); decoded.clear(); });
 
 /**
  * Cet item doit-il être affiché en vignette, à ce zoom ? Pure et exportée pour être testable.
@@ -76,6 +82,24 @@ export function zoomCeil(scale: number): number {
   return 2 ** Math.ceil(Math.log2(Math.max(scale, 1e-6)));
 }
 
+// Plafond des demandes de vignettes en vol. Chaque RPC est un fetch sur l'origine du core, que
+// Chromium borne à ~6 connexions : sans plafond, le premier dézoom d'une grosse planche empile des
+// centaines de fetches et TOUT autre RPC (autosave, proxy, annulation d'encodage) attend derrière.
+const THUMB_INFLIGHT_MAX = 4;
+let thumbRunning = 0;
+const thumbWaiting: (() => void)[] = [];
+function thumbGate<T>(job: () => Promise<T>): Promise<T> {
+  const run = (): Promise<T> => {
+    thumbRunning++;
+    return job().finally(() => {
+      thumbRunning--;
+      thumbWaiting.shift()?.();
+    });
+  };
+  if (thumbRunning < THUMB_INFLIGHT_MAX) return run();
+  return new Promise<T>((res, rej) => { thumbWaiting.push(() => run().then(res, rej)); });
+}
+
 /** Vignette d'une source disque, mise en cache. Les demandes simultanées partagent le même appel. */
 function thumbFor(ref: string): Promise<string | null> {
   const known = resolved.get(ref);
@@ -83,16 +107,34 @@ function thumbFor(ref: string): Promise<string | null> {
   const running = inflight.get(ref);
   if (running) return running;
   // `time: 0` = la frame unique d'une image fixe ; priorité basse, la planche est déjà lisible.
-  const job = Promise.resolve(nr.thumbnail?.(ref, 0, "low"))
+  const job = thumbGate(() => Promise.resolve(nr.thumbnail?.(ref, 0, "low")))
     .then((r) => (typeof r === "string" && r ? displaySrc("image", r) : null))
     .catch(() => null)
     .then((src) => {
-      resolved.set(ref, src);
+      if (src) resolved.set(ref, src);
       inflight.delete(ref);
       return src;
     });
   inflight.set(ref, job);
   return job;
+}
+
+/**
+ * Amorce `resolved` en UN RPC pour toutes les images locales d'une scène. Sans lui, chaque session
+ * repart de zéro : au premier dézoom, chaque image monte en source PLEINE (le gros bitmap se décode
+ * pour quelques frames), puis un RPC par item apprend que la vignette existait déjà sur disque.
+ */
+export function primeBoardThumbs(refs: string[]): void {
+  const wanted = [...new Set(refs)].filter(
+    (r) => r && !resolved.has(r) && !inflight.has(r)
+      && !/^(https?:|data:|blob:)/i.test(r) && !ANIMATED_RE.test(r),
+  );
+  if (!wanted.length) return;
+  void Promise.resolve(nr.thumbsResolve?.(wanted.map((path) => ({ path, time: 0 }))))
+    .then((res) => {
+      for (const r of res ?? []) if (r?.file) resolved.set(r.path, displaySrc("image", r.file));
+    })
+    .catch(() => { /* amorçage best-effort : repli sur le chemin paresseux par item */ });
 }
 
 /**
@@ -102,34 +144,41 @@ function thumbFor(ref: string): Promise<string | null> {
  * sortir du champ.
  */
 function preload(src: string): Promise<boolean> {
+  if (decoded.has(src)) return Promise.resolve(true);
   const img = new Image();
   img.src = src;
   return (img.decode?.() ?? Promise.resolve()).then(() => { decoded.add(src); return true; }, () => false);
 }
 
-// Sources dont le décodage a RÉUSSI dans cette session. L'échec d'une vignette n'est pas rattrapé
-// (la récupération d'un média est réservée à la source pleine, sous peine de faire passer un cache
-// de vignettes nettoyé pour une planche perdue) : au montage, on ne repart donc sur une vignette que
-// si elle a déjà été peinte, sinon une entrée purgée entre-temps laisserait une case cassée à vie.
+// Sources dont le décodage a RÉUSSI dans cette session : leur préchargement est gratuit, donc les
+// échanges vers elles sont immédiats (un aller-retour de zoom ne redécode pas ce qu'il vient de voir).
 const decoded = new Set<string>();
 
 /**
  * Source de DÉPART, au montage. Rien n'est encore à l'écran, donc rien à préserver : on prend
- * directement la bonne. Démarrer systématiquement sur la source pleine ferait décoder le gros bitmap
- * pour une seule frame — et le culling remonte les items à chaque dézoom, donc à chaque dézoom.
+ * directement la bonne — une vignette se peint plus vite qu'une source pleine, et démarrer plein
+ * ferait décoder le gros bitmap pour une seule frame, à chaque remontage du culling.
+ *
+ * Jugé au seuil de SORTIE (`onThumb`) : le culling remonte les items en plein pan/zoom, et juger un
+ * remontage au seuil d'entrée reconvertissait silencieusement toute la bande morte (180–360 px
+ * écran) en sources pleines. Une vignette morte (cache purgé sur disque) n'est pas un risque : son
+ * erreur de chargement retombe sur la source pleine (cf. `onError` du hook).
  */
 function firstSrc(item: BoardItem): string {
   const thumb = resolved.get(item.ref);
-  return thumb && decoded.has(thumb) && lodEligible(item, zoomCeil(useBoard.getState().view.scale), false)
+  return thumb && lodEligible(item, zoomCeil(useBoard.getState().view.scale), true)
     ? thumb
     : item.src;
 }
 
 /**
  * Source à afficher pour cette image, et si c'est la source PLEINE (l'appelant s'en sert pour ne pas
- * confondre l'échec d'une vignette avec un média disparu).
+ * confondre l'échec d'une vignette avec un média disparu). `onError` : à brancher sur l'erreur du
+ * <img> — une vignette morte (fichier purgé sur disque) retombe sur la source pleine et sort des
+ * caches ; renvoie false quand l'échec concerne la source pleine, que l'appelant doit traiter
+ * (récupération de média).
  */
-export function useImageLod(item: BoardItem): { src: string; full: boolean } {
+export function useImageLod(item: BoardItem): { src: string; full: boolean; onError: () => boolean } {
   // Sélecteur quantifié : la valeur ne change qu'une fois par doublement de zoom, donc la planche ne
   // se re-rend pas à chaque cran de molette (plusieurs centaines d'items n'y survivraient pas).
   const zoom = useBoard((s) => zoomCeil(s.view.scale));
@@ -171,5 +220,16 @@ export function useImageLod(item: BoardItem): { src: string; full: boolean } {
     return () => { alive = false; };
   }, [target, shown, item.src]);
 
-  return { src: shown, full: shown === item.src };
+  // Vignette en erreur au chargement (cache disque purgé entre-temps) : repli immédiat sur la
+  // source pleine et oubli de l'entrée morte — jamais de case cassée qui attend un rezoom.
+  const onError = useCallback(() => {
+    if (shown === item.src) return false;
+    resolved.delete(item.ref);
+    decoded.delete(shown);
+    setThumb(null);
+    setShown(item.src);
+    return true;
+  }, [shown, item.src, item.ref]);
+
+  return { src: shown, full: shown === item.src, onError };
 }

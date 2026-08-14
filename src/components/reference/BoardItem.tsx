@@ -72,16 +72,21 @@ function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
   const useProxy = !streamSrc && trimOut != null && localRef;
   const [proxUrl, setProxUrl] = useState<string | null>(null);
 
+  // Hauteur CRANTÉE : le core crante déjà la sienne (snapProxyHeight), donc un resize à l'intérieur
+  // d'un cran retombait sur le même fichier de cache — mais `item.h` brut dans les deps refaisait
+  // quand même un RPC (et un passage de file) à CHAQUE commit de redimensionnement.
+  const proxH = Math.min(1080, Math.max(240, Math.ceil((item.h || 240) / 240) * 240));
+
   // Encode le proxy dès le montage (le core throttle déjà les encodes concurrents via proxyGate →
   // pas besoin de gater côté UI ; un gate de visibilité empêchait la lecture de démarrer).
   useEffect(() => {
     if (!useProxy) { setProxUrl(null); return; }
     let alive = true;
     const token = nextProxyToken();
-    nr.proxy({ input: item.ref, start: trimIn, end: trimOut!, priority: "high", height: Math.round(item.h || 240), token, requireVideo: true })
+    nr.proxy({ input: item.ref, start: trimIn, end: trimOut!, priority: "high", height: proxH, token, requireVideo: true })
       .then((r) => { if (alive && r.ok && r.path) setProxUrl(nr.assetUrl(r.path)); });
     return () => { alive = false; nr.proxyCancel(token); };
-  }, [useProxy, item.ref, item.h, trimIn, trimOut]);
+  }, [useProxy, item.ref, proxH, trimIn, trimOut]);
 
   // Lecture / gel global — ne joue QUE si l'item n'est pas figé. Le ping-pong est piloté par l'effet
   // rAF dédié ci-dessous (lecture native seulement en mode boucle).
@@ -159,6 +164,9 @@ function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
       muted
       loop={playMode === "loop" && (useProxy || trimOut == null)}
       autoPlay={playing && playMode !== "pingpong"}
+      // Suspendu (gel, navigation, mode « off ») : métadonnées seules. Sans ça, chaque vidéo montée
+      // bufferise en entier même à l'arrêt — jusqu'à MEDIA_BUDGET flux ouverts en plein geste.
+      preload={playing ? "auto" : "metadata"}
       playsInline
       className={item.crop ? "block select-none" : "block h-full w-full select-none object-cover"}
       style={item.crop ? cropStyle(item.crop) : undefined}
@@ -203,6 +211,10 @@ function SequenceContent({ item }: { item: Item }) {
   const playing = (item.seqPlay ?? true) && !mediaSuspended; // défaut = lecture (autoplay au retour sur le board)
   const dirRef = useRef<1 | -1>(1);  // sens courant en mode aller-retour
   const posRef = useRef(0);          // position FLOTTANTE (frame fractionnaire) pour un pacing fluide
+  // Item courant lu par la boucle rAF via une ref : un `items.find` par frame est un balayage
+  // O(items) — dix séquences sur un board de 300 items font 180 000 parcours par seconde.
+  const itemRef = useRef(item);
+  itemRef.current = item;
 
   // Précharge une FENÊTRE glissante autour de la frame courante (ignore les manquantes) → pas de flash
   // au changement, sans garder toute la séquence décodée en mémoire (600 frames × N items sur le board
@@ -222,14 +234,15 @@ function SequenceContent({ item }: { item: Item }) {
   useEffect(() => {
     if (!playing || count < 2) return;
     let raf = 0, prev = 0;
-    posRef.current = item.frame ?? 0;
+    // Reprise sur la frame VIVANTE : une pause de navigation ne commite plus au document (cf. le
+    // nettoyage), donc `item.frame` peut retarder — seqFrames fait foi.
+    posRef.current = useBoard.getState().seqFrames[item.id] ?? item.frame ?? 0;
     const step = (ts: number) => {
       if (!prev) prev = ts;
       const dt = (ts - prev) / 1000;
       prev = ts;
       const st = useBoard.getState();
-      const it = st.items.find((i) => i.id === item.id);
-      if (!it) { raf = requestAnimationFrame(step); return; }
+      const it = itemRef.current;
       const lo = Math.min(Math.max(it.seqIn ?? 0, 0), count - 1);
       const hi = Math.min(Math.max(it.seqOut ?? count - 1, lo), count - 1);
       const mode = it.playMode ?? "loop";
@@ -256,10 +269,14 @@ function SequenceContent({ item }: { item: Item }) {
     raf = requestAnimationFrame(step);
     // Fin de lecture (pause, gel, démontage) → la dernière position rejoint le DOCUMENT : la scène se
     // rouvre là où on l'a laissée, et l'entrée vivante disparaît (sinon elle masquerait `item.frame`).
+    // EXCEPTION : la pause de NAVIGATION. Committer réécrit le tableau `items` entier — N séquences en
+    // lecture faisaient N reconstructions au premier cran de molette, pile au pire moment. La frame
+    // reste alors dans seqFrames (l'affichage la préfère déjà) et rejoindra le document au vrai stop.
     return () => {
       cancelAnimationFrame(raf);
-      const live = useBoard.getState().seqFrames[item.id];
-      if (live != null) commitSeqFrame(item.id, live);
+      const st = useBoard.getState();
+      const live = st.seqFrames[item.id];
+      if (live != null && !st.navigating) commitSeqFrame(item.id, live);
     };
     // item.frame exclu volontairement : il est ÉCRIT par cet effet (sinon relance à chaque frame).
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -564,23 +581,35 @@ function ImageContent({ item }: { item: Item }) {
   // le cache d'images décodées de Chromium, qui les évince et les laisse blanches jusqu'au repaint.
   const lod = useImageLod(item);
 
-  useEffect(() => {
-    if (!animated || !frozen) { setPainted(false); return; }
+  // Peint la frame courante de l'<img> dans le canvas de gel. `painted` retombe à false quand la
+  // nouvelle source n'est pas encore chargée : sinon le canvas continuerait d'afficher l'ANCIEN
+  // fichier après une récupération/un remplacement sous gel — le onLoad repeint dès qu'elle arrive.
+  const paintFrozen = () => {
     const img = imgRef.current;
     const canvas = canvasRef.current;
-    if (!img || !canvas || !img.naturalWidth) return;
+    if (!img || !canvas || !img.naturalWidth) { setPainted(false); return; }
     canvas.width = img.naturalWidth;
     canvas.height = img.naturalHeight;
     try {
       canvas.getContext("2d")?.drawImage(img, 0, 0);
       setPainted(true);
     } catch { /* peinture refusée : on laisse le <img> animé plutôt qu'un carré vide */ }
+  };
+  useEffect(() => {
+    if (!animated || !frozen) { setPainted(false); return; }
+    paintFrozen();
+    // paintFrozen lit des refs : seule la source et l'état de gel décident d'une repeinture.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animated, frozen, item.src]);
 
-  // Une vignette absente ou périmée n'est PAS un média disparu : seule la source pleine déclenche la
-  // récupération, sinon un cache de vignettes nettoyé ferait passer toute la planche pour perdue.
-  const onErr = () => { if (lod.full) triggerRecover(item); };
-  const onLd = (e: React.SyntheticEvent<HTMLImageElement>) => { if (lod.full && !e.currentTarget.naturalWidth) triggerRecover(item); };
+  // Une vignette absente ou périmée n'est PAS un média disparu : son erreur retombe sur la source
+  // pleine (lod.onError), et seule la source pleine déclenche la récupération — sinon un cache de
+  // vignettes nettoyé ferait passer toute la planche pour perdue.
+  const onErr = () => { if (!lod.onError()) triggerRecover(item); };
+  const onLd = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    if (lod.full && !e.currentTarget.naturalWidth) triggerRecover(item);
+    if (animated && frozen) paintFrozen();
+  };
   const cls = item.crop ? "block select-none" : "block h-full w-full select-none object-cover";
   const style = item.crop ? cropStyle(item.crop) : undefined;
   const media = (
@@ -781,8 +810,10 @@ export const BoardItem = memo(function BoardItem({
       }}
     >
       <div
+        // Pas de transition sur l'ombre/le ring : un lasso qui sélectionne un mur d'items animerait N
+        // ombres floues d'un coup — chaque frame de l'animation repeint le raster de chaque item.
         className={cn(
-          "h-full w-full rounded-sm transition-shadow",
+          "h-full w-full rounded-sm",
           // le titre du cadre déborde en haut (onglet) → pas de clipping pour les cadres
           item.kind === "frame" ? "overflow-visible" : "overflow-hidden",
           item.kind === "frame" ? "" : "shadow-lg ring-1",

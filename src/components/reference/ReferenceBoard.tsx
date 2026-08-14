@@ -37,6 +37,7 @@ import { shapeBBox } from "./drawGeometry";
 import { boundsOf, rotatedBBox } from "./boardArrange";
 import { useLive } from "./boardLive";
 import { itemToPngBlob } from "./boardRender";
+import { primeBoardThumbs } from "./boardImageLod";
 
 const clampScale = (s: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s));
 
@@ -191,8 +192,24 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     if (rafId.current == null) rafId.current = requestAnimationFrame(applyGesture);
   }, [applyGesture]);
 
-  // Le culling suit la vue COMMITÉE (zoom, fit, focus, fin de pan).
+  // Le culling suit la vue COMMITÉE (fit, focus, fin de pan/zoom).
   useLayoutEffect(() => { syncViewport(view, size.current.w, size.current.h); }, [view, syncViewport]);
+
+  // Vue explicite (fit, reset, focus) : annule la rafale de zoom en attente — sinon son commit
+  // différé (cf. holdMediaForZoom) écraserait la vue qu'on vient de poser.
+  const commitView = useCallback((v: BoardView) => {
+    liveView.current = null;
+    setView(v);
+  }, [setView]);
+
+  // Amorce les vignettes du LOD en UN RPC à l'ouverture d'une scène : sans ça, chaque image monte en
+  // source pleine (gros bitmap décodé pour rien) avant d'apprendre, un RPC par item, que sa vignette
+  // existait déjà sur disque.
+  useEffect(() => {
+    primeBoardThumbs(
+      useBoard.getState().items.filter((it) => it.kind === "image").map((it) => it.ref),
+    );
+  }, [sceneId]);
 
   // Un re-render PENDANT un geste (montage d'items par le culling) remettrait la transform issue du
   // store, périmée tant que le pan n'est pas commité → on ré-applique la vue vivante avant le paint.
@@ -239,58 +256,79 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     const r = rect();
     const cx = r ? r.width / 2 : 400;
     const cy = r ? r.height / 2 : 300;
-    return screenToBoard(useBoard.getState().view, cx, cy);
+    return screenToBoard(liveView.current ?? useBoard.getState().view, cx, cy);
   }, []);
 
   const ingest = useBoardIngest(centerPoint);
 
   // Un zoom est une rafale (molette/trackpad ou clics rapprochés). On ne fait qu'un gel au début,
   // puis on reprend après le dernier événement. Le compteur du store protège les chevauchements avec
-  // un pan ou le déplacement d'un item.
+  // un pan ou le déplacement d'un item. C'est AUSSI le point de commit du zoom impératif : la vue
+  // vivante ne rejoint le store qu'ici — l'UNIQUE re-render React de toute la rafale (le LOD des
+  // images et les abonnés de `view` ne s'évaluent donc qu'une fois, sur la vue finale).
   const holdMediaForZoom = useCallback(() => {
     if (zoomResumeTimer.current == null) useBoard.getState().beginNavigation();
     else clearTimeout(zoomResumeTimer.current);
     zoomResumeTimer.current = setTimeout(() => {
       zoomResumeTimer.current = null;
+      // Un pan encore en cours garde la main sur liveView : lui committera au pointerup.
+      if (gesture.current !== "pan" && liveView.current) {
+        const v = liveView.current;
+        liveView.current = null;
+        setView(v);
+      }
       useBoard.getState().endNavigation();
     }, 140);
-  }, []);
+  }, [setView]);
 
   useEffect(() => () => {
     if (zoomResumeTimer.current != null) {
       clearTimeout(zoomResumeTimer.current);
       zoomResumeTimer.current = null;
+      // Démontage en pleine rafale : la vue vivante rejoint quand même le store, sinon le dernier
+      // zoom serait perdu au retour sur le board.
+      if (gesture.current !== "pan" && liveView.current) setView(liveView.current);
+      liveView.current = null;
       useBoard.getState().endNavigation();
     }
     if (gesture.current === "pan") useBoard.getState().endNavigation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // PERF zoom — même chemin IMPÉRATIF que le pan : la vue vit dans liveView et s'applique en rAF
+  // (transform des couches + culling), le store n'est commité qu'en fin de rafale (holdMediaForZoom).
+  // Un setView par cran re-rendait tout le board à chaque frame de molette : ~mille sélecteurs
+  // zustand évalués + réconciliation de tous les items visibles, en pleine re-rasterisation GPU.
   const zoomAt = useCallback(
     (px: number, py: number, factor: number) => {
       holdMediaForZoom();
       zoomBack.current = null; // vue navigée à la main → le retour du double-clic n'a plus de sens
-      const v = useBoard.getState().view;
+      const v = liveView.current ?? useBoard.getState().view;
       const ns = clampScale(v.scale * factor);
       const bx = (px - v.tx) / v.scale;
       const by = (py - v.ty) / v.scale;
-      setView({ tx: px - bx * ns, ty: py - by * ns, scale: ns });
+      liveView.current = { tx: px - bx * ns, ty: py - by * ns, scale: ns };
+      scheduleGesture();
     },
-    [holdMediaForZoom, setView],
+    [holdMediaForZoom, scheduleGesture],
   );
 
   // Molette coalescée : les trackpads tirent bien plus d'événements que de frames → on accumule le
   // delta et on applique UN zoom par frame (setView re-rend le board, inutile de le faire 3× par vsync).
-  const wheelAcc = useRef<{ dy: number; x: number; y: number } | null>(null);
+  const wheelAcc = useRef<{ dy: number; x: number; y: number; left: number; top: number } | null>(null);
   const onWheel = useCallback(
     (e: React.WheelEvent) => {
-      const r = rect();
-      if (!r) return;
+      // L'origine du conteneur est mesurée UNE fois par frame (à l'ouverture de l'accumulateur) :
+      // un getBoundingClientRect par événement forçait un recalcul de layout à la cadence du
+      // trackpad, entrelacé avec les écritures de transform du geste.
       const a = wheelAcc.current;
       if (a) {
-        a.dy += e.deltaY; a.x = e.clientX - r.left; a.y = e.clientY - r.top;
+        a.dy += e.deltaY; a.x = e.clientX - a.left; a.y = e.clientY - a.top;
         return;
       }
-      wheelAcc.current = { dy: e.deltaY, x: e.clientX - r.left, y: e.clientY - r.top };
+      const r = rect();
+      if (!r) return;
+      wheelAcc.current = { dy: e.deltaY, x: e.clientX - r.left, y: e.clientY - r.top, left: r.left, top: r.top };
       requestAnimationFrame(() => {
         const w = wheelAcc.current;
         wheelAcc.current = null;
@@ -310,7 +348,9 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
       if (e.target !== e.currentTarget && e.button === 0) return; // clic sur un item → géré par l'item
       if (e.button !== 0 && e.button !== 1) return;
       try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* capture best-effort */ }
-      const v = useBoard.getState().view;
+      // Un zoom peut être en rafale (pas encore commité) : le pan doit partir de la vue VIVANTE,
+      // sinon il saute à la vue d'avant la rafale.
+      const v = liveView.current ?? useBoard.getState().view;
       if (e.button === 1 || space.current) {
         gesture.current = "pan";
         pan.current = { x: e.clientX, y: e.clientY, tx: v.tx, ty: v.ty };
@@ -354,7 +394,8 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     }
     if (gesture.current === "marquee" && marqueeRef.current) {
       const m = marqueeRef.current;
-      const v = useBoard.getState().view;
+      // Zoom en rafale pendant le lasso : la conversion écran→board doit lire la vue VIVANTE.
+      const v = liveView.current ?? useBoard.getState().view;
       const a = screenToBoard(v, Math.min(m.x0, m.x1), Math.min(m.y0, m.y1));
       const b = screenToBoard(v, Math.max(m.x0, m.x1), Math.max(m.y0, m.y1));
       if (Math.abs(m.x1 - m.x0) > 4 || Math.abs(m.y1 - m.y0) > 4) {
@@ -384,12 +425,12 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     if (!(b.w > 0) || !(b.h > 0)) return;
     const pad = 60;
     const s = clampScale(Math.min((r.width - pad) / b.w, (r.height - pad) / b.h));
-    setView({
+    commitView({
       tx: (r.width - b.w * s) / 2 - b.x * s,
       ty: (r.height - b.h * s) / 2 - b.y * s,
       scale: s,
     });
-  }, [setView]);
+  }, [commitView]);
   const fit = useCallback(() => fitItems(), [fitItems]);
   // Cadrer la SÉLECTION (repli sur tout le board si rien n'est sélectionné).
   const fitSelection = useCallback(() => {
@@ -417,19 +458,19 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     const back = zoomBack.current;
     if (back && back.id === focusReq) {
       zoomBack.current = null;
-      setView(back.view);
+      commitView(back.view);
       return;
     }
     const b = rotatedBBox(it);
     const pad = 80;
     const s = clampScale(Math.min((r.width - pad) / b.w, (r.height - pad) / b.h));
     zoomBack.current = { id: focusReq, view: useBoard.getState().view };
-    setView({
+    commitView({
       tx: r.width / 2 - b.cx * s,
       ty: r.height / 2 - b.cy * s,
       scale: s,
     });
-  }, [focusReq, setView]);
+  }, [focusReq, commitView]);
 
   useImperativeHandle(
     ref,
@@ -525,13 +566,13 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         }
         st.setNotice({ kind: "ok", text: t(cut ? "board.cutDone" : "board.copiedDone", { count: n }) });
       },
-      reset: () => setView({ tx: 0, ty: 0, scale: 1 } satisfies BoardView),
+      reset: () => commitView({ tx: 0, ty: 0, scale: 1 } satisfies BoardView),
       zoomBy: (factor: number) => {
         const r = rect();
         if (r) zoomAt(r.width / 2, r.height / 2, factor);
       },
     }),
-    [ingest.addFiles, ingest.addVideoUrl, ingest.addUrl, ingest.addPath, ingest.addCut, ingest.addCuts, ingest.addSequence, ingest.addPaste, addItem, centerPoint, fit, fitSelection, setView, zoomAt, t],
+    [ingest.addFiles, ingest.addVideoUrl, ingest.addUrl, ingest.addPath, ingest.addCut, ingest.addCuts, ingest.addSequence, ingest.addPaste, addItem, centerPoint, fit, fitSelection, commitView, zoomAt, t],
   );
 
   // Le chemin disque n'est pas dans l'objet `File` : il se résout par le pont WebView2. Sans chemin

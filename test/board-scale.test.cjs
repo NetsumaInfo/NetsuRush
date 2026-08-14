@@ -36,10 +36,44 @@ test('the board caps how many media items can be mounted at once', () => {
   assert.match(src, /it\.id === editingId \|\| pinned\.has\(it\.id\)/,
     'an item under an active gesture must never be dropped by the budget');
   // Set, pas `includes` : le test tourne pour chaque item, donc un tableau rendrait le filtrage
-  // quadratique — précisément quand tout un mur d'images est sélectionné.
-  assert.match(src, /const pinned = new Set\(selectedIds\)/,
-    'the pinned lookup must be O(1), not a scan of the selection per item');
+  // quadratique — précisément quand tout un mur d'images est sélectionné. Et l'épinglage est
+  // PLAFONNÉ : un mur entier sélectionné ne doit pas contourner les budgets (cf. board-culling).
+  assert.match(src, /const pinned = new Set\(selectedIds\.length <= FORCED_SELECTION_MAX \? selectedIds : \[\]\)/,
+    'the pinned lookup must be O(1) and capped, not a scan of the whole selection per item');
   assert.doesNotMatch(src, /selectedIds\.includes/);
+});
+
+// Le pan est impératif depuis toujours ; le zoom, lui, commitait la vue au store à CHAQUE cran de
+// molette → un re-render React complet du board par frame de zoom (~mille sélecteurs évalués +
+// réconciliation de tous les items visibles), en pleine re-rasterisation GPU. Le zoom doit passer
+// par le même chemin vivant que le pan, et ne committer qu'en fin de rafale.
+test('wheel zoom goes through the imperative path and commits once per burst', () => {
+  const src = read('src/components/reference/ReferenceBoard.tsx');
+  const zoomAt = src.slice(src.indexOf('const zoomAt'));
+  const body = zoomAt.slice(0, zoomAt.indexOf('\n  );'));
+  assert.match(body, /liveView\.current = \{ tx:/, 'zoomAt must write the live view, not the store');
+  assert.doesNotMatch(body, /setView\(/, 'no store commit inside the zoom hot path');
+  // Le commit unique vit dans le timer de fin de rafale, et un pan en cours garde la main.
+  assert.match(src, /if \(gesture\.current !== "pan" && liveView\.current\) \{/);
+  // Une vue explicite (fit, reset, focus) annule la rafale en attente, sinon le commit différé
+  // écraserait la vue qu'elle vient de poser.
+  assert.match(src, /const commitView = useCallback/);
+});
+
+// Une vidéo suspendue (gel, navigation, mode « off ») ne doit pas bufferiser en entier : autoplay
+// sans `preload` fait télécharger chaque flux monté — jusqu'à MEDIA_BUDGET connexions en plein geste.
+test('a suspended video only preloads its metadata', () => {
+  assert.match(read('src/components/reference/BoardItem.tsx'), /preload=\{playing \? "auto" : "metadata"\}/);
+});
+
+// Un lasso qui sélectionne un mur d'items ne doit animer AUCUNE ombre : chaque frame d'une
+// transition de box-shadow repeint le raster complet de l'item, multiplié par la sélection.
+test('selection rings switch instantly, no shadow transition on items', () => {
+  const src = read('src/components/reference/BoardItem.tsx');
+  // Le wrapper de CHAQUE item (celui qui porte shadow-lg + ring) : jamais de transition dessus.
+  // La poignée de rotation, unique et montée seulement en sélection primaire, peut garder la sienne.
+  assert.match(src, /"h-full w-full rounded-sm",/);
+  assert.doesNotMatch(src, /rounded-sm transition-shadow/);
 });
 
 // « Tout figer » doit vraiment tout figer. Un <img> animé (GIF, WebP) ne se met pas en pause : sans

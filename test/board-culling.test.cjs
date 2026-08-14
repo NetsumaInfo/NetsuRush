@@ -97,6 +97,17 @@ test('the small-board shortcut is disabled once the view is magnified', () => {
   assert.match(raw, /scale: view\.scale/);
 });
 
+// L'épinglage de la sélection est là pour les GESTES (drag de groupe, inspecteur). Sans plafond, un
+// Ctrl+A sur un mur de 200 items les épinglait TOUS au montage — les deux budgets contournés d'un
+// coup, exactement le scénario de gel que le culling existe pour empêcher.
+test('a wall-sized selection stops pinning items past both budgets', () => {
+  assert.match(raw, /const FORCED_SELECTION_MAX = (\d+)/);
+  const cap = Number(/const FORCED_SELECTION_MAX = (\d+)/.exec(raw)[1]);
+  const media = Number(/const MEDIA_BUDGET = (\d+)/.exec(raw)[1]);
+  assert.ok(cap > 0 && cap <= media, `le plafond d'épinglage ${cap} doit rester sous le budget média`);
+  assert.match(raw, /selectedIds\.length <= FORCED_SELECTION_MAX \? selectedIds : \[\]/);
+});
+
 test('both budgets stay well under what the browser tolerates', () => {
   // Chromium cesse de créer un lecteur média au-delà d'environ 75 par frame, SANS erreur.
   assert.ok(Number(/const MEDIA_BUDGET = (\d+)/.exec(raw)[1]) <= 60);

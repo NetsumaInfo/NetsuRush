@@ -18,6 +18,15 @@ export function setThumb(path: string, uri: string, time?: number): void {
 }
 export function clearThumbs(): void {
   cache.clear();
+  clearSubs.forEach((f) => f());
+}
+
+// Caches annexes (LOD du board) vidés en même temps : après une purge du cache disque, leurs URL
+// pointent vers des fichiers supprimés — cases cassées jusqu'au redémarrage sans cette invalidation.
+const clearSubs = new Set<() => void>();
+export function onThumbsCleared(cb: () => void): () => void {
+  clearSubs.add(cb);
+  return () => { clearSubs.delete(cb); };
 }
 
 // Invalidation ciblée après modification d'une timeline : évite de conserver dans le renderer une

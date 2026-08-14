@@ -276,7 +276,11 @@ export function DrawLayer() {
   if (!drawItem && !drawMode) return null;
 
   const selShape = drawSel && selectMode ? shapes.find((s) => s.id === drawSel) : null;
-  const hitW = 14 / view.scale; // largeur de la zone cliquable des cibles transparentes
+  // Largeur de la zone cliquable des cibles transparentes, quantifiée à l'octave : une valeur exacte
+  // en 1/scale changerait à chaque commit de zoom et casserait le memo de HitTargets — toutes les
+  // cibles re-réconciliées pour un cheveu de différence. Entre deux octaves elle vaut 7 à 14 px
+  // écran, largement dans la tolérance d'un clic.
+  const hitW = 14 / 2 ** Math.ceil(Math.log2(Math.max(view.scale, 1e-6)));
 
   // z : en mode dessin TOUJOURS au-dessus (z 20, items = z 10) pour tracer par-dessus tout ; sinon
   // respecte `drawBack` (arrière-plan = sous les items). → « premier plan » d'un item passe devant.

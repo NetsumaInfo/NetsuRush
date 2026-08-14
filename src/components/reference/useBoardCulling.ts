@@ -49,6 +49,13 @@ const ITEM_BUDGET = 260;
 const MEDIA_BUDGET = 48;
 const MEDIA_KINDS = new Set(["video", "sequence", "youtube", "embed"]);
 
+// Au-delà de ce nombre, une sélection cesse d'épingler ses items au montage. Une PETITE sélection
+// est un geste (drag de groupe, inspecteur) : son sujet ne doit pas disparaître sous les doigts. Un
+// mur sélectionné entier (Ctrl+A, grand lasso) n'est PAS un geste : épingler des centaines d'items
+// contournerait les deux plafonds ci-dessus et recréerait exactement le gel que le culling existe
+// pour empêcher. La sélection reste entière dans le store — seul le montage est borné.
+const FORCED_SELECTION_MAX = 16;
+
 interface Rect { x: number; y: number; w: number; h: number }
 // La zone retient le zoom auquel elle a été bâtie : c'est ce qui permet au filtrage de savoir s'il
 // regarde une vue d'ensemble ou un détail magnifié, sans redemander la taille du viewport.
@@ -139,7 +146,7 @@ export function useBoardCulling(items: BoardItem[], selectedIds: string[], editi
     if (!zone || (items.length < CULL_MIN_ITEMS && zone.scale <= CULL_ALWAYS_ZOOM)) return items;
     // Set, pas `includes` : le test est fait pour CHAQUE item, donc un tableau rendait le filtrage
     // quadratique — et c'est précisément quand on sélectionne tout un mur d'images que ça compte.
-    const pinned = new Set(selectedIds);
+    const pinned = new Set(selectedIds.length <= FORCED_SELECTION_MAX ? selectedIds : []);
     // Un item sous geste ou en édition n'est jamais lâché, et ne consomme aucun budget : son sujet ne
     // doit pas disparaître sous les doigts.
     const forced = (it: BoardItem) => it.id === editingId || pinned.has(it.id);

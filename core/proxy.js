@@ -356,6 +356,18 @@ async function proxySegment({ input, start, end, priority, height, token, codec,
   // Sans moteur matériel, limite immédiatement la file : trois libx264/libvpx ultrafast en parallèle
   // restent réactifs sans saturer tous les cœurs. Un moteur matériel remontera ensuite par HEAL_STREAK.
   if (resolved.vendor === 'cpu') proxyMax = Math.min(proxyMax, PROXY_MAX_LO);
+  // Cache hit answered BEFORE entering the encode queue: a remounted board video whose proxy is
+  // already on disk must not wait behind cold encodes — that read is the common case on pan/zoom,
+  // and queueing it showed a black tile for seconds while unrelated encodes finished.
+  {
+    const out = proxyOutPath(input, start, end, vc, resolved.encoder, preset, audio, h, resolved.extension);
+    if (await fileReady(out)) {
+      cacheIndex().touch(out);
+      const duration = Math.min(Math.max(0.6, end - start), 4);
+      await writeProxyMeta(out, input, start, duration, resolved.container, end);
+      return { ok: true, path: out, __hardware: resolved.vendor !== 'cpu' };
+    }
+  }
   return proxyGate(async () => {
     try {
       const makeOut = (enc) => proxyOutPath(input, start, end, vc, enc.encoder, preset, audio, h, enc.extension);
