@@ -132,7 +132,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
   const toggleFavFont = useBoard((s) => s.toggleFavFont);
   // Valeur courante du sélecteur unifié « Modèle » (id du modèle IA OU du shader Turbo).
   const upDefault = prefs.upEngine === "turbo" ? prefs.upShader : prefs.upModel;
-  const { ready: modelsReady, choices: upChoices } = useBoardUpChoices(true);
+  const { ready: modelsReady, choices: upChoices } = useBoardUpChoices("any");
   useEffect(() => {
     if (!modelsReady) return; // statut inconnu : ne jamais écraser le modèle choisi par l'utilisateur
     if (upChoices.length && !upChoices.some((choice) => choice.value === upDefault)) {

@@ -233,4 +233,42 @@ async function extractFrames(input, opts = {}) {
   }
 }
 
-module.exports = { run, probeMedia, playInfo, probeAudioTracks, extractAudio, exportClip, extractFrames, compareFrames };
+// UN cadre d'un média, rendu en PNG minuscule EN MÉMOIRE (jamais sur disque : c'est un échantillon,
+// pas une vignette à conserver — cf. thumbs.js pour ça).
+//
+// Sert la lecture des pixels côté renderer, qui n'a AUCUN moyen fiable d'y arriver seul : le
+// protocole d'asset de la coquille teint le canvas (`getImageData` lève) et la voie HTTP dépend
+// d'en-têtes CORS que la WebView n'honore pas toujours au chargement d'une <img>. Ici, ffmpeg lit le
+// fichier SUR LE DISQUE — image fixe, GIF animé ou vidéo, peu importe — et le PNG rendu se charge en
+// `data:` URL, donc sans la moindre restriction d'origine. C'est aussi la seule voie qui marche pour
+// une source qu'aucun élément de la page n'a encore décodée.
+async function sampleFrame(filePath, opts = {}) {
+  const target = String(filePath || '');
+  if (!target) return { ok: false, error: 'chemin manquant' };
+  const side = Math.max(16, Math.min(512, Number(opts.side) || 220));
+  const at = Math.max(0, Number(opts.at) || 0);
+  const args = ['-v', 'error'];
+  // Seek AVANT -i : rapide sur une vidéo. Sur une image fixe, un `-ss` non nul ne trouverait rien,
+  // d'où la garde.
+  if (at > 0) args.push('-ss', String(at));
+  args.push(
+    '-i', target,
+    '-frames:v', '1',
+    // Les deux côtés bornés à `side`, ratio conservé : une palette n'a pas besoin du détail fin, et
+    // le coût cesse de dépendre du poids du fichier.
+    '-vf', `scale='min(${side},iw)':'min(${side},ih)':force_original_aspect_ratio=decrease`,
+    '-f', 'image2pipe', '-vcodec', 'png', '-',
+  );
+  try {
+    // `encoding: 'buffer'` est indispensable : en utf8, execFile corromprait les octets du PNG.
+    const out = await run('ffmpeg', args, { encoding: 'buffer' });
+    const buf = Buffer.isBuffer(out) ? out : Buffer.from(out);
+    if (!buf.length) return { ok: false, error: 'aucune image rendue' };
+    return { ok: true, png: buf.toString('base64') };
+  } catch (e) {
+    const why = String((e && e.stderr) || (e && e.message) || e).trim().split(/\r?\n/).pop();
+    return { ok: false, error: why || 'échec ffmpeg' };
+  }
+}
+
+module.exports = { run, probeMedia, playInfo, probeAudioTracks, extractAudio, exportClip, extractFrames, compareFrames, sampleFrame };

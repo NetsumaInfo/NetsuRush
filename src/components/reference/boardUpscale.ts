@@ -14,8 +14,10 @@ import { useBoard } from "./useReferenceBoard";
 
 const tr = (key: string, opts?: Record<string, unknown>) => i18n.t(`reference:${key}`, opts);
 
-// Réglages effectifs d'un upscale : le sélecteur unique porte un id IA OU un id de shader Turbo ;
-// une image ne passe jamais par le moteur Turbo (vidéo uniquement).
+// Réglages effectifs d'un upscale : le sélecteur unique porte un id IA OU un id de shader Turbo.
+// Les shaders valent pour la vidéo ET l'image fixe ; seul RTX VSR reste vidéo (son CLI ne traite que
+// des fichiers entiers), et un GIF animé retombe côté core sur le moteur IA, seul à savoir
+// réencoder toutes ses frames.
 export interface UpscaleChoice {
   engine: "ia" | "turbo";
   model: UpscaleModel;
@@ -25,7 +27,7 @@ export interface UpscaleChoice {
 }
 
 export function upscaleChoiceFrom(selection: string, prefs: BoardPrefs, isVideo: boolean, denoise: number, scale: 1 | 2 | 4): UpscaleChoice {
-  const turbo = isVideo && boardUpEngine(selection) === "turbo";
+  const turbo = boardUpEngine(selection) === "turbo" && (isVideo || !isRtxShader(selection as ShaderModel));
   const model = (turbo ? prefs.upModel : selection) as UpscaleModel;
   // Le débruitage n'existe que sur les modèles IA qui l'exposent : l'envoyer ailleurs n'a pas de sens.
   const denoisable = !turbo && !!UP_MODELS.find((m) => m.id === model)?.denoise;
@@ -78,7 +80,7 @@ export async function quickUpscale(id: string): Promise<boolean> {
   if (!api) { st.setNotice({ kind: "error", text: tr("upscale.moduleUnavailable") }); return false; }
   const isVideo = item.kind === "video";
   const prefs = st.prefs;
-  const selection = isVideo && prefs.upEngine === "turbo" ? prefs.upShader : prefs.upModel;
+  const selection = prefs.upEngine === "turbo" ? prefs.upShader : prefs.upModel;
   const choice = upscaleChoiceFrom(selection, prefs, isVideo, prefs.upDenoise, prefs.upScale);
 
   st.setNotice({ kind: "ok", sticky: true, text: tr("upscale.upscaling") });

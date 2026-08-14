@@ -239,7 +239,8 @@ export const shaderRuntimeModel = (shader: ShaderModel): UpscaleModel | null =>
 
 // Liste UNIFIÉE « Modèle » du board = modèles IA (Real-ESRGAN/CUGAN) + shaders Turbo (libplacebo),
 // listés par leur VRAI nom (pas de catégorie « moteur/IA/turbo » exposée). Le moteur est déduit de
-// l'id choisi (`boardUpEngine`). Les shaders sont vidéo-only → la popup image ne montre que les IA.
+// l'id choisi (`boardUpEngine`). Les shaders valent pour la vidéo ET l'image ; seul RTX VSR est
+// écarté sur une image (cf. useBoardUpChoices).
 export type BoardUpChoice = { value: string; label: string; hint: string; engine: "ia" | "turbo" };
 export const BOARD_UP_CHOICES: BoardUpChoice[] = [
   ...UP_MODELS.map((m): BoardUpChoice => ({ value: m.id, label: m.label, hint: m.hint, engine: "ia" })),

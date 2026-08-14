@@ -1407,6 +1407,9 @@ export interface RefApi {
   scanFolder(dir: string, opts?: { cap?: number }): Promise<{ ok: boolean; root: string; name: string; files: { path: string; rel: string; name: string; kind: "image" | "video" }[]; truncated: boolean; count: number }>;
   // Écrit un export du board (PNG/JPG en base64, SVG en texte) vers un chemin choisi par l'utilisateur.
   writeFile(path: string, data: string, encoding: "base64" | "utf8"): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
+  // Un cadre d'un média (image, GIF, vidéo) rendu par le core en PNG base64, lu SUR LE DISQUE.
+  // Seule source de pixels relisible par le renderer : le protocole d'asset teinte le canvas.
+  sampleFrame(path: string, opts?: { at?: number; side?: number }): Promise<{ ok: boolean; png?: string; error?: string }>;
   extractMedia(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
   // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
@@ -3291,6 +3294,7 @@ const mock: NrApi = {
       sweepAssets: async () => ({ ok: true, removed: 0, bytes: 0, kept: 0 }),
       scanFolder: async (dir: string) => ({ ok: false, root: dir, name: "", files: [], truncated: false, count: 0 }),
       writeFile: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      sampleFrame: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       extractMedia: async () => ({ ok: false, error: "mock" }),
       extractFrames: async () => ({ ok: false, error: "mock" }),
       exportBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),

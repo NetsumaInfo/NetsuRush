@@ -8,10 +8,15 @@
 //     AFFICHÉE : une grande référence pèse plus qu'une vignette posée à côté ;
 //   - le budget de pixels est plafonné, donc le coût ne dépend pas du poids des images.
 //
-// Le point dur est la LECTURE des pixels : la coquille affiche les médias via son protocole d'asset,
-// qui teinte le canvas et interdit `getImageData`. L'échantillonnage repasse donc par le serveur HTTP
-// du core (`Access-Control-Allow-Origin: *`) en `crossOrigin="anonymous"`. Reste ignoré ce dont les
-// pixels sont vraiment hors d'atteinte : une iframe YouTube ou une carte embed.
+// Le point dur est la LECTURE des pixels. La coquille affiche les médias via son protocole d'asset,
+// qui teinte le canvas et fait lever `getImageData` ; la voie HTTP du core, elle, dépend d'en-têtes
+// CORS que la WebView n'honore pas toujours au chargement d'une <img>. D'où l'ordre :
+//   1. le CORE lit le fichier SUR LE DISQUE (ffmpeg) et rend un PNG minuscule → chargé en `data:`
+//      URL, donc lisible sans aucune restriction d'origine. Marche pour image, GIF et vidéo, et même
+//      pour une source qu'aucun élément de la page n'a encore décodée ;
+//   2. repli serveur HTTP du core en `crossOrigin="anonymous"` (source distante, asset temporaire) ;
+//   3. repli élément vivant à l'écran (déjà décodé, sans restriction : blob:, data:).
+// Reste ignoré ce dont les pixels sont vraiment hors d'atteinte : une iframe YouTube ou une carte embed.
 
 import { QuantizerCelebi, Score, Hct, hexFromArgb, argbFromRgb } from "@material/material-color-utilities";
 import { nr } from "@/lib/bridge";
@@ -32,7 +37,15 @@ export interface PaletteResult {
   colors: string[];
   skipped: number;   // médias ignorés (iframe, pixels illisibles)
   sampled: number;   // médias réellement échantillonnés
+  // Le core n'a jamais répondu sur la lecture de fichier. Presque toujours : la fenêtre n'a pas été
+  // relancée depuis la mise à jour, donc le core en cours ne connaît pas encore ce canal. Le dire
+  // vaut mieux qu'un « aucune couleur exploitable » qui n'indique rien à faire.
+  coreDown: boolean;
 }
+
+// Compteurs de la voie « fichier lu par le core », pour distinguer un core muet d'une vraie image
+// illisible.
+interface SampleStats { coreTried: number; coreOk: number }
 
 // Élément vivant de l'item à l'écran. Fidèle (frame courante d'une vidéo, image déjà décodée) mais
 // chargé sans `crossOrigin` : le TEINDRAIT le canvas et `getImageData` lèverait. On ne s'en sert
@@ -142,14 +155,32 @@ function pixelsFrom(el: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement,
   return out;
 }
 
-// Pixels d'un item. L'ordre compte : on passe D'ABORD par une source relisible (serveur HTTP du
-// core, en anonyme), parce que l'élément affiché vient du protocole d'asset et teint le canvas —
-// `getImageData` lèverait et le média serait compté comme ignoré. L'élément vivant ne sert que de
-// repli, pour les sources déjà libres de droit de lecture (data:, blob:, http distant déjà affiché).
-async function samplePixels(item: BoardItem, budget: number): Promise<number[] | null> {
+// Pixels d'un item, par ordre de fiabilité décroissante : fichier lu par le core → serveur HTTP du
+// core en anonyme → élément vivant à l'écran. Chaque voie peut rendre un canvas teinté ou une source
+// non dessinable ; tant qu'il en reste une, le média n'est pas perdu.
+async function samplePixels(item: BoardItem, budget: number, stats: SampleStats): Promise<number[] | null> {
   if (!SAMPLEABLE.has(item.kind)) return null;
 
   const ref = item.kind === "sequence" ? item.frames?.[item.frame ?? 0] ?? item.ref : item.ref;
+
+  // 1. Lecture par le CORE, directement sur le fichier. Le PNG rendu arrive en `data:` URL : aucune
+  //    origine, donc aucun canvas teinté, quelle que soit la nature du média.
+  if (ref && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
+    stats.coreTried++;
+    const shot = await nr.reference.sampleFrame(ref, {
+      at: item.kind === "video" ? item.trimIn ?? 0 : 0,
+      side: SIDE_MAX,
+    }).catch(() => null);
+    if (shot?.ok && shot.png) {
+      stats.coreOk++;
+      const el = await loadImage(`data:image/png;base64,${shot.png}`, false);
+      if (el) {
+        const px = pixelsFrom(el, item, budget);
+        if (px && px.length) return px;
+      }
+    }
+  }
+
   const src = readableSrc(ref);
   if (src) {
     const el = item.kind === "video"
@@ -174,7 +205,8 @@ export async function extractPalette(items: BoardItem[], count: number): Promise
   const want = Math.max(PALETTE_MIN, Math.min(PALETTE_MAX, Math.round(count)));
   const usable = items.filter((it) => SAMPLEABLE.has(it.kind) && !it.missing && !it.loading);
   const skippedKinds = items.length - usable.length;
-  if (!usable.length) return { colors: [], skipped: skippedKinds, sampled: 0 };
+  const stats: SampleStats = { coreTried: 0, coreOk: 0 };
+  if (!usable.length) return { colors: [], skipped: skippedKinds, sampled: 0, coreDown: false };
 
   // Pondération par surface AFFICHÉE : la planche dit ce qui compte, pas la définition des fichiers.
   const areas = usable.map((it) => Math.max(1, it.w * it.h));
@@ -185,7 +217,7 @@ export async function extractPalette(items: BoardItem[], count: number): Promise
   let sampled = 0;
   for (let i = 0; i < usable.length; i++) {
     const budget = Math.max(2_000, Math.round((areas[i] / total) * PIXEL_BUDGET));
-    const px = await samplePixels(usable[i], budget);
+    const px = await samplePixels(usable[i], budget, stats);
     if (!px || !px.length) { skipped++; continue; }
     sampled++;
     // Concaténation par boucle : `push(...px)` passerait des dizaines de milliers d'arguments d'un
@@ -193,7 +225,9 @@ export async function extractPalette(items: BoardItem[], count: number): Promise
     // d'un appel de fonction — la palette planterait sur les grandes sélections, pas les petites.
     for (let k = 0; k < px.length; k++) pixels.push(px[k]);
   }
-  if (!pixels.length) return { colors: [], skipped, sampled: 0 };
+  // Core muet sur TOUTES les tentatives : c'est lui le coupable, pas les images.
+  const coreDown = stats.coreTried > 0 && stats.coreOk === 0;
+  if (!pixels.length) return { colors: [], skipped, sampled: 0, coreDown };
 
   // 128 grappes : assez fin pour ne pas mélanger deux teintes proches, assez grossier pour rester rapide.
   const quantized = QuantizerCelebi.quantize(pixels, 128);
@@ -216,5 +250,5 @@ export async function extractPalette(items: BoardItem[], count: number): Promise
 
   // Tri par teinte : une bande lisible, pas un classement de scores.
   const ordered = scored.slice(0, want).sort((a, b) => Hct.fromInt(a).hue - Hct.fromInt(b).hue);
-  return { colors: ordered.map(hexFromArgb), skipped, sampled };
+  return { colors: ordered.map(hexFromArgb), skipped, sampled, coreDown };
 }

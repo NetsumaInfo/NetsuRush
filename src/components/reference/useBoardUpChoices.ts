@@ -9,23 +9,25 @@ import { BOARD_UP_CHOICES, shaderRuntimeModel, isRtxShader, RTX_RUNTIME_IDS, typ
 import { useInstalledModels } from "@/components/upscale/ModelPicker";
 import { isModelCompatible, useCompatibility } from "@/hooks/useCompatibility";
 
-// `allowTurbo` = faux sur une image : les shaders traitent un flux vidéo uniquement.
+// `target` = ce qui sera traité. Les shaders GLSL valent AUSSI pour une image fixe (une frame, même
+// filtre libplacebo) — les réserver à la vidéo privait l'image des moteurs les plus rapides. Seul
+// RTX VSR reste vidéo : son CLI ne traite que des fichiers vidéo entiers.
 // `ready` = statut d'installation connu — tant qu'il est faux, aucun réglage ne doit être réécrit
 // (au boot la liste paraîtrait vide et écraserait le modèle choisi par l'utilisateur).
-export function useBoardUpChoices(allowTurbo: boolean): { ready: boolean; choices: BoardUpChoice[] } {
+export function useBoardUpChoices(target: "video" | "image" | "any"): { ready: boolean; choices: BoardUpChoice[] } {
   const { ready, has } = useInstalledModels();
   const { status } = useCompatibility();
   const choices = useMemo(
     () => BOARD_UP_CHOICES.filter((c) => {
       if (c.engine === "turbo") {
-        if (!allowTurbo || !isModelCompatible(c.value, status)) return false;
-        if (isRtxShader(c.value as ShaderModel)) return RTX_RUNTIME_IDS.every(has);
+        if (!isModelCompatible(c.value, status)) return false;
+        if (isRtxShader(c.value as ShaderModel)) return target !== "image" && RTX_RUNTIME_IDS.every(has);
         const runtime = shaderRuntimeModel(c.value as ShaderModel);
         return !runtime || has(runtime);
       }
       return has(c.value) && isModelCompatible(c.value, status);
     }),
-    [allowTurbo, has, status],
+    [target, has, status],
   );
   return { ready, choices };
 }

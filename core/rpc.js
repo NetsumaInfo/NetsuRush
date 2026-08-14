@@ -874,6 +874,10 @@ function createRpc() {
     "reference:scanFolder": ([dir, opts]) => scanFolder(dir, opts || {}),
     // Export du board (PNG/JPG en base64, SVG en texte) vers un chemin choisi par l'utilisateur.
     "reference:writeFile": ([filePath, data, encoding]) => writeExportFile(filePath, data, encoding),
+    // Un cadre d'un média rendu en PNG base64, lu SUR LE DISQUE : c'est la seule source de pixels
+    // relisible par le renderer (le protocole d'asset de la coquille teinte le canvas). Sert
+    // l'extraction de palette, qui sans ça ne trouvait « aucune couleur exploitable ».
+    "reference:sampleFrame": ([filePath, opts]) => ffmpeg.sampleFrame(filePath, opts || {}),
 
     // --- Fond d'écran de l'interface (Paramètres › Interface › Thème) ---
     // L'import copie la source dans la bibliothèque et cuit la variante de base ; les marches de flou
@@ -1091,8 +1095,8 @@ function createRpc() {
     };
     const base = `up_${Date.now().toString(36)}`;
 
-    // Moteur Turbo (shader GPU libplacebo) — vidéo uniquement (les shaders ciblent le flux vidéo).
-    // Sortie HEVC mp4 (encode GPU) directement lisible sur le board. L'image reste sur le moteur IA.
+    // Moteur Turbo (shader GPU libplacebo) sur une VIDÉO : sortie HEVC mp4 (encode GPU) directement
+    // lisible sur le board. L'image fixe a son propre aiguillage plus bas.
     if (engine === "turbo" && kind !== "image") {
       const segs = inSec != null && outSec != null ? [{ in: inSec, out: outSec }] : undefined;
       const r = await turbo.runTurbo(sidecars, event, {
@@ -1107,9 +1111,14 @@ function createRpc() {
       // GIF animé → chemin dédié (toutes les frames → GIF), sinon image fixe (1 frame → PNG).
       const isGif = /\.gif$/i.test(String(src));
       const out = refStore.assetPath(`${base}.${isGif ? "gif" : "png"}`);
-      const r = isGif
-        ? await sidecars.runUpscaleGif({ input: src, out, model, scale, denoise })
-        : await sidecars.runUpscaleImage({ input: src, out, model, scale, denoise });
+      // Moteur Turbo sur une image : même shader GPU que la vidéo (une frame), et un GIF animé garde
+      // ses frames et sa cadence par le chemin dédié. Une image partait jusqu'ici TOUJOURS sur le
+      // moteur IA, y compris quand un shader était choisi : le choix était ignoré en silence.
+      const r = engine === "turbo"
+        ? await turbo.runTurboImage(sidecars, { input: src, out, shader, scale, denoise })
+        : isGif
+          ? await sidecars.runUpscaleGif({ input: src, out, model, scale, denoise })
+          : await sidecars.runUpscaleImage({ input: src, out, model, scale, denoise });
       if (!r || !r.ok || !r.output) return { ok: false, error: (r && r.error) || "échec upscale image" };
       return { ok: true, path: remember(r.output), width: r.width, height: r.height };
     }

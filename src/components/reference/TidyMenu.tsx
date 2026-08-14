@@ -96,7 +96,20 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
 
             <div className="mt-3 flex items-center justify-between text-xs font-medium text-muted-foreground">
               <span>{t("tidy.gap")}</span>
-              <span className="tabular-nums text-foreground">{prefs.arrangeGap}</span>
+              <div className="flex items-center gap-2">
+                {/* « Collé » = écart 0, en un clic : viser le zéro au curseur est pénible, et c'est
+                    le réglage qu'on veut pour une planche en mosaïque pleine. */}
+                <Button
+                  variant={prefs.arrangeGap === 0 ? "default" : "outline"}
+                  size="xs"
+                  className="h-6 px-2 text-[11px]"
+                  aria-pressed={prefs.arrangeGap === 0}
+                  onClick={() => setPrefs({ arrangeGap: prefs.arrangeGap === 0 ? 16 : 0 })}
+                >
+                  {t("tidy.gapNone")}
+                </Button>
+                <span className="tabular-nums text-foreground">{prefs.arrangeGap}</span>
+              </div>
             </div>
             <Slider
               className="mt-1.5"

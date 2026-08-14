@@ -51,7 +51,7 @@ export function UpscaleItemDialog({
 
   // Un shader Turbo = VIDÉO uniquement → sur une image la liste ne montre que les modèles IA.
   const choice = upscaleChoiceFrom(sel, prefs, isVideo, denoise, scale);
-  const { ready: modelsReady, choices } = useBoardUpChoices(isVideo);
+  const { ready: modelsReady, choices } = useBoardUpChoices(isVideo ? "video" : "image");
   useEffect(() => {
     if (modelsReady && choices.length && !choices.some((c) => c.value === sel)) setSel(choices[0].value);
   }, [modelsReady, choices, sel]);

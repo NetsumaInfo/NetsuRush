@@ -27,7 +27,7 @@ export async function extractPaletteToBoard(): Promise<void> {
   st.setNotice({ kind: "ok", text: i18n.t("reference:palette.working"), sticky: true });
   const res = await extractPalette(src, st.prefs.paletteSize);
   if (!res.colors.length) {
-    st.setNotice({ kind: "error", text: i18n.t("reference:palette.failed") });
+    st.setNotice({ kind: "error", text: i18n.t(res.coreDown ? "reference:palette.failedCore" : "reference:palette.failed") });
     return;
   }
 
@@ -57,7 +57,7 @@ export async function regeneratePalette(paletteId: string): Promise<void> {
   st.setNotice({ kind: "ok", text: i18n.t("reference:palette.working"), sticky: true });
   const res = await extractPalette(src, st.prefs.paletteSize);
   if (!res.colors.length) {
-    st.setNotice({ kind: "error", text: i18n.t("reference:palette.failed") });
+    st.setNotice({ kind: "error", text: i18n.t(res.coreDown ? "reference:palette.failedCore" : "reference:palette.failed") });
     return;
   }
   useBoard.getState().patchItem(paletteId, { colors: res.colors });

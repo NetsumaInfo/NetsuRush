@@ -175,6 +175,15 @@ async function clipFrames(input, start, end) {
   return Math.max(1, Math.round(dur * fps));
 }
 
+// `runOne`/`writeFrame` spawn ffmpeg with cwd = SHADER_DIR (the shader is passed as a relative
+// name). A missing directory makes spawn fail with ENOENT, which surfaced as « ffmpeg introuvable »
+// and sent everyone looking for the wrong problem — so name the real cause instead.
+function shaderDirError() {
+  return fs.existsSync(SHADER_DIR)
+    ? null
+    : `dossier des shaders absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})`;
+}
+
 const even = (n) => Math.max(2, n - (n % 2)); // yuv420 exige des dimensions paires
 // Une image de test ne doit jamais bloquer l'UI : un décodage qui patine est abandonné.
 const FRAME_TIMEOUT_MS = 60_000;
@@ -273,6 +282,8 @@ async function runShaderUpscale(event, opts) {
     outDir, segments, whole, importBack, baseName, outputName, savePath, parallel = false, concurrency = 2 } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   if (!outDir) return { ok: false, error: t('outputFolderMissing') };
+  const dirErr = shaderDirError();
+  if (dirErr) return { ok: false, error: dirErr };
   const resolved = await resolveProcessEncoding(opts || {});
   const sh = SHADERS[shader] || SHADERS.artcnn_c4f32;
   // Shader custom absent (vendor/shaders pas provisionné) → message clair plutôt qu'un échec ffmpeg obscur.
@@ -371,6 +382,8 @@ async function runShaderFrame(opts) {
   if (!input) return { ok: false, error: t('sourceMissing') };
   const sh = SHADERS[shader];
   if (!sh) return { ok: false, error: `${t('unknownModel')}: ${shader}` };
+  const dirErr = shaderDirError();
+  if (dirErr) return { ok: false, error: dirErr };
   if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
     return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
   }
@@ -397,4 +410,86 @@ async function runShaderFrame(opts) {
   return { ok: true, orig, out, width: ow, height: oh };
 }
 
-module.exports = { runShaderUpscale, runShaderFrame, SHADERS, modelForShader };
+// Upscale d'une IMAGE FIXE par le moteur shader, vers un fichier choisi par l'appelant.
+//
+// NetsuBoard n'embarque aucun moteur IA : sans ce chemin, une image du board n'aurait AUCUN moyen
+// d'être agrandie, alors que libplacebo traite une image exactement comme une vidéo d'une frame —
+// c'est déjà ce que fait `runShaderFrame` pour l'aperçu, qui écrit dans un dossier de test et rend
+// deux fichiers (avant/après). Ici on écrit un seul fichier, à l'emplacement demandé.
+//
+// This path writes ONE still frame, so an animated GIF is refused rather than silently flattened:
+// `-frames:v 1` would keep its first image only. Animated sources go to `runShaderGif`.
+async function runShaderImage(opts) {
+  const { input, out, shader = 'artcnn_c4f32', scale = 2,
+    deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
+  if (!input) return { ok: false, error: t('sourceMissing') };
+  if (!out) return { ok: false, error: t('sourceMissing') };
+  if (/\.gif$/i.test(String(input))) return { ok: false, error: t('turboGifUnsupported') };
+  const sh = SHADERS[shader];
+  if (!sh) return { ok: false, error: `${t('unknownModel')}: ${shader}` };
+  const dirErr = shaderDirError();
+  if (dirErr) return { ok: false, error: dirErr };
+  if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
+    return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
+  }
+  const bin = await libplaceboBin();
+  if (!bin) return { ok: false, error: t('turboUnavailable') };
+  let dims;
+  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
+  if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
+
+  const s = scale | 0 || 1;
+  const ow = even(dims.width * s);
+  const oh = even(dims.height * s);
+  await fsp.mkdir(path.dirname(out), { recursive: true });
+  // yuv444p en sortie de filtre : l'encodeur PNG convertit ensuite en RGB sans sous-échantillonner.
+  const filter = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix: 'yuv444p' });
+  const r = await writeFrame(bin, input, 0, out, filter);
+  if (!r.ok) return { ok: false, error: r.error };
+  return { ok: true, output: out, width: ow, height: oh };
+}
+
+// Upscale of an ANIMATED GIF, frames and timing kept, GIF in and GIF out.
+//
+// A GIF is a video to libplacebo like anything else — what it is not is a video to the GIF muxer,
+// which only takes 8-bit palettised frames while the filter hands back yuv444p. So the shaded stream
+// is split in two: one branch computes the palette, the other is quantised against it. `stats_mode=
+// diff` weights that palette towards the pixels that move rather than a static background, and
+// `diff_mode=rectangle` rewrites only the changed area of each frame — without it a 2×/4× GIF grows
+// far beyond its source for no visible gain.
+//
+// One ffmpeg pass, no intermediate frame dump: `palettegen` buffers the stream itself.
+async function runShaderGif(opts) {
+  const { input, out, shader = 'artcnn_c4f32', scale = 2,
+    deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
+  if (!input) return { ok: false, error: t('sourceMissing') };
+  if (!out) return { ok: false, error: t('sourceMissing') };
+  const sh = SHADERS[shader];
+  if (!sh) return { ok: false, error: `${t('unknownModel')}: ${shader}` };
+  const dirErr = shaderDirError();
+  if (dirErr) return { ok: false, error: dirErr };
+  if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
+    return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
+  }
+  const bin = await libplaceboBin();
+  if (!bin) return { ok: false, error: t('turboUnavailable') };
+  let dims;
+  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
+  if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
+
+  const s = scale | 0 || 1;
+  const ow = even(dims.width * s);
+  const oh = even(dims.height * s);
+  await fsp.mkdir(path.dirname(out), { recursive: true });
+  const placebo = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix: 'yuv444p' });
+  const args = ['-y', '-hide_banner', '-loglevel', 'error', '-progress', 'pipe:1', '-nostats',
+    '-init_hw_device', 'vulkan', '-i', input,
+    '-filter_complex', `[0:v]${placebo}[up];[up]split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
+    '-loop', '0', out]; // -loop 0 = boucle infinie, ce qu'est un GIF de référence sur un board
+  const frames = await clipFrames(input);
+  const r = await runOne(null, bin, args, path.basename(out), 0, 1, frames);
+  if (!r.ok) return { ok: false, error: r.error };
+  return { ok: true, output: out, width: ow, height: oh };
+}
+
+module.exports = { runShaderUpscale, runShaderFrame, runShaderImage, runShaderGif, SHADERS, modelForShader };

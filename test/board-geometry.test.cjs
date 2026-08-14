@@ -192,6 +192,37 @@ test('no layout ever stacks two items on top of each other', () => {
   }
 });
 
+test('aligning and distributing never stack items either', () => {
+  // Trente médias éparpillés : c'est le cas qui rendait la planche illisible, chaque bouton
+  // d'alignement ramenant tout le monde sur la même bande.
+  let seed = 4242;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const sel = Array.from({ length: 30 }, (_, i) => {
+    const h = 120 + rnd() * 800;
+    return box(`a${i}`, rnd() * 3000 - 1500, rnd() * 3000 - 1500, h * (0.5 + rnd() * 2), h);
+  });
+  for (const mode of ['left', 'hcenter', 'right', 'top', 'vcenter', 'bottom', 'hdist', 'vdist']) {
+    const pos = arrange.computeArrange(sel, mode, { gap: 12 });
+    const placed = sel.map((it) => ({ ...it, ...pos.get(it.id) }));
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        assert.ok(!overlaps(placed[i], placed[j]), `${mode} : ${placed[i].id} chevauche ${placed[j].id}`);
+      }
+    }
+  }
+});
+
+test('aligning leaves a readable selection untouched', () => {
+  // L'anti-empilement ne doit s'activer QUE sur un vrai chevauchement : trois images bien séparées
+  // gardent exactement leur position sur l'axe libre.
+  const sel = [box('a', 100, 0, 200, 100), box('b', 400, 300, 200, 100), box('c', 50, 600, 200, 100)];
+  const pos = arrange.computeArrange(sel, 'left', { gap: 12 });
+  for (const it of sel) {
+    assert.equal(pos.get(it.id).x, 50);          // bord gauche commun
+    assert.equal(pos.get(it.id).y, undefined);   // axe libre intact
+  }
+});
+
 test('arranging keeps the selection centred where it was', () => {
   const sel = [box('a', 0, 0, 100, 100), box('b', 400, 300, 100, 100)];
   const before = arrange.boundsOf(sel);

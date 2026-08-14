@@ -457,7 +457,9 @@ export const useBoard = create<BoardState>((set, get) => ({
       };
     }),
 
-  arrange: (mode) => get().tidy({ layout: mode }),
+  // Les boutons d'alignement/répartition partagent l'écart du sélecteur de rangement : régler
+  // « collé » (écart 0) doit valoir pour TOUS les gestes de mise en ordre, pas seulement « Ranger ».
+  arrange: (mode) => get().tidy({ layout: mode, gap: get().prefs.arrangeGap }),
 
   // Uniformisation PUIS disposition : les deux passes partagent un seul instantané d'historique,
   // sinon « ranger » coûterait deux Ctrl+Z pour un seul geste utilisateur.

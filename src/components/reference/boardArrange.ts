@@ -276,20 +276,42 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
 
-  if (mode === "left") sel.forEach((i) => pos.set(i.id, { x: minX + offX(i) }));
-  else if (mode === "right") sel.forEach((i) => pos.set(i.id, { x: maxX - bb(i).w + offX(i) }));
-  else if (mode === "hcenter") sel.forEach((i) => pos.set(i.id, { x: cx - bb(i).w / 2 + offX(i) }));
-  else if (mode === "top") sel.forEach((i) => pos.set(i.id, { y: minY + offY(i) }));
-  else if (mode === "bottom") sel.forEach((i) => pos.set(i.id, { y: maxY - bb(i).h + offY(i) }));
-  else if (mode === "vcenter") sel.forEach((i) => pos.set(i.id, { y: cy - bb(i).h / 2 + offY(i) }));
-  else if (mode === "hdist") {
+  // Un alignement ne doit JAMAIS empiler. Aligner trente images sur un bord les mettait toutes sur
+  // la même colonne — donc les unes SUR les autres, planche illisible. Les positions alignées sont
+  // gardées telles quelles ; seul ce qui se chevauche est repoussé le long de l'AUTRE axe, dans son
+  // ordre d'origine. Une petite sélection déjà lisible ne bouge pas d'un pixel.
+  const spread = (axis: "x" | "y") => {
+    const start = (i: ArrangeBox) => (axis === "y" ? bb(i).y : bb(i).x);
+    const size = (i: ArrangeBox) => (axis === "y" ? bb(i).h : bb(i).w);
+    const off = (i: ArrangeBox) => (axis === "y" ? offY(i) : offX(i));
+    let cursor = -Infinity;
+    for (const i of [...sel].sort((a, b) => start(a) - start(b))) {
+      const at = Math.max(start(i), cursor);
+      if (at !== start(i)) pos.set(i.id, { ...pos.get(i.id), [axis]: at + off(i) });
+      cursor = at + size(i) + gap;
+    }
+  };
+
+  if (mode === "left" || mode === "right" || mode === "hcenter") {
+    if (mode === "left") sel.forEach((i) => pos.set(i.id, { x: minX + offX(i) }));
+    else if (mode === "right") sel.forEach((i) => pos.set(i.id, { x: maxX - bb(i).w + offX(i) }));
+    else sel.forEach((i) => pos.set(i.id, { x: cx - bb(i).w / 2 + offX(i) }));
+    spread("y");
+  } else if (mode === "top" || mode === "bottom" || mode === "vcenter") {
+    if (mode === "top") sel.forEach((i) => pos.set(i.id, { y: minY + offY(i) }));
+    else if (mode === "bottom") sel.forEach((i) => pos.set(i.id, { y: maxY - bb(i).h + offY(i) }));
+    else sel.forEach((i) => pos.set(i.id, { y: cy - bb(i).h / 2 + offY(i) }));
+    spread("x");
+  } else if (mode === "hdist") {
+    // Écart PLANCHER = `gap` : quand les items ne tiennent pas dans leur propre emprise, un pas
+    // négatif les faisait se chevaucher. Répartir doit écarter le groupe, jamais le replier.
     const sorted = [...sel].sort((a, b) => bb(a).x - bb(b).x);
-    const step = (maxX - minX - sorted.reduce((t, i) => t + bb(i).w, 0)) / (sorted.length - 1);
+    const step = Math.max(gap, (maxX - minX - sorted.reduce((t, i) => t + bb(i).w, 0)) / (sorted.length - 1));
     let x = minX;
     sorted.forEach((i) => { pos.set(i.id, { x: x + offX(i) }); x += bb(i).w + step; });
   } else if (mode === "vdist") {
     const sorted = [...sel].sort((a, b) => bb(a).y - bb(b).y);
-    const step = (maxY - minY - sorted.reduce((t, i) => t + bb(i).h, 0)) / (sorted.length - 1);
+    const step = Math.max(gap, (maxY - minY - sorted.reduce((t, i) => t + bb(i).h, 0)) / (sorted.length - 1));
     let y = minY;
     sorted.forEach((i) => { pos.set(i.id, { y: y + offY(i) }); y += bb(i).h + step; });
   } else if (mode === "grid") {

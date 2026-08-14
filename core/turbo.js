@@ -41,6 +41,26 @@ async function runTurboFrame(sidecars, opts) {
 }
 
 /**
+ * Upscale d'une IMAGE, même aiguillage que `runTurbo`. Le GIF animé a son propre chemin des deux
+ * côtés : une image fixe est rendue en une frame, un GIF garde ses frames et sa cadence. RTX VSR n'a
+ * pas d'équivalent image (son CLI ne traite que des fichiers vidéo entiers) : il est refusé ici
+ * plutôt que substitué en silence par un autre moteur.
+ * @param {{ runUpscaleImage: (opts: any) => Promise<any>, runUpscaleGif: (opts: any) => Promise<any> }} sidecars
+ * @param {any} opts options d'upscale, `shader` = id du sélecteur temps réel
+ */
+function runTurboImage(sidecars, opts) {
+  const o = opts || {};
+  if (RTX_SHADERS.has(o.shader)) return Promise.resolve({ ok: false, error: t('turboFrameUnsupported') });
+  const gif = /\.gif$/i.test(String(o.input || ''));
+  const model = shaderUpscale.modelForShader(o.shader);
+  if (model) {
+    const withModel = Object.assign({}, o, { model });
+    return gif ? sidecars.runUpscaleGif(withModel) : sidecars.runUpscaleImage(withModel);
+  }
+  return gif ? shaderUpscale.runShaderGif(o) : shaderUpscale.runShaderImage(o);
+}
+
+/**
  * Cet id du sélecteur unique relève-t-il du panier « temps réel » ? Répondre ici évite de recopier
  * la liste des shaders chez chaque appelant (elle vit à trois endroits : GLSL, RTX, poids ONNX).
  * @param {string} id
@@ -49,4 +69,4 @@ function isTurboShader(id) {
   return RTX_SHADERS.has(id) || !!shaderUpscale.SHADERS[id] || !!shaderUpscale.modelForShader(id);
 }
 
-module.exports = { runTurbo, runTurboFrame, isTurboShader, RTX_SHADERS };
+module.exports = { runTurbo, runTurboFrame, runTurboImage, isTurboShader, RTX_SHADERS };

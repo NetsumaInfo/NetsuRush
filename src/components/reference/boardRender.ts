@@ -131,11 +131,24 @@ function naturalSize(el: CanvasImageSource): { w: number; h: number } {
   return { w: 0, h: 0 };
 }
 
-// Élément peignable d'un média. On passe d'abord par une source RELISIBLE (serveur HTTP du core, en
-// anonyme) : l'élément affiché, lui, vient du protocole d'asset et teindrait le canvas — l'export
-// entier échouerait alors à la conversion finale. L'élément vivant reste le repli.
-async function mediaSource(item: BoardItem): Promise<CanvasImageSource | null> {
+// Élément peignable d'un média, par ordre de fiabilité décroissante : cadre rendu par le CORE depuis
+// le fichier (arrive en `data:` URL, donc sans origine ni canvas teinté), puis serveur HTTP du core
+// en anonyme, puis l'élément vivant. L'élément affiché vient du protocole d'asset et teindrait le
+// canvas : l'export entier échouerait à la conversion finale.
+async function mediaSource(item: BoardItem, side = 1600): Promise<CanvasImageSource | null> {
   const ref = item.kind === "sequence" ? item.frames?.[item.frame ?? 0] ?? item.ref : item.ref;
+
+  if (ref && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
+    const shot = await nr.reference.sampleFrame(ref, {
+      at: item.kind === "video" ? item.trimIn ?? 0 : 0,
+      side: Math.max(16, Math.min(4096, Math.round(side))),
+    }).catch(() => null);
+    if (shot?.ok && shot.png) {
+      const el = await loadImage(`data:image/png;base64,${shot.png}`, false);
+      if (el && naturalSize(el).w) return el;
+    }
+  }
+
   const src = readableSrc(ref);
   if (src) {
     const el = item.kind === "video" ? await loadVideoFrame(src, item.trimIn ?? 0) : await loadImage(src, true);

@@ -436,6 +436,7 @@ const reference: RefApi = {
   sweepAssets: (opts) => call("reference:sweepAssets", [opts || {}]),
   scanFolder: (dir, opts) => call("reference:scanFolder", [dir, opts || {}]),
   writeFile: (p, data, encoding) => call("reference:writeFile", [p, data, encoding]),
+  sampleFrame: (p, opts) => call("reference:sampleFrame", [p, opts || {}]),
   extractMedia: (url, options) => call("reference:extractMedia", [url, options || {}]),
   extractFrames: (opts) => call("reference:extractFrames", [opts]),
   exportBoard: (scene, destPath, opts) => call("netsu:export", [scene, destPath, opts]),
