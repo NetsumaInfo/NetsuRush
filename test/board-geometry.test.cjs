@@ -155,10 +155,60 @@ test('block layout justifies rows and keeps every ratio', () => {
     if (row) row.push(it); else rows.push([it]);
   }
   assert.ok(rows.length > 1, 'échantillon trop petit pour vérifier la justification');
-  const widths = rows
-    .slice(0, -1) // la dernière ligne n'est pas étirée : elle ferait exploser un média isolé
-    .map((r) => Math.max(...r.map((it) => it.x + it.w)) - Math.min(...r.map((it) => it.x)));
+  // TOUTES les lignes, dernière comprise : le bloc doit être un rectangle plein, sans ligne
+  // orpheline — c'est ce qui permet une mosaïque vraiment collée à écart 0.
+  const widths = rows.map((r) => Math.max(...r.map((it) => it.x + it.w)) - Math.min(...r.map((it) => it.x)));
   assert.ok(Math.max(...widths) - Math.min(...widths) < 1, 'lignes non justifiées à la même largeur');
+});
+
+test('block layout at gap 0 is a flush mosaic with no gutter at all', () => {
+  const sel = [
+    box('a', 0, 0, 1920, 1080), box('b', 0, 0, 600, 800), box('c', 0, 0, 500, 500),
+    box('d', 0, 0, 1200, 400), box('e', 0, 0, 300, 450), box('f', 0, 0, 800, 800),
+    box('g', 0, 0, 1000, 700), box('h', 0, 0, 400, 900),
+  ];
+  const pos = arrange.computeArrange(sel, 'block', { gap: 0 });
+  const placed = sel.map((it) => ({ ...it, ...pos.get(it.id) }));
+
+  // Regroupement par ligne, puis vérification que les voisins se TOUCHENT exactement. Le tri se fait
+  // sur un y ARRONDI : deux items d'une même ligne diffèrent au dernier bit près, et un tri exact les
+  // mélangerait avec ceux de la ligne suivante.
+  const rows = [];
+  for (const it of [...placed].sort((a, b) => Math.round(a.y) - Math.round(b.y) || a.x - b.x)) {
+    const row = rows.find((r) => Math.abs(r[0].y - it.y) < 1);
+    if (row) row.push(it); else rows.push([it]);
+  }
+  rows.forEach((r) => r.sort((a, b) => a.x - b.x));
+  assert.ok(rows.length > 1, 'échantillon trop petit');
+  for (const r of rows) {
+    for (let i = 1; i < r.length; i++) {
+      assert.ok(Math.abs(r[i].x - (r[i - 1].x + r[i - 1].w)) < 0.01, 'espace horizontal résiduel');
+    }
+  }
+  for (let k = 1; k < rows.length; k++) {
+    assert.ok(Math.abs(rows[k][0].y - (rows[k - 1][0].y + rows[k - 1][0].h)) < 0.01, 'espace vertical résiduel');
+  }
+  // Rectangle plein : toutes les lignes à la même largeur, dernière comprise.
+  const widths = rows.map((r) => r[r.length - 1].x + r[r.length - 1].w - r[0].x);
+  assert.ok(Math.max(...widths) - Math.min(...widths) < 0.01, 'la mosaïque n\'est pas un rectangle');
+});
+
+test('block layout keeps the reading order, and reorders by name on demand', () => {
+  // Ordre « Actuel » = ce que l'œil voit (haut→bas, gauche→droite), pas l'ordre d'insertion.
+  const sel = [
+    { ...box('third', 0, 500, 200, 200), ref: 'C:/a/shot_1.png' },
+    { ...box('first', 0, 0, 200, 200), ref: 'C:/a/shot_10.png' },
+    { ...box('second', 300, 0, 200, 200), ref: 'C:/a/shot_2.png' },
+  ];
+  const reading = arrange.computeArrange(sel, 'block', { gap: 8 });
+  const order = (pos) => [...pos.entries()]
+    .sort((a, b) => a[1].y - b[1].y || a[1].x - b[1].x)
+    .map(([id]) => id);
+  assert.deepEqual(order(reading), ['first', 'second', 'third']);
+
+  const byName = arrange.computeArrange(sel, 'block', { gap: 8, sort: 'name' });
+  // Tri NATUREL sur le nom de fichier : shot_1, shot_2, shot_10.
+  assert.deepEqual(order(byName), ['third', 'second', 'first']);
 });
 
 test('block layout preserves the total area of the selection', () => {

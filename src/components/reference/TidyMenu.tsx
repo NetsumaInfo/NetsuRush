@@ -4,6 +4,7 @@
 //
 // Partagé par la barre d'outils et la barre de groupe : un seul endroit à faire évoluer.
 
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Popover } from "@base-ui/react/popover";
 import { Blocks, Columns3, Grid2x2, LayoutGrid, Rows3, Wand2 } from "lucide-react";
@@ -50,16 +51,40 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
   const prefs = useBoard((s) => s.prefs);
   const setPrefs = useBoard((s) => s.setPrefs);
   const tidy = useBoard((s) => s.tidy);
+  // Géométrie de la sélection à l'ouverture du panneau, et étiquette d'annulation de la session.
+  // Chaque réglage rejoue le rangement DEPUIS cet état : comparer deux dispositions compare deux
+  // rangements de la même planche, sans dérive d'échelle, et toute la session tient en un Ctrl+Z.
+  const base = useRef<Map<string, { x: number; y: number; w: number; h: number }> | null>(null);
+  const tag = useRef("");
 
-  const run = () => tidy({
-    layout: prefs.arrangeLayout,
-    uniform: prefs.arrangeUniform,
-    gap: prefs.arrangeGap,
-    sort: prefs.arrangeSort,
-  });
+  const openChange = (next: boolean) => {
+    if (!next) { base.current = null; return; }
+    const st = useBoard.getState();
+    const snap = new Map<string, { x: number; y: number; w: number; h: number }>();
+    for (const it of st.items) {
+      if (st.selectedIds.includes(it.id) && it.kind !== "draw") snap.set(it.id, { x: it.x, y: it.y, w: it.w, h: it.h });
+    }
+    base.current = snap;
+    tag.current = `tidy:${snap.size}:${st.selectedIds.join(",")}`;
+  };
+
+  // Tout réglage s'APPLIQUE aussitôt : un panneau où l'on clique « Grille » sans que rien ne bouge
+  // se lit comme un bouton mort — il fallait penser à valider ensuite pour voir quoi que ce soit.
+  const run = (over: Partial<typeof prefs> = {}) => {
+    const p = { ...useBoard.getState().prefs, ...over };
+    if (Object.keys(over).length) setPrefs(over);
+    tidy({
+      layout: p.arrangeLayout,
+      uniform: p.arrangeUniform,
+      gap: p.arrangeGap,
+      sort: p.arrangeSort,
+      base: base.current ?? undefined,
+      tag: tag.current || undefined,
+    });
+  };
 
   return (
-    <Popover.Root>
+    <Popover.Root onOpenChange={openChange}>
       <Tooltip>
         <TooltipTrigger render={<Popover.Trigger render={trigger} disabled={disabled} />} />
         <TooltipContent>{t("tidy.title")}</TooltipContent>
@@ -75,7 +100,7 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
                   key={l.value}
                   active={prefs.arrangeLayout === l.value}
                   label={t(l.labelKey)}
-                  onClick={() => setPrefs({ arrangeLayout: l.value })}
+                  onClick={() => run({ arrangeLayout: l.value })}
                 >
                   <l.icon className="size-3.5" />
                 </Choice>
@@ -89,7 +114,7 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
                   key={u.value}
                   active={prefs.arrangeUniform === u.value}
                   label={t(u.labelKey)}
-                  onClick={() => setPrefs({ arrangeUniform: u.value })}
+                  onClick={() => run({ arrangeUniform: u.value })}
                 />
               ))}
             </div>
@@ -97,14 +122,16 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
             <div className="mt-3 flex items-center justify-between text-xs font-medium text-muted-foreground">
               <span>{t("tidy.gap")}</span>
               <div className="flex items-center gap-2">
-                {/* « Collé » = écart 0, en un clic : viser le zéro au curseur est pénible, et c'est
-                    le réglage qu'on veut pour une planche en mosaïque pleine. */}
+                {/* « Collé » : écart 0 ET disposition en bloc, en un clic. Les deux vont ensemble —
+                    seul le bloc pave vraiment (lignes justifiées à la même largeur, donc rectangle
+                    plein) ; une grille à écart 0 laisserait quand même de l'air autour des médias
+                    plus petits que leur case, et l'utilisateur verrait encore « des petits espaces ». */}
                 <Button
                   variant={prefs.arrangeGap === 0 ? "default" : "outline"}
                   size="xs"
                   className="h-6 px-2 text-[11px]"
                   aria-pressed={prefs.arrangeGap === 0}
-                  onClick={() => setPrefs({ arrangeGap: prefs.arrangeGap === 0 ? 16 : 0 })}
+                  onClick={() => run(prefs.arrangeGap === 0 ? { arrangeGap: 16 } : { arrangeGap: 0, arrangeLayout: "block" })}
                 >
                   {t("tidy.gapNone")}
                 </Button>
@@ -117,7 +144,7 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
               max={200}
               step={2}
               value={prefs.arrangeGap}
-              onValueChange={(v) => setPrefs({ arrangeGap: Array.isArray(v) ? v[0] : v })}
+              onValueChange={(v) => run({ arrangeGap: Array.isArray(v) ? v[0] : v })}
             />
 
             <p className="mb-2 mt-3 text-xs font-medium text-muted-foreground">{t("tidy.sort")}</p>
@@ -125,18 +152,18 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
               <Choice
                 active={prefs.arrangeSort === "none"}
                 label={t("tidy.sortCurrent")}
-                onClick={() => setPrefs({ arrangeSort: "none" })}
+                onClick={() => run({ arrangeSort: "none" })}
               />
               <Choice
                 active={prefs.arrangeSort === "name"}
                 label={t("tidy.sortName")}
-                onClick={() => setPrefs({ arrangeSort: "name" })}
+                onClick={() => run({ arrangeSort: "name" })}
               />
             </div>
 
             <Popover.Close
               render={
-                <Button className="mt-3 w-full gap-1.5" size="sm" onClick={run} disabled={disabled}>
+                <Button className="mt-3 w-full gap-1.5" size="sm" onClick={() => run()} disabled={disabled}>
                   <Wand2 className="size-3.5" />
                   {t("tidy.apply")}
                 </Button>

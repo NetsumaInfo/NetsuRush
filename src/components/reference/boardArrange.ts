@@ -188,7 +188,12 @@ function packRects(sizes: { w: number; h: number }[], maxWidth: number): { pos: 
 // elle ne saute pas d'échelle sous le curseur.
 function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name"): Map<string, ArrangePos> {
   const out = new Map<string, ArrangePos>();
-  const sorted = sort === "name" ? sortByName(sel) : [...sel];
+  // « Actuel » = l'ordre de LECTURE de la planche (haut→bas, puis gauche→droite), pas l'ordre
+  // d'insertion : ranger doit conserver ce que l'œil voit déjà, sinon la mosaïque paraît rebattue au
+  // hasard alors qu'on n'a demandé qu'à la mettre au carré.
+  const sorted = sort === "name"
+    ? sortByName(sel)
+    : [...sel].sort((a, b) => rotatedBBox(a).y - rotatedBBox(b).y || rotatedBBox(a).x - rotatedBBox(b).x);
   const boxes = sorted
     .map((it) => ({ it, b: rotatedBBox(it) }))
     .filter(({ b }) => b.w > 0 && b.h > 0);
@@ -198,33 +203,35 @@ function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name"): M
   const ratios = boxes.map(({ b }) => b.w / b.h);
   const sumR = ratios.reduce((t, r) => t + r, 0);
   const area = boxes.reduce((t, { b }) => t + b.w * b.h, 0);
-  // Hauteur de ligne de référence : celle qui redonne l'aire d'origine une fois tout le monde à la
-  // même hauteur (Σ ratio × H² = aire).
-  const baseH = Math.max(MIN_SIZE, Math.sqrt(area / sumR));
-  // Nombre d'items par ligne visant une planche un peu plus large que haute (les écrans le sont) :
+  // Items par ligne visant une planche un peu plus large que haute (les écrans le sont) :
   // colonnes² × ratio moyen ≈ 1,4 × n.
   const perRow = Math.max(1, Math.ceil(Math.sqrt((1.4 * n * n) / sumR)));
-  const targetW = perRow * (sumR / n) * baseH + gap * (perRow - 1);
 
-  // Remplissage glouton : on ferme la ligne dès qu'elle DÉPASSE la largeur cible (la justification
-  // la ramènera dessus), ce qui donne des lignes régulières même avec des ratios très différents.
-  const rows: { idx: number[]; sum: number }[] = [];
-  let row: { idx: number[]; sum: number } = { idx: [], sum: 0 };
-  ratios.forEach((r, i) => {
-    row.idx.push(i);
-    row.sum += r;
-    if (row.sum * baseH + gap * (row.idx.length - 1) >= targetW) { rows.push(row); row = { idx: [], sum: 0 }; }
-  });
-  if (row.idx.length) rows.push(row);
+  // Lignes de taille ÉQUILIBRÉE : les n médias sont répartis sur `rowCount` lignes, à un près. Comme
+  // TOUTES les lignes sont ensuite justifiées à la même largeur, la planche est un rectangle plein —
+  // aucune ligne orpheline, donc aucun trou en bas, et à écart 0 les médias se touchent partout.
+  // Un remplissage glouton laissait au contraire une dernière ligne courte qu'on ne pouvait pas
+  // étirer sans faire exploser un média isolé sur toute la largeur.
+  const rowCount = Math.max(1, Math.min(n, Math.ceil(n / perRow)));
+  const rows: number[][] = [];
+  for (let r = 0, taken = 0; r < rowCount; r++) {
+    const left = n - taken;
+    // La dernière ligne prend tout le reste : le total est exactement n, quel que soit l'arrondi.
+    // Les autres gardent au moins un média pour chaque ligne encore à venir.
+    const count = r === rowCount - 1
+      ? left
+      : Math.max(1, Math.min(left - (rowCount - 1 - r), Math.round(left / (rowCount - r))));
+    rows.push(Array.from({ length: count }, (_, k) => taken + k));
+    taken += count;
+  }
 
-  // Chaque ligne est justifiée à `targetW`, SAUF la dernière si elle n'a pas débordé : l'étirer
-  // ferait exploser une ligne d'un seul média jusqu'à la largeur de toute la planche.
-  const heights = rows.map((r, k) => {
-    const inner = targetW - gap * (r.idx.length - 1);
-    const fit = inner / r.sum;
-    const last = k === rows.length - 1;
-    return Math.max(MIN_SIZE, last ? Math.min(fit, baseH) : fit);
-  });
+  // Largeur commune des lignes, choisie pour rendre l'AIRE d'origine : une ligne justifiée a la
+  // hauteur `targetW / Σratio`, donc son aire vaut `targetW² / Σratio`. Somme sur les lignes = aire
+  // d'origine ⇒ `targetW = √(aire / Σ(1/Σratio))`. La planche rangée occupe ainsi la même surface
+  // qu'avant : elle ne saute pas d'échelle sous le curseur.
+  const rowSums = rows.map((idx) => Math.max(1e-6, idx.reduce((t, i) => t + ratios[i], 0)));
+  const targetW = Math.sqrt(area / rowSums.reduce((t, s) => t + 1 / s, 0));
+  const heights = rows.map((idx, k) => Math.max(MIN_SIZE, (targetW - gap * (idx.length - 1)) / rowSums[k]));
 
   const blockH = heights.reduce((t, h) => t + h, 0) + gap * (rows.length - 1);
   const bb = boxes.map(({ b }) => b);
@@ -238,7 +245,7 @@ function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name"): M
   rows.forEach((r, k) => {
     const rowH = heights[k];
     let x = originX;
-    for (const i of r.idx) {
+    for (const i of r) {
       const { it, b } = boxes[i];
       // Échelle UNIFORME appliquée à la géométrie stockée : l'emprise tournée suit exactement, donc
       // un média incliné se range sur ce qu'il occupe vraiment à l'écran.

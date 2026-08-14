@@ -50,6 +50,13 @@ export type { ArrangeMode } from "./boardArrange";
 export interface TidyOpts extends ArrangeOpts {
   layout: ArrangeMode;
   uniform?: NormalizeMode | "none";
+  // Géométrie de DÉPART, capturée avant le premier rangement. Le sélecteur applique à chaque clic
+  // pour qu'on voie le résultat ; sans point de départ fixe, chaque essai repartirait du précédent
+  // et la sélection dériverait d'échelle en échelle. Avec, comparer deux dispositions revient à
+  // comparer deux rangements de la MÊME planche.
+  base?: Map<string, { x: number; y: number; w: number; h: number }>;
+  // Étiquette de coalescing : toute une session de réglages ne coûte qu'un seul Ctrl+Z.
+  tag?: string;
 }
 
 // Portée d'une réinitialisation de transformation.
@@ -463,14 +470,20 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   // Uniformisation PUIS disposition : les deux passes partagent un seul instantané d'historique,
   // sinon « ranger » coûterait deux Ctrl+Z pour un seul geste utilisateur.
-  tidy: ({ layout, uniform, gap, sort }) =>
+  tidy: ({ layout, uniform, gap, sort, base, tag }) =>
     set((s) => {
-      const picked = s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw");
-      if (picked.length < 2) return {};
-      recordHistory(s.items, null);
+      if (s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw").length < 2) return {};
+      recordHistory(s.items, tag ?? null);
+
+      // Retour au point de départ avant de ranger : le sélecteur rejoue depuis la même planche à
+      // chaque changement de réglage.
+      const from = base
+        ? s.items.map((it) => (base.has(it.id) ? { ...it, ...base.get(it.id)! } : it))
+        : s.items;
+      const picked = from.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw");
 
       let sel = picked;
-      let items = s.items;
+      let items = from;
       if (uniform && uniform !== "none") {
         const size = computeNormalize(sel, uniform);
         if (size.size) {
