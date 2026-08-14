@@ -33,8 +33,13 @@ test('the board caps how many media items can be mounted at once', () => {
   const budget = Number(/const MEDIA_BUDGET = (\d+)/.exec(src)[1]);
   assert.ok(budget > 0 && budget <= 60, `media budget ${budget} must stay well under the browser limit`);
   assert.match(src, /MEDIA_KINDS\.has\(it\.kind\)/);
-  assert.match(src, /it\.id === editingId \|\| selectedIds\.includes\(it\.id\)/,
+  assert.match(src, /it\.id === editingId \|\| pinned\.has\(it\.id\)/,
     'an item under an active gesture must never be dropped by the budget');
+  // Set, pas `includes` : le test tourne pour chaque item, donc un tableau rendrait le filtrage
+  // quadratique — précisément quand tout un mur d'images est sélectionné.
+  assert.match(src, /const pinned = new Set\(selectedIds\)/,
+    'the pinned lookup must be O(1), not a scan of the selection per item');
+  assert.doesNotMatch(src, /selectedIds\.includes/);
 });
 
 // « Tout figer » doit vraiment tout figer. Un <img> animé (GIF, WebP) ne se met pas en pause : sans

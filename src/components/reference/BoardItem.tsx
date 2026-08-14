@@ -17,6 +17,7 @@ import { shapeBBox, shifted } from "./drawGeometry";
 import { YoutubeItem } from "./YoutubeItem";
 import { EmbedItem } from "./EmbedItem";
 import { PaletteContent } from "./PaletteItem";
+import { useImageLod } from "./boardImageLod";
 
 // Récupération auto d'un média cassé/noir (lien distant mort ou média extrait d'un post) : une seule
 // tentative par item (anti-boucle), uniquement si un lien d'origine existe (sourceUrl ou ref http).
@@ -559,6 +560,9 @@ function ImageContent({ item }: { item: Item }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animated = ANIMATED_IMAGE_RE.test(item.src ?? "");
   const [painted, setPainted] = useState(false);
+  // Affichée petite, une image passe par sa vignette : trente bannières en pleine définition saturent
+  // le cache d'images décodées de Chromium, qui les évince et les laisse blanches jusqu'au repaint.
+  const lod = useImageLod(item);
 
   useEffect(() => {
     if (!animated || !frozen) { setPainted(false); return; }
@@ -573,14 +577,16 @@ function ImageContent({ item }: { item: Item }) {
     } catch { /* peinture refusée : on laisse le <img> animé plutôt qu'un carré vide */ }
   }, [animated, frozen, item.src]);
 
-  const onErr = () => triggerRecover(item);
-  const onLd = (e: React.SyntheticEvent<HTMLImageElement>) => { if (!e.currentTarget.naturalWidth) triggerRecover(item); };
+  // Une vignette absente ou périmée n'est PAS un média disparu : seule la source pleine déclenche la
+  // récupération, sinon un cache de vignettes nettoyé ferait passer toute la planche pour perdue.
+  const onErr = () => { if (lod.full) triggerRecover(item); };
+  const onLd = (e: React.SyntheticEvent<HTMLImageElement>) => { if (lod.full && !e.currentTarget.naturalWidth) triggerRecover(item); };
   const cls = item.crop ? "block select-none" : "block h-full w-full select-none object-cover";
   const style = item.crop ? cropStyle(item.crop) : undefined;
   const media = (
     <>
       <img
-        ref={imgRef} src={item.src} alt={item.title ?? ""} draggable={false}
+        ref={imgRef} src={lod.src} alt={item.title ?? ""} draggable={false}
         onError={onErr} onLoad={onLd} className={cls} style={{ ...style, ...(painted ? { display: "none" } : null) }}
       />
       {animated && <canvas ref={canvasRef} aria-hidden className={cls} style={{ ...style, ...(painted ? null : { display: "none" }) }} />}

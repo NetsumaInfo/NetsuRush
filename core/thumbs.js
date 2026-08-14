@@ -106,7 +106,11 @@ function thumbArgs(filePath, time, settings) {
     ? ['-vcodec', 'libwebp', '-lossless', '0', '-compression_level', String(s.webpEffort), '-quality', String(s.webpQuality)]
     : ['-vcodec', 'mjpeg', '-q:v', String(s.jpegQscale)];
   return [
-    '-v', 'error', '-noaccurate_seek', '-ss', String(time), '-i', filePath, '-an',
+    '-v', 'error',
+    // Pas de seek à 0 : sur une IMAGE FIXE, `-ss` cherche après la fin d'un flux d'une seule frame,
+    // ffmpeg ne rend rien et la vignette échouait sans un mot (« thumb échec »).
+    ...(time > 0 ? ['-noaccurate_seek', '-ss', String(time)] : []),
+    '-i', filePath, '-an',
     '-frames:v', '1', '-vf', `scale=-2:${s.height}`, '-f', 'image2pipe', ...codec, '-',
   ];
 }
@@ -126,6 +130,12 @@ async function thumbnail(filePath, time = 1, priority = 'high', settings) {
   // AUTO : le clip entier n'a pas d'in-point utile → viser une frame représentative (pas le noir
   // du début). Résolu AVANT la clé de cache : deux demandes auto du même fichier partagent la clé.
   if (time === AUTO_TIME) time = await autoTime(filePath);
+  // Une source SANS durée est une image fixe : son unique frame est à 0. Résolu avant la clé de
+  // cache, donc toutes les demandes d'une même image partagent une seule vignette.
+  if (time > 0) {
+    const info = await probeMedia(filePath).catch(() => null);
+    if (info && !info.duration) time = 0;
+  }
   const s = normalizeThumbSettings(settings);
   const key = thumbKey(filePath, time, s);
   const ram = thumbRam.get(key);

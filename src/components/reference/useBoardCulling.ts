@@ -78,8 +78,11 @@ export function useBoardCulling(items: BoardItem[], selectedIds: string[], editi
 
   const visible = useMemo(() => {
     if (!zone || items.length < CULL_MIN_ITEMS) return items;
+    // Set, pas `includes` : le test est fait pour CHAQUE item, donc un tableau rendait le filtrage
+    // quadratique — et c'est précisément quand on sélectionne tout un mur d'images que ça compte.
+    const pinned = new Set(selectedIds);
     const kept = items.filter(
-      (it) => overlaps(zone, it) || it.id === editingId || selectedIds.includes(it.id),
+      (it) => overlaps(zone, it) || it.id === editingId || pinned.has(it.id),
     );
     const media = kept.filter((it) => MEDIA_KINDS.has(it.kind));
     if (media.length <= MEDIA_BUDGET) return kept;
@@ -93,7 +96,7 @@ export function useBoardCulling(items: BoardItem[], selectedIds: string[], editi
       media.slice().sort((a, b) => dist(a) - dist(b)).slice(0, MEDIA_BUDGET).map((it) => it.id),
     );
     return kept.filter(
-      (it) => !MEDIA_KINDS.has(it.kind) || budgeted.has(it.id) || it.id === editingId || selectedIds.includes(it.id),
+      (it) => !MEDIA_KINDS.has(it.kind) || budgeted.has(it.id) || it.id === editingId || pinned.has(it.id),
     );
   }, [items, zone, selectedIds, editingId]);
 
