@@ -53,3 +53,15 @@ test('an item still loading or already missing is left alone', () => {
   assert.equal(lodEligible(img({ loading: true })), false);
   assert.equal(lodEligible(img({ missing: true })), false);
 });
+
+test('the thumbnail only stands in for a much larger source shown small', () => {
+  // Marges volontairement larges : une vignette qui se devine à l'écran est pire que la mémoire
+  // qu'elle économise.
+  const src = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.ok(Number(/const LOD_MIN_RATIO = (\d+)/.exec(src)[1]) >= 4);
+  assert.ok(Number(/const LOD_MAX_W = (\d+)/.exec(src)[1]) <= 320);
+  // Une fois repassée en pleine définition, une source y reste : refaire l'aller-retour à chaque
+  // franchissement du seuil redécoderait toute la planche d'un coup.
+  assert.match(src, /const pinnedFull = new Set<string>\(\)/);
+  assert.match(src, /!pinnedFull\.has\(item\.ref\)/);
+});

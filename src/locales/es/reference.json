@@ -596,7 +596,6 @@
     "layoutRow": "Fila",
     "layoutCol": "Columna",
     "uniform": "Igualar el tamaño",
-    "uniformBlock": "El mosaico « Bloque » fija su propia escala",
     "uniformNone": "Ninguna",
     "uniformHeight": "Misma altura",
     "uniformWidth": "Misma anchura",

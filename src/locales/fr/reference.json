@@ -596,7 +596,6 @@
     "layoutRow": "Ligne",
     "layoutCol": "Colonne",
     "uniform": "Uniformiser la taille",
-    "uniformBlock": "La mosaïque « Bloc » fixe elle-même l'échelle",
     "uniformNone": "Aucune",
     "uniformHeight": "Même hauteur",
     "uniformWidth": "Même largeur",

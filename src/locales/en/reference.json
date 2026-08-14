@@ -596,7 +596,6 @@
     "layoutRow": "Row",
     "layoutCol": "Column",
     "uniform": "Match size",
-    "uniformBlock": "The block mosaic sets its own scale",
     "uniformNone": "None",
     "uniformHeight": "Same height",
     "uniformWidth": "Same width",

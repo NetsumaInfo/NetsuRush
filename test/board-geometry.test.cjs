@@ -211,6 +211,32 @@ test('block layout keeps the reading order, and reorders by name on demand', () 
   assert.deepEqual(order(byName), ['third', 'second', 'first']);
 });
 
+test('block layout with keepSize leaves every size untouched', () => {
+  // Une taille commune vient d'être imposée par l'uniformisation : la justification par ligne la
+  // détruisait, et une planche de trente images sortait en rangées régulières SAUF la dernière.
+  const sel = [
+    box('a', 0, 0, 200, 120), box('b', 0, 0, 213, 120), box('c', 0, 0, 160, 120),
+    box('d', 0, 0, 300, 120), box('e', 0, 0, 180, 120), box('f', 0, 0, 240, 120),
+    box('g', 0, 0, 400, 120), box('h', 0, 0, 150, 120), box('i', 0, 0, 260, 120),
+  ];
+  const pos = arrange.computeArrange(sel, 'block', { gap: 10, keepSize: true });
+  assert.equal(pos.size, sel.length);
+  for (const it of sel) {
+    const p = pos.get(it.id);
+    assert.equal(p.w, undefined, `${it.id} a été redimensionné`);
+    assert.equal(p.h, undefined, `${it.id} a été redimensionné`);
+  }
+  const placed = sel.map((it) => ({ ...it, ...pos.get(it.id) }));
+  for (let i = 0; i < placed.length; i++) {
+    for (let j = i + 1; j < placed.length; j++) {
+      assert.ok(!overlaps(placed[i], placed[j]), `${placed[i].id} chevauche ${placed[j].id}`);
+    }
+  }
+  // Toutes les hauteurs étant égales, chaque ligne partage exactement le même y.
+  const ys = [...new Set(placed.map((p) => Math.round(p.y)))];
+  assert.ok(ys.length > 1 && ys.length < placed.length, `${ys.length} lignes pour 9 items`);
+});
+
 test('block layout preserves the total area of the selection', () => {
   const sel = [
     box('a', 0, 0, 400, 300), box('b', 0, 0, 100, 400),

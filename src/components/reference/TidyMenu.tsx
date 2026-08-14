@@ -71,10 +71,6 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
 
   // Tout réglage s'APPLIQUE aussitôt : un panneau où l'on clique « Grille » sans que rien ne bouge
   // se lit comme un bouton mort — il fallait penser à valider ensuite pour voir quoi que ce soit.
-  // « Bloc » est la mosaïque justifiée : c'est elle qui décide de l'échelle, donc l'uniformisation
-  // de taille n'a rien à y faire.
-  const blockScales = prefs.arrangeLayout === "block";
-
   const run = (over: Partial<typeof prefs> = {}) => {
     const p = { ...useBoard.getState().prefs, ...over };
     if (Object.keys(over).length) setPrefs(over);
@@ -112,24 +108,20 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
               ))}
             </div>
 
-            {/* La mosaïque « Bloc » fixe elle-même l'échelle de chaque ligne : lui demander en plus
-                une taille commune n'aurait aucun effet visible. Plutôt que de laisser quatre boutons
-                sans effet, on les désactive et on dit pourquoi. */}
+            {/* Vaut pour TOUTES les dispositions, « Bloc » compris : avec une taille commune, le bloc
+                pose les lignes telles quelles au lieu de les justifier — ranger trente images ne
+                rend plus quatre rangées régulières puis une dernière deux fois plus petite. */}
             <p className="mb-2 mt-3 text-xs font-medium text-muted-foreground">{t("tidy.uniform")}</p>
-            <Tooltip>
-              <TooltipTrigger render={<div className="flex flex-wrap gap-1.5" />}>
-                {UNIFORMS.map((u) => (
-                  <Choice
-                    key={u.value}
-                    active={prefs.arrangeUniform === u.value}
-                    label={t(u.labelKey)}
-                    disabled={blockScales}
-                    onClick={() => run({ arrangeUniform: u.value })}
-                  />
-                ))}
-              </TooltipTrigger>
-              {blockScales && <TooltipContent>{t("tidy.uniformBlock")}</TooltipContent>}
-            </Tooltip>
+            <div className="flex flex-wrap gap-1.5">
+              {UNIFORMS.map((u) => (
+                <Choice
+                  key={u.value}
+                  active={prefs.arrangeUniform === u.value}
+                  label={t(u.labelKey)}
+                  onClick={() => run({ arrangeUniform: u.value })}
+                />
+              ))}
+            </div>
 
             <div className="mt-3 flex items-center justify-between text-xs font-medium text-muted-foreground">
               <span>{t("tidy.gap")}</span>

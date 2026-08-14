@@ -417,8 +417,13 @@ export interface Geom {
 }
 
 export const MIN_SIZE = 48;
-export const ZOOM_MIN = 0.05;
-export const ZOOM_MAX = 8;
+// Amplitude de zoom : voulue quasi ILLIMITÉE. Une planche de référence s'étale sur des dizaines de
+// milliers d'unités, et on veut aussi bien la survoler entière que coller le nez sur un détail d'un
+// seul plan. Les anciennes bornes (0,05 – 8) arrêtaient la molette en plein geste.
+// Ce sont des garde-fous NUMÉRIQUES, pas ergonomiques : sous 1/5000 les coordonnées écrans perdent
+// leur précision en flottant, au-delà de 500 une matrice CSS finit par écrêter.
+export const ZOOM_MIN = 0.0002;
+export const ZOOM_MAX = 500;
 
 // id court non cryptographique (suffit pour des clés DOM/scène locales).
 export function uid(): string {

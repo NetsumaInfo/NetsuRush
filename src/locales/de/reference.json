@@ -596,7 +596,6 @@
     "layoutRow": "Zeile",
     "layoutCol": "Spalte",
     "uniform": "Größe angleichen",
-    "uniformBlock": "Das Block-Mosaik legt seinen Maßstab selbst fest",
     "uniformNone": "Keine",
     "uniformHeight": "Gleiche Höhe",
     "uniformWidth": "Gleiche Breite",

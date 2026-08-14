@@ -118,6 +118,10 @@ export type ArrangeBox = RotBox & Pick<BoardItem, "title" | "ref">;
 export interface ArrangeOpts {
   gap?: number;                  // écart entre items (unités monde)
   sort?: "none" | "name";        // "name" = titre, sinon nom de fichier de `ref`
+  // Taille DÉJÀ uniformisée en amont : le bloc ne doit alors pas ré-étirer chaque ligne à sa propre
+  // hauteur, sinon la taille commune qu'on vient d'imposer se reperd d'une ligne à l'autre — et
+  // ranger trente images en rendait cinq rangées régulières puis une dernière deux fois plus petite.
+  keepSize?: boolean;
 }
 
 const DEFAULT_GAP = 16;
@@ -186,7 +190,7 @@ function packRects(sizes: { w: number; h: number }[], maxWidth: number): { pos: 
 //
 // L'aire totale de la sélection est conservée : la planche rangée occupe la même surface qu'avant,
 // elle ne saute pas d'échelle sous le curseur.
-function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name"): Map<string, ArrangePos> {
+function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name", keepSize?: boolean): Map<string, ArrangePos> {
   const out = new Map<string, ArrangePos>();
   // « Actuel » = l'ordre de LECTURE de la planche (haut→bas, puis gauche→droite), pas l'ordre
   // d'insertion : ranger doit conserver ce que l'œil voit déjà, sinon la mosaïque paraît rebattue au
@@ -229,18 +233,36 @@ function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name"): M
   // hauteur `targetW / Σratio`, donc son aire vaut `targetW² / Σratio`. Somme sur les lignes = aire
   // d'origine ⇒ `targetW = √(aire / Σ(1/Σratio))`. La planche rangée occupe ainsi la même surface
   // qu'avant : elle ne saute pas d'échelle sous le curseur.
+  const bbAll = boxes.map(({ b }) => b);
+  const cx = (Math.min(...bbAll.map((b) => b.x)) + Math.max(...bbAll.map((b) => b.x + b.w))) / 2;
+  const cy = (Math.min(...bbAll.map((b) => b.y)) + Math.max(...bbAll.map((b) => b.y + b.h))) / 2;
+
+  // Tailles déjà imposées en amont : on ne fait que POSER, en lignes centrées. Justifier étirerait
+  // chaque ligne à une hauteur différente et détruirait la taille commune demandée.
+  if (keepSize) {
+    const widths = rows.map((idx) => idx.reduce((t, i) => t + boxes[i].b.w, 0) + gap * (idx.length - 1));
+    const rowH = rows.map((idx) => Math.max(...idx.map((i) => boxes[i].b.h)));
+    const totalH = rowH.reduce((t, h) => t + h, 0) + gap * (rows.length - 1);
+    let ky = cy - totalH / 2;
+    rows.forEach((r, k) => {
+      let kx = cx - widths[k] / 2;
+      for (const i of r) {
+        const { it, b } = boxes[i];
+        out.set(it.id, { x: kx + (it.x - b.x), y: ky + (rowH[k] - b.h) / 2 + (it.y - b.y) });
+        kx += b.w + gap;
+      }
+      ky += rowH[k] + gap;
+    });
+    return out;
+  }
+
   const rowSums = rows.map((idx) => Math.max(1e-6, idx.reduce((t, i) => t + ratios[i], 0)));
   const targetW = Math.sqrt(area / rowSums.reduce((t, s) => t + 1 / s, 0));
   const heights = rows.map((idx, k) => Math.max(MIN_SIZE, (targetW - gap * (idx.length - 1)) / rowSums[k]));
 
   const blockH = heights.reduce((t, h) => t + h, 0) + gap * (rows.length - 1);
-  const bb = boxes.map(({ b }) => b);
-  const minX = Math.min(...bb.map((b) => b.x));
-  const maxX = Math.max(...bb.map((b) => b.x + b.w));
-  const minY = Math.min(...bb.map((b) => b.y));
-  const maxY = Math.max(...bb.map((b) => b.y + b.h));
-  const originX = (minX + maxX) / 2 - targetW / 2;
-  let y = (minY + maxY) / 2 - blockH / 2;
+  const originX = cx - targetW / 2;
+  let y = cy - blockH / 2;
 
   rows.forEach((r, k) => {
     const rowH = heights[k];
@@ -269,7 +291,7 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
   if (sel.length < 2) return pos;
 
   const gap = Math.max(0, opts.gap ?? DEFAULT_GAP);
-  if (mode === "block") return computeBlock(sel, gap, opts.sort);
+  if (mode === "block") return computeBlock(sel, gap, opts.sort, opts.keepSize);
   const box = new Map(sel.map((i) => [i.id, rotatedBBox(i)]));
   const bb = (i: ArrangeBox) => box.get(i.id)!;
   // Décalage entre l'origine stockée et l'origine de l'emprise (nul si l'item n'est pas tourné).

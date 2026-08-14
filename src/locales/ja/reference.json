@@ -596,7 +596,6 @@
     "layoutRow": "横一列",
     "layoutCol": "縦一列",
     "uniform": "サイズを揃える",
-    "uniformBlock": "「ブロック」モザイクは自分で倍率を決めます",
     "uniformNone": "なし",
     "uniformHeight": "高さを揃える",
     "uniformWidth": "幅を揃える",

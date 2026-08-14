@@ -596,7 +596,6 @@
     "layoutRow": "一行",
     "layoutCol": "一列",
     "uniform": "统一尺寸",
-    "uniformBlock": "「区块」马赛克自行决定缩放",
     "uniformNone": "不统一",
     "uniformHeight": "等高",
     "uniformWidth": "等宽",

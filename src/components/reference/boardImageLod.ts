@@ -18,11 +18,11 @@ import { nr } from "@/lib/bridge";
 import { useBoard } from "./useReferenceBoard";
 import { displaySrc, type BoardItem } from "./referenceShared";
 
-// La source doit être au moins 2× plus définie que sa taille d'affichage pour que l'échange se voie
-// sur la mémoire sans se voir à l'écran.
-const LOD_MIN_RATIO = 2;
+// La source doit être BEAUCOUP plus définie que sa taille d'affichage : la vignette ne doit jamais
+// s'apercevoir, même en approchant un peu. Marge volontairement large.
+const LOD_MIN_RATIO = 4;
 // Au-delà, l'item n'est plus une vignette sur la planche : la source pleine est justifiée.
-const LOD_MAX_W = 640;
+const LOD_MAX_W = 320;
 // Zoom à partir duquel on repasse partout en pleine définition (on regarde une image de près).
 const LOD_ZOOM = 1.6;
 
@@ -32,6 +32,11 @@ const ANIMATED_RE = /\.(gif|webp|avif|apng)(?:$|[?#])/i;
 // ref disque → source d'affichage réduite (null = pas de vignette disponible pour cette source).
 const resolved = new Map<string, string | null>();
 const inflight = new Map<string, Promise<string | null>>();
+// Sources repassées en pleine définition (on a zoomé dessus). Elles y RESTENT : refaire l'aller-retour
+// à chaque franchissement du seuil rebasculait toute la planche d'un coup, et trente images qui se
+// redécodent en même temps donnent exactement le clignotement qu'on cherche à supprimer. Une fois le
+// gros bitmap décodé, le garder ne coûte plus rien.
+const pinnedFull = new Set<string>();
 
 /** Cet item gagne-t-il à être affiché en vignette ? Pure et exportée pour être testable. */
 export function lodEligible(item: BoardItem): boolean {
@@ -73,8 +78,12 @@ export function useImageLod(item: BoardItem): { src: string; full: boolean } {
   // Sélecteur BOOLÉEN sur le zoom : les items ne se re-rendent qu'au franchissement du seuil, pas à
   // chaque cran de molette (un board de plusieurs centaines d'items ne survivrait pas à l'inverse).
   const zoomedIn = useBoard((s) => s.view.scale >= LOD_ZOOM);
-  const wants = !zoomedIn && lodEligible(item);
+  const wants = !zoomedIn && !pinnedFull.has(item.ref) && lodEligible(item);
   const [thumb, setThumb] = useState<string | null>(() => (wants ? resolved.get(item.ref) ?? null : null));
+
+  // Épinglage hors rendu : au moment où le seuil est franchi, `wants` est déjà faux ; l'épingle ne
+  // sert qu'au dézoom suivant, donc l'effet a largement le temps de passer.
+  useEffect(() => { if (zoomedIn && item.ref) pinnedFull.add(item.ref); }, [zoomedIn, item.ref]);
 
   useEffect(() => {
     if (!wants) return;

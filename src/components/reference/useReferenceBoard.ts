@@ -492,7 +492,8 @@ export const useBoard = create<BoardState>((set, get) => ({
         }
       }
 
-      const pos = computeArrange(sel, layout, { gap, sort });
+      // `keepSize` : une taille commune vient d'être imposée, le rangement ne doit pas la défaire.
+      const pos = computeArrange(sel, layout, { gap, sort, keepSize: !!uniform && uniform !== "none" });
       if (!pos.size && items === s.items) return {};
       return {
         items: items.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id) } : it)),
