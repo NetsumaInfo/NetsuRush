@@ -149,6 +149,9 @@ test('thumbnail requests are capped in flight and primed in one batch', () => {
   assert.match(raw, /thumbsResolve/);
   assert.match(read('src/components/reference/ReferenceBoard.tsx'), /primeBoardThumbs\(/,
     'le board doit amorcer les vignettes à l’ouverture de scène');
+  // …et les RÉCHAUFFER (octets + décodage) : une vignette résolue mais froide monte encore en case
+  // vide quelques frames — le « rechargement » visible de la planche au premier dézoom.
+  assert.match(raw, /warmDecode\(urls\)/);
 });
 
 // LE clignotement. Affecter `src` vide le <img> à l'instant même : Chromium ne repeint qu'après

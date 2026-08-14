@@ -153,9 +153,33 @@ export function primeBoardThumbs(entries: { ref: string; time?: number }[]): voi
   if (!wanted.length) return;
   void Promise.resolve(nr.thumbsResolve?.(wanted))
     .then((res) => {
-      for (const r of res ?? []) if (r?.file) resolved.set(thumbKey(r.path, r.time ?? 0), displaySrc("image", r.file));
+      const urls: string[] = [];
+      for (const r of res ?? []) {
+        if (!r?.file) continue;
+        const url = displaySrc("image", r.file);
+        resolved.set(thumbKey(r.path, r.time ?? 0), url);
+        urls.push(url);
+      }
+      warmDecode(urls);
     })
     .catch(() => { /* amorçage best-effort : repli sur le chemin paresseux par item */ });
+}
+
+// Réchauffe en tâche de fond les vignettes résolues : octets lus du disque ET bitmap décodé une
+// première fois. Sans ça, un item qui entre dans la zone au dézoom monte avec une vignette encore
+// froide — une case vide de quelques frames, multipliée par la planche : le « rechargement » visible
+// que le montage anticipé du culling ne suffit pas à cacher sur un coup de molette violent. Après le
+// réchauffage, un montage repeint dans la frame (octets en cache + décodage synchrone). Trois à la
+// fois : jamais de rafale qui gênerait le geste en cours.
+function warmDecode(urls: string[]): void {
+  const queue = urls.filter((u) => !decoded.has(u));
+  let idx = 0;
+  const next = (): void => {
+    if (idx >= queue.length) return;
+    const u = queue[idx++];
+    void preload(u).then(next, next);
+  };
+  for (let i = 0; i < 3; i++) next();
 }
 
 /**

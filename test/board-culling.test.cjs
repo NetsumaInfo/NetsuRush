@@ -43,6 +43,17 @@ test('the mounted zone is also rebuilt when zooming in shrinks the viewport insi
   assert.equal(needsResync(z, vp(64)), true, 'au zoom maximal, à plus forte raison');
 });
 
+// Le « rechargement » visible au dézoom rapide : refaire la zone seulement une fois le viewport
+// SORTI, c'était monter les entrants déjà sous les yeux, avec leur latence de chargement. La zone
+// doit être refaite en AVANCE, pendant que le viewport est encore contenu dedans.
+test('the zone is rebuilt before a zoom-out overruns it, not after', () => {
+  const z = zoneFor(vp(1)); // zone à 2,5× le viewport
+  assert.equal(needsResync(z, vp(0.7)), false, 'réserve encore large : rien à refaire');
+  // À 0,55× le viewport a grandi de 82 % : la réserve passe sous CULL_GROW alors que le viewport
+  // est ENCORE contenu dans la zone — c'est tout l'intérêt, les entrants montent hors champ.
+  assert.equal(needsResync(z, vp(0.55)), true, 'la réserve fond : on refait avant le débordement');
+});
+
 test('the rebuild threshold leaves a full octave of zoom before firing', () => {
   // Une zone neuve vaut 2,5× le viewport, et le seuil est à 5× : un facteur 2 de marge exactement.
   // Trop bas, on refait la zone à chaque cran de molette ; trop haut, le gel revient.

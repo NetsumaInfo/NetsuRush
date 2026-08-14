@@ -30,12 +30,19 @@ const CULL_MARGIN = 0.75;
 // marge et borne les recalculs à un par doublement de zoom.
 const CULL_SHRINK = 5;
 
-// PLAFOND GLOBAL D'ITEMS MONTÉS. MEDIA_BUDGET ne bornait que les <video>/iframes ; images, notes et
-// cadres n'étaient bornés QUE par la zone. Or la zone est exprimée en coordonnées board et grandit
-// comme 1/scale : à fort dézoom elle couvre la planche entière, et une bibliothèque de plusieurs
-// centaines d'images se montait d'un coup. Un item minuscule à l'écran ne coûte pas moins cher qu'un
-// autre — Chromium le met en page et le décode à sa taille de MISE EN PAGE, pas à sa taille écran.
-const ITEM_BUDGET = 260;
+// …et au DÉZOOM, la zone doit être refaite AVANT d'être débordée. Attendre que le viewport en sorte,
+// c'était monter les entrants une fois déjà sous les yeux — le « rechargement » visible de toute la
+// planche en dézoomant vite. On refait la zone dès que la réserve tombe sous ce ratio : les entrants
+// montent encore hors champ, et il reste 60 % de croissance de viewport avant qu'un trou se voie.
+const CULL_GROW = 1.6;
+
+// PLAFOND GLOBAL D'ITEMS MONTÉS. MEDIA_BUDGET ne borne que les lecteurs ; images, notes et cadres ne
+// sont bornés QUE par la zone, qui grandit comme 1/scale et couvre la planche entière à fort dézoom.
+// Le plafond borne alors la mise en page et la composition. Depuis le LOD, une image dézoomée roule
+// sur sa vignette (le décodage n'explose plus avec la taille de mise en page) : le plafond protège
+// le nombre d'éléments, plus le poids de chacun — d'où 400, pour qu'une vue d'ensemble d'une grosse
+// planche reste entière au lieu de trouer ses bords.
+const ITEM_BUDGET = 400;
 
 // PLAFOND DE LECTEURS MÉDIA. La zone couvre 2,5× le viewport en largeur ET en hauteur, soit 6,25×
 // son aire : sur un board dense elle contient facilement plusieurs centaines d'items. Or Chromium
@@ -113,13 +120,16 @@ export function zoneFor(v: Rect): Rect {
 }
 
 /**
- * Faut-il refaire la zone montée ? Deux raisons, et il FAUT les deux : le viewport est sorti de la
- * zone (pan, dézoom), ou la zone est devenue bien plus large que lui (zoom). Sans la seconde, zoomer
- * ne resserrait jamais la zone — cf. CULL_SHRINK.
+ * Faut-il refaire la zone montée ? Trois raisons, et il FAUT les trois : le viewport est sorti de la
+ * zone (pan), la zone est devenue bien plus large que lui (zoom, cf. CULL_SHRINK), ou le viewport
+ * est sur le point de la déborder (dézoom, cf. CULL_GROW — refaire APRÈS la sortie montait les
+ * items une fois déjà visibles).
  */
 export function needsResync(zone: Rect | null, v: Rect): boolean {
   if (!zone) return true;
-  return !contains(zone, v) || zone.w > v.w * CULL_SHRINK || zone.h > v.h * CULL_SHRINK;
+  return !contains(zone, v)
+    || zone.w > v.w * CULL_SHRINK || zone.h > v.h * CULL_SHRINK
+    || zone.w < v.w * CULL_GROW || zone.h < v.h * CULL_GROW;
 }
 
 /**
