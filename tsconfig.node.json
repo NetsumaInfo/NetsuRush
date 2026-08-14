@@ -1,10 +1,18 @@
 {
   "compilerOptions": {
     "composite": true,
+    // Sortie HORS du dépôt. `tsc -b` écrivait vite.config.js + .d.ts à la RACINE, et Vite résout
+    // `vite.config.js` AVANT le `.ts` : la config réellement chargée devenait une copie figée du
+    // jour de la compilation. Pire, chaque réémission invalidait le cache de pré-bundling, donc le
+    // serveur repartait de zéro et dépassait le délai d'attente du lanceur. Un projet référencé ne
+    // peut pas désactiver l'émission (TS6310) : on la déplace.
+    "outDir": "node_modules/.tmp/vite-config",
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts"]
+  // `package.json` est importé par la config (numéro de version) : un projet à `outDir` doit
+  // lister TOUS les fichiers de son programme (TS6307).
+  "include": ["vite.config.ts", "package.json"]
 }

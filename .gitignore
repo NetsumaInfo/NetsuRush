@@ -111,3 +111,7 @@ core/poc/
 # Personal research notes (French, never published): third-party analyses, monetisation,
 # presentation scripts. Kept locally on purpose.
 docs/perso/
+
+# Type-check output of vite.config.ts — never source. Vite would load it INSTEAD of the .ts.
+/vite.config.js
+/vite.config.d.ts
