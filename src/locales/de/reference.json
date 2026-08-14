@@ -622,7 +622,11 @@
     "sourcesGone": "Die Quellmedien sind nicht mehr auf dem Board",
     "regenerate": "Neu berechnen",
     "size": "Farben",
-    "showHex": "Werte anzeigen"
+    "showHex": "Werte anzeigen",
+    "formatHint": "Als {{format}} kopieren",
+    "layoutRow": "Reihe",
+    "layoutCol": "Spalte",
+    "layoutGrid": "Raster"
   },
   "exportImage": {
     "menu": "Als Bild exportieren…",

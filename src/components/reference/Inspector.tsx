@@ -6,22 +6,33 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2 } from "lucide-react";
 import { nr } from "@/lib/bridge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useBoard } from "./useReferenceBoard";
 import { IconToggle, IconAction } from "./inspectorControls";
 import { TrimControls, TextControls, FrameControls, ArrangeBar, PlayModeControls, EmbedControls } from "./inspectorPanels";
-import { displaySrc, probeImage, youtubeId, isRemoteRef } from "./referenceShared";
+import { displaySrc, probeImage, youtubeId, isRemoteRef, paletteSize, type PaletteLayout } from "./referenceShared";
 import { convertToEmbed, downloadMediaFromEmbed, downloadYoutube } from "./boardMediaActions";
 import { quickUpscale } from "./boardUpscale";
 import { extractPaletteToBoard, regeneratePalette } from "./boardPaletteActions";
+import { COLOR_FORMATS, COLOR_FORMAT_LABEL } from "./colorFormat";
 import { UpscaleItemDialog } from "./UpscaleItemDialog";
 import { iconForLink } from "./brandIcons";
 
 // Cadence supposée d'une source en mode « même que la vidéo » (la vraie vient du core, après coup) :
 // haute exprès, l'avertissement « vidéo longue » doit se déclencher plutôt trop tôt que trop tard.
 const ASSUMED_SOURCE_FPS = 30;
+
+// Dispositions d'un bloc palette. Les icônes disent la FORME obtenue : une bande de pastilles côte à
+// côte, une pile, ou un carré.
+const PALETTE_LAYOUTS: { value: PaletteLayout; labelKey: string; icon: typeof Columns3 }[] = [
+  { value: "row", labelKey: "palette.layoutRow", icon: Columns3 },
+  { value: "col", labelKey: "palette.layoutCol", icon: Rows3 },
+  { value: "grid", labelKey: "palette.layoutGrid", icon: Grid2x2 },
+];
 
 export function Inspector() {
   const { t } = useTranslation("reference");
@@ -121,7 +132,9 @@ export function Inspector() {
         )}
         {isText && <TextControls item={item} />}
         {isFrame && <FrameControls item={item} />}
-        {/* Palette : afficher/masquer les valeurs, et recalculer depuis les médias d'origine. */}
+        {/* Palette : afficher/masquer les valeurs, choisir leur NOTATION (c'est elle qui part dans le
+            presse-papiers — chaque outil de destination attend la sienne), et recalculer depuis les
+            médias d'origine. */}
         {item.kind === "palette" && (
           <>
             <IconToggle
@@ -131,6 +144,44 @@ export function Inspector() {
             >
               <Hash />
             </IconToggle>
+            {/* Disposition des pastilles : bande, colonne ou carré. Le bloc est REDIMENSIONNÉ au
+                passage — une colonne de six pastilles dans une boîte large les écraserait. */}
+            <div className="flex items-center gap-0.5">
+              {PALETTE_LAYOUTS.map((l) => (
+                <IconToggle
+                  key={l.value}
+                  on={(item.paletteLayout ?? "row") === l.value}
+                  label={t(l.labelKey)}
+                  onClick={() => patchItem(item.id, {
+                    paletteLayout: l.value,
+                    ...paletteSize(item.colors?.length ?? 1, l.value),
+                  })}
+                >
+                  <l.icon />
+                </IconToggle>
+              ))}
+            </div>
+            <Separator orientation="vertical" className="h-6" />
+            <div className="flex items-center gap-0.5">
+              {COLOR_FORMATS.map((f) => (
+                <Tooltip key={f}>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant={(item.colorFormat ?? "hex") === f ? "default" : "ghost"}
+                        size="xs"
+                        className="h-7 px-1.5 text-[10px] font-semibold tracking-tight"
+                        aria-pressed={(item.colorFormat ?? "hex") === f}
+                        onClick={() => patchItem(item.id, { colorFormat: f, showHex: true })}
+                      />
+                    }
+                  >
+                    {COLOR_FORMAT_LABEL[f]}
+                  </TooltipTrigger>
+                  <TooltipContent>{t("palette.formatHint", { format: COLOR_FORMAT_LABEL[f] })}</TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
             <IconAction label={t("palette.regenerate")} onClick={() => void regeneratePalette(item.id)}>
               <RefreshCw />
             </IconAction>

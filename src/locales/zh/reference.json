@@ -622,7 +622,11 @@
     "sourcesGone": "原始媒体已不在板上",
     "regenerate": "重新生成",
     "size": "颜色数量",
-    "showHex": "显示色值"
+    "showHex": "显示色值",
+    "formatHint": "以 {{format}} 复制",
+    "layoutRow": "横排",
+    "layoutCol": "竖排",
+    "layoutGrid": "方阵"
   },
   "exportImage": {
     "menu": "导出为图片…",

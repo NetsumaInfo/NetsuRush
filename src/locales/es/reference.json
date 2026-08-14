@@ -622,7 +622,11 @@
     "sourcesGone": "Los medios de origen ya no están en el tablero",
     "regenerate": "Regenerar",
     "size": "Colores",
-    "showHex": "Mostrar los valores"
+    "showHex": "Mostrar los valores",
+    "formatHint": "Copiar como {{format}}",
+    "layoutRow": "En fila",
+    "layoutCol": "En columna",
+    "layoutGrid": "En cuadro"
   },
   "exportImage": {
     "menu": "Exportar como imagen…",

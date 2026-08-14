@@ -7,6 +7,7 @@ import { nr, type NetsuEmbed, type NetsuLevel, type NetsuQuality } from "@/lib/b
 import i18n from "@/i18n";
 import { comboFromEvent, isCompleteCombo, type ShortcutMap } from "@/lib/shortcuts";
 import { embedSrc } from "./embeds";
+import type { ColorFormat } from "./colorFormat";
 
 export type ItemKind = "image" | "video" | "youtube" | "embed" | "text" | "frame" | "draw" | "sequence" | "palette";
 
@@ -200,10 +201,13 @@ export interface BoardItem {
   shapes?: DrawShape[];
   // Palette (kind === "palette") : couleurs extraites d'une sélection de médias. `colors` = liste
   // hex dans l'ordre d'affichage, `sourceIds` = items d'origine (bouton « régénérer » tant qu'ils
-  // existent), `showHex` = afficher la valeur sous chaque pastille.
+  // existent), `showHex` = afficher la valeur sous chaque pastille, `colorFormat` = notation de
+  // cette valeur (celle qui part aussi dans le presse-papiers).
   colors?: string[];
   sourceIds?: string[];
   showHex?: boolean;
+  colorFormat?: ColorFormat;
+  paletteLayout?: PaletteLayout;
   // Séquence d'images (kind === "sequence") : `frames` = refs DURABLES de
   // chaque frame (chemins disque / URLs), affichées une à la fois. `frame` = index courant (persisté,
   // rouvre sur la même image). `fps` = cadence de base (défaut 12), `speed` = multiplicateur de vitesse
@@ -333,10 +337,34 @@ export function makeDrawItem(): BoardItem {
   return { id: uid(), kind: "draw", ref: "", src: "", x: 0, y: 0, w: 0, h: 0, rotation: 0, z: 0, shapes: [] };
 }
 
-// Bloc palette : bande de pastilles posée sur le board. La hauteur suit le nombre de couleurs
-// seulement par sa largeur (une seule rangée) ; l'utilisateur reste libre de le redimensionner.
+// Bloc palette : pastilles posées sur le board. L'utilisateur reste libre de le redimensionner.
 export const PALETTE_SWATCH = 64;   // côté d'une pastille à la pose (px monde)
-export const PALETTE_HEIGHT = 96;   // hauteur du bloc à la pose (pastille + valeur hex)
+export const PALETTE_HEIGHT = 96;   // hauteur du bloc EN LIGNE à la pose (pastille + valeur)
+
+// Disposition des pastilles dans le bloc. Une bande horizontale se glisse sous une planche, une
+// colonne se range le long d'une image haute, un carré tient dans un coin : le même nuancier ne se
+// pose pas au même endroit selon ce qu'il accompagne.
+export type PaletteLayout = "row" | "col" | "grid";
+
+// Grille de pastilles d'un bloc. SOURCE UNIQUE : le bloc à l'écran et son rendu d'export doivent
+// placer les pastilles exactement au même endroit.
+export function paletteGrid(count: number, layout: PaletteLayout = "row"): { cols: number; rows: number } {
+  const n = Math.max(1, count);
+  if (layout === "col") return { cols: 1, rows: n };
+  if (layout === "grid") {
+    const cols = Math.ceil(Math.sqrt(n));
+    return { cols, rows: Math.ceil(n / cols) };
+  }
+  return { cols: n, rows: 1 };
+}
+
+// Taille naturelle du bloc pour une disposition donnée. Changer de disposition sans redimensionner
+// écraserait les pastilles : une colonne de six doit être HAUTE, pas large.
+export function paletteSize(count: number, layout: PaletteLayout = "row"): { w: number; h: number } {
+  const { cols, rows } = paletteGrid(count, layout);
+  const band = PALETTE_HEIGHT - PALETTE_SWATCH; // titre + marges, constant quelle que soit la grille
+  return { w: Math.max(PALETTE_SWATCH * 1.6, cols * PALETTE_SWATCH), h: rows * PALETTE_SWATCH + band };
+}
 
 export function makePaletteItem(x: number, y: number, colors: string[], sourceIds?: string[]): BoardItem {
   const n = Math.max(1, colors.length);
@@ -347,13 +375,14 @@ export function makePaletteItem(x: number, y: number, colors: string[], sourceId
     src: "",
     x,
     y,
-    w: n * PALETTE_SWATCH,
-    h: PALETTE_HEIGHT,
+    ...paletteSize(n, "row"),
     rotation: 0,
     z: 0,
     colors,
     sourceIds,
     showHex: true,
+    colorFormat: "hex",
+    paletteLayout: "row",
     title: i18n.t("reference:palette.defaultTitle"),
   };
 }

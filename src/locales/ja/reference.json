@@ -622,7 +622,11 @@
     "sourcesGone": "元のメディアはボード上にありません",
     "regenerate": "再生成",
     "size": "色数",
-    "showHex": "値を表示"
+    "showHex": "値を表示",
+    "formatHint": "{{format}} でコピー",
+    "layoutRow": "横一列",
+    "layoutCol": "縦一列",
+    "layoutGrid": "格子"
   },
   "exportImage": {
     "menu": "画像として書き出し…",

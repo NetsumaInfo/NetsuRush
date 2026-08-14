@@ -622,7 +622,11 @@
     "sourcesGone": "Source media are no longer on the board",
     "regenerate": "Regenerate",
     "size": "Colors",
-    "showHex": "Show values"
+    "showHex": "Show values",
+    "formatHint": "Copy as {{format}}",
+    "layoutRow": "Row",
+    "layoutCol": "Column",
+    "layoutGrid": "Square"
   },
   "exportImage": {
     "menu": "Export as image…",

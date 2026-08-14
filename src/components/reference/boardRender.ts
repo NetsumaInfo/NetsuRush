@@ -7,8 +7,9 @@
 // l'utilisateur voit, pas les coordonnées stockées.
 
 import { nr } from "@/lib/bridge";
-import type { BoardItem, DrawShape } from "./referenceShared";
+import { paletteGrid, type BoardItem, type DrawShape } from "./referenceShared";
 import { rotatedBBox } from "./boardArrange";
+import { formatColor } from "./colorFormat";
 import { resolveShapes } from "./drawAnchor";
 import { connectorPath, penPath, shapeBBox } from "./drawGeometry";
 
@@ -278,8 +279,10 @@ function paintPalette(ctx: CanvasRenderingContext2D, item: BoardItem): void {
   const top = item.title ? 20 : 6;
   const pad = 6;
   const gap = 4;
-  const cw = (item.w - pad * 2 - gap * (colors.length - 1)) / colors.length;
-  const ch = item.h - top - pad;
+  // Mêmes colonnes/lignes que le bloc à l'écran : une palette exportée doit être celle qu'on voit.
+  const { cols, rows } = paletteGrid(colors.length, item.paletteLayout ?? "row");
+  const cw = (item.w - pad * 2 - gap * (cols - 1)) / cols;
+  const ch = (item.h - top - pad - gap * (rows - 1)) / rows;
   if (item.title) {
     ctx.font = `500 11px ${UI_FONT}`;
     ctx.fillStyle = "#9b9ba4";
@@ -287,15 +290,18 @@ function paintPalette(ctx: CanvasRenderingContext2D, item: BoardItem): void {
     ctx.fillText(item.title, pad + 4, 6);
   }
   colors.forEach((hex, i) => {
+    const cx = pad + (i % cols) * (cw + gap);
+    const cy = top + Math.floor(i / cols) * (ch + gap);
     ctx.fillStyle = hex;
-    drawRoundRect(ctx, pad + i * (cw + gap), top, cw, ch, 6);
+    drawRoundRect(ctx, cx, cy, cw, ch, 6);
     ctx.fill();
     if (item.showHex !== false) {
       ctx.font = `500 10px ${UI_FONT}`;
       ctx.fillStyle = readableOn(hex);
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
-      ctx.fillText(hex.toUpperCase(), pad + i * (cw + gap) + cw / 2, top + ch - 4, cw - 4);
+      // Même notation qu'à l'écran : un export doit montrer les valeurs telles que le lecteur les a choisies.
+      ctx.fillText(formatColor(hex, item.colorFormat ?? "hex"), cx + cw / 2, cy + ch - 4, cw - 4);
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
     }

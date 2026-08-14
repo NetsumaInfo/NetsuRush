@@ -1,10 +1,13 @@
 // Bloc PALETTE posé sur le board : bande de pastilles extraites d'une sélection de médias.
-// Clic sur une pastille → valeur hex dans le presse-papiers. Le bloc est un item comme un autre
-// (déplaçable, redimensionnable, persisté dans la scène et le .netsu).
+// Clic sur une pastille → sa valeur dans le presse-papiers, DANS LE FORMAT AFFICHÉ (hex, rgb, hsl,
+// hsb, oklch) : ce qu'on lit est ce qu'on colle. Le bloc est un item comme un autre (déplaçable,
+// redimensionnable, persisté dans la scène et le .netsu).
 
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 import { useBoard } from "./useReferenceBoard";
-import type { BoardItem } from "./referenceShared";
+import { formatColor } from "./colorFormat";
+import { paletteGrid, type BoardItem } from "./referenceShared";
 
 // Contraste du texte posé SUR une pastille : luminance relative approchée (sRGB pondéré), au-delà
 // de 0,55 on écrit en noir. Suffisant pour une valeur hex de 10 px, et sans dépendance.
@@ -23,10 +26,12 @@ export function PaletteContent({ item }: { item: BoardItem }) {
   const { t } = useTranslation("reference");
   const setNotice = useBoard((s) => s.setNotice);
   const colors = item.colors ?? [];
+  const format = item.colorFormat ?? "hex";
+  const grid = paletteGrid(colors.length, item.paletteLayout ?? "row");
 
-  const copy = (hex: string) => {
-    navigator.clipboard.writeText(hex).then(
-      () => setNotice({ kind: "ok", text: t("palette.copied", { hex }) }),
+  const copy = (value: string) => {
+    navigator.clipboard.writeText(value).then(
+      () => setNotice({ kind: "ok", text: t("palette.copied", { hex: value }) }),
       () => setNotice({ kind: "error", text: t("palette.copyFailed") }),
     );
   };
@@ -41,32 +46,48 @@ export function PaletteContent({ item }: { item: BoardItem }) {
           {item.title}
         </div>
       )}
-      <div className="flex min-h-0 flex-1 gap-1 p-1.5">
+      {/* Une grille CSS couvre les trois dispositions d'un seul jeu de règles : bande (1 ligne),
+          colonne (1 colonne) ou carré. Mêmes colonnes/lignes que le rendu d'export. */}
+      <div
+        className="grid min-h-0 flex-1 gap-1 p-1.5"
+        style={{
+          gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
+        }}
+      >
         {colors.length === 0 && (
           <div className="flex flex-1 items-center justify-center text-[11px] text-muted-foreground">
             {t("palette.empty")}
           </div>
         )}
-        {colors.map((hex, i) => (
-          <button
-            key={`${hex}-${i}`}
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => copy(hex)}
-            aria-label={hex}
-            className="group relative flex min-w-0 flex-1 items-end justify-center rounded-md ring-1 ring-black/10 transition-transform hover:scale-[1.02]"
-            style={{ background: hex }}
-          >
-            {item.showHex !== false && (
-              <span
-                className="pointer-events-none w-full truncate px-1 pb-1 text-center text-[10px] font-medium uppercase tracking-tight"
-                style={{ color: readableOn(hex) }}
-              >
-                {hex}
-              </span>
-            )}
-          </button>
-        ))}
+        {colors.map((hex, i) => {
+          const value = formatColor(hex, format);
+          return (
+            <button
+              key={`${hex}-${i}`}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => copy(value)}
+              aria-label={value}
+              className="group relative flex min-h-0 min-w-0 items-end justify-center rounded-md ring-1 ring-black/10 transition-transform hover:scale-[1.02]"
+              style={{ background: hex }}
+            >
+              {item.showHex !== false && (
+                <span
+                  // `rgb(238, 64, 99)` est trois fois plus long qu'un hex : au-delà, la valeur passe
+                  // d'un cran en dessous pour rester lisible entière plutôt que tronquée.
+                  className={cn(
+                    "pointer-events-none w-full truncate px-1 pb-1 text-center font-medium tracking-tight",
+                    format === "hex" ? "text-[10px] uppercase" : "text-[9px]",
+                  )}
+                  style={{ color: readableOn(hex) }}
+                >
+                  {value}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
