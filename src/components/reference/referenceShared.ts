@@ -417,13 +417,21 @@ export interface Geom {
 }
 
 export const MIN_SIZE = 48;
-// Amplitude de zoom : voulue quasi ILLIMITÉE. Une planche de référence s'étale sur des dizaines de
-// milliers d'unités, et on veut aussi bien la survoler entière que coller le nez sur un détail d'un
-// seul plan. Les anciennes bornes (0,05 – 8) arrêtaient la molette en plein geste.
-// Ce sont des garde-fous NUMÉRIQUES, pas ergonomiques : sous 1/5000 les coordonnées écrans perdent
-// leur précision en flottant, au-delà de 500 une matrice CSS finit par écrêter.
-export const ZOOM_MIN = 0.0002;
-export const ZOOM_MAX = 500;
+// Amplitude de zoom. Le board est une couche DOM transformée (`translate` + `scale`), pas un canvas :
+// l'amplitude n'est donc pas libre, elle est bornée par le compositeur.
+//
+// En HAUT, la couche porte `will-change: transform` : Chromium la rasterise en tuiles à l'échelle
+// composée. Passé quelques dizaines de fois, un seul item couvre des centaines de milliers de pixels,
+// le budget de tuiles explose, et le compositeur se met à resservir des tuiles PÉRIMÉES — de retour
+// au dézoom on ne revoit que la portion déjà rasterisée, la fenêtre finissant figée. 64× montre déjà
+// un pixel source en carré de 64 px : au-delà, il n'y a plus rien à inspecter.
+//
+// En BAS, la limite est le nombre d'items montés d'un coup : le viewport exprimé en coordonnées board
+// grandit comme 1/scale, donc à fort dézoom la zone de culling couvre la planche entière. C'est borné
+// par ITEM_BUDGET (cf. useBoardCulling) ; 1/500 laisse voir un million d'unités de large, soit dix
+// fois un mur de mille images.
+export const ZOOM_MIN = 0.002;
+export const ZOOM_MAX = 64;
 
 // id court non cryptographique (suffit pour des clés DOM/scène locales).
 export function uid(): string {

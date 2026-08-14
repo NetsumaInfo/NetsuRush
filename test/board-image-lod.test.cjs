@@ -17,51 +17,71 @@ const src = fs.readFileSync(path.join(root, rel), 'utf8')
 const js = esbuild.transformSync(src, { loader: 'ts', format: 'cjs' }).code;
 const mod = new Module(rel, null);
 mod._compile(js, path.join(root, rel));
-const { lodEligible } = mod.exports;
+const { lodEligible, zoomCeil } = mod.exports;
 
-const img = (over = {}) => ({ kind: 'image', ref: 'C:/rushes/a.png', w: 200, natW: 1920, ...over });
+// 200×120 unités board, source 1920 px de large. Au zoom 1 : 200×120 à l'écran.
+const img = (over = {}) => ({ kind: 'image', ref: 'C:/rushes/a.png', w: 200, h: 120, natW: 1920, ...over });
+const at = (zoom, over) => lodEligible(img(over), zoom);
 
 test('a large source shown small goes through its thumbnail', () => {
-  assert.equal(lodEligible(img()), true);
+  assert.equal(at(1), true);
 });
 
 test('a source barely larger than its box keeps the full image', () => {
   // 1,5× : l'échange ne rendrait presque rien et se verrait au moindre zoom.
-  assert.equal(lodEligible(img({ natW: 300 })), false);
-  assert.equal(lodEligible(img({ natW: 0 })), false);
+  assert.equal(at(1, { natW: 300 }), false);
+  assert.equal(at(1, { natW: 0 }), false);
 });
 
 test('a big item keeps the full image', () => {
-  assert.equal(lodEligible(img({ w: 900 })), false);
+  assert.equal(at(1, { w: 900, h: 540 }), false);
+});
+
+// Le critère est en pixels ÉCRAN : le même item change de camp selon le zoom, sans que sa géométrie
+// board ne bouge. C'est tout l'intérêt — une version antérieure ne regardait que les unités board,
+// donc à fort dézoom des items d'un pixel gardaient leur source pleine décodée.
+test('the same item follows the zoom, in screen pixels', () => {
+  assert.equal(at(1), true, 'affiché en 200×120 : la vignette suffit');
+  assert.equal(at(4), false, 'affiché en 800×480 : la vignette se verrait');
+  assert.equal(at(0.01), true, 'affiché en 2×1 : la source pleine serait du gâchis pur');
 });
 
 test('an animated image is never replaced by a still thumbnail', () => {
   for (const ext of ['gif', 'webp', 'avif', 'apng']) {
-    assert.equal(lodEligible(img({ ref: `C:/rushes/a.${ext}` })), false, ext);
+    assert.equal(at(1, { ref: `C:/rushes/a.${ext}` }), false, ext);
   }
 });
 
 test('only local still images qualify', () => {
-  assert.equal(lodEligible(img({ ref: 'https://cdn.example/a.png' })), false);
-  assert.equal(lodEligible(img({ ref: 'blob:abc' })), false);
-  assert.equal(lodEligible(img({ ref: 'data:image/png;base64,AA' })), false);
-  assert.equal(lodEligible(img({ kind: 'video' })), false);
-  assert.equal(lodEligible(img({ ref: '' })), false);
+  assert.equal(at(1, { ref: 'https://cdn.example/a.png' }), false);
+  assert.equal(at(1, { ref: 'blob:abc' }), false);
+  assert.equal(at(1, { ref: 'data:image/png;base64,AA' }), false);
+  assert.equal(at(1, { kind: 'video' }), false);
+  assert.equal(at(1, { ref: '' }), false);
 });
 
 test('an item still loading or already missing is left alone', () => {
-  assert.equal(lodEligible(img({ loading: true })), false);
-  assert.equal(lodEligible(img({ missing: true })), false);
+  assert.equal(at(1, { loading: true }), false);
+  assert.equal(at(1, { missing: true }), false);
+});
+
+// Le zoom est quantifié à l'octave : sans ça, chaque item s'abonnerait à la valeur exacte du zoom et
+// un cran de molette re-rendrait la planche entière.
+test('the subscribed zoom is quantised to octaves, and never underestimates', () => {
+  for (const s of [0.002, 0.03, 0.4, 1, 1.01, 2, 3, 7.9, 64]) {
+    const z = zoomCeil(s);
+    assert.ok(z >= s, `${z} doit majorer ${s}`);
+    assert.equal(Math.log2(z), Math.round(Math.log2(z)), `${z} doit être une puissance de 2`);
+  }
+  // Une octave entière de zoom sans changement de valeur : c'est la borne des re-rendus.
+  assert.equal(zoomCeil(1.01), zoomCeil(1.99));
+  assert.notEqual(zoomCeil(1.99), zoomCeil(2.01));
 });
 
 test('the thumbnail only stands in for a much larger source shown small', () => {
   // Marges volontairement larges : une vignette qui se devine à l'écran est pire que la mémoire
-  // qu'elle économise.
-  const src = fs.readFileSync(path.join(root, rel), 'utf8');
-  assert.ok(Number(/const LOD_MIN_RATIO = (\d+)/.exec(src)[1]) >= 4);
-  assert.ok(Number(/const LOD_MAX_W = (\d+)/.exec(src)[1]) <= 320);
-  // Une fois repassée en pleine définition, une source y reste : refaire l'aller-retour à chaque
-  // franchissement du seuil redécoderait toute la planche d'un coup.
-  assert.match(src, /const pinnedFull = new Set<string>\(\)/);
-  assert.match(src, /!pinnedFull\.has\(item\.ref\)/);
+  // qu'elle économise. 180 px écran contre un cran de vignette à 360 px de haut = ×2 de réserve.
+  const raw = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.ok(Number(/const LOD_MIN_RATIO = (\d+)/.exec(raw)[1]) >= 4);
+  assert.ok(Number(/const LOD_MAX_SCREEN_H = (\d+)/.exec(raw)[1]) <= 180);
 });

@@ -65,6 +65,21 @@ test('board media are served by the shell, not by the core HTTP server', () => {
   assert.match(read('src/components/reference/BoardItem.tsx'), /setProxUrl\(nr\.assetUrl\(r\.path\)\)/);
 });
 
+// Le board est une couche DOM transformée, pas un canvas : l'amplitude de zoom est bornée par le
+// compositeur, pas par l'ergonomie. Passé quelques dizaines de fois, la couche `will-change:
+// transform` réclame un budget de tuiles que Chromium ne sert plus — il resert alors des tuiles
+// PÉRIMÉES, et au retour au dézoom seule la portion déjà rasterisée réapparaît, la fenêtre finissant
+// figée. En bas, la limite est le nombre d'items montés d'un coup (cf. ITEM_BUDGET).
+test('the zoom range stays inside what the compositor can serve', () => {
+  const shared = read('src/components/reference/referenceShared.ts');
+  const max = Number(/export const ZOOM_MAX = ([\d.]+)/.exec(shared)[1]);
+  const min = Number(/export const ZOOM_MIN = ([\d.]+)/.exec(shared)[1]);
+  assert.ok(max <= 64, `ZOOM_MAX ${max} dépasse ce que le compositeur tient`);
+  assert.ok(min >= 0.001, `ZOOM_MIN ${min} monterait la planche entière d'un coup`);
+  // Large malgré tout : de la vue d'ensemble au détail d'un plan, sans jamais buter en plein geste.
+  assert.ok(max / min >= 1000, `amplitude ${Math.round(max / min)}:1 trop étroite pour l'usage`);
+});
+
 // Reculer une vidéo en écrivant `currentTime` force un décodage depuis la keyframe précédente. À la
 // cadence de l'écran et par item, un board qui porte des dizaines d'aller-retours noie le décodeur.
 test('ping-pong playback steps backwards on a budget, not on every frame', () => {
