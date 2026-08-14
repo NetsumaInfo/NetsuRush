@@ -65,6 +65,15 @@ test('board media are served by the shell, not by the core HTTP server', () => {
   assert.match(read('src/components/reference/BoardItem.tsx'), /setProxUrl\(nr\.assetUrl\(r\.path\)\)/);
 });
 
+// Un <img> qui vient d'être monté ne peint rien tant que son bitmap n'est pas décodé. Le culling
+// remonte les items à chaque dézoom : en asynchrone, toute la planche passe une frame en cases
+// blanches, ce qui se voit comme un clignotement général. Une vignette se décode en une
+// milliseconde, donc en synchrone sans coût perceptible — une source pleine, elle, bloquerait la
+// frame, d'où l'asynchrone conservé pour elle.
+test('a thumbnail decodes synchronously so a remount never paints an empty box', () => {
+  assert.match(read('src/components/reference/BoardItem.tsx'), /decoding=\{lod\.full \? "async" : "sync"\}/);
+});
+
 // Le board est une couche DOM transformée, pas un canvas : l'amplitude de zoom est bornée par le
 // compositeur, pas par l'ergonomie. Passé quelques dizaines de fois, la couche `will-change:
 // transform` réclame un budget de tuiles que Chromium ne sert plus — il resert alors des tuiles

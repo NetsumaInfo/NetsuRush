@@ -585,8 +585,12 @@ function ImageContent({ item }: { item: Item }) {
   const style = item.crop ? cropStyle(item.crop) : undefined;
   const media = (
     <>
+      {/* `decoding` sur la VIGNETTE seulement : le culling remonte les items à chaque dézoom, et un
+          décodage asynchrone laisse la case blanche une frame — multiplié par la planche, ça
+          clignote. Une vignette se décode en une milliseconde, le coût du décodage synchrone est
+          invisible ; une source pleine, elle, bloquerait la frame, d'où l'asynchrone conservé. */}
       <img
-        ref={imgRef} src={lod.src} alt={item.title ?? ""} draggable={false}
+        ref={imgRef} src={lod.src} alt={item.title ?? ""} draggable={false} decoding={lod.full ? "async" : "sync"}
         onError={onErr} onLoad={onLd} className={cls} style={{ ...style, ...(painted ? { display: "none" } : null) }}
       />
       {animated && <canvas ref={canvasRef} aria-hidden className={cls} style={{ ...style, ...(painted ? null : { display: "none" }) }} />}

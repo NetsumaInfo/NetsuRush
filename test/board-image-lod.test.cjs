@@ -21,7 +21,8 @@ const { lodEligible, zoomCeil } = mod.exports;
 
 // 200×120 unités board, source 1920 px de large. Au zoom 1 : 200×120 à l'écran.
 const img = (over = {}) => ({ kind: 'image', ref: 'C:/rushes/a.png', w: 200, h: 120, natW: 1920, ...over });
-const at = (zoom, over) => lodEligible(img(over), zoom);
+// Par défaut on interroge depuis la source PLEINE : c'est le seuil d'entrée qui s'applique.
+const at = (zoom, over, onThumb = false) => lodEligible(img(over), zoom, onThumb);
 
 test('a large source shown small goes through its thumbnail', () => {
   assert.equal(at(1), true);
@@ -78,10 +79,55 @@ test('the subscribed zoom is quantised to octaves, and never underestimates', ()
   assert.notEqual(zoomCeil(1.99), zoomCeil(2.01));
 });
 
+// Sans bande morte, un aller-retour de molette autour du seuil faisait basculer toute la planche à
+// chaque cran — et chaque bascule est un changement de `src`, donc un clignotement.
+test('the swap has a dead band: entering and leaving use different thresholds', () => {
+  // 120 unités de haut × 2 = 240 px écran : entre les deux seuils (180 et 360).
+  assert.equal(at(2, {}, false), false, 'depuis la source pleine, on n’y passe pas encore');
+  assert.equal(at(2, {}, true), true, 'déjà en vignette, on y reste');
+  // Hors de la bande, l'état courant ne change rien.
+  assert.equal(at(1, {}, false), true);
+  assert.equal(at(1, {}, true), true);
+  assert.equal(at(4, {}, false), false);
+  assert.equal(at(4, {}, true), false);
+});
+
 test('the thumbnail only stands in for a much larger source shown small', () => {
   // Marges volontairement larges : une vignette qui se devine à l'écran est pire que la mémoire
   // qu'elle économise. 180 px écran contre un cran de vignette à 360 px de haut = ×2 de réserve.
   const raw = fs.readFileSync(path.join(root, rel), 'utf8');
   assert.ok(Number(/const LOD_MIN_RATIO = (\d+)/.exec(raw)[1]) >= 4);
-  assert.ok(Number(/const LOD_MAX_SCREEN_H = (\d+)/.exec(raw)[1]) <= 180);
+  const enter = Number(/const LOD_ENTER_SCREEN_H = (\d+)/.exec(raw)[1]);
+  const leave = Number(/const LOD_LEAVE_SCREEN_H = (\d+)/.exec(raw)[1]);
+  assert.ok(enter <= 180, `seuil d'entrée ${enter} : la vignette se verrait`);
+  // Une octave pleine de bande morte : exactement le pas du zoom quantifié, donc jamais deux
+  // bascules dans le même mouvement de molette.
+  assert.ok(leave >= enter * 2, `bande morte ${enter}→${leave} trop étroite`);
+});
+
+// Le culling remonte les items à chaque dézoom. Repartir systématiquement sur la source pleine
+// ferait donc décoder le gros bitmap pour une seule frame, à chaque dézoom — l'exact contraire du
+// but. Au montage il n'y a rien à l'écran à préserver : on prend la bonne source tout de suite.
+test('a remounted item starts on the right source, not on the full one', () => {
+  const raw = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.match(raw, /function firstSrc\(item: BoardItem\): string/);
+  assert.match(raw, /useState\(\(\) => firstSrc\(item\)\)/);
+  // …mais seulement sur une vignette DÉJÀ peinte : l'échec d'une vignette n'est pas rattrapé (la
+  // récupération est réservée à la source pleine), donc une entrée de cache purgée entre-temps
+  // laisserait une case cassée que rien ne remplace.
+  assert.match(raw, /decoded\.has\(thumb\)/);
+  assert.match(raw, /decoded\.add\(src\)/);
+});
+
+// LE clignotement. Affecter `src` vide le <img> à l'instant même : Chromium ne repeint qu'après
+// décodage, et la case est blanche entre les deux. À l'échelle d'une planche, toutes les petites
+// images clignotent à chaque palier de zoom franchi.
+test('the displayed source only changes once the new one is decoded', () => {
+  const raw = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.match(raw, /img\.decode\?\.\(\)/, 'la cible doit être DÉCODÉE, pas seulement chargée');
+  // Un seul chemin doit pouvoir changer la source affichée, et il passe par preload().
+  const swaps = raw.match(/setShown\(/g) ?? [];
+  assert.equal(swaps.length, 2, 'un échange après décodage, plus la remise à zéro de fichier');
+  assert.match(raw, /void preload\(target\)\.then\(\(ok\) => \{[\s\S]*?setShown\(target\)/,
+    'l’échange doit vivre DANS la résolution du préchargement');
 });
