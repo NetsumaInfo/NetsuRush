@@ -17,7 +17,9 @@ import { shapeBBox, shifted } from "./drawGeometry";
 import { YoutubeItem } from "./YoutubeItem";
 import { EmbedItem } from "./EmbedItem";
 import { PaletteContent } from "./PaletteItem";
-import { useImageLod } from "./boardImageLod";
+import { knownThumb, useImageLod, zoomCeil } from "./boardImageLod";
+import { posterTime, stillSized, useVideoStill } from "./boardVideoLod";
+import { useOnScreen } from "./useOnScreen";
 
 // Récupération auto d'un média cassé/noir (lien distant mort ou média extrait d'un post) : une seule
 // tentative par item (anti-boucle), uniquement si un lien d'origine existe (sourceUrl ou ref http).
@@ -57,12 +59,15 @@ function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
   const ref = useRef<HTMLVideoElement>(null);
   const patchItem = useBoard((s) => s.patchItem);
   const mediaSuspended = useBoard((s) => s.frozen || (s.navigating && s.prefs.pauseMediaWhileNavigating));
+  // Hors champ = pause. La zone de culling couvre ~6× l'aire du viewport : sans ce test, jusqu'à
+  // MEDIA_BUDGET vidéos décodaient en marge pour personne. currentTime survit — la reprise est nette.
+  const onScreen = useOnScreen(ref);
   // Portée de boucle valide seulement si out > in (sinon on ignore le out pour éviter un seek en boucle).
   const trimIn = item.trimIn && item.trimIn > 0 ? item.trimIn : 0;
   const trimOut = item.trimOut != null && item.trimOut > trimIn ? item.trimOut : null;
   // Mode de lecture : "off" ne joue jamais (figé), "pingpong" aller-retour, "loop" (défaut) boucle.
   const playMode = item.playMode ?? "loop";
-  const playing = !mediaSuspended && playMode !== "off";
+  const playing = !mediaSuspended && onScreen && playMode !== "off";
 
   // Un CUT d'un fichier LOCAL (souvent MKV/HEVC : <video> ne lit pas le conteneur Matroska et le seek
   // mid-file échoue sur /stream copy → on voyait le DÉBUT du fichier, pas le plan) → on lit un PROXY
@@ -72,10 +77,12 @@ function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
   const useProxy = !streamSrc && trimOut != null && localRef;
   const [proxUrl, setProxUrl] = useState<string | null>(null);
 
-  // Hauteur CRANTÉE : le core crante déjà la sienne (snapProxyHeight), donc un resize à l'intérieur
-  // d'un cran retombait sur le même fichier de cache — mais `item.h` brut dans les deps refaisait
-  // quand même un RPC (et un passage de file) à CHAQUE commit de redimensionnement.
-  const proxH = Math.min(1080, Math.max(240, Math.ceil((item.h || 240) / 240) * 240));
+  // Hauteur du proxy en pixels ÉCRAN crantés : zoomé, le cut est net (l'ancienne hauteur en unités
+  // board donnait un 480p étiré plein écran) ; dézoomé, il ne décode plus du 1080p pour une case de
+  // 100 px. `zoomCeil` majore d'au plus une octave et ne change qu'une fois par doublement — donc au
+  // pire un changement de fichier par octave, servi par le cache disque du core au retour.
+  const zoom = useBoard((s) => zoomCeil(s.view.scale));
+  const proxH = Math.min(1080, Math.max(240, Math.ceil(((item.h || 240) * zoom) / 240) * 240));
 
   // Encode le proxy dès le montage (le core throttle déjà les encodes concurrents via proxyGate →
   // pas besoin de gater côté UI ; un gate de visibilité empêchait la lecture de démarrer).
@@ -157,10 +164,14 @@ function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
   useEffect(seekIn, [trimIn, useProxy]);
 
   const src = streamSrc ?? (useProxy ? proxUrl : item.src);
+  // Affiche native : la frame fixe déjà résolue reste peinte jusqu'à la première frame décodée —
+  // pas de flash noir au montage ni au retour du mode timbre-poste (cf. boardVideoLod).
+  const poster = !streamSrc && localRef ? knownThumb(item.ref, posterTime(item)) ?? undefined : undefined;
   const video = (
     <video
       ref={ref}
       src={src ?? undefined}
+      poster={poster}
       muted
       loop={playMode === "loop" && (useProxy || trimOut == null)}
       autoPlay={playing && playMode !== "pingpong"}
@@ -194,6 +205,22 @@ function VideoContent({ item, streamSrc, onStreamError, onNatSize }: {
   return item.crop ? <div className="relative h-full w-full overflow-hidden">{video}</div> : video;
 }
 
+// Vidéo locale minuscule à l'écran → frame d'affiche à la place du lecteur : plus de décodeur, plus
+// de flux ouvert, plus de RPC proxy pour un item de quelques dizaines de pixels. Le lecteur revient
+// (avec l'affiche en poster natif) dès que l'item repasse au-dessus de la bande morte.
+function VideoWithStill({ item }: { item: Item }) {
+  const still = useVideoStill(item);
+  if (!still) return <VideoContent item={item} />;
+  const cls = item.crop ? "block select-none" : "block h-full w-full select-none object-cover";
+  const img = (
+    <img
+      src={still} alt={item.title ?? ""} draggable={false} decoding="sync"
+      className={cls} style={item.crop ? cropStyle(item.crop) : undefined}
+    />
+  );
+  return item.crop ? <div className="relative h-full w-full overflow-hidden">{img}</div> : img;
+}
+
 // Séquence d'images : affiche frames[frame] ; avance auto en boucle quand `seqPlay`
 // et que le board n'est pas figé. L'avance écrit la frame via setSeqFrame (sans dirty → pas de spam
 // d'autosave). La barre de contrôle (SequencePlayer) ne fait que piloter seqPlay/frame.
@@ -202,13 +229,23 @@ function SequenceContent({ item }: { item: Item }) {
   const setSeqFrame = useBoard((s) => s.setSeqFrame);
   const commitSeqFrame = useBoard((s) => s.commitSeqFrame);
   const patchItem = useBoard((s) => s.patchItem);
+  const imgRef = useRef<HTMLImageElement>(null);
+  // Hors champ = pause : la boucle rAF s'arrête, plus d'échange d'<img> ni d'écriture au store pour
+  // une séquence que personne ne voit. La position vivante reste dans seqFrames.
+  const onScreen = useOnScreen(imgRef);
+  // Minuscule à l'écran (mode timbre-poste, cf. boardVideoLod) : la frame courante reste peinte,
+  // l'avance s'arrête — même bande morte d'une octave que les vidéos.
+  const zoom = useBoard((s) => zoomCeil(s.view.scale));
+  const [tiny, setTiny] = useState(false);
+  const wantsTiny = stillSized(item, zoom, tiny);
+  if (wantsTiny !== tiny) setTiny(wantsTiny);
   const frames = useMemo(() => item.frames ?? [], [item.frames]);
   const count = frames.length;
   // Frame vivante d'abord (hors document, cf. `seqFrames`) : ce sélecteur ne rend qu'un nombre, donc
   // la séquence voisine qui avance ne re-rend pas celle-ci.
   const liveFrame = useBoard((s) => s.seqFrames[item.id]);
   const cur = Math.min(Math.max(liveFrame ?? item.frame ?? 0, 0), Math.max(0, count - 1));
-  const playing = (item.seqPlay ?? true) && !mediaSuspended; // défaut = lecture (autoplay au retour sur le board)
+  const playing = (item.seqPlay ?? true) && !mediaSuspended && onScreen && !tiny; // défaut = lecture (autoplay au retour sur le board)
   const dirRef = useRef<1 | -1>(1);  // sens courant en mode aller-retour
   const posRef = useRef(0);          // position FLOTTANTE (frame fractionnaire) pour un pacing fluide
   // Item courant lu par la boucle rAF via une ref : un `items.find` par frame est un balayage
@@ -292,6 +329,7 @@ function SequenceContent({ item }: { item: Item }) {
   }
   const img = (
     <img
+      ref={imgRef}
       src={displaySrc("image", frames[cur])}
       alt={item.title ?? ""}
       draggable={false}
@@ -677,7 +715,7 @@ function ItemContent({ item, editing, live, onYtFallback }: { item: Item; editin
   if (item.kind === "frame") return <FrameContent item={item} />;
   if (item.kind === "palette") return <PaletteContent item={item} />;
   if (item.kind === "image") return <ImageContent item={item} />;
-  if (item.kind === "video") return <VideoContent item={item} />;
+  if (item.kind === "video") return <VideoWithStill item={item} />;
   if (item.kind === "sequence") return <SequenceContent item={item} />;
   // Embed / YouTube : `live` (double-clic) rend l'iframe cliquable (play, scroll, liens). Sinon
   // pointer-events:none → le clic sélectionne / déplace l'item (le drag du board n'est pas volé).

@@ -38,6 +38,7 @@ import { boundsOf, rotatedBBox } from "./boardArrange";
 import { useLive } from "./boardLive";
 import { itemToPngBlob } from "./boardRender";
 import { primeBoardThumbs } from "./boardImageLod";
+import { posterTime } from "./boardVideoLod";
 
 const clampScale = (s: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s));
 
@@ -204,10 +205,14 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
 
   // Amorce les vignettes du LOD en UN RPC à l'ouverture d'une scène : sans ça, chaque image monte en
   // source pleine (gros bitmap décodé pour rien) avant d'apprendre, un RPC par item, que sa vignette
-  // existait déjà sur disque.
+  // existait déjà sur disque. Les vidéos y gagnent leur frame d'affiche (poster + mode timbre-poste).
   useEffect(() => {
     primeBoardThumbs(
-      useBoard.getState().items.filter((it) => it.kind === "image").map((it) => it.ref),
+      useBoard.getState().items.flatMap((it) => {
+        if (it.kind === "image") return [{ ref: it.ref }];
+        if (it.kind === "video") return [{ ref: it.ref, time: posterTime(it) }];
+        return [];
+      }),
     );
   }, [sceneId]);
 

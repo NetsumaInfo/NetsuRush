@@ -507,6 +507,7 @@
     "openOnYouTube": "在 YouTube 打开"
   },
   "embed": {
+    "frozen": "播放已冻结",
     "level": {
       "link": "仅链接",
       "preview": "片段",

@@ -100,22 +100,37 @@ function thumbGate<T>(job: () => Promise<T>): Promise<T> {
   return new Promise<T>((res, rej) => { thumbWaiting.push(() => run().then(res, rej)); });
 }
 
-/** Vignette d'une source disque, mise en cache. Les demandes simultanées partagent le même appel. */
-function thumbFor(ref: string): Promise<string | null> {
-  const known = resolved.get(ref);
+// Clé de cache : les images n'ont qu'une frame (time 0 → la ref nue), les vidéos une frame
+// d'affiche à un instant donné (même arrondi que le cache disque du core).
+function thumbKey(ref: string, time: number): string {
+  return time ? `${ref}@${time.toFixed(2)}` : ref;
+}
+
+/** URL de vignette déjà RÉSOLUE cette session, sans RPC ni promesse. null = pas encore connue. */
+export function knownThumb(ref: string, time = 0): string | null {
+  return resolved.get(thumbKey(ref, time)) ?? null;
+}
+
+/**
+ * Vignette d'une source disque, mise en cache. Les demandes simultanées partagent le même appel.
+ * `time` : frame d'affiche pour une vidéo (0 = image fixe).
+ */
+export function thumbFor(ref: string, time = 0): Promise<string | null> {
+  const key = thumbKey(ref, time);
+  const known = resolved.get(key);
   if (known !== undefined) return Promise.resolve(known);
-  const running = inflight.get(ref);
+  const running = inflight.get(key);
   if (running) return running;
-  // `time: 0` = la frame unique d'une image fixe ; priorité basse, la planche est déjà lisible.
-  const job = thumbGate(() => Promise.resolve(nr.thumbnail?.(ref, 0, "low")))
+  // Priorité basse : la planche est déjà lisible pendant que la vignette se génère.
+  const job = thumbGate(() => Promise.resolve(nr.thumbnail?.(ref, time, "low")))
     .then((r) => (typeof r === "string" && r ? displaySrc("image", r) : null))
     .catch(() => null)
     .then((src) => {
-      if (src) resolved.set(ref, src);
-      inflight.delete(ref);
+      if (src) resolved.set(key, src);
+      inflight.delete(key);
       return src;
     });
-  inflight.set(ref, job);
+  inflight.set(key, job);
   return job;
 }
 
@@ -124,15 +139,21 @@ function thumbFor(ref: string): Promise<string | null> {
  * repart de zéro : au premier dézoom, chaque image monte en source PLEINE (le gros bitmap se décode
  * pour quelques frames), puis un RPC par item apprend que la vignette existait déjà sur disque.
  */
-export function primeBoardThumbs(refs: string[]): void {
-  const wanted = [...new Set(refs)].filter(
-    (r) => r && !resolved.has(r) && !inflight.has(r)
-      && !/^(https?:|data:|blob:)/i.test(r) && !ANIMATED_RE.test(r),
-  );
+export function primeBoardThumbs(entries: { ref: string; time?: number }[]): void {
+  const seen = new Set<string>();
+  const wanted: { path: string; time: number }[] = [];
+  for (const e of entries) {
+    const time = e.time ?? 0;
+    const key = thumbKey(e.ref, time);
+    if (!e.ref || seen.has(key) || resolved.has(key) || inflight.has(key)) continue;
+    if (/^(https?:|data:|blob:)/i.test(e.ref) || ANIMATED_RE.test(e.ref)) continue;
+    seen.add(key);
+    wanted.push({ path: e.ref, time });
+  }
   if (!wanted.length) return;
-  void Promise.resolve(nr.thumbsResolve?.(wanted.map((path) => ({ path, time: 0 }))))
+  void Promise.resolve(nr.thumbsResolve?.(wanted))
     .then((res) => {
-      for (const r of res ?? []) if (r?.file) resolved.set(r.path, displaySrc("image", r.file));
+      for (const r of res ?? []) if (r?.file) resolved.set(thumbKey(r.path, r.time ?? 0), displaySrc("image", r.file));
     })
     .catch(() => { /* amorçage best-effort : repli sur le chemin paresseux par item */ });
 }
@@ -143,7 +164,7 @@ export function primeBoardThumbs(refs: string[]): void {
  * image « chargée » peut encore coûter un décodage au premier paint, ce qu'on cherche justement à
  * sortir du champ.
  */
-function preload(src: string): Promise<boolean> {
+export function preload(src: string): Promise<boolean> {
   if (decoded.has(src)) return Promise.resolve(true);
   const img = new Image();
   img.src = src;

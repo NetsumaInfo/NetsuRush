@@ -73,12 +73,20 @@ export function SequencePlayer() {
   const liveFrame = useBoard((s) => (item ? s.seqFrames[item.id] : undefined));
   const cur = item ? Math.min(Math.max(liveFrame ?? item.frame ?? 0, 0), Math.max(0, total - 1)) : 0;
 
-  // Centre la vignette active dans la pellicule au fil de la lecture.
+  // Centre la vignette active dans la pellicule au fil de la lecture. THROTTLÉ pendant la lecture :
+  // scrollIntoView force un layout, et à 12-24 im./s c'en était un par frame de séquence. Un saut
+  // manuel (lecture arrêtée), lui, suit toujours immédiatement.
+  const lastFollow = useRef(0);
   useEffect(() => {
     if (!showStrip) return;
+    if (item?.seqPlay ?? true) {
+      const now = performance.now();
+      if (now - lastFollow.current < 400) return;
+      lastFollow.current = now;
+    }
     stripRef.current?.querySelector<HTMLElement>(`[data-frame="${cur}"]`)
       ?.scrollIntoView({ inline: "center", block: "nearest" });
-  }, [cur, showStrip]);
+  }, [cur, showStrip, item?.seqPlay]);
 
   if (!selectedId || count !== 1 || !item || item.kind !== "sequence") return null;
   if (editingId === item.id) return null;

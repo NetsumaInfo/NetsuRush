@@ -8,6 +8,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { Snowflake } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type BoardItem, parseVideoEmbed } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
@@ -34,6 +35,7 @@ export function EmbedItem({ item, interactive }: { item: BoardItem; interactive?
   const { t } = useTranslation("reference");
   const frameRef = useRef<HTMLIFrameElement>(null);
   const patchItem = useBoard((s) => s.patchItem);
+  const frozen = useBoard((s) => s.frozen);
   const provider = parseVideoEmbed(item.ref, true)?.provider ?? "generic";
   const autoHeight = provider === "twitter" || provider === "instagram";
   // hauteur courante lue par le handler sans réabonner à chaque changement.
@@ -51,6 +53,19 @@ export function EmbedItem({ item, interactive }: { item: BoardItem; interactive?
     return () => window.removeEventListener("message", onMsg);
   }, [autoHeight, item.id, patchItem]);
 
+  // « Tout figer » : l'iframe est DÉMONTÉE — c'était le seul média que le gel n'atteignait pas, un
+  // lecteur Vimeo/Twitch continuait de décoder sous un board censé être à l'arrêt. Masquer ne suffit
+  // pas (une iframe en display:none tourne encore) ; au dégel elle se recharge, prix assumé d'un
+  // gel explicite.
+  if (frozen) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-xl bg-[var(--color-surface)] text-muted-foreground">
+        <Snowflake className="size-6" strokeWidth={1.5} />
+        <span className="max-w-[85%] truncate text-xs font-medium">{item.title ?? t("embed.frozen")}</span>
+        <span className="text-[10px]">{t("embed.frozen")}</span>
+      </div>
+    );
+  }
   return (
     <div className={cn("block h-full w-full overflow-hidden rounded-xl bg-[var(--color-surface)]", interactive ? "pointer-events-auto" : "pointer-events-none")}>
       <iframe

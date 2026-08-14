@@ -507,6 +507,7 @@
     "openOnYouTube": "Auf YouTube öffnen"
   },
   "embed": {
+    "frozen": "Wiedergabe angehalten",
     "level": {
       "link": "Nur Links",
       "preview": "Ausschnitte",

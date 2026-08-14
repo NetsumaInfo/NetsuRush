@@ -507,6 +507,7 @@
     "openOnYouTube": "Abrir en YouTube"
   },
   "embed": {
+    "frozen": "Reproducción congelada",
     "level": {
       "link": "Solo enlaces",
       "preview": "Extractos",

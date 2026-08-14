@@ -113,6 +113,24 @@ export function DrawLayer() {
   }, [boardItems, live.geom]);
   const shapes = useMemo(() => resolveShapes(stored, anchoredItems), [stored, anchoredItems]);
 
+  // Culling des tracés, même logique que les items : seuls ceux qui croisent le viewport élargi
+  // (une marge d'un viewport de chaque côté) sont rendus. Sans lui, un board très annoté rendait
+  // TOUTES les formes, et la couche promue prenait pour bornes la bbox de l'ensemble — un raster
+  // énorme à fort zoom. La vue ne commite qu'une fois par geste : ce filtre est payé au commit,
+  // jamais par frame. La sélection et la gomme, elles, continuent de voir la liste complète.
+  const drawnShapes = useMemo(() => {
+    if (shapes.length < 40) return shapes;
+    const el = ref.current;
+    const w = (el?.clientWidth || window.innerWidth) / view.scale;
+    const h = (el?.clientHeight || window.innerHeight) / view.scale;
+    const x = -view.tx / view.scale, y = -view.ty / view.scale;
+    const x0 = x - w, y0 = y - h, x1 = x + w * 2, y1 = y + h * 2;
+    return shapes.filter((s) => {
+      const [a, b, c, d] = shapeBBox(s);
+      return a < x1 && c > x0 && b < y1 && d > y0;
+    });
+  }, [shapes, view]);
+
   // Écriture des formes : ce qui est lié est RÉ-ANCRÉ avant d'être stocké (sinon un tracé déplacé à
   // la main reviendrait à sa position d'origine au rendu suivant).
   const writeShapes = useCallback((next: DrawShape[], record = true, tag?: string) => {
@@ -314,9 +332,9 @@ export function DrawLayer() {
           className="absolute left-0 top-0 h-full w-full overflow-visible"
           style={{ pointerEvents: "none", overflow: "visible" }}
         >
-        <StaticShapes shapes={shapes} draft={draft} />
+        <StaticShapes shapes={drawnShapes} draft={draft} />
 
-        {!drawMode && <HitTargets shapes={shapes} hitW={hitW} onDown={onTargetDown} onMove={onTargetMove} onUp={onTargetUp} />}
+        {!drawMode && <HitTargets shapes={drawnShapes} hitW={hitW} onDown={onTargetDown} onMove={onTargetMove} onUp={onTargetUp} />}
 
         {selShape && (() => {
           const [a, b, c, d] = shapeBBox(selShape);

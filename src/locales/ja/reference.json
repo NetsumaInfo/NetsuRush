@@ -507,6 +507,7 @@
     "openOnYouTube": "YouTube で開く"
   },
   "embed": {
+    "frozen": "再生を停止中",
     "level": {
       "link": "リンクのみ",
       "preview": "抜き出し",

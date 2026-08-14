@@ -135,7 +135,7 @@ test('a dead thumbnail falls back to the full source instead of leaving a broken
 // mémorisé : cacher le null désactivait le LOD de ce média pour toute la session.
 test('a transient thumbnail failure is retried, not cached for the session', () => {
   const raw = fs.readFileSync(path.join(root, rel), 'utf8');
-  assert.match(raw, /if \(src\) resolved\.set\(ref, src\)/);
+  assert.match(raw, /if \(src\) resolved\.set\(key, src\)/);
 });
 
 // Chaque RPC est un fetch sur l'origine du core (~6 connexions max par origine dans Chromium) :
