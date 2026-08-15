@@ -364,7 +364,7 @@ test('installed runtime is scanned, repairable, and verified before restart', ()
   assert.match(gate, /@tauri-apps\/plugin-process/);
   assert.match(gate, /await relaunch\(\)/);
   assert.match(detect, /dev = torch_device\(torch\)/);
-  assert.match(detect, /torch\.from_numpy\(frames\.copy\(\)\)\.to\(dev\)/);
+  assert.match(detect, /torch\.from_numpy\(np\.stack\(batch_windows\)\)\.to\(dev\)/);
   const setupModels = fs.readFileSync(path.join(root, 'core', 'setup-models.js'), 'utf8');
   assert.match(setupModels, /siglipModel: selectedSearch/);
 });

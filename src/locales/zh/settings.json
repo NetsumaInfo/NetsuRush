@@ -17,6 +17,11 @@
     "social": {
       "discord": "加入服务器"
     },
+    "supportTitle": "支持",
+    "support": {
+      "github": "成为 GitHub 赞助者",
+      "coffee": "请我喝杯咖啡"
+    },
     "legal": "© 2026 Haim Faraj · NetsuRush 根据 GNU AGPL v3.0-only 分发 · 不提供担保。",
     "licenseLink": "完整许可证文本",
     "sourceLink": "对应源代码"

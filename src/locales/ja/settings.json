@@ -17,6 +17,11 @@
     "social": {
       "discord": "サーバーに参加"
     },
+    "supportTitle": "支援",
+    "support": {
+      "github": "GitHub でスポンサーになる",
+      "coffee": "コーヒーをおごる"
+    },
     "legal": "© 2026 Haim Faraj · NetsuRush は GNU AGPL v3.0-only の下で配布されます · 無保証。",
     "licenseLink": "ライセンス全文",
     "sourceLink": "対応するソースコード"

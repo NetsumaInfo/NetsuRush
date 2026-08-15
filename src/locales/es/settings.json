@@ -17,6 +17,11 @@
     "social": {
       "discord": "Unirse al servidor"
     },
+    "supportTitle": "Apoyar",
+    "support": {
+      "github": "Hazte sponsor en GitHub",
+      "coffee": "Invítame un café"
+    },
     "legal": "© 2026 Haim Faraj · NetsuRush se distribuye bajo GNU AGPL v3.0-only · Sin garantía.",
     "licenseLink": "Texto completo de la licencia",
     "sourceLink": "Código fuente correspondiente"

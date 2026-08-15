@@ -1,20 +1,26 @@
-// Barre d'outils du board : ajout (image / vidéo / YouTube), zoom, cadrage, nouvelle scène,
-// et actions de scène (sauver / ouvrir) + détacher (injectées par le parent selon le contexte).
+// Barre d'outils du board. Trois zones : à GAUCHE ce qui pose et regarde (ajout, zoom, cadrage,
+// gel), au CENTRE le nom du projet et son état (modifié, notice), à DROITE ce qui touche au
+// DOCUMENT (annuler/rétablir, nouvelle scène, enregistrer, ouvrir, partager) puis la fenêtre
+// (réglages, épingle, détacher). Le partage est un menu : le projet lui-même, ou une image de la scène.
 
 import { useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ImagePlus, Type, Frame, Pencil, Clapperboard, ZoomIn, ZoomOut, Maximize, FilePlus2,
   Save, SaveAll, FileCheck2, FolderOpen, Share2, PictureInPicture2, Minimize2, Pin, PinOff, Play, Pause,
-  Settings2, Home, Undo2, Redo2, RotateCw, Magnet,
+  Settings2, Home, Undo2, Redo2, RotateCw, Magnet, Package, ImageDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useBoard } from "./useReferenceBoard";
 import { fileLabel } from "./useScenePersistence";
 import { recoverAllOnlineMedia, recoverableOnlineItems } from "./boardMediaActions";
+import { ExportImageDialog } from "./ExportImageDialog";
 import type { BoardHandle } from "./ReferenceBoard";
 
 function IconBtn({ icon: Icon, label, onClick, disabled, active }: {
@@ -79,7 +85,9 @@ export function Toolbar({
   const canUndo = useBoard((s) => s.past.length > 0);
   const canRedo = useBoard((s) => s.future.length > 0);
   const [recovering, setRecovering] = useState(false);
+  const [imgExport, setImgExport] = useState(false);
   const recoverableCount = recoverableOnlineItems(items).length;
+  const hasItems = items.some((i) => i.kind !== "draw");
   const snap = useBoard((s) => s.prefs.snap);
   const setPrefs = useBoard((s) => s.setPrefs);
 
@@ -110,7 +118,7 @@ export function Toolbar({
     >
       {/* zone interactive : les contrôles ne doivent pas hériter du drag de la barre */}
       <div
-        className="flex items-center gap-1"
+        className="flex shrink-0 items-center gap-1"
         style={draggable ? ({ WebkitAppRegion: "no-drag" } as React.CSSProperties) : undefined}
       >
       {onHome && (
@@ -133,11 +141,6 @@ export function Toolbar({
 
       <Separator orientation="vertical" className="mx-1 h-5" />
 
-      <IconBtn icon={Undo2} label={t("actions.undo")} onClick={undo} disabled={!canUndo} />
-      <IconBtn icon={Redo2} label={t("actions.redo")} onClick={redo} disabled={!canRedo} />
-
-      <Separator orientation="vertical" className="mx-1 h-5" />
-
       {/* Aimant : accrochage bords/centres/coins et collage bord à bord. Alt le suspend le temps
           d'un geste ; ce bouton, lui, l'éteint durablement. */}
       <IconBtn icon={Magnet} label={snap ? t("toolbar.snapOff") : t("toolbar.snapOn")} active={snap} onClick={() => setPrefs({ snap: !snap })} />
@@ -150,56 +153,86 @@ export function Toolbar({
         onClick={toggleFrozen}
       />
 
-      <Separator orientation="vertical" className="mx-1 h-5" />
-
-      <IconBtn icon={FilePlus2} label={t("actions.newScene")} onClick={() => newScene()} />
-      {onSave && <IconBtn icon={Save} label={t("toolbar.saveScene")} onClick={onSave} />}
-      {onSaveAs && <IconBtn icon={SaveAll} label={t("toolbar.saveAs")} onClick={onSaveAs} />}
-      {onOpen && <IconBtn icon={FolderOpen} label={t("toolbar.openScene")} onClick={onOpen} />}
-      {onExport && <IconBtn icon={Share2} label={t("toolbar.share")} onClick={onExport} />}
-
-        <div className="ml-2 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-          {/* Un projet lié à un fichier affiche SON nom et, en infobulle, son chemin complet : savoir
-              où il est enregistré est la raison d'être du format. */}
-          {filePath ? (
-            <Tooltip>
-              <TooltipTrigger render={<span className="flex min-w-0 items-center gap-1 truncate" />}>
-                <FileCheck2 className="size-3.5 shrink-0" />
-                <span className="truncate">{fileLabel(filePath)}</span>
-              </TooltipTrigger>
-              <TooltipContent>{filePath}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <span className="truncate">{sceneName}</span>
-          )}
-          {dirty && <span className="size-1.5 shrink-0 rounded-full bg-primary" aria-label={t("toolbar.unsaved")} />}
-          {notice && (
-            <span className={cn("truncate", notice.kind === "error" ? "text-destructive" : "text-[var(--color-ok)]")}>
-              · {notice.text}
-            </span>
-          )}
-          {recoverableCount > 0 && (
-            <Button
-              variant="ghost"
-              size="xs"
-              disabled={recovering}
-              onClick={() => void retryMissing()}
-              aria-label={t("notice.redownloadAll", { count: recoverableCount })}
-            >
-              <RotateCw className={cn(recovering && "animate-spin")} />
-              {t("notice.redownloadAll", { count: recoverableCount })}
-            </Button>
-          )}
-        </div>
       </div>
 
-      {/* zone centrale : reste draggable (fenêtre détachée) pour saisir la barre */}
-      <div className="flex-1" />
+      {/* Zone centrale : nom du projet et son état. Centrée dans la place LAISSÉE par les deux
+          groupes d'outils plutôt qu'en centre absolu — un centre absolu passerait sous les boutons
+          dès que la fenêtre se resserre. Elle reste draggable (fenêtre détachée) hors des contrôles. */}
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 px-2 text-xs text-muted-foreground">
+        {/* Un projet lié à un fichier affiche SON nom et, en infobulle, son chemin complet : savoir
+            où il est enregistré est la raison d'être du format. */}
+        {filePath ? (
+          <Tooltip>
+            <TooltipTrigger render={<span className="flex min-w-0 items-center gap-1 truncate" />}>
+              <FileCheck2 className="size-3.5 shrink-0" />
+              <span className="truncate">{fileLabel(filePath)}</span>
+            </TooltipTrigger>
+            <TooltipContent>{filePath}</TooltipContent>
+          </Tooltip>
+        ) : (
+          <span className="truncate font-medium text-foreground">{sceneName}</span>
+        )}
+        {dirty && <span className="size-1.5 shrink-0 rounded-full bg-primary" aria-label={t("toolbar.unsaved")} />}
+        {notice && (
+          <span className={cn("truncate", notice.kind === "error" ? "text-destructive" : "text-[var(--color-ok)]")}>
+            · {notice.text}
+          </span>
+        )}
+        {recoverableCount > 0 && (
+          <Button
+            variant="ghost"
+            size="xs"
+            disabled={recovering}
+            onClick={() => void retryMissing()}
+            aria-label={t("notice.redownloadAll", { count: recoverableCount })}
+            style={draggable ? ({ WebkitAppRegion: "no-drag" } as React.CSSProperties) : undefined}
+          >
+            <RotateCw className={cn(recovering && "animate-spin")} />
+            {t("notice.redownloadAll", { count: recoverableCount })}
+          </Button>
+        )}
+      </div>
 
       <div
-        className="flex items-center gap-1"
+        className="flex shrink-0 items-center gap-1"
         style={draggable ? ({ WebkitAppRegion: "no-drag" } as React.CSSProperties) : undefined}
       >
+        <IconBtn icon={Undo2} label={t("actions.undo")} onClick={undo} disabled={!canUndo} />
+        <IconBtn icon={Redo2} label={t("actions.redo")} onClick={redo} disabled={!canRedo} />
+
+        <Separator orientation="vertical" className="mx-1 h-5" />
+
+        <IconBtn icon={FilePlus2} label={t("actions.newScene")} onClick={() => newScene()} />
+        {onSave && <IconBtn icon={Save} label={t("toolbar.saveScene")} onClick={onSave} />}
+        {onSaveAs && <IconBtn icon={SaveAll} label={t("toolbar.saveAs")} onClick={onSaveAs} />}
+        {onOpen && <IconBtn icon={FolderOpen} label={t("toolbar.openScene")} onClick={onOpen} />}
+
+        {/* Partager : le PROJET (fichier .netsu, médias embarqués selon le niveau choisi) ou une
+            IMAGE de la scène (PNG/JPG/SVG rendus depuis le modèle). Deux sorties très différentes
+            pour un même geste — d'où le menu plutôt que deux boutons de plus. */}
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger
+              render={<DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("toolbar.share")} />} />}
+            >
+              <Share2 />
+            </TooltipTrigger>
+            <TooltipContent>{t("toolbar.share")}</TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="end">
+            {onExport && (
+              <DropdownMenuItem onClick={onExport}>
+                <Package /> {t("toolbar.shareProject")}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem disabled={!hasItems} onClick={() => setImgExport(true)}>
+              <ImageDown /> {t("exportImage.menu")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Separator orientation="vertical" className="mx-1 h-5" />
+
         {onSettings && <IconBtn icon={Settings2} label={t("actions.settings")} onClick={onSettings} />}
         {onTogglePin && (
           <IconBtn
@@ -216,6 +249,7 @@ export function Toolbar({
         )}
       </div>
 
+      <ExportImageDialog open={imgExport} onOpenChange={setImgExport} />
     </div>
   );
 }

@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2 } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2, Link2, Unlink2 } from "lucide-react";
 import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,6 +21,7 @@ import { extractPaletteToBoard, regeneratePalette } from "./boardPaletteActions"
 import { COLOR_FORMATS, COLOR_FORMAT_LABEL } from "./colorFormat";
 import { UpscaleItemDialog } from "./UpscaleItemDialog";
 import { iconForLink } from "./brandIcons";
+import { enclosingFrame } from "./boardFrames";
 
 // Cadence supposée d'une source en mode « même que la vidéo » (la vraie vient du core, après coup) :
 // haute exprès, l'avertissement « vidéo longue » doit se déclencher plutôt trop tôt que trop tard.
@@ -84,6 +85,9 @@ export function Inspector() {
     item.kind === "youtube" ? `https://www.youtube.com/watch?v=${item.ref}`
     : item.kind === "embed" ? item.ref
     : item.sourceUrl || null;
+  // Cadre qui entoure l'élément. Lu hors abonnement : l'inspecteur se rend déjà à chaque changement
+  // de l'item sélectionné, et s'abonner à la liste entière le réveillerait à chaque commit du store.
+  const framedBy = enclosingFrame(item, useBoard.getState().items);
 
   // Décompose la vidéo en frames d'aperçu sur la PLAGE DE BOUCLE [in, out] (sinon vidéo entière), élargie
   // de la MARGE des Paramètres (garde quelques secondes autour pour réajuster). Cadence/qualité/plafond
@@ -283,6 +287,17 @@ export function Inspector() {
             }}
           >
             <Undo2 />
+          </IconAction>
+        )}
+        {/* Lien au cadre : même bascule que la pastille posée sur l'élément (bleu = le cadre l'emmène
+            et s'ajuste sur lui). N'apparaît que si un cadre l'entoure. */}
+        {framedBy && (
+          <IconAction
+            label={t(item.detached ? "actions.linkFrame" : "actions.unlinkFrame")}
+            active={!item.detached}
+            onClick={() => patchItem(item.id, { detached: item.detached ? undefined : true })}
+          >
+            {item.detached ? <Unlink2 /> : <Link2 />}
           </IconAction>
         )}
         <IconAction label={t("actions.bringToFront")} onClick={() => bringToFront(item.id)}><BringToFront /></IconAction>

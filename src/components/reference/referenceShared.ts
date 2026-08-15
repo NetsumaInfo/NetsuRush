@@ -133,6 +133,9 @@ export interface DrawShape {
   ownPts?: number[];
   a1?: ShapeAnchor;
   a2?: ShapeAnchor;
+  // Lien au CADRE coupé — même sens que `detached` sur un item : le tracé reste posé dans le cadre,
+  // mais le cadre ne l'emmène plus. Distinct de la liaison à un média (`own`/`a1`/`a2`) ci-dessus.
+  detached?: boolean;
 }
 
 // Item du board. `ref` = localisateur DURABLE (persisté) : chemin disque, URL distante, ou
@@ -172,6 +175,11 @@ export interface BoardItem {
   flipV?: boolean;
   // Rognage normalisé (fractions 0..1 du média source) : x,y coin haut-gauche, w,h taille.
   crop?: { x: number; y: number; w: number; h: number };
+  // Lien au cadre COUPÉ : l'item reste posé dans le rectangle d'un cadre, mais celui-ci ne l'emmène
+  // plus et ne s'ajuste plus sur lui. Bascule par le bouton de lien de l'item (cf. boardFrames).
+  // Effacé dès que l'item ne se trouve plus dans aucun cadre — sinon il resterait secrètement délié
+  // en arrivant dans un autre cadre.
+  detached?: boolean;
   // Note texte (kind === "text") / titre de cadre (kind === "frame").
   text?: string;
   fontSize?: number;

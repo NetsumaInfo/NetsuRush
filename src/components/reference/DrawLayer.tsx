@@ -11,10 +11,15 @@
 // comme la couche d'items) : on ne re-réconcilie PAS toutes les formes à chaque frame → plus de lag.
 
 import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link2, Trash2, Unlink2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useBoard } from "./useReferenceBoard";
 import { screenToBoard, uid, type BoardItem, type DrawShape } from "./referenceShared";
 import { shapeBBox, hitShape, shifted, handlesFor, editShape, penPath, connectorPath } from "./drawGeometry";
 import { attachShape, detachShape, indexItems, reanchorShape, resolveShapes } from "./drawAnchor";
+import { frameAtPoint } from "./boardFrames";
 import { useLive } from "./boardLive";
 import { ShapeView } from "./ShapeView";
 import { ShapeInspector } from "./ShapeInspector";
@@ -86,6 +91,7 @@ const HitTargets = memo(function HitTargets({ shapes, hitW, onDown, onMove, onUp
 });
 
 export function DrawLayer() {
+  const { t } = useTranslation("reference");
   const drawMode = useBoard((s) => s.drawMode);
   const drawBack = useBoard((s) => s.drawBack);
   const view = useBoard((s) => s.view);
@@ -176,7 +182,19 @@ export function DrawLayer() {
     }
     return false;
   }, [worldFromXY]);
-  const endGesture = () => { drag.current = null; edit.current = null; };
+  // Tracé délié traîné hors de tout cadre : le lien coupé n'a plus d'objet — même règle que les
+  // items, sinon il arriverait secrètement délié dans le prochain cadre où on le pose.
+  const endGesture = () => {
+    const id = drag.current?.id;
+    drag.current = null;
+    edit.current = null;
+    if (!id) return;
+    const shape = getShapes().find((s) => s.id === id);
+    if (!shape?.detached) return;
+    const [a, b, c, d] = shapeBBox(shape);
+    if (frameAtPoint((a + c) / 2, (b + d) / 2, useBoard.getState().items)) return;
+    writeShapes(getShapes().map((s) => (s.id === id ? { ...s, detached: undefined } : s)), false);
+  };
 
   // Cibles transparentes (hors mode dessin) : pointer capture sur la cible → déplacement.
   const onTargetDown = useCallback((id: string, e: React.PointerEvent) => {
@@ -363,6 +381,65 @@ export function DrawLayer() {
         })()}
         </svg>
       </div>
+
+      {/* Pastilles posées sur le tracé sélectionné — mêmes gestes que sur un item : lien au cadre
+          (bleu = le cadre l'emmène) et suppression. Rendues HORS de la couche transformée, donc à
+          taille d'écran constante : un tracé fin très dézoomé garde des boutons cliquables. */}
+      {selShape && !drawMode && (() => {
+        const [a, b, c, d] = shapeBBox(selShape);
+        const left = view.tx + a * view.scale;
+        const top = view.ty + b * view.scale;
+        const width = (c - a) * view.scale;
+        const frame = frameAtPoint((a + c) / 2, (b + d) / 2, boardItems);
+        const setDetached = (on: boolean) =>
+          writeShapes(getShapes().map((s) => (s.id === selShape.id ? { ...s, detached: on || undefined } : s)));
+        return (
+          <div
+            className="pointer-events-auto absolute z-30 flex items-center gap-1"
+            style={{ left, top: top - 34, width: Math.max(width, 64) }}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {frame && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-label={t(selShape.detached ? "actions.linkFrame" : "actions.unlinkFrame")}
+                      aria-pressed={!selShape.detached}
+                      onClick={() => setDetached(!selShape.detached)}
+                      className={cn(
+                        "flex size-6 items-center justify-center rounded-full shadow ring-1 [&_svg]:size-3.5",
+                        selShape.detached
+                          ? "bg-muted text-muted-foreground ring-foreground/15 hover:bg-muted/80"
+                          : "bg-primary text-primary-foreground ring-black/10 hover:bg-primary/90",
+                      )}
+                    />
+                  }
+                >
+                  {selShape.detached ? <Unlink2 /> : <Link2 />}
+                </TooltipTrigger>
+                <TooltipContent>{t(selShape.detached ? "actions.linkFrame" : "actions.unlinkFrame")}</TooltipContent>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    aria-label={t("common:action.delete")}
+                    onClick={() => { writeShapes(getShapes().filter((s) => s.id !== selShape.id)); selectDrawShape(null); }}
+                    className="flex size-6 items-center justify-center rounded-full bg-destructive/90 text-white shadow ring-1 ring-black/10 hover:bg-destructive [&_svg]:size-3.5"
+                  />
+                }
+              >
+                <Trash2 />
+              </TooltipTrigger>
+              <TooltipContent>{t("common:action.delete")}</TooltipContent>
+            </Tooltip>
+          </div>
+        );
+      })()}
 
       {selShape && (
         <ShapeInspector

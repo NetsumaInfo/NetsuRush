@@ -12,9 +12,19 @@ import { useBoard } from "./useReferenceBoard";
 import { rotatedBBox } from "./boardArrange";
 import { snapMove, snapValue, snapCandidates, type SnapGuide, type SnapRect } from "./boardSnap";
 import { clearLive, setLiveGeom, setLiveGuides } from "./boardLive";
+import { frameHugRect, frameHugStart, geomBox, linkedFrame, type FrameHug } from "./boardFrames";
 
 export type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 type Mode = { type: "move" } | { type: "rotate" } | { type: "resize"; handle: ResizeHandle };
+
+// Un item EMMENÉ par le geste (contenu d'un cadre, reste de la multi-sélection) : son wrapper et sa
+// position de départ, de quoi le translater en impératif à chaque frame.
+interface Carried {
+  el: HTMLElement;
+  x: number;
+  y: number;
+  r: number;
+}
 
 interface Drag {
   mode: Mode;
@@ -29,6 +39,13 @@ interface Drag {
   // Aimant : voisins et seuil FIGÉS au début du geste (une seule lecture du store, pas une par frame).
   snap: { others: SnapRect[]; cands: { x: number[]; y: number[] }; threshold: number; stick: number } | null;
   live: boolean; // publier la géométrie vivante (des tracés sont liés à cet item)
+  // Contenu emmené + déplacement courant : appliqués en IMPÉRATIF (cf. la boucle rAF plus bas).
+  carry: Carried[];
+  dx: number;
+  dy: number;
+  // Cadre qui tient l'item manipulé : il s'ajuste en direct sur son contenu. `geom` = dernier
+  // rectangle calculé (null = rien à changer), commité au relâchement.
+  hug: { id: string; el: HTMLElement | null; state: FrameHug; geom: Geom | null } | null;
 }
 
 const RAD = Math.PI / 180;
@@ -42,7 +59,9 @@ const HANDLE_DIR: Record<ResizeHandle, { dx: number; dy: number }> = {
 
 export function usePointerTransform(
   geom: Geom,
-  onCommit: (g: Geom) => void,
+  // `extra.frame` = cadre ajusté pendant le geste, à commiter dans le MÊME tick que la géométrie
+  // de l'item (une seule entrée d'annulation pour un seul geste).
+  onCommit: (g: Geom, extra?: { frame?: { id: string; geom: Geom } }) => void,
   opts?: {
     keepAspect?: boolean;
     captureRef?: React.RefObject<HTMLElement | null>;
@@ -52,6 +71,8 @@ export function usePointerTransform(
     // Items EMMENÉS par celui-ci (contenu d'un cadre) : ils ne peuvent pas être cibles d'aimant.
     // Fonction acceptée pour ne calculer la liste qu'au début du geste, pas à chaque rendu.
     groupIds?: string[] | (() => string[]);
+    // Item posable dans un cadre : le cadre qui le tient s'ajuste sur lui (cf. boardFrames).
+    hugFrame?: boolean;
   },
 ) {
   const [override, setOverride] = useState<Geom | null>(null);
@@ -75,6 +96,40 @@ export function usePointerTransform(
     },
     [flush],
   );
+
+  // Le contenu emmené suit en DIRECT, écrit à même le DOM à chaque frame — même voie que le pan du
+  // board. Le faire passer par le store re-rendrait toute la planche à chaque pointermove ; l'envoyer
+  // au canal de géométrie vivante abonnerait chaque item du board à chaque geste. La boucle tourne
+  // tant que le geste dure : un re-render qui remettrait la position du store est ainsi corrigé à la
+  // frame suivante, et réécrire une transform identique ne coûte rien.
+  const carryRaf = useRef<number | null>(null);
+  const carryTick = useCallback(() => {
+    const d = drag.current;
+    if (!d || !d.carry.length) { carryRaf.current = null; return; }
+    for (const c of d.carry) {
+      c.el.style.transform = `translate(${c.x + d.dx}px, ${c.y + d.dy}px) rotate(${c.r}deg)`;
+    }
+    carryRaf.current = requestAnimationFrame(carryTick);
+  }, []);
+  const stopCarry = useCallback(() => {
+    if (carryRaf.current != null) { cancelAnimationFrame(carryRaf.current); carryRaf.current = null; }
+    for (const c of drag.current?.carry ?? []) c.el.style.willChange = "";
+  }, []);
+
+  // Cadre qui s'ajuste : appliqué en impératif comme le contenu emmené (transform + taille du
+  // wrapper). `free` (Alt enfoncé) le fige à son rectangle d'origine — c'est la porte de sortie pour
+  // manipuler un item sans que son cadre ne bouge.
+  const applyHug = useCallback((d: Drag, g: Geom, free: boolean) => {
+    const h = d.hug;
+    if (!h) return;
+    h.geom = free ? null : frameHugRect(h.state, geomBox(g));
+    const el = h.el;
+    if (!el) return;
+    const r = h.geom ?? h.state.base;
+    el.style.transform = `translate(${r.x}px, ${r.y}px) rotate(0deg)`;
+    el.style.width = `${r.w}px`;
+    el.style.height = `${r.h}px`;
+  }, []);
 
   const start = useCallback(
     (mode: Mode, e: React.PointerEvent) => {
@@ -122,6 +177,40 @@ export function usePointerTransform(
           )
         : false;
 
+      // Ce qui part AVEC l'item : le reste de la multi-sélection, et le contenu d'un cadre. Wrappers
+      // et positions de départ lus UNE fois, puis promus en couche le temps du geste (leur transform
+      // change à chaque frame ; sans promotion, Chromium re-rasterise chaque média à chaque frame).
+      const carry: Carried[] = [];
+      if (mode.type === "move" && opts?.id) {
+        const sel = st.selectedIds.length > 1 && st.selectedIds.includes(opts.id) ? st.selectedIds : [];
+        const carried = typeof opts.groupIds === "function" ? opts.groupIds() : opts.groupIds ?? [];
+        const ids = new Set([...sel, ...carried]);
+        ids.delete(opts.id);
+        for (const id of ids) {
+          const it = st.items.find((i) => i.id === id);
+          const el = document.querySelector<HTMLElement>(`[data-board-item="${id}"]`);
+          if (!it || !el) continue; // item invisible (culling) : il rejoindra sa place au commit
+          el.style.willChange = "transform";
+          carry.push({ el, x: it.x, y: it.y, r: it.rotation || 0 });
+        }
+      }
+
+      // Cadre à ajuster. Un cadre TOURNÉ est laissé tranquille : « le bord du bas » n'a plus d'axe
+      // propre, et le redimensionner donnerait un rectangle qui ne correspond à rien de visible.
+      let hug: Drag["hug"] = null;
+      if (opts?.hugFrame && opts.id && mode.type !== "rotate") {
+        const me = st.items.find((i) => i.id === opts.id);
+        const f = me ? linkedFrame(me, st.items) : null;
+        if (f && !f.rotation) {
+          hug = {
+            id: f.id,
+            el: document.querySelector<HTMLElement>(`[data-board-item="${f.id}"]`),
+            state: frameHugStart(f, st.items, opts.id),
+            geom: null,
+          };
+        }
+      }
+
       drag.current = {
         mode,
         startX: e.clientX,
@@ -134,10 +223,15 @@ export function usePointerTransform(
         scale,
         snap,
         live: anchored,
+        carry,
+        dx: 0,
+        dy: 0,
+        hug,
       };
+      if (carry.length && carryRaf.current == null) carryRaf.current = requestAnimationFrame(carryTick);
       useBoard.getState().beginNavigation();
     },
-    [opts?.captureRef, opts?.id, opts?.groupIds],
+    [opts?.captureRef, opts?.id, opts?.groupIds, opts?.hugFrame, carryTick],
   );
 
   const onPointerMove = useCallback(
@@ -160,6 +254,10 @@ export function usePointerTransform(
         } else if (d.snap) {
           setLiveGuides([]);
         }
+        // Le contenu emmené lit ce delta à la frame suivante ; le cadre englobant grandit tout de suite.
+        d.dx = g.x - o.x;
+        d.dy = g.y - o.y;
+        applyHug(d, g, e.altKey);
         schedule(g);
         if (d.live && opts?.id) setLiveGeom({ [opts.id]: g });
         return;
@@ -231,10 +329,12 @@ export function usePointerTransform(
         setLiveGuides(guides);
       }
 
+      // Agrandir un item contre le bord de son cadre ouvre la place, exactement comme l'y pousser.
+      applyHug(d, g, e.altKey);
       schedule(g);
       if (d.live && opts?.id) setLiveGeom({ [opts.id]: g });
     },
-    [schedule, opts?.keepAspect, opts?.id],
+    [schedule, applyHug, opts?.keepAspect, opts?.id],
   );
 
   const onPointerUp = useCallback(
@@ -242,6 +342,10 @@ export function usePointerTransform(
       if (!drag.current) return;
       const cap = opts?.captureRef?.current ?? (e.currentTarget as Element);
       try { cap.releasePointerCapture?.(e.pointerId); } catch { /* noop */ }
+      const hugged = drag.current.hug?.geom
+        ? { id: drag.current.hug.id, geom: { ...drag.current.hug.geom } }
+        : undefined;
+      stopCarry();
       drag.current = null;
       if (raf.current != null) {
         cancelAnimationFrame(raf.current);
@@ -250,26 +354,27 @@ export function usePointerTransform(
       const g = pending.current ?? override;
       pending.current = null;
       if (g) {
-        onCommit(g);
+        onCommit(g, hugged ? { frame: hugged } : undefined);
         setOverride(null);
       }
       // Le store fait de nouveau foi : guides éteints, géométrie vivante rendue.
       clearLive();
       useBoard.getState().endNavigation();
     },
-    [onCommit, override, opts?.captureRef],
+    [onCommit, override, stopCarry, opts?.captureRef],
   );
 
   useEffect(
     () => () => {
       if (raf.current != null) cancelAnimationFrame(raf.current);
       if (drag.current) {
+        stopCarry();
         drag.current = null;
         clearLive();
         useBoard.getState().endNavigation();
       }
     },
-    [],
+    [stopCarry],
   );
 
   return {

@@ -5,12 +5,15 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2, FileQuestion, FolderSearch, Loader2, ImageOff, Link2 } from "lucide-react";
+import { Trash2, FileQuestion, FolderSearch, Loader2, ImageOff, Link2, Unlink2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { nr, nextProxyToken } from "@/lib/bridge";
 import { type BoardItem as Item, type BoardLink, parseVideoEmbed, EMBED_PLAYER_PROVIDERS, displaySrc, isRemoteRef } from "./referenceShared";
 import { recoverMedia, relocateMissingMedia } from "./boardMediaActions";
 import { usePointerTransform, type ResizeHandle } from "./usePointerTransform";
+import { enclosingFrame, frameContentIds, framable } from "./boardFrames";
+import { frameTitleFactor, noteTextFactor } from "./boardTextZoom";
 import { useBoard } from "./useReferenceBoard";
 import { registerPlayer } from "./playhead";
 import { shapeBBox, shifted } from "./drawGeometry";
@@ -376,8 +379,12 @@ function TextNote({ item, editing }: { item: Item; editing: boolean }) {
 
   // Décorations cumulables (souligné + barré) → liste d'espace-séparée.
   const deco = [item.underline && "underline", item.strike && "line-through"].filter(Boolean).join(" ");
+  // Lisibilité au dézoom : la police grossit à l'AFFICHAGE tant que le texte tient dans sa note
+  // (cf. boardTextZoom). Jamais en édition — la note s'auto-agrandit alors sur la hauteur du texte,
+  // et grossir la police lui ferait réclamer une hauteur qui n'a rien à voir avec ce qui est tapé.
+  const scale = useBoard((s) => s.view.scale);
   const style: React.CSSProperties = {
-    fontSize: item.fontSize ?? 18,
+    fontSize: (item.fontSize ?? 18) * (editing ? 1 : noteTextFactor(item, scale)),
     fontFamily: item.fontFamily,
     color: item.color ?? "#1f2937",
     textAlign: item.align ?? "left",
@@ -484,23 +491,16 @@ function cropStyle(c: NonNullable<Item["crop"]>): React.CSSProperties {
 }
 
 // Cadre (conteneur titré) : rectangle dont le CONTOUR prend la couleur choisie + titre en haut-gauche.
-// Items emmenés par un cadre : ceux dont le CENTRE tombe dedans (même test qu'au commit de
-// déplacement). Lu à la demande, au début d'un geste — jamais pendant le rendu.
-function frameContentIds(frame: Item): string[] {
-  const inside = (cx: number, cy: number) =>
-    cx >= frame.x && cx <= frame.x + frame.w && cy >= frame.y && cy <= frame.y + frame.h;
-  return useBoard
-    .getState()
-    .items.filter(
-      (it) => it.kind !== "frame" && it.kind !== "draw" && it.id !== frame.id && inside(it.x + it.w / 2, it.y + it.h / 2),
-    )
-    .map((it) => it.id);
-}
-
-// Déplacer le cadre déplace les items qu'il contient (cf. commit de déplacement plus bas).
+// Déplacer le cadre déplace les items qu'il contient (cf. commit de déplacement plus bas) ; le test
+// d'appartenance vit dans boardFrames, partagé par le geste et la croissance automatique.
 function FrameContent({ item }: { item: Item }) {
   const { t } = useTranslation("reference");
   const color = item.color ?? "#8b8b94";
+  // Titre lisible au dézoom : la police grossit à l'affichage jusqu'à une taille écran minimale,
+  // bornée par la largeur du cadre (cf. boardTextZoom). Le document garde la taille choisie.
+  const scale = useBoard((s) => s.view.scale);
+  const label = item.text || t("item.frameDefault");
+  const fontSize = (item.fontSize ?? 14) * frameTitleFactor(item, scale, label);
   // Remplissage : "none" → contour seul (intérieur transparent) ; "tint" → léger aplat teinté
   // (défaut) ; "solid" → couleur opaque. `filled` legacy → "solid".
   const fillMode = item.fillMode ?? (item.filled ? "solid" : "tint");
@@ -519,10 +519,18 @@ function FrameContent({ item }: { item: Item }) {
       }}
     >
       <span
-        className="absolute -top-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded px-2 py-0.5 font-medium leading-tight"
-        style={{ color, background: item.titleBg ?? "var(--color-surface)", fontSize: item.fontSize ?? 14, fontFamily: item.fontFamily }}
+        className="absolute left-3 max-w-[calc(100%-1.5rem)] truncate rounded px-2 py-0.5 font-medium leading-tight"
+        style={{
+          // L'étiquette chevauche le bord haut : son décalage suit sa taille, sinon un titre grossi
+          // au dézoom retomberait à l'intérieur du cadre.
+          top: -fontSize * 0.9,
+          color,
+          background: item.titleBg ?? "var(--color-surface)",
+          fontSize,
+          fontFamily: item.fontFamily,
+        }}
       >
-        {item.text || t("item.frameDefault")}
+        {label}
       </span>
     </div>
   );
@@ -737,6 +745,7 @@ export const BoardItem = memo(function BoardItem({
   const { t: tr } = useTranslation("reference");
   const wrapRef = useRef<HTMLDivElement>(null);
   const select = useBoard((s) => s.select);
+  const patchItem = useBoard((s) => s.patchItem);
   const toggleSelect = useBoard((s) => s.toggleSelect);
   const bringToFront = useBoard((s) => s.bringToFront);
   const updateItem = useBoard((s) => s.updateItem);
@@ -753,13 +762,30 @@ export const BoardItem = memo(function BoardItem({
   const liveable = item.kind === "embed" || (item.kind === "youtube" && ytFallback);
   useEffect(() => { if (!primary) setLive(false); }, [primary]);
 
+  // Bouton de lien au cadre. Le cadre entourant n'est cherché QUE quand le bouton peut s'afficher
+  // (survol ou sélection) : un sélecteur permanent balaierait la scène une fois par item et par
+  // commit du store, soit un coût quadratique sur une planche chargée. Lecture hors abonnement,
+  // relue à chaque rendu de l'item — ce qui inclut le survol et tout déplacement.
+  const [hover, setHover] = useState(false);
+  const showChrome = (hover || selected) && !editing;
+  const framedBy = showChrome && framable(item) ? enclosingFrame(item, useBoard.getState().items) : null;
+
   const t = usePointerTransform(
     { x: item.x, y: item.y, w: item.w, h: item.h, rotation: item.rotation },
-    (g) => {
+    (g, extra) => {
       // Déplacement pur (taille/rotation inchangées).
       const pureMove = g.w === item.w && g.h === item.h && g.rotation === item.rotation;
       const dx = g.x - item.x, dy = g.y - item.y;
       updateItem(item.id, g);
+      // Cadre agrandi pendant le geste pour faire place à l'item : même tick → une seule annulation.
+      if (extra?.frame) updateItem(extra.frame.id, extra.frame.geom, false);
+      // Item délié posé hors de tout cadre : le lien coupé n'a plus d'objet. Sans cet effacement il
+      // arriverait secrètement délié dans le prochain cadre où on le pose.
+      if (item.detached) {
+        const st = useBoard.getState();
+        const now = st.items.find((i) => i.id === item.id);
+        if (now && !enclosingFrame(now, st.items)) patchItem(item.id, { detached: undefined }, false);
+      }
       if (pureMove && (dx !== 0 || dy !== 0)) {
         const st = useBoard.getState();
         const sel = st.selectedIds;
@@ -770,21 +796,14 @@ export const BoardItem = memo(function BoardItem({
           // cadre = conteneur : déplace les items dont le centre est dans le cadre (position d'origine).
           const inFrame = (cx: number, cy: number) =>
             cx >= item.x && cx <= item.x + item.w && cy >= item.y && cy <= item.y + item.h;
-          const inside = st.items
-            .filter(
-              (it) =>
-                it.kind !== "frame" &&
-                it.kind !== "draw" &&
-                it.id !== item.id &&
-                inFrame(it.x + it.w / 2, it.y + it.h / 2),
-            )
-            .map((it) => it.id);
+          const inside = frameContentIds(item, st.items);
           if (inside.length) moveBy(inside, dx, dy);
           // Calque de dessin (singleton) : décale les formes dont le centre est dans le cadre.
           const shapes = st.items.find((i) => i.kind === "draw")?.shapes;
           if (shapes?.length) {
             let moved = false;
             const next = shapes.map((s) => {
+              if (s.detached) return s; // tracé délié du cadre : il reste où il est
               const [a, b, c, d] = shapeBBox(s);
               if (inFrame((a + c) / 2, (b + d) / 2)) { moved = true; return shifted(s, dx, dy); }
               return s;
@@ -806,7 +825,9 @@ export const BoardItem = memo(function BoardItem({
       // Aimant + géométrie vivante (tracés liés) : le moteur de gestes a besoin de savoir QUI il
       // manipule. Un cadre emmène son contenu, qui ne peut donc pas lui servir de cible d'accrochage.
       id: item.id,
-      groupIds: item.kind === "frame" ? () => frameContentIds(item) : undefined,
+      groupIds: item.kind === "frame" ? () => frameContentIds(item, useBoard.getState().items) : undefined,
+      // Déplacé ou redimensionné, l'item entraîne le cadre qui le tient (cf. boardFrames).
+      hugFrame: framable(item) && !item.detached,
     },
   );
   const g = t.geom;
@@ -835,6 +856,8 @@ export const BoardItem = memo(function BoardItem({
       onPointerMove={t.onPointerMove}
       onPointerUp={t.onPointerUp}
       onPointerCancel={t.onPointerCancel}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
       className={cn(
         "absolute left-0 top-0 origin-center touch-none",
         editing ? "cursor-text" : t.dragging ? "cursor-grabbing" : "cursor-grab",
@@ -874,6 +897,36 @@ export const BoardItem = memo(function BoardItem({
           <ItemContent item={item} editing={editing} live={live} onYtFallback={setYtFallback} />
         </div>
       </div>
+
+      {/* Lien au cadre : bleu = le cadre emmène cet item et s'ajuste sur lui, gris = lien coupé,
+          l'item reste posé là mais le cadre l'ignore. Le clic bascule les deux états. */}
+      {framedBy && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                aria-label={tr(item.detached ? "actions.linkFrame" : "actions.unlinkFrame")}
+                aria-pressed={!item.detached}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  patchItem(item.id, { detached: item.detached ? undefined : true });
+                }}
+                className={cn(
+                  "absolute -left-2 -top-9 z-10 flex size-6 items-center justify-center rounded-full shadow ring-1 [&_svg]:size-3.5",
+                  item.detached
+                    ? "bg-muted text-muted-foreground ring-foreground/15 hover:bg-muted/80"
+                    : "bg-primary text-primary-foreground ring-black/10 hover:bg-primary/90",
+                )}
+              />
+            }
+          >
+            {item.detached ? <Unlink2 /> : <Link2 />}
+          </TooltipTrigger>
+          <TooltipContent>{tr(item.detached ? "actions.linkFrame" : "actions.unlinkFrame")}</TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Indice d'interaction (embed/YouTube) : double-clic pour activer, clic ailleurs pour déplacer */}
       {liveable && primary && !editing && (
