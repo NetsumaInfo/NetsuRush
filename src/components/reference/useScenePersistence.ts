@@ -14,9 +14,24 @@ const HANDOFF_ID = "__handoff__";
 const AUTOSAVE_ID = "__autosave__";
 const RESERVED = new Set([HANDOFF_ID, AUTOSAVE_ID]);
 
+// Un objectURL ne vaut que pour l'onglet qui l'a créé : écrit sur disque, il rouvre une case morte
+// sans le moindre indice de ce qu'elle portait. Ça n'arrive que quand la copie en asset a échoué
+// (écriture refusée, service arrêté en plein import) — rare, mais silencieux jusqu'au rechargement.
+// On écrit donc l'item SANS localisateur et marqué manquant : la case dit ce qui lui manque, garde
+// son titre, et se répare toute seule si le lien d'origine est connu (cf. boardMediaRecovery).
+const durable = (item: BoardItem): BoardItem => {
+  if (!/^blob:/i.test(item.ref || "")) return item;
+  return {
+    ...item,
+    ref: "",
+    src: "",
+    missing: item.missing ?? { name: item.title || "média", size: 0, kind: item.kind },
+  };
+};
+
 // Items à PERSISTER : on exclut les placeholders de téléchargement (loading) — transitoires, l'autosave
 // debouncé peut sinon les figer sur disque (spinner bloqué à la réouverture si l'app ferme en plein DL).
-const persistable = (items: BoardItem[]) => items.filter((it) => !it.loading);
+const persistable = (items: BoardItem[]) => items.filter((it) => !it.loading).map(durable);
 // Une archive .netsu n'embarque que le média AFFICHÉ : le fichier gardé en réserve derrière un
 // embed (`localMedia`) resterait sur la machine d'origine, donc son chemin ne veut plus rien dire
 // une fois le board ouvert ailleurs. On l'oublie à l'export ; l'item se retéléchargera au besoin.
@@ -43,9 +58,19 @@ function retainedRefs(): string[] {
 }
 
 // Scène telle qu'elle part au core pour un ENREGISTREMENT (par opposition à un partage).
+// `adoptLocal` porte la politique de copie des médias locaux dans le dossier compagnon : c'est le
+// réglage de l'utilisateur, pas une constante du core — lui seul sait s'il pose des captures de
+// quelques Mo ou des rushes de plusieurs Go.
 const savable = (name: string) => {
   const st = useBoard.getState();
-  return { name, items: persistable(st.items), view: st.view, retain: retainedRefs() };
+  return {
+    name,
+    items: persistable(st.items),
+    view: st.view,
+    retain: retainedRefs(),
+    adoptLocal: st.prefs.copyLocalIntoProject,
+    adoptLocalMax: Math.round(st.prefs.copyLocalMaxMB * 1024 * 1024),
+  };
 };
 
 // Un item relu : la `src` d'affichage se recalcule depuis le localisateur durable — pour l'item

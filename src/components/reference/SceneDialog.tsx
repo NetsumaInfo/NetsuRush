@@ -103,7 +103,7 @@ export function SceneDialog({
                 <button
                   type="button"
                   aria-label={t("scene.delete")}
-                  className="opacity-0 group-hover:opacity-100 inline-flex items-center justify-center size-6 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  className="opacity-0 group-hover:opacity-100 hoverless:opacity-100 inline-flex items-center justify-center size-6 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                   onClick={() => doDelete(s.id)}
                 >
                   <Trash2 className="text-destructive size-4" />

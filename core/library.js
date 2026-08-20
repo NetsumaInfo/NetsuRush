@@ -12,6 +12,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const { isMediaPath } = require('./utils');
 const { t } = require('./i18n');
+const mediaIdent = require('./mediaIdent'); // identité de contenu : retrouver un rush déplacé
 
 function uid() {
   return crypto.randomBytes(6).toString('hex');
@@ -407,17 +408,39 @@ function createLibraryStore(dataDir, deps = {}) {
   // La bibliothèque ne stocke que des chemins : elle s'ouvre logiciels fermés, mais un fichier déplacé
   // devient « hors-ligne ». JAMAIS de purge automatique — un disque externe débranché viderait la
   // bibliothèque toute seule.
+  // Relocalisation SILENCIEUSE par contenu. Avant de déclarer un rush hors-ligne, on regarde si le
+  // MÊME fichier (signature de contenu, cf. core/mediaIdent.js) est connu ailleurs et toujours là :
+  // un disque qui change de lettre ou un dossier renommé ne demande alors plus aucun clic. Ne
+  // repointe que vers des octets PROUVÉS identiques — jamais vers un homonyme.
+  function autoRelink(paths) {
+    let relinked = 0;
+    for (const p of paths) {
+      const live = mediaIdent.liveTwin(p);
+      if (!live) continue;
+      const r = relinkPath(p, live);
+      if (r && r.ok && r.relinked) relinked++;
+    }
+    return relinked;
+  }
+
+  function missingPaths() {
+    const items = listItems();
+    const missing = [];
+    for (const it of items) {
+      if (!it.path) continue;
+      let ok = false;
+      try { ok = fs.existsSync(it.path); } catch (_) {}
+      if (!ok) missing.push({ path: it.path, name: it.name });
+    }
+    return { items, missing };
+  }
+
   function offlineItems() {
     try {
-      const items = listItems();
-      const missing = [];
-      for (const it of items) {
-        if (!it.path) continue;
-        let ok = false;
-        try { ok = fs.existsSync(it.path); } catch (_) {}
-        if (!ok) missing.push({ path: it.path, name: it.name });
-      }
-      return { ok: true, missing, offline: missing.length, total: items.length };
+      let { items, missing } = missingPaths();
+      const relinked = missing.length ? autoRelink(missing.map((m) => m.path)) : 0;
+      if (relinked) ({ items, missing } = missingPaths());
+      return { ok: true, missing, offline: missing.length, total: items.length, relinked };
     } catch (e) { return { ok: false, error: String(e) }; }
   }
 
@@ -442,14 +465,20 @@ function createLibraryStore(dataDir, deps = {}) {
     try {
       if (!root || !fs.existsSync(root)) return { ok: false, error: t('folderMissing') };
       const index = new Map(); // basename minuscule → chemin complet (premier trouvé)
-      scanDir(root, (full, name) => { const k = name.toLowerCase(); if (!index.has(k)) index.set(k, full); });
+      const files = [];        // repli par CONTENU quand le fichier a aussi été renommé
+      scanDir(root, (full, name) => {
+        const k = name.toLowerCase();
+        if (!index.has(k)) index.set(k, full);
+        files.push(full);
+      });
       let relinked = 0;
       for (const it of listItems()) {
         if (!it.path) continue;
         let exists = false;
         try { exists = fs.existsSync(it.path); } catch (_) {}
         if (exists) continue;
-        const cand = index.get(path.basename(it.path).toLowerCase());
+        const cand = index.get(path.basename(it.path).toLowerCase())
+          || mediaIdent.matchByContent(it.path, files);
         if (!cand) continue;
         it.path = cand;
         backend.put(it.id, it.name, encode(it), Date.now());

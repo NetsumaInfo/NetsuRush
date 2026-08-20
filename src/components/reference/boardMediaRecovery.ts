@@ -8,7 +8,9 @@ export type RecoverableOnlineItem = {
   missing?: unknown;
 };
 
-export function originalOnlineSource(item: RecoverableOnlineItem): string {
+// Ne lit que les deux champs qui portent un lien : un appelant qui veut seulement savoir si un item
+// a une origine en ligne n'a pas à en fabriquer un complet.
+export function originalOnlineSource(item: Pick<RecoverableOnlineItem, "sourceUrl" | "prevMedia">): string {
   return item.sourceUrl || item.prevMedia?.sourceUrl || "";
 }
 

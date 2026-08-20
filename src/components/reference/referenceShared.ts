@@ -54,7 +54,10 @@ export type ShortcutAction =
   | "delete" | "deselect" | "selectAll" | "duplicate"
   | "undo" | "redo" | "save" | "saveAs" | "openProject" | "fit" | "zoomIn" | "zoomOut"
   | "copy" | "cut" | "fitSelection" | "extractPalette" | "resetAll" | "toFront" | "toBack"
-  | "normalizeHeight" | "normalizeWidth" | "normalizeArea" | "arrangeDefault";
+  | "normalizeHeight" | "normalizeWidth" | "normalizeArea" | "arrangeDefault"
+  | "addText" | "addFrame" | "toggleDraw" | "toggleFreeze" | "prevFrame" | "nextFrame"
+  | "toggleMouseThrough" | "newScene" | "openSettings" | "togglePin" | "paletteStudio"
+  | "crop" | "groupSequence";
 export const SHORTCUT_DEFS: { action: ShortcutAction; labelKey: string; combo: string }[] = [
   { action: "delete", labelKey: "shortcut.delete", combo: "Delete" },
   { action: "deselect", labelKey: "shortcut.deselect", combo: "Escape" },
@@ -79,6 +82,21 @@ export const SHORTCUT_DEFS: { action: ShortcutAction; labelKey: string; combo: s
   { action: "extractPalette", labelKey: "shortcut.extractPalette", combo: "G" },
   { action: "toFront", labelKey: "shortcut.toFront", combo: "PageUp" },
   { action: "toBack", labelKey: "shortcut.toBack", combo: "PageDown" },
+  // Tools and playback: bare letters, inert in draw mode (letters belong to the tools there).
+  { action: "addText", labelKey: "shortcut.addText", combo: "T" },
+  { action: "addFrame", labelKey: "shortcut.addFrame", combo: "N" },
+  { action: "toggleDraw", labelKey: "shortcut.toggleDraw", combo: "B" },
+  { action: "toggleFreeze", labelKey: "shortcut.toggleFreeze", combo: "P" },
+  { action: "prevFrame", labelKey: "shortcut.prevFrame", combo: "," },
+  { action: "nextFrame", labelKey: "shortcut.nextFrame", combo: "." },
+  // Under Shift: a bare letter would cut the mouse off from the window on one keystroke too many.
+  { action: "toggleMouseThrough", labelKey: "shortcut.toggleMouseThrough", combo: "Shift+M" },
+  { action: "newScene", labelKey: "shortcut.newScene", combo: "Ctrl+N" },
+  { action: "openSettings", labelKey: "shortcut.openSettings", combo: "Ctrl+," },
+  { action: "togglePin", labelKey: "shortcut.togglePin", combo: "Ctrl+Shift+P" },
+  { action: "paletteStudio", labelKey: "shortcut.paletteStudio", combo: "Shift+G" },
+  { action: "crop", labelKey: "shortcut.crop", combo: "C" },
+  { action: "groupSequence", labelKey: "shortcut.groupSequence", combo: "Ctrl+G" },
 ];
 export type ShortcutKeys = ShortcutMap;
 export const DEFAULT_SHORTCUT_KEYS: ShortcutKeys = Object.fromEntries(SHORTCUT_DEFS.map((d) => [d.action, d.combo]));
@@ -116,6 +134,11 @@ export interface DrawShape {
   c: string;
   w: number;
   p: number[];
+  // Part d'épaisseur retenue POINT PAR POINT (0..1, un par point de `p`), tracé au stylet
+  // uniquement. Y est figée la pression — et l'inclinaison si elle est activée — telle qu'elle a
+  // été captée : changer un réglage plus tard ne doit pas redessiner un trait déjà posé. Absent =
+  // trait d'épaisseur constante, ce que trace une souris et ce que trace une tablette sans capteur.
+  pw?: number[];
   fill?: string;
   text?: string;
   cp?: [number, number];
@@ -500,6 +523,8 @@ export {
   DOWNLOADABLE_EMBED_PROVIDERS,
   isVideoUrl,
   isImageUrl,
+  sourceName,
+  OG_POSTER_ONLY_PROVIDERS,
 } from "./embeds";
 export type { EmbedProvider } from "./embeds";
 
@@ -542,6 +567,15 @@ export function probeNat(kind: ItemKind, src: string): Promise<{ w: number; h: n
 // passer par le remux ffmpeg à la volée (/stream copy), sinon le <video> ne charge rien.
 const NATIVE_VIDEO = new Set(["mp4", "m4v", "mov", "webm"]);
 
+/**
+ * Ce conteneur se lit-il tel quel dans le webview ? SOURCE UNIQUE du test : l'affichage s'en sert
+ * pour router vers le remux du core, l'ingestion pour savoir si un fichier fraîchement déposé peut
+ * être montré depuis son blob local, avant même que son chemin disque soit connu.
+ */
+export function playsNatively(nameOrPath: string): boolean {
+  return NATIVE_VIDEO.has(nameOrPath.split(".").pop()?.toLowerCase() || "");
+}
+
 // Localisateur durable → URL d'affichage. Chemin disque → core HTTP (/media Range-aware, ou /stream
 // remux pour les conteneurs non lus) ; URL http(s)/data/blob → telle quelle ; youtube → YoutubeItem.
 export function displaySrc(kind: ItemKind, ref: string): string {
@@ -554,10 +588,7 @@ export function displaySrc(kind: ItemKind, ref: string): string {
   if (isRemoteRef(ref)) return ref;
   // Vidéo locale : mp4/mov/webm lisibles tels quels ; mkv & co passent par /stream copy, un remux
   // ffmpeg en direct — celui-là ne peut pas sortir du serveur HTTP, il n'existe pas comme fichier.
-  if (kind === "video") {
-    const ext = ref.split(".").pop()?.toLowerCase() || "";
-    if (!NATIVE_VIDEO.has(ext)) return nr.streamUrl(ref, 0, "copy");
-  }
+  if (kind === "video" && !playsNatively(ref)) return nr.streamUrl(ref, 0, "copy");
   // Tout le reste est un FICHIER sur le disque → protocole asset de la coquille. Le serveur HTTP du
   // core partage son origine avec /rpc et le flux d'événements, et un webview n'ouvre que 6
   // connexions par origine : un board qui monte des dizaines de médias les mettait tous en file

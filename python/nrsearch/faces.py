@@ -14,12 +14,16 @@ import time
 import numpy as np
 from nri18n import t
 
+import nrident
 from detect import file_mtime
 
 from . import media
 from .catalog import path_chunks
 from .db import db_emb
 from .faceengines import engines
+
+# Tables de l'index de visages, dans l'ordre de transfert (données puis marqueur de complétion).
+FACE_TABLES = ["face_embeddings_v2", "face_index_runs_v1"]
 
 
 def _thumb_uri(pil):
@@ -184,6 +188,16 @@ def cmd_face_index(path, force=False, cut_model=None, detect_options=None):
         run = con.execute(
             "SELECT mtime, cut_key, faces FROM face_index_runs_v1 WHERE file_path=? AND engine_key=?",
             (path, engine_key)).fetchone()
+        # Même rattrapage que l'index d'images (index.py) : horodatage seul périmé, ou fichier
+        # IDENTIQUE déjà passé aux visages sous un autre nom → on reprend au lieu de re-détecter.
+        if not run or abs((run[0] or 0) - mt) > 1.0:
+            if run:
+                nrident.realign(con, path, FACE_TABLES, run[0] or 0)
+            else:
+                nrident.rescue(con, path, FACE_TABLES)
+            run = con.execute(
+                "SELECT mtime, cut_key, faces FROM face_index_runs_v1 WHERE file_path=? AND engine_key=?",
+                (path, engine_key)).fetchone()
         # cut_key NULL = passage antérieur à la clé de découpe : accepté (la découpe d'alors est
         # toujours celle que rend le cache de plans), sinon tout index de visages antérieur serait jeté.
         if run and abs((run[0] or 0) - mt) <= 1.0 and run[1] in (cut_key, legacy_key, None):
@@ -296,6 +310,7 @@ def cmd_face_index(path, force=False, cut_model=None, detect_options=None):
         "INSERT OR REPLACE INTO face_index_runs_v1 (file_path,engine_key,mtime,cut_key,faces,created_at) "
         "VALUES (?,?,?,?,?,?)", (path, engine_key, mt, cut_key, n_faces, time.time()))
     con.commit()
+    nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()
     # NE PAS free_engines() ici : l'indexation itère sur TOUT le lot (1 RPC par clip). Libérer entre
     # chaque clip forcerait un rechargement CCIP/YuNet/SFace (onnxruntime EXHAUSTIVE, ~20-30 s) à CHAQUE

@@ -218,9 +218,11 @@
   },
   "updates": {
     "title": "更新",
-    "subtitle": "从 GitHub 检查版本，并在安装前验证签名。",
+    "subtitle": "在 GitHub 检查版本，安装前验证签名。",
     "auto": "自动检查",
     "autoHint": "启动数秒后检查新版本。",
+    "autoInstall": "启动时自动更新",
+    "autoInstallHint": "启动时直接安装并重启，不再询问。",
     "on": "开启",
     "off": "关闭",
     "ready": "可以检查",
@@ -383,7 +385,7 @@
       "detail": "用几个字说说是什么事。",
       "tooLarge": "有文件超过 {{size}} MB。"
     },
-    "noWebhook": "发送已停用：未配置 Webhook。请在 nr.config.json 中填写 <c1>bugWebhook</c1>（或设置环境变量 <c2>NR_BUG_WEBHOOK</c2>）。",
+    "noWebhook": "发送已停用：未配置通道。请在 nr.config.json 中设置 <c1>bugWebhook</c1>，或部署 Convex 中继（<c2>VITE_CONVEX_SITE_URL</c2>）。",
     "descriptionOther": "详细说说",
     "descriptionOtherPlaceholder": "你的问题，或者想告诉我们的事…",
     "files": {

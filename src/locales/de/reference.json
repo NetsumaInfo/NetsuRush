@@ -11,6 +11,7 @@
     "flipV": "Vertikal spiegeln",
     "crop": "Zuschneiden",
     "openLink": "Link öffnen",
+    "reloadMedia": "Medium neu laden",
     "download": "Herunterladen",
     "restoreDownload": "Zur heruntergeladenen Datei zurück",
     "zoomIn": "Vergrößern",
@@ -55,7 +56,9 @@
     "unsaved": "Nicht gespeichert",
     "saveAs": "Speichern unter…",
     "snapOn": "Magnet aktivieren",
-    "snapOff": "Magnet deaktivieren"
+    "snapOff": "Magnet deaktivieren",
+    "snap": "Magnet",
+    "freeze": "Anhalten / abspielen"
   },
   "settings": {
     "tabLook": "Aussehen",
@@ -102,9 +105,16 @@
     "pauseMedia": "Pausieren",
     "keepPlaying": "Weiter abspielen",
     "fitOnOpen": "Beim Öffnen einpassen",
+    "blurBehavior": "Auswahlleiste ohne Fokus",
+    "blurBehaviorHint": "Beim Klick in eine andere Anwendung.",
+    "blurKeep": "Behalten",
+    "blurHide": "Ausblenden",
+    "blurDeselect": "Auswahl aufheben",
     "enabled": "An",
     "disabled": "Aus",
     "placeFrame": "Rahmen der Platzierungszone",
+    "pinnedToolbar": "Werkzeugleiste im angehefteten Zustand",
+    "pinnedToolbarHint": "Angeheftet bleiben Platzieren, Zeichnen und Einpassen. Der Rest liegt im Rechtsklickmenü.",
     "decompose": "Video in Bilder zerlegen",
     "decomposeHint": "Legt eine Reihe von Einzelbildern aus dem Video auf das Board.",
     "imagesPerSec": "Bilder / s",
@@ -119,12 +129,16 @@
     "upscaleQuick": "Schnell",
     "upscaleAsk": "Benutzerdefiniert",
     "upscaleQuickHint": "Die Schaltfläche Hochskalieren startet direkt mit diesen Einstellungen.",
-    "upscaleAskHint": "Die Schaltfläche Hochskalieren öffnet das Fenster: Modell, Skalierung und Vorschau.",
+    "upscaleAskHint": "Die Schaltfläche Hochskalieren öffnet das Fenster: Modell, Skalierung, Vorschau.",
     "model": "Modell",
     "upscaleModelDefault": "Standardmodell fürs Hochskalieren",
     "factor": "Faktor",
     "denoise": "Entrauschen",
     "downloadOnline": "Online-Videos herunterladen",
+    "copyLocal": "Lokale Medien ins Projekt kopieren",
+    "copyLocalOn": "Kopieren",
+    "copyLocalOff": "Verweisen",
+    "copyLocalMax": "Video-Obergrenze (MB)",
     "embedSwitch": "Zurück zum Player",
     "embedSwitchKeep": "Datei behalten",
     "embedSwitchDrop": "Datei löschen",
@@ -183,7 +197,53 @@
     "arrangeTitle": "Ordnen",
     "autoArrangeOnImport": "Importierte Stapel automatisch ordnen",
     "autoAnchorDraw": "Zeichnungen automatisch mit Medien verbinden",
-    "paletteSize": "Farben pro extrahierter Palette"
+    "paletteSize": "Farben pro extrahierter Palette",
+    "tabPen": "Stift",
+    "penNav": "Navigation mit Stift und Finger",
+    "penGestures": "Zum Zoomen zusammenziehen, mit zwei Fingern navigieren",
+    "penDragPans": "Ziehen auf leerer Fläche navigiert",
+    "penDragPansHint": "Auto: an auf einem Touch-Gerät ohne Maus. Sonst wählt ein Ziehen per Rahmen aus.",
+    "penBarrel": "Seitentaste des Stifts",
+    "penBarrelMenu": "Kontextmenü",
+    "penBarrelPan": "Navigieren",
+    "penPalm": "Handballenerkennung",
+    "penPalmHint": "Ein Finger wird ignoriert, solange der Stift gerade benutzt wurde.",
+    "penStroke": "Stiftstrich",
+    "penPressure": "Druck",
+    "penMinWidth": "Breite bei null Druck",
+    "penTilt": "Neigung",
+    "penEraser": "Radiererseite des Stifts",
+    "penStrokeHint": "Druck und Neigung werden beim Zeichnen übernommen: Eine Änderung zeichnet nichts neu.",
+    "penUi": "Oberfläche",
+    "penTouchUi": "Bedienelemente immer sichtbar",
+    "penTouchUiHint": "Auto: sobald ein Stift erkannt wird, oder auf einem Touch-Gerät.",
+    "penBigTargets": "Größere Ziele",
+    "penProbe": "Erkannte Hardware",
+    "penProbeHint": "Mit dem Stift darüberfahren: Die Werte füllen sich ohne zu zeichnen.",
+    "penProbePen": "Stift",
+    "penProbePressure": "Druck",
+    "penProbeTilt": "Neigung",
+    "penProbeHover": "Überfahren",
+    "penProbeTouch": "Berührungspunkte",
+    "penNoSensor": "kein Sensor",
+    "penYes": "Ja",
+    "penNo": "Nein",
+    "barButtons": "Werkzeugleiste",
+    "pinnedSide": "Rand",
+    "pinnedButtons": "Angepinnte Leiste",
+    "pinnedAvailable": "Verfügbar",
+    "pinnedAllPlaced": "Alles ist gesetzt.",
+    "pinnedBarHint": "Ziehen zum Setzen oder Verschieben, Klick zum Entfernen.",
+    "pinnedRemove": "{{label}} aus der Leiste entfernen",
+    "sideTop": "Oben",
+    "sideBottom": "Unten",
+    "sideLeft": "Links",
+    "sideRight": "Rechts",
+    "bgOpacity": "Deckkraft des Hintergrunds",
+    "contentOpacity": "Deckkraft der Inhalte",
+    "seeThroughScope": "Ebenfalls durchscheinend",
+    "seeThroughShell": "Oberfläche",
+    "seeThroughPlaceFrame": "Platzierungsrahmen"
   },
   "inspector": {
     "ytPlayer": "YouTube-Player",
@@ -322,7 +382,20 @@
     "grayscale": "Graustufen",
     "toFront": "In den Vordergrund",
     "toBack": "In den Hintergrund",
-    "extractPalette": "Palette extrahieren"
+    "extractPalette": "Palette extrahieren",
+    "addText": "Text hinzufügen",
+    "addFrame": "Rahmen hinzufügen",
+    "toggleDraw": "Zeichenmodus",
+    "toggleFreeze": "Alle anhalten / abspielen",
+    "prevFrame": "Frame zurück",
+    "nextFrame": "Frame vor",
+    "toggleMouseThrough": "Für die Maus transparent",
+    "newScene": "Neue Szene",
+    "openSettings": "Einstellungen",
+    "togglePin": "Fenster anpinnen",
+    "paletteStudio": "Paletten-Generator",
+    "crop": "Zuschneiden",
+    "groupSequence": "Als Sequenz gruppieren"
   },
   "drawStyle": {
     "thin": "Dünner Strich",
@@ -482,6 +555,7 @@
     "missingMedia": "Medium fehlt",
     "notBundled": "{{size}} · nicht eingebettet",
     "relocate": "Neu verknüpfen",
+    "reloadMedia": "Erneut herunterladen",
     "downloading": "Wird geladen…",
     "mediaFallback": "Medium",
     "interactiveActive": "Interaktiv — daneben klicken zum Bewegen",
@@ -507,7 +581,8 @@
   "youtube": {
     "notEmbeddable": "Video nicht einbettbar",
     "blocked": "YouTube sperrt die eingebettete Wiedergabe dieses Videos.",
-    "openOnYouTube": "Auf YouTube öffnen"
+    "openOnYouTube": "Auf YouTube öffnen",
+    "preparing": "Video wird vorbereitet…"
   },
   "embed": {
     "frozen": "Wiedergabe angehalten",
@@ -542,7 +617,7 @@
     "itemLabel": "Teilen: {{level}}",
     "settings": {
       "title": "Medienspeicherung",
-      "hint": "Was die .netsu-Datei standardmäßig mitnimmt. Jedes Medium lässt sich im Inspektor einzeln einstellen."
+      "hint": "Was die .netsu-Datei standardmäßig mitnimmt. Pro Medium im Inspektor einstellbar."
     }
   },
   "board": {
@@ -589,7 +664,9 @@
     "noProjectFile": "Dieses Board ist mit keiner Datei verknüpft",
     "relocating": "Medien im Ordner werden gesucht… ({{count}})",
     "relocated": "{{count}}/{{total}} Medien neu verknüpft",
-    "relocatedNone": "Keine Medien in diesem Ordner erkannt"
+    "relocatedNone": "Keine Medien in diesem Ordner erkannt",
+    "contentOpacity": "Deckkraft der Inhalte: {{percent}} %",
+    "itemOpacity": "Deckkraft des Mediums: {{percent}} %"
   },
   "tidy": {
     "title": "Ordnen",
@@ -631,7 +708,45 @@
     "formatHint": "Als {{format}} kopieren",
     "layoutRow": "Reihe",
     "layoutCol": "Spalte",
-    "layoutGrid": "Raster"
+    "layoutGrid": "Raster",
+    "studio": {
+      "open": "Paletten-Generator",
+      "edit": "Im Generator öffnen",
+      "close": "Generator schließen",
+      "title": "Paletten-Generator",
+      "pickScreen": "Bildschirm-Pipette",
+      "brightness": "Helligkeit",
+      "tones": "Töne",
+      "fromSelection": "Aus der Auswahl",
+      "fromBoard": "Vom ganzen Board",
+      "noSelection": "Wähle Bilder auf dem Board aus",
+      "noMedia": "Kein Bild auf dem Board",
+      "reset": "Zurücksetzen",
+      "pick": "Farbwähler",
+      "notation": "Notation",
+      "value": "Farbwert",
+      "place": "Aufs Board legen",
+      "apply": "Anwenden",
+      "placed": "Palette mit {{count}} Farben abgelegt",
+      "applied": "Palette aktualisiert ({{count}} Farben)",
+      "addSwatch": "Farbe hinzufügen",
+      "removeSwatch": "Farbe entfernen",
+      "lock": "Farbe sperren",
+      "unlock": "Farbe entsperren",
+      "moveLeft": "Nach links schieben",
+      "moveRight": "Nach rechts schieben",
+      "rule": {
+        "custom": "Benutzerdefiniert",
+        "analogous": "Analog",
+        "complementary": "Komplementär",
+        "split": "Geteilt-komplementär",
+        "triadic": "Triade",
+        "square": "Quadrat",
+        "compound": "Kombiniert",
+        "shades": "Schattierungen",
+        "monochromatic": "Monochrom"
+      }
+    }
   },
   "exportImage": {
     "menu": "Als Bild exportieren…",
@@ -656,6 +771,16 @@
     "progress": "Import {{done}}/{{total}}…",
     "reading": "{{count}} Dateien werden gelesen…",
     "done": "{{count}} Medien importiert",
-    "folderTruncated": "Ordner zu groß: die ersten {{count}} Medien wurden importiert"
+    "folderTruncated": "Ordner zu groß: die ersten {{count}} Medien wurden importiert",
+    "importing": "{{name}} wird importiert…",
+    "fetching": "Medium wird geladen…",
+    "linkDone": "Medium importiert",
+    "fetchingFrom": "Wird von {{source}} geladen…"
+  },
+  "mouseThrough": {
+    "on": "Für die Maus transparent",
+    "off": "Maus zurückholen",
+    "warning": "Klicks und Scrollen gehen an die Anwendung darunter, das Fenster bleibt im Vordergrund. Zurückholen: dem Fenster wieder den Fokus geben (Alt+Tab).",
+    "dontAskAgain": "Nicht mehr fragen"
   }
 }

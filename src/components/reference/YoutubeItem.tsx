@@ -36,6 +36,11 @@ const LOOP_POLL_MS = 100;
 // Après un reseek, getCurrentTime() renvoie encore l'ancienne position pendant quelques frames →
 // sans garde on redéclenche le seek en rafale (saccade + nouveau flash).
 const SEEK_COOLDOWN_MS = 500;
+// Délai après lequel une portée qu'on vient de modifier est considérée comme posée (cf. l'effet qui
+// ramène la lecture dedans), et tolérance en deçà de la borne d'entrée pour ne pas resauter sur un
+// écart de décodage de quelques dixièmes.
+const RANGE_SETTLE_MS = 250;
+const RANGE_SNAP_S = 0.5;
 declare global {
   interface Window {
     YT?: YTNamespace;
@@ -69,7 +74,7 @@ function playAllowed(item: BoardItem) {
   return !suspended && (item.playMode ?? "loop") !== "off";
 }
 
-export function YoutubeItem({ item, interactive }: { item: BoardItem; interactive?: boolean }) {
+export function YoutubeItem({ item, interactive, onReady }: { item: BoardItem; interactive?: boolean; onReady?: () => void }) {
   const { t } = useTranslation("reference");
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -86,10 +91,27 @@ export function YoutubeItem({ item, interactive }: { item: BoardItem; interactiv
   const playing = !suspended && (item.playMode ?? "loop") !== "off";
   // Portée courante lue par le poll (mise à jour sans recréer le player).
   const loop = useRef<{ in: number; out: number | null }>({ in: 0, out: null });
-  useEffect(() => { loop.current = {
-    in: item.trimIn && item.trimIn > 0 ? item.trimIn : 0,
-    out: item.trimOut != null && item.trimOut > (item.trimIn ?? 0) ? item.trimOut : null,
-  }; }, [item.trimIn, item.trimOut]);
+  useEffect(() => {
+    loop.current = {
+      in: item.trimIn && item.trimIn > 0 ? item.trimIn : 0,
+      out: item.trimOut != null && item.trimOut > (item.trimIn ?? 0) ? item.trimOut : null,
+    };
+    // Portée posée AILLEURS que là où joue la vidéo : on y saute. Le poll ci-dessous ne reboucle
+    // qu'une fois la borne de sortie atteinte — une portée placée vers la fin laissait donc tourner
+    // tout ce qui la précède avant de s'appliquer, plusieurs minutes durant, l'air figé.
+    // Différé : les bornes changent à chaque pixel du curseur, et corriger à chaque événement
+    // relancerait le chargement réseau qu'on vient justement d'éviter pendant le geste.
+    const timer = setTimeout(() => {
+      const p = playerRef.current;
+      const now = p?.getCurrentTime?.();
+      if (now == null) return;
+      const { in: tin, out } = loop.current;
+      if (now >= tin - RANGE_SNAP_S && (out == null || now <= out)) return;
+      lastSeekRef.current = Date.now();
+      p?.seekTo?.(tin, true);
+    }, RANGE_SETTLE_MS);
+    return () => clearTimeout(timer);
+  }, [item.trimIn, item.trimOut]);
 
   // Playhead + scrub for the inspector. A manual seek also arms the cooldown: without it the loop
   // poll sees a position past the out bound and yanks playback back while the bound is still moving.
@@ -98,9 +120,14 @@ export function YoutubeItem({ item, interactive }: { item: BoardItem; interactiv
     () =>
       registerPlayer(item.id, {
         time: () => playerRef.current?.getCurrentTime?.() ?? null,
-        seek: (t) => {
+        seek: (t, scrubbing) => {
           lastSeekRef.current = Date.now();
-          playerRef.current?.seekTo?.(t, true);
+          // `allowSeekAhead` à FAUX tant que la borne bouge : le lecteur se contente alors de ce
+          // qu'il a déjà en tampon. À vrai, chaque événement du curseur lui fait demander un nouveau
+          // segment au réseau — poser un in/out vers le milieu ou la fin en lançait des dizaines, et
+          // le lecteur restait figé le temps de toutes les honorer. Le seek final, lui, autorise le
+          // chargement : c'est lui qui doit montrer la vraie image de la borne posée.
+          playerRef.current?.seekTo?.(t, !scrubbing);
         },
       }),
     [item.id],
@@ -121,6 +148,9 @@ export function YoutubeItem({ item, interactive }: { item: BoardItem; interactiv
         height: "100%",
         playerVars: {
           autoplay: 1, mute: 1, controls: 0, modestbranding: 1, rel: 0, playsinline: 1, fs: 0,
+          // Sous-titres et fiches JAMAIS imposés : sans `cc_load_policy: 0`, YouTube rallume les
+          // sous-titres d'après le compte ou la langue du système et les grave sur la carte.
+          cc_load_policy: 0, iv_load_policy: 3,
           // enablejsapi + origin : sinon postMessage de l'IFrame API échoue (« target origin
           // does not match ») dans la WebView2 (origine http://127.0.0.1:1420).
           enablejsapi: 1,
@@ -133,6 +163,7 @@ export function YoutubeItem({ item, interactive }: { item: BoardItem; interactiv
             if (playAllowed(item)) e.target.playVideo();
             const d = e.target.getDuration();
             if (d && Math.abs(d - (item.dur ?? 0)) > 0.5) patchItem(item.id, { dur: d }, false);
+            onReady?.();
           },
           onStateChange: (e: { data: number; target: YTPlayer }) => {
             // Filet de sécurité : le poll reboucle normalement avant ENDED (cf. LOOP_TAIL_S).
@@ -142,7 +173,9 @@ export function YoutubeItem({ item, interactive }: { item: BoardItem; interactiv
               if (playAllowed(item)) e.target.playVideo();
             }
           },
-          onError: (e: { data: number }) => setErr(e.data),
+          // Une erreur est un état FINI : elle lève aussi le voile de chargement, sinon la
+          // superposition « non intégrable » et ses deux boutons resteraient derrière un spinner.
+          onError: (e: { data: number }) => { setErr(e.data); onReady?.(); },
         },
       });
       // Boucle sur [in, out], borne de fin toujours ramenée en deçà du terme de la vidéo.

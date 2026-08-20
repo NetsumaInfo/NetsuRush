@@ -385,7 +385,9 @@ export interface UpscaleProgress {
 // Test d'upscale sur UNE frame : compare avant/après sans encoder tout le clip.
 export interface UpscaleFrameOpts {
   input: string;
-  time: number;            // seconde de la frame à tester
+  // Seconde de la frame à tester. Omise ⇒ le core prend le milieu du média : la première frame est
+  // presque toujours un noir, un fondu ou un plan flou, donc illisible comme aperçu.
+  time?: number;
   // Même aiguillage que l'encodage : sans ces deux champs l'aperçu montrerait le rendu du moteur IA
   // pendant que le fichier final sortirait d'un shader Turbo.
   engine?: "ia" | "turbo";
@@ -1311,7 +1313,12 @@ export interface NetsuWeight {
 // `retain` = localisateurs que le board peut encore réclamer sans qu'ils soient posés : médias
 // retenus par l'historique d'annulation. Le core les met à l'abri de son ménage de fin
 // d'enregistrement — sans quoi supprimer un item effacerait ses octets avant le Ctrl+Z suivant.
-export interface NetsuScene { name: string; items: unknown[]; view?: unknown; retain?: string[] }
+// `adoptLocal` / `adoptLocalMax` = politique de copie des médias LOCAUX dans le dossier compagnon du
+// projet (octets ; le plafond ne vise que les vidéos). Absents ⇒ le core référence sans copier.
+export interface NetsuScene {
+  name: string; items: unknown[]; view?: unknown; retain?: string[];
+  adoptLocal?: boolean; adoptLocalMax?: number;
+}
 export interface NetsuImportResult {
   ok: boolean;
   scene?: { name: string; items: unknown[]; view: unknown | null };
@@ -1409,7 +1416,10 @@ export interface RefApi {
   writeFile(path: string, data: string, encoding: "base64" | "utf8"): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
   // Un cadre d'un média (image, GIF, vidéo) rendu par le core en PNG base64, lu SUR LE DISQUE.
   // Seule source de pixels relisible par le renderer : le protocole d'asset teinte le canvas.
-  sampleFrame(path: string, opts?: { at?: number; side?: number }): Promise<{ ok: boolean; png?: string; error?: string }>;
+  // `count` > 1 étale les cadres sur [`at`, `to`] (fin omise = durée du fichier) et les rend tous
+  // dans `pngs` — de quoi décrire une PORTÉE de vidéo et pas seulement son premier instant.
+  sampleFrame(path: string, opts?: { at?: number; to?: number; count?: number; side?: number }): Promise<{ ok: boolean; png?: string; pngs?: string[]; error?: string }>;
+  playInfo(filePath: string): Promise<{ duration: number; fps: number; codec: string; native: boolean; error?: string }>;
   extractMedia(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
   // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
@@ -2675,6 +2685,10 @@ export interface NrApi {
   // Chemins disque d'objets File lâchés depuis l'Explorateur (Chromium masque `File.path`). Index
   // aligné sur `files` ; chaîne vide quand le chemin est irrésoluble (navigateur, WebView2 ancien).
   pathsForFiles(files: File[]): Promise<string[]>;
+  // Attache le pont ci-dessus SANS rien à résoudre. Il coûte trois imports dynamiques et un `invoke`,
+  // payés jusqu'ici par le premier dépôt : à l'écran, cette latence-là est du temps mort avant que le
+  // média n'apparaisse. Appelé au montage du board, le premier dépôt part sur un pont déjà chaud.
+  warmFilePaths(): void;
   saveFile(defaultName?: string): Promise<string | null>;
   mediaUrl(filePath: string): string;
   // URL d'un fichier local pour les GRILLES d'aperçus (vignettes + proxys de lecture).
@@ -2698,6 +2712,9 @@ export interface NrApi {
   // Épingle la fenêtre principale au-dessus des autres (always-on-top), pour la garder visible
   // dans un coin de l'écran tout en travaillant dans Resolve. No-op hors Tauri.
   setAlwaysOnTop(on: boolean): void;
+  // Mouse-transparent window: clicks, wheel and hover go to the application underneath. The way
+  // back cannot be a click — it no longer arrives — so it is the return of FOCUS (Alt+Tab).
+  setMouseTransparent(on: boolean): void;
   // Redimensionne la fenêtre principale (taille logique). Sert à passer en petit format « coin »
   // quand on épingle, et à réagrandir au dépinglage (le responsif est inconfortable en très étroit).
   setWindowSize(w: number, h: number): void;
@@ -3247,6 +3264,7 @@ const mock: NrApi = {
   chooseImages: async () => null,
   chooseAnyFile: async () => null,
   pathsForFiles: async (files) => files.map(() => ""),
+  warmFilePaths: () => {},
   saveFile: async () => null,
   mediaUrl: (p) => "nrmedia://media?p=" + encodeURIComponent(p),
   assetUrl: (p) => "nrmedia://media?p=" + encodeURIComponent(p),
@@ -3255,6 +3273,7 @@ const mock: NrApi = {
   openPath: async () => false,
   revealPath: async () => false,
   setAlwaysOnTop: () => {},
+  setMouseTransparent: () => {},
   setWindowSize: () => {},
   // Le fond d'écran exige ffmpeg : sans backend, la bibliothèque est vide et l'import échoue
   // explicitement — l'UI reste navigable, elle ne prétend pas avoir importé quoi que ce soit.
@@ -3295,6 +3314,7 @@ const mock: NrApi = {
       scanFolder: async (dir: string) => ({ ok: false, root: dir, name: "", files: [], truncated: false, count: 0 }),
       writeFile: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       sampleFrame: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      playInfo: async () => ({ duration: 0, fps: 0, codec: "", native: false }),
       extractMedia: async () => ({ ok: false, error: "mock" }),
       extractFrames: async () => ({ ok: false, error: "mock" }),
       exportBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
@@ -3945,5 +3965,12 @@ export const nr: NrApi =
       : mock;
 
 // Token monotone par demande de proxy : identifie un job pour pouvoir l'annuler (carte hors écran).
-let _proxyTok = 1;
+//
+// La base est TIRÉE AU HASARD à chaque chargement de page, jamais 1. Le service core vit bien plus
+// longtemps que le renderer (rechargement, HMR, fenêtre rouverte) et retient les tokens annulés :
+// repartir de 1 faisait retomber les demandes neuves sur des numéros annulés dans une session
+// précédente, que le core refusait d'encoder. Le core oublie désormais la marque à la demande
+// suivante (cf. core/proxy.js), mais des numéros distincts d'une session à l'autre suppriment la
+// collision à la source — et protègent l'app qui tourne avant même que le core ne redémarre.
+let _proxyTok = Math.floor(Math.random() * 2 ** 31) + 1;
 export const nextProxyToken = (): number => _proxyTok++;

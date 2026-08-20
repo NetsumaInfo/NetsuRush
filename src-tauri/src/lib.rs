@@ -3,6 +3,7 @@
 use std::io::Write;
 use std::process::{Child, Command, Stdio};
 use std::path::{Path, PathBuf};
+use std::hash::{BuildHasher, Hasher};
 use std::sync::{atomic::{AtomicBool, Ordering}, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -48,6 +49,40 @@ fn pick_core_port() -> u16 {
 #[tauri::command]
 fn nr_core_port() -> u16 {
     CORE_PORT.load(Ordering::Acquire)
+}
+
+// ── Shared token for the background service ─────────────────────────────────────────────────────
+// The core cannot tell a renderer request from one sent by a web page open in a browser: both reach
+// it over loopback, and CORS authenticates nothing. The token settles it. It is drawn at every
+// launch and known only to the processes the shell starts: the renderer (`nr_core_token`), the core
+// (env `NR_CORE_TOKEN`), and the Adobe panel, which reads it from `core-port.json` — a file no web
+// page can open.
+static CORE_TOKEN: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+
+fn core_token() -> &'static str {
+    CORE_TOKEN.get_or_init(|| {
+        // 256 bits with no new dependency: `RandomState` is seeded by the OS. This token guards a
+        // loopback service, so it must be unpredictable — it is not a cryptographic key.
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|since| since.as_nanos())
+            .unwrap_or(0);
+        let mut out = String::with_capacity(64);
+        for round in 0..4u8 {
+            let mut hasher = std::collections::hash_map::RandomState::new().build_hasher();
+            hasher.write_u128(nanos);
+            hasher.write_u32(std::process::id());
+            hasher.write_u8(round);
+            out.push_str(&format!("{:016x}", hasher.finish()));
+        }
+        out
+    })
+}
+
+/// Shared core token. The renderer sends it as `x-nr-token` (see `coreClient`).
+#[tauri::command]
+fn nr_core_token() -> String {
+    core_token().to_string()
 }
 
 fn core_log_path() -> PathBuf {
@@ -536,6 +571,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             nr_attach_file_paths,
             nr_core_port,
+            nr_core_token,
             player::commands::control::player_load,
             player::commands::control::player_load_at,
             player::commands::control::player_claim,
@@ -651,7 +687,11 @@ fn spawn_core(_app: &AppHandle) -> Option<Child> {
     let port = pick_core_port();
     CORE_PORT.store(port, Ordering::Release);
     let mut command = Command::new("node");
-    command.arg(&server).stdin(Stdio::piped()).env("NR_CORE_PORT", port.to_string());
+    command
+        .arg(&server)
+        .stdin(Stdio::piped())
+        .env("NR_CORE_PORT", port.to_string())
+        .env("NR_CORE_TOKEN", core_token());
     if let Some(exe) = app_exe { command.env("NETSURUSH_APP_EXE", exe); }
     match command.spawn() {
         Ok(child) => {

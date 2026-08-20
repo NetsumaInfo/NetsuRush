@@ -11,6 +11,7 @@
     "flipV": "上下反転",
     "crop": "トリミング",
     "openLink": "リンクを開く",
+    "reloadMedia": "メディアを再読み込み",
     "download": "ダウンロード",
     "restoreDownload": "ダウンロード済みファイルに戻す",
     "zoomIn": "拡大",
@@ -55,7 +56,9 @@
     "unsaved": "未保存",
     "saveAs": "名前を付けて保存…",
     "snapOn": "スナップを有効化",
-    "snapOff": "スナップを無効化"
+    "snapOff": "スナップを無効化",
+    "snap": "スナップ",
+    "freeze": "停止 / 再生"
   },
   "settings": {
     "tabLook": "外観",
@@ -102,9 +105,16 @@
     "pauseMedia": "一時停止",
     "keepPlaying": "再生を続ける",
     "fitOnOpen": "開いたら全体表示",
+    "blurBehavior": "フォーカス外の選択バー",
+    "blurBehaviorHint": "他のアプリケーションをクリックしたとき。",
+    "blurKeep": "保持",
+    "blurHide": "非表示",
+    "blurDeselect": "選択を解除",
     "enabled": "オン",
     "disabled": "オフ",
     "placeFrame": "配置エリアの枠",
+    "pinnedToolbar": "ピン留め中のツールバー",
+    "pinnedToolbarHint": "ピン留め中は配置・描画・表示のみ。残りは右クリックメニューです。",
     "decompose": "動画を連番画像に分解",
     "decomposeHint": "動画から抜き出した連番画像をボードに置きます。",
     "imagesPerSec": "画像 / 秒",
@@ -119,12 +129,16 @@
     "upscaleQuick": "クイック",
     "upscaleAsk": "カスタム",
     "upscaleQuickHint": "「アップスケール」ボタンはこの設定ですぐに実行します。",
-    "upscaleAskHint": "「アップスケール」ボタンはウィンドウを開き、毎回モデル・倍率・プレビューを選べます。",
+    "upscaleAskHint": "「アップスケール」ボタンでウィンドウを開き、モデル・倍率・プレビューを選びます。",
     "model": "モデル",
     "upscaleModelDefault": "デフォルトのアップスケールモデル",
     "factor": "倍率",
     "denoise": "ノイズ除去",
     "downloadOnline": "オンライン動画をダウンロード",
+    "copyLocal": "ローカルメディアをプロジェクトにコピー",
+    "copyLocalOn": "コピー",
+    "copyLocalOff": "参照",
+    "copyLocalMax": "動画の上限 (MB)",
     "embedSwitch": "プレーヤーへの切り替え",
     "embedSwitchKeep": "ファイルを保持",
     "embedSwitchDrop": "ファイルを削除",
@@ -183,7 +197,53 @@
     "arrangeTitle": "整列",
     "autoArrangeOnImport": "読み込んだまとまりを自動で整列",
     "autoAnchorDraw": "描画をメディアに自動連結",
-    "paletteSize": "パレットあたりの色数"
+    "paletteSize": "パレットあたりの色数",
+    "tabPen": "ペン",
+    "penNav": "ペンと指の操作",
+    "penGestures": "ピンチでズーム、2本指で移動",
+    "penDragPans": "空白のドラッグで移動",
+    "penDragPansHint": "自動：マウスのないタッチ機で有効。無効なら範囲選択になります。",
+    "penBarrel": "ペンのサイドボタン",
+    "penBarrelMenu": "コンテキストメニュー",
+    "penBarrelPan": "移動",
+    "penPalm": "パームリジェクション",
+    "penPalmHint": "ペンを使った直後は指の接触を無視します。",
+    "penStroke": "ペンの描線",
+    "penPressure": "筆圧",
+    "penMinWidth": "筆圧ゼロのときの太さ",
+    "penTilt": "傾き",
+    "penEraser": "ペンの消しゴム側",
+    "penStrokeHint": "筆圧と傾きは描いた時点で確定。設定を変えても既存の線は変わりません。",
+    "penUi": "インターフェース",
+    "penTouchUi": "操作を常に表示",
+    "penTouchUiHint": "自動：ペンを検出したとき、またはタッチ機で。",
+    "penBigTargets": "当たり判定を大きく",
+    "penProbe": "検出されたハードウェア",
+    "penProbeHint": "ペンをかざすと、描かなくても値が入ります。",
+    "penProbePen": "ペン",
+    "penProbePressure": "筆圧",
+    "penProbeTilt": "傾き",
+    "penProbeHover": "ホバー",
+    "penProbeTouch": "タッチポイント",
+    "penNoSensor": "センサーなし",
+    "penYes": "あり",
+    "penNo": "なし",
+    "barButtons": "ツールバー",
+    "pinnedSide": "配置",
+    "pinnedButtons": "固定時のバー",
+    "pinnedAvailable": "利用可能",
+    "pinnedAllPlaced": "すべて配置済み。",
+    "pinnedBarHint": "ドラッグで配置・移動、クリックで削除。",
+    "pinnedRemove": "{{label}} をバーから削除",
+    "sideTop": "上",
+    "sideBottom": "下",
+    "sideLeft": "左",
+    "sideRight": "右",
+    "bgOpacity": "背景の不透明度",
+    "contentOpacity": "コンテンツの不透明度",
+    "seeThroughScope": "半透明にする対象",
+    "seeThroughShell": "インターフェース",
+    "seeThroughPlaceFrame": "配置枠"
   },
   "inspector": {
     "ytPlayer": "YouTube プレーヤー",
@@ -322,7 +382,20 @@
     "grayscale": "グレースケール",
     "toFront": "最前面へ",
     "toBack": "最背面へ",
-    "extractPalette": "パレットを抽出"
+    "extractPalette": "パレットを抽出",
+    "addText": "テキストを追加",
+    "addFrame": "フレームを追加",
+    "toggleDraw": "描画モード",
+    "toggleFreeze": "すべて停止 / 再生",
+    "prevFrame": "前のフレーム",
+    "nextFrame": "次のフレーム",
+    "toggleMouseThrough": "マウスを透過",
+    "newScene": "新しいシーン",
+    "openSettings": "設定",
+    "togglePin": "ウィンドウを固定",
+    "paletteStudio": "パレットジェネレーター",
+    "crop": "トリミング",
+    "groupSequence": "シーケンスにまとめる"
   },
   "drawStyle": {
     "thin": "細い線",
@@ -482,6 +555,7 @@
     "missingMedia": "メディアがありません",
     "notBundled": "{{size}} · 未同梱",
     "relocate": "場所を指定",
+    "reloadMedia": "再ダウンロード",
     "downloading": "ダウンロード中…",
     "mediaFallback": "メディア",
     "interactiveActive": "操作中 — 他をクリックで移動",
@@ -507,7 +581,8 @@
   "youtube": {
     "notEmbeddable": "埋め込み不可の動画",
     "blocked": "YouTube がこの動画の埋め込み再生をブロックしています。",
-    "openOnYouTube": "YouTube で開く"
+    "openOnYouTube": "YouTube で開く",
+    "preparing": "動画を準備中…"
   },
   "embed": {
     "frozen": "再生を停止中",
@@ -542,7 +617,7 @@
     "itemLabel": "共有：{{level}}",
     "settings": {
       "title": "メディアの保存",
-      "hint": ".netsu ファイルが既定で持ち出す内容。各メディアはインスペクターで個別に設定できます。"
+      "hint": ".netsu が既定で持ち出す内容。メディアごとにインスペクターで変更できます。"
     }
   },
   "board": {
@@ -589,7 +664,9 @@
     "noProjectFile": "このボードはファイルに紐づいていません",
     "relocating": "フォルダー内のメディアを検索中…（{{count}}）",
     "relocated": "{{count}}/{{total}} 件のメディアの場所を指定",
-    "relocatedNone": "このフォルダーで認識できるメディアはありません"
+    "relocatedNone": "このフォルダーで認識できるメディアはありません",
+    "contentOpacity": "コンテンツの不透明度：{{percent}} %",
+    "itemOpacity": "メディアの不透明度：{{percent}} %"
   },
   "tidy": {
     "title": "整列",
@@ -631,7 +708,45 @@
     "formatHint": "{{format}} でコピー",
     "layoutRow": "横一列",
     "layoutCol": "縦一列",
-    "layoutGrid": "格子"
+    "layoutGrid": "格子",
+    "studio": {
+      "open": "パレットジェネレーター",
+      "edit": "ジェネレーターで開く",
+      "close": "ジェネレーターを閉じる",
+      "title": "パレットジェネレーター",
+      "pickScreen": "画面スポイト",
+      "brightness": "明度",
+      "tones": "トーン",
+      "fromSelection": "選択範囲から",
+      "fromBoard": "ボード全体から",
+      "noSelection": "ボード上で画像を選択してください",
+      "noMedia": "ボードに画像がありません",
+      "reset": "リセット",
+      "pick": "カラーピッカー",
+      "notation": "表記",
+      "value": "カラー値",
+      "place": "ボードに配置",
+      "apply": "適用",
+      "placed": "{{count}} 色のパレットを配置しました",
+      "applied": "パレットを更新しました（{{count}} 色）",
+      "addSwatch": "色を追加",
+      "removeSwatch": "色を削除",
+      "lock": "色をロック",
+      "unlock": "色のロックを解除",
+      "moveLeft": "左へ移動",
+      "moveRight": "右へ移動",
+      "rule": {
+        "custom": "カスタム",
+        "analogous": "類似色",
+        "complementary": "補色",
+        "split": "分裂補色",
+        "triadic": "トライアド",
+        "square": "スクエア",
+        "compound": "コンパウンド",
+        "shades": "シェード",
+        "monochromatic": "モノクロマティック"
+      }
+    }
   },
   "exportImage": {
     "menu": "画像として書き出し…",
@@ -656,6 +771,16 @@
     "progress": "読み込み中 {{done}}/{{total}}…",
     "reading": "{{count}} 件のファイルを読み込み中…",
     "done": "{{count}} 件のメディアを読み込みました",
-    "folderTruncated": "フォルダーが大きすぎます：先頭 {{count}} 件を読み込みました"
+    "folderTruncated": "フォルダーが大きすぎます：先頭 {{count}} 件を読み込みました",
+    "importing": "{{name}} をインポート中…",
+    "fetching": "メディアを取得中…",
+    "linkDone": "メディアをインポートしました",
+    "fetchingFrom": "{{source}} から取得中…"
+  },
+  "mouseThrough": {
+    "on": "マウスを透過",
+    "off": "マウスを戻す",
+    "warning": "クリックとホイールは下のアプリへ届き、ウィンドウは最前面に留まります。戻すにはフォーカスを与えてください（Alt+Tab）。",
+    "dontAskAgain": "次回から表示しない"
   }
 }

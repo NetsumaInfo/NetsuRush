@@ -377,7 +377,7 @@ function writeFrame(bin, input, time, out, filter) {
 // le moteur IA. Sans lui, l'aperçu n'existait tout simplement pas pour les shaders : le bouton
 // disparaissait dès qu'un shader était choisi et il fallait lancer l'encodage complet pour juger.
 async function runShaderFrame(opts) {
-  const { input, time = 0, shader = 'artcnn_c4f32', scale = 2,
+  const { input, time, shader = 'artcnn_c4f32', scale = 2,
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   const sh = SHADERS[shader];
@@ -396,18 +396,24 @@ async function runShaderFrame(opts) {
   const s = scale | 0 || 1;
   const ow = even(dims.width * s);
   const oh = even(dims.height * s);
+  // Instant échantillonné. Sans consigne on prend le MILIEU du média : la frame 0 d'une vidéo est
+  // presque toujours un noir, un fondu ou un plan volontairement flou, et l'aperçu donnait ce flou-là
+  // à juger au lieu du travail du shader. Une image fixe a une durée nulle → elle reste à 0.
+  const at = Number.isFinite(time) && Number(time) > 0
+    ? Number(time)
+    : (dims.duration > 0 ? dims.duration / 2 : 0);
   await fsp.mkdir(UPSCALE_TEST_DIR, { recursive: true });
-  const id = `${Date.now()}_${Math.round(time * 1000)}`;
+  const id = `${Date.now()}_${Math.round(at * 1000)}`;
   const orig = path.join(UPSCALE_TEST_DIR, `orig_${id}.png`);
   const out = path.join(UPSCALE_TEST_DIR, `turbo_${id}.png`);
   // yuv444p en sortie de filtre : l'encodeur PNG convertit ensuite en RGB sans sous-échantillonner.
   const filter = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix: 'yuv444p' });
 
-  const src = await writeFrame(bin, input, time, orig, null);
+  const src = await writeFrame(bin, input, at, orig, null);
   if (!src.ok) return { ok: false, error: src.error };
-  const up = await writeFrame(bin, input, time, out, filter);
+  const up = await writeFrame(bin, input, at, out, filter);
   if (!up.ok) return { ok: false, error: up.error };
-  return { ok: true, orig, out, width: ow, height: oh };
+  return { ok: true, orig, out, width: ow, height: oh, time: at };
 }
 
 // Upscale d'une IMAGE FIXE par le moteur shader, vers un fichier choisi par l'appelant.

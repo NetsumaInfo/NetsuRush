@@ -181,8 +181,8 @@
     "close": "Fermer",
     "loadingCompare": "Chargement de la comparaison…",
     "previewMissing": "Aperçu introuvable — recommence le test.",
-    "hintZoomed": "Glisse la poignée pour comparer · molette = zoom · glisse l'image pour naviguer.",
-    "hintNotZoomed": "Glisse la poignée pour comparer · molette = zoom · zoome pour inspecter en détail."
+    "hintZoomed": "Glisse l'image pour naviguer · Maj+glisser = comparer · molette = zoom · double-clic = réinitialiser.",
+    "hintNotZoomed": "Glisse la poignée pour comparer · molette = zoom · double-clic = zoomer sur un point."
   },
   "review": {
     "ready": "Rendu prêt",

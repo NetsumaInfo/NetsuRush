@@ -45,6 +45,17 @@ export function upscaleChoiceFrom(selection: string, prefs: BoardPrefs, isVideo:
 export const canPreviewUpscale = (choice: UpscaleChoice) =>
   choice.engine === "ia" || !isRtxShader(choice.shader);
 
+// Instant échantillonné par l'aperçu vidéo. La PREMIÈRE frame ne vaut rien comme référence : une
+// vidéo ouvre sur un noir, un fondu ou un plan volontairement flou, et l'aperçu donnait ce flou-là à
+// juger au lieu du travail du moteur. On prend le milieu de la portée réellement lue. Durée inconnue
+// (lecture par proxy) ⇒ `undefined` : c'est le core qui choisit, il a la durée sondée.
+export function previewFrameTime(item: Pick<BoardItem, "trimIn" | "trimOut" | "dur">): number | undefined {
+  const start = Math.max(0, item.trimIn ?? 0);
+  const end = item.trimOut ?? item.dur;
+  if (end == null || !Number.isFinite(end) || end <= start) return undefined;
+  return start + (end - start) / 2;
+}
+
 // L'upscale exige un fichier LOCAL. Un média distant/extrait (ref http) est d'abord résolu
 // (resolveMedia, repli extractMedia). Un ref local est renvoyé tel quel.
 export async function ensureLocalMedia(ref: string): Promise<string | null> {

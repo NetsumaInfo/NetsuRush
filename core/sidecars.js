@@ -16,6 +16,7 @@ const { codecExt: upscaleExt, hasFiles, sanitizeName } = require('./utils');
 const { resolveProcessEncoding } = require('./processEncoding');
 const { MANIFEST, modelDir, RIFE_TORCH_DIR, RIFE_ARCH_DIR, GMFSS_DIR, DRBA_DIR, DRBA_ARCH_DIR } = require('./models');   // dossiers de poids gérés (BEN2/MatAnyone…) → env sidecar
 const logbus = require('./logbus'); // journal Console : forward du stderr des sidecars python
+const mediaIdent = require('./mediaIdent'); // identité de contenu : le même rush sous un autre nom
 
 // Env du process daemon = DETECT_ENV + chemins des poids gérés par le manager (BEN2/Lucida/MatAnyone) pour
 // que les moteurs chargent depuis NR_HOME/models plutôt que de re-tirer le repo HF.
@@ -261,21 +262,40 @@ function readSceneCacheDirect(filePath, model, threshold, options) {
     const sql = 'SELECT mtime, options_key, threshold, fps, duration, frames, scenes_json, options_json FROM scene_cache_v4 '
       + 'WHERE file_path=? AND model=?' + (threshold == null ? '' : ' AND threshold=?')
       + ' ORDER BY created_at DESC';
+    const wanted = options == null ? null : stableJson(options);
     // Statement préparé PAR APPEL (jamais mémorisé) : un StatementSync conservé peut être finalisé
     // par le GC → « statement has been finalized » (même piège que core/reference.js).
-    const rows = threshold == null
-      ? db.prepare(sql).all(filePath, model)
-      : db.prepare(sql).all(filePath, model, Number(threshold));
-    const wanted = options == null ? null : stableJson(options);
-    const row = rows.find((candidate) => wanted == null || stableJson(JSON.parse(String(candidate.options_json || '{}'))) === wanted);
+    const pick = (target) => {
+      const rows = threshold == null
+        ? db.prepare(sql).all(target, model)
+        : db.prepare(sql).all(target, model, Number(threshold));
+      return rows.find((candidate) => wanted == null
+        || stableJson(JSON.parse(String(candidate.options_json || '{}'))) === wanted) || null;
+    };
+    let row = pick(filePath);
+    // Rien sous ce chemin : le MÊME fichier peut être découpé sous un autre nom (copie sur un autre
+    // disque, rush renommé, projet déplacé). Le témoin d'identité écrit par python le dit sans
+    // relancer une détection (cf. core/mediaIdent.js, python/nrident.py).
+    let linkedFrom = null;
+    if (!row) {
+      for (const twin of mediaIdent.twinPaths(db, filePath)) {
+        row = pick(twin);
+        if (row) { linkedFrom = twin; break; }
+      }
+    }
     if (!row) return options == null ? { scenes: [], cached: false, model, error: null } : null;
     let mt = 0;
     try { mt = require('fs').statSync(filePath).mtimeMs / 1000; } catch (_) { /* fichier disparu */ }
-    if (Math.abs(Number(row.mtime) - mt) > 1.0) return { scenes: [], cached: false, stale: true, model, error: null };
+    // Découpe reprise d'un jumeau : son horodatage décrit l'autre fichier, la comparer n'a pas de
+    // sens — c'est la signature de contenu qui a déjà prouvé que les octets sont les mêmes.
+    if (!linkedFrom && Math.abs(Number(row.mtime) - mt) > 1.0
+        && !mediaIdent.sameBytesAsCached(db, filePath, row.mtime)) {
+      return { scenes: [], cached: false, stale: true, model, error: null };
+    }
     return {
       scenes: JSON.parse(String(row.scenes_json)), options: JSON.parse(String(row.options_json || 'null')),
       fps: row.fps, duration: row.duration, frames: row.frames, threshold: row.threshold,
-      model, optionsKey: row.options_key, cached: true, error: null,
+      model, optionsKey: row.options_key, cached: true, linkedFrom, error: null,
     };
   } catch (_) {
     try {

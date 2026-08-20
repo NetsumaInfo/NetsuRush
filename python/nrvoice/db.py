@@ -10,6 +10,7 @@ import json
 import sqlite3
 import time
 
+import nrident
 from detect import db_path, file_mtime  # source unique du chemin de base + mtime
 
 
@@ -45,12 +46,20 @@ def _con():
 def cache_get(table, path, phash, model):
     """Lit le cache (None si absent ou périmé). `table` = transcript|silence."""
     con = _con()
-    row = con.execute(
-        "SELECT mtime, result_json FROM %s_cache_v1 "
-        "WHERE file_path=? AND params_hash=? AND model=? "
-        "ORDER BY created_at DESC LIMIT 1" % table,
-        (path, phash, model),
-    ).fetchone()
+    full = "%s_cache_v1" % table
+    select = ("SELECT mtime, result_json FROM %s "
+              "WHERE file_path=? AND params_hash=? AND model=? "
+              "ORDER BY created_at DESC LIMIT 1" % full)
+    row = con.execute(select, (path, phash, model)).fetchone()
+    if not row:
+        # Aucune transcription sous ce chemin : un fichier IDENTIQUE déjà transcrit ailleurs
+        # (copie, rush renommé) cède la sienne — l'ASR est le calcul le plus cher du module voix.
+        if nrident.rescue(con, path, [full]):
+            row = con.execute(select, (path, phash, model)).fetchone()
+    if row and abs((row[0] or 0) - file_mtime(path)) > 1.0:
+        # Horodatage seul décalé (copie, restauration) → on réaligne au lieu de tout refaire.
+        if nrident.realign(con, path, [full], row[0] or 0):
+            row = con.execute(select, (path, phash, model)).fetchone()
     con.close()
     if not row:
         return None
@@ -70,4 +79,5 @@ def cache_store(table, path, phash, model, result):
         (path, file_mtime(path), phash, model, json.dumps(result), time.time()),
     )
     con.commit()
+    nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()

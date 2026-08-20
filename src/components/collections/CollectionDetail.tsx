@@ -118,7 +118,10 @@ export function CollectionDetail({ id }: { id: string }) {
     try {
       const c = await nr.collections?.load(id);
       setColl(c ?? null);
-      if (c?.shots?.length) grid.warmThumbs(c.shots.map((s) => ({ path: s.path, in: s.in, inFrame: s.inFrame, fps: s.fps })));
+      // `out` FAIT PARTIE de l'instant de vignette (thumbTime borne l'avance à 40 % du plan) : sans
+      // lui la préchauffe générait une image que la carte ne demanderait jamais, et chaque plan de
+      // moins de 1,25 s repartait sur son propre RPC.
+      if (c?.shots?.length) grid.warmThumbs(c.shots.map((s) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps })));
     } finally { setLoading(false); }
   }
   useEffect(() => { void reload(); void loadCollectionTags(); setSel(new Set()); setFilter(EMPTY_FILTER); /* eslint-disable-next-line */ }, [id]);
@@ -156,6 +159,15 @@ export function CollectionDetail({ id }: { id: string }) {
   // Cibles des actions qui ÉCRIVENT ailleurs (montage timeline, export fichier) : la sélection et
   // rien d'autre. Comme au Découpage, on n'envoie jamais une collection entière sur un clic distrait.
   const selectedShots = (): CollectionShot[] => (coll?.shots ?? []).filter((s) => s.id && sel.has(s.id));
+  // Cibles des pré-générations. Sans sélection, elles suivent la liste VIVANTE (ref réécrite à chaque
+  // rendu) : un rechargement de la collection pendant un run le fait suivre au lieu de le laisser sur
+  // la liste du clic. Une sélection, elle, est gelée au clic — cf. TimelineLiveView.
+  const shotsRef = useRef<CollectionShot[]>([]);
+  shotsRef.current = coll?.shots ?? [];
+  const proxyRange = (s: CollectionShot) => ({ path: s.path, in: s.in, out: s.out });
+  const thumbRange = (s: CollectionShot) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps });
+  const proxyTargets = () => (sel.size ? targets().map(proxyRange) : () => shotsRef.current.map(proxyRange));
+  const thumbTargets = () => (sel.size ? targets().map(thumbRange) : () => shotsRef.current.map(thumbRange));
 
   function toggle(sid?: string) {
     if (!sid) return;
@@ -378,7 +390,7 @@ export function CollectionDetail({ id }: { id: string }) {
             <Tooltip>
               <TooltipTrigger render={
                 <Button size="sm" variant="outline"
-                  onClick={() => grid.generateThumbs(targets().map((s) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps })))}
+                  onClick={() => grid.generateThumbs(thumbTargets())}
                   className={"h-8 text-xs " + (grid.thumbsGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
               }>
                 {grid.thumbsGen
@@ -390,7 +402,7 @@ export function CollectionDetail({ id }: { id: string }) {
             <Tooltip>
               <TooltipTrigger render={
                 <Button size="sm" variant="outline"
-                  onClick={() => grid.generateProxies(targets().map((s) => ({ path: s.path, in: s.in, out: s.out })))}
+                  onClick={() => grid.generateProxies(proxyTargets())}
                   className={"h-8 text-xs " + (grid.proxyGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
               }>
                 {grid.proxyGen
@@ -492,7 +504,7 @@ export function CollectionDetail({ id }: { id: string }) {
             name={coll?.name || "collection"}
             exportClips={panelExportClips}
             onTimelineImport={toTimeline}
-            getProxy={(p, i, o, prio) => grid.getProxy(p, i, o, prio, undefined, undefined, true)}
+            getProxy={(p, i, o, prio) => grid.getProxy(p, i, o, prio)}
             playerApi={playerApi}
           />
         </div>)}

@@ -30,6 +30,14 @@ export const PALETTE_MAX = 12;
 const PIXEL_BUDGET = 90_000;
 // Côté max d'un média rééchantillonné (le détail fin ne change pas une palette).
 const SIDE_MAX = 220;
+// Cadres pris sur la PORTÉE d'une vidéo. Un plan change de lumière, entre dans une nuit, coupe sur un
+// autre décor : une frame isolée donnait la couleur d'un instant, pas celle de ce qu'on regarde. Huit
+// cadres tiennent dans une seule passe ffmpeg et couvrent un plan de moodboard sans le relire en entier.
+const VIDEO_SAMPLES = 8;
+// Repli navigateur : un seek par instant, donc moins de cadres — assez pour couvrir début, milieu, fin.
+const FALLBACK_SAMPLES = 3;
+// Sous cette durée, la portée tient dans un plan fixe : un seul cadre dit tout.
+const MIN_SPAN_S = 0.5;
 // Kinds dont les pixels sont accessibles.
 const SAMPLEABLE = new Set(["image", "video", "sequence"]);
 
@@ -79,30 +87,49 @@ function loadImage(src: string, anonymous: boolean): Promise<HTMLImageElement | 
   });
 }
 
-// Vidéo décodée hors écran, positionnée sur la frame voulue, en `crossOrigin="anonymous"` pour que
-// ses pixels restent lisibles. Bornée dans le temps : une source lente ne bloque pas l'extraction.
-function loadVideoFrame(src: string, at: number): Promise<HTMLVideoElement | null> {
+// Portée lue d'une vidéo. `to` à 0 ⇒ fin inconnue ici : le core la sonde lui-même sur le fichier.
+function videoRange(item: BoardItem): { from: number; to: number } {
+  const from = Math.max(0, item.trimIn ?? 0);
+  const end = item.trimOut ?? item.dur;
+  return { from, to: end != null && Number.isFinite(end) && end > from ? end : 0 };
+}
+
+function seekTo(v: HTMLVideoElement, at: number): Promise<boolean> {
   return new Promise((resolve) => {
-    const v = document.createElement("video");
-    v.crossOrigin = "anonymous";
-    v.preload = "auto";
-    v.muted = true;
-    let done = false;
-    const finish = (ok: boolean) => {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      resolve(ok ? v : null);
-    };
-    const timer = setTimeout(() => finish(false), 8000);
-    v.onerror = () => finish(false);
-    v.onseeked = () => finish(true);
-    v.onloadeddata = () => {
-      if (at > 0 && at < (v.duration || Infinity)) v.currentTime = at;
-      else finish(true);
-    };
+    const timer = setTimeout(() => resolve(false), 4000);
+    v.onseeked = () => { clearTimeout(timer); resolve(true); };
+    v.currentTime = at;
+  });
+}
+
+// Vidéo décodée hors écran et PARCOURUE sur sa portée, en `crossOrigin="anonymous"` pour que ses
+// pixels restent lisibles. Chaque seek coûte un décodage depuis la keyframe précédente, d'où moins
+// d'instants que par le core. Bornée dans le temps : une source lente ne bloque pas l'extraction.
+async function videoPixels(src: string, item: BoardItem, budget: number): Promise<number[] | null> {
+  const v = document.createElement("video");
+  v.crossOrigin = "anonymous";
+  v.preload = "auto";
+  v.muted = true;
+  const ready = await new Promise<boolean>((resolve) => {
+    const timer = setTimeout(() => resolve(false), 8000);
+    v.onerror = () => { clearTimeout(timer); resolve(false); };
+    v.onloadeddata = () => { clearTimeout(timer); resolve(true); };
     v.src = src;
   });
+  if (!ready) return null;
+
+  const { from, to } = videoRange(item);
+  const end = to || v.duration || 0;
+  const n = end > from + MIN_SPAN_S ? FALLBACK_SAMPLES : 1;
+  const share = Math.max(2_000, Math.round(budget / n));
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const at = n > 1 ? from + ((end - from) * i) / n : from;
+    if (at > 0 && at < (v.duration || Infinity) && !(await seekTo(v, at))) continue;
+    const px = pixelsFrom(v, item, share);
+    if (px) for (let k = 0; k < px.length; k++) out.push(px[k]);
+  }
+  return out.length ? out : null;
 }
 
 function naturalSize(el: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement): { w: number; h: number } {
@@ -163,32 +190,46 @@ async function samplePixels(item: BoardItem, budget: number, stats: SampleStats)
 
   const ref = item.kind === "sequence" ? item.frames?.[item.frame ?? 0] ?? item.ref : item.ref;
 
+  const isVideo = item.kind === "video";
+  const range = isVideo ? videoRange(item) : { from: 0, to: 0 };
+
   // 1. Lecture par le CORE, directement sur le fichier. Le PNG rendu arrive en `data:` URL : aucune
-  //    origine, donc aucun canvas teinté, quelle que soit la nature du média.
+  //    origine, donc aucun canvas teinté, quelle que soit la nature du média. Une vidéo est lue sur
+  //    toute sa portée, chaque cadre pesant sa part du budget de pixels de l'item.
   if (ref && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
     stats.coreTried++;
     const shot = await nr.reference.sampleFrame(ref, {
-      at: item.kind === "video" ? item.trimIn ?? 0 : 0,
+      at: range.from,
+      to: range.to || undefined,
+      count: isVideo ? VIDEO_SAMPLES : 1,
       side: SIDE_MAX,
     }).catch(() => null);
-    if (shot?.ok && shot.png) {
+    const shots = shot?.ok ? shot.pngs?.length ? shot.pngs : shot.png ? [shot.png] : [] : [];
+    if (shots.length) {
       stats.coreOk++;
-      const el = await loadImage(`data:image/png;base64,${shot.png}`, false);
-      if (el) {
-        const px = pixelsFrom(el, item, budget);
-        if (px && px.length) return px;
+      const share = Math.max(2_000, Math.round(budget / shots.length));
+      const out: number[] = [];
+      for (const b64 of shots) {
+        const el = await loadImage(`data:image/png;base64,${b64}`, false);
+        if (!el) continue;
+        const px = pixelsFrom(el, item, share);
+        if (px) for (let k = 0; k < px.length; k++) out.push(px[k]);
       }
+      if (out.length) return out;
     }
   }
 
   const src = readableSrc(ref);
   if (src) {
-    const el = item.kind === "video"
-      ? await loadVideoFrame(src, item.trimIn ?? 0)
-      : await loadImage(src, true);
-    if (el) {
-      const px = pixelsFrom(el, item, budget);
+    if (isVideo) {
+      const px = await videoPixels(src, item, budget);
       if (px && px.length) return px;
+    } else {
+      const el = await loadImage(src, true);
+      if (el) {
+        const px = pixelsFrom(el, item, budget);
+        if (px && px.length) return px;
+      }
     }
   }
 

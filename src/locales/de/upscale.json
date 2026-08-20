@@ -181,8 +181,8 @@
     "close": "Schließen",
     "loadingCompare": "Vergleich wird geladen…",
     "previewMissing": "Vorschau fehlt — Test wiederholen.",
-    "hintZoomed": "Griff ziehen zum Vergleichen · Mausrad = Zoom · Bild ziehen zum Navigieren.",
-    "hintNotZoomed": "Griff ziehen zum Vergleichen · Mausrad = Zoom · zoomen für Details."
+    "hintZoomed": "Bild ziehen zum Navigieren · Umschalt+Ziehen = vergleichen · Mausrad = Zoom · Doppelklick = zurücksetzen.",
+    "hintNotZoomed": "Griff ziehen zum Vergleichen · Mausrad = Zoom · Doppelklick zoomt auf die Stelle."
   },
   "review": {
     "ready": "Render fertig",

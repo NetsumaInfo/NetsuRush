@@ -1,0 +1,115 @@
+name: Release
+
+# Builds the NSIS installer on a runner and, when SignPath is configured, has it Authenticode-signed
+# before it leaves CI. SignPath Foundation attests that the binary was produced from this public
+# repository, which is why packaging cannot stay on a development machine.
+#
+# This workflow deliberately does NOT create or publish the GitHub release: it uploads artefacts and
+# stops there. Publishing stays a manual, deliberate act — see docs/releasing.md.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+# `actions: read` is required by the SignPath action to read the job and download its artefact.
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  installer:
+    name: NSIS installer
+    runs-on: windows-latest
+    # The build fetches node.exe, the mpv runtime and the shaders, stages python/ and then runs a
+    # full release `tauri build`. It is materially heavier than the NetsuBoard one.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+
+      - name: Build the installer
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          # Mandatory EVEN IF the key pair carries no password: without it the CLI waits for a prompt
+          # on stdin, so the job hangs until the timeout with the .exe written and no .sig.
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+        run: npm run package
+
+      - name: Upload the unsigned installer
+        id: unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsurush-installer-unsigned
+          path: src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
+
+      # Skipped until the repository variables exist, so the workflow stays usable before the
+      # SignPath Foundation application is accepted. It then produces an unsigned installer, exactly
+      # like a local `npm run package`.
+      - name: Authenticode signature (SignPath)
+        id: signpath
+        if: vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: src-tauri/target/release/bundle/nsis
+
+      # Authenticode rewrites the bytes of the .exe, so the minisign signature `tauri build` wrote
+      # over the unsigned file no longer matches it. Left as is, EVERY user's updater would reject
+      # the release. It is regenerated here, on the signed installer, before the manifest reads it
+      # back from disk.
+      - name: Regenerate the updater signature over the signed installer
+        if: steps.signpath.outcome == 'success'
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+        run: |
+          $exe = Get-ChildItem src-tauri/target/release/bundle/nsis/*-setup.exe | Select-Object -First 1
+          npx tauri signer sign $exe.FullName
+
+      # create-update-manifest.mjs builds the download URL from GITHUB_REF_NAME. On a manual run
+      # from a branch that would point the updater at `.../download/development/...`.
+      - name: Updater manifest
+        shell: pwsh
+        run: |
+          if (-not $env:GITHUB_REF_NAME.StartsWith('v')) {
+            $env:GITHUB_REF_NAME = "v$((Get-Content package.json -Raw | ConvertFrom-Json).version)"
+          }
+          npm run update:manifest
+
+      - name: SHA-256 of the installer
+        shell: pwsh
+        run: |
+          Get-ChildItem src-tauri/target/release/bundle/nsis/*-setup.exe |
+            ForEach-Object { "$($_.Name)  $((Get-FileHash $_.FullName -Algorithm SHA256).Hash)" } |
+            Tee-Object -FilePath sha256.txt
+
+      - name: Upload the release artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsurush-release
+          path: |
+            src-tauri/target/release/bundle/nsis/*-setup.exe
+            src-tauri/target/release/bundle/nsis/*-setup.exe.sig
+            src-tauri/target/release/bundle/nsis/latest.json
+            sha256.txt
+          if-no-files-found: error

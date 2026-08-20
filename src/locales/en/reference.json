@@ -11,6 +11,7 @@
     "flipV": "Flip vertical",
     "crop": "Crop",
     "openLink": "Open link",
+    "reloadMedia": "Reload media",
     "download": "Download",
     "restoreDownload": "Back to downloaded file",
     "zoomIn": "Zoom in",
@@ -55,7 +56,9 @@
     "unsaved": "Unsaved",
     "saveAs": "Save as…",
     "snapOn": "Enable snapping",
-    "snapOff": "Disable snapping"
+    "snapOff": "Disable snapping",
+    "snap": "Snapping",
+    "freeze": "Freeze / play"
   },
   "settings": {
     "tabLook": "Look",
@@ -102,9 +105,16 @@
     "pauseMedia": "Pause",
     "keepPlaying": "Keep playing",
     "fitOnOpen": "Fit on open",
+    "blurBehavior": "Selection bar when unfocused",
+    "blurBehaviorHint": "When you click into another application.",
+    "blurKeep": "Keep",
+    "blurHide": "Hide",
+    "blurDeselect": "Deselect",
     "enabled": "On",
     "disabled": "Off",
     "placeFrame": "Content frame",
+    "pinnedToolbar": "Toolbar once pinned",
+    "pinnedToolbarHint": "Pinned, the board keeps place, draw and frame. The rest is in the right-click menu.",
     "decompose": "Break a video into frames",
     "decomposeHint": "Places a series of frames sampled from the video on the board.",
     "imagesPerSec": "Frames / s",
@@ -119,12 +129,16 @@
     "upscaleQuick": "Quick",
     "upscaleAsk": "Custom",
     "upscaleQuickHint": "The Upscale button runs straight away with these settings.",
-    "upscaleAskHint": "The Upscale button opens the dialog: model, scale and preview each time.",
+    "upscaleAskHint": "The Upscale button opens the dialog: model, scale, preview.",
     "model": "Model",
     "upscaleModelDefault": "Default upscale model",
     "factor": "Factor",
     "denoise": "Denoise",
     "downloadOnline": "Download online videos",
+    "copyLocal": "Copy local media into the project",
+    "copyLocalOn": "Copy",
+    "copyLocalOff": "Reference",
+    "copyLocalMax": "Video cap (MB)",
     "embedSwitch": "Switch back to player",
     "embedSwitchKeep": "Keep the file",
     "embedSwitchDrop": "Delete the file",
@@ -183,7 +197,53 @@
     "arrangeTitle": "Tidying",
     "autoArrangeOnImport": "Tidy imported batches automatically",
     "autoAnchorDraw": "Link drawings to media automatically",
-    "paletteSize": "Colors per extracted palette"
+    "paletteSize": "Colors per extracted palette",
+    "tabPen": "Pen",
+    "penNav": "Pen and touch navigation",
+    "penGestures": "Pinch to zoom, two fingers to navigate",
+    "penDragPans": "Dragging the empty board navigates",
+    "penDragPansHint": "Auto: on for a touch machine with no mouse. Otherwise a drag marquee-selects.",
+    "penBarrel": "Stylus side button",
+    "penBarrelMenu": "Context menu",
+    "penBarrelPan": "Navigate",
+    "penPalm": "Palm rejection",
+    "penPalmHint": "A finger is ignored while the stylus has just been in use.",
+    "penStroke": "Pen stroke",
+    "penPressure": "Pressure",
+    "penMinWidth": "Width at zero pressure",
+    "penTilt": "Tilt",
+    "penEraser": "Stylus eraser tip",
+    "penStrokeHint": "Pressure and tilt are baked in as you draw: changing a setting redraws nothing.",
+    "penUi": "Interface",
+    "penTouchUi": "Controls always visible",
+    "penTouchUiHint": "Auto: as soon as a stylus is detected, or on a touch machine.",
+    "penBigTargets": "Larger targets",
+    "penProbe": "Detected hardware",
+    "penProbeHint": "Hover with the stylus: the values fill in without drawing.",
+    "penProbePen": "Stylus",
+    "penProbePressure": "Pressure",
+    "penProbeTilt": "Tilt",
+    "penProbeHover": "Hover",
+    "penProbeTouch": "Touch points",
+    "penNoSensor": "no sensor",
+    "penYes": "Yes",
+    "penNo": "No",
+    "barButtons": "Toolbar",
+    "pinnedSide": "Edge",
+    "pinnedButtons": "Pinned bar",
+    "pinnedAvailable": "Available",
+    "pinnedAllPlaced": "Everything is placed.",
+    "pinnedBarHint": "Drag to place or move, click to remove.",
+    "pinnedRemove": "Remove {{label}} from the bar",
+    "sideTop": "Top",
+    "sideBottom": "Bottom",
+    "sideLeft": "Left",
+    "sideRight": "Right",
+    "bgOpacity": "Background opacity",
+    "contentOpacity": "Content opacity",
+    "seeThroughScope": "Also translucent",
+    "seeThroughShell": "Interface",
+    "seeThroughPlaceFrame": "Placement frame"
   },
   "inspector": {
     "ytPlayer": "YouTube player",
@@ -322,7 +382,20 @@
     "grayscale": "Grayscale",
     "toFront": "Bring to front",
     "toBack": "Send to back",
-    "extractPalette": "Extract palette"
+    "extractPalette": "Extract palette",
+    "addText": "Add text",
+    "addFrame": "Add frame",
+    "toggleDraw": "Draw mode",
+    "toggleFreeze": "Freeze all / play all",
+    "prevFrame": "Previous frame",
+    "nextFrame": "Next frame",
+    "toggleMouseThrough": "Transparent to mouse",
+    "newScene": "New scene",
+    "openSettings": "Settings",
+    "togglePin": "Pin the window",
+    "paletteStudio": "Palette generator",
+    "crop": "Crop",
+    "groupSequence": "Group into a sequence"
   },
   "drawStyle": {
     "thin": "Thin stroke",
@@ -482,6 +555,7 @@
     "missingMedia": "Missing media",
     "notBundled": "{{size}} · not bundled",
     "relocate": "Relocate",
+    "reloadMedia": "Re-download",
     "downloading": "Downloading…",
     "mediaFallback": "media",
     "interactiveActive": "Interactive — click elsewhere to move",
@@ -507,7 +581,8 @@
   "youtube": {
     "notEmbeddable": "Video can't be embedded",
     "blocked": "YouTube blocks embedded playback for this video.",
-    "openOnYouTube": "Open on YouTube"
+    "openOnYouTube": "Open on YouTube",
+    "preparing": "Preparing the video…"
   },
   "embed": {
     "frozen": "Playback frozen",
@@ -542,7 +617,7 @@
     "itemLabel": "Sharing: {{level}}",
     "settings": {
       "title": "Media storage",
-      "hint": "What the .netsu file carries, by default. Each media can be set apart from its inspector."
+      "hint": "What the .netsu carries by default. Set per media in the inspector."
     }
   },
   "board": {
@@ -589,7 +664,9 @@
     "noProjectFile": "This board is not linked to a file",
     "relocating": "Searching the folder for media… ({{count}})",
     "relocated": "{{count}}/{{total}} media relocated",
-    "relocatedNone": "No media recognised in this folder"
+    "relocatedNone": "No media recognised in this folder",
+    "contentOpacity": "Content opacity: {{percent}}%",
+    "itemOpacity": "Media opacity: {{percent}}%"
   },
   "tidy": {
     "title": "Tidy",
@@ -631,7 +708,45 @@
     "formatHint": "Copy as {{format}}",
     "layoutRow": "Row",
     "layoutCol": "Column",
-    "layoutGrid": "Square"
+    "layoutGrid": "Square",
+    "studio": {
+      "open": "Palette generator",
+      "edit": "Open in the generator",
+      "close": "Close the generator",
+      "title": "Palette generator",
+      "pickScreen": "Screen eyedropper",
+      "brightness": "Brightness",
+      "tones": "Tones",
+      "fromSelection": "From the selection",
+      "fromBoard": "From the whole board",
+      "noSelection": "Select images on the board",
+      "noMedia": "No image on the board",
+      "reset": "Reset",
+      "pick": "Color picker",
+      "notation": "Notation",
+      "value": "Color value",
+      "place": "Place on the board",
+      "apply": "Apply",
+      "placed": "Palette of {{count}} colors placed",
+      "applied": "Palette updated ({{count}} colors)",
+      "addSwatch": "Add a color",
+      "removeSwatch": "Remove color",
+      "lock": "Lock color",
+      "unlock": "Unlock color",
+      "moveLeft": "Move left",
+      "moveRight": "Move right",
+      "rule": {
+        "custom": "Custom",
+        "analogous": "Analogous",
+        "complementary": "Complementary",
+        "split": "Split complementary",
+        "triadic": "Triadic",
+        "square": "Square",
+        "compound": "Compound",
+        "shades": "Shades",
+        "monochromatic": "Monochrome"
+      }
+    }
   },
   "exportImage": {
     "menu": "Export as image…",
@@ -656,6 +771,16 @@
     "progress": "Importing {{done}}/{{total}}…",
     "reading": "Reading {{count}} files…",
     "done": "{{count}} media imported",
-    "folderTruncated": "Folder too large: first {{count}} media imported"
+    "folderTruncated": "Folder too large: first {{count}} media imported",
+    "importing": "Importing {{name}}…",
+    "fetching": "Fetching the media…",
+    "linkDone": "Media imported",
+    "fetchingFrom": "Fetching from {{source}}…"
+  },
+  "mouseThrough": {
+    "on": "Transparent to mouse",
+    "off": "Take the mouse back",
+    "warning": "Clicks and wheel will go to the application underneath, and the window stays on top. To take control back: give it focus again (Alt+Tab).",
+    "dontAskAgain": "Don't ask again"
   }
 }

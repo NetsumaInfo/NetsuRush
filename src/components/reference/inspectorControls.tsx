@@ -159,7 +159,7 @@ export function FontPicker({ value, onChange }: { value: string; onChange: (v: s
                             onClick={(e) => { e.stopPropagation(); toggleFavFont(v); }}
                             className={cn(
                               "inline-flex size-6 shrink-0 items-center justify-center rounded transition-colors hover:bg-foreground/15 [&_svg]:size-3.5",
-                              fav ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100",
+                              fav ? "text-primary opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100 hoverless:opacity-100",
                             )}
                           >
                             <Star className={fav ? "fill-current" : ""} />

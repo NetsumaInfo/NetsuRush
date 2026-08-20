@@ -7,6 +7,7 @@ import time
 
 import numpy as np
 
+import nrident
 from detect import file_mtime
 
 from . import media, model
@@ -17,6 +18,11 @@ from .config import (DECODE_WORKERS, DEFAULT_SAMPLING_FRAMES, FORCE_TIMEOUT, GRA
 from .db import db_emb
 
 
+# Index d'un fichier, dans l'ordre de transfert : les vecteurs d'abord, le marqueur de complétion
+# ensuite — un marqueur sans ses vecteurs annoncerait un travail qui n'existe pas.
+INDEX_TABLES = ["frame_embeddings_v1", "index_runs_v1"]
+
+
 def _index_image(path, mt, force=False):
     """Image fixe = 1 plan (l'image entière). Aucune détection de plans : on embed directement
     (sinon TransNetV2 tournerait sur 1 image = long pour rien)."""
@@ -25,6 +31,14 @@ def _index_image(path, mt, force=False):
     done = con.execute(
         "SELECT mtime FROM index_runs_v1 WHERE file_path=? AND model=?", (path, MODEL_TAG),
     ).fetchone()
+    if not force and not (done and done[0] is not None and abs(done[0] - mt) <= 1.0):
+        if done and done[0] is not None:
+            nrident.realign(con, path, INDEX_TABLES, done[0])
+        else:
+            nrident.rescue(con, path, INDEX_TABLES)
+        done = con.execute(
+            "SELECT mtime FROM index_runs_v1 WHERE file_path=? AND model=?", (path, MODEL_TAG),
+        ).fetchone()
     if not force and done and done[0] is not None and abs(done[0] - mt) <= 1.0:
         con.close()
         return {"ok": True, "file": path, "indexed": 0, "total": 1, "cached": True, "error": None}
@@ -53,6 +67,7 @@ def _index_image(path, mt, force=False):
         "VALUES (?,?,?,?,?,?,?)", (path, MODEL_TAG, mt, 1, 1, time.time(), "image"),
     )
     con.commit()
+    nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()
     sys.stderr.write("STAGE:prog:1/1\n"); sys.stderr.flush()
     return {"ok": True, "file": path, "indexed": 1, "total": 1, "cached": False, "error": None}
@@ -85,7 +100,26 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
     # Legacy (1-frame, sampling NULL) jamais à jour → ré-indexé sans Forcer.
     cur = done[2] if done else None
     current_fmt = sampling_current(cur, fmt, cut_key, legacy_key)
-    if not force and n > 0 and done and done[1] == n and done[0] is not None and abs(done[0] - mt) <= 1.0 and current_fmt:
+
+    def usable(run, fmt_ok):
+        return bool(n > 0 and run and run[1] == n and run[0] is not None
+                    and abs(run[0] - mt) <= 1.0 and fmt_ok)
+
+    if not force and not usable(done, current_fmt):
+        # Rien d'utilisable sous ce chemin. Deux rattrapages avant de rembobiner le GPU : l'index
+        # écrit pour ce fichier sous un horodatage périmé (copie, restauration) et celui d'un
+        # fichier IDENTIQUE déjà indexé sous un autre nom (cf. python/nrident.py).
+        if done and done[0] is not None and abs(done[0] - mt) > 1.0:
+            nrident.realign(con, path, INDEX_TABLES, done[0])
+        elif not done:
+            nrident.rescue(con, path, INDEX_TABLES)
+        done = con.execute(
+            "SELECT mtime, total, sampling FROM index_runs_v1 WHERE file_path=? AND model=?",
+            (path, MODEL_TAG),
+        ).fetchone()
+        cur = done[2] if done else None
+        current_fmt = sampling_current(cur, fmt, cut_key, legacy_key)
+    if not force and usable(done, current_fmt):
         con.close()
         return {"ok": True, "file": path, "indexed": 0, "total": n, "cached": True, "error": None}
     if n == 0:  # aucun plan détecté (fichier illisible, audio) → l'index existant reste intact
@@ -238,6 +272,7 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
                                    sampling_tag(fmt, cut_key)),
     )
     con.commit()
+    nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()
     return {"ok": True, "file": path, "indexed": indexed, "skipped": skipped,
             "total": n, "cached": False, "error": None}

@@ -65,6 +65,8 @@ async function discoverBase(): Promise<void> {
     try {
       const { invoke } = await import("@tauri-apps/api/core");
       const port = await invoke<number>("nr_core_port");
+      // Same round trip as the port: a shell that predates the command simply leaves the token empty.
+      setToken(await invoke<string>("nr_core_token").catch(() => ""));
       if (port) {
         BASE = `http://127.0.0.1:${port}`;
         return;
@@ -93,12 +95,20 @@ function forgetBase() {
   discovery = null;
 }
 
-// Token partagé optionnel : si la coquille Tauri l'injecte (window.__NR_TOKEN__), on l'envoie au core
-// (header /rpc + query `tk` sur /media et /stream) pour qu'il authentifie nos requêtes. Absent (dev,
-// avant câblage) → chaîne vide, le core n'exige rien (cf. media-server.js NR_CORE_TOKEN).
-const TOKEN: string =
+// Shared token: the Tauri shell draws it at launch and hands it over with the port
+// (`nr_core_token`). It goes out as the `x-nr-token` header on /rpc and as the `tk` query parameter
+// on the routes that cannot carry a header (/media, /stream, /ytstream, and EventSource). Absent
+// outside the shell (browser dev) → empty string, and the core falls back to the origin check alone
+// (cf. core/httpSecurity.js). Mutable because discovery is async: every read below is lazy.
+let TOKEN: string =
   (typeof window !== "undefined" && (window as unknown as { __NR_TOKEN__?: string }).__NR_TOKEN__) || "";
-const tkParam = TOKEN ? `&tk=${encodeURIComponent(TOKEN)}` : "";
+let tkParam = TOKEN ? `&tk=${encodeURIComponent(TOKEN)}` : "";
+
+function setToken(value: string): void {
+  if (!value || value === TOKEN) return;
+  TOKEN = value;
+  tkParam = `&tk=${encodeURIComponent(value)}`;
+}
 
 // ---- Chemins disque des fichiers lâchés depuis l'Explorateur ----
 // Chromium masque le chemin des objets `File` (pas de `File.path`). Activer `dragDropEnabled`
@@ -437,6 +447,7 @@ const reference: RefApi = {
   scanFolder: (dir, opts) => call("reference:scanFolder", [dir, opts || {}]),
   writeFile: (p, data, encoding) => call("reference:writeFile", [p, data, encoding]),
   sampleFrame: (p, opts) => call("reference:sampleFrame", [p, opts || {}]),
+  playInfo: (p) => call("reference:playInfo", [p]),
   extractMedia: (url, options) => call("reference:extractMedia", [url, options || {}]),
   extractFrames: (opts) => call("reference:extractFrames", [opts]),
   exportBoard: (scene, destPath, opts) => call("netsu:export", [scene, destPath, opts]),
@@ -476,6 +487,11 @@ const reference: RefApi = {
         title: i18n.t("common:window.reference"),
         decorations: false,
         alwaysOnTop: true,
+        // Set HERE and not in tauri.conf.json: the main window embeds mpv as a native Win32 child
+        // (src-tauri/src/player/mpv_window.rs), and a layered parent puts that child's rendering at
+        // risk. This floating window carries no mpv surface, and it is the one that sits over
+        // another application — so it is the one that can see through.
+        transparent: true,
         width: 720,
         height: 560,
         minWidth: 360,
@@ -960,6 +976,7 @@ export function makeCoreClient(): NrApi {
         ? requestParentFiles(false, []).then((a) => (a && a[0]) || null)
         : (dlgOpen({ multiple: false }) as Promise<string | null>),
     pathsForFiles: (files) => resolveFilePaths(files),
+    warmFilePaths: () => { void ensurePathBridge(); },
     saveFile: (defaultName) => dlgSave(defaultName),
     mediaUrl: (p) => `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
     assetUrl: (p) => assetSrc(p) ?? `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
@@ -967,6 +984,13 @@ export function makeCoreClient(): NrApi {
     openExternal: (url) => openUrl(url),
     openPath: (p) => openPath(p),
     revealPath: (p) => revealPath(p),
+    setMouseTransparent: (on) => {
+      void (async () => {
+        if (!isTauri) return;
+        const { getCurrentWindow } = await import("@tauri-apps/api/window");
+        await getCurrentWindow().setIgnoreCursorEvents(on).catch(() => {});
+      })();
+    },
     setAlwaysOnTop: (on) => {
       void (async () => {
         if (!isTauri) return;

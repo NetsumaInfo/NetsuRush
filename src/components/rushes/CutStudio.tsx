@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
-import { nr, nextProxyToken } from "@/lib/bridge";
-import { thumbTime } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -34,7 +32,6 @@ import { TimelineInsertionSelect } from "./TimelineInsertionSelect";
 import { modelUsesPreset } from "@/lib/detection";
 import { DetectionAdvancedSettings } from "./DetectionAdvancedSettings";
 import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls";
-import { toast } from "@/components/ui/toast";
 
 // Seuils de mise en page (px) : sous NARROW_W la vue passe en colonne, et la grille garde toujours
 // au moins MIN_GRID_W — sinon la barre d'outils n'a plus de place et ses boutons s'empilent.
@@ -58,7 +55,8 @@ export function CutStudio() {
     info, duration, segments, srcFrames, detecting, cacheLoading, progress,
     active, activeUrl,
     err, setErr, preset, setPreset, model, setModel,
-    proxyCache, getProxy, warmProxies, playScene, detect,
+    getProxy, peekProxy, bustProxy, warmProxies, playScene, detect,
+    generateProxies: genProxies, generateThumbs: genThumbs, proxyGen, thumbsGen,
     hasEdits, clearEdits, undoEdit, redoEdit,
   } = det;
 
@@ -86,9 +84,6 @@ export function CutStudio() {
 
   const { sel, setSel, toggleSel, selectAll, deselect, mergeSelected, removeSelected } = useCutActions(det, clip.path);
   const [gridPlay, setGridPlay] = useState(() => useApp.getState().cutGridPlay);
-  const [proxyGen, setProxyGen] = useState<{ done: number; total: number } | null>(null);
-  const [thumbsGen, setThumbsGen] = useState<{ done: number; total: number } | null>(null);
-  const thumbsAbortRef = useRef(false);
   const playerApi = useRef<ScenePlayerApi | null>(null);
 
   // « Tout lire » concentre la lecture sur la grille : le lecteur latéral s'arrête immédiatement
@@ -220,77 +215,35 @@ export function CutStudio() {
       : {}),
   }, { frameStep: (d) => { const a = playerApi.current; if (a) a.seek(a.time() + d); } });
 
-  // Tokens des jobs proxy en cours (un par plan) → permettent d'ANNULER : proxyCancel(token) jette
-  // les jobs encore en file et SIGKILL le ffmpeg en vol. genAbort = drapeau pour le message final.
-  const genTokensRef = useRef<number[]>([]);
-  const genAbortRef = useRef(false);
+  // Liste VIVANTE pour les pré-générations sans sélection : la ref est réécrite à chaque rendu, donc
+  // un run suit les plans affichés (fusion, retrait, re-détection) au lieu de rester sur ceux du clic.
+  // Une sélection reste gelée au clic — cf. TimelineLiveView.
+  const segmentsRef = useRef(segments);
+  segmentsRef.current = segments;
+  const genSource = () => {
+    const picked = selectedList();
+    return picked.length ? picked : () => segmentsRef.current;
+  };
 
-  // Pré-génère les proxys d'aperçu de TOUS les plans (ou de la sélection) à la MÊME hauteur que la
-  // grille (palier de cache identique → la lecture auto réutilise les fichiers, instantanée). En
-  // priorité 'low' : la file core cède toujours au survol/au plan actif, donc l'UI reste réactive.
-  //
-  // Pool BORNÉ (pas de Promise.all sur 1400 plans) : sinon le navigateur étale les fetch par vagues
-  // et des requêtes partent APRÈS l'« Arrêter » → elles encodaient quand même (« ça continue »). Ici
-  // un nombre fixe d'ouvriers tire les plans un par un ; l'arrêt lève genAbort → aucun nouveau fetch,
-  // et proxyCancelMany tue les rares encodes déjà en vol (kill ffmpeg + tokens marqués annulés).
-  async function generateProxies() {
-    if (proxyGen) {   // déjà en cours → le bouton sert d'ARRÊT
-      genAbortRef.current = true;
-      nr.proxyCancelMany(genTokensRef.current);
-      return;
-    }
+  // Boutons « pré-générer » : pools bornés, arrêt par re-clic, comptes et bilan — implémentation
+  // partagée avec Timeline Live et Collections (cf. previewCache). La hauteur passée est celle de la
+  // cellule mesurée, donc le palier de cache est exactement celui que la lecture auto ira relire.
+  function generateProxies() {
     const list = targetList();
     if (!list.length) return;
-    // hauteur de cellule = largeur carte × 9/16 × DPR (cf. SceneCard) → même palier que la grille.
-    const el = gridScrollRef.current;
-    let height: number | undefined;
-    if (el?.clientWidth) {
-      const cardW = gridMetrics(el.clientWidth, cols, narrow).cell;
-      height = Math.round(((cardW * 9) / 16) * (window.devicePixelRatio || 1));
-    }
     setErr(null);
-    genAbortRef.current = false;
-    genTokensRef.current = [];
-    let done = 0, idx = 0;
-    setProxyGen({ done, total: list.length });
-    // 6 ouvriers = encodes en vol bornés → « Arrêter » ne laisse que ≤6 ffmpeg à tuer, instantané.
-    const worker = async () => {
-      while (idx < list.length && !genAbortRef.current) {
-        const s = list[idx++];
-        const token = nextProxyToken();
-        genTokensRef.current.push(token);
-        try { await getProxy(s, "low", height, token); } catch { /* plan suivant */ }
-        done++; setProxyGen({ done, total: list.length });
-      }
-    };
-    await Promise.all(Array.from({ length: 6 }, worker));
-    setProxyGen(null);
-    if (genAbortRef.current) { toast.info(t("cutStudio.genStopped", { done, total: list.length })); genAbortRef.current = false; }
-    else toast.ok(t("cutStudio.proxiesReady", { count: list.length }));
+    const el = gridScrollRef.current;
+    const height = el?.clientWidth
+      ? Math.round(((gridMetrics(el.clientWidth, cols, narrow).cell * 9) / 16) * (window.devicePixelRatio || 1))
+      : undefined;
+    void genProxies(genSource(), height);
   }
 
-  // Pré-génère les vignettes de la grille. Pool BORNÉ (8 ouvriers) + ARRÊT, comme les proxys : un
-  // nr.thumbnail par plan (caché disque/RAM), CPU (thumbGate) → tourne EN MÊME TEMPS que l'encode
-  // proxy (GPU). Re-clic pendant = ARRÊT (thumbsAbort → plus aucun fetch lancé).
-  async function generateThumbs() {
-    if (thumbsGen) { thumbsAbortRef.current = true; return; }
+  function generateThumbs() {
     const list = targetList();
     if (!list.length) return;
     setErr(null);
-    thumbsAbortRef.current = false;
-    let done = 0, idx = 0;
-    setThumbsGen({ done, total: list.length });
-    const worker = async () => {
-      while (idx < list.length && !thumbsAbortRef.current) {
-        const s = list[idx++];
-        try { await nr.thumbnail(clip.path, thumbTime(s.in, s.out)); } catch { /* plan suivant */ }
-        done++; setThumbsGen({ done, total: list.length });
-      }
-    };
-    await Promise.all(Array.from({ length: 8 }, worker));
-    setThumbsGen(null);
-    if (thumbsAbortRef.current) { toast.info(t("cutStudio.thumbsStopped", { done, total: list.length })); thumbsAbortRef.current = false; }
-    else toast.ok(t("cutStudio.thumbsReady", { count: list.length }));
+    void genThumbs(genSource());
   }
 
   const selCount = selectedList().length;
@@ -444,7 +397,7 @@ export function CutStudio() {
                 {segments.map((s, i) => (
                   <SceneCard key={s.id} seg={s} index={i} clipPath={clip.path} clipName={clip.name} srcFrames={srcFrames}
                     active={active?.id === s.id} selected={sel.has(s.id)} play={gridPlay}
-                    getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => proxyCache.delete(s.id)} peekProxy={() => proxyCache.get(s.id) ?? null} onPlay={() => playScene(s)}
+                    getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => bustProxy(s)} peekProxy={() => peekProxy(s)} onPlay={() => playScene(s)}
                     onToggle={(mods) => toggleSel(s.id, mods)}
                     onAddToTimeline={showCardBtn ? () => runCardAction(s) : undefined}
                     addLabel={cardProfile.name}

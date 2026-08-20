@@ -104,19 +104,32 @@ export const AUDIO_LANGUAGES: { code: string; label: string }[] = [
 export const AUDIO_TRACK_SLOTS = 4;
 
 // Timeline visée par l'import (workflow timeline_import) : « open » = celle ouverte dans l'hôte,
-// « new » = toujours une nouvelle, « tl:<nom> » = une existante par son nom. MÊME encodage que
-// useTimelineTarget → le popover de destination se réutilise tel quel, sans conversion.
+// « new » / « new:<nom> » = toujours une nouvelle (nommée ou auto), « tl:<nom> » = une existante par
+// son nom. MÊME encodage que useTimelineTarget → le popover de destination se réutilise tel quel.
 export type TimelineTargetValue = string;
 const DEFAULT_TIMELINE_TARGET: TimelineTargetValue = "open";
 
 export function coerceTimelineTarget(v: string | undefined | null): TimelineTargetValue {
   if (v === "open" || v === "new") return v;
   if (typeof v === "string" && v.startsWith("tl:") && v.slice(3).trim()) return v;
+  // « new:<nom> » = nouvelle timeline nommée à la main. Saisie gardée BRUTE (trim au point d'usage,
+  // comme binTarget) : trimmer ici mangerait les espaces pendant la frappe.
+  if (typeof v === "string" && v.startsWith("new:")) return v.slice(4) ? v : "new";
   return DEFAULT_TIMELINE_TARGET;
 }
 
 export function timelineTargetName(v: TimelineTargetValue): string | null {
   return v.startsWith("tl:") ? v.slice(3) : null;
+}
+
+/** Cible « nouvelle timeline » (nommée ou non). */
+export function isNewTimelineTarget(v: TimelineTargetValue): boolean {
+  return v === "new" || v.startsWith("new:");
+}
+
+/** Nom saisi pour la nouvelle timeline, brut (null si aucun). */
+export function timelineNewName(v: TimelineTargetValue): string | null {
+  return v.startsWith("new:") ? v.slice(4) : null;
 }
 
 export function audioLanguageLabel(code: string | undefined | null): string {
@@ -173,7 +186,7 @@ export interface ExportProfile {
   // Destination de l'import timeline (workflow timeline_import) : null/absent = timeline à la racine ;
   // une chaîne = nom du DOSSIER Media Pool où ranger la timeline créée. Ignoré hors timeline_import.
   binTarget?: string | null;
-  // Timeline visée par l'import (workflow timeline_import) : "open" | "new" | "tl:<nom>".
+  // Timeline visée par l'import (workflow timeline_import) : "open" | "new" | "new:<nom>" | "tl:<nom>".
   timelineTarget?: TimelineTargetValue;
 }
 

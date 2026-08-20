@@ -18,6 +18,8 @@ export function UpdateSettings() {
   const error = useUpdater((state) => state.error);
   const autoCheck = useUpdater((state) => state.autoCheck);
   const setAutoCheck = useUpdater((state) => state.setAutoCheck);
+  const autoInstall = useUpdater((state) => state.autoInstall);
+  const setAutoInstall = useUpdater((state) => state.setAutoInstall);
   const check = useUpdater((state) => state.check);
   const download = useUpdater((state) => state.download);
   const install = useUpdater((state) => state.install);
@@ -44,6 +46,18 @@ export function UpdateSettings() {
           </div>
           <Toggle pressed={autoCheck} onPressedChange={setAutoCheck} aria-label={t("updates.auto")}>
             {autoCheck ? t("updates.on") : t("updates.off")}
+          </Toggle>
+        </div>
+
+        {/* Unattended install. Second row rather than a third state of the first toggle: checking
+            and restarting on their own are two different levels of consent. */}
+        <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
+          <div>
+            <p className="text-sm font-medium">{t("updates.autoInstall")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("updates.autoInstallHint")}</p>
+          </div>
+          <Toggle pressed={autoInstall} onPressedChange={setAutoInstall} aria-label={t("updates.autoInstall")}>
+            {autoInstall ? t("updates.on") : t("updates.off")}
           </Toggle>
         </div>
 

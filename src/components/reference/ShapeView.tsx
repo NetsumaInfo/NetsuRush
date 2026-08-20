@@ -1,6 +1,6 @@
 // Rendu SVG d'une forme de dessin (stylo, ligne, flèche cintrée, rect, ellipse, losange, texte).
 import type { ArrowHead, DrawShape } from "./referenceShared";
-import { connectorPath, dashArray, penPath } from "./drawGeometry";
+import { connectorPath, dashArray, penOutline, penPath } from "./drawGeometry";
 
 // Pointe posée à l'extrémité (tx,ty), `ang` = direction du tracé VERS la pointe. `c`/`w` = couleur/épaisseur.
 function HeadMark({ type, tx, ty, ang, len, c, w }: {
@@ -32,7 +32,13 @@ export function ShapeView({ s }: { s: DrawShape }) {
   // `op` = opacité de la FORME entière (trait + remplissage + pointes) — surligneur & réglage libre.
   const op = s.op != null && s.op < 1 ? s.op : undefined;
   const common = { stroke: s.c, strokeWidth: s.w, fill: "none", strokeLinecap: "round" as const, strokeLinejoin: "round" as const, strokeDasharray: dashArray(s.dash, s.w), opacity: op };
-  if (s.t === "pen") return <path d={penPath(s.p)} {...common} />;
+  // Tracé au stylet : l'épaisseur varie point par point, donc plus de `stroke` (constant par
+  // chemin) — un contour rempli. Le pointillé n'a pas de sens sur un tracé pressionné et n'est pas
+  // proposé pour lui : la forme porte son épaisseur, pas un motif de trait.
+  if (s.t === "pen") {
+    if (s.pw?.length) return <path d={penOutline(s.p, s.pw, s.w)} fill={s.c} stroke="none" opacity={op} />;
+    return <path d={penPath(s.p)} {...common} />;
+  }
   if (s.t === "line" || s.t === "arrow") {
     const [x1, y1, x2, y2] = s.p;
     const { d, startAng, endAng } = connectorPath(s);

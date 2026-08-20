@@ -16,12 +16,14 @@ import { Inspector } from "./Inspector";
 import { SequencePlayer } from "./SequencePlayer";
 import { CropOverlay } from "./CropOverlay";
 import { ReferenceBoard, type BoardHandle } from "./ReferenceBoard";
+import { PaletteStudio } from "./PaletteStudio";
 import { useScenePersistence } from "./useScenePersistence";
 import { useBoardShortcuts } from "./useBoardShortcuts";
 import { useProjectActions } from "./useProjectActions";
 import { useReferencePush } from "./useReferencePush";
 import { useAutosave } from "./useAutosave";
 import { useUnsavedWarning } from "./useUnsavedWarning";
+import { useDeselectOnBlur } from "./useAppFocus";
 
 // Fenêtre frameless : bande mince = zone de déplacement (sinon la fenêtre sans cadre ne bouge plus).
 // Au survol, la bande révèle deux icônes (épingler, rattacher) ; la bande reste déplaçable, seules
@@ -52,21 +54,29 @@ export function ReferenceWindow() {
     nr.reference?.setAlwaysOnTop(next);
   };
 
-  useBoardShortcuts(boardRef, { onSave: project.save, onSaveAs: project.saveAs, onOpenProject: project.openProject });
+  useBoardShortcuts(boardRef, {
+    onSave: project.save,
+    onSaveAs: project.saveAs,
+    onOpenProject: project.openProject,
+    onSettings: () => setSettingsDlg(true),
+    // Detached window: the pin toggles ITS own always-on-top, not the main window format.
+    onTogglePin: togglePin,
+  });
   useReferencePush(boardRef);
   // Autosave SANS restauration (le board initial vient du handoff, pas de l'autosave).
   useAutosave(persistence, { restore: false });
   useUnsavedWarning();
+  useDeselectOnBlur();
 
   return (
     <TooltipProvider delay={600}>
-      <div className="relative flex h-screen flex-col overflow-hidden bg-[var(--color-bg)]">
+      <div className="nr-shell-bg relative flex h-screen flex-col overflow-hidden bg-[var(--color-bg)]">
         {/* Bande de déplacement (frameless). Poignée toujours visible ; au survol, deux icônes
             apparaissent (épingler / rattacher). La bande reste déplaçable, seules les icônes non. */}
-        <div className="group flex h-6 shrink-0 items-center px-2" style={DRAG}>
+        <div className="nr-chrome-page group flex h-6 shrink-0 items-center px-2" style={DRAG}>
           <div className="flex-1" />
-          <span className="h-1 w-10 rounded-full bg-border transition-opacity group-hover:opacity-0" />
-          <div className="flex flex-1 items-center justify-end gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={NO_DRAG}>
+          <span className="h-1 w-10 rounded-full bg-border transition-opacity group-hover:opacity-0 hoverless:opacity-0" />
+          <div className="flex flex-1 items-center justify-end gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 hoverless:opacity-100" style={NO_DRAG}>
             <Tooltip>
               <TooltipTrigger
                 render={<Button variant="ghost" size="icon-sm" aria-label={pinned ? t("actions.unpin") : t("actions.pin")} aria-pressed={pinned} onClick={togglePin} />}
@@ -107,6 +117,9 @@ export function ReferenceWindow() {
         <MediaPicker open={pickDlg} onOpenChange={setPickDlg} board={boardRef} />
         <BoardSettings open={settingsDlg} onOpenChange={setSettingsDlg} />
         <CropOverlay />
+        {/* The detached window carries the inspector, so it carries its "open in the generator"
+            button too — without the panel mounted here that button would do nothing. */}
+        <PaletteStudio />
       </div>
     </TooltipProvider>
   );

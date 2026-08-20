@@ -18,6 +18,11 @@
   var hostEnv = cs.getHostEnvironment();
   var APP = hostEnv.appName === "PPRO" ? "ppro" : "aeft";
   var coreOnline = false;
+  // Shared token drawn by the Tauri shell and published in core-port.json. /rpc and /events refuse
+  // this panel on its origin alone — Adobe loads it from disk, so it carries `file:` or none at all.
+  // Read from a file the way the app path already is; a web page has no such reach, which is exactly
+  // what the guard leans on (core/httpSecurity.js).
+  var coreToken = "";
   var es = null;
   var esRetryTimer = null;
   var currentLang = "fr";
@@ -184,10 +189,34 @@
     relayLog(msg, isErr);
   }
 
+  // NR_HOME defaults to %LOCALAPPDATA%\NetsuRush (core/config.js). Re-read on every failed
+  // heartbeat: the core redraws its token at each launch, and the panel outlives the application.
+  function readCoreToken() {
+    var local = localAppData();
+    if (!local) return;
+    try {
+      var r = window.cep && window.cep.fs ? window.cep.fs.readFile(local + "/NetsuRush/core-port.json") : null;
+      if (!r || r.err !== 0 || !r.data) return;
+      var j = JSON.parse(r.data);
+      if (j && typeof j.token === "string") coreToken = j.token;
+    } catch (e0) { /* absent or unreadable: the origin check remains the only way through */ }
+  }
+
+  function rpcHeaders() {
+    var h = { "content-type": "application/json" };
+    if (coreToken) h["x-nr-token"] = coreToken;
+    return h;
+  }
+
+  // EventSource sets no header: the token can only travel in the query string, as on /media.
+  function tkQuery(prefix) {
+    return coreToken ? prefix + "tk=" + encodeURIComponent(coreToken) : "";
+  }
+
   function rpc(channel, args) {
     return fetch(CORE + "/rpc", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: rpcHeaders(),
       body: JSON.stringify({ channel: channel, args: args || [] })
     }).then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status + " · rpc " + channel);
@@ -260,10 +289,13 @@
       .catch(function () {
         setOnline(false);
         // Injoignable : soit le service est éteint, soit il a démarré ailleurs. On cherche, et le
-        // battement suivant retentera sur l'adresse trouvée.
+        // battement suivant retentera sur l'adresse trouvée. A restarted core also means a fresh
+        // token, so it is re-read here rather than only once at load.
+        readCoreToken();
         findCore(CORE_PORT_FIRST);
       });
   }
+  readCoreToken();
   heartbeat();
   setInterval(heartbeat, 5000);
 
@@ -272,7 +304,7 @@
     if (es) return;
     if (esRetryTimer) { clearTimeout(esRetryTimer); esRetryTimer = null; }
     try {
-      es = new EventSource(CORE + "/events");
+      es = new EventSource(CORE + "/events" + tkQuery("?"));
       es.onmessage = function (e) {
         var msg;
         try { msg = JSON.parse(e.data); } catch (e0) { return; }

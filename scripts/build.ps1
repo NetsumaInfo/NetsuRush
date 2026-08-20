@@ -154,13 +154,31 @@ New-Item -ItemType Directory -Force -Path $stageWindows | Out-Null
 Copy-Item -Force (Join-Path $root 'vendor\mpv\*.dll') $stageWindows
 
 Write-Host '== 5/5 tauri build (NSIS) =='
+# Signature Authenticode. Elle est OPT-IN par NETSURUSH_SIGN_COMMAND et n'est deliberement pas figee
+# dans tauri.conf.json : un signCommand permanent ferait echouer tout build sur une machine sans
+# outil de signature. Tauri lance la commande sur CHAQUE binaire du paquet, %1 = le fichier a signer.
+# Sans signature l'installeur reste diffusable, mais il repart de zero en reputation SmartScreen a
+# chaque version et se fait noter beaucoup plus durement par les classifieurs de Defender.
+# Details et choix de certificat : docs\code-signing.md
+$signConfig = Join-Path $root 'src-tauri\tauri.sign.conf.json'
+if (Test-Path $signConfig) { Remove-Item -Force $signConfig }
+$tauriArgs = @()
+if ($env:NETSURUSH_SIGN_COMMAND) {
+  $overlay = @{ bundle = @{ windows = @{ signCommand = $env:NETSURUSH_SIGN_COMMAND } } }
+  $json = $overlay | ConvertTo-Json -Depth 6
+  [System.IO.File]::WriteAllText($signConfig, $json, [System.Text.UTF8Encoding]::new($false))
+  $tauriArgs = @('--config', $signConfig)
+  Write-Host "  signature Authenticode ACTIVE : $env:NETSURUSH_SIGN_COMMAND"
+} else {
+  Write-Warning 'NETSURUSH_SIGN_COMMAND absent : installeur NON SIGNE (SmartScreen avertira).'
+}
 # Supprime seulement l'artefact de la version courante : ainsi un ancien setup ne peut jamais
 # transformer un build incomplet en faux succes, tout en preservant les versions precedentes.
 if (Test-Path $outDir) {
   Get-ChildItem -Path $outDir -Filter $artifactFilter -File -ErrorAction SilentlyContinue |
     Remove-Item -Force
 }
-npm run tauri build
+if ($tauriArgs.Count -gt 0) { npm run tauri build -- @tauriArgs } else { npm run tauri build }
 if ($LASTEXITCODE -ne 0) { throw 'tauri build echoue' }
 
 $out = Get-ChildItem -Path $outDir -Filter $artifactFilter -File -ErrorAction SilentlyContinue |

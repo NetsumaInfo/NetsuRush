@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Popover } from "@base-ui/react/popover";
 import { Clapperboard, Film, Search, Plus, FolderOpen, ChevronDown } from "lucide-react";
 import { type TimelineTargetView } from "./useTimelineTarget";
+import { isNewTimelineTarget, timelineNewName } from "@/features/export/profiles";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,7 +25,10 @@ export function TimelineTargetSelect({ target, className }: { target: TimelineTa
 
   // Libellé du déclencheur d'après la valeur courante. « Timeline ouverte » alors qu'AUCUNE ne l'est
   // annonce « nouvelle timeline » : c'est ce que le montage fera réellement (repli de build()).
-  const label = value === "new" || (value === "open" && !current) ? t("target.newTimeline")
+  const isNew = isNewTimelineTarget(value);
+  const newName = (timelineNewName(value) || "").trim();
+  const label = isNew && newName ? newName
+    : isNew || (value === "open" && !current) ? t("target.newTimeline")
     : value === "open" ? t("target.openedNamed", { name: current })
     : value.startsWith("tl:") ? value.slice(3)
     : t("target.choose");
@@ -57,10 +61,23 @@ export function TimelineTargetSelect({ target, className }: { target: TimelineTa
                   <Badge variant={value === "open" ? "secondary" : "outline"} className="shrink-0 text-[10px]">{current}</Badge>
                 </button>
               )}
-              <button type="button" onClick={() => pick("new")} className={rowCls(value === "new")}>
+              {/* « Nouvelle timeline » ne ferme PAS le popover : le champ de nom s'ouvre juste dessous
+                  (nom vide = nom déduit du contexte, affiché en placeholder par l'appelant). */}
+              <button type="button" onClick={() => { setValue(value.startsWith("new:") ? value : "new"); }} className={rowCls(isNew)}>
                 <Plus className="h-3.5 w-3.5 shrink-0 opacity-70" />
                 <span className="min-w-0 flex-1 truncate">{t("target.newTimeline")}</span>
               </button>
+              {isNew && (
+                <Input
+                  autoFocus
+                  value={timelineNewName(value) ?? ""}
+                  onChange={(e) => setValue(e.target.value ? `new:${e.target.value}` : "new")}
+                  onKeyDown={(e) => { if (e.key === "Enter") setOpen(false); }}
+                  placeholder={t("target.newNamePlaceholder")}
+                  aria-label={t("target.newNameLabel")}
+                  className="h-8 text-xs"
+                />
+              )}
             </div>
 
             {others.length > 0 && (

@@ -11,6 +11,7 @@
     "flipV": "Voltear vertical",
     "crop": "Recortar",
     "openLink": "Abrir el enlace",
+    "reloadMedia": "Recargar medio",
     "download": "Descargar",
     "restoreDownload": "Volver al archivo descargado",
     "zoomIn": "Acercar",
@@ -55,7 +56,9 @@
     "unsaved": "Sin guardar",
     "saveAs": "Guardar como…",
     "snapOn": "Activar el imán",
-    "snapOff": "Desactivar el imán"
+    "snapOff": "Desactivar el imán",
+    "snap": "Imán",
+    "freeze": "Congelar / reproducir"
   },
   "settings": {
     "tabLook": "Apariencia",
@@ -102,9 +105,16 @@
     "pauseMedia": "Pausar",
     "keepPlaying": "Seguir reproduciendo",
     "fitOnOpen": "Encuadrar al abrir",
+    "blurBehavior": "Barra de selección sin foco",
+    "blurBehaviorHint": "Al hacer clic en otra aplicación.",
+    "blurKeep": "Mantener",
+    "blurHide": "Ocultar",
+    "blurDeselect": "Deseleccionar",
     "enabled": "Activado",
     "disabled": "Desactivado",
     "placeFrame": "Marco de la zona de colocación",
+    "pinnedToolbar": "Barra de herramientas al fijar",
+    "pinnedToolbarHint": "Fijado, el tablero conserva colocar, dibujar y encuadrar. El resto, en el menú contextual.",
     "decompose": "Descomponer un vídeo en imágenes",
     "decomposeHint": "Coloca una serie de imágenes muestreadas del vídeo en el tablero.",
     "imagesPerSec": "Imágenes / s",
@@ -119,12 +129,16 @@
     "upscaleQuick": "Rápido",
     "upscaleAsk": "Personalizado",
     "upscaleQuickHint": "El botón Escalar se ejecuta directamente con estos ajustes.",
-    "upscaleAskHint": "El botón Escalar abre la ventana: modelo, escala y vista previa cada vez.",
+    "upscaleAskHint": "El botón Escalar abre la ventana: modelo, escala, vista previa.",
     "model": "Modelo",
     "upscaleModelDefault": "Modelo de escalado por defecto",
     "factor": "Factor",
     "denoise": "Reducción de ruido",
     "downloadOnline": "Descargar los vídeos en línea",
+    "copyLocal": "Copiar los medios locales en el proyecto",
+    "copyLocalOn": "Copiar",
+    "copyLocalOff": "Referenciar",
+    "copyLocalMax": "Límite de vídeo (MB)",
     "embedSwitch": "Cambio al reproductor",
     "embedSwitchKeep": "Conservar el archivo",
     "embedSwitchDrop": "Eliminar el archivo",
@@ -183,7 +197,53 @@
     "arrangeTitle": "Ordenación",
     "autoArrangeOnImport": "Ordenar automáticamente los lotes importados",
     "autoAnchorDraw": "Vincular automáticamente los trazos a los medios",
-    "paletteSize": "Colores por paleta extraída"
+    "paletteSize": "Colores por paleta extraída",
+    "tabPen": "Lápiz",
+    "penNav": "Navegación con lápiz y con el dedo",
+    "penGestures": "Pellizcar para hacer zoom, dos dedos para navegar",
+    "penDragPans": "Arrastrar sobre el fondo navega",
+    "penDragPansHint": "Auto: activado en un táctil sin ratón. Si no, arrastrar selecciona con lazo.",
+    "penBarrel": "Botón lateral del lápiz",
+    "penBarrelMenu": "Menú contextual",
+    "penBarrelPan": "Navegar",
+    "penPalm": "Rechazo de la palma",
+    "penPalmHint": "Se ignora el dedo mientras el lápiz acaba de usarse.",
+    "penStroke": "Trazo con lápiz",
+    "penPressure": "Presión",
+    "penMinWidth": "Grosor con presión cero",
+    "penTilt": "Inclinación",
+    "penEraser": "Punta borradora del lápiz",
+    "penStrokeHint": "Presión e inclinación quedan fijadas al trazar: cambiar un ajuste no redibuja nada.",
+    "penUi": "Interfaz",
+    "penTouchUi": "Controles siempre visibles",
+    "penTouchUiHint": "Auto: en cuanto se detecta un lápiz, o en un táctil.",
+    "penBigTargets": "Objetivos más grandes",
+    "penProbe": "Hardware detectado",
+    "penProbeHint": "Pasa el lápiz por encima: los valores se rellenan sin dibujar.",
+    "penProbePen": "Lápiz",
+    "penProbePressure": "Presión",
+    "penProbeTilt": "Inclinación",
+    "penProbeHover": "Sobrevuelo",
+    "penProbeTouch": "Puntos táctiles",
+    "penNoSensor": "sin sensor",
+    "penYes": "Sí",
+    "penNo": "No",
+    "barButtons": "Barra de herramientas",
+    "pinnedSide": "Borde",
+    "pinnedButtons": "Barra fijada",
+    "pinnedAvailable": "Disponibles",
+    "pinnedAllPlaced": "Todo está colocado.",
+    "pinnedBarHint": "Arrastra para colocar o mover, clic para quitar.",
+    "pinnedRemove": "Quitar {{label}} de la barra",
+    "sideTop": "Arriba",
+    "sideBottom": "Abajo",
+    "sideLeft": "Izquierda",
+    "sideRight": "Derecha",
+    "bgOpacity": "Opacidad del fondo",
+    "contentOpacity": "Opacidad del contenido",
+    "seeThroughScope": "También translúcido",
+    "seeThroughShell": "Interfaz",
+    "seeThroughPlaceFrame": "Marco de colocación"
   },
   "inspector": {
     "ytPlayer": "Reproductor de YouTube",
@@ -322,7 +382,20 @@
     "grayscale": "Escala de grises",
     "toFront": "Traer al frente",
     "toBack": "Enviar al fondo",
-    "extractPalette": "Extraer la paleta"
+    "extractPalette": "Extraer la paleta",
+    "addText": "Añadir texto",
+    "addFrame": "Añadir marco",
+    "toggleDraw": "Modo dibujo",
+    "toggleFreeze": "Congelar todo / reproducir todo",
+    "prevFrame": "Fotograma anterior",
+    "nextFrame": "Fotograma siguiente",
+    "toggleMouseThrough": "Transparente al ratón",
+    "newScene": "Nueva escena",
+    "openSettings": "Ajustes",
+    "togglePin": "Fijar la ventana",
+    "paletteStudio": "Generador de paletas",
+    "crop": "Recortar",
+    "groupSequence": "Agrupar en secuencia"
   },
   "drawStyle": {
     "thin": "Trazo fino",
@@ -482,6 +555,7 @@
     "missingMedia": "Medio ausente",
     "notBundled": "{{size}} · no incluido",
     "relocate": "Relocalizar",
+    "reloadMedia": "Volver a descargar",
     "downloading": "Descargando…",
     "mediaFallback": "medio",
     "interactiveActive": "Interactivo — clic fuera para mover",
@@ -507,7 +581,8 @@
   "youtube": {
     "notEmbeddable": "Vídeo no incrustable",
     "blocked": "YouTube bloquea la reproducción incrustada de este vídeo.",
-    "openOnYouTube": "Abrir en YouTube"
+    "openOnYouTube": "Abrir en YouTube",
+    "preparing": "Preparando el vídeo…"
   },
   "embed": {
     "frozen": "Reproducción congelada",
@@ -542,7 +617,7 @@
     "itemLabel": "Compartir: {{level}}",
     "settings": {
       "title": "Almacenamiento de medios",
-      "hint": "Lo que el archivo .netsu se lleva, por defecto. Cada medio puede ajustarse desde su inspector."
+      "hint": "Lo que el .netsu se lleva por defecto. Ajustable por medio en el inspector."
     }
   },
   "board": {
@@ -589,7 +664,9 @@
     "noProjectFile": "Este tablero no está vinculado a ningún archivo",
     "relocating": "Buscando archivos multimedia en la carpeta… ({{count}})",
     "relocated": "{{count}}/{{total}} archivos multimedia relocalizados",
-    "relocatedNone": "Ningún archivo multimedia reconocido en esta carpeta"
+    "relocatedNone": "Ningún archivo multimedia reconocido en esta carpeta",
+    "contentOpacity": "Opacidad del contenido: {{percent}} %",
+    "itemOpacity": "Opacidad del medio: {{percent}} %"
   },
   "tidy": {
     "title": "Ordenar",
@@ -631,7 +708,45 @@
     "formatHint": "Copiar como {{format}}",
     "layoutRow": "En fila",
     "layoutCol": "En columna",
-    "layoutGrid": "En cuadro"
+    "layoutGrid": "En cuadro",
+    "studio": {
+      "open": "Generador de paletas",
+      "edit": "Abrir en el generador",
+      "close": "Cerrar el generador",
+      "title": "Generador de paletas",
+      "pickScreen": "Cuentagotas de pantalla",
+      "brightness": "Brillo",
+      "tones": "Tonos",
+      "fromSelection": "Desde la selección",
+      "fromBoard": "Desde todo el board",
+      "noSelection": "Selecciona imágenes en el board",
+      "noMedia": "Ninguna imagen en el board",
+      "reset": "Restablecer",
+      "pick": "Selector de color",
+      "notation": "Notación",
+      "value": "Valor del color",
+      "place": "Colocar en el board",
+      "apply": "Aplicar",
+      "placed": "Paleta de {{count}} colores colocada",
+      "applied": "Paleta actualizada ({{count}} colores)",
+      "addSwatch": "Añadir un color",
+      "removeSwatch": "Quitar el color",
+      "lock": "Bloquear el color",
+      "unlock": "Desbloquear el color",
+      "moveLeft": "Mover a la izquierda",
+      "moveRight": "Mover a la derecha",
+      "rule": {
+        "custom": "Personalizado",
+        "analogous": "Análogo",
+        "complementary": "Complementario",
+        "split": "Compl. dividido",
+        "triadic": "Tríada",
+        "square": "Cuadrado",
+        "compound": "Compuesto",
+        "shades": "Matices",
+        "monochromatic": "Monocromo"
+      }
+    }
   },
   "exportImage": {
     "menu": "Exportar como imagen…",
@@ -656,6 +771,16 @@
     "progress": "Importando {{done}}/{{total}}…",
     "reading": "Leyendo {{count}} archivos…",
     "done": "{{count}} medios importados",
-    "folderTruncated": "Carpeta demasiado grande: importados los primeros {{count}} medios"
+    "folderTruncated": "Carpeta demasiado grande: importados los primeros {{count}} medios",
+    "importing": "Importando {{name}}…",
+    "fetching": "Obteniendo el medio…",
+    "linkDone": "Medio importado",
+    "fetchingFrom": "Obteniendo de {{source}}…"
+  },
+  "mouseThrough": {
+    "on": "Transparente al ratón",
+    "off": "Recuperar el ratón",
+    "warning": "Los clics y la rueda irán a la aplicación de debajo, y la ventana se mantiene encima. Para recuperar el control: vuelve a darle el foco (Alt+Tab).",
+    "dontAskAgain": "No preguntar de nuevo"
   }
 }

@@ -265,7 +265,15 @@ async function proxyResolve(items, opts = {}) {
 /** @typedef {Error & { cancelled?: boolean, stderr?: string }} FfError */
 function ffSpawnCancellable(args, token, timeout) {
   return new Promise((resolve, reject) => {
-    if (token != null && cancelledTokens.has(token)) { const e = /** @type {FfError} */ (new Error('cancelled')); e.cancelled = true; return reject(e); }
+    // Marque CONSOMMÉE (comme dans takeJob) : elle vaut pour la demande qu'on annule, pas pour
+    // toutes celles qui réutiliseront ce numéro ensuite. Laissée en place, elle empoisonnait le
+    // numéro jusqu'à l'arrêt du service.
+    if (token != null && cancelledTokens.has(token)) {
+      cancelledTokens.delete(token);
+      const e = /** @type {FfError} */ (new Error('cancelled'));
+      e.cancelled = true;
+      return reject(e);
+    }
     const ch = spawn(ffBin('ffmpeg'), args);
     if (token != null) proxyChildren.set(token, ch);
     let err = '';
@@ -343,6 +351,13 @@ async function encodeProxy(input, start, end, out, height, token, resolved, pres
 }
 
 async function proxySegment({ input, start, end, priority, height, token, codec, settings }) {
+  // La vie d'un token COMMENCE ici. Une marque d'annulation qui le précède ne peut désigner que la
+  // demande d'AVANT portant le même numéro : le compteur du renderer repart à zéro à chaque
+  // chargement de page, alors que ce service, lui, survit aux rechargements et aux réouvertures de
+  // fenêtre. Sans cet oubli, une marque posée par un « Arrêter » d'hier tuait la demande d'aujourd'hui
+  // — le core répondait `cancelled` sans lancer un seul ffmpeg, et la pré-génération défilait à vide
+  // en annonçant des plans « générés ». Une vraie annulation arrive forcément APRÈS cette ligne.
+  if (token != null) cancelledTokens.delete(token);
   const requestedHeight = settings?.height ?? height;
   const h = snapProxyHeight(requestedHeight);
   const configured = settings?.format === 'webm' ? 'vp8' : settings?.format === 'h264' ? 'h264' : 'hevc';

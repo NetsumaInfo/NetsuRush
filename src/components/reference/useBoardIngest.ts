@@ -10,6 +10,7 @@ import {
   type ItemKind,
   type BoardItem,
   displaySrc,
+  OG_POSTER_ONLY_PROVIDERS,
   kindFromPath,
   youtubeId,
   youtubeNatSize,
@@ -18,6 +19,8 @@ import {
   EMBED_PLAYER_PROVIDERS,
   isVideoUrl,
   isImageUrl,
+  sourceName,
+  playsNatively,
   fitSize,
   probeImage,
   probeVideo,
@@ -32,7 +35,15 @@ import { boundsOf, computeArrange } from "./boardArrange";
 // a YouTube card is a player, not a reference image the user sizes to taste.
 const YT_MAX = 480;
 
-// Hôte d'un lien → titre court d'un média extrait (ex. "x.com", "tiktok.com").
+// Ce que l'interface MONTRE d'un lien : le nom de la plateforme quand elle est reconnue, sinon rien
+// de plus que « média ». L'hôte de l'URL n'apparaît jamais — il ne dit rien à personne (« 127.0.0.1 »,
+// « i.redd.it », un CDN signé) et transforme une carte de chargement en fuite de tuyauterie.
+function sourceTitle(url: string): string {
+  return sourceName(url) ?? i18n.t("reference:item.mediaFallback");
+}
+
+// Hôte d'un lien, réservé aux INDICES passés au core (nom de fichier d'un média téléchargé). Jamais
+// affiché : côté écran c'est `sourceTitle` qui parle.
 function hostTitle(url: string): string {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return i18n.t("reference:item.mediaFallback"); }
 }
@@ -59,6 +70,14 @@ function gridLayout(
     x: x0 + (i % cols) * (w + gap),
     y: y0 + Math.floor(i / cols) * (h + gap),
   }));
+}
+
+// Ratio MESURÉ → géométrie de l'item, centrée sur `c`. null quand la mesure a échoué (source
+// illisible) : l'item garde sa taille provisoire plutôt que de s'effondrer sur un ratio inventé.
+function fitSizeOf(nat: { w: number; h: number }, box: number, c: { x: number; y: number }): Partial<BoardItem> | null {
+  if (!nat.w || !nat.h) return null;
+  const { w, h } = fitSize(nat.w, nat.h, box);
+  return { natW: nat.w, natH: nat.h, w, h, x: c.x - w / 2, y: c.y - h / 2 };
 }
 
 // Exécute `run` sur toute la liste avec au plus `limit` tâches en vol. Vraie file d'attente, pas des
@@ -91,6 +110,34 @@ function entryKind(nameOrPath: string, mime = ""): "image" | "video" | null {
   return null;
 }
 
+// Entités HTML d'un attribut `src` de presse-papier. Les URL de CDN sont pleines de `&` : sans ce
+// décodage, le lien mémorisé porte des `&amp;` et ne répond plus.
+function decodeAttr(value: string): string {
+  return value
+    .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#0?39;/g, "'")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
+
+// Lien EXACT du média venu du presse-papier ou d'un glisser depuis un navigateur.
+//
+// « Copier l'image » ne met dans le presse-papier que des OCTETS, réencodés par le navigateur (d'où
+// le titre « image.png » d'un JPEG). L'adresse d'origine ne survit que dans la saveur `text/html` du
+// MÊME presse-papier, sous forme d'un `<img src>`. C'est le seul endroit où elle existe encore : sans
+// elle, l'item n'a plus aucun moyen de se reconstituer si ses octets disparaissent, et le lien du
+// post — le seul repère utile pour retrouver un plan — est perdu à la seconde du collage.
+//
+// À lire SYNCHRONEMENT : un DataTransfer est vidé dès que le gestionnaire d'événement rend la main.
+export function pastedSourceUrl(data: DataTransfer): string {
+  const tag = (data.getData("text/html") || "")
+    .match(/<(?:img|video|source)\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
+  if (tag) {
+    const url = decodeAttr(tag[1]);
+    if (/^https?:\/\//i.test(url)) return url;
+  }
+  const text = (data.getData("text/uri-list") || data.getData("text/plain") || "").trim();
+  return /^https?:\/\/\S+$/.test(text) ? text : "";
+}
+
 // Extension de fichier à partir d'un type MIME de blob (presse-papier/drop), avec quelques alias.
 function extFromMime(mime: string, kind: ItemKind): string {
   const sub = (mime.split("/")[1] || "").toLowerCase();
@@ -99,6 +146,13 @@ function extFromMime(mime: string, kind: ItemKind): string {
     "x-msvideo": "avi", ogg: "ogv",
   };
   return map[sub] || sub || (kind === "image" ? "png" : "mp4");
+}
+
+// CURRENT centre of an already-placed item (the loading square), else `fallback`: an import
+// dragged while it loads lands where it was dragged to.
+function liveCenter(id: string, fallback: { x: number; y: number }): { x: number; y: number } {
+  const it = useBoard.getState().items.find((i) => i.id === id);
+  return it ? { x: it.x + it.w / 2, y: it.y + it.h / 2 } : fallback;
 }
 
 export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
@@ -232,36 +286,95 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     [place, addPath],
   );
 
-  // Item depuis un objet File (navigateur, presse-papier, ou drop sans chemin résoluble).
+  // UN fichier déposé, collé ou choisi. Posé AVANT la moindre attente : le placeholder paraît sous le
+  // curseur dans la frame du dépôt et la barre d'outils annonce l'import, puis ratio natif et source
+  // durable arrivent par patch. L'ancienne voie attendait la résolution du chemin disque PUIS le
+  // téléchargement et le décodage COMPLETS de l'image avant de poser quoi que ce soit : plusieurs
+  // centaines de millisecondes sans le moindre signe à l'écran, exactement là où l'utilisateur vient
+  // de lâcher son fichier.
   const addFile = useCallback(
-    async (file: File, at?: { x: number; y: number }) => {
-      const [path] = await nr.pathsForFiles([file]);
-      if (path) return addPath(path, file.name, at);
-      const kind: ItemKind | null = file.type.startsWith("image/")
-        ? "image"
-        : file.type.startsWith("video/")
-          ? "video"
-          : null;
+    //
+    // `extra` porte ce que le fichier ne dit pas de lui-même — au premier chef le lien d'origine d'un
+    // média collé depuis un navigateur (cf. `pastedSourceUrl`), écrit sur l'item DÈS sa pose : c'est ce
+    // qui rend l'item réparable si ses octets viennent à manquer.
+    async (file: File, at?: { x: number; y: number }, extra?: Partial<BoardItem>) => {
+      const kind = entryKind(file.name, file.type);
       if (!kind) return;
-      // Image OU vidéo collée/déposée sans chemin → l'écrire en asset disque (durable, survit au reload).
-      if (nr.reference?.saveAsset) {
+      const box = useBoard.getState().prefs.mediaMaxSize;
+      const c = at ?? centerPoint();
+      // Un objectURL n'est qu'un HANDLE sur le fichier : zéro octet lu ici, et la source reste locale
+      // au webview — ni serveur HTTP du core, ni protocole asset, ni round-trip de résolution de
+      // chemin entre le dépôt et le premier pixel.
+      const blob = URL.createObjectURL(file);
+      // Sauf pour un conteneur que le webview ne lit pas (mkv, avi…) : celui-là n'est visible qu'à
+      // travers le remux `/stream copy` du core, donc seulement une fois son chemin disque connu.
+      const direct = kind === "image" || playsNatively(file.name);
+      const id = addItem({
+        kind,
+        ref: blob,
+        src: direct ? blob : "",
+        x: c.x - box / 2,
+        y: c.y - box / 2,
+        w: box,
+        h: kind === "video" ? Math.round((box * 9) / 16) : box,
+        rotation: 0,
+        loading: true,
+        title: file.name,
+        ...extra,
+      });
+      useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.importing", { name: file.name }) });
+
+      // Chemin disque et ratio natif ne dépendent PAS l'un de l'autre (sauf conteneur non lu) : les
+      // deux attentes se recouvrent au lieu de s'additionner.
+      const pending = nr.pathsForFiles([file]);
+      let path = "";
+      let size: Partial<BoardItem> | null = null;
+      if (direct) {
+        // Le blob suffit à peindre : le loader tombe dès le ratio mesuré, SANS attendre la
+        // résolution du chemin disque — le pont WebView2 peut mettre jusqu'à 4 s (timeout) sur un
+        // File sans chemin (presse-papier, pont pas encore attaché), et le chemin ne sert qu'au
+        // localisateur durable, pas à l'affichage.
+        size = fitSizeOf(await probeNat(kind, blob), box, c);
+        useBoard.getState().patchItem(id, { loading: undefined, ...size }, false);
+        [path] = await pending;
+        // Chemin disque connu → c'est LUI le localisateur durable. La source d'affichage, elle, reste
+        // le blob déjà décodé : la rebasculer sur le protocole asset retéléchargerait et redécoderait
+        // le même fichier pour rien (`src` est de toute façon recalculé depuis `ref` au rechargement).
+        if (path) useBoard.getState().patchItem(id, { ref: path }, false);
+      } else {
+        // Conteneur non lu par le webview : sa seule source d'affichage passe par le core, donc par
+        // le chemin disque — ici l'attente est structurelle.
+        [path] = await pending;
+        const src = displaySrc(kind, path || "");
+        size = src ? fitSizeOf(await probeNat(kind, src), box, c) : null;
+        useBoard.getState().patchItem(id, {
+          loading: undefined,
+          src,
+          ...(path ? { ref: path } : null),
+          ...size,
+        }, false);
+      }
+
+      // Sans chemin (presse-papier, navigateur, coquille sans le pont) : copie en asset disque, en
+      // arrière-plan — l'item est déjà à l'écran et le blob le tient jusqu'à ce que l'écriture aboutisse.
+      if (!path && nr.reference?.saveAsset) {
         try {
-          const ext = extFromMime(file.type, kind);
-          const res = await nr.reference.saveAsset(await file.arrayBuffer(), ext);
+          const res = await nr.reference.saveAsset(await file.arrayBuffer(), extFromMime(file.type, kind));
           if (res.ok && res.path) {
-            const src = displaySrc(kind, res.path);
-            const nat = await probeNat(kind, src);
-            return place(kind, res.path, src, nat, file.name, at);
+            const durable = displaySrc(kind, res.path);
+            // Conteneur non lu par le webview : l'asset est sa PREMIÈRE source affichable, donc aussi
+            // la première mesurable — le blob, lui, n'aurait rien rendu.
+            const late = (direct || size) ? null : fitSizeOf(await probeNat(kind, durable), box, c);
+            useBoard.getState().patchItem(id, { ref: res.path, ...(direct ? null : { src: durable }), ...late }, false);
+            if (!direct) URL.revokeObjectURL(blob);
           }
         } catch {
-          /* repli objectURL ci-dessous */
+          /* écriture refusée : le blob tient la session, la source d'origine reste sur disque */
         }
       }
-      const url = URL.createObjectURL(file);
-      const nat = await probeNat(kind, url);
-      place(kind, url, url, nat, file.name, at);
+      useBoard.getState().setNotice({ kind: "ok", text: i18n.t("reference:ingest.done", { count: 1 }) });
     },
-    [addPath, place],
+    [addItem, centerPoint],
   );
 
   // Un LOT posé en BLOC : jamais une pile au même point. Les médias sont rangés (et regroupés dans
@@ -276,7 +389,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
   const addBatch = useCallback(
     async (
       list: BatchEntry[],
-      opts: { rootName?: string; frames?: boolean; at?: { x: number; y: number } } = {},
+      opts: { rootName?: string; frames?: boolean; at?: { x: number; y: number }; extra?: Partial<BoardItem> } = {},
     ) => {
       if (!list.length) return;
       const store = useBoard.getState();
@@ -347,6 +460,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
             rotation: 0,
             z: ++z,
             title: f.name,
+            ...opts.extra,
           });
         });
 
@@ -439,10 +553,10 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
   // progression. L'ancienne voie de repli les traitait en série et les posait tous au centre du
   // viewport : import interminable et planche illisible.
   const addFiles = useCallback(
-    (files: FileList | File[], at?: { x: number; y: number }) => {
+    (files: FileList | File[], at?: { x: number; y: number }, extra?: Partial<BoardItem>) => {
       const all = Array.from(files);
       if (!all.length) return;
-      if (all.length === 1) { void addFile(all[0], at); return; }
+      if (all.length === 1) { void addFile(all[0], at, extra); return; }
       void (async () => {
         useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.reading", { count: all.length }) });
         const paths = await nr.pathsForFiles(all);
@@ -454,9 +568,9 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
           if (!kind) { others.push(f); return; }
           list.push(p ? { path: p, rel: "", name: f.name, kind } : { file: f, rel: "", name: f.name, kind });
         });
-        if (list.length) await addBatch(list, { at });
+        if (list.length) await addBatch(list, { at, extra });
         else useBoard.getState().setNotice(null);
-        for (const f of others) await addFile(f, at);
+        for (const f of others) await addFile(f, at, extra);
       })();
     },
     [addFile, addBatch],
@@ -628,17 +742,36 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
     [place, addVideoFileUrl, addImageUrl],
   );
 
-  // Pose le(s) média(s) EXTRAIT(s) (yt-dlp/gallery-dl) — grille si plusieurs — en mémorisant le lien
-  // d'origine (`sourceUrl`) → permet de rebasculer en carte embed plus tard.
+  // Places the EXTRACTED medium (or media) while remembering the original link (`sourceUrl`), so
+  // switching back to an embed card stays possible. Carousel slides land IN A ROW, in post order:
+  // a staircase offset hid every slide behind the next and had to be undone by hand.
   const placeExtracted = useCallback(
     async (items: { path: string; kind: "image" | "video" }[], sourceUrl: string, at?: { x: number; y: number }) => {
       const c = at ?? centerPoint();
-      for (let i = 0; i < items.length; i++) {
-        const it = items[i];
+      const title = sourceTitle(sourceUrl);
+      const box = useBoard.getState().prefs.mediaMaxSize;
+      const gap = useBoard.getState().prefs.arrangeGap;
+      const measured: {
+        path: string; kind: "image" | "video"; src: string;
+        nat: { w: number; h: number }; w: number; h: number;
+      }[] = [];
+      for (const it of items) {
         const src = displaySrc(it.kind, it.path);
         const nat = await probeNat(it.kind, src);
-        const off = i * 28; // décalage en escalier (plusieurs médias d'un même post ne se superposent pas)
-        place(it.kind, it.path, src, nat, hostTitle(sourceUrl), { x: c.x + off, y: c.y + off }, { sourceUrl });
+        measured.push({ ...it, src, nat, ...fitSize(nat.w || box, nat.h || box, box) });
+      }
+      if (measured.length === 1) {
+        const [only] = measured;
+        place(only.kind, only.path, only.src, only.nat, title, c, { sourceUrl });
+        return;
+      }
+      // Measured first, laid out second: the row is centred on the drop point, so the post does
+      // not walk off towards one corner as it grows.
+      const total = measured.reduce((sum, m) => sum + m.w, 0) + gap * (measured.length - 1);
+      let x = c.x - total / 2;
+      for (const m of measured) {
+        place(m.kind, m.path, m.src, m.nat, title, { x: x + m.w / 2, y: c.y }, { sourceUrl });
+        x += m.w + gap;
       }
     },
     [place, centerPoint],
@@ -720,41 +853,69 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         return true;
       }
 
-      // À partir d'ici : téléchargement → on pose un PLACEHOLDER (carré + loader) à l'emplacement
-      // cible, remplacé par le vrai média à l'arrivée (retiré en `finally` quoi qu'il arrive).
+      // À partir d'ici : téléchargement. Deux signaux, parce qu'ils ne disent pas la même chose —
+      // le PLACEHOLDER (carré + loader) montre à quel endroit du board le média va atterrir, la
+      // notice de la barre d'outils dit d'où il vient et reste lisible même si l'utilisateur pan
+      // ailleurs entre-temps. Le placeholder est retiré en `finally`, quoi qu'il arrive.
       const at = centerPoint();
-      const loadingId = addLoading(at, hostTitle(text));
+      // Plateforme reconnue → on la nomme ; sinon on reste vague plutôt que d'exhiber un hôte.
+      const source = sourceName(text);
+      const loadingId = addLoading(at, sourceTitle(text));
+      // What existed before the import: the rest is this link's medium, and it follows the
+      // placeholder.
+      const before = new Set(useBoard.getState().items.map((it) => it.id));
+      useBoard.getState().setNotice({
+        kind: "ok",
+        sticky: true,
+        text: source ? i18n.t("reference:ingest.fetchingFrom", { source }) : i18n.t("reference:ingest.fetching"),
+      });
+      let ok = false;
       try {
-        // 3a. Giphy → URL CDN directe du GIF (la page bloque le scraping) → download image animée.
-        const gif = giphyGifUrl(text);
-        if (gif) return await addRemoteMedia(gif, "image", at, text);
+        ok = await (async (): Promise<boolean> => {
+          // 3a. Giphy → URL CDN directe du GIF (la page bloque le scraping) → download image animée.
+          const gif = giphyGifUrl(text);
+          if (gif) return await addRemoteMedia(gif, "image", at, text);
 
-        // 3b. Fichier média direct (.mp4/.gif/.png…, ou ?format=jpg) → download des octets.
-        if (isVideoUrl(text)) return await addRemoteMedia(text, "video", at);
-        if (isImageUrl(text)) return await addRemoteMedia(text, "image", at);
+          // 3b. Fichier média direct (.mp4/.gif/.png…, ou ?format=jpg) → download des octets.
+          if (isVideoUrl(text)) return await addRemoteMedia(text, "video", at);
+          if (isImageUrl(text)) return await addRemoteMedia(text, "image", at);
 
-        // 4. Réseau social reconnu → extraction (qualité pleine, multi-images), repli OpenGraph.
-        //    Instagram's OpenGraph result is only a poster, so failed video extraction falls back to
-        //    the official embed below. Generic links still try OpenGraph first, then extraction.
-        const ok = e
-          ? (await extractAndPlace(text, at))
-            || (e.provider !== "instagram" && await resolvePageAndPlace(text, at))
-          : prefs.autoDownloadOnline
-            ? (await resolvePageAndPlace(text, at)) || (await extractAndPlace(text, at))
-            : await resolvePageAndPlace(text, at);
-        if (ok) return true;
+          // 4. Known social network → extraction (whole post, or the slide pointed at), with an
+          //    OpenGraph fallback except for providers whose OpenGraph is only a poster. Generic
+          //    links still try OpenGraph first, then extraction.
+          const found = e
+            ? (await extractAndPlace(text, at))
+              || (!OG_POSTER_ONLY_PROVIDERS.has(e.provider) && await resolvePageAndPlace(text, at))
+            : prefs.autoDownloadOnline
+              ? (await resolvePageAndPlace(text, at)) || (await extractAndPlace(text, at))
+              : await resolvePageAndPlace(text, at);
+          if (found) return true;
 
-        // 5. Échec → repli carte embed ancrée (social, ou générique si autorisé).
-        const fb = e ?? (opts?.allowGenericEmbed ? parseVideoEmbed(text, true) : null);
-        if (fb) {
-          place("embed", fb.pageUrl, fb.embedUrl, fb.size ?? { w: 480, h: 270 }, fb.provider, at);
-          return true;
-        }
+          // 5. Échec → repli carte embed ancrée (social, ou générique si autorisé).
+          const fb = e ?? (opts?.allowGenericEmbed ? parseVideoEmbed(text, true) : null);
+          if (fb) {
+            place("embed", fb.pageUrl, fb.embedUrl, fb.size ?? { w: 480, h: 270 }, fb.provider, at);
+            return true;
+          }
 
-        // 6. Dernier recours : download CDN (image hotlink sans extension propre).
-        return await addRemoteMedia(text, undefined, at);
+          // 6. Dernier recours : download CDN (image hotlink sans extension propre).
+          return await addRemoteMedia(text, undefined, at);
+        })();
+        return ok;
       } finally {
+        // The medium joins the loading square where it now is, not the point where the link was
+        // pasted. The offset applies to everything that just arrived: a carousel keeps its row.
+        const moved = liveCenter(loadingId, at);
+        const dx = moved.x - at.x;
+        const dy = moved.y - at.y;
         removeItem(loadingId);
+        if (dx || dy) {
+          const fresh = useBoard.getState().items.filter((it) => !before.has(it.id)).map((it) => it.id);
+          if (fresh.length) useBoard.getState().moveBy(fresh, dx, dy, false);
+        }
+        // Échec : la notice s'efface SANS rien annoncer. Chaque appelant a déjà son message d'échec
+        // (dialogue d'ajout de lien, collage clavier) — en poser un second les ferait se chasser.
+        useBoard.getState().setNotice(ok ? { kind: "ok", text: i18n.t("reference:ingest.linkDone") } : null);
       }
     },
     [place, addRemoteMedia, extractAndPlace, resolvePageAndPlace, addLoading, removeItem, centerPoint],
@@ -764,12 +925,14 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
   // Renvoie false si rien d'exploitable (presse-papier vide, lien irrésoluble) → feedback appelant.
   const addPaste = useCallback(
     async (data: DataTransfer): Promise<boolean> => {
+      const sourceUrl = pastedSourceUrl(data);
       const blobs = Array.from(data.items)
         .filter((it) => it.kind === "file" && (it.type.startsWith("image/") || it.type.startsWith("video/")))
         .map((it) => it.getAsFile())
         .filter((f): f is File => !!f);
       if (blobs.length) {
-        blobs.forEach((b) => void addFile(b));
+        const extra = sourceUrl ? { sourceUrl } : undefined;
+        blobs.forEach((b) => void addFile(b, undefined, extra));
         return true;
       }
       const text = (data.getData("text/plain") || data.getData("text/uri-list")).trim();

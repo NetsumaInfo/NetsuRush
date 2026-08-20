@@ -30,6 +30,7 @@ import sys
 import threading
 import time
 
+import nrident
 from ffbin import ffmpeg_bin, ffprobe_bin
 
 
@@ -162,14 +163,14 @@ def _store(path, threshold, fps, duration, nframes, scenes, model, options, opti
          nframes, json.dumps(scenes), model, json.dumps(options, sort_keys=True), time.time()),
     )
     con.commit()
+    # Witness of what was cut: the copy of this rush living on another drive inherits this work
+    # instead of paying for it again (cf. python/nrident.py).
+    nrident.remember(con, path)
     con.close()
 
 
-def cmd_get(path, model, threshold=None, options=None):
-    con = db()
-    options_key = None
-    if threshold is not None and options is not None:
-        _, options_key = _canonical_options(model, threshold, options)
+def _select_scene_row(con, path, model, threshold, options_key):
+    """Cached cut for this exact path, v4 first then the legacy v3 table. None if there is none."""
     if options_key is not None:
         row = con.execute(
             "SELECT mtime, options_key, threshold, fps, duration, frames, scenes_json, options_json "
@@ -188,27 +189,65 @@ def cmd_get(path, model, threshold=None, options=None):
             "WHERE file_path=? AND model=? AND threshold=? ORDER BY created_at DESC LIMIT 1",
             (path, model, float(threshold)),
         ).fetchone()
-    if not row:
-        legacy = con.execute(
-            "SELECT mtime, threshold, fps, duration, frames, scenes_json FROM scene_cache_v3 "
-            "WHERE file_path=? AND model=?" + ("" if threshold is None else " AND threshold=?")
-            + " ORDER BY created_at DESC LIMIT 1",
-            (path, model) if threshold is None else (path, model, float(threshold)),
-        ).fetchone()
-        if legacy:
-            mtime, old_threshold, fps, duration, frames, scenes_json = legacy
-            row = (mtime, None, old_threshold, fps, duration, frames, scenes_json, None)
+    if row:
+        return row
+    legacy = con.execute(
+        "SELECT mtime, threshold, fps, duration, frames, scenes_json FROM scene_cache_v3 "
+        "WHERE file_path=? AND model=?" + ("" if threshold is None else " AND threshold=?")
+        + " ORDER BY created_at DESC LIMIT 1",
+        (path, model) if threshold is None else (path, model, float(threshold)),
+    ).fetchone()
+    if not legacy:
+        return None
+    mtime, old_threshold, fps, duration, frames, scenes_json = legacy
+    return (mtime, None, old_threshold, fps, duration, frames, scenes_json, None)
+
+
+# Tables carrying a cut, in transfer order: the same bytes always produce the same shot boundaries,
+# so a cut found under another path is valid here without any GPU work.
+SCENE_TABLES = ["scene_cache_v4", "scene_cache_v3"]
+
+
+def cmd_get(path, model, threshold=None, options=None, link=True):
+    """Cached cut for `path`.
+
+    `link` (default) lets an identical file already cut under another name — a copy on another
+    drive, a rush renamed, a project moved — hand its cut over instead of forcing a new detection.
+    Set it to False for a pure read (no hashing, no writing).
+    """
+    con = db()
+    options_key = None
+    if threshold is not None and options is not None:
+        _, options_key = _canonical_options(model, threshold, options)
+    row = _select_scene_row(con, path, model, threshold, options_key)
+    linked = None
+    if row is None and link:
+        linked = nrident.rescue(con, path, SCENE_TABLES)
+        if linked:
+            row = _select_scene_row(con, path, model, threshold, options_key)
+    stale = False
+    if row is not None:
+        mtime = row[0]
+        if abs(mtime - file_mtime(path)) > 1.0:  # fichier modifié → cache périmé…
+            # …sauf si seul l'horodatage a bougé (copie, restauration, synchro) : les octets sont
+            # les mêmes, la découpe reste juste. On réaligne le cache au lieu de le jeter.
+            if not (link and nrident.realign(con, path, SCENE_TABLES, mtime)):
+                row, stale = None, True
     con.close()
-    if not row:
-        return {"scenes": [], "cached": False, "model": model, "error": None}
+    if row is None:
+        out = {"scenes": [], "cached": False, "model": model, "error": None}
+        if stale:
+            out["stale"] = True
+        return out
     mtime, options_key, threshold, fps, duration, frames, scenes_json, options_json = row
-    if abs(mtime - file_mtime(path)) > 1.0:  # fichier modifié → cache périmé
-        return {"scenes": [], "cached": False, "stale": True, "model": model, "error": None}
-    return {"scenes": json.loads(scenes_json), "fps": fps, "duration": duration,
-            "frames": frames, "threshold": threshold, "model": model,
-            "options": json.loads(options_json) if options_json else None,
-            "optionsKey": options_key,
-            "cached": True, "error": None}
+    result = {"scenes": json.loads(scenes_json), "fps": fps, "duration": duration,
+              "frames": frames, "threshold": threshold, "model": model,
+              "options": json.loads(options_json) if options_json else None,
+              "optionsKey": options_key,
+              "cached": True, "error": None}
+    if linked:
+        result["linkedFrom"] = linked["from"]
+    return result
 
 
 def _frame_count_estimate(path):
@@ -603,8 +642,35 @@ def _postprocess_scenes(scenes, fps, min_frames):
     return out
 
 
+def _link_existing_cut(path, model, threshold, options):
+    """Cut of an identical file already known under another path, or None.
+
+    Only when NOTHING is cached under this path: a re-detection asked on a rush the cache already
+    knows must still recompute (that is what the button is for). What this catches is the copy on
+    another drive, the renamed rush, the project moved to another folder — cases where a fresh
+    detection would spend minutes rebuilding boundaries that are already known to be identical.
+    """
+    con = db()
+    try:
+        if _select_scene_row(con, path, model, None, None) is not None:
+            return None
+        linked = nrident.rescue(con, path, SCENE_TABLES)
+    except sqlite3.Error:
+        return None
+    finally:
+        con.close()
+    if not linked:
+        return None
+    got = cmd_get(path, model, threshold, options, link=False)
+    return got if got.get("cached") else None
+
+
 def cmd_detect(path, threshold, model, options=None):
     _reset_progress()  # échelle 0..100 par job (mode serve : jobs successifs)
+    model = model if model in ("omnishotcut", "autoshot") else "transnetv2"
+    linked = _link_existing_cut(path, model, 0.0 if model == "omnishotcut" else threshold, options)
+    if linked:
+        return linked
     try:
         if model == "omnishotcut":
             threshold = 0.0  # OmniShotCut n'a pas de seuil (mode auto) → clé de cache stable

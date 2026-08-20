@@ -163,6 +163,29 @@ export function embedSrc(ref: string): string {
   return parseVideoEmbed(ref, true)?.embedUrl ?? ref;
 }
 
+// Nom d'AFFICHAGE d'une plateforme. Ce sont des noms propres : ils ne se traduisent pas, donc ils
+// ne passent pas par les locales. `generic` n'y figure pas — un site quelconque n'a aucune marque à
+// annoncer, et l'appelant retombe alors sur une formulation neutre.
+const PROVIDER_LABEL: Partial<Record<EmbedProvider, string>> = {
+  vimeo: "Vimeo", dailymotion: "Dailymotion", twitch: "Twitch", streamable: "Streamable",
+  twitter: "X", tiktok: "TikTok", instagram: "Instagram", facebook: "Facebook",
+  reddit: "Reddit", bluesky: "Bluesky", threads: "Threads", snapchat: "Snapchat",
+  pinterest: "Pinterest", linkedin: "LinkedIn", tumblr: "Tumblr", flickr: "Flickr",
+  bilibili: "Bilibili", vk: "VK", kuaishou: "Kuaishou", niconico: "Niconico",
+  odysee: "Odysee", rumble: "Rumble",
+};
+
+/**
+ * Plateforme derrière un lien, sous son nom de marque — ou null quand aucune n'est reconnue.
+ * SOURCE UNIQUE de ce que l'interface a le droit de dire d'un lien : jamais son hôte. « 127.0.0.1 »,
+ * « i.redd.it » ou un CDN signé n'apprennent rien à personne et étalent de la tuyauterie à l'écran.
+ */
+export function sourceName(url: string): string | null {
+  if (youtubeId(url)) return "YouTube";
+  const e = parseVideoEmbed(url, false);
+  return (e && PROVIDER_LABEL[e.provider]) || null;
+}
+
 // Providers à LECTEUR propre (iframe jouable, boucle) → on garde l'embed plutôt que d'extraire le
 // fichier. Les AUTRES (réseaux sociaux : twitter/tiktok/instagram/facebook/reddit/bluesky) → on
 // extrait le vrai média par défaut (yt-dlp/gallery-dl). `generic` → extraction tentée puis repli embed.
@@ -197,3 +220,7 @@ export function isVideoUrl(u: string): boolean {
 export function isImageUrl(u: string): boolean {
   return IMAGE_RE.test(`.${urlExt(u)}`);
 }
+
+// Providers whose OpenGraph only returns a poster of the post, never the medium: a failed extraction
+// falls back to the embed card rather than to a thumbnail that would pass for the medium.
+export const OG_POSTER_ONLY_PROVIDERS = new Set<EmbedProvider>(["instagram"]);

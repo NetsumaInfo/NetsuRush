@@ -11,6 +11,7 @@
     "flipV": "垂直翻转",
     "crop": "裁剪",
     "openLink": "打开链接",
+    "reloadMedia": "重新加载媒体",
     "download": "下载",
     "restoreDownload": "恢复已下载的文件",
     "zoomIn": "放大",
@@ -55,7 +56,9 @@
     "unsaved": "未保存",
     "saveAs": "另存为…",
     "snapOn": "启用吸附",
-    "snapOff": "关闭吸附"
+    "snapOff": "关闭吸附",
+    "snap": "吸附",
+    "freeze": "冻结 / 播放"
   },
   "settings": {
     "tabLook": "外观",
@@ -102,9 +105,16 @@
     "pauseMedia": "暂停",
     "keepPlaying": "继续播放",
     "fitOnOpen": "打开时适配",
+    "blurBehavior": "失去焦点时的选择栏",
+    "blurBehaviorHint": "点击其他应用程序时。",
+    "blurKeep": "保留",
+    "blurHide": "隐藏",
+    "blurDeselect": "取消选择",
     "enabled": "开",
     "disabled": "关",
     "placeFrame": "放置区边框",
+    "pinnedToolbar": "固定后的工具栏",
+    "pinnedToolbarHint": "固定后只保留放置、绘制和取景。其余在右键菜单里。",
     "decompose": "把视频拆成图片",
     "decomposeHint": "把从视频里抽取的一组图片放到画板上。",
     "imagesPerSec": "图片 / 秒",
@@ -119,12 +129,16 @@
     "upscaleQuick": "快速",
     "upscaleAsk": "自定义",
     "upscaleQuickHint": "“放大”按钮将直接使用这些设置运行。",
-    "upscaleAskHint": "“放大”按钮会打开窗口，每次选择模型、倍数并预览。",
+    "upscaleAskHint": "“放大”按钮打开窗口：模型、倍数、预览。",
     "model": "模型",
     "upscaleModelDefault": "默认超分辨率模型",
     "factor": "倍数",
     "denoise": "降噪",
     "downloadOnline": "下载在线视频",
+    "copyLocal": "将本地媒体复制到项目",
+    "copyLocalOn": "复制",
+    "copyLocalOff": "引用",
+    "copyLocalMax": "视频上限 (MB)",
     "embedSwitch": "切换回播放器",
     "embedSwitchKeep": "保留文件",
     "embedSwitchDrop": "删除文件",
@@ -183,7 +197,53 @@
     "arrangeTitle": "整理",
     "autoArrangeOnImport": "自动整理导入的批次",
     "autoAnchorDraw": "自动把绘制与媒体关联",
-    "paletteSize": "每个调色板的颜色数"
+    "paletteSize": "每个调色板的颜色数",
+    "tabPen": "手写笔",
+    "penNav": "手写笔与手指导航",
+    "penGestures": "双指捏合缩放，双指拖动平移",
+    "penDragPans": "在空白处拖动即平移",
+    "penDragPansHint": "自动：在没有鼠标的触控设备上启用。否则拖动为框选。",
+    "penBarrel": "笔身侧键",
+    "penBarrelMenu": "右键菜单",
+    "penBarrelPan": "平移",
+    "penPalm": "防误触",
+    "penPalmHint": "手写笔刚用过时忽略手指接触。",
+    "penStroke": "手写笔笔迹",
+    "penPressure": "压感",
+    "penMinWidth": "零压力时的粗细",
+    "penTilt": "倾斜",
+    "penEraser": "笔尾橡皮",
+    "penStrokeHint": "压感与倾斜在落笔时确定：改设置不会重绘已有笔迹。",
+    "penUi": "界面",
+    "penTouchUi": "始终显示控件",
+    "penTouchUiHint": "自动：检测到手写笔时，或在触控设备上。",
+    "penBigTargets": "更大的点按范围",
+    "penProbe": "检测到的硬件",
+    "penProbeHint": "用笔悬停即可读到数值，无需书写。",
+    "penProbePen": "手写笔",
+    "penProbePressure": "压感",
+    "penProbeTilt": "倾斜",
+    "penProbeHover": "悬停",
+    "penProbeTouch": "触控点",
+    "penNoSensor": "无传感器",
+    "penYes": "是",
+    "penNo": "否",
+    "barButtons": "工具栏",
+    "pinnedSide": "位置",
+    "pinnedButtons": "固定时的工具栏",
+    "pinnedAvailable": "可用",
+    "pinnedAllPlaced": "全部已放置。",
+    "pinnedBarHint": "拖动放置或移动，点击移除。",
+    "pinnedRemove": "从工具栏移除 {{label}}",
+    "sideTop": "上",
+    "sideBottom": "下",
+    "sideLeft": "左",
+    "sideRight": "右",
+    "bgOpacity": "背景不透明度",
+    "contentOpacity": "内容不透明度",
+    "seeThroughScope": "一并半透明",
+    "seeThroughShell": "界面",
+    "seeThroughPlaceFrame": "放置边框"
   },
   "inspector": {
     "ytPlayer": "YouTube 播放器",
@@ -322,7 +382,20 @@
     "grayscale": "黑白",
     "toFront": "移到最前",
     "toBack": "移到最后",
-    "extractPalette": "提取调色板"
+    "extractPalette": "提取调色板",
+    "addText": "添加文字",
+    "addFrame": "添加边框",
+    "toggleDraw": "绘图模式",
+    "toggleFreeze": "全部冻结 / 播放",
+    "prevFrame": "上一帧",
+    "nextFrame": "下一帧",
+    "toggleMouseThrough": "鼠标穿透",
+    "newScene": "新场景",
+    "openSettings": "设置",
+    "togglePin": "固定窗口",
+    "paletteStudio": "调色板生成器",
+    "crop": "裁剪",
+    "groupSequence": "合并为序列"
   },
   "drawStyle": {
     "thin": "细线",
@@ -482,6 +555,7 @@
     "missingMedia": "媒体缺失",
     "notBundled": "{{size}} · 未打包",
     "relocate": "重新定位",
+    "reloadMedia": "重新下载",
     "downloading": "下载中…",
     "mediaFallback": "媒体",
     "interactiveActive": "交互中 — 点击别处可移动",
@@ -507,7 +581,8 @@
   "youtube": {
     "notEmbeddable": "视频无法嵌入",
     "blocked": "YouTube 禁止嵌入播放该视频。",
-    "openOnYouTube": "在 YouTube 打开"
+    "openOnYouTube": "在 YouTube 打开",
+    "preparing": "正在准备视频…"
   },
   "embed": {
     "frozen": "播放已冻结",
@@ -542,7 +617,7 @@
     "itemLabel": "分享：{{level}}",
     "settings": {
       "title": "媒体存储",
-      "hint": ".netsu 文件默认带走的内容。每个媒体都可以在检查器中单独设置。"
+      "hint": ".netsu 默认带走的内容。可在检查器中逐个媒体设置。"
     }
   },
   "board": {
@@ -589,7 +664,9 @@
     "noProjectFile": "此看板未关联任何文件",
     "relocating": "正在文件夹中查找媒体…（{{count}}）",
     "relocated": "已重新定位 {{count}}/{{total}} 个媒体",
-    "relocatedNone": "此文件夹中未识别到媒体"
+    "relocatedNone": "此文件夹中未识别到媒体",
+    "contentOpacity": "内容不透明度：{{percent}}%",
+    "itemOpacity": "媒体不透明度：{{percent}}%"
   },
   "tidy": {
     "title": "整理",
@@ -631,7 +708,45 @@
     "formatHint": "以 {{format}} 复制",
     "layoutRow": "横排",
     "layoutCol": "竖排",
-    "layoutGrid": "方阵"
+    "layoutGrid": "方阵",
+    "studio": {
+      "open": "调色板生成器",
+      "edit": "在生成器中打开",
+      "close": "关闭生成器",
+      "title": "调色板生成器",
+      "pickScreen": "屏幕取色器",
+      "brightness": "明度",
+      "tones": "色调",
+      "fromSelection": "取自所选",
+      "fromBoard": "取自整个面板",
+      "noSelection": "请在面板上选择图片",
+      "noMedia": "面板上没有图片",
+      "reset": "重置",
+      "pick": "拾色器",
+      "notation": "表示法",
+      "value": "颜色值",
+      "place": "放到面板",
+      "apply": "应用",
+      "placed": "已放置 {{count}} 色调色板",
+      "applied": "调色板已更新（{{count}} 色）",
+      "addSwatch": "添加颜色",
+      "removeSwatch": "移除颜色",
+      "lock": "锁定颜色",
+      "unlock": "解锁颜色",
+      "moveLeft": "左移",
+      "moveRight": "右移",
+      "rule": {
+        "custom": "自定义",
+        "analogous": "类似色",
+        "complementary": "互补色",
+        "split": "分裂互补",
+        "triadic": "三角配色",
+        "square": "正方形",
+        "compound": "复合",
+        "shades": "明暗渐变",
+        "monochromatic": "单色"
+      }
+    }
   },
   "exportImage": {
     "menu": "导出为图片…",
@@ -656,6 +771,16 @@
     "progress": "正在导入 {{done}}/{{total}}…",
     "reading": "正在读取 {{count}} 个文件…",
     "done": "已导入 {{count}} 个媒体",
-    "folderTruncated": "文件夹过大：已导入前 {{count}} 个媒体"
+    "folderTruncated": "文件夹过大：已导入前 {{count}} 个媒体",
+    "importing": "正在导入 {{name}}…",
+    "fetching": "正在获取媒体…",
+    "linkDone": "已导入媒体",
+    "fetchingFrom": "正在从 {{source}} 获取…"
+  },
+  "mouseThrough": {
+    "on": "鼠标穿透",
+    "off": "收回鼠标",
+    "warning": "点击和滚轮将传给下方应用，窗口保持在最前。要收回：重新让它获得焦点（Alt+Tab）。",
+    "dontAskAgain": "不再询问"
   }
 }

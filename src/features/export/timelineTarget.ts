@@ -1,7 +1,7 @@
 // Options de montage portées par le profil d'export ACTIF quand il vise la timeline : timeline
 // visée, dossier de rangement, vidéo seule. Fonction PURE — SEULE traduction profil → opts de build,
 // pour que tous les chemins (créer / envoyer la sélection / ajouter un plan) se comportent pareil.
-import { type ExportProfile, coerceTimelineTarget, timelineTargetName, isTimelineImport } from "./profiles";
+import { type ExportProfile, coerceTimelineTarget, timelineTargetName, timelineNewName, isNewTimelineTarget, isTimelineImport } from "./profiles";
 import type { TimelineInsertionMode } from "@/features/timeline/insertion";
 
 export interface TimelineBuildOpts {
@@ -17,11 +17,18 @@ export function timelineBuildOptsFromProfile(profile: ExportProfile): TimelineBu
   if (!isTimelineImport(profile.workflow)) return { mode: "append" };
   const target = coerceTimelineTarget(profile.timelineTarget);
   const name = timelineTargetName(target);
-  const o: TimelineBuildOpts = { mode: target === "new" ? "new" : "append" };
+  const o: TimelineBuildOpts = { mode: isNewTimelineTarget(target) ? "new" : "append" };
   if (name) o.timelineName = name;
   // Trim au POINT D'USAGE (le profil garde la saisie brute) → jamais de dossier nommé « » côté hôte.
   const bin = profile.binTarget?.trim();
   if (bin) { o.dest = "bin"; o.binName = bin; }
   if (profile.audioMode === "none") o.videoOnly = true;
   return o;
+}
+
+// Nom de la timeline à CRÉER : la saisie du sélecteur de destination (« Nouvelle timeline » → champ
+// de nom) prime sur le nom déduit du contexte (rush, collection, timeline source). Un nom passé
+// explicitement par une modale reste prioritaire — il n'arrive pas jusqu'ici.
+export function newTimelineName(profile: ExportProfile, fallback: string): string {
+  return timelineNewName(coerceTimelineTarget(profile.timelineTarget))?.trim() || fallback;
 }

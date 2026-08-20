@@ -23,6 +23,7 @@ import { useTabSync } from "@/hooks/useTabSync";
 import { BrandIcon } from "@/components/BrandIcon";
 import { BetaBadge } from "@/components/BetaBadge";
 import { UpdateBootstrap } from "@/components/updates/UpdateBootstrap";
+import { armAutoInstall } from "@/store/updater";
 import { Spinner } from "@/components/ui/spinner";
 import { Toaster } from "@/components/ui/toast";
 import { loadExportCapabilities } from "@/features/export/capabilities";
@@ -124,6 +125,11 @@ function Shell() {
   // Réapplique l'épinglage (always-on-top) persisté au démarrage : la préférence vit dans le store
   // (localStorage) mais l'état réel de la fenêtre Tauri se perd à chaque lancement.
   useEffect(() => { nr.setAlwaysOnTop(useApp.getState().pinned); }, []);
+
+  // Mise à jour automatique au lancement (option, désactivée par défaut). Armée ICI et nulle part
+  // ailleurs : l'installation et la connexion sont derrière nous, donc le redémarrage qu'elle peut
+  // déclencher ne peut couper ni un téléchargement de runtime ni une connexion en cours.
+  useEffect(() => { armAutoInstall(); }, []);
 
   // Diagnostic GPU au démarrage : confirme dans la console que le décodage vidéo matériel et
   // WebGPU sont actifs (video_decode/webgpu = "enabled"). navigator.gpu = présence de l'API WebGPU.

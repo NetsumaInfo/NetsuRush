@@ -32,6 +32,8 @@ const { killSidecars } = require("./sidecars");
 const { killRoto } = require("./roto");
 const { ffBin, NR_HOME } = require("./config");
 const { getCapabilities } = require("./export/capabilities");
+const { refreshYtDlpForAppVersion } = require("./ytdlpUpdate");
+const { controlRequestAllowed } = require("./httpSecurity");
 
 const HOST = "127.0.0.1";
 // Port IMPOSÉ par la coquille Tauri (elle en choisit un libre et le sert au renderer via
@@ -47,19 +49,50 @@ const rpc = createRpc();
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, `http://${HOST}`);
 
-  // CORS UNIQUEMENT pour le RPC/SSE/health (le webview Tauri tauri://localhost et vite :1420 sont
-  // cross-origin et lisent ces réponses via fetch). On NE met PAS d'en-tête CORS sur /media et
-  // /stream : ces routes servent des fichiers disque arbitraires ; sans `Access-Control-Allow-Origin`,
-  // un site web tiers ouvert dans un navigateur ne peut PAS lire leur contenu via fetch (les balises
-  // <img>/<video> du webview, elles, n'exigent pas de CORS pour s'afficher).
-  if (u.pathname !== "/media" && u.pathname !== "/stream" && u.pathname !== "/ytstream") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "content-type");
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  }
+  // RPC/SSE/health accept only the Tauri renderer, a served or dev loopback renderer, or a holder of
+  // the shared token (Adobe panel, MCP bridge). CORS `*` was a browser-to-loopback confused-deputy
+  // primitive here: a public web page could invoke ffmpeg, open paths, or mutate local state. /media,
+  // /stream and /ytstream still carry NO CORS header: they serve arbitrary disk files, and without
+  // `Access-Control-Allow-Origin` a third-party site cannot read their content through fetch (the
+  // webview's own <img>/<video> tags need no CORS to display them).
+  const controlRoute = u.pathname === "/rpc" || u.pathname === "/events";
+  // Liveness beacon, and the ONLY way an out-of-process client can find the service: the port moves
+  // between launches, so the Adobe panel sweeps the range reading `{ok, app, port, channels}`. It
+  // carries nothing worth guarding, and guarding it would lock the panel out before it could prove
+  // anything about itself.
+  const beaconRoute = u.pathname === "/healthz";
+
+  // A preflight carries no custom header by construction — it announces them, it does not send them
+  // — so it cannot authenticate itself, and it performs no action. It is answered ahead of the
+  // guard, which then applies to the real request that follows.
   if (req.method === "OPTIONS") {
+    if (!controlRoute && !beaconRoute) {
+      res.writeHead(403).end();
+      return;
+    }
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin ? String(req.headers.origin) : "*");
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "content-type,x-nr-token");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     res.writeHead(204).end();
     return;
+  }
+
+  if (controlRoute && !controlRequestAllowed(req.headers, u)) {
+    res.writeHead(403).end("forbidden origin");
+    return;
+  }
+  if (controlRoute && req.headers.origin) {
+    // The origin is echoed back, never `*`: the response is readable only by the caller already
+    // recognised above, and `Vary` stops a cache from serving it to another origin.
+    res.setHeader("Access-Control-Allow-Origin", String(req.headers.origin));
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "content-type,x-nr-token");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  }
+  if (beaconRoute) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   }
 
   if (u.pathname === "/healthz") {
@@ -102,11 +135,14 @@ let activePort = FIXED_PORT || PORT_FIRST;
 
 // Le port retenu est publié sur disque : les clients HORS processus (panneau CEP, diagnostic) n'ont
 // aucun autre moyen de le connaître, et le renderer Tauri, lui, le tient de la coquille.
+// The token ships alongside it: that is what lets the Adobe panel through on /rpc and /events, whose
+// `file:` origin is refused. The file is written with the user's own rights — no web page reads it.
 function publishPort(port) {
   process.env.NR_CORE_PORT = String(port); // hérité par les sidecars et le serveur MCP
   try {
     fs.mkdirSync(NR_HOME, { recursive: true });
-    fs.writeFileSync(path.join(NR_HOME, "core-port.json"), JSON.stringify({ port, pid: process.pid, url: `http://${HOST}:${port}` }));
+    const token = process.env.NR_CORE_TOKEN || "";
+    fs.writeFileSync(path.join(NR_HOME, "core-port.json"), JSON.stringify({ port, pid: process.pid, url: `http://${HOST}:${port}`, token }));
   } catch (error) {
     console.warn("core: port non publié (le panneau Adobe devra le chercher)", String(error));
   }
@@ -121,6 +157,10 @@ function onListening() {
   void getCapabilities()
     .then((caps) => console.log(`Encodeurs vidéo: ${caps.hwEncoders.join(', ') || 'CPU'}`))
     .catch((error) => console.warn('Sonde encodeurs indisponible, repli CPU:', String(error)));
+  // Refreshes yt-dlp on the first boot of a new application version, and on that boot only. In the
+  // background: a version gap downloads a wheel, and no link on a board should wait for that.
+  void refreshYtDlpForAppVersion()
+    .catch((error) => console.warn('yt-dlp: mise à jour ignorée:', String(error)));
 }
 
 server.on("listening", onListening);

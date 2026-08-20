@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ComboKeys } from "@/components/ui/kbd";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { useBoard } from "./useReferenceBoard";
 import { DrawHeadPicker } from "./DrawHeadPicker";
@@ -30,8 +31,9 @@ function isTyping(el: Element | null): boolean {
   return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || (el as HTMLElement).isContentEditable);
 }
 
-function IconBtn({ label, active, disabled, onClick, children }: {
-  label: string; active?: boolean; disabled?: boolean; onClick: () => void; children: React.ReactNode;
+// `combo` = the tool's key, as a badge in the tooltip. The accessible label stays clean.
+function IconBtn({ label, combo, active, disabled, onClick, children }: {
+  label: string; combo?: string; active?: boolean; disabled?: boolean; onClick: () => void; children: React.ReactNode;
 }) {
   return (
     <Tooltip>
@@ -40,7 +42,12 @@ function IconBtn({ label, active, disabled, onClick, children }: {
       >
         {children}
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>
+        <span className="flex items-center gap-1.5">
+          {label}
+          {combo && <ComboKeys combo={combo} />}
+        </span>
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -56,7 +63,8 @@ export function DrawToolbar() {
   const canRedo = useBoard((s) => s.future.length > 0);
   const drawBack = useBoard((s) => s.drawBack);
   const setDrawBack = useBoard((s) => s.setDrawBack);
-  const drawKeys = useBoard((s) => s.prefs.drawKeys); // raccourcis outils personnalisables (Paramètres)
+  const drawKeys = useBoard((s) => s.prefs.drawKeys);
+  const shortcutKeys = useBoard((s) => s.prefs.shortcutKeys); // raccourcis-commandes (annuler / rétablir) // raccourcis outils personnalisables (Paramètres)
 
   const connector = pen.tool === "arrow" || pen.tool === "line";
   const styleable = pen.tool !== "select" && pen.tool !== "eraser";
@@ -76,11 +84,11 @@ export function DrawToolbar() {
 
   return (
     <div className="absolute left-1/2 top-4 z-30 -translate-x-1/2">
-      <div className="flex w-max max-w-[96vw] items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-card/95 px-3 py-2 shadow-xl backdrop-blur">
+      <div className="nr-chrome flex w-max max-w-[96vw] items-center gap-1.5 overflow-x-auto rounded-xl border border-border bg-card/95 px-3 py-2 shadow-xl backdrop-blur">
         {TOOLS.map((tool) => {
           const lbl = t(tool.labelKey);
           return (
-            <IconBtn key={tool.tool} label={drawKeys[tool.tool] ? `${lbl} (${drawKeys[tool.tool].toUpperCase()})` : lbl} active={pen.tool === tool.tool} onClick={() => setPen({ tool: tool.tool })}>
+            <IconBtn key={tool.tool} label={lbl} combo={drawKeys[tool.tool]?.toUpperCase()} active={pen.tool === tool.tool} onClick={() => setPen({ tool: tool.tool })}>
               <tool.icon />
             </IconBtn>
           );
@@ -124,8 +132,8 @@ export function DrawToolbar() {
 
         <Separator orientation="vertical" className="h-6" />
 
-        <IconBtn label={t("actions.undo")} disabled={!canUndo} onClick={undo}><Undo2 /></IconBtn>
-        <IconBtn label={t("actions.redo")} disabled={!canRedo} onClick={redo}><Redo2 /></IconBtn>
+        <IconBtn label={t("actions.undo")} combo={shortcutKeys.undo} disabled={!canUndo} onClick={undo}><Undo2 /></IconBtn>
+        <IconBtn label={t("actions.redo")} combo={shortcutKeys.redo} disabled={!canRedo} onClick={redo}><Redo2 /></IconBtn>
 
         <Separator orientation="vertical" className="h-6" />
 

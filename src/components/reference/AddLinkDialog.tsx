@@ -46,6 +46,9 @@ export function AddLinkDialog({
       onOpenChange={(o) => {
         if (busy) return; // résolution en cours : on ne ferme pas sous les pieds de l'utilisateur
         setErr(null);
+        // le champ ne survit pas à la fermeture : sinon la prochaine ouverture repropose le lien
+        // qui vient d'échouer, et l'utilisateur le resoumet sans le voir.
+        if (!o) setUrl("");
         onOpenChange(o);
       }}
     >

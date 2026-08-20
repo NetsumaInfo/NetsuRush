@@ -236,7 +236,10 @@
     "genStopped": "Generation stopped · Proxies: {{done}}/{{total}}",
     "proxiesReady": "Proxies ready · Shots: {{count}}",
     "thumbsStopped": "Thumbnails stopped · {{done}}/{{total}}",
-    "thumbsReady": "Thumbnails ready · {{count}}"
+    "thumbsReady": "Thumbnails ready · {{count}}",
+    "genFailed": "Proxies · {{failed}}/{{total}} failed",
+    "thumbsFailed": "Thumbnails · {{failed}}/{{total}} failed",
+    "proxiesUpToDate": "Proxies already up to date · {{count}} shot(s), nothing to generate"
   },
   "rushGrid": {
     "home": "Home",
@@ -288,7 +291,9 @@
     "openedTimeline": "Open timeline",
     "openedNamed": "{{name}} (open)",
     "choose": "Choose…",
-    "existing": "Existing timelines"
+    "existing": "Existing timelines",
+    "newNamePlaceholder": "Timeline name (auto if empty)",
+    "newNameLabel": "New timeline name"
   },
   "sendDialog": {
     "readingCuts": "Reading the cuts…",

@@ -1,6 +1,6 @@
 // Destination d'un montage : timeline OUVERTE (append), une timeline EXISTANTE choisie (append),
 // ou une NOUVELLE timeline. Partagé par Collections et Timeline Live (bouton « ajouter à la
-// timeline » des cartes + actions groupées). Encodage de la valeur : "open" | "new" | "tl:<nom>".
+// timeline » des cartes + actions groupées). Encodage de la valeur : "open" | "new" | "new:<nom>" | "tl:<nom>".
 //
 // La valeur vit dans le PROFIL D'EXPORT ACTIF, comme dans le Découpage (ExportTimelineTarget) : un
 // état local ici donnait à Collections/Timeline Live une destination privée, que régler dans les
@@ -10,7 +10,8 @@ import { nr } from "@/lib/bridge";
 import { useTimelineList } from "./useTimelineList";
 import { hostBuildTimeline, isAdobeHost } from "@/lib/host";
 import { useApp } from "@/store";
-import { coerceTimelineTarget, getActiveExportProfile } from "@/features/export/profiles";
+import { coerceTimelineTarget, getActiveExportProfile, isNewTimelineTarget } from "@/features/export/profiles";
+import { newTimelineName } from "@/features/export/timelineTarget";
 
 type TargetValue = string;
 
@@ -52,8 +53,9 @@ export interface TimelineTargetView {
 export interface TimelineTarget extends TimelineTargetView {
   loading: boolean;        // scan des timelines en cours (1er chargement ou refresh)
   refresh: () => Promise<void>;
-  // Monte des blocs vers la destination choisie. name = nom si nouvelle timeline.
-  build: (name: string, blocks: { filePath: string; inFrame?: number; outFrame?: number | null; fps?: number }[]) =>
+  // Monte des blocs vers la destination choisie. fallbackName = nom de la nouvelle timeline quand
+  // le sélecteur n'en porte pas (« Nouvelle timeline » sans nom saisi).
+  build: (fallbackName: string, blocks: { filePath: string; inFrame?: number; outFrame?: number | null; fps?: number }[]) =>
     Promise<{ ok: boolean; timeline?: string; count?: number; error?: string }>;
 }
 
@@ -70,13 +72,15 @@ export function useTimelineTarget(enabled = true): TimelineTarget {
   const value = coerceTimelineTarget(profile.timelineTarget);
   const setValue = (next: TargetValue) => updateProfile(profile.id, { timelineTarget: coerceTimelineTarget(next) });
 
-  async function build(name: string, blocks: TimelineBlock[]) {
+  async function build(fallbackName: string, blocks: TimelineBlock[]) {
     if (!blocks.length) return { ok: false, error: t("shared.noShots") };
     // « Timeline ouverte » alors qu'aucune ne l'est → nouvelle timeline. Repli calculé au montage et
     // NON écrit dans le profil : ouvrir la vue hôte déconnecté ne doit pas réécrire le réglage.
     const target = value === "open" && !current ? "new" : value;
-    const mode: "new" | "append" = target === "new" ? "new" : "append";
+    const mode: "new" | "append" = isNewTimelineTarget(target) ? "new" : "append";
     const timelineName = target.startsWith("tl:") ? target.slice(3) : undefined;
+    // Nom saisi dans le sélecteur (« Nouvelle timeline » → champ de nom) ; sinon le nom du contexte.
+    const name = newTimelineName(profile, fallbackName);
 
     // Adobe : même route que le Derush et la Recherche (job du panneau, segments en secondes).
     // `nr.script.buildTimeline` est le monteur NATIF Resolve — il ne sait pas parler à Premiere/AE.

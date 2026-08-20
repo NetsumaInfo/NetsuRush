@@ -11,7 +11,7 @@ import { paletteGrid, type BoardItem, type DrawShape } from "./referenceShared";
 import { rotatedBBox } from "./boardArrange";
 import { formatColor } from "./colorFormat";
 import { resolveShapes } from "./drawAnchor";
-import { connectorPath, penPath, shapeBBox } from "./drawGeometry";
+import { connectorPath, penOutline, penPath, shapeBBox } from "./drawGeometry";
 
 export interface RenderOptions {
   // Largeur de sortie en pixels ; à défaut, la taille naturelle du contenu (+ marge).
@@ -416,7 +416,9 @@ function paintShape(ctx: CanvasRenderingContext2D, s: DrawShape): void {
   ctx.setLineDash(dashFor(s));
 
   if (s.t === "pen") {
-    ctx.stroke(new Path2D(penPath(s.p)));
+    // Tracé au stylet : contour rempli, l'épaisseur y varie point par point (cf. penOutline).
+    if (s.pw?.length) { ctx.fillStyle = s.c; ctx.fill(new Path2D(penOutline(s.p, s.pw, s.w))); }
+    else ctx.stroke(new Path2D(penPath(s.p)));
   } else if (s.t === "line" || s.t === "arrow") {
     const { d, startAng, endAng } = connectorPath(s);
     ctx.stroke(new Path2D(d));
@@ -549,7 +551,10 @@ function svgShape(s: DrawShape): string {
     : s.dash === "dotted" ? ` stroke-dasharray="0.1 ${s.w * 2}"` : "";
   const op = s.op != null && s.op < 1 ? ` opacity="${s.op}"` : "";
   const common = `fill="${s.fill && s.fill !== "none" ? s.fill : "none"}" stroke="${s.c}" stroke-width="${s.w}" stroke-linecap="round" stroke-linejoin="round"${dash}${op}`;
-  if (s.t === "pen") return `<path d="${penPath(s.p)}" ${common} fill="none"/>`;
+  if (s.t === "pen") {
+    if (s.pw?.length) return `<path d="${penOutline(s.p, s.pw, s.w)}" fill="${s.c}" stroke="none"${op}/>`;
+    return `<path d="${penPath(s.p)}" ${common} fill="none"/>`;
+  }
   if (s.t === "line" || s.t === "arrow") return `<path d="${connectorPath(s).d}" ${common} fill="none"/>`;
   if (s.t === "rect") {
     const x = Math.min(s.p[0], s.p[2]), y = Math.min(s.p[1], s.p[3]);

@@ -23,12 +23,16 @@ export function UpdateBootstrap() {
   if (!latest) return null;
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); else setOpen(true); }}>
-      <DialogContent>
+      {/* Une version chargée peut aligner une dizaine de nouveautés : la fenêtre est plus large, et
+          bornée à la hauteur de l'écran avec la LISTE pour seule zone qui défile. En laissant la
+          boîte grandir, le bouton finissait sous le bord de la fenêtre — sans issue au clavier non
+          plus, puisqu'il n'y a rien d'autre à atteindre. */}
+      <DialogContent className="max-h-[calc(100vh-3rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("updates.whatsNew", { version: latest.version })}</DialogTitle>
           <DialogDescription>{latest.title[language]}</DialogDescription>
         </DialogHeader>
-        <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+        <ul className="min-h-0 list-disc space-y-2 overflow-y-auto pr-1 pl-5 text-sm text-muted-foreground">
           {latest.highlights[language].map((highlight) => <li key={highlight}>{highlight}</li>)}
         </ul>
         <DialogFooter><Button onClick={close}>{t("updates.gotIt")}</Button></DialogFooter>

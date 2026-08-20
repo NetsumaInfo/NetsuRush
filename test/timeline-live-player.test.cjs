@@ -16,12 +16,12 @@ test('Timeline Live right player reuses the exact card proxy request', () => {
 
 test('shared Timeline Live proxy requests coalesce while generation is in flight', () => {
   const grid = fs.readFileSync(
-    path.join(__dirname, '..', 'src', 'components', 'rushes', 'useShotGrid.ts'),
+    path.join(__dirname, '..', 'src', 'components', 'rushes', 'previewCache.ts'),
     'utf8',
   );
-  assert.match(grid, /proxyPendingRef = useRef<Map<string, Promise<string \| null>>>/);
-  assert.match(grid, /const pending = proxyPendingRef\.current\.get\(k\);\s*if \(pending\) return pending;/);
-  assert.match(grid, /proxyPendingRef\.current\.set\(k, request\)/);
+  assert.match(grid, /pendingRef = useRef<Map<string, Promise<string \| null>>>/);
+  assert.match(grid, /const inFlight = pendingRef\.current\.get\(key\);\s*if \(inFlight\) return inFlight;/);
+  assert.match(grid, /pendingRef\.current\.set\(key, request\)/);
 });
 
 test('Timeline Live double click opens the player without pinning playback inside the card', () => {

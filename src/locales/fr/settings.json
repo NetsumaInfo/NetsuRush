@@ -218,9 +218,11 @@
   },
   "updates": {
     "title": "Mises à jour",
-    "subtitle": "Les versions sont vérifiées sur GitHub et leur signature est validée avant installation.",
+    "subtitle": "Versions vérifiées sur GitHub, signature validée avant installation.",
     "auto": "Vérification automatique",
     "autoHint": "Recherche une nouvelle version quelques secondes après le démarrage.",
+    "autoInstall": "Mise à jour automatique au lancement",
+    "autoInstallHint": "Installe et redémarre au lancement, sans rien demander.",
     "on": "Activée",
     "off": "Désactivée",
     "ready": "Prêt à vérifier",
@@ -383,7 +385,7 @@
       "detail": "Dis en quelques mots de quoi il s'agit.",
       "tooLarge": "Un fichier dépasse {{size}} Mo."
     },
-    "noWebhook": "Envoi désactivé : aucun webhook configuré. Renseignez <c1>bugWebhook</c1> dans nr.config.json (ou la variable d'environnement <c2>NR_BUG_WEBHOOK</c2>).",
+    "noWebhook": "Envoi désactivé : aucun canal. Renseigne <c1>bugWebhook</c1> dans nr.config.json, ou déploie le relais Convex (<c2>VITE_CONVEX_SITE_URL</c2>).",
     "descriptionOther": "Explique ta demande",
     "descriptionOtherPlaceholder": "Ta question, ou ce que tu veux nous dire…",
     "files": {

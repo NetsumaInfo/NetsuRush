@@ -61,8 +61,15 @@ function TrimNum({ value, empty, placeholder, ariaLabel, onCommit }: {
 // short range.
 const HEAD_POLL_MS = 60;
 const RESTART_JUMP_S = 0.15;
+// Diamètre du pouce du curseur (`size-4`). Base UI, en `thumbAlignment="edge"`, ne place PAS le pouce
+// linéairement : il le rentre d'un demi-pouce à chaque bout pour qu'il ne déborde jamais de la piste,
+// soit `pouce/2 + (largeur − pouce) × pct`. La tête de lecture doit suivre la même règle, sinon elle
+// ne coïncide avec les bornes qu'au milieu de la course et paraît dépasser la fin.
+const THUMB_PX = 16;
+// Cadence maximale des aperçus de scrub. Un lecteur ne suit pas un événement de curseur par pixel.
+const SCRUB_MS = 90;
 
-function LoopPlayhead({ id, dur }: { id: string; dur: number }) {
+function LoopPlayhead({ id, span }: { id: string; span: number }) {
   const [pos, setPos] = useState<number | null>(null);
   const [flash, setFlash] = useState(false);
   const prev = useRef<number | null>(null);
@@ -81,8 +88,8 @@ function LoopPlayhead({ id, dur }: { id: string; dur: number }) {
     return () => { clearInterval(timer); clearTimeout(off); };
   }, [id]);
 
-  if (pos == null || !dur) return null;
-  const pct = Math.min(100, Math.max(0, (pos / dur) * 100));
+  if (pos == null || !span) return null;
+  const pct = Math.min(100, Math.max(0, (pos / span) * 100));
   return (
     <>
       <span
@@ -93,7 +100,7 @@ function LoopPlayhead({ id, dur }: { id: string; dur: number }) {
       />
       <span
         className="pointer-events-none absolute top-1/2 z-10 h-3.5 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow ring-1 ring-black/40"
-        style={{ left: `${pct}%` }}
+        style={{ left: `calc(${THUMB_PX / 2}px + (100% - ${THUMB_PX}px) * ${pct / 100})` }}
       />
     </>
   );
@@ -108,6 +115,12 @@ export function TrimControls({ item }: { item: BoardItem }) {
   const tin = item.trimIn && item.trimIn > 0 ? item.trimIn : 0;
   const tout = item.trimOut != null && item.trimOut > 0 ? item.trimOut : dur ?? 0;
   const hi = dur ? Math.min(tout || dur, dur) : tout;
+  // Borne du curseur, arrondie AU-DESSUS de la durée : arrondie au plus proche elle pouvait tomber
+  // SOUS `dur`, et la valeur de fin (= `dur` quand rien n'est rogné) sortait alors de la plage — le
+  // pouce ne rejoignait plus le bout de la piste alors que le clip est lu en entier.
+  const max = dur ? Math.ceil(dur * 10) / 10 : 0;
+  // Dernière position visée par le geste + date du dernier aperçu demandé (cf. `onValueChange`).
+  const scrub = useRef<{ at: number | null; last: number }>({ at: null, last: 0 });
 
   const set = (a: number, b: number) =>
     patchItem(item.id, {
@@ -121,14 +134,28 @@ export function TrimControls({ item }: { item: BoardItem }) {
 
       {dur ? (
         <SliderPrimitive.Root
-          value={[tin, hi]} min={0} max={Math.round(dur * 10) / 10} step={0.1} thumbAlignment="edge"
+          value={[tin, hi]} min={0} max={max} step={0.1} thumbAlignment="edge"
           onValueChange={(v) => {
             const a = Array.isArray(v) ? v : [0, dur];
             set(a[0], a[1]);
             // Scrub: the dragged bound previews on the media itself, so a range is set by what is
-            // seen, not by reading numbers.
+            // seen, not by reading numbers. Le curseur émet à chaque pixel parcouru : on garde la
+            // dernière position voulue mais on n'en demande l'aperçu qu'à cadence tenable, en mode
+            // « geste en cours » (aucun chargement réseau côté lecteur streamé).
             const moved = Math.abs(a[0] - tin) > 0.001 ? a[0] : Math.abs(a[1] - hi) > 0.001 ? a[1] : null;
-            if (moved != null) playerSeek(item.id, moved);
+            if (moved == null) return;
+            scrub.current.at = moved;
+            const now = Date.now();
+            if (now - scrub.current.last < SCRUB_MS) return;
+            scrub.current.last = now;
+            playerSeek(item.id, moved, true);
+          }}
+          // Geste terminé : un dernier seek, chargement autorisé, pour montrer la VRAIE image de la
+          // borne posée et non la dernière frame qui se trouvait déjà en tampon.
+          onValueCommitted={() => {
+            const { at } = scrub.current;
+            scrub.current = { at: null, last: 0 };
+            if (at != null) playerSeek(item.id, at);
           }}
           className="w-28"
         >
@@ -136,7 +163,7 @@ export function TrimControls({ item }: { item: BoardItem }) {
             <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-foreground/20 select-none">
               <SliderPrimitive.Indicator className="h-full bg-primary select-none" />
             </SliderPrimitive.Track>
-            <LoopPlayhead id={item.id} dur={dur} />
+            <LoopPlayhead id={item.id} span={max} />
             {[tin, hi].map((val, i) => (
               <SliderPrimitive.Thumb
                 key={i}

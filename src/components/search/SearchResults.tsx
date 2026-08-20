@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, Play, Group, Copy, Images, ScanFace, CheckSquare, Square } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { nr, type SearchHit } from "@/lib/bridge";
+import { type SearchHit } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,18 @@ import { hitKey, grid } from "@/components/search/searchHelpers";
 import { sendPathToBoard } from "@/components/reference/boardActions";
 import { ExportButton } from "@/components/export/ExportButton";
 import { setMaxPlaying, resetPlaySlots, MAX_PLAYING_HARD } from "@/components/rushes/cutStudioShared";
-import { previewSettingsFingerprint } from "@/lib/previewSettings";
+import { usePreviewCache } from "@/components/rushes/previewCache";
 import { warmResolveThumbs } from "@/lib/thumbCache";
 import { thumbTime } from "@/lib/utils";
 
 function fileName(p: string): string {
   return p.replace(/^.*[\\/]/, "");
+}
+
+// Plage d'aperçu d'un résultat : le plan, borné à 10 s. Cette borne fait partie de l'identité du
+// proxy (elle entre dans la clé du cache partagé) → calculée ICI et nulle part ailleurs.
+function previewRange(h: SearchHit): { path: string; in: number; out: number } {
+  return { path: h.file_path, in: h.start_sec, out: Math.min(h.end_sec, h.start_sec + 10) };
 }
 
 const VIEWS = [
@@ -36,8 +42,8 @@ const VIEWS = [
 const PAGE = 60;
 
 // Affichage des résultats : en-tête (seuil/tri/vue), actions de sélection (vue
-// plate) et corps selon la vue (plate / doublons / groupes). Possède la sélection
-// locale, la lecture "tout lire" et le cache de proxies (réinitialisés à chaque recherche).
+// plate) et corps selon la vue (plate / doublons / groupes). Possède la sélection locale et la
+// lecture « tout lire » (remises à zéro à chaque recherche) ; les aperçus viennent du cache partagé.
 export function SearchResults() {
   const { t } = useTranslation("search");
   const {
@@ -57,11 +63,14 @@ export function SearchResults() {
   const [playAll, setPlayAll] = useState(false);
   const [sel, setSel] = useState<Set<string>>(new Set());      // sélection des résultats
   const [visible, setVisible] = useState(PAGE);                // nb de cartes montées (vue plate)
-  const proxyCache = useRef<Map<string, string> | null>(null);
-  if (proxyCache.current === null) proxyCache.current = new Map();
-  const proxies = proxyCache.current;
+  // Cache d'aperçus PARTAGÉ avec le Découpage, Timeline Live et Collections (cf. previewCache) : il
+  // est indexé par (fichier, plage), donc un résultat qui tombe sur un plan déjà lu ailleurs trouve
+  // son proxy sans un seul ffmpeg de plus.
+  const preview = usePreviewCache();
 
-  // Nouveaux résultats (et montage) → reset sélection + cache proxies + lecture auto + créneaux
+  // Nouveaux résultats (et montage) → reset sélection + lecture auto + créneaux. Le cache d'aperçus,
+  // lui, SURVIT : il est indexé par (fichier, plage), donc un plan retrouvé par une autre recherche
+  // rejoue son proxy sans réencoder.
   // (compteur partagé remis à zéro : évite un état faussé hérité de la grille derush qui affamerait
   // la lecture auto). On remonte AUSSI le plafond de lecture simultanée : le pool est partagé avec la
   // grille derush (cutStudioShared) et CutStudio a pu le laisser bas → toutes les cartes visibles
@@ -70,7 +79,7 @@ export function SearchResults() {
   // donc pas de géométrie à mesurer pour en déduire un nombre de cartes visibles. À 30, un grand
   // écran en 6 colonnes laissait ses dernières rangées figées sur leur vignette sous « Tout lire ».
   // La borne réelle reste la bande de lecture : seules les cartes qui l'atteignent réclament un créneau.
-  useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); proxies.clear(); resetPlaySlots(); setMaxPlaying(MAX_PLAYING_HARD); }, [searchHits, proxies]);
+  useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); resetPlaySlots(); setMaxPlaying(MAX_PLAYING_HARD); }, [searchHits]);
 
   // Amorçage des vignettes DÉJÀ générées en UN appel (rien n'est encodé ici) : les résultats
   // portent souvent des rushs déjà découpés, dont les vignettes sont sur le disque. Sans ce
@@ -88,34 +97,15 @@ export function SearchResults() {
   // (cf. proxyResolve) — un aperçu au palier d'à côté vaut mieux qu'une vignette figée.
   useEffect(() => {
     if (!searchHits.length) return;
-    const range = (h: SearchHit) => ({ input: h.file_path, start: h.start_sec, end: Math.min(h.end_sec, h.start_sec + 10) });
-    let alive = true;
-    void nr.proxyResolve(searchHits.map(range))
-      .then((rows) => {
-        if (!alive) return;
-        const byRange = new Map(rows.filter((r) => r.file).map((r) => [`${r.input}|${r.start}|${r.end}`, r.file as string]));
-        const fingerprint = previewSettingsFingerprint();
-        for (const h of searchHits) {
-          const r = range(h);
-          const file = byRange.get(`${r.input}|${r.start}|${r.end}`);
-          const k = `${hitKey(h)}|${fingerprint}`;
-          // Premier écrit gagne : une lecture réelle a pu remplir l'entrée entre-temps.
-          if (file && !proxies.has(k)) proxies.set(k, nr.assetUrl(file));
-        }
-      })
-      .catch(() => { /* best-effort : repli sur l'encode à la demande */ });
-    return () => { alive = false; };
-  }, [searchHits, proxies]);
+    preview.warmProxies(searchHits.map(previewRange));
+    // `preview` est stable pour la vue ; le lister relancerait la résolution à chaque rendu.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchHits]);
 
-  async function getProxy(h: SearchHit, height?: number, token?: number, priority: "high" | "low" = "high"): Promise<string | null> {
-    const k = `${hitKey(h)}|${previewSettingsFingerprint()}`;
-    const c = proxies.get(k);
-    if (c) return c;
-    const end = Math.min(h.end_sec, h.start_sec + 10);   // aperçu court (≤10s)
-    const r = await nr.proxy({ input: h.file_path, start: h.start_sec, end, priority, height, token });
-    if (r.ok && r.path) { const u = nr.assetUrl(r.path); proxies.set(k, u); return u; }
-    return null;
-  }
+  const getProxy = (h: SearchHit, height?: number, token?: number, priority: "high" | "low" = "high") => {
+    const r = previewRange(h);
+    return preview.getProxy(r.path, r.in, r.out, priority, height, token);
+  };
   function toggleSel(k: string) {
     setSel((s) => { const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n; });
   }
@@ -142,13 +132,13 @@ export function SearchResults() {
 
   function card(h: SearchHit, i: number) {
     const k = hitKey(h);
-    const proxyKey = `${k}|${previewSettingsFingerprint()}`;
+    const r = previewRange(h);
     return (
       <ResultCard
         key={k} hit={h} index={i} selected={sel.has(k)} play={playAll}
         onToggle={() => toggleSel(k)} onDownload={() => sendHitsToTimeline([h])}
-        getProxy={(ph, tok, prio) => getProxy(h, ph, tok, prio)} bustProxy={() => proxies.delete(proxyKey)}
-        peekProxy={() => proxies.get(proxyKey) ?? null}
+        getProxy={(ph, tok, prio) => getProxy(h, ph, tok, prio)} bustProxy={() => preview.bustProxy(r.path, r.in, r.out)}
+        peekProxy={() => preview.peekProxy(r.path, r.in, r.out)}
         onFindSimilar={(thumb) => findSimilar(h, thumb)}
         onAddRef={(thumb) => addRef({ file_path: h.file_path, scene_index: h.scene_index, thumb })}
         refActive={refKeys.has(`${h.file_path}#${h.scene_index}`)}

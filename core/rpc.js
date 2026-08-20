@@ -567,6 +567,9 @@ function createRpc() {
     // --- ffmpeg / probe / proxy / thumbs ---
     "ffmpeg:probe": ([p]) => ffmpeg.probeMedia(p),
     "player:info": ([p]) => ffmpeg.playInfo(p),
+    // Same probe, reached from the reference board: a one-frame step needs the real rate
+    // (23.976, not 24), and HTML5 does not expose it.
+    "reference:playInfo": ([filePath]) => ffmpeg.playInfo(filePath),
     "ffmpeg:audioTracks": ([p]) => probeAudioTracksTagged(p),
     "ffmpeg:detectScenes": ([p, threshold, model, options]) => sidecars.detectScenes(ev, p, threshold, model, options),
     "ffmpeg:cachedScenes": ([p, model, threshold, options]) => sidecars.getCachedScenes(p, model, threshold, options),

@@ -181,8 +181,8 @@
     "close": "关闭",
     "loadingCompare": "正在加载对比…",
     "previewMissing": "找不到预览 — 请重新测试。",
-    "hintZoomed": "拖动滑柄对比 · 滚轮 = 缩放 · 拖动画面平移。",
-    "hintNotZoomed": "拖动滑柄对比 · 滚轮 = 缩放 · 放大可看细节。"
+    "hintZoomed": "拖动画面平移 · Shift+拖动 = 对比 · 滚轮 = 缩放 · 双击重置。",
+    "hintNotZoomed": "拖动滑柄对比 · 滚轮 = 缩放 · 双击放大该处。"
   },
   "review": {
     "ready": "渲染完成",

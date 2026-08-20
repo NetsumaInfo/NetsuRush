@@ -16,14 +16,18 @@ import { useTranslation } from "react-i18next";
 import { ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
+import i18n from "@/i18n";
 import { logError } from "@/lib/appLog";
 import { useBoard } from "./useReferenceBoard";
-import { useBoardIngest } from "./useBoardIngest";
+import { useBoardIngest, pastedSourceUrl } from "./useBoardIngest";
+import { watchMouseThroughExit } from "./boardMouseThrough";
+import { clampMediaOpacity } from "./boardPrefs";
 import { useBoardCulling } from "./useBoardCulling";
 import { BoardItem } from "./BoardItem";
 import { DrawLayer } from "./DrawLayer";
 import { DrawToolbar } from "./DrawToolbar";
 import {
+  type BoardItem as Item,
   type BoardView,
   type NrMediaDrag,
   NR_MEDIA_DND,
@@ -34,6 +38,7 @@ import {
   makeFrameItem,
 } from "./referenceShared";
 import { shapeBBox } from "./drawGeometry";
+import { isPalm, isTouchFirst, kindOf, usesBarrel, watchPen, type PointerKind } from "./tabletInput";
 import { boundsOf, rotatedBBox } from "./boardArrange";
 import { useLive } from "./boardLive";
 import { itemToPngBlob } from "./boardRender";
@@ -73,7 +78,7 @@ function SnapGuides({ view }: { view: BoardView }) {
 }
 
 export interface BoardHandle {
-  addFiles: (files: FileList | File[], at?: { x: number; y: number }) => void;
+  addFiles: (files: FileList | File[], at?: { x: number; y: number }, extra?: Partial<Item>) => void;
   addVideoUrl: (url: string, opts?: { allowGenericEmbed?: boolean }) => boolean;
   addUrl: (url: string, opts?: { allowGenericEmbed?: boolean }) => Promise<boolean>;
   addPath: (path: string, title?: string) => void;
@@ -115,6 +120,9 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   const fitOnOpen = useBoard((s) => s.prefs.fitOnOpen);
   const sceneId = useBoard((s) => s.sceneId);
   const placeFrame = useBoard((s) => s.placeFrame);
+  const seeThroughShell = useBoard((s) => s.prefs.seeThroughShell);
+  const seeThroughPlaceFrame = useBoard((s) => s.prefs.seeThroughPlaceFrame);
+  const contentOpacity = useBoard((s) => s.prefs.contentOpacity);
   const drawMode = useBoard((s) => s.drawMode);
   const selectedIds = useBoard((s) => s.selectedIds);
   const selectedId = useBoard((s) => s.selectedId);
@@ -127,8 +135,14 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
 
   const [over, setOver] = useState(false);
   const pan = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
-  const gesture = useRef<"pan" | "marquee" | null>(null);
+  const gesture = useRef<"pan" | "marquee" | "pinch" | null>(null);
   const space = useRef(false);
+  // Contacts en cours (doigts/stylet), CLÉS par pointerId. Deux contacts simultanés = pincement :
+  // c'est le seul zoom d'une machine sans molette, et le seul pan d'une machine sans clavier.
+  const contacts = useRef(new Map<number, { x: number; y: number }>());
+  // Repère figé au 2e contact : écart et milieu des deux doigts, plus la vue de départ. Tout se
+  // calcule PAR RAPPORT à lui — un pincement mesuré d'une frame à l'autre dérive.
+  const pinch = useRef<{ d: number; cx: number; cy: number; view: BoardView } | null>(null);
   const marqueeRef = useRef<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
   const [marquee, setMarquee] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
   const marqueeDiv = useRef<HTMLDivElement>(null);
@@ -248,6 +262,32 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     return { x: minX - PLACE_PAD, y: minY - PLACE_PAD, w: maxX - minX + PLACE_PAD * 2, h: maxY - minY + PLACE_PAD * 2 };
   }, [items, placeFrame]);
 
+  // Pont de résolution des chemins d'objets `File` : attaché au montage, jamais au premier dépôt.
+  // Son attache (imports dynamiques + `invoke`) s'ajoutait sinon au temps d'attente entre le lâcher
+  // du fichier et son apparition — la seule fraction de l'import que l'utilisateur regarde.
+  useEffect(() => { nr.warmFilePaths(); }, []);
+
+  // Guet du stylet : c'est ce qui permet au rejet de paume de savoir qu'un stylet travaille même
+  // quand il survole la barre d'outils plutôt que la planche.
+  useEffect(() => { watchPen(); }, []);
+
+  // A translucent background makes the page and the shells step aside (see `nr-see-through`);
+  // without that the opacity would dissolve into the application background instead of revealing
+  // the desktop. The second class says whether the interface follows, or keeps an opaque surface.
+  useEffect(() => {
+    const root = document.documentElement;
+    const on = background.opacity < 1;
+    root.classList.toggle("nr-see-through", on);
+    root.classList.toggle("nr-see-through-shell", on && seeThroughShell);
+    return () => {
+      root.classList.remove("nr-see-through");
+      root.classList.remove("nr-see-through-shell");
+    };
+  }, [background.opacity, seeThroughShell]);
+
+  // Mouse-transparent: regaining focus gives the mouse back, and so does unmounting.
+  useEffect(() => watchMouseThroughExit(), []);
+
   // Espace maintenu → le glissé gauche sur le fond pane au lieu de sélectionner (façon mood-board).
   useEffect(() => {
     const kd = (e: KeyboardEvent) => { if (e.code === "Space") space.current = true; };
@@ -276,8 +316,8 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     else clearTimeout(zoomResumeTimer.current);
     zoomResumeTimer.current = setTimeout(() => {
       zoomResumeTimer.current = null;
-      // Un pan encore en cours garde la main sur liveView : lui committera au pointerup.
-      if (gesture.current !== "pan" && liveView.current) {
+      // Un pan ou un pincement en cours garde la main sur liveView : lui committera au pointerup.
+      if (gesture.current !== "pan" && gesture.current !== "pinch" && liveView.current) {
         const v = liveView.current;
         liveView.current = null;
         setView(v);
@@ -292,11 +332,11 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
       zoomResumeTimer.current = null;
       // Démontage en pleine rafale : la vue vivante rejoint quand même le store, sinon le dernier
       // zoom serait perdu au retour sur le board.
-      if (gesture.current !== "pan" && liveView.current) setView(liveView.current);
+      if (gesture.current !== "pan" && gesture.current !== "pinch" && liveView.current) setView(liveView.current);
       liveView.current = null;
       useBoard.getState().endNavigation();
     }
-    if (gesture.current === "pan") useBoard.getState().endNavigation();
+    if (gesture.current === "pan" || gesture.current === "pinch") useBoard.getState().endNavigation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -321,8 +361,29 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   // Molette coalescée : les trackpads tirent bien plus d'événements que de frames → on accumule le
   // delta et on applique UN zoom par frame (setView re-rend le board, inutile de le faire 3× par vsync).
   const wheelAcc = useRef<{ dy: number; x: number; y: number; left: number; top: number } | null>(null);
+  // Alt + wheel = OPACITY, never zoom. Over a medium: its own. Over the void: the whole board's.
+  // It is the gesture of reference tools, and it costs no key.
+  const wheelOpacity = useCallback((e: React.WheelEvent) => {
+    const step = e.deltaY > 0 ? -0.05 : 0.05;
+    const st = useBoard.getState();
+    const hit = (e.target as HTMLElement | null)?.closest?.("[data-board-item]") as HTMLElement | null;
+    const id = hit?.dataset.boardItem;
+    const item = id ? st.items.find((it) => it.id === id) : undefined;
+    if (item) {
+      const next = clampMediaOpacity((item.opacity ?? 1) + step);
+      st.patchItem(item.id, { opacity: next < 1 ? next : undefined }, false);
+      st.setNotice({ kind: "ok", text: i18n.t("reference:notice.itemOpacity", { percent: Math.round(next * 100) }) });
+      return;
+    }
+    const next = clampMediaOpacity(st.prefs.contentOpacity + step);
+    st.setPrefs({ contentOpacity: next });
+    st.setNotice({ kind: "ok", text: i18n.t("reference:notice.contentOpacity", { percent: Math.round(next * 100) }) });
+  }, []);
+
   const onWheel = useCallback(
     (e: React.WheelEvent) => {
+      // Alt held: the wheel sets opacity. Zoom keeps the bare wheel.
+      if (e.altKey) { wheelOpacity(e); return; }
       // L'origine du conteneur est mesurée UNE fois par frame (à l'ouverture de l'accumulateur) :
       // un getBoundingClientRect par événement forçait un recalcul de layout à la cadence du
       // trackpad, entrelacé avec les écritures de transform du geste.
@@ -344,24 +405,85 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         zoomAt(w.x, w.y, Math.exp(-w.dy * k));
       });
     },
-    [zoomAt],
+    [zoomAt, wheelOpacity],
   );
+
+  // Le glissé sur le fond navigue-t-il au lieu de sélectionner ? `auto` tranche sur la machine :
+  // une tablette-PC (tactile, aucun pointeur qui survole) n'a ni molette ni barre d'espace, donc
+  // pas d'autre geste pour se déplacer ; une tablette à écran posée à côté d'une souris garde le
+  // lasso, qui reste ce qu'on attend d'un glissé sur le vide.
+  const dragNavigates = useCallback((kind: PointerKind) => {
+    if (kind === "mouse") return false;
+    const mode = useBoard.getState().prefs.penDragPans;
+    if (mode !== "auto") return mode === "on";
+    return kind === "touch" || isTouchFirst();
+  }, []);
+
+  // Démarre le pan à partir de la vue VIVANTE : un zoom peut être en rafale (pas encore commité),
+  // et repartir de la vue du store ferait sauter le board à l'état d'avant la rafale.
+  const beginPan = useCallback((cx: number, cy: number) => {
+    const v = liveView.current ?? useBoard.getState().view;
+    gesture.current = "pan";
+    pan.current = { x: cx, y: cy, tx: v.tx, ty: v.ty };
+    useBoard.getState().beginNavigation();
+    // Curseur en impératif : aucun re-render React pendant le pan.
+    if (containerRef.current) containerRef.current.style.cursor = "grabbing";
+  }, []);
+
+  // Abandonne le geste à un doigt en cours au profit du pincement, SANS rien commiter : le lasso
+  // n'a pas à sélectionner ce qu'il a balayé le temps que le deuxième doigt se pose.
+  const dropMarquee = useCallback(() => {
+    marqueeRef.current = null;
+    setMarquee(null);
+  }, []);
+
+  // Suivi des contacts et rejet de paume en phase de CAPTURE, avant tout le monde. Un doigt posé
+  // sur un média ne remonte jamais jusqu'ici — l'item arrête la propagation pour prendre son geste —
+  // et c'est pourtant le cas le plus courant d'un DEUXIÈME doigt sur une planche bien remplie.
+  const onPointerDownCapture = useCallback((e: React.PointerEvent) => {
+    // Rejet de paume : la main posée sur une dalle qui ne sait pas la distinguer arrive comme un
+    // contact tactile ordinaire. Tant que le stylet travaille, un doigt n'est pas une intention —
+    // et l'arrêter ICI est ce qui empêche aussi un média de partir avec la paume.
+    if (isPalm(e, useBoard.getState().prefs.palmRejection)) { e.stopPropagation(); return; }
+    if (kindOf(e) === "mouse") return;
+    contacts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    // Pincement : deux contacts, et la planche tient encore le geste. Un média déjà en cours de
+    // déplacement le garde : le lui voler en pleine main serait pire que de ne rien faire.
+    if (contacts.current.size !== 2 || !useBoard.getState().prefs.touchGestures) return;
+    if (gesture.current !== null && gesture.current !== "marquee" && gesture.current !== "pan") return;
+    // Geste sans nom côté planche, mais navigation déjà tenue : c'est un ITEM qui est en cours de
+    // déplacement sous le premier doigt (usePointerTransform tient le sien). Il le garde.
+    if (gesture.current === null && useBoard.getState().navigating) return;
+    const [a, b] = [...contacts.current.values()];
+    const r = rect();
+    dropMarquee();
+    if (gesture.current !== "pan") useBoard.getState().beginNavigation();
+    gesture.current = "pinch";
+    pan.current = null;
+    pinch.current = {
+      d: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
+      cx: (a.x + b.x) / 2 - (r?.left ?? 0),
+      cy: (a.y + b.y) / 2 - (r?.top ?? 0),
+      view: liveView.current ?? useBoard.getState().view,
+    };
+    e.stopPropagation(); // le deuxième doigt ne commence pas un geste d'item
+  }, [dropMarquee]);
+
+  const onPointerMoveCapture = useCallback((e: React.PointerEvent) => {
+    if (contacts.current.has(e.pointerId)) contacts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  }, []);
 
   // Fond : glissé gauche = marquee de sélection ; clic milieu ou Espace+gauche = pan.
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
+      if (gesture.current === "pinch") return;
       if (e.target !== e.currentTarget && e.button === 0) return; // clic sur un item → géré par l'item
-      if (e.button !== 0 && e.button !== 1) return;
+      // Bouton latéral du stylet réglé sur « naviguer » : il arrive comme un clic droit (bouton 2).
+      const barrelPans = usesBarrel(e) && useBoard.getState().prefs.penBarrel === "pan";
+      if (!barrelPans && e.button !== 0 && e.button !== 1) return;
       try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* capture best-effort */ }
-      // Un zoom peut être en rafale (pas encore commité) : le pan doit partir de la vue VIVANTE,
-      // sinon il saute à la vue d'avant la rafale.
-      const v = liveView.current ?? useBoard.getState().view;
-      if (e.button === 1 || space.current) {
-        gesture.current = "pan";
-        pan.current = { x: e.clientX, y: e.clientY, tx: v.tx, ty: v.ty };
-        useBoard.getState().beginNavigation();
-        // Curseur en impératif : aucun re-render React pendant le pan.
-        if (containerRef.current) containerRef.current.style.cursor = "grabbing";
+      if (e.button === 1 || barrelPans || space.current || dragNavigates(kindOf(e))) {
+        beginPan(e.clientX, e.clientY);
       } else {
         gesture.current = "marquee";
         select(null);
@@ -371,10 +493,29 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         setMarquee(marqueeRef.current); // monte la div ; les moves la déplacent en impératif
       }
     },
-    [select],
+    [select, beginPan, dragNavigates],
   );
   const onPointerMove = useCallback(
     (e: React.PointerEvent) => {
+      // Pincement : l'écart des doigts donne l'échelle, leur milieu donne la translation. Un seul
+      // calcul pour les deux — le point du board sous le milieu de départ reste sous le milieu
+      // courant, ce qui EST le geste attendu (deux doigts déplacent autant qu'ils zooment).
+      if (gesture.current === "pinch") {
+        const p = pinch.current;
+        if (!p || contacts.current.size < 2) return;
+        const [a, b] = [...contacts.current.values()];
+        const r = rect();
+        const d = Math.max(1, Math.hypot(b.x - a.x, b.y - a.y));
+        const cx = (a.x + b.x) / 2 - (r?.left ?? 0);
+        const cy = (a.y + b.y) / 2 - (r?.top ?? 0);
+        const ns = clampScale(p.view.scale * (d / p.d));
+        const bx = (p.cx - p.view.tx) / p.view.scale;
+        const by = (p.cy - p.view.ty) / p.view.scale;
+        liveView.current = { tx: cx - bx * ns, ty: cy - by * ns, scale: ns };
+        zoomBack.current = null; // vue navigée à la main → le retour du double-clic n'a plus de sens
+        scheduleGesture();
+        return;
+      }
       if (gesture.current === "pan") {
         const p = pan.current;
         if (!p) return;
@@ -389,8 +530,21 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     },
     [scheduleGesture],
   );
+  // Fin d'un contact, en capture pour la même raison que son début. Un doigt levé termine le
+  // pincement : le second qui reste ne redevient PAS un lasso, sinon relâcher un pouce
+  // sélectionnerait la moitié de la planche.
+  const onPointerUpCapture = useCallback((e: React.PointerEvent) => {
+    if (!contacts.current.delete(e.pointerId) || gesture.current !== "pinch") return;
+    if (rafId.current != null) { cancelAnimationFrame(rafId.current); rafId.current = null; }
+    if (liveView.current) { setView(liveView.current); liveView.current = null; }
+    gesture.current = null;
+    pinch.current = null;
+    useBoard.getState().endNavigation();
+  }, [setView]);
+
   const finishPointerGesture = useCallback((e: React.PointerEvent) => {
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* noop */ }
+    if (gesture.current === "pinch") return;
     const wasPanning = gesture.current === "pan";
     if (rafId.current != null) { cancelAnimationFrame(rafId.current); rafId.current = null; }
     if (gesture.current === "pan" && liveView.current) {
@@ -597,6 +751,10 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     <div
       ref={containerRef}
       onWheel={onWheel}
+      onPointerDownCapture={onPointerDownCapture}
+      onPointerMoveCapture={onPointerMoveCapture}
+      onPointerUpCapture={onPointerUpCapture}
+      onPointerCancelCapture={onPointerUpCapture}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={finishPointerGesture}
@@ -630,6 +788,10 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
         const dirs = Array.from(e.dataTransfer.items ?? [])
           .map((it) => ({ entry: it.webkitGetAsEntry?.(), file: it.getAsFile?.() ?? null }))
           .filter((d): d is { entry: FileSystemDirectoryEntry; file: File | null } => !!d.entry && d.entry.isDirectory);
+        // Un glisser depuis un navigateur porte le lien du média À CÔTÉ de ses octets : lu ici, avec
+        // le reste du DataTransfer, sinon il a disparu au premier `await`.
+        const dropSource = pastedSourceUrl(e.dataTransfer);
+        const dropExtra = dropSource ? { sourceUrl: dropSource } : undefined;
         const r = rect();
         const dropAt = screenToBoard(useBoard.getState().view, e.clientX - (r?.left ?? 0), e.clientY - (r?.top ?? 0));
         if (dirs.length) {
@@ -637,44 +799,52 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
           const files = dropped.filter((f) => f.type || f.size);
           void (async () => {
             for (const dir of dirs) await ingest.addDroppedEntry(dir.entry, dir.file, dropAt);
-            if (files.length) ingest.addFiles(files, dropAt);
+            if (files.length) ingest.addFiles(files, dropAt, dropExtra);
           })();
           return;
         }
-        if (dropped.length) ingest.addFiles(dropped, dropAt);
+        if (dropped.length) ingest.addFiles(dropped, dropAt, dropExtra);
         else void ingest.addPaste(e.dataTransfer);
       }}
       className={cn(
         "relative h-full w-full cursor-default touch-none overflow-hidden outline-none",
         over && "ring-2 ring-inset ring-primary",
       )}
-      style={{ backgroundColor: background.color }}
     >
-      {/* Grille de points (repère spatial, masquée en fond monochrome) : div dédiée TRANSLATÉE en
-          modulo du pas — déplacement composite GPU, zéro repaint pendant le pan (l'ancien
-          backgroundPosition sur le conteneur re-rasterisait tout le viewport à chaque frame). */}
-      {background.mode === "dots" && (
-        <div
-          ref={dotsRef}
-          aria-hidden
-          className="pointer-events-none absolute will-change-transform"
-          style={{
-            inset: -dotGap,
-            backgroundImage: "radial-gradient(circle, var(--color-border) 1px, transparent 1px)",
-            backgroundSize: `${dotGap}px ${dotGap}px`,
-            transform: `translate(${view.tx % dotGap}px, ${view.ty % dotGap}px)`,
-          }}
-        />
-      )}
+      {/* The background is a LAYER: its opacity reaches the fill and the dots, never the media.
+          Below 1, what shows through is the window itself (see `nr-see-through`). */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        style={{ backgroundColor: background.color, opacity: background.opacity }}
+      >
+        {/* Grille de points (repère spatial, masquée en fond monochrome) : div dédiée TRANSLATÉE en
+            modulo du pas — déplacement composite GPU, zéro repaint pendant le pan (l'ancien
+            backgroundPosition sur le conteneur re-rasterisait tout le viewport à chaque frame). */}
+        {background.mode === "dots" && (
+          <div
+            ref={dotsRef}
+            aria-hidden
+            className="pointer-events-none absolute will-change-transform"
+            style={{
+              inset: -dotGap,
+              backgroundImage: "radial-gradient(circle, var(--color-border) 1px, transparent 1px)",
+              backgroundSize: `${dotGap}px ${dotGap}px`,
+              transform: `translate(${view.tx % dotGap}px, ${view.ty % dotGap}px)`,
+            }}
+          />
+        )}
+      </div>
       {/* couche transformée : tous les items en coordonnées board (z 10 → le dessin peut passer
           devant (z 20) ou derrière (z 0) selon `drawBack`). `data-board-pan` : ciblée par le pan
           impératif (applyGesture). */}
       <div
         data-board-pan
         className="absolute left-0 top-0 z-10 origin-top-left will-change-transform"
-        style={{ transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})` }}
+        style={{ transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`, opacity: contentOpacity }}
       >
-        {/* Cadre de la zone de pose : aplat très léger + contour, derrière les items (zIndex 0).
+        {/* Cadre de la zone de pose : aplat très léger + contour, SOUS la couche des items (zIndex 0
+            contre 1) — son aplat ne teinte donc jamais un média, quel que soit son plan.
             Épaisseur ÷ scale → reste ~1,5px à l'écran quel que soit le zoom. */}
         {placeFrame && contentBounds && (
           <div
@@ -687,18 +857,25 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
               zIndex: 0,
               border: `${1.5 / view.scale}px solid color-mix(in srgb, var(--color-fg) 14%, transparent)`,
               background: "color-mix(in srgb, var(--color-fg) 4%, transparent)",
+              // Limits landmark: it follows the background opacity, unless set otherwise.
+              opacity: seeThroughPlaceFrame ? background.opacity : 1,
             }}
           />
         )}
-        {visible.map((it) => (
-          <BoardItem
-            key={it.id}
-            item={it}
-            selected={selected.has(it.id)}
-            primary={it.id === selectedId && selectedIds.length === 1}
-            editing={editingId === it.id}
-          />
-        ))}
+        {/* Couche des items : positionnée + zIndex 1 → CONTEXTE D'EMPILEMENT propre. Le z d'un item
+            ne se compare qu'à celui des autres items ; « arrière-plan » (z négatif) le range derrière
+            ses voisins sans jamais le faire passer sous le cadre de pose. */}
+        <div className="absolute left-0 top-0" style={{ zIndex: 1 }}>
+          {visible.map((it) => (
+            <BoardItem
+              key={it.id}
+              item={it}
+              selected={selected.has(it.id)}
+              primary={it.id === selectedId && selectedIds.length === 1}
+              editing={editingId === it.id}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Guides de l'aimant : lignes fines tracées pendant un geste, dans le repère board. */}

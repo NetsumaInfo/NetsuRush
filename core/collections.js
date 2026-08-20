@@ -8,6 +8,7 @@
 
 const path = require('path');
 const { t } = require('./i18n');
+const mediaIdent = require('./mediaIdent'); // identité de contenu : retrouver une source déplacée
 const fs = require('fs');
 const crypto = require('crypto');
 
@@ -376,23 +377,41 @@ function createCollectionStore(dataDir) {
   // Une collection ne stocke QUE des chemins de fichiers : elle s'ouvre même logiciels fermés, mais un
   // média déplacé devient « hors-ligne ». On liste les chemins manquants (dédupliqués : une source =
   // souvent plusieurs plans) pour les relier depuis les réglages.
+  function scanOffline(c) {
+    const seen = new Set();
+    const missing = [];
+    for (const s of c.shots) {
+      if (!s.path || seen.has(s.path)) continue;
+      seen.add(s.path);
+      let ok = false;
+      try { ok = fs.existsSync(s.path); } catch (_) {}
+      if (!ok) missing.push({ path: s.path, name: s.name || path.basename(s.path), count: 0 });
+    }
+    // Nombre de plans par source manquante (info UI).
+    const missingByPath = new Map(missing.map((x) => [x.path, x]));
+    for (const s of c.shots) { const m = missingByPath.get(s.path); if (m) m.count++; }
+    return { missing, sources: seen.size };
+  }
+
   function offlineShots(id) {
     try {
       const c = loadCollection(id);
       if (!c) return { ok: false, error: t('collectionMissing') };
-      const seen = new Set();
-      const missing = [];
-      for (const s of c.shots) {
-        if (!s.path || seen.has(s.path)) continue;
-        seen.add(s.path);
-        let ok = false;
-        try { ok = fs.existsSync(s.path); } catch (_) {}
-        if (!ok) missing.push({ path: s.path, name: s.name || path.basename(s.path), count: 0 });
+      let { missing, sources } = scanOffline(c);
+      // Relocalisation SILENCIEUSE par contenu (cf. core/mediaIdent.js) : une source manquante dont
+      // les octets EXACTS sont connus ailleurs et toujours présents se repointe toute seule.
+      let relinked = 0;
+      for (const m of missing) {
+        const live = mediaIdent.liveTwin(m.path);
+        if (!live) continue;
+        const r = relinkPath(id, m.path, live);
+        if (r && r.ok && r.relinked) relinked++;
       }
-      // Nombre de plans par source manquante (info UI).
-      const missingByPath = new Map(missing.map((x) => [x.path, x]));
-      for (const s of c.shots) { const m = missingByPath.get(s.path); if (m) m.count++; }
-      return { ok: true, missing, offline: missing.length, total: seen.size };
+      if (relinked) {
+        const again = loadCollection(id);
+        if (again) ({ missing, sources } = scanOffline(again));
+      }
+      return { ok: true, missing, offline: missing.length, total: sources, relinked };
     } catch (e) { return { ok: false, error: String(e) }; }
   }
 
@@ -420,6 +439,7 @@ function createCollectionStore(dataDir) {
       if (!c) return { ok: false, error: t('collectionMissing') };
       if (!dir || !fs.existsSync(dir)) return { ok: false, error: t('folderMissing') };
       const index = new Map(); // basename minuscule → chemin complet (premier trouvé)
+      const files = [];        // repli par CONTENU quand le fichier a aussi été renommé
       const stack = [dir];
       let scanned = 0;
       while (stack.length && scanned < 40000) {
@@ -429,7 +449,12 @@ function createCollectionStore(dataDir) {
         for (const e of entries) {
           const full = path.join(d, e.name);
           if (e.isDirectory()) stack.push(full);
-          else { scanned++; const k = e.name.toLowerCase(); if (!index.has(k)) index.set(k, full); }
+          else {
+            scanned++;
+            const k = e.name.toLowerCase();
+            if (!index.has(k)) index.set(k, full);
+            files.push(full);
+          }
         }
       }
       let relinked = 0;
@@ -438,7 +463,8 @@ function createCollectionStore(dataDir) {
         let exists = false;
         try { exists = fs.existsSync(s.path); } catch (_) {}
         if (exists) return s;
-        const cand = index.get(path.basename(s.path).toLowerCase());
+        const cand = index.get(path.basename(s.path).toLowerCase())
+          || mediaIdent.matchByContent(s.path, files);
         return cand ? (relinked++, { ...s, path: cand }) : s;
       });
       const ts = Date.now();

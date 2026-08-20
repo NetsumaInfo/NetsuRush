@@ -6,12 +6,13 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2, Link2, Unlink2 } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2, Link2, Unlink2, SwatchBook } from "lucide-react";
 import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useBoard } from "./useReferenceBoard";
+import { useHideOnBlur } from "./useAppFocus";
 import { IconToggle, IconAction } from "./inspectorControls";
 import { TrimControls, TextControls, FrameControls, ArrangeBar, PlayModeControls, EmbedControls } from "./inspectorPanels";
 import { displaySrc, probeImage, youtubeId, isRemoteRef, paletteSize, type PaletteLayout } from "./referenceShared";
@@ -50,11 +51,16 @@ export function Inspector() {
   const addSequenceFrom = useBoard((s) => s.addSequenceFrom);
   const prefs = useBoard((s) => s.prefs);
   const [upOpen, setUpOpen] = useState(false);
+  const setStudio = useBoard((s) => s.setStudio);
+  // Réglage « barre quand l'app perd le focus » : la sélection reste, seule la barre s'efface.
+  const hidden = useHideOnBlur();
+
+  if (hidden) return null;
 
   if (count >= 2) {
     return (
       <div className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2">
-        <div className="flex w-max max-w-[96vw] items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 px-3 py-2 shadow-xl backdrop-blur">
+        <div className="nr-chrome flex w-max max-w-[96vw] items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card/95 px-3 py-2 shadow-xl backdrop-blur">
           <ArrangeBar count={count} />
         </div>
       </div>
@@ -122,7 +128,7 @@ export function Inspector() {
 
   return (
     <div data-note-toolbar className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2">
-      <div className="flex w-max max-w-[96vw] items-center gap-1 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-xl backdrop-blur">
+      <div className="nr-chrome flex w-max max-w-[96vw] items-center gap-1 rounded-xl border border-border bg-card/95 px-3 py-2 shadow-xl backdrop-blur">
         {/* Contrôles propres au type */}
         {isMedia && (
           <>
@@ -188,6 +194,10 @@ export function Inspector() {
             </div>
             <IconAction label={t("palette.regenerate")} onClick={() => void regeneratePalette(item.id)}>
               <RefreshCw />
+            </IconAction>
+            {/* Rework THIS block in the generator (wheel, harmonies, locks) and write back into it. */}
+            <IconAction label={t("palette.studio.edit")} onClick={() => setStudio({ targetId: item.id })}>
+              <SwatchBook />
             </IconAction>
           </>
         )}

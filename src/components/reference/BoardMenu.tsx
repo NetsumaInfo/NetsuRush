@@ -10,10 +10,10 @@ import {
   Copy, FlipHorizontal, FlipVertical, Crop, BringToFront, SendToBack, Trash2,
   PictureInPicture2, Minimize2, Home, Pin, Layers, Download, AppWindow, Undo2, Redo2, Settings2,
   FolderSearch, ClipboardCopy, Scissors, RotateCcw, Wand2, Ruler, Palette, ImageDown,
-  Link2, Unlink2,
+  Link2, Unlink2, RefreshCw,
 } from "lucide-react";
 import { enclosingFrame } from "./boardFrames";
-import { convertToEmbed, downloadMediaFromEmbed, relocateMissingMedia } from "./boardMediaActions";
+import { convertToEmbed, downloadMediaFromEmbed, reloadMedia, reloadableMedia, relocateMissingMedia } from "./boardMediaActions";
 import { iconForLink } from "./brandIcons";
 import { nr } from "@/lib/bridge";
 import {
@@ -165,6 +165,14 @@ export function BoardContextMenu({
                   </ContextMenuItem>
                 );
               })()}
+              {/* Rechargement à la demande, item par item. Proposé MÊME quand la case a l'air correcte :
+                  une source qui a changé, un fichier repris par le ménage ou une synchronisation en
+                  retard donnent une case plausible et périmée, que rien ne distingue à l'œil. */}
+              {reloadableMedia(item) && item.kind !== "embed" && (
+                <ContextMenuItem onClick={() => void reloadMedia(item.id)}>
+                  <RefreshCw /> {t("actions.reloadMedia")}
+                </ContextMenuItem>
+              )}
               {item.kind === "embed" && (
                 <ContextMenuItem onClick={() => void downloadMediaFromEmbed(item.id)}>
                   <Download /> {item.localMedia ? t("actions.restoreDownload") : t("boardMenu.downloadMedia")}

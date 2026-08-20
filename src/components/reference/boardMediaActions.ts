@@ -12,7 +12,36 @@ import {
   runSequentialRecovery,
 } from "./boardMediaRecovery";
 
-export { recoverableOnlineItems } from "./boardMediaRecovery";
+export { recoverableOnlineItems, originalOnlineSource } from "./boardMediaRecovery";
+
+// Récupérations AUTOMATIQUES déjà tentées, par item. Une seule par session : sur un lien mort, la
+// case échoue, retente, échoue à nouveau — en boucle, et autant de fois qu'il y a d'items morts.
+const autoRecovered = new Set<string>();
+
+/** Récupération automatique, déclenchée par un échec d'affichage. Bornée à une par item. */
+export function recoverMediaOnce(id: string): void {
+  if (autoRecovered.has(id)) return;
+  autoRecovered.add(id);
+  void recoverMedia(id);
+}
+
+/**
+ * Rechargement DEMANDÉ par l'utilisateur. Jamais borné — c'est son geste, pas une boucle — et il
+ * rouvre le droit à une tentative automatique : entre les deux, le réseau a pu revenir, le service
+ * finir de démarrer, le lien redevenir joignable. Garder la porte fermée après un clic réussi
+ * priverait l'item de sa réparation silencieuse au rechargement suivant.
+ */
+export function reloadMedia(id: string): Promise<boolean> {
+  autoRecovered.delete(id);
+  return recoverMedia(id);
+}
+
+/** Un item a-t-il de quoi se recharger tout seul, c'est-à-dire un lien d'origine ? */
+export function reloadableMedia(item: { kind: string; ref?: string; sourceUrl?: string; prevMedia?: { sourceUrl?: string } }): boolean {
+  if (item.kind === "embed") return true;
+  if (item.kind !== "image" && item.kind !== "video" && item.kind !== "sequence") return false;
+  return !!(originalOnlineSource(item) || /^https?:/i.test(item.ref || ""));
+}
 
 const tr = (key: string, opts?: Record<string, unknown>) => i18n.t(`reference:${key}`, opts);
 

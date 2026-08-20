@@ -1,42 +1,24 @@
 // État commun d'une grille de plans hors derush (Collections, Timeline Live) : colonnes, lecture
-// auto, plafond de lecture recalculé sur la zone visible, et cache proxy par (chemin|in|out). Mêmes
-// invariants perf que CutStudio : aucune préchauffe spéculative, encode à la demande au survol/lecture.
+// auto, plafond de lecture recalculé sur la zone visible. Tout ce qui touche aux APERÇUS (cache
+// d'URL, préchauffe, boutons de génération) vient de `usePreviewCache` — la MÊME implémentation que
+// le Découpage, et plus une copie qui dérive.
 //
 // Densité et lecture auto viennent des réglages de NetsuCut (`cutCols`/`cutGridPlay`) : ces grilles
 // affichent les MÊMES cartes que le Découpage, une densité par module se réglait trois fois.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { nr, nextProxyToken } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { forgetThumbs, getThumb, warmResolveThumbs } from "@/lib/thumbCache";
-import { thumbTime } from "@/lib/utils";
 import { autoplayCeiling, gridMetrics, resetPlaySlots, setMaxPlaying } from "./cutStudioShared";
-import { previewSettingsFingerprint, PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
+import { usePreviewCache, type PreviewRange, type PreviewSource, type PreviewThumbRange } from "./previewCache";
 
-// Un plan minimal pour la pré-génération de proxys (chemin + plage en secondes).
-export type ProxyShot = { path: string; in: number; out: number };
-// Un plan pour la préchauffe de vignettes (chemin + point d'entrée, frame si connue).
-export type ThumbShot = { path: string; in: number; out?: number; inFrame?: number; fps?: number };
-type GenerationState = { started: number; done: number; failed: number; total: number };
-
-const WARM_THUMB_CHUNK = 8;
-const WARM_PROXY_DEBOUNCE_MS = 150;
-function waitForThumbIdle(): Promise<void> {
-  return new Promise((resolve) => {
-    if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(() => resolve(), { timeout: 1000 });
-    else window.setTimeout(resolve, 80);
-  });
-}
+// Réexportés : les vues parlaient de `ProxyShot`/`ThumbShot` avant que le pipeline d'aperçu ne soit
+// partagé. Mêmes formes, un seul endroit où elles sont définies.
+export type ProxyShot = PreviewRange;
+export type ThumbShot = PreviewThumbRange;
 
 /** `narrow` = vue étroite (panneau CEP, fenêtre épinglée) : plafonne la cellule pour garder
  *  plusieurs colonnes. La géométrie rendue est celle du Découpage (`gridMetrics`). */
 export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
-  const proxyCache = useRef<Map<string, string>>(new Map());
-  // Carte + lecteur latéral peuvent demander le même plan dans le même rendu. Une seule promesse
-  // possède alors l'encodage et tous les consommateurs reçoivent exactement le même résultat.
-  const proxyPendingRef = useRef<Map<string, Promise<string | null>>>(new Map());
-  const warmVersionRef = useRef(0);
-  const warmProxyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current); }, []);
+  const preview = usePreviewCache();
   const cols = useApp((s) => s.cutCols);
   const setColsStore = useApp((s) => s.setCutCols);
   // Enveloppe compatible `Dispatch<SetStateAction<number>>` : les appelants gardent `setCols((c) => c + 1)`.
@@ -50,12 +32,7 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
   const gridScrollRef = useRef<HTMLDivElement>(null);
 
   // Créneaux de lecture remis à zéro à l'entrée/sortie (évite un compteur faussé hérité).
-  useEffect(() => { resetPlaySlots(); return () => { warmVersionRef.current++; resetPlaySlots(); }; }, []);
-  useEffect(() => {
-    const clear = () => proxyCache.current.clear();
-    window.addEventListener(PREVIEW_SETTINGS_EVENT, clear);
-    return () => window.removeEventListener(PREVIEW_SETTINGS_EVENT, clear);
-  }, []);
+  useEffect(() => { resetPlaySlots(); return () => resetPlaySlots(); }, []);
 
   // Largeur de la zone défilante → géométrie de la grille ET plafond de lecture, recalculés au
   // resize / changement de densité (mêmes formules que le Découpage).
@@ -77,208 +54,25 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
   }, [cols, narrow]);
   const { cell, actualCols } = gridMetrics(gridW, cols, narrow);
 
-  const key = (path: string, start: number, end: number, requireVideo = false) => `${path}|${start.toFixed(3)}|${end.toFixed(3)}|${requireVideo ? "video" : "grid"}|${previewSettingsFingerprint()}`;
-
-  // Génère/récupère le proxy d'un plan (cache renderer par chemin+plage). Hauteur ignorée dans la
-  // clé : stable tant que les colonnes ne changent pas (palier serveur quasi identique).
-  async function getProxy(path: string, start: number, end: number, priority: "high" | "low" = "high", height?: number, token?: number, requireVideo = false): Promise<string | null> {
-    const k = key(path, start, end, requireVideo);
-    const c = proxyCache.current.get(k);
-    if (c) return c;
-    const pending = proxyPendingRef.current.get(k);
-    if (pending) return pending;
-    const request = nr.proxy({ input: path, start, end, priority, height, token, requireVideo })
-      .then((r) => {
-        if (!r.ok || !r.path) return null;
-        const u = nr.assetUrl(r.path);
-        proxyCache.current.set(k, u);
-        return u;
-      })
-      .finally(() => proxyPendingRef.current.delete(k));
-    proxyPendingRef.current.set(k, request);
-    return request;
-  }
-  const bust = (path: string, start: number, end: number) => proxyCache.current.delete(key(path, start, end));
-
-  /** URL du proxy si elle est DÉJÀ en cache, en lecture synchrone : la carte peut monter sa <video>
-   *  dans son premier rendu au lieu d'attendre une promesse. */
-  const peekProxy = (path: string, start: number, end: number) => proxyCache.current.get(key(path, start, end)) ?? null;
-
-  // Amorce le cache d'URL avec les proxies DÉJÀ encodés, en UN appel (aucun ffmpeg, aucune file).
-  // Sans lui, chaque carte réclame son proxy au core en entrant dans la bande, même pour un fichier
-  // déjà sur disque, et se fait annuler en ressortant : au défilement la grille reste sur ses
-  // vignettes. `height` doit être le palier réellement encodé (il entre dans la clé de cache).
-  const warmProxies = useCallback((list: ProxyShot[], height?: number) => {
-    const missing = list.filter((s) => !proxyCache.current.has(key(s.path, s.in, s.out)));
-    if (!missing.length) return;
-    // Anti-rafale : la hauteur de cellule vient d'un ResizeObserver et des boutons de densité, donc
-    // l'appelant nous relance à chaque pixel pendant un redimensionnement. Côté core, chaque
-    // résolution lit le dossier de proxies — une rafale mettrait le service à genoux pendant que la
-    // grille se réagence. Une liste déjà résolue sort plus haut sans même armer le minuteur.
-    if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current);
-    warmProxyTimer.current = setTimeout(() => {
-      warmProxyTimer.current = null;
-      void nr.proxyResolve(missing.map((s) => ({ input: s.path, start: s.in, end: s.out })), { height })
-        .then((rows) => {
-          for (const row of rows) {
-            if (!row.file) continue;
-            const k = key(row.input, row.start, row.end);
-            if (!proxyCache.current.has(k)) proxyCache.current.set(k, nr.assetUrl(row.file));
-          }
-        })
-        .catch(() => { /* best-effort : repli sur l'encode à la demande */ });
-    }, WARM_PROXY_DEBOUNCE_MS);
-    // Dépendances vides : `key` est recréé à chaque rendu mais lit l'empreinte des réglages À
-    // L'APPEL, donc la fermeture reste juste. L'inclure relancerait la résolution à chaque rendu
-    // du parent — c'est-à-dire à chaque sélection de carte.
-  }, []);
-
-  // Réutilise d'abord le cache existant, puis génère les manquantes par PETITS lots pendant les creux.
-  // Un nouvel appel/remount annule logiquement l'ancien parcours : aucun poll ni fan-out global.
-  function warmThumbs(shots: ThumbShot[]) {
-    if (!shots.length) return;
-    const version = ++warmVersionRef.current;
-    void (async () => {
-      const items = shots.map((s) => ({ path: s.path, time: thumbTime(s.in, s.out) }));
-      await warmResolveThumbs(items);
-      if (warmVersionRef.current !== version) return;
-      const missing = shots.filter((s) => !getThumb(s.path, thumbTime(s.in, s.out)));
-      const byFile = new Map<string, ThumbShot[]>();
-      for (const s of missing) {
-        const list = byFile.get(s.path);
-        if (list) list.push(s); else byFile.set(s.path, [s]);
-      }
-      for (const [path, list] of byFile) {
-        for (let offset = 0; offset < list.length; offset += WARM_THUMB_CHUNK) {
-          await waitForThumbIdle();
-          if (warmVersionRef.current !== version) return;
-          const chunk = list.slice(offset, offset + WARM_THUMB_CHUNK);
-          await nr.thumbsBatch(path, chunk.map((s) => {
-            const time = thumbTime(s.in, s.out);
-            return { time, frame: s.fps ? Math.round(time * s.fps) : (s.inFrame ?? 0) };
-          })).catch(() => {});
-          if (warmVersionRef.current !== version) return;
-          await warmResolveThumbs(chunk.map((s) => ({ path: s.path, time: thumbTime(s.in, s.out) })));
-        }
-      }
-    })();
-  }
-
-  // Version « bouton » : pool BORNÉ (8 ouvriers) + ARRÊT, comme generateProxies. CPU (thumbGate),
-  // indépendant de la génération proxy (GPU/proxyGate) → les deux tournent EN MÊME TEMPS. Pas de
-  // thumbsBatch ici : un gros batch n'est pas annulable et son verrou global écrase le multi-fichier ;
-  // ici chaque plan = un nr.thumbnail (caché disque/RAM), l'arrêt lève thumbsAbort → plus de fetch.
-  const [thumbsGen, setThumbsGen] = useState<GenerationState | null>(null);
-  const thumbsAbortRef = useRef(false);
-  const thumbsRunRef = useRef<Promise<void> | null>(null);
-  async function generateThumbs(shots: ThumbShot[]) {
-    if (thumbsRunRef.current) { thumbsAbortRef.current = true; return; }   // re-clic = ARRÊT
-    if (!shots.length) return;
-    thumbsAbortRef.current = false;
-    const run = (async () => {
-      let started = 0, done = 0, failed = 0, idx = 0;
-      const publish = () => setThumbsGen({ started, done, failed, total: shots.length });
-      publish();
-      const worker = async () => {
-        while (idx < shots.length && !thumbsAbortRef.current) {
-          const s = shots[idx++];
-          started++; publish();
-          try {
-            const result = await nr.thumbnail(s.path, thumbTime(s.in, s.out));
-            if (typeof result !== "string") failed++;
-          } catch { failed++; }
-          done++; publish();
-        }
-      };
-      await Promise.all(Array.from({ length: 8 }, worker));
-      if (!thumbsAbortRef.current) {
-        await warmResolveThumbs(shots.map((s) => ({ path: s.path, time: thumbTime(s.in, s.out) })));
-      }
-      if (failed) console.warn(`[miniatures] ${failed}/${done} générations échouées`);
-    })();
-    thumbsRunRef.current = run;
-    try { await run; } finally {
-      if (thumbsRunRef.current === run) thumbsRunRef.current = null;
-      setThumbsGen(null);
-      thumbsAbortRef.current = false;
-    }
-  }
-
-  // Pré-génère les proxys d'aperçu de TOUS les plans passés (ou de la sélection) à la MÊME hauteur
-  // que la grille → la lecture auto réutilise les fichiers (instantané). Priorité 'low' : la file core
-  // cède toujours au survol/plan actif. Pool BORNÉ (6 ouvriers) + abort : « Arrêter » lève genAbort
-  // (aucun nouveau fetch) et proxyCancelMany tue les ≤6 encodes en vol. Cf. CutStudio.generateProxies.
-  const [proxyGen, setProxyGen] = useState<GenerationState | null>(null);
-  const genAbortRef = useRef(false);
-  const genTokensRef = useRef<number[]>([]);
-  const proxyRunRef = useRef<Promise<void> | null>(null);
-
-  async function generateProxies(list: ProxyShot[]) {
-    if (proxyRunRef.current) {   // déjà en cours → sert d'ARRÊT
-      genAbortRef.current = true;
-      nr.proxyCancelMany(genTokensRef.current);
-      return;
-    }
-    if (!list.length) return;
-    // hauteur de cellule = largeur carte × 9/16 × DPR (cf. SceneCard) → même palier que la grille.
+  // Hauteur de cellule mesurée = palier d'encodage des proxys (largeur carte × 9/16 × DPR, cf.
+  // SceneCard) → la pré-génération vise le MÊME fichier que la lecture à la demande.
+  function proxyHeight(): number | undefined {
     const el = gridScrollRef.current;
-    let height: number | undefined;
-    if (el?.clientWidth) {
-      const cardW = gridMetrics(el.clientWidth, cols, narrow).cell;
-      height = Math.round(((cardW * 9) / 16) * (window.devicePixelRatio || 1));
-    }
-    genAbortRef.current = false;
-    genTokensRef.current = [];
-    const run = (async () => {
-      let started = 0, done = 0, failed = 0, idx = 0;
-      const publish = () => setProxyGen({ started, done, failed, total: list.length });
-      publish();
-      const worker = async () => {
-        while (idx < list.length && !genAbortRef.current) {
-          const s = list[idx++];
-          const token = nextProxyToken();
-          genTokensRef.current.push(token);
-          started++; publish();
-          try { if (!await getProxy(s.path, s.in, s.out, "low", height, token)) failed++; } catch { failed++; }
-          done++; publish();
-        }
-      };
-      await Promise.all(Array.from({ length: 6 }, worker));
-      if (failed) console.warn(`[proxies] ${failed}/${done} générations échouées`);
-    })();
-    proxyRunRef.current = run;
-    try { await run; } finally {
-      if (proxyRunRef.current === run) proxyRunRef.current = null;
-      setProxyGen(null);
-      genAbortRef.current = false;
-    }
+    if (!el?.clientWidth) return undefined;
+    const cardW = gridMetrics(el.clientWidth, cols, narrow).cell;
+    return Math.round(((cardW * 9) / 16) * (window.devicePixelRatio || 1));
   }
 
-  async function cancelGeneration() {
-    thumbsAbortRef.current = true;
-    genAbortRef.current = true;
-    nr.proxyCancelMany(genTokensRef.current);
-    await Promise.allSettled([thumbsRunRef.current, proxyRunRef.current].filter((run): run is Promise<void> => !!run));
-  }
-
-  // Appelée uniquement quand l'empreinte complète d'une timeline change. Purge d'abord les anciennes
-  // plages sur disque et en RAM ; les nouvelles générations peuvent ensuite repartir sur un état net.
-  async function invalidatePreviewRanges(list: ProxyShot[]) {
-    if (!list.length) return;
-    await cancelGeneration();
-    const prefixes = list.map((s) => `${s.path}|${s.in.toFixed(3)}|${s.out.toFixed(3)}|`);
-    for (const cachedKey of proxyCache.current.keys()) {
-      if (prefixes.some((prefix) => cachedKey.startsWith(prefix))) proxyCache.current.delete(cachedKey);
-    }
-    forgetThumbs(list.flatMap((s) => {
-      const precise = thumbTime(s.in, s.out);
-      const legacy = thumbTime(s.in);
-      return precise === legacy ? [{ path: s.path, time: precise }] : [{ path: s.path, time: precise }, { path: s.path, time: legacy }];
-    }));
-    await nr.cache?.purgePreviewRanges(list.map((s) => ({ path: s.path, start: s.in, end: s.out })));
-    genAbortRef.current = false;
-    genTokensRef.current = [];
-  }
-
-  return { cols, setCols, cell, actualCols, gridPlay, setGridPlay, gridScrollRef, getProxy, bust, peekProxy, warmThumbs, warmProxies, proxyGen, generateProxies, thumbsGen, generateThumbs, cancelGeneration, invalidatePreviewRanges };
+  return {
+    cols, setCols, cell, actualCols, gridPlay, setGridPlay, gridScrollRef,
+    getProxy: preview.getProxy,
+    bust: preview.bustProxy,
+    peekProxy: preview.peekProxy,
+    warmThumbs: preview.warmThumbs,
+    warmProxies: preview.warmProxies,
+    proxyGen: preview.proxyGen,
+    generateProxies: (source: PreviewSource<ProxyShot>) => preview.generateProxies(source, proxyHeight()),
+    thumbsGen: preview.thumbsGen,
+    generateThumbs: preview.generateThumbs,
+  };
 }

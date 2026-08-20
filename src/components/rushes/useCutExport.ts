@@ -4,7 +4,7 @@ import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { hostBuildTimeline, hostImport } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
-import { timelineBuildOptsFromProfile, type TimelineBuildOpts } from "@/features/export/timelineTarget";
+import { timelineBuildOptsFromProfile, newTimelineName, type TimelineBuildOpts } from "@/features/export/timelineTarget";
 import { type Segment } from "./cutStudioShared";
 import { toast } from "@/components/ui/toast";
 
@@ -19,6 +19,12 @@ function activeTimelineOpts(): TimelineBuildOpts {
   };
 }
 
+// Nom de la timeline créée : celui saisi dans le sélecteur de destination, sinon « <rush> — Derush ».
+function timelineName(fallback: string): string {
+  const st = useApp.getState();
+  return newTimelineName(getActiveExportProfile(st.exportProfiles, st.activeExportProfileId), fallback);
+}
+
 interface CutExportOpts {
   clipPath: string;
   clipName: string;
@@ -31,8 +37,6 @@ interface CutExportOpts {
 interface CutExport {
   busy: string | null;
   exported: string[];
-  tlName: string;
-  setTlName: React.Dispatch<React.SetStateAction<string>>;
   extract: () => Promise<void>;
   createTimeline: () => Promise<void>;
   appendSelection: () => Promise<void>;
@@ -49,7 +53,6 @@ export function useCutExport({
   const { t } = useTranslation("derush");
   const [busy, setBusy] = useState<string | null>(null);
   const [exported, setExported] = useState<string[]>([]);
-  const [tlName, setTlName] = useState("");
 
   async function extract() {
     if (hasSelection && !hasSelection()) return;
@@ -79,7 +82,7 @@ export function useCutExport({
     if (hasSelection && !hasSelection()) return;
     const list = targetList();
     if (!list.length) return;
-    const name = tlName.trim() || t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") });
+    const name = timelineName(t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") }));
     setBusy(t("export.creatingTimeline")); setErr(null);
     const host = useApp.getState().activeHost;
     // Action explicite « Créer une timeline » → toujours une nouvelle, quelle que soit la cible du profil.
@@ -97,7 +100,7 @@ export function useCutExport({
     if (hasSelection && !hasSelection()) return;
     const list = targetList();
     if (!list.length) return;
-    const name = tlName.trim() || t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") });
+    const name = timelineName(t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") }));
     setBusy(t("export.sendingTimeline")); setErr(null);
     const host = useApp.getState().activeHost;
     const r = await hostBuildTimeline(host, {
@@ -112,7 +115,7 @@ export function useCutExport({
   // Ajoute UN plan à la timeline visée par le profil : AppendToTimeline le pose à la suite du dernier
   // clip. Toujours 'append' — une cible « nouvelle timeline » créerait une timeline par plan.
   async function addToTimeline(s: Segment): Promise<{ ok: boolean; error?: string }> {
-    const name = tlName.trim() || t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") });
+    const name = timelineName(t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") }));
     setErr(null);
     const host = useApp.getState().activeHost;
     const r = await hostBuildTimeline(host, {
@@ -134,5 +137,5 @@ export function useCutExport({
     r.ok ? toast.ok(t("export.imported", { count: r.count ?? exported.length, dest })) : setErr(r.error || t("shared.failedImport"));
   }
 
-  return { busy, exported, tlName, setTlName, extract, createTimeline, appendSelection, addToTimeline, importBack };
+  return { busy, exported, extract, createTimeline, appendSelection, addToTimeline, importBack };
 }

@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { nr, type MediaInfo, type DetectModel, type CutSpan, type CutEdits } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { getThumb, warmResolveThumbs } from "@/lib/thumbCache";
-import { thumbTime } from "@/lib/utils";
 import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { detectionOptionsFor, detectionOptionsKey, detectionThreshold } from "@/lib/detection";
 import { createSmoothProgress } from "@/lib/smoothProgress";
@@ -11,6 +9,7 @@ import { toast } from "@/components/ui/toast";
 import {
   nextSegId, modelLabel, resetPlaySlots, PRESETS, MODELS, type Segment,
 } from "./cutStudioShared";
+import { usePreviewCache, type GenerationState, type PreviewSource } from "./previewCache";
 
 // Réapplique les fusions persistées à une liste de plans FRAÎCHEMENT détectés/rechargés. Recalage
 // par CHEVAUCHEMENT de frames (les bornes du détecteur peuvent bouger d'une passe à l'autre) : tout
@@ -64,7 +63,6 @@ function applyEdits(segs: Segment[], edits: CutEdits): Segment[] {
 }
 
 const EMPTY_EDITS: CutEdits = { merges: [], removed: [] };
-const WARM_PROXY_DEBOUNCE_MS = 150;
 
 export interface ShotDetection {
   info: MediaInfo | null;
@@ -85,10 +83,19 @@ export interface ShotDetection {
   setPreset: React.Dispatch<React.SetStateAction<number>>;
   model: DetectModel;
   setModel: React.Dispatch<React.SetStateAction<DetectModel>>;
-  proxyCache: Map<number, string>;
   getProxy: (s: Segment, priority?: "high" | "low", height?: number, token?: number) => Promise<string | null>;
-  /** Résout en UN appel les proxies déjà en cache et remplit `proxyCache` (aucun encode). */
+  /** Lecture SYNCHRONE du cache d'URL : la carte monte sa <video> sans attendre une promesse. */
+  peekProxy: (s: Segment) => string | null;
+  /** Oublie l'URL d'un plan : une <video> qui plante repart sur le chemin asynchrone. */
+  bustProxy: (s: Segment) => void;
+  /** Résout en UN appel les proxies déjà encodés et amorce le cache (aucun encode). */
   warmProxies: (list: Segment[], height?: number) => void;
+  /** Pré-génère les proxies/vignettes des plans passés. Rappelée pendant un run = ARRÊT.
+   *  Une FONCTION plutôt qu'un tableau = le run suit la liste affichée (cf. previewCache). */
+  generateProxies: (source: PreviewSource<Segment>, height?: number) => Promise<void>;
+  generateThumbs: (source: PreviewSource<Segment>, fps?: number) => Promise<void>;
+  proxyGen: GenerationState | null;
+  thumbsGen: GenerationState | null;
   playScene: (s: Segment) => Promise<void>;
   detect: () => Promise<void>;
   // Édits persistés du rush POUR LE MODÈLE COURANT : fusions (union de plans) et retraits.
@@ -107,20 +114,17 @@ export interface ShotDetection {
 // rechargement du cache SQLite par clip+modèle, préchauffe vignettes/proxies, lecture du plan actif.
 export function useShotDetection(clipPath: string): ShotDetection {
   const { t } = useTranslation("derush");
-  const proxyCacheRef = useRef<Map<number, string> | null>(null);
-  if (proxyCacheRef.current === null) proxyCacheRef.current = new Map();
-  const proxyCache = proxyCacheRef.current;
-  const proxyPendingRef = useRef<Map<number, Promise<string | null>>>(new Map());
+  // Cache d'URL, préchauffes et boutons de génération : implémentation PARTAGÉE avec Timeline Live,
+  // Collections et la Recherche (cf. previewCache). Le Découpage n'a plus de copie à lui.
+  const preview = usePreviewCache();
 
+  // Le cache lui-même est vidé par `previewCache` ; ici on ne remet à zéro que ce qui est propre au
+  // studio — le plan chargé dans le lecteur pointe sur un proxy encodé avec les anciens réglages.
   useEffect(() => {
-    const clear = () => {
-      proxyCache.clear();
-      proxyPendingRef.current.clear();
-      setActiveUrl(null);
-    };
+    const clear = () => setActiveUrl(null);
     window.addEventListener(PREVIEW_SETTINGS_EVENT, clear);
     return () => window.removeEventListener(PREVIEW_SETTINGS_EVENT, clear);
-  }, [proxyCache]);
+  }, []);
 
   const [info, setInfo] = useState<MediaInfo | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
@@ -154,114 +158,43 @@ export function useShotDetection(clipPath: string): ShotDetection {
   // l'état entier coûte moins cher (et se raisonne bien mieux) qu'un journal d'opérations inverses.
   const pastRef = useRef<CutEdits[]>([]);
   const futureRef = useRef<CutEdits[]>([]);
-  const warmPollsRef = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
-  const warmProxyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current); }, []);
-  useEffect(() => () => {
-    warmPollsRef.current.forEach((timer) => clearInterval(timer));
-    warmPollsRef.current.clear();
-  }, []);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
 
   const duration = info?.duration || 0;
 
-  // height = hauteur RÉELLE de la cellule (mesurée côté carte) → proxy à la bonne résolution.
-  // Cache par id (premier écrit gagne) : la taille de cellule est stable tant qu'on ne change pas
-  // les colonnes ; un éventuel décalage de palier reste cosmétique (cellule minuscule).
-  async function getProxy(s: Segment, priority: "high" | "low" = "high", height?: number, token?: number): Promise<string | null> {
-    const c = proxyCache.get(s.id);
-    if (c) return c;
-    const pending = proxyPendingRef.current.get(s.id);
-    if (pending) return pending;
-    const request = nr.proxy({ input: clipPath, start: s.in, end: s.out, priority, height, token })
-      .then((r) => {
-        if (!r.ok || !r.path) return null;
-        const u = nr.assetUrl(r.path);
-        proxyCache.set(s.id, u);
-        return u;
-      })
-      .finally(() => proxyPendingRef.current.delete(s.id));
-    proxyPendingRef.current.set(s.id, request);
-    return request;
-  }
+  // Aperçu d'un plan : le cache partagé est indexé par (fichier, plage), donc le lecteur latéral,
+  // la carte de la grille et la pré-génération visent tous le MÊME fichier. `height` = hauteur réelle
+  // de la cellule, mesurée côté carte, pour ne jamais encoder plus de pixels que ce qui s'affiche.
+  const getProxy = (s: Segment, priority: "high" | "low" = "high", height?: number, token?: number) =>
+    preview.getProxy(clipPath, s.in, s.out, priority, height, token);
+  const peekProxy = (s: Segment) => preview.peekProxy(clipPath, s.in, s.out);
+  const bustProxy = (s: Segment) => preview.bustProxy(clipPath, s.in, s.out);
 
   // Aucune préchauffe proxy spéculative : les proxys ne s'encodent qu'à la lecture réelle (survol /
   // lecture auto, cf. useSceneCardMedia) → le scroll ne déclenche aucun ffmpeg, pas de saturation
   // CPU/GPU à la réouverture. Les vignettes (cache disque, servies en nrmedia://) remplissent la
-  // grille ; l'encode proxy suit la lecture, focalisé et dans l'ordre.
+  // grille ; l'encode proxy suit la lecture, focalisé et dans l'ordre. `warmProxies` ne fait que
+  // RÉSOUDRE les fichiers déjà encodés (cf. previewCache), il n'en fabrique aucun.
+  const warmProxies = useCallback(
+    (list: Segment[], height?: number) => preview.warmProxies(list.map((s) => ({ path: clipPath, in: s.in, out: s.out })), height),
+    [clipPath, preview.warmProxies],
+  );
 
-  // Amorce le cache d'URL des proxies DÉJÀ encodés, en UN appel — pendant symétrique de
-  // `warmResolveThumbs` pour les vignettes.
-  //
-  // Sans lui, une carte ne peut pas connaître l'URL de son aperçu sans demander « ffmpeg:proxy » au
-  // core, MÊME quand le fichier est déjà sur disque : chaque carte qui entre dans la bande émet son
-  // RPC, passe par la file d'encodage, réécrit son sidecar, puis se fait annuler en ressortant. Au
-  // défilement ça fait des centaines d'allers-retours pour des fichiers tous présents, et la grille
-  // reste sur ses vignettes — le symptôme « ça ne joue pas quand je scrolle ». Ici, tout est résolu
-  // d'un coup : la carte trouve son URL dans le cache et monte sa <video> sans rien demander.
-  //
-  // `height` doit être le palier RÉELLEMENT utilisé à l'encodage (il entre dans la clé de cache) :
-  // l'appelant passe la hauteur de cellule mesurée, comme la pré-génération.
-  const warmProxies = useCallback((list: Segment[], height?: number) => {
-    const missing = list.filter((s) => !proxyCache.has(s.id));
-    if (!missing.length) return;
-    const items = missing.map((s) => ({ input: clipPath, start: s.in, end: s.out }));
-    // Anti-rafale : la hauteur de cellule vient d'un ResizeObserver et des boutons de densité, donc
-    // l'appelant nous relance à chaque pixel pendant un redimensionnement. Côté core, chaque
-    // résolution lit le dossier de proxies — une rafale mettrait le service à genoux pendant que la
-    // grille se réagence. Une liste déjà résolue sort plus haut sans même armer le minuteur.
-    if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current);
-    warmProxyTimer.current = setTimeout(() => {
-      warmProxyTimer.current = null;
-      void nr.proxyResolve(items, { height })
-        .then((rows) => {
-          const byRange = new Map(rows.filter((r) => r.file).map((r) => [`${r.start}|${r.end}`, r.file as string]));
-          for (const s of missing) {
-            const file = byRange.get(`${s.in}|${s.out}`);
-            // Le cache peut avoir été rempli entre-temps par une lecture réelle : premier écrit gagne.
-            if (file && !proxyCache.has(s.id)) proxyCache.set(s.id, nr.assetUrl(file));
-          }
-        })
-        .catch(() => { /* best-effort : les cartes repartent sur l'encode à la demande */ });
-    }, WARM_PROXY_DEBOUNCE_MS);
-  }, [clipPath, proxyCache]);
+  const warmThumbs = useCallback(
+    (list: Segment[], fps: number) => preview.warmThumbs(list.map((s) => ({ path: clipPath, in: s.in, out: s.out, inFrame: s.inFrame, fps }))),
+    [clipPath, preview.warmThumbs],
+  );
 
-  // Pré-génère toutes les vignettes en un seul passage ffmpeg (réouverture à froid = aussi
-  // rapide que juste après la détection, où le fichier est chaud dans le cache disque de l'OS).
-  const warmThumbs = useCallback((list: Segment[], fps: number) => {
-    if (!list.length) return;
-    const items = list.map((s) => ({ path: clipPath, time: thumbTime(s.in, s.out) }));
-    // Résout EN UN RPC les vignettes déjà sur disque → amorce le cache renderer, les cartes
-    // s'affichent sans 1 RPC chacune (scroll fluide).
-    void warmResolveThumbs(items);
-    // 1re génération : thumbsBatch écrit les vignettes sur disque AU FIL DE L'EAU mais ne renvoie
-    // PAS les chemins. Sans ré-amorçage, chaque carte tire son propre RPC au scroll (sockets HTTP
-    // saturés → apparition lente). On ré-amorce le cache renderer pendant la génération (les
-    // vignettes tombent progressivement) ET au terme → mêmes perfs qu'à la réouverture, même session.
-    //
-    // Chaque tour ne redemande que les vignettes ENCORE absentes du cache renderer : le core fait un
-    // `stat` par entrée, donc repasser la liste entière d'un rush de plusieurs centaines de plans
-    // toutes les 1,5 s pilonnait le disque exactement pendant qu'on défile.
-    const pending = () => items.filter((it) => !getThumb(it.path, it.time));
-    const poll = setInterval(() => {
-      const missing = pending();
-      if (!missing.length) return;
-      void warmResolveThumbs(missing);
-    }, 1500);
-    warmPollsRef.current.add(poll);
-    nr.thumbsBatch(clipPath, list.map((s) => {
-      const t = thumbTime(s.in, s.out);
-      return { time: t, frame: fps ? Math.round(t * fps) : (s.inFrame ?? 0) };
-    }))
-      .catch(() => {})
-      .finally(() => {
-        clearInterval(poll);
-        warmPollsRef.current.delete(poll);
-        const missing = pending();
-        if (missing.length) void warmResolveThumbs(missing);
-      });
-  }, [clipPath]);
+  // Boutons « pré-générer » de la barre d'outils : mêmes pools bornés que Timeline Live et
+  // Collections, puisque c'est le même code (cf. previewCache).
+  const asShots = (source: PreviewSource<Segment>, fps?: number) => () =>
+    (typeof source === "function" ? source() : source)
+      .map((s) => ({ path: clipPath, in: s.in, out: s.out, inFrame: s.inFrame, fps }));
+  const generateProxies = (source: PreviewSource<Segment>, height?: number) =>
+    preview.generateProxies(asShots(source), height);
+  const generateThumbs = (source: PreviewSource<Segment>, fps?: number) =>
+    preview.generateThumbs(asShots(source, fps));
 
   async function playScene(s: Segment) {
     setErr(null);
@@ -279,8 +212,7 @@ export function useShotDetection(clipPath: string): ShotDetection {
   async function detect() {
     useApp.getState().offerCloseForRam();
     setDetecting(true); setProgress(0); setErr(null);
-    proxyCache.clear();
-    proxyPendingRef.current.clear();
+    preview.clearProxies();
     // Filtre par chemin : plusieurs détections tournent en parallèle (batch/board) → ne prend que
     // la progression de CE clip (sans filtre, la barre sautait au rythme des autres jobs).
     // Lissée : la détection est muette pendant le chargement du modèle et la lecture full-vidéo.
@@ -462,7 +394,8 @@ export function useShotDetection(clipPath: string): ShotDetection {
     info, duration, segments, setSegments, srcFrames, detecting, cacheLoading, progress,
     active, setActive, activeUrl, setActiveUrl,
     err, setErr, preset, setPreset, model, setModel,
-    proxyCache, getProxy, warmProxies, playScene, detect,
+    getProxy, peekProxy, bustProxy, warmProxies, playScene, detect,
+    generateProxies, generateThumbs, proxyGen: preview.proxyGen, thumbsGen: preview.thumbsGen,
     hasEdits, recordMerge, recordRemoval, clearEdits, undoEdit, redoEdit, canUndo, canRedo,
   };
 }

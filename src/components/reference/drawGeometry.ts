@@ -141,21 +141,70 @@ export function editShape(s: DrawShape, k: string, x: number, y: number, straigh
   return s;
 }
 
+// Suite de commandes lissées à partir du point courant : courbes quadratiques dont les ancres sont
+// les MI-POINTS entre échantillons (chaque point capté devient point de contrôle). Partagée par le
+// tracé à épaisseur constante et par les deux bords d'un tracé à épaisseur variable.
+function smoothTail(pts: number[]): string {
+  const n = pts.length / 2;
+  if (n <= 2) {
+    let d = "";
+    for (let i = 1; i < n; i++) d += ` L ${pts[i * 2]} ${pts[i * 2 + 1]}`;
+    return d;
+  }
+  let d = "";
+  for (let i = 1; i + 1 < n; i++) {
+    const mx = (pts[i * 2] + pts[(i + 1) * 2]) / 2, my = (pts[i * 2 + 1] + pts[(i + 1) * 2 + 1]) / 2;
+    d += ` Q ${pts[i * 2]} ${pts[i * 2 + 1]} ${mx} ${my}`;
+  }
+  d += ` L ${pts[(n - 1) * 2]} ${pts[(n - 1) * 2 + 1]}`;
+  return d;
+}
+
+// Contour REMPLI d'un tracé au stylet : `pw` porte, point par point, la part d'épaisseur retenue
+// (pression et inclinaison figées au tracé). Un trait dont l'épaisseur varie ne peut plus être un
+// `stroke-width`, qui est une constante par chemin — il devient un polygone qu'on remplit.
+//
+// Les deux bords sont les points décalés de ±rayon le long de la NORMALE à la direction locale
+// (moyenne des segments entrant et sortant : une normale prise sur un seul segment casse à chaque
+// changement de direction). Les extrémités sont fermées par un demi-cercle, comme le ferait un
+// `stroke-linecap: round` — sans quoi un trait se termine par une arête franche.
+export function penOutline(p: number[], pw: number[], w: number): string {
+  const n = Math.min(p.length / 2, pw.length);
+  const half = w / 2;
+  const floor = w * 0.05; // un échantillon à pression nulle ne doit pas replier le contour sur lui-même
+  const radius = (i: number) => Math.max(floor, half * (pw[i] ?? 1));
+  if (n < 1) return "";
+  if (n < 2) {
+    // Point posé sans déplacement : un disque, pas un contour.
+    const r = radius(0);
+    return `M ${p[0] - r} ${p[1]} a ${r} ${r} 0 1 0 ${r * 2} 0 a ${r} ${r} 0 1 0 ${-r * 2} 0 Z`;
+  }
+  const left: number[] = [], right: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const x = p[i * 2], y = p[i * 2 + 1];
+    const ax = i > 0 ? p[(i - 1) * 2] : x, ay = i > 0 ? p[(i - 1) * 2 + 1] : y;
+    const bx = i < n - 1 ? p[(i + 1) * 2] : x, by = i < n - 1 ? p[(i + 1) * 2 + 1] : y;
+    const len = Math.hypot(bx - ax, by - ay) || 1;
+    const dx = (bx - ax) / len, dy = (by - ay) / len;
+    const r = radius(i);
+    left.push(x - dy * r, y + dx * r);
+    right.push(x + dy * r, y - dx * r);
+  }
+  const rev: number[] = [];
+  for (let i = n - 1; i >= 0; i--) rev.push(right[i * 2], right[i * 2 + 1]);
+  const rEnd = radius(n - 1), rStart = radius(0);
+  // Balayage 0 aux deux bouts : le demi-cercle passe PAR LA POINTE, du côté extérieur au tracé.
+  return (
+    `M ${left[0]} ${left[1]}${smoothTail(left)}`
+    + ` A ${rEnd} ${rEnd} 0 0 0 ${rev[0]} ${rev[1]}${smoothTail(rev)}`
+    + ` A ${rStart} ${rStart} 0 0 0 ${left[0]} ${left[1]} Z`
+  );
+}
+
 // Tracé du stylo LISSÉ : courbes quadratiques dont les ancres sont les MI-POINTS entre échantillons
 // (chaque point capté devient point de contrôle) → encre fluide sans osciller, passe près de tous les
 // points. ≤2 points → segment simple. Le hit-test reste sur les segments bruts (approximation fidèle).
 export function penPath(p: number[]): string {
   if (p.length < 2) return "";
-  if (p.length <= 4) {
-    let d = `M ${p[0]} ${p[1]}`;
-    for (let i = 2; i < p.length; i += 2) d += ` L ${p[i]} ${p[i + 1]}`;
-    return d;
-  }
-  let d = `M ${p[0]} ${p[1]}`;
-  for (let i = 2; i + 3 < p.length; i += 2) {
-    const mx = (p[i] + p[i + 2]) / 2, my = (p[i + 1] + p[i + 3]) / 2;
-    d += ` Q ${p[i]} ${p[i + 1]} ${mx} ${my}`;
-  }
-  d += ` L ${p[p.length - 2]} ${p[p.length - 1]}`;
-  return d;
+  return `M ${p[0]} ${p[1]}${smoothTail(p)}`;
 }

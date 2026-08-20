@@ -462,3 +462,120 @@ test('« Enregistrer sous… » emmène les médias compagnons au lieu de les la
     sessions.closeSession(dest);
   }
 });
+
+// --- Copie des médias LOCAUX dans le dossier compagnon (réglage) --------------------------------
+//
+// Le cas de panne que ça ferme : un projet qui ne garde qu'un POINTEUR vers le fichier d'origine se
+// vide dès que celui-ci est renommé, effacé ou laissé sur l'autre machine. C'est la version « média
+// hors ligne » la plus banale, et la seule que la récupération par lien ne sait pas réparer — un
+// fichier du disque n'a pas de lien. La copie rend le projet autonome ; le plafond la rend tenable.
+
+test('un média local est copié dans le dossier compagnon quand le réglage le demande', async () => {
+  const { root, projectsDir, refStore } = workspace();
+  const image = writeFile(root, 'ref.png', 'des octets d’image');
+  const file = path.join(projectsDir, 'projet.netsu');
+  const session = sessions.openSession(file, { create: true });
+  try {
+    const scene = {
+      name: 'Projet',
+      items: [{ id: 'i1', kind: 'image', ref: image, title: 'Ref', x: 0, y: 0, w: 200, h: 200, z: 0 }],
+      adoptLocal: true,
+      adoptLocalMax: 512 * 1024 * 1024,
+    };
+    const res = await saveBoardProject({ session, refStore, scene });
+    assert.equal(res.ok, true);
+    assert.equal(res.counts.adopted, 1);
+
+    // L'ORIGINAL DE L'UTILISATEUR N'A PAS BOUGÉ. C'est une copie, jamais un déplacement : le
+    // contraire viderait son dossier sous ses pieds au premier Ctrl+S.
+    assert.equal(fs.existsSync(image), true);
+
+    // Et le projet porte désormais sa propre copie, dans le sous-dossier des images.
+    const copied = path.join(sidecar.sidecarDirFor(file), 'images');
+    assert.equal(fs.readdirSync(copied).length, 1);
+
+    // Relu, l'item pointe sur la copie du projet et non plus sur l'original.
+    const read = readBoardProject({ session, refStore });
+    assert.equal(sidecar.isInSidecar(file, read.scene.items[0].ref), true);
+  } finally {
+    sessions.closeSession(file);
+  }
+});
+
+test('le plafond ne vise que les vidéos : une image passe toujours', async () => {
+  const { root, projectsDir, refStore } = workspace();
+  const image = writeFile(root, 'ref.png', 'x'.repeat(4096));
+  const rush = writeFile(root, 'A001.mov', 'y'.repeat(4096));
+  const file = path.join(projectsDir, 'projet.netsu');
+  const session = sessions.openSession(file, { create: true });
+  try {
+    const scene = {
+      name: 'Projet',
+      items: [
+        { id: 'i1', kind: 'image', ref: image, title: 'Ref', x: 0, y: 0, w: 200, h: 200, z: 0 },
+        { id: 'v1', kind: 'video', ref: rush, title: 'Rush', x: 0, y: 0, w: 320, h: 180, z: 1 },
+      ],
+      adoptLocal: true,
+      // Plafond sous la taille du rush : la vidéo reste référencée, l'image est copiée quand même.
+      adoptLocalMax: 1024,
+    };
+    const res = await saveBoardProject({ session, refStore, scene });
+    assert.equal(res.counts.adopted, 1);
+
+    const read = readBoardProject({ session, refStore });
+    const byId = new Map(read.scene.items.map((it) => [it.id, it]));
+    assert.equal(sidecar.isInSidecar(file, byId.get('i1').ref), true);
+    assert.equal(path.resolve(byId.get('v1').ref), path.resolve(rush));
+    assert.equal(fs.existsSync(path.join(sidecar.sidecarDirFor(file), 'videos')), false);
+  } finally {
+    sessions.closeSession(file);
+  }
+});
+
+test('sans le réglage, rien ne change : le rush reste référencé', async () => {
+  const { root, projectsDir, refStore } = workspace();
+  const rush = writeFile(root, 'A001.mov', 'des octets de rush');
+  const file = path.join(projectsDir, 'projet.netsu');
+  const session = sessions.openSession(file, { create: true });
+  try {
+    // Sans `adoptLocal`, un projet écrit par une version antérieure ne doit pas se mettre à recopier
+    // des gigaoctets au premier enregistrement de la nouvelle version.
+    const scene = { name: 'Projet', items: [{ id: 'v1', kind: 'video', ref: rush, x: 0, y: 0, w: 320, h: 180, z: 0 }] };
+    const res = await saveBoardProject({ session, refStore, scene });
+    assert.equal(res.counts.adopted, 0);
+    assert.equal(fs.existsSync(sidecar.sidecarDirFor(file)), false);
+  } finally {
+    sessions.closeSession(file);
+  }
+});
+
+// --- Média venu d'un lien : les DEUX moitiés survivent -------------------------------------------
+//
+// Un média extrait d'un post doit garder son lien ET sa copie locale. Le lien seul se périme (post
+// supprimé, CDN expiré) ; la copie seule ne dit plus d'où vient le plan et ne se partage pas comme
+// une source. Les deux ensemble, chacun rattrape l'autre.
+
+test('un média extrait garde son lien d’origine ET sa copie locale', async () => {
+  const { assetsDir, projectsDir, refStore } = workspace();
+  const downloaded = writeFile(assetsDir, 'a1b2c3d4.jpg', 'octets téléchargés');
+  const file = path.join(projectsDir, 'projet.netsu');
+  const session = sessions.openSession(file, { create: true });
+  try {
+    const link = 'https://x.com/auteur/status/1234567890';
+    const scene = {
+      name: 'Projet',
+      items: [{
+        id: 'm1', kind: 'image', ref: downloaded, title: 'X', sourceUrl: link,
+        x: 0, y: 0, w: 200, h: 200, z: 0,
+      }],
+    };
+    assert.equal((await saveBoardProject({ session, refStore, scene })).counts.adopted, 1);
+
+    const item = readBoardProject({ session, refStore }).scene.items[0];
+    assert.equal(item.sourceUrl, link);
+    assert.equal(sidecar.isInSidecar(file, item.ref), true);
+    assert.equal(fs.existsSync(item.ref), true);
+  } finally {
+    sessions.closeSession(file);
+  }
+});

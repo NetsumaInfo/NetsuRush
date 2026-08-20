@@ -9,6 +9,10 @@
 //   Cadrer la sélection (Maj+F) · Zoom (Ctrl/⌘+= / Ctrl/⌘+-, ou molette) ·
 //   Même hauteur (Maj+H) · Même largeur (Maj+W) · Même surface (Maj+S) · Ranger (Maj+O) ·
 //   Tout réinitialiser (R) · Extraire la palette (G) · Premier plan (Pg↑) · Arrière-plan (Pg↓) ·
+//   Texte (T) · Cadre (N) · Dessin (B) · Geler/lire tout (P) · Image précédente/suivante (, / .) ·
+//   Transparent à la souris (Maj+M) · Nouvelle scène (Ctrl/⌘+N) · Paramètres (Ctrl/⌘+,) ·
+//   Épingler (Ctrl/⌘+Maj+P) · Générateur de palettes (Maj+G) · Rogner (C) ·
+//   Grouper en séquence (Ctrl/⌘+G) · toute action peut être DÉLIÉE (Suppr dans les Paramètres) ·
 //   Pan : Espace+glissé ou clic-milieu · Aimant : Alt = désactivé le temps du geste.
 
 import { useEffect } from "react";
@@ -18,6 +22,8 @@ import { shifted } from "./drawGeometry";
 import { isTyping, comboFromEvent } from "@/lib/shortcuts";
 import { uid, SHORTCUT_DEFS } from "./referenceShared";
 import { extractPaletteToBoard } from "./boardPaletteActions";
+import { askMouseThrough } from "./boardMouseThrough";
+import { stepFrame } from "./boardFrameStep";
 import type { BoardHandle } from "./ReferenceBoard";
 
 const ARROWS: Record<string, [number, number]> = {
@@ -26,9 +32,12 @@ const ARROWS: Record<string, [number, number]> = {
 
 export function useBoardShortcuts(
   boardRef: React.RefObject<BoardHandle | null>,
-  actions: { onSave?: () => void; onSaveAs?: () => void; onOpenProject?: () => void } = {},
+  actions: {
+    onSave?: () => void; onSaveAs?: () => void; onOpenProject?: () => void;
+    onSettings?: () => void; onTogglePin?: () => void;
+  } = {},
 ) {
-  const { onSave, onSaveAs, onOpenProject } = actions;
+  const { onSave, onSaveAs, onOpenProject, onSettings, onTogglePin } = actions;
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
       if (isTyping(document.activeElement) || !e.clipboardData) return;
@@ -73,14 +82,24 @@ export function useBoardShortcuts(
       const combo = comboFromEvent(e);
       // En mode dessin, les LETTRES NUES appartiennent aux outils (stylo, gomme…) : on ne leur vole
       // pas la touche. Les combos avec modificateur (Ctrl+Z, Ctrl+S…) restent actifs partout.
-      if (st.drawMode && !(e.ctrlKey || e.metaKey || e.altKey) && combo.length === 1) return;
+      // Exception: the key that LEAVES draw mode, otherwise it would take the mouse to get out.
+      if (st.drawMode && !(e.ctrlKey || e.metaKey || e.altKey) && combo.length === 1 && combo !== keys.toggleDraw) return;
       // Ordre de résolution FIXE (celui de la liste de référence) : si deux actions se retrouvent sur
       // le même combo — un rebind maladroit dans les Paramètres — c'est toujours la même qui gagne,
       // et jamais l'ordre d'insertion d'un objet enregistré au fil du temps.
       let action = SHORTCUT_DEFS.map((d) => d.action).find((a) => keys[a] === combo);
       // Filet de sécurité NON rebindable : Retour arrière supprime aussi. Supprimer sa sélection ne
       // doit jamais dépendre d'un réglage — c'est le geste le plus fréquent du board.
+      // Punctuation that needs Shift depending on the layout (AZERTY: "." = Shift+;): what counts
+      // is the printed character, so an unexpected "Shift+." falls back to ".".
+      if (!action && e.shiftKey && e.key.length === 1 && !/[a-z0-9]/i.test(e.key)) {
+        const bare = combo.replace("Shift+", "");
+        action = SHORTCUT_DEFS.map((d) => d.action).find((a) => keys[a] === bare);
+      }
       if (!action && (e.key === "Backspace" || e.key === "Delete")) action = "delete";
+      // Fixed alias: F fits everything (the convention of reference tools and 3D). Not in draw
+      // mode, where F is the arrow tool.
+      if (!action && !st.drawMode && combo === "F") action = "fit";
       if (!action) return;
 
       switch (action) {
@@ -202,6 +221,81 @@ export function useBoardShortcuts(
           e.preventDefault();
           st.sendSelectedToBack();
           break;
+        case "addText":
+          e.preventDefault();
+          st.setDrawMode(false);
+          boardRef.current?.addText();
+          break;
+        case "addFrame":
+          e.preventDefault();
+          st.setDrawMode(false);
+          boardRef.current?.addFrame();
+          break;
+        case "toggleDraw":
+          e.preventDefault();
+          st.setDrawMode(!st.drawMode);
+          break;
+        case "toggleFreeze":
+          e.preventDefault();
+          st.toggleFrozen();
+          break;
+        case "toggleMouseThrough":
+          e.preventDefault();
+          askMouseThrough();
+          break;
+        case "prevFrame":
+        case "nextFrame": {
+          // One-frame step on whatever is selected: the frame of a film strip, or the playhead of
+          // a player (video, YouTube stream) moved by 1/fps. Playback stops either way — one
+          // looks at an image, not at an animation. Nothing selected: the key is not stolen from
+          // the page.
+          const dir = action === "nextFrame" ? 1 : -1;
+          const picked = st.items.filter((it) => st.selectedIds.includes(it.id));
+          const seqs = picked.filter((it) => it.kind === "sequence" && (it.frames?.length ?? 0) > 1);
+          const clips = picked.filter((it) => it.kind === "video" || it.kind === "youtube");
+          if (!seqs.length && !clips.length) break;
+          e.preventDefault();
+          for (const it of seqs) {
+            const total = it.frames!.length;
+            const cur = st.seqFrames[it.id] ?? it.frame ?? 0;
+            st.commitSeqFrame(it.id, (cur + dir + total) % total);
+            st.patchItem(it.id, { seqPlay: false }, false);
+          }
+          for (const it of clips) stepFrame(it, dir);
+          break;
+        }
+        case "newScene":
+          e.preventDefault();
+          st.newScene();
+          break;
+        case "openSettings":
+          e.preventDefault();
+          onSettings?.();
+          break;
+        case "togglePin":
+          e.preventDefault();
+          onTogglePin?.();
+          break;
+        case "paletteStudio":
+          e.preventDefault();
+          st.setDrawMode(false);
+          st.setStudio({ targetId: null });
+          break;
+        case "crop": {
+          // Cropping: one medium at a time, it is a framing down to the pixel.
+          const only = st.selectedIds.length === 1
+            ? st.items.find((it) => it.id === st.selectedIds[0] && (it.kind === "image" || it.kind === "video"))
+            : undefined;
+          if (!only) break;
+          e.preventDefault();
+          st.setCropping(only.id);
+          break;
+        }
+        case "groupSequence":
+          if (st.selectedIds.length < 2) break;
+          e.preventDefault();
+          st.groupSequence(st.selectedIds);
+          break;
       }
     };
     window.addEventListener("paste", onPaste);
@@ -210,5 +304,5 @@ export function useBoardShortcuts(
       window.removeEventListener("paste", onPaste);
       window.removeEventListener("keydown", onKey);
     };
-  }, [boardRef, onSave, onSaveAs, onOpenProject]);
+  }, [boardRef, onSave, onSaveAs, onOpenProject, onSettings, onTogglePin]);
 }

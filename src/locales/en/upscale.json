@@ -181,8 +181,8 @@
     "close": "Close",
     "loadingCompare": "Loading the comparison…",
     "previewMissing": "Preview not found — run the test again.",
-    "hintZoomed": "Drag the handle to compare · wheel = zoom · drag the image to pan.",
-    "hintNotZoomed": "Drag the handle to compare · wheel = zoom · zoom in for a closer look."
+    "hintZoomed": "Drag the image to pan · Shift-drag to compare · wheel = zoom · double-click to reset.",
+    "hintNotZoomed": "Drag the handle to compare · wheel = zoom · double-click to zoom in on a spot."
   },
   "review": {
     "ready": "Render ready",

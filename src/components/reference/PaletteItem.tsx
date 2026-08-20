@@ -1,12 +1,12 @@
 // Bloc PALETTE posé sur le board : bande de pastilles extraites d'une sélection de médias.
 // Clic sur une pastille → sa valeur dans le presse-papiers, DANS LE FORMAT AFFICHÉ (hex, rgb, hsl,
-// hsb, oklch) : ce qu'on lit est ce qu'on colle. Le bloc est un item comme un autre (déplaçable,
-// redimensionnable, persisté dans la scène et le .netsu).
+// hsb, oklch), au `#` près que `clipboardColor` retire d'un hex. Le bloc est un item comme un autre
+// (déplaçable, redimensionnable, persisté dans la scène et le .netsu).
 
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useBoard } from "./useReferenceBoard";
-import { formatColor } from "./colorFormat";
+import { clipboardColor, formatColor } from "./colorFormat";
 import { paletteGrid, type BoardItem } from "./referenceShared";
 
 // Contraste du texte posé SUR une pastille : luminance relative approchée (sRGB pondéré), au-delà
@@ -29,7 +29,8 @@ export function PaletteContent({ item }: { item: BoardItem }) {
   const format = item.colorFormat ?? "hex";
   const grid = paletteGrid(colors.length, item.paletteLayout ?? "row");
 
-  const copy = (value: string) => {
+  const copy = (shown: string) => {
+    const value = clipboardColor(shown);
     navigator.clipboard.writeText(value).then(
       () => setNotice({ kind: "ok", text: t("palette.copied", { hex: value }) }),
       () => setNotice({ kind: "error", text: t("palette.copyFailed") }),

@@ -236,7 +236,10 @@
     "genStopped": "Generación detenida · Proxies: {{done}}/{{total}}",
     "proxiesReady": "Proxies listos · Planos: {{count}}",
     "thumbsStopped": "Miniaturas detenidas · {{done}}/{{total}}",
-    "thumbsReady": "Miniaturas listas · {{count}}"
+    "thumbsReady": "Miniaturas listas · {{count}}",
+    "genFailed": "Proxies · {{failed}}/{{total}} fallidos",
+    "thumbsFailed": "Miniaturas · {{failed}}/{{total}} fallidas",
+    "proxiesUpToDate": "Proxies ya al día · {{count}} plano(s), nada que generar"
   },
   "rushGrid": {
     "home": "Inicio",
@@ -288,7 +291,9 @@
     "openedTimeline": "Timeline abierta",
     "openedNamed": "{{name}} (abierta)",
     "choose": "Elegir…",
-    "existing": "Timelines existentes"
+    "existing": "Timelines existentes",
+    "newNamePlaceholder": "Nombre de la timeline (auto si está vacío)",
+    "newNameLabel": "Nombre de la nueva timeline"
   },
   "sendDialog": {
     "readingCuts": "Leyendo los cortes…",

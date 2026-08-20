@@ -236,7 +236,10 @@
     "genStopped": "Génération arrêtée · {{done}}/{{total}} proxy(s)",
     "proxiesReady": "Proxys prêts · {{count}} plan(s)",
     "thumbsStopped": "Vignettes arrêtées · {{done}}/{{total}}",
-    "thumbsReady": "Vignettes prêtes · {{count}}"
+    "thumbsReady": "Vignettes prêtes · {{count}}",
+    "genFailed": "Proxys : {{failed}}/{{total}} échec(s)",
+    "thumbsFailed": "Vignettes : {{failed}}/{{total}} échec(s)",
+    "proxiesUpToDate": "Proxys déjà à jour · {{count}} plan(s), rien à générer"
   },
   "rushGrid": {
     "home": "Accueil",
@@ -288,7 +291,9 @@
     "openedTimeline": "Timeline ouverte",
     "openedNamed": "{{name}} (ouverte)",
     "choose": "Choisir…",
-    "existing": "Timelines existantes"
+    "existing": "Timelines existantes",
+    "newNamePlaceholder": "Nom de la timeline (auto si vide)",
+    "newNameLabel": "Nom de la nouvelle timeline"
   },
   "sendDialog": {
     "readingCuts": "Lecture des découpes…",

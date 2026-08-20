@@ -119,8 +119,27 @@ async function tokenizeProjectRef(ctx, rawRef, kindHint, place) {
     return { token: '', missing: { name: path.basename(abs), size: stat.size, kind: kindHint } };
   }
 
-  // Rush de l'utilisateur : il reste chez lui. On n'enregistre que son identité, pour le retrouver
-  // même s'il a bougé entre deux séances.
+  // Rush de l'utilisateur. Deux issues, et le choix ne se joue pas au même endroit selon le poids.
+  //
+  //   RÉFÉRENCÉ (`ref:`) — le fichier reste chez lui, le projet ne garde que son identité de contenu.
+  //     Zéro octet recopié, ce qui compte quand on lâche un dossier de rushes de plusieurs dizaines
+  //     de Go. Mais le projet DÉPEND d'un fichier qu'il ne possède pas : renommé, effacé, laissé sur
+  //     l'autre machine, et la case est vide — c'est la panne « média hors ligne » la plus banale.
+  //
+  //   ADOPTÉ (`sidecar:`) — le fichier est COPIÉ dans le dossier compagnon. JAMAIS déplacé : l'original
+  //     de l'utilisateur ne bouge pas d'un octet, c'est le sien. Le projet devient autonome, se
+  //     déplace avec ses médias, et un partage emporte de quoi tout afficher.
+  //
+  // Une image est adoptée SANS condition de taille : c'est la matière même d'un board de référence,
+  // et son poids se compte en mégaoctets. Une vidéo ne l'est que sous un plafond — un board porte
+  // volontiers dix boucles de quelques Mo, jamais dix rushes de 12 Go.
+  if (ctx.adoptLocal && (kindHint !== 'video' || stat.size <= ctx.adoptLocalMax)) {
+    const adopted = await adoptInto(ctx, abs, spot);
+    if (adopted) return { token: adopted.token, adopted: true };
+    // Échec de copie (disque plein, fichier verrouillé) : on RETOMBE sur la référence plutôt que de
+    // perdre l'item. Le prochain enregistrement retentera la copie.
+  }
+
   const known = knownMediaId(ctx.session, abs, stat);
   if (known) return { token: `ref:${known}`, referenced: true };
 
@@ -356,6 +375,14 @@ async function saveBoardProject({ session, refStore, scene }) {
     groups: new Map(),
     /** @type {Set<string>} dossiers de séquence déjà attribués */
     groupNames: new Set(),
+    // Politique d'adoption des médias locaux (cf. tokenizeProjectRef). Absente de la scène — board
+    // écrit par une version antérieure, appel de test — elle reste DÉSACTIVÉE : un enregistrement ne
+    // doit jamais se mettre à recopier des gigaoctets parce qu'un champ manquait.
+    adoptLocal: scene.adoptLocal === true,
+    // Plafond par fichier, appliqué aux SEULES vidéos. 0 ⇒ aucune vidéo adoptée.
+    adoptLocalMax: Number.isFinite(scene.adoptLocalMax) && Number(scene.adoptLocalMax) > 0
+      ? Number(scene.adoptLocalMax)
+      : 0,
   };
   const prepared = [];
   const keepMediaIds = new Set();

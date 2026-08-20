@@ -82,6 +82,25 @@ const TRANSCRIBE_BACKEND = CONFIG.transcribeCppBackend
 // Interpréteur Python des SIDECARS ML (détection/recherche/upscale) : venv local (torch CUDA).
 const PYTHON = CONFIG.python || (process.platform === 'win32' ? 'python' : 'python3');
 
+// YouTube's player challenge is solved by running JavaScript, and yt-dlp shells out to a runtime to
+// do it. Only `deno` is enabled by default — nothing here ships deno — so on a machine without one
+// yt-dlp prints "No supported JavaScript runtime could be found ... some formats may be missing",
+// falls back to a client it has already deprecated, and the day that client goes, every YouTube
+// link in the application stops resolving. `--no-warnings` on our side hides the notice entirely.
+//
+// The runtime is already on disk: this core RUNS on the node.exe bundled in resources/bin, which
+// satisfies yt-dlp's "v22 and up", so `process.execPath` is handed over rather than hoping the
+// machine has its own. Deno keeps priority when the user has one; this only adds a fallback.
+// Path form is `node:<path>`, split on the FIRST colon by yt-dlp, so a Windows drive letter is safe.
+//
+// `--js-runtimes` exists since yt-dlp 2025.11.12; `python/requirements.txt` pins a later build, so
+// the option is always understood by the venv this core spawns.
+function jsRuntimeArgs() {
+  const major = Number.parseInt(process.versions.node, 10);
+  if (!Number.isFinite(major) || major < 22) return [];
+  return ['--js-runtimes', `node:${process.execPath}`];
+}
+
 // Interpréteur Python du PONT RESOLVE : la fusionscript.dll de Resolve 21 est compilée pour
 // Python 3.13 (ABI) → charger le helper avec un 3.13, distinct du venv 3.10 des sidecars.
 // Surchargeable via nr.config.json (resolvePython) ; à défaut on retombe sur PYTHON.
@@ -154,11 +173,49 @@ DETECT_ENV.NETSURUSH_FFMPEG = ffBin('ffmpeg');
 DETECT_ENV.NETSURUSH_FFPROBE = ffBin('ffprobe');
 DETECT_ENV.NETSURUSH_SESSION_DIR = SESSION_CACHE_ROOT;
 
-// Extraction de médias sociaux : navigateur source pour les cookies yt-dlp/gallery-dl.
-// Valeurs utiles : "chrome", "edge", "firefox", ou null/false pour désactiver la passe cookies.
-const COOKIES_BROWSER = CONFIG.cookiesBrowser === false || CONFIG.cookiesBrowser === null
-  ? null
-  : (process.env.NR_COOKIES_BROWSER || CONFIG.cookiesBrowser || 'chrome');
+// Cookie source browsers for yt-dlp/gallery-dl (social extraction, YouTube relay).
+// `cookiesBrowser` takes a name, a list, or false/null to switch the cookie pass off.
+//
+// SEVERAL candidates, not one: a browser being named does not make it READABLE. Chrome locks its
+// cookie database while it runs — yt-dlp then answers « Could not copy Chrome cookie database »
+// (yt-dlp#7271) — and the machine may only hold a YouTube session in another one. They are tried in
+// order until one answers.
+const COOKIE_BROWSER_PROFILES = {
+  // Firefox FIRST: it is the only one that stays readable while running, so the only one that does
+  // not demand closing the browser to play a video.
+  firefox: [path.join(process.env.APPDATA || '', 'Mozilla', 'Firefox', 'Profiles')],
+  edge: [path.join(process.env.LOCALAPPDATA || '', 'Microsoft', 'Edge', 'User Data')],
+  brave: [path.join(process.env.LOCALAPPDATA || '', 'BraveSoftware', 'Brave-Browser', 'User Data')],
+  vivaldi: [path.join(process.env.LOCALAPPDATA || '', 'Vivaldi', 'User Data')],
+  opera: [path.join(process.env.APPDATA || '', 'Opera Software')],
+  chrome: [path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'User Data')],
+};
+
+/** Browsers to try, in order: the configured one first, then the ones actually installed. Probing
+ * the profile directory avoids paying a yt-dlp spawn per absent browser.
+ * @returns {string[]} */
+function cookieBrowserCandidates() {
+  if (CONFIG.cookiesBrowser === false || CONFIG.cookiesBrowser === null) return [];
+  const configured = process.env.NR_COOKIES_BROWSER || CONFIG.cookiesBrowser;
+  const asked = Array.isArray(configured) ? configured.map(String) : configured ? [String(configured)] : [];
+  const installed = Object.keys(COOKIE_BROWSER_PROFILES).filter((name) => {
+    if (process.platform !== 'win32') return true;   // off Windows, yt-dlp finds its own paths
+    return COOKIE_BROWSER_PROFILES[name].some((dir) => { try { return !!dir && fs.existsSync(dir); } catch (_) { return false; } });
+  });
+  return [...new Set([...asked, ...installed])];
+}
+
+/** cookies.txt file (Netscape format) named by the user, or null. This is the path that depends on
+ * NO browser being installed or closed: exported once, it always reads — where Chrome locks its own
+ * database for as long as it runs.
+ * @returns {string|null} */
+function ytCookiesFile() {
+  const p = process.env.NR_COOKIES_FILE || CONFIG.cookiesFile;
+  try { return p && fs.existsSync(p) ? String(p) : null; } catch (_) { return null; }
+}
+
+// Compat: first candidate. Callers that chain attempts read the list instead.
+const COOKIES_BROWSER = cookieBrowserCandidates()[0] || null;
 
 // Vignettes = minuscules mais COÛTEUSES à régénérer (seek+décode par plan, des centaines par rush)
 // → cache PERSISTANT dans ~/.netsurush (comme la DB des plans). os.tmpdir() était nettoyé par
@@ -258,7 +315,7 @@ const yieldLoop = () => new Promise((r) => setImmediate(r));
 
 module.exports = {
   CONFIG, ffBin, transcribeCli, ML_BACKEND, ONNX_BACKEND, TRANSCRIBE_BACKEND,
-  PYTHON, RESOLVE_PYTHON, DETECT_ENV, COOKIES_BROWSER,
+  PYTHON, RESOLVE_PYTHON, DETECT_ENV, COOKIES_BROWSER, cookieBrowserCandidates, ytCookiesFile, jsRuntimeArgs,
   VOICE_DIR, DATA_DIR, UPSCALE_TEST_DIR, ROTO_DIR, SEQ_DIR, SESSION_CACHE_ROOT,
   SHADER_DIR, RTX_DIR, RTX_EXE, RTX_DLLS, rtxBin, NR_HOME, CONFIG_PATH, WALLPAPER_DIR,
   // Dossiers relocalisables : TOUJOURS via les getters (une const destructurée au require figerait la

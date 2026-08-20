@@ -59,6 +59,8 @@ nrtest.mp4
 NetsuRush-*-Setup.exe
 
 # Resources staged by scripts/build.ps1 (regenerable — keep only README.txt)
+# Overlay de signature genere par scripts/build.ps1 depuis NETSURUSH_SIGN_COMMAND.
+src-tauri/tauri.sign.conf.json
 src-tauri/resources/bin/
 src-tauri/resources/core/
 src-tauri/resources/python/

@@ -218,9 +218,11 @@
   },
   "updates": {
     "title": "Updates",
-    "subtitle": "Versionen werden auf GitHub geprüft und ihre Signatur wird vor der Installation validiert.",
+    "subtitle": "Auf GitHub geprüft, Signatur vor der Installation validiert.",
     "auto": "Automatisch prüfen",
     "autoHint": "Sucht kurz nach dem Start nach einer neuen Version.",
+    "autoInstall": "Automatisches Update beim Start",
+    "autoInstallHint": "Installiert beim Start und startet neu, ohne Nachfrage.",
     "on": "Aktiv",
     "off": "Inaktiv",
     "ready": "Bereit zur Prüfung",
@@ -383,7 +385,7 @@
       "detail": "Sag in wenigen Worten, worum es geht.",
       "tooLarge": "Eine Datei ist größer als {{size}} MB."
     },
-    "noWebhook": "Senden deaktiviert: kein Webhook konfiguriert. Tragen Sie <c1>bugWebhook</c1> in nr.config.json ein (oder die Umgebungsvariable <c2>NR_BUG_WEBHOOK</c2>).",
+    "noWebhook": "Senden aus: kein Kanal. Setze <c1>bugWebhook</c1> in nr.config.json oder deploye das Convex-Relay (<c2>VITE_CONVEX_SITE_URL</c2>).",
     "descriptionOther": "Sag uns mehr",
     "descriptionOtherPlaceholder": "Deine Frage oder was du uns sagen möchtest…",
     "files": {

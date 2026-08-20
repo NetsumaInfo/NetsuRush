@@ -42,6 +42,40 @@ test('a manifest URL counts as a resolve failure, not a playable stream', async 
   }
 });
 
+// yt-dlp runs JavaScript to solve YouTube's player challenge and only enables `deno` by default.
+// Nothing here ships deno, so without this flag the extraction falls back to a client yt-dlp has
+// already deprecated and loses formats — silently, since the call passes `--no-warnings`.
+test('the YouTube resolve hands yt-dlp the bundled node as its JS runtime', async () => {
+  const childProcess = require('node:child_process');
+  const originalSpawn = childProcess.spawn;
+  let captured = null;
+  childProcess.spawn = (_bin, args) => {
+    captured = args;
+    const child = new EventEmitter();
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    process.nextTick(() => {
+      child.stdout.emit('data', Buffer.from('https://rr5---sn-example.googlevideo.com/videoplayback?itag=22\n'));
+      child.emit('close', 0);
+    });
+    return child;
+  };
+  delete require.cache[require.resolve('../core/ytstream')];
+  const { resolveStream } = require('../core/ytstream');
+  try {
+    const resolved = await resolveStream('hFldDZZcrQo');
+    assert.equal(resolved.ok, true);
+    const flag = captured.indexOf('--js-runtimes');
+    assert.ok(flag >= 0, 'no --js-runtimes in the yt-dlp arguments');
+    // `node:<path>`: yt-dlp splits on the FIRST colon, so a Windows drive letter stays in the path.
+    assert.match(captured[flag + 1], /^node:.+node(\.exe)?$/i);
+  } finally {
+    childProcess.spawn = originalSpawn;
+    delete require.cache[require.resolve('../core/ytstream')];
+  }
+});
+
 test('YouTube relay logs the yt-dlp failure before returning 502', async () => {
   const childProcess = require('node:child_process');
   const originalSpawn = childProcess.spawn;

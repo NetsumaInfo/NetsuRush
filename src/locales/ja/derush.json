@@ -236,7 +236,10 @@
     "genStopped": "生成を停止 · プロキシ {{done}}/{{total}}",
     "proxiesReady": "プロキシ完了 · {{count}} ショット",
     "thumbsStopped": "サムネイルを停止 · {{done}}/{{total}}",
-    "thumbsReady": "サムネイル完了 · {{count}}"
+    "thumbsReady": "サムネイル完了 · {{count}}",
+    "genFailed": "プロキシ · {{failed}}/{{total}} 件失敗",
+    "thumbsFailed": "サムネイル · {{failed}}/{{total}} 件失敗",
+    "proxiesUpToDate": "プロキシは最新 · {{count}} ショット、生成なし"
   },
   "rushGrid": {
     "home": "ホーム",
@@ -288,7 +291,9 @@
     "openedTimeline": "開いているタイムライン",
     "openedNamed": "{{name}}（開いています）",
     "choose": "選択…",
-    "existing": "既存のタイムライン"
+    "existing": "既存のタイムライン",
+    "newNamePlaceholder": "タイムライン名（空欄なら自動）",
+    "newNameLabel": "新規タイムラインの名前"
   },
   "sendDialog": {
     "readingCuts": "カットを読み込み中…",

@@ -69,12 +69,15 @@ test('ingestion poses a YouTube card at the ratio the link announces', () => {
 });
 
 test('the relayed stream reshapes the card to its true ratio, once and without an undo step', () => {
-  assert.match(boardItem, /onNatSize\?\.\(e\.currentTarget\.videoWidth, e\.currentTarget\.videoHeight\)/);
   // A proxy is a re-encoded excerpt — its dimensions must never be taken for the source's.
   assert.match(boardItem, /if \(!useProxy && e\.currentTarget\.videoWidth && e\.currentTarget\.videoHeight\)/);
-  assert.match(boardItem, /onNatSize=\{fitNatSize\}/);
-  // Constant area around the item centre, cropped items left alone, measurement not recorded.
-  assert.match(boardItem, /Math\.sqrt\(it\.w \* it\.h \* ratio\)/);
-  assert.match(boardItem, /!it\.crop && it\.w > 0 && it\.h > 0 && Math\.abs\(it\.w \/ it\.h - ratio\) > 0\.01/);
-  assert.match(boardItem, /patchItem\(item\.id, patch, false\)/);
+  assert.match(boardItem, /fitNatSize\(item\.id, e\.currentTarget\.videoWidth, e\.currentTarget\.videoHeight\)/);
+  assert.match(boardItem, /fitNatSize\(item\.id, e\.currentTarget\.naturalWidth, e\.currentTarget\.naturalHeight\)/);
+  // The reshape itself: constant area around the item centre, cropped items left alone,
+  // measurement not recorded as an undo step.
+  const natFit = fs.readFileSync(path.join(dir, 'boardNatFit.ts'), 'utf8');
+  assert.match(natFit, /Math\.sqrt\(it\.w \* it\.h \* ratio\)/);
+  assert.match(natFit, /if \(!it \|\| it\.crop\) return/);
+  assert.match(natFit, /it\.w > 0 && it\.h > 0 && Math\.abs\(it\.w \/ it\.h - ratio\) > 0\.01/);
+  assert.match(natFit, /patchItem\(id, patch, false\)/);
 });

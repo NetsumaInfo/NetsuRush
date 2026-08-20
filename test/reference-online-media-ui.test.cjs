@@ -40,8 +40,11 @@ test('online media downloads by default while YouTube stays linked', () => {
   assert.match(prefs, /onlineDefaultsVersion:\s*1/);
 });
 
-test('Instagram video extraction falls back to its embed instead of an OpenGraph thumbnail', () => {
-  assert.match(source, /e\.provider !== "instagram"\s*&&\s*await resolvePageAndPlace\(text, at\)/);
+test('providers whose OpenGraph is only a poster fall back to their embed', () => {
+  // The rule is no longer hard-coded on Instagram: it is a set, and Instagram belongs to it.
+  assert.match(source, /!OG_POSTER_ONLY_PROVIDERS\.has\(e\.provider\)\s*&&\s*await resolvePageAndPlace\(text, at\)/);
+  const embeds = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'reference', 'embeds.ts'), 'utf8');
+  assert.match(embeds, /OG_POSTER_ONLY_PROVIDERS = new Set<EmbedProvider>\(\["instagram"\]\)/);
   assert.match(source, /const fb = e \?\?/);
 });
 

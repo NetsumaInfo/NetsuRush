@@ -236,7 +236,10 @@
     "genStopped": "生成已停止 · {{done}}/{{total}} 个代理文件",
     "proxiesReady": "代理文件就绪 · {{count}} 个镜头",
     "thumbsStopped": "缩略图已停止 · {{done}}/{{total}}",
-    "thumbsReady": "缩略图就绪 · {{count}}"
+    "thumbsReady": "缩略图就绪 · {{count}}",
+    "genFailed": "代理文件 · {{failed}}/{{total}} 个失败",
+    "thumbsFailed": "缩略图 · {{failed}}/{{total}} 个失败",
+    "proxiesUpToDate": "代理文件已是最新 · {{count}} 个镜头，无需生成"
   },
   "rushGrid": {
     "home": "首页",
@@ -288,7 +291,9 @@
     "openedTimeline": "已打开的时间线",
     "openedNamed": "{{name}}（已打开）",
     "choose": "选择…",
-    "existing": "现有时间线"
+    "existing": "现有时间线",
+    "newNamePlaceholder": "时间线名称（留空则自动）",
+    "newNameLabel": "新建时间线的名称"
   },
   "sendDialog": {
     "readingCuts": "读取切分…",

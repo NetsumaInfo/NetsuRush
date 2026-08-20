@@ -10,7 +10,7 @@
 // PAS sur `view`). Pendant le pan, seul le `transform` du <svg> change (déplacement composite GPU,
 // comme la couche d'items) : on ne re-réconcilie PAS toutes les formes à chaque frame → plus de lag.
 
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link2, Trash2, Unlink2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useBoard } from "./useReferenceBoard";
 import { screenToBoard, uid, type BoardItem, type DrawShape } from "./referenceShared";
 import { shapeBBox, hitShape, shifted, handlesFor, editShape, penPath, connectorPath } from "./drawGeometry";
+import { FLAT_PRESSURE, pressureWidth, tiltLean, usesEraser } from "./tabletInput";
 import { attachShape, detachShape, indexItems, reanchorShape, resolveShapes } from "./drawAnchor";
 import { frameAtPoint } from "./boardFrames";
 import { useLive } from "./boardLive";
@@ -105,6 +106,15 @@ export function DrawLayer() {
   const drag = useRef<{ id: string; lx: number; ly: number; recorded: boolean } | null>(null);
   const edit = useRef<{ id: string; k: string; recorded: boolean } | null>(null);
   const drawing = useRef(false);
+  // La gomme peut venir de l'outil choisi OU du bout inversé du stylet : le geste en cours doit
+  // s'en souvenir, le retourner en plein tracé ne relance pas de pointerdown.
+  const erasing = useRef(false);
+  // Une tablette SANS capteur renvoie exactement 0,5 tant que la pointe touche (valeur imposée par
+  // la spec). Tant qu'aucun échantillon n'en dévie, le tracé ne garde aucune pression : il redevient
+  // un trait d'épaisseur constante, exactement ce que la souris pose.
+  const sawPressure = useRef(false);
+  // Contact qui tient le tracé en cours : un DEUXIÈME doigt veut zoomer, pas dessiner.
+  const strokeId = useRef<number | null>(null);
 
   // Formes LIÉES à un média : leurs coordonnées stockées sont exprimées dans le repère de l'item,
   // et reconverties ici depuis sa géométrie courante. Pendant un geste, la géométrie vit dans le
@@ -217,12 +227,54 @@ export function DrawLayer() {
     endGesture();
   }, []);
 
+  // Un deuxième contact pendant un tracé = un pincement qui commence, pas un deuxième trait : la
+  // planche prend la main et le trait en cours est jeté. Écoute sur la FENÊTRE et en capture — le
+  // board arrête la propagation du deuxième doigt pour l'empêcher de déclencher un geste d'item,
+  // donc l'événement n'atteindrait jamais ce calque.
+  useEffect(() => {
+    const onSecond = (e: PointerEvent) => {
+      if (!drawing.current || strokeId.current === null || e.pointerId === strokeId.current) return;
+      if (e.pointerType === "mouse" || !useBoard.getState().prefs.touchGestures) return;
+      drawing.current = false;
+      erasing.current = false;
+      strokeId.current = null;
+      setDraft(null);
+    };
+    window.addEventListener("pointerdown", onSecond, { capture: true });
+    return () => window.removeEventListener("pointerdown", onSecond, { capture: true });
+  }, []);
+
+  // Cet échantillon apporte-t-il une variation d'épaisseur RÉELLE ? La spec impose 0,5 à un matériel
+  // sans capteur : une valeur qui ne bouge jamais ne mérite pas d'être stockée par point.
+  const varies = (e: { pressure: number; tiltX: number; tiltY: number }) => {
+    const p = useBoard.getState().prefs;
+    if (p.penPressure && Math.abs(e.pressure - FLAT_PRESSURE) > 0.01) return true;
+    return p.penTilt && (e.tiltX !== 0 || e.tiltY !== 0);
+  };
+
+  // Part d'épaisseur d'un échantillon : la pression du stylet, éventuellement élargie par
+  // l'inclinaison (un stylet couché pose une marque plus large, comme le flanc d'un crayon). Vaut 1
+  // pour une souris, un doigt, ou quand le réglage est coupé — donc trait d'épaisseur constante.
+  const widthFactor = (e: { pointerType: string; pressure: number; tiltX: number; tiltY: number }) => {
+    if (e.pointerType !== "pen") return 1;
+    const p = useBoard.getState().prefs;
+    let f = p.penPressure ? pressureWidth(e.pressure, p.penMinWidth) : 1;
+    if (p.penTilt) f *= 1 + tiltLean(e.tiltX, e.tiltY) * 0.6;
+    return f;
+  };
+
   // --- Wrapper plein écran : actif uniquement en mode dessin (tracé / gomme / outil sélection) ----
   const onDown = (e: React.PointerEvent) => {
-    if (!drawMode || e.button !== 0) return;
+    // La pointe gomme du stylet arrive avec son propre bouton (5), pas le bouton 0 d'une pointe
+    // d'écriture : sans ce test elle ne déclencherait rien du tout.
+    const tipErases = useBoard.getState().prefs.penEraserTip && usesEraser(e);
+    if (!drawMode || (e.button !== 0 && !tipErases)) return;
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* best-effort */ }
     const { x, y } = worldPoint(e);
-    const tool = pen.tool;
+    const tool = tipErases ? "eraser" : pen.tool;
+    erasing.current = tool === "eraser";
+    sawPressure.current = false;
+    strokeId.current = e.pointerId;
 
     if (tool === "select") {
       if (drawSel) {
@@ -247,8 +299,9 @@ export function DrawLayer() {
     drawing.current = true;
     const op = tool === "marker" ? (pen.op < 1 ? pen.op : 0.45) : pen.op < 1 ? pen.op : undefined;
     const base = { id: uid(), c: pen.color, w: wWorld(), dash: pen.dash, op };
-    if (tool === "pen") setDraft({ ...base, t: "pen", p: [x, y] });
-    else if (tool === "marker") setDraft({ ...base, t: "pen", w: wWorld() * 2.4, p: [x, y] }); // trait large
+    const f = widthFactor(e);
+    if (tool === "pen") setDraft({ ...base, t: "pen", p: [x, y], pw: [f] });
+    else if (tool === "marker") setDraft({ ...base, t: "pen", w: wWorld() * 2.4, p: [x, y], pw: [f] }); // trait large
     else if (tool === "arrow") setDraft({ ...base, t: "arrow", p: [x, y, x, y], h1: pen.head1, h2: pen.head2, route: pen.route });
     else if (tool === "line") setDraft({ ...base, t: "line", p: [x, y, x, y], route: pen.route }); // ligne = sans pointe
     else setDraft({ ...base, t: tool, p: [x, y, x, y] });
@@ -259,21 +312,35 @@ export function DrawLayer() {
     if (applyMove(e.clientX, e.clientY)) return;
     if (!drawing.current) return;
     const { x, y } = worldPoint(e);
-    if (pen.tool === "eraser") {
+    if (erasing.current) {
       const thr = (pen.width + 12) / view.scale;
       writeShapes(getShapes().filter((s) => !hitShape(s, x, y, thr)));
       return;
     }
     const shift = e.shiftKey;
+    // Échantillons FUSIONNÉS : un stylet émet à 200–1000 Hz, le navigateur n'en livre qu'un par
+    // frame et empile le reste dans l'événement. Les relire, c'est la différence entre une courbe
+    // et une ligne brisée — c'est là que se joue la fidélité d'un tracé rapide.
+    const samples: PointerEvent[] = e.nativeEvent.getCoalescedEvents?.() ?? [];
+    const pts = samples.length ? samples : [e.nativeEvent];
+    // Hors de la mise à jour d'état, qui doit rester pure : elle peut être rejouée.
+    if (!sawPressure.current && pts.some((ev) => ev.pointerType === "pen" && varies(ev))) sawPressure.current = true;
     setDraft((c) => {
       if (!c) return c;
       if (c.t === "pen") {
         // Amincissement : ignorer les échantillons < ~1,5px écran du précédent (bruit du pointeur) →
         // tracés plus légers et lissage penPath plus stable.
         const minD = 1.5 / useBoard.getState().view.scale;
-        const n = c.p.length;
-        if (n >= 2 && Math.hypot(x - c.p[n - 2], y - c.p[n - 1]) < minD) return c;
-        return { ...c, p: [...c.p, x, y] };
+        let p = c.p, pw = c.pw;
+        for (const ev of pts) {
+          const w = worldFromXY(ev.clientX, ev.clientY);
+          const n = p.length;
+          if (n >= 2 && Math.hypot(w.x - p[n - 2], w.y - p[n - 1]) < minD) continue;
+          if (p === c.p) { p = [...c.p]; pw = c.pw ? [...c.pw] : undefined; }
+          p.push(w.x, w.y);
+          pw?.push(widthFactor(ev));
+        }
+        return p === c.p ? c : { ...c, p, pw };
       }
       let ex = x, ey = y;
       if (shift && (c.t === "line" || c.t === "arrow")) {
@@ -295,14 +362,19 @@ export function DrawLayer() {
   const onUp = (e: React.PointerEvent) => {
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* noop */ }
     drawing.current = false;
+    erasing.current = false;
+    strokeId.current = null;
     endGesture();
     if (draft) {
       const ok = draft.t === "pen" ? draft.p.length >= 4 : Math.hypot(draft.p[2] - draft.p[0], draft.p[3] - draft.p[1]) > 3 / view.scale;
+      // Rien n'a varié sur toute la course (souris, doigt, ou tablette sans capteur figée à 0,5) :
+      // le tracé repart en épaisseur constante plutôt que de traîner un tableau de 1 par point.
+      const kept = draft.pw && !sawPressure.current ? { ...draft, pw: undefined } : draft;
       // Accrochage automatique : une flèche tracée d'une image vers une autre est tenue par ses deux
       // bouts ; un trait posé sur une image lui appartient. Débrayable dans les Paramètres.
       if (ok) {
         const st = useBoard.getState();
-        const shaped = st.prefs.autoAnchorDraw ? attachShape(draft, st.items) : draft;
+        const shaped = st.prefs.autoAnchorDraw ? attachShape(kept, st.items) : kept;
         writeShapes([...getShapes(), shaped]);
       }
       setDraft(null);

@@ -55,6 +55,7 @@ NetsuRush is a standalone desktop app (Tauri shell + Node "core" service) that d
 | Timeline-transfer research log (read before reopening) | `docs/timeline-transfer-research.md` |
 | Windows compatibility notes | `docs/windows-compatibility.md` |
 | Release process | `docs/releasing.md` |
+| Authenticode, SmartScreen reputation, Defender false positives | `docs/code-signing.md` |
 | Security policy | `SECURITY.md` |
 | Licensing (AGPL-3.0-only, third-party notices) | `LICENSE`, `LICENSES/`, `docs/licensing.md` |
 

@@ -236,7 +236,10 @@
     "genStopped": "Erzeugung gestoppt · Proxys: {{done}}/{{total}}",
     "proxiesReady": "Proxys bereit · Einstellungen: {{count}}",
     "thumbsStopped": "Miniaturen gestoppt · {{done}}/{{total}}",
-    "thumbsReady": "Miniaturen bereit · {{count}}"
+    "thumbsReady": "Miniaturen bereit · {{count}}",
+    "genFailed": "Proxys · {{failed}}/{{total}} fehlgeschlagen",
+    "thumbsFailed": "Miniaturen · {{failed}}/{{total}} fehlgeschlagen",
+    "proxiesUpToDate": "Proxys bereits aktuell · {{count}} Einstellung(en), nichts zu erzeugen"
   },
   "rushGrid": {
     "home": "Start",
@@ -288,7 +291,9 @@
     "openedTimeline": "Offene Timeline",
     "openedNamed": "{{name}} (offen)",
     "choose": "Wählen…",
-    "existing": "Vorhandene Timelines"
+    "existing": "Vorhandene Timelines",
+    "newNamePlaceholder": "Name der Timeline (auto, wenn leer)",
+    "newNameLabel": "Name der neuen Timeline"
   },
   "sendDialog": {
     "readingCuts": "Schnitte werden gelesen…",

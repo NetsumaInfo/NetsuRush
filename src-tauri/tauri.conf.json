@@ -52,6 +52,11 @@
     "targets": ["nsis"],
     "license": "AGPL-3.0-only",
     "licenseFile": "../LICENSE",
+    "publisher": "Haim Faraj",
+    "homepage": "https://github.com/NetsumaInfo/NetsuRush",
+    "copyright": "© 2026 Haim Faraj — AGPL-3.0-only",
+    "shortDescription": "Standalone DaVinci Resolve companion",
+    "longDescription": "Standalone companion for DaVinci Resolve: AI-assisted rush triage, rush preview, frame-accurate cutting and a reference board.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

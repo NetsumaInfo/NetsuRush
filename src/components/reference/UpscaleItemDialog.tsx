@@ -22,7 +22,7 @@ import { displaySrc, type BoardItem } from "./referenceShared";
 import { MiniSelect } from "./inspectorControls";
 import { useBoard } from "./useReferenceBoard";
 import { useBoardUpChoices } from "./useBoardUpChoices";
-import { applyUpscaled, canPreviewUpscale, ensureLocalMedia, upscaleChoiceFrom } from "./boardUpscale";
+import { applyUpscaled, canPreviewUpscale, ensureLocalMedia, previewFrameTime, upscaleChoiceFrom } from "./boardUpscale";
 
 export function UpscaleItemDialog({
   item,
@@ -110,13 +110,13 @@ export function UpscaleItemDialog({
       const input = await ensureLocal();
       if (!input) return setError(t("upscale.remoteFail"));
       if (isVideo) {
-        const at = item.trimIn ?? 0;
+        const at = previewFrameTime(item);
         const r = await nr.upscaleTestFrame({
           input, time: at, engine: choice.engine, model: choice.model, shader: choice.shader,
           scale: choice.scale, denoise: choice.denoise,
         });
         if (!r.ok || !r.out || !r.orig) return setError(r.error || t("upscale.previewFail"));
-        setPreview({ origUrl: nr.mediaUrl(r.orig), outUrl: nr.mediaUrl(r.out), width: r.width || 0, height: r.height || 0, time: at });
+        setPreview({ origUrl: nr.mediaUrl(r.orig), outUrl: nr.mediaUrl(r.out), width: r.width || 0, height: r.height || 0, time: at ?? 0 });
       } else {
         const r = await ref.upscaleItem({ path: input, kind: "image", model: choice.model, scale: choice.scale, denoise: choice.denoise });
         if (!r.ok || !r.path) return setError(r.error || t("upscale.previewFail"));
@@ -165,7 +165,8 @@ export function UpscaleItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) close(); }}>
-      <DialogContent className="sm:max-w-md">
+      {/* Large : l'aperçu avant/après est ce qu'on vient juger ici, il mérite la place. */}
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wand2 className="size-4" /> {t("upscale.title")}

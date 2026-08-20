@@ -127,8 +127,11 @@ test('a dead thumbnail falls back to the full source instead of leaving a broken
   const raw = fs.readFileSync(path.join(root, rel), 'utf8');
   assert.match(raw, /resolved\.delete\(item\.ref\)/);
   assert.match(raw, /setShown\(item\.src\)/);
-  assert.match(read('src/components/reference/BoardItem.tsx'), /if \(!lod\.onError\(\)\) triggerRecover\(item\)/,
-    'l’erreur du <img> doit passer par le repli du LOD avant la récupération de média');
+  // Ordre imposé : repli du LOD, puis reprise du fichier local, et seulement alors la récupération
+  // en ligne. Inverser en ferait une demande réseau pour une vignette périmée ou un service qui
+  // n'avait pas fini de démarrer.
+  assert.match(read('src/components/reference/BoardItem.tsx'), /if \(!lod\.onError\(\) && !retry\.onFailure\(\)\) triggerRecover\(item\)/,
+    'l’erreur du <img> doit passer par le repli du LOD puis la reprise locale avant la récupération de média');
 });
 
 // Un échec de RPC vignette (timeout pendant la tempête d'un premier dézoom) ne doit pas être

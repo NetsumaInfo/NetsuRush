@@ -32,7 +32,7 @@ import { TimelineTrackSelect } from "./TimelineTrackSelect";
 import { cutsOfTrack, trackOptions } from "./timelineTracks";
 import { hostBuildTimeline, hostShort } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
-import { timelineBuildOptsFromProfile } from "@/features/export/timelineTarget";
+import { timelineBuildOptsFromProfile, newTimelineName } from "@/features/export/timelineTarget";
 import { fmt, gridContainerStyle, nextSegId } from "./cutStudioShared";
 
 // L'identité d'un plan ne suffit pas : sa fin, sa position timeline, son FPS ou même sa source peuvent
@@ -245,7 +245,14 @@ export function TimelineLiveView() {
   const hasBins = useMemo(() => { for (const b of bins.values()) if (b) return true; return false; }, [bins]);
 
   // Si l'empreinte complète est identique, on ne remonte aucune carte et on conserve vignettes/proxys.
-  // Si elle change, on purge les anciennes plages puis on réchauffe progressivement les miniatures.
+  //
+  // Si elle change, on repeint — et RIEN N'EST PURGÉ. Vignettes et proxys sont indexés par (fichier,
+  // plage) : un plan qu'on déplace ou rogne dans Resolve tombe simplement sur une autre clé, les
+  // plans intacts gardent les leurs. La vue purgeait au contraire TOUTES les plages affichées à
+  // chaque changement d'empreinte (donc à chaque montage fait dans Resolve, ce qui est le quotidien
+  // d'une timeline « live ») et annulait au passage la génération en cours : le bouton « générer les
+  // proxys » travaillait pour un cache effacé dans la foulée. Le Découpage n'a jamais purgé quoi que
+  // ce soit ; c'est cette voie-là qui fait foi.
   const cutsSigRef = useRef<string | null>(null);
   const loadedTimelineRef = useRef<string | null>(null);
   const openRequestRef = useRef(0);
@@ -278,9 +285,6 @@ export function TimelineLiveView() {
       const list = adobe.cuts(name);
       const signature = timelineCutsSignature(list);
       if (signature !== cutsSigRef.current) {
-        const previous = cutsRef.current.map((c) => ({ path: c.path, in: c.in, out: c.out }));
-        if (cutsSigRef.current != null) await grid.invalidatePreviewRanges(previous);
-        if (!isCurrent()) return;
         applyCuts(list, signature);
         grid.warmThumbs(list.map((c) => ({ path: c.path, in: c.in, out: c.out, inFrame: c.inFrame, fps: c.fps })));
       }
@@ -309,10 +313,6 @@ export function TimelineLiveView() {
       if (r.ok) {
         const sig = timelineCutsSignature(r.cuts);
         if (sig === cutsSigRef.current) return;   // inchangé → aucun re-render
-        const hadBaseline = cutsSigRef.current != null;
-        const previous = cutsRef.current.map((c) => ({ path: c.path, in: c.in, out: c.out }));
-        if (hadBaseline) await grid.invalidatePreviewRanges(previous);
-        if (!isCurrent()) return;
         applyCuts(r.cuts, sig);
         const thumbs = r.cuts.map((c) => ({ path: c.path, in: c.in, out: c.out, inFrame: c.inFrame, fps: c.fps }));
         // Jamais de génération massive automatique de proxys : ils restent à la demande (lecture/survol)
@@ -371,9 +371,35 @@ export function TimelineLiveView() {
   const toShot = (c: TimelineCut): CollectionShot => ({ path: c.path, name: c.name, in: c.in, out: c.out, inFrame: c.inFrame, outFrame: c.outFrame, srcFrames: c.srcFrames, fps: c.fps });
   const block = (c: TimelineCut) => ({ filePath: c.path, inFrame: c.inFrame, outFrame: c.outFrame, fps: c.fps });
   const selectedCuts = useMemo(() => visibleCuts.filter((c) => sel.has(c.id)), [visibleCuts, sel]);
-  // Une sélection faite sur une AUTRE piste ne compte pas ici : sans ce test sur les plans visibles,
-  // « générer les vignettes » partirait sur une liste vide au lieu de traiter la piste affichée.
-  const targets = () => (selectedCuts.length ? selectedCuts : visibleCuts);
+  // Cibles des pré-générations. Une sélection faite sur une AUTRE piste ne compte pas : sans ce test
+  // sur les plans VISIBLES, « générer les vignettes » partirait sur une liste vide au lieu de traiter
+  // la piste affichée. Sans sélection, elles suivent la liste VIVANTE au lieu de celle du
+  // clic : la vue peint d'abord les plans cachés de la timeline (snapshot disque, instantané) et ne
+  // les remplace qu'au retour de la lecture live, si bien qu'un clic dans cet intervalle verrouillait
+  // la génération sur une liste courte qui ne correspondait plus au compte affiché juste au-dessus.
+  // La ref est réécrite à chaque rendu, donc le run relit toujours l'état courant.
+  //
+  // Une SÉLECTION, elle, est gelée au clic : c'est un choix explicite et de taille connue — la faire
+  // suivre ferait basculer un run en cours sur toute la timeline au moment où l'on décoche.
+  //
+  // La liste vivante reste CELLE DE LA TIMELINE OUVERTE AU CLIC : en ouvrir une autre pendant un run
+  // tarit la source (le run finit sur ce qu'il a fait) plutôt que de basculer sur les plans d'une
+  // timeline qu'on n'a jamais demandé de préparer.
+  const visibleCutsRef = useRef(visibleCuts);
+  visibleCutsRef.current = visibleCuts;
+  const proxyRange = (c: TimelineCut) => ({ path: c.path, in: c.in, out: c.out });
+  const thumbRange = (c: TimelineCut) => ({ path: c.path, in: c.in, out: c.out, inFrame: c.inFrame, fps: c.fps });
+  const liveCuts = (name: string | null) => () => (openedRef.current === name ? visibleCutsRef.current : []);
+  const proxyTargets = () => {
+    if (selectedCuts.length) return selectedCuts.map(proxyRange);
+    const live = liveCuts(opened);
+    return () => live().map(proxyRange);
+  };
+  const thumbTargets = () => {
+    if (selectedCuts.length) return selectedCuts.map(thumbRange);
+    const live = liveCuts(opened);
+    return () => live().map(thumbRange);
+  };
   const activeCut = activeCutId ? visibleCuts.find((c) => c.id === activeCutId) ?? null : null;
 
   const toggle = useApp((s) => s.toggleTlSel);
@@ -384,11 +410,13 @@ export function TimelineLiveView() {
     const profile = getActiveExportProfile(state.exportProfiles, state.activeExportProfileId);
     const opts = timelineBuildOptsFromProfile(profile);
     if (forceAppend) opts.mode = "append";
+    // Nom saisi dans le sélecteur de destination ; sinon « <timeline source> — Derush ».
+    const name = newTimelineName(profile, t("shared.defaultDerushName", { name: opened || t("shared.timelineFallback") }));
     // `nr.script.buildTimeline` est le monteur natif Resolve (blocs en frames). Sur Premiere/AE le
     // montage repart en SECONDES par le job du panneau — même route que Derush et Recherche.
     if (adobe.active) {
       const r = await hostBuildTimeline(state.activeHost, {
-        name: t("shared.defaultDerushName", { name: opened || t("shared.timelineFallback") }),
+        name,
         input: list[0].path,
         mode: forceAppend ? "append" : opts.mode,
         fps: list[0].fps,
@@ -398,7 +426,7 @@ export function TimelineLiveView() {
       return { ok: r.ok, timeline: r.timeline, count: r.count, error: r.error };
     }
     const r = await nr.script?.buildTimeline({
-      name: t("shared.defaultDerushName", { name: opened || t("shared.timelineFallback") }),
+      name,
       blocks: list.map(block),
       ...opts,
       insertion: state.timelineInsertions[state.activeHost],
@@ -559,7 +587,7 @@ export function TimelineLiveView() {
             <Tooltip>
               <TooltipTrigger render={
                 <Button size="sm" variant="outline"
-                  onClick={() => grid.generateThumbs(targets().map((c) => ({ path: c.path, in: c.in, out: c.out, inFrame: c.inFrame, fps: c.fps })))}
+                  onClick={() => grid.generateThumbs(thumbTargets())}
                   className={"h-8 text-xs " + (grid.thumbsGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
               }>
                 {grid.thumbsGen
@@ -571,7 +599,7 @@ export function TimelineLiveView() {
             <Tooltip>
               <TooltipTrigger render={
                 <Button size="sm" variant="outline"
-                  onClick={() => grid.generateProxies(targets().map((c) => ({ path: c.path, in: c.in, out: c.out })))}
+                  onClick={() => grid.generateProxies(proxyTargets())}
                   className={"h-8 text-xs " + (grid.proxyGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
               }>
                 {grid.proxyGen

@@ -25,6 +25,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tailwind v4 wraps `hover:` and `group-hover:` in `@media (hover: hover)`, so a control revealed
+   only on hover is NEVER revealed on a tablet or a touch screen — those pointers do not hover.
+   `hoverless:` is the other half of that media query: put it on such controls so they stay visible
+   where hover does not exist. The second branch, `data-touch-ui` on <html>, is the pen setting
+   forcing that same behavior on a machine that CAN hover — a display tablet where reaching a
+   control should not depend on parking the stylus over it first. */
+@custom-variant hoverless {
+  @media (hover: none) { @slot; }
+  &:where([data-touch-ui] *) { @slot; }
+}
+
+/* Pen setting "larger targets": aiming a 32 px button with a stylus — on a tablet with no screen,
+   without seeing your own hand — wants more margin. Only the design system's buttons. */
+[data-big-targets] [data-slot="button"] {
+  min-inline-size: 2.25rem;
+  min-block-size: 2.25rem;
+}
+
 /* Chip sombre des overlays de vignette (numéro, sélection, collection, timeline, durée). rgba EXPLICITE
    (pas `bg-black/xx` = color-mix Tailwind v4) → s'affiche noir MÊME dans le vieux moteur CEF 99 du
    panneau Adobe (color-mix = Chrome 111+, absent en CEF 99 → sinon fond transparent = chips invisibles). */
@@ -1028,4 +1046,22 @@ button:not(:disabled):active,
     animation: gate-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   @keyframes gate-in { to { opacity: 1; transform: none; } }
+}
+
+/* TRANSLUCENT board (background opacity < 1): the board paints its own background, so the page and
+   the shells that laid down a fill (detached window, pinned board) step aside. */
+html.nr-see-through,
+html.nr-see-through body,
+html.nr-see-through .nr-shell-bg {
+  background: transparent;
+}
+
+/* Scope of that translucency (Settings). By default the INTERFACE — title bar, toolbars, floating
+   panels — takes an opaque surface back: a translucent title bar over a busy desktop stops being
+   readable. `nr-see-through-shell` lets it follow the background instead. */
+html.nr-see-through:not(.nr-see-through-shell) .nr-chrome {
+  background-color: var(--color-card);
+}
+html.nr-see-through:not(.nr-see-through-shell) .nr-chrome-page {
+  background-color: var(--color-bg);
 }

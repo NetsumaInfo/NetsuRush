@@ -242,33 +242,110 @@ async function extractFrames(input, opts = {}) {
 // fichier SUR LE DISQUE — image fixe, GIF animé ou vidéo, peu importe — et le PNG rendu se charge en
 // `data:` URL, donc sans la moindre restriction d'origine. C'est aussi la seule voie qui marche pour
 // une source qu'aucun élément de la page n'a encore décodée.
+const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+// `image2pipe` concatène les PNG dans un seul flux : on les redécoupe en suivant leurs chunks
+// (longueur + type + données + CRC) jusqu'à IEND. Chercher la signature à l'aveugle suffirait presque,
+// mais rien n'interdit à ces 8 octets d'apparaître dans un IDAT compressé — le découpage serait faux.
+function splitPngs(buf) {
+  const out = [];
+  let p = 0;
+  while (p + 8 <= buf.length && buf.compare(PNG_SIG, 0, 8, p, p + 8) === 0) {
+    let q = p + 8;
+    while (q + 12 <= buf.length) {
+      const len = buf.readUInt32BE(q);
+      const type = buf.toString('latin1', q + 4, q + 8);
+      q += 12 + len;
+      if (type === 'IEND') break;
+    }
+    if (q > buf.length) break;
+    out.push(buf.subarray(p, q));
+    p = q;
+  }
+  return out;
+}
+
 async function sampleFrame(filePath, opts = {}) {
   const target = String(filePath || '');
   if (!target) return { ok: false, error: 'chemin manquant' };
   const side = Math.max(16, Math.min(512, Number(opts.side) || 220));
   const at = Math.max(0, Number(opts.at) || 0);
+  // Plusieurs cadres = on couvre la PORTÉE lue au lieu de son premier instant. Une palette de plan
+  // décrit ce qu'on voit du début à la fin ; une frame isolée ne dit rien d'un plan qui change de
+  // lumière. Fin non fournie ⇒ la durée sondée du fichier.
+  const count = Math.max(1, Math.min(32, Math.round(Number(opts.count) || 1)));
+  let span = 0;
+  if (count > 1) {
+    let to = Number(opts.to);
+    if (!Number.isFinite(to) || to <= at) {
+      try { to = (await probeMedia(target)).duration || 0; } catch (_) { to = 0; }
+    }
+    if (to > at) span = to - at;
+  }
+  const frames = span > 0 ? count : 1;
+
+  let err = '';
+  const shoot = async (keyOnly) => {
+    try {
+      // `encoding: 'buffer'` est indispensable : en utf8, execFile corromprait les octets du PNG.
+      const out = await run('ffmpeg', sampleArgs(target, at, span, frames, side, keyOnly), { encoding: 'buffer' });
+      return splitPngs(Buffer.isBuffer(out) ? out : Buffer.from(out));
+    } catch (e) {
+      err = String((e && e.stderr) || (e && e.message) || e).trim().split(/\r?\n/).pop();
+      return [];
+    }
+  };
+
+  // Passe rapide d'abord (images clés seules). Un fichier peut n'en avoir presque aucune dans la
+  // portée — plan fixe, aplat de couleur, GOP très long — et le tirage raterait alors des pans
+  // entiers du plan. En dessous de la moitié de ce qui est demandé on repasse en décodage complet,
+  // seul cas où l'extraction coûte le prix de la lecture.
+  const enough = Math.max(2, Math.ceil(frames / 2));
+  let pngs = frames > 1 ? await shoot(true) : [];
+  if (pngs.length < Math.min(enough, frames)) pngs = await shoot(false);
+  if (!pngs.length) return { ok: false, error: err || 'aucune image rendue' };
+  // `png` reste le premier cadre : les appelants qui n'en veulent qu'un n'ont rien à changer.
+  return { ok: true, png: pngs[0].toString('base64'), pngs: pngs.map((p) => p.toString('base64')) };
+}
+
+// Arguments d'un tirage de cadres.
+//
+// `keyOnly` est ce qui rend l'extraction fluide : `-skip_frame nokey` fait sauter au décodeur tout ce
+// qui n'est pas une image clé, donc on lit une poignée d'images au lieu de toute la portée — et ces
+// images-là sont justement celles qui DIFFÈRENT entre elles, puisqu'un encodeur en pose une à chaque
+// rupture. Le `select` ne garde qu'une clé par tranche de temps pour que les cadres restent répartis
+// du début à la fin au lieu de s'agglutiner sur un passage agité.
+// Sans images clés exploitables, repli sur `fps` : décodage complet de la portée, cadence régulière.
+function sampleArgs(target, at, span, frames, side, keyOnly) {
   const args = ['-v', 'error'];
+  if (keyOnly) args.push('-skip_frame', 'nokey');
   // Seek AVANT -i : rapide sur une vidéo. Sur une image fixe, un `-ss` non nul ne trouverait rien,
   // d'où la garde.
   if (at > 0) args.push('-ss', String(at));
+  args.push('-i', target);
+  if (span > 0) args.push('-t', String(span));
+  // Les deux côtés bornés à `side`, ratio conservé : une palette n'a pas besoin du détail fin, et
+  // le coût cesse de dépendre du poids du fichier. Le redimensionnement passe AVANT la sélection :
+  // ce qui suit travaille sur des vignettes.
+  const scale = `scale='min(${side},iw)':'min(${side},ih)':force_original_aspect_ratio=decrease`;
+  let vf = scale;
+  const selecting = keyOnly && frames > 1 && span > 0;
+  if (frames > 1 && span > 0) {
+    vf = selecting
+      ? `${scale},select='isnan(prev_selected_t)+gte(t-prev_selected_t,${(span / frames).toFixed(6)})'`
+      : `fps=${(frames / span).toFixed(6)},${scale}`;
+  }
+  args.push('-vf', vf);
+  // `select` laisse passer des cadres irréguliers : sans ça ffmpeg en dupliquerait pour tenir une
+  // cadence constante et le tirage rendrait plusieurs fois la même image. Réservé à CETTE passe :
+  // un ffmpeg trop ancien pour l'option échoue ici, et le repli `fps` (qui n'en a pas besoin) prend
+  // le relais au lieu de faire tomber l'extraction entière.
+  if (selecting) args.push('-fps_mode', 'passthrough');
   args.push(
-    '-i', target,
-    '-frames:v', '1',
-    // Les deux côtés bornés à `side`, ratio conservé : une palette n'a pas besoin du détail fin, et
-    // le coût cesse de dépendre du poids du fichier.
-    '-vf', `scale='min(${side},iw)':'min(${side},ih)':force_original_aspect_ratio=decrease`,
+    '-frames:v', String(frames),
     '-f', 'image2pipe', '-vcodec', 'png', '-',
   );
-  try {
-    // `encoding: 'buffer'` est indispensable : en utf8, execFile corromprait les octets du PNG.
-    const out = await run('ffmpeg', args, { encoding: 'buffer' });
-    const buf = Buffer.isBuffer(out) ? out : Buffer.from(out);
-    if (!buf.length) return { ok: false, error: 'aucune image rendue' };
-    return { ok: true, png: buf.toString('base64') };
-  } catch (e) {
-    const why = String((e && e.stderr) || (e && e.message) || e).trim().split(/\r?\n/).pop();
-    return { ok: false, error: why || 'échec ffmpeg' };
-  }
+  return args;
 }
 
 module.exports = { run, probeMedia, playInfo, probeAudioTracks, extractAudio, exportClip, extractFrames, compareFrames, sampleFrame };

@@ -53,8 +53,9 @@ test('wheel zoom goes through the imperative path and commits once per burst', (
   const body = zoomAt.slice(0, zoomAt.indexOf('\n  );'));
   assert.match(body, /liveView\.current = \{ tx:/, 'zoomAt must write the live view, not the store');
   assert.doesNotMatch(body, /setView\(/, 'no store commit inside the zoom hot path');
-  // Le commit unique vit dans le timer de fin de rafale, et un pan en cours garde la main.
-  assert.match(src, /if \(gesture\.current !== "pan" && liveView\.current\) \{/);
+  // Le commit unique vit dans le timer de fin de rafale, et un geste qui tient déjà la vue vivante
+  // garde la main : le pan, et le pincement à deux doigts qui commite au relâchement.
+  assert.match(src, /if \(gesture\.current !== "pan" && gesture\.current !== "pinch" && liveView\.current\) \{/);
   // Une vue explicite (fit, reset, focus) annule la rafale en attente, sinon le commit différé
   // écraserait la vue qu'elle vient de poser.
   assert.match(src, /const commitView = useCallback/);

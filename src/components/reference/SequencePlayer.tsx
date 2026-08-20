@@ -17,7 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useBoard } from "./useReferenceBoard";
-import { displaySrc, youtubeId } from "./referenceShared";
+import { displaySrc, youtubeId, type ShortcutAction } from "./referenceShared";
+import { ComboKeys } from "@/components/ui/kbd";
 import { revertSequence } from "./boardMediaActions";
 import { IconAction, IconToggle } from "./inspectorControls";
 import { iconForLink } from "./brandIcons";
@@ -34,9 +35,11 @@ const LOOP_META: Record<SeqLoop, { icon: typeof Repeat; labelKey: string }> = {
 };
 const LOOP_NEXT: Record<SeqLoop, SeqLoop> = { loop: "pingpong", pingpong: "off", off: "loop" };
 
-function CtrlBtn({ icon: Icon, label, onClick, active }: {
-  icon: typeof Play; label: string; onClick: () => void; active?: boolean;
+// `action` = the command shortcut that does the SAME thing → its key shows in the tooltip.
+function CtrlBtn({ icon: Icon, label, onClick, active, action }: {
+  icon: typeof Play; label: string; onClick: () => void; active?: boolean; action?: ShortcutAction;
 }) {
+  const combo = useBoard((s) => (action ? s.prefs.shortcutKeys[action] : ""));
   return (
     <Tooltip>
       <TooltipTrigger
@@ -44,7 +47,12 @@ function CtrlBtn({ icon: Icon, label, onClick, active }: {
       >
         <Icon />
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>
+        <span className="flex items-center gap-1.5">
+          {label}
+          {combo && <ComboKeys combo={combo} />}
+        </span>
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -123,7 +131,7 @@ export function SequencePlayer() {
   return (
     <>
       <div className="absolute z-30 -translate-x-1/2" style={{ left, top }}>
-        <div className="flex items-center gap-1 rounded-xl border border-border bg-card/95 px-2 py-1.5 shadow-xl backdrop-blur">
+        <div className="nr-chrome flex items-center gap-1 rounded-xl border border-border bg-card/95 px-2 py-1.5 shadow-xl backdrop-blur">
           <Tooltip>
             <TooltipTrigger
               render={<Button variant="ghost" size="sm" className="w-12 tabular-nums" onClick={cycleSpeed} aria-label={t("sequence.playbackSpeed")} />}
@@ -132,14 +140,14 @@ export function SequencePlayer() {
             </TooltipTrigger>
             <TooltipContent>{t("sequence.playbackSpeed")}</TooltipContent>
           </Tooltip>
-          <CtrlBtn icon={SkipBack} label={t("sequence.prevFrame")} onClick={() => goto(cur - 1)} />
+          <CtrlBtn icon={SkipBack} label={t("sequence.prevFrame")} action="prevFrame" onClick={() => goto(cur - 1)} />
           <CtrlBtn
             icon={playing ? Pause : Play}
             label={playing ? t("sequence.pause") : t("sequence.play")}
             active={playing}
             onClick={() => patchItem(item.id, { seqPlay: !playing }, false)}
           />
-          <CtrlBtn icon={SkipForward} label={t("sequence.nextFrame")} onClick={() => goto(cur + 1)} />
+          <CtrlBtn icon={SkipForward} label={t("sequence.nextFrame")} action="nextFrame" onClick={() => goto(cur + 1)} />
           <CtrlBtn icon={loopMeta.icon} label={t(loopMeta.labelKey)} active={loopMode !== "off"} onClick={cycleLoop} />
           <CtrlBtn
             icon={GalleryHorizontal}
@@ -175,7 +183,7 @@ export function SequencePlayer() {
 
       {showStrip && total > 0 && (
         <div className="absolute bottom-3 left-1/2 z-30 max-w-[94vw] -translate-x-1/2">
-          <div className="flex flex-col gap-1.5 rounded-xl border border-border bg-card/95 p-2 shadow-xl backdrop-blur">
+          <div className="nr-chrome flex flex-col gap-1.5 rounded-xl border border-border bg-card/95 p-2 shadow-xl backdrop-blur">
             {/* Portée de boucle : double-curseur sur les index de frames (zone bouclée = piste pleine) */}
             {total >= 2 && (
               <div className="flex items-center gap-2 px-1">

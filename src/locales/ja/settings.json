@@ -218,9 +218,11 @@
   },
   "updates": {
     "title": "アップデート",
-    "subtitle": "GitHub でリリースを確認し、署名を検証してからインストールします。",
+    "subtitle": "GitHub で確認し、署名を検証してからインストールします。",
     "auto": "自動確認",
     "autoHint": "起動から数秒後に新しいバージョンを確認します。",
+    "autoInstall": "起動時に自動更新",
+    "autoInstallHint": "起動時に確認なしでインストールし、再起動します。",
     "on": "オン",
     "off": "オフ",
     "ready": "確認できます",
@@ -383,7 +385,7 @@
       "detail": "ひとことで内容を書いてください。",
       "tooLarge": "ファイルが {{size}} MB を超えています。"
     },
-    "noWebhook": "送信は無効です：Webhook が設定されていません。nr.config.json に <c1>bugWebhook</c1> を設定するか、環境変数 <c2>NR_BUG_WEBHOOK</c2> を指定してください。",
+    "noWebhook": "送信は無効：チャネル未設定。nr.config.json に <c1>bugWebhook</c1> を設定するか、Convex リレー（<c2>VITE_CONVEX_SITE_URL</c2>）をデプロイしてください。",
     "descriptionOther": "くわしく教えてください",
     "descriptionOtherPlaceholder": "質問や、伝えたいことを書いてください…",
     "files": {

@@ -76,6 +76,25 @@ test('a stroke mostly outside an image stays free', () => {
   assert.equal(anchor.anchorCount(free), 0);
 });
 
+test('a perfectly straight stroke over a media still belongs to it', () => {
+  const yt = item({ id: 'yt', kind: 'youtube', x: 0, y: 0, w: 640, h: 360 });
+  for (const p of [[100, 180, 500, 180], [320, 40, 320, 340]]) {
+    assert.equal(anchor.attachShape({ id: 'flat', t: 'pen', c: '#fff', w: 3, p }, [yt]).own, 'yt');
+  }
+  // Même règle pour une forme fermée aplatie (rectangle tracé comme un soulignement).
+  const flatRect = { id: 'r', t: 'rect', c: '#fff', w: 3, p: [100, 200, 300, 200] };
+  assert.equal(anchor.attachShape(flatRect, [yt]).own, 'yt');
+});
+
+test('a rotated media owns what is drawn on its real surface, not on its bounding box', () => {
+  // 640×360 tournée d'un quart de tour : elle occupe visuellement x 140..500, y -140..500.
+  const turned = item({ id: 'yt', kind: 'youtube', x: 0, y: 0, w: 640, h: 360, rotation: 90 });
+  const onSurface = { id: 'a', t: 'pen', c: '#fff', w: 3, p: [200, -100, 400, -60, 300, -20] };
+  const besideIt = { id: 'b', t: 'pen', c: '#fff', w: 3, p: [10, 10, 90, 40, 40, 80] };
+  assert.equal(anchor.attachShape(onSurface, [turned]).own, 'yt');
+  assert.equal(anchor.attachShape(besideIt, [turned]).own, undefined);
+});
+
 test('a deleted item leaves the shape where it was, never a ghost', () => {
   const a = item({ id: 'a', x: 0, y: 0, w: 100, h: 100 });
   const b = item({ id: 'b', x: 400, y: 0, w: 100, h: 100 });

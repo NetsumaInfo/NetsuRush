@@ -15,7 +15,7 @@ import { shapeBBox } from "./drawGeometry";
 // Kinds qui peuvent porter un tracé : tout ce qui est un média ou un conteneur visible.
 const ANCHORABLE = new Set(["image", "video", "youtube", "embed", "sequence", "frame", "palette", "text"]);
 
-// Part de la bbox d'une forme qui doit tomber dans un item pour qu'elle lui appartienne.
+// Part des points d'une forme qui doit tomber dans un item pour qu'elle lui appartienne.
 const OWN_COVERAGE = 0.8;
 
 export type AnchorItem = Pick<BoardItem, "id" | "kind" | "x" | "y" | "w" | "h" | "rotation" | "flipH" | "flipV" | "z">;
@@ -37,17 +37,34 @@ export function itemAtPoint(items: AnchorItem[], x: number, y: number): AnchorIt
   return win;
 }
 
-// Item qui « contient » la boîte donnée (recouvrement ≥ 80 %, mesuré sur les AABB). Sert au trait
-// libre : dessiner sur une image l'y attache, dessiner à cheval sur le vide ne l'attache pas.
-function itemCovering(items: AnchorItem[], bb: [number, number, number, number]): AnchorItem | null {
-  const [x0, y0, x1, y1] = bb;
-  const area = Math.max(1e-6, (x1 - x0) * (y1 - y0));
+// Points d'une forme qui décident de son appartenance. Un tracé libre est jugé sur SES points ; une
+// forme fermée (rectangle, ellipse, losange, texte) n'en a que deux, on prend sa boîte échantillonnée
+// aux quatre coins plus le centre.
+function coverageSamples(shape: DrawShape): number[] {
+  if (shape.t === "pen" || shape.t === "line" || shape.t === "arrow") return shape.p;
+  const [x0, y0, x1, y1] = shapeBBox(shape);
+  return [x0, y0, x1, y0, x1, y1, x0, y1, (x0 + x1) / 2, (y0 + y1) / 2];
+}
+
+// Item qui « contient » la forme : ≥ 80 % de ses points tombent dans le repère de l'item. Sert au
+// trait libre : dessiner sur une image l'y attache, dessiner à cheval sur le vide ne l'attache pas.
+// Le test se fait dans le repère de l'item — comme `itemAtPoint` — donc une image tournée est jugée
+// sur sa vraie surface, et un trait parfaitement droit (boîte plate, aire nulle) est jugé comme les
+// autres au lieu d'être exclu d'office.
+function itemCovering(items: AnchorItem[], shape: DrawShape): AnchorItem | null {
+  const pts = coverageSamples(shape);
+  const total = Math.floor(pts.length / 2);
+  if (!total) return null;
   let win: AnchorItem | null = null;
   for (const it of items) {
     if (!ANCHORABLE.has(it.kind) || !it.w || !it.h) continue;
-    const ix = Math.max(0, Math.min(x1, it.x + it.w) - Math.max(x0, it.x));
-    const iy = Math.max(0, Math.min(y1, it.y + it.h) - Math.max(y0, it.y));
-    if ((ix * iy) / area < OWN_COVERAGE) continue;
+    const b = box(it);
+    let inside = 0;
+    for (let i = 0; i + 1 < pts.length; i += 2) {
+      const { fx, fy } = toItemSpace(b, pts[i], pts[i + 1]);
+      if (fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1) inside++;
+    }
+    if (inside / total < OWN_COVERAGE) continue;
     if (!win || it.z > win.z) win = it;
   }
   return win;
@@ -74,7 +91,7 @@ export function attachShape(shape: DrawShape, items: AnchorItem[]): DrawShape {
     return next;
   }
 
-  const owner = itemCovering(items, shapeBBox(shape));
+  const owner = itemCovering(items, shape);
   if (!owner) return shape;
   return { ...shape, own: owner.id, ownPts: normalizePts(shape.p, owner) };
 }
