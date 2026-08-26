@@ -32,7 +32,8 @@ test('le panneau propose les seuls conteneurs que le codec accepte', () => {
 });
 
 test('le mode de timeline imbriquée par défaut est le même des deux côtés', () => {
-  const ui = /useState<AeNestedMode>\("(\w+)"\)/.exec(AE_HOOK);
+  // Le défaut UI vit dans l'objet des réglages persistés (DEFAULTS), plus dans le useState.
+  const ui = /nestedMode: "(\w+)"/.exec(AE_HOOK);
   const core = /nestedMode = '(\w+)'/.exec(AE_CORE);
   assert.ok(ui && core, 'défaut de nestedMode introuvable');
   // `render` fait rendre chaque timeline imbriquée par Resolve, donc exige un dossier de sortie :

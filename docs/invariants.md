@@ -95,7 +95,7 @@ Commands: `serve` (**JSON-lines daemon**, the nominal mode — models stay warm 
 
 ## ffmpeg
 
-- Cutting/extracting is **lossless**: `-c copy -avoid_negative_ts make_zero`. Never re-encode.
+- Cutting/extracting is **frame-exact first, lossless when provable** (`core/export/frameCut.js`). A blind `-ss/-t` stream copy is not precise: the head falls back to the previous keyframe (measured 24–70 extra frames on BluRay rips) and the open GOP drags 1–2 extra frames at the tail. Stream copy (`-c copy -avoid_negative_ts make_zero`) is used **only** when the packet probe proves exactness (keyframe at the start, tail bounded by packet count via `-frames:v`, no leading/overshoot pictures in the kept window); otherwise the clip is re-encoded. Precise re-encode bounds: seek at −¼ frame (mkv 1/1000 timebase rounds pts below the target, dropping the first frame) and `-frames:v` for the video end (`-t` only bounds audio).
 - `probe` returns duration and dimensions **only**. The full keyframe scan (`-skip_frame nokey`) was too slow on long files and was removed. Do not add it back.
 - `ffprobe` keyframes, when needed: `pts_time` + `pict_type==I` (not the deprecated `pkt_pts_time`).
 - **The version is PINNED** — `$FfmpegVersion` in `scripts/setup.ps1` is the single source, and the download URL carries it. The `ffmpeg-release-full.7z` alias is **forbidden**: it is a moving target that jumped a major version without a single repo change, while the fallback stayed two majors behind. The zip fallback exists only for machines without a 7z extractor, and **never a `master` build**: its libplacebo/Vulkan sometimes fails to initialise, which breaks Turbo upscaling.

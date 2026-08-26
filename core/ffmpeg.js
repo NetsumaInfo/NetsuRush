@@ -143,12 +143,43 @@ async function extractAudio({ input, track = 0, seconds = 0 } = {}) {
   try { return await job; } finally { audioInflight.delete(key); }
 }
 
+// Découpe FRAME-EXACTE d'un plan (extraction du Derush). Copie de flux seulement quand frameCut
+// prouve l'exactitude sur les paquets source ; sinon ré-encodage précis h264 (GPU sondé, repli CPU)
+// + copie audio (puis AAC si le conteneur refuse la piste). Un `-ss/-t` en copie aveugle reculait de
+// 24-70 frames en tête sur les rips BluRay. Requires paresseux : capabilities requiert ce module.
 async function exportClip({ input, start, end, output }) {
   if (end <= start) throw new Error('fin <= début');
-  await run('ffmpeg', [
-    '-y', '-ss', String(start), '-i', input, '-t', String(end - start),
-    '-c', 'copy', '-avoid_negative_ts', 'make_zero', output,
+  const frameCut = require('./export/frameCut');
+  let fps = 0;
+  try { fps = (await playInfo(input)).fps || 0; } catch (_) {}
+  let plan = null;
+  try { plan = await frameCut.planClip(input, start, end, fps); } catch (_) {}
+  if (plan) {
+    try {
+      await run('ffmpeg', frameCut.copyArgs(input, plan, [], output));
+      return output;
+    } catch (_) { /* conteneur incompatible avec la copie → ré-encode ci-dessous */ }
+  }
+  const { pickGpuEncoder } = require('./export/encoder');
+  const { videoEncodeArgs } = require('./export/encodeArgs');
+  let enc = null;
+  try { enc = await pickGpuEncoder({ workflow: 'video_encode', codec: 'h264_high' }); } catch (_) {}
+  const bounds = frameCut.encodeCutBounds(start, end, fps);
+  const base = bounds
+    ? ['-y', '-ss', String(bounds.ss), '-i', input, '-t', String(bounds.duration), '-frames:v', String(bounds.vframes)]
+    : ['-y', '-ss', String(start), '-i', input, '-t', String(end - start)];
+  const cut = (encoder, audioArgs) => run('ffmpeg', [
+    ...base,
+    '-map', '0:v:0', '-map', '0:a?',
+    ...videoEncodeArgs('h264_high', encoder), ...audioArgs,
+    '-avoid_negative_ts', 'make_zero', output,
   ]);
+  try {
+    await cut(enc, ['-c:a', 'copy']);
+  } catch (e) {
+    try { await cut(enc, ['-c:a', 'aac', '-b:a', '192k']); }
+    catch (_) { await cut(null, ['-c:a', 'aac', '-b:a', '192k']); } // dernier repli : tout CPU
+  }
   return output;
 }
 

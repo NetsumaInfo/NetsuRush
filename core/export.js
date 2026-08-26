@@ -17,6 +17,7 @@ const naming = require('./export/naming');
 const spacer = require('./export/spacer');
 const { videoEncodeArgs, audioEncodeArgs, audioMapArgs, mergeMapArgs, containerTagArgs } = require('./export/encodeArgs');
 const { pickGpuEncoder } = require('./export/encoder');
+const frameCut = require('./export/frameCut');
 const encodeGate = require('./export/gate');
 const capabilities = require('./export/capabilities');
 const audioLang = require('./audioLang');
@@ -141,11 +142,16 @@ function isEncoderOpenError(err) {
 
 /**
  * Args ffmpeg pour produire UN fichier de sortie depuis un plan.
+ * Avec `fps` connu, les bornes viennent de frameCut.encodeCutBounds (seek −¼ frame + `-frames:v`),
+ * seules bornes frame-exactes d'un ré-encodage ; sans fps (sonde muette), ancien `-ss/-t`.
  * @param {ExportClipInput} clip @param {string} out @param {ExportProfileLike} profile
- * @param {string|null} gpuEncoder @param {boolean} encode @returns {string[]}
+ * @param {string|null} gpuEncoder @param {boolean} encode @param {number} [fps] @returns {string[]}
  */
-function clipArgs(clip, out, profile, gpuEncoder, encode) {
-  const base = ['-y', '-ss', String(clip.start), '-i', clip.input, '-t', String(clip.end - clip.start)];
+function clipArgs(clip, out, profile, gpuEncoder, encode, fps) {
+  const bounds = encode ? frameCut.encodeCutBounds(clip.start, clip.end, fps || 0) : null;
+  const base = bounds
+    ? ['-y', '-ss', String(bounds.ss), '-i', clip.input, '-t', String(bounds.duration), '-frames:v', String(bounds.vframes)]
+    : ['-y', '-ss', String(clip.start), '-i', clip.input, '-t', String(clip.end - clip.start)];
   const map = audioMapArgs(clip.audioTrack, profile.audioMode);
   if (!encode) return [...base, ...map, '-c', 'copy', '-avoid_negative_ts', 'make_zero', out];
   const ext = profile.container;
@@ -163,18 +169,32 @@ function clipArgs(clip, out, profile, gpuEncoder, encode) {
 
 /**
  * Encode/copie UN plan vers `out`, avec replis : remux→ré-encode, GPU→CPU.
+ * Remux = FRAME-EXACT d'abord : copie de flux seulement quand frameCut PROUVE l'exactitude sur les
+ * paquets source (keyframe au début, fin bornée au paquet près) ; sinon ré-encodage précis avec le
+ * codec du profil — un `-ss/-t` en copie aveugle sortait 24 à 70 frames en trop en tête et 1-2 en
+ * queue (mesuré sur rips BluRay).
  * @param {ExportClipInput} clip @param {string} out @param {ExportProfileLike} profile
  * @param {string|null} gpuEncoder @returns {Promise<void>}
  */
 async function runClip(clip, out, profile, gpuEncoder) {
   const encode = profile.workflow === 'video_encode';
+  let fps = 0;
+  try { fps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { fps = 0; }
+  if (!encode) {
+    let plan = null;
+    try { plan = await frameCut.planClip(clip.input, clip.start, clip.end, fps); } catch (_) { plan = null; }
+    if (plan) {
+      try {
+        await ffmpeg.run('ffmpeg', frameCut.copyArgs(clip.input, plan, audioMapArgs(clip.audioTrack, profile.audioMode), out));
+        return;
+      } catch (_) { /* copie planifiée en échec (conteneur incompatible…) → ré-encode ci-dessous */ }
+    }
+  }
   try {
-    await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, encode));
+    await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, true, fps));
   } catch (e) {
-    if (encode && gpuEncoder && isEncoderOpenError(e) && (!profile.encoderMode || profile.encoderMode === 'auto')) {
-      await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, null, true)); // anciens profils : repli CPU
-    } else if (!encode) {
-      await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, true)); // remux échoué → ré-encode
+    if (gpuEncoder && isEncoderOpenError(e) && (!profile.encoderMode || profile.encoderMode === 'auto')) {
+      await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, null, true, fps)); // anciens profils : repli CPU
     } else {
       throw e;
     }
@@ -201,7 +221,10 @@ async function exportClips(event, opts) {
   const base = sanitizeName(opts.baseName || 'export') || 'export';
   const phase = profile.workflow === 'video_encode' ? 'Encode' : 'Découpe';
   const total = clips.length;
-  const gpuEncoder = await pickGpuEncoder(profile);
+  // Résolu aussi pour le remux : ses plans hors keyframe partent en ré-encodage précis (frameCut),
+  // qui doit viser le même moteur GPU qu'un profil d'encodage du même codec. Sans codec dans le
+  // profil (jamais le cas des profils du renderer), le repli CPU h264 d'encodeArgs s'applique.
+  const gpuEncoder = await pickGpuEncoder(profile.workflow === 'video_encode' || !profile.codec ? profile : { ...profile, workflow: 'video_encode' });
 
   // Horloge UNIQUE du lot : les jetons {date}/{time} doivent donner la même valeur pour tous les
   // plans, sinon un export à cheval sur une seconde sort des noms qui ne se rangent plus ensemble.
@@ -428,26 +451,33 @@ const PREVIEW_TOTAL = 3;
  * Nom que produirait le profil, pour l'éditeur — la MÊME résolution que l'export réel, donc l'aperçu
  * ne peut pas mentir. Rend aussi le nom du fichier fusionné (le gabarit s'y résout sans index) et la
  * liste des jetons, qui peuple le menu « Insérer » : un jeton ajouté au core apparaît dans l'UI.
- * @param {{ profile: ExportProfileLike, baseName?: string }} opts
+ *
+ * `clip` (+ `total`, `index`) = plan RÉEL : le dialogue d'enregistrement propose alors le nom que le
+ * fichier portera vraiment, jetons {source}/{label}/{start} compris. Sans lui, un plan D'EXEMPLE
+ * sert de contexte — c'est le cas de l'éditeur de profil, qui n'a aucun plan sous la main.
+ * @param {{ profile: ExportProfileLike, baseName?: string, clip?: ExportClipInput, total?: number, index?: number }} opts
  * @returns {{ name: string, merged: string, tokens: string[] }}
  */
 function previewName(opts) {
   const profile = (opts && opts.profile) || /** @type {ExportProfileLike} */ ({});
   const ext = profile.container || 'mp4';
   const base = sanitizeName(opts.baseName || 'export') || 'export';
+  const clip = (opts && opts.clip) || PREVIEW_CLIP;
+  const total = Number(opts && opts.total) > 0 ? Number(opts.total) : PREVIEW_TOTAL;
+  const index = Number(opts && opts.index) > 0 ? Number(opts.index) : 1;
   const ctx = {
     base,
-    source: PREVIEW_CLIP.input,
-    total: PREVIEW_TOTAL,
-    start: PREVIEW_CLIP.start,
-    end: PREVIEW_CLIP.end,
-    label: PREVIEW_CLIP.label,
+    source: clip.input,
+    total,
+    start: clip.start,
+    end: clip.end,
+    label: clip.label,
     profile: profile.name,
     codec: profile.workflow === 'video_encode' ? profile.codec : 'copy',
     container: ext,
   };
   return {
-    name: `${naming.resolveName(profile.naming, { ...ctx, index: 1 })}.${ext}`,
+    name: `${naming.resolveName(profile.naming, { ...ctx, index })}.${ext}`,
     merged: `${naming.resolveName(profile.naming, { ...ctx, index: null })}.${ext}`,
     tokens: naming.NAMING_TOKENS,
   };
