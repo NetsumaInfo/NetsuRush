@@ -111,8 +111,8 @@ Trois règles ont chacune corrigé un bug réel et ne doivent pas être cassées
    frames, jamais un fichier ré-exporté. `endFrame` est inclusif ; le fps de la timeline est
    forcé sur celui du clip *avant* sa création ; l'espace-frames du détecteur est remappé sur
    celui de l'hôte.
-2. **Découpe frame-exacte** — copie de flux (`-c copy`) seulement quand l'exactitude est prouvée
-   sur les paquets source ; sinon réencodage précis (`docs/invariants.md`, section ffmpeg).
+2. **Découpe lossless** — `-c copy`, jamais de réencodage. La coupe se cale donc sur les images
+   clés (quelques images en trop, l'UI le signale) ; seul le réencodage coupe à l'image.
 3. **Le décodage vidéo est la ressource critique** — aucune animation JavaScript sur les grilles,
    aucun `<video>` monté hors écran, aucun fond animé pendant un traitement lourd.
 

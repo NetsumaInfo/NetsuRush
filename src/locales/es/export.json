@@ -111,18 +111,17 @@
   },
   "iconPicker": {
     "search": "Buscar un icono…",
+    "loading": "Cargando iconos…",
     "importedImage": "Imagen importada",
     "removeFromLibrary": "Quitar de la biblioteca",
     "importImage": "Importar imagen / GIF",
     "profileIcon": "Icono del perfil",
-    "defaultIcon": "Icono por defecto",
-    "default": "Por defecto",
     "tabEmojis": "Emojis",
     "tabIcons": "Iconos",
     "tabImages": "Imágenes"
   },
   "notice": {
-    "cancelled": "Exportación cancelada: no se eligió carpeta de destino.",
+    "cancelled": "Exportación cancelada: no se eligió destino.",
     "merging": "Uniendo…",
     "exporting": "Exportando…",
     "exported_one": "{{count}} archivo exportado ({{profile}}) → {{dir}}{{failed}}",
@@ -134,7 +133,9 @@
   "workflow": {
     "timeline": "Timeline",
     "remux": "Remux",
-    "encode": "Recodificar"
+    "encode": "Recodificar",
+    "remuxWarning": "Corte no preciso",
+    "remuxWarningDetail": "Remux copia el flujo sin recodificarlo: el corte se ajusta a los fotogramas clave de la fuente, así que pueden aparecer algunos fotogramas de más al principio y al final del plano. Para un corte exacto al fotograma, usa Recodificar."
   },
   "audioMode": {
     "copy": "Copia",

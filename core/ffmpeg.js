@@ -143,47 +143,15 @@ async function extractAudio({ input, track = 0, seconds = 0 } = {}) {
   try { return await job; } finally { audioInflight.delete(key); }
 }
 
-// Découpe FRAME-EXACTE d'un plan (extraction du Derush) : réencapsulage au codec de la source via
-// frameCut.cutRemux (copie pure prouvée → smart cut → ré-encodage same-codec). Repli h264 (GPU
-// sondé puis CPU) seulement quand le same-codec est impossible (codec exotique, HEVC sans encodeur
-// matériel). Un `-ss/-t` en copie aveugle reculait de 24-70 frames en tête sur les rips BluRay.
-// Requires paresseux : capabilities requiert ce module.
+// Extraction d'un plan : COPIE DE FLUX pure, donc pas frame-exacte (la copie démarre à la keyframe
+// précédente, la fin traîne le GOP ouvert — cf. core/export/frameCut.js). Arbitrage produit assumé,
+// signalé dans l'UI ; seul un ré-encodage coupe à la frame.
 async function exportClip({ input, start, end, output }) {
   if (end <= start) throw new Error('fin <= début');
-  const frameCut = require('./export/frameCut');
-  const { pickGpuEncoder } = require('./export/encoder');
-  let fps = 0;
-  try { fps = (await playInfo(input)).fps || 0; } catch (_) {}
-  const faststart = /\.(mp4|mov)$/i.test(output);
-  try {
-    const mode = await frameCut.cutRemux(input, start, end, output, {
-      fps,
-      audioMap: ['-map', '0:v:0', '-map', '0:a?'],
-      faststart,
-      pickEncoder: (codecId) => pickGpuEncoder({ workflow: 'video_encode', codec: codecId }),
-    });
-    if (mode) return output;
-  } catch (_) { /* → repli h264 ci-dessous */ }
-  const { videoEncodeArgs } = require('./export/encodeArgs');
-  let enc = null;
-  try { enc = await pickGpuEncoder({ workflow: 'video_encode', codec: 'h264_high' }); } catch (_) {}
-  const bounds = frameCut.encodeCutBounds(start, end, fps);
-  const base = bounds
-    ? ['-y', '-ss', String(bounds.ss), '-i', input, '-t', String(bounds.duration), '-frames:v', String(bounds.vframes)]
-    : ['-y', '-ss', String(start), '-i', input, '-t', String(end - start)];
-  const cut = (encoder, audioArgs) => run('ffmpeg', [
-    ...base,
-    '-map', '0:v:0', '-map', '0:a?',
-    ...videoEncodeArgs('h264_high', encoder), ...audioArgs,
-    ...(faststart ? ['-movflags', '+faststart'] : []),
-    '-avoid_negative_ts', 'make_zero', output,
+  await run('ffmpeg', [
+    '-y', '-ss', String(start), '-i', input, '-t', String(end - start),
+    '-c', 'copy', '-avoid_negative_ts', 'make_zero', output,
   ]);
-  try {
-    await cut(enc, ['-c:a', 'copy']);
-  } catch (e) {
-    try { await cut(enc, ['-c:a', 'aac', '-b:a', '192k']); }
-    catch (_) { await cut(null, ['-c:a', 'aac', '-b:a', '192k']); } // dernier repli : tout CPU
-  }
   return output;
 }
 

@@ -3,7 +3,7 @@
 // quand on change de réglage. Moteurs GPU filtrés par sonde réelle côté core. shadcn Base UI.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderInput, ChevronDown, CircleHelp } from "lucide-react";
+import { FolderInput, ChevronDown, CircleHelp, TriangleAlert } from "lucide-react";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { swrRead } from "@/lib/swr";
@@ -112,24 +112,6 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         </div>
       </div>
 
-      <ToggleGroup
-        className="w-full"
-        value={[profile.workflow]}
-        onValueChange={(v) => {
-          const wf = v[0] as ExportProfile["workflow"] | undefined;
-          if (!wf) return;
-          // Remux/import timeline n'acceptent pas un codec audio ré-encodé → retour à « Copie ».
-          // Le son coupé (« none ») survit au changement de flux : c'est un choix de piste, pas de codec.
-          const fix = (wf === "video_remux" || wf === "timeline_import") && profile.audioMode !== "copy" && profile.audioMode !== "none"
-            ? { audioMode: "copy" as const } : {};
-          set({ workflow: wf, ...fix });
-        }}
-      >
-        {EXPORT_WORKFLOW_OPTIONS.map((o) => (
-          <ToggleGroupItem key={o.value} className="flex-1 text-xs" value={o.value}>{o.label}</ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-
       {/* Rangement (workflow Timeline) : la timeline de coupes est créée dans un sous-dossier du
           Media Pool au lieu de la racine, où elle se mêlerait aux rushs. Ce n'est PAS une
           destination alternative à la timeline — d'où le libellé « Dossier » seul. */}
@@ -196,6 +178,47 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
           <span className="text-[0.8125rem] text-muted-foreground">{t("editor.timelineTarget")}</span>
           <ExportTimelineTarget profile={profile} className="w-full" />
         </div>
+      )}
+
+      {/* Choix du flux APRÈS les réglages propres à la timeline : ce qui suit (moteur, codec,
+          conteneur, nommage) vaut pour les trois, la bascule se lit donc comme leur en-tête. */}
+      <ToggleGroup
+        className="w-full"
+        value={[profile.workflow]}
+        onValueChange={(v) => {
+          const wf = v[0] as ExportProfile["workflow"] | undefined;
+          if (!wf) return;
+          // Remux/import timeline n'acceptent pas un codec audio ré-encodé → retour à « Copie ».
+          // Le son coupé (« none ») survit au changement de flux : c'est un choix de piste, pas de codec.
+          const fix = (wf === "video_remux" || wf === "timeline_import") && profile.audioMode !== "copy" && profile.audioMode !== "none"
+            ? { audioMode: "copy" as const } : {};
+          set({ workflow: wf, ...fix });
+        }}
+      >
+        {EXPORT_WORKFLOW_OPTIONS.map((o) => (
+          <ToggleGroupItem key={o.value} className="flex-1 text-xs" value={o.value}>{o.label}</ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+
+      {/* Le Remux copie le flux : la coupe se cale sur les images clés de la source, donc quelques
+          images en trop en tête et en queue. Dit ICI, sous la bascule, plutôt qu'après l'export :
+          le compromis se choisit au moment où l'on choisit le flux. */}
+      {profile.workflow === "video_remux" && (
+        <Tooltip>
+          <TooltipTrigger
+            render={(
+              <div
+                className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-2 text-left text-[0.75rem] leading-snug text-amber-600 dark:text-amber-400"
+                tabIndex={0}
+                aria-label={t("workflow.remuxWarningDetail")}
+              />
+            )}
+          >
+            <TriangleAlert className="mt-px size-3.5 shrink-0" />
+            <span>{t("workflow.remuxWarning")}</span>
+          </TooltipTrigger>
+          <TooltipContent side="right" align="center" className="max-w-72">{t("workflow.remuxWarningDetail")}</TooltipContent>
+        </Tooltip>
       )}
 
       <Row label={t("editor.optimization")} disabled={!encode}>

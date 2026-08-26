@@ -111,18 +111,17 @@
   },
   "iconPicker": {
     "search": "搜索图标…",
+    "loading": "正在加载图标…",
     "importedImage": "已导入的图片",
     "removeFromLibrary": "从库中移除",
     "importImage": "导入图片 / GIF",
     "profileIcon": "预设图标",
-    "defaultIcon": "默认图标",
-    "default": "默认",
     "tabEmojis": "表情",
     "tabIcons": "图标",
     "tabImages": "图片"
   },
   "notice": {
-    "cancelled": "已取消导出：未选择目标文件夹。",
+    "cancelled": "已取消导出：未选择保存位置。",
     "merging": "合并中…",
     "exporting": "导出中…",
     "exported_one": "已导出 {{count}} 个文件（{{profile}}）→ {{dir}}{{failed}}",
@@ -134,7 +133,9 @@
   "workflow": {
     "timeline": "时间线",
     "remux": "Remux",
-    "encode": "重新编码"
+    "encode": "重新编码",
+    "remuxWarning": "剪切不精确",
+    "remuxWarningDetail": "Remux 直接复制流而不重新编码：剪切点会对齐到源文件的关键帧，因此镜头开头和结尾可能多出几帧。需要精确到帧的剪切，请使用「重新编码」。"
   },
   "audioMode": {
     "copy": "直接复制",

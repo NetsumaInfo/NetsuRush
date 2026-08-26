@@ -111,18 +111,17 @@
   },
   "iconPicker": {
     "search": "Rechercher une icône…",
+    "loading": "Chargement des icônes…",
     "importedImage": "Image importée",
     "removeFromLibrary": "Retirer de la bibliothèque",
     "importImage": "Importer une image / GIF",
     "profileIcon": "Icône du profil",
-    "defaultIcon": "Icône par défaut",
-    "default": "Défaut",
     "tabEmojis": "Emojis",
     "tabIcons": "Icônes",
     "tabImages": "Images"
   },
   "notice": {
-    "cancelled": "Export annulé : aucun dossier de destination choisi.",
+    "cancelled": "Export annulé : aucune destination choisie.",
     "merging": "Fusion…",
     "exporting": "Export…",
     "exported_one": "{{count}} fichier exporté ({{profile}}) → {{dir}}{{failed}}",
@@ -134,7 +133,9 @@
   "workflow": {
     "timeline": "Timeline",
     "remux": "Remux",
-    "encode": "Réencodage"
+    "encode": "Réencodage",
+    "remuxWarning": "Coupe non précise",
+    "remuxWarningDetail": "Le Remux copie le flux sans le ré-encoder : la coupe se cale sur les images clés de la source, donc quelques images en trop peuvent apparaître au début et à la fin du plan. Pour une coupe exacte à l'image, prends Réencodage."
   },
   "audioMode": {
     "copy": "Copie",

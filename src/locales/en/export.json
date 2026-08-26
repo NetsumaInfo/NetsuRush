@@ -111,18 +111,17 @@
   },
   "iconPicker": {
     "search": "Search icons…",
+    "loading": "Loading icons…",
     "importedImage": "Imported image",
     "removeFromLibrary": "Remove from library",
     "importImage": "Import an image / GIF",
     "profileIcon": "Profile icon",
-    "defaultIcon": "Default icon",
-    "default": "Default",
     "tabEmojis": "Emojis",
     "tabIcons": "Icons",
     "tabImages": "Images"
   },
   "notice": {
-    "cancelled": "Export cancelled: no destination folder picked.",
+    "cancelled": "Export cancelled: no destination chosen.",
     "merging": "Merging…",
     "exporting": "Exporting…",
     "exported_one": "{{count}} file exported ({{profile}}) → {{dir}}{{failed}}",
@@ -134,7 +133,9 @@
   "workflow": {
     "timeline": "Timeline",
     "remux": "Remux",
-    "encode": "Re-encode"
+    "encode": "Re-encode",
+    "remuxWarning": "Cut is not precise",
+    "remuxWarningDetail": "Remux copies the stream without re-encoding it: the cut snaps to the source keyframes, so a few extra frames can show up at the start and the end of the shot. For a frame-exact cut, use Re-encode."
   },
   "audioMode": {
     "copy": "Copy",

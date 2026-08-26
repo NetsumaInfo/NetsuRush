@@ -111,18 +111,17 @@
   },
   "iconPicker": {
     "search": "Icon suchen…",
+    "loading": "Icons werden geladen…",
     "importedImage": "Importiertes Bild",
     "removeFromLibrary": "Aus Bibliothek entfernen",
     "importImage": "Bild / GIF importieren",
     "profileIcon": "Profil-Icon",
-    "defaultIcon": "Standard-Icon",
-    "default": "Standard",
     "tabEmojis": "Emojis",
     "tabIcons": "Icons",
     "tabImages": "Bilder"
   },
   "notice": {
-    "cancelled": "Export abgebrochen: kein Zielordner gewählt.",
+    "cancelled": "Export abgebrochen: kein Ziel gewählt.",
     "merging": "Zusammenführen…",
     "exporting": "Export…",
     "exported_one": "{{count}} Datei exportiert ({{profile}}) → {{dir}}{{failed}}",
@@ -134,7 +133,9 @@
   "workflow": {
     "timeline": "Timeline",
     "remux": "Remux",
-    "encode": "Neu kodieren"
+    "encode": "Neu kodieren",
+    "remuxWarning": "Schnitt nicht bildgenau",
+    "remuxWarningDetail": "Remux kopiert den Stream ohne Neukodierung: Der Schnitt richtet sich nach den Keyframes der Quelle, daher können am Anfang und am Ende der Einstellung einige Bilder zu viel erscheinen. Für einen bildgenauen Schnitt „Neu kodieren“ verwenden."
   },
   "audioMode": {
     "copy": "Kopie",

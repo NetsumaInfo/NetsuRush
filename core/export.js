@@ -169,37 +169,26 @@ function clipArgs(clip, out, profile, gpuEncoder, encode, fps) {
 
 /**
  * Encode/copie UN plan vers `out`, avec replis : remux→ré-encode, GPU→CPU.
- * Remux = FRAME-EXACT d'abord : copie de flux seulement quand frameCut PROUVE l'exactitude sur les
- * paquets source (keyframe au début, fin bornée au paquet près) ; sinon ré-encodage précis avec le
- * codec du profil — un `-ss/-t` en copie aveugle sortait 24 à 70 frames en trop en tête et 1-2 en
- * queue (mesuré sur rips BluRay).
+ * Le remux reste une COPIE DE FLUX pure, donc pas frame-exact (cf. `frameCut.js` : la copie démarre
+ * à la keyframe précédente et la fin traîne le GOP ouvert). Arbitrage produit assumé, signalé dans
+ * l'UI par l'avertissement du flux « Remux » ; seul le ré-encodage coupe à la frame.
  * @param {ExportClipInput} clip @param {string} out @param {ExportProfileLike} profile
  * @param {string|null} gpuEncoder @returns {Promise<void>}
  */
 async function runClip(clip, out, profile, gpuEncoder) {
   const encode = profile.workflow === 'video_encode';
   let fps = 0;
-  try { fps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { fps = 0; }
-  if (!encode) {
-    // Remux = réencapsulage au CODEC DE LA SOURCE : copie pure prouvée → smart cut → ré-encodage
-    // same-codec. Le codec du profil ne sert qu'en dernier repli (same-codec impossible : codec
-    // exotique, HEVC sans encodeur matériel).
-    let mode = null;
-    try {
-      mode = await frameCut.cutRemux(clip.input, clip.start, clip.end, out, {
-        fps,
-        audioMap: audioMapArgs(clip.audioTrack, profile.audioMode),
-        faststart: isFaststart(profile.container),
-        pickEncoder: (codecId) => pickGpuEncoder({ workflow: 'video_encode', codec: codecId, encoderMode: profile.encoderMode }),
-      });
-    } catch (_) { mode = null; }
-    if (mode) return;
-  }
+  if (encode) { try { fps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { fps = 0; } }
   try {
-    await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, true, fps));
+    await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, encode, fps));
   } catch (e) {
-    if (gpuEncoder && isEncoderOpenError(e) && (!profile.encoderMode || profile.encoderMode === 'auto')) {
+    if (encode && gpuEncoder && isEncoderOpenError(e) && (!profile.encoderMode || profile.encoderMode === 'auto')) {
       await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, null, true, fps)); // anciens profils : repli CPU
+    } else if (!encode) {
+      // Copie échouée (conteneur qui refuse le flux source) → ré-encode avec le codec du profil.
+      let encFps = 0;
+      try { encFps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { encFps = 0; }
+      await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, true, encFps));
     } else {
       throw e;
     }
@@ -226,10 +215,7 @@ async function exportClips(event, opts) {
   const base = sanitizeName(opts.baseName || 'export') || 'export';
   const phase = profile.workflow === 'video_encode' ? 'Encode' : 'Découpe';
   const total = clips.length;
-  // Résolu aussi pour le remux : ses plans hors keyframe partent en ré-encodage précis (frameCut),
-  // qui doit viser le même moteur GPU qu'un profil d'encodage du même codec. Sans codec dans le
-  // profil (jamais le cas des profils du renderer), le repli CPU h264 d'encodeArgs s'applique.
-  const gpuEncoder = await pickGpuEncoder(profile.workflow === 'video_encode' || !profile.codec ? profile : { ...profile, workflow: 'video_encode' });
+  const gpuEncoder = await pickGpuEncoder(profile);
 
   // Horloge UNIQUE du lot : les jetons {date}/{time} doivent donner la même valeur pour tous les
   // plans, sinon un export à cheval sur une seconde sort des noms qui ne se rangent plus ensemble.
