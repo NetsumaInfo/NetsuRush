@@ -12,10 +12,9 @@
   "editor": {
     "name": "Nombre",
     "namePlaceholder": "Nombre del perfil",
-    "destination": "Destino",
-    "timeline": "Timeline",
     "folder": "Carpeta",
     "folderPlaceholder": "Nombre de la carpeta…",
+    "folderHint": "Carpeta del Media Pool donde se guardan los cortes, en lugar de la raíz.",
     "defaultFolder": "NetsuRush — Cortes",
     "existingFolders": "Carpetas existentes",
     "mediaPoolFolders": "Carpetas del Media Pool",

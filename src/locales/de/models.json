@@ -39,6 +39,11 @@
     "desc": "Absteigend"
   },
   "vramShort": "Braucht {{need}} GB VRAM, deine Karte hat {{have}} ({{gpu}}) — passt nicht. Laden geht trotzdem.",
+  "stage": {
+    "download": "Download",
+    "verify": "Prüfung",
+    "install": "Installation"
+  },
   "status": {
     "bundled": "Mitgeliefert",
     "bundledTip": "Teil der Laufzeit (nicht löschbar).",

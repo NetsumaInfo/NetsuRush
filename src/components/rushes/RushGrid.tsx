@@ -17,6 +17,7 @@ import { MediaTree } from "./MediaTree";
 import { FolderNameDialog } from "@/components/collections/FolderNameDialog";
 import { LIB_ROOT } from "./libraryShared";
 import { hasOsFiles, importDroppedFiles } from "./libraryDrop";
+import { useDropZone } from "@/lib/dropZone";
 import { SortSelect, FoldersToggle } from "./BrowserControls";
 import { TimelineDrop } from "./TimelineDrop";
 import { BatchDetectBar, BatchDetectProgress } from "./BatchDetect";
@@ -32,6 +33,7 @@ export function RushGrid() {
       libraryError: s.libraryError,
     })),
   );
+  const openFlow = useApp((s) => s.openFlow);
   const libraryNotice = useApp((s) => s.libraryNotice);
   const canUndoLibrary = useApp((s) => s.libraryUndo.length > 0);
   const undoLibraryDelete = useApp((s) => s.undoLibraryDelete);
@@ -63,7 +65,14 @@ export function RushGrid() {
   const [sortKey, setSortKey] = useState<SortKey>(loadSortKey);
   const [folders, setFolders] = useState(true);   // affichage par dossiers Media Pool ↔ liste à plat
   const [newFolder, setNewFolder] = useState(false);
-  const [over, setOver] = useState(false);        // survol d'un dépôt de fichiers de l'Explorateur
+  // Dépôt depuis l'Explorateur n'importe où sur la page : les rushs rejoignent la racine. Une rangée
+  // de dossier intercepte le sien avant nous (stopPropagation), donc viser un dossier range dedans.
+  // Le liseré s'éteint à la FIN du glissé, où qu'elle ait lieu (cf. useDropZone) — y compris quand le
+  // curseur quitte la fenêtre en survolant une carte, ce qui le laissait allumé indéfiniment.
+  const drop = useDropZone({
+    accept: hasOsFiles,                        // un glissé interne de carte ne porte pas de fichiers
+    onDrop: (e) => void importDroppedFiles(Array.from(e.dataTransfer.files), null),
+  });
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -86,6 +95,16 @@ export function RushGrid() {
     void removeLibraryItems(removableIds);
     exitSelect();   // la notice « N rushs retirés · Annuler » prend le relais
   };
+  // Ouvre les rushs cochés dans une seule grille défilante. L'ordre est celui de la GRILLE (tri et
+  // filtre compris) : c'est l'ordre qu'on avait sous les yeux en cochant, donc celui qu'on attend
+  // en défilant. Le `Set` de la sélection, lui, n'a pas d'ordre.
+  function openFlowSelection() {
+    const picked = filtered.filter((c) => sel.has(c.path));
+    if (!picked.length) return;
+    openFlow(picked);
+    exitSelect();
+  }
+
   function runBatch() {
     if (!sel.size) return;
     void runBatchDetect([...sel], PRESETS[batchPreset].thr, batchModel);   // OmniShotCut ignore le seuil (auto)
@@ -114,29 +133,10 @@ export function RushGrid() {
     setLibraryFocus(`${LIB_ROOT}/${name}`);
   }
 
-  // Dépôt depuis l'Explorateur n'importe où sur la page : les rushs rejoignent la racine. Une rangée
-  // de dossier intercepte le sien avant nous (stopPropagation), donc viser un dossier range dedans.
-  function onDropFiles(e: React.DragEvent) {
-    if (!hasOsFiles(e.dataTransfer)) return;   // drag interne d'une carte
-    e.preventDefault();
-    setOver(false);
-    void importDroppedFiles(Array.from(e.dataTransfer.files), null);
-  }
-
   return (
     <div
       className="relative flex h-full flex-col"
-      onDragOver={(e) => {
-        if (!hasOsFiles(e.dataTransfer)) return;
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-        setOver(true);
-      }}
-      onDragLeave={(e) => { if (e.target === e.currentTarget) setOver(false); }}
-      // Capture : une rangée de dossier arrête la propagation du drop (elle range chez elle) — sans
-      // ce passage en amont, le liseré de la page resterait allumé après un dépôt sur un dossier.
-      onDropCapture={() => setOver(false)}
-      onDrop={onDropFiles}
+      {...drop.dropProps}
     >
       <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
         <Tooltip>
@@ -209,6 +209,7 @@ export function RushGrid() {
           setPresetIdx={setBatchPreset}
           onSelectAll={() => setSel(new Set(filtered.map((c) => c.path)))}
           onClear={() => setSel(new Set())}
+          onOpenFlow={openFlowSelection}
           onRun={runBatch}
           onRemove={removeSelected}
           removeCount={removableIds.length}
@@ -271,7 +272,7 @@ export function RushGrid() {
       </div>
       {/* Cible de dépôt : un liseré sur toute la page, jamais un voile — le voile masquerait les
           rangées de dossiers, qui sont justement les cibles fines du même geste. */}
-      {over && <div className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-inset ring-primary" />}
+      {drop.over && <div className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-inset ring-primary" />}
       <FolderNameDialog
         open={newFolder}
         initial=""

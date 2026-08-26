@@ -43,7 +43,8 @@ def serve():
             elif cmd == "setPost":
                 res = session.set_post(req.get("grow"), req.get("feather"),
                                        req.get("holes"), req.get("dots"),
-                                       req.get("border"), req.get("smooth"), req.get("gamma"))
+                                       req.get("border"), req.get("smooth"), req.get("gamma"),
+                                       req.get("harden"))
             elif cmd == "setView":
                 res = session.set_view(req.get("mode"), req.get("outline"), req.get("bg"))
             elif cmd == "setObjects":
@@ -66,6 +67,8 @@ def serve():
                                      warmup=req.get("warmup"), max_size=req.get("maxSize"),
                                      batch=req.get("batch"), overlap=req.get("overlap"),
                                      frame=req.get("frame"))
+            elif cmd == "testPreview":
+                res = session.test_preview()
             elif cmd == "setRefined":
                 res = session.set_refined(req.get("on", True))
             elif cmd == "export":

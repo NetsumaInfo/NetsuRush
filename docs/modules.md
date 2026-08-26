@@ -46,6 +46,41 @@ Infinite canvas (pan/zoom) where images, local videos and YouTube videos are lai
 - **Tooltips**: every icon button goes through the custom `Tooltip` wrapper; native `title=` is never used. Colour pickers are wrapped in a `TooltipTrigger render={<span/>}` so the picker's own popover trigger stays inside.
 - Media elements are `display:block` (`<video>`, `<img>`, YouTube iframe) to avoid the thin horizontal line from inline baseline gaps during playback.
 
+## Cut flow (`src/components/rushes/`)
+
+A **flow** is a run of clips opened together in one scrolling grid. Opening a single clip opens a
+flow of one: `useShotDetection` always takes a list of paths, so a four-clip grid is the same code
+with four entries rather than a mode of its own. Selecting clips in the browser and pressing
+**Flow** opens them; the store keeps the run in `flow` and its first clip stays `selected`.
+
+The whole point is that scrolling a flow is indistinguishable from scrolling one clip. What that
+costs, and therefore what must not be broken:
+
+- **Every clip is published at once.** The caches of all clips are read in parallel and posted by a
+  single `setSegments`. A clip appearing mid-scroll would move what the user is looking at.
+- **Shot order is flow order, never a global sort.** Each clip has its own seconds, so sorting the
+  grid by `in` would interleave them. Merging reinserts the union at the place of the first shot it
+  absorbed instead of re-sorting.
+- **Every shot carries its `path`** (`Segment.path`), and every card, preview, thumbnail and export
+  target resolves through it. It is absent only in single-clip grids, where the view's path stands in.
+- **Editing stays inside one clip, selection does not.** A selection crosses the flow because it
+  feeds export; a merge groups by file and records one union per clip, since two shots from
+  different files share no bounds. Cut edits are stored per (clip, model); undo/redo snapshots the
+  whole table, so one Ctrl+Z undoes the last gesture wherever it happened.
+- **A timeline build carries one source file**, so a flow chains one call per clip: the first sets
+  the target, the rest append to the timeline it returned.
+- **Clips with no shots yet are named, not hidden** — the toolbar offers to cut only those, leaving
+  the already-cut ones untouched (`detect(only)`), because a silently missing clip reads as a grid
+  that simply ends early.
+
+`cutFlow.ts` derives where you are from the scroll offset and the grid geometry alone — no per-card
+observer, and one read per frame rather than one per scroll event. `CutFlowNav` owns that position
+and is **the only thing in the page that reacts to scrolling**: it names the clip currently at the
+top of the grid and jumps to any other. Keeping the index in `CutStudio` instead re-rendered the
+whole studio at every clip boundary, rebuilding the grid's several hundred cards exactly while
+scrolling. Its label must pass the clip name to `SelectValue` explicitly — Base UI renders the raw
+value otherwise, which showed the index instead of a name.
+
 ## `.netsu` container
 
 `core/netsu/`, façade `core/netsu.js`. The share and project format is a **SQLite container**, no longer a ZIP.
@@ -95,6 +130,47 @@ The renderer registry and the core manifest declare **exactly the same ids** (lo
 - **Benchmark submissions belong in advanced**: ×4 models trained on clean bicubic degradation have no effect on noise or compression and no video track record; presenting them next to production restorers misleads.
 - **Model-driven upscale settings** (`modelCaps` in `upscaleShared.ts`, mirroring the Python side): `native` marks the network's own factor (starred in the picker, with an explicit note that another factor is resampling, not better reconstruction), and `tuning: "onnx-window"` hides tile/pad/precision on a fixed-shape ONNX graph where only the overlap matters. A slider with no effect reads as a broken setting.
 - Before adding a model: probe its source (a script checks every network source in the manifest by real request), confirm its Python engine exists, and file it as advanced **by default** — the current selection only grows when a situation is not already covered.
+
+## Process hub output (`src/components/upscale/` + `core/imageOutput.js` + `python/upscaler/imgout.py`)
+
+Every op of the hub (upscale, interpolation, depth, cutout) writes one of three things: a video, a
+still image, or a numbered image sequence. One contract carries that choice from the settings panel
+down to the sidecars.
+
+- **A still source can only write an image.** `isStillSource` decides on the extension, and the
+  output selector is then locked on "Image" — a video codec has nothing to encode. **The animated
+  GIF is deliberately NOT a still**: it goes down the video path so it keeps its frames instead of
+  collapsing to its first one. Interpolation is disabled outright on a still-only selection: it
+  needs two neighbouring frames, and running it would produce a job that can only fail.
+- **A sequence always lands in its own folder**, and it is that **folder** that is imported to the
+  Media Pool — Resolve accepts an image sequence by its folder, never by a `%06d` pattern. Hundreds
+  of frames next to the videos would also make the output folder unusable.
+- **The ffmpeg image arguments are resolved ONCE, in the core** (`core/imageOutput.js`), and travel
+  in the request as `image_args`, exactly like `video_args` for the codecs. The Python side keeps an
+  identical fallback builder for direct CLI calls, and nothing else re-derives that mapping.
+- **PNG compression is lossless at every level** (only write time and file size change), so the
+  level is presented as a speed choice, not a quality one. **16-bit only means something when the op
+  produces more than 8 bits**: the depth map writes real 16-bit grey through cv2, everything else
+  stretches 8-bit (×257) and says so. JPEG carries no alpha, so the cutout never offers it.
+- **RTX VSR refuses an image output** instead of being swapped for another engine: its CLI only
+  writes MP4, and the user picked RTX on purpose.
+- **A chain forces `outputKind: 'video'` on every step**, including the last: each step feeds the
+  next one a file it must be able to read, and a frozen step setting must not break that.
+
+### Output naming (`outputNaming.ts`)
+
+- **One pattern names the whole batch**, resolved at launch: `{name}` `{op}` `{scale}` `{model}`
+  `{date}` `{n}`/`{nn}`/`{nnn}`. The default `{name}_{op}_{scale}` reproduces the file names the hub
+  produced when the suffix was hard-coded in the core, so the change is invisible until it is used.
+  An **empty token collapses its separator** — `clip_depth_` is a dirty name.
+- **A rename lives on the source, not in a side table** (`UpSource.outName`): it is set by renaming a
+  media in the selection tray, survives an op or page switch with the tray, and takes precedence over
+  the pattern. There is no per-media list of controls in the settings panel — the pattern covers the
+  batch, a rename covers the exception.
+- **Two sources landing on the same name are named out loud, before the run.** The second output
+  would silently overwrite the first, so the collision is reported with the offending name, marked on
+  the guilty rows of the tray, and repaired in one click by adding a counter to the pattern. The
+  comparison is **case-insensitive**, like the file system underneath.
 
 ## Roto Studio (`src/components/netsulab/roto/` + `core/roto.js` + `python/nrroto/`)
 

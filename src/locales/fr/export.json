@@ -12,10 +12,9 @@
   "editor": {
     "name": "Nom",
     "namePlaceholder": "Nom du profil",
-    "destination": "Destination",
-    "timeline": "Timeline",
     "folder": "Dossier",
     "folderPlaceholder": "Nom du dossier…",
+    "folderHint": "Dossier du Media Pool où sont rangées les coupes, au lieu de la racine.",
     "defaultFolder": "NetsuRush — Coupes",
     "existingFolders": "Dossiers existants",
     "mediaPoolFolders": "Dossiers du Media Pool",
@@ -134,7 +133,7 @@
   },
   "workflow": {
     "timeline": "Timeline",
-    "remux": "Copie des flux",
+    "remux": "Remux",
     "encode": "Réencodage"
   },
   "audioMode": {

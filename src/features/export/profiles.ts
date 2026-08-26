@@ -562,8 +562,9 @@ export function isExportCodecContainerCompatible(codec: ExportCodec, container: 
 // avec quinze codecs, une condition oubliée sortait un couple que ffmpeg refuse à l'exécution.
 //  - WebM ne mux qu'Opus (« Only ... Vorbis or Opus audio ... are supported for WebM ») ; « copy » y
 //    est exclu, la piste source est presque toujours AAC → l'échec serait la règle ;
-//  - MP4 ne porte ni FLAC ni PCM de façon lisible par les monteurs → MOV/MKV pour ces modes ;
-//  - MOV ne porte pas Opus.
+//  - MP4 ne porte pas le PCM de façon lisible par les monteurs → MOV/MKV pour ces modes ;
+//  - MOV ne mux ni Opus ni FLAC (« flac only supported in MP4 ») → le FLAC ne sort qu'en MKV, le MP4
+//    l'accepterait mais aucun logiciel de montage ne le lit.
 const AUDIO_CONTAINERS: Record<Exclude<ExportAudioMode, "none">, ExportContainer[]> = {
   copy: ["mp4", "mkv", "mov"],
   aac_128: ["mp4", "mkv", "mov"],
@@ -575,7 +576,7 @@ const AUDIO_CONTAINERS: Record<Exclude<ExportAudioMode, "none">, ExportContainer
   opus_192: ["mp4", "mkv", "webm"],
   mp3_192: ["mp4", "mkv", "mov"],
   mp3: ["mp4", "mkv", "mov"],
-  flac: ["mkv", "mov"],
+  flac: ["mkv"],
   alac: ["mp4", "mkv", "mov"],
   pcm16: ["mkv", "mov"],
   pcm24: ["mkv", "mov"],

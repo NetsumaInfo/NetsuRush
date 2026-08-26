@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { nr, type ProcessProgress, type ProcessResult } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { DEFAULT_INTERP, type InterpSettings } from "./processShared";
+import { DEFAULT_INTERP, interpTokens, type InterpSettings } from "./processShared";
+import { imageOutputPayload, isStillSource, outputKindFor } from "./imageOutput";
 import { useSharedProcSources, jobFor, makeRenderReviews, type FrameCompare, type RenderReview } from "./useProcSources";
 import i18n from "@/i18n";
 import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
@@ -12,7 +13,7 @@ const SETTINGS_KEY = "nr.netsulab.interpolate.settings";
 // Mode interpolation (RIFE) du hub. Même forme de retour que useUpscale → réutilise Sources/Preview.
 export function useInterpolate() {
   const base = useSharedProcSources();
-  const { sources, active, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders } = base;
+  const { sources, active, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders, setNamingTokens } = base;
 
   const [settings, setSettings] = useState<InterpSettings>(() => readPersistedObject(SETTINGS_KEY, DEFAULT_INTERP));
   const patch = useCallback((p: Partial<InterpSettings>) => setSettings((s) => {
@@ -20,6 +21,8 @@ export function useInterpolate() {
     writePersistedObject(SETTINGS_KEY, next);
     return next;
   }), []);
+
+  useEffect(() => { setNamingTokens(interpTokens(settings)); }, [settings, setNamingTokens]);
 
   const [compare, setCompare] = useState<FrameCompare | null>(null);
   const [testing, setTesting] = useState(false);
@@ -58,8 +61,13 @@ export function useInterpolate() {
     if (!dir) return;
     if (outputNamingProblem) { setErr(i18n.t(`upscale:errors.${outputNamingProblem}`)); return; }
 
-    const multi = sources.length > 1;
-    const anyRange = sources.some((s) => s.in != null);
+    // Une image fixe n'a rien à interpoler (il faut deux images voisines) : on ne la lance pas.
+    const targets = sources.filter((s) => !isStillSource(s));
+    const skipped = sources.length - targets.length;
+    if (!targets.length) { setErr(i18n.t("upscale:errors.interpolateNeedsVideo")); return; }
+
+    const multi = targets.length > 1;
+    const anyRange = targets.some((s) => s.in != null);
     if (!multi && !anyRange && scope === "scenes" && !scenes.some((_, i) => picked.has(i))) { setErr(i18n.t("upscale:errors.noShotSelected")); return; }
     if (!multi && !anyRange && scope === "range" && range[1] <= range[0]) { setErr(i18n.t("upscale:errors.invalidRange")); return; }
 
@@ -72,10 +80,10 @@ export function useInterpolate() {
     const reviews: RenderReview[] = [];
     let imported = 0; let failed = 0; let lastErr: string | null = null;
     try {
-      for (let i = 0; i < sources.length; i++) {
-        const src = sources[i];
+      for (let i = 0; i < targets.length; i++) {
+        const src = targets[i];
         const { whole, segments } = jobFor(src, { multi, scope, range, scenes, picked });
-        setBatch({ i, n: sources.length, name: src.name });
+        setBatch({ i, n: targets.length, name: src.name });
         setBusy({ file: src.name, pct: 0, done: 0, total: segments?.length || 1, phase: "model" });
         const r = await nr.processInterpolate({
           input: src.path,
@@ -83,6 +91,7 @@ export function useInterpolate() {
           targetFps: settings.targetFps ?? undefined, slowmo: settings.slowmo, dedup: settings.dedup,
           codec: settings.codec, quality: settings.quality, preset: settings.preset, bitDepth: settings.bitDepth, profile: settings.profile,
           audio: settings.audio, abr: settings.abr, ...processExportPayload(settings),
+          ...imageOutputPayload(settings, outputKindFor(settings, src)),
           outDir: dir, whole, segments,
           importBack, baseName: src.name.replace(/\.[^.]+$/, ""), outputName: outputNameFor(src),
         });
@@ -95,8 +104,10 @@ export function useInterpolate() {
         if (!r.ok) lastErr = r.error || i18n.t("upscale:errors.interpolateFailed");
       }
       recordRenders(reviews);
+      failed += skipped;
       setResult({ ok: outputs.length > 0, outputs, imported, failed, error: outputs.length ? null : lastErr });
       if (!outputs.length) setErr(lastErr);
+      else if (skipped) setErr(i18n.t("upscale:errors.interpolateSkippedStills", { count: skipped }));
     } catch (e) {
       setErr(i18n.t("upscale:errors.interpolateUnavailable", { err: String(e) }));
     } finally {

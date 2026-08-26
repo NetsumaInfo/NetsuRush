@@ -288,8 +288,7 @@
       "panelInstalled": "拡張機能をインストールしました。アプリケーションを再起動してください",
       "installPanel": "拡張機能をインストール",
       "panelHint": "アプリケーションを開き、ウィンドウ ▸ 拡張機能 ▸ NetsuRush を選択してください。",
-
-      "uxpHint": "Premiere Pro {{year}} は UXP を先に読み込みます。ウィンドウ ▸ 拡張機能 に表示されない場合は、再インストールしてアプリケーションを再起動してください。",
+      "uxpHint": "Premiere Pro {{year}} は UXP を先に読み込みます。ウィンドウ ▸ 拡張機能に出ない場合は入れ直して再起動してください。",
       "caches": "キャッシュ",
       "cacheFolders_one": "{{count}} 個のフォルダーを検出",
       "cacheFolders_other": "{{count}} 個のフォルダーを検出",
@@ -374,9 +373,7 @@
       "qeExperimental": "Premiere Pro には公式の消去 API がありません。この呼び出しはバージョンごとに変わる非公開のインターフェース（QE DOM）を使用します。失敗した場合は、アプリケーションを終了して「ディスクキャッシュ」から同じ処理ができます。",
       "compatAeft": "After Effects 2020（17.0）から 2026（26.x）に対応。24.3 以降は「ディスクを含むすべて」がディスクキャッシュも消去します。",
       "compatPpro": "Premiere Pro 2020（14.0）から 2025（25.x）で確認済み。",
-
       "uxpEra": "Premiere Pro {{year}}：Adobe は UXP に移行し、ExtendScript は保守されず 2026 年 9 月にサポートが終了します。この呼び出しは黙って失敗する可能性があります。",
-
       "uxpFallback": "上の「ディスクキャッシュ」は Adobe の API を一切使わずに同じ処理を行います。",
       "hygiene": "プロジェクトの整理",
       "hygieneHint": "開いているプロジェクトに作用し、アプリケーション内で取り消せます。",

@@ -3,12 +3,18 @@ import type { DetectModel } from "@/lib/bridge";
 import { fmtTime } from "@/lib/utils";
 
 // Un plan détecté : bornes en secondes (in/out) et, si dispo, en frames source (inFrame/outFrame).
+//
+// `path` = fichier source du plan. Absent quand toute la grille tient dans UN fichier (le cas des
+// vues qui n'ouvrent qu'un rush) : l'appelant retombe alors sur le chemin de la vue. Il est
+// TOUJOURS renseigné dès qu'une grille enchaîne plusieurs rushs — un plan ne sait plus d'où il
+// vient autrement, et l'aperçu comme l'export visent le mauvais fichier.
 export interface Segment {
   id: number;
   in: number;
   out: number;
   inFrame?: number;
   outFrame?: number;
+  path?: string;
 }
 
 // Compteur d'identifiants de plans, partagé à l'échelle du module (jamais réinitialisé : un id
@@ -63,16 +69,36 @@ const GRID_PAD = 12;          // pl-1 pr-2 de la zone défilante
 const MIN_CELL = 120;
 const MIN_CELL_NARROW = 96;   // vue étroite : on accepte plus petit pour garder des colonnes
 
+// Bornes du réglage de densité — les MÊMES que celles que le store applique à `cutCols`.
+export const COLS_MIN = 2;
+export const COLS_MAX = 8;
+
 export function gridMetrics(width: number, cols: number, narrow = false) {
-  if (!width) return { cell: 0, actualCols: cols };
+  if (!width) return { cell: 0, actualCols: cols, maxCols: COLS_MAX };
   const inner = width - GRID_PAD;
   const floor = narrow ? MIN_CELL_NARROW : MIN_CELL;
   const cellFor = (n: number) => (inner - (n - 1) * GRID_GAP) / n;
+  // Widest column count this width can hold without going under the cell floor. The +/- needs it:
+  // above it, raising the setting changes nothing on screen.
+  let maxCols = 1;
+  while (maxCols < COLS_MAX && cellFor(maxCols + 1) >= floor) maxCols++;
   let actualCols = Math.max(1, Math.floor(cols));
   while (actualCols > 1 && cellFor(actualCols) < floor) actualCols--;
   const cell = cellFor(actualCols);
-  return { cell, actualCols };
+  return { cell, actualCols, maxCols };
 }
+
+// Density steps drive what is ON SCREEN, not the remembered setting. The +/- used to write `cols`
+// while the grid renders `actualCols`, which `gridMetrics` shaves down to hold MIN_CELL: in a
+// pinned window the setting could read 6 while the grid showed 3, so the first three clicks on "−"
+// moved nothing. Stepping from the real count makes every click land.
+export function stepCols(actualCols: number, d: number, maxCols = COLS_MAX): number {
+  const ceiling = Math.min(COLS_MAX, Math.max(1, maxCols));
+  return Math.min(ceiling, Math.max(COLS_MIN, Math.round(actualCols) + d));
+}
+// "−" = fewer columns = bigger thumbnails; "+" = more columns, capped by what the width can hold.
+export const canFewerCols = (actualCols: number) => actualCols > COLS_MIN;
+export const canMoreCols = (actualCols: number, maxCols: number) => actualCols < Math.min(COLS_MAX, maxCols);
 
 // Style du CONTENEUR de grille : colonnes + hauteur de rangée publiée en variable CSS. Les cartes
 // (`.nr-grid-card`) lisent `--nr-cell-h` par héritage, donc changer de densité met à jour le

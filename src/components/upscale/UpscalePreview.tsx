@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { ScanSearch, ImagePlay, AlertTriangle, FileVideo, FileOutput, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ScanSearch, ImagePlay, AlertTriangle, FileVideo, FileOutput, ChevronLeft, ChevronRight, Check, Image as ImageIcon } from "lucide-react";
 import { useApp } from "@/store";
+import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Spinner } from "@/components/ui/spinner";
@@ -10,6 +11,7 @@ import { nativePlayer } from "@/lib/nativePlayer";
 import { LazyThumb } from "@/components/rushes/LazyThumb";
 import { warmGenerateThumbs, warmResolveThumbs } from "@/lib/thumbCache";
 import { UpscalePlayer } from "./UpscalePlayer";
+import { isStillSource } from "./imageOutput";
 import { UpscaleCompare } from "./UpscaleCompare";
 import { RenderedReview } from "./RenderedReview";
 import type { FrameCompare, ProcController } from "./useProcSources";
@@ -53,7 +55,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
   // Quand la dernière source est désélectionnée, l'état vide React ne suffit donc
   // pas : on libère explicitement le média et on masque aussi cette surface native.
   useEffect(() => {
-    if (active) return;
+    if (active && !isStillSource(active)) return;
     void nativePlayer.stop().catch(() => {});
     void nativePlayer.hide().catch(() => {});
   }, [active]);
@@ -70,6 +72,9 @@ export function UpscalePreview({ up }: { up: ProcController }) {
   const multi = sources.length > 1;
   const idx = Math.min(activeIdx, sources.length - 1);
   const reviewActive = renderReviewOpen && !!activeRender;
+  // Image fixe : ni durée, ni plage, ni plans — l'aperçu est l'image elle-même et le test porte
+  // forcément sur elle (t = 0).
+  const still = isStillSource(active);
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-y-auto p-5">
@@ -84,7 +89,12 @@ export function UpscalePreview({ up }: { up: ProcController }) {
               <TooltipContent>{t("preview.prevClip")}</TooltipContent>
             </Tooltip>
           )}
-          <FileVideo className="h-4 w-4 shrink-0 text-primary" />
+          {still
+            ? <Tooltip>
+                <TooltipTrigger render={<ImageIcon className="h-4 w-4 shrink-0 text-primary" />} />
+                <TooltipContent>{t("preview.stillSource")}</TooltipContent>
+              </Tooltip>
+            : <FileVideo className="h-4 w-4 shrink-0 text-primary" />}
           <Tooltip>
             <TooltipTrigger render={<span className="truncate font-medium">{active.name}</span>} />
             <TooltipContent>{active.path}</TooltipContent>
@@ -102,14 +112,14 @@ export function UpscalePreview({ up }: { up: ProcController }) {
         </div>
         {/* Portée de la source APERÇUE (marche en multi : chaque source se rogne indépendamment).
             Entier = clip complet · Plage = rogner in/out (persisté sur la source) · Plans = par plan (source unique). */}
-        <ToggleGroup value={[trimmed && scope === "whole" ? "range" : scope]} onValueChange={(v) => {
+        {!still && <ToggleGroup value={[trimmed && scope === "whole" ? "range" : scope]} onValueChange={(v) => {
           const s = v[0] as UpScope; if (!s) return;
           setScope(s);
           if (s === "range") setSourceRange(idx, range[0], range[1]);     // fige le rognage courant
           else setSourceRange(idx, null, null);                          // Entier/Plans → dérogne la source
         }}>
           {SCOPES.filter((s) => s !== "scenes" || single).map((s) => <ToggleGroupItem key={s} value={s}>{t(`scope.${s}`)}</ToggleGroupItem>)}
-        </ToggleGroup>
+        </ToggleGroup>}
         {!reviewActive && renderedForActive.length > 0 && (
           <Button variant="outline" size="sm" onClick={openRenderReview}>
             <FileOutput className="size-4 text-[var(--color-ok)]" /> {t("review.open", { count: renderedForActive.length })}
@@ -139,6 +149,11 @@ export function UpscalePreview({ up }: { up: ProcController }) {
             onSelect={selectRender} onClose={closeRenderReview} onCompare={setRenderCompare}
           />
         );
+        if (still) return (
+          <div className="flex min-h-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-black/40 p-2">
+            <img src={nr.mediaUrl(active.path)} alt={active.name} className="max-h-[52vh] max-w-full object-contain" />
+          </div>
+        );
         return (
           <UpscalePlayer
             key={activeKey}
@@ -153,10 +168,11 @@ export function UpscalePreview({ up }: { up: ProcController }) {
 
       {/* Test d'upscale sur la frame courante */}
       {!reviewActive && <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => testFrame(cur)} disabled={testing}>
+        <Button variant="outline" size="sm" onClick={() => testFrame(still ? 0 : cur)} disabled={testing}>
           {testing ? <Spinner className="h-4 w-4" /> : <ImagePlay className="h-4 w-4" />}
           {testing ? t("preview.testing") : compare
             ? t("preview.testAnotherModel")
+            : still ? t("preview.testStill")
             : t("preview.testOnImage", { time: fmt(cur) })}
         </Button>
         {compare && <span className="text-xs text-muted-foreground">{t("preview.wheelZoom")}</span>}
@@ -169,7 +185,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
 
       {/* Sélection des plans détectés (scope = scenes) — grille avec vignettes. Masqué pour un plan de
           timeline (sa portée est déjà fixée par le cut). */}
-      {single && scope === "scenes" && (
+      {single && !still && scope === "scenes" && (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={detectScenes} disabled={detecting}>

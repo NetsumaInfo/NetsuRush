@@ -1,10 +1,7 @@
 {
   "img": "img",
+  "resetParams": "Restablecer los ajustes",
   "cancel": "Cancelar",
-  "compare": {
-    "before": "Antes",
-    "after": "Después"
-  },
   "object": {
     "name": "Objeto {{n}}"
   },
@@ -102,13 +99,22 @@
     "bgcolorHint": "Fotograma compuesto sobre un color plano (control del recorte)"
   },
   "post": {
-    "grow": "Dilatar / erosionar",
-    "feather": "Suavizar el borde",
     "holes": "Tapar los huecos",
+    "holesHint": "Rellena los huecos dentro de la máscara de hasta N × N píxeles de superficie.",
     "dots": "Quitar el polvillo",
+    "dotsHint": "Borra las manchas aisladas fuera del sujeto de hasta N × N píxeles de superficie.",
+    "border": "Rebabas del encuadre",
+    "borderHint": "Limpia los N píxeles del borde de la imagen, a menudo sucios (viñeteado, compresión).",
+    "grow": "Dilatar / erosionar",
+    "growHint": "Desplaza el borde de la máscara hacia fuera (+) o hacia dentro (−), en píxeles.",
     "smooth": "Alisar el contorno",
-    "border": "Corregir los bordes de imagen",
+    "smoothHint": "Redondea los escalones del contorno sin ensanchar el borde ni aplastar el degradado.",
+    "harden": "Endurecer el alfa",
+    "hardenHint": "Elimina el halo semitransparente: el interior se vuelve opaco y el fondo desaparece. Más alto, borde más duro.",
+    "feather": "Suavizar el borde",
+    "featherHint": "Extiende el borde de la máscara en degradado sobre el radio indicado, en píxeles.",
     "gamma": "Densidad (gamma)",
+    "gammaHint": "Densifica (> 1) o aligera (< 1) todo el alfa de una vez. 1 = neutro.",
     "resetTip": "Doble clic = reiniciar"
   },
   "remove": {

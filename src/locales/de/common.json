@@ -53,7 +53,8 @@
   "fileType": {
     "video": "Video",
     "image": "Bild",
-    "media": "Medien"
+    "media": "Medien",
+    "visual": "Videos und Bilder"
   },
   "window": {
     "reference": "Referenz",

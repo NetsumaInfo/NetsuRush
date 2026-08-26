@@ -12,10 +12,9 @@
   "editor": {
     "name": "Name",
     "namePlaceholder": "Profilname",
-    "destination": "Ziel",
-    "timeline": "Timeline",
     "folder": "Ordner",
     "folderPlaceholder": "Ordnername…",
+    "folderHint": "Media-Pool-Ordner für die Schnitte statt des Stammverzeichnisses.",
     "defaultFolder": "NetsuRush — Schnitte",
     "existingFolders": "Vorhandene Ordner",
     "mediaPoolFolders": "Media-Pool-Ordner",

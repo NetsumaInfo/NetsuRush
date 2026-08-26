@@ -17,7 +17,7 @@
     "realLower": "real",
     "animeLower": "anime",
     "download": "Laden",
-    "hint": "Real: YuNet + SFace (~40 MB, permissiv). Anime: imgutils + CCIP (~120 MB, werden beim 1. Einsatz geladen). Auch unter Einstellungen › Modelle."
+    "hint": "Realfilm: YuNet + SFace (~40 MB). Anime: CCIP (~120 MB). Auch unter Einstellungen › Modelle."
   },
   "faceIndexPicker": {
     "title": "Rohmaterial für Gesichts-Index wählen",
@@ -53,7 +53,7 @@
       "none": "nicht indiziert"
     },
     "detail": "Detail:",
-    "detailHint": "Analysierte Bilder je Einstellung. Dort gesetzt, wo sich am meisten ändert, nie an den Rändern (Blenden, Schwarz). Eine lange Einstellung bekommt eines mehr.",
+    "detailHint": "Analysierte Frames pro Shot. Höher: die Suche findet mehr, das Indexieren dauert länger.",
     "parallel": "Parallel",
     "parallelHint": "Mehrere Clips gleichzeitig verarbeiten, so viele wie der freie VRAM zulässt",
     "reindex": "Neu indizieren",
@@ -180,7 +180,7 @@
   },
   "faceRefPicker": {
     "title": "Suche nach Gesicht",
-    "hint": "Ein oder mehrere Fotos des Charakters hinzufügen, dann das gesuchte Gesicht anklicken. Mehrere Gesichter desselben Charakters = robustere Suche.",
+    "hint": "Füge Fotos der Figur hinzu und klicke dann das gesuchte Gesicht an. Mehr Gesichter, sichereres Ergebnis.",
     "addImage": "Bild hinzufügen",
     "clearImages": "Leeren",
     "facesChosen": "Ausgewählte Gesichter: {{count}}",

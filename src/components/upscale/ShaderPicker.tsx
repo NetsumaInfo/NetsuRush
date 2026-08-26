@@ -42,7 +42,12 @@ export function ShaderPicker({ value, onChange, disabled }: {
           {items.map((m) => (
             <Tooltip key={m.id}>
               <TooltipTrigger render={<SelectItem value={m.id}>{m.label}</SelectItem>} />
-              <TooltipContent side="right">{hintOf(m)}</TooltipContent>
+              {/* Côté VERTICAL obligatoire : le panneau touche le bord droit de la fenêtre, donc un
+                  `side="right"` bascule à gauche — droit sur la vidéo. mpv rend dans une fenêtre
+                  Win32 enfant POSÉE AU-DESSUS de WebView2 (`src-tauri/src/player/mpv_window.rs`) :
+                  une fenêtre native peint par-dessus le HTML quel que soit le z-index, l'infobulle
+                  disparaissait derrière l'image. Haut/bas ne bascule qu'en haut/bas, jamais dedans. */}
+              <TooltipContent>{hintOf(m)}</TooltipContent>
             </Tooltip>
           ))}
         </SelectContent>

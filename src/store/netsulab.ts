@@ -52,6 +52,9 @@ export interface NetsulabSlice {
   nlToggleSource: (s: UpSource) => void;
   // Ajout en lot dédupliqué par clé (glisser-déposer, « tout ajouter ») ; la dernière ajoutée devient active.
   nlAddSources: (items: UpSource[]) => void;
+  // Renomme la SORTIE d'un média du bac (nom exact, sans extension). Vide/null = revenir au motif
+  // partagé. Le nom vit sur la source : il survit au changement d'op et de page.
+  nlRenameSource: (key: string, name: string | null) => void;
   // Retrait ciblé depuis le bac (croix sur une puce).
   nlRemoveSource: (key: string) => void;
   // Retrait EN LOT (désélectionner tous les plans d'une timeline d'un coup — une seule maj du store).
@@ -77,7 +80,7 @@ export const createNetsulabSlice: StateCreator<AppState, [], [], NetsulabSlice> 
     // null/null (ou plage vide) → efface le rognage (source = clip entier). uid conservé
     // (identité d'aperçu stable : rogner/dérogner ne recharge pas le lecteur).
     nlSources[idx] = (inS == null || outS == null || outS <= inS)
-      ? { name: src.name, path: src.path, uid: src.uid }
+      ? { name: src.name, path: src.path, uid: src.uid, outName: src.outName }
       : { ...src, in: inS, out: outS };
     return { nlSources };
   }),
@@ -115,6 +118,20 @@ export const createNetsulabSlice: StateCreator<AppState, [], [], NetsulabSlice> 
     if (!add.length) return {};
     const nlSources = [...s.nlSources, ...add];
     return { nlSources, nlActiveIdx: nlSources.length - 1 };
+  }),
+
+  nlRenameSource: (key, name) => set((s) => {
+    const i = s.nlSources.findIndex((x) => nlSrcKey(x) === key);
+    if (i < 0) return {};
+    const trimmed = (name || "").trim();
+    const src = s.nlSources[i];
+    if ((src.outName || "") === trimmed) return {};
+    const nlSources = s.nlSources.slice();
+    const next: UpSource = { ...src };
+    if (trimmed) next.outName = trimmed;
+    else delete next.outName;
+    nlSources[i] = next;
+    return { nlSources };
   }),
 
   nlRemoveSource: (key) => set((s) => {

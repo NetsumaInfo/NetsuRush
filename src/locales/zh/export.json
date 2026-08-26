@@ -12,10 +12,9 @@
   "editor": {
     "name": "名称",
     "namePlaceholder": "预设名称",
-    "destination": "目标位置",
-    "timeline": "时间线",
     "folder": "文件夹",
     "folderPlaceholder": "文件夹名称…",
+    "folderHint": "存放剪辑片段的 Media Pool 文件夹，而不是根目录。",
     "defaultFolder": "NetsuRush — 剪切",
     "existingFolders": "已有文件夹",
     "mediaPoolFolders": "Media Pool 文件夹",
@@ -134,7 +133,7 @@
   },
   "workflow": {
     "timeline": "时间线",
-    "remux": "重新封装",
+    "remux": "Remux",
     "encode": "重新编码"
   },
   "audioMode": {

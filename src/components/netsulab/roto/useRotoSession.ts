@@ -3,7 +3,7 @@ import { nr, type RotoProgress } from "@/lib/bridge";
 import type { UpSource } from "@/components/upscale/upscaleShared";
 import {
   type RotoMatteParams, type RotoObject, type RotoPoint, type RotoPostState,
-  type RotoRemoveParams, type RotoViewState,
+  type RotoRemoveParams, type RotoViewMode, type RotoViewState,
   DEFAULT_MATTE_PARAMS, DEFAULT_POST, DEFAULT_REMOVE_PARAMS, DEFAULT_VIEW, SAM_MODELS,
 } from "./rotoShared";
 import { useApp } from "@/store";
@@ -47,6 +47,9 @@ export function useRotoSession(active: UpSource | null) {
   const [testSrc, setTestSrc] = useState<string | null>(null);      // aperçu d'un test sur 1 image (après)
   const [testBefore, setTestBefore] = useState<string | null>(null);// image source (avant) → comparateur
   const [testLabel, setTestLabel] = useState<string | null>(null);
+  // Mode d'affichage dans lequel l'aperçu de test a été rendu : c'est lui qui dit si l'image porte
+  // une transparence à lire sur damier (`alpha`) ou si elle est opaque (édition, matte, fond).
+  const [testMode, setTestMode] = useState<RotoViewMode | null>(null);
   // Point sélectionné (table OU glisser sur le viewer) : {frame, obj, index parmi l'objet}. Lueur + drag.
   const [selectedPoint, setSelectedPoint] = useState<{ f: number; obj: number; index: number } | null>(null);
   const [removeParams, setRemoveParams] = useState<RotoRemoveParams>(DEFAULT_REMOVE_PARAMS);
@@ -79,6 +82,10 @@ export function useRotoSession(active: UpSource | null) {
   const liveDirRef = useRef("mattes/union");
   const orderRef = useRef<number[]>([]);   // frames des points dans l'ordre de pose (undo local)
   const postTimer = useRef(0);
+  const postSeq = useRef(0);
+  // Nature de l'aperçu de test affiché : « refine » = alpha, donc rejouable avec un autre
+  // post-traitement ; « remove » = image inpaintée, que la retouche du masque ne touche pas.
+  const testKindRef = useRef<"refine" | "remove" | null>(null);
   const previewTimer = useRef(0);
 
   // Modèles réellement installés → n'afficher que ceux-là (SAM + moteurs matte/suppression).
@@ -105,6 +112,7 @@ export function useRotoSession(active: UpSource | null) {
     setDims(null); setFramesDir(null); setFps(0); setFrame(0); setInF(null); setOutF(null);
     setPointsByFrame({}); setOverlaySrc(null); setPreviewSrc(null); setOverlayFull(false);
     setWork(null); setLiveMatte(null); setTestSrc(null); setTestBefore(null); setTestLabel(null);
+    setTestMode(null); testKindRef.current = null;
     setSelectedPoint(null);
     setTracked(false); setDeduped(false); setRefined(false); setUseRefined(true);
     setErr(null); setNote(null); setPost(DEFAULT_POST); setView(DEFAULT_VIEW);
@@ -281,18 +289,38 @@ export function useRotoSession(active: UpSource | null) {
     } catch (e) { fail(e); } finally { setBusy(null); }
   }, []);
 
-  // Post-traitement non destructif : push debouncé au backend puis re-fetch de l'overlay.
+  // Re-fetch de CE QUI EST À L'ÉCRAN après un changement de rendu (retouche du masque, mode
+  // d'affichage) : le comparateur d'un test de matte fin quand il occupe le centre, l'overlay du
+  // viewer sinon. Rafraîchir l'overlay SOUS le comparateur ne montrerait rien tout en coûtant un
+  // rendu plein cadre par cran de slider ; `clearTest` le remet à jour à la fermeture.
+  // `alive` jette une réponse dépassée : le daemon peut mettre plus longtemps que le debounce, et
+  // l'image d'un réglage abandonné s'afficherait par-dessus celle du réglage courant.
+  const refreshShown = useCallback((alive: () => boolean) => {
+    if (busyRef.current || !alive()) return;
+    if (testKindRef.current === "refine") {
+      nr.rotoTestPreview().then((r) => {
+        if (r.ok && r.preview && alive()) { setTestSrc(r.preview); setTestMode(r.mode ?? null); }
+      }).catch(() => {});
+      return;
+    }
+    if (testKindRef.current) return;
+    nr.rotoMask({ frame }).then((r) => {
+      if (r.ok && alive()) { setOverlaySrc(r.mask || null); setOverlayFull(!!(r.full && r.mask)); }
+    }).catch(() => {});
+  }, [frame]);
+
+  // Post-traitement non destructif : push debouncé au backend, puis rafraîchissement de l'écran.
   const updatePost = useCallback((patch: Partial<RotoPostState>) => {
     const next = { ...post, ...patch };
     setPost(next);
     clearTimeout(postTimer.current);
+    const seq = ++postSeq.current;
     postTimer.current = window.setTimeout(() => {
-      nr.rotoSetPost(next).then(() => {
-        if (busyRef.current) return;
-        nr.rotoMask({ frame }).then((r) => { if (r.ok) setOverlaySrc(r.mask || null); }).catch(() => {});
-      }).catch(() => {});
+      nr.rotoSetPost(next)
+        .then(() => refreshShown(() => seq === postSeq.current))
+        .catch(() => {});
     }, 250);
-  }, [frame, post]);
+  }, [frame, post, refreshShown]);
 
   const addObject = useCallback(() => {
     const id = Math.max(...objects.map((o) => o.id)) + 1;
@@ -327,16 +355,13 @@ export function useRotoSession(active: UpSource | null) {
       const next = { ...cur, ...patch };
       const backend = patch.mode !== undefined || patch.outline !== undefined || patch.bg !== undefined;
       if (backend) {
-        void nr.rotoSetView({ mode: next.mode, outline: next.outline, bg: next.bg }).then(() => {
-          if (busyRef.current) return;
-          nr.rotoMask({ frame }).then((r) => {
-            if (r.ok) { setOverlaySrc(r.mask || null); setOverlayFull(!!(r.full && r.mask)); }
-          }).catch(() => {});
-        }).catch(() => {});
+        void nr.rotoSetView({ mode: next.mode, outline: next.outline, bg: next.bg })
+          .then(() => refreshShown(() => true))
+          .catch(() => {});
       }
       return next;
     });
-  }, [frame]);
+  }, [refreshShown]);
 
   // Retire UN point précis (table des points) — le backend rejoue le reste.
   const removePoint = useCallback(async (f: number, obj: number, index: number) => {
@@ -453,22 +478,36 @@ export function useRotoSession(active: UpSource | null) {
   // TEST sur l'image courante : le moteur tourne sur cette seule image (fenêtre courte pour la
   // suppression — contexte temporel du modèle vidéo) et renvoie un aperçu, RIEN n'est écrit.
   // Capture l'aperçu (après) ET l'image source (avant, /media) de la frame testée → comparateur.
-  const onPreview = useCallback((label: string, beforeFrame: number) => (r: { preview?: string }) => {
-    if (r.preview) {
-      setTestSrc(r.preview); setTestLabel(label); setNote(null);
-      setTestBefore(framesDirRef.current
-        ? nr.mediaUrl(`${framesDirRef.current}/${String(beforeFrame).padStart(5, "0")}.jpg`) : null);
-    }
-  }, []);
+  const onPreview = useCallback((kind: "refine" | "remove", label: string, beforeFrame: number) =>
+    (r: { preview?: string; mode?: RotoViewMode }) => {
+      if (r.preview) {
+        testKindRef.current = kind;
+        // Une suppression d'objet rend une image inpaintée OPAQUE : pas de mode d'affichage, donc
+        // pas de damier — le matte fin, lui, sort dans la vue courante.
+        setTestMode(kind === "refine" ? (r.mode ?? "edit") : null);
+        setTestSrc(r.preview); setTestLabel(label); setNote(null);
+        setTestBefore(framesDirRef.current
+          ? nr.mediaUrl(`${framesDirRef.current}/${String(beforeFrame).padStart(5, "0")}.jpg`) : null);
+      }
+    }, []);
   const testRefine = useCallback((engine: string) =>
     action(() => nr.rotoRefine({ engine, warmup: matteParams.warmup, maxSize: matteParams.maxSize, frame }),
       "Test matte (1 image)",
-      onPreview(i18n.t("roto:test.matteImage", { n: frame + 1 }), frame)),
+      onPreview("refine", i18n.t("roto:test.matteImage", { n: frame + 1 }), frame)),
     [action, frame, matteParams.maxSize, matteParams.warmup, onPreview]);
   const testRemove = useCallback((engine: string) =>
     action(() => nr.rotoObjectRemove({ engine, ...removeParams, frame }), "Test suppression (1 image)",
-      onPreview(i18n.t("roto:test.removeImage", { n: frame + 1 }), frame)), [action, frame, removeParams, onPreview]);
-  const clearTest = useCallback(() => { setTestSrc(null); setTestBefore(null); setTestLabel(null); }, []);
+      onPreview("remove", i18n.t("roto:test.removeImage", { n: frame + 1 }), frame)), [action, frame, removeParams, onPreview]);
+  // Fermeture du comparateur : le viewer reprend la place, avec un overlay qui peut dater d'avant
+  // les retouches faites pendant que le test l'occupait.
+  const clearTest = useCallback(() => {
+    setTestSrc(null); setTestBefore(null); setTestLabel(null); setTestMode(null);
+    testKindRef.current = null;
+    if (busyRef.current) return;
+    nr.rotoMask({ frame }).then((r) => {
+      if (r.ok) { setOverlaySrc(r.mask || null); setOverlayFull(!!(r.full && r.mask)); }
+    }).catch(() => {});
+  }, [frame]);
 
   return {
     dims, framesDir, fps, frame, setFrame,
@@ -486,7 +525,7 @@ export function useRotoSession(active: UpSource | null) {
     post, updatePost,
     view, updateView,
     tracked, busy, prog, err, note,
-    liveMatte, testSrc, testBefore, testLabel, clearTest,
+    liveMatte, testSrc, testBefore, testLabel, testMode, clearTest,
     removeParams, setRemoveParams,
     matteParams, setMatteParams, refined, useRefined, toggleRefined,
     addPoint, previewPoint, clearPreview, undoPoint, clearPoints, removePoint,

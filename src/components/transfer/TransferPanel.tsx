@@ -1,6 +1,6 @@
 // NetsuBridge — transfert d'une timeline d'un logiciel de montage vers un autre. La page choisit un
 // couple, montre ce qui a été lu, puis délègue lecture et montage au core (core/transfer/).
-import { Suspense, lazy, useCallback } from "react";
+import { Suspense, lazy, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, ArrowLeftRight, CheckCircle2, FolderOpen, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,10 +33,17 @@ export function TransferPanel() {
     timelineName, setTimelineName, target, setTarget,
     name, setName, mode, setMode, videoOnly, setVideoOnly,
     richAe, setRichAe, setAeOptions, needsDir,
+    upscale, setUpscale, outDir, setOutDir,
     preview, previewBusy, busy, progress, result, run,
   } = ctl;
 
   const setOptions = useCallback((opts: Parameters<typeof setAeOptions>[0]) => setAeOptions(opts), [setAeOptions]);
+  // L'upscale et le dossier de sortie sont les MÊMES des deux côtés de l'option : la page les porte
+  // pour les deux voies, sinon l'ouvrir jetait ce qui venait d'être réglé juste au-dessus.
+  const aeHost = useMemo(
+    () => ({ upscale, setUpscale, outDir, setOutDir }),
+    [upscale, setUpscale, outDir, setOutDir],
+  );
   const canRun = !!timelineName && !busy && !needsDir && (advanced || mode !== "append" || !!target);
 
   return (
@@ -164,9 +171,11 @@ export function TransferPanel() {
 
       <TransferPreviewCard preview={preview} busy={previewBusy} />
 
-      {rich && richAe && (
-        <Suspense fallback={<Card className="block p-6"><Spinner className="size-4" /></Card>}>
-          <TransferAeOptions onChange={setOptions} />
+      {/* Monté dès que le couple expose le pipeline avancé, affiché seulement quand l'option est
+          allumée : le démonter à chaque bascule rendait tous ses réglages aux défauts. */}
+      {rich && (
+        <Suspense fallback={richAe ? <Card className="block p-6"><Spinner className="size-4" /></Card> : null}>
+          <TransferAeOptions onChange={setOptions} host={aeHost} show={richAe} />
         </Suspense>
       )}
 

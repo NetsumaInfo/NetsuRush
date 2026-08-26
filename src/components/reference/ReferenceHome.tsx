@@ -23,6 +23,7 @@ import {
 import { ProjectThumb, SceneThumb } from "./SceneThumb";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useBoard } from "./useReferenceBoard";
+import { useDragEndReset } from "@/lib/dropZone";
 
 const RTF = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
 function relDate(ts: number): string {
@@ -327,6 +328,9 @@ export function ReferenceHome({
   const [recent, setRecent] = useState<RefSceneMeta[]>([]);
   const [projects, setProjects] = useState<NetsuRecent[]>([]);
   const [over, setOver] = useState(false);
+  // Le liseré s'éteint à la FIN du glissé, où qu'elle survienne : `dragleave` ne suffit pas (il tire
+  // aussi vers les enfants, et jamais quand le curseur quitte la fenêtre en survolant l'un d'eux).
+  useDragEndReset(() => setOver(false));
   // L'accueil n'a pas de barre d'outils : sans ce relais, une ouverture de projet ratée (dépôt,
   // carte récente) ne dirait rien du tout — la notice partait dans un store que personne n'affiche.
   const notice = useBoard((s) => s.notice);

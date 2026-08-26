@@ -333,11 +333,12 @@ export function FolderEditor({
             <DialogTitle>{editing ? tr("folder.editTitle") : tr("folder.new")}</DialogTitle>
           </DialogHeader>
 
-          {/* `overflow-y-auto` force l'autre axe à `auto` : le conteneur rogne donc AUSSI à gauche et
-              à droite. Sans marge intérieure, le contenu est collé à x=0 et tout ce qui déborde de sa
-              boîte — contour de la vignette, anneau de focus d'un champ — était coupé net. On ouvre
-              4 px de chaque côté et on les reprend en marge négative : rien ne bouge à l'écran. */}
-          <div className="-mx-1 min-h-0 space-y-4 overflow-y-auto overflow-x-hidden px-1">
+          {/* `overflow-y-auto` rogne sur les QUATRE côtés (l'autre axe passe à `auto`). Sans marge
+              intérieure, le contenu est collé aux bords et tout ce qui déborde de sa boîte — contour
+              de la vignette, anneau de focus d'un champ — était coupé net : en haut pour le champ de
+              nom, qui est le premier enfant. On ouvre 4 px sur le pourtour et on les reprend en marge
+              négative : rien ne bouge à l'écran. */}
+          <div className="-m-1 min-h-0 space-y-4 overflow-y-auto overflow-x-hidden p-1">
           <div className="flex items-center gap-3">
             {/* Le contour est dessiné DANS la vignette (`outline` à décalage négatif) et non par une
                 boîte parente : une bordure aurait mangé 1 px de la vignette (box-sizing) et un

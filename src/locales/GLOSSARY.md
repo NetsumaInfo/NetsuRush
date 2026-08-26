@@ -23,6 +23,7 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
 | rush (métrage source) | footage / clip | clip / metraje | Rohmaterial / Clip | 素材 / クリップ | 素材 |
 | plan (unité de découpe) | shot | plano / toma | Einstellung / Shot | ショット / カット | 镜头 |
 | derush (workflow) | logging | visionado / clasificación | Sichtung | 素材整理 | 素材整理 |
+| flux (rushs enchaînés dans une grille) | flow | flujo | Abfolge | 連続表示 | 连续浏览 |
 | découpe / coupe | cut | corte | Schnitt | カット | 剪切 / 切分 |
 | découper (verbe) | to cut / split | cortar / dividir | schneiden | カットする | 切分 |
 | timeline | timeline | timeline / línea de tiempo | Timeline | タイムライン | 时间线 |
@@ -53,6 +54,7 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
 | fondu | dissolve / fade | fundido | Blende | ディゾルブ | 溶解 |
 | rendu | render | renderizado | Rendern | レンダリング | 渲染 |
 | réencoder | re-encode | recodificar | neu kodieren | 再エンコード | 重新编码 |
+| remux (copie des flux, sans réencodage) | Remux | Remux | Remux | Remux | Remux |
 | lossless (sans perte) | lossless | sin pérdidas | verlustfrei | ロスレス | 无损 |
 | IA | AI | IA | KI | AI | AI |
 | dossier | folder | carpeta | Ordner | フォルダー | 文件夹 |
@@ -68,6 +70,6 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
 - **Services** : Discord, Convex, YouTube, Hugging Face.
 - **Modèles / moteurs** : SigLIP2, Real-ESRGAN, Real-CUGAN, TransNetV2, OmniShotCut, Whisper,
   WhisperX, Parakeet, Canary, Silero, NOVA-VAD, SAM2, MatAnyone, RIFE, Depth Anything, BiRefNet,
-  YuNet, SFace, MiniMax, Wan, ArtCNN, Anime4K.
-- **Formats / techno** : HEVC, H.264, mp4, mkv, SRT, VTT, FCPXML, ZXP, CEP, NVENC, ffmpeg, GPU, VRAM,
+  YuNet, SFace, MiniMax, Wan, ArtCNN.
+- **Formats / techno** : Remux, HEVC, H.264, mp4, mkv, SRT, VTT, FCPXML, ZXP, CEP, NVENC, ffmpeg, GPU, VRAM,
   RAM, FPS, ASR, VAD, HSB/RGB/hex.

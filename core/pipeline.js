@@ -52,8 +52,11 @@ async function runPipeline(event, opts) {
       } } };
 
       let r;
+      // Une chaîne enchaîne des fichiers VIDÉO : chaque étape doit rendre un fichier lisible par la
+      // suivante, donc jamais une image ni une séquence, même si les réglages figés d'une étape en
+      // portent un.
       const common = { input: cur, outDir: dir, importBack: last ? !!importBack : false,
-        baseName: base, outputName: last ? outputName : undefined, whole: true };
+        baseName: base, outputName: last ? outputName : undefined, whole: true, outputKind: 'video' };
       if (op.kind === 'upscale') {
         const s = op.settings || {};
         const routedModel = s.engine === 'turbo' && shaderUpscale.modelForShader(s.shader);

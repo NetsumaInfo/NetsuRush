@@ -1,20 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { nr, type ProcessProgress, type ProcessResult } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { DEFAULT_SEG, type SegSettings } from "./processShared";
+import { DEFAULT_SEG, SEG_MODELS, segTokens, type SegSettings } from "./processShared";
 import { useSharedProcSources, jobFor, makeRenderReviews, type FrameCompare, type RenderReview } from "./useProcSources";
 import i18n from "@/i18n";
 import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import { isUpscaleCompareCompatible, mergeUpscaleModelResult } from "./upscaleCompareState";
-import { SEG_MODELS } from "./processShared";
 import { processExportPayload } from "./processExport";
+import { imageOutputPayload, outputKindFor } from "./imageOutput";
 
 const SETTINGS_KEY = "nr.netsulab.removebg.settings";
 
 // Mode removeBG (détourage / alpha) du hub. Pas de codec/audio (sortie alpha dédiée). Même forme de retour.
 export function useRemoveBg() {
   const base = useSharedProcSources();
-  const { sources, active, activeKey, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders } = base;
+  const { sources, active, activeKey, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders, setNamingTokens } = base;
 
   const [settings, setSettings] = useState<SegSettings>(() => readPersistedObject(SETTINGS_KEY, DEFAULT_SEG));
   const patch = useCallback((p: Partial<SegSettings>) => setSettings((s) => {
@@ -22,6 +22,8 @@ export function useRemoveBg() {
     writePersistedObject(SETTINGS_KEY, next);
     return next;
   }), []);
+
+  useEffect(() => { setNamingTokens(segTokens(settings)); }, [settings, setNamingTokens]);
 
   const [compare, setCompare] = useState<FrameCompare | null>(null);
   const [testing, setTesting] = useState(false);
@@ -122,8 +124,12 @@ export function useRemoveBg() {
         setBusy({ file: src.name, pct: 0, done: 0, total: segments?.length || 1, phase: "model" });
         const r = await nr.processRemoveBg({
           input: src.path,
-          model: settings.model, format: settings.format, dedup: settings.dedup,
+          model: settings.model, dedup: settings.dedup,
+          // Le format alpha suit la SORTIE choisie : une séquence n'a qu'une forme (PNG RGBA), une
+          // vidéo alpha laisse le core arbitrer ProRes 4444 / WebM VP9 selon le codec demandé.
+          format: outputKindFor(settings, src) === "video" ? "prores_4444" : "png_seq",
           ...processExportPayload(settings),
+          ...imageOutputPayload(settings, outputKindFor(settings, src)),
           despeckle: settings.despeckle,
           edgeSmoothing: settings.edgeSmoothing,
           edgeOffset: settings.edgeOffset,

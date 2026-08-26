@@ -5,6 +5,7 @@ import { DEFAULT_SETTINGS } from "@/components/upscale/upscaleShared";
 import { DEFAULT_INTERP } from "@/components/upscale/processShared";
 import { useSharedProcSources } from "@/components/upscale/useProcSources";
 import { ExportRows } from "@/components/upscale/procSettingsParts";
+import type { ProcessExportSettings } from "@/components/upscale/processExport";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
@@ -109,7 +110,9 @@ export function ChainPanel() {
           </div>
         </div>
 
-        <ExportRows outDir={base.outDir} chooseOut={base.chooseOut} importBack={base.importBack} setImportBack={base.setImportBack} disabled={running} />
+        {/* Aperçu du nom : c'est la DERNIÈRE étape qui écrit le fichier final, donc son conteneur. */}
+        <ExportRows outDir={base.outDir} chooseOut={base.chooseOut} importBack={base.importBack} setImportBack={base.setImportBack} disabled={running}
+          v={chain.length ? (chain[chain.length - 1].settings as unknown as ProcessExportSettings) : undefined} />
       </div>
 
       <div className="space-y-3 border-t border-border p-4">

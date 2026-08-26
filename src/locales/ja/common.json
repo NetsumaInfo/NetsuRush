@@ -53,7 +53,8 @@
   "fileType": {
     "video": "動画",
     "image": "画像",
-    "media": "メディア"
+    "media": "メディア",
+    "visual": "動画と画像"
   },
   "window": {
     "reference": "リファレンス",

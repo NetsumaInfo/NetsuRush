@@ -32,7 +32,7 @@
     "modeAppend": "Línea de tiempo existente",
     "videoOnly": "Solo vídeo",
     "richAe": "Opciones avanzadas de After Effects",
-    "richAeHint": "Transformaciones, velocidad y precomposiciones, en lugar de una copia simple de los planos. Los medios y la codificación se ajustan entonces en el panel de abajo.",
+    "richAeHint": "Recrea transformaciones, velocidad y precomposiciones en vez de copiar los planos. Los medios se ajustan abajo.",
     "yes": "Sí",
     "no": "No",
     "choose": "Elegir…",
@@ -86,7 +86,7 @@
       "hint": "Los archivos originales se enlazan tal cual. No se escribe ningún archivo."
     },
     "remux": {
-      "label": "Reempaquetar",
+      "label": "Remux",
       "hint": "Nuevo contenedor, sin pérdida. Útil si el destino no lee el de origen."
     },
     "reencode": {

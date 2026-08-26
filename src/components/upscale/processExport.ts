@@ -1,4 +1,5 @@
 import type { ExportEncodingValue } from "@/features/export/encodingFields";
+import { DEFAULT_IMAGE_OUTPUT, type ImageOutputSettings } from "./imageOutput";
 import {
   coerceExportEncoderMode,
   coerceExportSpeed,
@@ -13,7 +14,7 @@ import {
 
 // Contrat d'encodage partagé par Upscale / Interpolation / Profondeur. Les valeurs sont exactement
 // celles des profils d'export généraux : une seule taxonomie renderer → core → ffmpeg.
-export interface ProcessExportSettings {
+export interface ProcessExportSettings extends ImageOutputSettings {
   exportCodec: ExportCodec;
   encoderMode: ExportEncoderMode;
   exportSpeed: ExportSpeed;
@@ -24,6 +25,7 @@ export interface ProcessExportSettings {
 }
 
 export const DEFAULT_PROCESS_EXPORT: ProcessExportSettings = {
+  ...DEFAULT_IMAGE_OUTPUT,
   exportCodec: "h265_main10",
   encoderMode: "gpu",
   exportSpeed: "balanced",
@@ -63,7 +65,7 @@ export function isProcessExportProfile(profile: ExportProfile): boolean {
 // Profil général → réglages d'encodage du hub. La sélection de piste par LANGUE n'a pas d'équivalent
 // ici (elle se résout par fichier côté core, au moment de l'export de plans) → on retombe sur « toutes
 // les pistes », le mode par défaut du hub.
-export function processExportFromProfile(profile: ExportProfile): ProcessExportSettings {
+export function processExportFromProfile(profile: ExportProfile): Omit<ProcessExportSettings, keyof ImageOutputSettings> {
   return {
     exportCodec: profile.codec,
     encoderMode: coerceExportEncoderMode(profile.encoderMode),

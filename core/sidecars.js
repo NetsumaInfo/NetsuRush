@@ -14,6 +14,7 @@ const scheduler = require('./scheduler');
 const { importToMediaPool } = require('./resolve'); // pont Python externe (core/resolve.js)
 const { codecExt: upscaleExt, hasFiles, sanitizeName } = require('./utils');
 const { resolveProcessEncoding } = require('./processEncoding');
+const { outputKind, imageSpec, imageTarget, imagePayload } = require('./imageOutput');
 const { MANIFEST, modelDir, RIFE_TORCH_DIR, RIFE_ARCH_DIR, GMFSS_DIR, DRBA_DIR, DRBA_ARCH_DIR } = require('./models');   // dossiers de poids gérés (BEN2/MatAnyone…) → env sidecar
 const logbus = require('./logbus'); // journal Console : forward du stderr des sidecars python
 const mediaIdent = require('./mediaIdent'); // identité de contenu : le même rush sous un autre nom
@@ -212,10 +213,16 @@ function detectProgress(event, tagPath) {
 async function detectScenes(event, filePath, threshold = 0.5, model = 'transnetv2', options = {}) {
   const onProg = detectProgress(event, filePath);
   const e = await detectPool.acquire();
+  // Détections qui se partagent le GPU à cet instant, celle-ci comprise (elle vient d'acquérir son
+  // daemon). OmniShotCut n'émet aucune progression pendant son inférence : il l'ESTIME sur le temps,
+  // et une estimation calée sur un job seul se fait dépasser dès qu'un lot en lance plusieurs — la
+  // barre butait alors sur son plafond et paraissait figée. Ce nombre n'entre PAS dans `options` :
+  // ce serait un réglage de découpe, donc une clé de cache différente selon la charge du moment.
+  const concurrency = detectPool.pool.filter((slot) => slot.busy).length || 1;
   try {
-    let r = await e.d.req({ cmd: 'detect', path: filePath, threshold: Number(threshold), model, options }, onProg);
+    let r = await e.d.req({ cmd: 'detect', path: filePath, threshold: Number(threshold), model, options, concurrency }, onProg);
     if (r && r.error && /interrompu|injoignable/.test(String(r.error))) {
-      r = await runDetect(event, ['detect', filePath, String(threshold), model, JSON.stringify(options || {})], filePath);
+      r = await runDetect(event, ['detect', filePath, String(threshold), model, JSON.stringify(options || {}), String(concurrency)], filePath);
     }
     return r;
   } finally {
@@ -609,6 +616,37 @@ function refreshPerfEnv() {
   }
   recycle(dCpu);
 }
+// Installing a model rewrites files of the venv the sidecars are RUNNING on (`kornia_rs.pyd`,
+// `onnxruntime`…). Windows refuses to replace a binary a live process has mapped, so pip stops on
+// [WinError 32] halfway through and the model is left half-installed. Idle daemons are handed back
+// before any install — they cost nothing to restart on the next job. A BUSY one is never killed:
+// its name is returned so the install can say what holds the file instead of cancelling a render
+// the user is watching.
+function releaseVenvLocks() {
+  const busy = [];
+  const release = (name, daemon) => {
+    try { if (daemon.idle()) daemon.kill(); else busy.push(name); } catch (_) {}
+  };
+  for (const entry of idxPool.pool) {
+    if (entry.busy) busy.push('search');
+    else release('search', /** @type {any} */ (entry.d));
+  }
+  for (const entry of detectPool.pool) {
+    if (entry.busy) busy.push('detect');
+    else release('detect', /** @type {any} */ (entry.d));
+  }
+  release('search', dCpu);
+  release('upscale', dUpscale);
+  release('process', dProcess);
+  release('transcribe', dTranscribe);
+  try {
+    const roto = require('./roto'); // à la demande : roto.js dépend déjà de ce module au chargement
+    if (roto.rotoIdle()) roto.killRoto();
+    else busy.push('roto');
+  } catch (_) {}
+  return [...new Set(busy)];
+}
+
 // Tue TOUS les daemons python persistants (recherche + détection + upscale…) — appelé à l'arrêt du
 // core pour ne pas laisser de process orphelins qui occupent GPU/VRAM.
 function killSidecars() {
@@ -682,6 +720,7 @@ function makeUpscaleDaemon() {
       chain = p.catch(() => {});
       return p;
     },
+    idle() { return pending.size === 0; },
     kill() { try { proc?.kill(); } catch (_) {} },
   };
 }
@@ -764,6 +803,7 @@ function makeProcessDaemon() {
       chain = p.catch(() => {});
       return p;
     },
+    idle() { return pending.size === 0; },
     kill() {
       if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
       try { proc?.kill(); } catch (_) {}
@@ -832,6 +872,7 @@ function makeTranscribeDaemon() {
       chain = p.catch(() => {});
       return p;
     },
+    idle() { return pending.size === 0; },
     kill() { try { proc?.kill(); } catch (_) {} },
   };
 }
@@ -907,8 +948,12 @@ async function runUpscale(event, opts) {
     outDir, segments, whole, importBack, baseName, outputName, savePath } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
-  const resolved = await resolveProcessEncoding(opts || {});
-  const ext = resolved.ext || upscaleExt(resolved.codec);
+  // Sortie IMAGE (source fixe) ou SÉQUENCE : aucun codec vidéo à résoudre, l'écriture passe par
+  // les arguments image. Le reste du job (découpe, progression, import) ne change pas.
+  const kind = outputKind(opts);
+  const spec = imageSpec(opts);
+  const resolved = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
+  const ext = resolved ? (resolved.ext || upscaleExt(resolved.codec)) : spec.ext;
   const customName = typeof outputName === 'string' && outputName.trim();
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = (whole || !Array.isArray(segments) || !segments.length)
@@ -922,20 +967,26 @@ async function runUpscale(event, opts) {
     // `savePath` = destination EXACTE imposée par l'appelant (archivage d'une collection : le fichier
     // doit retomber sur le nom attendu du dossier de stockage). Un seul job, sinon les N sorties
     // s'écraseraient — le suffixe numéroté reprend la main.
-    const out = (total === 1 && savePath)
+    const suffix = customName ? '' : `_upscaled_${scale}x`;
+    const target = kind === 'video' ? null
+      : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
+    const out = (total === 1 && savePath && kind === 'video')
       ? String(savePath)
-      : path.join(outDir, `${base}${customName ? '' : `_upscaled_${scale}x`}${j.tag}.${ext}`);
+      : target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
     if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
     const fileLabel = path.basename(out);
     const payload = {
-      cmd: 'upscale', input, out, model: String(model), outscale: scale | 0, codec: resolved.codec,
+      cmd: kind === 'image' ? 'image' : 'upscale',
+      input, out, model: String(model), outscale: scale | 0, codec: resolved ? resolved.codec : null,
       tile: tile | 0, tile_pad: tilePad | 0, pre_pad: prePad | 0,
-      quality: quality | 0, preset: String(preset), bitdepth: bitDepth | 0, profile: resolved.profile,
-      audio: resolved.audioMode || String(audio), abr: abr | 0, atrack: audioTrack | 0,
-      video_args: resolved.videoArgs, audio_args: resolved.audioArgs, container: resolved.container,
+      quality: quality | 0, preset: String(preset), bitdepth: bitDepth | 0, profile: resolved ? resolved.profile : null,
+      audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr: abr | 0, atrack: audioTrack | 0,
+      video_args: resolved ? resolved.videoArgs : null, audio_args: resolved ? resolved.audioArgs : null,
+      container: resolved ? resolved.container : null,
       start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
       denoise: denoise != null ? denoise : null, fp32: !!fp32,
       cleanup_noise: cleanupNoise, cleanup_edges: cleanupEdges,
+      ...imagePayload(kind, spec),
     };
     // Un job peut être rejoué (repli encodeur matériel → profil CPU). Le second passage
     // recommence à STAGE:load ; ne jamais faire reculer la barre déjà avancée du même fichier.
@@ -953,8 +1004,11 @@ async function runUpscale(event, opts) {
       else if (s.includes('STAGE:infer')) send(2, 'upscale');
       else if (s.includes('STAGE:load')) send(1, 'model');
     };
-    const r = await adaptiveRequest(dUpscale, payload, onProgress, resolved);
-    if (r && r.ok && r.output) outputs.push(r.output);
+    const r = resolved
+      ? await adaptiveRequest(dUpscale, payload, onProgress, resolved)
+      : await dUpscale.req(payload, onProgress);
+    // Une séquence s'importe par son DOSSIER (Resolve ne prend pas un motif de fichiers).
+    if (r && r.ok && r.output) outputs.push(target ? target.imported : r.output);
     else lastErr = (r && r.error) || 'échec upscale';
   }
   let imported = 0;
@@ -993,8 +1047,10 @@ async function runInterpolate(event, opts) {
     outDir, importBack, baseName, outputName } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
-  const resolved = await resolveProcessEncoding(opts || {});
-  const ext = resolved.ext || upscaleExt(resolved.codec);
+  const kind = outputKind(opts);
+  const spec = imageSpec(opts);
+  const resolved = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
+  const ext = resolved ? (resolved.ext || upscaleExt(resolved.codec)) : spec.ext;
   const customName = typeof outputName === 'string' && outputName.trim();
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = processJobs(opts);
@@ -1003,16 +1059,22 @@ async function runInterpolate(event, opts) {
   let lastErr = null;
   for (let i = 0; i < total; i++) {
     const j = jobs[i];
-    const out = path.join(outDir, `${base}${customName ? '' : `_interp_${factor | 0}x`}${j.tag}.${ext}`);
+    const suffix = customName ? '' : `_interp_${factor | 0}x`;
+    const target = kind === 'video' ? null
+      : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
+    const out = target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
     if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
     const fileLabel = path.basename(out);
     const payload = {
       cmd: 'interpolate', input, out, model: String(model), factor: factor | 0,
       target_fps: targetFps != null ? targetFps : null, slowmo: !!slowmo, dedup: !!dedup,
-      codec: resolved.codec, quality: quality | 0, preset: String(preset), bitdepth: bitDepth | 0, profile: resolved.profile,
-      audio: resolved.audioMode || String(audio), abr: abr | 0, atrack: audioTrack | 0,
-      video_args: resolved.videoArgs, audio_args: resolved.audioArgs, container: resolved.container,
+      codec: resolved ? resolved.codec : null, quality: quality | 0, preset: String(preset),
+      bitdepth: bitDepth | 0, profile: resolved ? resolved.profile : null,
+      audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr: abr | 0, atrack: audioTrack | 0,
+      video_args: resolved ? resolved.videoArgs : null, audio_args: resolved ? resolved.audioArgs : null,
+      container: resolved ? resolved.container : null,
       start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
+      ...imagePayload(kind, spec),
     };
     let lastPct = -1;
     const send = (pct, phase) => {
@@ -1022,8 +1084,10 @@ async function runInterpolate(event, opts) {
       event.sender.send('process:progress', { file: fileLabel, pct: next, done: i, total, phase });
     };
     send(0, 'model');
-    const r = await adaptiveRequest(dProcess, payload, processProg(send, 'interpolate'), resolved);
-    if (r && r.ok && r.output) outputs.push(r.output);
+    const r = resolved
+      ? await adaptiveRequest(dProcess, payload, processProg(send, 'interpolate'), resolved)
+      : await dProcess.req(payload, processProg(send, 'interpolate'));
+    if (r && r.ok && r.output) outputs.push(target ? target.imported : r.output);
     else lastErr = (r && r.error) || 'échec interpolation';
   }
   let imported = 0;
@@ -1041,8 +1105,10 @@ async function runDepth(event, opts) {
     outDir, importBack, baseName, outputName } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
-  const resolved = await resolveProcessEncoding(opts || {});
-  const ext = resolved.ext || upscaleExt(resolved.codec);
+  const kind = outputKind(opts);
+  const spec = imageSpec(opts);
+  const resolved = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
+  const ext = resolved ? (resolved.ext || upscaleExt(resolved.codec)) : spec.ext;
   const customName = typeof outputName === 'string' && outputName.trim();
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = processJobs(opts);
@@ -1051,15 +1117,21 @@ async function runDepth(event, opts) {
   let lastErr = null;
   for (let i = 0; i < total; i++) {
     const j = jobs[i];
-    const out = path.join(outDir, `${base}${customName ? '' : '_depth'}${j.tag}.${ext}`);
+    const suffix = customName ? '' : '_depth';
+    const target = kind === 'video' ? null
+      : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
+    const out = target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
     if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
     const fileLabel = path.basename(out);
     const payload = {
       cmd: 'depth', input, out, model: String(model), bits: bits | 0, colormap: String(colormap), dedup: !!dedup,
-      codec: resolved.codec, quality: quality | 0, preset: String(preset), bitdepth: bitDepth | 0, profile: resolved.profile,
-      audio: resolved.audioMode || String(audio), abr: abr | 0, atrack: audioTrack | 0,
-      video_args: resolved.videoArgs, audio_args: resolved.audioArgs, container: resolved.container,
+      codec: resolved ? resolved.codec : null, quality: quality | 0, preset: String(preset),
+      bitdepth: bitDepth | 0, profile: resolved ? resolved.profile : null,
+      audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr: abr | 0, atrack: audioTrack | 0,
+      video_args: resolved ? resolved.videoArgs : null, audio_args: resolved ? resolved.audioArgs : null,
+      container: resolved ? resolved.container : null,
       start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
+      ...imagePayload(kind, spec),
     };
     let lastPct = -1;
     const send = (pct, phase) => {
@@ -1069,8 +1141,10 @@ async function runDepth(event, opts) {
       event.sender.send('process:progress', { file: fileLabel, pct: next, done: i, total, phase });
     };
     send(0, 'model');
-    const r = await adaptiveRequest(dProcess, payload, processProg(send, 'depth'), resolved);
-    if (r && r.ok && r.output) outputs.push(r.output);
+    const r = resolved
+      ? await adaptiveRequest(dProcess, payload, processProg(send, 'depth'), resolved)
+      : await dProcess.req(payload, processProg(send, 'depth'));
+    if (r && r.ok && r.output) outputs.push(target ? target.imported : r.output);
     else lastErr = (r && r.error) || 'échec depth';
   }
   let imported = 0;
@@ -1081,18 +1155,23 @@ async function runDepth(event, opts) {
     error: outputs.length ? null : lastErr };
 }
 
-// Détourage (rembg) : sortie alpha. Format = ProRes 4444 (.mov), PNG-seq (dossier), ou WebM alpha.
-// Pour png_seq, `out` est un DOSSIER par job (`${base}_alpha${tag}/frame_%06d.png`), créé au préalable ;
-// l'import Media Pool pousse alors le dossier (séquence d'images).
+// Détourage (rembg) : sortie alpha. Vidéo (ProRes 4444 .mov ou WebM alpha), séquence PNG RGBA
+// (un dossier par job, numérotation réglée par le hub) ou image PNG unique quand la source est une
+// image fixe. Une séquence s'importe par son dossier, jamais par son motif de fichiers.
 async function runRemoveBg(event, opts) {
   const { input, model = 'isnet-anime', format = 'prores_4444', dedup = false,
     despeckle = 0, edgeSmoothing = 0, edgeOffset = 0, outDir, importBack, baseName, outputName } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
-  const encoding = format === 'png_seq' ? null : await resolveProcessEncoding(opts || {});
-  const alphaFormat = format === 'png_seq' ? 'png_seq'
-    : String(opts?.exportCodec || '').startsWith('vp9') ? 'webm_alpha' : 'prores_4444';
-  const ext2 = encoding?.ext || (alphaFormat === 'prores_4444' ? 'mov' : alphaFormat === 'webm_alpha' ? 'webm' : 'png');
+  // La sortie détourée porte toujours un alpha : une image ou une séquence sort en PNG RGBA, une
+  // vidéo reste arbitrée entre ProRes 4444 et WebM VP9 selon le codec demandé.
+  const kind = format === 'png_seq' && outputKind(opts) === 'video' ? 'sequence' : outputKind(opts);
+  const spec = imageSpec({ ...opts, imageFormat: 'png' });
+  const encoding = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
+  const alphaFormat = kind === 'video'
+    ? (String(opts?.exportCodec || '').startsWith('vp9') ? 'webm_alpha' : 'prores_4444')
+    : 'png_seq';
+  const ext2 = encoding?.ext || (alphaFormat === 'prores_4444' ? 'mov' : alphaFormat === 'webm_alpha' ? 'webm' : spec.ext);
   const customName = typeof outputName === 'string' && outputName.trim();
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = processJobs(opts);
@@ -1101,16 +1180,12 @@ async function runRemoveBg(event, opts) {
   let lastErr = null;
   for (let i = 0; i < total; i++) {
     const j = jobs[i];
-    let out, imported;
-    if (alphaFormat === 'png_seq') {
-      const dir = path.join(outDir, `${base}${customName ? '' : '_alpha'}${j.tag}`);
-      try { await fsp.mkdir(dir, { recursive: true }); } catch (_) {}
-      out = path.join(dir, 'frame_%06d.png');
-      imported = dir; // l'import vise le dossier de la séquence
-    } else {
-      out = path.join(outDir, `${base}${customName ? '' : '_alpha'}${j.tag}.${ext2}`);
-      imported = out;
-    }
+    const suffix = customName ? '' : '_alpha';
+    // Une séquence s'importe par son DOSSIER (Resolve ne prend pas un motif de fichiers).
+    const target = kind === 'video' ? null
+      : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
+    const out = target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext2}`);
+    const imported = target ? target.imported : out;
     if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
     const fileLabel = path.basename(out);
     const payload = {
@@ -1120,6 +1195,7 @@ async function runRemoveBg(event, opts) {
       atrack: Number.isFinite(Number(opts?.audioTrack)) ? Number(opts.audioTrack) : -1,
       container: encoding?.container || ext2,
       start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
+      ...imagePayload(kind, spec, { alpha: true }),
     };
     let lastPct = -1;
     const send = (pct, phase) => {
@@ -1215,6 +1291,7 @@ async function runUpscaleGif(opts) {
 module.exports = {
   detectScenes, getCachedScenes, detectConcurrency,
   searchIndex, abortIndex, queryReq, cpuReq, killSearch, killSidecars, indexConcurrency, refreshPerfEnv,
+  releaseVenvLocks,
   runUpscale, runUpscaleFrame, runUpscaleImage, runUpscaleGif, recordTestFrames,
   runInterpolate, runDepth, runRemoveBg, runProcessFrame,
   transcribeAudio, detectTrackLang, runSilence, runFiller,

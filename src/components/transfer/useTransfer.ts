@@ -9,6 +9,7 @@ import type {
 import type {
   ExportAudioMode, ExportCodec, ExportContainer, ExportEncoderMode, ExportSpeed,
 } from "@/features/export/profiles";
+import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import { aeProducesFiles } from "@/components/ae/aeShared";
 import { canSwap, defaultTarget, hasRichAeOptions, isSupportedPair, loadPair, savePair } from "./transferShared";
 
@@ -19,6 +20,44 @@ interface HostTimelines {
 }
 
 const EMPTY: HostTimelines = { entries: [], current: null, error: null };
+
+/**
+ * Réglages de travail de la page, MÉMORISÉS. Le panneau est démonté dès qu'on change d'onglet :
+ * sans cette mémoire, un aller-retour rendait tout aux défauts. Ce qui dépend du projet ouvert
+ * (timeline source, nom, timeline de destination) n'y est PAS : ces valeurs ne survivent pas au
+ * projet suivant.
+ */
+const SETTINGS_KEY = "nr.transfer.settings";
+
+interface TransferSettings {
+  mode: "new" | "append";
+  videoOnly: boolean;
+  richAe: boolean;
+  mediaMode: TransferMediaMode;
+  codec: ExportCodec;
+  audioMode: ExportAudioMode;
+  container: ExportContainer;
+  encoderMode: ExportEncoderMode;
+  speed: ExportSpeed;
+  outDir: string | null;
+  upscale: TransferUpscale;
+}
+
+// Réglages d'encodage dans le vocabulaire des PROFILS D'EXPORT. Par défaut les fichiers d'origine
+// sont liés tels quels : un transfert de montage n'a aucune raison de transcoder.
+const DEFAULT_SETTINGS: TransferSettings = {
+  mode: "new",
+  videoOnly: false,
+  richAe: false,
+  mediaMode: "copy",
+  codec: "prores_422_hq",
+  audioMode: "copy",
+  container: "mov",
+  encoderMode: "cpu",
+  speed: "balanced",
+  outDir: null,
+  upscale: {},
+};
 
 async function fetchTimelines(host: TransferHost): Promise<HostTimelines> {
   try {
@@ -40,22 +79,21 @@ export function useTransfer() {
   const [timelineName, setTimelineName] = useState<string | null>(null);
   const [target, setTarget] = useState<string | null>(null);
 
+  const [saved] = useState(() => readPersistedObject(SETTINGS_KEY, DEFAULT_SETTINGS));
   const [name, setName] = useState("");
-  const [mode, setMode] = useState<"new" | "append">("new");
-  const [videoOnly, setVideoOnly] = useState(false);
-  const [richAe, setRichAe] = useState(false);
+  const [mode, setMode] = useState<"new" | "append">(saved.mode);
+  const [videoOnly, setVideoOnly] = useState(saved.videoOnly);
+  const [richAe, setRichAe] = useState(saved.richAe);
   const [aeOptions, setAeOptions] = useState<AeExportOpts | null>(null);
 
-  // Réglages d'encodage dans le vocabulaire des PROFILS D'EXPORT. Par défaut les fichiers d'origine
-  // sont liés tels quels : un transfert de montage n'a aucune raison de transcoder.
-  const [mediaMode, setMediaMode] = useState<TransferMediaMode>("copy");
-  const [codec, setCodec] = useState<ExportCodec>("prores_422_hq");
-  const [audioMode, setAudioMode] = useState<ExportAudioMode>("copy");
-  const [container, setContainer] = useState<ExportContainer>("mov");
-  const [encoderMode, setEncoderMode] = useState<ExportEncoderMode>("cpu");
-  const [speed, setSpeed] = useState<ExportSpeed>("balanced");
-  const [outDir, setOutDir] = useState<string | null>(null);
-  const [upscale, setUpscale] = useState<TransferUpscale>({});
+  const [mediaMode, setMediaMode] = useState<TransferMediaMode>(saved.mediaMode);
+  const [codec, setCodec] = useState<ExportCodec>(saved.codec);
+  const [audioMode, setAudioMode] = useState<ExportAudioMode>(saved.audioMode);
+  const [container, setContainer] = useState<ExportContainer>(saved.container);
+  const [encoderMode, setEncoderMode] = useState<ExportEncoderMode>(saved.encoderMode);
+  const [speed, setSpeed] = useState<ExportSpeed>(saved.speed);
+  const [outDir, setOutDir] = useState<string | null>(saved.outDir);
+  const [upscale, setUpscale] = useState<TransferUpscale>(saved.upscale);
 
   const [preview, setPreview] = useState<TransferPreview | null>(null);
   const [previewBusy, setPreviewBusy] = useState(false);
@@ -65,6 +103,12 @@ export function useTransfer() {
 
   useEffect(() => savePair(from, to), [from, to]);
   useEffect(() => nr.onTransferProgress(setProgress), []);
+
+  useEffect(() => {
+    writePersistedObject<TransferSettings>(SETTINGS_KEY, {
+      mode, videoOnly, richAe, mediaMode, codec, audioMode, container, encoderMode, speed, outDir, upscale,
+    });
+  }, [mode, videoOnly, richAe, mediaMode, codec, audioMode, container, encoderMode, speed, outDir, upscale]);
 
   const loadSources = useCallback(async () => {
     const list = await fetchTimelines(from);
@@ -151,8 +195,9 @@ export function useTransfer() {
   const rich = hasRichAeOptions(from, to);
   /**
    * Le pipeline AE avancé REMPLACE le transfert générique : le core ne lit alors ni le traitement
-   * des médias, ni l'encodage, ni le dossier de sortie, ni le mode de destination de cette page.
-   * Ces réglages disparaissent donc de l'écran quand il conduit.
+   * des médias, ni l'encodage, ni le mode de destination de cette page. Ces réglages disparaissent
+   * donc de l'écran quand il conduit. L'upscale et le dossier de sortie, eux, sont les MÊMES des
+   * deux côtés : ils restent portés par cette page et voyagent avec l'option (`aeHost`).
    */
   const advanced = rich && richAe;
 
@@ -172,7 +217,7 @@ export function useTransfer() {
         audio: aeOptions.audio,
       })
     : effectiveMediaMode !== "copy" || (audioMode !== "copy" && audioMode !== "none");
-  const needsDir = producesFiles && !(advanced ? aeOptions?.outDir : outDir);
+  const needsDir = producesFiles && !outDir;
 
   const chooseOut = useCallback(async () => {
     const dir = await nr.chooseDir();
@@ -214,7 +259,7 @@ export function useTransfer() {
     name, setName, mode, setMode, videoOnly, setVideoOnly,
     mediaMode: effectiveMediaMode, setMediaMode, codec, audioMode, container, encoderMode, speed, applyEncoding,
     upscale, setUpscale, growing,
-    outDir, chooseOut, producesFiles, needsDir,
+    outDir, setOutDir, chooseOut, producesFiles, needsDir,
     richAe, setRichAe, setAeOptions,
     preview, previewBusy, busy, progress, result, run,
   };

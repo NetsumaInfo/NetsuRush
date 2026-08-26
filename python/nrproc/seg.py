@@ -1,9 +1,11 @@
 """Suppression de fond par frame (rembg) → sortie avec canal alpha. Streamé, STAGE:prog:i/n.
 
-Formats : prores_4444 (.mov, import Resolve direct) / webm_alpha (.webm) / png_seq (motif PNG)."""
+Formats : prores_4444 (.mov, import Resolve direct) / webm_alpha (.webm) / images PNG RGBA
+(image unique quand la source est une image fixe, sinon séquence numérotée)."""
 import os
 from nri18n import t
 
+from upscaler.imgout import image_spec, image_written, open_image_writer
 from upscaler.log import log
 
 from .dedup import DEAD_THR, run_perframe_dedup
@@ -28,7 +30,7 @@ def _cutout_rgba(engine, bgr):
 
 
 def cmd_removebg(args):
-    """Détoure un segment vidéo (fond transparent). Sortie alpha selon args.format."""
+    """Détoure un segment vidéo (fond transparent). Sortie alpha : vidéo, image ou séquence."""
     try:
         from .runner import get_seg
     except Exception as exc:  # noqa: BLE001
@@ -51,8 +53,13 @@ def cmd_removebg(args):
 
     import numpy as np
 
+    # Sortie image : une image PNG RGBA, ou une séquence numérotée réglée par le hub. Le flux brut
+    # est déjà en rgba (le détourage produit l'alpha), d'où `pix_in`.
+    spec = image_spec(args, alpha=True)
+    images = spec["kind"] != "video"
     dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None))
-    enc = open_encoder_alpha(args.out, w, h, fps_str, fmt, args)
+    enc = (open_image_writer(args.out, w, h, fps_str, spec, pix_in="rgba") if images
+           else open_encoder_alpha(args.out, w, h, fps_str, fmt, args))
 
     def process_fn(frame):
         return cleanup_rgba(
@@ -100,12 +107,16 @@ def cmd_removebg(args):
         dec.wait()
         enc.wait()
 
-    if err:
+    # Une image UNIQUE fait sortir ffmpeg après sa première frame : le tuyau se ferme alors que le
+    # décodeur en a encore. Ce n'est pas un échec tant que le fichier est écrit.
+    if err and not (images and image_written(args.out, spec)):
         return {"ok": False, "error": err}
-    # png_seq : `out` est un motif → on vérifie la 1re image ; sinon le fichier unique.
-    if fmt == "png_seq":
-        first = args.out % 1
-        if not os.path.exists(first):
+    if images:
+        if not image_written(args.out, spec):
+            return {"ok": False, "error": t("empty_alpha")}
+    elif fmt == "png_seq":
+        # Appel hérité (motif PNG sans réglage de sortie) : on vérifie la 1re image.
+        if not os.path.exists(args.out % 1):
             return {"ok": False, "error": t("empty_alpha")}
     elif not os.path.exists(args.out) or os.path.getsize(args.out) == 0:
         return {"ok": False, "error": t("empty_output")}

@@ -7,10 +7,13 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 // Une section repliée AFFICHE SON ÉTAT (`summary`) : sans ça, replier ne gagne pas de place, ça
 // cache l'information — on rouvrirait chaque tiroir juste pour savoir ce qu'il contient.
 
-// Cinq étapes, dans l'ordre du travail. Neuf tiroirs éparpillaient les mêmes réglages : le modèle
+// Six étapes, dans l'ordre du travail. Neuf tiroirs éparpillaient les mêmes réglages : le modèle
 // de segmentation, les objets et les points décrivent UNE seule chose (ce qu'on isole), et le
 // modèle de matte et les curseurs de retouche façonnent UN seul alpha, l'un après l'autre.
-const ROTO_SECTIONS = ["select", "track", "view", "mask", "output"] as const;
+// La suppression d'objet garde SON tiroir : c'est une sortie qui reconstruit le fond au lieu de
+// l'exporter, et la ranger sous « Sortie » la rendait introuvable. « Sortie » ferme la marche —
+// écrire le fichier est le dernier geste, tout ce qui précède le prépare.
+const ROTO_SECTIONS = ["select", "track", "view", "mask", "remove", "output"] as const;
 export type RotoSectionId = (typeof ROTO_SECTIONS)[number];
 
 const LS_KEY = "nr.roto.sections";

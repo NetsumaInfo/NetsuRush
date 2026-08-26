@@ -42,10 +42,8 @@ function FieldHint({ label, hint }: { label: string; hint?: string }) {
           <TooltipTrigger render={<span className="inline-flex shrink-0 text-muted-foreground" tabIndex={0} aria-label={hint} />}>
             <CircleHelp className="size-3.5" />
           </TooltipTrigger>
-          <TooltipContent side="right" align="center" className="max-w-56">
-            <p className="font-medium">{label}</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
-          </TooltipContent>
+          {/* Pas de titre : le libellé du champ est juste à côté du curseur, le répéter noie la phrase utile. */}
+          <TooltipContent side="right" align="center" className="max-w-64">{hint}</TooltipContent>
         </Tooltip>
       )}
     </span>
@@ -77,8 +75,9 @@ function NumberSetting({ label, hint, value, min, max, step = 1, onChange }: {
   );
 }
 
-function Labels<T extends string>({ label, hint, values, all, labelFor, onChange }: {
-  label: string; hint: string; values: T[]; all: T[]; labelFor: (value: T) => string; onChange: (values: T[]) => void;
+function Labels<T extends string>({ label, hint, values, all, labelFor, hintFor, onChange }: {
+  label: string; hint: string; values: T[]; all: T[];
+  labelFor: (value: T) => string; hintFor: (value: T) => string; onChange: (values: T[]) => void;
 }) {
   const { t } = useTranslation("derush");
   const allSelected = all.every((value) => values.includes(value));
@@ -90,19 +89,27 @@ function Labels<T extends string>({ label, hint, values, all, labelFor, onChange
           {t("advanced.selectAllTypes")}
         </Button>
         {all.map((value) => (
-          <Toggle
-            key={value}
-            size="sm"
-            variant="outline"
-            pressed={values.includes(value)}
-            onPressedChange={(pressed) => {
-              const next = pressed ? [...new Set([...values, value])] : values.filter((entry) => entry !== value);
-              if (next.length) onChange(next);
-            }}
-            className="h-7 px-2 text-[11px] aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary"
-          >
-            {labelFor(value)}
-          </Toggle>
+          // Chaque type porte son propre exemple : « Porte » ou « Saut brutal » ne veulent rien
+          // dire tant qu'on n'a pas vu l'effet décrit.
+          <Tooltip key={value}>
+            <TooltipTrigger
+              render={
+                <Toggle
+                  size="sm"
+                  variant="outline"
+                  pressed={values.includes(value)}
+                  onPressedChange={(pressed) => {
+                    const next = pressed ? [...new Set([...values, value])] : values.filter((entry) => entry !== value);
+                    if (next.length) onChange(next);
+                  }}
+                  className="h-7 px-2 text-[11px] aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary"
+                />
+              }
+            >
+              {labelFor(value)}
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-56">{hintFor(value)}</TooltipContent>
+          </Tooltip>
         ))}
       </div>
     </section>
@@ -176,8 +183,8 @@ export function DetectionAdvancedSettings({ model, disabled = false, compact = f
               </label>
 
               {omni.mode === "default" && (<>
-                <Labels<OmniIntraLabel> label={t("advanced.intraLabels")} hint={t("advanced.labelsHint")} values={omni.intraLabels} all={OMNI_INTRA_LABELS} labelFor={(value) => t(OMNI_INTRA_LABEL_KEYS[value])} onChange={(intraLabels) => patch({ omnishotcut: { ...omni, intraLabels } })} />
-                <Labels<OmniInterLabel> label={t("advanced.interLabels")} hint={t("advanced.labelsHint")} values={omni.interLabels} all={OMNI_INTER_LABELS} labelFor={(value) => t(OMNI_INTER_LABEL_KEYS[value])} onChange={(interLabels) => patch({ omnishotcut: { ...omni, interLabels } })} />
+                <Labels<OmniIntraLabel> label={t("advanced.intraLabels")} hint={t("advanced.intraLabelsHint")} values={omni.intraLabels} all={OMNI_INTRA_LABELS} labelFor={(value) => t(OMNI_INTRA_LABEL_KEYS[value])} hintFor={(value) => t(`${OMNI_INTRA_LABEL_KEYS[value]}Hint`)} onChange={(intraLabels) => patch({ omnishotcut: { ...omni, intraLabels } })} />
+                <Labels<OmniInterLabel> label={t("advanced.interLabels")} hint={t("advanced.interLabelsHint")} values={omni.interLabels} all={OMNI_INTER_LABELS} labelFor={(value) => t(OMNI_INTER_LABEL_KEYS[value])} hintFor={(value) => t(`${OMNI_INTER_LABEL_KEYS[value]}Hint`)} onChange={(interLabels) => patch({ omnishotcut: { ...omni, interLabels } })} />
               </>)}
             </div>
           )}

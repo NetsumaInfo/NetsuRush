@@ -8,6 +8,7 @@ from nri18n import t
 from .backends import get_upsampler
 from .cleanup import cleanup_frame
 from .codecs import UnknownCodecError, video_codec_args
+from .imgout import cv_write_params, image_spec, image_written, open_image_writer
 from .log import log
 from .media import (decode_one_frame, open_decoder, open_encoder,
                     open_gif_encoder, probe, probe_color, write_png)
@@ -39,9 +40,12 @@ def cmd_gif(args):
 
 
 def cmd_upscale(args):
+    # Sortie image (une image, ou une séquence numérotée) : aucun codec vidéo n'entre en jeu.
+    spec = image_spec(args)
+    images = spec["kind"] != "video"
     # Valide le codec AVANT de charger le modèle / lancer ffmpeg : un codec inconnu échoue
     # explicitement (plus de repli silencieux sur ProRes).
-    if not getattr(args, "video_args", None):
+    if not images and not getattr(args, "video_args", None):
         try:
             video_codec_args(args.codec, args.quality, args.preset, args.bitdepth, getattr(args, "profile", None))
         except UnknownCodecError as exc:
@@ -59,16 +63,24 @@ def cmd_upscale(args):
     # Colorimétrie source → round-trip YUV→RGB→YUV identité (sinon sortie plus foncée que l'aperçu).
     color = probe_color(args.input, w, h)
     ow, oh = w * args.outscale, h * args.outscale
-    dec = open_decoder(args.input, args.start, args.end, color)
-    enc = open_encoder(args.out, ow, oh, fps_str, args, color)
+    # Les images sortent en RGB plein : pas de conversion colorimétrique de sortie, donc pas de
+    # matrice à imposer au décodeur non plus (l'invariant bt709 ne concerne que la sortie YUV).
+    dec = open_decoder(args.input, args.start, args.end, None if images else color)
+    enc = (open_image_writer(args.out, ow, oh, fps_str, spec) if images
+           else open_encoder(args.out, ow, oh, fps_str, args, color))
     done, err = run_stream(dec, enc, up, w, h, args.outscale, nb, t("encoder_stopped"),
                            args.cleanup_noise, args.cleanup_edges)
 
-    if err:
+    # Une image UNIQUE fait sortir ffmpeg après sa première frame : le tuyau se ferme alors que le
+    # décodeur en a encore. Ce n'est pas un échec tant que le fichier est écrit.
+    if err and not (images and image_written(args.out, spec)):
         return {"ok": False, "error": err}
-    if enc.returncode not in (0, None):
+    if enc.returncode not in (0, None) and not (images and image_written(args.out, spec)):
         return {"ok": False, "error": t("ffmpeg_code", code=enc.returncode)}
-    if not os.path.exists(args.out) or os.path.getsize(args.out) == 0:
+    if images:
+        if not image_written(args.out, spec):
+            return {"ok": False, "error": t("empty_output")}
+    elif not os.path.exists(args.out) or os.path.getsize(args.out) == 0:
         return {"ok": False, "error": t("empty_output")}
     return {"ok": True, "output": args.out, "width": ow, "height": oh, "frames": done, "error": None}
 
@@ -105,8 +117,9 @@ def cmd_frame(args):
 
 
 def cmd_image(args):
-    """Upscale un FICHIER image (board de référence) → écrit un fichier image. cv2 lit/écrit en BGR
-    (même convention que .enhance). Sortie en PNG (sans perte) quelle que soit l'extension demandée.
+    """Upscale un FICHIER image → écrit un fichier image. cv2 lit/écrit en BGR (même convention que
+    .enhance). Le format suit la demande : PNG 8 ou 16 bits (sans perte, compression réglable) ou
+    JPEG (qualité réglable, sans alpha).
     L'alpha n'est pas upscalable par le modèle (RGB) → on le lit séparément avec Pillow (gère aussi
     PNG palette/tRNS), on le redimensionne à la taille de sortie puis on le réattache (BGRA)."""
     import cv2
@@ -148,7 +161,15 @@ def cmd_image(args):
         output = np.ascontiguousarray(output[:, :, :3])
         output = cv2.merge([output[:, :, 0], output[:, :, 1], output[:, :, 2], a.astype("uint8")])  # BGRA
 
-    if not cv2.imwrite(args.out, output) or not os.path.exists(args.out):
+    spec = image_spec(args, alpha=alpha is not None)
+    if spec["format"] in ("jpeg", "jpg") and output.ndim == 3 and output.shape[2] == 4:
+        # Le JPEG ne porte pas d'alpha : on écrit les canaux couleur plutôt qu'un fichier refusé.
+        output = np.ascontiguousarray(output[:, :, :3])
+    elif spec["format"] == "png" and spec["bits"] >= 16 and output.dtype == np.uint8:
+        # 8 bits étirés sur 16 (×257 = réplication d'octet) : le modèle ne rend que du 8-bit, le
+        # fichier respecte la profondeur demandée sans inventer de précision.
+        output = (output.astype("uint16") * 257)
+    if not cv2.imwrite(args.out, output, cv_write_params(spec)) or not os.path.exists(args.out):
         return {"ok": False, "error": t("write_upscaled_image")}
     return {"ok": True, "output": args.out, "width": ow, "height": oh, "error": None}
 
@@ -157,15 +178,21 @@ def cmd_image(args):
 FRAME_DEFAULTS = {"time": 0.0, "model": "light", "outscale": 2, "denoise": None, "tile": 0,
                   "tile_pad": 10, "pre_pad": 0, "fp32": False,
                   "cleanup_noise": 0.0, "cleanup_edges": 0.0}
+# Sortie image commune aux commandes : "video" = comportement historique (les autres clés sont
+# alors ignorées), "sequence" = motif numéroté, "image" = fichier unique.
+IMAGE_OUT_DEFAULTS = {"out_kind": "video", "img_format": "png", "png_bits": 8,
+                      "png_compression": 6, "jpeg_quality": 92, "seq_start": 1, "image_args": None}
 IMAGE_DEFAULTS = {"model": "light", "outscale": 2, "denoise": None, "tile": 0,
                   "tile_pad": 10, "pre_pad": 0, "fp32": False,
                   "cleanup_noise": 0.0, "cleanup_edges": 0.0}
+IMAGE_DEFAULTS.update(IMAGE_OUT_DEFAULTS)
 GIF_DEFAULTS = dict(IMAGE_DEFAULTS)
 UPSCALE_DEFAULTS = {"model": "light", "outscale": 4, "codec": "x264", "start": None, "end": None,
                     "denoise": None, "tile": 0, "tile_pad": 10, "pre_pad": 0, "fp32": False,
                     "cleanup_noise": 0.0, "cleanup_edges": 0.0,
                     "quality": 20, "preset": "medium", "bitdepth": 8, "profile": None,
                     "audio": "copy", "abr": 192, "atrack": 0}
+UPSCALE_DEFAULTS.update(IMAGE_OUT_DEFAULTS)
 
 
 class Req:

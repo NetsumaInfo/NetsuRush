@@ -111,6 +111,9 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
         <Popover.Positioner side="top" sideOffset={6} className="z-50 outline-none">
           <Popover.Popup
             onClick={(e) => e.stopPropagation()}
+            // Les touches du popover ne redescendent JAMAIS à la carte porteuse : par un portail,
+            // React les fait remonter dans son arbre, où une grille de plans écoute Espace/Entrée.
+            onKeyDown={(e) => e.stopPropagation()}
             className="w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]"
           >
             <div className="px-1 pb-1.5 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">

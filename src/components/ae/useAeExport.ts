@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { nr } from "@/lib/bridge";
 import { swrRead } from "@/lib/swr";
+import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import type { AeVideoMode, AeAudioMode, AeVideoContainer, AeAudioContainer, AePrecompNaming, AePrecompTarget, AeTransformMode, AeNestedMode, AeAudioRenderFmt, UpscaleCodec, AeExportOpts, AeExportResult, AeProgress, TransferUpscale } from "@/lib/bridge";
 import { aeOutputReasons, audioContainersFor, videoContainersFor } from "./aeShared";
 import i18n from "@/i18n";
@@ -10,35 +11,104 @@ interface TimelineEntry {
   current: boolean;
 }
 
+/**
+ * Réglages du formulaire, MÉMORISÉS. Le panneau est démonté dès qu'on quitte l'onglet — et, dans
+ * NetsuBridge, dès qu'on referme les options avancées. Sans cette mémoire, chaque aller-retour
+ * rendait les réglages aux défauts et jetait ce que l'utilisateur venait de poser.
+ */
+const SETTINGS_KEY = "nr.ae.settings";
+
+interface AeFormSettings {
+  videoMode: AeVideoMode;
+  codec: UpscaleCodec;
+  audio: AeAudioMode;
+  abr: number;
+  handleSec: number;
+  precomp: boolean;
+  precompNaming: AePrecompNaming;
+  precompTarget: AePrecompTarget;
+  folders: boolean;
+  transformMode: AeTransformMode;
+  nestedMode: AeNestedMode;
+  audioRenderFmt: AeAudioRenderFmt;
+  videoContainer: AeVideoContainer;
+  audioContainer: AeAudioContainer;
+}
+
+// `nestedMode` par défaut aligné sur le core : `render` ferait rendre chaque timeline imbriquée par
+// Resolve, donc exigerait un dossier de sortie sans que rien d'autre n'écrive.
+const DEFAULT_FORM: AeFormSettings = {
+  videoMode: "copy",
+  codec: "prores_422",
+  audio: "copy",
+  abr: 192,
+  handleSec: 0,
+  precomp: false,
+  precompNaming: "file",
+  precompTarget: "video",
+  folders: false,
+  transformMode: "none",
+  nestedMode: "flatten",
+  audioRenderFmt: "wav",
+  videoContainer: "mov",
+  audioContainer: "m4a",
+};
+
+/**
+ * Réglages qu'un écran hôte porte LUI-MÊME. NetsuBridge propose l'upscale et le dossier de sortie
+ * avant même qu'on ouvre les options avancées : garder ici un second exemplaire posait deux fois la
+ * même question, et ouvrir le panneau jetait la réponse déjà donnée.
+ */
+export interface AeHostState {
+  upscale: TransferUpscale;
+  setUpscale: Dispatch<SetStateAction<TransferUpscale>>;
+  outDir: string | null;
+  setOutDir: Dispatch<SetStateAction<string | null>>;
+}
+
 // État + actions de l'export After Effects (sépare la logique du composant de vue).
-export function useAeExport() {
+export function useAeExport(host?: AeHostState) {
   const [timelines, setTimelines] = useState<TimelineEntry[]>([]);
   const [timelinesError, setTimelinesError] = useState<string | null>(null);
   const [timelineName, setTimelineName] = useState<string | null>(null);
   const [compName, setCompName] = useState("");
 
-  const [videoMode, setVideoMode] = useState<AeVideoMode>("copy");
-  const [codec, setCodec] = useState<UpscaleCodec>("prores_422");
-  const [audio, setAudio] = useState<AeAudioMode>("copy");
-  const [abr, setAbr] = useState(192);
-  const [handleSec, setHandleSec] = useState(0);
-  const [precomp, setPrecomp] = useState(false);
-  const [precompNaming, setPrecompNaming] = useState<AePrecompNaming>("file");
-  const [precompTarget, setPrecompTarget] = useState<AePrecompTarget>("video");
-  const [folders, setFolders] = useState(false);
-  const [transformMode, setTransformMode] = useState<AeTransformMode>("none");
-  // Défaut aligné sur le core : `render` ferait rendre chaque timeline imbriquée par Resolve, donc
-  // exigerait un dossier de sortie sans que rien d'autre n'écrive.
-  const [nestedMode, setNestedMode] = useState<AeNestedMode>("flatten");
-  const [audioRenderFmt, setAudioRenderFmt] = useState<AeAudioRenderFmt>("wav");
-  const [videoContainer, setVideoContainer] = useState<AeVideoContainer>("mov");
-  const [audioContainer, setAudioContainer] = useState<AeAudioContainer>("m4a");
-  const [outDir, setOutDir] = useState<string | null>(null);
-  const [upscale, setUpscale] = useState<TransferUpscale>({});
+  const [saved] = useState(() => readPersistedObject(SETTINGS_KEY, DEFAULT_FORM));
+  const [videoMode, setVideoMode] = useState<AeVideoMode>(saved.videoMode);
+  const [codec, setCodec] = useState<UpscaleCodec>(saved.codec);
+  const [audio, setAudio] = useState<AeAudioMode>(saved.audio);
+  const [abr, setAbr] = useState(saved.abr);
+  const [handleSec, setHandleSec] = useState(saved.handleSec);
+  const [precomp, setPrecomp] = useState(saved.precomp);
+  const [precompNaming, setPrecompNaming] = useState<AePrecompNaming>(saved.precompNaming);
+  const [precompTarget, setPrecompTarget] = useState<AePrecompTarget>(saved.precompTarget);
+  const [folders, setFolders] = useState(saved.folders);
+  const [transformMode, setTransformMode] = useState<AeTransformMode>(saved.transformMode);
+  const [nestedMode, setNestedMode] = useState<AeNestedMode>(saved.nestedMode);
+  const [audioRenderFmt, setAudioRenderFmt] = useState<AeAudioRenderFmt>(saved.audioRenderFmt);
+  const [videoContainer, setVideoContainer] = useState<AeVideoContainer>(saved.videoContainer);
+  const [audioContainer, setAudioContainer] = useState<AeAudioContainer>(saved.audioContainer);
+
+  // Dossier de sortie et upscale : ceux de l'écran hôte quand il en porte, les nôtres sinon.
+  const ownOutDir = useState<string | null>(null);
+  const ownUpscale = useState<TransferUpscale>({});
+  const hosted = !!host;
+  const [outDir, setOutDir]: [string | null, Dispatch<SetStateAction<string | null>>] =
+    host ? [host.outDir, host.setOutDir] : ownOutDir;
+  const [upscale, setUpscale]: [TransferUpscale, Dispatch<SetStateAction<TransferUpscale>>] =
+    host ? [host.upscale, host.setUpscale] : ownUpscale;
 
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<AeProgress | null>(null);
   const [result, setResult] = useState<AeExportResult | null>(null);
+
+  useEffect(() => {
+    writePersistedObject<AeFormSettings>(SETTINGS_KEY, {
+      videoMode, codec, audio, abr, handleSec, precomp, precompNaming, precompTarget, folders,
+      transformMode, nestedMode, audioRenderFmt, videoContainer, audioContainer,
+    });
+  }, [videoMode, codec, audio, abr, handleSec, precomp, precompNaming, precompTarget, folders,
+    transformMode, nestedMode, audioRenderFmt, videoContainer, audioContainer]);
 
   const loadTimelines = useCallback(async () => {
     // SWR : liste cachée peinte d'abord (instantané), scan Resolve la remplace ensuite.
@@ -55,7 +125,9 @@ export function useAeExport() {
     );
   }, []);
 
-  useEffect(() => { loadTimelines(); }, [loadTimelines]);
+  // Quand un écran hôte conduit, c'est LUI qui choisit la timeline source : refaire le scan ici
+  // relancerait Resolve pour une liste que ce panneau n'affiche même pas.
+  useEffect(() => { if (!hosted) void loadTimelines(); }, [hosted, loadTimelines]);
 
   useEffect(() => nr.onAeProgress((p) => setProgress(p)), []);
 
@@ -75,7 +147,7 @@ export function useAeExport() {
     const dir = await nr.chooseDir();
     if (dir) setOutDir(dir);
     return dir;
-  }, []);
+  }, [setOutDir]);
 
   // L'upscale REMPLACE les pixels : ni la copie ni le réencapsulage ne savent le faire. L'option
   // impose donc le réencodage — le core applique la même règle, l'UI ne fait que la montrer.

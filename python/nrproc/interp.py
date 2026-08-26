@@ -11,6 +11,7 @@ selon leur écart temporel réel → durée conservée, mouvement lisse, et moin
 import os
 from nri18n import t
 
+from upscaler.imgout import image_spec, image_written, open_image_writer
 from upscaler.log import log
 
 from .dedup import DEAD_THR, frames_differ as _frames_differ
@@ -115,7 +116,7 @@ def _scaled_fps(fps_str, factor):
 
 
 def cmd_interpolate(args):
-    """Interpole un segment vidéo. Sortie = vidéo (codec d'upscaler.codecs)."""
+    """Interpole un segment vidéo. Sortie = vidéo (codec d'upscaler.codecs) ou séquence d'images."""
     # Le moteur RIFE est importé paresseusement : un wheel manquant donne une erreur propre.
     try:
         from .runner import get_rife
@@ -157,8 +158,13 @@ def cmd_interpolate(args):
 
     import numpy as np
 
+    # Sortie image : les frames interpolées sont écrites une par une, à la cadence de SORTIE (elle
+    # ne sert qu'à horodater le flux brut — une séquence n'a pas de cadence propre).
+    spec = image_spec(args)
+    images = spec["kind"] != "video"
     dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None))
-    enc = open_encoder_video(args.out, w, h, fps_str, args, out_fps=out_fps_str)
+    enc = (open_image_writer(args.out, w, h, out_fps_str, spec) if images
+           else open_encoder_video(args.out, w, h, fps_str, args, out_fps=out_fps_str))
 
     try:
         if dedup:
@@ -179,6 +185,9 @@ def cmd_interpolate(args):
 
     if err:
         return {"ok": False, "error": err}
-    if not os.path.exists(args.out) or os.path.getsize(args.out) == 0:
+    if images:
+        if not image_written(args.out, spec):
+            return {"ok": False, "error": t("empty_output")}
+    elif not os.path.exists(args.out) or os.path.getsize(args.out) == 0:
         return {"ok": False, "error": t("empty_output")}
     return {"ok": True, "output": args.out, "width": w, "height": h, "frames": written, "error": None}

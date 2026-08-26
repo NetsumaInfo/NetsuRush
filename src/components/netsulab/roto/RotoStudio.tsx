@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { fmtTime } from "@/lib/utils";
 import { Accordion } from "@/components/ui/accordion";
-import { isDefaultPost, REMOVE_ENGINES, REFINE_ENGINES, SAM_MODELS, VIEW_MODES } from "./rotoShared";
-import { BeforeAfter } from "./BeforeAfter";
+import {
+  isDefaultPost, EXPORT_FMT_KEY, EXPORT_FORMATS, REMOVE_ENGINES, REFINE_ENGINES, SAM_MODELS, VIEW_MODES,
+} from "./rotoShared";
+import { UpscaleCompare } from "@/components/upscale/UpscaleCompare";
+import type { FrameCompare } from "@/components/upscale/useProcSources";
 import { useRotoSession } from "./useRotoSession";
 import { useFrameViewer } from "./useFrameViewer";
 import { ObjectsPanel } from "./ObjectsPanel";
@@ -49,6 +51,8 @@ export function RotoStudio() {
   // Moteur de suppression retenu (remonté par EngineRow) : les réglages propres à la diffusion
   // n'ont aucun effet sur LaMa, qui reconstruit en une passe.
   const [removeEngine, setRemoveEngine] = useState(REMOVE_ENGINES[0].id);
+  // Format d'export tenu ICI : le tiroir « Sortie » le résume quand il est fermé.
+  const [exportFmt, setExportFmt] = useState(EXPORT_FORMATS[0].id);
   const sections = useRotoSections();
 
   // Résumés affichés sur un tiroir FERMÉ : sans eux, replier une section cacherait son état au
@@ -65,11 +69,34 @@ export function RotoStudio() {
   const maskSummary = s.refined
     ? t(s.useRefined ? "summary.matteOn" : "summary.matteOff")
     : postCount ? t("summary.post", { count: postCount }) : t("summary.matteNone");
-  const outputSummary = t("summary.remove", { steps: s.removeParams.steps, seed: s.removeParams.seed });
+  const outputSummary = t(`exportFmt.${EXPORT_FMT_KEY[exportFmt]}Label`, {
+    defaultValue: EXPORT_FORMATS.find((f) => f.id === exportFmt)?.label ?? exportFmt,
+  });
+  const removeSummary = t("summary.remove", { steps: s.removeParams.steps, seed: s.removeParams.seed });
+
+  // Test sur 1 image → même charge utile qu'un test de traitement, donc même comparateur (wipe,
+  // zoom molette ancré, pan). `alpha` : le damier n'a de sens que sous une image RÉELLEMENT
+  // transparente, donc sous la vue « alpha » ; sous une vue opaque (édition, matte, fond couleur)
+  // il ne ferait que salir le rendu qu'on juge. Sans image source, le comparateur se dégrade en
+  // aperçu simple des deux côtés plutôt que de disparaître.
+  const testCompare = useMemo<FrameCompare | null>(() => (s.testSrc ? {
+    origUrl: s.testBefore ?? s.testSrc,
+    outUrl: s.testSrc,
+    width: s.dims?.w ?? 0,
+    height: s.dims?.h ?? 0,
+    time: s.fps > 0 ? s.frame / s.fps : 0,
+    alpha: s.testMode === "alpha",
+  } : null), [s.testSrc, s.testBefore, s.testMode, s.dims, s.fps, s.frame]);
 
   // Le matte fin n'a de sens qu'une fois le plan suivi : on déplie sa section à ce moment-là,
   // UNE seule fois — la rouvrir à chaque suivi ignorerait le fait que l'utilisateur l'a refermée.
-  useEffect(() => { if (s.tracked) sections.openOnce("mask"); }, [s.tracked, sections]);
+  // Idem pour la suppression d'objet : elle exige le suivi (`disabled={!s.tracked}`), donc avant
+  // lui son tiroir ne sert à rien — et après, c'est la sortie qu'on cherche.
+  useEffect(() => {
+    if (!s.tracked) return;
+    sections.openOnce("mask");
+    sections.openOnce("remove");
+  }, [s.tracked, sections]);
 
   // Va à une frame donnée en coupant la lecture (scrub/step manuels).
   const goto = useCallback((f: number) => {
@@ -130,6 +157,14 @@ export function RotoStudio() {
       <section className="flex min-w-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden p-4">
         {!active ? (
           <p className="text-sm text-muted-foreground">{t("studio.pickSource")}</p>
+        ) : testCompare ? (
+          // TEST sur une image : le comparateur PREND LA PLACE du viewer, exactement comme le
+          // résultat d'un traitement. Une popup montrait le rendu au tiers de sa taille, sans zoom
+          // ni loupe — donc rien de jugeable, alors que c'est là qu'on décide des réglages.
+          <div className="flex w-full min-w-0 flex-col gap-2">
+            {s.testLabel && <p className="text-xs text-muted-foreground">{s.testLabel}</p>}
+            <UpscaleCompare data={testCompare} onClose={s.clearTest} />
+          </div>
         ) : (
           <>
             <RotoViewer s={s} shown={view.shown} stopPlayback={view.stop} />
@@ -234,22 +269,25 @@ export function RotoStudio() {
               </div>
             </RotoSection>
 
-            {/* 5. Ce qui sort de l'outil : un fichier avec alpha, ou un plan nettoyé. */}
-            <RotoSection id="output" title={t("panels.output")} summary={outputSummary}>
-              <div className="space-y-3">
-                <RotoStep label={t("output.exportStep")}>
-                  <ExportRow disabled={!s.tracked || running} objects={s.objects} onExport={s.exportAs} />
-                </RotoStep>
-                <RotoStep label={t("panels.removeObject")}>
-                  <div className="space-y-1.5">
-                    <EngineRow label={t("panels.removeObject")} icon={Eraser} engines={REMOVE_ENGINES}
-                      installed={s.installedModels} disabled={!s.tracked || running} onRun={s.removeSelected}
-                      onTest={s.testRemove} testDisabled={!s.tracked || running} onEngineChange={setRemoveEngine} />
-                    <RemoveParamsRows value={s.removeParams} onChange={s.setRemoveParams} disabled={running}
-                      diffusion={removeEngine === "minimax-remover"} />
-                  </div>
-                </RotoStep>
+            {/* 5. Effacer au lieu d'extraire : le masque pilote la reconstruction du fond. Tiroir à
+                   part — rangée sous « Sortie », l'opération passait pour une variante de l'export. */}
+            <RotoSection id="remove" title={t("panels.removeObject")} summary={removeSummary}>
+              <div className="space-y-1.5">
+                <EngineRow label={t("panels.removeObject")} icon={Eraser} engines={REMOVE_ENGINES}
+                  installed={s.installedModels} disabled={!s.tracked || running} onRun={s.removeSelected}
+                  onTest={s.testRemove} testDisabled={!s.tracked || running} onEngineChange={setRemoveEngine} />
+                <RemoveParamsRows value={s.removeParams} onChange={s.setRemoveParams} disabled={running}
+                  diffusion={removeEngine === "minimax-remover"} />
               </div>
+            </RotoSection>
+
+            {/* 6. Dernier geste : écrire le fichier avec sa couche alpha. En queue de rail parce que
+                   tout ce qui précède — masque, matte, effacement — décide de ce qu'il contient. */}
+            <RotoSection id="output" title={t("panels.output")} summary={outputSummary}>
+              <RotoStep label={t("output.exportStep")}>
+                <ExportRow fmt={exportFmt} onFmtChange={setExportFmt} disabled={!s.tracked || running}
+                  objects={s.objects} onExport={s.exportAs} />
+              </RotoStep>
             </RotoSection>
           </Accordion>
         </div>
@@ -278,13 +316,6 @@ export function RotoStudio() {
         </div>
       </aside>
 
-      {/* TEST sur une image : comparateur AVANT/APRÈS (curseur glissant), rien n'est écrit. */}
-      <Dialog open={!!s.testSrc} onOpenChange={(o) => { if (!o) s.clearTest(); }}>
-        <DialogContent className="max-w-3xl">
-          <DialogTitle className="text-sm">{s.testLabel}</DialogTitle>
-          {s.testSrc && <BeforeAfter before={s.testBefore} after={s.testSrc} />}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

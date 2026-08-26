@@ -7,6 +7,7 @@ import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
 import { retainPausedVideo } from "@/lib/previewVideoPool";
+import { claimHoverPreview } from "@/lib/hoverPreview";
 import { IS_REMOTE } from "@/lib/remote";
 
 // Bandes d'anticipation, en PIXELS FIXES. Elles étaient dérivées de la hauteur de cellule, donc un
@@ -305,14 +306,32 @@ export function useSceneCardMedia({
     setTries((t) => Math.min(t + 1, 4));
   }
 
+  // Survol arbitré GLOBALEMENT (cf. lib/hoverPreview) : une seule carte de l'app peut être sous le
+  // pointeur. Sans ça, un défilement à la molette laissait la carte quittée en lecture (Chromium
+  // n'émet `mouseleave` qu'au mouvement suivant) — plusieurs aperçus finissaient par jouer en fond.
+  const dropClaim = useRef<(() => void) | null>(null);
+  const hoverOff = useRef(() => {
+    dropClaim.current = null;
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+    setPointerOn(false);
+    setHovered(false);
+  }).current;
+  // Le jeton doit repartir au démontage : une carte détruite en plein survol le garderait sinon, et
+  // la carte suivante ne pourrait plus le prendre.
+  useEffect(() => () => {
+    dropClaim.current?.();
+    dropClaim.current = null;
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
   function enter() {
     setPointerOn(true);
+    dropClaim.current = claimHoverPreview(rootRef.current, hoverOff);
     timer.current = setTimeout(() => setHovered(true), 180);
   }
   function leave() {
-    setPointerOn(false);
-    if (timer.current) clearTimeout(timer.current);
-    setHovered(false);
+    dropClaim.current?.();
+    hoverOff();
   }
   function focusEnter() { setFocusOn(true); }
   function focusLeave() { setFocusOn(false); }

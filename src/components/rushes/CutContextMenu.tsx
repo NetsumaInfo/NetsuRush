@@ -9,7 +9,7 @@ import {
   ContextMenuSeparator, ContextMenuLabel, ContextMenuCheckboxItem, ContextMenuGroup,
   ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent,
 } from "@/components/ui/context-menu";
-import { MODELS, PRESETS } from "./cutStudioShared";
+import { canFewerCols, canMoreCols, MODELS, PRESETS, stepCols } from "./cutStudioShared";
 import type { DetectModel } from "@/lib/bridge";
 import { modelUsesPreset } from "@/lib/detection";
 
@@ -35,7 +35,11 @@ export interface CutMenuProps {
   onClearEdits: () => void;
   gridPlay: boolean;
   setGridPlay: (p: boolean) => void;
+  /** Colonnes RÉELLEMENT affichées (cf. gridMetrics), pas le réglage mémorisé : c'est ce nombre
+   *  que les deux entrées font varier, sinon les premiers clics ne changent rien à l'écran. */
   cols: number;
+  /** Colonnes maximales que la largeur courante peut tenir sans passer sous le plancher de cellule. */
+  maxCols: number;
   setCols: React.Dispatch<React.SetStateAction<number>>;
   onThumbs: () => void;
   thumbsBusy: boolean;
@@ -137,10 +141,10 @@ export function CutContextMenu(p: CutMenuProps) {
             <ContextMenuSeparator />
             <ContextMenuGroup>
               <ContextMenuLabel>{t("shared.thumbSize")}</ContextMenuLabel>
-              <ContextMenuItem closeOnClick={false} onClick={() => p.setCols((c) => Math.max(2, c - 1))} disabled={p.cols <= 2}>
+              <ContextMenuItem closeOnClick={false} onClick={() => p.setCols(stepCols(p.cols, -1, p.maxCols))} disabled={!canFewerCols(p.cols)}>
                 <Plus /> {t("cutMenu.larger")}
               </ContextMenuItem>
-              <ContextMenuItem closeOnClick={false} onClick={() => p.setCols((c) => Math.min(8, c + 1))} disabled={p.cols >= 8}>
+              <ContextMenuItem closeOnClick={false} onClick={() => p.setCols(stepCols(p.cols, 1, p.maxCols))} disabled={!canMoreCols(p.cols, p.maxCols)}>
                 <Minus /> {t("cutMenu.smaller")}
               </ContextMenuItem>
             </ContextMenuGroup>

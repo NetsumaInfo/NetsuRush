@@ -2,7 +2,18 @@
   "app": {
     "modulePreparing": "準備中のモジュールです。近日公開。"
   },
-  "nav": { "derush": "NetsuCut", "script": "NetsuDraft", "notebook": "NetsuBook", "search": "NetsuSearch", "upscale": "NetsuLab", "reference": "NetsuBoard", "transfer": "NetsuBridge", "voice": "NetsuTalk", "chat": "NetsuPilot", "optimisation": "NetsuBoost" },
+  "nav": {
+    "derush": "NetsuCut",
+    "script": "NetsuDraft",
+    "notebook": "NetsuBook",
+    "search": "NetsuSearch",
+    "upscale": "NetsuLab",
+    "reference": "NetsuBoard",
+    "transfer": "NetsuBridge",
+    "voice": "NetsuTalk",
+    "chat": "NetsuPilot",
+    "optimisation": "NetsuBoost"
+  },
   "sidebar": {
     "settings": "設定",
     "hostPicked": "操作対象アプリ"
@@ -18,10 +29,12 @@
     "resolveOffline": "Resolve オフライン",
     "project": "プロジェクト：{{project}}",
     "refresh": "状態を更新",
-    "resolveHint": "ブリッジは動作していますが、Resolve が応答しません。<b1>Resolve Studio</b1> でプロジェクトを開き、<b2>環境設定 ▸ システム ▸ 一般 ▸ 外部スクリプティング = ローカル</b2> にして Resolve を再起動してください。",
+    "resolveHint": "ブリッジは動いていますが、Resolve が応答しません。<b1>Resolve Studio</b1> でプロジェクトを開き、<b2>環境設定 ▸ システム ▸ 一般 ▸ 外部スクリプティング = ローカル</b2> を有効にして再起動してください。",
     "adobeHint": "{{host}} を開き、<b>ウィンドウ ▸ エクステンション ▸ NetsuRush</b> パネルを開いてください（Adobe タブからインストール）。"
   },
-  "menu": { "derush": "素材整理", "chat": "チャット",
+  "menu": {
+    "derush": "素材整理",
+    "chat": "チャット",
     "edit": "編集",
     "cut": "切り取り",
     "paste": "貼り付け",

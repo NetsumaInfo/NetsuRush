@@ -12,10 +12,9 @@
   "editor": {
     "name": "名前",
     "namePlaceholder": "プロファイル名",
-    "destination": "書き出し先",
-    "timeline": "タイムライン",
     "folder": "フォルダー",
     "folderPlaceholder": "フォルダー名…",
+    "folderHint": "カットをルートではなくこの Media Pool フォルダーに整理します。",
     "defaultFolder": "NetsuRush — カット",
     "existingFolders": "既存のフォルダー",
     "mediaPoolFolders": "Media Pool のフォルダー",

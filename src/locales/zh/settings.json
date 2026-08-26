@@ -450,6 +450,8 @@
     "showProject": "项目名称",
     "showProjectHint": "可能泄露客户名称。",
     "showElapsed": "已用时间",
+    "showLinks": "可点击的卡片",
+    "showLinksHint": "图片打开 Discord 服务器，第一行打开仓库。",
     "custom": "自定义文本",
     "customHelp": "替换自动生成的行。{module} 和 {projet} 会被替换。",
     "details": "第一行",
@@ -597,7 +599,7 @@
     },
     "projects": {
       "current": "已打开",
-      "desc": "搜索默认只覆盖当前打开的项目。NetsuRush 读取过某项目的媒体池后，该项目就会出现在此列表。扫描会依次打开每个 Resolve 项目以收集其素材，随后重新打开原来的项目。",
+      "desc": "搜索已知的项目。NetsuRush 读取过某个项目的媒体池后，它就会出现在这里。「清点」会去找出其余的。",
       "empty": "尚无已知项目。",
       "forget": "移除",
       "forgetTooltip": "从列表中移除该项目（不影响索引与文件）",

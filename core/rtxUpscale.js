@@ -12,6 +12,7 @@ const { rtxBin, RTX_DIR, RTX_DLLS } = require('./config');
 const { importToMediaPool } = require('./resolve');
 const { sanitizeName } = require('./utils');
 const { playInfo, probeMedia } = require('./ffmpeg');
+const { audioModeForContainer } = require('./processEncoding');
 const { t } = require('./i18n');
 
 // VSR agrandit exactement ×2 : aucun autre facteur n'existe dans le SDK.
@@ -132,6 +133,9 @@ async function runRtxUpscale(event, opts) {
   if (dims.height >= RTX_MAX_INPUT_HEIGHT) return { ok: false, error: t('rtxInputTooLarge') };
 
   const bin = /** @type {string} */ (rtxBin());
+  // Le CLI n'écrit que du MP4 : une piste que ce conteneur refuse (PCM d'un ProRes, Vorbis d'un
+  // WebM) ferait échouer le muxage APRÈS l'upscale entier. Arbitré avant, comme partout ailleurs.
+  const aMode = await audioModeForContainer('mp4', String(audio), opts);
   const customName = typeof outputName === 'string' && outputName.trim();
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = (whole || !Array.isArray(segments) || !segments.length)
@@ -158,7 +162,7 @@ async function runRtxUpscale(event, opts) {
     const frames = await clipFrames(input, j.start, j.end);
     const args = buildArgs({
       input, out, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
-      quality: qp, preset: nvPreset, audio: String(audio), abr, vsrQuality: vsr, hdr: trueHdr,
+      quality: qp, preset: nvPreset, audio: aMode, abr, vsrQuality: vsr, hdr: trueHdr,
     });
     const r = await runOne(event, bin, args, path.basename(out), i, total, frames);
     return Object.assign({}, r, { out });

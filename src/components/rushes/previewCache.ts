@@ -45,6 +45,9 @@ const WARM_PROXY_DEBOUNCE_MS = 150;
 // poll each card would pull its own RPC while scrolling (HTTP sockets saturated → slow reveal); here
 // the renderer cache is re-primed while the batch lands, and once more when it ends.
 const WARM_THUMB_POLL_MS = 1500;
+// Ceiling of the backoff applied when a round brings nothing new (see warmThumbs). It only ever
+// delays the re-priming of a cache the batch is still filling, never the batch itself.
+const WARM_THUMB_POLL_MAX_MS = 12_000;
 // Bounded pools, never `Promise.all` over 1400 shots: the browser would spread the fetches in waves
 // and requests would leave AFTER "Stop", encoding anyway. A fixed worker count pulls shots one by
 // one, so aborting leaves at most this many encodes to kill.
@@ -91,13 +94,15 @@ export function usePreviewCache(): PreviewCache {
   // encode and every consumer gets exactly the same result.
   const pendingRef = useRef<Map<string, Promise<string | null>>>(new Map());
   const warmProxyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const warmPollsRef = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
+  // Each entry cancels one warm poll. Functions rather than timer ids: the poll re-arms itself with a
+  // growing delay, so the id it would be cancelled by is not the id it was started with.
+  const warmPollsRef = useRef<Set<() => void>>(new Set());
   const warmVersionRef = useRef(0);
 
   useEffect(() => () => {
     warmVersionRef.current++;
     if (warmProxyTimer.current) clearTimeout(warmProxyTimer.current);
-    warmPollsRef.current.forEach((poll) => clearInterval(poll));
+    warmPollsRef.current.forEach((cancel) => cancel());
     warmPollsRef.current.clear();
   }, []);
 
@@ -168,11 +173,26 @@ export function usePreviewCache(): PreviewCache {
     // entry, so replaying the whole list of a several-hundred-shot grid every 1.5 s would pound the
     // disk exactly while scrolling.
     const pending = () => items.filter((it) => !getThumb(it.path, it.time));
-    const poll = setInterval(() => {
+    // Le rythme RALENTIT quand un tour ne rapporte rien. Sur une grille de plusieurs centaines de
+    // plans dont aucune vignette n'est encore sur disque, un intervalle fixe renvoyait la liste
+    // entière toutes les 1,5 s — le core statait des centaines de fichiers en boucle, en concurrence
+    // directe avec la génération qu'on attend. Le premier tour qui rapporte quelque chose remet le
+    // rythme au plus court : tant que ça avance, la grille se remplit à la même vitesse qu'avant.
+    let delay = WARM_THUMB_POLL_MS;
+    let left = items.length;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const tick = () => {
       const missing = pending();
-      if (missing.length) void warmResolveThumbs(missing);
-    }, WARM_THUMB_POLL_MS);
-    warmPollsRef.current.add(poll);
+      if (missing.length) {
+        delay = missing.length < left ? WARM_THUMB_POLL_MS : Math.min(WARM_THUMB_POLL_MAX_MS, delay * 2);
+        left = missing.length;
+        void warmResolveThumbs(missing);
+      }
+      timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, delay);
+    const cancel = () => { if (timer) clearTimeout(timer); timer = null; };
+    warmPollsRef.current.add(cancel);
     // One batch per FILE: the core keeps one current batch per file (a newer one supersedes it), so
     // a grid spanning twenty sources warms them all at once instead of queueing behind one another.
     const byFile = new Map<string, PreviewThumbRange[]>();
@@ -185,8 +205,8 @@ export function usePreviewCache(): PreviewCache {
       return { time, frame: s.fps ? Math.round(time * s.fps) : (s.inFrame ?? 0) };
     })).catch(() => {}));
     void Promise.all(batches).finally(() => {
-      clearInterval(poll);
-      warmPollsRef.current.delete(poll);
+      cancel();
+      warmPollsRef.current.delete(cancel);
       if (warmVersionRef.current !== version) return;   // another grid took over
       const missing = pending();
       if (missing.length) void warmResolveThumbs(missing);
@@ -217,6 +237,38 @@ export function usePreviewCache(): PreviewCache {
     proxyTokensRef.current = [];
     const run = (async () => {
       let done = 0, failed = 0, reused = 0;
+      // La VÉRITÉ est sur le disque, pas dans le cache d'URL. Ce cache dit « ce proxy existe » sur la
+      // foi d'une résolution ou d'une lecture passées : vider le cache d'aperçus depuis les Réglages,
+      // une éviction automatique (LRU) ou un dossier temporaire nettoyé par Windows laissent derrière
+      // des URL qui ne désignent plus rien. La pré-génération répondait alors « déjà à jour » et ne
+      // régénérait RIEN, définitivement — impossible de la relancer sur des fichiers disparus.
+      //
+      // Un seul appel pour toute la liste, sans encoder quoi que ce soit : ce qui manque est OUBLIÉ du
+      // cache, donc réellement réencodé plus bas, et ce qui reste compte comme déjà prêt.
+      const verified = new Set<string>();
+      // Sérialisée : six ouvriers découvrent les mêmes nouveaux plans en même temps. Enchaînées, les
+      // vérifications se fondent en un seul appel (le premier marque, les suivants n'ont plus rien à
+      // demander) et personne ne lit le cache avant que les entrées mortes n'en soient sorties.
+      let verifyChain: Promise<void> = Promise.resolve();
+      const verifyPending = (shots: PreviewRange[]) => {
+        verifyChain = verifyChain.then(() => verify(shots));
+        return verifyChain;
+      };
+      const verify = async (shots: PreviewRange[]) => {
+        const pending = shots.filter((shot) => !verified.has(previewKey(shot.path, shot.in, shot.out)));
+        if (!pending.length) return;
+        for (const shot of pending) verified.add(previewKey(shot.path, shot.in, shot.out));
+        const rows = await nr
+          .proxyResolve(pending.map((shot) => ({ input: shot.path, start: shot.in, end: shot.out })), { height })
+          .catch(() => []);
+        const present = new Set(rows.filter((row) => row.file).map((row) => previewKey(row.input, row.start, row.end)));
+        for (const shot of pending) {
+          const key = previewKey(shot.path, shot.in, shot.out);
+          if (!present.has(key)) cache.delete(key);
+        }
+      };
+      await verifyPending(readSource(source));
+      if (proxyAbortRef.current) return;
       // Shots whose proxy was ALREADY there. Without this count, re-running over a fully cached list
       // flies through the bar and reports "proxies ready": nothing distinguishes "there was nothing
       // to do" from "it did nothing".
@@ -253,6 +305,10 @@ export function usePreviewCache(): PreviewCache {
           const shot = nextShot();
           if (!shot) return;
           publish();
+          // Plans arrivés APRÈS le départ (la liste vivante a grandi) : ils n'ont pas traversé la
+          // vérification initiale. On la passe sur la liste ENTIÈRE — les plans déjà vérifiés en
+          // sortent tout seuls, donc les retardataires partent en UN appel et non un chacun.
+          await verifyPending(readSource(source));
           if (peekProxy(shot.path, shot.in, shot.out)) reused++;
           try {
             let ok = await encode(shot);

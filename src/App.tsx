@@ -26,6 +26,7 @@ import { UpdateBootstrap } from "@/components/updates/UpdateBootstrap";
 import { armAutoInstall } from "@/store/updater";
 import { Spinner } from "@/components/ui/spinner";
 import { Toaster } from "@/components/ui/toast";
+import { ExportStatusToast } from "@/components/export/ExportStatusToast";
 import { loadExportCapabilities } from "@/features/export/capabilities";
 import { GateFrame } from "@/components/auth/GateFrame";
 
@@ -272,6 +273,11 @@ function Shell() {
           de l'indicateur d'erreur, qui reste ancré au bas. */}
       <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
         <Toaster />
+        {/* APRÈS la pile : le gestionnaire de pastilles ne retient pas ce qu'on lui envoie avant que
+            sa pile ne soit abonnée. Ce voyant peut émettre dès son montage (un export lancé depuis une
+            autre fenêtre est déjà en cours quand la vue arrive) — placé avant, sa première pastille
+            partait dans le vide. Il ne rend rien, l'ordre visuel est libre. */}
+        <ExportStatusToast />
         <ErrorBadge />
       </div>
       <PowerPrompt />

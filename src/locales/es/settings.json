@@ -450,6 +450,8 @@
     "showProject": "Nombre del proyecto",
     "showProjectHint": "Puede revelar el nombre de un cliente.",
     "showElapsed": "Tiempo transcurrido",
+    "showLinks": "Tarjeta con enlaces",
+    "showLinksHint": "La imagen abre el servidor de Discord; la primera línea, el repositorio.",
     "custom": "Textos personalizados",
     "customHelp": "Sustituyen a las líneas automáticas. {module} y {projet} se reemplazan.",
     "details": "Primera línea",
@@ -597,7 +599,7 @@
     },
     "projects": {
       "current": "Abierto",
-      "desc": "La búsqueda se limita al proyecto abierto de forma predeterminada. Un proyecto entra en esta lista cuando NetsuRush lee su Media Pool. El escaneo abre cada proyecto de Resolve por turnos para recoger sus clips y luego vuelve a abrir el original.",
+      "desc": "Los proyectos que conoce la búsqueda. Un proyecto entra aquí en cuanto NetsuRush lee su Media Pool. «Recensar» busca los demás.",
       "empty": "Todavía no hay proyectos conocidos.",
       "forget": "Olvidar",
       "forgetTooltip": "Quita el proyecto de la lista (el índice y los archivos no se tocan)",

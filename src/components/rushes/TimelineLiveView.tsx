@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
-import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ScenePlayer } from "@/components/player/ScenePlayer";
 import { ExportButton } from "@/components/export/ExportButton";
@@ -33,7 +32,7 @@ import { cutsOfTrack, trackOptions } from "./timelineTracks";
 import { hostBuildTimeline, hostShort } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
 import { timelineBuildOptsFromProfile, newTimelineName } from "@/features/export/timelineTarget";
-import { fmt, gridContainerStyle, nextSegId } from "./cutStudioShared";
+import { canFewerCols, canMoreCols, fmt, gridContainerStyle, nextSegId, stepCols } from "./cutStudioShared";
 
 // L'identité d'un plan ne suffit pas : sa fin, sa position timeline, son FPS ou même sa source peuvent
 // changer sans modifier `track:index:inFrame`. Cette empreinte pilote la réutilisation exacte du cache.
@@ -67,7 +66,7 @@ export function TimelineLiveView() {
   // scanner, on ne l'active donc pas (les envois passent par hostBuildTimeline plus bas).
   const target = useTimelineTarget(browsable && !adobe.active);
   const timelineList = adobe.active ? adobe.timelines : target.timelines;
-  const { panelW, setPanelW, panelRef, startPanelDrag, playerOpen, setPlayerOpen } = usePanelLayout();
+  const { panelW, panelRef, startPanelDrag, handleRef, edgeRef, startEdgeDrag, onHandleKeyDown, playerOpen, setPlayerOpen } = usePanelLayout();
 
   const [q, setQ] = useState("");
   // timeline ouverte + sélection PERSISTÉES dans le store (la vue se démonte au changement d'onglet →
@@ -100,9 +99,6 @@ export function TimelineLiveView() {
   const [error, setError] = useState<string | null>(null);
   const exportProfiles = useApp((s) => s.exportProfiles);
   const activeExportProfileId = useApp((s) => s.activeExportProfileId);
-  const exportBusy = useApp((s) => s.exportBusy);
-  const exportProgress = useApp((s) => s.exportProgress);
-  const exportError = useApp((s) => s.exportError);
   const activeProfile = getActiveExportProfile(exportProfiles, activeExportProfileId);
 
   // Vignette par timeline (1er plan source). Le scan Resolve est coûteux (round-trips par timeline) →
@@ -624,9 +620,9 @@ export function TimelineLiveView() {
             <Tooltip>
               <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
                 <LayoutGrid className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-                <button type="button" aria-label={t("common:action.decrease")} onClick={() => grid.setCols((c) => Math.max(2, c - 1))} disabled={grid.cols <= 2} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
-                <span className="w-4 text-center tabular-nums">{grid.cols}</span>
-                <button type="button" aria-label={t("common:action.increase")} onClick={() => grid.setCols((c) => Math.min(8, c + 1))} disabled={grid.cols >= 8} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
+                <button type="button" aria-label={t("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
+                <span className="w-4 text-center tabular-nums">{grid.actualCols}</span>
+                <button type="button" aria-label={t("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
               </TooltipTrigger>
               <TooltipContent>{t("shared.thumbSize")}</TooltipContent>
             </Tooltip>
@@ -653,7 +649,9 @@ export function TimelineLiveView() {
       </div>
 
       <div className="flex min-h-0 flex-1 px-4">
-      <div ref={grid.gridScrollRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto mr-1 pl-1 pr-2 pb-4 pt-2">
+      {/* Pinned with the player closed: the grid owns the right edge — it breaks out of the 20px
+          gutter (px-4 + mr-1) so its scrollbar sits against the window like a real one. */}
+      <div ref={grid.gridScrollRef} className={"min-h-0 min-w-0 flex-1 overflow-y-auto pl-1 pr-2 pb-4 pt-2 " + (pinned && !playerOpen ? "-mr-5" : "mr-1")}>
         {loading ? (
           <div className="grid gap-3" style={gridContainerStyle(grid.actualCols || grid.cols, grid.cell)}>
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
@@ -687,15 +685,28 @@ export function TimelineLiveView() {
         )}
       </div>
 
+      {/* Lecteur fermé : son trait reste, et reprend les mêmes gestes à l'envers (molette ou glissé
+          vers la GAUCHE = rouvrir) — cf. Découpage. */}
+      {!playerOpen && !!visibleCuts.length && (
+        <div role="separator" aria-orientation="vertical" aria-label={t("cutStudio.showPlayer")}
+          tabIndex={0}
+          ref={edgeRef}
+          onPointerDown={startEdgeDrag}
+          onDoubleClick={() => setPlayerOpen(true)}
+          onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); setPlayerOpen(true); } }}
+          className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+          <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+          <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        </div>
+      )}
+
       {playerOpen && !!visibleCuts.length && (
         <div className="flex h-full min-h-0 shrink-0 bg-background">
           <div role="separator" aria-orientation="vertical" aria-label={t("shared.resize")}
             tabIndex={0}
+            ref={handleRef}
             onPointerDown={startPanelDrag}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft") { e.preventDefault(); setPanelW((w) => Math.min(560, w + 20)); }
-              else if (e.key === "ArrowRight") { e.preventDefault(); setPanelW((w) => Math.max(260, w - 20)); }
-            }}
+            onKeyDown={onHandleKeyDown}
             className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
                 restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
@@ -706,7 +717,7 @@ export function TimelineLiveView() {
           <aside ref={panelRef} style={{ width: panelW }} className="flex h-full min-h-0 shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-3 pl-5">
             <Card className="shrink-0 overflow-hidden p-0">
               <div className="relative aspect-video">
-                <ScenePlayer src={activeUrl} loop defaultVolume={0.2} />
+                <ScenePlayer src={activeUrl} defaultVolume={0.2} />
                 {activeCut && (
                   <div className="absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs">
                     {visibleCuts.findIndex((c) => c.id === activeCut.id) + 1}/{visibleCuts.length}
@@ -734,11 +745,8 @@ export function TimelineLiveView() {
                 disabled={selCount === 0}
                 className="w-full"
               />
-              {exportBusy && <Progress value={exportProgress} />}
             </div>
 
-            {exportBusy && <p className="break-words text-xs text-muted-foreground">{exportBusy}</p>}
-            {exportError && <p className="break-words text-xs text-destructive">{exportError}</p>}
           </aside>
         </div>
       )}

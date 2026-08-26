@@ -6,6 +6,7 @@ import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
 import { retainPausedVideo } from "@/lib/previewVideoPool";
 import { getThumb, setThumb as setThumbCache, subscribeThumbs } from "@/lib/thumbCache";
+import { claimHoverPreview } from "@/lib/hoverPreview";
 
 const THUMB_MARGIN_PX = 1600;
 // PRÉCHARGE. INVARIANT : cette bande couvre celle de la LECTURE (`PLAY_LEAD_PX`, la seule source de
@@ -228,7 +229,23 @@ export function useResultPreview(opts: {
 
   function resetUrl() { setFetchedUrl(null); }
 
+  // Survol arbitré GLOBALEMENT (cf. lib/hoverPreview) : une seule carte de l'app peut être sous le
+  // pointeur, et le jeton se rend aussi au défilement — un `mouseleave` manqué laissait sinon
+  // l'aperçu jouer (avec son) derrière le pointeur. Même mécanique que la grille de plans.
+  const dropClaim = useRef<(() => void) | null>(null);
+  const hoverOff = useRef(() => { dropClaim.current = null; setHovered(false); }).current;
+  useEffect(() => () => { dropClaim.current?.(); dropClaim.current = null; }, []);
+
+  function enter() {
+    dropClaim.current = claimHoverPreview(rootRef.current, hoverOff);
+    setHovered(true);
+  }
+  function leave() {
+    dropClaim.current?.();
+    hoverOff();
+  }
+
   // `near` : assez proche de l'écran pour mériter son habillage (voir ResultCard). Loin, la carte ne
   // rend que sa vignette.
-  return { rootRef, thumb, thumbErr, hovered, setHovered, url, showVideo, videoPaused, near: nearThumb || hovered, resetUrl };
+  return { rootRef, thumb, thumbErr, hovered, enter, leave, url, showVideo, videoPaused, near: nearThumb || hovered, resetUrl };
 }

@@ -93,7 +93,7 @@
     },
     "bake": {
       "label": "Re-encoded",
-      "hint": "Speed and framing baked into the file, with the codec chosen above, at timeline size. Outside the frame: black, unless that codec carries an alpha channel. An ANIMATED framing is rendered by DaVinci Resolve, keyframes included: faithful, but one render per shot."
+      "hint": "Speed and framing baked into the file, at timeline size — outside the frame is black. Animated framing: rendered by Resolve, one per shot."
     }
   },
   "errors": {

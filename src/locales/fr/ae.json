@@ -93,7 +93,7 @@
     },
     "bake": {
       "label": "Réencodé",
-      "hint": "Vitesse et cadrage cuits dans le fichier, avec le codec choisi ci-dessus, à la taille de la timeline. Hors cadre : noir, sauf si ce codec porte une couche alpha. Un cadrage ANIMÉ est rendu par DaVinci Resolve, images clés comprises : fidèle, mais un rendu par plan."
+      "hint": "Vitesse et cadrage cuits dans le fichier, à la taille de la timeline — hors cadre en noir. Cadrage animé : rendu par Resolve, un par plan."
     }
   },
   "errors": {
@@ -101,7 +101,7 @@
   },
   "outDirReasons": {
     "reencode": "plans réencodés",
-    "remux": "plans réencapsulés",
+    "remux": "plans remuxés",
     "bake": "vitesse cuite",
     "nestedRender": "timelines imbriquées rendues par Resolve",
     "audio": "pistes audio extraites"

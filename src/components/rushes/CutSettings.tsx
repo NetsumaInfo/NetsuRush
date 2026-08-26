@@ -108,9 +108,9 @@ export function CutSettings({ open, onOpenChange }: { open: boolean; onOpenChang
     <div
       role="dialog"
       aria-label={t("settings.title")}
-      className="absolute right-3 top-14 z-50 flex max-h-[calc(100%-4.5rem)] w-96 flex-col overflow-y-auto rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur"
+      className="absolute right-3 top-14 z-50 flex max-h-[calc(100%-4.5rem)] w-96 flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur"
     >
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <div className="flex shrink-0 items-center justify-between px-3 pb-1 pt-2">
         <h2 className="text-sm font-semibold text-foreground">{t("settings.title")}</h2>
         <button
           type="button"
@@ -122,13 +122,13 @@ export function CutSettings({ open, onOpenChange }: { open: boolean; onOpenChang
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-border px-3 pb-2">
         {TABS.map((tb) => (
           <Seg key={tb.id} active={tab === tb.id} onClick={() => setTab(tb.id)}>{t(tb.labelKey)}</Seg>
         ))}
       </div>
 
-      <div className="flex flex-col gap-5 p-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-4">
         {tab === "detect" && (<>
           <Row label={t("settings.defaultModel")} hint={t("settings.defaultModelHint")}>
             <DetectionModelSelect model={cutModel} onChange={setCutModel} className="w-40" />

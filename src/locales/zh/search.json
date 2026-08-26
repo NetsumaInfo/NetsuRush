@@ -17,7 +17,7 @@
     "realLower": "真人",
     "animeLower": "动画",
     "download": "下载",
-    "hint": "真人：YuNet + SFace（约 40 MB，宽松协议）。动画：imgutils + CCIP（约 120 MB，首次使用时下载）。也可在“设置 › 模型”中获取。"
+    "hint": "实拍：YuNet + SFace（约 40 MB）。动画：CCIP（约 120 MB）。也可在设置 › 模型中获取。"
   },
   "faceIndexPicker": {
     "title": "选择要索引人脸的素材",
@@ -53,7 +53,7 @@
       "none": "未索引"
     },
     "detail": "精度：",
-    "detailHint": "每个镜头分析的画面数。取在变化最大的位置，避开首尾（淡入淡出、黑场）。长镜头会多取一张。",
+    "detailHint": "每个镜头分析的画面数量。调高后搜索命中更多，但索引更慢。",
     "parallel": "并行",
     "parallelHint": "同时处理多个素材，数量取决于空闲显存",
     "reindex": "重新索引",
@@ -180,7 +180,7 @@
   },
   "faceRefPicker": {
     "title": "按人脸搜索",
-    "hint": "添加一张或多张角色照片，然后点击要搜索的人脸。同一角色多张人脸 = 结果更稳。",
+    "hint": "添加该角色的照片，然后点击要查找的那张脸。脸越多，结果越稳。",
     "addImage": "添加图片",
     "clearImages": "清空",
     "facesChosen": "已选 {{count}} 张人脸",

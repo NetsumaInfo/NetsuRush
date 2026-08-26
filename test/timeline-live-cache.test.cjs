@@ -51,8 +51,12 @@ test('automatic thumbnail warming batches per file and is cancellable', () => {
   assert.match(source, /nr\.thumbsBatch\(path, group\.map/);
   // Each poll round only asks for what is STILL missing, and every poll is cancellable.
   assert.match(source, /const pending = \(\) => items\.filter\(\(it\) => !getThumb\(it\.path, it\.time\)\)/);
-  assert.match(source, /warmPollsRef\.current\.add\(poll\)/);
-  assert.match(source, /warmPollsRef\.current\.forEach\(\(poll\) => clearInterval\(poll\)\)/);
+  assert.match(source, /warmPollsRef\.current\.add\(cancel\)/);
+  assert.match(source, /warmPollsRef\.current\.forEach\(\(cancel\) => cancel\(\)\)/);
+  // A round that brings nothing new slows the next one down, up to a ceiling; a round that makes
+  // progress goes straight back to the short rhythm. A fixed interval re-sent the WHOLE missing list
+  // every 1.5 s, which on a several-hundred-shot grid competed with the generation it waits for.
+  assert.match(source, /delay = missing\.length < left \? WARM_THUMB_POLL_MS : Math\.min\(WARM_THUMB_POLL_MAX_MS, delay \* 2\)/);
   // A newer grid takes over: the stale run must not re-warm behind it.
   assert.match(source, /warmVersionRef\.current !== version/);
 });

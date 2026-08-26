@@ -293,6 +293,15 @@ export interface ProcessExportOpts {
   speed?: "fast" | "balanced" | "quality" | "max";
   audioMode?: string;
   container?: "mp4" | "mkv" | "mov" | "webm";
+  // Sortie image du hub : un fichier image (source fixe) ou une séquence numérotée (source vidéo).
+  // "video" (défaut) = comportement historique, les champs suivants sont alors ignorés.
+  outputKind?: "video" | "sequence" | "image";
+  imageFormat?: "png" | "jpeg";
+  pngBits?: 8 | 16;         // profondeur PNG écrite
+  pngCompression?: number;  // 0..9 (sans perte quel que soit le niveau)
+  jpegQuality?: number;     // 1..100
+  seqPadding?: number;      // chiffres du compteur d'images
+  seqStart?: number;        // numéro de la première image
 }
 
 export interface UpscaleOpts extends ProcessExportOpts {
@@ -336,9 +345,10 @@ export type ShaderModel =
   | "artcnn_r16f96" | "artcnn_r8f64"
   | "artcnn_c4f32" | "artcnn_c4f32_ds" | "artcnn_c4f32_dn"
   | "artcnn_c4f16" | "artcnn_c4f16_ds" | "artcnn_c4f16_dn"
-  | "anime4k_aa_hq" | "anime4k_bb_hq" | "rtx_vsr" | "lanczos"
-  // Valeurs persistées historiques : toujours acceptées par le core, mais retirées du sélecteur.
-  | "artcnn_quality" | "anime4k";
+  | "rtx_vsr" | "lanczos"
+  // Valeurs persistées historiques : toujours acceptées par le core (elles retombent sur ArtCNN),
+  // mais retirées du sélecteur. Anime4K n'est plus livré du tout.
+  | "artcnn_quality" | "anime4k" | "anime4k_aa_hq" | "anime4k_bb_hq";
 
 export interface UpscaleShaderOpts extends ProcessExportOpts {
   input: string;
@@ -542,6 +552,9 @@ export interface RotoProgress { pct?: number | null; stage?: string; frame?: num
 export interface RotoPost {
   grow?: number; feather?: number; holes?: number; dots?: number;
   border?: number; smooth?: number; gamma?: number;
+  // Durcissement de l'alpha en % : coupe la demi-transparence d'un matte fin (intérieur plein,
+  // halo de fond à zéro) en ne laissant un dégradé que sur le vrai bord.
+  harden?: number;
 }
 // Mode d'affichage du masque : edit (overlay teinté) / matte (N&B) / alpha (découpe RGBA sur
 // damier) / bgcolor (composite sur couleur unie). outline = contours colorés par objet.
@@ -1227,6 +1240,7 @@ export interface DiscordPrefs {
   showModule: boolean;   // ligne « Derush », « Recherche »… selon l'onglet ouvert
   showProject: boolean;  // nom du projet/rush — off par défaut (un nom peut trahir un client)
   showElapsed: boolean;  // « 12:34 écoulées » depuis l'ouverture de l'app
+  showLinks: boolean;    // l'art ouvre le serveur, la premiere ligne le depot
   detailsTpl: string;
   stateTpl: string;
 }
@@ -1234,9 +1248,12 @@ export interface DiscordPrefs {
 // rejetée), d'où les champs optionnels — l'aperçu doit refléter cette omission.
 export interface DiscordActivity {
   details?: string;
+  // Une url PAR CHAMP : c'est ce qui rend la carte cliquable sur le profil, et le seul
+  // mecanisme qui marche — les boutons ne s'affichent jamais a leur proprietaire.
+  details_url?: string;
   state?: string;
   timestamps?: { start?: number }; // secondes Unix
-  assets?: { large_image?: string; large_text?: string };
+  assets?: { large_image?: string; large_text?: string; large_url?: string; small_url?: string };
 }
 export interface DiscordState {
   enabled: boolean;
@@ -2616,6 +2633,12 @@ export interface NrApi {
   rotoPropagate(opts?: RotoPropagateOpts): Promise<RotoResult>;
   rotoCancel(): Promise<{ ok: boolean; error?: string }>;
   rotoRefine(opts: RotoRefineOpts): Promise<RotoResult>;
+  // Rejoue l'aperçu du dernier test de matte fin avec le post-traitement et le mode d'affichage
+  // courants (le modèle ne retourne pas). `preview` null = rien à rejouer ; `mode` = vue rendue,
+  // dont le client déduit s'il doit poser un damier sous l'image.
+  rotoTestPreview(): Promise<{
+    ok: boolean; preview?: string | null; frame?: number; mode?: RotoViewMode; error?: string;
+  }>;
   rotoSetRefined(opts: { on: boolean }): Promise<RotoResult>;
   rotoExport(opts: { format: string; mode?: string; out?: string; obj?: number; bg?: string }): Promise<RotoResult>;
   rotoObjectRemove(opts: RotoRemoveOpts): Promise<RotoResult>;
@@ -2680,6 +2703,8 @@ export interface NrApi {
   chooseDir(): Promise<string | null>;
   chooseFiles(): Promise<string[] | null>;
   chooseMediaFiles(): Promise<string[] | null>;
+  // Vidéos ET images fixes : sources du hub de traitements, qui upscale/détoure aussi une image.
+  chooseVisualFiles(): Promise<string[] | null>;
   chooseImages(): Promise<string[] | null>;
   chooseAnyFile(): Promise<string | null>;
   // Chemins disque d'objets File lâchés depuis l'Explorateur (Chromium masque `File.path`). Index
@@ -2970,6 +2995,7 @@ const MOCK_DISCORD_PREFS: DiscordPrefs = {
   showModule: true,
   showProject: false,
   showElapsed: true,
+  showLinks: true,
   detailsTpl: "",
   stateTpl: "",
 };
@@ -3212,6 +3238,7 @@ const mock: NrApi = {
   rotoPropagate: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoCancel: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoRefine: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+  rotoTestPreview: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoSetRefined: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoExport: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoObjectRemove: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
@@ -3261,6 +3288,7 @@ const mock: NrApi = {
   chooseDir: async () => null,
   chooseFiles: async () => null,
   chooseMediaFiles: async () => null,
+  chooseVisualFiles: async () => null,
   chooseImages: async () => null,
   chooseAnyFile: async () => null,
   pathsForFiles: async (files) => files.map(() => ""),

@@ -450,6 +450,8 @@
     "showProject": "Nom du projet",
     "showProjectHint": "Peut révéler un nom de client.",
     "showElapsed": "Temps écoulé",
+    "showLinks": "Carte cliquable",
+    "showLinksHint": "L’image ouvre le serveur Discord, la première ligne le dépôt.",
     "custom": "Textes personnalisés",
     "customHelp": "Remplacent les lignes automatiques. {module} et {projet} sont substitués.",
     "details": "Première ligne",
@@ -597,7 +599,7 @@
     },
     "projects": {
       "current": "Ouvert",
-      "desc": "La recherche se limite par défaut au projet ouvert. Un projet rejoint cette liste dès que NetsuRush a lu son Media Pool. Le recensement ouvre chaque projet Resolve à tour de rôle pour relever ses rushs, puis rouvre celui de départ — utile pour les projets indexés avant l'arrivée de cette liste.",
+      "desc": "Les projets que la recherche connaît. Un projet y entre dès que NetsuRush a lu son Media Pool. « Recenser » va chercher les autres.",
       "empty": "Aucun projet connu pour l'instant.",
       "forget": "Oublier",
       "forgetTooltip": "Retire le projet de la liste (l'index et les fichiers ne sont pas touchés)",

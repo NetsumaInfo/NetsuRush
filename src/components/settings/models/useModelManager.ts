@@ -6,6 +6,10 @@ import { nr, type GpuVram, type ModelProgress, type ModelStatus } from "@/lib/br
 export interface ModelManager {
   status: Record<string, ModelStatus>;   // id → { installed, sizeBytes }
   downloading: Record<string, number | null>; // id → pct (null = indéterminé) pendant le download
+  // Étape en cours (download / verify / install). Sans elle, tout ce qui suit le téléchargement
+  // s'affichait « … » sur une barre indéterminée : impossible de distinguer une vérification
+  // d'empreinte ou un `pip install` d'un téléchargement qui repartirait de zéro.
+  stages: Record<string, string>;
   removing: Record<string, boolean>;     // suppression disque en cours
   errors: Record<string, string>;
   diskTotal: number;
@@ -27,6 +31,7 @@ export interface ModelManager {
 export function useModelManager(): ModelManager {
   const [status, setStatus] = useState<Record<string, ModelStatus>>({});
   const [downloading, setDownloading] = useState<Record<string, number | null>>({});
+  const [stages, setStages] = useState<Record<string, string>>({});
   const [removing, setRemoving] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [diskTotal, setDiskTotal] = useState(0);
@@ -59,13 +64,16 @@ export function useModelManager(): ModelManager {
       if (!alive.current) return;
       if (p.stage === "done" || p.stage === "canceled") {
         setDownloading((d) => { const n = { ...d }; delete n[p.id]; return n; });
+        setStages((s) => { const n = { ...s }; delete n[p.id]; return n; });
         refresh();
         if (p.stage === "done") setRestartRequired(true);
       } else if (p.stage === "error") {
         setDownloading((d) => { const n = { ...d }; delete n[p.id]; return n; });
+        setStages((s) => { const n = { ...s }; delete n[p.id]; return n; });
         if (p.error) setErrors((e) => ({ ...e, [p.id]: p.error as string }));
       } else {
         setDownloading((d) => ({ ...d, [p.id]: p.pct ?? null }));
+        if (p.stage) setStages((s) => (s[p.id] === p.stage ? s : { ...s, [p.id]: p.stage as string }));
       }
     });
     return () => { alive.current = false; off(); };
@@ -135,7 +143,7 @@ export function useModelManager(): ModelManager {
   }, [refresh]);
 
   return {
-    status, downloading, removing, errors, diskTotal, gpu, loading, restartRequired,
+    status, downloading, stages, removing, errors, diskTotal, gpu, loading, restartRequired,
     conflict, dismissConflict: () => setConflict(null),
     download, importFile, cancel, remove, refresh, restart,
   };

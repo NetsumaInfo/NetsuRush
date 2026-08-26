@@ -3,21 +3,33 @@ import { nr, type AudioTrack, type ProcMode, type Scene } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { type UpScope, type UpSource } from "./upscaleShared";
 import { readPersistedValue, writePersistedValue } from "@/lib/persistedJson";
+import { isStillSource } from "./imageOutput";
+import {
+  DEFAULT_PATTERN, EMPTY_TOKENS, resolveOutputName, reviewOutputNames,
+  type NamingReport, type NamingTokens,
+} from "./outputNaming";
 
 const SCOPE_KEY = "nr.netsulab.scope";
 const OUT_DIR_KEY = "nr.netsulab.outDir";
 const IMPORT_BACK_KEY = "nr.netsulab.importBack";
 const OUTPUT_NAMING_KEY = "nr.netsulab.outputNaming";
+const OUTPUT_PATTERN_KEY = "nr.netsulab.outputPattern";
 const RENDER_HISTORY_KEY = "nr.netsulab.renders.v1";
 const REVIEWABLE_VIDEO = /\.(?:avi|m2ts|m4v|mkv|mov|mp4|mts|mxf|ts|webm)$/i;
 
-export type OutputNamingMode = "original" | "prefix" | "suffix" | "custom";
-export interface OutputNaming {
-  mode: OutputNamingMode;
-  value: string;
-}
+// Motif de nommage hérité (mode + valeur) : migré UNE fois vers le motif à jetons, puis oublié.
+type LegacyNamingMode = "original" | "prefix" | "suffix" | "custom";
 
-const DEFAULT_OUTPUT_NAMING: OutputNaming = { mode: "original", value: "" };
+function migrateLegacyNaming(): string | null {
+  const saved = readPersistedValue<{ mode?: string; value?: string } | null>(OUTPUT_NAMING_KEY, null);
+  const mode = saved?.mode as LegacyNamingMode | undefined;
+  if (!mode) return null;
+  const value = typeof saved?.value === "string" ? saved.value.trim() : "";
+  if (mode === "custom" && value) return value;
+  if (mode === "prefix" && value) return `${value}${DEFAULT_PATTERN}`;
+  if (mode === "suffix" && value) return `{name}${value}_{op}_{scale}`;
+  return DEFAULT_PATTERN;
+}
 
 export interface FrameCompare {
   origUrl: string;
@@ -58,15 +70,6 @@ function nameOf(p: string): string {
   return p.replace(/\\/g, "/").split("/").pop() || p;
 }
 
-function outputBaseName(sourceName: string, naming: OutputNaming): string {
-  const original = sourceName.replace(/\.[^.]+$/, "");
-  const value = naming.value.trim();
-  if (naming.mode === "prefix") return `${value}${original}`;
-  if (naming.mode === "suffix") return `${original}${value}`;
-  if (naming.mode === "custom" && value) return value.replace(/\.[^.]+$/, "");
-  return original;
-}
-
 // Associe chaque fichier final à sa source et, si l'op a produit plusieurs plans, à sa plage exacte.
 // Les séquences PNG sont volontairement exclues : le viewer vidéo ne doit jamais tenter de lire un
 // dossier comme un média. Elles restent bien présentes dans le résultat d'export classique.
@@ -101,7 +104,6 @@ export function makeRenderReviews(
 // timeline (plusieurs plans du même fichier = sources DISTINCTES, sélectionnables indépendamment).
 export const srcKey = (s: { path: string; in?: number; out?: number }): string =>
   (s.in != null && s.out != null) ? `${s.path}#${s.in.toFixed(3)}-${s.out.toFixed(3)}` : s.path;
-const outputNamingKey = (source: UpSource): string => source.uid ?? srcKey(source);
 
 // Résout le découpage d'UNE source pour un run : un plan de timeline (in/out portés) → segment exact ;
 // sinon on applique la portée du panneau (entier / plage / plans) — seulement en source unique.
@@ -109,6 +111,8 @@ export function jobFor(
   src: UpSource,
   ctx: { multi: boolean; scope: UpScope; range: [number, number]; scenes: Scene[]; picked: Set<number> },
 ): { whole: boolean; segments?: { in: number; out: number }[] } {
+  // Une image fixe n'a ni durée ni plans : elle sort toujours en un seul job, quelle que soit la portée.
+  if (isStillSource(src)) return { whole: true };
   if (src.in != null && src.out != null) return { whole: false, segments: [{ in: src.in, out: src.out }] };
   const { multi, scope, range, scenes, picked } = ctx;
   if (multi || scope === "whole") return { whole: true };
@@ -163,37 +167,40 @@ export function useProcSources() {
   const [detecting, setDetecting] = useState(false);
 
   const [outDir, setOutDir] = useState<string | null>(() => readPersistedValue<string | null>(OUT_DIR_KEY, null));
-  const [outputNaming, setOutputNamingState] = useState<OutputNaming>(() => {
-    const saved = readPersistedValue<Partial<OutputNaming> | null>(OUTPUT_NAMING_KEY, null);
-    const mode = saved?.mode;
-    return mode === "prefix" || mode === "suffix" || mode === "custom" || mode === "original"
-      ? { mode, value: typeof saved?.value === "string" ? saved.value : "" }
-      : DEFAULT_OUTPUT_NAMING;
+  // Motif de nommage PARTAGÉ par toutes les sources (un seul champ à l'écran). Un média renommé
+  // dans le bac porte son nom exact (UpSource.outName) et sort du motif.
+  const [outputPattern, setOutputPatternState] = useState<string>(() => {
+    const saved = readPersistedValue<unknown>(OUTPUT_PATTERN_KEY, null);
+    if (typeof saved === "string") return saved;
+    return migrateLegacyNaming() ?? DEFAULT_PATTERN;
   });
-  const setOutputNaming = useCallback((next: OutputNaming) => {
-    writePersistedValue(OUTPUT_NAMING_KEY, next);
-    setOutputNamingState(next);
+  const setOutputPattern = useCallback((next: string) => {
+    writePersistedValue(OUTPUT_PATTERN_KEY, next);
+    setOutputPatternState(next);
   }, []);
-  const [outputNamingOverrides, setOutputNamingOverrides] = useState<Record<string, OutputNaming>>({});
-  const setOutputNamingOverride = useCallback((source: UpSource, next: OutputNaming | null) => {
-    const key = outputNamingKey(source);
-    setOutputNamingOverrides((current) => {
-      if (next) return { ...current, [key]: next };
-      if (!(key in current)) return current;
-      const copy = { ...current };
-      delete copy[key];
-      return copy;
-    });
+  // Jetons de l'op ACTIVE ({op}/{scale}/{model}) : publiés ici par le hook du mode courant, pour que
+  // l'aperçu du nom et la détection de collisions parlent du run réellement configuré. Garde
+  // d'égalité : un effet qui republie les mêmes jetons ne provoque pas de nouveau rendu.
+  const [namingTokens, setNamingTokensState] = useState<NamingTokens>(EMPTY_TOKENS);
+  const setNamingTokens = useCallback((next: NamingTokens) => {
+    setNamingTokensState((cur) =>
+      (cur.op === next.op && cur.scale === next.scale && cur.model === next.model) ? cur : next);
   }, []);
-  const outputNamingOverrideFor = useCallback((source: UpSource): OutputNaming | null =>
-    outputNamingOverrides[outputNamingKey(source)] ?? null, [outputNamingOverrides]);
-  const outputNamingFor = useCallback((source: UpSource): OutputNaming =>
-    outputNamingOverrideFor(source) ?? outputNaming, [outputNaming, outputNamingOverrideFor]);
-  const outputNameFor = useCallback((source: UpSource) =>
-    outputBaseName(source.name, outputNamingFor(source)), [outputNamingFor]);
-  const outputBases = sources.map((source) => outputNameFor(source).toLocaleLowerCase());
-  const outputNamingProblem: "duplicateOutputNames" | null =
-    new Set(outputBases).size !== outputBases.length ? "duplicateOutputNames" : null;
+  const renameSource = useApp((s) => s.nlRenameSource);
+  const setSourceName = useCallback((source: UpSource, name: string | null) =>
+    renameSource(srcKey(source), name), [renameSource]);
+  // Rapport de nommage : nom final de chaque source + collisions. Recalculé à chaque rendu (quelques
+  // dizaines de chaînes au plus) pour que l'avertissement suive la frappe dans le champ.
+  const nameReport: NamingReport = reviewOutputNames(sources, outputPattern, namingTokens);
+  const outputNameFor = useCallback((source: UpSource) => {
+    const index = sources.findIndex((s) => srcKey(s) === srcKey(source));
+    return resolveOutputName(source, index < 0 ? 0 : index, outputPattern, namingTokens);
+  }, [sources, outputPattern, namingTokens]);
+  const outputNamingProblem = nameReport.problem;
+  // Sources IMAGE FIXE du bac : elles sortent un fichier image, jamais une vidéo, et l'interpolation
+  // n'a rien à interpoler dessus.
+  const stillCount = sources.reduce((n, source) => n + (isStillSource(source) ? 1 : 0), 0);
+  const allStills = sources.length > 0 && stillCount === sources.length;
   const [importBack, setImportBackState] = useState(() => readPersistedValue(IMPORT_BACK_KEY, true));
   const setImportBack = useCallback((value: boolean) => {
     writePersistedValue(IMPORT_BACK_KEY, value);
@@ -244,7 +251,8 @@ export function useProcSources() {
   const addSources = useCallback((items: UpSource[]) => { setSourcesErr(null); nlAdd(items); }, [nlAdd]);
 
   const pickFiles = useCallback(async () => {
-    const files = await nr.chooseFiles();
+    // Vidéos ET images fixes : le hub traite les deux (une image sort en PNG/JPEG).
+    const files = await nr.chooseVisualFiles();
     if (files && files.length) nlAdd(files.map((p) => ({ name: nameOf(p), path: p })));
   }, [nlAdd]);
 
@@ -299,7 +307,8 @@ export function useProcSources() {
     duration, range, setRange, setSourceRange,
     scenes, picked, detecting, detectScenes, toggleScene, setAllScenes,
     outDir, chooseOut, importBack, setImportBack,
-    outputNaming, setOutputNaming, outputNamingOverrides, setOutputNamingOverride, outputNamingOverrideFor, outputNamingFor, outputNameFor, outputNamingProblem,
+    outputPattern, setOutputPattern, namingTokens, setNamingTokens, setSourceName,
+    nameReport, outputNameFor, outputNamingProblem, stillCount, allStills,
     sourcesErr, setSourcesErr,
     renderedForActive, activeRender, renderReviewOpen,
     recordRenders, selectRender, openRenderReview, closeRenderReview,

@@ -450,6 +450,8 @@
     "showProject": "Project name",
     "showProjectHint": "Can reveal a client's name.",
     "showElapsed": "Time elapsed",
+    "showLinks": "Clickable card",
+    "showLinksHint": "The art opens the Discord server, the first line the repository.",
     "custom": "Custom text",
     "customHelp": "Replaces the automatic lines. {module} and {projet} get substituted.",
     "details": "First line",
@@ -597,7 +599,7 @@
     },
     "projects": {
       "current": "Open",
-      "desc": "Search is limited to the open project by default. A project joins this list once NetsuRush has read its Media Pool. Scanning opens each Resolve project in turn to collect its footage, then reopens the original one — useful for projects indexed before this list existed.",
+      "desc": "The projects search knows about. A project lands here once NetsuRush has read its Media Pool. “Scan” goes and finds the rest.",
       "empty": "No project known yet.",
       "forget": "Forget",
       "forgetTooltip": "Removes the project from the list (index and files are untouched)",

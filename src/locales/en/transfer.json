@@ -32,7 +32,7 @@
     "modeAppend": "Existing timeline",
     "videoOnly": "Video only",
     "richAe": "Advanced After Effects options",
-    "richAeHint": "Transforms, speed and precomps, instead of a plain copy of the shots. Media and encoding are then set in the panel below.",
+    "richAeHint": "Rebuilds transforms, speed and precomps instead of copying the shots over. Media is set below.",
     "yes": "Yes",
     "no": "No",
     "choose": "Choose…",
@@ -86,7 +86,7 @@
       "hint": "Original files linked as they are. No file written."
     },
     "remux": {
-      "label": "Rewrap",
+      "label": "Remux",
       "hint": "New container, lossless. Useful when the target cannot read the source one."
     },
     "reencode": {

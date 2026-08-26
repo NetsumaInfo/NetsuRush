@@ -78,10 +78,8 @@ export function DetectionModelSelect({
           </SelectContent>
         </Select>
       </TooltipTrigger>
-      <TooltipContent side="bottom" align="end" className="max-w-60">
-        <p className="font-medium">{active.label}</p>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{activeDetail}</p>
-      </TooltipContent>
+      {/* Le nom du modèle est déjà sur le déclencheur : le tooltip ne porte que ce qu'il fait. */}
+      <TooltipContent side="bottom" align="end" className="max-w-60">{activeDetail}</TooltipContent>
     </Tooltip>
   );
 }

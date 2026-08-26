@@ -93,7 +93,11 @@ function makeRotoDaemon() {
     return p;
   }
 
-  return { req, kill: () => { try { if (proc) proc.kill(); } catch (_) {} proc = null; } };
+  return {
+    req,
+    idle: () => pending.size === 0,
+    kill: () => { try { if (proc) proc.kill(); } catch (_) {} proc = null; },
+  };
 }
 
 const dRoto = makeRotoDaemon();
@@ -155,6 +159,10 @@ const rotoClearTracking = () => dRoto.req({ cmd: 'clearTracking' });
 const rotoDedupe = (event, opts) => dRoto.req(Object.assign({ cmd: 'dedupe' }, opts || {}), rotoProg(event));
 const rotoPropagate = (event, opts) => dRoto.req(Object.assign({ cmd: 'propagate' }, opts || {}), rotoProg(event));
 const rotoRefine = (event, opts) => dRoto.req(Object.assign({ cmd: 'refine' }, opts), rotoProg(event));
+// Recompose l'aperçu du dernier test de matte fin avec le post-traitement courant : aucun modèle
+// ne tourne, l'alpha est déjà sur le disque. C'est ce qui rend la retouche vivante sous le
+// comparateur, dont l'image est figée depuis le test.
+const rotoTestPreview = () => dRoto.req({ cmd: 'testPreview' });
 // Bascule « utiliser le matte fin » : le calcul reste sur le disque, seule la source qui fait foi
 // change — comparer avant/après ne doit rien relancer.
 const rotoSetRefined = (opts) => dRoto.req(Object.assign({ cmd: 'setRefined' }, opts || {}));
@@ -172,6 +180,10 @@ const rotoCancel = () => {
 module.exports = {
   rotoOpen, rotoAddPoint, rotoClearPoints, rotoUndoPoint, rotoPreviewPoint, rotoMask, rotoSetPost,
   rotoSetView, rotoSetObjects, rotoRemovePoint, rotoMovePoint, rotoClearTracking, rotoDedupe,
-  rotoPropagate, rotoRefine, rotoSetRefined, rotoExport, rotoObjectRemove, rotoCancel,
+  rotoPropagate, rotoRefine, rotoTestPreview, rotoSetRefined, rotoExport, rotoObjectRemove,
+  rotoCancel,
   killRoto: () => dRoto.kill(),
+  // Le gestionnaire de modèles rend les sidecars LIBRES avant un `pip install` : sous Windows un
+  // .pyd mappé par ce daemon bloquerait la réécriture du venv (cf. releaseVenvLocks).
+  rotoIdle: () => dRoto.idle(),
 };

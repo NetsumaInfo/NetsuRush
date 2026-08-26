@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { modelById } from "@/lib/modelRegistry";
 import {
   Download, Eraser, Route, ChevronDown, ChevronLeft, ChevronRight, StepBack, StepForward,
-  Trash2, Copy, Undo2, Dices, FlaskConical, Sparkles, type LucideIcon,
+  Trash2, Copy, Undo2, Dices, FlaskConical, RotateCcw, Sparkles, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,8 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { ModelPicker, ModelsCta, useInstalledModels, useRequireModel } from "@/components/upscale/ModelPicker";
 import { cn } from "@/lib/utils";
 import {
-  BATCHED_REFINE, EXPORT_FORMATS, MATTE_SIZE_STEPS, REMOVE_QUALITY_STEPS, SAM_MODELS, VIEW_MODES,
+  BATCHED_REFINE, DEFAULT_MATTE_PARAMS, DEFAULT_POST, DEFAULT_REMOVE_PARAMS, EXPORT_FMT_KEY,
+  EXPORT_FORMATS, MATTE_SIZE_STEPS, REMOVE_QUALITY_STEPS, SAM_MODELS, VIEW_MODES, isDefaultPost,
   type RotoPostState, type RotoRemoveParams, type RotoViewState, type RotoViewMode,
 } from "./rotoShared";
 import type { RotoSession } from "./useRotoSession";
@@ -181,13 +182,19 @@ export function PostPanel({ post, onChange, disabled }: {
   post: RotoPostState; onChange: (patch: Partial<RotoPostState>) => void; disabled: boolean;
 }) {
   const { t } = useTranslation("roto");
-  const row = (label: string, key: keyof RotoPostState, min: number, max: number,
+  // Libellé ET explication viennent de la clé du réglage : un curseur dont on ne sait pas ce qu'il
+  // fait ne se règle qu'au hasard, et deux d'entre eux (bavures du cadre, durcir l'alpha) ne sont
+  // pas devinables depuis leur seul nom.
+  const row = (key: keyof RotoPostState, min: number, max: number,
     { unit = "px", step = 1, reset = 0 }: { unit?: string; step?: number; reset?: number } = {}) => (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
         <Tooltip>
-          <TooltipTrigger render={<span className="cursor-default select-none" onDoubleClick={() => onChange({ [key]: reset })}>{label}</span>} />
-          <TooltipContent>{t("post.resetTip")}</TooltipContent>
+          <TooltipTrigger render={<span className="cursor-default select-none" onDoubleClick={() => onChange({ [key]: reset })}>{t(`post.${key}`)}</span>} />
+          <TooltipContent className="max-w-[260px]">
+            <p>{t(`post.${key}Hint`)}</p>
+            <p className="mt-1 opacity-70">{t("post.resetTip")}</p>
+          </TooltipContent>
         </Tooltip>
         <span className="tabular-nums">{post[key]}{post[key] !== reset ? ` ${unit}` : ""}</span>
       </div>
@@ -195,15 +202,23 @@ export function PostPanel({ post, onChange, disabled }: {
         onValueChange={(v) => { const n = Array.isArray(v) ? v[0] : v; if (n != null) onChange({ [key]: n }); }} />
     </div>
   );
+  // ORDRE = ordre de traitement côté python (nrroto.postproc) : nettoyer la matte, puis déplacer et
+  // lisser sa forme, puis décider de son alpha. Lire le panneau de haut en bas décrit donc ce qui
+  // arrive vraiment au masque — un ordre d'affichage libre laissait croire à des réglages
+  // indépendants alors que chacun travaille sur le résultat du précédent.
   return (
     <div className="space-y-2.5">
-      {row(t("post.grow"), "grow", -20, 20)}
-      {row(t("post.feather"), "feather", 0, 25)}
-      {row(t("post.holes"), "holes", 0, 30)}
-      {row(t("post.dots"), "dots", 0, 30)}
-      {row(t("post.smooth"), "smooth", 0, 10)}
-      {row(t("post.border"), "border", 0, 10)}
-      {row(t("post.gamma"), "gamma", 0.2, 5, { unit: "", step: 0.1, reset: 1 })}
+      {row("holes", 0, 30)}
+      {row("dots", 0, 30)}
+      {row("border", 0, 10)}
+      {row("grow", -20, 20)}
+      {row("smooth", 0, 10)}
+      {row("harden", 0, 100, { unit: "%" })}
+      {row("feather", 0, 25)}
+      {row("gamma", 0.2, 5, { unit: "", step: 0.1, reset: 1 })}
+      {/* Sortie de secours : huit curseurs se poussent vite trop loin, et le double-clic ne remet à
+          zéro qu'un réglage à la fois — il faudrait se souvenir de ceux qu'on a touchés. */}
+      <ResetParams onReset={() => onChange(DEFAULT_POST)} disabled={disabled || isDefaultPost(post)} />
     </div>
   );
 }
@@ -264,6 +279,29 @@ export function EngineRow({ label, icon: Icon, engines, installed, disabled, onR
     </div>
   );
 }
+
+// Retour aux valeurs d'usine d'UN groupe de réglages. Icône seule, alignée à droite : le rail est
+// étroit et un bouton pleine largeur pèserait plus lourd que ce qu'il fait. Désactivé quand rien n'a
+// bougé — il dit donc aussi si le groupe est encore d'origine.
+function ResetParams({ onReset, disabled }: { onReset: () => void; disabled: boolean }) {
+  const { t } = useTranslation("roto");
+  return (
+    <div className="flex justify-end">
+      <Tooltip>
+        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="h-6 w-6 text-muted-foreground"
+          disabled={disabled} onClick={onReset} aria-label={t("resetParams")}>
+          <RotateCcw className="h-3.5 w-3.5" />
+        </Button>} />
+        <TooltipContent>{t("resetParams")}</TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+// Comparaison champ à champ contre les valeurs d'usine (des objets plats de nombres et de booléens) :
+// c'est elle qui décide si la remise à zéro a encore quelque chose à remettre.
+const isSameParams = <T extends object>(a: T, b: T) =>
+  (Object.keys(b) as (keyof T)[]).every((k) => a[k] === b[k]);
 
 // Libellé avec infobulle — motif commun aux réglages de suppression et de matte fin.
 function ParamLabel({ text, hint }: { text: string; hint: string }) {
@@ -373,6 +411,8 @@ export function RemoveParamsRows({ value, onChange, disabled, diffusion }: {
           {switchRow("cpuOffload")}
         </AdvancedRows>
       )}
+      <ResetParams onReset={() => onChange(DEFAULT_REMOVE_PARAMS)}
+        disabled={disabled || isSameParams(value, DEFAULT_REMOVE_PARAMS)} />
     </div>
   );
 }
@@ -407,27 +447,32 @@ export function MatteFinePanel({ s, engines, disabled }: {
     </div>
   );
   if (!cur) return <ModelsCta label={t("engineRow.noneInstalled", { label: t("panels.matteFine") })} />;
+  // Une seule rangée sélecteur + deux icônes, comme « Suppression d'objet » (cf. EngineRow) : les
+  // libellés vivent dans les infobulles. En boutons texte, l'affinage était la seule étape du rail
+  // à ne pas ressembler aux autres, et le sélecteur y perdait sa ligne.
   return (
     <div className="space-y-2">
-      <ModelPicker items={avail} value={cur.id} onChange={setEng} disabled={disabled}
-        itemExtra={(id) => {
-          const e = avail.find((x) => x.id === id);
-          return e && isNC(e) ? <Badge variant="outline" className="text-[10px]">NC</Badge> : null;
-        }} />
       <div className="flex gap-1.5">
+        <ModelPicker items={avail} value={cur.id} onChange={setEng} disabled={disabled}
+          className="min-w-0 flex-1"
+          itemExtra={(id) => {
+            const e = avail.find((x) => x.id === id);
+            return e && isNC(e) ? <Badge variant="outline" className="text-[10px]">NC</Badge> : null;
+          }} />
         <Tooltip>
-          <TooltipTrigger render={<Button variant="outline" size="sm" className="shrink-0"
-            disabled={disabled || (!s.tracked && !s.points.length)} onClick={() => s.testRefine(cur.id)}>
-            <FlaskConical className="h-3.5 w-3.5" /> {t("matte.test")}
+          <TooltipTrigger render={<Button variant="ghost" size="icon" className="shrink-0"
+            disabled={disabled || (!s.tracked && !s.points.length)} onClick={() => s.testRefine(cur.id)}
+            aria-label={t("matte.test")}>
+            <FlaskConical className="h-4 w-4" />
           </Button>} />
-          <TooltipContent>{t("matte.testTip")}</TooltipContent>
+          <TooltipContent>{t("matte.test")} — {t("matte.testTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<Button size="sm" className="min-w-0 flex-1" disabled={disabled || !s.tracked}
-            onClick={() => s.refine(cur.id)}>
-            <Sparkles className="h-3.5 w-3.5" /> {t("matte.run")}
+          <TooltipTrigger render={<Button variant="outline" size="icon" className="shrink-0"
+            disabled={disabled || !s.tracked} onClick={() => s.refine(cur.id)} aria-label={t("matte.run")}>
+            <Sparkles className="h-4 w-4" />
           </Button>} />
-          <TooltipContent>{cur.hint}</TooltipContent>
+          <TooltipContent>{t("matte.run")} — {cur.hint}</TooltipContent>
         </Tooltip>
       </div>
 
@@ -476,23 +521,26 @@ export function MatteFinePanel({ s, engines, disabled }: {
             </Toggle>
           </div>
         )}
+        <ResetParams onReset={() => s.setMatteParams(DEFAULT_MATTE_PARAMS)}
+          disabled={disabled || isSameParams(p, DEFAULT_MATTE_PARAMS)} />
       </AdvancedRows>
     </div>
   );
 }
 
 // Sélecteur de format + portée (tous les objets / un seul) + bouton Exporter.
-export function ExportRow({ disabled, objects, onExport }: {
+export function ExportRow({ fmt, onFmtChange, disabled, objects, onExport }: {
+  // Format PILOTÉ par le parent : le tiroir « Sortie » l'affiche en résumé quand il est fermé,
+  // ce qu'un état local ici ne lui laisserait pas voir.
+  fmt: string;
+  onFmtChange: (fmt: string) => void;
   disabled: boolean;
   objects: { id: number; name: string }[];
   onExport: (fmt: string, obj?: number) => void;
 }) {
   const { t } = useTranslation("roto");
-  const fmtKey: Record<string, string> = {
-    prores_4444: "prores", webm_alpha: "webm", ffv1_alpha: "ffv1",
-    matte_mp4: "matte", bgcolor_mp4: "bgcolor", png_seq: "png",
-  };
-  const [fmt, setFmt] = useState(EXPORT_FORMATS[0].id);
+  const fmtKey = EXPORT_FMT_KEY;
+  const setFmt = onFmtChange;
   const [scope, setScope] = useState(0);   // 0 = union (tous les objets)
   const cur = EXPORT_FORMATS.find((f) => f.id === fmt) || EXPORT_FORMATS[0];
   const scopeItems = [{ value: "0", label: t("exportRow.allObjects") },

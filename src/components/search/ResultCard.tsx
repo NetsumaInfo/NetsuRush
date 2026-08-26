@@ -55,7 +55,7 @@ function ResultCardImpl({
   // Plan sérialisé pour « Ranger dans une collection » (identique au bouton du pied).
   const shots = [{ path: hit.file_path, name: basename(hit.file_path), in: hit.start_sec, out: hit.end_sec, inFrame: hit.start_frame, outFrame: hit.end_frame, srcFrames: hit.src_frames, fps: hit.fps }];
 
-  const { rootRef, thumb, thumbErr, hovered, setHovered, url, showVideo, videoPaused, near, resetUrl } =
+  const { rootRef, thumb, thumbErr, hovered, enter, leave, url, showVideo, videoPaused, near, resetUrl } =
     useResultPreview({ filePath: hit.file_path, thumbAt, index, play, getProxy, bustProxy, peekProxy });
   const playing = showVideo && !videoPaused;
 
@@ -70,8 +70,8 @@ function ResultCardImpl({
             "group flex flex-col overflow-hidden rounded-xl border bg-card transition-transform [content-visibility:auto] [contain-intrinsic-size:auto_240px]",
             selectionRing(selected),
           )}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          onMouseEnter={enter}
+          onMouseLeave={leave}
         />
       }>
       <div className="relative aspect-video bg-muted">

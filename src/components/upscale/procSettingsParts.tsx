@@ -1,7 +1,9 @@
-import { FolderOpen } from "lucide-react";
+import { useRef } from "react";
+import { AlertTriangle, FolderOpen, ListOrdered, RotateCcw } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem } from "@/components/ui/select";
@@ -23,7 +25,9 @@ import {
   isProcessExportProfile, matchProcessExportProfile, processEncodingPatch, processEncodingValue,
   processExportFromProfile, type ProcessExportSettings,
 } from "./processExport";
-import { useSharedProcSources, type OutputNamingMode } from "./useProcSources";
+import { useSharedProcSources } from "./useProcSources";
+import { DEFAULT_IMAGE_OUTPUT, outputKindFor, outputSample, type ImageOutputSettings } from "./imageOutput";
+import { NAME_TOKENS, numberedPattern, type NameToken } from "./outputNaming";
 
 // Helpers partagés par les panneaux de réglages des modes du hub (interp/depth/upscale) :
 // Section/Row, le bloc Codec vidéo, le bloc Audio et le bloc Export. Évite de dupliquer 3×
@@ -189,23 +193,51 @@ export function ProcessEncodingRows({ v, patch, audioTracks, disabled, allowedCo
   );
 }
 
-// Bloc Export partagé (dossier + import Media Pool) — `hint` optionnel sous le toggle d'import.
-export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disabled, hint }: {
+
+// Shared export block: destination folder, Media Pool import, and the ONE naming pattern that names
+// every output. Per-media names are set by renaming a media in the selection tray, not by a list of
+// controls here - the pattern covers the batch, a rename covers the exception.
+export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disabled, hint, v }: {
   outDir: string | null;
   chooseOut: () => Promise<string | null>;
   importBack: boolean;
   setImportBack: (b: boolean) => void;
   disabled?: boolean;
   hint?: string;
+  // Encoding + image settings of the active op, so the preview shows the REAL final file name.
+  v?: ProcessExportSettings;
 }) {
   const { t } = useTranslation("upscale");
   const {
-    sources, outputNaming, setOutputNaming, setOutputNamingOverride,
-    outputNamingOverrideFor, outputNameFor, outputNamingProblem,
+    sources, active, outputPattern, setOutputPattern, nameReport, setSourceName,
   } = useSharedProcSources();
-  const namingItems = (["original", "prefix", "suffix", "custom"] as OutputNamingMode[])
-    .map((value) => ({ value, label: t(`settings.naming.${value}`) }));
-  const needsValue = outputNaming.mode !== "original";
+  const patternRef = useRef<HTMLInputElement | null>(null);
+  const image: ImageOutputSettings = v ?? DEFAULT_IMAGE_OUTPUT;
+  const container = v?.exportContainer ?? "mp4";
+
+  // Caret-aware insertion: a token lands where the user was typing, not always at the end.
+  const insertToken = (token: NameToken) => {
+    const field = patternRef.current;
+    const text = `{${token}}`;
+    if (!field) { setOutputPattern(`${outputPattern}${text}`); return; }
+    const start = field.selectionStart ?? outputPattern.length;
+    const end = field.selectionEnd ?? start;
+    const next = `${outputPattern.slice(0, start)}${text}${outputPattern.slice(end)}`;
+    setOutputPattern(next);
+    requestAnimationFrame(() => {
+      field.focus();
+      const caret = start + text.length;
+      field.setSelectionRange(caret, caret);
+    });
+  };
+
+  const activeIndex = active ? sources.findIndex((s) => s.uid === active.uid) : -1;
+  const previewBase = nameReport.names[activeIndex >= 0 ? activeIndex : 0] ?? "";
+  const preview = previewBase
+    ? outputSample(previewBase, outputKindFor(image, active), image, container)
+    : null;
+  const renamed = sources.filter((s) => s.outName);
+
   return (
     <Section title={t("settings.sectionExport")}>
       <Row label={t("settings.rowFolder")}>
@@ -218,76 +250,77 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
           {importBack ? t("settings.yes") : t("settings.no")}
         </Toggle>
       </Row>
-      <Row label={sources.length > 1 ? t("settings.rowDefaultNaming") : t("settings.rowOutputName")}>
-        <Field value={outputNaming.mode} disabled={disabled}
-          onChange={(mode) => setOutputNaming({ ...outputNaming, mode: mode as OutputNamingMode })}
-          items={namingItems} />
-      </Row>
-      {needsValue && (
+
+      <div className="space-y-1.5">
+        <HintLabel label={t("settings.rowOutputName")} hint={t("settings.namingPatternNote")}
+          className="block text-xs font-medium text-muted-foreground" />
         <Input
-          value={outputNaming.value}
-          onChange={(e) => setOutputNaming({ ...outputNaming, value: e.target.value })}
-          placeholder={t(`settings.namingPlaceholder.${outputNaming.mode}`)}
+          ref={patternRef}
+          value={outputPattern}
+          onChange={(e) => setOutputPattern(e.target.value)}
+          placeholder={t("settings.namingPlaceholder")}
           disabled={disabled}
           aria-label={t("settings.rowOutputName")}
+          spellCheck={false}
         />
+        <div className="flex flex-wrap gap-1">
+          {NAME_TOKENS.map((token) => (
+            <Tooltip key={token}>
+              <TooltipTrigger render={<button
+                type="button"
+                onClick={() => insertToken(token)}
+                disabled={disabled}
+                className="rounded border border-border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:border-primary hover:text-foreground disabled:opacity-50"
+              >{`{${token}}`}</button>} />
+              <TooltipContent>{t(`settings.token.${token}`)}</TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+        {preview && (
+          <Tooltip>
+            <TooltipTrigger render={<p className="truncate font-mono text-[11px] text-muted-foreground" />}>
+              {preview}
+            </TooltipTrigger>
+            <TooltipContent>{preview}</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* Two sources landing on the same name would overwrite each other: say WHICH name, and offer
+          the one-click repair (a counter in the pattern) instead of a bare warning. */}
+      {nameReport.collisions.length > 0 && (
+        <Card className="block space-y-1.5 border-destructive/40 p-2.5 text-[11px] leading-snug text-destructive">
+          <p className="flex items-start gap-1.5 font-medium">
+            <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" />
+            {t("settings.namingCollision", { count: nameReport.collisions.length })}
+          </p>
+          <ul className="space-y-0.5 pl-5">
+            {nameReport.collisions.slice(0, 4).map((clash) => (
+              <li key={clash.name} className="truncate font-mono">
+                {clash.name} <span className="font-sans opacity-80">({t("settings.namingCollisionSources", { count: clash.indexes.length })})</span>
+              </li>
+            ))}
+          </ul>
+          <Button variant="outline" size="sm" className="w-full" disabled={disabled}
+            onClick={() => setOutputPattern(numberedPattern(outputPattern))}>
+            <ListOrdered className="h-3.5 w-3.5" /> {t("settings.namingNumber")}
+          </Button>
+        </Card>
       )}
-      {sources.length > 1 && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-medium text-muted-foreground">{t("settings.perMediaNames")}</p>
-          <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-            {sources.map((source) => {
-              const override = outputNamingOverrideFor(source);
-              const sourceId = source.uid ?? `${source.path}#${source.in ?? "all"}-${source.out ?? "all"}`;
-              const mode = override?.mode ?? "default";
-              const items = [
-                { value: "default", label: t("settings.naming.default") },
-                ...namingItems,
-              ];
-              return (
-                <div key={sourceId} className="space-y-1.5 rounded-md border border-border/70 bg-muted/20 p-2">
-                  <div className="min-w-0">
-                    <Tooltip>
-                      <TooltipTrigger render={<p className="truncate text-[11px] font-medium text-foreground" />}>
-                        {source.name}
-                      </TooltipTrigger>
-                      <TooltipContent>{source.name}</TooltipContent>
-                    </Tooltip>
-                    {source.in != null && source.out != null && (
-                      <p className="text-[10px] tabular-nums text-muted-foreground">{source.in.toFixed(2)}–{source.out.toFixed(2)} s</p>
-                    )}
-                  </div>
-                  <Field value={mode} disabled={disabled} items={items} onChange={(nextMode) => {
-                    if (nextMode === "default") setOutputNamingOverride(source, null);
-                    else setOutputNamingOverride(source, {
-                      mode: nextMode as OutputNamingMode,
-                      value: override?.value ?? "",
-                    });
-                  }} />
-                  {override && override.mode !== "original" && (
-                    <Input
-                      value={override.value}
-                      onChange={(e) => setOutputNamingOverride(source, { ...override, value: e.target.value })}
-                      placeholder={t(`settings.namingPlaceholder.${override.mode}`)}
-                      disabled={disabled}
-                      aria-label={t("settings.nameForMedia", { name: source.name })}
-                    />
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger render={<p className="truncate text-[10px] text-muted-foreground" />}>
-                      {override ? t("settings.resultingName") : t("settings.inheritedName")} : {outputNameFor(source)}
-                    </TooltipTrigger>
-                    <TooltipContent>{outputNameFor(source)}</TooltipContent>
-                  </Tooltip>
-                </div>
-              );
-            })}
-          </div>
+      {nameReport.empty.length > 0 && (
+        <p className="text-[11px] leading-snug text-destructive">{t("errors.emptyOutputName")}</p>
+      )}
+
+      {renamed.length > 0 && (
+        <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+          <span className="truncate">{t("settings.namingRenamed", { count: renamed.length })}</span>
+          <Button variant="ghost" size="sm" disabled={disabled}
+            onClick={() => renamed.forEach((source) => setSourceName(source, null))}>
+            <RotateCcw className="h-3.5 w-3.5" /> {t("settings.namingResetAll")}
+          </Button>
         </div>
       )}
-      {outputNamingProblem && (
-        <p className="text-[11px] leading-snug text-destructive">{t(`errors.${outputNamingProblem}`)}</p>
-      )}
+
       {hint && <p className="text-[11px] leading-snug text-muted-foreground">{hint}</p>}
     </Section>
   );

@@ -11,8 +11,9 @@ Commandes :
   python upscale.py upscale --input <v> --out <v> --model <m> --outscale <s> --codec <c>
                             [--start s] [--end s] [--denoise 0..1] [--tile px] [--fp32]
   python upscale.py frame   --input <v> --orig <png> --out <png> [--time s] ...
-  python upscale.py image   --input <img> --out <img> ...
+  python upscale.py image   --input <img> --out <img> [--img_format png|jpeg] [--png_bits 8|16] ...
   python upscale.py gif     --input <gif> --out <gif> ...
+`upscale` accepte aussi une SORTIE IMAGE : --out_kind sequence|image (défaut : sortie vidéo).
 Sortie stdout = 1 ligne JSON : {"ok":bool,"output":path,"width":w,"height":h,"frames":n,"error":null}
 """
 import argparse
@@ -127,6 +128,16 @@ def main():
     g.add_argument("--fp32", action="store_true")
     g.add_argument("--cleanup_noise", type=float, default=0.0)
     g.add_argument("--cleanup_edges", type=float, default=0.0)
+
+    # Sortie image : "video" (défaut) = comportement historique pour `upscale` ; `image` écrit
+    # toujours un fichier image et n'y lit que le format / la profondeur / la compression.
+    for sub_parser in (u, im):
+        sub_parser.add_argument("--out_kind", default=None)           # video | sequence | image
+        sub_parser.add_argument("--img_format", default="png")        # png | jpeg
+        sub_parser.add_argument("--png_bits", type=int, default=8)    # 8 | 16
+        sub_parser.add_argument("--png_compression", type=int, default=6)   # 0..9 (sans perte)
+        sub_parser.add_argument("--jpeg_quality", type=int, default=92)     # 1..100
+        sub_parser.add_argument("--seq_start", type=int, default=1)   # numéro de la 1re image
 
     args = p.parse_args()
     try:

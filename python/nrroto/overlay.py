@@ -49,14 +49,12 @@ def _outline_of(m, thickness=2):
         return dil & ~ero
 
 
-def overlay_data_uri(masks, post=None, outline=False):
-    """{obj: masque bool HxW} -> data-URI PNG RGBA (chaque objet teinté, alpha ~55%, contour opaque
-    optionnel). `post` = post-traitement non destructif appliqué au rendu seulement. L'opacité
-    globale est réglée côté client (CSS) — l'alpha ici est la base."""
+def _overlay_rgba(masks, post=None, outline=False):
+    """{obj: masque HxW} -> RGBA teinté (chaque objet sa couleur, alpha ~55 %, contour opaque
+    optionnel), None sans masque. `post` = post-traitement appliqué au rendu seulement."""
     if not masks:
         return None
     import numpy as np
-    from PIL import Image
 
     h, w = next(iter(masks.values())).shape
     rgba = np.zeros((h, w, 4), dtype=np.uint8)
@@ -70,7 +68,15 @@ def overlay_data_uri(masks, post=None, outline=False):
         if outline:
             edge = _outline_of(u8 > 127)
             rgba[edge, 0], rgba[edge, 1], rgba[edge, 2], rgba[edge, 3] = r, g, b, 255
-    return _png_uri(Image.fromarray(rgba, "RGBA"))
+    return rgba
+
+
+def overlay_data_uri(masks, post=None, outline=False):
+    """Overlay teinté en data-URI PNG RGBA, posé PAR-DESSUS la frame côté client. L'opacité globale
+    est réglée là-bas (CSS) — l'alpha calculé ici est la base."""
+    from PIL import Image
+    rgba = _overlay_rgba(masks, post, outline=outline)
+    return None if rgba is None else _png_uri(Image.fromarray(rgba, "RGBA"))
 
 
 def _hex_rgb(s, default=(0, 255, 0)):
@@ -117,6 +123,26 @@ def render_view(frame_path, masks, post=None, mode="edit", outline=False, bg="#0
             rgba[edge, 0], rgba[edge, 1], rgba[edge, 2], rgba[edge, 3] = r, g, b, 255
         img = Image.fromarray(rgba, "RGBA")
     return _png_uri(img)
+
+
+def render_view_flat(frame_path, masks, post=None, mode="edit", outline=False, bg="#00ff00"):
+    """Rendu d'une frame en UNE image autonome — aperçus de test, comparateur avant/après.
+
+    Identique à `render_view` sauf en mode `edit`, dont l'overlay teinté est ici APLATI sur la
+    frame : un comparateur affiche une seule image, il n'a aucun calque en dessous où poser un
+    RGBA transparent."""
+    if mode and mode != "edit":
+        return render_view(frame_path, masks, post, mode=mode, outline=outline, bg=bg)
+    import numpy as np
+    from PIL import Image
+    rgba = _overlay_rgba(masks, post, outline=outline)
+    if rgba is None:
+        return None
+    h, w = rgba.shape[:2]
+    frame = np.array(Image.open(frame_path).convert("RGB").resize((w, h)), dtype=np.float32)
+    a = (rgba[..., 3].astype(np.float32) / 255.0)[..., None]
+    comp = (rgba[..., :3].astype(np.float32) * a + frame * (1.0 - a)).astype(np.uint8)
+    return _png_uri(Image.fromarray(comp, "RGB"))
 
 
 def matte_paths(root, frame):

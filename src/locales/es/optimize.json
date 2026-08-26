@@ -288,8 +288,7 @@
       "panelInstalled": "Extensión instalada: reinicia la aplicación",
       "installPanel": "Instalar extensión",
       "panelHint": "Abre la aplicación y ve a Ventana ▸ Extensiones ▸ NetsuRush.",
-
-      "uxpHint": "Premiere Pro {{year}} carga UXP primero: si la extensión no aparece en Ventana ▸ Extensiones, reinstálala y reinicia la aplicación.",
+      "uxpHint": "Premiere Pro {{year}} carga UXP primero. Si la extensión falta en Ventana ▸ Extensiones, reinstálala y reinicia.",
       "caches": "Cachés",
       "cacheFolders_one": "{{count}} carpeta detectada",
       "cacheFolders_other": "{{count}} carpetas detectadas",
@@ -374,9 +373,7 @@
       "qeExperimental": "Premiere Pro no expone ninguna API oficial de purga: esta llamada usa el QE DOM, una interfaz no documentada que cambia entre versiones. Si falla, la sección Cachés de disco hace lo mismo con la aplicación cerrada.",
       "compatAeft": "After Effects 2020 (17.0) hasta 2026 (26.x). Desde la 24.3, «Todo, incluido el disco» también vacía la caché de disco.",
       "compatPpro": "Verificado de Premiere Pro 2020 (14.0) a 2025 (25.x).",
-
       "uxpEra": "Premiere Pro {{year}}: Adobe pasó a UXP, ExtendScript ya no se mantiene y su soporte termina en septiembre de 2026. Esta llamada puede fallar sin avisar.",
-
       "uxpFallback": "La sección Cachés de disco, arriba, hace lo mismo sin ninguna API de Adobe.",
       "hygiene": "Higiene del proyecto",
       "hygieneHint": "Actúa sobre el proyecto abierto y se puede deshacer en la aplicación.",

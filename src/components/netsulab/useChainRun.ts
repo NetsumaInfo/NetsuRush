@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { nr, type PipelineProgress, type ProcessResult } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { makeRenderReviews, useSharedProcSources, type RenderReview } from "@/components/upscale/useProcSources";
+import { isStillSource } from "@/components/upscale/imageOutput";
 import { useTranslation } from "react-i18next";
 
 // Exécute la CHAÎNE ordonnée (nlChain) sur chaque source du bac via le pipeline core (fichier→fichier,
@@ -9,8 +10,10 @@ import { useTranslation } from "react-i18next";
 export function useChainRun() {
   const { t } = useTranslation("upscale");
   const base = useSharedProcSources();
-  const { sources, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, recordRenders } = base;
+  const { sources, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, recordRenders, setNamingTokens } = base;
   const chain = useApp((s) => s.nlChain);
+  // Une chaîne enchaîne des transforms vidéo → vidéo : {op} vaut « chain » pour le motif de nommage.
+  useEffect(() => { setNamingTokens({ op: "chain", scale: "", model: "" }); }, [setNamingTokens]);
 
   const [busy, setBusy] = useState<PipelineProgress | null>(null);
   const [batch, setBatch] = useState<{ i: number; n: number; name: string } | null>(null);
@@ -24,6 +27,10 @@ export function useChainRun() {
     if (!dir) dir = await chooseOut();
     if (!dir) return;
     if (outputNamingProblem) { setErr(t(`errors.${outputNamingProblem}`)); return; }
+    // Le pipeline core est fichier vidéo → fichier vidéo : une image fixe n'y entre pas.
+    const targets = sources.filter((s) => !isStillSource(s));
+    const skipped = sources.length - targets.length;
+    if (!targets.length) { setErr(t("errors.chainNeedsVideo")); return; }
 
     running.current = true;
     setResult(null); setErr(null);
@@ -33,9 +40,9 @@ export function useChainRun() {
     const reviews: RenderReview[] = [];
     let imported = 0; let failed = 0; let lastErr: string | null = null;
     try {
-      for (let i = 0; i < sources.length; i++) {
-        const src = sources[i];
-        setBatch({ i, n: sources.length, name: src.name });
+      for (let i = 0; i < targets.length; i++) {
+        const src = targets[i];
+        setBatch({ i, n: targets.length, name: src.name });
         setBusy({ file: src.name, pct: 0, done: 0, total: chain.length, phase: chain[0].kind, opIndex: 0, opCount: chain.length });
         const r = await nr.pipelineRun({
           input: src.path,
@@ -54,8 +61,10 @@ export function useChainRun() {
         if (!r.ok) lastErr = r.error || t("errors.chainFailed");
       }
       recordRenders(reviews);
+      failed += skipped;
       setResult({ ok: outputs.length > 0, outputs, imported, failed, error: outputs.length ? null : lastErr });
       if (!outputs.length) setErr(lastErr);
+      else if (skipped) setErr(t("errors.chainSkippedStills", { count: skipped }));
     } catch (e) {
       setErr(t("errors.chainUnavailable", { err: String(e) }));
     } finally {

@@ -58,5 +58,5 @@ test('the renderer shares the settings that make a rush read as "already cut"', 
   assert.match(bridge, /prefsGet: async \(\) =>/);
   assert.match(client, /prefsSet: \(patch\) => call\("prefs:set", \[patch\]\)/);
   // Repli : à défaut de correspondance exacte, on sert la découpe connue de ce modèle.
-  assert.match(detection, /exact\.scenes\?\.length \? exact : \(await nr\.cachedScenes\(clipPath, model\)/);
+  assert.match(detection, /exact\.scenes\?\.length \? exact : \(await nr\.cachedScenes\(path, model\)/);
 });

@@ -253,6 +253,54 @@ function audioEncodeArgs(audioMode) {
 }
 
 /**
+ * Codec audio réellement ÉCRIT par un mode : c'est lui que le conteneur doit accepter, pas l'id du
+ * panneau. Deux vocabulaires arrivent ici — celui des profils d'export (`aac_192`, `pcm16`) et celui
+ * de l'export AE (`aac`, `pcm`) —, d'où la comparaison par préfixe. `copy` n'écrit rien de nouveau :
+ * c'est le flux SOURCE qui entre dans le conteneur.
+ * @param {string} audioMode @param {string|null} [sourceCodec] @returns {string|null}
+ */
+function writtenAudioCodec(audioMode, sourceCodec = null) {
+  const id = String(audioMode || '');
+  if (id === 'none') return null;
+  if (id === 'copy' || id === 'remux') return sourceCodec || null;
+  if (id.startsWith('pcm')) return /24/.test(id) ? 'pcm_s24le' : 'pcm_s16le';
+  if (id.startsWith('aac')) return 'aac';
+  if (id.startsWith('ac3') || id.startsWith('eac3')) return 'ac3';
+  if (id.startsWith('alac')) return 'alac';
+  if (id.startsWith('flac')) return 'flac';
+  if (id.startsWith('opus')) return 'opus';
+  if (id.startsWith('mp3')) return 'mp3';
+  return sourceCodec || null;
+}
+
+// Ce qu'un conteneur mux RÉELLEMENT. Le muxeur ne refuse qu'à l'écriture de l'en-tête, donc APRÈS le
+// job entier (un upscale de dix minutes meurt sur « flac only supported in MP4 » à la dernière
+// seconde) : le couple se vérifie avant de lancer ffmpeg. Le MKV porte tout → aucune entrée.
+//  - refus du MOV : flac, opus, vorbis, truehd (ffmpeg : « only supported in MP4 ») ;
+//  - refus du MP4 : le PCM et le Vorbis, sans tag standard ;
+//  - le WebM est une liste blanche (« Only ... Vorbis or Opus audio ... are supported for WebM »).
+const CONTAINER_AUDIO_REFUSED = {
+  mov: new Set(['flac', 'opus', 'vorbis', 'truehd']),
+  mp4: new Set(['vorbis']),
+};
+const WEBM_AUDIO = new Set(['opus', 'vorbis']);
+
+/**
+ * Vrai si `container` peut muxer ce codec audio. Un codec inconnu (ou absent) ne pose aucune
+ * contrainte : mieux vaut laisser passer que réencoder une piste que ffmpeg aurait acceptée.
+ * @param {string} container @param {string|null} codec @returns {boolean}
+ */
+function containerAcceptsAudio(container, codec) {
+  const name = String(codec || '').toLowerCase();
+  if (!name) return true;
+  const ext = String(container || '').toLowerCase();
+  if (ext === 'webm') return WEBM_AUDIO.has(name);
+  if (ext === 'mp4' && name.startsWith('pcm_')) return false;
+  const refused = CONTAINER_AUDIO_REFUSED[ext];
+  return !refused || !refused.has(name);
+}
+
+/**
  * Tag conteneur obligatoire pour HEVC en mp4/mov (sinon lecteurs refusent).
  * @param {string} codec @param {string} ext @returns {string[]}
  */
@@ -289,5 +337,5 @@ function mergeMapArgs(audioMode) {
 module.exports = {
   selectGpuEncoder, videoEncodeArgs, gpuVideoArgs, cpuVideoArgs, audioEncodeArgs, audioMapArgs,
   mergeMapArgs, containerTagArgs, isNvenc, isHardwareEncoder, hwVendor, hwCandidates, listCodecs,
-  listAudioModes, codecFamily,
+  listAudioModes, codecFamily, writtenAudioCodec, containerAcceptsAudio,
 };

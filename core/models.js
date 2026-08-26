@@ -14,6 +14,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const https = require('https');
+const crypto = require('node:crypto');
 const { spawn } = require('child_process');
 const { NR_HOME, CONFIG, PYTHON, DETECT_ENV, RTX_DIR, RTX_EXE, RTX_DLLS, fsp, saveConfig } = require('./config');
 const logbus = require('./logbus');
@@ -129,6 +130,14 @@ const OMNISHOTCUT_PIP = path.join(
 // dès qu'une entrée combine `pipPatch` (la source devient une copie corrigée dans %TEMP%, dont le
 // chemin n'existe pas à l'écriture du manifeste) et `installSteps`.
 const PIP_TARGET = '@pipTarget';
+
+// SAM 2 / SAM 3 build FROM SOURCE, and their pyproject declares `torch` as a BUILD dependency. The
+// default PEP 517 isolation would resolve it again in a throwaway environment: a second multi-
+// gigabyte torch download per install, of a wheel that may not even match the venv's CUDA build.
+// The venv already holds setuptools and the right torch, so the build runs in place. `wheel` comes
+// first because `bdist_wheel` lives in that distribution until setuptools 70.1, and a venv created
+// by `python -m venv` ships 65.x.
+const SOURCE_BUILD_STEPS = (target) => [['wheel'], ['--no-build-isolation', target]];
 
 // Runtime ONNX pour un venv qui n'en a aucun (installation sans voix/traitements/recherche). Même
 // pin CUDA 12 que setup.ps1, verrouillé par packaging.test.cjs : `onnxruntime-gpu` >= 1.23 vise
@@ -463,20 +472,44 @@ const MANIFEST = /** @type {Record<string, any>} */ ({
   // Segmentation (roto) : poids HF + `pip` = le PACKAGE python qui les charge (installé auto après
   // le download → « Installé » = poids ET code prêts). Tarball GitHub (pas besoin de `git`), sans
   // compilation CUDA (SAM2_BUILD_CUDA=0). `pipCheck` = module importable pour tester la présence.
-  'sam2.1-large':            { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-large',      pip: SAM2_PIP, pipCheck: 'sam2' },
-  'sam2.1':                  { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-base-plus', pip: SAM2_PIP, pipCheck: 'sam2' },
-  'sam2.1-small':            { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-small',     pip: SAM2_PIP, pipCheck: 'sam2' },
-  'sam2.1-tiny':             { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-tiny',      pip: SAM2_PIP, pipCheck: 'sam2' },
+  'sam2.1-large':            { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-large',      pip: SAM2_PIP, pipCheck: 'sam2',
+                               installSteps: SOURCE_BUILD_STEPS(PIP_TARGET) },
+  'sam2.1':                  { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-base-plus', pip: SAM2_PIP, pipCheck: 'sam2',
+                               installSteps: SOURCE_BUILD_STEPS(PIP_TARGET) },
+  'sam2.1-small':            { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-small',     pip: SAM2_PIP, pipCheck: 'sam2',
+                               installSteps: SOURCE_BUILD_STEPS(PIP_TARGET) },
+  'sam2.1-tiny':             { kind: 'hf', task: 'segment', repo: 'facebook/sam2.1-hiera-tiny',      pip: SAM2_PIP, pipCheck: 'sam2',
+                               installSteps: SOURCE_BUILD_STEPS(PIP_TARGET) },
   // EdgeTAM : poids seuls (56 Mo) + le yaml Hydra du dépôt amont, que le package sam2 ne connaît pas.
   // Il est déposé DANS le dossier du modèle et référencé par chemin absolu (cf. nrroto/sam_engine).
   edgetam:                   { kind: 'hf', task: 'segment', repo: 'facebook/EdgeTAM', pip: SAM2_PIP, pipCheck: 'sam2',
+                               installSteps: SOURCE_BUILD_STEPS(PIP_TARGET),
                                vendorDir: path.join(MODELS_DIR, 'segment', 'edgetam'),
                                vendor: [{ file: 'edgetam.yaml', url: EDGETAM_CFG }] },
   // SAM 3.1 : un seul checkpoint (3,5 Go) + le package `sam3` du dépôt Meta. Aucune intégration
   // transformers — le predictor vidéo vient du package. Le paquet `sam3` cohabite avec `sam2` (noms
   // de module distincts) : SAM 3.1 n'entre donc dans aucun groupe d'exclusivité.
-  'sam3.1':                  { kind: 'hf', task: 'segment', repo: 'facebook/sam3.1', pip: SAM3_PIP, pipCheck: 'sam3',
-                               installSteps: [['hydra-core', 'omegaconf', 'iopath', 'psutil'], [SAM3_PIP]] },
+  //
+  // ⚠️ Les poids NE viennent PAS de `facebook/sam3.1` : ce dépôt-là est « gated: manual » (Meta
+  // ouvre l'accès compte par compte), donc `resolve/main` y répond 401 et aucun bouton ne peut
+  // marcher. La SAM License AUTORISE explicitement la redistribution (§1.b.i : sous les mêmes
+  // termes, avec une copie de l'accord jointe) — un miroir public est donc licite, et celui-ci
+  // embarque bien le LICENSE.
+  //
+  // Miroir choisi et VÉRIFIÉ : sur Hugging Face, le blob git d'un fichier LFS est son *pointeur*,
+  // qui contient le sha256 du contenu. Le blob de `sam3.1_multiplex.pt` vaut 88589b6b… chez
+  // `facebook/sam3.1` comme chez ce miroir (idem pour LICENSE et config.json) : le miroir désigne
+  // donc EXACTEMENT les octets officiels, ce que `verify` retranscrit en clair et que le
+  // téléchargement recontrôle. Un `.pt` est un pickle — sans cette empreinte, faire confiance à un
+  // dépôt tiers reviendrait à exécuter son code.
+  'sam3.1':                  { kind: 'hf', task: 'segment', repo: 'research21/sam3.1', pip: SAM3_PIP, pipCheck: 'sam3',
+                               verify: { 'sam3.1_multiplex.pt': '0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6' },
+                               pipPatch: ['sam3-edt-without-triton'],
+                               // `pycocotools` : le paquet amont l'importe depuis sa chaîne
+                               // d'entraînement, que `sam3/model` traverse au chargement — sans lui,
+                               // `import sam3` échoue alors que rien n'entraîne quoi que ce soit.
+                               installSteps: [['hydra-core', 'omegaconf', 'iopath', 'psutil', 'pycocotools'],
+                                 ...SOURCE_BUILD_STEPS(PIP_TARGET)] },
   // SAMURAI / SAM2Long : aucun poids propre (ils lisent les checkpoints SAM 2.1) → seul le CODE se
   // télécharge. Installer l'un remplace le paquet `sam2` de l'autre : `exclusiveWith` le fait
   // proprement au lieu de laisser pip écraser en silence une installation qui marchait.
@@ -1091,7 +1124,11 @@ function downloadAttempt(url, tmp, from, onProg, ctrl) {
     httpsStream(url, headers).then(({ req, res, code }) => {
       if (code !== 200 && code !== 206) {
         res.resume();
-        const err = /** @type {Error & { fatal?: boolean }} */ (new Error(`HTTP ${code} sur ${url}`));
+        // 401/403 sur huggingface.co = dépôt sous approbation : l'accès se demande à l'éditeur des
+        // poids, il ne se règle pas dans l'app. Le code HTTP seul ne disait pas ça.
+        const gated = (code === 401 || code === 403) && isHfUrl(url);
+        const err = /** @type {Error & { fatal?: boolean }} */ (
+          new Error(gated ? `${t('hfGated')} — ${url}` : `HTTP ${code} sur ${url}`));
         // A client error does not heal by retrying: dead URL, private repo, quota. 408/429 do —
         // the server is explicitly asking to wait. So does 416: the partial overshoots the
         // resource, and the next attempt starts from zero since this one gained nothing.
@@ -1174,6 +1211,31 @@ function httpsJson(url, depth = 0) {
   });
 }
 
+// Empreinte sha256 d'un fichier, en flux (les poids pèsent des gigaoctets : les charger en mémoire
+// pour les hacher doublerait le pic de RAM d'un téléchargement).
+function sha256File(file) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(file);
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(hash.digest('hex')));
+  });
+}
+
+// --- Dépôts Hugging Face sous approbation --------------------------------------------------------
+// Certains dépôts publient leurs métadonnées mais refusent leurs FICHIERS (401 sur
+// `resolve/main/...`) : l'accès est accordé à la main par l'éditeur des poids, à un compte nommé.
+// NetsuRush ne franchit pas cette porte — ni jeton embarqué, ni miroir des poids : ce serait
+// redistribuer ce que l'éditeur a précisément choisi de ne pas laisser redistribuer. Le seul apport
+// du code ici est de NOMMER la cause, là où l'échec se lisait « HTTP 401 ».
+const HF_HOSTS = new Set(['huggingface.co', 'www.huggingface.co']);
+
+/** URL servie par Hugging Face lui-même (pas son CDN LFS). Une URL illisible répond `false`. */
+function isHfUrl(url) {
+  try { return HF_HOSTS.has(new URL(url).host); } catch (_) { return false; }
+}
+
 // Télécharge un dépôt HF en Node (pas de dépendance python) → VRAIE barre de progression : lit l'arbre
 // de fichiers (API HF /tree → tailles), somme le total, télécharge chaque fichier via resolve/main avec
 // suivi octet-par-octet, et émet un pct CUMULÉ sur l'ensemble du dépôt.
@@ -1247,6 +1309,17 @@ async function downloadHf(id, m, emit, ctrl) {
       const url = `https://huggingface.co/${f.repo || m.repo}/resolve/main/${f.path.split('/').map(encodeURIComponent).join('/')}`;
       try {
         await downloadUrl(url, out, (fileDone) => { live.set(i, fileDone); bump(); }, 0, ctrl);
+        // Empreinte attendue (poids repris d'un miroir) : on la contrôle AVANT de considérer le
+        // fichier acquis. Sans ça, `verify` ne serait qu'une décoration dans le manifeste.
+        const want = m.verify && m.verify[f.path];
+        if (want) {
+          emit({ id, pct: null, done, total, stage: 'verify' });
+          const got = await sha256File(out);
+          if (got !== want) {
+            try { fs.unlinkSync(out); } catch { /* */ }
+            throw new Error(`${t('checksumMismatch')} (${f.path})`);
+          }
+        }
         live.delete(i);
         done += (f.size || 0);
         bump();
@@ -1352,6 +1425,15 @@ function bindCancelable(ctrl, p) {
 //     ONNX (visages, Parakeet, détourage) repasse sur processeur sans un seul message.
 // Chaque `pip install` de modèle est donc contraint aux versions DÉJÀ posées : pip garde la roue en
 // place, ou échoue en le disant. Fichier écrit une fois par démarrage du core, à partir du venv réel.
+//
+// The local label (`+cu124`, `+rocm7.2.1`) is STRIPPED from every pin. A wheel carrying one exists
+// only on the PyTorch index, never on PyPI, so a pin that keeps it is unresolvable as soon as pip
+// has to look a package up — which happens for real: PIP_CONSTRAINT is inherited by the PEP 517
+// build environment, and `sam2` declares `torch>=2.5.1` as a BUILD dependency. With the label the
+// build env asked PyPI for `torch==2.6.0+cu124`, got ResolutionImpossible, and the install died on
+// "Failed to build ... when installing build dependencies". PEP 440 makes the short form just as
+// tight for the installed wheel: a public `==2.6.0` pin matches `2.6.0+cu124`, so the ABI stays
+// locked while the pin remains resolvable from PyPI.
 let torchConstraint;
 async function torchConstraintFile() {
   if (torchConstraint !== undefined) return torchConstraint;
@@ -1359,7 +1441,7 @@ async function torchConstraintFile() {
   const code = 'import importlib.metadata as m\n'
     + 'for n in ("torch","torchvision","torchaudio",'
     + '"onnxruntime","onnxruntime-gpu","onnxruntime-directml","onnxruntime-openvino"):\n'
-    + '    try: print(n+"=="+m.version(n))\n'
+    + '    try: print(n+"=="+m.version(n).split("+")[0])\n'
     + '    except Exception: pass\n';
   const pins = await new Promise((resolve) => {
     let out = '';
@@ -1372,6 +1454,22 @@ async function torchConstraintFile() {
   const file = path.join(os.tmpdir(), 'nr-pip-constraints.txt');
   try { await fsp.writeFile(file, `${pins}\n`, 'utf8'); torchConstraint = file; } catch (_) {}
   return torchConstraint;
+}
+
+// Les daemons python tournent SUR le venv que pip s'apprête à réécrire. Ceux qui sont LIBRES sont
+// rendus avant l'installation (ils repartent au job suivant) ; le nom de ceux qui travaillent
+// encore sert à expliquer un [WinError 32] au lieu de le montrer brut. Requis à la demande :
+// `sidecars` dépend de ce module au chargement.
+function releaseSidecarLocks() {
+  try { return require('./sidecars').releaseVenvLocks(); } catch (_) { return []; }
+}
+
+// Windows refuse de remplacer un .pyd mappé par un process vivant : pip s'arrête alors sur
+// « [WinError 32] ... utilisé par un autre processus », qui ne nomme jamais LE process fautif.
+const FILE_LOCKED = /WinError 32/i;
+function installError(error, busy) {
+  if (!FILE_LOCKED.test(error || '')) return error;
+  return busy.length ? `${t('venvFileLocked')} (${busy.join(', ')})` : t('venvFileLocked');
 }
 
 // Lance UN `pip install --no-input <args...>` dans le venv. Le process ET ses enfants CMake sont
@@ -1447,6 +1545,35 @@ function extractZipArchive(archive, outDir, ctrl) {
   });
 }
 
+// Remplacement de `sam3/model/edt.py` (cf. PIP_PATCHES `sam3-edt-without-triton`). Gardé ici
+// en clair : c'est le fichier RÉEL que verra le paquet installé.
+const SAM3_EDT_WITHOUT_TRITON = `"""EDT sans Triton — fichier remplacé par NetsuRush (PIP_PATCHES: sam3-edt-without-triton).
+
+Triton n'a pas de version officielle sous Windows, et ce module l'importait au CHARGEMENT : tout
+« import sam3 » échouait donc avant la moindre inférence. Le noyau d'origine ne sert qu'à la
+simulation de clics correctifs (sample_one_point_from_error_center, entraînement et évaluation),
+jamais au suivi vidéo, et son propre docstring dit qu'il reproduit
+cv2.distanceTransform(input, cv2.DIST_L2, 0) — c'est exactement ce qu'on appelle ici.
+"""
+
+import numpy as np
+import torch
+
+
+def edt_triton(data: torch.Tensor) -> torch.Tensor:
+    """Transformée de distance euclidienne d'un lot d'images binaires (B, H, W).
+
+    Même contrat que la version Triton : distance L2 au zéro le plus proche, un plan par image du
+    lot. Le calcul passe par OpenCV sur processeur, donc sans exigence de tenseur CUDA.
+    """
+    import cv2
+
+    assert data.dim() == 3, "edt_triton attend un lot (B, H, W)"
+    arr = data.detach().to(torch.uint8).cpu().numpy()
+    out = np.stack([cv2.distanceTransform(plane, cv2.DIST_L2, 0) for plane in arr])
+    return torch.from_numpy(out).to(device=data.device, dtype=torch.float32)
+`;
+
 const PIP_PATCHES = {
   // Le pyproject amont de MatAnyone2 déclare `packages = ["matanyone2"]` (qui embarque déjà
   // `matanyone2/config/`, yaml compris) PUIS un `force-include` du MÊME dossier vers le MÊME chemin :
@@ -1461,6 +1588,22 @@ const PIP_PATCHES = {
   // suppression d'objet meurt sur une erreur qui ne nomme jamais MatAnyone. Le paquet n'utilise du
   // hub que `PyTorchModelHubMixin`, stable en 1.x : le pin est retiré, la dépendance reste.
   // Idempotent : sans pin (amont corrigé), ne touche à rien.
+  // Le paquet `sam3` importe Triton au CHARGEMENT (`sam3/model/edt.py`), or Triton n'a pas de
+  // version officielle sous Windows : « import sam3 » échouait donc avant toute inférence, poids
+  // téléchargés ou non. Ce noyau ne sert QU'À la simulation de clics correctifs
+  // (`sample_one_point_from_error_center`, entraînement/évaluation), jamais au suivi vidéo, et son
+  // docstring amont dit qu'il reproduit `cv2.distanceTransform(..., DIST_L2, 0)` : on remplace donc
+  // le fichier par cette version OpenCV, même contrat, sans Triton.
+  // Idempotent : un fichier sans `import triton` (amont corrigé, ou Triton devenu disponible) n'est
+  // pas touché.
+  'sam3-edt-without-triton': (dir) => {
+    const f = path.join(dir, 'sam3', 'model', 'edt.py');
+    let s;
+    try { s = fs.readFileSync(f, 'utf8'); } catch { return false; }
+    if (!/^import triton$/m.test(s)) return false;
+    fs.writeFileSync(f, SAM3_EDT_WITHOUT_TRITON);
+    return true;
+  },
   'matanyone-drop-hub-pin': (dir) => {
     const f = path.join(dir, 'pyproject.toml');
     let s;
@@ -1524,6 +1667,7 @@ async function ensurePipPackage(m, id, emit, ctrl) {
     if (probe.state === 'broken') return { ok: false, error: `${t('pyRuntimeBroken')} : ${probe.detail}` };
   }
   emit({ id, pct: null, stage: 'install' });
+  const busy = releaseSidecarLocks();
   const constraint = await torchConstraintFile();
   const env = {
     ...DETECT_ENV, SAM2_BUILD_CUDA: '0', SAM2_BUILD_ALLOW_ERRORS: '1',
@@ -1547,7 +1691,7 @@ async function ensurePipPackage(m, id, emit, ctrl) {
     for (const step of steps) {
       const args = step.map((arg) => (arg === PIP_TARGET ? pipTarget : arg));
       const r = await pipInstall(id, args, env, ctrl);
-      if (!r.ok) return { ok: false, error: `${t('installationFailed')} (${checks.join(', ')}): ${r.error}` };
+      if (!r.ok) return { ok: false, error: `${t('installationFailed')} (${checks.join(', ')}): ${installError(r.error, busy)}` };
     }
     if (!(await pyRuntimeReady(m, checks))) return { ok: false, error: `${t('installationFailed')} (${checks.join(', ')})` };
     return { ok: true };
@@ -1607,15 +1751,20 @@ async function installPipFork(id, m, report, ctrl) {
   report({ id, pct: null, stage: 'install' });
   // Désinstaller d'abord : pip poserait le nouveau paquet PAR-DESSUS l'ancien, laissant cohabiter
   // deux jeux de fichiers et un `sam2` dont on ne saurait plus dire de quelle version il vient.
+  const busy = releaseSidecarLocks();
   await pipUninstall(m.package);
   if (ctrl.canceled) return { ok: false, id, canceled: true };
   let prepared = null;
   try {
     prepared = await preparePatchedPip(m.pip, m.pipPatch, id, m.pipSubdir);
     const env = { ...DETECT_ENV, SAM2_BUILD_CUDA: '0', SAM2_BUILD_ALLOW_ERRORS: '1' };
-    const r = await pipInstall(id, ['--no-deps', prepared.dir], env, ctrl);
+    // Same source build as the SAM 2 package itself: build in the venv rather than let PEP 517
+    // isolation pull a whole second torch for a fork that only replaces python files.
+    const w = await pipInstall(id, ['wheel'], env, ctrl);
+    if (ctrl.canceled || w.canceled) return { ok: false, id, canceled: true };
+    const r = await pipInstall(id, ['--no-deps', '--no-build-isolation', prepared.dir], env, ctrl);
     if (ctrl.canceled || r.canceled) return { ok: false, id, canceled: true };
-    if (!r.ok) return fail(`${t('installationFailed')} (${id}): ${r.error}`);
+    if (!r.ok) return fail(`${t('installationFailed')} (${id}): ${installError(r.error, busy)}`);
   } catch (e) {
     return fail(`${t('preparationFailed')} (${id}): ${e}`);
   } finally {

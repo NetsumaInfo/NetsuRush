@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { nr, type UpscaleProgress, type UpscaleResult } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { hostImport } from "@/lib/host";
-import { DEFAULT_SETTINGS, RESTORE_MODELS, SHADER_MODELS, UP_MODELS, shaderRuntimeModel, isRtxShader, type UpSettings } from "./upscaleShared";
+import { DEFAULT_SETTINGS, RESTORE_MODELS, SHADER_MODELS, UP_MODELS, shaderRuntimeModel, isRtxShader, upscaleTokens, type UpSettings } from "./upscaleShared";
+import { imageOutputPayload, outputKindFor } from "./imageOutput";
 import { useSharedProcSources, jobFor, makeRenderReviews } from "./useProcSources";
 import i18n from "@/i18n";
 import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
@@ -30,11 +31,14 @@ export type { FrameCompare } from "./useProcSources";
 
 export function useUpscale() {
   const base = useSharedProcSources();
-  const { sources, active, activeKey, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders } = base;
+  const { sources, active, activeKey, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders, setNamingTokens } = base;
 
   const [settings, setSettings] = useState<UpSettings>(() => {
     const saved = readPersistedObject(SETTINGS_KEY, DEFAULT_SETTINGS);
-    if (saved.shader === "anime4k") return { ...saved, shader: "anime4k_aa_hq" };
+    // Anime4K retiré du produit : un réglage persisté qui le visait retombe sur l'ArtCNN le plus
+    // proche (B+B = restauration douce → DN), sinon le sélecteur afficherait une valeur sans entrée.
+    if (saved.shader === "anime4k_bb_hq") return { ...saved, shader: "artcnn_c4f32_dn" };
+    if (saved.shader.startsWith("anime4k")) return { ...saved, shader: "artcnn_c4f32" };
     if (saved.shader === "artcnn_quality") return { ...saved, shader: "artcnn_c4f32" };
     // RTX VSR n'existe qu'en ×2 : une échelle héritée d'un autre shader ferait échouer le job au
     // lancement, alors que le sélecteur, lui, verrouille déjà le facteur.
@@ -62,6 +66,10 @@ export function useUpscale() {
     setTestErr(null);
     setTesting(false);
   }, [activeKey, compareConfigKey]);
+
+  // Publishes what {op}/{scale}/{model} mean for this op, so the naming preview and the collision
+  // check downstairs describe the run actually configured.
+  useEffect(() => { setNamingTokens(upscaleTokens(settings)); }, [settings, setNamingTokens]);
 
   const [busy, setBusy] = useState<UpscaleProgress | null>(null);
   const [batch, setBatch] = useState<{ i: number; n: number; name: string } | null>(null);
@@ -160,6 +168,13 @@ export function useUpscale() {
     try {
       const completed = await mapConcurrent(sources, sourceConcurrency, async (src, i) => {
         const { whole, segments } = jobFor(src, { multi, scope, range, scenes, picked });
+        // RTX VSR n'écrit que du MP4 : une séquence héritée d'un autre moteur retombe sur la vidéo
+        // (le sélecteur est déjà verrouillé). Une image fixe, elle, garde sa forme pour que le core
+        // refuse explicitement au lieu de lancer un job voué à l'échec.
+        const rtx = !restoring && settings.engine === "turbo" && isRtxShader(settings.shader);
+        const wanted = outputKindFor(settings, src);
+        const outputKind = rtx && wanted === "sequence" ? "video" : wanted;
+        const imageOut = imageOutputPayload(settings, outputKind);
         setBatch({ i, n: sources.length, name: src.name });
         setBusy({ file: src.name, pct: 0, done: 0, total: segments?.length || 1, phase: "model" });
         // Moteur Turbo = shader GLSL (ffmpeg libplacebo, GPU) ; sinon moteur IA (Real-ESRGAN/CUGAN).
@@ -173,7 +188,7 @@ export function useUpscale() {
               hdrContrast: settings.rtxHdrContrast, hdrSaturation: settings.rtxHdrSaturation,
               hdrMidGray: settings.rtxHdrMidGray, hdrNits: settings.rtxHdrNits,
               quality: settings.quality, preset: settings.preset, bitDepth: settings.bitDepth, profile: settings.profile,
-              audio: settings.audio, abr: settings.abr, ...processExportPayload(settings),
+              audio: settings.audio, abr: settings.abr, ...processExportPayload(settings), ...imageOut,
               outDir: dir, whole, segments,
               importBack: backendImport, baseName: src.name.replace(/\.[^.]+$/, ""),
               outputName: outputNameFor(src),
@@ -187,7 +202,7 @@ export function useUpscale() {
               tile: settings.tile, tilePad: settings.tilePad, prePad: settings.prePad, fp32: settings.fp32,
               cleanupNoise: settings.cleanupNoise, cleanupEdges: settings.cleanupEdges,
               quality: settings.quality, preset: settings.preset, bitDepth: settings.bitDepth, profile: settings.profile,
-              audio: settings.audio, abr: settings.abr, ...processExportPayload(settings),
+              audio: settings.audio, abr: settings.abr, ...processExportPayload(settings), ...imageOut,
               outDir: dir, whole, segments,
               importBack: backendImport, baseName: src.name.replace(/\.[^.]+$/, ""),
               outputName: outputNameFor(src),

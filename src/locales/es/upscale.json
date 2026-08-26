@@ -22,7 +22,8 @@
     "process": "Procesos",
     "rotoStudio": "Roto Studio",
     "selectRush": "Selecciona al menos un clip para ajustar el modelo y la salida.",
-    "clipProgress": "Clip {{i}}/{{n}} — {{name}}"
+    "clipProgress": "Clip {{i}}/{{n}} — {{name}}",
+    "interpolateNeedsVideo": "La interpolación necesita vídeo: la selección solo contiene imágenes fijas."
   },
   "titles": {
     "upscale": "Ajustes de escalado",
@@ -78,7 +79,13 @@
     "previewCenter": "Vista previa al centro",
     "previewCenterMenu": "Vista previa al centro",
     "remove": "Quitar",
-    "removeNamed": "Quitar {{name}}"
+    "removeNamed": "Quitar {{name}}",
+    "rename": "Renombrar la salida",
+    "renameReset": "Volver al patrón",
+    "renameLabel": "Nombre de salida de {{name}}",
+    "stillSource": "Imagen fija",
+    "outputName": "Nombre de salida: {{name}}",
+    "nameClash": "Otra fuente genera este nombre: ambas salidas se sobrescribirían."
   },
   "sources": {
     "mediaPool": "Media Pool",
@@ -134,7 +141,9 @@
     "shotPreview": "Vista previa",
     "detectPrompt": "Detecta los planos para escalar cortes precisos.",
     "select": "Seleccionar",
-    "deselect": "Deseleccionar"
+    "deselect": "Deseleccionar",
+    "stillSource": "Imagen fija",
+    "testStill": "Probar en esta imagen"
   },
   "scope": {
     "whole": "Entero",
@@ -206,7 +215,6 @@
     "sectionExport": "Exportar",
     "sectionShaderTurbo": "Shader (Turbo)",
     "sectionModelIa": "Modelo IA",
-    "sectionAlphaFormat": "Formato alfa",
     "rowUpscaleMode": "Categoría",
     "modeUpscale": "Escalado",
     "modeRestore": "Restauración",
@@ -220,23 +228,6 @@
     "rowFolder": "Carpeta",
     "rowImportPool": "Importar al Media Pool",
     "rowOutputName": "Nombre de salida",
-    "rowDefaultNaming": "Regla predeterminada",
-    "perMediaNames": "Nombre de cada medio",
-    "nameForMedia": "Nombre de salida para {{name}}",
-    "resultingName": "Nombre personalizado",
-    "inheritedName": "Nombre heredado",
-    "naming": {
-      "default": "Usar regla predeterminada",
-      "original": "Mismo nombre",
-      "prefix": "Añadir prefijo",
-      "suffix": "Añadir sufijo",
-      "custom": "Renombrar"
-    },
-    "namingPlaceholder": {
-      "prefix": "Prefijo",
-      "suffix": "Sufijo",
-      "custom": "Nombre exacto"
-    },
     "rowEngine": "Motor",
     "engineAi": "IA",
     "engineTurbo": "Turbo",
@@ -265,7 +256,6 @@
     "rowFps": "FPS",
     "rowSlowmo": "Cámara lenta",
     "rowDeadFrames": "Duplicados",
-    "rowDepth": "Profundidad",
     "rowColormap": "Colormap",
     "rowOutput": "Salida",
     "groupDiffusion": "Difusión",
@@ -303,7 +293,54 @@
     "rowHdrNits": "Luminancia máxima",
     "hdrParamsNote": "Valores por defecto del SDK (125 / 100 / 25 / 1000 nits). La luminancia máxima se escribe en los metadatos del máster.",
     "scaleResampledNote": "Este modelo reconstruye a {{native}}×; los demás factores solo redimensionan su salida después.",
-    "windowedModelNote": "Este modelo usa un grafo de dimensiones fijas: solo se puede ajustar el solape de las ventanas."
+    "windowedModelNote": "Este modelo usa un grafo de dimensiones fijas: solo se puede ajustar el solape de las ventanas.",
+    "sectionOutput": "Salida",
+    "outputHint": "Vídeo codificado, o una imagen por fotograma en su propia carpeta.",
+    "outputStillNote": "Una imagen fija se exporta como imagen: el códec de vídeo no se aplica.",
+    "output": {
+      "video": "Vídeo",
+      "sequence": "Secuencia de imágenes",
+      "image": "Imagen"
+    },
+    "outputMixedNote": "La selección mezcla vídeos e imágenes fijas: cada fuente exporta en su forma.",
+    "rowImageFormat": "Formato",
+    "imageFormat": {
+      "png": "PNG (sin pérdida)",
+      "jpeg": "JPEG"
+    },
+    "rowPngBits": "Profundidad",
+    "pngBitsNote": "16 bits solo aporta precisión si el proceso la genera: mapas de profundidad, no el escalado.",
+    "rowPngCompression": "Compresión",
+    "pngCompressionNote": "Sin pérdida en cualquier nivel: solo cambian el tiempo de escritura y el tamaño.",
+    "pngLevel": {
+      "1": "Rápida",
+      "6": "Equilibrada",
+      "9": "Máxima"
+    },
+    "rowJpegQuality": "Calidad JPEG",
+    "jpegQualityNote": "JPEG cuantiza la imagen y no admite alfa. 92 ya es visualmente transparente.",
+    "rowSeqDigits": "Numeración",
+    "seqDigits": "{{n}} dígitos",
+    "rowSeqStart": "Primera imagen",
+    "seqFolderNote": "Cada fuente tiene su carpeta: {{file}}",
+    "namingPatternNote": "El patrón nombra todas las salidas: los tokens se resuelven al lanzar. Un medio renombrado en la bandeja conserva su nombre.",
+    "namingPlaceholder": "{name}_{op}_{scale}",
+    "token": {
+      "name": "Nombre del archivo de origen, sin extensión",
+      "op": "Proceso aplicado (upscaled, interp, depth…)",
+      "scale": "Factor de escala (4x, 2x)",
+      "model": "Modelo o shader utilizado",
+      "date": "Fecha de hoy (AAAA-MM-DD)",
+      "n": "Posición en la selección",
+      "nn": "Posición con 2 dígitos",
+      "nnn": "Posición con 3 dígitos"
+    },
+    "namingCollision": "{{count}} nombre generado por varias fuentes — la segunda salida sobrescribiría la primera.",
+    "namingCollisionSources": "{{count}} fuentes",
+    "namingNumber": "Numerar automáticamente",
+    "namingRenamed": "{{count}} medios renombrados",
+    "namingResetAll": "Restablecer",
+    "outputRtxNote": "RTX VSR solo escribe vídeo: elige otro motor para exportar imágenes."
   },
   "deband": {
     "none": "Ninguno",
@@ -357,7 +394,6 @@
     "artcnn_c4f32": "Anime — el mejor equilibrio entre velocidad y calidad.",
     "artcnn_c4f16": "Anime — el más rápido.",
     "artcnn_quality": "Anime — reduce el ruido y mejora la nitidez.",
-    "anime4k": "Anime — ligero, adecuado para fuentes dañadas.",
     "lanczos": "Imagen real/general — sin IA, instantáneo."
   },
   "shaderHint": {
@@ -369,8 +405,6 @@
     "artcnn_c4f16": "Anime — el más rápido.",
     "artcnn_c4f16_ds": "Rápido — reduce ruido, realza.",
     "artcnn_c4f16_dn": "Rápido — reduce ruido, suaviza.",
-    "anime4k_aa_hq": "Anime — percepción máxima.",
-    "anime4k_bb_hq": "Anime — restauración suave.",
     "rtx_vsr": "Real y anime — ×2 fijo, NVIDIA.",
     "lanczos": "Real — sin IA, instantáneo."
   },
@@ -411,20 +445,12 @@
     "ben2": "BEN2 — imagen 4K, pelo y bordes muy finos.",
     "rvm": "RVM — matte de vídeo en tiempo real, coherencia temporal."
   },
-  "alphaFormat": {
-    "png_seq": "Secuencia PNG"
-  },
-  "alphaFormatHint": {
-    "prores_4444": "ProRes 4444 — alfa, import directo en Resolve.",
-    "png_seq": "Secuencia PNG — alfa sin pérdidas.",
-    "webm_alpha": "WebM VP9 — alfa web."
-  },
   "errors": {
     "frameBlack": "Frame casi negro (¿fundido?) — mueve el cabezal y repite la prueba.",
     "testFailed": "error en la prueba",
     "noShotSelected": "Ningún plano seleccionado.",
     "invalidRange": "Rango no válido.",
-    "duplicateOutputNames": "Varias fuentes producirían el mismo nombre. Expórtalas por separado.",
+    "duplicateOutputNames": "Varias fuentes producirían el mismo nombre de salida: renómbralas o numera el patrón.",
     "upscaleFailed": "error de escalado",
     "interpolateFailed": "error de interpolación",
     "depthFailed": "error de profundidad",
@@ -435,6 +461,11 @@
     "interpolateUnavailable": "Interpolación no disponible: {{err}}. Comprueba que el servicio core y el venv de Python estén activos (reinicia NetsuRush).",
     "depthUnavailable": "Profundidad no disponible: {{err}}. Comprueba que el servicio core y el venv de Python estén activos (reinicia NetsuRush).",
     "removebgUnavailable": "Quitar fondo no disponible: {{err}}. Comprueba que el servicio core y el venv de Python estén activos (reinicia NetsuRush).",
-    "chainUnavailable": "Cadena no disponible: {{err}}. Comprueba que el core y el venv estén activos."
+    "chainUnavailable": "Cadena no disponible: {{err}}. Comprueba que el core y el venv estén activos.",
+    "emptyOutputName": "El patrón no produce ningún nombre: añade al menos {name} o algún texto.",
+    "interpolateNeedsVideo": "La interpolación necesita dos fotogramas contiguos: una imagen fija no los tiene.",
+    "interpolateSkippedStills": "{{count}} imagen fija omitida: la interpolación solo se aplica a vídeo.",
+    "chainNeedsVideo": "Una cadena encadena archivos de vídeo: una imagen fija no puede entrar.",
+    "chainSkippedStills": "{{count}} imagen fija omitida por la cadena."
   }
 }

@@ -16,7 +16,6 @@ import { useTranslation } from "react-i18next";
 import { type CollectionShot, type ExportClipInput } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { ExportButton } from "@/components/export/ExportButton";
 import { ExportAudioSelect } from "@/components/export/ExportAudioSelect";
@@ -62,8 +61,6 @@ export function CollectionSidePanel({
   const { t } = useTranslation("collections");
   const profiles = useApp((s) => s.exportProfiles);
   const activeProfileId = useApp((s) => s.activeExportProfileId);
-  const exportBusy = useApp((s) => s.exportBusy);
-  const exportProgress = useApp((s) => s.exportProgress);
   const activeProfile = getActiveExportProfile(profiles, activeProfileId);
   const url = useShotProxy(shot, getProxy);
 
@@ -74,7 +71,7 @@ export function CollectionSidePanel({
       <Card className="shrink-0 overflow-hidden p-0">
         <div className="relative aspect-video">
           {/* shortcuts={false} : la vue pilote déjà le clavier (Ctrl+Z = annuler un retrait). */}
-          <ScenePlayer src={url} loop apiRef={playerApi} shortcuts={false} />
+          <ScenePlayer src={url} apiRef={playerApi} shortcuts={false} />
           {shot && total > 0 && (
             <div className="absolute left-2 top-2 rounded nr-chip px-2 py-0.5 text-xs tabular-nums">{position}/{total}</div>
           )}
@@ -96,8 +93,9 @@ export function CollectionSidePanel({
         <ExportAudioSelect profile={activeProfile} size="sm" />
         {/* La timeline VISÉE reste dans la barre du haut : elle doit rester réglable panneau fermé. */}
         <TimelineInsertionSelect className="w-full min-w-0" />
+        {/* La progression d'export s'affiche en pastille (cf. ExportStatusToast) : ce panneau peut
+            être fermé pendant l'export, et le résultat arrive au même endroit que le suivi. */}
         <ExportButton clips={exportClips} baseName={name} onTimelineImport={onTimelineImport} className="w-full" />
-        {exportBusy && <Progress value={exportProgress} />}
       </div>
     </aside>
   );

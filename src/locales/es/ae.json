@@ -93,7 +93,7 @@
     },
     "bake": {
       "label": "Recodificado",
-      "hint": "Velocidad y encuadre fijados en el archivo, con el códec elegido arriba, al tamaño de la línea de tiempo. Fuera del cuadro: negro, salvo que ese códec tenga canal alfa. Un encuadre ANIMADO lo renderiza DaVinci Resolve, con sus fotogramas clave: fiel, pero un render por plano."
+      "hint": "Velocidad y encuadre integrados en el archivo, al tamaño de la timeline; fuera de cuadro, negro. Encuadre animado: lo renderiza Resolve, uno por plano."
     }
   },
   "errors": {

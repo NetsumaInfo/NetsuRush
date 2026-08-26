@@ -52,7 +52,7 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [cols, narrow]);
-  const { cell, actualCols } = gridMetrics(gridW, cols, narrow);
+  const { cell, actualCols, maxCols } = gridMetrics(gridW, cols, narrow);
 
   // Hauteur de cellule mesurée = palier d'encodage des proxys (largeur carte × 9/16 × DPR, cf.
   // SceneCard) → la pré-génération vise le MÊME fichier que la lecture à la demande.
@@ -64,7 +64,7 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
   }
 
   return {
-    cols, setCols, cell, actualCols, gridPlay, setGridPlay, gridScrollRef,
+    cols, setCols, cell, actualCols, maxCols, gridPlay, setGridPlay, gridScrollRef,
     getProxy: preview.getProxy,
     bust: preview.bustProxy,
     peekProxy: preview.peekProxy,

@@ -450,6 +450,8 @@
     "showProject": "Projektname",
     "showProjectHint": "Kann einen Kundennamen verraten.",
     "showElapsed": "Vergangene Zeit",
+    "showLinks": "Anklickbare Karte",
+    "showLinksHint": "Das Bild öffnet den Discord-Server, die erste Zeile das Repository.",
     "custom": "Eigene Texte",
     "customHelp": "Ersetzen die automatischen Zeilen. {module} und {projet} werden eingesetzt.",
     "details": "Erste Zeile",
@@ -597,7 +599,7 @@
     },
     "projects": {
       "current": "Geöffnet",
-      "desc": "Die Suche beschränkt sich standardmäßig auf das geöffnete Projekt. Ein Projekt erscheint hier, sobald NetsuRush seinen Media Pool gelesen hat. Der Scan öffnet jedes Resolve-Projekt nacheinander, erfasst dessen Material und öffnet danach wieder das ursprüngliche.",
+      "desc": "Die Projekte, die die Suche kennt. Ein Projekt landet hier, sobald NetsuRush seinen Media Pool gelesen hat. „Erfassen“ holt die übrigen.",
       "empty": "Noch keine Projekte bekannt.",
       "forget": "Vergessen",
       "forgetTooltip": "Entfernt das Projekt aus der Liste (Index und Dateien bleiben unberührt)",

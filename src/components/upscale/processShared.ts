@@ -1,7 +1,8 @@
 import type {
-  InterpModel, DepthModel, DepthColor, SegModel, AlphaFormat, UpscaleCodec, AudioMode,
+  InterpModel, DepthModel, DepthColor, SegModel, UpscaleCodec, AudioMode,
 } from "@/lib/bridge";
 import { DEFAULT_PROCESS_EXPORT, type ProcessExportSettings } from "./processExport";
+import type { NamingTokens } from "./outputNaming";
 
 // Tables de modèles + valeurs par défaut pour les 3 modes du hub (interpolation / depth / removeBG).
 // Façon UP_MODELS d'upscaleShared : id + libellé + indice. `label` = NOM EXACT du modèle (= dépôt du
@@ -83,10 +84,6 @@ export const DEPTH_COLORS: { id: DepthColor; label: string }[] = [
   { id: "viridis", label: "Viridis" },
 ];
 
-export const DEPTH_BITS: { id: 8 | 16; label: string }[] = [
-  { id: 8, label: "8-bit" },
-  { id: 16, label: "16-bit" },
-];
 
 // ── RemoveBG (détourage / alpha) ────────────────────────────────────────────
 export const SEG_MODELS: { id: SegModel; label: string; hint?: string }[] = [
@@ -96,11 +93,6 @@ export const SEG_MODELS: { id: SegModel; label: string; hint?: string }[] = [
   { id: "rvm", label: "Robust Video Matting", hint: "Matte vidéo temps réel, cohérence temporelle." },
 ];
 
-export const ALPHA_FORMATS: { id: AlphaFormat; label: string; hint: string }[] = [
-  { id: "prores_4444", label: "ProRes 4444", hint: "ProRes 4444 — alpha, import Resolve direct." },
-  { id: "png_seq", label: "Séquence PNG", hint: "Séquence PNG — alpha lossless." },
-  { id: "webm_alpha", label: "WebM VP9", hint: "WebM VP9 — alpha web." },
-];
 
 // ── Réglages par mode ───────────────────────────────────────────────────────
 // Noms en `*Settings` (pas `*Opts`) pour ne pas entrer en collision avec les types bridge
@@ -123,7 +115,8 @@ export interface InterpSettings extends ProcessExportSettings {
 
 export interface DepthSettings extends ProcessExportSettings {
   model: DepthModel;
-  bits: 8 | 16;
+  // La profondeur d'ÉCRITURE (8/16 bits) vit dans le bloc Sortie, partagé par toutes les ops : elle
+  // ne veut rien dire tant que la sortie n'est pas une image.
   colormap: DepthColor;
   dedup: boolean;            // ne calculer la depth que sur les frames uniques (accélérateur transverse)
   codec: UpscaleCodec;
@@ -138,7 +131,6 @@ export interface DepthSettings extends ProcessExportSettings {
 
 export interface SegSettings extends ProcessExportSettings {
   model: SegModel;
-  format: AlphaFormat;
   dedup: boolean;            // ne détourer que les frames uniques (accélérateur transverse)
   despeckle: number;         // intensité 0..30 (aire minimale = intensité²)
   edgeSmoothing: number;     // rayon d'adoucissement du contour
@@ -166,7 +158,6 @@ export const DEFAULT_DEPTH: DepthSettings = {
   ...DEFAULT_PROCESS_EXPORT,
   exportAudioMode: "none",
   model: "da3-small",
-  bits: 8,
   colormap: "gray",
   dedup: false,
   codec: "hevc_nvenc",   // encode GPU par défaut (rapide)
@@ -186,9 +177,18 @@ export const DEFAULT_SEG: SegSettings = {
   exportAudioMode: "none",
   exportContainer: "mov",
   model: "birefnet",
-  format: "prores_4444",
   dedup: false,
   despeckle: 0,
   edgeSmoothing: 0,
   edgeOffset: 0,
 };
+
+// Naming tokens of the three other ops (see upscaleTokens for the upscale side).
+export const interpTokens = (settings: InterpSettings): NamingTokens =>
+  ({ op: settings.slowmo ? "slowmo" : "interp", scale: `${settings.factor}x`, model: settings.model });
+
+export const depthTokens = (settings: DepthSettings): NamingTokens =>
+  ({ op: "depth", scale: "", model: settings.model });
+
+export const segTokens = (settings: SegSettings): NamingTokens =>
+  ({ op: "alpha", scale: "", model: settings.model });

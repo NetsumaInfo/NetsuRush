@@ -1,9 +1,8 @@
 import { Toggle } from "@/components/ui/toggle";
 import { Slider } from "@/components/ui/slider";
-import {
-  SEG_MODELS, ALPHA_FORMATS, type SegSettings as SegVals,
-} from "./processShared";
-import { Section, Row, Field, ProcessEncodingRows, ExportRows } from "./procSettingsParts";
+import { SEG_MODELS, type SegSettings as SegVals } from "./processShared";
+import { Section, Row, ProcessEncodingRows, ExportRows } from "./procSettingsParts";
+import { ProcessOutputRows, useOutputShape } from "./ProcessOutputRows";
 import { ModelPicker, useModelOptions } from "./ModelPicker";
 import { useTranslation } from "react-i18next";
 import type { AudioTrack } from "@/lib/bridge";
@@ -26,8 +25,8 @@ interface Props {
 // Pas de codec/audio (sortie alpha dédiée : ProRes 4444 / séquence PNG / WebM VP9).
 export function RemoveBgSettings({ settings, patch, audioTracks, outDir, chooseOut, importBack, setImportBack, disabled }: Props) {
   const { t } = useTranslation("upscale");
-  const fmt = ALPHA_FORMATS.find((f) => f.id === settings.format);
   const models = useModelOptions(SEG_MODELS, settings.model);
+  const { writesVideo } = useOutputShape(settings);
   const sliderRow = (label: string, key: "despeckle" | "edgeSmoothing" | "edgeOffset",
     min: number, max: number, step: number, unit = "") => (
     <div className="space-y-1">
@@ -51,16 +50,11 @@ export function RemoveBgSettings({ settings, patch, audioTracks, outDir, chooseO
           empty={t("modelPicker.emptyRemovebg")} />
       </Section>
 
-      <Section title={t("settings.sectionAlphaFormat")}>
-        <Row label={t("settings.rowOutput")}>
-          <Field value={settings.format === "png_seq" ? "png_seq" : "video"} disabled={disabled}
-            onChange={(v) => patch({ format: v === "png_seq" ? "png_seq" : "prores_4444" })}
-            items={[
-              { value: "video", label: t("alphaFormat.video", { defaultValue: "Vidéo avec alpha" }) },
-              { value: "png_seq", label: t("alphaFormat.png_seq", { defaultValue: "Séquence PNG" }) },
-            ]} />
-        </Row>
-        {settings.format === "png_seq" && fmt && <p className="text-[11px] leading-snug text-muted-foreground">{t(`alphaFormatHint.${fmt.id}`, { defaultValue: fmt.hint })}</p>}
+      {/* La sortie détourée porte TOUJOURS un alpha : la séquence est PNG RGBA, la vidéo est
+          arbitrée entre ProRes 4444 et WebM VP9 par le codec choisi juste en dessous. */}
+      <ProcessOutputRows v={settings} patch={patch} disabled={disabled} alphaOnly />
+
+      <Section>
         <Row label={t("settings.rowDeadFrames")}>
           <Toggle pressed={settings.dedup} onPressedChange={(on) => patch({ dedup: on })} disabled={disabled}>
             {settings.dedup ? t("settings.deadFramesRemove") : t("settings.deadFramesKeep")}
@@ -68,7 +62,7 @@ export function RemoveBgSettings({ settings, patch, audioTracks, outDir, chooseO
         </Row>
       </Section>
 
-      {settings.format !== "png_seq" && (
+      {writesVideo && (
         <ProcessEncodingRows v={settings} patch={patch} audioTracks={audioTracks}
           allowedCodecs={ALPHA_EXPORT_CODECS} disabled={disabled} />
       )}
@@ -83,7 +77,7 @@ export function RemoveBgSettings({ settings, patch, audioTracks, outDir, chooseO
 
       <ExportRows
         outDir={outDir} chooseOut={chooseOut} importBack={importBack} setImportBack={setImportBack} disabled={disabled}
-        hint={t("settings.removeBgHint")}
+        v={settings} hint={t("settings.removeBgHint")}
       />
     </div>
   );

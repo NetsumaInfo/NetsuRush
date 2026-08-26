@@ -293,6 +293,9 @@ const VIDEO_EXT = ["mp4", "mov", "mkv", "avi", "m4v", "mxf", "webm", "wmv", "flv
 const AUDIO_EXT = ["wav", "mp3", "aac", "m4a", "flac", "ogg", "opus", "aif", "aiff", "wma"];
 const MEDIA_EXT = [...VIDEO_EXT, ...AUDIO_EXT];
 const IMAGE_EXT = ["jpg", "jpeg", "png", "tif", "tiff", "bmp", "webp", "gif", "dpx", "exr"];
+// Sources du hub de traitements : une image fixe s'upscale, se détoure et se met en depth map
+// exactement comme une vidéo, donc le sélecteur accepte les deux familles.
+const VISUAL_EXT = [...VIDEO_EXT, ...IMAGE_EXT];
 
 async function dlgOpen(opts: Record<string, unknown>): Promise<string | string[] | null> {
   if (!isTauri) return null;
@@ -912,6 +915,7 @@ export function makeCoreClient(): NrApi {
     rotoPropagate: (opts) => call("roto:propagate", [opts || {}]),
     rotoCancel: () => call("roto:cancel"),
     rotoRefine: (opts) => call("roto:refine", [opts]),
+    rotoTestPreview: () => call("roto:testPreview"),
     rotoSetRefined: (opts) => call("roto:setRefined", [opts]),
     rotoExport: (opts) => call("roto:export", [opts]),
     rotoObjectRemove: (opts) => call("roto:objectRemove", [opts]),
@@ -967,6 +971,10 @@ export function makeCoreClient(): NrApi {
       isRemote
         ? requestParentFiles(true, MEDIA_EXT)
         : (dlgOpen({ multiple: true, filters: [{ name: i18n.t("common:fileType.media"), extensions: MEDIA_EXT }] }) as Promise<string[] | null>),
+    chooseVisualFiles: () =>
+      isRemote
+        ? requestParentFiles(true, VISUAL_EXT)
+        : (dlgOpen({ multiple: true, filters: [{ name: i18n.t("common:fileType.visual"), extensions: VISUAL_EXT }] }) as Promise<string[] | null>),
     chooseImages: () =>
       isRemote
         ? requestParentFiles(true, IMAGE_EXT)

@@ -67,8 +67,13 @@ export interface DerushSlice {
   importToPool: (paths: string[]) => Promise<{ ok: boolean; count?: number; error?: string }>;
   addLocalClips: (paths: string[]) => void;
 
+  // Rush ouvert dans CutStudio. `flow` = la SUITE de rushs enchaînés dans une seule grille
+  // défilante ; `selected` en est toujours le premier et reste la référence de tout ce qui parle
+  // d'« un rush ouvert » (entête, titre, mode épinglé). Ouvrir un rush seul = un flux d'un.
   selected: Clip | null;
+  flow: Clip[];
   open: (c: Clip) => void;
+  openFlow: (clips: Clip[]) => void;
   close: () => void;
 
   // Découpe en lot : détection IA de plusieurs rushs d'affilée, mise en cache (chaque rush s'ouvre
@@ -102,13 +107,13 @@ let clipsInflight: Promise<void> | null = null;
 export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (set, get) => ({
   derushSection: "decoupage",
   // Changer de sous-onglet ferme le clip ouvert (CutStudio couvre tout l'onglet sinon) + la page de découpe.
-  setDerushSection: (derushSection) => set({ derushSection, selected: null, cutTimelineOpen: false }),
+  setDerushSection: (derushSection) => set({ derushSection, selected: null, flow: [], cutTimelineOpen: false }),
 
   derushView: "home",
   backHome: () => set({ derushView: "home" }),
 
   cutTimelineOpen: false,
-  openCutTimeline: () => set({ cutTimelineOpen: true, selected: null }),
+  openCutTimeline: () => set({ cutTimelineOpen: true, selected: null, flow: [] }),
   closeCutTimeline: () => set({ cutTimelineOpen: false }),
 
   tlOpened: null,
@@ -203,8 +208,17 @@ export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (s
   addLocalClips: (paths) => { void get().importFiles(paths); },
 
   selected: null,
-  open: (selected) => set({ selected }),
-  close: () => set({ selected: null }),
+  flow: [],
+  open: (selected) => set({ selected, flow: [selected] }),
+  // Les rushs gardent l'ordre reçu : c'est celui de la grille, donc celui que l'utilisateur voit
+  // au moment de cocher. Un doublon de chemin serait deux fois le même défilement — on l'écarte.
+  openFlow: (clips) => {
+    const seen = new Set<string>();
+    const flow = clips.filter((c) => !seen.has(c.path) && seen.add(c.path));
+    if (!flow.length) return;
+    set({ selected: flow[0], flow });
+  },
+  close: () => set({ selected: null, flow: [] }),
 
   batchDetect: null,
   batchCancel: false,

@@ -679,6 +679,7 @@ function createRpc() {
   "roto:propagate": ([opts]) => roto.rotoPropagate(ev, opts),
   "roto:cancel": () => roto.rotoCancel(),
   "roto:refine": ([opts]) => roto.rotoRefine(ev, opts),
+  "roto:testPreview": () => roto.rotoTestPreview(),
   "roto:setRefined": ([opts]) => roto.rotoSetRefined(opts),
   "roto:export": ([opts]) => roto.rotoExport(ev, opts),
   "roto:objectRemove": ([opts]) => roto.rotoObjectRemove(ev, opts),

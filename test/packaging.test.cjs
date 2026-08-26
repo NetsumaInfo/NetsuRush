@@ -372,7 +372,12 @@ test('installed runtime is scanned, repairable, and verified before restart', ()
 test('NetsuCut reveals detected scenes without the removed fake thumbnail loading', () => {
   const detection = fs.readFileSync(path.join(root, 'src', 'components', 'rushes', 'useShotDetection.ts'), 'utf8');
   assert.doesNotMatch(detection, /WARM_FIRST|warmFirstThumbs/);
-  assert.match(detection, /setSegments\(segs\);/);
+  // Les plans du cache sont posés d'un bloc, puis les vignettes se préchauffent : jamais l'inverse.
+  // Un flux ne publie donc jamais un rush de moins, ce qui est ce qui le fait défiler comme un seul.
+  const reveal = detection.slice(detection.indexOf('const loaded = await Promise.all'));
+  const posed = reveal.indexOf('setSegments(all);');
+  const warmed = reveal.indexOf('helpersRef.current.warmThumbs(all');
+  assert.ok(posed >= 0 && warmed > posed, 'les plans doivent être posés avant la préchauffe');
 });
 
 test('OmniShotCut is installed and verified from the bundled local package', () => {
@@ -408,6 +413,22 @@ test('NetsuCut exposes only the three wired detection engines and option-aware c
   assert.match(detect, /intraLabels/);
   assert.match(detect, /interLabels/);
   assert.doesNotMatch(registry, /scenesdetect/i);
+});
+
+test('the GPU load of the moment reaches the estimator without touching the cut cache key', () => {
+  const sidecars = fs.readFileSync(path.join(root, 'core', 'sidecars.js'), 'utf8');
+  const detect = fs.readFileSync(path.join(root, 'python', 'detect.py'), 'utf8');
+  // Compté APRÈS l'acquisition : ce job est dans le nombre qu'il reçoit.
+  const dispatch = sidecars.slice(sidecars.indexOf('async function detectScenes'), sidecars.indexOf('// Lecture DIRECTE du cache'));
+  assert.ok(dispatch.indexOf('detectPool.acquire()') < dispatch.indexOf('slot.busy'));
+  assert.match(dispatch, /const concurrency = detectPool\.pool\.filter\(\(slot\) => slot\.busy\)\.length \|\| 1/);
+  // Champ de PREMIER NIVEAU du job. Dans `options`, il entrerait dans la clé de cache et un rush
+  // découpé en lot ne retrouverait plus la découpe qu'il a faite seul.
+  assert.match(dispatch, /model, options, concurrency \}/);
+  assert.doesNotMatch(dispatch, /options: \{[^}]*concurrency/);
+  assert.match(detect, /def cmd_detect\(path, threshold, model, options=None, concurrency=1\)/);
+  assert.match(detect, /_detect_omnishot\(path, normalized\["omnishotcut"\], concurrency\)/);
+  assert.match(detect, /max\(30\.0, duration \* 0\.12\) \* max\(1, int\(concurrency or 1\)\)/);
 });
 
 test('first-run setup never bypasses the gate when the core is temporarily unavailable', () => {

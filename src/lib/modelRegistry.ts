@@ -25,6 +25,11 @@ type ModelLicense =
   // Stability AI Community : commercial autorisé SOUS un plafond de chiffre d'affaires, avec
   // attribution. Ni permissive, ni purement non commerciale — d'où son propre libellé.
   | "Stability-Community"
+  // SAM License (Meta) : licence maison, mais le droit accordé est large — usage, reproduction,
+  // DISTRIBUTION et modification, sans redevance ni restriction de champ. Pas de clause non
+  // commerciale. Contraintes réelles : redistribuer sous les mêmes termes avec l'accord joint,
+  // citer les SAM Materials dans une publication, respecter les contrôles à l'export.
+  | "SAM-License"
   | "bundled" | "unknown";
 
 // Tier : light (bas VRAM, défaut sûr) / balanced (défaut recommandé) / heavy (gros GPU, opt-in).
@@ -246,11 +251,21 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   // ---- Segmentation interactive (Roto Studio) ----
   // Libellés = nom publié par le DÉPÔT qui livre le modèle, même quand il ne fait que reprendre les
   // poids d'un autre (SAMURAI et SAM2Long tournent sur les checkpoints SAM 2.1).
-  { id: "sam3.1", label: "SAM 3.1", task: "segment", engine: "sam3", license: "NC", commercialUse: false, sizeBytes: 3_502_755_717, tier: "heavy", vramGB: 12, hint: "Génération la plus récente, nettement meilleure que SAM 2.1 sur les objets qui se croisent ou disparaissent. GPU NVIDIA obligatoire.", default: true },
-  { id: "sam2.1-large", label: "SAM 2.1 Hiera Large", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 900 * MB, tier: "heavy", vramGB: 10, hint: "Meilleure qualité de masque, plus de VRAM." },
-  { id: "sam2.1", label: "SAM 2.1 Hiera Base+", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 350 * MB, tier: "balanced", vramGB: 5, hint: "Repli rapide, bas VRAM." },
-  { id: "samurai", label: "SAMURAI", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 12 * MB, tier: "balanced", vramGB: 5, hint: "Tient l'objet quand il passe derrière autre chose : mémoire guidée par le mouvement. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
-  { id: "sam2long", label: "SAM2Long", task: "segment", engine: "sam", license: "CC-BY-NC-4.0", commercialUse: false, sizeBytes: 12 * MB, tier: "balanced", vramGB: 5, hint: "Pour les plans longs : garde plusieurs pistes en parallèle et élague les mauvaises, donc l'erreur ne s'accumule pas. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
+  // VRAM des variantes SAM 2.1 : MESURÉE sur Hiera Large (source 1920×1080, 240 frames) — pic de
+  // 2,05 Gio, stable quelle que soit la longueur du plan, parce que le moteur charge la vidéo ET la
+  // banque de mémoire en RAM (`offload_video_to_cpu` + `offload_state_to_cpu`, cf. sam_engine.py).
+  // Les 10 Go annoncés avant venaient de la doc amont, qui mesure SANS ces offloads : le badge
+  // d'alerte écartait le meilleur modèle d'une carte qui l'exécute sans effort. Les variantes plus
+  // petites suivent le même chemin avec un encodeur plus léger, donc restent en dessous.
+  // VRAM MESURÉE ici (RTX 3070 Ti 8 Go) : 3,7 Gio pour les seuls poids, 6,2 Gio réservés dès le
+  // PREMIER clic — avant toute propagation, qui ajoute encore la mémoire multiplex. Il restait
+  // 0,68 Gio libres sur la carte : le modèle ne tient pas sur 8 Go, et son moteur amont exige CUDA
+  // sans repli processeur. D'où un seuil à 10, qui laisse l'avertissement s'afficher sur ces cartes.
+  { id: "sam3.1", label: "SAM 3.1", task: "segment", engine: "sam3", license: "SAM-License", commercialUse: true, sizeBytes: 3_502_755_717, tier: "heavy", vramGB: 10, hint: "Génération la plus récente, nettement meilleure que SAM 2.1 sur les objets qui se croisent ou disparaissent. Mesuré : 6,2 Gio de VRAM dès le premier clic, donc hors d'atteinte d'une carte de 8 Go." },
+  { id: "sam2.1-large", label: "SAM 2.1 Hiera Large", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 900 * MB, tier: "balanced", vramGB: 3, hint: "Meilleure qualité de masque. 2 Gio de VRAM mesurés, longueur de plan indifférente.", default: true },
+  { id: "sam2.1", label: "SAM 2.1 Hiera Base+", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 350 * MB, tier: "balanced", vramGB: 2, hint: "Repli rapide, bas VRAM." },
+  { id: "samurai", label: "SAMURAI", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 12 * MB, tier: "balanced", vramGB: 3, hint: "Tient l'objet quand il passe derrière autre chose : mémoire guidée par le mouvement. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
+  { id: "sam2long", label: "SAM2Long", task: "segment", engine: "sam", license: "CC-BY-NC-4.0", commercialUse: false, sizeBytes: 12 * MB, tier: "balanced", vramGB: 3, hint: "Pour les plans longs : garde plusieurs pistes en parallèle et élague les mauvaises, donc l'erreur ne s'accumule pas. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
   { id: "edgetam", label: "EdgeTAM", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 56_116_523, tier: "light", vramGB: 2, hint: "Le plus léger : 56 Mo, ~20× plus rapide que SAM 2 sur petite carte. Masques moins fins.", advanced: true },
   { id: "sam2.1-small", label: "SAM 2.1 Hiera Small", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 184 * MB, tier: "light", vramGB: 3, hint: "Variante intermédiaire entre EdgeTAM et Base+.", advanced: true },
   { id: "sam2.1-tiny", label: "SAM 2.1 Hiera Tiny", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 156 * MB, tier: "light", vramGB: 2, hint: "La plus petite variante SAM 2.1.", advanced: true },

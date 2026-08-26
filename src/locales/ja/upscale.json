@@ -22,7 +22,8 @@
     "process": "処理",
     "rotoStudio": "Roto Studio",
     "selectRush": "素材を1つ以上選ぶとモデルと出力を設定できます。",
-    "clipProgress": "クリップ {{i}}/{{n}} — {{name}}"
+    "clipProgress": "クリップ {{i}}/{{n}} — {{name}}",
+    "interpolateNeedsVideo": "補間には動画が必要です。選択には静止画しかありません。"
   },
   "titles": {
     "upscale": "アップスケールの設定",
@@ -78,7 +79,13 @@
     "previewCenter": "中央にプレビュー",
     "previewCenterMenu": "中央にプレビュー",
     "remove": "外す",
-    "removeNamed": "{{name}} を外す"
+    "removeNamed": "{{name}} を外す",
+    "rename": "出力名を変更",
+    "renameReset": "パターンに戻す",
+    "renameLabel": "{{name}} の出力名",
+    "stillSource": "静止画",
+    "outputName": "出力名 : {{name}}",
+    "nameClash": "他のソースが同じ名前を出力します。両方の出力が上書きし合います。"
   },
   "sources": {
     "mediaPool": "Media Pool",
@@ -134,7 +141,9 @@
     "shotPreview": "プレビュー",
     "detectPrompt": "ショットを検出すると正確なカット単位でアップスケールできます。",
     "select": "選択",
-    "deselect": "選択解除"
+    "deselect": "選択解除",
+    "stillSource": "静止画",
+    "testStill": "この画像でテスト"
   },
   "scope": {
     "whole": "全体",
@@ -206,7 +215,6 @@
     "sectionExport": "書き出し",
     "sectionShaderTurbo": "シェーダー（Turbo）",
     "sectionModelIa": "AI モデル",
-    "sectionAlphaFormat": "アルファ形式",
     "rowUpscaleMode": "カテゴリー",
     "modeUpscale": "アップスケール",
     "modeRestore": "修復",
@@ -220,23 +228,6 @@
     "rowFolder": "フォルダー",
     "rowImportPool": "Media Pool に取り込む",
     "rowOutputName": "出力名",
-    "rowDefaultNaming": "デフォルトルール",
-    "perMediaNames": "メディアごとの名前",
-    "nameForMedia": "{{name}} の出力名",
-    "resultingName": "個別名",
-    "inheritedName": "継承した名前",
-    "naming": {
-      "default": "デフォルトルールを使用",
-      "original": "同じ名前",
-      "prefix": "接頭辞を追加",
-      "suffix": "接尾辞を追加",
-      "custom": "名前を変更"
-    },
-    "namingPlaceholder": {
-      "prefix": "接頭辞",
-      "suffix": "接尾辞",
-      "custom": "正確なファイル名"
-    },
     "rowEngine": "エンジン",
     "engineAi": "AI",
     "engineTurbo": "Turbo",
@@ -265,7 +256,6 @@
     "rowFps": "fps",
     "rowSlowmo": "スローモーション",
     "rowDeadFrames": "重複フレーム",
-    "rowDepth": "深度",
     "rowColormap": "カラーマップ",
     "rowOutput": "出力",
     "groupDiffusion": "ディフュージョン",
@@ -303,7 +293,54 @@
     "rowHdrNits": "ピーク輝度",
     "hdrParamsNote": "SDK の既定値（125 / 100 / 25 / 1000 nits）。ピーク輝度はマスターのメタデータに書き込まれます。",
     "scaleResampledNote": "このモデルは {{native}}× で再構成します。他の倍率は出力を後からリサイズするだけです。",
-    "windowedModelNote": "このモデルは固定サイズのグラフで動作します。調整できるのはウィンドウの重なりだけです。"
+    "windowedModelNote": "このモデルは固定サイズのグラフで動作します。調整できるのはウィンドウの重なりだけです。",
+    "sectionOutput": "出力",
+    "outputHint": "エンコードした動画、または専用フォルダーに 1 フレーム 1 枚の画像。",
+    "outputStillNote": "静止画は画像として書き出されます。動画コーデックは適用されません。",
+    "output": {
+      "video": "動画",
+      "sequence": "連番画像",
+      "image": "画像"
+    },
+    "outputMixedNote": "選択に動画と静止画が混在しています。各ソースはそれぞれの形式で書き出されます。",
+    "rowImageFormat": "形式",
+    "imageFormat": {
+      "png": "PNG（可逆）",
+      "jpeg": "JPEG"
+    },
+    "rowPngBits": "ビット深度",
+    "pngBitsNote": "16 ビットは処理側が精度を持つ場合にのみ意味があります（深度マップは該当、アップスケールは非該当）。",
+    "rowPngCompression": "圧縮",
+    "pngCompressionNote": "どの段階でも可逆です。変わるのは書き込み時間とファイルサイズだけです。",
+    "pngLevel": {
+      "1": "高速",
+      "6": "バランス",
+      "9": "最大"
+    },
+    "rowJpegQuality": "JPEG 品質",
+    "jpegQualityNote": "JPEG は画像を量子化し、アルファを保持しません。92 でも見た目の劣化はほぼありません。",
+    "rowSeqDigits": "連番の桁数",
+    "seqDigits": "{{n}} 桁",
+    "rowSeqStart": "開始番号",
+    "seqFolderNote": "各ソースに専用フォルダーを作ります : {{file}}",
+    "namingPatternNote": "このパターンがすべての出力名を決めます。トークンは実行時に置換され、トレイで個別に変更した名前はそのまま残ります。",
+    "namingPlaceholder": "{name}_{op}_{scale}",
+    "token": {
+      "name": "拡張子を除いたソースファイル名",
+      "op": "適用した処理（upscaled、interp、depth など）",
+      "scale": "拡大倍率（4x、2x）",
+      "model": "使用したモデルまたはシェーダー",
+      "date": "実行日（YYYY-MM-DD）",
+      "n": "選択内での順番",
+      "nn": "順番を 2 桁で",
+      "nnn": "順番を 3 桁で"
+    },
+    "namingCollision": "{{count}} 件の名前が複数のソースで重複しています。後の出力が先の出力を上書きします。",
+    "namingCollisionSources": "{{count}} 件のソース",
+    "namingNumber": "自動で連番を付ける",
+    "namingRenamed": "{{count}} 件のメディアを個別に命名",
+    "namingResetAll": "リセット",
+    "outputRtxNote": "RTX VSR は動画しか書き出せません。画像出力には別のエンジンを選んでください。"
   },
   "deband": {
     "none": "なし",
@@ -357,7 +394,6 @@
     "artcnn_c4f32": "アニメ — 速度と品質のバランスに優れます。",
     "artcnn_c4f16": "アニメ — 最速です。",
     "artcnn_quality": "アニメ — ノイズを除去してシャープにします。",
-    "anime4k": "アニメ — 軽量で、傷んだ素材に適しています。",
     "lanczos": "実写/汎用 — AI不使用ですぐに処理できます。"
   },
   "shaderHint": {
@@ -369,8 +405,6 @@
     "artcnn_c4f16": "アニメ — 最速。",
     "artcnn_c4f16_ds": "高速 — ノイズ除去＋シャープ。",
     "artcnn_c4f16_dn": "高速 — ノイズ除去＋軟調。",
-    "anime4k_aa_hq": "アニメ — 知覚品質最大。",
-    "anime4k_bb_hq": "アニメ — 穏やかな復元。",
     "rtx_vsr": "実写・アニメ — 2× 固定、NVIDIA。",
     "lanczos": "実写 — AI なし、即時。"
   },
@@ -411,20 +445,12 @@
     "ben2": "BEN2 — 4K 画像、髪や極細の輪郭。",
     "rvm": "RVM — リアルタイム映像マット、時間的一貫性。"
   },
-  "alphaFormat": {
-    "png_seq": "PNG シーケンス"
-  },
-  "alphaFormatHint": {
-    "prores_4444": "ProRes 4444 — アルファ対応、Resolve に直接取り込み。",
-    "png_seq": "PNG シーケンス — ロスレスのアルファ。",
-    "webm_alpha": "WebM VP9 — Web 用アルファ。"
-  },
   "errors": {
     "frameBlack": "ほぼ真っ黒なフレームです（ディゾルブ？）— 再生ヘッドを動かして再テスト。",
     "testFailed": "テスト失敗",
     "noShotSelected": "ショットが選択されていません。",
     "invalidRange": "範囲が不正です。",
-    "duplicateOutputNames": "複数のソースが同じ名前になります。個別に書き出してください。",
+    "duplicateOutputNames": "複数のソースが同じ出力名になります。名前を変えるか、パターンに連番を入れてください。",
     "upscaleFailed": "アップスケール失敗",
     "interpolateFailed": "補間失敗",
     "depthFailed": "深度生成に失敗",
@@ -435,6 +461,11 @@
     "interpolateUnavailable": "補間を利用できません：{{err}}。core サービスと Python venv が動いているか確認（NetsuRush を再起動）。",
     "depthUnavailable": "深度を利用できません：{{err}}。core サービスと Python venv が動いているか確認（NetsuRush を再起動）。",
     "removebgUnavailable": "背景除去を利用できません：{{err}}。core サービスと Python venv が動いているか確認（NetsuRush を再起動）。",
-    "chainUnavailable": "チェーンを利用できません：{{err}}。core と venv が動いているか確認。"
+    "chainUnavailable": "チェーンを利用できません：{{err}}。core と venv が動いているか確認。",
+    "emptyOutputName": "パターンから名前が作れません。少なくとも {name} かテキストを入れてください。",
+    "interpolateNeedsVideo": "補間には隣り合う 2 枚のフレームが必要です。静止画にはありません。",
+    "interpolateSkippedStills": "{{count}} 枚の静止画をスキップしました。補間は動画にのみ適用されます。",
+    "chainNeedsVideo": "チェーンは動画ファイルを順に処理します。静止画は投入できません。",
+    "chainSkippedStills": "チェーンが {{count}} 枚の静止画をスキップしました。"
   }
 }

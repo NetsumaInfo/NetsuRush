@@ -40,6 +40,13 @@ const RECONNECT_MIN_MS = 1_000;
 const RECONNECT_MAX_MS = 30_000;
 const HANDSHAKE_TIMEOUT_MS = 10_000; // pipe qui accepte sans jamais répondre READY
 const LARGE_IMAGE = 'nr_logo';  // clé d'asset (portail dev › Rich Presence › Art Assets)
+// Destinations des liens de la carte. Discord accepte une url PAR CHAMP : `details_url` sur la
+// premiere ligne, `large_url`/`small_url` sur les images. C'est le SEUL moyen de rendre une
+// presence cliquable — les boutons de profil, eux, ne s'affichent jamais a leur proprietaire.
+// Doublon assume de src/lib/community.ts : ce fichier tourne cote core et ne peut pas importer
+// le TypeScript du rendu.
+const SERVER_URL = 'https://discord.gg/Vq7K6mWNX5';
+const REPO_URL = 'https://github.com/NetsumaInfo/NetsuRush';
 // Info PUBLIQUE de l'application (nom + icône), sans authentification : c'est ce que Discord affiche
 // réellement sur le profil. Sert UNIQUEMENT à rendre l'aperçu des Paramètres fidèle.
 const API = 'https://discord.com/api';
@@ -47,7 +54,7 @@ const CDN = 'https://cdn.discordapp.com';
 const TEXT_MIN = 2;             // Discord rejette une ligne de moins de 2 caractères
 const TEXT_MAX = 128;
 
-/** @typedef {{ enabled:boolean, showModule:boolean, showProject:boolean, showElapsed:boolean, detailsTpl:string, stateTpl:string }} DiscordPrefs */
+/** @typedef {{ enabled:boolean, showModule:boolean, showProject:boolean, showElapsed:boolean, showLinks:boolean, detailsTpl:string, stateTpl:string }} DiscordPrefs */
 
 /** @type {DiscordPrefs} */
 const DEFAULT_PREFS = {
@@ -55,6 +62,7 @@ const DEFAULT_PREFS = {
   showModule: true,
   showProject: false, // vie privée : un nom de projet peut trahir un client → opt-in explicite
   showElapsed: true,
+  showLinks: true,
   detailsTpl: '',
   stateTpl: '',
 };
@@ -69,7 +77,7 @@ const DEFAULT_PREFS = {
 function sanitizePrefs(raw) {
   const out = { ...DEFAULT_PREFS };
   if (!raw || typeof raw !== 'object') return out;
-  for (const k of /** @type {const} */ (['enabled', 'showModule', 'showProject', 'showElapsed'])) {
+  for (const k of /** @type {const} */ (['enabled', 'showModule', 'showProject', 'showElapsed', 'showLinks'])) {
     if (typeof raw[k] === 'boolean') out[k] = raw[k];
   }
   for (const k of /** @type {const} */ (['detailsTpl', 'stateTpl'])) {
@@ -330,6 +338,13 @@ function createDiscordRpc({ CONFIG, broadcast, dataDir }) {
     const activity = { assets: { large_image: LARGE_IMAGE, large_text: 'NetsuRush' } };
     if (details) activity.details = details;
     if (state) activity.state = state;
+    // Une url ne peut pas pendre sans sa ligne : chacune n'est posee qu'avec le contenu
+    // qu'elle rend cliquable. La deuxieme ligne reste muette — deux liens cote a cote
+    // encombrent la carte, et l'art couvre deja la seconde destination.
+    if (prefs.showLinks) {
+      activity.assets.large_url = SERVER_URL;
+      if (details) activity.details_url = REPO_URL;
+    }
     if (prefs.showElapsed) activity.timestamps = { start: startedAt }; // SECONDES (pas des ms)
     return activity;
   }

@@ -44,6 +44,7 @@ import { useLive } from "./boardLive";
 import { itemToPngBlob } from "./boardRender";
 import { primeBoardThumbs } from "./boardImageLod";
 import { posterTime } from "./boardVideoLod";
+import { useDragEndReset } from "@/lib/dropZone";
 
 const clampScale = (s: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s));
 
@@ -134,6 +135,9 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   const addItem = useBoard((s) => s.addItem);
 
   const [over, setOver] = useState(false);
+  // Le liseré s'éteint à la FIN du glissé, où qu'elle survienne : `dragleave` ne suffit pas (il tire
+  // aussi vers les enfants, et jamais quand le curseur quitte la fenêtre en survolant l'un d'eux).
+  useDragEndReset(() => setOver(false));
   const pan = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
   const gesture = useRef<"pan" | "marquee" | "pinch" | null>(null);
   const space = useRef(false);

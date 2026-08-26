@@ -22,7 +22,8 @@
     "process": "处理",
     "rotoStudio": "Roto Studio",
     "selectRush": "至少选择一个素材，才能设置模型和输出。",
-    "clipProgress": "片段 {{i}}/{{n}} — {{name}}"
+    "clipProgress": "片段 {{i}}/{{n}} — {{name}}",
+    "interpolateNeedsVideo": "插帧需要视频：当前所选内容只有静态图片。"
   },
   "titles": {
     "upscale": "超分辨率设置",
@@ -78,7 +79,13 @@
     "previewCenter": "在中间预览",
     "previewCenterMenu": "在中间预览",
     "remove": "移除",
-    "removeNamed": "移除 {{name}}"
+    "removeNamed": "移除 {{name}}",
+    "rename": "重命名输出",
+    "renameReset": "恢复为模板",
+    "renameLabel": "{{name}} 的输出名称",
+    "stillSource": "静态图片",
+    "outputName": "输出名称：{{name}}",
+    "nameClash": "另一个源会生成同名文件：两个输出会互相覆盖。"
   },
   "sources": {
     "mediaPool": "Media Pool",
@@ -134,7 +141,9 @@
     "shotPreview": "预览",
     "detectPrompt": "检测镜头，即可按精确切分做超分。",
     "select": "选择",
-    "deselect": "取消选择"
+    "deselect": "取消选择",
+    "stillSource": "静态图片",
+    "testStill": "在这张图上测试"
   },
   "scope": {
     "whole": "整段",
@@ -206,7 +215,6 @@
     "sectionExport": "导出",
     "sectionShaderTurbo": "Shader（Turbo）",
     "sectionModelIa": "AI 模型",
-    "sectionAlphaFormat": "Alpha 格式",
     "rowUpscaleMode": "类别",
     "modeUpscale": "超分辨率",
     "modeRestore": "修复",
@@ -220,23 +228,6 @@
     "rowFolder": "文件夹",
     "rowImportPool": "导入 Media Pool",
     "rowOutputName": "输出名称",
-    "rowDefaultNaming": "默认规则",
-    "perMediaNames": "每个媒体的命名",
-    "nameForMedia": "{{name}} 的输出名称",
-    "resultingName": "自定义名称",
-    "inheritedName": "继承名称",
-    "naming": {
-      "default": "使用默认规则",
-      "original": "保持原名",
-      "prefix": "添加前缀",
-      "suffix": "添加后缀",
-      "custom": "重命名"
-    },
-    "namingPlaceholder": {
-      "prefix": "前缀",
-      "suffix": "后缀",
-      "custom": "精确文件名"
-    },
     "rowEngine": "引擎",
     "engineAi": "AI",
     "engineTurbo": "Turbo",
@@ -265,7 +256,6 @@
     "rowFps": "FPS",
     "rowSlowmo": "慢动作",
     "rowDeadFrames": "重复帧",
-    "rowDepth": "深度",
     "rowColormap": "Colormap",
     "rowOutput": "输出",
     "groupDiffusion": "Diffusion",
@@ -303,7 +293,54 @@
     "rowHdrNits": "峰值亮度",
     "hdrParamsNote": "SDK 默认值（125 / 100 / 25 / 1000 nits）。峰值亮度会写入母版元数据。",
     "scaleResampledNote": "该模型以 {{native}}× 重建；其他倍数只是事后缩放其输出。",
-    "windowedModelNote": "该模型使用固定尺寸的计算图：只有窗口重叠可调。"
+    "windowedModelNote": "该模型使用固定尺寸的计算图：只有窗口重叠可调。",
+    "sectionOutput": "输出",
+    "outputHint": "编码视频，或在专属文件夹中每帧一张图像。",
+    "outputStillNote": "静态图片输出为图像：视频编解码器不适用。",
+    "output": {
+      "video": "视频",
+      "sequence": "图像序列",
+      "image": "图像"
+    },
+    "outputMixedNote": "所选内容混合了视频和静态图片：每个源按各自的形式输出。",
+    "rowImageFormat": "格式",
+    "imageFormat": {
+      "png": "PNG（无损）",
+      "jpeg": "JPEG"
+    },
+    "rowPngBits": "位深",
+    "pngBitsNote": "只有当处理本身具备更高精度时，16 位才有意义：深度图有，放大没有。",
+    "rowPngCompression": "压缩",
+    "pngCompressionNote": "任何级别都是无损的：只改变写入时间和文件大小。",
+    "pngLevel": {
+      "1": "快速",
+      "6": "均衡",
+      "9": "最高"
+    },
+    "rowJpegQuality": "JPEG 质量",
+    "jpegQualityNote": "JPEG 会量化图像且不含 alpha 通道。92 在视觉上已几乎无损。",
+    "rowSeqDigits": "编号位数",
+    "seqDigits": "{{n}} 位",
+    "rowSeqStart": "起始编号",
+    "seqFolderNote": "每个源都有自己的文件夹：{{file}}",
+    "namingPatternNote": "该模板决定所有输出名称：占位符在运行时替换；在选择栏中单独重命名的媒体保留自己的名称。",
+    "namingPlaceholder": "{name}_{op}_{scale}",
+    "token": {
+      "name": "源文件名（不含扩展名）",
+      "op": "所应用的处理（upscaled、interp、depth 等）",
+      "scale": "缩放倍数（4x、2x）",
+      "model": "所用的模型或着色器",
+      "date": "当天日期（YYYY-MM-DD）",
+      "n": "在所选内容中的序号",
+      "nn": "序号（2 位）",
+      "nnn": "序号（3 位）"
+    },
+    "namingCollision": "{{count}} 个名称由多个源生成 — 后一个输出会覆盖前一个。",
+    "namingCollisionSources": "{{count}} 个源",
+    "namingNumber": "自动编号",
+    "namingRenamed": "已单独重命名 {{count}} 个媒体",
+    "namingResetAll": "重置",
+    "outputRtxNote": "RTX VSR 只能输出视频：如需导出图像请选择其他引擎。"
   },
   "deband": {
     "none": "无",
@@ -357,7 +394,6 @@
     "artcnn_c4f32": "动漫 — 速度与质量的最佳平衡。",
     "artcnn_c4f16": "动漫 — 速度最快。",
     "artcnn_quality": "动漫 — 降噪并锐化。",
-    "anime4k": "动漫 — 轻量，适合受损素材。",
     "lanczos": "实拍/通用 — 无需 AI，即时处理。"
   },
   "shaderHint": {
@@ -369,8 +405,6 @@
     "artcnn_c4f16": "动画 — 最快。",
     "artcnn_c4f16_ds": "快速 — 降噪并锐化。",
     "artcnn_c4f16_dn": "快速 — 降噪并柔化。",
-    "anime4k_aa_hq": "动画 — 观感最佳。",
-    "anime4k_bb_hq": "动画 — 柔和修复。",
     "rtx_vsr": "实拍与动画 — 固定 2×，NVIDIA。",
     "lanczos": "实拍 — 无 AI，瞬时。"
   },
@@ -411,20 +445,12 @@
     "ben2": "BEN2 — 4K 图像，发丝和边缘极细。",
     "rvm": "RVM — 实时视频遮罩，时序连贯。"
   },
-  "alphaFormat": {
-    "png_seq": "PNG 序列"
-  },
-  "alphaFormatHint": {
-    "prores_4444": "ProRes 4444 — 带 alpha，可直接导入 Resolve。",
-    "png_seq": "PNG 序列 — 无损 alpha。",
-    "webm_alpha": "WebM VP9 — 网页 alpha。"
-  },
   "errors": {
     "frameBlack": "画面接近全黑（溶解？）— 移动播放头后重新测试。",
     "testFailed": "测试失败",
     "noShotSelected": "未选择镜头。",
     "invalidRange": "范围无效。",
-    "duplicateOutputNames": "多个源会生成相同名称。请分别导出。",
+    "duplicateOutputNames": "多个源会生成相同的输出名称：请重命名，或在模板中加入编号。",
     "upscaleFailed": "超分失败",
     "interpolateFailed": "插帧失败",
     "depthFailed": "深度失败",
@@ -435,6 +461,11 @@
     "interpolateUnavailable": "插帧不可用：{{err}}。检查 core 服务和 Python venv 是否运行（重启 NetsuRush）。",
     "depthUnavailable": "深度不可用：{{err}}。检查 core 服务和 Python venv 是否运行（重启 NetsuRush）。",
     "removebgUnavailable": "抠像不可用：{{err}}。检查 core 服务和 Python venv 是否运行（重启 NetsuRush）。",
-    "chainUnavailable": "处理链不可用：{{err}}。检查 core 和 venv 是否运行。"
+    "chainUnavailable": "处理链不可用：{{err}}。检查 core 和 venv 是否运行。",
+    "emptyOutputName": "该模板生成不了名称：请至少加入 {name} 或一段文字。",
+    "interpolateNeedsVideo": "插帧需要相邻的两帧：静态图片没有。",
+    "interpolateSkippedStills": "已跳过 {{count}} 张静态图片：插帧仅适用于视频。",
+    "chainNeedsVideo": "处理链逐步传递视频文件：静态图片无法进入。",
+    "chainSkippedStills": "处理链跳过了 {{count}} 张静态图片。"
   }
 }

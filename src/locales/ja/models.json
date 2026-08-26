@@ -39,6 +39,11 @@
     "desc": "降順"
   },
   "vramShort": "VRAM が {{need}} GB 必要ですが、{{gpu}} は {{have}} GB です。動きません。ダウンロードは可能。",
+  "stage": {
+    "download": "ダウンロード中",
+    "verify": "検証中",
+    "install": "インストール中"
+  },
   "status": {
     "bundled": "同梱",
     "bundledTip": "ランタイムに同梱（削除不可）。",

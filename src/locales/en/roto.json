@@ -1,10 +1,7 @@
 {
   "img": "frame",
+  "resetParams": "Reset settings",
   "cancel": "Cancel",
-  "compare": {
-    "before": "Before",
-    "after": "After"
-  },
   "object": {
     "name": "Object {{n}}"
   },
@@ -102,13 +99,22 @@
     "bgcolorHint": "Frame comped over a solid color (key check)"
   },
   "post": {
-    "grow": "Grow / shrink",
-    "feather": "Feather edge",
     "holes": "Fill holes",
+    "holesHint": "Fills holes inside the mask up to N × N pixels in area.",
     "dots": "Remove specks",
+    "dotsHint": "Erases isolated specks outside the subject up to N × N pixels in area.",
+    "border": "Frame edge bleed",
+    "borderHint": "Cleans up the N pixels at the edge of the frame, often dirty (vignetting, compression).",
+    "grow": "Grow / shrink",
+    "growHint": "Moves the mask edge outwards (+) or inwards (−), in pixels.",
     "smooth": "Smooth outline",
-    "border": "Fix frame edges",
+    "smoothHint": "Rounds the staircase steps of the outline without widening the edge or crushing the gradient.",
+    "harden": "Harden alpha",
+    "hardenHint": "Removes the semi-transparent halo: the inside goes opaque, the background drops out. Higher, harder edge.",
+    "feather": "Feather edge",
+    "featherHint": "Spreads the mask edge into a gradient over the given radius, in pixels.",
     "gamma": "Density (gamma)",
+    "gammaHint": "Thickens (> 1) or lightens (< 1) the whole alpha at once. 1 = neutral.",
     "resetTip": "Double-click = reset"
   },
   "remove": {

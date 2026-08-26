@@ -1,10 +1,7 @@
 {
   "img": "Bild",
+  "resetParams": "Einstellungen zurücksetzen",
   "cancel": "Abbrechen",
-  "compare": {
-    "before": "Vorher",
-    "after": "Nachher"
-  },
   "object": {
     "name": "Objekt {{n}}"
   },
@@ -102,13 +99,22 @@
     "bgcolorHint": "Bild auf einer Vollfarbe komponiert (Freistellungskontrolle)"
   },
   "post": {
-    "grow": "Erweitern / verkleinern",
-    "feather": "Kante weichzeichnen",
     "holes": "Löcher füllen",
+    "holesHint": "Füllt Löcher innerhalb der Maske bis zu N × N Pixel Fläche.",
     "dots": "Flecken entfernen",
+    "dotsHint": "Löscht isolierte Flecken außerhalb des Motivs bis zu N × N Pixel Fläche.",
+    "border": "Bildrand-Ausfransen",
+    "borderHint": "Säubert die N Pixel am Bildrand, die oft schmutzig sind (Vignettierung, Kompression).",
+    "grow": "Erweitern / verkleinern",
+    "growHint": "Verschiebt die Maskenkante nach außen (+) oder nach innen (−), in Pixeln.",
     "smooth": "Kontur glätten",
-    "border": "Bildränder korrigieren",
+    "smoothHint": "Rundet die Treppenstufen der Kontur, ohne die Kante zu verbreitern oder den Verlauf zu zerstören.",
+    "harden": "Alpha härten",
+    "hardenHint": "Entfernt den halbtransparenten Saum: innen deckend, Hintergrund weg. Höher, härtere Kante.",
+    "feather": "Kante weichzeichnen",
+    "featherHint": "Zieht die Maskenkante über den angegebenen Radius zu einem Verlauf auseinander, in Pixeln.",
     "gamma": "Dichte (Gamma)",
+    "gammaHint": "Verdichtet (> 1) oder erleichtert (< 1) das gesamte Alpha auf einmal. 1 = neutral.",
     "resetTip": "Doppelklick = zurücksetzen"
   },
   "remove": {

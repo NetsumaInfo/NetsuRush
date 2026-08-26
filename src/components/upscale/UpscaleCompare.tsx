@@ -33,6 +33,11 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
   // Une URL chargée reste chargée. Les anciens booléens étaient remis à false par un effet exécuté
   // après `onLoad` : les images étaient visibles (comme sur la capture) mais le voile tournait à vie.
   const [loadedUrls, setLoadedUrls] = useState<Set<string>>(() => new Set());
+  // Côtés déjà vus AU MOINS une fois, par variante : une image rafraîchie EN PLACE (retouche live
+  // du masque) change d'URL sans rien changer d'autre, et l'<img> garde la précédente à l'écran
+  // jusqu'au décodage de la nouvelle. Sans ce second registre, le voile de chargement clignotait à
+  // chaque cran de slider par-dessus une image parfaitement visible.
+  const [loadedIds, setLoadedIds] = useState<Set<string>>(() => new Set());
   const [failedUrls, setFailedUrls] = useState<Set<string>>(() => new Set());
   const hasModelComparison = (data.variants?.length ?? 0) >= 2;
   const variants = useMemo(() => hasModelComparison ? data.variants! : [
@@ -46,23 +51,33 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
   const left = variants.find((v) => v.id === leftId) ?? variants[0];
   const right = variants.find((v) => v.id === rightId) ?? variants[Math.min(1, variants.length - 1)];
 
+  // Remise à zéro sur l'identité de la COMPARAISON, jamais sur ses pixels : `variants` est un
+  // tableau recréé à chaque rendu, et l'URL d'un côté change dès qu'il est rafraîchi en place.
+  // S'y accrocher dézoomait au moindre réglage, précisément pendant l'examen d'un bord.
+  const variantKey = variants.map((v) => v.id).join("|");
   useEffect(() => {
     setLeftId(preferredLeft ?? variants[0].id);
     setRightId(preferredRight ?? variants[Math.min(1, variants.length - 1)].id);
     view.current = { s: 1, x: 0, y: 0 };
     setScale(1); setPanState({ x: 0, y: 0 }); setPos(50);
-  }, [data.revision, preferredLeft, preferredRight, variants]);
+  }, [data.revision, preferredLeft, preferredRight, variantKey]);
 
-  const markLoaded = useCallback((url: string) => setLoadedUrls((old) => {
-    if (old.has(url)) return old;
-    const next = new Set(old); next.add(url); return next;
-  }), []);
+  const markLoaded = useCallback((url: string, id: string) => {
+    setLoadedUrls((old) => {
+      if (old.has(url)) return old;
+      const next = new Set(old); next.add(url); return next;
+    });
+    setLoadedIds((old) => {
+      if (old.has(id)) return old;
+      const next = new Set(old); next.add(id); return next;
+    });
+  }, []);
   const markFailed = useCallback((url: string) => setFailedUrls((old) => {
     if (old.has(url)) return old;
     const next = new Set(old); next.add(url); return next;
   }), []);
-  const origLoaded = loadedUrls.has(left.url);
-  const upLoaded = loadedUrls.has(right.url);
+  const origLoaded = loadedUrls.has(left.url) || loadedIds.has(left.id);
+  const upLoaded = loadedUrls.has(right.url) || loadedIds.has(right.id);
   const imgErr = failedUrls.has(left.url) || failedUrls.has(right.url);
 
   const ratio = data.width && data.height ? data.height / data.width : 9 / 16;
@@ -224,12 +239,12 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
       >
         {/* résultat gauche — plein cadre, sous tout */}
         <img src={left.url} alt={left.label} draggable={false} className={imgCls} style={imgStyle}
-          onLoad={() => markLoaded(left.url)} onError={() => markFailed(left.url)} />
+          onLoad={() => markLoaded(left.url, left.id)} onError={() => markFailed(left.url)} />
         {/* résultat droit / détouré — révélé à DROITE de la poignée (clip l'espace écran à gauche). Le damier
             (si alpha) est porté par ce calque → visible seulement sous le côté « Après ». */}
         <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${pos}%)`, ...checker }}>
           <img src={right.url} alt={right.label} draggable={false} className={imgCls} style={imgStyle}
-            onLoad={() => markLoaded(right.url)} onError={() => markFailed(right.url)} />
+            onLoad={() => markLoaded(right.url, right.id)} onError={() => markFailed(right.url)} />
         </div>
 
         {/* chargement / erreur (sinon écran noir silencieux pendant le décodage des gros PNG) */}

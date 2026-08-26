@@ -4,7 +4,7 @@
 const path = require('path');
 const fs = require('fs');
 const { codecExt } = require('../utils');
-const { gpuVideoArgs } = require('../export/encodeArgs');
+const { gpuVideoArgs, writtenAudioCodec } = require('../export/encodeArgs');
 
 const FIXED_CODECS = {
   prores_proxy:  ['-c:v', 'prores_ks', '-profile:v', '0', '-pix_fmt', 'yuv422p10le'],
@@ -77,21 +77,11 @@ function streamCodecName(codec) {
 }
 
 /**
- * Codec audio réellement écrit, selon le traitement demandé et ce que porte la source. Deux
- * vocabulaires arrivent ici : celui de l'export AE (`aac`, `pcm`) et celui des profils d'export
- * (`aac_192`, `pcm_s16`) — d'où la comparaison par préfixe et non par égalité.
+ * Codec audio réellement écrit, selon le traitement demandé et ce que porte la source. La table vit
+ * avec les arguments d'encodage (`core/export/encodeArgs.js`) : les deux vocabulaires de modes audio
+ * y sont déjà traduits, et une seconde table finirait par en diverger.
  */
-function outAudioCodec(mode, sourceCodec) {
-  const id = String(mode || '');
-  if (id === 'none') return null;
-  if (id === 'copy' || id === 'remux') return sourceCodec || null;   // le flux source tel quel
-  if (id.startsWith('pcm')) return 'pcm_s16le';
-  if (id.startsWith('aac')) return 'aac';
-  if (id.startsWith('ac3') || id.startsWith('eac3')) return 'ac3';
-  if (id.startsWith('alac')) return 'alac';
-  if (id.startsWith('flac')) return 'flac';
-  return sourceCodec || null;
-}
+const outAudioCodec = writtenAudioCodec;
 
 /**
  * Conteneur d'un fichier VIDÉO produit, rabattu sur le MOV quand le MP4 ne peut pas porter les flux.

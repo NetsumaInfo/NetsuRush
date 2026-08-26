@@ -1,10 +1,7 @@
 {
   "img": "帧",
+  "resetParams": "重置设置",
   "cancel": "取消",
-  "compare": {
-    "before": "处理前",
-    "after": "处理后"
-  },
   "object": {
     "name": "对象 {{n}}"
   },
@@ -102,13 +99,22 @@
     "bgcolorHint": "画面合成在纯色上（检查抠像）"
   },
   "post": {
-    "grow": "扩张 / 收缩",
-    "feather": "边缘羽化",
     "holes": "填补空洞",
+    "holesHint": "填补蒙版内部面积不超过 N × N 像素的空洞。",
     "dots": "去除杂点",
+    "dotsHint": "擦除主体之外面积不超过 N × N 像素的孤立杂点。",
+    "border": "画面边缘溢出",
+    "borderHint": "清理画面边缘的 N 个像素，那里常常很脏（暗角、压缩噪点）。",
+    "grow": "扩张 / 收缩",
+    "growHint": "以像素为单位把蒙版边界向外（+）或向内（−）移动。",
     "smooth": "平滑轮廓",
-    "border": "修正画面边缘",
+    "smoothHint": "磨平轮廓的锯齿台阶，既不加宽边缘，也不压掉渐变。",
+    "harden": "硬化 alpha",
+    "hardenHint": "去掉半透明的光晕：内部变成不透明，背景被去除。调得越高边缘越硬。",
+    "feather": "边缘羽化",
+    "featherHint": "在给定半径内把蒙版边界摊开成渐变（像素）。",
     "gamma": "浓度（gamma）",
+    "gammaHint": "一次性加浓（> 1）或减淡（< 1）整个 alpha。1 = 中性。",
     "resetTip": "双击 = 重置"
   },
   "remove": {

@@ -12,10 +12,9 @@
   "editor": {
     "name": "Name",
     "namePlaceholder": "Profile name",
-    "destination": "Destination",
-    "timeline": "Timeline",
     "folder": "Folder",
     "folderPlaceholder": "Folder name…",
+    "folderHint": "Media Pool folder where the cuts are filed, instead of the root.",
     "defaultFolder": "NetsuRush — Cuts",
     "existingFolders": "Existing folders",
     "mediaPoolFolders": "Media Pool folders",

@@ -1,6 +1,6 @@
 """Post-traitement NON destructif des masques roto (réimplémenté) : boucher les
 trous, retirer les poussières, correction de bord d'image (border), dilater/éroder, lisser le
-contour (smooth), adoucir le bord (feather), gamma d'alpha. Appliqué à la volée sur l'overlay ET
+contour (smooth), durcir l'alpha (harden), adoucir le bord (feather), gamma d'alpha. Appliqué à la volée sur l'overlay ET
 « cuit » dans les mattes à l'export — les PNG propagés ne sont JAMAIS modifiés.
 
 Entrée = masque bool HxW ; sortie = uint8 0..255 (soft si feather>0/gamma≠1, sinon binaire 0/255).
@@ -14,7 +14,8 @@ except Exception:  # noqa: BLE001 — venv sans opencv : repli PIL
 
 
 def default_post():
-    return {"grow": 0, "feather": 0, "holes": 0, "dots": 0, "border": 0, "smooth": 0, "gamma": 1.0}
+    return {"grow": 0, "feather": 0, "holes": 0, "dots": 0, "border": 0, "smooth": 0,
+            "harden": 0, "gamma": 1.0}
 
 
 def is_default(post):
@@ -22,6 +23,7 @@ def is_default(post):
     return not (int(p.get("grow") or 0) or int(p.get("feather") or 0)
                 or int(p.get("holes") or 0) or int(p.get("dots") or 0)
                 or int(p.get("border") or 0) or int(p.get("smooth") or 0)
+                or int(p.get("harden") or 0)
                 or abs(float(p.get("gamma") or 1.0) - 1.0) > 1e-3)
 
 
@@ -113,6 +115,23 @@ def _gamma(u8, g):
     return lut[u8]
 
 
+def _harden(u8, amount):
+    """Durcit l'alpha : `amount` en % (0 = intact, 100 = binaire au seuil 128).
+
+    Un matte fin rend souvent un intérieur à 240-250 et un halo de fond à 5-15 : composé, ça donne
+    un sujet légèrement transparent cerné d'un liseré. On étire donc la plage [lo, hi] sur [0, 255]
+    en écrêtant — l'intérieur redevient plein, le halo tombe à zéro, et seule la bande [lo, hi]
+    garde un dégradé, d'autant plus étroite que `amount` est fort. Le VRAI bord reste donc dégradé
+    tant qu'on ne pousse pas à 100."""
+    a = max(0, min(100, int(amount))) / 100.0
+    if a <= 0:
+        return u8
+    half = max(1.0, 127.0 * (1.0 - a))
+    lo, hi = 128.0 - half, 128.0 + half
+    lut = np.clip((np.arange(256, dtype=np.float32) - lo) * (255.0 / (hi - lo)), 0, 255).astype(np.uint8)
+    return lut[u8]
+
+
 def _feather(u8, px):
     """Adoucit le bord : blur gaussien du masque binaire → alpha progressif."""
     if px <= 0:
@@ -177,6 +196,7 @@ def apply_post_alpha(alpha, post):
     border = int(p.get("border") or 0)
     grow = int(p.get("grow") or 0)
     smooth = int(p.get("smooth") or 0)
+    harden = int(p.get("harden") or 0)
     feather = int(p.get("feather") or 0)
     gamma = float(p.get("gamma") or 1.0)
     if holes > 0:
@@ -191,12 +211,18 @@ def apply_post_alpha(alpha, post):
         u8 = _grow_alpha(u8, grow)
     if smooth > 0:
         u8 = _smooth_alpha(u8, smooth)
+    # Durcir AVANT d'adoucir : l'inverse écraserait le dégradé qu'on vient de demander.
+    if harden > 0:
+        u8 = _harden(u8, harden)
     return _gamma(_feather(u8, feather), gamma)
 
 
 def apply_post(mask, post):
     """masque bool HxW + réglages {holes, dots, border, grow, smooth, feather, gamma} → uint8 0..255.
-    Ordre : opérations binaires (trous → poussières → bord → grow → lissage) puis alpha (feather → gamma)."""
+    Ordre : opérations binaires (trous → poussières → bord → grow → lissage) puis alpha (feather → gamma).
+
+    `harden` est ignoré ici : un masque binaire n'a aucune semi-transparence à durcir. Le réglage ne
+    vaut que pour l'alpha en niveaux de gris du matte fin (cf. `apply_post_alpha`)."""
     p = post or {}
     m = mask.astype(bool)
     holes = int(p.get("holes") or 0)

@@ -12,6 +12,7 @@ import { useApp } from "@/store";
 import { nr, type Clip, type LibraryFolder } from "@/lib/bridge";
 import { ClipGrid, CLIP_DND } from "./ClipCard";
 import { hasOsFiles, importDroppedFiles } from "./libraryDrop";
+import { useDropZone } from "@/lib/dropZone";
 import { FolderNameDialog } from "@/components/collections/FolderNameDialog";
 import { LIB_ROOT, folderPath, buildClipTree, countTreeClips, type ClipTreeNode } from "./libraryShared";
 
@@ -52,7 +53,8 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
       deleteLibraryFolder: s.deleteLibraryFolder, importFolder: s.importFolder, libraryItems: s.libraryItems,
     })),
   );
-  const [over, setOver] = useState(false);
+  // Rangée de dossier : elle GARDE le dépôt (stopPropagation), sinon la page le reprendrait pour la
+  // racine. Le liseré s'éteint à la fin du glissé où qu'elle survienne (cf. useDropZone).
   const [dialog, setDialog] = useState<"new" | "rename" | "delete" | null>(null);
   // Décoché par défaut : le geste sûr (les rushs remontent au parent) reste celui qu'on obtient en
   // validant sans réfléchir. Cocher est un acte délibéré.
@@ -60,20 +62,24 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
   const isRoot = folder === null;
   const inFolder = countTreeClips(node);
 
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault(); e.stopPropagation(); setOver(false);
-    // Fichiers de l'Explorateur lâchés SUR une rangée : ils se rangent dans CE dossier, pas à la
-    // racine. `stopPropagation` ci-dessus empêche la page de les reprendre pour la racine.
-    if (hasOsFiles(e.dataTransfer)) {
-      void importDroppedFiles(Array.from(e.dataTransfer.files), folder?.id ?? null);
-      return;
-    }
-    const id = e.dataTransfer.getData(CLIP_DND);
-    if (!id) return;
-    const it = libraryItems.find((x) => x.id === id);
-    if (!it || it.folderId === (folder?.id ?? null)) return;
-    void moveLibraryItem(id, folder?.id ?? null);
-  };
+  const drop = useDropZone({
+    accept: (dt) => dt.types.includes(CLIP_DND) || hasOsFiles(dt),
+    // Fichiers de l'Explorateur = ajout (copie) ; carte déjà en bibliothèque = rangement.
+    effect: (dt) => (hasOsFiles(dt) ? "copy" : "move"),
+    stopPropagation: true,
+    onDrop: (e) => {
+      // Fichiers de l'Explorateur lâchés SUR une rangée : ils se rangent dans CE dossier, pas à la racine.
+      if (hasOsFiles(e.dataTransfer)) {
+        void importDroppedFiles(Array.from(e.dataTransfer.files), folder?.id ?? null);
+        return;
+      }
+      const id = e.dataTransfer.getData(CLIP_DND);
+      if (!id) return;
+      const it = libraryItems.find((x) => x.id === id);
+      if (!it || it.folderId === (folder?.id ?? null)) return;
+      void moveLibraryItem(id, folder?.id ?? null);
+    },
+  });
 
   const pickDir = async () => { const d = await nr.chooseDir(); if (d) void importFolder(d); };
 
@@ -89,19 +95,11 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
             // keydown bulle ici et le preventDefault annule son activation native (Entrée replierait le
             // dossier au lieu d'ouvrir le dialogue).
             onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } }}
-            onDragOver={(e) => {
-              if (!e.dataTransfer.types.includes(CLIP_DND) && !hasOsFiles(e.dataTransfer)) return;
-              e.preventDefault(); e.stopPropagation();
-              // Fichiers de l'Explorateur = ajout (copie) ; carte déjà en bibliothèque = rangement.
-              e.dataTransfer.dropEffect = hasOsFiles(e.dataTransfer) ? "copy" : "move";
-              setOver(true);
-            }}
-            onDragLeave={() => setOver(false)}
-            onDrop={onDrop}
+            {...drop.dropProps}
             style={{ paddingLeft: depth * 14 + 4 }}
             className={cn(
               "group flex w-full cursor-pointer items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm text-foreground outline-none transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring",
-              over && "bg-primary/10 ring-1 ring-primary",
+              drop.over && "bg-primary/10 ring-1 ring-primary",
             )} />
         }>
           <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90")} />

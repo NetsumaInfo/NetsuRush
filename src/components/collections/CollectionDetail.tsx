@@ -21,9 +21,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ExportButton } from "@/components/export/ExportButton";
 import { ShotCard } from "@/components/rushes/ShotCard";
 import { useShotGrid } from "@/components/rushes/useShotGrid";
+import { usePanelResize } from "@/hooks/usePanelResize";
 import { useTimelineTarget } from "@/components/rushes/useTimelineTarget";
 import { TimelineTargetSelect } from "@/components/rushes/TimelineTargetSelect";
-import { fmt, gridContainerStyle, nextSegId } from "@/components/rushes/cutStudioShared";
+import { canFewerCols, canMoreCols, fmt, gridContainerStyle, nextSegId, stepCols } from "@/components/rushes/cutStudioShared";
 import { type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { CollectionGlyph } from "./collectionGlyph";
 import { FolderEditor } from "./FolderEditor";
@@ -50,7 +51,16 @@ export function CollectionDetail({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
-  const [busy, setBusy] = useState<string | null>(null);
+  // Libellé publié AUSSI dans le store : la pastille d'export l'affiche (cf. ExportStatusToast).
+  // L'état local reste pour éteindre les boutons pendant l'opération.
+  const setExportBusy = useApp((s) => s.setExportBusy);
+  const setExportProgress = useApp((s) => s.setExportProgress);
+  const [busy, setBusyLocal] = useState<string | null>(null);
+  const setBusy = (label: string | null) => {
+    setBusyLocal(label);
+    if (label) setExportProgress(0);
+    setExportBusy(label);
+  };
   // Seules les ERREURS restent affichées : elles décrivent un état à corriger. Les retours de
   // réussite passent par une pastille qui s'efface d'elle-même (cf. `toast`).
   const [error, setError] = useState<string | null>(null);
@@ -65,21 +75,11 @@ export function CollectionDetail({ id }: { id: string }) {
   // est interdit par Tauri). On garde l'objet complet (tags/label/note) → restauration fidèle.
   const [undoStack, setUndoStack] = useState<CollectionShot[]>([]);
 
-  // Largeur du panneau lecteur (poignée glissable) — comme le Découpage (CutStudio), clé dédiée.
-  const [panelW, setPanelW] = useState<number>(() => {
-    const v = parseInt(localStorage.getItem("nr.coll.panelW") || "", 10);
-    return Number.isFinite(v) && v >= 260 && v <= 600 ? v : 360;
+  // Largeur du panneau lecteur et gestes de la poignée — MÊME implémentation que le Découpage
+  // (glisser, molette, forcer sous le minimum pour fermer, rouvrir depuis le trait), clé dédiée.
+  const { panelW, startPanelDrag, handleRef, onHandleKeyDown, edgeRef, startEdgeDrag } = usePanelResize({
+    storageKey: "nr.coll.panelW", max: 600, open: sidePanel, setOpen: toggleSide,
   });
-  useEffect(() => { try { localStorage.setItem("nr.coll.panelW", String(panelW)); } catch { /* noop */ } }, [panelW]);
-  const panelDrag = useRef<{ x: number; w: number } | null>(null);
-  function startPanelDrag(e: { clientX: number; preventDefault: () => void }) {
-    panelDrag.current = { x: e.clientX, w: panelW };
-    document.body.style.userSelect = "none"; document.body.style.cursor = "col-resize";
-    const onMove = (ev: MouseEvent) => { const d = panelDrag.current; if (d) setPanelW(Math.min(600, Math.max(260, d.w + (d.x - ev.clientX)))); };
-    const onUp = () => { panelDrag.current = null; document.body.style.userSelect = ""; document.body.style.cursor = ""; window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-    window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onUp);
-    e.preventDefault();
-  }
 
   // Largeur RÉELLE de la vue (≠ largeur de fenêtre) : le détail d'une collection vit aussi dans le
   // panneau CEP et la fenêtre épinglée. Sous NARROW_W on empile, sinon le lecteur latéral ne
@@ -306,9 +306,9 @@ export function CollectionDetail({ id }: { id: string }) {
         <Tooltip>
           <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
             <LayoutGrid className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-            <button type="button" aria-label={tr("common:action.decrease")} onClick={() => grid.setCols((c) => Math.max(2, c - 1))} disabled={grid.cols <= 2} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
-            <span className="w-4 text-center tabular-nums">{grid.cols}</span>
-            <button type="button" aria-label={tr("common:action.increase")} onClick={() => grid.setCols((c) => Math.min(8, c + 1))} disabled={grid.cols >= 8} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label={tr("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
+            <span className="w-4 text-center tabular-nums">{grid.actualCols}</span>
+            <button type="button" aria-label={tr("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
           </TooltipTrigger>
           <TooltipContent>{tr("detail.thumbSize")}</TooltipContent>
         </Tooltip>
@@ -436,7 +436,9 @@ export function CollectionDetail({ id }: { id: string }) {
 
       {/* Grille : même géométrie que le Découpage — la densité EST le nombre de colonnes, tenu quelle
           que soit la largeur (cf. gridMetrics). */}
-      <div ref={grid.gridScrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5">
+      {/* Pinned with the panel closed: the grid owns the right edge — it breaks out of the 20px
+          gutter (px-4 + pr-1) so its scrollbar sits against the window like a real one. */}
+      <div ref={grid.gridScrollRef} className={"min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5" + (pinned && !sidePanel ? " -mr-5" : "")}>
         {loading ? (
           <div className="grid gap-3" style={gridStyle}>
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
@@ -479,15 +481,30 @@ export function CollectionDetail({ id }: { id: string }) {
       </div>
       </div>
 
+        {/* Lecteur fermé : son trait reste, et reprend les mêmes gestes à l'envers — molette ou
+            glissé vers la GAUCHE le rouvre (cf. Découpage). */}
+        {!sidePanel && !narrow && (
+          <div role="separator" aria-orientation="vertical" aria-label={tr("detail.player")} tabIndex={0}
+            ref={edgeRef}
+            onPointerDown={startEdgeDrag}
+            onDoubleClick={() => toggleSide(true)}
+            onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); toggleSide(true); } }}
+            className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+            <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          </div>
+        )}
+
         {sidePanel && (
         <div className={"flex min-h-0 bg-background " + (narrow ? "order-first w-full shrink-0 flex-col" : "h-full shrink-0")}>
           {/* poignée : glisser pour élargir/rétrécir le lecteur (comme le Découpage). Inutile en
               colonne, où le lecteur prend toute la largeur. */}
           {!narrow && (
           <div role="separator" aria-orientation="vertical" aria-label={tr("detail.resize")} tabIndex={0}
-            onMouseDown={startPanelDrag}
-            onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); setPanelW((w) => Math.min(600, w + 20)); } else if (e.key === "ArrowRight") { e.preventDefault(); setPanelW((w) => Math.max(260, w - 20)); } }}
-            className="group relative w-px shrink-0 self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+            ref={handleRef}
+            onPointerDown={startPanelDrag}
+            onKeyDown={onHandleKeyDown}
+            className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
                 restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
@@ -516,10 +533,9 @@ export function CollectionDetail({ id }: { id: string }) {
 
       {/* Bandeau d'état en PIED de vue, comme au Découpage : au-dessus de la grille il repoussait
           les vignettes vers le bas à chaque message. */}
-      {(busy || error || undoStack.length > 0) && (
+      {(error || undoStack.length > 0) && (
         <div className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-1.5 text-xs">
-          {busy && <span className="flex items-center gap-1.5 text-muted-foreground"><Spinner /> {busy}</span>}
-          {!busy && error && <span className="text-destructive">{error}</span>}
+          {error && <span className="text-destructive">{error}</span>}
           {undoStack.length > 0 && (
             <button type="button" onClick={() => void undoRemove()} className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <Undo2 className="size-3" /> {tr("detail.undoRemove")}

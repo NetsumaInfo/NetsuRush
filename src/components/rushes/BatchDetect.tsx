@@ -1,7 +1,7 @@
 // Découpe en lot : barre de sélection (choix du modèle + lancement) et panneau de progression
 // (un rush par ligne). La détection sérielle vit dans le store (runBatchDetect) ; ici, l'UI seule.
 import { useTranslation } from "react-i18next";
-import { Scissors, X, CheckCheck, Check, TriangleAlert, Trash2 } from "lucide-react";
+import { Scissors, X, CheckCheck, Check, TriangleAlert, Trash2, Layers } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import type { DetectModel } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -16,7 +16,7 @@ import { DetectionAdvancedSettings } from "./DetectionAdvancedSettings";
 import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls";
 
 // Barre d'actions affichée en mode sélection : compteur, tout/aucun, modèle, lancer, quitter.
-export function BatchDetectBar({ total, count, model, setModel, presetIdx, setPresetIdx, onSelectAll, onClear, onRun, onRemove, removeCount, onExit, busy }: {
+export function BatchDetectBar({ total, count, model, setModel, presetIdx, setPresetIdx, onSelectAll, onClear, onRun, onOpenFlow, onRemove, removeCount, onExit, busy }: {
   total: number;
   count: number;
   model: DetectModel;
@@ -26,6 +26,9 @@ export function BatchDetectBar({ total, count, model, setModel, presetIdx, setPr
   onSelectAll: () => void;
   onClear: () => void;
   onRun: () => void;
+  // Ouvre les rushs cochés dans UNE grille défilante, à la suite. La découpe en lot reste à côté :
+  // elle détecte sans ouvrir, ce flux ouvre sans imposer de détecter.
+  onOpenFlow: () => void;
   // Retrait de la sélection. `removeCount` = ceux qui ont une entrée de bibliothèque (un rush du
   // Media Pool n'en a pas — rien à en retirer) ; 0 = bouton masqué.
   onRemove: () => void;
@@ -45,6 +48,14 @@ export function BatchDetectBar({ total, count, model, setModel, presetIdx, setPr
       <DetectionModelSelect model={model} onChange={setModel} disabled={busy} />
       <DetectionPresetSelect model={model} preset={presetIdx} onChange={setPresetIdx} disabled={busy} />
       <DetectionAdvancedSettings model={model} disabled={busy} compact />
+      <Tooltip>
+        <TooltipTrigger render={
+          <Button variant="outline" size="sm" disabled={count === 0 || busy} onClick={onOpenFlow} />
+        }>
+          <Layers className="h-4 w-4" /> {t("batch.openFlow", { count })}
+        </TooltipTrigger>
+        <TooltipContent>{t("batch.openFlowTip")}</TooltipContent>
+      </Tooltip>
       <Button size="sm" disabled={count === 0 || busy} onClick={onRun}>
         <Scissors className="h-4 w-4" /> {t("batch.cut", { count })}
       </Button>
@@ -93,7 +104,9 @@ export function BatchDetectProgress() {
           <Button variant="ghost" size="icon-sm" aria-label={t("common:action.close")} onClick={dismissBatchDetect}><X /></Button>
         )}
       </div>
-      <ul className="max-h-64 space-y-2 overflow-y-auto">
+      {/* Gouttière à droite : la barre de défilement se posait SUR les pourcentages et sur le bout
+          des barres de progression, qui vont bord à bord. Les lignes reculent, elle a sa place. */}
+      <ul className="max-h-64 space-y-2 overflow-y-auto pr-2">
         {items.map((it) => (
           <li key={it.path} className="space-y-1">
             <div className="flex items-center gap-2 text-xs">

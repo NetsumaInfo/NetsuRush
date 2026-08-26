@@ -1,10 +1,13 @@
 """Estimation de profondeur par frame (transformers depth-estimation). Depth relatif →
 normalisation percentile p2/p98 → gris 8-bit (ou colormap cv2). Streamé, STAGE:prog:i/n.
 
-bits=16 : sortie en séquence PNG 16-bit niveaux de gris (best-effort) ; sinon vidéo 8-bit."""
+Sortie : vidéo, image unique ou séquence d'images selon la demande du hub. Une sortie PNG 16-bit
+est écrite en niveaux de gris VRAIMENT 16-bit (la depth map est le seul traitement du hub dont la
+précision dépasse 8 bits) ; le colormap est alors sans objet."""
 import os
 from nri18n import t
 
+from upscaler.imgout import image_spec, image_written, open_image_writer
 from upscaler.log import log
 
 from .dedup import DEAD_THR, run_perframe_dedup
@@ -52,7 +55,7 @@ def _depth_gray_of(engine, bgr):
 
 
 def cmd_depth(args):
-    """Carte de profondeur d'un segment vidéo. Sortie = vidéo (codec) ou PNG-seq 16-bit."""
+    """Carte de profondeur d'un segment vidéo. Sortie = vidéo, image ou séquence d'images."""
     try:
         from .runner import get_depth
     except Exception as exc:  # noqa: BLE001
@@ -78,24 +81,30 @@ def cmd_depth(args):
 
     dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None))
 
-    # bits=16 : séquence PNG 16-bit niveaux de gris (best-effort) ; le colormap est ignoré (gris).
-    png_seq = bits >= 16
+    spec = image_spec(args)
+    images = spec["kind"] != "video"
+    # Gris 16-bit : la profondeur est le seul traitement du hub dont la précision dépasse 8 bits, donc
+    # on écrit chaque image nous-mêmes plutôt que de la faire transiter par un flux 8-bit.
+    gray16 = images and spec["format"] == "png" and (bits >= 16 or spec["bits"] >= 16)
     enc = None
-    if not png_seq:
+    if not images:
         enc = open_encoder_video(args.out, w, h, fps_str, args)
+    elif not gray16:
+        enc = open_image_writer(args.out, w, h, fps_str, spec)
 
-    if png_seq:
+    if gray16:
         import cv2
 
-    # Modèle sur une frame bgr → gris 8-bit ; écriture d'une frame de sortie (png 16-bit ou vidéo).
+    # Modèle sur une frame bgr → gris 8-bit ; écriture d'une frame de sortie (image ou vidéo).
     def process_fn(frame):
         return _depth_gray_of(engine, frame)
 
     def write_fn(gray8, idx):
-        if png_seq:
-            # 16-bit gris : ré-étire le gris 8-bit sur 16 bits (best-effort), une image par frame.
+        if gray16:
+            # Gris 8-bit ré-étiré sur 16 bits (×257 = réplication d'octet), une image par frame.
             g16 = (gray8.astype("uint16") * 257)  # 0..255 → 0..65535
-            cv2.imwrite(args.out % (idx + 1), g16)
+            out = args.out if spec["kind"] == "image" else args.out % (spec["start"] + idx)
+            cv2.imwrite(out, g16)
         else:
             bgr = _depth_to_bgr(gray8, colormap)
             enc.stdin.write(np.ascontiguousarray(bgr).tobytes())
@@ -139,9 +148,8 @@ def cmd_depth(args):
 
     if err:
         return {"ok": False, "error": err}
-    if png_seq:
-        first = args.out % 1
-        if not os.path.exists(first):
+    if images:
+        if not image_written(args.out, spec):
             return {"ok": False, "error": t("empty_depth")}
         return {"ok": True, "output": args.out, "width": w, "height": h, "frames": done, "error": None}
     if not os.path.exists(args.out) or os.path.getsize(args.out) == 0:

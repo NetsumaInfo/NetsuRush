@@ -5,7 +5,7 @@
 // d'import natif (nr.chooseMediaFiles/chooseDir) vers le Media Pool. Le mode d'emploi vit dans l'ÉTAT
 // VIDE, pas en permanence au-dessus de la liste.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, ChevronsLeft, Search, Loader2, House, FilePlus2, FolderPlus, Film, Folder } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
@@ -14,12 +14,14 @@ import { useApp } from "@/store";
 import { basename, THUMB_AUTO } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
+import { claimHoverPreview } from "@/lib/hoverPreview";
 import { useThumb } from "./useThumb";
 import { RecordingsSection } from "./RecordingsSection";
 import { AudioWaveThumb } from "./AudioWaveThumb";
 import { NR_FOOTAGE_DND, isAudioPath, type FootageDrag } from "./scriptShared";
 import { attachTranscriptHit, TranscriptHitRow, useTranscriptHits } from "./TranscriptSearch";
 import { useScript } from "./useScript";
+import { useDragEndReset } from "@/lib/dropZone";
 
 const isAudio = (c: Clip) => isAudioPath(c.path);
 
@@ -31,6 +33,9 @@ function Thumb({ clip }: { clip: Clip }) {
   const thumb = useThumb(audio ? "" : clip.path, THUMB_AUTO);
   const [hovered, setHovered] = useState(false);
   const [pinned, setPinned] = useState(false);
+  const drop = useRef<(() => void) | null>(null);
+  const hoverOff = useRef(() => { drop.current = null; setHovered(false); }).current;
+  useEffect(() => () => { drop.current?.(); drop.current = null; }, []);
   const [preview, setPreview] = useState<string | null>(null);
   const active = !audio && (hovered || pinned);
 
@@ -48,8 +53,10 @@ function Thumb({ clip }: { clip: Clip }) {
     <button
       type="button"
       className={`footage-thumb ${pinned ? "is-playing" : ""}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      // Survol arbitré globalement (cf. lib/hoverPreview) : un `mouseleave` manqué au défilement
+      // laissait sinon l'aperçu tourner derrière le pointeur.
+      onMouseEnter={(event) => { drop.current = claimHoverPreview(event.currentTarget, hoverOff); setHovered(true); }}
+      onMouseLeave={() => { drop.current?.(); hoverOff(); }}
       onClick={(event) => { event.preventDefault(); event.stopPropagation(); setPinned((value) => !value); }}
       aria-label={pinned ? "Arrêter l’aperçu" : "Lire l’aperçu"}
     >
@@ -177,6 +184,9 @@ export function FootagesPanel({ collapsed, width, onHome }: { collapsed: boolean
   const [source, setSource] = useState<"mediapool" | "recordings">("mediapool");
   const [searchMode, setSearchMode] = useState<"name" | "speech">("name");
   const [over, setOver] = useState(false);
+  // Le liseré s'éteint à la FIN du glissé, où qu'elle survienne : `dragleave` ne suffit pas (il tire
+  // aussi vers les enfants, et jamais quand le curseur quitte la fenêtre en survolant l'un d'eux).
+  useDragEndReset(() => setOver(false));
   const [scriptPool, setScriptPool] = useState<Clip[] | null>(null);
   const [poolError, setPoolError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);

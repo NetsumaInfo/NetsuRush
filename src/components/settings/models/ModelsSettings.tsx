@@ -212,6 +212,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
   const st = mgr.status[m.id];
   const installed = st?.installed ?? false;
   const dl = mgr.downloading[m.id];
+  const stage = mgr.stages[m.id];
   const busy = dl !== undefined;
   const removing = mgr.removing[m.id] ?? false;
   const err = mgr.errors[m.id];
@@ -286,7 +287,12 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
           </div>
         ) : busy ? (
           <div className="flex items-center justify-end gap-1.5">
-            <span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">{dl != null ? `${dl}%` : "…"}</span>
+            {/* Un pourcentage tant qu'on télécharge, le NOM de l'étape ensuite : vérification et
+                installation prennent des dizaines de secondes sur une barre indéterminée, et sans
+                libellé elles passaient pour un téléchargement qui recommence. */}
+            <span className="min-w-8 text-right text-[10px] tabular-nums text-muted-foreground">
+              {dl != null ? `${dl}%` : t(`stage.${stage || "install"}`, { defaultValue: "…" })}
+            </span>
             <Progress value={dl} className="h-1 w-12" />
             <Tooltip>
               <TooltipTrigger render={<button type="button" onClick={() => mgr.cancel(m.id)} aria-label={t("action.cancelDownload")} className="rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground">

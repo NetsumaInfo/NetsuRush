@@ -975,6 +975,28 @@ html.nr-wallpaper-on body {
   * {
     @apply border-border outline-ring/50;
   }
+  /* Text selection is OFF by default across the app. A desktop shell is not a web page: dragging
+     across a grid of thumbnails, a toolbar or a card highlighted labels edge to edge and left the
+     blue swatch stuck there, and the drag never meant "select" in the first place.
+     Stays selectable: what you actually copy — form fields, editors (contenteditable), error text,
+     code and log blocks, rendered markdown (chat answers), plus anything tagged `.nr-selectable`.
+     Rules live in `base` on purpose: the `select-text` / `select-none` utilities keep overriding
+     them per component, which is how any exception is made. */
+  html {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable]:not([contenteditable="false"]),
+  pre,
+  code,
+  .typeset,
+  .text-destructive,
+  .nr-selectable {
+    -webkit-user-select: text;
+    user-select: text;
+  }
   body {
     @apply bg-background text-foreground;
   }

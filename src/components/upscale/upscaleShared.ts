@@ -1,5 +1,6 @@
 import type { UpscaleModel, UpscaleCodec, AudioMode, ShaderModel, CompatibilityStatus } from "@/lib/bridge";
 import { DEFAULT_PROCESS_EXPORT, type ProcessExportSettings } from "./processExport";
+import type { NamingTokens } from "./outputNaming";
 
 // Modèles. Fallin/CUGAN/LD-Anime = via Spandrel (poids OpenModelDB) ; les autres = Real-ESRGAN.
 // `label` = NOM EXACT du modèle (= fichier de poids / dépôt du manifeste core/models.js), jamais son
@@ -179,8 +180,6 @@ export const SHADER_MODELS: { id: ShaderModel; label: string; hint: string }[] =
   { id: "artcnn_c4f16", label: "ArtCNN C4F16", hint: "Anime — le plus rapide." },
   { id: "artcnn_c4f16_ds", label: "ArtCNN C4F16 DS", hint: "Rapide — débruite, accentue." },
   { id: "artcnn_c4f16_dn", label: "ArtCNN C4F16 DN", hint: "Rapide — débruite, adoucit." },
-  { id: "anime4k_aa_hq", label: "Anime4K mode A+A HQ", hint: "Anime — perceptuel max." },
-  { id: "anime4k_bb_hq", label: "Anime4K mode B+B HQ", hint: "Anime — restauration douce." },
   { id: "rtx_vsr", label: "NVIDIA RTX VSR", hint: "Réel et anime — 2× fixe, NVIDIA." },
   { id: "lanczos", label: "Lanczos-sharp", hint: "Réel — sans IA, instantané." },
 ];
@@ -319,6 +318,9 @@ export interface UpSource {
   // Identité STABLE de l'entrée du bac (posée à l'ajout, survit au rognage). Deux plans du même
   // fichier = uids distincts → les effets keyés sur uid rechargent bien l'aperçu au changement de plan.
   uid?: string;
+  // Exact output name (no extension) set by renaming this media in the tray. Absent = the shared
+  // naming pattern applies. Carried by the source so a rename survives an op or page switch.
+  outName?: string;
 }
 
 export interface UpSettings extends ProcessExportSettings {
@@ -393,3 +395,17 @@ export const DEFAULT_SETTINGS: UpSettings = {
   abr: 192,
   audioTrack: -1,
 };
+
+// Naming tokens of the upscale op: what {op}, {scale} and {model} stand for in the output pattern.
+// Kept next to the settings so the default pattern reproduces the historical file names.
+export function upscaleTokens(settings: UpSettings): NamingTokens {
+  if (settings.mode === "restore") return { op: "restored", scale: "", model: settings.model };
+  const scale = `${settings.scale}x`;
+  if (settings.engine === "turbo") {
+    const runtime = shaderRuntimeModel(settings.shader);
+    if (runtime) return { op: "upscaled", scale, model: runtime };
+    if (isRtxShader(settings.shader)) return { op: settings.rtxHdr ? "rtx_hdr" : "rtx", scale, model: settings.shader };
+    return { op: "turbo", scale, model: settings.shader };
+  }
+  return { op: "upscaled", scale, model: settings.model };
+}

@@ -1,10 +1,7 @@
 {
   "img": "img",
+  "resetParams": "Réinitialiser les réglages",
   "cancel": "Annuler",
-  "compare": {
-    "before": "Avant",
-    "after": "Après"
-  },
   "object": {
     "name": "Objet {{n}}"
   },
@@ -102,13 +99,22 @@
     "bgcolorHint": "Sujet composé sur une couleur unie pour contrôler les contours"
   },
   "post": {
-    "grow": "Dilater / éroder",
-    "feather": "Adoucir le bord",
     "holes": "Boucher les trous",
+    "holesHint": "Remplit les trous à l'intérieur du masque jusqu'à N × N pixels de surface.",
     "dots": "Retirer les poussières",
+    "dotsHint": "Efface les taches isolées hors du sujet jusqu'à N × N pixels de surface.",
+    "border": "Bavures du cadre",
+    "borderHint": "Nettoie les N pixels du bord de l’image, souvent sales (vignettage, compression).",
+    "grow": "Dilater / éroder",
+    "growHint": "Déplace le bord du masque vers l'extérieur (+) ou vers l'intérieur (−), en pixels.",
     "smooth": "Lisser le contour",
-    "border": "Corriger les bords d'image",
+    "smoothHint": "Arrondit les marches d'escalier du contour, sans élargir le bord ni écraser le dégradé.",
+    "harden": "Durcir l'alpha",
+    "hardenHint": "Supprime le halo semi-transparent : l’intérieur devient opaque, le fond disparaît. Plus haut, bord plus dur.",
+    "feather": "Adoucir le bord",
+    "featherHint": "Étale le bord du masque en dégradé sur le rayon donné, en pixels.",
     "gamma": "Densité (gamma)",
+    "gammaHint": "Densifie (> 1) ou allège (< 1) tout l'alpha d'un coup. 1 = neutre.",
     "resetTip": "Double-clic = réinitialiser"
   },
   "remove": {

@@ -39,6 +39,11 @@
     "desc": "Descending"
   },
   "vramShort": "Needs {{need}} GB of VRAM, your card has {{have}} ({{gpu}}) — it won't fit. You can still download it.",
+  "stage": {
+    "download": "Downloading",
+    "verify": "Verifying",
+    "install": "Installing"
+  },
   "status": {
     "bundled": "Bundled",
     "bundledTip": "Included in the runtime (can't be removed).",

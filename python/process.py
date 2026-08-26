@@ -16,6 +16,8 @@ Commandes :
   python process.py removebg    --input <v> --out <v> --model <m> --format <prores_4444|png_seq|webm_alpha>
                                 [--start s] [--end s]
   python process.py frame       --input <v> --orig <png> --out <png> --mode <m> --model <m> [--time s]
+Toutes les commandes acceptent une SORTIE IMAGE : --out_kind sequence|image avec --img_format,
+--png_bits, --png_compression, --jpeg_quality et --seq_start (défaut : sortie vidéo).
 Sortie stdout = 1 ligne JSON : {"ok":bool,"output":path,"width":w,"height":h,"frames":n,"error":null}
 (la commande frame renvoie orig/out au lieu d'output)."""
 import argparse
@@ -142,6 +144,15 @@ def main():
     fr.add_argument("--edge_smoothing", type=int, default=0)
     fr.add_argument("--edge_offset", type=int, default=0)
 
+    # Sortie image commune aux trois commandes : "video" (défaut) = comportement historique.
+    for sub_parser in (it, de, rb):
+        sub_parser.add_argument("--out_kind", default="video")        # video | sequence | image
+        sub_parser.add_argument("--img_format", default="png")        # png | jpeg
+        sub_parser.add_argument("--png_bits", type=int, default=8)    # 8 | 16
+        sub_parser.add_argument("--png_compression", type=int, default=6)   # 0..9 (sans perte)
+        sub_parser.add_argument("--jpeg_quality", type=int, default=92)     # 1..100
+        sub_parser.add_argument("--seq_start", type=int, default=1)   # numéro de la 1re image
+
     args = p.parse_args()
     try:
         res = _dispatch(args.cmd, args)
@@ -149,6 +160,12 @@ def main():
         res = {"ok": False, "error": str(exc)}
     print(json.dumps(res))
 
+
+# Sortie image commune aux commandes du hub : "video" = comportement historique (les autres clés
+# sont alors ignorées), "sequence" = motif numéroté, "image" = fichier unique. `image_args` porte
+# les arguments ffmpeg déjà résolus par le core (cf. core/imageOutput.js).
+IMAGE_OUT_DEFAULTS = {"out_kind": "video", "img_format": "png", "png_bits": 8,
+                      "png_compression": 6, "jpeg_quality": 92, "seq_start": 1, "image_args": None}
 
 # Valeurs par défaut d'une requête worker (les clés absentes du JSON prennent celles-ci).
 INTERP_DEFAULTS = {"model": "rife-v4.6", "factor": 2, "target_fps": None, "slowmo": False,
@@ -165,6 +182,8 @@ REMOVEBG_DEFAULTS = {"model": "isnet-anime", "format": "prores_4444",
                      "audio": "copy", "abr": 192, "atrack": 0, "start": None, "end": None}
 FRAME_DEFAULTS = {"mode": "depth", "model": "depth-anything-v2-small", "colormap": "gray", "time": 0.0,
                   "despeckle": 0, "edge_smoothing": 0, "edge_offset": 0}
+for _defaults in (INTERP_DEFAULTS, DEPTH_DEFAULTS, REMOVEBG_DEFAULTS):
+    _defaults.update(IMAGE_OUT_DEFAULTS)
 
 
 class Req:

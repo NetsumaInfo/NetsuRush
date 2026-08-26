@@ -4,34 +4,66 @@ import { Toast as ToastPrimitive } from "@base-ui/react/toast"
 import { CheckIcon, CircleAlertIcon, InfoIcon, XIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
+import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
 // Gestionnaire GLOBAL, hors React : les messages naissent dans des hooks et des callbacks asynchrones
 // (fin d'un encode, retour d'un export) qui n'ont pas de contexte sous la main.
 const manager = ToastPrimitive.createToastManager()
 
-type Tone = "ok" | "error" | "info"
+type Tone = "ok" | "error" | "info" | "task"
 
 // Un retour de fin de tâche se lit en passant : 4 s suffisent. Une erreur demande d'agir, elle reste
-// deux fois plus longtemps et s'annonce en priorité haute aux lecteurs d'écran.
-const TIMEOUT: Record<Tone, number> = { ok: 4000, info: 4000, error: 8000 }
+// deux fois plus longtemps et s'annonce en priorité haute aux lecteurs d'écran. Une tâche EN COURS
+// ne s'efface pas toute seule (timeout 0) : c'est son achèvement qui la remplace.
+const TIMEOUT: Record<Tone, number> = { ok: 4000, info: 4000, error: 8000, task: 0 }
 
-function push(tone: Tone, text: string) {
-  return manager.add({ title: text, type: tone, timeout: TIMEOUT[tone], priority: tone === "error" ? "high" : "low" })
+function push(tone: Tone, text: string, progress?: number | null) {
+  return manager.add({
+    title: text,
+    type: tone,
+    timeout: TIMEOUT[tone],
+    priority: tone === "error" ? "high" : "low",
+    data: { progress: progress ?? null },
+  })
+}
+
+/** Pastille d'une tâche EN COURS : elle vit tant que la tâche dure, et se remplace par son résultat. */
+export interface TaskToast {
+  /** Nouveau libellé et/ou nouvelle progression (0-100 ; `null` = indéterminé, simple attente). */
+  update: (text: string, progress?: number | null) => void
+  ok: (text: string) => void
+  fail: (text: string) => void
+  close: () => void
+}
+
+// L'achèvement REMPLACE la pastille au lieu de la muter : une pastille née sans expiration garderait
+// son minuteur à zéro, et le message de fin resterait affiché indéfiniment.
+function task(text: string, progress?: number | null): TaskToast {
+  const id = push("task", text, progress)
+  const replace = (tone: Tone, message: string) => { manager.close(id); push(tone, message) }
+  return {
+    update: (next, pct) => manager.update(id, { title: next, data: { progress: pct ?? null } }),
+    ok: (message) => replace("ok", message),
+    fail: (message) => replace("error", message),
+    close: () => manager.close(id),
+  }
 }
 
 export const toast = {
   ok: (text: string) => push("ok", text),
   info: (text: string) => push("info", text),
   error: (text: string) => push("error", text),
+  task,
   close: (id?: string) => manager.close(id),
 }
 
-const ICON: Record<Tone, typeof CheckIcon> = { ok: CheckIcon, error: CircleAlertIcon, info: InfoIcon }
+const ICON: Record<Tone, typeof CheckIcon> = { ok: CheckIcon, error: CircleAlertIcon, info: InfoIcon, task: InfoIcon }
 const TONE_CLASS: Record<Tone, string> = {
   ok: "text-[var(--color-ok)]",
   error: "text-destructive",
   info: "text-primary",
+  task: "text-primary",
 }
 
 /**
@@ -56,8 +88,11 @@ function ToastList() {
       className="pointer-events-none flex w-[min(22rem,calc(100vw-2rem))] flex-col items-end gap-2"
     >
       {toasts.map((item) => {
-        const tone: Tone = item.type === "error" || item.type === "info" ? item.type : "ok"
+        const tone: Tone = item.type === "error" || item.type === "info" || item.type === "task" ? item.type : "ok"
         const Icon = ICON[tone]
+        // Progression d'une tâche en cours. `null` = on ne sait pas encore mesurer (montage d'une
+        // timeline, choix du dossier) : le rouet suffit, une barre à zéro ferait croire à un blocage.
+        const progress = tone === "task" ? (item.data as { progress?: number | null } | undefined)?.progress ?? null : null
         return (
           <ToastPrimitive.Root
             key={item.id}
@@ -75,8 +110,18 @@ function ToastList() {
               "motion-reduce:transition-none",
             )}
           >
-            <Icon className={cn("mt-0.5 size-3.5 shrink-0", TONE_CLASS[tone])} />
-            <ToastPrimitive.Title className="min-w-0 flex-1 break-words py-0.5 leading-snug text-foreground" />
+            {tone === "task"
+              ? <Spinner className="mt-0.5 size-3.5 shrink-0 text-primary" />
+              : <Icon className={cn("mt-0.5 size-3.5 shrink-0", TONE_CLASS[tone])} />}
+            <div className="min-w-0 flex-1">
+              <ToastPrimitive.Title className="min-w-0 select-text break-words py-0.5 leading-snug text-foreground" />
+              {progress != null && progress > 0 && (
+                <div className="mb-1 mt-0.5 h-1 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out"
+                    style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} />
+                </div>
+              )}
+            </div>
             <ToastPrimitive.Close
               aria-label={t("action.close")}
               className="mt-px shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"

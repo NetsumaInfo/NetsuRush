@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft, Scissors, FolderInput, CheckSquare, Square,
@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
+import { basename } from "@/store/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,7 +15,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
-import { autoplayCeiling, fmt, gridContainerStyle, gridMetrics, setMaxPlaying, type Segment } from "./cutStudioShared";
+import { autoplayCeiling, canFewerCols, canMoreCols, fmt, gridContainerStyle, gridMetrics, setMaxPlaying, stepCols, type Segment } from "./cutStudioShared";
 import { RATE_LADDER } from "./cutShortcuts";
 import { useCutActions } from "./useCutActions";
 import { useCutShortcuts } from "./useCutShortcuts";
@@ -32,35 +33,53 @@ import { TimelineInsertionSelect } from "./TimelineInsertionSelect";
 import { modelUsesPreset } from "@/lib/detection";
 import { DetectionAdvancedSettings } from "./DetectionAdvancedSettings";
 import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls";
+import { flowOffsets } from "./cutFlow";
+import { CutFlowNav } from "./CutFlowNav";
 
 // Seuils de mise en page (px) : sous NARROW_W la vue passe en colonne, et la grille garde toujours
 // au moins MIN_GRID_W — sinon la barre d'outils n'a plus de place et ses boutons s'empilent.
 const NARROW_W = 640;
 const MIN_GRID_W = 260;
 
+// Séparateur d'identité du flux : un chemin ne peut pas contenir de saut de ligne, donc joindre
+// les chemins avec lui rend une clé stable et sans collision.
+const SEP = "\n";
+
 export function CutStudio() {
   const { t } = useTranslation(["derush", "common"]);
-  const { selected, close, connected, pinned } = useApp(
-    useShallow((s) => ({ selected: s.selected, close: s.close, connected: s.connected, pinned: s.pinned })),
+  const { selected, storeFlow, close, connected, pinned } = useApp(
+    useShallow((s) => ({ selected: s.selected, storeFlow: s.flow, close: s.close, connected: s.connected, pinned: s.pinned })),
   );
   const clip = selected!;
-  const isLocal = clip.source === "local";
+  // Le FLUX est la vue générale : un rush ouvert seul en est un d'un seul élément. Toute la suite
+  // (détection, aperçus, sélection, export) travaille dessus sans jamais distinguer les deux cas —
+  // c'est ce qui garantit qu'une grille de quatre rushs se comporte comme une grille d'un.
+  const flow = storeFlow.length ? storeFlow : [clip];
+  const flowKey = flow.map((c) => c.path).join(SEP);
+  const paths = useMemo(() => flowKey.split(SEP), [flowKey]);
+  const clipOf = useMemo(() => new Map(flow.map((c) => [c.path, c])), [flowKey]);   // eslint-disable-line react-hooks/exhaustive-deps
+  // Repli sur le nom de fichier, jamais sur le chemin entier : ce nom sert aussi à baptiser les
+  // extraits, et un chemin complet y produirait un nom de fichier inutilisable.
+  const nameOf = (path: string) => clipOf.get(path)?.name ?? basename(path);
+  const isLocalPath = (path: string) => clipOf.get(path)?.source === "local";
+  const isLocal = flow.every((c) => c.source === "local");
   // Fenêtre épinglée → mode compact : entête de détection et lecteur masqués pour tenir dans un coin
   // de l'écran. La barre d'outils reste ENTIÈRE (sélection, aperçus, lecture, export) : c'est la
   // seule surface cliquable qui reste, la reléguer au clic droit rendait l'épinglé inutilisable.
   const compact = pinned;
 
-  const det = useShotDetection(clip.path);
+  const det = useShotDetection(paths);
   const {
-    info, duration, segments, srcFrames, detecting, cacheLoading, progress,
-    active, activeUrl,
+    info, duration, segments, detecting, cacheLoading, progress,
+    active, activeUrl, sourceOf, pathOf,
     err, setErr, preset, setPreset, model, setModel,
     getProxy, peekProxy, bustProxy, warmProxies, playScene, detect,
     generateProxies: genProxies, generateThumbs: genThumbs, proxyGen, thumbsGen,
     hasEdits, clearEdits, undoEdit, redoEdit,
   } = det;
+  const srcFramesOf = (path: string) => sourceOf(path).srcFrames;
 
-  const { cols, setCols, panelW, setPanelW, panelRef, resizingRef, startPanelDrag, playerOpen, setPlayerOpen } = usePanelLayout();
+  const { cols, setCols, panelW, panelRef, resizingRef, startPanelDrag, handleRef, edgeRef, startEdgeDrag, onHandleKeyDown, playerOpen, setPlayerOpen } = usePanelLayout();
   // Lecteur visible seulement si demandé ET hors mode compact (épinglé = vignettes seules).
   const showPanel = playerOpen && !compact;
 
@@ -82,7 +101,7 @@ export function CutStudio() {
   const narrow = rootW > 0 && rootW < NARROW_W;
   const asideW = rootW ? Math.min(panelW, Math.max(MIN_GRID_W, rootW - MIN_GRID_W)) : panelW;
 
-  const { sel, setSel, toggleSel, selectAll, deselect, mergeSelected, removeSelected } = useCutActions(det, clip.path);
+  const { sel, setSel, toggleSel, selectAll, deselect, mergeSelected, removeSelected } = useCutActions(det, flowKey);
   const [gridPlay, setGridPlay] = useState(() => useApp.getState().cutGridPlay);
   const playerApi = useRef<ScenePlayerApi | null>(null);
 
@@ -103,9 +122,13 @@ export function CutStudio() {
   // à chaque changement de colonnes. Carte = aspect-video (h = largeur × 9/16), grille gap-3 (12px).
   // Grille à COLONNES TENUES (cf. gridMetrics) : rétrécir la zone rétrécit les vignettes, le nombre
   // de colonnes ne bouge pas. Le +/- règle ce nombre.
-  const gridScrollRef = useRef<HTMLDivElement>(null);
+  const gridScrollRef = useRef<HTMLDivElement | null>(null);
+  // La zone défilante est AUSSI tenue en état : le repérage dans le flux s'abonne à son scroll, et
+  // un abonnement a besoin de l'élément au moment du montage, pas d'une ref lue trop tôt.
+  const [gridEl, setGridEl] = useState<HTMLDivElement | null>(null);
+  const attachGrid = (el: HTMLDivElement | null) => { gridScrollRef.current = el; setGridEl(el); };
   const [gridW, setGridW] = useState(0);
-  const { actualCols, cell } = gridMetrics(gridW, cols, narrow);
+  const { actualCols, cell, maxCols } = gridMetrics(gridW, cols, narrow);
   useEffect(() => {
     const el = gridScrollRef.current;
     if (!el) return;
@@ -134,6 +157,20 @@ export function CutStudio() {
     warmProxies(segments, Math.round(((cell * 9) / 16) * (window.devicePixelRatio || 1)));
   }, [segments, cell, warmProxies]);
 
+  // Repérage dans le flux. Le studio calcule les PALIERS (où commence chaque rush) et les rushs pas
+  // encore découpés — deux dérivés des plans, donc stables entre deux défilements. Le rush COURANT,
+  // lui, appartient à `CutFlowNav` : c'est la seule chose qui suit le scroll, et la garder ici
+  // re-rendait les centaines de vignettes de la grille à chaque frontière franchie.
+  //
+  // Les deux dérivés se calculent EN UN SEUL passage : sur un flux, `segments` compte des milliers
+  // d'entrées et deux balayages séparés valaient un balayage de trop.
+  const isFlow = flow.length > 1;
+  const { offsets, uncut } = useMemo(() => {
+    const seen = new Set<string>();
+    for (const s of segments) seen.add(s.path ?? paths[0]);
+    return { offsets: flowOffsets(segments, paths), uncut: paths.filter((p) => !seen.has(p)) };
+  }, [segments, paths]);
+
   const selectedList = () => segments.filter((s) => sel.has(s.id));
   // Les aperçus peuvent cibler tout le rush, mais les actions d'export exigent une sélection.
   const targetList = () => {
@@ -144,18 +181,22 @@ export function CutStudio() {
   // Vide la sélection (héritée des plans précédents) avant de relancer la détection.
   function runDetect() { setSel(new Set()); detect(); }
 
+  // Un flux dont un rush n'est pas encore découpé se contenterait sinon de ne pas le montrer : on
+  // défilerait sans jamais l'atteindre, et rien ne dirait pourquoi. Les découper ne retouche pas les
+  // autres (cf. detect(only)).
+  function detectUncut() { setSel(new Set()); void detect(uncut); }
+
   const exp = useCutExport({
-    clipPath: clip.path,
-    clipName: clip.name,
-    srcFrames,
+    pathOf,
+    srcFramesOf,
+    nameOf,
+    baseName: clip.name,
     targetList,
     hasSelection: () => selectedList().length > 0,
     setErr,
   });
   const { busy, exported, createTimeline, appendSelection, addToTimeline, importBack } = exp;
   const { download, busy: dlBusy } = useExport();
-  const exportProgress = useApp((s) => s.exportProgress);
-  const exportError = useApp((s) => s.exportError);
   const exportProfiles = useApp((s) => s.exportProfiles);
   const cardActionProfileId = useApp((s) => s.cardActionProfileId);
   const activeExportProfileId = useApp((s) => s.activeExportProfileId);
@@ -163,17 +204,18 @@ export function CutStudio() {
   // Le choix de piste audio vit dans le profil actif (résolu côté core par resolveClipAudio) — pas
   // d'état local qui divergerait de ce que montrent les Réglages d'export.
   const activeProfile = getActiveExportProfile(exportProfiles, activeExportProfileId);
-  const exportInputs = () => selectedList().map((s) => ({ input: clip.path, start: s.in, end: s.out }));
+  const exportInputs = () => selectedList().map((s) => ({ input: pathOf(s), start: s.in, end: s.out }));
 
   // Petit bouton de chaque vignette : applique le profil configuré (import timeline OU fichier).
   const cardProfile = getActiveExportProfile(exportProfiles, cardActionProfileId);
   const cardIsTimeline = isTimelineImport(cardProfile.workflow);
-  const showCardBtn = cardIsTimeline ? connected && !isLocal : true;
+  // Le bouton d'envoi timeline dépend du rush de LA CARTE : un flux peut mêler rushs du Media Pool
+  // et rushs importés du disque, et seuls les premiers savent rejoindre une timeline de l'hôte.
+  const showCardBtn = (s: Segment) => (cardIsTimeline ? connected && !isLocalPath(pathOf(s)) : true);
   const runCardAction = (s: Segment) =>
     cardIsTimeline
       ? addToTimeline(s)
-      : download({ clips: [{ input: clip.path, start: s.in, end: s.out }], baseName: exportBaseName, profileId: cardActionProfileId });
-  useEffect(() => { if (exportError) setErr(exportError); }, [exportError, setErr]);
+      : download({ clips: [{ input: pathOf(s), start: s.in, end: s.out }], baseName: exportBaseName, profileId: cardActionProfileId });
 
   // Navigation de plan en plan depuis le lecteur (flèches) : part du plan actif, sinon du premier.
   function stepShot(d: number) {
@@ -257,8 +299,18 @@ export function CutStudio() {
         <div className="flex flex-wrap items-center gap-2.5">
            <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex items-center justify-center rounded-md transition-colors hover:bg-accent h-8 px-2 text-sm"><ArrowLeft className="h-4 w-4" /></button>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[13px] font-medium leading-tight">{clip.name}</div>
-            {info && <div className="text-[11px] leading-tight text-muted-foreground">{info.width}×{info.height} · {fmt(duration)}</div>}
+            {/* Flux : le nom affiché est celui du rush qu'on a SOUS LES YEUX, et il change en défilant.
+                L'entête garde exactement sa forme — seul son contenu suit le défilement, donc rien ne
+                bouge dans la page pendant qu'on descend. */}
+            {isFlow ? (
+              <CutFlowNav flow={flow} offsets={offsets} cell={cell} cols={actualCols}
+                scrollEl={gridEl} sourceOf={sourceOf} total={duration} />
+            ) : (
+              <>
+                <div className="truncate text-[13px] font-medium leading-tight">{clip.name}</div>
+                {info && <div className="text-[11px] leading-tight text-muted-foreground">{info.width}×{info.height} · {fmt(duration)}</div>}
+              </>
+            )}
           </div>
           {/* Vue étroite : sélecteurs RÉTRÉCIS, jamais masqués — le choix du modèle de détection est
               le réglage le plus utilisé de la vue, le cacher dans le panneau Adobe le rendait
@@ -297,7 +349,7 @@ export function CutStudio() {
           model={model} setModel={setModel} preset={preset} setPreset={setPreset} onDetect={runDetect}
           onSelectAll={selectAll} onDeselect={deselect} onMerge={mergeSelected}
           hasEdits={hasEdits} onClearEdits={clearEdits}
-          gridPlay={gridPlay} setGridPlay={setGridPlayback} cols={cols} setCols={setCols}
+          gridPlay={gridPlay} setGridPlay={setGridPlayback} cols={actualCols} maxCols={maxCols} setCols={setCols}
           onThumbs={generateThumbs} thumbsBusy={!!thumbsGen} onProxies={generateProxies} proxyBusy={!!proxyGen}
           connected={connected} isLocal={isLocal}
           onExtract={() => void download({ clips: exportInputs(), baseName: exportBaseName })} onCreateTimeline={createTimeline} onAppendSelection={appendSelection}
@@ -322,7 +374,17 @@ export function CutStudio() {
                   <TooltipContent>{t("cutStudio.mergeTip", { count: selCount })}</TooltipContent>
                 </Tooltip>
               )}
-              <div className="flex-1" />
+              {isFlow && uncut.length > 0 && (
+                <Tooltip>
+                  <TooltipTrigger render={
+                    <Button size="sm" variant="outline" onClick={detectUncut} disabled={detecting}
+                      className="h-8 gap-1 border-primary/40 px-2 text-xs text-primary hover:text-primary" />
+                  }>
+                    <Scissors className="size-3.5" /> {t("cutStudio.flowUncut", { count: uncut.length })}
+                  </TooltipTrigger>
+                  <TooltipContent>{t("cutStudio.flowUncutTip")}</TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger render={
                   <Button size="sm" variant="outline" onClick={generateThumbs}
@@ -359,12 +421,16 @@ export function CutStudio() {
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.autoplayPreviews")}</TooltipContent>
               </Tooltip>
+              {/* Le ressort sépare ce qui FABRIQUE la grille (à gauche : sélection, fusion, découpe,
+                  vignettes, aperçus, lecture) de ce qui la CADRE ou la SORT — même partage qu'en
+                  Timeline Live, où ces trois boutons ont toujours été du côté gauche. */}
+              <div className="flex-1" />
               <Tooltip>
                 <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
                   <LayoutGrid className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-                   <button type="button" aria-label={t("common:action.decrease")} onClick={() => setCols((c) => Math.max(2, c - 1))} disabled={cols <= 2} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
-                  <span className="w-4 text-center tabular-nums">{cols}</span>
-                   <button type="button" aria-label={t("common:action.increase")} onClick={() => setCols((c) => Math.min(8, c + 1))} disabled={cols >= 8} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
+                   <button type="button" aria-label={t("common:action.decrease")} onClick={() => setCols(stepCols(actualCols, -1, maxCols))} disabled={!canFewerCols(actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
+                  <span className="w-4 text-center tabular-nums">{actualCols}</span>
+                   <button type="button" aria-label={t("common:action.increase")} onClick={() => setCols(stepCols(actualCols, 1, maxCols))} disabled={!canMoreCols(actualCols, maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.thumbSize")}</TooltipContent>
               </Tooltip>
@@ -391,19 +457,27 @@ export function CutStudio() {
           {/* Zone défilante : seule la grille bouge. Retrait ASYMÉTRIQUE assumé — la gouttière gauche
               garde son écart d'origine (4 px), la droite est réduite au minimum pour que la dernière
               colonne vienne contre le lecteur : 2 px, la barre de défilement, le trait de poignée. */}
-          <div ref={gridScrollRef} style={{ contain: "layout paint" }} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5">
+          {/* Pinned: no player, no resize edge — the grid owns the right edge, so it breaks out of
+              the 20px gutter (px-4 + pr-1) and its scrollbar sits against the window like a real one. */}
+          <div ref={attachGrid} style={{ contain: "layout paint" }} className={"min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5" + (compact ? " -mr-5" : "")}>
             {segments.length > 0 ? (
               <div className="grid gap-3" style={gridContainerStyle(actualCols, cell)}>
-                {segments.map((s, i) => (
-                  <SceneCard key={s.id} seg={s} index={i} clipPath={clip.path} clipName={clip.name} srcFrames={srcFrames}
-                    active={active?.id === s.id} selected={sel.has(s.id)} play={gridPlay}
-                    getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => bustProxy(s)} peekProxy={() => peekProxy(s)} onPlay={() => playScene(s)}
-                    onToggle={(mods) => toggleSel(s.id, mods)}
-                    onAddToTimeline={showCardBtn ? () => runCardAction(s) : undefined}
-                    addLabel={cardProfile.name}
-                    alwaysChrome={compact}
-                    pos={fmt(s.in)} dur={fmt(s.out - s.in)} />
-                ))}
+                {segments.map((s, i) => {
+                  // Chaque carte porte SON rush : dans un flux, deux vignettes voisines peuvent venir
+                  // de fichiers différents, et tout ce qui suit (vignette, proxy, collection, envoi
+                  // timeline) doit viser le bon.
+                  const path = pathOf(s);
+                  return (
+                    <SceneCard key={s.id} seg={s} index={i} clipPath={path} clipName={nameOf(path)} srcFrames={srcFramesOf(path)}
+                      active={active?.id === s.id} selected={sel.has(s.id)} play={gridPlay}
+                      getProxy={(h, tok, prio) => getProxy(s, prio ?? "high", h, tok)} bustProxy={() => bustProxy(s)} peekProxy={() => peekProxy(s)} onPlay={() => playScene(s)}
+                      onToggle={(mods) => toggleSel(s.id, mods)}
+                      onAddToTimeline={showCardBtn(s) ? () => runCardAction(s) : undefined}
+                      addLabel={cardProfile.name}
+                      alwaysChrome={compact}
+                      pos={fmt(s.in)} dur={fmt(s.out - s.in)} />
+                  );
+                })}
               </div>
             ) : detecting || cacheLoading ? (
               // Chargement du cache (réouverture d'un rush déjà découpé) OU détection en cours : on
@@ -421,6 +495,21 @@ export function CutStudio() {
           </div>
         </CutContextMenu>
 
+        {/* Lecteur fermé : il reste son trait, qui reprend les mêmes gestes à l'envers — molette ou
+            glissé vers la GAUCHE le rouvre. Sans lui, le geste qui ferme n'aurait pas de retour. */}
+        {!showPanel && !narrow && !compact && (
+          <div role="separator" aria-orientation="vertical" aria-label={t("cutStudio.showPlayer")}
+            tabIndex={0}
+            ref={edgeRef}
+            onPointerDown={startEdgeDrag}
+            onDoubleClick={() => setPlayerOpen(true)}
+            onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); setPlayerOpen(true); } }}
+            className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+            <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          </div>
+        )}
+
         {showPanel && (
         <div className={"flex min-h-0 bg-background " + (narrow ? "order-first w-full shrink-0 flex-col" : "h-full shrink-0")}>
         {/* poignée : glisser pour rétrécir/élargir le lecteur (gauche = +large, droite = +petit).
@@ -428,11 +517,9 @@ export function CutStudio() {
         {!narrow && (
         <div role="separator" aria-orientation="vertical" aria-label={t("shared.resize")}
           tabIndex={0}
+          ref={handleRef}
           onPointerDown={startPanelDrag}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowLeft") { e.preventDefault(); setPanelW((w) => Math.min(560, w + 20)); }
-            else if (e.key === "ArrowRight") { e.preventDefault(); setPanelW((w) => Math.max(260, w - 20)); }
-          }}
+          onKeyDown={onHandleKeyDown}
           className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
           {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
               restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
@@ -451,7 +538,7 @@ export function CutStudio() {
             <div className="relative aspect-video">
               {/* shortcuts={false} : NetsuCut pilote le clavier (←/→ = plan préc/suiv, M = fusionner)
                   et commande la lecture via apiRef. Sans ça, le lecteur volerait les flèches. */}
-              <ScenePlayer src={activeUrl} loop apiRef={playerApi} shortcuts={false} defaultVolume={0.2} />
+              <ScenePlayer src={activeUrl} apiRef={playerApi} shortcuts={false} defaultVolume={0.2} />
               {active && <div className="absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs">{segments.findIndex((s) => s.id === active.id) + 1}/{segments.length}</div>}
             </div>
           </Card>
@@ -478,7 +565,6 @@ export function CutStudio() {
                 disabled={selCount === 0 || !!busy}
                 className="w-full"
               />
-              {dlBusy && <Progress value={exportProgress} />}
               {isLocal && (
                 <p className="text-[11px] text-muted-foreground">{t("cutStudio.addToPoolHint")}</p>
               )}
@@ -486,17 +572,18 @@ export function CutStudio() {
             </div>
           )}
 
-          {/* break-words : un chemin de fichier long dans une erreur pousserait la largeur du panneau. */}
-          {busy && <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Spinner /> {busy}</p>}
+          {/* « Ça exporte » vit dans la pastille (cf. ExportStatusToast), pas ici : le panneau peut
+              être fermé, et le message de fin arrive de toute façon en pastille.
+              break-words : un chemin de fichier long dans une erreur pousserait la largeur du panneau. */}
           {err && <p className="break-words text-xs text-destructive">{err}</p>}
         </aside>
         </div>)}
       </div>
-      {/* messages d'état repris hors panneau quand le lecteur est masqué (sinon plus de retour visuel) */}
-      {!showPanel && (busy || err) && (
+      {/* Erreur reprise hors panneau quand le lecteur est masqué (sinon plus de retour visuel). Le
+          voyant « ça exporte », lui, est passé en pastille — cf. ExportStatusToast. */}
+      {!showPanel && err && (
         <div className="shrink-0 border-t border-border px-4 py-1.5 text-xs">
-          {busy && <span className="flex items-center gap-1.5 text-muted-foreground"><Spinner /> {busy}</span>}
-          {!busy && err && <span className="text-destructive">{err}</span>}
+          <span className="text-destructive">{err}</span>
         </div>
       )}
     </div>

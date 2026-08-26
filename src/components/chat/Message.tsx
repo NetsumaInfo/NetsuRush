@@ -51,7 +51,7 @@ export function Message({ msg, active = false }: { msg: UiMessage; active?: bool
             <button type="button" onClick={() => setShowThink((s) => !s)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground">
               <Brain className={cn("size-3", active && !msg.content && "animate-pulse text-primary")} /> {showThink ? t("message.hideReasoning") : t("message.reasoning")}
             </button>
-            {showThink && <div className="mt-1 whitespace-pre-wrap rounded-md border border-border bg-muted/30 p-2 text-xs italic text-muted-foreground">{msg.thinking}</div>}
+            {showThink && <div className="mt-1 select-text whitespace-pre-wrap rounded-md border border-border bg-muted/30 p-2 text-xs italic text-muted-foreground">{msg.thinking}</div>}
           </div>
         )}
         {msg.tools.length > 0 && (
@@ -59,7 +59,7 @@ export function Message({ msg, active = false }: { msg: UiMessage; active?: bool
         )}
         {showThinking && <Thinking label={status} fallback={t("message.thinking")} />}
         {msg.content && (
-          <div className={cn("max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed",
+          <div className={cn("max-w-[85%] select-text rounded-lg px-3 py-2 text-sm leading-relaxed",
             isUser ? "whitespace-pre-wrap bg-primary/15 text-foreground" : "bg-card text-foreground")}>
             {isUser ? msg.content : <Markdown text={msg.content} />}
           </div>

@@ -131,6 +131,9 @@ class RotoSession:
         self._matte_engine = None
         self.matte_batch = 16     # images par lot (moteurs par lots — cf. VIDEOMAMA_ENGINES)
         self.matte_overlap = 2    # images communes à deux lots, fondues pour effacer la jonction
+        # Dernier test de matte fin sur 1 image : {frame, alpha}. L'alpha calculé est gardé pour
+        # rejouer l'aperçu avec un autre post-traitement sans refaire tourner le modèle.
+        self.last_test = None
 
     # ---- ouverture : cache de session, sinon extraction en thread ----
     def open(self, video, in_s=None, out_s=None, sam_dir=None, sam_model=None):
@@ -481,10 +484,10 @@ class RotoSession:
         return {"ok": True, "mask": self._render(f, masks), "full": self.view.get("mode", "edit") != "edit"}
 
     def set_post(self, grow=None, feather=None, holes=None, dots=None,
-                 border=None, smooth=None, gamma=None):
+                 border=None, smooth=None, gamma=None, harden=None):
         """Post-traitement non destructif (overlay + export). Les mattes propagées ne bougent pas."""
         for k, v in (("grow", grow), ("feather", feather), ("holes", holes), ("dots", dots),
-                     ("border", border), ("smooth", smooth)):
+                     ("border", border), ("smooth", smooth), ("harden", harden)):
             if v is not None:
                 self.post[k] = int(v)
         if gamma is not None:
@@ -814,10 +817,12 @@ class RotoSession:
             return {"ok": False, "error": t("engine_missing", engine=eng, error=exc)}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": t("engine_failed", engine=eng, error=exc)}
-        uri = self._alpha_preview(os.path.join(out_dir, "%05d.png" % f), self._frame_path(f))
+        alpha_path = os.path.join(out_dir, "%05d.png" % f)
+        uri = self._alpha_preview(alpha_path, self._frame_path(f))
         if not uri:
             return {"ok": False, "error": t("fine_matte_unreadable")}
-        return {"ok": True, "preview": uri}
+        self.last_test = {"frame": f, "alpha": alpha_path}
+        return {"ok": True, "preview": uri, "mode": self.view.get("mode", "edit")}
 
     def _refine_test_batched(self, engine, f, mask_path, out_dir, max_size):
         """Essai d'un moteur par lots sur UNE image : lot d'une seule image, rien d'autre.
@@ -845,15 +850,37 @@ class RotoSession:
             os.path.join(out_dir, "%05d.png" % f))
 
     def _alpha_preview(self, alpha_path, frame_path):
-        """PNG d'alpha + image source → data-URI RGBA (l'image découpée par l'alpha affiné)."""
+        """Alpha d'un test + image source → data-URI PNG rendu EXACTEMENT comme le viewer.
+
+        Même chemin que l'overlay (mode d'affichage, contours, couleur de fond, post-traitement
+        courants) : l'aperçu d'un test montre donc ce que l'écran et l'export donneront, au lieu
+        d'une découpe RGBA figée qui ignorait les deux. Aplati, parce qu'un comparateur affiche une
+        seule image sans calque en dessous."""
         if not os.path.isfile(alpha_path):
             return None
         import numpy as np
         from PIL import Image
-        from nrroto.overlay import _png_uri
         a = np.array(Image.open(alpha_path).convert("L"))
-        fr = np.array(Image.open(frame_path).convert("RGB").resize((a.shape[1], a.shape[0])))
-        return _png_uri(Image.fromarray(np.dstack([fr, a]), "RGBA"))
+        v = self.view
+        return overlay.render_view_flat(frame_path, {1: a}, self.post,
+                                        mode=v.get("mode", "edit"), outline=bool(v.get("outline")),
+                                        bg=v.get("bg", "#00ff00"))
+
+    def test_preview(self):
+        """Rejoue l'aperçu du dernier test de matte fin avec le post-traitement et le mode
+        d'affichage COURANTS.
+
+        Le modèle ne retourne pas : seul l'alpha déjà sur le disque est recomposé, donc retouche du
+        masque et changement de vue restent vivants pendant qu'on regarde le comparateur.
+        `preview: None` = rien à rejouer (aucun test, ou le dernier aperçu vient d'une suppression
+        d'objet)."""
+        lt = self.last_test
+        if not lt or self.video is None:
+            return {"ok": True, "preview": None}
+        uri = self._alpha_preview(lt["alpha"], self._frame_path(lt["frame"]))
+        if not uri:
+            return {"ok": True, "preview": None}
+        return {"ok": True, "preview": uri, "frame": lt["frame"], "mode": self.view.get("mode", "edit")}
 
     def refine(self, engine="matanyone", obj=None, combined=False, warmup=None, max_size=None,
                frame=None, batch=None, overlap=None):
@@ -1093,6 +1120,8 @@ class RotoSession:
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": t("engine_failed", engine=label, error=exc)}
         from nrroto.overlay import _png_uri
+        # L'aperçu affiché n'est plus un alpha : la retouche du masque ne s'y rejoue pas.
+        self.last_test = None
         return {"ok": True, "preview": _png_uri(img)}
 
     def object_remove(self, engine=DEFAULT_REMOVE_ENGINE, out=None, steps=None, grow=None, frame=None,
@@ -1170,6 +1199,7 @@ class RotoSession:
         self.video, self.work, self.frames = None, None, 0
         self.points, self.order, self.names, self.current, self.propagated = {}, [], {}, {}, False
         self.refined, self.use_refined = False, True
+        self.last_test = None
         self.post = postproc.default_post()
         self.view = {"mode": "edit", "outline": False, "bg": "#00ff00"}
         self._extract_thread, self._extract_error = None, None

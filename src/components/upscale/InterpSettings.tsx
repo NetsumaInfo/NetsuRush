@@ -5,6 +5,7 @@ import {
   INTERP_MODELS, INTERP_FACTORS, INTERP_TARGET_FPS, type InterpSettings as InterpVals,
 } from "./processShared";
 import { Section, Row, Field, ProcessEncodingRows, ExportRows } from "./procSettingsParts";
+import { ProcessOutputRows, useOutputShape } from "./ProcessOutputRows";
 import { ModelPicker, useModelOptions } from "./ModelPicker";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +25,7 @@ interface Props {
 export function InterpSettings({ settings, patch, audioTracks, outDir, chooseOut, importBack, setImportBack, disabled }: Props) {
   const { t } = useTranslation("upscale");
   const targetOn = settings.targetFps != null;
+  const { writesVideo } = useOutputShape(settings);
   const models = useModelOptions(INTERP_MODELS, settings.model);
 
   return (
@@ -69,8 +71,9 @@ export function InterpSettings({ settings, patch, audioTracks, outDir, chooseOut
         </Row>
       </Section>
 
-      <ProcessEncodingRows v={settings} patch={patch} audioTracks={audioTracks} disabled={disabled} />
-      <ExportRows outDir={outDir} chooseOut={chooseOut} importBack={importBack} setImportBack={setImportBack} disabled={disabled} />
+      <ProcessOutputRows v={settings} patch={patch} disabled={disabled} />
+      {writesVideo && <ProcessEncodingRows v={settings} patch={patch} audioTracks={audioTracks} disabled={disabled} />}
+      <ExportRows outDir={outDir} chooseOut={chooseOut} importBack={importBack} setImportBack={setImportBack} disabled={disabled} v={settings} />
     </div>
   );
 }

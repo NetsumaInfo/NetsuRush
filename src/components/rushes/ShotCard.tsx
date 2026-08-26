@@ -70,7 +70,9 @@ function ShotCardImpl({
           onBlur={focusLeave}
           onClick={onToggle}
           onDoubleClick={onPlay}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+          // `e.target !== e.currentTarget` : un portail Base UI (popover « Ranger ») remonte dans
+          // l'arbre REACT — sans la garde, l'espace tapé dans son champ de nom était avalé ici.
+          onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
           // `nr-grid-card` = content-visibility + hauteur de remplacement héritée du conteneur de
           // grille (`--nr-cell-h`, cf. index.css et SceneCard).
           className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 nr-grid-card outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}

@@ -28,14 +28,18 @@ export interface RotoPoint { x: number; y: number; label: 0 | 1; obj: number; }
 
 // Post-traitement NON destructif du masque (overlay live + cuit à l'export). Unités = pixels
 // (grow ±, feather rayon, border bande, smooth rayon) ou taille max en px (trous/poussières :
-// aire ≤ v²). gamma = densité d'alpha (1 = neutre). 0 / 1.0 = inactif.
+// aire ≤ v²). harden = % de durcissement de l'alpha, gamma = densité d'alpha (1 = neutre).
+// 0 / 1.0 = inactif. L'ORDRE des champs est celui du traitement, et celui du panneau.
 export interface RotoPostState {
-  grow: number; feather: number; holes: number; dots: number;
-  border: number; smooth: number; gamma: number;
+  holes: number; dots: number; border: number;
+  grow: number; smooth: number; harden: number; feather: number; gamma: number;
 }
-export const DEFAULT_POST: RotoPostState = { grow: 0, feather: 0, holes: 0, dots: 0, border: 0, smooth: 0, gamma: 1 };
+export const DEFAULT_POST: RotoPostState = {
+  holes: 0, dots: 0, border: 0, grow: 0, smooth: 0, harden: 0, feather: 0, gamma: 1,
+};
 export const isDefaultPost = (p: RotoPostState) =>
-  !p.grow && !p.feather && !p.holes && !p.dots && !p.border && !p.smooth && Math.abs(p.gamma - 1) < 1e-3;
+  !p.grow && !p.feather && !p.holes && !p.dots && !p.border && !p.smooth && !p.harden
+  && Math.abs(p.gamma - 1) < 1e-3;
 
 // Modes d'affichage du masque (rendu côté python ; l'opacité de l'overlay edit = CSS client).
 export type RotoViewMode = "edit" | "matte" | "alpha" | "bgcolor";
@@ -127,3 +131,9 @@ export const EXPORT_FORMATS: { id: string; label: string; hint: string }[] = [
   { id: "bgcolor_mp4", label: "Fond couleur (MP4)", hint: "Objet composé sur la couleur de fond du mode d'affichage" },
   { id: "png_seq", label: "Séquence PNG (masque)", hint: "Une image de masque par image vidéo" },
 ];
+
+// Clé i18n courte de chaque format : les ids portent le codec, les libellés sont traduits.
+export const EXPORT_FMT_KEY: Record<string, string> = {
+  prores_4444: "prores", webm_alpha: "webm", ffv1_alpha: "ffv1",
+  matte_mp4: "matte", bgcolor_mp4: "bgcolor", png_seq: "png",
+};

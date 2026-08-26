@@ -39,6 +39,11 @@
     "desc": "降序"
   },
   "vramShort": "需要 {{need}} GB VRAM，你的显卡只有 {{have}}（{{gpu}}）— 跑不动。仍可下载。",
+  "stage": {
+    "download": "下载中",
+    "verify": "校验中",
+    "install": "安装中"
+  },
   "status": {
     "bundled": "已内置",
     "bundledTip": "随运行时提供（不可删除）。",

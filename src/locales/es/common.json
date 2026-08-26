@@ -53,7 +53,8 @@
   "fileType": {
     "video": "Vídeo",
     "image": "Imagen",
-    "media": "Medios"
+    "media": "Medios",
+    "visual": "Vídeos e imágenes"
   },
   "window": {
     "reference": "NetsuRush — Referencia",

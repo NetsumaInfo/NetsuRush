@@ -2,7 +2,18 @@
   "app": {
     "modulePreparing": "Module in the works — coming soon."
   },
-  "nav": { "derush": "NetsuCut", "script": "NetsuDraft", "notebook": "NetsuBook", "search": "NetsuSearch", "upscale": "NetsuLab", "reference": "NetsuBoard", "transfer": "NetsuBridge", "voice": "NetsuTalk", "chat": "NetsuPilot", "optimisation": "NetsuBoost" },
+  "nav": {
+    "derush": "NetsuCut",
+    "script": "NetsuDraft",
+    "notebook": "NetsuBook",
+    "search": "NetsuSearch",
+    "upscale": "NetsuLab",
+    "reference": "NetsuBoard",
+    "transfer": "NetsuBridge",
+    "voice": "NetsuTalk",
+    "chat": "NetsuPilot",
+    "optimisation": "NetsuBoost"
+  },
   "sidebar": {
     "settings": "Settings",
     "hostPicked": "Controlled app"
@@ -18,10 +29,12 @@
     "resolveOffline": "Resolve offline",
     "project": "Project: {{project}}",
     "refresh": "Refresh status",
-    "resolveHint": "The bridge is running, but Resolve isn't responding. Open <b1>Resolve Studio</b1> with a project, then set <b2>Preferences ▸ System ▸ General ▸ External scripting using = Local</b2> and restart Resolve.",
+    "resolveHint": "The bridge works, Resolve is not answering. Open <b1>Resolve Studio</b1> with a project, turn on <b2>Preferences ▸ System ▸ General ▸ External scripting = Local</b2>, then restart it.",
     "adobeHint": "Open {{host}}, then the <b>Window ▸ Extensions ▸ NetsuRush</b> panel (install it from the Adobe tab)."
   },
-  "menu": { "derush": "Footage", "chat": "Chat",
+  "menu": {
+    "derush": "Footage",
+    "chat": "Chat",
     "edit": "Edit",
     "cut": "Cut",
     "paste": "Paste",

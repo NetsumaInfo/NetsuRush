@@ -53,7 +53,8 @@
   "fileType": {
     "video": "视频",
     "image": "图像",
-    "media": "媒体"
+    "media": "媒体",
+    "visual": "视频和图像"
   },
   "window": {
     "reference": "参考",

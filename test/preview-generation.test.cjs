@@ -330,7 +330,9 @@ test('binds the NetsuLab player lifecycle to the selected source', () => {
   assert.ok(emptyStart >= 0 && activeStart > emptyStart);
   assert.doesNotMatch(source.slice(emptyStart, activeStart), /<UpscalePlayer/);
   assert.match(source, /<UpscalePlayer\s+key=\{activeKey\}/);
-  assert.match(source, /if \(active\) return;[\s\S]*nativePlayer\.stop\(\)[\s\S]*nativePlayer\.hide\(\)/);
+  // Aucune source OU source image fixe : dans les deux cas le lecteur natif doit lâcher sa surface
+  // (elle vit au-dessus du WebView et recouvrirait l'aperçu de l'image).
+  assert.match(source, /if \(active && !isStillSource\(active\)\) return;[\s\S]*nativePlayer\.stop\(\)[\s\S]*nativePlayer\.hide\(\)/);
   assert.match(player, /if \(!playSignal \|\| !visible\) return;[\s\S]*if \(alive\) return nativePlayer\.play\(\)/);
 });
 

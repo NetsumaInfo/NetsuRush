@@ -25,10 +25,31 @@ function timelineName(fallback: string): string {
   return newTimelineName(getActiveExportProfile(st.exportProfiles, st.activeExportProfileId), fallback);
 }
 
+// Regroupe les plans PAR RUSH en gardant l'ordre du flux : le montage sort dans l'ordre où la grille
+// les montre. Un appel de montage porte un seul fichier source (l'API de l'hôte en prend un), donc
+// un flux de quatre rushs = quatre appels enchaînés sur la même timeline.
+function groupByPath(list: Segment[], pathOf: (s: Segment) => string): { path: string; shots: Segment[] }[] {
+  const out: { path: string; shots: Segment[] }[] = [];
+  for (const s of list) {
+    const path = pathOf(s);
+    const last = out[out.length - 1];
+    if (last && last.path === path) last.shots.push(s);
+    else out.push({ path, shots: [s] });
+  }
+  return out;
+}
+
+const asSegments = (shots: Segment[]) => shots.map((s) => ({ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame }));
+
 interface CutExportOpts {
-  clipPath: string;
-  clipName: string;
-  srcFrames: number;
+  /** Fichier source d'un plan (un flux en enchaîne plusieurs). */
+  pathOf: (s: Segment) => string;
+  /** Nombre d'images du rush — la frame-accuracy est propre à chaque source. */
+  srcFramesOf: (path: string) => number;
+  /** Nom de fichier d'un rush, pour nommer les extraits. */
+  nameOf: (path: string) => string;
+  /** Nom de base du flux : celui du premier rush, utilisé pour la timeline créée. */
+  baseName: string;
   targetList: () => Segment[];
   hasSelection?: () => boolean;
   setErr: (m: string | null) => void;
@@ -48,11 +69,25 @@ interface CutExport {
 // timeline frame-accurate, import retour au Media Pool. La gestion des caches vit dans
 // Paramètres › Stockage (purge ciblée par rush) — plus de purge globale depuis ici.
 export function useCutExport({
-  clipPath, clipName, srcFrames, targetList, hasSelection, setErr,
+  pathOf, srcFramesOf, nameOf, baseName, targetList, hasSelection, setErr,
 }: CutExportOpts): CutExport {
   const { t } = useTranslation("derush");
-  const [busy, setBusy] = useState<string | null>(null);
+  // Le libellé part AUSSI dans le store : c'est lui que lit la pastille d'export (cf.
+  // ExportStatusToast), pour que « ça monte la timeline » s'affiche au même endroit que son résultat
+  // plutôt qu'en pied de panneau. L'état local reste, il sert à éteindre les boutons.
+  const setExportBusy = useApp((s) => s.setExportBusy);
+  const setExportProgress = useApp((s) => s.setExportProgress);
+  const [busy, setBusyLocal] = useState<string | null>(null);
+  const setBusy = (label: string | null) => {
+    setBusyLocal(label);
+    // Progression remise à zéro à l'ENTRÉE d'une phase : un montage de timeline ne se mesure pas, et
+    // la pastille afficherait sinon le pourcentage d'un export de fichiers terminé depuis longtemps.
+    if (label) setExportProgress(0);
+    setExportBusy(label);
+  };
   const [exported, setExported] = useState<string[]>([]);
+
+  const stem = (name: string) => name.replace(/\.[^.]+$/, "");
 
   async function extract() {
     if (hasSelection && !hasSelection()) return;
@@ -61,14 +96,19 @@ export function useCutExport({
     const dir = await nr.chooseDir();
     if (!dir) return;
     const sep = dir.includes("\\") ? "\\" : "/";
-    const base = clipName.replace(/\.[^.]+$/, "");
     // Extraction en masse = tâche lourde (ffmpeg) → propose de fermer le logiciel de montage.
     if (list.length >= 5) useApp.getState().offerCloseForRam();
     setBusy(t("export.extracting")); setErr(null);
     const done: string[] = [];
+    // Numérotation PAR RUSH : dans un flux, `rushA_001` puis `rushB_001` se lisent tout de suite,
+    // là où un compteur global écrirait `rushB_014` sans dire d'où vient le 14.
+    const nth = new Map<string, number>();
     for (let i = 0; i < list.length; i++) {
-      const out = `${dir}${sep}${base}_${String(i + 1).padStart(3, "0")}.mp4`;
-      const r = await nr.exportClip({ input: clipPath, start: list[i].in, end: list[i].out, output: out });
+      const input = pathOf(list[i]);
+      const n = (nth.get(input) ?? 0) + 1;
+      nth.set(input, n);
+      const out = `${dir}${sep}${stem(nameOf(input))}_${String(n).padStart(3, "0")}.mp4`;
+      const r = await nr.exportClip({ input, start: list[i].in, end: list[i].out, output: out });
       if (r.ok && r.output) done.push(r.output);
       else { setErr(t("export.clipError", { index: i + 1, error: r.error })); break; }
       setBusy(t("export.extractingN", { done: done.length, total: list.length }));
@@ -78,35 +118,53 @@ export function useCutExport({
     toast.ok(t("export.extracted", { count: done.length, dir }));
   }
 
+  // Envoie une liste de plans vers UNE timeline, rush par rush. Le premier groupe porte le mode
+  // demandé (nouvelle timeline, ou la cible du profil) ; les suivants s'ajoutent à la timeline que
+  // ce premier appel a désignée — sinon un flux de quatre rushs créerait quatre timelines.
+  async function buildFlow(list: Segment[], name: string, mode?: "new" | "append") {
+    const host = useApp.getState().activeHost;
+    const groups = groupByPath(list, pathOf);
+    let timeline: string | undefined;
+    let created = false;
+    let count = 0;
+    let fpsMismatch = false;
+    for (let i = 0; i < groups.length; i++) {
+      const g = groups[i];
+      const r = await hostBuildTimeline(host, {
+        name, input: g.path, srcFrames: srcFramesOf(g.path), ...activeTimelineOpts(),
+        ...(i === 0 ? (mode ? { mode } : {}) : { mode: "append" as const, timelineName: timeline }),
+        segments: asSegments(g.shots),
+      });
+      if (!r.ok) return { ok: false as const, error: r.error, timeline, count, created, fpsMismatch };
+      timeline = r.timeline || timeline;
+      created = created || !!r.created;
+      count += r.count ?? g.shots.length;
+      fpsMismatch = fpsMismatch || !!r.fpsMismatch;
+    }
+    return { ok: true as const, error: undefined, timeline, count, created, fpsMismatch };
+  }
+
   async function createTimeline() {
     if (hasSelection && !hasSelection()) return;
     const list = targetList();
     if (!list.length) return;
-    const name = timelineName(t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") }));
+    const name = timelineName(t("shared.defaultDerushName", { name: stem(baseName) }));
     setBusy(t("export.creatingTimeline")); setErr(null);
-    const host = useApp.getState().activeHost;
     // Action explicite « Créer une timeline » → toujours une nouvelle, quelle que soit la cible du profil.
-    const r = await hostBuildTimeline(host, {
-      name, input: clipPath, srcFrames, ...activeTimelineOpts(), mode: "new",
-      segments: list.map((s) => ({ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame })),
-    });
+    const r = await buildFlow(list, name, "new");
     setBusy(null);
     r.ok ? toast.ok(t("export.timelineCreated", { name: r.timeline, count: r.count })) : setErr(r.error || t("shared.failedTimeline"));
   }
 
-  // Envoie la SÉLECTION vers la timeline visée par le profil en un seul appel (frame-accurate).
+  // Envoie la SÉLECTION vers la timeline visée par le profil (frame-accurate, un appel par rush).
   // L'action est volontairement inerte si aucune vignette n'est sélectionnée.
   async function appendSelection() {
     if (hasSelection && !hasSelection()) return;
     const list = targetList();
     if (!list.length) return;
-    const name = timelineName(t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") }));
+    const name = timelineName(t("shared.defaultDerushName", { name: stem(baseName) }));
     setBusy(t("export.sendingTimeline")); setErr(null);
-    const host = useApp.getState().activeHost;
-    const r = await hostBuildTimeline(host, {
-      name, input: clipPath, srcFrames, ...activeTimelineOpts(),
-      segments: list.map((s) => ({ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame })),
-    });
+    const r = await buildFlow(list, name);
     setBusy(null);
     if (r.ok) toast.ok(`${t("export.sentTimeline", { count: r.count ?? list.length, name: r.timeline })}${r.created ? t("export.createdSuffix") : ""}${r.fpsMismatch ? t("export.fpsSuffix") : ""}`);
     else setErr(r.error || t("export.sendFailed"));
@@ -115,11 +173,12 @@ export function useCutExport({
   // Ajoute UN plan à la timeline visée par le profil : AppendToTimeline le pose à la suite du dernier
   // clip. Toujours 'append' — une cible « nouvelle timeline » créerait une timeline par plan.
   async function addToTimeline(s: Segment): Promise<{ ok: boolean; error?: string }> {
-    const name = timelineName(t("shared.defaultDerushName", { name: clipName.replace(/\.[^.]+$/, "") }));
+    const name = timelineName(t("shared.defaultDerushName", { name: stem(baseName) }));
     setErr(null);
     const host = useApp.getState().activeHost;
+    const input = pathOf(s);
     const r = await hostBuildTimeline(host, {
-      name, input: clipPath, srcFrames, ...activeTimelineOpts(), mode: "append",
+      name, input, srcFrames: srcFramesOf(input), ...activeTimelineOpts(), mode: "append",
       segments: [{ in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame }],
     });
     if (r.ok) toast.ok(`${t("export.shotAdded", { name: r.timeline })}${r.created ? t("export.createdSuffix") : ""}${r.fpsMismatch ? t("export.fpsSuffix") : ""}`);

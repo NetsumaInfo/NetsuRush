@@ -153,7 +153,7 @@ export interface BoardPrefs {
   upQuick: boolean;
   upEngine: "ia" | "turbo"; // moteur : IA (Real-ESRGAN/CUGAN, qualité max) ou Turbo (shader GPU, quasi temps réel)
   upModel: UpscaleModel;   // modèle IA par défaut (anime doux, réel rapide, réel max…)
-  upShader: ShaderModel;   // shader Turbo par défaut (ArtCNN, Anime4K, réel net…)
+  upShader: ShaderModel;   // shader Turbo par défaut (ArtCNN, RTX VSR, Lanczos…)
   upScale: 1 | 2 | 4;      // facteur par défaut (1× = restauration à la définition d'origine)
   upDenoise: number;       // débruitage par défaut (0..1) — n'agit que sur les modèles IA qui le gèrent
   drawKeys: DrawKeys;      // raccourcis clavier des outils de dessin (personnalisables) — outil → lettre
@@ -300,8 +300,11 @@ export function readPrefs(): BoardPrefs {
       // le choix de l'utilisateur qui prime.
       arrangeUniform: v.arrangeDefaultsVersion === 1 ? v.arrangeUniform ?? PREFS_DEFAULT.arrangeUniform : PREFS_DEFAULT.arrangeUniform,
       arrangeDefaultsVersion: 1,
-      upShader: v.upShader === "anime4k" ? "anime4k_aa_hq"
-        : v.upShader === "artcnn_quality" ? "artcnn_c4f32" : v.upShader ?? PREFS_DEFAULT.upShader,
+      // Anime4K retiré du produit, `artcnn_quality` remplacé : les deux retombent sur l'ArtCNN le
+      // plus proche plutôt que de rester une valeur sans entrée dans le sélecteur.
+      upShader: v.upShader === "anime4k_bb_hq" ? "artcnn_c4f32_dn"
+        : v.upShader?.startsWith("anime4k") || v.upShader === "artcnn_quality"
+          ? "artcnn_c4f32" : v.upShader ?? PREFS_DEFAULT.upShader,
       // A button dropped from the product must not linger in a saved bar, and an unknown edge
       // must not leave the bar without a place to sit.
       ...splitZones(v, "pinnedButtons", "pinnedButtonsEnd"),

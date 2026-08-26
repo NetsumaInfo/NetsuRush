@@ -18,7 +18,13 @@ const RTX_SHADERS = new Set(['rtx_vsr']);
  */
 function runTurbo(sidecars, event, opts) {
   const shader = opts && opts.shader;
-  if (RTX_SHADERS.has(shader)) return rtxUpscale.runRtxUpscale(event, opts);
+  if (RTX_SHADERS.has(shader)) {
+    // Le CLI RTX Video SDK n'écrit que du MP4 : ni image, ni séquence d'images. On refuse plutôt
+    // que de substituer un autre moteur en silence (l'utilisateur a choisi RTX pour RTX).
+    const kind = String((opts && opts.outputKind) || 'video');
+    if (kind !== 'video') return Promise.resolve({ ok: false, error: t('rtxVideoOnly') });
+    return rtxUpscale.runRtxUpscale(event, opts);
+  }
   const model = shaderUpscale.modelForShader(shader);
   if (model) return sidecars.runUpscale(event, Object.assign({}, opts, { model }));
   return shaderUpscale.runShaderUpscale(event, opts);

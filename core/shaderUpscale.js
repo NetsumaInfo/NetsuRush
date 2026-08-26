@@ -13,12 +13,18 @@ const { codecExt, sanitizeName } = require('./utils');
 const { playInfo, probeMedia } = require('./ffmpeg');
 const { t } = require('./i18n');
 const { resolveProcessEncoding } = require('./processEncoding');
+const { outputKind, imageSpec, imageTarget, imageEncodeArgs } = require('./imageOutput');
 
 // Shaders Turbo : id (renderer) → fichier .glsl custom (custom_shader_path) OU scaler libplacebo
-// intégré (`upscaler`, pas de fichier). Anime = CNN GLSL (ArtCNN/Anime4K) ; réel = lanczossharp.
+// intégré (`upscaler`, pas de fichier). Anime = CNN GLSL (ArtCNN) ; réel = lanczossharp.
 // Suffixes ArtCNN : `_DS` = doubleur qui débruite ET accentue, `_DN` = doubleur qui débruite et
 // adoucit. Ce sont des poids distincts, pas un post-filtre : ils ne se combinent pas avec la variante
 // neutre du même réseau.
+//
+// Anime4K a été retiré du produit. Les ids ci-dessous restent RÉSOLUS parce qu'ils ont pu être
+// enregistrés : les faire disparaître d'ici ferait échouer le job au lancement au lieu de
+// simplement changer son shader. Ils pointent vers l'ArtCNN le plus proche (B+B = restauration
+// douce → variante DN). Miroir de NetsuBoard, où le retrait a été fait en premier.
 const SHADERS = {
   artcnn_c4f32:    { file: 'ArtCNN_C4F32.glsl', upscaler: null },
   artcnn_c4f32_ds: { file: 'ArtCNN_C4F32_DS.glsl', upscaler: null },
@@ -27,10 +33,10 @@ const SHADERS = {
   artcnn_c4f16_ds: { file: 'ArtCNN_C4F16_DS.glsl', upscaler: null },
   artcnn_c4f16_dn: { file: 'ArtCNN_C4F16_DN.glsl', upscaler: null },
   artcnn_quality:  { file: 'ArtCNN_C4F32_DS.glsl', upscaler: null },
-  anime4k:        { file: 'Anime4K_ModeA.glsl', upscaler: null },
-  anime4k_aa_hq:  { file: 'Anime4K_ModeAA_HQ.glsl', upscaler: null },
-  anime4k_bb_hq:  { file: 'Anime4K_ModeBB_HQ.glsl', upscaler: null },
-  lanczos:        { file: null, upscaler: 'ewa_lanczossharp' },
+  anime4k:         { file: 'ArtCNN_C4F32.glsl', upscaler: null },
+  anime4k_aa_hq:   { file: 'ArtCNN_C4F32.glsl', upscaler: null },
+  anime4k_bb_hq:   { file: 'ArtCNN_C4F32_DN.glsl', upscaler: null },
+  lanczos:         { file: null, upscaler: 'ewa_lanczossharp' },
 };
 
 // Ces deux choix restent dans le même sélecteur « Shader », mais l'architecture R n'existe
@@ -211,15 +217,26 @@ function placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix 
   return `${placebo}:format=${pix}`;
 }
 
-function buildArgs({ input, out, sh, ow, oh, codec, quality, preset, bitDepth, profile, audio, abr, audioTrack, start, end, deband, grain, sharp, sigmoid, dither, videoArgs, audioArgs, container }) {
-  const pixArg = Array.isArray(videoArgs) ? videoArgs.indexOf('-pix_fmt') : -1;
-  const pix = pixArg >= 0 && videoArgs[pixArg + 1] ? videoArgs[pixArg + 1] : filterPixFmt(codec, bitDepth, profile);
+function buildArgs({ input, out, sh, ow, oh, codec, quality, preset, bitDepth, profile, audio, abr, audioTrack, start, end, deband, grain, sharp, sigmoid, dither, videoArgs, audioArgs, container, imageArgs, single, seqStart }) {
+  // Sortie image : libplacebo travaille nativement en RGB, donc le filtre rend directement le
+  // format de l'image écrite — aucun aller-retour par du YUV, et pas d'audio à muxer.
+  const pixArg = Array.isArray(imageArgs || videoArgs) ? (imageArgs || videoArgs).indexOf('-pix_fmt') : -1;
+  const pix = pixArg >= 0 && (imageArgs || videoArgs)[pixArg + 1]
+    ? (imageArgs || videoArgs)[pixArg + 1]
+    : filterPixFmt(codec, bitDepth, profile);
   const placebo = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix });
   const args = ['-y', '-hide_banner', '-loglevel', 'error', '-progress', 'pipe:1', '-nostats',
     '-init_hw_device', 'vulkan'];
   if (start != null) args.push('-ss', String(start));
   if (end != null && start != null) args.push('-t', String(Math.max(0, end - start)));
   args.push('-i', input, '-vf', placebo, '-map', '0:v:0');
+  if (Array.isArray(imageArgs)) {
+    args.push(...imageArgs, '-an');
+    if (single) args.push('-frames:v', '1', '-update', '1');
+    else if (seqStart != null) args.push('-start_number', String(seqStart));
+    args.push(out);
+    return args;
+  }
   args.push(...(Array.isArray(videoArgs) ? videoArgs : videoCodecArgs(codec, quality, preset, bitDepth, profile)));
   if (audio !== 'none') {
     const track = audioTrack | 0;
@@ -284,7 +301,11 @@ async function runShaderUpscale(event, opts) {
   if (!outDir) return { ok: false, error: t('outputFolderMissing') };
   const dirErr = shaderDirError();
   if (dirErr) return { ok: false, error: dirErr };
-  const resolved = await resolveProcessEncoding(opts || {});
+  // Sortie IMAGE (source fixe) ou SÉQUENCE : pas de codec vidéo à résoudre, l'écriture passe par
+  // les arguments image partagés avec les autres ops du hub.
+  const kind = outputKind(opts);
+  const spec = imageSpec(opts);
+  const resolved = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
   const sh = SHADERS[shader] || SHADERS.artcnn_c4f32;
   // Shader custom absent (vendor/shaders pas provisionné) → message clair plutôt qu'un échec ffmpeg obscur.
   if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
@@ -303,7 +324,7 @@ async function runShaderUpscale(event, opts) {
   const ow = even(dims.width * s);
   const oh = even(dims.height * s);
 
-  const ext = resolved.ext || codecExt(resolved.codec);
+  const ext = resolved ? (resolved.ext || codecExt(resolved.codec)) : spec.ext;
   const customName = typeof outputName === 'string' && outputName.trim();
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = (whole || !Array.isArray(segments) || !segments.length)
@@ -312,38 +333,46 @@ async function runShaderUpscale(event, opts) {
   const total = jobs.length;
   const outputs = [];
   let lastErr = null;
-  let usedEncoder = resolved.codec;
+  let usedEncoder = resolved ? resolved.codec : spec.format;
 
   const results = await mapConcurrent(jobs, parallel ? Math.min(4, Math.max(2, concurrency | 0)) : 1, async (j, i) => {
     // `savePath` = destination EXACTE imposée par l'appelant (cf. runUpscale) ; un seul job, sinon
     // les N sorties s'écraseraient.
-    const out = (total === 1 && savePath)
+    const suffix = customName ? '' : `_turbo_${s}x`;
+    const target = kind === 'video' ? null
+      : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
+    const out = (total === 1 && savePath && kind === 'video')
       ? String(savePath)
-      : path.join(outDir, `${base}${customName ? '' : `_turbo_${s}x`}${j.tag}.${ext}`);
+      : target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
     if (path.resolve(out).toLowerCase() === path.resolve(input).toLowerCase()) {
       return { ok: false, error: 'le nom de sortie écraserait le fichier source', out };
     }
     const fileLabel = path.basename(out);
     const frames = await clipFrames(input, j.start, j.end);
+    const imageArgs = target ? imageEncodeArgs(spec) : null;
     const args = buildArgs({
-      input, out, sh, ow, oh, codec: resolved.codec, quality: quality | 0, preset: String(preset), bitDepth: bitDepth | 0, profile: resolved.profile,
-      audio: resolved.audioMode || String(audio), abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
+      input, out, sh, ow, oh, codec: resolved ? resolved.codec : null, quality: quality | 0, preset: String(preset), bitDepth: bitDepth | 0, profile: resolved ? resolved.profile : null,
+      audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
       deband: String(deband), grain, sharp: String(sharp), sigmoid: sigmoid !== false, dither: dither !== false,
-      videoArgs: resolved.videoArgs, audioArgs: resolved.audioArgs, container: resolved.container,
+      videoArgs: resolved ? resolved.videoArgs : null, audioArgs: resolved ? resolved.audioArgs : null,
+      container: resolved ? resolved.container : null,
+      imageArgs, single: kind === 'image', seqStart: spec.start,
     });
     let r = await runOne(event, bin, args, fileLabel, i, total, frames);
-    if (!r.ok && resolved.hardware) {
+    if (!r.ok && resolved && resolved.hardware) {
       console.warn(`[turbo] ${resolved.codec} indisponible pendant le job, repli ${resolved.fallbackCodec}`);
       const fallbackArgs = buildArgs({
         input, out, sh, ow, oh, codec: resolved.fallbackCodec, quality: quality | 0, preset: String(preset), bitDepth: bitDepth | 0, profile: resolved.fallbackProfile,
         audio: resolved.audioMode || String(audio), abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
         deband: String(deband), grain, sharp: String(sharp), sigmoid: sigmoid !== false, dither: dither !== false,
         videoArgs: resolved.fallbackVideoArgs, audioArgs: resolved.audioArgs, container: resolved.container,
+        imageArgs: null, single: false, seqStart: null,
       });
       r = await runOne(event, bin, fallbackArgs, fileLabel, i, total, frames);
       if (r.ok) usedEncoder = resolved.fallbackCodec;
     }
-    return Object.assign({}, r, { out });
+    // Une séquence s'importe par son DOSSIER (Resolve ne prend pas un motif de fichiers).
+    return Object.assign({}, r, { out: target ? target.imported : out });
   });
   for (const r of results) {
     if (r.ok) outputs.push(r.out);

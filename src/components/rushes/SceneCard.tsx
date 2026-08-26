@@ -70,6 +70,10 @@ function SceneCardImpl({
           onClick={(e) => onToggle({ shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey })}
           onDoubleClick={onPlay}
           onKeyDown={(e) => {
+            // Un portail Base UI (popover « Ranger », menu contextuel) fait remonter ses événements
+            // dans l'ARBRE REACT, pas dans le DOM : sans cette garde, le preventDefault ci-dessous
+            // mangeait l'ESPACE tapé dans le champ « nom du dossier » du popover. Cf. ClipCard.
+            if (e.target !== e.currentTarget) return;
             if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle({ shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey }); }
             else if (e.key === "p" || e.key === "P") { e.preventDefault(); onPlay(); }
           }}

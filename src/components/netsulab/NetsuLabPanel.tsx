@@ -41,7 +41,7 @@ type OpController = ProcController & {
 };
 
 function OpLayout({
-  up, title, titleMeta, runLabel, runIcon: RunIcon, busyLabel, progressLabel, settings,
+  up, title, titleMeta, runLabel, runIcon: RunIcon, busyLabel, progressLabel, settings, unavailable,
 }: {
   up: OpController;
   title: string;
@@ -51,6 +51,9 @@ function OpLayout({
   busyLabel: string;
   progressLabel: string;
   settings: React.ReactNode;
+  // Op impossible sur la sélection courante (interpolation d'une image fixe) : on dit pourquoi
+  // plutôt que de laisser lancer un job qui échouera.
+  unavailable?: string;
 }) {
   const { t } = useTranslation("upscale");
   const procMode = useApp((s) => s.procMode);
@@ -82,14 +85,19 @@ function OpLayout({
           {!chainMode && (
             <>
               <ToggleGroup size="sm" className="w-full" value={[procMode]} onValueChange={(v) => v[0] && setProcMode(v[0] as ProcMode)}>
-                {OPS.map((m) => (
-                  <Tooltip key={m.id}>
-                    <TooltipTrigger render={<ToggleGroupItem value={m.id} className="flex-1" disabled={running} aria-label={t(`ops.${m.id}`)}>
-                      <m.icon className="h-4 w-4" />
-                    </ToggleGroupItem>} />
-                    <TooltipContent>{t(`ops.${m.id}`)}</TooltipContent>
-                  </Tooltip>
-                ))}
+                {OPS.map((m) => {
+                  // L'interpolation a besoin de deux images voisines : elle n'a rien à faire d'une
+                  // sélection qui ne contient que des images fixes.
+                  const off = running || (m.id === "interpolate" && up.allStills);
+                  return (
+                    <Tooltip key={m.id}>
+                      <TooltipTrigger render={<ToggleGroupItem value={m.id} className="flex-1" disabled={off} aria-label={t(`ops.${m.id}`)}>
+                        <m.icon className="h-4 w-4" />
+                      </ToggleGroupItem>} />
+                      <TooltipContent>{m.id === "interpolate" && up.allStills ? t("panel.interpolateNeedsVideo") : t(`ops.${m.id}`)}</TooltipContent>
+                    </Tooltip>
+                  );
+                })}
               </ToggleGroup>
               <h2 className="flex items-center gap-1.5 px-1 text-sm font-semibold">
                 <Sparkles className="h-4 w-4 shrink-0 text-primary" />
@@ -104,7 +112,11 @@ function OpLayout({
           <ChainPanel />
         ) : (
           <>
-            {has ? (
+            {has && unavailable ? (
+              <div className="flex flex-1 items-center justify-center p-6 text-center text-xs text-muted-foreground">
+                {unavailable}
+              </div>
+            ) : has ? (
               <div className="min-h-0 flex-1 overflow-y-auto p-4">{settings}</div>
             ) : (
               <div className="flex flex-1 items-center justify-center p-6 text-center text-xs text-muted-foreground">
@@ -133,7 +145,7 @@ function OpLayout({
                 </Card>
               )}
 
-              <Button className="w-full" size="lg" onClick={up.run} disabled={!has || running}>
+              <Button className="w-full" size="lg" onClick={up.run} disabled={!has || running || !!unavailable}>
                 {running ? <Spinner className="h-4 w-4" /> : <RunIcon className="h-4 w-4" />}
                 {running ? busyLabel
                   : sources.length > 1 ? t("run.idleMulti", { label: runLabel.idle, count: sources.length })
@@ -172,6 +184,7 @@ function InterpOp() {
   return (
     <OpLayout
       up={up} title={t("titles.interpolate")} titleMeta={t("settings.sectionModelIa")} runIcon={Gauge}
+      unavailable={up.allStills ? t("panel.interpolateNeedsVideo") : undefined}
       runLabel={{ idle: t("run.interpolateIdle"), running: t("run.interpolateBusy") }} busyLabel={t("run.interpolateBusy")} progressLabel={t("progress.interpolation")}
       settings={
         <InterpSettings

@@ -32,7 +32,7 @@
     "modeAppend": "Vorhandene Timeline",
     "videoOnly": "Nur Video",
     "richAe": "Erweiterte After-Effects-Optionen",
-    "richAeHint": "Transformationen, Geschwindigkeit und Präkompositionen statt einer einfachen Kopie der Clips. Medien und Kodierung werden dann im Panel unten eingestellt.",
+    "richAeHint": "Baut Transformationen, Tempo und Precomps nach, statt die Shots nur zu kopieren. Medien werden unten eingestellt.",
     "yes": "Ja",
     "no": "Nein",
     "choose": "Auswählen…",
@@ -86,7 +86,7 @@
       "hint": "Originaldateien werden unverändert verknüpft. Keine Datei wird geschrieben."
     },
     "remux": {
-      "label": "Neu verpacken",
+      "label": "Remux",
       "hint": "Neuer Container, verlustfrei. Nützlich, wenn das Ziel den Quellcontainer nicht liest."
     },
     "reencode": {

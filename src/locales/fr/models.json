@@ -39,6 +39,11 @@
     "desc": "Décroissant"
   },
   "vramShort": "Demande {{need}} Go de VRAM, ta carte en a {{have}} ({{gpu}}) — il ne tiendra pas. Téléchargeable quand même.",
+  "stage": {
+    "download": "Téléchargement",
+    "verify": "Vérification",
+    "install": "Installation"
+  },
   "status": {
     "bundled": "Fourni",
     "bundledTip": "Inclus dans le runtime (non supprimable).",

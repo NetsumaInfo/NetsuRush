@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { nr, type ProcessProgress, type ProcessResult } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { DEFAULT_DEPTH, type DepthSettings } from "./processShared";
@@ -6,13 +6,15 @@ import { useSharedProcSources, jobFor, makeRenderReviews, type FrameCompare, typ
 import i18n from "@/i18n";
 import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import { processExportPayload } from "./processExport";
+import { imageOutputPayload, outputKindFor } from "./imageOutput";
+import { depthTokens } from "./processShared";
 
 const SETTINGS_KEY = "nr.netsulab.depth.settings";
 
 // Mode depth (estimation de profondeur) du hub. Même forme de retour que useUpscale.
 export function useDepth() {
   const base = useSharedProcSources();
-  const { sources, active, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders } = base;
+  const { sources, active, scope, range, scenes, picked, outDir, chooseOut, importBack, outputNamingProblem, outputNameFor, setSourcesErr, recordRenders, setNamingTokens } = base;
 
   const [settings, setSettings] = useState<DepthSettings>(() => readPersistedObject(SETTINGS_KEY, DEFAULT_DEPTH));
   const patch = useCallback((p: Partial<DepthSettings>) => setSettings((s) => {
@@ -24,6 +26,8 @@ export function useDepth() {
   const [compare, setCompare] = useState<FrameCompare | null>(null);
   const [testing, setTesting] = useState(false);
   const [testErr, setTestErr] = useState<string | null>(null);
+
+  useEffect(() => { setNamingTokens(depthTokens(settings)); }, [settings, setNamingTokens]);
 
   const [busy, setBusy] = useState<ProcessProgress | null>(null);
   const [batch, setBatch] = useState<{ i: number; n: number; name: string } | null>(null);
@@ -79,9 +83,12 @@ export function useDepth() {
         setBusy({ file: src.name, pct: 0, done: 0, total: segments?.length || 1, phase: "model" });
         const r = await nr.processDepth({
           input: src.path,
-          model: settings.model, bits: settings.bits, colormap: settings.colormap, dedup: settings.dedup,
+          // 16 bits n'a de sens que sur une image : la depth map est le seul traitement du hub dont
+          // la précision dépasse 8 bits, et le sidecar n'écrit du 16-bit que pour une sortie PNG.
+          model: settings.model, bits: settings.pngBits, colormap: settings.colormap, dedup: settings.dedup,
           codec: settings.codec, quality: settings.quality, preset: settings.preset, bitDepth: settings.bitDepth, profile: settings.profile,
           audio: settings.audio, abr: settings.abr, ...processExportPayload(settings),
+          ...imageOutputPayload(settings, outputKindFor(settings, src)),
           outDir: dir, whole, segments,
           importBack, baseName: src.name.replace(/\.[^.]+$/, ""), outputName: outputNameFor(src),
         });

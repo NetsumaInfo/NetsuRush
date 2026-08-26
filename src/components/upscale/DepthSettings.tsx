@@ -1,10 +1,10 @@
 import { Toggle } from "@/components/ui/toggle";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { AudioTrack } from "@/lib/bridge";
 import {
-  DEPTH_MODELS, DEPTH_BITS, DEPTH_COLORS, type DepthSettings as DepthVals,
+  DEPTH_MODELS, DEPTH_COLORS, type DepthSettings as DepthVals,
 } from "./processShared";
 import { Section, Row, Field, ProcessEncodingRows, ExportRows } from "./procSettingsParts";
+import { ProcessOutputRows, useOutputShape } from "./ProcessOutputRows";
 import { ModelPicker, useModelOptions } from "./ModelPicker";
 import { useTranslation } from "react-i18next";
 
@@ -23,6 +23,7 @@ interface Props {
 export function DepthSettings({ settings, patch, audioTracks, outDir, chooseOut, importBack, setImportBack, disabled }: Props) {
   const { t } = useTranslation("upscale");
   const models = useModelOptions(DEPTH_MODELS, settings.model);
+  const { writesVideo } = useOutputShape(settings);
 
   return (
     <div className="space-y-5">
@@ -30,11 +31,6 @@ export function DepthSettings({ settings, patch, audioTracks, outDir, chooseOut,
         <ModelPicker items={models} value={settings.model} disabled={disabled}
           onChange={(id) => patch({ model: id as DepthVals["model"] })}
           empty={t("modelPicker.emptyDepth")} />
-        <Row label={t("settings.rowDepth")}>
-          <ToggleGroup value={[String(settings.bits)]} onValueChange={(v) => v[0] && patch({ bits: Number(v[0]) as DepthVals["bits"] })}>
-            {DEPTH_BITS.map((b) => <ToggleGroupItem key={b.id} value={String(b.id)} disabled={disabled}>{b.label}</ToggleGroupItem>)}
-          </ToggleGroup>
-        </Row>
 
         <Row label={t("settings.rowColormap")}>
           <Field value={settings.colormap} disabled={disabled}
@@ -49,8 +45,9 @@ export function DepthSettings({ settings, patch, audioTracks, outDir, chooseOut,
         </Row>
       </Section>
 
-      <ProcessEncodingRows v={settings} patch={patch} audioTracks={audioTracks} disabled={disabled} />
-      <ExportRows outDir={outDir} chooseOut={chooseOut} importBack={importBack} setImportBack={setImportBack} disabled={disabled} />
+      <ProcessOutputRows v={settings} patch={patch} disabled={disabled} />
+      {writesVideo && <ProcessEncodingRows v={settings} patch={patch} audioTracks={audioTracks} disabled={disabled} />}
+      <ExportRows outDir={outDir} chooseOut={chooseOut} importBack={importBack} setImportBack={setImportBack} disabled={disabled} v={settings} />
     </div>
   );
 }

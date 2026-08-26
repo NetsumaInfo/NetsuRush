@@ -32,6 +32,31 @@ def _find_ckpt(override_dir=None):
     return None
 
 
+
+def _patch_multiplex_init_state(predictor):
+    """Absorbe les arguments que le prédicteur multiplex se passe à lui-même et ne comprend pas.
+
+    Le `start_session` du prédicteur de base transmet TOUJOURS `offload_state_to_cpu` (et
+    `video_loader_type` s'il existe) à `init_state`, or l'`init_state` du modèle multiplex ne
+    connaît ni l'un ni l'autre : toute session meurt sur un TypeError avant la première image.
+    Plutôt que de réécrire la gestion de session amont (qui, elle, fonctionne), on filtre les
+    arguments à l'entrée. Le déchargement de l'état n'existe simplement pas dans ce modèle : seules
+    les IMAGES se déchargent en RAM, ce que `offload_video_to_cpu` fait toujours.
+    """
+    model = getattr(predictor, "model", None)
+    if model is None or getattr(model, "_nr_init_state_filtered", False):
+        return
+    original = model.init_state
+
+    def init_state(*args, **kwargs):
+        kwargs.pop("offload_state_to_cpu", None)
+        kwargs.pop("video_loader_type", None)
+        return original(*args, **kwargs)
+
+    model.init_state = init_state
+    model._nr_init_state_filtered = True
+
+
 class Sam3Engine:
     """Une session vidéo SAM 3.1. `state` porte l'identifiant de session côté paquet amont : le reste
     de NetsuRush ne teste que sa présence (« une vidéo est-elle ouverte ? »), jamais son contenu."""
@@ -60,7 +85,21 @@ class Sam3Engine:
         if not ckpt:
             raise RuntimeError(t("sam3_weights_missing"))
         self.backend, self.device = backend, "cuda"
-        self.predictor = build_sam3_video_predictor(checkpoint_path=ckpt, load_from_HF=False)
+        # SAM 3.1 est livré en checkpoint « multiplex » (mémoire multiplexée + détecteur) : c'est un
+        # ASSEMBLAGE différent, que le constructeur générique ne sait pas monter — il charge un
+        # state_dict qui ne correspond à aucun de ses poids. L'amont a son propre point d'entrée.
+        # `use_fa3=False` : FlashAttention 3 n'existe que sur Hopper, jamais sur une GeForce.
+        # Aucun `load_from_HF` ici (paramètre du modèle IMAGE) et pas de `bpe_path` : le tokeniseur
+        # voyage dans le paquet `sam3`, donc rien n'est retiré du réseau au chargement.
+        if "multiplex" in os.path.basename(ckpt).lower():
+            from sam3.model_builder import build_sam3_multiplex_video_predictor
+            # `use_rope_real=False` : les fréquences RoPE du checkpoint sont complexes. En mode réel,
+            # le modèle réclame des tampons `_real`/`_imag` absents des poids et se charge amputé.
+            self.predictor = build_sam3_multiplex_video_predictor(
+                checkpoint_path=ckpt, use_fa3=False, use_rope_real=False)
+            _patch_multiplex_init_state(self.predictor)
+        else:
+            self.predictor = build_sam3_video_predictor(checkpoint_path=ckpt)
 
     def open(self, frames_dir, sam_dir=None):
         """Ouvre une session sur le dossier de frames extraites. Une session déjà ouverte est fermée

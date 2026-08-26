@@ -22,7 +22,8 @@
     "process": "Verarbeitung",
     "rotoStudio": "Roto Studio",
     "selectRush": "Mindestens einen Clip wählen, um Modell und Ausgabe zu setzen.",
-    "clipProgress": "Clip {{i}}/{{n}} — {{name}}"
+    "clipProgress": "Clip {{i}}/{{n}} — {{name}}",
+    "interpolateNeedsVideo": "Die Interpolation braucht Video: die Auswahl enthält nur Standbilder."
   },
   "titles": {
     "upscale": "Upscale-Einstellungen",
@@ -78,7 +79,13 @@
     "previewCenter": "Vorschau in der Mitte",
     "previewCenterMenu": "Vorschau in der Mitte",
     "remove": "Entfernen",
-    "removeNamed": "{{name}} entfernen"
+    "removeNamed": "{{name}} entfernen",
+    "rename": "Ausgabe umbenennen",
+    "renameReset": "Zurück zum Muster",
+    "renameLabel": "Ausgabename für {{name}}",
+    "stillSource": "Standbild",
+    "outputName": "Ausgabename: {{name}}",
+    "nameClash": "Eine andere Quelle erzeugt diesen Namen: beide Ausgaben würden sich überschreiben."
   },
   "sources": {
     "mediaPool": "Media Pool",
@@ -134,7 +141,9 @@
     "shotPreview": "Vorschau",
     "detectPrompt": "Shots erkennen, um exakte Schnitte hochzuskalieren.",
     "select": "Auswählen",
-    "deselect": "Abwählen"
+    "deselect": "Abwählen",
+    "stillSource": "Standbild",
+    "testStill": "An diesem Bild testen"
   },
   "scope": {
     "whole": "Ganz",
@@ -206,7 +215,6 @@
     "sectionExport": "Export",
     "sectionShaderTurbo": "Shader (Turbo)",
     "sectionModelIa": "KI-Modell",
-    "sectionAlphaFormat": "Alpha-Format",
     "rowUpscaleMode": "Kategorie",
     "modeUpscale": "Upscale",
     "modeRestore": "Restaurierung",
@@ -220,23 +228,6 @@
     "rowFolder": "Ordner",
     "rowImportPool": "In den Media Pool importieren",
     "rowOutputName": "Ausgabename",
-    "rowDefaultNaming": "Standardregel",
-    "perMediaNames": "Benennung je Medium",
-    "nameForMedia": "Ausgabename für {{name}}",
-    "resultingName": "Eigener Name",
-    "inheritedName": "Geerbter Name",
-    "naming": {
-      "default": "Standardregel verwenden",
-      "original": "Gleicher Name",
-      "prefix": "Präfix hinzufügen",
-      "suffix": "Suffix hinzufügen",
-      "custom": "Umbenennen"
-    },
-    "namingPlaceholder": {
-      "prefix": "Präfix",
-      "suffix": "Suffix",
-      "custom": "Exakter Dateiname"
-    },
     "rowEngine": "Engine",
     "engineAi": "KI",
     "engineTurbo": "Turbo",
@@ -265,7 +256,6 @@
     "rowFps": "FPS",
     "rowSlowmo": "Zeitlupe",
     "rowDeadFrames": "Duplikate",
-    "rowDepth": "Tiefe",
     "rowColormap": "Colormap",
     "rowOutput": "Ausgabe",
     "groupDiffusion": "Diffusion",
@@ -303,7 +293,54 @@
     "rowHdrNits": "Spitzenhelligkeit",
     "hdrParamsNote": "SDK-Standardwerte (125 / 100 / 25 / 1000 nits). Die Spitzenhelligkeit wird in die Metadaten des Masters geschrieben.",
     "scaleResampledNote": "Dieses Modell rekonstruiert mit {{native}}×; andere Faktoren skalieren die Ausgabe nur nachträglich.",
-    "windowedModelNote": "Dieses Modell nutzt einen Graphen mit festen Abmessungen: Nur die Fensterüberlappung ist einstellbar."
+    "windowedModelNote": "Dieses Modell nutzt einen Graphen mit festen Abmessungen: Nur die Fensterüberlappung ist einstellbar.",
+    "sectionOutput": "Ausgabe",
+    "outputHint": "Kodiertes Video oder ein Bild pro Frame in einem eigenen Ordner.",
+    "outputStillNote": "Ein Standbild wird als Bild geschrieben: der Video-Codec gilt nicht.",
+    "output": {
+      "video": "Video",
+      "sequence": "Bildsequenz",
+      "image": "Bild"
+    },
+    "outputMixedNote": "Die Auswahl mischt Videos und Standbilder: jede Quelle schreibt ihre eigene Form.",
+    "rowImageFormat": "Format",
+    "imageFormat": {
+      "png": "PNG (verlustfrei)",
+      "jpeg": "JPEG"
+    },
+    "rowPngBits": "Bittiefe",
+    "pngBitsNote": "16 Bit bringt nur Präzision, wenn die Verarbeitung sie liefert: Depth Maps, nicht das Upscaling.",
+    "rowPngCompression": "Kompression",
+    "pngCompressionNote": "Auf jeder Stufe verlustfrei: nur Schreibzeit und Dateigröße ändern sich.",
+    "pngLevel": {
+      "1": "Schnell",
+      "6": "Ausgewogen",
+      "9": "Maximal"
+    },
+    "rowJpegQuality": "JPEG-Qualität",
+    "jpegQualityNote": "JPEG quantisiert das Bild und trägt kein Alpha. 92 ist bereits visuell verlustfrei.",
+    "rowSeqDigits": "Nummerierung",
+    "seqDigits": "{{n}} Stellen",
+    "rowSeqStart": "Erstes Bild",
+    "seqFolderNote": "Jede Quelle bekommt ihren Ordner: {{file}}",
+    "namingPatternNote": "Das Muster benennt alle Ausgaben: Token werden beim Start ersetzt. Ein in der Ablage umbenanntes Medium behält seinen Namen.",
+    "namingPlaceholder": "{name}_{op}_{scale}",
+    "token": {
+      "name": "Name der Quelldatei, ohne Erweiterung",
+      "op": "Angewandte Verarbeitung (upscaled, interp, depth…)",
+      "scale": "Skalierungsfaktor (4x, 2x)",
+      "model": "Verwendetes Modell oder Shader",
+      "date": "Heutiges Datum (JJJJ-MM-TT)",
+      "n": "Position in der Auswahl",
+      "nn": "Position, 2 Stellen",
+      "nnn": "Position, 3 Stellen"
+    },
+    "namingCollision": "{{count}} Name von mehreren Quellen erzeugt — die zweite Ausgabe würde die erste überschreiben.",
+    "namingCollisionSources": "{{count}} Quellen",
+    "namingNumber": "Automatisch nummerieren",
+    "namingRenamed": "{{count}} Medien umbenannt",
+    "namingResetAll": "Zurücksetzen",
+    "outputRtxNote": "RTX VSR schreibt nur Video: Wählen Sie eine andere Engine für Bilder."
   },
   "deband": {
     "none": "Keins",
@@ -357,7 +394,6 @@
     "artcnn_c4f32": "Anime — bestes Verhältnis aus Geschwindigkeit und Qualität.",
     "artcnn_c4f16": "Anime — am schnellsten.",
     "artcnn_quality": "Anime — entrauscht und schärft.",
-    "anime4k": "Anime — leichtgewichtig, gut für beschädigte Quellen.",
     "lanczos": "Realfilm/allgemein — ohne KI, sofort."
   },
   "shaderHint": {
@@ -369,8 +405,6 @@
     "artcnn_c4f16": "Anime — am schnellsten.",
     "artcnn_c4f16_ds": "Schnell — entrauscht, schärft.",
     "artcnn_c4f16_dn": "Schnell — entrauscht, glättet.",
-    "anime4k_aa_hq": "Anime — maximal wahrnehmbar.",
-    "anime4k_bb_hq": "Anime — sanfte Restaurierung.",
     "rtx_vsr": "Realfilm und Anime — festes 2×, NVIDIA.",
     "lanczos": "Realfilm — ohne KI, sofort."
   },
@@ -411,20 +445,12 @@
     "ben2": "BEN2 — 4K-Bilder, sehr feine Haare und Kanten.",
     "rvm": "RVM — Video-Matte in Echtzeit, zeitlich stabil."
   },
-  "alphaFormat": {
-    "png_seq": "PNG-Sequenz"
-  },
-  "alphaFormatHint": {
-    "prores_4444": "ProRes 4444 — Alpha, direkter Resolve-Import.",
-    "png_seq": "PNG-Sequenz — verlustfreies Alpha.",
-    "webm_alpha": "WebM VP9 — Alpha fürs Web."
-  },
   "errors": {
     "frameBlack": "Frame fast schwarz (Blende?) — Abspielkopf verschieben und neu testen.",
     "testFailed": "Test fehlgeschlagen",
     "noShotSelected": "Kein Shot gewählt.",
     "invalidRange": "Bereich ungültig.",
-    "duplicateOutputNames": "Mehrere Quellen würden denselben Namen erzeugen. Exportiere sie getrennt.",
+    "duplicateOutputNames": "Mehrere Quellen würden denselben Ausgabenamen erzeugen: umbenennen oder Muster nummerieren.",
     "upscaleFailed": "Upscale fehlgeschlagen",
     "interpolateFailed": "Interpolation fehlgeschlagen",
     "depthFailed": "Depth fehlgeschlagen",
@@ -435,6 +461,11 @@
     "interpolateUnavailable": "Interpolation nicht verfügbar: {{err}}. Prüfen, ob Core-Dienst und Python-venv laufen (NetsuRush neu starten).",
     "depthUnavailable": "Depth nicht verfügbar: {{err}}. Prüfen, ob Core-Dienst und Python-venv laufen (NetsuRush neu starten).",
     "removebgUnavailable": "Freistellen nicht verfügbar: {{err}}. Prüfen, ob Core-Dienst und Python-venv laufen (NetsuRush neu starten).",
-    "chainUnavailable": "Kette nicht verfügbar: {{err}}. Prüfen, ob Core und venv laufen."
+    "chainUnavailable": "Kette nicht verfügbar: {{err}}. Prüfen, ob Core und venv laufen.",
+    "emptyOutputName": "Das Muster ergibt keinen Namen: Fügen Sie mindestens {name} oder Text hinzu.",
+    "interpolateNeedsVideo": "Die Interpolation braucht zwei benachbarte Bilder: ein Standbild hat keine.",
+    "interpolateSkippedStills": "{{count}} Standbild übersprungen: Interpolation gilt nur für Video.",
+    "chainNeedsVideo": "Eine Kette verkettet Videodateien: ein Standbild passt nicht hinein.",
+    "chainSkippedStills": "{{count}} Standbild von der Kette übersprungen."
   }
 }

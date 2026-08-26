@@ -39,6 +39,11 @@
     "desc": "Descendente"
   },
   "vramShort": "Requiere {{need}} GB de VRAM y la tarjeta tiene {{have}} ({{gpu}}) — no va a caber. Se puede descargar igual.",
+  "stage": {
+    "download": "Descargando",
+    "verify": "Verificando",
+    "install": "Instalando"
+  },
   "status": {
     "bundled": "Incluido",
     "bundledTip": "Viene con el runtime (no se puede eliminar).",

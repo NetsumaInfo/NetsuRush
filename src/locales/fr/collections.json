@@ -180,7 +180,7 @@
     "off": "Désactivé",
     "storagePlaceholder": "Dossier de stockage…",
     "browse": "Parcourir",
-    "remux": "Copie des flux",
+    "remux": "Remux (copie)",
     "reencode": "Ré-encoder",
     "codec": "Codec",
     "container": "Conteneur",

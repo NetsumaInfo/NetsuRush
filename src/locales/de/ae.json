@@ -93,7 +93,7 @@
     },
     "bake": {
       "label": "Neu kodiert",
-      "hint": "Geschwindigkeit und Bildausschnitt in die Datei eingebrannt, mit dem oben gewählten Codec, in Timeline-Größe. Außerhalb des Bilds: Schwarz, außer der Codec hat einen Alphakanal. Ein ANIMIERTER Bildausschnitt wird von DaVinci Resolve gerendert, samt Keyframes: originalgetreu, aber ein Render pro Shot."
+      "hint": "Tempo und Bildausschnitt in die Datei gebrannt, in Timeline-Größe – außerhalb des Bildes schwarz. Animierter Ausschnitt: von Resolve gerendert, einer pro Shot."
     }
   },
   "errors": {

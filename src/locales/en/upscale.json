@@ -22,7 +22,8 @@
     "process": "Processing",
     "rotoStudio": "Roto Studio",
     "selectRush": "Pick at least one clip to set the model and output.",
-    "clipProgress": "Clip {{i}}/{{n}} — {{name}}"
+    "clipProgress": "Clip {{i}}/{{n}} — {{name}}",
+    "interpolateNeedsVideo": "Interpolation needs video: the selection holds only still images."
   },
   "titles": {
     "upscale": "Upscale settings",
@@ -78,7 +79,13 @@
     "previewCenter": "Preview in the middle",
     "previewCenterMenu": "Preview in the middle",
     "remove": "Remove",
-    "removeNamed": "Remove {{name}}"
+    "removeNamed": "Remove {{name}}",
+    "rename": "Rename the output",
+    "renameReset": "Back to the pattern",
+    "renameLabel": "Output name for {{name}}",
+    "stillSource": "Still image",
+    "outputName": "Output name: {{name}}",
+    "nameClash": "Another source produces this name: the two outputs would overwrite each other."
   },
   "sources": {
     "mediaPool": "Media Pool",
@@ -134,7 +141,9 @@
     "shotPreview": "Preview",
     "detectPrompt": "Detect shots to upscale exact cuts.",
     "select": "Select",
-    "deselect": "Deselect"
+    "deselect": "Deselect",
+    "stillSource": "Still image",
+    "testStill": "Test on this image"
   },
   "scope": {
     "whole": "Whole",
@@ -206,7 +215,6 @@
     "sectionExport": "Export",
     "sectionShaderTurbo": "Shader (Turbo)",
     "sectionModelIa": "AI model",
-    "sectionAlphaFormat": "Alpha format",
     "rowCodec": "Codec",
     "rowProfile": "Profile",
     "rowMode": "Mode",
@@ -220,23 +228,6 @@
     "rowFolder": "Folder",
     "rowImportPool": "Import to the Media Pool",
     "rowOutputName": "Output name",
-    "rowDefaultNaming": "Default rule",
-    "perMediaNames": "Naming for each media",
-    "nameForMedia": "Output name for {{name}}",
-    "resultingName": "Custom name",
-    "inheritedName": "Inherited name",
-    "naming": {
-      "default": "Use default rule",
-      "original": "Same name",
-      "prefix": "Add a prefix",
-      "suffix": "Add a suffix",
-      "custom": "Rename"
-    },
-    "namingPlaceholder": {
-      "prefix": "Prefix to add",
-      "suffix": "Suffix to add",
-      "custom": "Exact name, without extension"
-    },
     "rowEngine": "Engine",
     "engineAi": "AI",
     "engineTurbo": "Turbo",
@@ -265,7 +256,6 @@
     "rowFps": "fps",
     "rowSlowmo": "Slow motion",
     "rowDeadFrames": "Duplicates",
-    "rowDepth": "Depth",
     "rowColormap": "Colormap",
     "rowOutput": "Output",
     "groupDiffusion": "Diffusion",
@@ -303,7 +293,54 @@
     "rowHdrNits": "Peak luminance",
     "hdrParamsNote": "SDK defaults (125 / 100 / 25 / 1000 nits). Peak luminance is written into the master's metadata.",
     "scaleResampledNote": "This model reconstructs at {{native}}×; other factors just resize its output afterwards.",
-    "windowedModelNote": "This model runs a fixed-shape graph: only the window overlap is adjustable."
+    "windowedModelNote": "This model runs a fixed-shape graph: only the window overlap is adjustable.",
+    "sectionOutput": "Output",
+    "outputHint": "An encoded video, or one image per frame in its own folder.",
+    "outputStillNote": "A still source writes an image: the video codec does not apply.",
+    "output": {
+      "video": "Video",
+      "sequence": "Image sequence",
+      "image": "Image"
+    },
+    "outputMixedNote": "The selection mixes videos and stills: each source writes its own form.",
+    "rowImageFormat": "Format",
+    "imageFormat": {
+      "png": "PNG (lossless)",
+      "jpeg": "JPEG"
+    },
+    "rowPngBits": "Bit depth",
+    "pngBitsNote": "16-bit only adds precision when the op produces it: depth maps, not upscaling.",
+    "rowPngCompression": "Compression",
+    "pngCompressionNote": "Lossless at every level: only write time and file size change.",
+    "pngLevel": {
+      "1": "Fast",
+      "6": "Balanced",
+      "9": "Maximum"
+    },
+    "rowJpegQuality": "JPEG quality",
+    "jpegQualityNote": "JPEG quantizes the image and carries no alpha. 92 is already visually lossless.",
+    "rowSeqDigits": "Numbering",
+    "seqDigits": "{{n}} digits",
+    "rowSeqStart": "First frame",
+    "seqFolderNote": "Each source gets its own folder: {{file}}",
+    "namingPatternNote": "The pattern names every output: tokens are resolved at launch. A media renamed in the tray keeps its own name.",
+    "namingPlaceholder": "{name}_{op}_{scale}",
+    "token": {
+      "name": "Source file name, without its extension",
+      "op": "Operation applied (upscaled, interp, depth…)",
+      "scale": "Scale factor (4x, 2x)",
+      "model": "Model or shader used",
+      "date": "Today's date (YYYY-MM-DD)",
+      "n": "Position in the selection",
+      "nn": "Position, 2 digits",
+      "nnn": "Position, 3 digits"
+    },
+    "namingCollision": "{{count}} name produced by several sources — the second output would overwrite the first.",
+    "namingCollisionSources": "{{count}} sources",
+    "namingNumber": "Number them automatically",
+    "namingRenamed": "{{count}} media renamed",
+    "namingResetAll": "Reset",
+    "outputRtxNote": "RTX VSR only writes video: pick another engine to write images."
   },
   "deband": {
     "none": "None",
@@ -357,7 +394,6 @@
     "artcnn_c4f32": "Anime — best speed/quality balance.",
     "artcnn_c4f16": "Anime — fastest.",
     "artcnn_quality": "Anime — denoises and sharpens.",
-    "anime4k": "Anime — lightweight, good for damaged sources.",
     "lanczos": "Live action/general — no AI, instant."
   },
   "shaderHint": {
@@ -369,8 +405,6 @@
     "artcnn_c4f16": "Anime — fastest.",
     "artcnn_c4f16_ds": "Fast — denoise, sharpen.",
     "artcnn_c4f16_dn": "Fast — denoise, soften.",
-    "anime4k_aa_hq": "Anime — max perceptual.",
-    "anime4k_bb_hq": "Anime — soft restoration.",
     "rtx_vsr": "Live action and anime — fixed 2×, NVIDIA.",
     "lanczos": "Live action — no AI, instant."
   },
@@ -411,20 +445,12 @@
     "ben2": "BEN2 — 4K images, very fine hair and edges.",
     "rvm": "RVM — real-time video matte, temporal consistency."
   },
-  "alphaFormat": {
-    "png_seq": "PNG sequence"
-  },
-  "alphaFormatHint": {
-    "prores_4444": "ProRes 4444 — alpha, direct Resolve import.",
-    "png_seq": "PNG sequence — lossless alpha.",
-    "webm_alpha": "WebM VP9 — web alpha."
-  },
   "errors": {
     "frameBlack": "Frame is nearly black (fade?) — move the playhead and test again.",
     "testFailed": "test failed",
     "noShotSelected": "No shot selected.",
     "invalidRange": "Invalid range.",
-    "duplicateOutputNames": "Several sources would produce the same name. Export them separately.",
+    "duplicateOutputNames": "Several sources would produce the same output name: rename them or number the pattern.",
     "upscaleFailed": "upscale failed",
     "interpolateFailed": "interpolation failed",
     "depthFailed": "depth failed",
@@ -435,6 +461,11 @@
     "interpolateUnavailable": "Interpolation unavailable: {{err}}. Check that the core service and the Python venv are running (restart NetsuRush).",
     "depthUnavailable": "Depth unavailable: {{err}}. Check that the core service and the Python venv are running (restart NetsuRush).",
     "removebgUnavailable": "Remove BG unavailable: {{err}}. Check that the core service and the Python venv are running (restart NetsuRush).",
-    "chainUnavailable": "Chain unavailable: {{err}}. Check that the core and the venv are running."
+    "chainUnavailable": "Chain unavailable: {{err}}. Check that the core and the venv are running.",
+    "emptyOutputName": "The pattern produces no name: add at least {name} or some text.",
+    "interpolateNeedsVideo": "Interpolation needs two neighbouring frames: a still image has none.",
+    "interpolateSkippedStills": "{{count}} still skipped: interpolation only applies to video.",
+    "chainNeedsVideo": "A chain runs video files through each step: a still image cannot enter it.",
+    "chainSkippedStills": "{{count}} still skipped by the chain."
   }
 }

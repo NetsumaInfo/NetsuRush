@@ -268,7 +268,7 @@ function setCacheDir(root) {
   }
   return { ...cacheDirs };
 }
-// Shaders GLSL du moteur d'upscale "Turbo" (ArtCNN/Anime4K, lus par ffmpeg libplacebo). Dev = vendor/
+// Shaders GLSL du moteur d'upscale "Turbo" (ArtCNN, lus par ffmpeg libplacebo). Dev = vendor/
 // (gitignored, peuplé par scripts/fetch-shaders.ps1) ; bundle = resources/shaders (NR_RESOURCE_DIR).
 const SHADER_DIR = process.env.NETSURUSH_SHADER_DIR || CONFIG.shaderDir
   || (process.env.NR_RESOURCE_DIR

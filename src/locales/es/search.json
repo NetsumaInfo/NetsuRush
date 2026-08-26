@@ -17,7 +17,7 @@
     "realLower": "real",
     "animeLower": "animación",
     "download": "Descargar",
-    "hint": "Real: YuNet + SFace (~40 MB, permisiva). Animación: imgutils + CCIP (~120 MB, se descargan al primer uso). También en Ajustes › Modelos."
+    "hint": "Real: YuNet + SFace (~40 MB). Anime: CCIP (~120 MB). También en Ajustes › Modelos."
   },
   "faceIndexPicker": {
     "title": "Elegir los clips donde indexar las caras",
@@ -53,7 +53,7 @@
       "none": "sin indexar"
     },
     "detail": "Detalle:",
-    "detailHint": "Imágenes analizadas por plano. Situadas donde el plano más cambia, nunca en sus bordes (fundidos, negros). Un plano largo recibe una más.",
+    "detailHint": "Fotogramas analizados por plano. Más alto: la búsqueda encuentra más, la indexación tarda más.",
     "parallel": "Paralelo",
     "parallelHint": "Procesar varios brutos a la vez, tantos como permita la VRAM libre",
     "reindex": "Reindexar",
@@ -180,7 +180,7 @@
   },
   "faceRefPicker": {
     "title": "Búsqueda por cara",
-    "hint": "Añade una o varias fotos del personaje y luego haz clic en la cara a buscar. Varias caras del mismo personaje = búsqueda más robusta.",
+    "hint": "Añade fotos del personaje y luego haz clic en la cara a buscar. Más caras, resultado más fiable.",
     "addImage": "Añadir una imagen",
     "clearImages": "Vaciar",
     "facesChosen": "Caras elegidas: {{count}}",

@@ -3,7 +3,7 @@
 // quand on change de réglage. Moteurs GPU filtrés par sonde réelle côté core. shadcn Base UI.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Film, FolderInput, ChevronDown } from "lucide-react";
+import { FolderInput, ChevronDown, CircleHelp } from "lucide-react";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { swrRead } from "@/lib/swr";
@@ -130,50 +130,59 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         ))}
       </ToggleGroup>
 
-      {/* Destination (workflow Timeline) : timeline à la racine OU rangée dans un dossier du Media Pool. */}
+      {/* Rangement (workflow Timeline) : la timeline de coupes est créée dans un sous-dossier du
+          Media Pool au lieu de la racine, où elle se mêlerait aux rushs. Ce n'est PAS une
+          destination alternative à la timeline — d'où le libellé « Dossier » seul. */}
       {isTimelineImport && (
         <div className="flex flex-col gap-1.5">
-          <span className="text-[0.8125rem] text-muted-foreground">{t("editor.destination")}</span>
-          <div className="flex items-center gap-2">
-            {/* `!= null` et pas la véracité : un nom VIDE reste le mode « Dossier » (en rouge), sinon le
-                sélecteur resauterait sur « Timeline » dès qu'on efface le champ pour le retaper. */}
-            <ToggleGroup
-              value={[profile.binTarget != null ? "bin" : "timeline"]}
-              onValueChange={(v) => { const d = v[0]; if (d === "timeline") set({ binTarget: null }); else if (d === "bin") set({ binTarget: profile.binTarget || t("editor.defaultFolder") }); }}
+          <div className="flex items-center justify-between gap-3">
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
+              {t("editor.folder")}
+              <Tooltip>
+                <TooltipTrigger render={<span className="inline-flex shrink-0" tabIndex={0} aria-label={t("editor.folderHint")} />}>
+                  <CircleHelp className="size-3.5" />
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center" className="max-w-64">{t("editor.folderHint")}</TooltipContent>
+              </Tooltip>
+            </span>
+            {/* `!= null` et pas la véracité : un nom VIDE reste « rangée dans un dossier » (en rouge),
+                sinon l'interrupteur retomberait dès qu'on efface le champ pour le retaper. */}
+            <Toggle
+              pressed={profile.binTarget != null}
+              onPressedChange={(p) => set({ binTarget: p ? (profile.binTarget || t("editor.defaultFolder")) : null })}
             >
-              <ToggleGroupItem value="timeline" className="flex-1 gap-1.5 text-xs"><Film className="size-3.5" /> {t("editor.timeline")}</ToggleGroupItem>
-              <ToggleGroupItem value="bin" className="flex-1 gap-1.5 text-xs"><FolderInput className="size-3.5" /> {t("editor.folder")}</ToggleGroupItem>
-            </ToggleGroup>
-            {profile.binTarget != null && (
-              <div className="flex flex-1 items-center gap-1">
-                <Input
-                  value={profile.binTarget}
-                  onChange={(e) => set({ binTarget: e.target.value })}
-                  placeholder={t("editor.folderPlaceholder")}
-                  className={cn("flex-1", binIssue && "border-destructive focus-visible:ring-destructive/40")}
-                  aria-invalid={!!binIssue}
-                  aria-errormessage={binIssue ? binErrorId : undefined}
-                />
-                {bins.length > 0 && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label={t("editor.existingFolders")}>
-                      <ChevronDown className="size-4" />
-                    </Button>} />
-                    <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
-                      <DropdownMenuGroup>
-                        <DropdownMenuLabel>{t("editor.mediaPoolFolders")}</DropdownMenuLabel>
-                        {bins.map((b) => (
-                          <DropdownMenuItem key={b} onClick={() => set({ binTarget: b })}>
-                            <FolderInput className="size-3.5" /> {b}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-            )}
+              {profile.binTarget != null ? t("toggle.yes") : t("toggle.no")}
+            </Toggle>
           </div>
+          {profile.binTarget != null && (
+            <div className="flex items-center gap-1">
+              <Input
+                value={profile.binTarget}
+                onChange={(e) => set({ binTarget: e.target.value })}
+                placeholder={t("editor.folderPlaceholder")}
+                className={cn("flex-1", binIssue && "border-destructive focus-visible:ring-destructive/40")}
+                aria-invalid={!!binIssue}
+                aria-errormessage={binIssue ? binErrorId : undefined}
+              />
+              {bins.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label={t("editor.existingFolders")}>
+                    <ChevronDown className="size-4" />
+                  </Button>} />
+                  <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>{t("editor.mediaPoolFolders")}</DropdownMenuLabel>
+                      {bins.map((b) => (
+                        <DropdownMenuItem key={b} onClick={() => set({ binTarget: b })}>
+                          <FolderInput className="size-3.5" /> {b}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          )}
           {binIssue && (
             <span id={binErrorId} className="text-[0.75rem] text-destructive">{binIssue.message}</span>
           )}

@@ -196,6 +196,9 @@ function PlayerSurface({
     stopReverse();   // relancer/mettre en pause sort de la marche arrière
     rateRef.current = 1;
     v.playbackRate = 1;
+    // Sans boucle, la fin de média laisse `paused` à faux (spec HTML) : sans ce cas, le bouton
+    // « lecture » aurait mis en PAUSE un lecteur déjà arrêté. On relit depuis le début.
+    if (v.ended) { v.currentTime = 0; v.play().catch(() => {}); return; }
     v.paused ? v.play().catch(() => {}) : v.pause();
   }, [native.player, stopReverse, usingNative]);
 
@@ -317,7 +320,9 @@ function PlayerSurface({
               });
             }
           }}
-          onEnded={onEnded}
+          // Fin de média : aucun événement `pause` n'est émis (la spec laisse `paused` à faux) →
+          // l'état de lecture doit être remis à la main, sinon le lecteur affiche « pause » à l'arrêt.
+          onEnded={() => { setPlaying(false); onEnded?.(); }}
         >
           <track kind="captions" />
         </video>

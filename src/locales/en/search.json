@@ -17,7 +17,7 @@
     "realLower": "live action",
     "animeLower": "anime",
     "download": "Download",
-    "hint": "Live action: YuNet + SFace (~40 MB, permissive). Anime: imgutils + CCIP (~120 MB, downloaded on first use). Also available in Settings › Models."
+    "hint": "Live action: YuNet + SFace (~40 MB). Anime: CCIP (~120 MB). Also in Settings › Models."
   },
   "faceIndexPicker": {
     "title": "Choose the footage to index faces in",
@@ -53,7 +53,7 @@
       "none": "not indexed"
     },
     "detail": "Detail:",
-    "detailHint": "Frames analysed per shot. Placed where the shot changes most, never on its edges (fades, black). A long shot gets one more.",
+    "detailHint": "Frames analyzed per shot. Higher: search finds more, indexing takes longer.",
     "parallel": "Parallel",
     "parallelHint": "Process several rushes at once, as many as free VRAM allows",
     "reindex": "Re-index",
@@ -180,7 +180,7 @@
   },
   "faceRefPicker": {
     "title": "Face search",
-    "hint": "Add one or more photos of the character, then click the face to search for. Several faces of the same character = a more robust query.",
+    "hint": "Add photos of the character, then click the face to search for. More faces, safer result.",
     "addImage": "Add an image",
     "clearImages": "Clear",
     "facesChosen": "Faces selected: {{count}}",

@@ -17,7 +17,7 @@
     "realLower": "réel",
     "animeLower": "animé",
     "download": "Télécharger",
-    "hint": "Réel : YuNet + SFace (~40 Mo, permissif). Animé : imgutils + CCIP (~120 Mo, téléchargés au 1er usage). Aussi disponibles dans Paramètres › Modèles."
+    "hint": "Réel : YuNet + SFace (~40 Mo). Animé : CCIP (~120 Mo). Aussi dans Paramètres › Modèles."
   },
   "faceIndexPicker": {
     "title": "Choisir les rush où indexer les visages",
@@ -53,7 +53,7 @@
       "none": "non indexé"
     },
     "detail": "Détail :",
-    "detailHint": "Images analysées par plan. Placées là où le plan change le plus, jamais sur ses bords (fondus, noirs). Un plan long en reçoit une de plus.",
+    "detailHint": "Images analysées par plan. Plus haut : la recherche trouve plus de choses, l'indexation dure plus longtemps.",
     "parallel": "Parallèle",
     "parallelHint": "Traiter plusieurs rushs à la fois, autant que la VRAM libre en autorise",
     "reindex": "Ré-indexer",
@@ -180,7 +180,7 @@
   },
   "faceRefPicker": {
     "title": "Recherche par visage",
-    "hint": "Ajoute une ou plusieurs photos du personnage, puis clique le visage à chercher. Plusieurs visages du même personnage = requête plus robuste.",
+    "hint": "Ajoute des photos du personnage, puis clique le visage à chercher. Plusieurs visages, résultat plus sûr.",
     "addImage": "Ajouter une image",
     "clearImages": "Vider",
     "facesChosen": "{{count}} visage(s) choisi(s)",
