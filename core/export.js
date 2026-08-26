@@ -181,14 +181,19 @@ async function runClip(clip, out, profile, gpuEncoder) {
   let fps = 0;
   try { fps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { fps = 0; }
   if (!encode) {
-    let plan = null;
-    try { plan = await frameCut.planClip(clip.input, clip.start, clip.end, fps); } catch (_) { plan = null; }
-    if (plan) {
-      try {
-        await ffmpeg.run('ffmpeg', frameCut.copyArgs(clip.input, plan, audioMapArgs(clip.audioTrack, profile.audioMode), out));
-        return;
-      } catch (_) { /* copie planifiée en échec (conteneur incompatible…) → ré-encode ci-dessous */ }
-    }
+    // Remux = réencapsulage au CODEC DE LA SOURCE : copie pure prouvée → smart cut → ré-encodage
+    // same-codec. Le codec du profil ne sert qu'en dernier repli (same-codec impossible : codec
+    // exotique, HEVC sans encodeur matériel).
+    let mode = null;
+    try {
+      mode = await frameCut.cutRemux(clip.input, clip.start, clip.end, out, {
+        fps,
+        audioMap: audioMapArgs(clip.audioTrack, profile.audioMode),
+        faststart: isFaststart(profile.container),
+        pickEncoder: (codecId) => pickGpuEncoder({ workflow: 'video_encode', codec: codecId, encoderMode: profile.encoderMode }),
+      });
+    } catch (_) { mode = null; }
+    if (mode) return;
   }
   try {
     await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, true, fps));

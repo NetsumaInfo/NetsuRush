@@ -15,6 +15,7 @@
 
 const { execFile } = require('node:child_process');
 const { ffBin } = require('../config');
+const { videoEncodeArgs, containerTagArgs } = require('./encodeArgs');
 
 // Marge de sonde autour du plan : assez pour attraper la keyframe de départ et l'ancre de fin.
 const PROBE_MARGIN_S = 1.0;
@@ -144,4 +145,136 @@ function encodeCutBounds(start, end, fps) {
   return { ss, duration: end - ss, vframes: Math.max(1, Math.round((end - start) * fps)) };
 }
 
-module.exports = { planClip, planPreciseCopy, copyArgs, encodeCutBounds, probeWindow };
+// ---------------------------------------------------------------------------------------------
+// Réencapsulage « remux » : quand la copie pure est impossible, ré-encodage complet en restant
+// dans le CODEC DE LA SOURCE (pix_fmt et drapeaux couleur recopiés). Le codec du PROFIL ne sert
+// jamais ici : un remux ne change pas de codec.
+// ---------------------------------------------------------------------------------------------
+
+/** exec ffmpeg local (frameCut ne peut pas requérir ../ffmpeg : cycle via capabilities). */
+function runFf(args) {
+  return new Promise((resolve, reject) => {
+    execFile(ffBin('ffmpeg'), args, { maxBuffer: 64 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) { err.stderr = stderr; return reject(err); }
+      resolve(stdout);
+    });
+  });
+}
+
+/**
+ * Flux vidéo de la source : codec, pix_fmt et drapeaux couleur (à recopier sur tout ré-encodage —
+ * invariant colorspace : un bt709 non re-signalé sort plus foncé chez certains lecteurs).
+ * @param {string} input
+ * @returns {Promise<{ codec: string, pixFmt: string, colorSpace: string, colorPrimaries: string, colorTrc: string }>}
+ */
+function probeSourceVideo(input) {
+  return new Promise((resolve, reject) => {
+    execFile(ffBin('ffprobe'), [
+      '-v', 'error', '-select_streams', 'v:0',
+      '-show_entries', 'stream=codec_name,pix_fmt,color_space,color_primaries,color_transfer',
+      '-of', 'default=nw=1', input,
+    ], { maxBuffer: 4 * 1024 * 1024 }, (err, stdout) => {
+      if (err) return reject(err);
+      /** @type {Record<string, string>} */
+      const kv = {};
+      for (const line of String(stdout).split(/\r?\n/)) {
+        const i = line.indexOf('=');
+        if (i > 0) kv[line.slice(0, i)] = line.slice(i + 1);
+      }
+      const clean = (v) => (v && v !== 'unknown' && v !== 'N/A' ? v : '');
+      resolve({
+        codec: clean(kv.codec_name), pixFmt: clean(kv.pix_fmt),
+        colorSpace: clean(kv.color_space), colorPrimaries: clean(kv.color_primaries), colorTrc: clean(kv.color_transfer),
+      });
+    });
+  });
+}
+
+/**
+ * Codec id du vocabulaire d'export (encodeArgs) équivalent au flux source, ou null (codec sans
+ * ré-encodage same-codec — le remux retombe alors sur l'encodage au codec du profil).
+ * @param {string} codec @param {string} pixFmt @returns {string|null}
+ */
+function matchSourceCodecId(codec, pixFmt) {
+  const is10 = /10[lb]e$/.test(pixFmt);
+  const is12 = /12[lb]e$/.test(pixFmt);
+  const sub = /444/.test(pixFmt) ? '444' : /422/.test(pixFmt) ? '422' : '420';
+  if (codec === 'h264') {
+    if (sub === '444') return 'h264_high444';
+    if (sub === '422') return 'h264_high422';
+    return is10 ? 'h264_high10' : 'h264_high';
+  }
+  if (codec === 'hevc') {
+    if (sub === '444') return is10 ? 'h265_main444_10' : 'h265_main444';
+    if (sub === '422') return 'h265_main422_10';
+    if (is12) return 'h265_main12';
+    return is10 ? 'h265_main10' : 'h265_main';
+  }
+  if (codec === 'av1') return is10 ? 'av1_main10' : 'av1_main';
+  if (codec === 'vp9') return is10 ? 'vp9_10' : 'vp9';
+  return null; // prores/dnxhd/ffv1… : intra-only, la copie pure suffit toujours
+}
+
+/** Drapeaux couleur à recopier sur un ré-encodage (vides si la source ne les signale pas). */
+function colorArgs(src) {
+  const args = [];
+  if (src.colorSpace) args.push('-colorspace', src.colorSpace);
+  if (src.colorPrimaries) args.push('-color_primaries', src.colorPrimaries);
+  if (src.colorTrc) args.push('-color_trc', src.colorTrc);
+  return args;
+}
+
+/**
+ * Réencapsulage frame-exact d'un plan, au CODEC DE LA SOURCE : copie pure prouvée, sinon
+ * ré-encodage complet same-codec. Rend le mode utilisé, ou null si le same-codec est impossible
+ * (pas d'encodeur pour ce codec — ex. HEVC sans encodeur matériel : libx265 ne se déclenche
+ * jamais automatiquement) : l'appelant décide de son propre repli (codec du profil).
+ * @param {string} input @param {number} start @param {number} end @param {string} out
+ * @param {{ fps: number, audioMap?: string[], faststart?: boolean,
+ *           pickEncoder?: (codecId: string) => Promise<string|null> }} opts
+ * @returns {Promise<'copy'|'encode'|null>}
+ */
+async function cutRemux(input, start, end, out, opts) {
+  const fps = opts.fps;
+  if (!(fps > 0) || !(end > start)) return null;
+  const audioMap = opts.audioMap || [];
+  const packets = await probeWindow(input, start - PROBE_MARGIN_S, end + PROBE_MARGIN_S).catch(() => []);
+
+  // 1. Copie pure prouvée exacte : le vrai remux, zéro pixel touché.
+  const full = planPreciseCopy(packets, start, end, fps);
+  if (full) {
+    await runFf(copyArgs(input, full, audioMap, out));
+    return 'copy';
+  }
+
+  // Ré-encodage same-codec requis : codec id + encodeur.
+  const src = await probeSourceVideo(input).catch(() => null);
+  const codecId = src ? matchSourceCodecId(src.codec, src.pixFmt) : null;
+  if (!codecId) return null;
+  const encoder = opts.pickEncoder ? await opts.pickEncoder(codecId).catch(() => null) : null;
+  if (src.codec === 'hevc' && !encoder) return null; // jamais libx265 automatiquement (invariant)
+  const vArgs = [...videoEncodeArgs(codecId, encoder, 'quality'), ...colorArgs(src)];
+
+  // Le smart cut « tête ré-encodée + copie concaténée » (AMVerge) a été ESSAYÉ et retiré : mesuré
+  // corrompu sur flux réels — SPS/PPS de l'encodeur incompatibles avec le flux copié, et la
+  // « keyframe » de reprise est souvent un I de récupération open-GOP (pas un IDR), donc le
+  // décodeur traîne l'état de la tête (« Missing reference picture », POC en vrac). La voie annexB
+  // (SPS in-band) corrompt pareil. Ne pas re-tenter sans un vrai outil bitstream.
+
+  // 2. Ré-encodage complet, toujours au codec de la source (un remux ne change pas de codec).
+  const b = encodeCutBounds(start, end, fps);
+  const ext = (out.split('.').pop() || '').toLowerCase();
+  const cut = (audioArgs) => runFf(['-y', '-ss', String(b.ss), '-i', input,
+    '-t', String(b.duration), '-frames:v', String(b.vframes),
+    ...audioMap, ...vArgs, ...audioArgs, ...containerTagArgs(codecId, ext),
+    ...(opts.faststart ? ['-movflags', '+faststart'] : []),
+    '-avoid_negative_ts', 'make_zero', out]);
+  try { await cut(['-c:a', 'copy']); }
+  catch (_) { await cut(['-c:a', 'aac', '-b:a', '192k']); } // le conteneur refuse la piste copiée
+  return 'encode';
+}
+
+module.exports = {
+  planClip, planPreciseCopy, copyArgs, encodeCutBounds, probeWindow,
+  cutRemux, matchSourceCodecId, probeSourceVideo,
+};

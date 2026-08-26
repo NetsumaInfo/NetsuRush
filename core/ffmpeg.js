@@ -143,24 +143,27 @@ async function extractAudio({ input, track = 0, seconds = 0 } = {}) {
   try { return await job; } finally { audioInflight.delete(key); }
 }
 
-// Découpe FRAME-EXACTE d'un plan (extraction du Derush). Copie de flux seulement quand frameCut
-// prouve l'exactitude sur les paquets source ; sinon ré-encodage précis h264 (GPU sondé, repli CPU)
-// + copie audio (puis AAC si le conteneur refuse la piste). Un `-ss/-t` en copie aveugle reculait de
-// 24-70 frames en tête sur les rips BluRay. Requires paresseux : capabilities requiert ce module.
+// Découpe FRAME-EXACTE d'un plan (extraction du Derush) : réencapsulage au codec de la source via
+// frameCut.cutRemux (copie pure prouvée → smart cut → ré-encodage same-codec). Repli h264 (GPU
+// sondé puis CPU) seulement quand le same-codec est impossible (codec exotique, HEVC sans encodeur
+// matériel). Un `-ss/-t` en copie aveugle reculait de 24-70 frames en tête sur les rips BluRay.
+// Requires paresseux : capabilities requiert ce module.
 async function exportClip({ input, start, end, output }) {
   if (end <= start) throw new Error('fin <= début');
   const frameCut = require('./export/frameCut');
+  const { pickGpuEncoder } = require('./export/encoder');
   let fps = 0;
   try { fps = (await playInfo(input)).fps || 0; } catch (_) {}
-  let plan = null;
-  try { plan = await frameCut.planClip(input, start, end, fps); } catch (_) {}
-  if (plan) {
-    try {
-      await run('ffmpeg', frameCut.copyArgs(input, plan, [], output));
-      return output;
-    } catch (_) { /* conteneur incompatible avec la copie → ré-encode ci-dessous */ }
-  }
-  const { pickGpuEncoder } = require('./export/encoder');
+  const faststart = /\.(mp4|mov)$/i.test(output);
+  try {
+    const mode = await frameCut.cutRemux(input, start, end, output, {
+      fps,
+      audioMap: ['-map', '0:v:0', '-map', '0:a?'],
+      faststart,
+      pickEncoder: (codecId) => pickGpuEncoder({ workflow: 'video_encode', codec: codecId }),
+    });
+    if (mode) return output;
+  } catch (_) { /* → repli h264 ci-dessous */ }
   const { videoEncodeArgs } = require('./export/encodeArgs');
   let enc = null;
   try { enc = await pickGpuEncoder({ workflow: 'video_encode', codec: 'h264_high' }); } catch (_) {}
@@ -172,6 +175,7 @@ async function exportClip({ input, start, end, output }) {
     ...base,
     '-map', '0:v:0', '-map', '0:a?',
     ...videoEncodeArgs('h264_high', encoder), ...audioArgs,
+    ...(faststart ? ['-movflags', '+faststart'] : []),
     '-avoid_negative_ts', 'make_zero', output,
   ]);
   try {

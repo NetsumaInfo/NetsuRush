@@ -3,7 +3,7 @@
 // dans la fenêtre gardée). Tout le reste doit rendre null → l'appelant ré-encode.
 const test = require('node:test');
 const assert = require('node:assert');
-const { planPreciseCopy, copyArgs } = require('../core/export/frameCut');
+const { planPreciseCopy, copyArgs, matchSourceCodecId, encodeCutBounds } = require('../core/export/frameCut');
 
 const FPS = 24;
 const t = (frame) => frame / FPS;
@@ -81,6 +81,27 @@ test('entrées invalides → null', () => {
   assert.strictEqual(planPreciseCopy([], 0, 2, FPS), null);
   assert.strictEqual(planPreciseCopy(gop(0, 48), 2, 1, FPS), null);
   assert.strictEqual(planPreciseCopy(gop(0, 48), 0, 2, 0), null);
+});
+
+test('matchSourceCodecId : le remux ré-encode dans le codec (et la profondeur) de la source', () => {
+  assert.strictEqual(matchSourceCodecId('h264', 'yuv420p'), 'h264_high');
+  assert.strictEqual(matchSourceCodecId('h264', 'yuv420p10le'), 'h264_high10');
+  assert.strictEqual(matchSourceCodecId('hevc', 'yuv420p'), 'h265_main');
+  assert.strictEqual(matchSourceCodecId('hevc', 'yuv420p10le'), 'h265_main10');
+  assert.strictEqual(matchSourceCodecId('hevc', 'yuv422p10le'), 'h265_main422_10');
+  assert.strictEqual(matchSourceCodecId('av1', 'yuv420p10le'), 'av1_main10');
+  assert.strictEqual(matchSourceCodecId('vp9', 'yuv420p'), 'vp9');
+  // Codecs intra-only : la copie pure suffit toujours, pas d'équivalent d'encodage → null.
+  assert.strictEqual(matchSourceCodecId('prores', 'yuv422p10le'), null);
+  assert.strictEqual(matchSourceCodecId('ffv1', 'yuv420p'), null);
+});
+
+test('encodeCutBounds : seek à −¼ frame, vidéo bornée en frames', () => {
+  const b = encodeCutBounds(10, 12, 24);
+  assert.ok(b);
+  assert.ok(Math.abs(b.ss - (10 - 0.25 / 24)) < 1e-9);
+  assert.strictEqual(b.vframes, 48);
+  assert.strictEqual(encodeCutBounds(10, 12, 0), null);
 });
 
 test('copyArgs : vidéo bornée en paquets (-frames:v), audio en durée (-t)', () => {
