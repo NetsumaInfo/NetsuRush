@@ -196,30 +196,28 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         }}
       >
         {EXPORT_WORKFLOW_OPTIONS.map((o) => (
-          <ToggleGroupItem key={o.value} className="flex-1 text-xs" value={o.value}>{o.label}</ToggleGroupItem>
+          <ToggleGroupItem
+            key={o.value}
+            className="flex-1 gap-1 text-xs"
+            value={o.value}
+            // Le Remux copie le flux : la coupe se cale sur les images clés de la source, donc
+            // quelques images en trop en tête et en queue. Signalé SUR l'option elle-même — le
+            // compromis se lit au moment où l'on choisit le flux, sans bloc qui pousse la suite.
+            aria-label={o.value === "video_remux" ? `${o.label} — ${t("workflow.remuxWarning")}` : undefined}
+          >
+            {o.label}
+            {o.value === "video_remux" && (
+              <Tooltip>
+                {/* Non focusable : le bouton porteur l'est déjà et annonce l'avertissement. */}
+                <TooltipTrigger render={<span className="inline-flex shrink-0 text-amber-500" aria-hidden="true" />}>
+                  <TriangleAlert className="size-3" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" align="center" className="max-w-72">{t("workflow.remuxWarningDetail")}</TooltipContent>
+              </Tooltip>
+            )}
+          </ToggleGroupItem>
         ))}
       </ToggleGroup>
-
-      {/* Le Remux copie le flux : la coupe se cale sur les images clés de la source, donc quelques
-          images en trop en tête et en queue. Dit ICI, sous la bascule, plutôt qu'après l'export :
-          le compromis se choisit au moment où l'on choisit le flux. */}
-      {profile.workflow === "video_remux" && (
-        <Tooltip>
-          <TooltipTrigger
-            render={(
-              <div
-                className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-2 text-left text-[0.75rem] leading-snug text-amber-600 dark:text-amber-400"
-                tabIndex={0}
-                aria-label={t("workflow.remuxWarningDetail")}
-              />
-            )}
-          >
-            <TriangleAlert className="mt-px size-3.5 shrink-0" />
-            <span>{t("workflow.remuxWarning")}</span>
-          </TooltipTrigger>
-          <TooltipContent side="right" align="center" className="max-w-72">{t("workflow.remuxWarningDetail")}</TooltipContent>
-        </Tooltip>
-      )}
 
       <Row label={t("editor.optimization")} disabled={!encode}>
         <Select
