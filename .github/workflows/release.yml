@@ -48,6 +48,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
           # The native player runtime is distributed as a release asset, not committed to git.
           NETSURUSH_MPV_RUNTIME_URL: https://github.com/NetsumaInfo/NetsuRush/releases/download/${{ github.ref_name }}/netsurush-mpv-runtime.zip
+          # ML packages and weights are distributed as a release asset, not committed to git.
+          NETSURUSH_VENDOR_RUNTIME_URL: https://github.com/NetsumaInfo/NetsuRush/releases/download/${{ github.ref_name }}/netsurush-vendor-runtime.zip
         run: npm run package
 
       - name: Upload the unsigned installer

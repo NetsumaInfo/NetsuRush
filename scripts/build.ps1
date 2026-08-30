@@ -60,6 +60,13 @@ if ($mpvUrl) {
   & (Join-Path $PSScriptRoot 'fetch-mpv.ps1')
 }
 if ($LASTEXITCODE -ne 0) { throw 'fetch-mpv echoue' }
+$vendorUrl = $env:NETSURUSH_VENDOR_RUNTIME_URL
+if ($vendorUrl) {
+  & (Join-Path $PSScriptRoot 'fetch-vendor-runtime.ps1') -Url $vendorUrl
+} else {
+  & (Join-Path $PSScriptRoot 'fetch-vendor-runtime.ps1')
+}
+if ($LASTEXITCODE -ne 0) { throw 'fetch-vendor-runtime echoue' }
 
 Write-Host '== 4/5 Stage des ressources (core/python/scripts/vendor) =='
 $required = @(
