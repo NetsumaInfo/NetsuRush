@@ -81,9 +81,10 @@ test('twins are found by signature, and by path spelling alone', () => {
     db.close();
 
     // Même fichier, écrit avec l'autre séparateur : reconnu sans aucun hachage.
-    const spelled = identDb([{ path: twin.replace(/\\/g, '/'), sig: null, size: 0 }]);
+    const spelledPath = twin.replace(/\\/g, '/');
+    const spelled = identDb([{ path: spelledPath, sig: null, size: 0 }]);
     const found = mediaIdent.twinPaths(spelled, twin);
-    assert.equal(found.length, process.platform === 'win32' || twin.includes('/') ? 1 : 0);
+    assert.equal(found.length, spelledPath === twin ? 0 : 1);
     spelled.close();
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });

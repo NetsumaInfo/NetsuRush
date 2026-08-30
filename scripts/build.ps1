@@ -53,7 +53,12 @@ if ($LASTEXITCODE -ne 0) { throw 'fetch-node echoue' }
 # Runtime du lecteur natif : les DLL ne sont pas versionnees (mpv GPL, ffmpeg LGPL/GPL). Elles
 # vivent dans vendor\mpv, que fetch-mpv.ps1 provisionne. Le stage vers resources\windows a lieu
 # plus bas, avec les autres ressources.
-& (Join-Path $PSScriptRoot 'fetch-mpv.ps1')
+$mpvUrl = $env:NETSURUSH_MPV_RUNTIME_URL
+if ($mpvUrl) {
+  & (Join-Path $PSScriptRoot 'fetch-mpv.ps1') -Url $mpvUrl
+} else {
+  & (Join-Path $PSScriptRoot 'fetch-mpv.ps1')
+}
 if ($LASTEXITCODE -ne 0) { throw 'fetch-mpv echoue' }
 
 Write-Host '== 4/5 Stage des ressources (core/python/scripts/vendor) =='
