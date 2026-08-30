@@ -4,6 +4,7 @@ import { Toast as ToastPrimitive } from "@base-ui/react/toast"
 import { CheckIcon, CircleAlertIcon, InfoIcon, XIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
+import { notifyDurations } from "@/lib/notifySettings"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
@@ -13,19 +14,31 @@ const manager = ToastPrimitive.createToastManager()
 
 type Tone = "ok" | "error" | "info" | "task"
 
-// Un retour de fin de tâche se lit en passant : 4 s suffisent. Une erreur demande d'agir, elle reste
-// deux fois plus longtemps et s'annonce en priorité haute aux lecteurs d'écran. Une tâche EN COURS
-// ne s'efface pas toute seule (timeout 0) : c'est son achèvement qui la remplace.
-const TIMEOUT: Record<Tone, number> = { ok: 4000, info: 4000, error: 8000, task: 0 }
+// Combien de temps la pastille reste, en millisecondes. Une erreur demande d'agir : elle reste plus
+// longtemps qu'une réussite, et s'annonce en priorité haute aux lecteurs d'écran. Une tâche EN COURS
+// ne s'efface jamais toute seule : c'est son achèvement qui la remplace. Les deux autres durées se
+// règlent dans Paramètres › Interface › Notifications.
+function lifespan(tone: Tone): number {
+  if (tone === "task") return 0
+  const durations = notifyDurations()
+  return (tone === "error" ? durations.error : durations.ok) * 1000
+}
 
 function push(tone: Tone, text: string, progress?: number | null) {
-  return manager.add({
+  const id = manager.add({
+    // Minuteur MAISON (`timeout: 0` côté Base UI) : le sien se met en pause dès que le curseur passe
+    // sur la pile OU que la fenêtre perd le focus — or pendant un export on regarde Resolve, et le
+    // message de fin restait alors affiché indéfiniment.
+    timeout: 0,
     title: text,
     type: tone,
-    timeout: TIMEOUT[tone],
     priority: tone === "error" ? "high" : "low",
     data: { progress: progress ?? null },
   })
+  const ms = lifespan(tone)
+  // 0 = l'utilisateur a choisi « jusqu'au clic » (ou c'est une tâche en cours).
+  if (ms > 0) setTimeout(() => manager.close(id), ms)
+  return id
 }
 
 /** Pastille d'une tâche EN COURS : elle vit tant que la tâche dure, et se remplace par son résultat. */

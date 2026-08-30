@@ -3,7 +3,7 @@
 // elle les trois listes divergeraient. Données pures (ids + icônes + clés i18n) : aucun composant de
 // page ici, sinon la barre de titre tirerait tout le code des Paramètres au démarrage.
 import {
-  Boxes, Brush, Cpu, DatabaseBackup, Download, FolderKanban, HardDrive, Info,
+  Bell, Boxes, Brush, Cpu, DatabaseBackup, Download, FolderKanban, HardDrive, Info,
   Languages, Mic, MonitorPlay, Palette, PanelLeft, RefreshCw, Scissors, Sparkles, Terminal,
   UserRound, Wrench,
 } from "lucide-react";
@@ -49,6 +49,7 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
       { id: "theme", icon: Palette },
       { id: "language", icon: Languages },
       { id: "navigation", icon: PanelLeft },
+      { id: "notifications", icon: Bell },
     ],
   },
   {

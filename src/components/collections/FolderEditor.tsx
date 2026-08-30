@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectGroup, SelectGroupLabel, SelectItem, Selec
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { HoverLabel } from "@/components/common/HoverLabel";
 import { EmojiPicker } from "@/components/common/EmojiPicker";
 import { TagInput } from "./TagInput";
 import {
@@ -52,6 +53,9 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: C
   useLucideCatalog();
   const names = lucideNames();
   const [q, setQ] = useState("");
+  // Une seule bulle pour toute la grille (cf. common/HoverLabel) : un Tooltip par cellule coûtait
+  // 240 stores de positionnement et rendait l'onglet lent à ouvrir.
+  const gridRef = useRef<HTMLDivElement>(null);
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
     return (s ? names.filter((n) => n.toLowerCase().includes(s)) : names).slice(0, 240);
@@ -62,20 +66,16 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: C
         <Search className="h-3.5 w-3.5 text-muted-foreground" />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("editor.iconSearch")} className="w-full bg-transparent py-1.5 text-sm outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </div>
-      <div className="grid max-h-64 grid-cols-9 gap-1 overflow-y-auto">
+      <div ref={gridRef} className="grid max-h-64 grid-cols-9 gap-1 overflow-y-auto">
         {list.map((n) => (
-          <Tooltip key={n}>
-            <TooltipTrigger render={
-              <button type="button" onClick={() => onPick({ kind: "lucide", name: n })}
-                className={cn("flex aspect-square items-center justify-center rounded-md transition-colors",
-                  current === n ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
-                {createElement(lucideIcon(n) as LucideIcon, { className: "h-4 w-4" })}
-              </button>
-            } />
-            <TooltipContent>{n}</TooltipContent>
-          </Tooltip>
+          <button key={n} type="button" aria-label={n} data-hover-label={n} onClick={() => onPick({ kind: "lucide", name: n })}
+            className={cn("flex aspect-square items-center justify-center rounded-md transition-colors",
+              current === n ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
+            {createElement(lucideIcon(n) as LucideIcon, { className: "h-4 w-4" })}
+          </button>
         ))}
       </div>
+      <HoverLabel containerRef={gridRef} />
     </div>
   );
 }

@@ -625,6 +625,20 @@
     "hideAria": "Hide {{module}}",
     "showAria": "Show {{module}}"
   },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "How long status badges stay on screen. A running task stays until it ends.",
+    "reset": "Reset all",
+    "ok": "Task completed",
+    "okHint": "Export finished, sent to the timeline, successes in general.",
+    "error": "Error",
+    "errorHint": "Red failure message: it asks you to act, so it stays longer.",
+    "badge": "Error indicator",
+    "badgeHint": "Red badge in the bottom-right corner. Errors stay readable in the console.",
+    "seconds_one": "{{count}} second",
+    "seconds_other": "{{count}} seconds",
+    "untilClick": "Until clicked"
+  },
   "detection": {
     "reindexHint": "Another model draws different shot boundaries: rushes already indexed will have to be indexed again."
   },
@@ -636,7 +650,8 @@
     "interface": {
       "theme": "Theme",
       "language": "Language",
-      "navigation": "Navigation"
+      "navigation": "Navigation",
+      "notifications": "Notifications"
     },
     "media": {
       "preview": "Previews"

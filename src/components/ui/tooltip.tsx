@@ -47,6 +47,7 @@ function TooltipContent({
   align = "center",
   collisionPadding = 8,
   collisionAvoidance,
+  anchor,
   children,
   ...props
 }: React.ComponentProps<typeof Tooltip.Popup> & {
@@ -55,6 +56,9 @@ function TooltipContent({
   align?: React.ComponentProps<typeof Tooltip.Positioner>["align"]
   collisionPadding?: React.ComponentProps<typeof Tooltip.Positioner>["collisionPadding"]
   collisionAvoidance?: React.ComponentProps<typeof Tooltip.Positioner>["collisionAvoidance"]
+  // Ancre explicite : une bulle unique partagée par une grille dense se recale sur la cellule
+  // survolée au lieu d'avoir son propre `Tooltip.Trigger` (cf. components/common/HoverLabel).
+  anchor?: React.ComponentProps<typeof Tooltip.Positioner>["anchor"]
 }) {
   return (
     <Tooltip.Portal>
@@ -67,6 +71,7 @@ function TooltipContent({
         side={side}
         align={align}
         collisionPadding={collisionPadding}
+        {...(anchor !== undefined && { anchor })}
         {...(collisionAvoidance !== undefined && { collisionAvoidance })}
       >
         <Tooltip.Popup

@@ -625,6 +625,20 @@
     "hideAria": "{{module}} ausblenden",
     "showAria": "{{module}} anzeigen"
   },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "subtitle": "Wie lange Statusmeldungen sichtbar bleiben. Eine laufende Aufgabe bleibt bis zum Ende.",
+    "reset": "Alles zurücksetzen",
+    "ok": "Aufgabe beendet",
+    "okHint": "Export fertig, an die Timeline gesendet, Erfolge allgemein.",
+    "error": "Fehler",
+    "errorHint": "Rote Fehlermeldung: sie verlangt eine Reaktion und bleibt deshalb länger.",
+    "badge": "Fehleranzeige",
+    "badgeHint": "Rote Plakette unten rechts. Die Fehler bleiben in der Konsole lesbar.",
+    "seconds_one": "{{count}} Sekunde",
+    "seconds_other": "{{count}} Sekunden",
+    "untilClick": "Bis zum Klick"
+  },
   "detection": {
     "reindexHint": "Ein anderes Modell setzt die Schnittgrenzen anders: bereits indiziertes Rohmaterial muss erneut indiziert werden."
   },
@@ -636,7 +650,8 @@
     "interface": {
       "theme": "Design",
       "language": "Sprache",
-      "navigation": "Navigation"
+      "navigation": "Navigation",
+      "notifications": "Benachrichtigungen"
     },
     "media": {
       "preview": "Vorschauen"

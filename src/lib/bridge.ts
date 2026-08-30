@@ -2554,7 +2554,10 @@ export interface NrApi {
   exportCapabilities(opts?: { force?: boolean }): Promise<ExportCapabilitiesResult>;
   // Nom de fichier que produirait le gabarit du profil (éditeur de profil). Résolu par le MÊME code
   // que l'export réel côté core → l'aperçu ne peut pas diverger du fichier écrit.
-  exportPreviewName(opts: { profile: ExportProfile; baseName?: string }): Promise<ExportNamePreview>;
+  // `clip` (+ total/index) = le plan RÉEL sur le point d'être exporté : le dialogue d'enregistrement
+  // propose alors le nom que le fichier portera vraiment. Sans lui, un plan d'exemple sert de
+  // contexte (éditeur de profil, qui n'a aucun plan sous la main).
+  exportPreviewName(opts: { profile: ExportProfile; baseName?: string; clip?: ExportClipInput; total?: number; index?: number }): Promise<ExportNamePreview>;
   onExportProgress(cb: (p: ExportProgress) => void): () => void;
   aeExport(opts: AeExportOpts): Promise<AeExportResult>;
   onAeProgress(cb: (p: AeProgress) => void): () => void;
@@ -2700,7 +2703,9 @@ export interface NrApi {
   charDuplicates(o?: { minScore?: number }): Promise<{ pairs: DuplicatePair[]; error?: string | null }>;
   onSearchProgress(cb: (p: { pct: number | null; phase: string; kind?: "clip" | "face" | "label" }) => void): () => void;
   startDrag(file: string): void;
-  chooseDir(): Promise<string | null>;
+  // `defaultPath` ouvre le sélecteur SUR un dossier — le dernier utilisé, pour ne pas repartir de la
+  // racine à chaque export.
+  chooseDir(defaultPath?: string): Promise<string | null>;
   chooseFiles(): Promise<string[] | null>;
   chooseMediaFiles(): Promise<string[] | null>;
   // Vidéos ET images fixes : sources du hub de traitements, qui upscale/détoure aussi une image.
@@ -2714,7 +2719,10 @@ export interface NrApi {
   // payés jusqu'ici par le premier dépôt : à l'écran, cette latence-là est du temps mort avant que le
   // média n'apparaisse. Appelé au montage du board, le premier dépôt part sur un pont déjà chaud.
   warmFilePaths(): void;
-  saveFile(defaultName?: string): Promise<string | null>;
+  // Dialogue « enregistrer sous » : `defaultName` peut être un chemin COMPLET (dossier + nom
+  // proposé). `extensions` cale le filtre sur le conteneur voulu — sans lui, le dialogue impose les
+  // extensions vidéo à un PNG.
+  saveFile(defaultName?: string, extensions?: string[]): Promise<string | null>;
   mediaUrl(filePath: string): string;
   // URL d'un fichier local pour les GRILLES d'aperçus (vignettes + proxys de lecture).
   //

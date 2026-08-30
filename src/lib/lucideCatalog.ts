@@ -27,6 +27,11 @@ export function lucideNames(): string[] {
   return catalog.get()?.LUCIDE_NAMES ?? NO_NAMES;
 }
 
+/** Déclenche le chargement sans re-rendre — pour préchauffer à l'ouverture d'un sélecteur. */
+export function loadLucideCatalog(): void {
+  void catalog.load();
+}
+
 /** Déclenche le chargement du catalogue et re-rend le composant quand il arrive. */
 export function useLucideCatalog(): void {
   catalog.use();

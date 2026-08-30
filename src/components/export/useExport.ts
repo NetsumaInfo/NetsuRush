@@ -6,7 +6,10 @@ import { useEffect } from "react";
 import i18n from "@/i18n";
 import { useApp } from "@/store";
 import { nr, type ExportClipInput } from "@/lib/bridge";
+import type { ExportProfile } from "@/features/export/profiles";
 import { getActiveExportProfile, getExportProfileIssues } from "@/features/export/profiles";
+import { lastExportDir, rememberExportDir } from "@/features/export/lastDir";
+import { dirname, joinPath } from "@/lib/utils";
 import { toast } from "@/components/ui/toast";
 
 interface DownloadArgs {
@@ -20,6 +23,18 @@ interface DownloadArgs {
 interface DownloadResult {
   ok: boolean;
   error?: string;
+}
+
+// Nom proposé dans le dialogue : résolu par le CORE, avec le plan réel en contexte — donc le même
+// nom que le fichier aurait porté sans dialogue. Le core injoignable ne doit pas bloquer l'export :
+// on retombe alors sur « <base>.<conteneur> ».
+async function suggestName(profile: ExportProfile, baseName: string, clips: ExportClipInput[], merge: boolean): Promise<string> {
+  try {
+    const preview = await nr.exportPreviewName({ profile, baseName, clip: clips[0], total: clips.length, index: 1 });
+    const name = merge ? preview.merged : preview.name;
+    if (name) return name;
+  } catch { /* repli ci-dessous */ }
+  return `${baseName || "export"}.${profile.container}`;
 }
 
 export function useExport() {
@@ -47,14 +62,29 @@ export function useExport() {
       return { ok: false, error: message };
     }
 
-    const dir = await nr.chooseDir();
-    // Annulation du sélecteur : le dossier est OBLIGATOIRE → on le DIT. Sans ça le clic ne produisait
-    // rien du tout (ni fichier, ni message) et l'export passait pour cassé.
+    // UN seul fichier en sortie (un plan, ou une fusion) → dialogue « enregistrer sous » : le nom
+    // proposé est celui que le gabarit du profil produirait, et l'utilisateur pose le fichier
+    // exactement où il veut. Plusieurs fichiers → sélecteur de DOSSIER, un nom par fichier n'aurait
+    // pas de sens. Les deux s'ouvrent sur le dernier dossier utilisé.
+    const single = shouldMerge || clips.length === 1;
+    const previous = lastExportDir();
+    let dir = "";
+    let savePath: string | undefined;
+    if (single) {
+      const suggested = await suggestName(profile, baseName, clips, shouldMerge);
+      const chosen = await nr.saveFile(joinPath(previous, suggested), [profile.container]);
+      if (chosen) { savePath = chosen; dir = dirname(chosen); }
+    } else {
+      dir = (await nr.chooseDir(previous)) || "";
+    }
+    // Annulation du sélecteur : la destination est OBLIGATOIRE → on le DIT. Sans ça le clic ne
+    // produisait rien du tout (ni fichier, ni message) et l'export passait pour cassé.
     if (!dir) {
       const message = i18n.t("export:notice.cancelled");
       setExportError(message);
       return { ok: false, error: message };
     }
+    rememberExportDir(dir);
 
     // Tâche lourde → propose de fermer le logiciel de montage (libérer RAM/GPU).
     useApp.getState().offerCloseForRam();
@@ -62,7 +92,7 @@ export function useExport() {
     setExportProgress(0);
     setExportBusy(shouldMerge ? i18n.t("export:notice.merging") : i18n.t("export:notice.exporting"));
 
-    const r = await nr.exportClips({ clips, dir, baseName, profile, merge: shouldMerge });
+    const r = await nr.exportClips({ clips, dir, savePath, baseName, profile, merge: shouldMerge });
 
     setExportBusy(null);
     if (r.ok) {

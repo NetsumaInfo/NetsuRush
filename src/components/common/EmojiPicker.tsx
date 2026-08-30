@@ -1,11 +1,11 @@
 // Sélecteur d'emoji MAISON (pas le widget emoji-mart brut, qui jure avec la DA de l'app). Réutilise
 // le JEU DE DONNÉES emoji-mart (@emoji-mart/data : jeu complet + mots-clés) mais avec NOTRE grille
 // thémée sur les tokens de l'app : recherche, catégories, survol cohérent. Réutilisable partout.
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import emojiData from "@emoji-mart/data";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { HoverLabel } from "@/components/common/HoverLabel";
 
 type EmojiEntry = { id: string; name: string; keywords: string[]; skins: { native: string }[] };
 type EmojiDataShape = {
@@ -25,6 +25,8 @@ function native(id: string): string {
 export function EmojiPicker({ onPick, className, heightClass = "max-h-56" }: { onPick: (ch: string) => void; className?: string; heightClass?: string }) {
   const { t } = useTranslation("shell");
   const [q, setQ] = useState("");
+  // Le jeu complet fait ~1 800 cellules : une seule bulle partagée, ancrée sur la cellule survolée.
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Recherche : filtre par nom + mots-clés sur tout le jeu (aplati). Sinon on rend par catégories.
   const results = useMemo(() => {
@@ -40,19 +42,16 @@ export function EmojiPicker({ onPick, className, heightClass = "max-h-56" }: { o
   }, [q]);
 
   const cell = (id: string) => (
-    <Tooltip key={id}>
-      <TooltipTrigger render={
-        <button
-          type="button"
-          aria-label={DATA.emojis[id]?.name}
-          onClick={() => { const ch = native(id); if (ch) onPick(ch); }}
-          className="flex aspect-square items-center justify-center rounded-md text-xl leading-none transition-colors hover:bg-accent"
-        >
-          {native(id)}
-        </button>
-      } />
-      <TooltipContent>{DATA.emojis[id]?.name}</TooltipContent>
-    </Tooltip>
+    <button
+      key={id}
+      type="button"
+      aria-label={DATA.emojis[id]?.name}
+      data-hover-label={DATA.emojis[id]?.name}
+      onClick={() => { const ch = native(id); if (ch) onPick(ch); }}
+      className="flex aspect-square items-center justify-center rounded-md text-xl leading-none transition-colors hover:bg-accent"
+    >
+      {native(id)}
+    </button>
   );
 
   return (
@@ -66,7 +65,7 @@ export function EmojiPicker({ onPick, className, heightClass = "max-h-56" }: { o
           className="w-full bg-transparent py-1.5 text-sm outline-none"
         />
       </div>
-      <div className={`${heightClass} overflow-y-auto pr-1`}>
+      <div ref={scrollRef} className={`${heightClass} overflow-y-auto pr-1`}>
         {results ? (
           results.length ? (
             <div className="grid grid-cols-8 gap-0.5">{results.map(cell)}</div>
@@ -84,6 +83,7 @@ export function EmojiPicker({ onPick, className, heightClass = "max-h-56" }: { o
             ))
         )}
       </div>
+      <HoverLabel containerRef={scrollRef} />
     </div>
   );
 }

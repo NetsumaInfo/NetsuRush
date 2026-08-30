@@ -625,6 +625,20 @@
     "hideAria": "Masquer {{module}}",
     "showAria": "Afficher {{module}}"
   },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Combien de temps les pastilles d'état restent affichées. Une tâche en cours, elle, reste jusqu'à la fin.",
+    "reset": "Tout rétablir",
+    "ok": "Fin de tâche",
+    "okHint": "Export terminé, envoi vers la timeline, réussites en général.",
+    "error": "Erreur",
+    "errorHint": "Message rouge d'échec : il demande d'agir, donc il reste plus longtemps.",
+    "badge": "Indicateur d'erreurs",
+    "badgeHint": "Pastille rouge du coin bas-droit. Les erreurs restent lisibles dans la console.",
+    "seconds_one": "{{count}} seconde",
+    "seconds_other": "{{count}} secondes",
+    "untilClick": "Jusqu'au clic"
+  },
   "detection": {
     "reindexHint": "Un autre modèle découpe les plans autrement : tes rush déjà indexés devront l'être à nouveau."
   },
@@ -636,7 +650,8 @@
     "interface": {
       "theme": "Thème",
       "language": "Langue",
-      "navigation": "Navigation"
+      "navigation": "Navigation",
+      "notifications": "Notifications"
     },
     "media": {
       "preview": "Aperçus"

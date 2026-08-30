@@ -51,7 +51,7 @@ export function ExportImageDialog({ open, onOpenChange }: { open: boolean; onOpe
     setBusy(true);
     try {
       const base = (sceneName || "board").replace(/[\\/:*?"<>|]+/g, "_");
-      const dest = await nr.saveFile(`${base}.${format}`);
+      const dest = await nr.saveFile(`${base}.${format}`, [format]);
       if (!dest) return;
 
       const background = transparent && format === "png" ? null : "var(--color-bg)";

@@ -15,6 +15,7 @@ import { DiscordSettings } from "./DiscordSettings";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
 import { NavigationSettings } from "./NavigationSettings";
+import { NotificationSettings } from "./NotificationSettings";
 import { PlaybackSettings } from "./PlaybackSettings";
 import { DictationSettings } from "./DictationSettings";
 import { IndexingSettings } from "./IndexingSettings";
@@ -31,7 +32,7 @@ import { AboutSettings } from "./AboutSettings";
 
 const PANELS: Record<SettingsPage, Record<string, ComponentType>> = {
   account: { profile: AccountSettings, discord: DiscordSettings },
-  interface: { theme: AppearanceSettings, language: LanguageSettings, navigation: NavigationSettings },
+  interface: { theme: AppearanceSettings, language: LanguageSettings, navigation: NavigationSettings, notifications: NotificationSettings },
   media: { preview: PlaybackSettings },
   ai: { models: ModelsSettings, dictation: DictationSettings, indexing: IndexingSettings },
   export: { export: ExportProfileSettings },

@@ -26,6 +26,7 @@ import {
 } from "@/lib/customThemes";
 import { DEFAULT_PREVIEW_SETTINGS, readPreviewSettings, writePreviewSettings } from "@/lib/previewSettings";
 import { DEFAULT_SEARCH_PERF, readSearchPerf, writeSearchPerf, type SearchPerfSettings } from "@/lib/searchPerf";
+import { DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyDurations } from "@/lib/notifySettings";
 import { readFrames, writeFrames, type SamplingFrames } from "@/lib/sampling";
 import type { PreviewGenerationSettings } from "@/lib/bridge";
 import {
@@ -256,6 +257,10 @@ export interface SettingsSlice {
   previewSettings: PreviewGenerationSettings;
   setPreviewSettings: (settings: PreviewGenerationSettings) => void;
   resetPreviewSettings: () => void;
+  // Combien de temps les pastilles d'état et l'indicateur d'erreurs restent affichés (secondes).
+  notify: NotifyDurations;
+  setNotify: (patch: Partial<NotifyDurations>) => void;
+  resetNotify: () => void;
   // Options de performance de la recherche (partagées avec les autres fenêtres, cf. useSharedPrefs).
   searchPerf: SearchPerfSettings;
   setSearchPerf: (patch: Partial<SearchPerfSettings>) => void;
@@ -473,6 +478,9 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
       clearThumbs();
       set({ previewSettings });
     },
+    notify: readNotify(),
+    setNotify: (patch) => set({ notify: writeNotify({ ...get().notify, ...patch }) }),
+    resetNotify: () => set({ notify: writeNotify(DEFAULT_NOTIFY) }),
     searchPerf: readSearchPerf(),
     setSearchPerf: (patch) => set({ searchPerf: writeSearchPerf({ ...get().searchPerf, ...patch }) }),
     resetSearchPerf: () => set({ searchPerf: writeSearchPerf(DEFAULT_SEARCH_PERF) }),

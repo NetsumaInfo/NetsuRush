@@ -625,6 +625,20 @@
     "hideAria": "{{module}}を非表示",
     "showAria": "{{module}}を表示"
   },
+  "notifications": {
+    "title": "通知",
+    "subtitle": "ステータス表示が画面に残る時間。実行中のタスクは終了まで残ります。",
+    "reset": "すべて既定に戻す",
+    "ok": "タスク完了",
+    "okHint": "書き出し完了、タイムラインへ送信など、成功の知らせ。",
+    "error": "エラー",
+    "errorHint": "赤い失敗メッセージ。対処が必要なので長めに表示します。",
+    "badge": "エラーインジケーター",
+    "badgeHint": "右下の赤いバッジ。エラー自体はコンソールで確認できます。",
+    "seconds_one": "{{count}} 秒",
+    "seconds_other": "{{count}} 秒",
+    "untilClick": "クリックするまで"
+  },
   "detection": {
     "reindexHint": "モデルが変わるとショットの区切りも変わります。インデックス済みの素材は作り直しになります。"
   },
@@ -636,7 +650,8 @@
     "interface": {
       "theme": "テーマ",
       "language": "言語",
-      "navigation": "ナビゲーション"
+      "navigation": "ナビゲーション",
+      "notifications": "通知"
     },
     "media": {
       "preview": "プレビュー"

@@ -302,10 +302,13 @@ async function dlgOpen(opts: Record<string, unknown>): Promise<string | string[]
   const { open } = await import("@tauri-apps/plugin-dialog");
   return (await open(opts)) as string | string[] | null;
 }
-async function dlgSave(defaultPath?: string): Promise<string | null> {
+async function dlgSave(defaultPath?: string, extensions?: string[]): Promise<string | null> {
   if (!isTauri) return null;
   const { save } = await import("@tauri-apps/plugin-dialog");
-  return await save({ defaultPath, filters: [{ name: i18n.t("common:fileType.video"), extensions: ["mp4", "mov", "mkv"] }] });
+  // Filtre calé sur le conteneur demandé : le dialogue natif RENOMME le fichier avec l'extension du
+  // filtre actif, donc une liste vidéo figée transformait un « board.png » en « board.mp4 ».
+  const list = extensions && extensions.length ? extensions : ["mp4", "mov", "mkv"];
+  return await save({ defaultPath, filters: [{ name: i18n.t("common:fileType.video"), extensions: list }] });
 }
 
 // Rendu « en remote » (iframe dans le panneau CEP Adobe) : pas de dialogue Tauri. On demande au
@@ -962,7 +965,7 @@ export function makeCoreClient(): NrApi {
     charDuplicates: (o) => call("char:duplicates", [o]),
     onSearchProgress: (cb) => on("search:progress", cb as (p: unknown) => void),
     startDrag: () => {},
-    chooseDir: () => dlgOpen({ directory: true }) as Promise<string | null>,
+    chooseDir: (defaultPath) => dlgOpen({ directory: true, ...(defaultPath ? { defaultPath } : {}) }) as Promise<string | null>,
     chooseFiles: () =>
       isRemote
         ? requestParentFiles(true, VIDEO_EXT)
@@ -985,7 +988,7 @@ export function makeCoreClient(): NrApi {
         : (dlgOpen({ multiple: false }) as Promise<string | null>),
     pathsForFiles: (files) => resolveFilePaths(files),
     warmFilePaths: () => { void ensurePathBridge(); },
-    saveFile: (defaultName) => dlgSave(defaultName),
+    saveFile: (defaultName, extensions) => dlgSave(defaultName, extensions),
     mediaUrl: (p) => `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
     assetUrl: (p) => assetSrc(p) ?? `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
     ytStreamUrl: (id) => `${BASE}/ytstream?id=${encodeURIComponent(id)}${tkParam}`,

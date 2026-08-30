@@ -625,6 +625,20 @@
     "hideAria": "Ocultar {{module}}",
     "showAria": "Mostrar {{module}}"
   },
+  "notifications": {
+    "title": "Notificaciones",
+    "subtitle": "Cuánto tiempo permanecen los avisos de estado. Una tarea en curso permanece hasta terminar.",
+    "reset": "Restablecer todo",
+    "ok": "Tarea terminada",
+    "okHint": "Exportación terminada, envío a la timeline, aciertos en general.",
+    "error": "Error",
+    "errorHint": "Mensaje rojo de fallo: pide actuar, por eso dura más.",
+    "badge": "Indicador de errores",
+    "badgeHint": "Aviso rojo en la esquina inferior derecha. Los errores siguen legibles en la consola.",
+    "seconds_one": "{{count}} segundo",
+    "seconds_other": "{{count}} segundos",
+    "untilClick": "Hasta hacer clic"
+  },
   "detection": {
     "reindexHint": "Otro modelo corta los planos de otra manera: los brutos ya indexados habrá que indexarlos de nuevo."
   },
@@ -636,7 +650,8 @@
     "interface": {
       "theme": "Tema",
       "language": "Idioma",
-      "navigation": "Navegación"
+      "navigation": "Navegación",
+      "notifications": "Notificaciones"
     },
     "media": {
       "preview": "Vistas previas"

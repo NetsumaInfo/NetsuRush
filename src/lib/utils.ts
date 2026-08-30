@@ -11,6 +11,20 @@ export function basename(p: string): string {
   return parts[parts.length - 1] || p;
 }
 
+// Dossier parent d'un chemin (Windows ou POSIX). Chaîne vide si le chemin n'en a pas.
+export function dirname(p: string): string {
+  const cut = Math.max(p.lastIndexOf("/"), p.lastIndexOf("\\"));
+  return cut > 0 ? p.slice(0, cut) : "";
+}
+
+// Concatène un dossier et un nom de fichier en gardant le séparateur du dossier : un chemin Windows
+// rendu avec des « / » se ferait recoller de travers par le dialogue natif.
+export function joinPath(dir: string, name: string): string {
+  if (!dir) return name;
+  const sep = dir.includes("\\") && !dir.includes("/") ? "\\" : "/";
+  return `${dir.replace(/[\\/]+$/, "")}${sep}${name}`;
+}
+
 // Décalage (s) de la vignette d'un plan : on capture quelques frames APRÈS le début, jamais la
 // toute 1re frame (souvent une transition/fondu/flou de coupe → vignette trompeuse). ~3-4 frames à
 // 24 fps. Source UNIQUE : sert aussi de clé de cache (path@time.toFixed(2)) → écriture et lecture

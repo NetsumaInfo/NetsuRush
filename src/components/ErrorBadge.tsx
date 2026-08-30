@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { AlertTriangle, Terminal, Check } from "lucide-react";
 import { useApp } from "@/store";
 import { subscribeErrorCount, markConsoleSeen } from "@/lib/appConsole";
+import { notifyDurations, subscribeNotify } from "@/lib/notifySettings";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem,
 } from "@/components/ui/context-menu";
@@ -14,14 +15,25 @@ import {
 export function ErrorBadge() {
   const { t } = useTranslation("shell");
   const [count, setCount] = useState(0);
+  // Le compteur, lui, n'est PAS remis à zéro par l'effacement : les erreurs restent à lire dans la
+  // console. Seule la pastille s'efface, pour ne pas rester en travers de l'écran toute la session.
+  const [faded, setFaded] = useState(false);
+  const [seconds, setSeconds] = useState(() => notifyDurations().badge);
   const openConsole = useApp((s) => s.openConsole);
   const onConsole = useApp((s) => s.tab === "settings" && s.settingsPage === "system" && s.settingsTab.system === "console");
 
-  useEffect(() => subscribeErrorCount(setCount), []);
+  useEffect(() => subscribeNotify((d) => setSeconds(d.badge)), []);
+  // Une NOUVELLE erreur ramène la pastille : c'est l'événement qui compte, pas le total.
+  useEffect(() => subscribeErrorCount((n) => { setCount(n); setFaded(false); }), []);
+  useEffect(() => {
+    if (count === 0 || seconds <= 0) return;
+    const timer = setTimeout(() => setFaded(true), seconds * 1000);
+    return () => clearTimeout(timer);
+  }, [count, seconds]);
   // Déjà sur la console → l'utilisateur voit les erreurs : on remet le compteur à zéro.
   useEffect(() => { if (onConsole) markConsoleSeen(); }, [onConsole, count]);
 
-  if (count === 0 || onConsole) return null;
+  if (count === 0 || faded || onConsole) return null;
 
   return (
     <ContextMenu>

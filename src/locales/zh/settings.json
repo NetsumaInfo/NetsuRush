@@ -625,6 +625,20 @@
     "hideAria": "隐藏 {{module}}",
     "showAria": "显示 {{module}}"
   },
+  "notifications": {
+    "title": "通知",
+    "subtitle": "状态提示停留的时间。正在进行的任务会一直显示到结束。",
+    "reset": "全部恢复默认",
+    "ok": "任务完成",
+    "okHint": "导出完成、发送到时间线等成功提示。",
+    "error": "错误",
+    "errorHint": "红色失败提示：需要处理，因此停留更久。",
+    "badge": "错误指示器",
+    "badgeHint": "右下角的红色圆点。错误内容仍可在控制台查看。",
+    "seconds_one": "{{count}} 秒",
+    "seconds_other": "{{count}} 秒",
+    "untilClick": "点击后关闭"
+  },
   "detection": {
     "reindexHint": "换一个模型，镜头的分界也会不同：已经建好索引的素材需要重建。"
   },
@@ -636,7 +650,8 @@
     "interface": {
       "theme": "主题",
       "language": "语言",
-      "navigation": "导航"
+      "navigation": "导航",
+      "notifications": "通知"
     },
     "media": {
       "preview": "预览"

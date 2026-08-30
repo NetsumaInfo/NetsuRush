@@ -49,7 +49,19 @@ function defaultExportIconName(workflow: ExportWorkflow): string {
 export function ExportProfileIcon({ profile, className }: { profile: ExportProfile; className?: string }) {
   const icon = profile.icon;
   if (icon?.type === "image") {
-    return <img src={icon.src} alt="" className={cn("rounded-[3px] object-cover", className)} draggable={false} />;
+    // Une image importée n'a pas la marge intérieure d'un glyphe lucide : rendue à la taille du
+    // glyphe, un logo devient illisible. On la laisse déborder de sa boîte (150 %, centrée) et on
+    // ne la recadre JAMAIS — `object-contain` garde l'alpha et les proportions entières.
+    return (
+      <span className={cn("relative inline-block align-middle", className)}>
+        <img
+          src={icon.src}
+          alt=""
+          className="absolute left-1/2 top-1/2 h-auto max-h-[150%] w-auto max-w-[150%] -translate-x-1/2 -translate-y-1/2 object-contain"
+          draggable={false}
+        />
+      </span>
+    );
   }
   if (icon?.type === "emoji") {
     return <span className={cn("inline-flex items-center justify-center leading-none", className)}>{icon.ch}</span>;
@@ -71,8 +83,11 @@ function readAsDataUrl(file: File): Promise<string> {
   });
 }
 
-// Image fixe → réduction 64×64 (recadrage centré, reste petite en localStorage). GIF animé →
+// Image fixe → réduction à 128 px sur le plus grand côté, PROPORTIONS CONSERVÉES (aucun recadrage :
+// une bannière ou un logo large perdrait ses bords, et l'alpha du PNG est préservé). GIF animé →
 // conservé tel quel (le canvas l'aplatirait et tuerait l'animation).
+const ICON_MAX_SIDE = 128;
+
 export async function fileToIconDataUrl(file: File): Promise<string> {
   if (file.type === "image/gif") return readAsDataUrl(file);
   const url = URL.createObjectURL(file);
@@ -83,14 +98,16 @@ export async function fileToIconDataUrl(file: File): Promise<string> {
       im.onerror = reject;
       im.src = url;
     });
-    const size = 64;
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (!w || !h) return readAsDataUrl(file);
+    const scale = Math.min(1, ICON_MAX_SIDE / Math.max(w, h));
     const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
     const ctx = canvas.getContext("2d");
     if (!ctx) return readAsDataUrl(file);
-    const s = Math.min(img.width, img.height) || size;
-    ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/png");
   } finally {
     URL.revokeObjectURL(url);
