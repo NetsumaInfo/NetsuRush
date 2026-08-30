@@ -37,10 +37,11 @@ NetsuRush ajoute donc deux surfaces adossées à un serveur du projet :
   l'installation dans Resolve, plus un forum de demandes (tutoriel manquant, preset cherché,
   entraide).
 
-L'acte 2 coûte de l'argent (serveur, bande passante, modération) : **il n'est engagé qu'une fois
-l'acte 1 stabilisé et l'intérêt réel des utilisateurs mesuré.** Conception, coûts, sécurité et
-questions ouvertes : [`community-hub.md`](community-hub.md). Modèle économique et licence :
-`perso/communaute-et-monetisation.md`.
+L'acte 2 est lancé progressivement sur le site : forum public, annuaire de chaînes et recherche
+sur les métadonnées précèdent le stockage de fichiers, l'installation assistée et la vente. Cette
+séparation permet de mesurer l'intérêt et la charge de modération sans rendre les outils locaux
+dépendants d'un serveur. Conception, coûts, sécurité, monétisation et ordre de livraison :
+[`community-hub.md`](community-hub.md).
 
 ## 2. Contraintes et faits techniques
 
@@ -140,7 +141,8 @@ Trois règles ont chacune corrigé un bug réel et ne doivent pas être cassées
 
 Risques propres à l'acte 2 (détaillés dans [`community-hub.md`](community-hub.md)) :
 
-- **Dépendance à YouTube** : quota de l'API Data v3 et clé qui doit rester côté serveur (Convex).
+- **Dépendance à YouTube** : quotas granulaires de l'API Data v3, règles de conservation des
+  métadonnées et clé qui doit rester côté serveur.
   Les vidéos se regardent dans le **lecteur embarqué officiel** : la vue compte pour le créateur
   et la chaîne est mise en avant — l'app n'héberge et ne réencode jamais la vidéo.
 - **Coût récurrent du serveur**, sans revenu garanti : c'est la raison du gate sur l'adoption.
