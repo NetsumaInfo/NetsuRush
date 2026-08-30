@@ -9,16 +9,16 @@
     },
     "highlights": {
       "fr": [
-        "NetsuBoard gagne l’aimantation, le rangement de groupes, les cadres de sélection, les palettes enrichies et de nouveaux outils de dessin et d’export.",
-        "Les cadres suivent leur contenu, permettent de lier ou délier les éléments et conservent des titres et notes lisibles pendant le dézoom.",
-        "Les images, vidéos et miniatures restent plus fluides grâce au rendu adaptatif, au chargement anticipé et à une meilleure élimination des éléments hors écran.",
+        "Cette version apporte une série de petites améliorations et corrections dans plusieurs parties de NetsuRush.",
+        "Les flux d’export, de notifications, de réglages et d’outils gagnent en clarté et en fiabilité.",
+        "Des optimisations améliorent les performances, la réactivité et la stabilité générale, notamment dans NetsuBoard.",
         "Cette base de NetsuBoard prépare la prochaine mise à jour majeure consacrée au partage de fichiers."
       ],
       "en": [
-        "NetsuBoard gains snapping, group tidying, selection frames, richer palettes, and new drawing and export tools.",
-        "Frames follow their contents, let items be linked or detached, and keep titles and notes readable while zooming out.",
-        "Images, videos, and thumbnails remain smoother through adaptive rendering, background warmup, and improved off-screen culling.",
-        "This NetsuBoard foundation prepares the upcoming major file-sharing update."
+        "This version brings a series of small improvements and fixes across several parts of NetsuRush.",
+        "Export, notification, settings, and tooling flows are clearer and more reliable.",
+        "Optimizations improve performance, responsiveness, and overall stability, including in NetsuBoard.",
+        "This foundation prepares the upcoming major 0.4 update focused on file sharing."
       ]
     }
   },
