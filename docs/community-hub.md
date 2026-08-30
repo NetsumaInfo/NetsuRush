@@ -43,7 +43,9 @@ preset, plugin or community for the task they need.
 7. **Money does not buy trust.** A subscription never grants trusted-author status, faster review of
    dangerous code, moderation immunity or higher organic ranking.
 8. **No hidden paid discovery.** Sponsorships and promoted placements are visibly labelled.
-9. **Start narrow, then earn complexity.** Native video, paid third-party sales and hosted binary
+9. **A focused social network.** Profiles, follows and feeds connect people around Resolve topics;
+   NetsuRush does not optimise for generic viral attention or infinite passive consumption.
+10. **Start narrow, then earn complexity.** Native video, paid third-party sales and hosted binary
    applications are later phases, not launch requirements.
 
 ## 3. Existing foundation
@@ -70,6 +72,12 @@ The landing surface contains:
 - a rotating area for small or specialised channels;
 - tutorials grouped by language, level and Resolve version;
 - outstanding tutorial requests from NetsuHub, visible to creators.
+
+Before sign-in, the home page shows a useful editorial mix. A member can then select the subjects
+they care about—for example Fusion, Color, Fairlight, editing, motion design, anime/AMV, scripting or
+audio—and follow individual channels. Their home page combines recent tutorials, discussions,
+resources and requests from those explicit choices. Every selected subject can be viewed, added or
+removed from the feed settings; personalisation is not inferred secretly from browsing behaviour.
 
 Small-channel discovery is an editorial rotation, not a secret engagement score. Project-authored
 annotations are visibly distinct from YouTube fields.
@@ -98,9 +106,20 @@ zero-result statistics guide channel curation and tutorial requests.
 
 ### 4.3 Directory, claims and playback
 
-Each channel page exposes name, avatar, languages, specialties, recent tutorials and a YouTube link.
-Members can suggest a channel; suggestions enter moderation. A creator can claim a channel, correct
-NetsuRush annotations, submit videos, respond to requests and opt out.
+Each channel page exposes name, avatar, banner, languages, specialties, recent tutorials, linked
+resources/posts, follower count and a YouTube link. Members can follow it without subscribing on
+YouTube; the UI keeps the two actions distinct.
+
+There are three separate channel workflows:
+
+1. **Community suggestion:** any member proposes a missing channel for the searchable directory.
+2. **Creator listing request:** the owner asks to add and claim their channel, proves ownership, and
+   supplies languages, subjects and representative videos.
+3. **Sponsored spotlight request:** a listed/claimed channel asks for a time-limited paid showcase.
+   Sponsorship never becomes a requirement for ordinary listing or organic search inclusion.
+
+All requests enter a visible moderation state. A claimed creator can correct NetsuRush annotations,
+submit videos, respond to tutorial requests, publish channel updates and opt out.
 
 Playback is user-initiated in the official YouTube player. NetsuRush does not obscure player controls,
 manufacture autoplay views or promise that every play will count. `Open in YouTube` and `View channel`
@@ -193,6 +212,32 @@ scopes; it does not read a member's Discord servers, Google Drive or YouTube acc
 Public roles are member, verified creator, trusted resource author, moderator and administrator.
 Helpful and accepted answers can appear on profiles, but no opaque global score decides who may
 speak. New-account rate limits handle abuse without making legitimate beginners prove themselves.
+
+Public profiles provide avatar, banner, biography, languages, Resolve specialties, verified links,
+YouTube channel when applicable, posts, accepted answers, published resources and curated public
+collections. Members control which optional fields are visible. Profiles have stable public URLs and
+can be followed.
+
+### 5.6 Social graph and community home
+
+Members can follow people, claimed YouTube channels and subject tags. Following is deliberately
+simple: no friend approval model, private messaging or automatic contact import in the first release.
+
+The signed-in home feed can contain:
+
+- new videos from followed channels and selected subjects;
+- posts and accepted answers from followed creators;
+- newly approved resources in followed categories;
+- open tutorial/resource requests matching selected subjects;
+- clearly labelled editorial and sponsored spotlights.
+
+Ranking starts with recency, explicit follows, selected subjects and small editorial rotations. It
+does not use an opaque engagement-maximising algorithm. Users can switch to a purely chronological
+view, inspect why an item appears, mute a subject/creator and reset their choices. The feed is finite
+and paginated rather than an endless autoplay surface.
+
+Notifications cover direct replies, mentions, accepted answers, followed-resource releases and
+moderation decisions. Bulk creator/channel activity is summarised to avoid notification spam.
 
 ## 6. Low-friction resource catalogue
 
@@ -358,6 +403,13 @@ may fund a collection, newsletter section, event or visibly promoted placement. 
 states who paid, its duration and what was promised. Sponsors cannot suppress criticism, buy trusted
 status or alter organic results secretly.
 
+A claimed YouTube channel can request a sponsored spotlight page or campaign containing its own
+presentation, specialties, selected videos, posting schedule and direct subscription link. NetsuRush
+reviews it for relevance and disclosure before publication. Sponsored channel cards carry a visible
+label in every placement, have start/end dates, and are excluded from organic ranking calculations.
+An unpaid editorial spotlight remains possible for genuinely useful small channels and is labelled
+as editorial rather than sponsored.
+
 Prepare a sponsor page only after measuring a real audience: active users, tutorial clicks,
 languages, countries and community participation. Do not sell unmeasured impressions.
 
@@ -407,6 +459,7 @@ References: [Better Auth social sign-on](https://better-auth.com/docs/basic-usag
 - Google plus Discord sign-in and account linking;
 - public SSR post lists/details;
 - posts, comments, votes, accepted answers, reports and moderation basics;
+- public member/creator profiles, subject selection and simple follows;
 - processed images and YouTube embeds; no native video or arbitrary attachments;
 - community and legal documents.
 
@@ -415,7 +468,9 @@ References: [Better Auth social sign-on](https://better-auth.com/docs/basic-usag
 - manually seeded channel directory;
 - server-side metadata ingestion and compliant refresh;
 - title/description/channel/tag search and filters;
-- recent uploads, tutorial requests, channel suggestions and claims.
+- recent uploads, tutorial requests, channel suggestions and claims;
+- community-suggestion and creator-listing request workflows;
+- mixed community home built from explicit subjects and follows.
 
 ### Stage 3 — free catalogue
 
@@ -426,7 +481,8 @@ References: [Better Auth social sign-on](https://better-auth.com/docs/basic-usag
 
 ### Stage 4 — sustainability
 
-- Supporter membership, sponsor page, creator profiles, collections, cost and moderation analytics.
+- Supporter membership, sponsor page, sponsored-channel request and spotlight workflows, richer
+  collections, cost and moderation analytics.
 
 ### Stage 5 — higher risk
 
@@ -441,6 +497,8 @@ catalogue from delivering the mission.
 - weekly public readers and authenticated contributors;
 - searches leading to tutorial clicks and zero-result rate;
 - independent channels receiving outbound visits;
+- selected-subject retention, meaningful follows and chronological-feed usage;
+- community/creator channel requests approved and claimed;
 - median time to first useful answer and solved-question rate;
 - requests fulfilled by tutorials or resources;
 - submission-to-approval conversion and moderation queue age by risk lane;
@@ -459,11 +517,13 @@ individual editor is learning.
 | Minimum age and jurisdiction-specific terms | Public writes | Legal review before launch |
 | Moderator capacity and response target | Public writes | At least one backup moderator before growth campaigns |
 | Google OAuth and account-link collisions | Stage 1 | Deliberate linking; never force-link unverified matches |
+| Initial subjects and home-feed explanation | Stage 1 | Explicit choices, recency and visible reasons; no behavioural inference |
 | YouTube quota/policy audit | Stage 2 | Re-check official console immediately before implementation |
 | Accepted resource formats | Stage 3 | Start with inspectable Resolve assets |
 | Trusted-author promotion/revocation | Stage 3 | Identity plus clean history, never payment |
 | R2 domain and cost alert thresholds | Stage 3 | Configure alerts before uploads open |
 | Supporter price and annual option | Stage 4 | Test accessibility of EUR 2–5; full free participation remains |
+| Sponsored channel offer and disclosure format | Stage 4 | Fixed duration and clear label; never required for directory inclusion |
 | Marketplace commission and tax model | Stage 5 | Validate 10–15% range with creators and advisers |
 | Native video eligibility/quotas | Stage 5 | No launch promise; managed streaming only |
 
@@ -474,5 +534,6 @@ individual editor is learning.
 - hosting arbitrary applications, OFX installers or executable archives;
 - executing or silently updating community code;
 - selling third-party resources before legal and operational readiness;
-- a general social network, private messaging system or algorithmic attention feed;
+- a general-purpose network unrelated to Resolve, private messaging, contact importing, stories,
+  short-video autoplay or an opaque engagement-maximising feed;
 - making local NetsuRush tools depend on a community account or server.

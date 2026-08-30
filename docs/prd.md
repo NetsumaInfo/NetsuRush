@@ -30,12 +30,12 @@ Resolve est justement la facilité à *créer* et *partager* des presets et des 
 
 NetsuRush ajoute donc deux surfaces adossées à un serveur du projet :
 
-- **NetsuLearn** — découverte de tutoriels : page d'accueil éditoriale (populaires par thème,
-  dernières sorties, chaînes qui montent), annuaire de chaînes par spécialité, et recherche
-  qui rend une requête métier (« tracker un masque en Fusion ») sur le tutoriel adapté.
+- **NetsuLearn** — découverte de tutoriels : accueil éditorial puis personnalisé par sujets et
+  chaînes suivies, annuaire de chaînes par spécialité, profils créateurs, et recherche qui rend
+  une requête métier (« tracker un masque en Fusion ») sur le tutoriel adapté.
 - **NetsuHub** — échange communautaire : scripts, macros, presets, plugins, avec une aide à
-  l'installation dans Resolve, plus un forum de demandes (tutoriel manquant, preset cherché,
-  entraide).
+  l'installation dans Resolve, plus profils, abonnements aux sujets/créateurs et forum de demandes
+  (tutoriel manquant, preset cherché, entraide).
 
 L'acte 2 est lancé progressivement sur le site : forum public, annuaire de chaînes et recherche
 sur les métadonnées précèdent le stockage de fichiers, l'installation assistée et la vente. Cette
@@ -77,8 +77,8 @@ dépendants d'un serveur. Conception, coûts, sécurité, monétisation et ordre
 | Optimisation | **NetsuBoost** | Diagnostic et libération des ressources de l'hôte | livré |
 | Transfert | **NetsuBridge** | Recopie d'une timeline d'un logiciel vers un autre | livré, runtime Adobe non testé |
 | Export AE | — | Export d'une timeline vers After Effects (`.jsx`) | livré |
-| Tutoriels | **NetsuLearn** | Fil éditorial, annuaire de chaînes par spécialité, recherche de tutoriels Resolve | planifié (phase 2) |
-| Communauté | **NetsuHub** | Scripts, macros Fusion, presets et plugins ; installation assistée dans Resolve ; forum de demandes | planifié (phase 2) |
+| Tutoriels | **NetsuLearn** | Accueil par sujets/chaînes suivies, annuaire, profils créateurs et recherche de tutoriels Resolve | planifié (phase 2) |
+| Communauté | **NetsuHub** | Profils et abonnements, forum, scripts, macros, presets et plugins ; installation assistée | planifié (phase 2) |
 
 Les modules marqués « runtime non testé » compilent et passent leurs tests, mais exigent un
 logiciel tiers, un GPU ou des modèles téléchargés pour être exercés de bout en bout.
