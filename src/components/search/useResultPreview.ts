@@ -4,7 +4,8 @@ import { acquirePlaySlot, PLAY_LEAD_PX } from "@/components/rushes/cutStudioShar
 import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
-import { retainPausedVideo } from "@/lib/previewVideoPool";
+import { retainPausedVideo, requestPreloadMount } from "@/lib/previewVideoPool";
+import { useGranted } from "@/lib/useGranted";
 import { getThumb, setThumb as setThumbCache, subscribeThumbs } from "@/lib/thumbCache";
 import { claimHoverPreview } from "@/lib/hoverPreview";
 
@@ -46,7 +47,6 @@ export function useResultPreview(opts: {
   const [nearThumb, setNearThumb] = useState(false);
   const [nearVideo, setNearVideo] = useState(false);   // ±lookahead : pré-encode le proxy en avance
   const [visible, setVisible] = useState(false);       // vraiment à l'écran : proxy en priorité 'high'
-  const [staggerReady, setStaggerReady] = useState(false);
   const [fetchedUrl, setFetchedUrl] = useState<string | null>(null);
   // Le cache de la vue prime : quand il connaît déjà le proxy, la carte n'a RIEN à demander et monte
   // sa <video> dans ce rendu-ci. `bustProxy` vide l'entrée → repli sur le chemin asynchrone.
@@ -127,17 +127,14 @@ export function useResultPreview(opts: {
   // Le survol N'ENTRE PAS dans cette condition : il y rendait le créneau en entrant sous le curseur
   // et le redemandait en sortant, en repassant par la file — la carte se figeait alors qu'elle jouait
   // déjà, et chaque passage de souris relançait le cycle. Cf. useSceneCardMedia.
-  useEffect(() => {
-    if (!(play && visible)) { setStaggerReady(false); return; }
-    const release = acquirePlaySlot(index, () => setStaggerReady(true));
-    return () => { release(); setStaggerReady(false); };
-  }, [play, visible, index]);
+  // Droit accordé (cf. useGranted) : il retombe sans re-rendu à la sortie de la bande de lecture.
+  const slotGranted = useGranted(play && visible, (grant) => acquirePlaySlot(index, grant), [index]);
 
   // On encode le proxy UNIQUEMENT quand la carte joue vraiment : survol (immédiat) ou créneau de
-  // lecture accordé (staggerReady, échelonné). PAS de pré-encode spéculatif de tout l'écran : « Tout
+  // lecture accordé (échelonné). PAS de pré-encode spéculatif de tout l'écran : « Tout
   // lire » demandait sinon un proxy pour CHAQUE carte visible d'un coup → NVENC noyé (PROXY_MAX) →
   // la plupart échouaient → la lecture ne démarrait pas. Le créneau pace les demandes (cf. derush).
-  const wantVideo = nearVideo && (hovered || (play && staggerReady));
+  const wantVideo = nearVideo && (hovered || slotGranted);
 
   // L'élément naît DÈS la bande de préchauffe, sans attendre le créneau, et reste MONTÉ tant que la
   // carte est dans la bande : on met en pause plutôt que de détruire l'élément média (chargement +
@@ -147,9 +144,15 @@ export function useResultPreview(opts: {
   // Le pool a démonté cet élément faute de place : ne PAS le remonter pour la simple préchauffe, le
   // rendu et le pool se relanceraient sans fin. Veto levé à la sortie de bande.
   const [preloadEvicted, setPreloadEvicted] = useState(false);
-  useEffect(() => { if (!nearVideo) setPreloadEvicted(false); }, [nearVideo]);
-  const preload = nearVideo && (play || hovered) && !preloadEvicted;
-  if ((wantVideo || preload) && url && !held) setHeld(true);
+  if (preloadEvicted && !nearVideo) setPreloadEvicted(false);
+  // Préchauffe RYTHMÉE par le même régulateur que la grille de plans (previewVideoPool) : le tour
+  // accordé pose `held` ; une carte qui doit jouer n'attend pas. Cf. useSceneCardMedia.
+  const preloadWanted = nearVideo && (play || hovered) && !preloadEvicted && !!url;
+  useEffect(() => {
+    if (!preloadWanted || wantVideo || held) return;
+    return requestPreloadMount(index, () => setHeld(true));
+  }, [preloadWanted, wantVideo, held, index]);
+  if (wantVideo && url && !held) setHeld(true);
   if (held && !url) setHeld(false);
   useEffect(() => {
     if (!held || nearVideo) return;
@@ -194,12 +197,10 @@ export function useResultPreview(opts: {
   // ANTICIPATION : en lecture auto, une carte de la bande jouera à coup sûr en arrivant à l'écran →
   // on encode son proxy MAINTENANT, en priorité basse. Bandé + retardé + plafonné, exactement comme
   // la grille de derush (cf. useSceneCardMedia pour le détail des trois garde-fous).
-  const [prefetchReady, setPrefetchReady] = useState(false);
-  useEffect(() => {
-    if (!(play && nearVideo)) { setPrefetchReady(false); return; }
-    const timer = setTimeout(() => setPrefetchReady(true), PREFETCH_SETTLE_MS);
-    return () => { clearTimeout(timer); setPrefetchReady(false); };
-  }, [play, nearVideo]);
+  const prefetchReady = useGranted(play && nearVideo, (settled) => {
+    const timer = setTimeout(settled, PREFETCH_SETTLE_MS);
+    return () => clearTimeout(timer);
+  });
 
   // La préchauffe qui s'arrête parce que la carte passe en LECTURE ne doit PAS annuler sa demande en
   // vol : c'est exactement celle qu'on attend. Seule une vraie sortie de bande tue l'encode.

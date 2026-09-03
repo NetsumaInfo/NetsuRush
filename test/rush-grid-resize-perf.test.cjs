@@ -116,12 +116,12 @@ test('an evicted preview is not remounted by the preload path alone', () => {
   const media = read('src/components/rushes/useSceneCardMedia.ts');
   assert.match(media, /retainPausedVideo\(\(\) => \{ setHeld\(false\); setPreloadEvicted\(true\); \}\)/);
   assert.match(media, /const preloadWanted = nearVideo && \(play \|\| hovered\) && !preloadEvicted/);
-  assert.match(media, /if \(!nearVideo\) setPreloadEvicted\(false\)/,
+  assert.match(media, /if \(preloadEvicted && !nearVideo\) setPreloadEvicted\(false\)/,
     'the veto must be lifted when the card leaves the band, or it never preloads again');
   // La préchauffe est RYTHMÉE (créer un WebMediaPlayer bloque le thread principal), mais une carte
   // qui doit jouer ne fait jamais la queue : elle se figerait alors qu'elle a déjà son créneau.
-  assert.match(media, /requestPreloadMount\(index, \(\) => setPreloadReady\(true\)\)/);
-  assert.match(media, /if \(!preloadWanted \|\| wantVideo\) \{ setPreloadReady\(false\); return; \}/,
+  assert.match(media, /requestPreloadMount\(index, \(\) => setHeld\(true\)\)/);
+  assert.match(media, /if \(!preloadWanted \|\| wantVideo \|\| held\) return;/,
     'a card that must play now must bypass the mount pacer');
 });
 
@@ -164,9 +164,11 @@ test('the search preview hook follows the same playback mechanics as the shot gr
     'the preload band must be derived from the play band so it always covers it');
   assert.match(src, /const url = fetchedUrl \?\? peekProxy\?\.\(\) \?\? null/,
     'a resolved proxy URL must be read synchronously while rendering');
-  assert.match(src, /const preload = nearVideo && \(play \|\| hovered\) && !preloadEvicted/,
+  assert.match(src, /const preloadWanted = nearVideo && \(play \|\| hovered\) && !preloadEvicted/,
     'the <video> must mount on the preload band, with the anti-loop veto');
-  assert.match(src, /if \(!\(play && visible\)\) \{ setStaggerReady\(false\); return; \}/,
+  assert.match(src, /requestPreloadMount\(index, \(\) => setHeld\(true\)\)/,
+    'speculative mounts must go through the shared pacer, like the shot grid');
+  assert.match(src, /useGranted\(play && visible, \(grant\) => acquirePlaySlot\(index, grant\), \[index\]\)/,
     'hover must not make the card drop and re-queue its play slot');
   assert.match(src, /if \(!settled\) nr\.proxyCancel\(token\)/,
     'a request that already resolved has nothing left to cancel');

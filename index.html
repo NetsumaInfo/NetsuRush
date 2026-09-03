@@ -20,6 +20,10 @@
           var p = new URLSearchParams(location.search);
           var core = p.get("core");
           if (core) window.__NR_CORE__ = core;
+          // ?tk=<token de core-port.json> : sans lui /media et /stream répondent 403, donc une grille
+          // ouverte dans un navigateur reste sans vignette ni aperçu (cf. coreClient `TOKEN`).
+          var tk = p.get("tk");
+          if (tk) window.__NR_TOKEN__ = tk;
           if (p.get("remote") === "1") window.__NR_REMOTE__ = true;
           var host = p.get("host");
           if (host) window.__NR_HOST__ = host;
