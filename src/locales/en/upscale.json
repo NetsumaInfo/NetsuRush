@@ -325,6 +325,7 @@
     "seqFolderNote": "Each source gets its own folder: {{file}}",
     "namingPatternNote": "The pattern names every output: tokens are resolved at launch. A media renamed in the tray keeps its own name.",
     "namingPlaceholder": "{name}_{op}_{scale}",
+    "insertToken": "Insert a token",
     "token": {
       "name": "Source file name, without its extension",
       "op": "Operation applied (upscaled, interp, depth…)",

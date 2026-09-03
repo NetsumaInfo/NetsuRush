@@ -178,7 +178,13 @@
     "bgcolorLabel": "Farbhintergrund (MP4)",
     "bgcolorHint": "Objekt auf der Hintergrundfarbe des Anzeigemodus komponiert",
     "pngLabel": "PNG-Sequenz (Matte)",
-    "pngHint": "Ein Matte-Bild pro Frame"
+    "pngHint": "Ein Matte-Bild pro Frame",
+    "pngAlphaLabel": "PNG (Alpha)",
+    "pngAlphaHint": "Freigestelltes Bild, transparenter Hintergrund",
+    "jpegBgLabel": "JPEG (Farbhintergrund)",
+    "jpegBgHint": "Objekt über die Hintergrundfarbe des Anzeigemodus gelegt",
+    "pngMatteLabel": "S/W-Maske (PNG)",
+    "pngMatteHint": "Nur Schwarz-Weiß-Maske"
   },
   "sam": {
     "large": "Bessere Maskenqualität, mehr VRAM.",

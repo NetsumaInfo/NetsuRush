@@ -325,6 +325,7 @@
     "seqFolderNote": "Jede Quelle bekommt ihren Ordner: {{file}}",
     "namingPatternNote": "Das Muster benennt alle Ausgaben: Token werden beim Start ersetzt. Ein in der Ablage umbenanntes Medium behält seinen Namen.",
     "namingPlaceholder": "{name}_{op}_{scale}",
+    "insertToken": "Platzhalter einfügen",
     "token": {
       "name": "Name der Quelldatei, ohne Erweiterung",
       "op": "Angewandte Verarbeitung (upscaled, interp, depth…)",

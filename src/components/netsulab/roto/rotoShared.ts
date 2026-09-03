@@ -132,8 +132,18 @@ export const EXPORT_FORMATS: { id: string; label: string; hint: string }[] = [
   { id: "png_seq", label: "Séquence PNG (masque)", hint: "Une image de masque par image vidéo" },
 ];
 
+// Still sources write ONE image, so none of the video formats above applies: the picture keeps its
+// alpha (PNG), gets flattened onto the display background colour (JPEG, which carries no alpha), or
+// the mask alone comes out to be reused elsewhere.
+export const STILL_EXPORT_FORMATS: { id: string; label: string; hint: string }[] = [
+  { id: "png_alpha", label: "PNG (alpha)", hint: "Image détourée, fond transparent" },
+  { id: "jpeg_bgcolor", label: "JPEG (fond couleur)", hint: "Objet composé sur la couleur de fond du mode d’affichage" },
+  { id: "png_matte", label: "Masque N&B (PNG)", hint: "Masque noir et blanc seul" },
+];
+
 // Clé i18n courte de chaque format : les ids portent le codec, les libellés sont traduits.
 export const EXPORT_FMT_KEY: Record<string, string> = {
   prores_4444: "prores", webm_alpha: "webm", ffv1_alpha: "ffv1",
   matte_mp4: "matte", bgcolor_mp4: "bgcolor", png_seq: "png",
+  png_alpha: "pngAlpha", jpeg_bgcolor: "jpegBg", png_matte: "pngMatte",
 };

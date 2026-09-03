@@ -178,7 +178,13 @@
     "bgcolorLabel": "Fondo de color (MP4)",
     "bgcolorHint": "Objeto compuesto sobre el color de fondo del modo de visualización",
     "pngLabel": "Secuencia PNG (matte)",
-    "pngHint": "Una imagen de matte por fotograma"
+    "pngHint": "Una imagen de matte por fotograma",
+    "pngAlphaLabel": "PNG (alfa)",
+    "pngAlphaHint": "Imagen recortada, fondo transparente",
+    "jpegBgLabel": "JPEG (fondo de color)",
+    "jpegBgHint": "Objeto compuesto sobre el color de fondo del modo de visualización",
+    "pngMatteLabel": "Máscara B/N (PNG)",
+    "pngMatteHint": "Solo máscara en blanco y negro"
   },
   "sam": {
     "large": "Mejor calidad de máscara, más VRAM.",

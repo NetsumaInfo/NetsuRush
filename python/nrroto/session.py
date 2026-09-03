@@ -15,6 +15,7 @@ réels), post-traitement NON destructif des masques (postproc), ROI auto pour le
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -31,6 +32,9 @@ FFMPEG = os.environ.get("NETSURUSH_FFMPEG", "ffmpeg")
 MAX_W = 1920  # plafond d'extraction (SAM travaille en 1024 de toute façon ; l'alpha est recalé à l'export)
 CACHE_ROOT = os.environ.get("NETSURUSH_ROTO_CACHE", "") or os.path.join(tempfile.gettempdir(), "nr-roto-cache")
 CACHE_KEEP = 6  # sessions gardées sur disque (LRU par mtime)
+# STILL sources: mirror of STILL_RE on the renderer side (components/upscale/imageOutput.ts).
+# GIF stays out - it is decoded as a video, so it keeps its frames.
+STILL_RE = re.compile(r"\.(?:png|jpe?g|webp|bmp|tiff?|tga|dpx|exr|jfif)$", re.I)
 
 # Moteurs de suppression d'objet CÂBLÉS : id → (env des poids, libellé).
 # `minimax-remover` (CC-BY-NC, diffusion vidéo cohérente temporellement) est le seul câblé depuis le
@@ -117,6 +121,10 @@ class RotoSession:
         self.post = postproc.default_post()   # post-traitement non destructif (overlay + export)
         self.view = {"mode": "edit", "outline": False, "bg": "#00ff00"}   # mode d'affichage du masque
         self.propagated = False
+        # Still source: one frame, so no tracking to propagate and an IMAGE output. The mask that
+        # was drawn stands as it is (see `_commit_still`).
+        self.still = False
+        self._still_sig = None    # fingerprint of the masks already written as mattes (still)
         self.work = None          # dossier de cache de la session (frames/ + mattes/)
         self.sam_dir = None       # dossier de poids SAM demandé (sélecteur UI)
         self.sam_model = None     # id du modèle demandé : décide de la GÉNÉRATION du moteur
@@ -152,6 +160,7 @@ class RotoSession:
             self.engine = _make_engine(sam_model)
         self.sam_model = sam_model
         self.video, self.w, self.h, self.fps = video, int(w), int(h), float(fps or 24)
+        self.still = bool(STILL_RE.search(video))
         self.in_s = float(in_s) if in_s is not None else None
         self.scale = min(1.0, MAX_W / float(w))
         key = _cache_key(video, in_s, out_s)
@@ -189,7 +198,7 @@ class RotoSession:
         self.frames = total_f   # estimation ; corrigée par extractdone (meta + SSE)
         return {"ok": True, "frames": total_f, "w": self.w, "h": self.h, "fps": self.fps,
                 "framesDir": frames_dir, "work": self.work, "ready": False, "cached": False,
-                "deduped": False}
+                "deduped": False, "still": self.still}
 
     def _try_cache(self):
         """Session déjà en cache et complète → restaure frames + points + suivi, zéro extraction."""
@@ -218,6 +227,7 @@ class RotoSession:
                for (f, o), lst in sorted(self.points.items()) for (x, y, lb) in lst]
         return {"ok": True, "frames": n, "w": self.w, "h": self.h, "fps": self.fps,
                 "framesDir": frames_dir, "work": self.work, "ready": True, "cached": True,
+                "still": self.still,
                 "tracked": self.propagated, "points": pts, "refined": self.refined,
                 "names": {str(k): v for k, v in self.names.items()},
                 "deduped": os.path.isdir(dedupe_mod.backup_dir(self.work))}
@@ -585,6 +595,36 @@ class RotoSession:
         return {"ok": True, "groups": groups, "changed": changed}
 
     # ---- propagation / exports ----
+    def _commit_still(self):
+        """Still source: the mask that was drawn IS the result, there is nothing to propagate.
+
+        Writes the live masks of frame 0 as mattes (union + obj-N), so everything downstream —
+        post-processing, fine matte, export, object removal — runs the video chain without ever
+        loading SAM's video predictor. Only rewritten when the masks changed, and the fine matte
+        computed from the old ones is then stale, exactly as after a new propagation."""
+        masks = self.current.get(0)
+        if not masks:
+            return self.propagated
+        sig = tuple(sorted((int(o), hash(m.tobytes())) for o, m in masks.items()))
+        if self.propagated and sig == self._still_sig:
+            return True
+        self._drop_refined()
+        unique = self._unique_mattes_dir()
+        shutil.rmtree(self._mattes_dir(), ignore_errors=True)
+        shutil.rmtree(unique, ignore_errors=True)
+        os.makedirs(unique, exist_ok=True)
+        overlay.save_mattes(unique, 0, masks)
+        dedupe_mod.expand_unique_mattes(unique, self._mattes_dir(), 0, [0])
+        self._still_sig = sig
+        self.propagated = True
+        return True
+
+    def _ensure_committed(self):
+        """Downstream steps read the mattes from disk. On a still we write them on the fly: asking
+        the user to "track" a single frame would mean nothing on screen."""
+        if self.still:
+            self._commit_still()
+
     def propagate(self, mode="all", frame=None, in_f=None, out_f=None, count=None):
         """mode=all : suivi complet (avant + arrière depuis les frames annotées, mattes remises à
         zéro). mode=forward|backward : re-propagation PARTIELLE depuis `frame` (correction locale,
@@ -596,6 +636,10 @@ class RotoSession:
         sémantique exacte de max_frame_num_to_track → pas-à-pas fiable, jamais « tout »)."""
         if not self.points:
             return {"ok": False, "error": t("add_point_first")}
+        # A still has nothing to propagate: burn the current mask and stop there.
+        if self.still:
+            self._commit_still()
+            return {"ok": True, "frames": 1, "uniqueFrames": 1, "canceled": False}
         self._ensure_open()
         # Une propagation partielle repart des mattes pré-déduplication pour ne pas figer les zones
         # hors de sa portée. Une propagation complète va tout réécrire et peut supprimer directement.
@@ -705,18 +749,34 @@ class RotoSession:
 
     def export(self, fmt, out=None, mode=None, obj=None, bg=None):
         """Export : `obj` = id d'objet (matte de CET objet seul) ou None (union de tous)."""
+        self._ensure_committed()
         if not self.propagated:
             return {"ok": False, "error": t("track_before_export")}
-        import re
         scope = ("obj-%d" % int(obj)) if obj else "union"
         raw = (self.names.get(int(obj)) or scope) if obj else ""
         suffix = ("_%s" % re.sub(r'[\\/:*?"<>|]+', "_", raw)) if obj else ""
         base = os.path.splitext(self.video)[0] + "_roto" + suffix
         out = out or base
         _stage("export")
-        path = export_alpha.export(self.video, self._post_dir(scope), fmt, out, self.fps,
-                                   self.in_s, bg=bg or self.view.get("bg"))
+        post = self._post_dir(scope)
+        if self.still:
+            # A still writes an IMAGE: one matte, no frame rate and no offset in the composite.
+            # The alpha is still scaled back onto the full-resolution source, as it is for video.
+            path = export_alpha.export_still(self.video, self._still_matte(post), fmt, out,
+                                             bg=bg or self.view.get("bg"))
+        else:
+            path = export_alpha.export(self.video, post, fmt, out, self.fps,
+                                       self.in_s, bg=bg or self.view.get("bg"))
         return {"ok": True, "output": path}
+
+    @staticmethod
+    def _still_matte(post_dir):
+        """The single matte of a still session. Its index is not necessarily 0 (the folder may come
+        from a bounded track), so take the first PNG present."""
+        names = sorted(n for n in os.listdir(post_dir) if n.endswith(".png"))
+        if not names:
+            raise RuntimeError(t("track_before_export"))
+        return os.path.join(post_dir, names[0])
 
     def _refine_proc(self, eng):
         """Processeur d'affinage, gardé CHAUD tant que le moteur ne change pas.
@@ -905,6 +965,7 @@ class RotoSession:
             if self.video is None:
                 return {"ok": False, "error": t("no_video")}
             return self._refine_test(eng, int(frame), steady, cap)
+        self._ensure_committed()
         if not self.propagated:
             return {"ok": False, "error": t("track_before_refine")}
 
@@ -1106,6 +1167,20 @@ class RotoSession:
             full.paste(Image.open(path).convert("L"), (rect[0], rect[1]))
             full.save(path)
 
+    def _remove_still(self, label, runner, kw, out):
+        """Object removal on a still: the engine renders one frame, so write that frame as an image.
+        A one-frame video would be a deliverable nobody can reopen as a picture."""
+        try:
+            img = runner(out_path=os.path.join(self.work, "remove_still.mp4"),
+                         start=0, count=1, preview_index=0, **kw)
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": t("engine_failed", engine=label, error=exc)}
+        path = out or (os.path.splitext(self.video)[0] + "_remove.png")
+        if not path.lower().endswith((".png", ".jpg", ".jpeg")):
+            path += ".png"
+        img.convert("RGB").save(path)
+        return {"ok": True, "output": path}
+
     def _remove_test(self, eng, label, runner, kw, frame):
         """TEST sur UNE image (« et si ? » avant de lancer tout le plan) : aperçu seul, rien n'est
         écrit hors du dossier de travail. MiniMax exige une fenêtre Wan de 13 frames (4k+1) centrée —
@@ -1135,6 +1210,7 @@ class RotoSession:
 
         plate (bool) · harmonize/grain (0..100 côté UI, ramenés en 0..1) · quality (px, MiniMax
         seul : palier de résolution de diffusion)."""
+        self._ensure_committed()
         if not self.propagated:
             return {"ok": False, "error": t("segment_before_remove")}
         eng = str(engine or DEFAULT_REMOVE_ENGINE)
@@ -1181,6 +1257,8 @@ class RotoSession:
         self._release_matte()
         if frame is not None:
             return self._remove_test(eng, label, runner, kw, int(frame))
+        if self.still:
+            return self._remove_still(label, runner, kw, out)
         out_path = out or (os.path.splitext(self.video)[0] + "_remove.mp4")
         from nrroto.video import Canceled
         try:

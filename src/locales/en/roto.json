@@ -178,7 +178,13 @@
     "bgcolorLabel": "Color background (MP4)",
     "bgcolorHint": "Object comped over the display mode's background color",
     "pngLabel": "PNG sequence (matte)",
-    "pngHint": "One matte image per frame"
+    "pngHint": "One matte image per frame",
+    "pngAlphaLabel": "PNG (alpha)",
+    "pngAlphaHint": "Cut-out image, transparent background",
+    "jpegBgLabel": "JPEG (color background)",
+    "jpegBgHint": "Object comped over the display mode's background color",
+    "pngMatteLabel": "B&W matte (PNG)",
+    "pngMatteHint": "Black and white mask only"
   },
   "sam": {
     "large": "Better mask quality, more VRAM.",

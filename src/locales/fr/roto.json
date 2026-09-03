@@ -178,7 +178,13 @@
     "bgcolorLabel": "Fond couleur (MP4)",
     "bgcolorHint": "Objet composé sur la couleur de fond du mode d'affichage",
     "pngLabel": "Séquence PNG (masque)",
-    "pngHint": "Une image de masque par image vidéo"
+    "pngHint": "Une image de masque par image vidéo",
+    "pngAlphaLabel": "PNG (alpha)",
+    "pngAlphaHint": "Image détourée, fond transparent",
+    "jpegBgLabel": "JPEG (fond couleur)",
+    "jpegBgHint": "Objet composé sur la couleur de fond du mode d'affichage",
+    "pngMatteLabel": "Masque N&B (PNG)",
+    "pngMatteHint": "Masque noir et blanc seul"
   },
   "sam": {
     "large": "Meilleure qualité de masque, plus de VRAM.",

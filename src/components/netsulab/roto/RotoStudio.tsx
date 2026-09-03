@@ -12,7 +12,8 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { fmtTime } from "@/lib/utils";
 import { Accordion } from "@/components/ui/accordion";
 import {
-  isDefaultPost, EXPORT_FMT_KEY, EXPORT_FORMATS, REMOVE_ENGINES, REFINE_ENGINES, SAM_MODELS, VIEW_MODES,
+  isDefaultPost, EXPORT_FMT_KEY, EXPORT_FORMATS, STILL_EXPORT_FORMATS, REMOVE_ENGINES, REFINE_ENGINES,
+  SAM_MODELS, VIEW_MODES,
 } from "./rotoShared";
 import { UpscaleCompare } from "@/components/upscale/UpscaleCompare";
 import type { FrameCompare } from "@/components/upscale/useProcSources";
@@ -53,6 +54,12 @@ export function RotoStudio() {
   const [removeEngine, setRemoveEngine] = useState(REMOVE_ENGINES[0].id);
   // Format d'export tenu ICI : le tiroir « Sortie » le résume quand il est fermé.
   const [exportFmt, setExportFmt] = useState(EXPORT_FORMATS[0].id);
+  // A still writes an image, a clip writes a video: the two format lists have nothing in common, so
+  // switching source kind falls back to the first format of the list that now applies.
+  const exportFormats = s.still ? STILL_EXPORT_FORMATS : EXPORT_FORMATS;
+  useEffect(() => {
+    setExportFmt((cur) => (exportFormats.some((f) => f.id === cur) ? cur : exportFormats[0].id));
+  }, [exportFormats]);
   const sections = useRotoSections();
 
   // Résumés affichés sur un tiroir FERMÉ : sans eux, replier une section cacherait son état au
@@ -69,8 +76,9 @@ export function RotoStudio() {
   const maskSummary = s.refined
     ? t(s.useRefined ? "summary.matteOn" : "summary.matteOff")
     : postCount ? t("summary.post", { count: postCount }) : t("summary.matteNone");
-  const outputSummary = t(`exportFmt.${EXPORT_FMT_KEY[exportFmt]}Label`, {
-    defaultValue: EXPORT_FORMATS.find((f) => f.id === exportFmt)?.label ?? exportFmt,
+  const outputFmt = exportFormats.find((f) => f.id === exportFmt) ?? exportFormats[0];
+  const outputSummary = t(`exportFmt.${EXPORT_FMT_KEY[outputFmt.id]}Label`, {
+    defaultValue: outputFmt.label,
   });
   const removeSummary = t("summary.remove", { steps: s.removeParams.steps, seed: s.removeParams.seed });
 
@@ -93,10 +101,10 @@ export function RotoStudio() {
   // Idem pour la suppression d'objet : elle exige le suivi (`disabled={!s.tracked}`), donc avant
   // lui son tiroir ne sert à rien — et après, c'est la sortie qu'on cherche.
   useEffect(() => {
-    if (!s.tracked) return;
+    if (!s.outputReady) return;
     sections.openOnce("mask");
     sections.openOnce("remove");
-  }, [s.tracked, sections]);
+  }, [s.outputReady, sections]);
 
   // Va à une frame donnée en coupant la lecture (scrub/step manuels).
   const goto = useCallback((f: number) => {
@@ -110,8 +118,10 @@ export function RotoStudio() {
 
   // Navigation clavier (hors saisie de texte) : ←/→ image (Maj ×10), J/K/L lecture pro, Espace,
   // I/O bornes de plage (Maj = effacer), 1-9 objet actif, PgUp/PgDn frames annotées, Ctrl+Z undo.
+  // Une image fixe garde les raccourcis qui ne parlent pas de temps (undo, objet actif, polarité du
+  // point) : seuls les déplacements d'image n'ont plus de cible, et `goto` les borne déjà.
   useEffect(() => {
-    if (!active || nbFrames < 2) return;
+    if (!active || !nbFrames) return;
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
@@ -168,7 +178,8 @@ export function RotoStudio() {
         ) : (
           <>
             <RotoViewer s={s} shown={view.shown} stopPlayback={view.stop} />
-            <RotoTimeline s={s} goto={goto} />
+            {/* One frame: nothing to scrub, and a filmstrip with a single thumbnail is just noise. */}
+            {nbFrames > 1 && <RotoTimeline s={s} goto={goto} />}
             {nbFrames > 1 && (
               <div className="flex w-full min-w-0 max-w-full flex-wrap items-center gap-2">
                 <Tooltip>
@@ -244,11 +255,14 @@ export function RotoStudio() {
               </div>
             </RotoSection>
 
-            {/* 2. Propager la sélection sur le plan. */}
-            <RotoSection id="track" title={t("panels.track")}
-              summary={s.tracked ? t("summary.tracked") : t("summary.notTracked")}>
-              <TrackButtons s={s} running={running} />
-            </RotoSection>
+            {/* 2. Propager la sélection sur le plan. Une image fixe n'a rien à propager : le masque
+                   posé fait foi, et l'étape disparaît au lieu d'offrir un suivi d'une seule image. */}
+            {!s.still && (
+              <RotoSection id="track" title={t("panels.track")}
+                summary={s.tracked ? t("summary.tracked") : t("summary.notTracked")}>
+                <TrackButtons s={s} running={running} />
+              </RotoSection>
+            )}
 
             {/* 3. Ce qu'on regarde — un mode, pas un réglage : il change en permanence pendant le travail. */}
             <RotoSection id="view" title={t("panels.display")} summary={t(viewLabelKey)}>
@@ -274,8 +288,8 @@ export function RotoStudio() {
             <RotoSection id="remove" title={t("panels.removeObject")} summary={removeSummary}>
               <div className="space-y-1.5">
                 <EngineRow label={t("panels.removeObject")} icon={Eraser} engines={REMOVE_ENGINES}
-                  installed={s.installedModels} disabled={!s.tracked || running} onRun={s.removeSelected}
-                  onTest={s.testRemove} testDisabled={!s.tracked || running} onEngineChange={setRemoveEngine} />
+                  installed={s.installedModels} disabled={!s.outputReady || running} onRun={s.removeSelected}
+                  onTest={s.testRemove} testDisabled={!s.outputReady || running} onEngineChange={setRemoveEngine} />
                 <RemoveParamsRows value={s.removeParams} onChange={s.setRemoveParams} disabled={running}
                   diffusion={removeEngine === "minimax-remover"} />
               </div>
@@ -285,8 +299,8 @@ export function RotoStudio() {
                    tout ce qui précède — masque, matte, effacement — décide de ce qu'il contient. */}
             <RotoSection id="output" title={t("panels.output")} summary={outputSummary}>
               <RotoStep label={t("output.exportStep")}>
-                <ExportRow fmt={exportFmt} onFmtChange={setExportFmt} disabled={!s.tracked || running}
-                  objects={s.objects} onExport={s.exportAs} />
+                <ExportRow fmt={exportFmt} onFmtChange={setExportFmt} formats={exportFormats}
+                  disabled={!s.outputReady || running} objects={s.objects} onExport={s.exportAs} />
               </RotoStep>
             </RotoSection>
           </Accordion>

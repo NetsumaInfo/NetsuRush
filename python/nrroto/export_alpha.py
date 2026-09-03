@@ -70,3 +70,45 @@ def export(video, union_dir, fmt, out, fps, in_s=None, bg=None):
          ["-filter_complex", "[1:v][0:v]scale2ref[m][v];[v][m]alphamerge[outv]",
           "-map", "[outv]", "-shortest"] + codec + [out])
     return out
+
+
+# Still sources: one matte, one image out. `png_alpha` keeps the cut-out transparent, `jpeg_bgcolor`
+# flattens it onto a solid colour (JPEG carries no alpha), `png_matte` writes the mask alone.
+STILL_FORMATS = {
+    "png_alpha": (".png", ["-frames:v", "1", "-pix_fmt", "rgba"]),
+    "jpeg_bgcolor": (".jpg", ["-frames:v", "1", "-q:v", "2", "-pix_fmt", "yuvj420p"]),
+    "png_matte": (".png", ["-frames:v", "1"]),
+}
+
+
+def export_still(image, matte, fmt, out, bg=None):
+    """Composites ONE matte onto a still source and writes an image.
+
+    The matte lives at the extraction resolution (capped at 1920) while the source may be larger:
+    `scale2ref` puts the alpha back onto the source pixels, so the exported image keeps its full
+    resolution instead of the one SAM happened to work at."""
+    suffix, codec = STILL_FORMATS.get(fmt, STILL_FORMATS["png_alpha"])
+    if not out.lower().endswith(suffix):
+        out += suffix
+
+    if fmt == "png_matte":
+        # Mask alone, but at the SOURCE resolution: a matte exported smaller than the picture it
+        # describes cannot be reused on that picture in another tool.
+        _run(["-i", image, "-i", matte,
+              "-filter_complex", "[1:v][0:v]scale2ref[m][v]",
+              "-map", "[m]"] + codec + [out])
+        return out
+
+    if fmt == "jpeg_bgcolor":
+        color = "0x%s" % (bg or "00ff00").lstrip("#")
+        _run(["-i", image, "-i", matte, "-f", "lavfi", "-i", "color=c=%s" % color,
+              "-filter_complex",
+              "[1:v][0:v]scale2ref[m][v];[2:v][0:v]scale2ref[c][v2];"
+              "[v2][m]alphamerge[fg];[c][fg]overlay=shortest=1[outv]",
+              "-map", "[outv]"] + codec + [out])
+        return out
+
+    _run(["-i", image, "-i", matte,
+          "-filter_complex", "[1:v][0:v]scale2ref[m][v];[v][m]alphamerge[outv]",
+          "-map", "[outv]"] + codec + [out])
+    return out

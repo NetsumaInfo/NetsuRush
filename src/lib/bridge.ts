@@ -529,6 +529,7 @@ export interface RotoOpenResult {
   ok: boolean; frames?: number; w?: number; h?: number; fps?: number; framesDir?: string;
   work?: string; ready?: boolean; cached?: boolean; tracked?: boolean; deduped?: boolean;
   refined?: boolean;                // un matte fin est déjà en cache pour ce suivi
+  still?: boolean;                  // source image fixe : une seule frame, sortie image
   points?: { frame: number; obj: number; x: number; y: number; label: 0 | 1 }[];   // px SOURCE
   names?: Record<string, string>;   // noms d'objets persistés (id -> nom)
   error?: string;

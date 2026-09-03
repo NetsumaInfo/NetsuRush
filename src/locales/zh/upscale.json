@@ -325,6 +325,7 @@
     "seqFolderNote": "每个源都有自己的文件夹：{{file}}",
     "namingPatternNote": "该模板决定所有输出名称：占位符在运行时替换；在选择栏中单独重命名的媒体保留自己的名称。",
     "namingPlaceholder": "{name}_{op}_{scale}",
+    "insertToken": "插入标记",
     "token": {
       "name": "源文件名（不含扩展名）",
       "op": "所应用的处理（upscaled、interp、depth 等）",

@@ -178,7 +178,13 @@
     "bgcolorLabel": "纯色背景（MP4）",
     "bgcolorHint": "对象合成在显示模式的背景色上",
     "pngLabel": "PNG 序列（遮罩）",
-    "pngHint": "每帧一张遮罩图"
+    "pngHint": "每帧一张遮罩图",
+    "pngAlphaLabel": "PNG（Alpha）",
+    "pngAlphaHint": "抠像图片，背景透明",
+    "jpegBgLabel": "JPEG（背景色）",
+    "jpegBgHint": "对象合成在显示模式的背景色上",
+    "pngMatteLabel": "黑白遮罩（PNG）",
+    "pngMatteHint": "仅黑白遮罩"
   },
   "sam": {
     "large": "蒙版质量更好，占用更多 VRAM。",

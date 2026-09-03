@@ -1,10 +1,14 @@
 import { useRef } from "react";
-import { AlertTriangle, FolderOpen, ListOrdered, RotateCcw } from "lucide-react";
+import { AlertTriangle, Braces, FolderOpen, ListOrdered, RotateCcw } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuGroup, DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem } from "@/components/ui/select";
 import { basename } from "@/lib/utils";
@@ -254,27 +258,42 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
       <div className="space-y-1.5">
         <HintLabel label={t("settings.rowOutputName")} hint={t("settings.namingPatternNote")}
           className="block text-xs font-medium text-muted-foreground" />
-        <Input
-          ref={patternRef}
-          value={outputPattern}
-          onChange={(e) => setOutputPattern(e.target.value)}
-          placeholder={t("settings.namingPlaceholder")}
-          disabled={disabled}
-          aria-label={t("settings.rowOutputName")}
-          spellCheck={false}
-        />
-        <div className="flex flex-wrap gap-1">
-          {NAME_TOKENS.map((token) => (
-            <Tooltip key={token}>
-              <TooltipTrigger render={<button
-                type="button"
-                onClick={() => insertToken(token)}
-                disabled={disabled}
-                className="rounded border border-border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground transition-colors hover:border-primary hover:text-foreground disabled:opacity-50"
-              >{`{${token}}`}</button>} />
-              <TooltipContent>{t(`settings.token.${token}`)}</TooltipContent>
+        {/* Same shape as the export profile editor: the field, then ONE token button that opens the
+            list. A row of chips under the field spent a third of the panel restating what the menu
+            says, on a control that is used once per pattern. */}
+        <div className="flex items-center gap-1">
+          <Input
+            ref={patternRef}
+            value={outputPattern}
+            onChange={(e) => setOutputPattern(e.target.value)}
+            placeholder={t("settings.namingPlaceholder")}
+            disabled={disabled}
+            aria-label={t("settings.rowOutputName")}
+            className="flex-1 font-mono text-xs"
+            spellCheck={false}
+          />
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger render={<span />}>
+                <DropdownMenuTrigger render={<Button variant="outline" size="icon" disabled={disabled}
+                  aria-label={t("settings.insertToken")}>
+                  <Braces className="size-4" />
+                </Button>} />
+              </TooltipTrigger>
+              <TooltipContent>{t("settings.insertToken")}</TooltipContent>
             </Tooltip>
-          ))}
+            <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{t("settings.insertToken")}</DropdownMenuLabel>
+                {NAME_TOKENS.map((token) => (
+                  <DropdownMenuItem key={token} onClick={() => insertToken(token)}>
+                    <span className="font-mono text-xs">{`{${token}}`}</span>
+                    <span className="ml-auto pl-3 text-muted-foreground">{t(`settings.token.${token}`)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         {preview && (
           <Tooltip>

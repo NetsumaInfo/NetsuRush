@@ -178,7 +178,13 @@
     "bgcolorLabel": "背景色（MP4）",
     "bgcolorHint": "表示モードの背景色の上にオブジェクトを合成",
     "pngLabel": "PNG シーケンス（マット）",
-    "pngHint": "1 フレームにつきマット画像 1 枚"
+    "pngHint": "1 フレームにつきマット画像 1 枚",
+    "pngAlphaLabel": "PNG（アルファ）",
+    "pngAlphaHint": "切り抜き画像、背景は透明",
+    "jpegBgLabel": "JPEG（背景色）",
+    "jpegBgHint": "表示モードの背景色の上に合成したオブジェクト",
+    "pngMatteLabel": "白黒マット（PNG）",
+    "pngMatteHint": "白黒マスクのみ"
   },
   "sam": {
     "large": "マスク品質が高く、VRAM を多く使用。",

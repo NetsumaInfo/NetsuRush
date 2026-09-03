@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { nr, type RotoProgress } from "@/lib/bridge";
 import type { UpSource } from "@/components/upscale/upscaleShared";
+import { isStillSource } from "@/components/upscale/imageOutput";
 import {
   type RotoMatteParams, type RotoObject, type RotoPoint, type RotoPostState,
   type RotoRemoveParams, type RotoViewMode, type RotoViewState,
@@ -509,7 +510,18 @@ export function useRotoSession(active: UpSource | null) {
     }).catch(() => {});
   }, [frame]);
 
+  // A still source has a single frame: there is nothing to track, the mask that was drawn stands as
+  // it is, and the daemon writes it as mattes by itself when an output step asks for them. The
+  // studio reads this to drop the tracking step and to offer image formats instead of video ones.
+  const still = !!active && isStillSource(active);
+  const pointCount = Object.values(pointsByFrame).reduce((n, p) => n + p.length, 0);
+
   return {
+    still,
+    // Fine matte, object removal and export all read mattes from disk. A clip gets them from the
+    // track pass; a still gets them as soon as a point is placed, because the daemon burns the
+    // current mask itself instead of running a propagation over a single frame.
+    outputReady: still ? pointCount > 0 : tracked,
     dims, framesDir, fps, frame, setFrame,
     inF, outF, setInF, setOutF,
     samModel, chooseSam, installedSam, installedModels,
@@ -517,7 +529,7 @@ export function useRotoSession(active: UpSource | null) {
     objects, activeObj, setActiveObj, addObject, removeObject, renameObject,
     pointLabel, setPointLabel,
     points: pointsByFrame[frame] || [], pointsByFrame,
-    pointCount: Object.values(pointsByFrame).reduce((n, p) => n + p.length, 0),
+    pointCount,
     overlaySrc: showOverlay ? overlaySrc : null,
     previewSrc: showOverlay ? previewSrc : null,
     overlayFull,

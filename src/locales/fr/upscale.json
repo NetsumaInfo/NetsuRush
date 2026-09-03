@@ -325,6 +325,7 @@
     "seqFolderNote": "Chaque source a son dossier : {{file}}",
     "namingPatternNote": "Le motif nomme toutes les sorties : les jetons sont remplacés au lancement. Un média renommé dans le bac garde son nom.",
     "namingPlaceholder": "{name}_{op}_{scale}",
+    "insertToken": "Insérer un jeton",
     "token": {
       "name": "Nom du fichier source, sans extension",
       "op": "Traitement appliqué (upscaled, interp, depth…)",

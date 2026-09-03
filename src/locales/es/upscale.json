@@ -325,6 +325,7 @@
     "seqFolderNote": "Cada fuente tiene su carpeta: {{file}}",
     "namingPatternNote": "El patrón nombra todas las salidas: los tokens se resuelven al lanzar. Un medio renombrado en la bandeja conserva su nombre.",
     "namingPlaceholder": "{name}_{op}_{scale}",
+    "insertToken": "Insertar un token",
     "token": {
       "name": "Nombre del archivo de origen, sin extensión",
       "op": "Proceso aplicado (upscaled, interp, depth…)",

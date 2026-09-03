@@ -325,6 +325,7 @@
     "seqFolderNote": "各ソースに専用フォルダーを作ります : {{file}}",
     "namingPatternNote": "このパターンがすべての出力名を決めます。トークンは実行時に置換され、トレイで個別に変更した名前はそのまま残ります。",
     "namingPlaceholder": "{name}_{op}_{scale}",
+    "insertToken": "トークンを挿入",
     "token": {
       "name": "拡張子を除いたソースファイル名",
       "op": "適用した処理（upscaled、interp、depth など）",

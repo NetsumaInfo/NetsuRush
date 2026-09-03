@@ -469,7 +469,7 @@ export function MatteFinePanel({ s, engines, disabled }: {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon" className="shrink-0"
-            disabled={disabled || !s.tracked} onClick={() => s.refine(cur.id)} aria-label={t("matte.run")}>
+            disabled={disabled || !s.outputReady} onClick={() => s.refine(cur.id)} aria-label={t("matte.run")}>
             <Sparkles className="h-4 w-4" />
           </Button>} />
           <TooltipContent>{t("matte.run")} — {cur.hint}</TooltipContent>
@@ -529,7 +529,7 @@ export function MatteFinePanel({ s, engines, disabled }: {
 }
 
 // Sélecteur de format + portée (tous les objets / un seul) + bouton Exporter.
-export function ExportRow({ fmt, onFmtChange, disabled, objects, onExport }: {
+export function ExportRow({ fmt, onFmtChange, disabled, objects, onExport, formats = EXPORT_FORMATS }: {
   // Format PILOTÉ par le parent : le tiroir « Sortie » l'affiche en résumé quand il est fermé,
   // ce qu'un état local ici ne lui laisserait pas voir.
   fmt: string;
@@ -537,22 +537,24 @@ export function ExportRow({ fmt, onFmtChange, disabled, objects, onExport }: {
   disabled: boolean;
   objects: { id: number; name: string }[];
   onExport: (fmt: string, obj?: number) => void;
+  // Formats offered for THIS source: video codecs for a clip, image files for a still.
+  formats?: { id: string; label: string; hint: string }[];
 }) {
   const { t } = useTranslation("roto");
   const fmtKey = EXPORT_FMT_KEY;
   const setFmt = onFmtChange;
   const [scope, setScope] = useState(0);   // 0 = union (tous les objets)
-  const cur = EXPORT_FORMATS.find((f) => f.id === fmt) || EXPORT_FORMATS[0];
+  const cur = formats.find((f) => f.id === fmt) || formats[0];
   const scopeItems = [{ value: "0", label: t("exportRow.allObjects") },
     ...objects.map((o) => ({ value: String(o.id), label: o.name }))];
   return (
     <div className="space-y-1.5">
       <div className="flex gap-1.5">
-        <Select value={fmt} onValueChange={(v) => setFmt(String(v))}
-          items={EXPORT_FORMATS.map((f) => ({ value: f.id, label: t(`exportFmt.${fmtKey[f.id]}Label`, { defaultValue: f.label }) }))} disabled={disabled}>
+        <Select value={cur.id} onValueChange={(v) => setFmt(String(v))}
+          items={formats.map((f) => ({ value: f.id, label: t(`exportFmt.${fmtKey[f.id]}Label`, { defaultValue: f.label }) }))} disabled={disabled}>
           <SelectTrigger className="min-w-0 flex-1"><SelectValue>{t(`exportFmt.${fmtKey[cur.id]}Label`, { defaultValue: cur.label })}</SelectValue></SelectTrigger>
           <SelectContent>
-            {EXPORT_FORMATS.map((f) => <SelectItem key={f.id} value={f.id}>{t(`exportFmt.${fmtKey[f.id]}Label`, { defaultValue: f.label })}</SelectItem>)}
+            {formats.map((f) => <SelectItem key={f.id} value={f.id}>{t(`exportFmt.${fmtKey[f.id]}Label`, { defaultValue: f.label })}</SelectItem>)}
           </SelectContent>
         </Select>
         <Tooltip>
