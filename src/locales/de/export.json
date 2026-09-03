@@ -15,6 +15,7 @@
     "folder": "Ordner",
     "folderPlaceholder": "Ordnername…",
     "folderHint": "Media-Pool-Ordner für die Schnitte statt des Stammverzeichnisses.",
+    "folderHintFile": "Unterordner, der im beim Export gewählten Ordner angelegt wird und die Dateien aufnimmt.",
     "defaultFolder": "NetsuRush — Schnitte",
     "existingFolders": "Vorhandene Ordner",
     "mediaPoolFolders": "Media-Pool-Ordner",

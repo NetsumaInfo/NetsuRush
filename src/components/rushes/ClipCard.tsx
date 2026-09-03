@@ -5,6 +5,7 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Film, HardDriveDownload, Clapperboard, Scissors, CheckSquare, Folder, FolderInput, Images, Trash2, Unlink } from "lucide-react";
 import { cn, basename } from "@/lib/utils";
+import { hoverLiftFlow } from "@/components/common/hoverLift";
 import { selectionRing, SelectCheck } from "@/components/common/selectable";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent, ContextMenuLabel, ContextMenuGroup } from "@/components/ui/context-menu";
@@ -104,11 +105,14 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
             // Garde identique à celui de MediaTree : la carte contient un <button> (envoi timeline).
             // Sans ça, Entrée dessus ouvrait CutStudio au lieu du dialogue.
             onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } }}
-            className={cn(
-              "group block cursor-pointer select-none overflow-hidden rounded-xl border bg-card text-left transition-transform hover:-translate-y-0.5 hover:border-primary outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-              selectionRing(selected),
-            )} />
+            // Coquille IMMOBILE : elle reçoit le survol, la couche visuelle en dessous se soulève
+            // (cf. common/hoverLift — porté ici, le soulèvement faisait vibrer la carte).
+            className="group block cursor-pointer select-none text-left outline-none" />
         }>
+        <div className={hoverLiftFlow(
+          "overflow-hidden rounded-xl border bg-card group-hover:border-primary group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-1",
+          selectionRing(selected),
+        )}>
         <div className="relative">
           <Thumb path={clip.path} dim={offline} />
           {selected && <SelectCheck />}
@@ -148,6 +152,7 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
           <div className="truncate text-xs text-muted-foreground">
             {[clip.resolution, clip.duration].filter(Boolean).join(" · ") || "—"}
           </div>
+        </div>
         </div>
         </ContextMenuTrigger>
         {/* Clic droit : mêmes actions que la carte (ouvrir / choisir / (dé)sélectionner / timeline). */}

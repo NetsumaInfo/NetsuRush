@@ -28,7 +28,16 @@ function pump(): void {
     if (job.cancelled) continue;
     active++;
     job.started = true;
-    job.start();
+    // Un `start` qui jette emporterait son créneau avec lui : le compteur ne redescendrait jamais,
+    // et au sixième la préchauffe s'arrêterait DÉFINITIVEMENT — plus une seule vignette ni un seul
+    // proxy généré, sans erreur visible. Le créneau est donc rendu quoi qu'il arrive.
+    try {
+      job.start();
+    } catch (err) {
+      job.cancelled = true;
+      active = Math.max(0, active - 1);
+      console.warn("[preview] préchauffe abandonnée :", err);
+    }
   }
 }
 

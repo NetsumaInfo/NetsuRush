@@ -504,7 +504,9 @@ export function CutStudio() {
             onPointerDown={startEdgeDrag}
             onDoubleClick={() => setPlayerOpen(true)}
             onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); setPlayerOpen(true); } }}
-            className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
+            // Sort de la gouttière droite de la vue (`px-4`) : lecteur fermé, le trait n'a plus rien
+            // à border, il se colle donc au bord de la fenêtre et rend ces pixels à la grille.
+            className="group relative -mr-3.5 w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
             <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>

@@ -5,17 +5,19 @@ import { TimelineTargetSelect } from "@/components/rushes/TimelineTargetSelect";
 import { useTimelineList } from "@/components/rushes/useTimelineList";
 import { type ExportProfile, coerceTimelineTarget, isTimelineImport } from "@/features/export/profiles";
 
-export function ExportTimelineTarget({ profile, className }: { profile: ExportProfile; className?: string }) {
+export function ExportTimelineTarget({ profile, className, disabled }: { profile: ExportProfile; className?: string; disabled?: boolean }) {
   const update = useApp((s) => s.updateExportProfile);
   const enabled = isTimelineImport(profile.workflow);
   // Le canal listTimelines choisit lui-même la meilleure source : Resolve en ligne, sinon snapshot.
   // `s.connected` appartient au Media Pool du derush et peut être faux alors que l'API Resolve répond.
+  // Hors import timeline, le sélecteur reste POSÉ mais inerte (l'éditeur ne doit pas sauter) : rien
+  // n'est alors demandé à Resolve, la liste vide suffit à afficher le libellé de la valeur gardée.
   const { timelines, current } = useTimelineList(enabled);
-  if (!enabled) return null;
 
   return (
     <TimelineTargetSelect
       className={className}
+      disabled={disabled ?? !enabled}
       target={{
         timelines,
         current,

@@ -79,9 +79,15 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
   // Conteneurs proposés : filtrés au codec en ré-encodage (jamais un couple invalide), tous sinon.
   const containerOptions = encode ? fields.containerOptions : EXPORT_CONTAINER_OPTIONS;
 
+  // Ligne « Dossier » : même geste pour les deux mondes, cible différente — dossier du Media Pool
+  // en import timeline, sous-dossier de sortie en export fichier.
+  const folderField = isTimelineImport ? "binTarget" : "folderTarget";
+  const folderValue = isTimelineImport ? profile.binTarget ?? null : profile.folderTarget ?? null;
+  const setFolder = (v: string | null) => set({ [folderField]: v });
+  const folderHint = t(isTimelineImport ? "editor.folderHint" : "editor.folderHintFile");
   // Réglage obligatoire manquant → champ en rouge (et export bloqué côté bouton).
-  const binIssue = getExportProfileIssue(profile, "binTarget");
-  const binErrorId = `${profile.id}-bin-error`;
+  const folderIssue = getExportProfileIssue(profile, folderField);
+  const folderErrorId = `${profile.id}-folder-error`;
 
   // Dossiers Media Pool existants (suggestions du sélecteur de destination) : on peut en choisir un
   // OU en saisir un nouveau (créé à la volée côté Resolve). Chargés seulement pour l'import timeline.
@@ -112,73 +118,73 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         </div>
       </div>
 
-      {/* Rangement (workflow Timeline) : la timeline de coupes est créée dans un sous-dossier du
-          Media Pool au lieu de la racine, où elle se mêlerait aux rushs. Ce n'est PAS une
-          destination alternative à la timeline — d'où le libellé « Dossier » seul. */}
-      {isTimelineImport && (
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-3">
-            <span className="inline-flex min-w-0 items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
-              {t("editor.folder")}
-              <Tooltip>
-                <TooltipTrigger render={<span className="inline-flex shrink-0" tabIndex={0} aria-label={t("editor.folderHint")} />}>
-                  <CircleHelp className="size-3.5" />
-                </TooltipTrigger>
-                <TooltipContent side="right" align="center" className="max-w-64">{t("editor.folderHint")}</TooltipContent>
-              </Tooltip>
-            </span>
-            {/* `!= null` et pas la véracité : un nom VIDE reste « rangée dans un dossier » (en rouge),
-                sinon l'interrupteur retomberait dès qu'on efface le champ pour le retaper. */}
-            <Toggle
-              pressed={profile.binTarget != null}
-              onPressedChange={(p) => set({ binTarget: p ? (profile.binTarget || t("editor.defaultFolder")) : null })}
-            >
-              {profile.binTarget != null ? t("toggle.yes") : t("toggle.no")}
-            </Toggle>
-          </div>
-          {profile.binTarget != null && (
-            <div className="flex items-center gap-1">
-              <Input
-                value={profile.binTarget}
-                onChange={(e) => set({ binTarget: e.target.value })}
-                placeholder={t("editor.folderPlaceholder")}
-                className={cn("flex-1", binIssue && "border-destructive focus-visible:ring-destructive/40")}
-                aria-invalid={!!binIssue}
-                aria-errormessage={binIssue ? binErrorId : undefined}
-              />
-              {bins.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label={t("editor.existingFolders")}>
-                    <ChevronDown className="size-4" />
-                  </Button>} />
-                  <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
-                    <DropdownMenuGroup>
-                      <DropdownMenuLabel>{t("editor.mediaPoolFolders")}</DropdownMenuLabel>
-                      {bins.map((b) => (
-                        <DropdownMenuItem key={b} onClick={() => set({ binTarget: b })}>
-                          <FolderInput className="size-3.5" /> {b}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          )}
-          {binIssue && (
-            <span id={binErrorId} className="text-[0.75rem] text-destructive">{binIssue.message}</span>
-          )}
+      {/* Rangement, dans les deux mondes : l'import timeline range la timeline créée dans un
+          DOSSIER DU MEDIA POOL (au lieu de la racine, où elle se mêlerait aux rushs) ; un export
+          fichier range ses fichiers dans un SOUS-DOSSIER du dossier choisi au moment de l'export.
+          Même geste, même ligne — d'où le libellé « Dossier » seul, la cible dépend du flux. */}
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex min-w-0 items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
+            {t("editor.folder")}
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex shrink-0" tabIndex={0} aria-label={folderHint} />}>
+                <CircleHelp className="size-3.5" />
+              </TooltipTrigger>
+              <TooltipContent side="right" align="center" className="max-w-64">{folderHint}</TooltipContent>
+            </Tooltip>
+          </span>
+          {/* `!= null` et pas la véracité : un nom VIDE reste « rangé dans un dossier » (en rouge),
+              sinon l'interrupteur retomberait dès qu'on efface le champ pour le retaper. */}
+          <Toggle
+            pressed={folderValue != null}
+            onPressedChange={(p) => setFolder(p ? (folderValue || t("editor.defaultFolder")) : null)}
+          >
+            {folderValue != null ? t("toggle.yes") : t("toggle.no")}
+          </Toggle>
         </div>
-      )}
+        {folderValue != null && (
+          <div className="flex items-center gap-1">
+            <Input
+              value={folderValue}
+              onChange={(e) => setFolder(e.target.value)}
+              placeholder={t("editor.folderPlaceholder")}
+              className={cn("flex-1", folderIssue && "border-destructive focus-visible:ring-destructive/40")}
+              aria-invalid={!!folderIssue}
+              aria-errormessage={folderIssue ? folderErrorId : undefined}
+            />
+            {/* Suggestions : seul le Media Pool sait quels dossiers existent déjà. Un sous-dossier
+                de sortie est créé à la volée, il n'y a rien à proposer. */}
+            {isTimelineImport && bins.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label={t("editor.existingFolders")}>
+                  <ChevronDown className="size-4" />
+                </Button>} />
+                <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>{t("editor.mediaPoolFolders")}</DropdownMenuLabel>
+                    {bins.map((b) => (
+                      <DropdownMenuItem key={b} onClick={() => set({ binTarget: b })}>
+                        <FolderInput className="size-3.5" /> {b}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        )}
+        {folderIssue && (
+          <span id={folderErrorId} className="text-[0.75rem] text-destructive">{folderIssue.message}</span>
+        )}
+      </div>
 
       {/* Timeline visée : celle ouverte, une nouvelle, ou une existante par son nom. Même valeur que
-          le sélecteur du panneau de droite (elle vit dans le profil). */}
-      {isTimelineImport && (
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[0.8125rem] text-muted-foreground">{t("editor.timelineTarget")}</span>
-          <ExportTimelineTarget profile={profile} className="w-full" />
-        </div>
-      )}
+          le sélecteur du panneau de droite (elle vit dans le profil). Toujours posée, grisée hors
+          import timeline — comme toutes les autres lignes, pour que l'UI ne saute pas. */}
+      <div className={cn("flex flex-col gap-1.5 transition-opacity", !isTimelineImport && "opacity-40")}>
+        <span className="text-[0.8125rem] text-muted-foreground">{t("editor.timelineTarget")}</span>
+        <ExportTimelineTarget profile={profile} className="w-full" disabled={!isTimelineImport} />
+      </div>
 
       {/* Choix du flux APRÈS les réglages propres à la timeline : ce qui suit (moteur, codec,
           conteneur, nommage) vaut pour les trois, la bascule se lit donc comme leur en-tête. */}

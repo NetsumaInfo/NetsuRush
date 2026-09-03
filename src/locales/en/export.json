@@ -15,6 +15,7 @@
     "folder": "Folder",
     "folderPlaceholder": "Folder name…",
     "folderHint": "Media Pool folder where the cuts are filed, instead of the root.",
+    "folderHintFile": "Subfolder created inside the folder picked at export time, where the files are written.",
     "defaultFolder": "NetsuRush — Cuts",
     "existingFolders": "Existing folders",
     "mediaPoolFolders": "Media Pool folders",

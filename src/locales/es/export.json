@@ -15,6 +15,7 @@
     "folder": "Carpeta",
     "folderPlaceholder": "Nombre de la carpeta…",
     "folderHint": "Carpeta del Media Pool donde se guardan los cortes, en lugar de la raíz.",
+    "folderHintFile": "Subcarpeta creada dentro de la carpeta elegida al exportar, donde se guardan los archivos.",
     "defaultFolder": "NetsuRush — Cortes",
     "existingFolders": "Carpetas existentes",
     "mediaPoolFolders": "Carpetas del Media Pool",

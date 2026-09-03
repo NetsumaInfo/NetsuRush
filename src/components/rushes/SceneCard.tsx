@@ -7,6 +7,7 @@ import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, C
 import { Skeleton } from "@/components/ui/skeleton";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { selectionRing, SelectToggle } from "@/components/common/selectable";
+import { hoverLiftLayer } from "@/components/common/hoverLift";
 import { AddToCollection } from "@/components/collections/AddToCollection";
 import { IS_REMOTE } from "@/lib/remote";
 import { type Segment } from "./cutStudioShared";
@@ -80,9 +81,15 @@ function SceneCardImpl({
           // `nr-grid-card` = content-visibility + hauteur de remplacement lue dans `--nr-cell-h`,
           // posée UNE fois sur le conteneur de grille (cf. index.css) : la carte ne porte plus de
           // hauteur en prop, donc un cran de densité ne rerend aucune carte.
-          className={`group relative aspect-video cursor-pointer overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 nr-grid-card outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 ${active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true)}`}
+          // Coquille IMMOBILE : elle reçoit le survol, la couche visuelle en dessous se soulève
+          // (cf. common/hoverLift — porté ici, le soulèvement faisait vibrer la carte).
+          className="group relative aspect-video cursor-pointer nr-grid-card outline-none"
         />
       }>
+      <div className={hoverLiftLayer(
+        "overflow-hidden rounded-xl border bg-muted group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-1",
+        active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true),
+      )}>
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
       {/* la vignette reste la couche de fond : quand la <video> se démonte (Lecture auto coupée),
           elle est déjà là dessous → aucun flash noir. La <video> se superpose le temps de jouer. */}
@@ -141,6 +148,7 @@ function SceneCardImpl({
           </Tooltip>
         )}
       </>)}
+      </div>
       </ContextMenuTrigger>
       {/* Clic droit : lire / (dé)sélectionner / envoyer à la timeline. */}
       {chrome && (

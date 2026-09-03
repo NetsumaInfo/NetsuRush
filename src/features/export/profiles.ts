@@ -186,6 +186,10 @@ export interface ExportProfile {
   // Destination de l'import timeline (workflow timeline_import) : null/absent = timeline à la racine ;
   // une chaîne = nom du DOSSIER Media Pool où ranger la timeline créée. Ignoré hors timeline_import.
   binTarget?: string | null;
+  // Rangement des FICHIERS produits (workflows video_remux / video_encode) : null/absent = écrits
+  // directement dans le dossier choisi à l'export ; une chaîne = nom du sous-dossier créé dedans.
+  // Pendant du binTarget, côté disque. Ignoré par l'import timeline.
+  folderTarget?: string | null;
   // Timeline visée par l'import (workflow timeline_import) : "open" | "new" | "new:<nom>" | "tl:<nom>".
   timelineTarget?: TimelineTargetValue;
 }
@@ -630,7 +634,7 @@ export function getRecommendedContainerForCodec(codec: ExportCodec): ExportConta
 // Validité d'un profil — SOURCE UNIQUE du rouge (éditeur) et du blocage (bouton d'export).
 // ---------------------------------------------------------------------------
 
-export type ExportProfileField = "binTarget";
+export type ExportProfileField = "binTarget" | "folderTarget";
 
 export interface ExportProfileIssue {
   field: ExportProfileField;
@@ -643,6 +647,9 @@ export function getExportProfileIssues(profile: ExportProfile): ExportProfileIss
   const issues: ExportProfileIssue[] = [];
   if (isTimelineImport(profile.workflow) && profile.binTarget != null && !profile.binTarget.trim()) {
     issues.push({ field: "binTarget", message: i18n.t("export:issue.binTargetRequired") });
+  }
+  if (usesFile(profile.workflow) && profile.folderTarget != null && !profile.folderTarget.trim()) {
+    issues.push({ field: "folderTarget", message: i18n.t("export:issue.binTargetRequired") });
   }
   return issues;
 }
@@ -709,6 +716,7 @@ export function normalizeExportProfile(profile: ExportProfile): ExportProfile {
     // replier "" sur null ferait resauter le sélecteur sur « Timeline » dès qu'on vide le champ.
     // "" = mode dossier SANS nom → invalide (cf. getExportProfileIssues), null = timeline à la racine.
     binTarget: typeof profile.binTarget === "string" ? profile.binTarget : null,
+    folderTarget: typeof profile.folderTarget === "string" ? profile.folderTarget : null,
     timelineTarget: coerceTimelineTarget(profile.timelineTarget),
   };
 }

@@ -15,6 +15,7 @@
     "folder": "文件夹",
     "folderPlaceholder": "文件夹名称…",
     "folderHint": "存放剪辑片段的 Media Pool 文件夹，而不是根目录。",
+    "folderHintFile": "在导出时选择的文件夹内创建的子文件夹，文件保存到这里。",
     "defaultFolder": "NetsuRush — 剪切",
     "existingFolders": "已有文件夹",
     "mediaPoolFolders": "Media Pool 文件夹",

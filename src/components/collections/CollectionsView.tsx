@@ -12,6 +12,7 @@ import { useApp } from "@/store";
 import { nr, type CollectionMeta, type CollectionPreviewShot } from "@/lib/bridge";
 import { getThumb, setThumb } from "@/lib/thumbCache";
 import { cn } from "@/lib/utils";
+import { hoverLiftLayer, hoverLiftFlow } from "@/components/common/hoverLift";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -346,7 +347,7 @@ export function CollectionsView() {
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); s.openCollection(c.id); } }}
                     className="group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-xl" />
                 }>
-                  <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-card ring-1 ring-border transition-all group-hover:-translate-y-0.5 group-hover:ring-primary/40 group-hover:ring-2">
+                  <div className={hoverLiftFlow("relative aspect-video w-full overflow-hidden rounded-xl bg-card ring-1 ring-border transition-all group-hover:ring-primary/40 group-hover:ring-2")}>
                     {c.preview && c.preview.length
                       ? <CollectionMosaic preview={c.preview} />
                       : <div className="flex h-full items-center justify-center"><CollectionGlyph icon={c.icon} color={c.color} size={GLYPH_SIZE.gallery} /></div>}
@@ -379,9 +380,13 @@ export function CollectionsView() {
                     tabIndex={0}
                     onClick={() => s.openCollection(c.id)}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); s.openCollection(c.id); } }}
-                    className={cn("group relative flex cursor-pointer flex-col items-center rounded-xl bg-card p-3 transition-all hover:-translate-y-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-                      view === "compact" ? "aspect-square justify-center gap-1.5 p-2" : "aspect-[4/3] justify-center gap-2")} />
+                    // Coquille IMMOBILE : elle reçoit le survol, la couche visuelle se soulève
+                    // (cf. common/hoverLift).
+                    className={cn("group relative cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+                      view === "compact" ? "aspect-square" : "aspect-[4/3]")} />
                 }>
+                  <div className={hoverLiftLayer("flex flex-col items-center rounded-xl bg-card transition-all",
+                    view === "compact" ? "justify-center gap-1.5 p-2" : "justify-center gap-2 p-3")}>
                   <CollectionGlyph icon={c.icon} color={c.color} size={glyphSize} />
                   <div className="min-w-0 max-w-full text-center">
                     <div className={cn("flex items-center justify-center gap-1 font-medium", view === "compact" ? "text-[11px]" : "text-sm")}>
@@ -399,6 +404,7 @@ export function CollectionsView() {
                   </div>
                   {view !== "compact" && <CardSummary c={c} display={display} max={3} center />}
                   {cardMenu(c)}
+                  </div>
                 </ContextMenuTrigger>
                 {cardCtxMenu(c)}
               </ContextMenu>

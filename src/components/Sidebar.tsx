@@ -71,7 +71,7 @@ export function Sidebar() {
   return (
     <div
       className="absolute inset-y-0 left-0 z-40 overflow-hidden shadow-xl shadow-black/30"
-      style={{ width: collapsed ? "52px" : "15rem", transition: "width 220ms cubic-bezier(0.4, 0, 0.2, 1)" }}
+      style={{ width: collapsed ? "46px" : "15rem", transition: "width 220ms cubic-bezier(0.4, 0, 0.2, 1)" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocusCapture={onFocusIn}
@@ -80,7 +80,7 @@ export function Sidebar() {
       {/* `nr-wp-surface` : sous un fond d'écran, ce panneau survole le contenu — il repeint le fond
           lui-même au lieu d'être translucide, sinon on verrait les boutons du module par transparence. */}
       <aside className="nr-wp-surface flex h-full w-60 flex-col bg-card">
-        <ul className="flex flex-1 flex-col gap-1 p-2 pt-3">
+        <ul className="flex flex-1 flex-col gap-1 px-1.5 pb-2 pt-3">
           {visibleNav.map((n) => {
             const Icon = n.icon;
             const active = n.id === tab;
@@ -91,7 +91,7 @@ export function Sidebar() {
                   onClick={() => setTab(n.id)}
                   onPointerEnter={() => prefetchPanel(n.id)}
                   className={cn(
-                    "flex h-9 w-full items-center gap-3 rounded-md px-2.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                    "flex h-9 w-full items-center gap-3 rounded-md px-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     active
                       ? "bg-accent text-primary"
                       : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
@@ -117,14 +117,14 @@ export function Sidebar() {
         </ul>
 
         {/* Séparateurs encartés (marge latérale) : un trait pleine largeur découpait le rail en tranches. */}
-        <div className="mx-3 h-px bg-border" />
-        <div className="px-2">
+        <div className="mx-2 h-px bg-border" />
+        <div className="px-1.5">
           <button
             type="button"
             onClick={() => setTab("settings")}
             onPointerEnter={() => prefetchPanel("settings")}
             className={cn(
-              "flex h-9 w-full items-center gap-3 rounded-md px-2.5 text-sm transition-colors",
+              "flex h-9 w-full items-center gap-3 rounded-md px-2 text-sm transition-colors",
               tab === "settings"
                 ? "bg-accent text-primary"
                 : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
@@ -154,12 +154,12 @@ export function Sidebar() {
         </div>
 
         {/* Sélecteur d'hôte : quel logiciel NetsuRush pilote (Resolve / Premiere / After Effects). */}
-        <div className="mx-3 h-px bg-border" />
-        <div className="px-2">
+        <div className="mx-2 h-px bg-border" />
+        <div className="px-1.5">
           <DropdownMenu onOpenChange={(open) => { if (open) void refreshAdobeStatus(); }}>
             <DropdownMenuTrigger
               render={
-                <button type="button" className="flex h-9 w-full min-w-0 items-center gap-3 rounded-md px-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
+                <button type="button" className="flex h-9 w-full min-w-0 items-center gap-3 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
                   <HostIcon host={activeHost} className="size-[18px]" />
                   <span
                     className="flex-1 truncate text-left"
@@ -195,12 +195,12 @@ export function Sidebar() {
           </DropdownMenu>
         </div>
 
-        <div className="mx-3 h-px bg-border" />
-        <div className="flex items-center gap-1 px-2">
+        <div className="mx-2 h-px bg-border" />
+        <div className="flex items-center gap-1 px-1.5">
           <DropdownMenu onOpenChange={(open) => { if (open && adobeActive) void refreshAdobeStatus(); }}>
             <DropdownMenuTrigger
               render={
-                <button type="button" className="flex h-9 min-w-0 flex-1 items-center gap-3 rounded-md px-2.5 text-xs transition-colors hover:bg-accent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
+                <button type="button" className="flex h-9 min-w-0 flex-1 items-center gap-3 rounded-md px-2 text-xs transition-colors hover:bg-accent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
                   <span className={cn("size-2.5 shrink-0 rounded-full", activeDot)} />
                   <span
                     className="flex-1 truncate text-left"

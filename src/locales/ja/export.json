@@ -15,6 +15,7 @@
     "folder": "フォルダー",
     "folderPlaceholder": "フォルダー名…",
     "folderHint": "カットをルートではなくこの Media Pool フォルダーに整理します。",
+    "folderHintFile": "書き出し時に選んだフォルダーの中に作られるサブフォルダー。ファイルはここに書き出されます。",
     "defaultFolder": "NetsuRush — カット",
     "existingFolders": "既存のフォルダー",
     "mediaPoolFolders": "Media Pool のフォルダー",

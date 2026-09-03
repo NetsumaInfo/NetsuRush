@@ -133,6 +133,33 @@ function exportConcurrency(profile, gpuEncoder, total, override) {
 /** @param {string} ext @returns {boolean} */
 const isFaststart = (ext) => ext === 'mp4' || ext === 'mov';
 
+/**
+ * Sous-dossier de rangement du profil (`folderTarget`), appliqué à la destination choisie à
+ * l'export : le dossier retenu pour un lot, ou le dossier du fichier pour une sortie unique. Créé
+ * ici, sinon ffmpeg échouerait sur un chemin inexistant. Un nom vide, ou une destination IMPOSÉE
+ * par l'appelant (`savePaths` de l'archivage d'une collection, qui tient son propre rangement), ne
+ * déplace rien.
+ * Le nom est assaini comme les noms de fichiers : un séparateur ou un `..` saisi dans le champ
+ * n'écrit jamais hors de la destination.
+ * @param {ExportProfileLike & { folderTarget?: string|null }} profile
+ * @param {{ dir?: string, savePath?: string, savePaths?: (string|null)[] }} opts
+ * @returns {{ dir?: string, savePath?: string }}
+ */
+function applyFolderTarget(profile, opts) {
+  // Vide AVANT d'assainir : `sanitizeName('')` rend son défaut ('clip'), qui rangerait dans un
+  // dossier que personne n'a demandé.
+  const raw = typeof (profile && profile.folderTarget) === 'string' ? profile.folderTarget.trim() : '';
+  const folder = raw ? sanitizeName(raw).replace(/^\.+$/, '') : '';
+  if (!folder || (opts.savePaths && opts.savePaths.length)) return {};
+  const base = opts.dir || (opts.savePath ? path.dirname(opts.savePath) : '');
+  if (!base) return {};
+  const dir = path.join(base, folder);
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) { return {}; } // dossier non créable → destination d'origine
+  return opts.savePath && !opts.dir
+    ? { savePath: path.join(dir, path.basename(opts.savePath)) }
+    : { dir };
+}
+
 /** Vrai si l'erreur ffmpeg vient de l'ouverture d'un encodeur matériel (→ repli CPU). */
 function isEncoderOpenError(err) {
   const s = String((err && err.stderr) || err || '').toLowerCase();
@@ -207,6 +234,9 @@ async function exportClips(event, opts) {
   const { clips, profile, merge } = opts || {};
   if (!Array.isArray(clips) || !clips.length) return { ok: false, files: [], failed: 0, error: t('noShotsExport') };
   if (!profile) return { ok: false, files: [], failed: 0, error: t('exportProfileMissing') };
+  // Rangement du profil : tout ce qui suit (noms planifiés, fusion) écrit dans la destination
+  // corrigée, jamais dans celle d'origine.
+  opts = { ...opts, ...applyFolderTarget(profile, opts) };
 
   // Sélection intelligente de piste audio par langue (profile.audioSelect) — mute clips[].audioTrack.
   await resolveClipAudio(clips, profile, { detectLang: opts.detectLang });
@@ -474,4 +504,4 @@ function previewName(opts) {
   };
 }
 
-module.exports = { exportClips, exportCapabilities, previewName };
+module.exports = { exportClips, exportCapabilities, previewName, applyFolderTarget };

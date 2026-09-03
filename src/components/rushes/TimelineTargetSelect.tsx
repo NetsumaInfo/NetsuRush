@@ -11,7 +11,7 @@ import { isNewTimelineTarget, timelineNewName } from "@/features/export/profiles
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-export function TimelineTargetSelect({ target, className }: { target: TimelineTargetView; className?: string }) {
+export function TimelineTargetSelect({ target, className, disabled }: { target: TimelineTargetView; className?: string; disabled?: boolean }) {
   const { t } = useTranslation("derush");
   const { timelines, current, value, setValue } = target;
   const [open, setOpen] = useState(false);
@@ -42,7 +42,8 @@ export function TimelineTargetSelect({ target, className }: { target: TimelineTa
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
-        className={`inline-flex h-8 max-w-[240px] items-center gap-1.5 rounded-md border border-border bg-card pl-2 pr-2 text-xs text-muted-foreground outline-none transition-colors hover:bg-accent data-[popup-open]:border-ring ${className || ""}`}
+        disabled={disabled}
+        className={`inline-flex h-8 max-w-[240px] items-center gap-1.5 rounded-md border border-border bg-card pl-2 pr-2 text-xs text-muted-foreground outline-none transition-colors hover:bg-accent data-[popup-open]:border-ring disabled:pointer-events-none ${className || ""}`}
       >
         <Clapperboard className="h-3.5 w-3.5 shrink-0" />
         <span className="shrink-0">{t("target.to")}</span>

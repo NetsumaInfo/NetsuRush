@@ -29,6 +29,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn, basename, thumbTime } from "@/lib/utils";
+import { hoverLiftLayer } from "@/components/common/hoverLift";
 import { previewSettingsFingerprint } from "@/lib/previewSettings";
 import { NR_MEDIA_DND, type NrMediaDrag, kindFromPath } from "./referenceShared";
 import type { BoardHandle } from "./ReferenceBoard";
@@ -101,17 +102,21 @@ function MediaCardImpl({
       onMouseLeave={leave}
       onClick={onActivate}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onActivate(); } }}
-      className={cn(
-        "group relative aspect-video cursor-grab overflow-hidden rounded-xl border bg-muted transition-transform hover:-translate-y-0.5 active:cursor-grabbing [content-visibility:auto] [contain-intrinsic-size:auto_120px]",
-        selected ? "border-primary ring-2 ring-inset ring-primary" : "border-border hover:border-primary/60",
-      )}
+      // Coquille IMMOBILE : elle reçoit le survol, la couche visuelle en dessous se soulève
+      // (cf. common/hoverLift — porté ici, le soulèvement faisait vibrer la carte).
+      className="group relative aspect-video cursor-grab active:cursor-grabbing [content-visibility:auto] [contain-intrinsic-size:auto_120px]"
     >
-      {!shown && <Skeleton className="absolute inset-0 rounded-none" />}
-      {shown && <img src={shown} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
-      {showVideo && <PreviewVideo url={url!} label="" onError={onVideoError} audible={hovered} paused={videoPaused} />}
-      {badge && <span className="absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">{badge}</span>}
-      {footer && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tabular-nums text-white">{footer}</span>}
-      {selectable && selected && <SelectCheck />}
+      <div className={hoverLiftLayer(
+        "overflow-hidden rounded-xl border bg-muted",
+        selected ? "border-primary ring-2 ring-inset ring-primary" : "border-border group-hover:border-primary/60",
+      )}>
+        {!shown && <Skeleton className="absolute inset-0 rounded-none" />}
+        {shown && <img src={shown} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
+        {showVideo && <PreviewVideo url={url!} label="" onError={onVideoError} audible={hovered} paused={videoPaused} />}
+        {badge && <span className="absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">{badge}</span>}
+        {footer && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tabular-nums text-white">{footer}</span>}
+        {selectable && selected && <SelectCheck />}
+      </div>
     </div>
   );
 }

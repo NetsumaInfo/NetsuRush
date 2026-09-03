@@ -15,6 +15,7 @@
     "folder": "Dossier",
     "folderPlaceholder": "Nom du dossier…",
     "folderHint": "Dossier du Media Pool où sont rangées les coupes, au lieu de la racine.",
+    "folderHintFile": "Sous-dossier créé dans le dossier choisi à l'export, où sont rangés les fichiers.",
     "defaultFolder": "NetsuRush — Coupes",
     "existingFolders": "Dossiers existants",
     "mediaPoolFolders": "Dossiers du Media Pool",

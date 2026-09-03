@@ -61,6 +61,15 @@ function onHidden() {
   if (document.hidden) drop();
 }
 
+// Le pointeur sort de la FENÊTRE. `relatedTarget` nul = il ne va sur aucun élément du document,
+// donc il a quitté la page. C'est le seul signal fiable quand la souris part vers une autre
+// application sans clic : la fenêtre garde le focus (pas de `blur` sous WebView2), plus aucun
+// `pointermove` n'arrive, et le contrôle géométrique ne peut donc plus rien relâcher — la carte
+// quittée restait en lecture, avec son son.
+function onOut(e: PointerEvent | MouseEvent) {
+  if (!e.relatedTarget) drop();
+}
+
 function bind() {
   if (bound || typeof window === "undefined") return;
   bound = true;
@@ -68,7 +77,9 @@ function bind() {
   window.addEventListener("scroll", schedule, { passive: true, capture: true });
   // Le pointeur quitte la fenêtre (ou l'app perd le focus) : plus rien n'est survolé.
   window.addEventListener("blur", drop);
-  document.addEventListener("pointerleave", drop);
+  window.addEventListener("pointerout", onOut, { passive: true, capture: true });
+  window.addEventListener("mouseout", onOut, { passive: true, capture: true });   // souris sans PointerEvent
+  document.documentElement.addEventListener("pointerleave", drop);
   document.addEventListener("visibilitychange", onHidden);
 }
 
