@@ -111,7 +111,7 @@ function Shell() {
   // Mode épinglé (coin d'écran) : interface dégraissée — rail latéral et sous-nav masqués pour ne
   // garder que le contenu (vignettes + clic droit). Dépingler via le bouton de la barre de titre.
   const pinned = useApp((s) => s.pinned);
-  // Barre latérale masquée entièrement (option clic droit) : on ne réserve plus le rail de 46px.
+  // Barre latérale masquée entièrement (option clic droit) : on ne réserve plus le rail de 40px.
   const sidebarHidden = useApp((s) => s.sidebarHidden);
 
   useTabSync();
@@ -255,10 +255,10 @@ function Shell() {
       </TitleBarMenu>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* rail réserve 46px ; la Sidebar s'étend en overlay au survol. Masqué en mode épinglé OU si
+        {/* rail réserve 40px ; la Sidebar s'étend en overlay au survol. Masqué en mode épinglé OU si
             l'utilisateur a explicitement caché la barre (clic droit → « Masquer la barre latérale »). */}
         {!pinned && !sidebarHidden && (
-          <div className="relative shrink-0" style={{ width: "46px" }}>
+          <div className="relative shrink-0" style={{ width: "40px" }}>
             <Sidebar />
           </div>
         )}

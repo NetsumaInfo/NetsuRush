@@ -66,7 +66,7 @@ function onHidden() {
 // application sans clic : la fenêtre garde le focus (pas de `blur` sous WebView2), plus aucun
 // `pointermove` n'arrive, et le contrôle géométrique ne peut donc plus rien relâcher — la carte
 // quittée restait en lecture, avec son son.
-function onOut(e: PointerEvent | MouseEvent) {
+function onOut(e: PointerEvent) {
   if (!e.relatedTarget) drop();
 }
 
@@ -77,8 +77,11 @@ function bind() {
   window.addEventListener("scroll", schedule, { passive: true, capture: true });
   // Le pointeur quitte la fenêtre (ou l'app perd le focus) : plus rien n'est survolé.
   window.addEventListener("blur", drop);
-  window.addEventListener("pointerout", onOut, { passive: true, capture: true });
-  window.addEventListener("mouseout", onOut, { passive: true, capture: true });   // souris sans PointerEvent
+  // `pointerout` seul, en phase de bouillonnement : il traverse chaque frontière d'élément survolée,
+  // donc il part très souvent pendant un défilement. Doubler avec `mouseout`, et en capture, ferait
+  // deux fois ce travail sur le thread qui peint le défilement — pour rien, WebView2 émettant
+  // toujours les PointerEvent.
+  window.addEventListener("pointerout", onOut, { passive: true });
   document.documentElement.addEventListener("pointerleave", drop);
   document.addEventListener("visibilitychange", onHidden);
 }
