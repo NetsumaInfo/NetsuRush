@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { DetectModel } from "@/lib/bridge";
 import { fmtTime } from "@/lib/utils";
+import { resetPreloadMounts } from "@/lib/previewVideoPool";
 
 // Un plan détecté : bornes en secondes (in/out) et, si dispo, en frames source (inFrame/outFrame).
 //
@@ -168,6 +169,12 @@ export const MAX_PLAYING_HARD = 52;
 // regarde. En rAF, le premier créneau tombe à la frame suivante et les montages s'alignent sur la
 // peinture.
 const GRANT_BURST = 4;
+// Durée d'une image à 60 Hz. Sert de mètre étalon au régulateur de `pumpSlots` : au-delà, l'image
+// précédente a déjà débordé, donc on lui accorde moins de démarrages.
+const FRAME_MS = 1000 / 60;
+let lastPumpAt = 0;
+// La file n'est retriée que si une inscription a eu lieu depuis le dernier tri.
+let queueDirty = false;
 let playingActive = 0;
 type PlaySlot = { order: number; granted: boolean; grant: () => void };
 let slotQueue: PlaySlot[] = [];
@@ -182,9 +189,22 @@ function pumpSlots() {
   slotFrame = requestAnimationFrame(() => {
     slotFrame = null;
     if (!slotQueue.length || playingActive >= maxPlaying) return;
-    slotQueue.sort((a, b) => a.order - b.order);
+    // L'ÉCART entre cette image et la précédente dit ce que la machine encaisse RÉELLEMENT : il
+    // intègre le rendu React et la création des WebMediaPlayer accordés au tour d'avant. C'est la
+    // seule mesure honnête ici — le coût d'un `grant()` ne se voit pas à l'appel, il tombe plus tard
+    // dans le commit React.
+    const now = performance.now();
+    const frameMs = lastPumpAt ? now - lastPumpAt : FRAME_MS;
+    lastPumpAt = now;
+    const burst = frameMs > FRAME_MS * 2 ? 1 : frameMs > FRAME_MS * 1.2 ? 2 : GRANT_BURST;
+    // Trié seulement quand la file a bougé : un tri de plusieurs centaines d'entrées à chaque image
+    // coûtait plus que le travail qu'il ordonnait.
+    if (queueDirty) {
+      slotQueue.sort((a, b) => a.order - b.order);
+      queueDirty = false;
+    }
     let granted = 0;
-    while (granted < GRANT_BURST && playingActive < maxPlaying) {
+    while (granted < burst && playingActive < maxPlaying) {
       const s = slotQueue.shift();
       if (!s) break;
       playingActive++;
@@ -203,6 +223,7 @@ function pumpSlots() {
 export function acquirePlaySlot(order: number, grant: () => void): () => void {
   const slot: PlaySlot = { order, granted: false, grant };
   slotQueue.push(slot);
+  queueDirty = true;
   pumpSlots();
   return () => {
     const i = slotQueue.indexOf(slot);
@@ -216,4 +237,8 @@ export function resetPlaySlots() {
   if (slotFrame != null) { cancelAnimationFrame(slotFrame); slotFrame = null; }
   slotQueue = [];
   playingActive = 0;
+  queueDirty = false;
+  lastPumpAt = 0;
+  // Même cycle de vie : une file de montages héritée viserait des cartes qui n'existent plus.
+  resetPreloadMounts();
 }

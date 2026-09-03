@@ -115,9 +115,14 @@ test('cards read the resolved proxy URL synchronously while rendering', () => {
 test('an evicted preview is not remounted by the preload path alone', () => {
   const media = read('src/components/rushes/useSceneCardMedia.ts');
   assert.match(media, /retainPausedVideo\(\(\) => \{ setHeld\(false\); setPreloadEvicted\(true\); \}\)/);
-  assert.match(media, /const preload = nearVideo && \(play \|\| hovered\) && !preloadEvicted/);
+  assert.match(media, /const preloadWanted = nearVideo && \(play \|\| hovered\) && !preloadEvicted/);
   assert.match(media, /if \(!nearVideo\) setPreloadEvicted\(false\)/,
     'the veto must be lifted when the card leaves the band, or it never preloads again');
+  // La préchauffe est RYTHMÉE (créer un WebMediaPlayer bloque le thread principal), mais une carte
+  // qui doit jouer ne fait jamais la queue : elle se figerait alors qu'elle a déjà son créneau.
+  assert.match(media, /requestPreloadMount\(index, \(\) => setPreloadReady\(true\)\)/);
+  assert.match(media, /if \(!preloadWanted \|\| wantVideo\) \{ setPreloadReady\(false\); return; \}/,
+    'a card that must play now must bypass the mount pacer');
 });
 
 // L'empreinte des réglages entre dans la clé de cache proxy, donc dans le rendu de CHAQUE carte.

@@ -6,7 +6,7 @@ import { acquirePlaySlot, PLAY_LEAD_PX, type Segment } from "./cutStudioShared";
 import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
-import { retainPausedVideo } from "@/lib/previewVideoPool";
+import { retainPausedVideo, requestPreloadMount } from "@/lib/previewVideoPool";
 import { claimHoverPreview } from "@/lib/hoverPreview";
 import { IS_REMOTE } from "@/lib/remote";
 
@@ -219,7 +219,19 @@ export function useSceneCardMedia({
   // retour la carte a de nouveau droit à sa préchauffe.
   const [preloadEvicted, setPreloadEvicted] = useState(false);
   useEffect(() => { if (!nearVideo) setPreloadEvicted(false); }, [nearVideo]);
-  const preload = nearVideo && (play || hovered) && !preloadEvicted;
+  // La préchauffe passe par le RYTHMEUR de montages (previewVideoPool) : créer un WebMediaPlayer est
+  // un travail synchrone du thread principal, et un défilement fait entrer des dizaines de cartes
+  // par seconde dans la bande. Sans étalement, chacune montait son élément dans le rendu même — le
+  // défilement avançait alors par à-coups. Une carte qui doit JOUER (`wantVideo`) ne passe pas par
+  // là : son créneau de lecture l'a déjà rythmée, et la faire attendre une seconde file la figerait.
+  const preloadWanted = nearVideo && (play || hovered) && !preloadEvicted && !!url;
+  const [preloadReady, setPreloadReady] = useState(false);
+  useEffect(() => {
+    if (!preloadWanted || wantVideo) { setPreloadReady(false); return; }
+    const release = requestPreloadMount(index, () => setPreloadReady(true));
+    return () => { release(); setPreloadReady(false); };
+  }, [preloadWanted, wantVideo, index]);
+  const preload = preloadWanted && preloadReady;
   if ((wantVideo || preload) && url && !held) setHeld(true);
   if (held && !url) setHeld(false);
   useEffect(() => {
