@@ -1,4 +1,4 @@
-import { Scissors, PenLine, Search, Wand2, Images, ArrowLeftRight, AudioLines, MessageSquare, Gauge, NotebookPen } from "lucide-react";
+import { Scissors, PenLine, Search, Wand2, Images, ArrowLeftRight, AudioLines, MessageSquare, Gauge, NotebookPen, Boxes } from "lucide-react";
 import type { ModuleId } from "@/lib/modules";
 
 // Navigation latérale — partagée avec App (lookup du libellé de l'onglet actif).
@@ -11,6 +11,7 @@ export const NAV: { id: ModuleId; label: string; labelKey: string; icon: typeof 
   { id: "upscale", label: "NetsuLab", labelKey: "nav.upscale", icon: Wand2 },
   { id: "voice", label: "NetsuTalk", labelKey: "nav.voice", icon: AudioLines },
   { id: "chat", label: "NetsuPilot", labelKey: "nav.chat", icon: MessageSquare },
+  { id: "flow", label: "NetsuFlow", labelKey: "nav.flow", icon: Boxes },
   { id: "optimisation", label: "NetsuBoost", labelKey: "nav.optimisation", icon: Gauge },
   { id: "transfer", label: "NetsuBridge", labelKey: "nav.transfer", icon: ArrowLeftRight },
 ];

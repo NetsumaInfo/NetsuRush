@@ -1,0 +1,14 @@
+{
+  "name": "netsuflow-fake-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic fake renderer service for the NetsuFlow T03 bridge proof. Node built-ins only.",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

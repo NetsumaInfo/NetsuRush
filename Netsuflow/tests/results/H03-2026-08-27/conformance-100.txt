@@ -1,0 +1,16 @@
+ok    probe reports a concrete engine version  engine 0.8.16, capture screenshot
+ok    describe matches the fixture  300 frames at 30/1
+ok    first, repeated, sequential, reverse and random frames  12 requests, 8 distinct frames, all idempotent
+ok    the alpha capture path agrees with the buffer path  identical
+ok    alpha survives to the caller  empty rgba(0,0,0,0), half rgba(255,255,255,128)
+ok    a broken composition fails with a named code, not a hang  COMPOSITION_NOT_READY after 22s
+ok    an impossible deadline is refused promptly  FRAME_TIMEOUT in 1 ms
+ok    an aborted request is refused without rendering  FRAME_ABORTED
+ok    invalidate reuses the session only when identity holds  reuse and rebuild both correct
+ok    a closed session refuses work  SESSION_CLOSED, and close is idempotent
+ok    the timeline shim reports when it took a decision  warned, and named the mode that removes the deadline
+ok    a composition that registers a timeline is not warned about  no diagnostics, as it should be
+ok    100 open/close cycles leak nothing  scratch dirs flat, adapter rss +35 MiB
+
+13 checks, 0 failure(s)
+PASS

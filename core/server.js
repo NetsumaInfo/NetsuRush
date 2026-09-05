@@ -22,9 +22,12 @@ const sessionCache = require("./sessionCache");
 sessionCache.resetSync();
 
 const http = require("node:http");
+const { Readable } = require("node:stream");
 const fs = require("node:fs");
 const path = require("node:path");
 const { serveFile, streamMedia, mediaGuard } = require("./media-server");
+const { flow } = require("./flow");
+const logbus = require("./logbus");
 const { serveApp } = require("./appstatic");
 const { serveYoutube } = require("./ytstream");
 const { createRpc } = require("./rpc");
@@ -45,6 +48,46 @@ const PORT_FIRST = 8730;
 const PORT_SPAN = 20;
 
 const rpc = createRpc();
+
+/// Relays one rendered frame from the NetsuFlow service.
+///
+/// The two alpha headers ride along because a fully transparent composition and
+/// a composition that failed to render look identical on screen; the page says
+/// which one it is, and it can only say so if the numbers survive the relay.
+async function serveFlowFrame(req, res, frame) {
+  const index = Number(frame);
+  if (!Number.isInteger(index) || index < 0) {
+    res.writeHead(400).end("bad frame");
+    return;
+  }
+  const port = flow.editorPort();
+  if (!port) {
+    res.writeHead(503).end("renderer service is not running");
+    return;
+  }
+  // A handler must never reject: an unhandled rejection here would take the
+  // core down for one image request.
+  try {
+    const upstream = await fetch(`http://127.0.0.1:${port}/api/frame?n=${index}`);
+    if (!upstream.ok || !upstream.body) {
+      res.writeHead(upstream.status).end("frame unavailable");
+      return;
+    }
+    const headers = { "Content-Type": upstream.headers.get("content-type") || "image/png" };
+    for (const name of ["x-opaque-pixels", "x-partial-alpha-pixels"]) {
+      const value = upstream.headers.get(name);
+      if (value !== null) headers[name] = value;
+    }
+    res.writeHead(200, headers);
+    // Streamed rather than buffered: a 1080p PNG is megabytes, and holding one
+    // per in-flight scrub step in memory is the same mistake twice.
+    Readable.fromWeb(upstream.body).pipe(res);
+  } catch (e) {
+    logbus.emit("flow", "error", `frame ${index}: ${e && e.message ? e.message : e}`);
+    if (res.headersSent) res.destroy();
+    else res.writeHead(502).end("renderer service unreachable");
+  }
+}
 
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, `http://${HOST}`);
@@ -117,6 +160,15 @@ const server = http.createServer((req, res) => {
       mode: u.searchParams.get("mode") === "copy" ? "copy" : "enc",
       ffmpegBin: ffBin("ffmpeg"),
     });
+    return;
+  }
+  // Frame d'une composition NetsuFlow, relayée depuis le service de rendu. Même garde que /media,
+  // et pour la même raison : la réponse est affichable par une <img> du webview sans CORS, mais
+  // illisible par fetch depuis une page tierce. Relais plutôt qu'accès direct au service — son
+  // port change à chaque lancement, et le renderer n'a pas à le connaître pour afficher une image.
+  if (u.pathname === "/flow/frame") {
+    if (mediaGuard(req, res, u)) return;
+    void serveFlowFrame(req, res, u.searchParams.get("n"));
     return;
   }
   // Flux YouTube relayé (lecture sans iframe, cf. core/ytstream.js). Même garde que /media : hôte

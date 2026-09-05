@@ -1,0 +1,62 @@
+
+> netsuflow-hyperframes-renderer-prototype@0.0.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: every function the adapter needs is a package-root export
+ok 1 - every function the adapter needs is a package-root export
+  ---
+  duration_ms: 0.9368
+  type: 'test'
+  ...
+# Subtest: the helpers that keep work out of NetsuFlow are still present
+ok 2 - the helpers that keep work out of NetsuFlow are still present
+  ---
+  duration_ms: 0.6428
+  type: 'test'
+  ...
+# Subtest: the root export surface has not drifted since it was pinned
+ok 3 - the root export surface has not drifted since it was pinned
+  ---
+  duration_ms: 0.6693
+  type: 'test'
+  ...
+# Subtest: the engine version is pinned exactly, not to a range
+ok 4 - the engine version is pinned exactly, not to a range
+  ---
+  duration_ms: 9.4478
+  type: 'test'
+  ...
+# Subtest: every pixel-relevant dependency resolves to a concrete version
+ok 5 - every pixel-relevant dependency resolves to a concrete version
+  ---
+  duration_ms: 4.3596
+  type: 'test'
+  ...
+# Subtest: the lockfile is present and fingerprinted
+ok 6 - the lockfile is present and fingerprinted
+  ---
+  duration_ms: 3.9263
+  type: 'test'
+  ...
+# Subtest: BeginFrame capture is reported as Linux-only
+ok 7 - BeginFrame capture is reported as Linux-only
+  ---
+  duration_ms: 0.1913
+  type: 'test'
+  ...
+# Subtest: the manifest is stable across calls in one run
+ok 8 - the manifest is stable across calls in one run
+  ---
+  duration_ms: 7.9056
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 734.4899

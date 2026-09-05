@@ -1,0 +1,12 @@
+ok   no timeline, no shim                   init  45523 ms  shim not injected
+ok   no timeline, auto                      init   3276 ms  shim marked=[netsuflow-fixture] kept=[]
+ok   no timeline, none                      init    125 ms  shim marked=[netsuflow-fixture] kept=[]
+ok   registers a timeline, auto             init    101 ms  shim injected, had not fired before capture
+ok   registers a timeline, gsap             init     91 ms  shim not injected
+ok   late timeline, auto (default grace)    init   2739 ms  shim injected, had not fired before capture  marker rgb(0,200,83)  animation was ready
+ok   late timeline, auto (grace 500 ms)     init    723 ms  shim marked=[netsuflow-fixture-gsap-late] kept=[]  marker rgb(255,23,68)  captured before the timeline existed
+ok   late timeline, gsap                    init   2595 ms  shim not injected  marker rgb(0,200,83)  animation was ready
+
+auto saves 42247 ms on a composition without a timeline (14x)
+known limitation, reproduced: a grace shorter than the composition setup captures it too early. The adapter warns whenever the shim marks a host, and gsap mode removes the deadline entirely.
+PASS

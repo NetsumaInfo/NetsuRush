@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8" /><title>My page</title></head>
+<body style="margin:0;background:#101018">
+  <div id="stage" data-composition-id="netsuflow-user"
+       data-width="1920" data-height="1080"
+       data-composition-duration="4" data-netsuflow-fps="24" data-no-timeline
+       style="width:1920px;height:1080px;position:relative;overflow:hidden">
+    <div id="bar" style="position:absolute;top:500px;left:0;height:80px;background:#ff5f7e"></div>
+    <div id="txt" style="position:absolute;top:120px;left:120px;font:700 90px system-ui;color:#fff">HELLO</div>
+  </div>
+  <script>
+    var stage = document.getElementById('stage');
+    var FPS = Number(stage.dataset.netsuflowFps);
+    var DURATION = Number(stage.dataset.compositionDuration);
+    var bar = document.getElementById('bar');
+    var txt = document.getElementById('txt');
+    function seek(t) {
+      var c = Math.min(Math.max(t, 0), DURATION);
+      var p = c / DURATION;
+      bar.style.width = (p * 1920) + 'px';
+      txt.style.opacity = String(Math.min(1, p * 3));
+      window.__hf.currentTime = c;
+    }
+    window.__hf = { duration: DURATION, seek: seek, currentTime: 0 };
+    window.__hfWaitForSeekCompletion = function () {
+      return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
+    };
+    seek(0);
+  </script>
+</body>
+</html>

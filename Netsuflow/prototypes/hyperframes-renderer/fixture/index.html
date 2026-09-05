@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NetsuFlow fixture composition</title>
+    <!--
+      A HyperFrames composition is a plain HTML file: no build step, no bundler,
+      no TypeScript entry point. Metadata lives on the root element and clip
+      timing on data-start / data-duration / data-track-index, which are the
+      canonical authored timing attributes.
+
+      The engine's contract with this page is small and public: expose
+      window.__hf = { duration, seek } with duration > 0, seeking in seconds.
+      frame-code.js implements it with pure arithmetic and no animation library,
+      so that any difference between two captures of the same frame belongs to
+      the engine, the browser, or the capture mode, and never to the fixture.
+
+      Nothing here touches the network, the wall clock, or unseeded randomness.
+      The font and image are served from this directory.
+    -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div
+      id="composition"
+      class="composition"
+      data-composition-id="netsuflow-fixture"
+      data-width="1920"
+      data-height="1080"
+      data-composition-duration="10"
+      data-netsuflow-fps="30"
+    >
+      <!-- Frame identity, byte-exact. Same layout as the bridge's diagnostic
+           frame: a 16-cell binary counter, then the frame number big-endian in
+           the red channel of the first four pixels of row 0. -->
+      <canvas id="machine-band"></canvas>
+
+      <!-- Flat opaque swatches: exact colours, hard edges. -->
+      <div id="swatch-red" class="region swatch"></div>
+      <div id="swatch-green" class="region swatch"></div>
+      <div id="swatch-blue" class="region swatch"></div>
+      <div id="swatch-grey" class="region swatch"></div>
+
+      <!-- Opaque white beside 50% white over transparency: the region that
+           separates straight from premultiplied alpha. -->
+      <div id="alpha-edge" class="region">
+        <div id="alpha-opaque"></div>
+        <div id="alpha-half"></div>
+      </div>
+
+      <!-- Text in a locally served variable font, tabular figures so the
+           advance width never changes with the frame number. -->
+      <div id="text-region" class="region">
+        <p id="readout">FRAME 00000</p>
+      </div>
+
+      <!-- CSS transform. -->
+      <div id="transform-region" class="region">
+        <div id="spinner"><div id="spinner-marker"></div></div>
+      </div>
+
+      <!-- Inline SVG, strictly axis-aligned so every edge lands on a pixel
+           boundary and the region can be required to be byte-exact. Diagonals
+           and curves live in the antialiasing probe below, on purpose: mixing
+           them here would make one unstable edge contaminate the whole
+           region's verdict. -->
+      <div id="svg-region" class="region">
+        <svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+          <rect x="0" y="0" width="240" height="240" fill="#37474f" />
+          <rect id="svg-arc" x="20" y="40" width="40" height="60" fill="#aed581" />
+          <rect x="20" y="140" width="200" height="80" fill="#ff7043" />
+        </svg>
+      </div>
+
+      <!-- Antialiasing probe, isolated and expected to be the least stable
+           region in the fixture. Diagonal and curved edges are rasterised with
+           antialiasing, and this fixture's first run showed those pixels
+           changing between two captures of the same frame while every
+           hard-edged region stayed identical. Keeping the probe means the
+           instability is measured rather than designed out of sight; keeping
+           it separate means it cannot mask a real regression elsewhere. -->
+      <div id="antialias-region" class="region">
+        <svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="240" height="240" fill="#263238" />
+          <polygon points="20,220 120,60 220,220" fill="#ff7043" />
+          <circle cx="120" cy="120" r="40" fill="#4dd0e1" />
+          <!-- Animated, so this layer is re-rasterised on every seek. That is
+               the condition under which the antialiased edges above were first
+               seen to change: a static layer is cached and never varies, so a
+               probe without this rect would quietly stop probing. -->
+          <rect id="aa-tick" x="10" y="10" width="20" height="12" fill="#ffffff" />
+        </svg>
+      </div>
+
+      <!-- Canvas 2D drawing. -->
+      <div id="canvas-region" class="region">
+        <canvas id="drawing"></canvas>
+      </div>
+
+      <!-- Local image asset, nearest-neighbour scaled, with a transparent
+           quadrant. -->
+      <div id="image-region" class="region">
+        <img id="swatch-image" src="assets/swatch.png" alt="" />
+      </div>
+
+      <!-- Animated bar. -->
+      <div id="sweep-region" class="region">
+        <div id="sweep"></div>
+      </div>
+
+      <!-- Clip-timed regions. Together they tile the timeline without gaps or
+           overlaps, so exactly one is visible at any time inside the duration. -->
+      <div
+        id="clip-a"
+        class="region clip"
+        data-start="0"
+        data-duration="3"
+        data-track-index="0"
+      ></div>
+      <div
+        id="clip-b"
+        class="region clip"
+        data-start="3"
+        data-duration="4"
+        data-track-index="0"
+      ></div>
+      <div
+        id="clip-c"
+        class="region clip"
+        data-start="7"
+        data-duration="3"
+        data-track-index="0"
+      ></div>
+
+      <!-- Opacity ramp, not clip-timed. -->
+      <div id="fader" class="region"></div>
+    </div>
+
+    <script src="frame-code.js"></script>
+  </body>
+</html>

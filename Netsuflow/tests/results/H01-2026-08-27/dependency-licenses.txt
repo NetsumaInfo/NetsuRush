@@ -1,0 +1,16 @@
+licenses: {
+ "MIT": 44,
+ "MISSING": 5,
+ "Apache-2.0": 5,
+ "ISC": 8,
+ "BSD-2-Clause": 13,
+ "BSD-3-Clause": 3,
+ "0BSD": 1
+}
+missing license field: @hyperframes/core@0.8.16, @hyperframes/engine@0.8.16, @hyperframes/lint@0.8.16, @hyperframes/parsers@0.8.16, @hyperframes/studio-server@0.8.16
+hyperframes packages:
+  @hyperframes/core@0.8.16 license=MISSING
+  @hyperframes/engine@0.8.16 license=MISSING
+  @hyperframes/lint@0.8.16 license=MISSING
+  @hyperframes/parsers@0.8.16 license=MISSING
+  @hyperframes/studio-server@0.8.16 license=MISSING

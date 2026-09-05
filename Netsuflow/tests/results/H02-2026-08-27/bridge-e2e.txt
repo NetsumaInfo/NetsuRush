@@ -1,0 +1,25 @@
+bridge end-to-end: real engine behind the bridge protocol
+
+[BrowserManager] Browser launched (HeadlessChrome/152.0.7977.54, screenshot, gl=--use-gl=angle --use-angle=swiftshader, headlessShell=true, platform=win32)
+[initSession:screenshot] page.goto start (0ms)
+[initSession:screenshot] page.goto complete (103ms)
+[initSession:screenshot] GSAP proxy flush complete (105ms)
+[initSession:screenshot] pollHfReady complete (107ms)
+[initSession:screenshot] pollSubCompositionTimelines complete (ready) (109ms)
+[initSession:screenshot] applyVideoMetadataHints complete (110ms)
+[initSession:screenshot] media + fonts + tailwind ready (114ms)
+[initSession:screenshot] static-frame dedup: disabled (canvas/webgl+no GSAP tweens (non-GSAP animation)) (129ms)
+server on 127.0.0.1:60075, session warm in 1701 ms
+
+ok    a known frame crosses the wire byte-identical to the C++ pattern mirror  230400 bytes
+ok    out-of-order and repeated frames stay byte-exact  6 requests
+ok    a stale source revision is refused, not answered  stale-revision
+ok    C++ harness: frame 320 180 7  connect=Ok status=Ok error= bytes=230400 pixelsMatch=true
+ok    C++ harness: repeat 320 180 7 20  connect=Ok completed=20 failures=0 mismatches=0 p50=0.311 p95=0.496 p99=0.496 rssStartKb=4548 rssEndKb=4576 handlesStart=89 handlesEnd=89
+ok    C++ harness: sequence 320 180 30  connect=Ok completed=30 failures=0 mismatches=0 p50=66.384 p95=68.209 p99=76.862 rssStartKb=4548 rssEndKb=4580 handlesStart=89 handlesEnd=89
+ok    C++ harness: soak 320 180 40  connect=Ok completed=40 failures=0 mismatches=0 p50=66.704 p95=70.042 p99=70.485 rssStartKb=4544 rssEndKb=4576 handlesStart=89 handlesEnd=89
+ok    C++ harness: reconnect 320 180 3  connect=Ok first=Ok reconnect=Ok second=Ok
+ok    C++ harness: abort 320 180 5  connect=Ok status=Aborted error=render aborted by the host bytes=0
+ok    C++ harness: expect-error 64 64 0  connect=Ok status=ServiceError error=renderer service returned an error bytes=0
+
+10 checks, 0 failures  PASS

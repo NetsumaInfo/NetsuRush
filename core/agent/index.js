@@ -10,13 +10,15 @@ const { createSession } = require('./session');
 const { createChatStore } = require('./store');
 const { createResolveTools } = require('./tools/resolve'); // catalogue Resolve (compound dispatchers)
 const { createReferenceTools } = require('./tools/reference'); // board de référence (mood-board)
+const { createFlowTools } = require('./tools/flow'); // NetsuFlow : lecture + PROPOSITION, jamais d'écriture
 const { createMcpBridge } = require('./mcp/server'); // serveur MCP stdio exposant le registry aux CLI
 
 /**
  * @param {{
  *   broadcast:(ch:string,p:any)=>void, ev:any, dataDir:string,
  *   modules:{ resolveMod:any, timeline:any, sidecars:any, thumbs:any, proxy:any, ffmpeg:any,
- *             aeExporter:any, refStore:any, guarded:(fn:Function)=>Function, rOp:(fn:Function)=>Function }
+ *             aeExporter:any, refStore:any, flow:any,
+ *             guarded:(fn:Function)=>Function, rOp:(fn:Function)=>Function }
  * }} deps
  */
 function createAgent(deps) {
@@ -26,6 +28,9 @@ function createAgent(deps) {
   registry.registerAll(createNetsuRushTools({ ...modules, ev }));
   registry.registerAll(createResolveTools({ ...modules, ev }));
   registry.registerAll(createReferenceTools({ refStore: modules.refStore, broadcast }));
+  // Surface `flow` uniquement : le catalogue Resolve n'a rien à faire dans un
+  // éditeur de composition, et réciproquement.
+  registry.registerAll(createFlowTools({ flow: modules.flow }));
 
   const permissions = createPermissions({ broadcast });
   const store = createChatStore(dataDir);

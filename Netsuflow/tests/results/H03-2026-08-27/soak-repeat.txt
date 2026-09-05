@@ -1,0 +1,22 @@
+H03: cache, scrubbing, and soak — engine 0.8.16, Node v22.16.0
+phases: f, soak requests: 10000
+
+browsers owned by this prototype at start: 0
+
+— Phase F: 10000-request soak —
+    1000 requests  browsers 5  browser ws  253 MiB  handles  2027  node rss  109 MiB  cache 4.0 MiB
+    2000 requests  browsers 5  browser ws  255 MiB  handles  2027  node rss  120 MiB  cache 4.0 MiB
+    3000 requests  browsers 5  browser ws  255 MiB  handles  2027  node rss  109 MiB  cache 4.0 MiB
+    4000 requests  browsers 5  browser ws  256 MiB  handles  2027  node rss  138 MiB  cache 4.0 MiB
+    5000 requests  browsers 5  browser ws  257 MiB  handles  2062  node rss  142 MiB  cache 4.0 MiB
+    6000 requests  browsers 5  browser ws  257 MiB  handles  2062  node rss  141 MiB  cache 4.0 MiB
+    7000 requests  browsers 5  browser ws  258 MiB  handles  2062  node rss  110 MiB  cache 4.0 MiB
+    8000 requests  browsers 5  browser ws  259 MiB  handles  2062  node rss  140 MiB  cache 4.0 MiB
+    9000 requests  browsers 5  browser ws  259 MiB  handles  2062  node rss  144 MiB  cache 4.0 MiB
+   10000 requests  browsers 5  browser ws  260 MiB  handles  2060  node rss  142 MiB  cache 4.0 MiB
+  soak                           p50    0.3 ms  p95   62.7 ms  p99   65.6 ms  max  111.7 ms
+ok    10000 requests after the cache bound is reached  60s, p50 0.3 ms p95 62.7 ms p99 65.6 ms, hit rate 91.9%, browser ws +6 MiB, handles +33, node rss +33 MiB
+
+browsers owned by this prototype at end: 0 (started with 0)
+
+1 checks, 0 failure(s)  PASS

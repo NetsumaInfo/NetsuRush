@@ -8,7 +8,13 @@ export default defineSchema({
   // cette table sert la future ALLOWLIST (grant manuel) sans changer le schéma.
   betaGrants: defineTable({
     userId: v.string(), // id du user Better Auth (document._id du composant)
-    role: v.string(), // "member" | "admin" | "pending"
+    role: v.string(), // "member" | "admin" | "pending" — accès BETA DESKTOP
+    // Rôle sur le SITE : "moderator" | "admin". Absent = membre ordinaire, ce
+    // qu'est tout compte connecté (les inscriptions du site sont ouvertes).
+    // Champ SÉPARÉ de `role` à dessein : promouvoir un modérateur du site ne
+    // doit pas ouvrir la beta desktop, et retirer la beta ne doit pas retirer
+    // la modération. Deux droits, deux colonnes.
+    siteRole: v.optional(v.string()),
     grantedAt: v.number(),
     note: v.optional(v.string()),
   }).index("by_user", ["userId"]),

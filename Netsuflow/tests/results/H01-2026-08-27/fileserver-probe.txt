@@ -1,0 +1,37 @@
+Probe of @hyperframes/engine 0.8.16 createFileServer against the NetsuFlow
+trust boundary. Run once on 2026-08-27, Windows 11 x64, Node v22.16.0, from
+Netsuflow/prototypes/hyperframes-renderer/ with fileserver-probe.mjs.
+
+The served root contained only two throwaway files in a temp directory. SECRET.txt
+was placed one level ABOVE the served root; nothing should ever return it.
+
+url: http://localhost:54020 port: 54020
+listening sockets:
+  TCP    0.0.0.0:54020          0.0.0.0:0              LISTENING       23744
+ok      200  /  (baseline, should serve index.html)
+ok      200  /index.html  (baseline)
+ok      404  /../SECRET.txt  (literal dot-dot)
+ok      404  /..%2fSECRET.txt  (encoded slash)
+ok      404  /%2e%2e/SECRET.txt  (encoded dots)
+ok      404  /....//SECRET.txt  (doubled dots)
+ok      404  /..\SECRET.txt  (windows separator)
+ESCAPE  200  /%2e%2e%5cSECRET.txt  (encoded windows separator)  <-- served a file outside the root
+non-loopback 192.168.1.20: reachable, status 200  <-- bound beyond loopback
+
+Conclusion: two independent failures against NetsuFlow's requirements.
+
+1. Bind. serve({ fetch, port }) is called with no hostname, so @hono/node-server
+   binds every interface. The project directory was reachable from this machine's
+   LAN address. FileServerOptions exposes no hostname, so configuration cannot
+   narrow it.
+
+2. Root escape. Hono normalises the ordinary traversal forms; six of seven
+   attempts returned 404. The surviving form decodes to a backslash after
+   normalisation, and path.join treats that as a separator on Windows, so
+   join(projectDir, relativePath) resolves above the root. There is no canonical
+   root check to catch it.
+
+NetsuFlow does not inherit either failure: createFileServer is exported but never
+called inside the engine, and createCaptureSession takes a caller-supplied URL.
+Decision: do not adopt; write the project server as Task 3 already planned, with
+these cases as named regression tests. Report both upstream.

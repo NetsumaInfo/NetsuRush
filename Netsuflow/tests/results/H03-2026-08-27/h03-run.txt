@@ -1,0 +1,45 @@
+H03: cache, scrubbing, and soak — engine 0.8.16, Node v22.16.0
+phases: a, b, c, d, e, g, h, soak requests: 10000
+
+browsers owned by this prototype at start: 0
+
+— Phase A: cold / warm miss / memory hit —
+  1080p warm miss (adapter)      p50  119.9 ms  p95  133.7 ms  p99  133.7 ms  max  133.7 ms
+  1080p capture stage            p50   94.3 ms  p95  106.9 ms  p99  106.9 ms  max  106.9 ms
+  1080p decode stage             p50   24.8 ms  p95   37.6 ms  p99   37.6 ms  max   37.6 ms
+  1080p memory hit (bridge)      p50   15.9 ms  p95   26.8 ms  p99   27.8 ms  max   27.8 ms
+ok    1080p: cold, warm miss, and memory hit  cold 5452.2 ms, miss p95 133.7 ms, hit p95 26.8 ms
+  4K warm miss (adapter)         p50  315.0 ms  p95  326.8 ms  p99  326.8 ms  max  326.8 ms
+  4K capture stage               p50  205.6 ms  p95  208.7 ms  p99  208.7 ms  max  208.7 ms
+  4K decode stage                p50  109.9 ms  p95  122.1 ms  p99  122.1 ms  max  122.1 ms
+  4K memory hit (bridge)         p50   60.1 ms  p95   69.6 ms  p99   71.0 ms  max   71.0 ms
+ok    4K: cold, warm miss, and memory hit  cold 6737.0 ms, miss p95 326.8 ms, hit p95 69.6 ms
+
+— Phase B: scrub traces, every frame verified —
+  sequential (300)               p50   66.7 ms  p95   69.2 ms  p99   72.6 ms  max   75.7 ms
+  reverse (300)                  p50   66.5 ms  p95   68.5 ms  p99   69.5 ms  max   70.5 ms
+  loop (300)                     p50    0.3 ms  p95   66.7 ms  p99   68.0 ms  max   70.4 ms
+  random (1000)                  p50   66.7 ms  p95   68.7 ms  p99   70.4 ms  max   77.0 ms
+ok    sequential, reverse, random and loop traces return the frame asked for  sequential p50 66.7 ms, reverse p50 66.5 ms, loop p50 0.3 ms, random p50 66.7 ms, cache hit rate 16.9%
+
+— Phase C: concurrent bindings —
+  2 bindings                     p50   66.8 ms  p95   69.0 ms  p99 2619.0 ms  max 2619.0 ms
+ok    2 bindings render concurrently without crossing frames  2 browsers expected, 6 running, 328 MiB working set (was 0)
+  4 bindings                     p50   66.6 ms  p95   69.4 ms  p99 3122.0 ms  max 3122.0 ms
+ok    4 bindings render concurrently without crossing frames  4 browsers expected, 8 running, 482 MiB working set (was 0)
+
+— Phase D: revision changes —
+ok    rapid invalidation never returns a frame from before the change  40 invalidations, 40 fresh renders, 0 stale frames
+
+— Phase E: bounded waits —
+ok    an impossible deadline fails fast instead of blocking the caller  FRAME_TIMEOUT in 1.9 ms
+
+— Phase G: browser kill and recovery —
+ok    a killed browser is reported, and the next binding recovers without a restart  killed 5 browser process(es), reported in 4.2 ms as render-failed, recovered
+
+— Phase H: standalone versus bridge —
+ok    frames through the bridge are byte-identical to the adapter’s own  8 frames byte-identical, 8 carrying partial alpha
+
+browsers owned by this prototype at end: 0 (started with 0)
+
+9 checks, 0 failure(s)  PASS

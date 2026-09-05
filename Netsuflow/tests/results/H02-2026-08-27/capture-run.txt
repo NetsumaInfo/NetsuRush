@@ -1,0 +1,19 @@
+[BrowserManager] Browser launched (HeadlessChrome/152.0.7977.54, screenshot, gl=--use-gl=angle --use-angle=swiftshader, headlessShell=true, platform=win32)
+[initSession:screenshot] page.goto start (0ms)
+[initSession:screenshot] page.goto complete (108ms)
+[initSession:screenshot] GSAP proxy flush complete (110ms)
+[initSession:screenshot] pollHfReady complete (111ms)
+[initSession:screenshot] pollSubCompositionTimelines complete (ready) (3111ms)
+[initSession:screenshot] applyVideoMetadataHints complete (3111ms)
+[initSession:screenshot] media + fonts + tailwind ready (3114ms)
+[initSession:screenshot] static-frame dedup: disabled (canvas/webgl+no GSAP tweens (non-GSAP animation)) (3122ms)
+server        http://127.0.0.1:59357 (token-scoped, loopback only)
+__hf.duration 10s (expected 10)
+repeat 1      identical
+repeat 2      identical
+alpha 50%     rgba(255, 255, 255, 128)
+empty area    rgba(0, 0, 0, 0)
+stage timings {"frames":17,"avgTotalMs":94,"avgSeekMs":3,"avgBeforeCaptureMs":24,"avgScreenshotMs":67,"p50TotalMs":94,"p95TotalMs":98,"p99TotalMs":98,"subTimelineWaitOutcome":"ready","initDurationMs":3115,"initTweenCount":0,"initElementCount":43,"warnings":[],"staticDedupReused":0,"staticDedupEnabled":true,"stati
+
+7 reference frames written to S:\projet_app\NetsuRush\Netsuflow\prototypes\hyperframes-renderer\reference
+PASS

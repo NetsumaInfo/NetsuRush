@@ -990,6 +990,27 @@ export function makeCoreClient(): NrApi {
     warmFilePaths: () => { void ensurePathBridge(); },
     saveFile: (defaultName, extensions) => dlgSave(defaultName, extensions),
     mediaUrl: (p) => `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
+
+    flowStatus: () => call("flow:status", []),
+    flowStart: () => call("flow:start", []),
+    flowStop: () => call("flow:stop", []),
+    flowState: () => call("flow:state", []),
+    flowSave: (opts) => call("flow:save", [opts]),
+    flowSend: () => call("flow:send", []),
+    flowBakeProgress: () => call("flow:bakeProgress", []),
+    flowBake: () => call("flow:bake", []),
+    flowBakeClear: () => call("flow:bakeClear", []),
+    flowBakeQuality: (quality) => call("flow:bakeQuality", [quality]),
+    flowExportInfo: () => call("flow:exportInfo", []),
+    flowExportStart: (opts) => call("flow:exportStart", [opts]),
+    flowExportCancel: () => call("flow:exportCancel", []),
+    flowBrowse: (target) => call("flow:browse", [target]),
+    flowBrowseNative: (target) => call("flow:browseNative", [target]),
+    // Cache-busted per frame AND per revision: the service answers the current
+    // composition, so a URL keyed only on the frame would show a stale image
+    // after an edit. `rev` is opaque here — it only has to change.
+    flowFrameUrl: (frame, rev) =>
+      `${BASE}/flow/frame?n=${frame}&rev=${encodeURIComponent(rev)}${tkParam}`,
     assetUrl: (p) => assetSrc(p) ?? `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
     ytStreamUrl: (id) => `${BASE}/ytstream?id=${encodeURIComponent(id)}${tkParam}`,
     openExternal: (url) => openUrl(url),

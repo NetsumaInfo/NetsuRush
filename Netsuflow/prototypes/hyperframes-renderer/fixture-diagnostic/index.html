@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<!--
+  The bridge's cross-language proof, as a composition.
+
+  This page paints, per frame, exactly the pixels that
+  openfx/src/DiagnosticFrame.cpp computes for the same (width, height, frame).
+  The C++ bridge harness compares what it receives against its own local
+  generator, so when this composition travels HTML -> Chromium screenshot ->
+  PNG -> decode -> protocol -> C++ client and still matches byte for byte, the
+  whole pixel path is proven at once, with two independent implementations of
+  the expected image on either end.
+
+  It carries data-no-timeline as its author: this page genuinely has no GSAP
+  timeline, and the attribute is the engine's documented opt-out. The user
+  fixture in ../fixture deliberately does NOT carry it, because it represents
+  compositions NetsuFlow does not author.
+-->
+<head>
+  <meta charset="utf-8" />
+  <title>NetsuFlow diagnostic composition</title>
+  <style>
+    html, body { margin: 0; padding: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div
+    data-composition-id="netsuflow-diagnostic"
+    data-width="320"
+    data-height="180"
+    data-composition-duration="137"
+    data-no-timeline
+  >
+    <canvas id="frame" width="320" height="180"></canvas>
+  </div>
+  <script>
+    'use strict';
+
+    const WIDTH = 320;
+    const HEIGHT = 180;
+    const FPS = 30;
+    // 137 s at 30 fps = 4110 frames. The C++ harness soak draws pseudo-random
+    // frames in [0, 4096), and a composition shorter than that would clamp the
+    // seek and silently answer with its last frame — measured as a soak
+    // mismatch at frame 807 with a 10 s duration.
+    const DURATION = 137;
+
+    const canvas = document.getElementById('frame');
+    const context = canvas.getContext('2d', { alpha: false, willReadFrequently: false });
+    const image = context.createImageData(WIDTH, HEIGHT);
+
+    // Mirror of makeDiagnosticFrame in DiagnosticFrame.cpp / diagnosticFrame.mjs.
+    // Byte-identical output for the same spec is the entire point of this file;
+    // any deviation here is a bug by definition.
+    function paintDiagnosticFrame(frame) {
+      const pixels = image.data;
+      const f = frame & 0x00ffffff;
+
+      for (let y = 0; y < HEIGHT; y += 1) {
+        const rowStart = y * WIDTH * 4;
+        for (let x = 0; x < WIDTH; x += 1) {
+          const offset = rowStart + x * 4;
+          pixels[offset] = (x * 7 + f * 13) & 0xff;
+          pixels[offset + 1] = (y * 11 + f * 29) & 0xff;
+          pixels[offset + 2] = ((x ^ y) + f * 3) & 0xff;
+          pixels[offset + 3] = 255;
+        }
+      }
+
+      // Visible binary frame counter across the top band.
+      const tenth = Math.floor(HEIGHT / 10);
+      const band = Math.min(Math.max(tenth, 8), HEIGHT);
+      const cellWidth = Math.floor(WIDTH / 16);
+      if (cellWidth > 0) {
+        for (let cell = 0; cell < 16; cell += 1) {
+          const value = ((frame >>> cell) & 1) !== 0 ? 255 : 16;
+          const x0 = cell * cellWidth;
+          const x1 = cell + 1 === 16 ? WIDTH : x0 + cellWidth;
+          for (let y = 0; y < band; y += 1) {
+            const rowStart = y * WIDTH * 4;
+            for (let x = x0; x < x1; x += 1) {
+              const offset = rowStart + x * 4;
+              pixels[offset] = value;
+              pixels[offset + 1] = value;
+              pixels[offset + 2] = value;
+              pixels[offset + 3] = 255;
+            }
+          }
+        }
+      }
+
+      // Machine-readable frame marker in the red channel of the first four pixels.
+      for (let i = 0; i < 4; i += 1) {
+        const shift = (3 - i) * 8;
+        pixels[i * 4] = (frame >>> shift) & 0xff;
+      }
+
+      context.putImageData(image, 0, 0);
+    }
+
+    function seek(seconds) {
+      const clamped = Math.min(Math.max(seconds, 0), DURATION);
+      // The tiny epsilon absorbs (frame/fps)*fps landing at 6.999999999999999.
+      const frame = Math.round(clamped * FPS + 1e-6);
+      paintDiagnosticFrame(frame);
+      window.__hf.currentTime = clamped;
+      window.__hf.currentFrame = frame;
+    }
+
+    window.__hf = {
+      duration: DURATION,
+      seek,
+      currentTime: 0,
+      currentFrame: 0,
+    };
+
+    window.__hfWaitForSeekCompletion = () =>
+      new Promise((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+
+    paintDiagnosticFrame(0);
+  </script>
+</body>
+</html>

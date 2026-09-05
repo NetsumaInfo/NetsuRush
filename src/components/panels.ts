@@ -18,6 +18,7 @@ const load = {
   upscale: () => import("@/components/netsulab/NetsuLabPanel").then((m) => ({ default: m.NetsuLabPanel })),
   voice: () => import("@/components/voice/VoicePanel").then((m) => ({ default: m.VoicePanel })),
   chat: () => import("@/components/chat/ChatPanel").then((m) => ({ default: m.ChatPanel })),
+  flow: () => import("@/components/flow/FlowPanel").then((m) => ({ default: m.FlowPanel })),
   optimisation: () => import("@/components/optimize/OptimizePanel").then((m) => ({ default: m.OptimizePanel })),
   transfer: () => import("@/components/transfer/TransferPanel").then((m) => ({ default: m.TransferPanel })),
   settings: () => import("@/components/settings/SettingsPanel").then((m) => ({ default: m.SettingsPanel })),

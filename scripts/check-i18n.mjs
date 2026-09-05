@@ -10,7 +10,7 @@ const SOURCE_DIR = path.join(ROOT, "src");
 // tableau de clés avec defaultValue) ne sont pas vérifiables statiquement et sont ignorées.
 const NAMESPACED_KEY = /\bt\(\s*"([a-z]+):([\w.$-]+)"/g;
 const EXPECTED_LANGUAGE_COUNT = 6;
-const EXPECTED_NAMESPACE_COUNT = 23;
+const EXPECTED_NAMESPACE_COUNT = 24;
 
 function relative(file) {
   return path.relative(ROOT, file).replaceAll("\\", "/");

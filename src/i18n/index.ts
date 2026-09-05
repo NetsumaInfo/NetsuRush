@@ -51,6 +51,7 @@ export const NAMESPACES = [
   "script",
   "adobe",
   "chat",
+  "flow",
   "export",
   "optimize",
   "settings",

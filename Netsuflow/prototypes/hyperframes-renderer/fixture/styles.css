@@ -1,0 +1,227 @@
+/* Fixture styling.
+ *
+ * The background stays transparent everywhere. A Fusion generator exists to
+ * produce an image with alpha, so an opaque fixture would hide the one failure
+ * mode that matters most, and "the browser painted white" would be
+ * indistinguishable from "alpha was lost in the pixel path".
+ *
+ * Every region sits at an exact, documented pixel rectangle so a captured frame
+ * can be checked region by region instead of as one opaque blob.
+ */
+
+@font-face {
+  font-family: 'FixtureInter';
+  src: url('assets/inter-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: block; /* never paint a fallback face: that would be a silent pixel change */
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+#composition {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.region {
+  position: absolute;
+}
+
+/* --- machine-readable band: y 0..107 ------------------------------------- */
+
+#machine-band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Exactly one canvas pixel per CSS pixel. Any scaling here would resample
+   * the frame counter and make it unreadable. */
+  width: 1920px;
+  height: 108px;
+}
+
+/* --- flat opaque swatches: y 160..359 ------------------------------------ */
+
+.swatch {
+  top: 160px;
+  width: 200px;
+  height: 200px;
+}
+
+#swatch-red { left: 80px; background: #ff0000; }
+#swatch-green { left: 320px; background: #00ff00; }
+#swatch-blue { left: 560px; background: #0000ff; }
+#swatch-grey { left: 800px; background: #808080; }
+
+/* --- alpha edge: y 160..359, x 1040..1239 --------------------------------
+ * Left half opaque white, right half white at 50 percent over transparency.
+ * Straight and premultiplied alpha differ here, so this is the region that
+ * decides which normalisation the pixel path actually performs. */
+
+#alpha-edge {
+  top: 160px;
+  left: 1040px;
+  width: 200px;
+  height: 200px;
+}
+
+#alpha-opaque {
+  position: absolute;
+  inset: 0 100px 0 0;
+  background: rgb(255 255 255);
+}
+
+#alpha-half {
+  position: absolute;
+  inset: 0 0 0 100px;
+  background: rgb(255 255 255 / 50%);
+}
+
+/* --- text: y 420..519 ----------------------------------------------------- */
+
+#text-region {
+  top: 420px;
+  left: 80px;
+  width: 440px;
+  height: 100px;
+  /* Opaque, and deliberately so. Glyph antialiasing blends against whatever is
+   * behind it, and "behind it" being transparent makes the blend depend on how
+   * the compositor treats an empty backdrop. A known colour makes the text
+   * region a measurement instead of a variable. */
+  background: #102027;
+}
+
+#readout {
+  margin: 0;
+  padding-left: 16px;
+  font-family: 'FixtureInter', monospace;
+  font-size: 48px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums; /* digits must not change advance width */
+  line-height: 100px;
+  color: #eceff1;
+  white-space: nowrap;
+}
+
+/* --- CSS transform: y 420..659, x 560..799 -------------------------------- */
+
+#transform-region {
+  top: 420px;
+  left: 560px;
+  width: 240px;
+  height: 240px;
+}
+
+#spinner {
+  position: absolute;
+  top: 60px;
+  left: 60px;
+  width: 120px;
+  height: 120px;
+  background: #e91e63;
+  transform-origin: 50% 50%;
+}
+
+/* The spinner has to be asymmetric under 180 degrees, or a half-turn looks
+ * exactly like no turn at all and the region stops testing rotation. This
+ * corner marker is what makes the angle readable. */
+#spinner-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  background: #ffeb3b;
+}
+
+/* --- inline SVG: y 420..659, x 880..1119 ---------------------------------- */
+
+#svg-region {
+  top: 420px;
+  left: 880px;
+  width: 240px;
+  height: 240px;
+}
+
+/* --- antialiasing probe: y 720..959, x 1300..1539 -------------------------
+ * Deliberately the one region with diagonal and curved edges. It is expected to
+ * be the least reproducible part of the fixture and is compared with a
+ * tolerance, never byte-for-byte. */
+
+#antialias-region {
+  top: 720px;
+  left: 1300px;
+  width: 240px;
+  height: 240px;
+}
+
+/* --- canvas 2D: y 420..659, x 1200..1439 ---------------------------------- */
+
+#canvas-region {
+  top: 420px;
+  left: 1200px;
+  width: 240px;
+  height: 240px;
+}
+
+/* --- local image: y 420..659, x 1520..1759 -------------------------------- */
+
+#image-region {
+  top: 420px;
+  left: 1520px;
+  width: 240px;
+  height: 240px;
+}
+
+#swatch-image {
+  width: 240px;
+  height: 240px;
+  /* Nearest-neighbour keeps the 64px source's hard edges hard, so a difference
+   * in this region means a real pixel-path change and not a resampler. */
+  image-rendering: pixelated;
+}
+
+/* --- animated bar: y 720..779 --------------------------------------------- */
+
+#sweep-region {
+  top: 720px;
+  left: 80px;
+  width: 600px;
+  height: 60px;
+  background: #202020;
+}
+
+#sweep {
+  height: 60px;
+  width: 0;
+  background: #00e5ff;
+}
+
+/* --- clip-timed regions: y 840..1019 --------------------------------------
+ * Driven by data-start / data-duration, the canonical authored timing
+ * attributes. */
+
+.clip {
+  top: 840px;
+  width: 260px;
+  height: 180px;
+}
+
+#clip-a { left: 80px; background: #7e57c2; }
+#clip-b { left: 380px; background: #26a69a; }
+#clip-c { left: 680px; background: #ef5350; }
+
+#fader {
+  top: 840px;
+  left: 1000px;
+  width: 260px;
+  height: 180px;
+  background: #ffee58;
+}

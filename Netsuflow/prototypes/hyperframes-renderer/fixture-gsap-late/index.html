@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NetsuFlow late-timeline fixture</title>
+    <!--
+      The case that decides whether `auto` can be the default.
+
+      This composition registers its timeline 2500 ms after load, which is
+      longer than the shim's default grace. A real project reaches this by
+      loading fonts, decoding media, or building its animation after an async
+      setup step — none of which is unusual.
+
+      Under `auto` the shim gives up first and the engine captures a composition
+      whose animation does not exist yet, with nothing reporting an error. Under
+      `gsap` the engine waits and the frame is correct. The point of this
+      fixture is to make that trade-off measurable instead of assumed.
+    -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+      }
+      #composition {
+        position: relative;
+        width: 960px;
+        height: 540px;
+      }
+      #late-marker {
+        position: absolute;
+        top: 100px;
+        left: 40px;
+        width: 200px;
+        height: 200px;
+        /* Red until the timeline registers, green afterwards, so a capture taken
+           too early is visible in the pixels and not only in the diagnostics. */
+        background: #ff1744;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="composition"
+      data-composition-id="netsuflow-fixture-gsap-late"
+      data-width="960"
+      data-height="540"
+      data-composition-duration="4"
+      data-netsuflow-fps="30"
+    >
+      <div id="late-marker"></div>
+    </div>
+
+    <script>
+      (() => {
+        'use strict';
+        const root = document.getElementById('composition');
+        const DURATION = Number(root.dataset.compositionDuration);
+        const marker = document.getElementById('late-marker');
+
+        window.__hf = {
+          duration: DURATION,
+          seek(seconds) {
+            const t = Math.min(Math.max(Number(seconds) || 0, 0), DURATION);
+            marker.style.height = `${200 + Math.round((t / DURATION) * 100)}px`;
+          },
+        };
+        window.__hfWaitForSeekCompletion = () =>
+          new Promise((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          });
+
+        // Deliberately later than the shim's default grace.
+        window.setTimeout(() => {
+          window.__timelines = window.__timelines || {};
+          window.__timelines['netsuflow-fixture-gsap-late'] = {
+            getChildren() {
+              return [{ startTime: () => 0, duration: () => 4 }];
+            },
+          };
+          marker.style.background = '#00c853';
+        }, 2500);
+
+        window.__hf.seek(0);
+      })();
+    </script>
+  </body>
+</html>

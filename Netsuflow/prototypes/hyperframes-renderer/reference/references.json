@@ -1,0 +1,311 @@
+{
+  "fixture": "netsuflow-fixture",
+  "fixtureDigest": "4c1ed5912b97686217e953c4da778416cdd549861c178276705ab77b6328b687",
+  "width": 1920,
+  "height": 1080,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "durationSeconds": 10,
+  "capture": {
+    "entryPoint": "captureFrameToBuffer",
+    "format": "png",
+    "forceScreenshot": true
+  },
+  "engine": {
+    "package": "@hyperframes/engine",
+    "declaredVersion": "0.8.16",
+    "resolvedVersion": "0.8.16",
+    "pinnedExactly": true
+  },
+  "node": {
+    "version": "v22.16.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "captureMode": {
+    "mode": "screenshot",
+    "deterministicPathAvailable": false,
+    "reason": "BeginFrame capture requires Linux; win32 always resolves to Puppeteer screenshot capture."
+  },
+  "browser": {
+    "build": "152.0.7977.54",
+    "binary": "chrome-headless-shell"
+  },
+  "frames": [
+    {
+      "frame": 0,
+      "pngSha256": "01b21cb6d725750e3eef62ea739fbdaedbae7e881d3501c91cd17e4e87269391",
+      "pixelsSha256": "06c88a582636eeaf986eb6ff51cf33360cb3f083b318d58a93881ff0f7b30b3e",
+      "bytes": 19965,
+      "marker": 0,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 1,
+      "pngSha256": "7a242b5e5a71337f10b0f10c9ca11595838f9923b6b7ef8aee7dc10f6518e600",
+      "pixelsSha256": "f33efd01ba77d6d16c24f84eb2e38aa85f4a273e3f795e179619d961f7b6e2d0",
+      "bytes": 21089,
+      "marker": 1,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 2,
+      "pngSha256": "4d35b064aaaf739bb1b0641499facb5b547cde7ec70685402cfbaae860ae8ff7",
+      "pixelsSha256": "865cc898b9b12ab3542347170c24d8a4e91570d2e5327b959e2e4fc1bb497482",
+      "bytes": 21997,
+      "marker": 2,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 30,
+      "pngSha256": "442eec08dab8754177b95cb9c7520da90499bd660a43ca2a8bc7150190dbf934",
+      "pixelsSha256": "b34c0a62e22537b00d5b9b4fffa663008be99e10236355999b1bdc56b0e8f535",
+      "bytes": 26111,
+      "marker": 30,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 89,
+      "pngSha256": "e7c5691d4ef6ebd633970c480a9c278f29ad53f6376e3a7ffec0948965cb4fc1",
+      "pixelsSha256": "1bedd14215d29e7ca70190dcc39f68382fa172a41e06ca048627472ec9edf015",
+      "bytes": 26005,
+      "marker": 89,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 150,
+      "pngSha256": "4bf15861b2a1a9f3498a6dc9b32067cc1c1e604c1476d8745cf24bbd35e696cf",
+      "pixelsSha256": "9b00bd946905b4ad4a82752272e123400190f251da48b78c54cae70f5b7daecb",
+      "bytes": 21149,
+      "marker": 150,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 299,
+      "pngSha256": "daba9900d2865d8f5b07b6f0f6eb1c9f15014015321a0c79f9962d262b96673c",
+      "pixelsSha256": "b3762d1d18f7ecfdb2d9e6013d3dfcd50c1108ba5cc4fdb8eca7c2378ace3c4a",
+      "bytes": 23771,
+      "marker": 299,
+      "samples": {
+        "swatchRed": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "swatchGrey": [
+          128,
+          128,
+          128,
+          255
+        ],
+        "alphaOpaque": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "alphaHalf": [
+          255,
+          255,
+          255,
+          128
+        ],
+        "transparentGap": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

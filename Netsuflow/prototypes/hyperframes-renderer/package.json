@@ -1,0 +1,25 @@
+{
+  "name": "netsuflow-hyperframes-renderer-prototype",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated HyperFrames capture prototype for the NetsuFlow H01-H03 gates. Not shipped.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "manifest": "node runtimeManifest.mjs",
+    "bench:pixel": "node tools/pixel-bench.mjs",
+    "bench:capture-path": "node tools/capture-path-measure.mjs",
+    "e2e:bridge": "node tools/bridge-e2e.mjs",
+    "conformance": "node tools/engine-conformance.mjs",
+    "h03": "node tools/h03-soak.mjs"
+  },
+  "dependencies": {
+    "@hyperframes/engine": "0.8.27"
+  },
+  "devDependencies": {
+    "pngjs": "7.0.0"
+  }
+}

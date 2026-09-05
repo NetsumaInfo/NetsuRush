@@ -1,0 +1,14 @@
+pixel path benchmark, 30 samples per stage, Node v22.16.0
+
+1080p real Chrome capture: 1920x1080, 19 KiB encoded, 7.9 MiB decoded
+  guard only (chunk walk + re-inflate)  p50     6.50 ms   p95     9.52 ms
+  engine decodePng only                 p50    15.34 ms   p95    20.81 ms
+  decodePngToRgba (guard + decode)      p50    23.80 ms   p95    25.95 ms
+  pngjs (reference only)                p50    39.63 ms   p95    50.27 ms
+
+4K synthetic: 3840x2160, 27722 KiB encoded, 31.6 MiB decoded
+  guard only (chunk walk + re-inflate)  p50   107.24 ms   p95   109.59 ms
+  engine decodePng only                 p50   197.31 ms   p95   204.06 ms
+  decodePngToRgba (guard + decode)      p50   303.29 ms   p95   313.99 ms
+  pngjs (reference only)                p50   335.41 ms   p95   341.62 ms
+

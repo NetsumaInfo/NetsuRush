@@ -15,8 +15,20 @@
  * @property {object} inputSchema  JSON Schema de l'objet d'arguments
  * @property {ToolRisk} risk
  * @property {(input:any)=>ToolRisk} [riskFor]  risque dynamique par appel (dispatchers compound)
+ * @property {readonly Surface[]} [surfaces]  fenêtres où l'outil est proposé (défaut : 'pilot')
  * @property {(args:any, ctx:any)=>Promise<any>|any} handler
  */
+
+/// Les surfaces de l'agent. Un même moteur, deux métiers : NetsuPilot pilote
+/// Resolve et le derush, NetsuFlow édite une composition web. Exposer les 300+
+/// outils Resolve à l'éditeur de composition (ou l'inverse) noierait le modèle
+/// sous des capacités hors sujet et rendrait les deux prompts impossibles à
+/// écrire — d'où un registre unique, filtré par fenêtre.
+/**
+ * @typedef {'pilot'|'flow'} Surface
+ */
+const SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot', 'flow']));
+const DEFAULT_SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot']));
 
 function createToolRegistry() {
   /** @type {Map<string, ToolDef>} */
@@ -29,6 +41,7 @@ function createToolRegistry() {
     tools.set(tool.name, {
       risk: 'read',
       inputSchema: { type: 'object', properties: {} },
+      surfaces: DEFAULT_SURFACES,
       ...tool,
     });
   }
@@ -43,8 +56,13 @@ function createToolRegistry() {
     return tools.get(name) || null;
   }
 
-  function list() {
-    return [...tools.values()];
+  /// Sans surface : tout le registre (le serveur MCP et le debug en ont besoin).
+  /// Avec : seulement ce que cette fenêtre a le droit de proposer.
+  /** @param {Surface} [surface] */
+  function list(surface) {
+    const all = [...tools.values()];
+    if (!surface) return all;
+    return all.filter((t) => (t.surfaces || DEFAULT_SURFACES).includes(surface));
   }
 
   // Métadonnées seules (sans handler) — pour l'UI / le debug.
@@ -53,16 +71,18 @@ function createToolRegistry() {
   }
 
   // --- Surfaces de définition (3 formats) -----------------------------------
-  function toAnthropicTools() {
-    return list().map((t) => ({
+  /** @param {Surface} [surface] */
+  function toAnthropicTools(surface) {
+    return list(surface).map((t) => ({
       name: t.name,
       description: t.description,
       input_schema: t.inputSchema,
     }));
   }
 
-  function toOpenAITools() {
-    return list().map((t) => ({
+  /** @param {Surface} [surface] */
+  function toOpenAITools(surface) {
+    return list(surface).map((t) => ({
       type: 'function',
       function: { name: t.name, description: t.description, parameters: t.inputSchema },
     }));
@@ -90,9 +110,9 @@ function createToolRegistry() {
   }
 
   return {
-    register, registerAll, get, list, describe,
+    register, registerAll, get, list, describe, SURFACES,
     toAnthropicTools, toOpenAITools, toMcpTools, execute,
   };
 }
 
-module.exports = { createToolRegistry };
+module.exports = { createToolRegistry, SURFACES };

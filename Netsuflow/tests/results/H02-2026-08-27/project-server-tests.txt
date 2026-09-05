@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: the served URL carries a per-run token and no trailing slash
+ok 1 - the served URL carries a per-run token and no trailing slash
+  ---
+  duration_ms: 20.1075
+  type: 'test'
+  ...
+# Subtest: the URL the engine actually builds serves the entry point
+ok 2 - the URL the engine actually builds serves the entry point
+  ---
+  duration_ms: 20.9838
+  type: 'test'
+  ...
+# Subtest: a doubled separator does not escape the root
+ok 3 - a doubled separator does not escape the root
+  ---
+  duration_ms: 11.2126
+  type: 'test'
+  ...
+# Subtest: it serves the project root
+ok 4 - it serves the project root
+  ---
+  duration_ms: 4.5803
+  type: 'test'
+  ...
+# Subtest: it refuses a request with no token, a wrong token, or another run's token
+ok 5 - it refuses a request with no token, a wrong token, or another run's token
+  ---
+  duration_ms: 6.0458
+  type: 'test'
+  ...
+# Subtest: no encoded separator escapes the served root
+ok 6 - no encoded separator escapes the served root
+  ---
+  duration_ms: 16.7722
+  type: 'test'
+  ...
+# Subtest: a symlink cannot lead out of the root
+ok 7 - a symlink cannot lead out of the root
+  ---
+  duration_ms: 2.6895
+  type: 'test'
+  ...
+# Subtest: it answers only on loopback
+ok 8 - it answers only on loopback
+  ---
+  duration_ms: 2029.212
+  type: 'test'
+  ...
+# Subtest: content types come from an explicit table
+ok 9 - content types come from an explicit table
+  ---
+  duration_ms: 10.3768
+  type: 'test'
+  ...
+# Subtest: it serves byte ranges and rejects unsatisfiable ones
+ok 10 - it serves byte ranges and rejects unsatisfiable ones
+  ---
+  duration_ms: 8.8778
+  type: 'test'
+  ...
+# Subtest: a missing asset is a plain 404
+ok 11 - a missing asset is a plain 404
+  ---
+  duration_ms: 0.9899
+  type: 'test'
+  ...
+# Subtest: a directory is not listed
+ok 12 - a directory is not listed
+  ---
+  duration_ms: 1.0681
+  type: 'test'
+  ...
+# Subtest: only GET and HEAD are answered
+ok 13 - only GET and HEAD are answered
+  ---
+  duration_ms: 6.0143
+  type: 'test'
+  ...
+# Subtest: an absurd URL is refused before any filesystem work
+ok 14 - an absurd URL is refused before any filesystem work
+  ---
+  duration_ms: 1.2519
+  type: 'test'
+  ...
+# Subtest: a file larger than the limit is refused rather than buffered
+ok 15 - a file larger than the limit is refused rather than buffered
+  ---
+  duration_ms: 5.1811
+  type: 'test'
+  ...
+# Subtest: responses forbid caching and sniffing
+ok 16 - responses forbid caching and sniffing
+  ---
+  duration_ms: 3.9513
+  type: 'test'
+  ...
+# Subtest: close releases the port
+ok 17 - close releases the port
+  ---
+  duration_ms: 5.4595
+  type: 'test'
+  ...
+# Subtest: script injection reaches index.html and nothing else
+ok 18 - script injection reaches index.html and nothing else
+  ---
+  duration_ms: 7.3407
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2273.9343

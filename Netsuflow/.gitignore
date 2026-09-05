@@ -1,0 +1,6 @@
+# CMake build trees for the OpenFX proof
+openfx/build/
+openfx/build*/
+
+# Test artifacts are committed deliberately; scratch runs are not
+tests/results/**/*.tmp

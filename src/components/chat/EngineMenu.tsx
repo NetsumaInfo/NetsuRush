@@ -13,9 +13,9 @@ import {
   DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 
-const PROVIDER_LABEL: Record<ChatProvider, string> = { anthropic: "Claude", openai: "OpenAI", openrouter: "OpenRouter", cli: "CLI" };
+const PROVIDER_LABEL: Record<ChatProvider, string> = { anthropic: "Claude", openai: "OpenAI", openrouter: "OpenRouter", xai: "Grok (xAI)", cli: "CLI" };
 const MODES: ChatPermMode[] = ["read-only", "ask", "safe", "auto"];
-const ANTHROPIC_MODELS = ["claude-opus-4-8", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"];
+const ANTHROPIC_MODELS = ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"];
 const OPENAI_MODELS = ["gpt-5-codex", "o4-mini"];
 // Sélection courte de modèles OpenRouter populaires ; n'importe quel id se tape dans le champ libre.
 const OPENROUTER_MODELS = [

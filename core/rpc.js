@@ -45,6 +45,7 @@ const netsu = require("./netsu"); // format de partage « .netsu » (board → c
 const extract = require("./extract"); // yt-dlp / gallery-dl : extraction du vrai média d'un lien
 const netsuSidecar = require("./netsu/sidecar");
 const { createAeExport } = require("./aeExport");
+const { flow } = require("./flow"); // NetsuFlow : service de rendu de compositions web
 const { createTransfer } = require("./transfer");
 const { createAdobeBridge } = require("./adobe"); // pont Adobe : panneau CEP Premiere/AE ↔ core
 const { createPrefs } = require("./prefs"); // réglages renderer partagés entre origines
@@ -276,7 +277,7 @@ function createRpc() {
   // brackets guarded/rOp (mêmes invariants de registre de handles que les canaux resolve:*).
   const agent = createAgent({
     broadcast, ev, dataDir: DATA_DIR,
-    modules: { resolveMod, timeline, sidecars, thumbs, proxy, ffmpeg, aeExporter, refStore, guarded, rOp },
+    modules: { resolveMod, timeline, sidecars, thumbs, proxy, ffmpeg, aeExporter, refStore, guarded, rOp, flow },
   });
 
   // Archivage d'une collection : exporte TOUS ses plans (remux/encode via profil d'export) vers un
@@ -708,6 +709,26 @@ function createRpc() {
     "transfer:sources": rOp(([opts]) => transfer.listSources(opts || {})),
     "transfer:read": guarded(([opts]) => transfer.summary(opts || {})),
     "transfer:run": guarded(([opts]) => transfer.run(ev, opts || {})),
+
+    // --- NetsuFlow (compositions web → frames) ---
+    // Les pixels ne passent PAS ici : `/flow/frame` sur le serveur HTTP du core les sert au
+    // renderer comme une image ordinaire. Une frame 1080p pèse 8,3 Mio en brut, et la faire
+    // transiter en base64 par l'IPC à chaque pas de scrub n'aurait pas de sens.
+    "flow:status": () => flow.status(),
+    "flow:start": () => flow.start(),
+    "flow:stop": () => flow.stop(),
+    "flow:state": () => flow.state(),
+    "flow:save": ([opts]) => flow.save(opts || {}),
+    "flow:send": () => flow.send(),
+    "flow:bakeProgress": () => flow.bakeProgress(),
+    "flow:bake": () => flow.bake(),
+    "flow:bakeClear": () => flow.bakeClear(),
+    "flow:bakeQuality": ([quality]) => flow.bakeQuality(String(quality || "")),
+    "flow:exportInfo": () => flow.exportInfo(),
+    "flow:exportStart": ([opts]) => flow.exportStart(opts || {}),
+    "flow:exportCancel": () => flow.exportCancel(),
+    "flow:browse": ([target]) => flow.browse(target),
+    "flow:browseNative": ([target]) => flow.browseNative(target),
 
     // --- Pont Adobe (panneau CEP Premiere/AE ↔ core) ---
     "adobe:status": () => adobeBridge.status(),

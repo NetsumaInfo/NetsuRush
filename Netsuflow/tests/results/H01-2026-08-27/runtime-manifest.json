@@ -1,0 +1,42 @@
+{
+  "adapter": {
+    "name": "netsuflow-hyperframes-renderer-prototype",
+    "version": "0.1.0-prototype"
+  },
+  "node": {
+    "version": "v22.16.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "engine": {
+    "package": "@hyperframes/engine",
+    "declaredVersion": "0.8.16",
+    "resolvedVersion": "0.8.16",
+    "pinnedExactly": true
+  },
+  "dependencies": {
+    "@hyperframes/engine": "0.8.16",
+    "@hyperframes/core": "0.8.16",
+    "@hyperframes/parsers": "0.8.16",
+    "puppeteer": "25.9.0",
+    "puppeteer-core": "25.9.0"
+  },
+  "lockfile": {
+    "present": true,
+    "lockfileVersion": 3,
+    "packageCount": 105,
+    "sha256": "1864abe8b65c9bcf9b2c486612ad83134e6dd95700d01ddd9979918f67f86713"
+  },
+  "captureMode": {
+    "mode": "screenshot",
+    "deterministicPathAvailable": false,
+    "reason": "BeginFrame capture requires Linux; win32 always resolves to Puppeteer screenshot capture."
+  },
+  "browser": {
+    "provisioned": false,
+    "executablePath": null,
+    "build": null,
+    "note": "Dependencies were installed with --ignore-scripts; browser provisioning is a separate verified step."
+  },
+  "generatedAt": null
+}

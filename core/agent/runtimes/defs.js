@@ -14,7 +14,7 @@ const DEFS = [
     streamFormat: 'claude-stream-json',
     promptViaStdin: true,
     mcpInjection: 'mcp-config-flag',
-    models: ['claude-opus-4-8', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001'],
+    models: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5-20251001'],
     buildArgs: ({ model, mcpConfigPath }) => [
       '-p',
       '--output-format', 'stream-json',
@@ -78,6 +78,66 @@ const DEFS = [
     mcpInjection: null,
     models: ['qwen3-coder-plus', 'qwen3-coder-flash'],
     buildArgs: ({ model }) => (model ? ['-m', model] : []),
+  },
+  {
+    // GitHub's agent, GA since February 2026. `-p` is non-interactive.
+    // A known trap: in that mode the workspace `.mcp.json` is skipped in
+    // silence, so the config has to be passed explicitly or the NetsuRush
+    // tools are simply absent with no error to explain it.
+    id: 'copilot',
+    name: 'GitHub Copilot CLI',
+    bin: 'copilot',
+    fallbackBins: ['copilot.cmd'],
+    versionArgs: ['--version'],
+    streamFormat: 'text',
+    promptViaStdin: false,
+    mcpInjection: 'copilot-additional-config',
+    models: [],
+    buildArgs: ({ prompt, model, mcpConfigPath }) => [
+      '-p', prompt,
+      '--no-ask-user',
+      ...(model ? ['--model', model] : []),
+      ...(mcpConfigPath ? ['--additional-mcp-config', mcpConfigPath] : []),
+    ],
+  },
+  {
+    // xAI's harness. It can emit newline-delimited JSON in the Anthropic
+    // Messages wire format, so the parser we already have for Claude Code
+    // reads it as-is rather than needing one of its own.
+    id: 'grok',
+    name: 'Grok Build',
+    bin: 'grok',
+    fallbackBins: ['grok.cmd'],
+    versionArgs: ['--version'],
+    streamFormat: 'claude-stream-json',
+    promptViaStdin: false,
+    mcpInjection: null,
+    models: ['grok-4.6', 'grok-4.5'],
+    buildArgs: ({ prompt, model }) => [
+      '-p', prompt,
+      '--output-format', 'streaming-messages-json',
+      '--always-approve',
+      '--no-auto-update',
+      ...(model ? ['--model', model] : []),
+    ],
+  },
+  {
+    // Google's Go-based successor to the Gemini CLI. Same print-mode shape as
+    // Claude Code, including a real stream-json output format.
+    id: 'antigravity',
+    name: 'Antigravity',
+    bin: 'agy',
+    fallbackBins: ['agy.cmd'],
+    versionArgs: ['--version'],
+    streamFormat: 'claude-stream-json',
+    promptViaStdin: false,
+    mcpInjection: null,
+    models: [],
+    buildArgs: ({ prompt, model }) => [
+      '-p', prompt,
+      '--output-format', 'stream-json',
+      ...(model ? ['--model', model] : []),
+    ],
   },
   {
     id: 'cursor',

@@ -18,20 +18,24 @@ function createSession(deps) {
   const { registry, permissions, broadcast } = deps;
 
   // Secrets EN RAM uniquement (jamais écrits sur disque par le core ; au repos = Stronghold côté Tauri).
-  const keys = { anthropic: '', openai: '', openaiBaseUrl: '', openrouter: '' };
+  const keys = { anthropic: '', openai: '', openaiBaseUrl: '', openrouter: '', xai: '', xaiBaseUrl: '' };
   /** @type {Map<string,{ abort:AbortController, child?:import('child_process').ChildProcess }>} */
   const runs = new Map();
 
   /** @param {string} runId @param {any} ev */
   function emit(runId, ev) { broadcast('chat:event', { runId, ev }); }
 
-  /** @param {{mode?:string, anthropicKey?:string, openaiKey?:string, openaiBaseUrl?:string, openrouterKey?:string}} cfg */
+  /** @param {{mode?:string, anthropicKey?:string, openaiKey?:string, openaiBaseUrl?:string,
+   *            openrouterKey?:string, xaiKey?:string, xaiBaseUrl?:string}} cfg */
   function configure(cfg) {
     if (cfg.mode) permissions.setMode(cfg.mode);
     if (typeof cfg.anthropicKey === 'string') keys.anthropic = cfg.anthropicKey;
     if (typeof cfg.openaiKey === 'string') keys.openai = cfg.openaiKey;
     if (typeof cfg.openaiBaseUrl === 'string') keys.openaiBaseUrl = cfg.openaiBaseUrl;
     if (typeof cfg.openrouterKey === 'string') keys.openrouter = cfg.openrouterKey;
+    if (typeof cfg.xaiKey === 'string') keys.xai = cfg.xaiKey;
+    // EU accounts are served from eu-west-1; the default is the US endpoint.
+    if (typeof cfg.xaiBaseUrl === 'string') keys.xaiBaseUrl = cfg.xaiBaseUrl;
     return { ok: true };
   }
 
@@ -44,6 +48,7 @@ function createSession(deps) {
         anthropic: !!keys.anthropic,
         openai: !!keys.openai,
         openrouter: !!keys.openrouter,
+        xai: !!keys.xai,
       },
       cli,
     };
@@ -84,11 +89,12 @@ function createSession(deps) {
   }
 
   /**
-   * @param {{ runId:string, provider:'anthropic'|'openai'|'openrouter'|'cli', agent?:string, model?:string,
-   *           messages:Array<{role:'user'|'assistant',content:string}>, system?:string }} opts
+   * @param {{ runId:string, provider:'anthropic'|'openai'|'openrouter'|'xai'|'cli', agent?:string, model?:string,
+   *           messages:Array<{role:'user'|'assistant',content:string}>, system?:string,
+   *           surface?:'pilot'|'flow' }} opts
    */
   async function send(opts) {
-    const { runId, provider, agent, model, messages, system } = opts;
+    const { runId, provider, agent, model, messages, system, surface } = opts;
     const abort = new AbortController();
     const entry = { abort };
     runs.set(runId, entry);
@@ -97,15 +103,24 @@ function createSession(deps) {
 
     try {
       if (provider === 'anthropic') {
-        await runAnthropic({ apiKey: keys.anthropic, model, system, messages, tools: registry.toAnthropicTools(), runTool, onEvent, signal: abort.signal });
+        await runAnthropic({ apiKey: keys.anthropic, model, system, messages, tools: registry.toAnthropicTools(surface), runTool, onEvent, signal: abort.signal });
       } else if (provider === 'openai') {
-        await runOpenAI({ apiKey: keys.openai, baseUrl: keys.openaiBaseUrl || undefined, model, system, messages, tools: registry.toOpenAITools(), runTool, onEvent, signal: abort.signal });
+        await runOpenAI({ apiKey: keys.openai, baseUrl: keys.openaiBaseUrl || undefined, model, system, messages, tools: registry.toOpenAITools(surface), runTool, onEvent, signal: abort.signal });
+      } else if (provider === 'xai') {
+        // Documented as compatible with the OpenAI REST shape, so the existing
+        // tool-calling loop drives it unchanged: a base URL and a key, not an
+        // adapter. EU accounts use eu-west-1.api.x.ai instead.
+        await runOpenAI({
+          apiKey: keys.xai, baseUrl: keys.xaiBaseUrl || 'https://api.x.ai/v1',
+          model: model || 'grok-4.6',
+          system, messages, tools: registry.toOpenAITools(surface), runTool, onEvent, signal: abort.signal,
+        });
       } else if (provider === 'openrouter') {
         // OpenRouter = API OpenAI-compatible → même boucle tool-calling, baseUrl + clé dédiées.
         await runOpenAI({
           apiKey: keys.openrouter, baseUrl: 'https://openrouter.ai/api/v1',
           model: model || 'anthropic/claude-sonnet-4.5',
-          system, messages, tools: registry.toOpenAITools(), runTool, onEvent, signal: abort.signal,
+          system, messages, tools: registry.toOpenAITools(surface), runTool, onEvent, signal: abort.signal,
         });
       } else if (provider === 'cli') {
         const def = getDef(agent || 'claude');

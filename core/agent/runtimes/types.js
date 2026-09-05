@@ -20,7 +20,7 @@
  * @property {(o:BuildArgsOpts)=>string[]} buildArgs  args de lancement complets
  * @property {StreamFormat} streamFormat
  * @property {boolean} [promptViaStdin]  true = prompt écrit sur stdin (sinon positionnel)
- * @property {'mcp-config-flag'|'codex-config'|null} [mcpInjection]
+ * @property {'mcp-config-flag'|'codex-config'|'copilot-additional-config'|null} [mcpInjection]
  * @property {string[]} [models]    modèles connus (UI), informatif
  */
 

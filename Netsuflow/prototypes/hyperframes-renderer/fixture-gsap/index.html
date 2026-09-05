@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NetsuFlow timeline-registering fixture</title>
+    <!--
+      The other half of the timeline question.
+
+      A GSAP-driven composition registers window.__timelines[compositionId]
+      during setup, and the engine waits for that before capturing. This fixture
+      registers one the same way, so the waiting path can be tested without
+      taking a dependency on GSAP itself — which matters, because the product is
+      sold and GreenSock's no-charge licence does not cover redistribution.
+
+      What the engine actually requires is the registration, not the library.
+      It reads timelines defensively, skipping any entry whose getChildren is
+      not a function, so the minimal object below exercises the readiness poll
+      and the tween-counting path both.
+
+      Note the absence of data-no-timeline: this composition is supposed to be
+      waited for, and the shim must leave it alone.
+    -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+      }
+      #composition {
+        position: relative;
+        width: 960px;
+        height: 540px;
+        background: transparent;
+      }
+      #bar {
+        position: absolute;
+        top: 100px;
+        left: 40px;
+        height: 80px;
+        width: 0;
+        background: #00e5ff;
+      }
+      #block {
+        position: absolute;
+        top: 260px;
+        left: 40px;
+        width: 160px;
+        height: 160px;
+        background: #7e57c2;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="composition"
+      data-composition-id="netsuflow-fixture-gsap"
+      data-width="960"
+      data-height="540"
+      data-composition-duration="4"
+      data-netsuflow-fps="30"
+    >
+      <div id="bar"></div>
+      <div id="block"></div>
+    </div>
+
+    <script>
+      (() => {
+        'use strict';
+        const root = document.getElementById('composition');
+        const DURATION = Number(root.dataset.compositionDuration);
+        const bar = document.getElementById('bar');
+        const block = document.getElementById('block');
+
+        function seek(seconds) {
+          const t = Math.min(Math.max(Number(seconds) || 0, 0), DURATION);
+          const progress = DURATION > 0 ? t / DURATION : 0;
+          bar.style.width = `${Math.round(progress * 800)}px`;
+          block.style.transform = `translateX(${Math.round(progress * 700)}px)`;
+        }
+
+        // What a GSAP composition does, reduced to the part the engine reads.
+        // Two synthetic children so the tween count is non-zero and the
+        // static-frame analysis has intervals to walk.
+        window.__timelines = window.__timelines || {};
+        window.__timelines['netsuflow-fixture-gsap'] = {
+          getChildren() {
+            return [
+              { startTime: () => 0, duration: () => 2 },
+              { startTime: () => 2, duration: () => 2 },
+            ];
+          },
+        };
+
+        window.__hf = { duration: DURATION, seek };
+        window.__hfWaitForSeekCompletion = () =>
+          new Promise((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          });
+
+        seek(0);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<!--
+  A scratch composition to edit by hand while testing in Fusion.
+
+  A HyperFrames composition is a plain HTML file. There is no build step and no
+  bundler. The engine's contract with this page is small:
+
+    window.__hf = { duration, seek }   duration in seconds, seek(seconds)
+
+  The engine navigates to index.html, calls seek() for each frame, waits for
+  window.__hfWaitForSeekCompletion() if the page defines one, then screenshots.
+  So `seek` must paint synchronously, or resolve that promise when it has.
+
+  Two rules the service enforces, not suggestions:
+
+  * data-width / data-height must equal the resolution the host asks for. The
+    service refuses a mismatched request with `bad-request` rather than
+    rendering the wrong size and calling it right.
+  * Nothing may depend on the wall clock, the network, or unseeded randomness.
+    Frame N must paint identically every time it is asked for, or the frame
+    cache will serve one of the two versions at random.
+
+  data-no-timeline is the engine's documented opt-out from waiting for a GSAP
+  timeline to register. Keep it unless this page actually builds one.
+-->
+<head>
+  <meta charset="utf-8" />
+  <title>NetsuFlow sandbox composition</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: transparent; }
+    #stage { position: relative; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div
+    id="stage"
+    data-composition-id="netsuflow-user"
+    data-width="1920"
+    data-height="1080"
+    data-composition-duration="10"
+    data-netsuflow-fps="24"
+    data-no-timeline
+    style="width: 1920px; height: 1080px;"
+  >
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Your markup goes here.                                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="box" style="
+      position: absolute; top: 440px; left: 0;
+      width: 200px; height: 200px; border-radius: 24px;
+      background: #4f8cff;
+    "></div>
+    <div id="label" style="
+      position: absolute; top: 60px; left: 60px;
+      font: 600 64px/1 system-ui, sans-serif; color: #ffffff;
+    ">frame 0</div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // Read both from the attributes rather than repeating them, because the
+    // engine seeks in SECONDS. A composition that hardcodes a different fps
+    // than its binding declares still renders — it just labels frames with the
+    // wrong numbers, which is the kind of drift that survives every check.
+    const stage = document.getElementById('stage');
+    const FPS = Number(stage.dataset.netsuflowFps);
+    const DURATION = Number(stage.dataset.compositionDuration);
+
+    const box = document.getElementById('box');
+    const label = document.getElementById('label');
+
+    // ------------------------------------------------------------------
+    // Everything animated is a pure function of `t`. That is the whole
+    // discipline: no requestAnimationFrame, no Date.now(), no transitions.
+    // ------------------------------------------------------------------
+    function paint(t) {
+      const frame = Math.round(t * FPS);
+      const progress = DURATION > 0 ? t / DURATION : 0;
+
+      box.style.transform = `translateX(${progress * 1720}px)`;
+      label.textContent = `frame ${frame}`;
+    }
+
+    function seek(seconds) {
+      const clamped = Math.min(Math.max(seconds, 0), DURATION);
+      paint(clamped);
+      window.__hf.currentTime = clamped;
+      window.__hf.currentFrame = Math.round(clamped * FPS);
+    }
+
+    window.__hf = {
+      duration: DURATION,
+      seek,
+      currentTime: 0,
+      currentFrame: 0,
+    };
+
+    // CSS transforms are applied on the next style flush. Waiting two frames
+    // is what stops a capture from landing on the previous position.
+    window.__hfWaitForSeekCompletion = () =>
+      new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+
+    seek(0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NetsuFlow broken fixture</title>
+    <!--
+      The failure path needs a composition that fails the way a real one does.
+
+      This page throws while initialising, so window.__hf is never assigned. The
+      engine polls for `window.__hf && typeof window.__hf.seek === "function" &&
+      window.__hf.duration > 0` and gives up on a timeout, which is the most
+      common way a user's project breaks: the code ran, it threw, and there is
+      nothing to seek.
+
+      What the adapter must do with it: surface a bounded, named error well
+      inside the render deadline, keep the session closeable, and leave no
+      browser or page behind. A hang here would reach Resolve's render thread.
+    -->
+  </head>
+  <body>
+    <div
+      id="composition"
+      data-composition-id="netsuflow-fixture-broken"
+      data-width="1920"
+      data-height="1080"
+      data-composition-duration="10"
+      data-netsuflow-fps="30"
+    ></div>
+
+    <script>
+      (() => {
+        'use strict';
+        // Deliberate: reading a property of undefined throws before __hf is set.
+        const missing = undefined;
+        window.__hf = {
+          duration: missing.duration,
+          seek() {},
+        };
+      })();
+    </script>
+  </body>
+</html>

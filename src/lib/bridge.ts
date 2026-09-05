@@ -12,6 +12,109 @@ import type {
 } from "@/features/export/profiles";
 import type { NotebookMeta, PageMeta, NotebookPage, Database, NotebookKind, NotebookLanguage } from "@/components/notebook/notebookShared";
 
+// --- NetsuFlow: web compositions rendered to frames ---------------------------
+// Mirrors what the renderer service answers. `variables` is what the pasted
+// composition declares for itself, so the Inspector is generated from the
+// composition rather than from a schema this application maintains separately.
+
+export interface FlowStatus {
+  running: boolean;
+  editorPort: number;
+  bridgePort: number;
+  error: string;
+  /** False when the service cannot start at all; `prerequisite` says why. */
+  ready: boolean;
+  prerequisite: string;
+}
+
+export interface FlowVariableOption { value: string; label: string }
+
+export interface FlowVariable {
+  id: string;
+  type: "string" | "number" | "boolean" | "color" | "enum";
+  label: string;
+  description: string;
+  group: string;
+  default: unknown;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  /** Set when a numeric default carried a suffix ("16px"); re-attached on write. */
+  suffix?: string;
+  /** Declared alpha of a colour, kept separate from its `#rrggbb`. */
+  alpha?: number;
+  /** The author's own spelling of a colour, never rewritten. */
+  original?: string;
+  multiline?: boolean;
+  options?: FlowVariableOption[];
+}
+
+/** A size the composition asks for, with the place it was read from. */
+export interface FlowRequestedSize { width: number; height: number; source: string }
+
+export interface FlowState {
+  html: string;
+  width: number;
+  height: number;
+  fps: number;
+  durationFrames: number;
+  variables: FlowVariable[];
+  requested: FlowRequestedSize[];
+}
+
+export interface FlowBakeProgress {
+  running: boolean;
+  done: number;
+  total: number;
+  error: string | null;
+  frames: number;
+  bytes: number;
+  generations: number;
+  /** Byte cap of the disk store; the only remaining way it can grow. */
+  limit: number;
+  store: boolean;
+  directory: string;
+  /** Active storage tier. Every tier is lossless: this trades encode time
+   *  against size, never pixels. */
+  quality: string;
+  qualities: string[];
+}
+
+export interface FlowExportFormat {
+  key: string;
+  label: string;
+  detail: string;
+  available: boolean;
+}
+
+export interface FlowExportInfo {
+  formats: FlowExportFormat[];
+  defaults: { directory: string; name: string };
+  running: boolean;
+  done: number;
+  total: number;
+  error: string | null;
+  output: string;
+}
+
+export interface FlowExportRequest {
+  format: string;
+  directory: string;
+  name: string;
+  quality?: number;
+  from: number;
+  to: number;
+}
+
+export interface FlowBrowseResult {
+  path: string;
+  parent: string | null;
+  entries: string[];
+  shortcuts: { label: string; path: string }[];
+  error: string;
+}
+
 export interface ResolveInfo {
   connected: boolean;
   project?: string | null;
@@ -1975,13 +2078,13 @@ export interface CutAnalysis {
 // Moteur hybride : provider 'anthropic'/'openai' = BYOK (clé en RAM côté core, au repos = Stronghold),
 // 'cli' = agent CLI installé (claude/codex) piloté via MCP. Outils = modules NetsuRush + catalogue
 // Resolve. La permission (mode configurable) peut demander une approbation avant une action.
-export type ChatProvider = "anthropic" | "openai" | "openrouter" | "cli";
+export type ChatProvider = "anthropic" | "openai" | "openrouter" | "xai" | "cli";
 export type ChatPermMode = "read-only" | "ask" | "auto" | "safe";
 export interface ChatMessage { role: "user" | "assistant"; content: string }
 export interface ChatAgentInfo { id: string; name: string; available: boolean; version: string | null; models: string[] }
 export interface ChatAgentsInfo {
   mode: ChatPermMode;
-  byok: { anthropic: boolean; openai: boolean; openrouter: boolean };
+  byok: { anthropic: boolean; openai: boolean; openrouter: boolean; xai: boolean };
   cli: ChatAgentInfo[];
 }
 // Événement normalisé poussé en SSE (chat:event). Champs présents selon `type`.
@@ -2011,6 +2114,8 @@ export interface ChatSendOpts {
   model?: string;
   messages: ChatMessage[];
   system?: string;
+  /** Which window is asking. Picks the tool set, and must match the prompt. */
+  surface?: "pilot" | "flow";
 }
 export interface ChatApi {
   agents(): Promise<ChatAgentsInfo>;
@@ -2621,6 +2726,22 @@ export interface NrApi {
   onPipelineProgress(cb: (p: PipelineProgress) => void): () => void;
   // Roto Studio : session SAM interactive multi-objets (points → masque immédiat → propagation →
   // matte / export alpha / suppression d'objet). `obj` = id d'objet (1..n, couleur côté UI).
+  flowStatus(): Promise<FlowStatus>;
+  flowStart(): Promise<{ ok: boolean; editorPort: number; bridgePort: number }>;
+  flowStop(): Promise<{ ok: boolean }>;
+  flowState(): Promise<FlowState>;
+  flowSave(opts: { html?: string; vars?: Record<string, unknown>; width?: number; height?: number }): Promise<FlowState>;
+  flowSend(): Promise<{ width: number; height: number; revision: string }>;
+  flowBakeProgress(): Promise<FlowBakeProgress>;
+  flowBake(): Promise<unknown>;
+  flowBakeClear(): Promise<FlowBakeProgress & { removed: { frames: number; bytes: number; generations: number } }>;
+  flowBakeQuality(quality: string): Promise<FlowBakeProgress>;
+  flowExportInfo(): Promise<FlowExportInfo>;
+  flowExportStart(opts: FlowExportRequest): Promise<unknown>;
+  flowExportCancel(): Promise<unknown>;
+  flowBrowse(target?: string): Promise<FlowBrowseResult>;
+  flowBrowseNative(target?: string): Promise<{ path: string | null }>;
+  flowFrameUrl(frame: number, rev: string): string;
   rotoOpen(opts: { video: string; in?: number; out?: number; model?: string }): Promise<RotoOpenResult>;
   rotoAddPoint(opts: { frame: number; x: number; y: number; label: 0 | 1; obj: number }): Promise<RotoMaskResult>;
   rotoClearPoints(opts: { frame?: number; obj?: number }): Promise<RotoMaskResult>;
@@ -3231,6 +3352,22 @@ const mock: NrApi = {
   onModelsProgress: () => () => {},
   pipelineRun: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   onPipelineProgress: () => () => {},
+  flowStatus: async () => ({ running: false, editorPort: 0, bridgePort: 0, error: i18n.t("common:mock.appUnavailable"), ready: false, prerequisite: "" }),
+  flowStart: async () => ({ ok: false, editorPort: 0, bridgePort: 0 }),
+  flowStop: async () => ({ ok: true }),
+  flowState: async () => { throw new Error(i18n.t("common:mock.appUnavailable")); },
+  flowSave: async () => { throw new Error(i18n.t("common:mock.appUnavailable")); },
+  flowSend: async () => { throw new Error(i18n.t("common:mock.appUnavailable")); },
+  flowBakeProgress: async () => ({ running: false, done: 0, total: 0, error: null, frames: 0, bytes: 0, generations: 0, limit: 0, store: false, directory: "", quality: "fast", qualities: [] }),
+  flowBake: async () => ({}),
+  flowBakeClear: async () => ({ running: false, done: 0, total: 0, error: null, frames: 0, bytes: 0, generations: 0, limit: 0, store: false, directory: "", quality: "fast", qualities: [], removed: { frames: 0, bytes: 0, generations: 0 } }),
+  flowBakeQuality: async () => ({ running: false, done: 0, total: 0, error: null, frames: 0, bytes: 0, generations: 0, limit: 0, store: false, directory: "", quality: "fast", qualities: [] }),
+  flowExportInfo: async () => ({ formats: [], defaults: { directory: "", name: "" }, running: false, done: 0, total: 0, error: null, output: "" }),
+  flowExportStart: async () => ({}),
+  flowExportCancel: async () => ({}),
+  flowBrowse: async () => ({ path: "", parent: null, entries: [], shortcuts: [], error: "" }),
+  flowBrowseNative: async () => ({ path: null }),
+  flowFrameUrl: () => "",
   rotoOpen: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoAddPoint: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoClearPoints: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
@@ -3976,7 +4113,7 @@ const mock: NrApi = {
   } satisfies CacheApi,
   // Mock navigateur : Chat IA inerte (l'UI rend, aucun moteur). Les vrais appels passent par le core.
   chat: {
-    agents: async () => ({ mode: "ask", byok: { anthropic: false, openai: false, openrouter: false }, cli: [] }),
+    agents: async () => ({ mode: "ask", byok: { anthropic: false, openai: false, openrouter: false, xai: false }, cli: [] }),
     configure: async () => ({ ok: false }),
     send: async () => ({ ok: false }),
     cancel: async () => ({ ok: true }),
