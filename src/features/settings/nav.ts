@@ -5,7 +5,7 @@
 import {
   Bell, Boxes, Brush, Cpu, DatabaseBackup, Download, FolderKanban, HardDrive, Info,
   Languages, Mic, MonitorPlay, Palette, PanelLeft, RefreshCw, Scissors, Sparkles, Terminal,
-  UserRound, Wrench,
+  UserRound, Users, Wrench,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { AdobeLogo } from "@/components/HostIcon";
@@ -40,6 +40,9 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
     tabs: [
       { id: "profile", icon: UserRound },
       { id: "discord", icon: DiscordIcon },
+      // Sharing belongs to the ACCOUNT, not to a module: the device identity, the people, the
+      // invitations and the projects are the same whichever page opened them.
+      { id: "sharing", icon: Users },
     ],
   },
   {

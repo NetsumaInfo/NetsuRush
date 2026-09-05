@@ -51,6 +51,7 @@ NetsuRush is a standalone desktop app (Tauri shell + Node "core" service) that d
 | Adobe CEP panel and timeline transfer | `docs/host-bridges.md` |
 | Packaging, first-run setup, auth, presence | `docs/distribution.md` |
 | One-time Convex/Discord auth provisioning | `docs/auth-setup.md` |
+| Sharing and collaboration (surfaces, keys, P2P, Convex rendezvous) | `docs/collab.md` |
 | Code structure and cleanliness rules | `docs/code-style.md` |
 | Timeline-transfer research log (read before reopening) | `docs/timeline-transfer-research.md` |
 | Windows compatibility notes | `docs/windows-compatibility.md` |

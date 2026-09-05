@@ -645,7 +645,8 @@
   "tab": {
     "account": {
       "profile": "Perfil",
-      "discord": "Discord"
+      "discord": "Discord",
+      "sharing": "Compartir"
     },
     "interface": {
       "theme": "Tema",

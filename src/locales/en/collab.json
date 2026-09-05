@@ -1,0 +1,128 @@
+{
+  "title": "Sharing and collaboration",
+  "subtitle": "What is shared with your account: this device, the people, the invitations and the documents you edit together.",
+  "signedOut": "Sign in to share a document.",
+  "surface": {
+    "unknown": "Shared document",
+    "board": "Reference board"
+  },
+  "device": {
+    "title": "This device",
+    "subtitle": "Its public key identifies you to your collaborators. The private key never leaves this machine.",
+    "ready": "Protected native identity is ready.",
+    "unavailable": "Native collaboration is unavailable.",
+    "desktopOnly": "Sharing needs the desktop application.",
+    "unnamed": "NetsuRush device",
+    "current": "this device",
+    "revoke": "Revoke this device"
+  },
+  "friends": {
+    "title": "People",
+    "subtitle": "Add by Discord username or NetsuRush handle. You can only share with someone on this list.",
+    "yourHandle": "You: @{{handle}}",
+    "placeholder": "Discord username or NetsuRush handle",
+    "add": "Add",
+    "accept": "Accept",
+    "remove": "Remove",
+    "awaiting": "Pending",
+    "empty": "Nobody yet.",
+    "notYetJoined": "Not signed up yet",
+    "status": {
+      "sent": "Request sent.",
+      "linked": "You are connected.",
+      "pending": "Already sent.",
+      "already": "Already on your list.",
+      "self": "That is you.",
+      "unknown": "Invalid identifier.",
+      "ambiguous": "Several people match. Use their Discord ID.",
+      "error": "Failed.",
+      "invited": "Invitation sent."
+    }
+  },
+  "invites": {
+    "title": "Invitations",
+    "join": "Join",
+    "shared": "Shared document"
+  },
+  "projects": {
+    "title": "Shared documents",
+    "subtitle": "The documents shared with your account. The ones on this machine open from their own module.",
+    "rotation": "key rotation pending",
+    "add": "Add here",
+    "failed": "Could not add this document",
+    "unnamed": "Share from {{date}}",
+    "delete": "Delete",
+    "leave": "Leave",
+    "confirmDelete": "Delete for everyone?",
+    "confirmLeave": "Leave this share?",
+    "absent": "{{count}} document(s) not on this machine",
+    "role": {
+      "owner": "Owner",
+      "editor": "Can edit",
+      "viewer": "View only"
+    }
+  },
+  "activity": {
+    "title": "Collaboration activity",
+    "changed": "{{count}} people changed a document while you were away. Open it to retrieve the changes.",
+    "media": "{{count}} people are waiting for original media. Open the document and stay online to transfer it.",
+    "key": "{{count}} new member(s) are waiting for secure access. Open the document to deliver the project key.",
+    "dismiss": "Dismiss"
+  },
+  "notConfigured": "Sign-in is not configured on this installation.",
+  "dialog": {
+    "title": "Collaborate",
+    "subtitle": "Pick the people to invite to this document.",
+    "noFriends": "Add someone first in Settings › Account › Sharing.",
+    "invited": "{{n}} invitation(s) sent.",
+    "notice": "The document becomes collaborative. Invited people receive the invitation on their next start.",
+    "create": "Create and invite",
+    "invite": "Invite",
+    "failed": "Sharing failed.",
+    "mediaMissing": "{{count}} media file(s) missing from disk: {{names}}. Recover them (moved folder?) then share again."
+  },
+  "rotationPending": "The revocation is recorded. New publications wait for an owner device to finish key rotation.",
+  "staleHead": {
+    "title": "Stale recovery branch",
+    "warning": "A device has not merged this branch for more than 30 days.",
+    "detail": "{{days}} days · {{size}} encrypted",
+    "discard": "Discard",
+    "confirmTitle": "Discard this branch?",
+    "confirmWarning": "Changes published only by this device will be lost permanently. Continue only if that device can no longer reconnect."
+  },
+  "members": {
+    "remove": "Remove from project",
+    "pending": "Invitation pending",
+    "cancelInvite": "Cancel invitation"
+  },
+  "lifecycle": {
+    "leave": "Leave project",
+    "delete": "Delete project",
+    "leaveTitle": "Leave this project?",
+    "deleteTitle": "Delete this project?",
+    "leaveWarning": "You keep what this device already received, but can no longer sync this project.",
+    "deleteWarning": "Rendezvous data, invitations and encrypted recovery copies will be deleted for every member. This cannot be undone."
+  },
+  "sync": {
+    "queued": "Changes are waiting here. They will leave on their own as soon as a device is reachable.",
+    "upToDate": "Everything is in sync.",
+    "peers": "{{count}} reachable device(s)"
+  },
+  "panel": {
+    "title": "Sharing status",
+    "online": "{{count}} online",
+    "alone": "Nobody else yet.",
+    "hereNow": "Online",
+    "neverSeen": "Not reached yet",
+    "seenMinutes": "Seen {{count}} min ago",
+    "seenHours": "Seen {{count}} h ago",
+    "seenDays": "Seen {{count}} d ago",
+    "invited": "Invitation pending",
+    "unknownMember": "Member",
+    "queued": "Changes are waiting here. They will leave on their own as soon as a device is reachable.",
+    "upToDate": "Everything is in sync.",
+    "rotation": "Key rotation pending: new publications wait for one of the owner's devices.",
+    "waitingKey": "{{count}} member(s) waiting for the key. Stay online to pass it on.",
+    "nobodyReachable": "Nobody is reachable right now: your changes will go out when they return."
+  }
+}

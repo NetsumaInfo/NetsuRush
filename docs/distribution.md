@@ -39,6 +39,29 @@ A login gate over the shell (after the setup gate, main window only; the detache
 - **The three accesses to the auth chain are DYNAMIC** (provider in an async subtree, the login gate `lazy`, the deep-link module imported inside the effect). Statically imported, `convex/react` + `better-auth` landed in the entry chunk of **every** renderer — including the CEP panel on an old Chromium — and removing them cut ~140 KB raw / 48 KB gzipped from startup parsing. **Do not reintroduce a static import** of the auth or Convex client from the app entry points.
 - The renderer references Convex functions through `anyApi`, so it does not import generated files that do not exist before the first `convex dev` run, and `npm run build` stays green.
 
+## Collaboration packaging (`src-tauri/src/collab/` + `convex/`)
+
+Sharing adds **nothing to the installer**: everything native is compiled into the shell (iroh, Loro,
+`rusqlite` with its bundled SQLite, the crypto crates), and `@noble/ed25519` is a **Convex-side**
+dependency bundled by `convex deploy`, never by Vite. There is no new sidecar, no new resource and no
+new download at first run. The one thing that changes at build time:
+
+- **`src-tauri/build.rs` pins the Convex deployment into the binary** from `VITE_CONVEX_URL`
+  (`.env.local`, `.env.production` or `.env`), and the native service refuses a runtime deployment
+  hint that does not match it. A renderer must not be able to point the service — which holds the
+  account's bearer token — at a deployment of its choosing. A build without that variable produces a
+  shell whose collaboration reports itself unavailable, which is the nominal state for a contributor
+  clone with no backend.
+- The Rust toolchain floor is **1.85** (iroh 1.x). Declaring the old 1.77.2 made cargo silently
+  resolve iroh 0.29 instead.
+- `Cargo.lock` pins `wmi` — pulled in transitively by iroh's network watcher — to `windows 0.62`.
+  Its requirement is a wide range (`>=0.59, <0.63`), and unifying it with the shell's own
+  `windows = "0.61"` mixed two `windows-core` versions and failed to compile.
+
+Data lives under `<data>/collab` where `<data>` is `DATA_DIR` from `core/config.js` (`~/.netsurush`).
+An uninstall that clears application data must treat it as user content: it holds the device key
+ring, the per-project stores and the only local copy of a shared media.
+
 ## Bug report relay (`convex/http.ts` → `core/bugreport.js`)
 
 Reports reach a Discord channel, but **the app never carries the webhook URL**. It POSTs the multipart message to `POST <deployment>.convex.site/bug/report`, and the deployment forwards it using `BUG_WEBHOOK`, a server-side environment variable. Rotating the channel is `npx convex env set BUG_WEBHOOK …` — no rebuild, nothing to change on a tester's machine — and a URL that never ships cannot be extracted from the bundle to spam the channel.

@@ -99,7 +99,7 @@ Further wallpaper rules:
 
 `src/features/settings/nav.ts` is the **single source** of the settings map (page ids, tabs, icons): the side nav, the title-bar sub-nav and the router all read the same list, otherwise the three diverge. It holds pure data only — no page component — so the title bar does not pull the settings code at startup.
 
-Pages: **Account** (Profile · Discord) · **Interface** (Theme · Language · Navigation) · **Media** (Previews) · **AI** (Video · Dictation · Indexing — the models tab has id `models`, label "Video") · **Export** · **Adobe** · **Storage** (Media cache · Cleanup · Project cache · Projects) · **System** (Updates · Compatibility · Console) · **About**.
+Pages: **Account** (Profile · Discord · Sharing — the collaboration panel, `docs/collab.md`) · **Interface** (Theme · Language · Navigation) · **Media** (Previews) · **AI** (Video · Dictation · Indexing — the models tab has id `models`, label "Video") · **Export** · **Adobe** · **Storage** (Media cache · Cleanup · Project cache · Projects) · **System** (Updates · Compatibility · Console) · **About**.
 
 - The active tab is remembered **per page** (`settingsTab: Record<SettingsPage,string>` in `store/shell`).
 - `openSettings(page, tab)` is the only external entry point.

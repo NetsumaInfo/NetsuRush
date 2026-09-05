@@ -645,7 +645,8 @@
   "tab": {
     "account": {
       "profile": "资料",
-      "discord": "Discord"
+      "discord": "Discord",
+      "sharing": "共享"
     },
     "interface": {
       "theme": "主题",

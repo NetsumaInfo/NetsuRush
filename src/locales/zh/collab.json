@@ -1,0 +1,128 @@
+{
+  "title": "共享与协作",
+  "subtitle": "与你的账号相关的共享内容：本设备、成员、邀请，以及你们共同编辑的文档。",
+  "signedOut": "登录后即可共享文档。",
+  "surface": {
+    "unknown": "共享文档",
+    "board": "参考板"
+  },
+  "device": {
+    "title": "本设备",
+    "subtitle": "它的公钥用于向协作者标识你的身份。私钥永远不会离开这台机器。",
+    "ready": "受保护的本机身份已就绪。",
+    "unavailable": "本机协作不可用。",
+    "desktopOnly": "共享需要桌面应用。",
+    "unnamed": "NetsuRush 设备",
+    "current": "本设备",
+    "revoke": "吊销此设备"
+  },
+  "friends": {
+    "title": "成员",
+    "subtitle": "通过 Discord 用户名或 NetsuRush 标识添加。只能与此列表中的人共享。",
+    "yourHandle": "你：@{{handle}}",
+    "placeholder": "Discord 用户名或 NetsuRush 标识",
+    "add": "添加",
+    "accept": "接受",
+    "remove": "移除",
+    "awaiting": "等待中",
+    "empty": "暂无成员。",
+    "notYetJoined": "尚未注册",
+    "status": {
+      "sent": "请求已发送。",
+      "linked": "你们已建立联系。",
+      "pending": "已发送过。",
+      "already": "已在你的列表中。",
+      "self": "这是你自己。",
+      "unknown": "标识无效。",
+      "ambiguous": "匹配到多个人。请使用其 Discord ID。",
+      "error": "失败。",
+      "invited": "邀请已发送。"
+    }
+  },
+  "invites": {
+    "title": "邀请",
+    "join": "加入",
+    "shared": "共享文档"
+  },
+  "projects": {
+    "title": "共享文档",
+    "subtitle": "与你的账号共享的文档。本机上的文档可在各自模块中打开。",
+    "rotation": "等待密钥轮换",
+    "add": "添加到此处",
+    "failed": "无法添加该文档",
+    "unnamed": "{{date}} 的共享",
+    "delete": "删除",
+    "leave": "退出",
+    "confirmDelete": "为所有人删除？",
+    "confirmLeave": "退出该共享？",
+    "absent": "{{count}} 个共享不在本机",
+    "role": {
+      "owner": "所有者",
+      "editor": "可编辑",
+      "viewer": "仅查看"
+    }
+  },
+  "activity": {
+    "title": "协作动态",
+    "changed": "你不在时有 {{count}} 人修改了文档。打开它以获取更改。",
+    "media": "{{count}} 人正在等待原始媒体。打开文档并保持在线以传输。",
+    "key": "{{count}} 位新成员正在等待加密访问。打开文档以传递项目密钥。",
+    "dismiss": "隐藏"
+  },
+  "notConfigured": "此安装未配置登录。",
+  "dialog": {
+    "title": "协作",
+    "subtitle": "选择要邀请到此文档的成员。",
+    "noFriends": "请先在 设置 › 账号 › 共享 中添加成员。",
+    "invited": "已发送 {{n}} 份邀请。",
+    "notice": "该文档将变为协作文档。受邀者会在下次启动时收到邀请。",
+    "create": "创建并邀请",
+    "invite": "邀请",
+    "failed": "共享失败。",
+    "mediaMissing": "磁盘上找不到 {{count}} 个媒体文件：{{names}}。请先找回它们（文件夹是否移动过？）再重新共享。"
+  },
+  "rotationPending": "吊销已记录。新的发布需等待所有者的设备完成密钥轮换。",
+  "staleHead": {
+    "title": "过期的恢复分支",
+    "warning": "某台设备已超过 30 天未合并此分支。",
+    "detail": "{{days}} 天 · 加密 {{size}}",
+    "discard": "放弃",
+    "confirmTitle": "放弃该分支？",
+    "confirmWarning": "仅由该设备发布的更改将永久丢失。只有当该设备无法再连接时才继续。"
+  },
+  "members": {
+    "remove": "移出项目",
+    "pending": "邀请待接受",
+    "cancelInvite": "取消邀请"
+  },
+  "lifecycle": {
+    "leave": "退出项目",
+    "delete": "删除项目",
+    "leaveTitle": "退出该项目？",
+    "deleteTitle": "删除该项目？",
+    "leaveWarning": "你会保留本设备已收到的内容，但不能再同步该项目。",
+    "deleteWarning": "汇合数据、邀请和加密备份将对所有成员删除。此操作不可撤销。"
+  },
+  "sync": {
+    "queued": "有更改在此等待。一旦有可达设备便会自动发出。",
+    "upToDate": "全部已同步。",
+    "peers": "{{count}} 台可达设备"
+  },
+  "panel": {
+    "title": "共享状态",
+    "online": "{{count}} 人在线",
+    "alone": "暂时没有其他人。",
+    "hereNow": "在线",
+    "neverSeen": "尚未联系上",
+    "seenMinutes": "{{count}} 分钟前出现",
+    "seenHours": "{{count}} 小时前出现",
+    "seenDays": "{{count}} 天前出现",
+    "invited": "邀请待接受",
+    "unknownMember": "成员",
+    "queued": "有更改在此等待。一旦有可达设备便会自动发出。",
+    "upToDate": "全部已同步。",
+    "rotation": "等待密钥轮换：新的发布正在等待所有者的设备。",
+    "waitingKey": "{{count}} 位成员正在等待密钥。请保持在线以便传递。",
+    "nobodyReachable": "当前没有可达的成员：你的更改会在他们回来后发出。"
+  }
+}

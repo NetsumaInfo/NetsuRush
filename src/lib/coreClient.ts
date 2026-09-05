@@ -9,6 +9,7 @@ import i18n from "@/i18n";
 import { logError } from "@/lib/appLog";
 import { readPreviewSettings } from "@/lib/previewSettings";
 import { beginHeavyCall, isHeavyChannel } from "@/lib/busyBus";
+import { rememberImportGrants } from "@/lib/collab/importGrants";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -137,7 +138,14 @@ async function ensurePathBridge(): Promise<boolean> {
         import("@tauri-apps/api/core"),
         import("@tauri-apps/api/window"),
       ]);
-      await listen<{ id: number; paths: string[] }>("nr://file-paths", (e) => {
+      await listen<{ id: number; paths: string[]; grants?: string[] }>("nr://file-paths", (e) => {
+        // A trusted OS drop is one of the two origins allowed to authorise an import into a shared
+        // document. The capability travels with the path so the renderer is never believed about
+        // where a file came from (`docs/collab.md`).
+        rememberImportGrants((e.payload.paths || []).map((path, index) => ({
+          path,
+          grant: e.payload.grants?.[index] ?? "",
+        })));
         const done = pathWaiters.get(e.payload.id);
         if (done) { pathWaiters.delete(e.payload.id); done(e.payload.paths || []); }
       });
@@ -302,6 +310,29 @@ async function dlgOpen(opts: Record<string, unknown>): Promise<string | string[]
   const { open } = await import("@tauri-apps/plugin-dialog");
   return (await open(opts)) as string | string[] | null;
 }
+/**
+ * The OS picker opened inside Rust, which hands back a one-use import capability beside every
+ * path. The other authorised origin for a shared document's media; `dlgOpen` grants nothing, so a
+ * file chosen through it can only be imported when the document already names it.
+ */
+async function trustedFileOpen(
+  label: string,
+  extensions: string[],
+  multiple: boolean,
+): Promise<string | string[] | null> {
+  if (!isTauri) return null;
+  const { invoke } = await import("@tauri-apps/api/core");
+  const selected = await invoke<Array<{ path: string; grant: string }>>("nr_pick_trusted_files", {
+    label,
+    extensions,
+    multiple,
+  });
+  if (!selected.length) return null;
+  rememberImportGrants(selected);
+  const paths = selected.map((entry) => entry.path);
+  return multiple ? paths : paths[0];
+}
+
 async function dlgSave(defaultPath?: string, extensions?: string[]): Promise<string | null> {
   if (!isTauri) return null;
   const { save } = await import("@tauri-apps/plugin-dialog");
@@ -969,7 +1000,7 @@ export function makeCoreClient(): NrApi {
     chooseFiles: () =>
       isRemote
         ? requestParentFiles(true, VIDEO_EXT)
-        : (dlgOpen({ multiple: true, filters: [{ name: i18n.t("common:fileType.video"), extensions: VIDEO_EXT }] }) as Promise<string[] | null>),
+        : (trustedFileOpen(i18n.t("common:fileType.video"), VIDEO_EXT, true) as Promise<string[] | null>),
     chooseMediaFiles: () =>
       isRemote
         ? requestParentFiles(true, MEDIA_EXT)
@@ -981,11 +1012,11 @@ export function makeCoreClient(): NrApi {
     chooseImages: () =>
       isRemote
         ? requestParentFiles(true, IMAGE_EXT)
-        : (dlgOpen({ multiple: true, filters: [{ name: i18n.t("common:fileType.image"), extensions: IMAGE_EXT }] }) as Promise<string[] | null>),
+        : (trustedFileOpen(i18n.t("common:fileType.image"), IMAGE_EXT, true) as Promise<string[] | null>),
     chooseAnyFile: () =>
       isRemote
         ? requestParentFiles(false, []).then((a) => (a && a[0]) || null)
-        : (dlgOpen({ multiple: false }) as Promise<string | null>),
+        : (trustedFileOpen("", [], false) as Promise<string | null>),
     pathsForFiles: (files) => resolveFilePaths(files),
     warmFilePaths: () => { void ensurePathBridge(); },
     saveFile: (defaultName, extensions) => dlgSave(defaultName, extensions),

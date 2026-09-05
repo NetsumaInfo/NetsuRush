@@ -1,0 +1,128 @@
+{
+  "title": "Partage et collaboration",
+  "subtitle": "Ce qui est partagé avec ton compte : cet appareil, les personnes, les invitations et les documents que vous éditez à plusieurs.",
+  "signedOut": "Connecte-toi pour partager un document.",
+  "surface": {
+    "unknown": "Document partagé",
+    "board": "Board de référence"
+  },
+  "device": {
+    "title": "Cet appareil",
+    "subtitle": "Sa clé publique sert à t'identifier auprès de tes collaborateurs. La clé privée ne quitte jamais cette machine.",
+    "ready": "Identité native protégée et prête.",
+    "unavailable": "La collaboration native n'est pas disponible.",
+    "desktopOnly": "Le partage demande l'application de bureau.",
+    "unnamed": "Appareil NetsuRush",
+    "current": "cet appareil",
+    "revoke": "Révoquer cet appareil"
+  },
+  "friends": {
+    "title": "Personnes",
+    "subtitle": "Ajoute par pseudo Discord ou identifiant NetsuRush. On ne partage qu'avec quelqu'un de cette liste.",
+    "yourHandle": "Toi : @{{handle}}",
+    "placeholder": "Pseudo Discord ou identifiant NetsuRush",
+    "add": "Ajouter",
+    "accept": "Accepter",
+    "remove": "Retirer",
+    "awaiting": "En attente",
+    "empty": "Personne pour l'instant.",
+    "notYetJoined": "Pas encore inscrit",
+    "status": {
+      "sent": "Demande envoyée.",
+      "linked": "Vous êtes liés.",
+      "pending": "Déjà envoyée.",
+      "already": "Déjà dans ta liste.",
+      "self": "C'est toi.",
+      "unknown": "Identifiant invalide.",
+      "ambiguous": "Plusieurs personnes correspondent. Utilise son ID Discord.",
+      "error": "Échec.",
+      "invited": "Invitation envoyée."
+    }
+  },
+  "invites": {
+    "title": "Invitations",
+    "join": "Rejoindre",
+    "shared": "Document partagé"
+  },
+  "projects": {
+    "title": "Documents partagés",
+    "subtitle": "Les documents partagés avec ton compte. Ceux de cette machine s'ouvrent depuis leur module.",
+    "rotation": "rotation de clé en attente",
+    "add": "Ajouter ici",
+    "failed": "Impossible d'ajouter ce document",
+    "unnamed": "Partage du {{date}}",
+    "delete": "Supprimer",
+    "leave": "Quitter",
+    "confirmDelete": "Supprimer pour tous ?",
+    "confirmLeave": "Quitter ce partage ?",
+    "absent": "{{count}} document(s) absent(s) de cette machine",
+    "role": {
+      "owner": "Propriétaire",
+      "editor": "Peut modifier",
+      "viewer": "Lecture seule"
+    }
+  },
+  "activity": {
+    "title": "Activité collaborative",
+    "changed": "{{count}} personne(s) ont modifié un document pendant ton absence. Ouvre-le pour récupérer les changements.",
+    "media": "{{count}} personne(s) attendent un média original. Ouvre le document et reste en ligne pour le transmettre.",
+    "key": "{{count}} nouveau(x) membre(s) attendent l'accès chiffré. Ouvre le document pour transmettre la clé du projet.",
+    "dismiss": "Masquer"
+  },
+  "notConfigured": "La connexion n'est pas configurée sur cette installation.",
+  "dialog": {
+    "title": "Collaborer",
+    "subtitle": "Choisis les personnes à inviter sur ce document.",
+    "noFriends": "Ajoute d'abord quelqu'un dans Paramètres › Compte › Partage.",
+    "invited": "{{n}} invitation(s) envoyée(s).",
+    "notice": "Le document devient collaboratif. Les personnes invitées reçoivent l'invitation dès leur prochain démarrage.",
+    "create": "Créer et inviter",
+    "invite": "Inviter",
+    "failed": "Le partage a échoué.",
+    "mediaMissing": "{{count}} média(s) introuvable(s) sur le disque : {{names}}. Retrouve-les (dossier déplacé ?) puis repartage."
+  },
+  "rotationPending": "La révocation est enregistrée. Les nouvelles publications attendent qu'un appareil du propriétaire termine la rotation de clé.",
+  "staleHead": {
+    "title": "Branche de récupération obsolète",
+    "warning": "Un appareil n'a pas fusionné cette branche depuis plus de 30 jours.",
+    "detail": "{{days}} j · {{size}} chiffrés",
+    "discard": "Abandonner",
+    "confirmTitle": "Abandonner cette branche ?",
+    "confirmWarning": "Les modifications publiées uniquement par cet appareil seront perdues définitivement. Continue seulement si cet appareil ne peut plus se reconnecter."
+  },
+  "members": {
+    "remove": "Retirer du projet",
+    "pending": "Invitation en attente",
+    "cancelInvite": "Annuler l'invitation"
+  },
+  "lifecycle": {
+    "leave": "Quitter le projet",
+    "delete": "Supprimer le projet",
+    "leaveTitle": "Quitter ce projet ?",
+    "deleteTitle": "Supprimer ce projet ?",
+    "leaveWarning": "Tu gardes ce que ton appareil a déjà reçu, mais tu ne pourras plus synchroniser ce projet.",
+    "deleteWarning": "Le rendez-vous, les invitations et les sauvegardes chiffrées seront supprimés pour tous les membres. Cette action est irréversible."
+  },
+  "sync": {
+    "queued": "Des modifications attendent ici. Elles partiront toutes seules dès qu'un appareil sera joignable.",
+    "upToDate": "Tout est synchronisé.",
+    "peers": "{{count}} appareil(s) joignable(s)"
+  },
+  "panel": {
+    "title": "État du partage",
+    "online": "{{count}} en ligne",
+    "alone": "Personne d'autre pour l'instant.",
+    "hereNow": "En ligne",
+    "neverSeen": "Pas encore joint",
+    "seenMinutes": "Vu il y a {{count}} min",
+    "seenHours": "Vu il y a {{count}} h",
+    "seenDays": "Vu il y a {{count}} j",
+    "invited": "Invitation en attente",
+    "unknownMember": "Membre",
+    "queued": "Des modifications attendent ici. Elles partiront seules dès qu'un appareil sera joignable.",
+    "upToDate": "Tout est synchronisé.",
+    "rotation": "Rotation de clé en attente : les nouvelles publications attendent un appareil du propriétaire.",
+    "waitingKey": "{{count}} membre(s) attendent la clé. Reste en ligne pour la leur transmettre.",
+    "nobodyReachable": "Personne n'est joignable pour l'instant : tes modifications partiront à leur retour."
+  }
+}

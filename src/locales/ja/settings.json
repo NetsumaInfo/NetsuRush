@@ -645,7 +645,8 @@
   "tab": {
     "account": {
       "profile": "プロフィール",
-      "discord": "Discord"
+      "discord": "Discord",
+      "sharing": "共有"
     },
     "interface": {
       "theme": "テーマ",

@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdobeBridgePanel } from "@/components/adobe/AdobeBridgePanel";
 import { AccountSettings } from "./AccountSettings";
 import { DiscordSettings } from "./DiscordSettings";
+import { SharingSettings } from "./SharingSettings";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
 import { NavigationSettings } from "./NavigationSettings";
@@ -31,7 +32,7 @@ import { ConsoleSettings } from "./ConsoleSettings";
 import { AboutSettings } from "./AboutSettings";
 
 const PANELS: Record<SettingsPage, Record<string, ComponentType>> = {
-  account: { profile: AccountSettings, discord: DiscordSettings },
+  account: { profile: AccountSettings, discord: DiscordSettings, sharing: SharingSettings },
   interface: { theme: AppearanceSettings, language: LanguageSettings, navigation: NavigationSettings, notifications: NotificationSettings },
   media: { preview: PlaybackSettings },
   ai: { models: ModelsSettings, dictation: DictationSettings, indexing: IndexingSettings },

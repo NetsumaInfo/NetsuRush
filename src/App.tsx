@@ -35,6 +35,12 @@ const NotebookWindow = lazy(() => import("@/components/notebook/NotebookWindow")
 // Chargé PARESSEUSEMENT : le gate tire convex/react. Sans déploiement Convex il n'est jamais monté,
 // et son chunk ne part donc jamais sur le réseau (cf. AuthGate ci-dessous).
 const LoginGate = lazy(() => import("@/components/auth/LoginGate").then((m) => ({ default: m.LoginGate })));
+// Idem : le module tire convex/react. Rien n'est monté sans déploiement Convex.
+const CollaborationNotifications = lazy(() =>
+  import("@/components/collab/CollaborationNotifications").then((m) => ({
+    default: m.CollaborationNotifications,
+  })),
+);
 
 // Gate d'accès : traversant tant que Convex n'est pas configuré (dev, navigateur, mock) — même
 // contrat qu'avant, mais sans faire entrer la chaîne auth dans le bundle d'entrée.
@@ -280,6 +286,13 @@ function Shell() {
         <ExportStatusToast />
         <ErrorBadge />
       </div>
+      {/* Ce qui s'est passé pendant que l'app était fermée : la ligne durable reste dans
+          Paramètres › Compte › Partage, celle-ci n'est que le rappel transitoire. */}
+      {convexConfigured && (
+        <Suspense fallback={null}>
+          <CollaborationNotifications />
+        </Suspense>
+      )}
       <PowerPrompt />
       <UpdateBootstrap />
     </div>

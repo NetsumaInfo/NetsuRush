@@ -1,0 +1,128 @@
+{
+  "title": "Teilen und Zusammenarbeit",
+  "subtitle": "Was mit deinem Konto geteilt wird: dieses Gerät, die Personen, die Einladungen und die Dokumente, die ihr gemeinsam bearbeitet.",
+  "signedOut": "Melde dich an, um ein Dokument zu teilen.",
+  "surface": {
+    "unknown": "Geteiltes Dokument",
+    "board": "Referenz-Board"
+  },
+  "device": {
+    "title": "Dieses Gerät",
+    "subtitle": "Sein öffentlicher Schlüssel weist dich gegenüber deinen Mitarbeitenden aus. Der private Schlüssel verlässt diesen Rechner nie.",
+    "ready": "Geschützte native Identität ist bereit.",
+    "unavailable": "Native Zusammenarbeit ist nicht verfügbar.",
+    "desktopOnly": "Teilen erfordert die Desktop-Anwendung.",
+    "unnamed": "NetsuRush-Gerät",
+    "current": "dieses Gerät",
+    "revoke": "Dieses Gerät widerrufen"
+  },
+  "friends": {
+    "title": "Personen",
+    "subtitle": "Über Discord-Namen oder NetsuRush-Kennung hinzufügen. Geteilt wird nur mit jemandem aus dieser Liste.",
+    "yourHandle": "Du: @{{handle}}",
+    "placeholder": "Discord-Name oder NetsuRush-Kennung",
+    "add": "Hinzufügen",
+    "accept": "Annehmen",
+    "remove": "Entfernen",
+    "awaiting": "Ausstehend",
+    "empty": "Noch niemand.",
+    "notYetJoined": "Noch nicht registriert",
+    "status": {
+      "sent": "Anfrage gesendet.",
+      "linked": "Ihr seid verbunden.",
+      "pending": "Bereits gesendet.",
+      "already": "Steht schon auf deiner Liste.",
+      "self": "Das bist du.",
+      "unknown": "Ungültige Kennung.",
+      "ambiguous": "Mehrere Personen passen. Nutze ihre Discord-ID.",
+      "error": "Fehlgeschlagen.",
+      "invited": "Einladung gesendet."
+    }
+  },
+  "invites": {
+    "title": "Einladungen",
+    "join": "Beitreten",
+    "shared": "Geteiltes Dokument"
+  },
+  "projects": {
+    "title": "Geteilte Dokumente",
+    "subtitle": "Die mit deinem Konto geteilten Dokumente. Die auf diesem Rechner öffnen sich in ihrem eigenen Modul.",
+    "rotation": "Schlüsselwechsel ausstehend",
+    "add": "Hier hinzufügen",
+    "failed": "Dieses Dokument konnte nicht hinzugefügt werden",
+    "unnamed": "Freigabe vom {{date}}",
+    "delete": "Löschen",
+    "leave": "Verlassen",
+    "confirmDelete": "Für alle löschen?",
+    "confirmLeave": "Diese Freigabe verlassen?",
+    "absent": "{{count}} Dokument(e) nicht auf diesem Rechner",
+    "role": {
+      "owner": "Eigentümer",
+      "editor": "Kann bearbeiten",
+      "viewer": "Nur lesen"
+    }
+  },
+  "activity": {
+    "title": "Aktivität der Zusammenarbeit",
+    "changed": "{{count}} Person(en) haben ein Dokument geändert, während du weg warst. Öffne es, um die Änderungen zu holen.",
+    "media": "{{count}} Person(en) warten auf eine Originaldatei. Öffne das Dokument und bleib online, um sie zu übertragen.",
+    "key": "{{count}} neue(s) Mitglied(er) warten auf den verschlüsselten Zugang. Öffne das Dokument, um den Projektschlüssel zu übergeben.",
+    "dismiss": "Ausblenden"
+  },
+  "notConfigured": "Die Anmeldung ist in dieser Installation nicht konfiguriert.",
+  "dialog": {
+    "title": "Zusammenarbeiten",
+    "subtitle": "Wähle die Personen, die du zu diesem Dokument einladen willst.",
+    "noFriends": "Füge zuerst jemanden unter Einstellungen › Konto › Teilen hinzu.",
+    "invited": "{{n}} Einladung(en) gesendet.",
+    "notice": "Das Dokument wird kollaborativ. Eingeladene erhalten die Einladung beim nächsten Start.",
+    "create": "Erstellen und einladen",
+    "invite": "Einladen",
+    "failed": "Teilen fehlgeschlagen.",
+    "mediaMissing": "{{count}} Mediendatei(en) nicht auf der Festplatte gefunden: {{names}}. Stelle sie wieder her (Ordner verschoben?) und teile erneut."
+  },
+  "rotationPending": "Der Widerruf ist eingetragen. Neue Veröffentlichungen warten, bis ein Gerät des Eigentümers den Schlüsselwechsel abschließt.",
+  "staleHead": {
+    "title": "Veralteter Wiederherstellungszweig",
+    "warning": "Ein Gerät hat diesen Zweig seit über 30 Tagen nicht zusammengeführt.",
+    "detail": "{{days}} Tage · {{size}} verschlüsselt",
+    "discard": "Verwerfen",
+    "confirmTitle": "Diesen Zweig verwerfen?",
+    "confirmWarning": "Nur von diesem Gerät veröffentlichte Änderungen gehen endgültig verloren. Fahre nur fort, wenn sich dieses Gerät nicht mehr verbinden kann."
+  },
+  "members": {
+    "remove": "Aus dem Projekt entfernen",
+    "pending": "Einladung ausstehend",
+    "cancelInvite": "Einladung zurückziehen"
+  },
+  "lifecycle": {
+    "leave": "Projekt verlassen",
+    "delete": "Projekt löschen",
+    "leaveTitle": "Dieses Projekt verlassen?",
+    "deleteTitle": "Dieses Projekt löschen?",
+    "leaveWarning": "Du behältst, was dieses Gerät bereits erhalten hat, kannst dieses Projekt aber nicht mehr synchronisieren.",
+    "deleteWarning": "Treffpunktdaten, Einladungen und verschlüsselte Sicherungen werden für alle Mitglieder gelöscht. Das lässt sich nicht rückgängig machen."
+  },
+  "sync": {
+    "queued": "Hier warten Änderungen. Sie gehen von selbst raus, sobald ein Gerät erreichbar ist.",
+    "upToDate": "Alles ist synchron.",
+    "peers": "{{count}} erreichbare(s) Gerät(e)"
+  },
+  "panel": {
+    "title": "Status der Freigabe",
+    "online": "{{count}} online",
+    "alone": "Noch niemand sonst.",
+    "hereNow": "Online",
+    "neverSeen": "Noch nicht erreicht",
+    "seenMinutes": "Vor {{count}} Min. gesehen",
+    "seenHours": "Vor {{count}} Std. gesehen",
+    "seenDays": "Vor {{count}} T. gesehen",
+    "invited": "Einladung ausstehend",
+    "unknownMember": "Mitglied",
+    "queued": "Hier warten Änderungen. Sie gehen von selbst raus, sobald ein Gerät erreichbar ist.",
+    "upToDate": "Alles ist synchron.",
+    "rotation": "Schlüsselwechsel ausstehend: neue Veröffentlichungen warten auf ein Gerät des Eigentümers.",
+    "waitingKey": "{{count}} Mitglied(er) warten auf den Schlüssel. Bleib online, um ihn zu übergeben.",
+    "nobodyReachable": "Gerade ist niemand erreichbar: deine Änderungen gehen raus, sobald jemand zurück ist."
+  }
+}

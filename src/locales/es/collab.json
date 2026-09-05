@@ -1,0 +1,128 @@
+{
+  "title": "Compartir y colaborar",
+  "subtitle": "Lo que se comparte con tu cuenta: este dispositivo, las personas, las invitaciones y los documentos que editáis juntos.",
+  "signedOut": "Inicia sesión para compartir un documento.",
+  "surface": {
+    "unknown": "Documento compartido",
+    "board": "Tablero de referencia"
+  },
+  "device": {
+    "title": "Este dispositivo",
+    "subtitle": "Su clave pública te identifica ante tus colaboradores. La clave privada nunca sale de esta máquina.",
+    "ready": "Identidad nativa protegida y lista.",
+    "unavailable": "La colaboración nativa no está disponible.",
+    "desktopOnly": "Compartir requiere la aplicación de escritorio.",
+    "unnamed": "Dispositivo NetsuRush",
+    "current": "este dispositivo",
+    "revoke": "Revocar este dispositivo"
+  },
+  "friends": {
+    "title": "Personas",
+    "subtitle": "Añade por usuario de Discord o identificador NetsuRush. Solo puedes compartir con alguien de esta lista.",
+    "yourHandle": "Tú: @{{handle}}",
+    "placeholder": "Usuario de Discord o identificador NetsuRush",
+    "add": "Añadir",
+    "accept": "Aceptar",
+    "remove": "Quitar",
+    "awaiting": "Pendiente",
+    "empty": "Nadie todavía.",
+    "notYetJoined": "Aún no se ha registrado",
+    "status": {
+      "sent": "Solicitud enviada.",
+      "linked": "Ya estáis conectados.",
+      "pending": "Ya enviada.",
+      "already": "Ya está en tu lista.",
+      "self": "Eres tú.",
+      "unknown": "Identificador no válido.",
+      "ambiguous": "Coinciden varias personas. Usa su ID de Discord.",
+      "error": "Error.",
+      "invited": "Invitación enviada."
+    }
+  },
+  "invites": {
+    "title": "Invitaciones",
+    "join": "Unirse",
+    "shared": "Documento compartido"
+  },
+  "projects": {
+    "title": "Documentos compartidos",
+    "subtitle": "Los documentos compartidos con tu cuenta. Los de esta máquina se abren desde su propio módulo.",
+    "rotation": "rotación de clave pendiente",
+    "add": "Añadir aquí",
+    "failed": "No se pudo añadir este documento",
+    "unnamed": "Compartido del {{date}}",
+    "delete": "Eliminar",
+    "leave": "Salir",
+    "confirmDelete": "¿Eliminar para todos?",
+    "confirmLeave": "¿Salir de este documento compartido?",
+    "absent": "{{count}} documento(s) que no están en esta máquina",
+    "role": {
+      "owner": "Propietario",
+      "editor": "Puede editar",
+      "viewer": "Solo lectura"
+    }
+  },
+  "activity": {
+    "title": "Actividad colaborativa",
+    "changed": "{{count}} persona(s) modificaron un documento mientras no estabas. Ábrelo para recuperar los cambios.",
+    "media": "{{count}} persona(s) esperan un medio original. Abre el documento y mantente en línea para transferirlo.",
+    "key": "{{count}} miembro(s) nuevo(s) esperan el acceso cifrado. Abre el documento para entregar la clave del proyecto.",
+    "dismiss": "Ocultar"
+  },
+  "notConfigured": "El inicio de sesión no está configurado en esta instalación.",
+  "dialog": {
+    "title": "Colaborar",
+    "subtitle": "Elige a las personas que quieres invitar a este documento.",
+    "noFriends": "Añade a alguien primero en Ajustes › Cuenta › Compartir.",
+    "invited": "{{n}} invitación(es) enviada(s).",
+    "notice": "El documento pasa a ser colaborativo. Las personas invitadas recibirán la invitación en su próximo inicio.",
+    "create": "Crear e invitar",
+    "invite": "Invitar",
+    "failed": "No se pudo compartir.",
+    "mediaMissing": "{{count}} archivo(s) multimedia no encontrado(s) en el disco: {{names}}. Recupéralos (¿carpeta movida?) y vuelve a compartir."
+  },
+  "rotationPending": "La revocación está registrada. Las nuevas publicaciones esperan a que un dispositivo del propietario termine la rotación de clave.",
+  "staleHead": {
+    "title": "Rama de recuperación obsoleta",
+    "warning": "Un dispositivo no ha fusionado esta rama desde hace más de 30 días.",
+    "detail": "{{days}} días · {{size}} cifrados",
+    "discard": "Descartar",
+    "confirmTitle": "¿Descartar esta rama?",
+    "confirmWarning": "Los cambios publicados solo por ese dispositivo se perderán definitivamente. Continúa solo si ese dispositivo ya no puede reconectarse."
+  },
+  "members": {
+    "remove": "Quitar del proyecto",
+    "pending": "Invitación pendiente",
+    "cancelInvite": "Cancelar la invitación"
+  },
+  "lifecycle": {
+    "leave": "Salir del proyecto",
+    "delete": "Eliminar el proyecto",
+    "leaveTitle": "¿Salir de este proyecto?",
+    "deleteTitle": "¿Eliminar este proyecto?",
+    "leaveWarning": "Conservas lo que este dispositivo ya recibió, pero no podrás seguir sincronizando este proyecto.",
+    "deleteWarning": "Los datos de encuentro, las invitaciones y las copias cifradas de recuperación se eliminarán para todos los miembros. Esta acción no se puede deshacer."
+  },
+  "sync": {
+    "queued": "Hay cambios esperando aquí. Saldrán solos en cuanto haya un dispositivo accesible.",
+    "upToDate": "Todo está sincronizado.",
+    "peers": "{{count}} dispositivo(s) accesible(s)"
+  },
+  "panel": {
+    "title": "Estado del uso compartido",
+    "online": "{{count}} en línea",
+    "alone": "Nadie más por ahora.",
+    "hereNow": "En línea",
+    "neverSeen": "Aún sin contacto",
+    "seenMinutes": "Visto hace {{count}} min",
+    "seenHours": "Visto hace {{count}} h",
+    "seenDays": "Visto hace {{count}} d",
+    "invited": "Invitación pendiente",
+    "unknownMember": "Miembro",
+    "queued": "Hay cambios esperando aquí. Saldrán solos en cuanto haya un dispositivo accesible.",
+    "upToDate": "Todo está sincronizado.",
+    "rotation": "Rotación de clave pendiente: las nuevas publicaciones esperan a un dispositivo del propietario.",
+    "waitingKey": "{{count}} miembro(s) esperan la clave. Mantente en línea para entregársela.",
+    "nobodyReachable": "Ahora mismo no hay nadie accesible: tus cambios saldrán cuando vuelvan."
+  }
+}

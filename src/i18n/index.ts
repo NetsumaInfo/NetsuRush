@@ -55,6 +55,7 @@ export const NAMESPACES = [
   "export",
   "optimize",
   "settings",
+  "collab",
   "dictate",
   "ae",
   "transfer",

@@ -25,7 +25,11 @@ NetsuRush is a desktop application running on the user's machine. The areas that
 - the **media server** (`/media`, `/stream`): arbitrary file reads, path traversal;
 - the **Resolve bridge** and the **Adobe panel jobs**: script execution inside third-party software;
 - **Convex authentication** and the `netsurush://` deep link;
-- the **bug reporter**: masking of paths, e-mails and tokens before sending.
+- the **bug reporter**: masking of paths, e-mails and tokens before sending;
+- the **native collaboration service** (`src-tauri/src/collab/`): device identity and key ring,
+  the `collab://` media protocol and its import grants, the iroh peer admission rules, and the
+  Convex rendezvous mutations. `docs/collab.md` states the trust boundaries and the residual
+  risks it accepts.
 
 **Out of scope**:
 
