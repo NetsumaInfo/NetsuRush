@@ -11,6 +11,7 @@ const http = require('http');
 const https = require('https');
 const { t } = require('./i18n');
 const downloadTarget = require('./netsu/downloadTarget');
+const thumbs = require('./thumbs');
 
 // Téléchargement d'octets distants (CDN, ex. Discord) plafonné — 512 Mo.
 const MAX_ASSET = 512 * 1024 * 1024;
@@ -213,7 +214,34 @@ function createReferenceStore(dataDir) {
     try {
       const id = scene.id || uid();
       const ts = Date.now();
-      const data = JSON.stringify({ items: scene.items || [], view: scene.view || null });
+      const collaboration = scene.collaboration && typeof scene.collaboration.projectId === 'string'
+        ? { projectId: scene.collaboration.projectId }
+        : null;
+      // Localisateurs des médias du board, indépendants des items. Une scène collaborative ne garde
+      // AUCUN item — le document Loro fait foi — mais la coquille s'appuie sur la scène enregistrée
+      // pour autoriser l'import d'un fichier local : sans cette liste, plus aucun média ne peut
+      // entrer dans un board partagé.
+      const media = Array.isArray(scene.media)
+        ? scene.media.filter((ref) => typeof ref === 'string' && ref && ref.length <= 4096).slice(0, 5000)
+        : [];
+      // Aperçu de disposition, en LECTURE seule : une scène collaborative ne garde aucun item, donc
+      // rien à dessiner sur l'écran d'accueil. Ces quelques champs par item suffisent à la vignette
+      // et ne peuvent pas servir de seconde copie modifiable du board.
+      const num = (value, fallback = 0) => (Number.isFinite(value) ? value : fallback);
+      const preview = Array.isArray(scene.preview)
+        ? scene.preview.slice(0, 40).map((it) => ({
+          id: String(it && it.id ? it.id : '').slice(0, 64),
+          kind: String(it && it.kind ? it.kind : 'image').slice(0, 16),
+          x: num(it && it.x), y: num(it && it.y),
+          w: num(it && it.w, 1), h: num(it && it.h, 1),
+          z: num(it && it.z),
+          rotation: num(it && it.rotation),
+          ...(typeof it.ref === 'string' && /^https?:\/\//i.test(it.ref) ? { ref: it.ref.slice(0, 2048) } : null),
+        }))
+        : [];
+      const data = JSON.stringify({
+        items: scene.items || [], view: scene.view || null, collaboration, media, preview,
+      });
       backend.put(id, scene.name || 'Sans titre', data, ts);
       return { ok: true, id, updatedAt: ts };
     } catch (e) {
@@ -224,13 +252,29 @@ function createReferenceStore(dataDir) {
   function loadScene(id) {
     const row = backend.get(id);
     if (!row) return null;
-    let parsed = { items: [], view: null };
+    let parsed = { items: [], view: null, collaboration: null, media: [], preview: [] };
     try { parsed = JSON.parse(row.data); } catch (_) {}
-    return { id: row.id, name: row.name, items: parsed.items || [], view: parsed.view || null, updatedAt: row.updated_at };
+    return {
+      id: row.id,
+      name: row.name,
+      items: parsed.items || [],
+      view: parsed.view || null,
+      collaboration: parsed.collaboration || null,
+      media: parsed.media || [],
+      preview: parsed.preview || [],
+      updatedAt: row.updated_at,
+    };
   }
 
   function listScenes() {
-    try { return backend.list(); } catch (_) { return []; }
+    // Le lien scène ⇄ projet partagé voyage avec la LISTE : l'accueil et les Paramètres doivent
+    // savoir quelles scènes sont collaboratives sans charger chaque board en entier.
+    try {
+      return backend.list().map((meta) => ({
+        ...meta,
+        collaboration: (loadScene(meta.id) || {}).collaboration || null,
+      }));
+    } catch (_) { return []; }
   }
 
   function deleteScene(id) {
@@ -247,6 +291,20 @@ function createReferenceStore(dataDir) {
       const out = path.join(assetsDir, `${hash}.${e}`);
       if (!fs.existsSync(out)) fs.writeFileSync(out, buf);
       return { ok: true, path: out };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  // Aperçu léger (JPEG) d'un média local, écrit en ASSET de l'app : la collaboration l'envoie aux
+  // pairs avant l'original, pour qu'une image de 40 Mo ou une vidéo montrent quelque chose en
+  // quelques Ko. L'asset est la zone que la coquille sait autoriser à l'import (grant) — la vignette
+  // du cache ffmpeg, elle, vit ailleurs et n'y est pas éligible.
+  async function collabPreview(srcPath) {
+    try {
+      const thumb = await thumbs.thumbnail(String(srcPath || ''), 1, 'high', { preset: 'light', format: 'jpeg' });
+      if (typeof thumb !== 'string') return { ok: false, error: String((thumb && thumb.error) || 'thumbnail failed') };
+      return saveAsset(await fs.promises.readFile(thumb), 'jpg');
     } catch (e) {
       return { ok: false, error: String(e) };
     }
@@ -367,6 +425,12 @@ function createReferenceStore(dataDir) {
         if (nested && nested.ref) into.add(path.resolve(String(nested.ref)).toLowerCase());
       }
     }
+    // Une scène COLLABORATIVE ne garde aucun item — le document Loro fait foi — et sa liste de
+    // localisateurs est alors la seule trace des fichiers locaux que le board affiche. Sans elle,
+    // le ménage ci-dessous emporterait les médias d'un board partagé.
+    for (const value of Array.isArray(scene && scene.media) ? scene.media : []) {
+      if (value) into.add(path.resolve(String(value)).toLowerCase());
+    }
     return into;
   }
 
@@ -408,9 +472,10 @@ function createReferenceStore(dataDir) {
   }
 
   return {
-    kind, listScenes, loadScene, saveScene, deleteScene, saveAsset, fetchAsset, resolveMedia,
+    kind, listScenes, loadScene, saveScene, deleteScene, saveAsset, collabPreview, fetchAsset,
+    resolveMedia,
     storagePath: () => dir,
-    assetsDir, assetPath, isAppAsset, removeAsset, sweepAssets,
+    assetsDir, assetPath, isAppAsset, removeAsset, sweepAssets, sceneRefs,
   };
 }
 

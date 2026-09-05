@@ -2,10 +2,11 @@
 // Chargée via le hash #reference (App route dessus). Sans cadre (frameless) → la barre d'outils
 // sert de zone de déplacement. Au montage, reprend le board figé par le handoff de la fenêtre mère.
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Pin, PinOff, Minimize2 } from "lucide-react";
 import { nr } from "@/lib/bridge";
+import { convexConfigured } from "@/lib/convexEnv";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { BoardContextMenu } from "./BoardMenu";
@@ -24,6 +25,10 @@ import { useReferencePush } from "./useReferencePush";
 import { useAutosave } from "./useAutosave";
 import { useUnsavedWarning } from "./useUnsavedWarning";
 import { useDeselectOnBlur } from "./useAppFocus";
+
+const CollabHost = lazy(() =>
+  import("./CollabHost").then((module) => ({ default: module.CollabHost })),
+);
 
 // Fenêtre frameless : bande mince = zone de déplacement (sinon la fenêtre sans cadre ne bouge plus).
 // Au survol, la bande révèle deux icônes (épingler, rattacher) ; la bande reste déplaçable, seules
@@ -71,6 +76,11 @@ export function ReferenceWindow() {
   return (
     <TooltipProvider delay={600}>
       <div className="nr-shell-bg relative flex h-screen flex-col overflow-hidden bg-[var(--color-bg)]">
+        {convexConfigured && (
+          <Suspense fallback={null}>
+            <CollabHost />
+          </Suspense>
+        )}
         {/* Bande de déplacement (frameless). Poignée toujours visible ; au survol, deux icônes
             apparaissent (épingler / rattacher). La bande reste déplaçable, seules les icônes non. */}
         <div className="nr-chrome-page group flex h-6 shrink-0 items-center px-2" style={DRAG}>

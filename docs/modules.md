@@ -45,6 +45,7 @@ Infinite canvas (pan/zoom) where images, local videos and YouTube videos are lai
 - **Right-click covers everything** (`BoardMenu.tsx`): `onContextMenuCapture` selects the item under the cursor (or deselects on empty space) **before** the menu opens, so the menu is adaptive — item actions when an item is targeted, then always the board actions.
 - **Tooltips**: every icon button goes through the custom `Tooltip` wrapper; native `title=` is never used. Colour pickers are wrapped in a `TooltipTrigger render={<span/>}` so the picker's own popover trigger stays inside.
 - Media elements are `display:block` (`<video>`, `<img>`, YouTube iframe) to avoid the thin horizontal line from inline baseline gaps during playback.
+- **Sharing** (`docs/collab.md`): the board is the first collaborative *surface*. `Share ▸ Collaborate` publishes the scene as a shared document; from then on the Zustand board is a RENDER CACHE and the native Loro document is authoritative — `useCollabBridge` coalesces local edits over 150 ms, holds an incoming projection while a gesture is pending, and drops a batch whose project is no longer the board's (the diff would otherwise delete the whole document on the way out). A shared media is a `collab:<hash>`, not a path: `isCoreFileRef` guards every route that hands a locator to the core (upscale, frame extraction, palette, poster, image export), and the actions it cannot serve are withheld at their ENTRY POINT rather than refused at the end of their chain.
 
 ## Cut flow (`src/components/rushes/`)
 

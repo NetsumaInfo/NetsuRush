@@ -7,13 +7,13 @@
 // `compact` is the pinned version, which also picks its edge. Pin, detach and reattach are never
 // part of it: they are the way out of the format.
 
-import { useState, type RefObject } from "react";
+import { lazy, Suspense, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ImagePlus, Type, Frame, Pencil, Clapperboard, ZoomIn, ZoomOut, Maximize, FilePlus2,
   Save, SaveAll, FileCheck2, FolderOpen, Share2, PictureInPicture2, Minimize2, Pin, PinOff, Play, Pause,
   Settings2, Home, Undo2, Redo2, RotateCw, Magnet, Package, ImageDown, SwatchBook,
-  MousePointer2, MousePointerBan, Pipette, LayoutGrid,
+  MousePointer2, MousePointerBan, Pipette, LayoutGrid, Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,20 @@ import {
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { convexConfigured } from "@/lib/convexEnv";
 import { useBoard } from "./useReferenceBoard";
+
+// LAZY, et montés seulement quand ils servent : ces deux-là tirent `convex/react`, qui ne doit
+// pas entrer dans le bundle d'entrée d'une app qui s'ouvre sans backend — et leurs hooks
+// lèveraient hors du provider Convex, absent quand aucun déploiement n'est configuré.
+const BoardCollabStatus = lazy(() =>
+  import("./BoardCollabStatus").then((module) => ({ default: module.BoardCollabStatus })),
+);
+const BoardCollaborationDialog = lazy(() =>
+  import("./BoardCollaborationDialog").then((module) => ({
+    default: module.BoardCollaborationDialog,
+  })),
+);
 import { fileLabel } from "./useScenePersistence";
 import { recoverAllOnlineMedia, recoverableOnlineItems } from "./boardMediaActions";
 import { ExportImageDialog } from "./ExportImageDialog";
@@ -95,7 +108,7 @@ export function Toolbar({
   compact?: boolean;   // fenêtre épinglée : outils de planche seulement, le document reste au clic droit
   className?: string;
 }) {
-  const { t } = useTranslation("reference");
+  const { t } = useTranslation(["reference", "collab"]);
   const sceneName = useBoard((s) => s.sceneName);
   const filePath = useBoard((s) => s.filePath);
   const dirty = useBoard((s) => s.dirty);
@@ -112,6 +125,7 @@ export function Toolbar({
   const canRedo = useBoard((s) => s.future.length > 0);
   const [recovering, setRecovering] = useState(false);
   const [imgExport, setImgExport] = useState(false);
+  const [collab, setCollab] = useState(false);
   const mouseThrough = useBoard((s) => s.mouseThrough);
   const prefs = useBoard((s) => s.prefs);
   const askOpen = useBoard((s) => s.mouseThroughAsk);
@@ -120,6 +134,8 @@ export function Toolbar({
   const recoverableCount = recoverableOnlineItems(items).length;
   const hasItems = items.some((i) => i.kind !== "draw");
   const snap = useBoard((s) => s.prefs.snap);
+  const readOnly = useBoard((s) => s.collabProjectId !== null && s.collabRole === "viewer");
+  const shared = useBoard((s) => s.collabProjectId !== null);
   const setPrefs = useBoard((s) => s.setPrefs);
 
   // Choisir un autre outil/ajout quitte le mode dessin (revient au curseur normal).
@@ -215,6 +231,15 @@ export function Toolbar({
           <DropdownMenuItem disabled={!hasItems} onClick={() => setImgExport(true)}>
             <ImageDown /> {t("exportImage.menu")}
           </DropdownMenuItem>
+          {/* Partager À QUELQU'UN, et non un fichier : le board devient collaboratif et les
+              personnes choisies reçoivent une invitation dans leur application. Sans déploiement
+              Convex il n'y a ni compte ni liste : l'entrée disparaît plutôt que de mener à une
+              impasse. */}
+          {convexConfigured && (
+            <DropdownMenuItem onClick={() => setCollab(true)}>
+              <Users /> {t("collab:dialog.title")}
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -239,6 +264,11 @@ export function Toolbar({
   const dialogs = (
     <>
       <ExportImageDialog open={imgExport} onOpenChange={setImgExport} />
+      {collab && (
+        <Suspense fallback={null}>
+          <BoardCollaborationDialog open onOpenChange={setCollab} />
+        </Suspense>
+      )}
       <MouseThroughDialog open={askOpen} onOpenChange={setAskOpen} />
     </>
   );
@@ -314,6 +344,14 @@ export function Toolbar({
           <span className="truncate font-medium text-foreground">{sceneName}</span>
         )}
         {dirty && <span className="size-1.5 shrink-0 rounded-full bg-primary" aria-label={t("toolbar.unsaved")} />}
+        {/* Board partagé : qui est là et ce qui reste à faire, sous une pastille. Elle remplace les
+            mentions en texte, qui disaient l'état sans jamais dire QUI ni quoi faire. */}
+        {shared && convexConfigured && (
+          <Suspense fallback={null}>
+            <BoardCollabStatus />
+          </Suspense>
+        )}
+        {readOnly && <span className="shrink-0">· {t("collab:projects.role.viewer")}</span>}
         {notice && (
           <span className={cn("truncate", notice.kind === "error" ? "text-destructive" : "text-[var(--color-ok)]")}>
             · {notice.text}

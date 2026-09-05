@@ -547,7 +547,20 @@
     "deleteProject": "彻底删除",
     "deleteProjectTitle": "删除“{{name}}”？",
     "deleteProjectWarning": ".netsu 文件及其 .medias 文件夹将被永久删除。外部源媒体不会被删除。",
-    "projectMissing": "找不到文件"
+    "projectMissing": "找不到文件",
+    "sharedBoard": "已共享",
+    "cardStatus": {
+      "key": "待发密钥",
+      "media": "待发媒体",
+      "changed": "有改动"
+    },
+    "invites": {
+      "body": "邀请你加入共享看板",
+      "join": "加入",
+      "decline": "拒绝",
+      "later": "稍后",
+      "failed": "无法加入此看板"
+    }
   },
   "item": {
     "doubleClickEdit": "双击编辑…",
@@ -560,7 +573,10 @@
     "mediaFallback": "媒体",
     "interactiveActive": "交互中 — 点击别处可移动",
     "interactiveHint": "双击进入交互",
-    "relocateAll": "全部重新定位（{{count}}）"
+    "relocateAll": "全部重新定位（{{count}}）",
+    "mediaWaiting": "正在等待拥有此媒体的设备",
+    "mediaRemoved": "媒体已从项目中移除",
+    "retryMedia": "重试"
   },
   "sequence": {
     "loop": "循环",
@@ -782,5 +798,8 @@
     "off": "收回鼠标",
     "warning": "点击和滚轮将传给下方应用，窗口保持在最前。要收回：重新让它获得焦点（Alt+Tab）。",
     "dontAskAgain": "不再询问"
+  },
+  "collab": {
+    "saveAsBlocked": "协作项目仍由共享场景管理。请使用导出来创建本地副本。"
   }
 }

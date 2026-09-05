@@ -4,6 +4,7 @@
 
 import { create } from "zustand";
 import i18n from "@/i18n";
+import type { MemberPresence } from "@/lib/collab/client";
 import {
   type BoardItem,
   type BoardView,
@@ -70,6 +71,14 @@ export interface BoardState {
   // finiraient par diverger. `null` = board de travail anonyme (autosave, comportement d'origine).
   filePath: string | null;
   fileReadonly: boolean;       // archive .netsu v1 : lisible, pas enregistrable en place
+  collabProjectId: string | null;
+  collabRole: "owner" | "editor" | "viewer" | null;
+  collabKeyEpoch: number;
+  collabRotationRequired: boolean;
+  collabPeerCandidates: number;
+  collabOfflineQueued: boolean;
+  // Présence OBSERVÉE des autres membres (cf. service.rs#member_presence). Vide hors board partagé.
+  collabMembers: MemberPresence[];
   items: BoardItem[];
   // Frame VIVANTE des séquences en lecture, hors du document. Elle vivait dans `items`, donc chaque
   // frame de chaque séquence recréait le tableau ENTIER : sur un board de plusieurs centaines de
@@ -252,11 +261,22 @@ function reconcile(items: BoardItem[], s: BoardState) {
   return { selectedIds, selectedId, editingId, croppingId, drawSel };
 }
 
+function isReadOnlyCollaborator(state: Pick<BoardState, "collabProjectId" | "collabRole">): boolean {
+  return state.collabProjectId !== null && state.collabRole === "viewer";
+}
+
 export const useBoard = create<BoardState>((set, get) => ({
   sceneId: null,
   sceneName: i18n.t("reference:scene.untitled"),
   filePath: null,
   fileReadonly: false,
+  collabProjectId: null,
+  collabRole: null,
+  collabKeyEpoch: 0,
+  collabRotationRequired: false,
+  collabPeerCandidates: 0,
+  collabOfflineQueued: false,
+  collabMembers: [],
   items: [],
   view: INITIAL_VIEW,
   background: readBg(),
@@ -286,6 +306,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   notice: null,
 
   addItem: (item) => {
+    if (isReadOnlyCollaborator(get())) return "";
     const id = item.id ?? uid();
     const z = item.z ?? (topZ(get().items) + 1);
     set((s) => {
@@ -303,6 +324,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   updateItem: (id, geom, record = true) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       // Geste (déplacer/redimensionner/pivoter) : 1 commit au pointerup → 1 entrée discrète.
       if (record) recordHistory(s.items, null);
       return {
@@ -313,6 +335,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   patchItem: (id, patch, record = true) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       // Tag = item + champs modifiés → les rafales (drag de couleur, frappe d'une note) se coalescent
       // en une seule entrée d'annulation ; les actions discrètes (clics distincts) restent séparées.
       if (record) recordHistory(s.items, `patch:${id}:${Object.keys(patch).sort().join(",")}`);
@@ -324,6 +347,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   removeItem: (id) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       recordHistory(s.items, null);
       return {
         items: s.items.filter((it) => it.id !== id),
@@ -335,6 +359,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   removeSelected: () =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const kill = new Set(s.selectedIds);
       recordHistory(s.items, null);
       return {
@@ -348,6 +373,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // Duplique un item (décalé) et le sélectionne. Le calque de dessin (singleton) n'est pas dupliqué.
   duplicateItem: (id) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const src = s.items.find((it) => it.id === id);
       if (!src || src.kind === "draw") return {};
       recordHistory(s.items, null);
@@ -367,6 +393,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // — sans quoi elle masquerait la valeur du document au rendu suivant.
   commitSeqFrame: (id, frame) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const { [id]: _live, ...rest } = s.seqFrames;
       return {
         seqFrames: rest,
@@ -378,6 +405,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // La séquence prend la géométrie du 1er item ; les sources sont retirées.
   groupSequence: (ids) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const picked = s.items.filter((it) => ids.includes(it.id) && it.kind === "image");
       if (picked.length < 2) return {};
       const ordered = [...picked].sort((a, b) => a.x - b.x || a.y - b.y);
@@ -406,6 +434,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // mode de lecture, rognage) sont effacés. Sans source → ajout d'un nouvel item (repli).
   addSequenceFrom: (sourceId, frames, dims, fps) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const fr = (frames || []).filter(Boolean);
       if (!fr.length) return {};
       recordHistory(s.items, null);
@@ -472,6 +501,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   moveBy: (ids, dx, dy, record = true, tag) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const move = new Set(ids);
       if (record) recordHistory(s.items, tag ?? null);
       return {
@@ -488,6 +518,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // sinon « ranger » coûterait deux Ctrl+Z pour un seul geste utilisateur.
   tidy: ({ layout, uniform, gap, sort, base, tag }) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       if (s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw").length < 2) return {};
       recordHistory(s.items, tag ?? null);
 
@@ -519,6 +550,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   normalize: (mode) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const sel = s.items.filter((it) => s.selectedIds.includes(it.id) && it.kind !== "draw");
       const size = computeNormalize(sel, mode);
       if (!size.size) return {};
@@ -534,6 +566,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // puisque notre rognage est exprimé en fractions du média et déforme donc la boîte affichée.
   reset: (kind) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const ids = new Set(s.selectedIds);
       if (!ids.size) return {};
       const all = kind === "all";
@@ -564,6 +597,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   patchSelected: (patch, tag) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const ids = new Set(s.selectedIds);
       if (!ids.size) return {};
       recordHistory(s.items, tag ?? null);
@@ -574,6 +608,7 @@ export const useBoard = create<BoardState>((set, get) => ({
     }),
 
   addItems: (list, select = true) => {
+    if (isReadOnlyCollaborator(get())) return [];
     if (!list.length) return [];
     const ids: string[] = [];
     set((s) => {
@@ -602,6 +637,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   },
 
   cutSelection: () => {
+    if (isReadOnlyCollaborator(get())) return 0;
     const n = get().copySelection();
     if (n) get().removeSelected();
     return n;
@@ -610,6 +646,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // Colle le presse-papiers interne en gardant les positions RELATIVES du groupe copié, recentré
   // sur le point demandé (curseur). Les items collés deviennent la sélection.
   pasteClipboard: (x, y) => {
+    if (isReadOnlyCollaborator(get())) return 0;
     if (!internalClipboard.length) return 0;
     const src = internalClipboard;
     const minX = Math.min(...src.map((it) => it.x));
@@ -624,6 +661,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   bringSelectedToFront: () =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const ids = new Set(s.selectedIds);
       if (!ids.size) return {};
       recordHistory(s.items, null);
@@ -633,6 +671,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   sendSelectedToBack: () =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       const ids = new Set(s.selectedIds);
       if (!ids.size) return {};
       recordHistory(s.items, null);
@@ -640,11 +679,22 @@ export const useBoard = create<BoardState>((set, get) => ({
       return { items: s.items.map((it) => (ids.has(it.id) ? { ...it, z: --z } : it)), dirty: true };
     }),
 
-  setEditing: (id) => { resetCoalesce(); set({ editingId: id }); },
+  setEditing: (id) => {
+    if (id && isReadOnlyCollaborator(get())) return;
+    resetCoalesce();
+    set({ editingId: id });
+  },
   // Demande de centrage/zoom sur un item (double-clic) ; le board la consomme puis remet à null.
   requestFocus: (id) => set({ focusReq: id }),
-  setCropping: (id) => { resetCoalesce(); set({ croppingId: id }); },
-  setStudio: (studio) => set({ studio }),
+  setCropping: (id) => {
+    if (id && isReadOnlyCollaborator(get())) return;
+    resetCoalesce();
+    set({ croppingId: id });
+  },
+  setStudio: (studio) => {
+    if (studio && isReadOnlyCollaborator(get())) return;
+    set({ studio });
+  },
   setMouseThrough: (on) => set({ mouseThrough: on }),
   setMouseThroughAsk: (on) => set({ mouseThroughAsk: on }),
   toggleFrozen: () => set((s) => ({ frozen: !s.frozen })),
@@ -654,6 +704,7 @@ export const useBoard = create<BoardState>((set, get) => ({
     return { navigationHolds, navigating: navigationHolds > 0 };
   }),
   setDrawMode: (on) => {
+    if (on && isReadOnlyCollaborator(get())) return;
     resetCoalesce();
     set((s) => ({
       drawMode: on, selectedId: null, selectedIds: [], editingId: null, drawSel: null,
@@ -661,7 +712,10 @@ export const useBoard = create<BoardState>((set, get) => ({
       pen: on && s.pen.tool === "select" ? { ...s.pen, tool: "pen" } : s.pen,
     }));
   },
-  setDrawBack: (back) => set({ drawBack: back, dirty: true }),
+  setDrawBack: (back) => {
+    if (isReadOnlyCollaborator(get())) return;
+    set({ drawBack: back, dirty: true });
+  },
   setPen: (p) => set((s) => ({ pen: { ...s.pen, ...p } })),
 
   // Sélectionne une forme de dessin (handles + inspecteur) → vide la sélection d'items.
@@ -671,6 +725,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // dans l'historique UNIFIÉ — passé à false pour les mises à jour live (drag du stylo, etc.).
   drawSetShapes: (next, record = true, tag) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       if (record) recordHistory(s.items, tag ?? null);
       const item = s.items.find((i) => i.kind === "draw");
       const items = item
@@ -683,6 +738,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   // séquences ET dessin). La sélection est recalée sur le contenu restauré (références mortes retirées).
   undo: () =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       if (!s.past.length) return {};
       resetHistoryCtl();
       const prev = s.past[s.past.length - 1];
@@ -697,6 +753,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   redo: () =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       if (!s.future.length) return {};
       resetHistoryCtl();
       const next = s.future[s.future.length - 1];
@@ -747,6 +804,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   bringToFront: (id) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       recordHistory(s.items, null);
       const top = topZ(s.items);
       return { items: s.items.map((it) => (it.id === id ? { ...it, z: top + 1 } : it)), dirty: true };
@@ -754,6 +812,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   sendToBack: (id) =>
     set((s) => {
+      if (isReadOnlyCollaborator(s)) return {};
       recordHistory(s.items, null);
       const bottom = bottomZ(s.items);
       return { items: s.items.map((it) => (it.id === id ? { ...it, z: bottom - 1 } : it)), dirty: true };
@@ -782,6 +841,13 @@ export const useBoard = create<BoardState>((set, get) => ({
       sceneName: scene.name,
       filePath: scene.filePath ?? null,
       fileReadonly: !!scene.fileReadonly,
+      collabProjectId: scene.collaboration?.projectId ?? null,
+      collabRole: null,
+      collabKeyEpoch: 0,
+      collabRotationRequired: false,
+      collabPeerCandidates: 0,
+      collabMembers: [],
+      collabOfflineQueued: false,
       items: scene.items,
       seqFrames: {},   // positions vivantes de la scène précédente : jamais reportées sur la nouvelle
       view: scene.view ?? INITIAL_VIEW,
@@ -801,7 +867,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   newScene: (name = i18n.t("reference:scene.untitled")) => {
     resetHistoryCtl();
-    set({ sceneId: null, sceneName: name, filePath: null, fileReadonly: false, items: [], view: INITIAL_VIEW, selectedId: null, selectedIds: [], editingId: null, croppingId: null, studio: null, drawMode: false, drawBack: false, drawSel: null, past: [], future: [], dirty: false });
+    set({ sceneId: null, sceneName: name, filePath: null, fileReadonly: false, collabProjectId: null, collabRole: null, collabKeyEpoch: 0, collabRotationRequired: false, collabPeerCandidates: 0, collabOfflineQueued: false, items: [], view: INITIAL_VIEW, selectedId: null, selectedIds: [], editingId: null, croppingId: null, studio: null, drawMode: false, drawBack: false, drawSel: null, past: [], future: [], dirty: false });
   },
 
   clearDirty: () => set({ dirty: false }),

@@ -3,7 +3,8 @@
 // localisateur durable `ref` (un objectURL persisté serait mort après un reload).
 
 import { useCallback } from "react";
-import { nr, type NetsuExportOpts, type NetsuWeight } from "@/lib/bridge";
+import { nr, type NetsuExportOpts, type NetsuWeight, type ScenePreviewItem } from "@/lib/bridge";
+import { withLocalMediaPaths } from "@/lib/collab/board/media";
 import i18n from "@/i18n";
 import { useBoard } from "./useReferenceBoard";
 import { type BoardItem, type BoardView, displaySrc } from "./referenceShared";
@@ -45,7 +46,7 @@ const exportable = (items: BoardItem[]) =>
 function retainedRefs(): string[] {
   const st = useBoard.getState();
   const out = new Set<string>();
-  const add = (ref?: string) => { if (ref && !/^(https?:|data:|blob:)/i.test(ref)) out.add(ref); };
+  const add = (ref?: string) => { if (ref && !/^(https?:|data:|blob:|collab:)/i.test(ref)) out.add(ref); };
   for (const snapshot of [...st.past, ...st.future, st.items]) {
     for (const item of snapshot) {
       add(item.ref);
@@ -56,6 +57,112 @@ function retainedRefs(): string[] {
   }
   return [...out];
 }
+
+// ── Scène collaborative ─────────────────────────────────────────────────────────────────────────
+// Une scène partagée ne persiste AUCUN item : le document Loro fait foi, et une seconde copie
+// modifiable les ferait diverger. Elle garde en revanche deux choses que le document ne peut pas
+// porter — la liste des localisateurs de ses médias locaux, contre laquelle la coquille autorise
+// un import, et une disposition en lecture seule pour sa vignette d'accueil.
+
+// Dernière liste écrite pour la scène collaborative ouverte : un board inchangé ne réécrit pas sa
+// ligne à chaque geste.
+let lastCollabMedia: string[] = [];
+let lastCollabPreview = "";
+let collabPreviewTimer: number | null = null;
+
+/** Oublie la liste de la scène précédemment ouverte. */
+export function resetCollabMediaSync(): void {
+  lastCollabMedia = [];
+  lastCollabPreview = "";
+  if (collabPreviewTimer !== null) {
+    window.clearTimeout(collabPreviewTimer);
+    collabPreviewTimer = null;
+  }
+}
+
+// Ligne de bibliothèque créée par une adoption pas encore validée. Le partage peut échouer pour
+// bien des raisons et l'utilisateur réessaie ; sans ça, chaque tentative laissait un board
+// identique de plus sur l'accueil.
+let pendingAdoption: string | null = null;
+
+// Disposition d'un board collaboratif, pour sa seule vignette d'accueil.
+function collabPreview(): ScenePreviewItem[] {
+  return useBoard.getState().items
+    .filter((item) => item.w > 0 && item.h > 0)
+    .sort((left, right) => (left.z ?? 0) - (right.z ?? 0))
+    .slice(0, 40)
+    .map((item) => ({
+      id: item.id,
+      kind: item.kind,
+      x: item.x,
+      y: item.y,
+      w: item.w,
+      h: item.h,
+      z: item.z ?? 0,
+      rotation: item.rotation ?? 0,
+      ...(/^https?:\/\//i.test(item.ref || "") ? { ref: item.ref } : null),
+    }));
+}
+
+/**
+ * Réécrit la liste des localisateurs de la scène collaborative ouverte. C'est la seule chose qui
+ * permette à la coquille d'autoriser l'import d'un fichier local dans un board partagé, et elle
+ * doit être sur le disque AVANT que les médias du lot ne partent à l'importeur — d'où sa place hors
+ * du hook : le pont collaboratif l'appelle directement.
+ */
+export async function syncCollabMedia(force = false): Promise<void> {
+  const state = useBoard.getState();
+  if (!state.collabProjectId || !state.sceneId) return;
+  const media = retainedRefs();
+  const preview = collabPreview();
+  const signature = JSON.stringify(preview);
+  const mediaChanged = media.length !== lastCollabMedia.length
+    || media.some((ref, index) => ref !== lastCollabMedia[index]);
+  if (!mediaChanged && signature === lastCollabPreview) return;
+  // Seule la LISTE doit être sur disque avant le départ du lot — c'est elle qui autorise l'import.
+  // La disposition n'existe que pour la vignette : réécrire la ligne à chaque vidage de 150 ms d'un
+  // glissé faisait une écriture SQLite par pause du pointeur. Un changement de disposition seul
+  // attend donc que le board se taise un instant.
+  if (!mediaChanged && !force) {
+    if (collabPreviewTimer === null) {
+      collabPreviewTimer = window.setTimeout(() => {
+        collabPreviewTimer = null;
+        void syncCollabMedia(true);
+      }, 2000);
+    }
+    return;
+  }
+  if (collabPreviewTimer !== null) {
+    window.clearTimeout(collabPreviewTimer);
+    collabPreviewTimer = null;
+  }
+  const result = await nr.reference?.saveScene({
+    id: state.sceneId,
+    name: state.sceneName,
+    items: [],
+    view: state.view,
+    collaboration: { projectId: state.collabProjectId },
+    media,
+    preview,
+  });
+  if (result?.ok) {
+    lastCollabMedia = media;
+    lastCollabPreview = signature;
+  }
+}
+
+const collaboration = () => {
+  const projectId = useBoard.getState().collabProjectId;
+  return projectId ? { projectId } : null;
+};
+
+// Une scène collaborative persiste son lien et sa vue, jamais une seconde copie modifiable du
+// board. À la réouverture, la projection native remplace le cache vide — y compris quand le projet
+// lui-même est vide.
+const sceneItems = () => {
+  const state = useBoard.getState();
+  return state.collabProjectId ? [] : persistable(state.items);
+};
 
 // Scène telle qu'elle part au core pour un ENREGISTREMENT (par opposition à un partage).
 // `adoptLocal` porte la politique de copie des médias locaux dans le dossier compagnon : c'est le
@@ -127,6 +234,13 @@ export function useScenePersistence() {
   // interne est détachée (`sceneId: null`) — le fichier fait foi, garder les deux les ferait diverger.
   const saveProjectAs = useCallback(async () => {
     const st = useBoard.getState();
+    // Un projet collaboratif reste piloté par sa scène partagée : dupliquer son id sans définir un
+    // second projet créerait deux noms locaux pour une seule vérité distante. L'export reste ouvert.
+    if (st.collabProjectId) {
+      const error = tr("collab.saveAsBlocked");
+      flash(error, "error");
+      return { ok: false, error };
+    }
     const dest = await api?.saveNetsuPath(`${st.sceneName || "board"}.netsu`);
     if (!dest) return null; // annulé
     const projectName = fileLabel(dest);
@@ -194,8 +308,9 @@ export function useScenePersistence() {
         const res = await api?.saveScene({
           id: st.sceneId ?? undefined,
           name: finalName,
-          items: persistable(st.items),
+          items: sceneItems(),
           view: st.view,
+          collaboration: collaboration(),
         });
         if (res?.ok) {
           useBoard.setState({ sceneId: res.id ?? st.sceneId, sceneName: finalName, dirty: false });
@@ -290,7 +405,8 @@ export function useScenePersistence() {
     async (opts: NetsuExportOpts): Promise<NetsuWeight> => {
       const st = useBoard.getState();
       if (!api?.weigh) return { ok: false };
-      return api.weigh({ name: st.sceneName, items: exportable(st.items), view: st.view }, opts);
+      const items = await withLocalMediaPaths(exportable(st.items));
+      return api.weigh({ name: st.sceneName, items, view: st.view }, opts);
     },
     [api],
   );
@@ -302,7 +418,11 @@ export function useScenePersistence() {
       const dest = await api?.saveNetsuPath(`${st.sceneName || "board"}.netsu`);
       if (!dest) return null; // annulé
       try {
-        const res = await api?.exportBoard({ name: st.sceneName, items: exportable(st.items), view: st.view }, dest, opts);
+        // Un board PARTAGÉ désigne ses médias par empreinte : le core, qui ne connaît que des
+        // fichiers, écrivait alors un .netsu entièrement fait de placeholders en annonçant un
+        // export réussi. Leurs octets sont bien sur ce disque — on lui en donne le chemin.
+        const items = await withLocalMediaPaths(exportable(st.items));
+        const res = await api?.exportBoard({ name: st.sceneName, items, view: st.view }, dest, opts);
         if (res?.ok) {
           const c = res.counts;
           flash(c ? tr("notice.exported", { bundled: c.bundled, referenced: c.referenced }) : tr("notice.boardExported"), "ok");
@@ -360,9 +480,94 @@ export function useScenePersistence() {
     useBoard.setState({ sceneId: null, dirty: false });
   }, [open]);
 
+  /**
+   * Fait entrer dans la bibliothèque un board ouvert depuis un fichier, pour qu'il puisse devenir
+   * collaboratif. « Enregistrer sous » fait du `.netsu` le document de travail, et un projet
+   * partagé ne peut pas avoir deux autorités sur le même board — mais c'est une raison de
+   * CONVERTIR, pas de refuser. Le fichier reste sur le disque, en export figé.
+   *
+   * Sans effet quand le board vit déjà dans la bibliothèque.
+   */
+  const adoptIntoLibrary = useCallback(async () => {
+    const state = useBoard.getState();
+    // La coquille autorise l'import d'un média en lisant la scène TELLE QU'ELLE EST STOCKÉE : un
+    // fichier que le board affiche mais que la scène enregistrée ne mentionne pas est refusé, et
+    // l'item part alors amputé de son média. Tout board est donc écrit avant d'être partagé — pas
+    // seulement ceux qu'on convertit — pour que le disque porte exactement ce qui est publié.
+    const fresh = state.filePath !== null || state.sceneId === null;
+    const result = await api?.saveScene({
+      id: fresh ? pendingAdoption ?? undefined : state.sceneId ?? undefined,
+      name: state.sceneName,
+      items: sceneItems(),
+      view: state.view,
+    });
+    if (!result?.ok || !result.id) throw new Error(result?.error || tr("notice.saveFailed"));
+    // Seule une ligne créée par cet appel peut être retirée si le partage échoue ensuite.
+    if (!fresh) return { sceneId: result.id, adopted: false as const };
+    pendingAdoption = result.id;
+    // Le board n'est PAS détaché de son fichier ici : le partage peut encore échouer, et un board à
+    // demi converti — copie créée, fichier oublié — laisserait l'utilisateur entre deux documents.
+    return { sceneId: result.id, adopted: true as const };
+  }, [api]);
+
+  /** Détache le board de son `.netsu` une fois le partage réellement abouti. */
+  const completeAdoption = useCallback((sceneId: string) => {
+    pendingAdoption = null;
+    const { filePath } = useBoard.getState();
+    // Le fichier reste sur le disque en export figé, mais sans ce lien sa carte « récents » et la
+    // scène partagée sont deux boards sans rapport sur l'accueil — et la carte fichier, la plus
+    // reconnaissable, est la mauvaise à éditer.
+    if (filePath) void api?.linkSource(filePath, sceneId).catch(() => undefined);
+    useBoard.setState({ sceneId, filePath: null, fileReadonly: false, dirty: false });
+  }, [api]);
+
+  /** Remet le board où il était quand une adoption n'a pas pu aboutir. */
+  const abortAdoption = useCallback(async (before: { sceneId: string | null; filePath: string | null }) => {
+    if (pendingAdoption) {
+      await api?.deleteScene(pendingAdoption).catch(() => undefined);
+      pendingAdoption = null;
+    }
+    useBoard.setState({ sceneId: before.sceneId, filePath: before.filePath, collabProjectId: null });
+  }, [api]);
+
+  /** Lie le projet collaboratif à la scène : c'est ce qui rend le board partagé sur cette machine. */
+  const bindCollaboration = useCallback(async (projectId: string) => {
+    const state = useBoard.getState();
+    if (state.filePath) {
+      throw new Error("A file-backed board must be imported into the scene library before sharing");
+    }
+    const result = await api?.saveScene({
+      id: state.sceneId ?? undefined,
+      name: state.sceneName,
+      items: [],
+      view: state.view,
+      collaboration: { projectId },
+      media: retainedRefs(),
+      preview: collabPreview(),
+    });
+    lastCollabMedia = [];
+    lastCollabPreview = "";
+    pendingAdoption = null;
+    if (!result?.ok || !result.id) {
+      throw new Error(result?.error || "Could not bind the collaborative project to this scene");
+    }
+    useBoard.setState({
+      sceneId: result.id,
+      collabProjectId: projectId,
+      collabRole: null,
+      collabKeyEpoch: 0,
+      collabRotationRequired: false,
+      collabPeerCandidates: 0,
+      collabOfflineQueued: false,
+      dirty: false,
+    });
+    return result.id;
+  }, [api]);
+
   return {
     save, open, list, remove, handoff, loadHandoff, saveAuto, loadAuto, weigh, exportBoard, importBoard,
     saveProject, saveProjectAs, openProject, recentProjects, forgetProject,
+    bindCollaboration, adoptIntoLibrary, completeAdoption, abortAdoption,
     available: !!api,
   };
 }

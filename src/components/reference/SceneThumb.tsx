@@ -30,7 +30,8 @@ function BoardThumb({ items }: { items: BoardItem[] | null }) {
     let alive = true;
     // Vignettes des vidéos locales (chemin disque) — milieu du clip, cache du process principal.
     for (const it of items) {
-      if (it.kind !== "video" || /^(https?:|blob:)/i.test(it.ref)) continue;
+      // `collab:` n'est pas un chemin : le core ne peut pas en tirer de vignette.
+      if (it.kind !== "video" || !it.ref || /^(https?:|blob:|collab:)/i.test(it.ref)) continue;
       void nr.thumbnail(it.ref).then((r) => {
         if (alive && typeof r === "string") setVideoThumbs((m) => ({ ...m, [it.id]: nr.mediaUrl(r) }));
       });

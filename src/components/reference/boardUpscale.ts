@@ -8,7 +8,7 @@ import { nr } from "@/lib/bridge";
 import type { ShaderModel, UpscaleModel } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { boardUpEngine, isRtxShader, UP_MODELS } from "@/components/upscale/upscaleShared";
-import { displaySrc, isRemoteRef, type BoardItem } from "./referenceShared";
+import { displaySrc, isCollabRef, isRemoteRef, type BoardItem } from "./referenceShared";
 import type { BoardPrefs } from "./boardPrefs";
 import { useBoard } from "./useReferenceBoard";
 
@@ -59,6 +59,9 @@ export function previewFrameTime(item: Pick<BoardItem, "trimIn" | "trimOut" | "d
 // L'upscale exige un fichier LOCAL. Un média distant/extrait (ref http) est d'abord résolu
 // (resolveMedia, repli extractMedia). Un ref local est renvoyé tel quel.
 export async function ensureLocalMedia(ref: string): Promise<string | null> {
+  // Un média de board partagé n'existe pas comme fichier pour le core : le renvoyer tel quel lui
+  // ferait ouvrir un chemin nommé « collab:… ».
+  if (isCollabRef(ref)) return null;
   if (!isRemoteRef(ref)) return ref;
   const api = nr.reference;
   if (!api) return null;

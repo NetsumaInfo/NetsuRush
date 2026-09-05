@@ -163,6 +163,101 @@ export async function recoverMedia(id: string): Promise<boolean> {
   }
 }
 
+// Soin AUTOMATIQUE des chemins morts : un board converti garde des chemins absolus vers un dossier
+// compagnon qui a pu bouger ou disparaître — mais le nom du fichier porte son empreinte de contenu,
+// et les mêmes octets vivent souvent encore ailleurs (magasin d'assets, compagnon d'un autre
+// projet). Le core les retrouve sans lire un octet ; ici on ne fait qu'appliquer les nouveaux
+// chemins. Silencieux et sans dialogue : rien à demander à l'utilisateur, ses médias sont là.
+function collectLocalRefs(items: ReturnType<typeof useBoard.getState>["items"]): string[] {
+  const refs: string[] = [];
+  const add = (ref?: string) => {
+    if (ref && !/^(https?:|data:|blob:|collab:)/i.test(ref)) refs.push(ref);
+  };
+  for (const item of items) {
+    if (item.kind === "youtube" || item.kind === "embed") continue;
+    add(item.ref);
+    item.frames?.forEach(add);
+    add(item.prevMedia?.ref);
+    add(item.localMedia?.ref);
+  }
+  return refs;
+}
+
+export async function healDeadMediaRefs(): Promise<number> {
+  const state = useBoard.getState();
+  const refs = collectLocalRefs(state.items);
+  if (!refs.length) return 0;
+  const result = await nr.reference?.locateMedia(refs, state.filePath || undefined);
+  const moves = result?.moves ?? {};
+  if (!Object.keys(moves).length) return 0;
+  let healed = 0;
+  for (const item of useBoard.getState().items) {
+    const ref = item.ref ? moves[item.ref] : undefined;
+    const frames = item.frames?.some((frame) => moves[frame])
+      ? item.frames.map((frame) => moves[frame] || frame)
+      : undefined;
+    const prev = item.prevMedia?.ref ? moves[item.prevMedia.ref] : undefined;
+    const local = item.localMedia?.ref ? moves[item.localMedia.ref] : undefined;
+    if (!ref && !frames && !prev && !local) continue;
+    healed += 1;
+    useBoard.getState().patchItem(item.id, {
+      ...(ref ? { ref, src: displaySrc(item.kind, ref), missing: undefined } : null),
+      ...(frames ? { frames } : null),
+      ...(prev && item.prevMedia ? { prevMedia: { ...item.prevMedia, ref: prev, src: "" } } : null),
+      ...(local && item.localMedia ? { localMedia: { ...item.localMedia, ref: local } } : null),
+    });
+  }
+  return healed;
+}
+
+// Préparation d'un PARTAGE : tout ce que la machine peut faire seule avant que la publication ne
+// juge. 1) les chemins morts dont les octets vivent ailleurs sont soignés ; 2) ce qui reste mort
+// mais garde un lien d'origine est retéléchargé (c'est le cas type : média copié d'un site, dossier
+// compagnon disparu depuis) ; 3) ce qui reste mort après ça est marqué manquant sur le board — la
+// carte placeholder et la relocalisation par dossier prennent le relais. Le partage lui-même reste
+// refusé tant qu'un média affiché n'est pas lisible : un board qui part amputé le reste pour tous.
+export async function prepareShareMedia(): Promise<void> {
+  await healDeadMediaRefs();
+  const state = useBoard.getState();
+  const refs = collectLocalRefs(state.items);
+  if (!refs.length) return;
+  const located = await nr.reference?.locateMedia(refs, state.filePath || undefined);
+  const dead = new Set(located?.dead ?? []);
+  if (!dead.size) return;
+
+  const recoverable = state.items.filter(
+    (item) => item.ref && dead.has(item.ref) && !!originalOnlineSource(item),
+  );
+  if (recoverable.length) {
+    await runSequentialRecovery(
+      recoverable,
+      (item) => recoverMedia(item.id),
+      (current, total) => {
+        useBoard.getState().setNotice({
+          kind: "ok",
+          sticky: true,
+          text: tr("notice.recoveringOnline", { current, total }),
+        });
+      },
+    );
+    useBoard.getState().setNotice(null);
+  }
+
+  // `recoverMedia` remplace le ref des items qu'il a rendus ; ceux qui portent encore un chemin
+  // mort n'ont plus aucun recours automatique. Le marquage rend visible QUI bloque, avec les
+  // gestes de récupération existants (relocaliser depuis un dossier, notamment).
+  for (const item of useBoard.getState().items) {
+    if (!item.ref || !dead.has(item.ref) || item.missing) continue;
+    useBoard.getState().patchItem(item.id, {
+      missing: {
+        name: item.ref.split(/[\\/]/).pop() || item.ref,
+        size: 0,
+        kind: item.kind,
+      },
+    });
+  }
+}
+
 // Items dont le média local est introuvable et qu'un dossier peut rendre d'un coup. Les séquences
 // en sont exclues : leur placeholder résume des dizaines de frames (« 12/30 images manquantes »),
 // il ne désigne aucun fichier — elles gardent la relocalisation par item, qui rechoisit les images.

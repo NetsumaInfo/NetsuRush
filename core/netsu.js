@@ -435,4 +435,5 @@ module.exports = {
   exportBoard, importBoard, weigh, zipStore, unzip,
   openProject, saveProject, saveProjectAs, closeProject, closeAllProjects,
   previewProject, recentProjects, forgetProject: recents.forget, deleteProject, relocateFrom,
+  linkSourceScene: recents.linkSource,
 };

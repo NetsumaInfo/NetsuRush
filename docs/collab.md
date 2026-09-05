@@ -1,13 +1,15 @@
 # Sharing and collaboration
 
-**Implementation status:** the infrastructure is complete in source and statically verified — Convex
-rendezvous, native service, renderer bridge, account panel. **No module is wired to it yet**: the
-surface registry has no entry, so nothing can be shared from the interface today. Binding the first
-modules (Collections, Carnet, Référence) is the next step and is described in
-[Adding a surface](#adding-a-surface). Native changes need a Tauri window restart before the running
-application can exercise them, and nothing here has been validated in a live two-machine session.
+**Implementation status:** complete in source and statically verified — Convex rendezvous, native
+service, renderer bridge, account panel, and **one wired surface: the reference board** (Référence).
+Collections and Carnet are not wired yet; [Adding a surface](#adding-a-surface) is what that takes.
+Native changes need a Tauri window restart before the running application can exercise them, and
+nothing here has been validated in a live two-machine session.
 
-NetsuRush supports local-first shared documents for **2 to 10 members**.
+NetsuRush supports local-first shared documents for **2 to 10 members**. On the reference board,
+members can edit the complete persisted contract: item creation and deletion, geometry, ordering,
+text, drawing, crop and trim, appearance, playback, palettes, sequences, links, embeds, and media
+manifests.
 
 The design has three deliberately separate jobs:
 
@@ -35,7 +37,37 @@ a lowercase module label that travels with the project.
   bound, how to create one when an invitation is accepted, how to remove it when the project goes
   away.
 
-A project with no surface is read as `board`, the label collaboration shipped with.
+A project with no surface is read as `board`, the label collaboration shipped with — and the one
+surface currently registered (`src/components/reference/collabSurface.ts`, imported for its side
+effect from `App.tsx` so the account panel can name a shared board even when the Référence tab was
+never opened).
+
+### The board surface
+
+Sharing a file-backed board converts it into a library scene; the `.netsu` stays on disk as a frozen
+export. The file's recents entry is linked to that scene (`sourceSceneId`), and the home screen
+hides the file card while the linked scene is collaborative — otherwise the board shows twice with
+nothing relating the two cards, and the file card is the wrong one to edit. Leaving or deleting the
+project removes the scene and the file card returns.
+
+`Save As` is blocked on a shared board: duplicating a scene id without defining a new collaboration
+project would create two local names for one remote truth. Explicit export remains available, and
+resolves every `collab:` locator to the path of its bytes on this disk
+(`lib/collab/board/media.ts#withLocalMediaPaths`) — without that, the core wrote a `.netsu` made
+entirely of "relocate" placeholders while reporting success.
+
+A collaborative scene stores **no items** — the document is authoritative — so it stores instead the
+durable locators of the board's local media beside them, and the grant check reads that list too.
+Without it a shared board can never accept another local file: the stored scene mentions nothing.
+The list is rewritten before every batch leaves (`useScenePersistence#syncCollabMedia`), so a file
+dropped on the board is authorised by the time its bytes are asked for. The scene also stores a
+read-only layout of at most 40 items, purely so its home-screen card has something to draw.
+
+Before sharing, dead paths are healed (`boardMediaActions#prepareShareMedia`): the core relocates by
+name alone — the open project's companion folder first, then the asset store, then every known
+project's companion — reading zero bytes, since the file name carries the content fingerprint. What
+stays dead but keeps an online origin is re-downloaded; whatever remains dead is marked missing on
+the board so the recovery gestures take over.
 
 ### Adding a surface
 
@@ -382,11 +414,12 @@ delete. The current running device cannot revoke itself.
 
 `test/collaboration-contract.test.cjs` checks the shape of the stack: no prototype escape hatch in
 the native command surface, the documentation and security pointers, the surface registry contract,
-and collaboration copy present in all six locales. The rest is `npm run build`, `npm run check:core`,
+the board's ownership of its own publication, the `isCollabRef`/`isCoreFileRef` guards on every path
+that would otherwise hand a shared media to the core, and collaboration copy present in all six
+locales. The rest is `npm run build`, `npm run check:core`,
 `npm run check:i18n` and `cargo check --locked`.
 
-Before the first release that ships a wired surface, perform a real two-machine Windows session with
-two distinct accounts:
+Before releasing this, perform a real two-machine Windows session with two distinct accounts:
 
 1. restart both Tauri windows so the new Rust core is running;
 2. create a project from an existing document and verify its initial checkpoint;

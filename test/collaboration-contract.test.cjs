@@ -93,3 +93,42 @@ test("all six locales expose the collaboration copy", () => {
     assert.ok(settings.tab.account.sharing, `${locale} settings.tab.account.sharing is missing`);
   }
 });
+
+test("the reference board is registered as a surface and drives its own publication", () => {
+  const surface = read("src/components/reference/collabSurface.ts");
+  const dialog = read("src/components/reference/BoardCollaborationDialog.tsx");
+  const bridge = read("src/components/reference/useCollabBridge.ts");
+  const app = read("src/App.tsx");
+
+  // Une seule déclaration, et elle est chargée au boot : les Paramètres doivent pouvoir nommer un
+  // board partagé même si l'onglet Référence n'a jamais été ouvert.
+  assert.match(surface, /registerCollabSurface\(\{/);
+  assert.match(surface, /id: BOARD_SURFACE/);
+  assert.match(app, /import "@\/components\/reference\/collabSurface"/);
+
+  // Le board possède sa publication : soigner ses médias, entrer dans la bibliothèque, lier le
+  // projet à la scène — et tout défaire quand la publication échoue.
+  assert.match(dialog, /prepareShareMedia/);
+  assert.match(dialog, /adoptIntoLibrary/);
+  assert.match(dialog, /bindCollaboration/);
+  assert.match(dialog, /abortAdoption/);
+  assert.match(dialog, /surface: BOARD_SURFACE/);
+
+  // Un lot dont le projet n'est plus celui du board est ABANDONNÉ : le diff produirait sinon la
+  // suppression du document entier en quittant un board partagé.
+  assert.match(bridge, /state\.collabProjectId !== projectId/);
+});
+
+test("a shared media never reaches the core as if it were a file", () => {
+  for (const relative of [
+    "src/components/reference/boardRender.ts",
+    "src/components/reference/palette.ts",
+    "src/components/reference/boardUpscale.ts",
+    "src/components/reference/Inspector.tsx",
+  ]) {
+    assert.match(read(relative), /isCollabRef|isCoreFileRef/, `${relative} misses the guard`);
+  }
+  // La scène collaborative ne garde aucun item : sa liste de localisateurs est la SEULE trace des
+  // fichiers locaux qu'elle affiche, et le ménage du magasin d'assets doit la lire.
+  assert.match(read("core/reference.js"), /Array\.isArray\(scene && scene\.media\)/);
+});

@@ -547,7 +547,20 @@
     "deleteProject": "Eliminar por completo",
     "deleteProjectTitle": "¿Eliminar «{{name}}»?",
     "deleteProjectWarning": "El archivo .netsu y su carpeta .medias se eliminarán de forma permanente. Los medios de origen externos no se tocarán.",
-    "projectMissing": "Archivo no encontrado"
+    "projectMissing": "Archivo no encontrado",
+    "sharedBoard": "Compartido",
+    "cardStatus": {
+      "key": "Falta la clave",
+      "media": "Piden un archivo",
+      "changed": "Modificado"
+    },
+    "invites": {
+      "body": "te invita a un tablero compartido",
+      "join": "Unirse",
+      "decline": "Rechazar",
+      "later": "Más tarde",
+      "failed": "No se pudo unir a este tablero"
+    }
   },
   "item": {
     "doubleClickEdit": "Doble clic para editar…",
@@ -560,7 +573,10 @@
     "mediaFallback": "medio",
     "interactiveActive": "Interactivo — clic fuera para mover",
     "interactiveHint": "Doble clic para interactuar",
-    "relocateAll": "Relocalizar todo ({{count}})"
+    "relocateAll": "Relocalizar todo ({{count}})",
+    "mediaWaiting": "Esperando a un dispositivo que tenga este medio",
+    "mediaRemoved": "Medio retirado del proyecto",
+    "retryMedia": "Reintentar"
   },
   "sequence": {
     "loop": "Bucle",
@@ -782,5 +798,8 @@
     "off": "Recuperar el ratón",
     "warning": "Los clics y la rueda irán a la aplicación de debajo, y la ventana se mantiene encima. Para recuperar el control: vuelve a darle el foco (Alt+Tab).",
     "dontAskAgain": "No preguntar de nuevo"
+  },
+  "collab": {
+    "saveAsBlocked": "Un proyecto colaborativo sigue controlado por su escena compartida. Usa la exportación para crear una copia local."
   }
 }

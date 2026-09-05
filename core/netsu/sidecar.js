@@ -377,7 +377,7 @@ function pruneEmptyDirs(dir) {
 }
 
 module.exports = {
-  TOKEN, DIR_SUFFIX, BUCKETS, SEQ_ROOT,
+  TOKEN, DIR_SUFFIX, BUCKETS, SEQ_ROOT, HASH_HEX,
   sidecarDirFor, isSidecarToken, sidecarToken, resolveSidecar, isInSidecar, isInAnySidecar,
-  slugify, indexSidecar, adopt, adoptAsync, sweep,
+  slugify, indexSidecar, adopt, adoptAsync, sweep, hashFromName,
 };

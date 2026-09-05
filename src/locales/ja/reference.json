@@ -547,7 +547,20 @@
     "deleteProject": "完全に削除",
     "deleteProjectTitle": "「{{name}}」を削除しますか？",
     "deleteProjectWarning": ".netsu ファイルと .medias フォルダーは完全に削除されます。外部のソースメディアは削除されません。",
-    "projectMissing": "ファイルが見つかりません"
+    "projectMissing": "ファイルが見つかりません",
+    "sharedBoard": "共有",
+    "cardStatus": {
+      "key": "鍵待ち",
+      "media": "メディア待ち",
+      "changed": "更新あり"
+    },
+    "invites": {
+      "body": "共有ボードに招待しています",
+      "join": "参加",
+      "decline": "辞退",
+      "later": "後で",
+      "failed": "このボードに参加できませんでした"
+    }
   },
   "item": {
     "doubleClickEdit": "ダブルクリックで編集…",
@@ -560,7 +573,10 @@
     "mediaFallback": "メディア",
     "interactiveActive": "操作中 — 他をクリックで移動",
     "interactiveHint": "ダブルクリックで操作",
-    "relocateAll": "すべての場所を指定（{{count}}）"
+    "relocateAll": "すべての場所を指定（{{count}}）",
+    "mediaWaiting": "このメディアを持つデバイスを待っています",
+    "mediaRemoved": "プロジェクトから削除されたメディア",
+    "retryMedia": "再試行"
   },
   "sequence": {
     "loop": "ループ",
@@ -782,5 +798,8 @@
     "off": "マウスを戻す",
     "warning": "クリックとホイールは下のアプリへ届き、ウィンドウは最前面に留まります。戻すにはフォーカスを与えてください（Alt+Tab）。",
     "dontAskAgain": "次回から表示しない"
+  },
+  "collab": {
+    "saveAsBlocked": "共同プロジェクトは共有シーンが管理します。ローカルコピーは書き出しで作成してください。"
   }
 }

@@ -29,6 +29,7 @@ const voice = require("./voice"); // module voix : transcription + silences (sou
 const exportMod = require("./export"); // export fichier piloté par profil (remux/encode, GPU/CPU, merge)
 const audioLang = require("./audioLang"); // normalisation des étiquettes de langue des pistes audio
 const { createReferenceStore, scanFolder, writeExportFile } = require("./reference");
+const { createBoardMediaLocator } = require("./boardMediaLocator");
 const wallpaper = require("./wallpaper");
 const { createCollectionStore } = require("./collections"); // dossiers de plans gardés (bibliothèque)
 const { createCollectionArchive } = require("./collectionArchive"); // archivage disque d'une collection + changement de dossier
@@ -93,6 +94,7 @@ function createRpc() {
   logbus.attach(broadcast);
 
   const refStore = createReferenceStore(DATA_DIR);
+  const boardMediaLocator = createBoardMediaLocator({ assetsDir: refStore.assetsDir });
   const collectionStore = createCollectionStore(DATA_DIR);
   // Sondes injectées : la bibliothèque met les métas au format Resolve (timecode/résolution/codec) pour
   // que les rushs importés se lisent comme ceux du Media Pool dans la même grille.
@@ -876,6 +878,12 @@ function createRpc() {
       return refStore.saveAsset(buf, ext);
     },
     // Télécharge un média distant côté core (sans CORS) puis le persiste en asset disque.
+    // Aperçu léger envoyé aux pairs avant l'original d'un board partagé (docs/collab.md).
+    "reference:collabPreview": ([srcPath]) => refStore.collabPreview(srcPath),
+    // Chemin mort d'un média de board : le nom porte son empreinte, on le retrouve sans lire
+    // un octet (compagnon du projet, magasin d'assets, compagnons des projets connus).
+    "reference:locateMedia": ([refs, projectPath]) =>
+      boardMediaLocator.locateMedia({ refs, projectPath }),
     "reference:fetchAsset": ([url, options]) => refStore.fetchAsset(url, options || {}),
     // Résout le vrai média de N'IMPORTE quel lien (fichier direct ou page via OpenGraph) → asset.
     "reference:resolveMedia": ([url, options]) => refStore.resolveMedia(url, options || {}),
@@ -1024,6 +1032,9 @@ function createRpc() {
     "netsu:closeProject": ([filePath]) => netsu.closeProject(filePath),
     "netsu:recents": ([type]) => netsu.recentProjects(refStore, type),
     "netsu:forget": ([filePath]) => netsu.forgetProject(filePath),
+    // Lie un .netsu à la scène qui l'a remplacé : partager un board ouvert depuis un fichier
+    // le convertit en scène de la bibliothèque, et sans ce lien l'accueil montre les deux.
+    "netsu:linkSource": ([filePath, sourceSceneId]) => netsu.linkSourceScene(filePath, sourceSceneId),
     "netsu:deleteProject": ([filePath]) => netsu.deleteProject(filePath),
 
     // --- Module Script : documents/blocs/médias (SQLite ou JSON) + build natif ---

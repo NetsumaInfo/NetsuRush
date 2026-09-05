@@ -29,6 +29,10 @@ import { Toaster } from "@/components/ui/toast";
 import { ExportStatusToast } from "@/components/export/ExportStatusToast";
 import { loadExportCapabilities } from "@/features/export/capabilities";
 import { GateFrame } from "@/components/auth/GateFrame";
+// Enregistre le board de référence comme surface collaborative. Importé pour son EFFET DE
+// BORD : les Paramètres doivent pouvoir nommer un board partagé même si l'onglet Référence
+// n'a jamais été ouvert (docs/collab.md).
+import "@/components/reference/collabSurface";
 
 const ReferenceWindow = lazy(() => import("@/components/reference/ReferenceWindow").then((m) => ({ default: m.ReferenceWindow })));
 const NotebookWindow = lazy(() => import("@/components/notebook/NotebookWindow").then((m) => ({ default: m.NotebookWindow })));

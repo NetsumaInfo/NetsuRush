@@ -14,13 +14,15 @@
 //   1. le CORE lit le fichier SUR LE DISQUE (ffmpeg) et rend un PNG minuscule → chargé en `data:`
 //      URL, donc lisible sans aucune restriction d'origine. Marche pour image, GIF et vidéo, et même
 //      pour une source qu'aucun élément de la page n'a encore décodée ;
-//   2. repli serveur HTTP du core en `crossOrigin="anonymous"` (source distante, asset temporaire) ;
+//   2. repli HTTP en `crossOrigin="anonymous"` — serveur du core (source distante, asset temporaire)
+//      ou protocole natif des blobs pour un board PARTAGÉ, dont c'est la seule voie lisible ;
 //   3. repli élément vivant à l'écran (déjà décodé, sans restriction : blob:, data:).
 // Reste ignoré ce dont les pixels sont vraiment hors d'atteinte : une iframe YouTube ou une carte embed.
 
 import { QuantizerCelebi, Score, Hct, hexFromArgb, argbFromRgb } from "@material/material-color-utilities";
 import { nr } from "@/lib/bridge";
-import type { BoardItem } from "./referenceShared";
+import { collabMediaSrc } from "@/lib/collab/currentProject";
+import { isCollabRef, type BoardItem } from "./referenceShared";
 
 export const PALETTE_MIN = 3;
 export const PALETTE_MAX = 12;
@@ -66,9 +68,16 @@ function liveMedia(id: string): HTMLImageElement | HTMLVideoElement | HTMLCanvas
 // Source LISIBLE par un canvas : le serveur HTTP du core répond avec `Access-Control-Allow-Origin: *`,
 // donc une image chargée là en `crossOrigin="anonymous"` ne teinte pas le canvas — contrairement au
 // protocole d'asset de la coquille, qui sert l'affichage mais interdit la relecture des pixels.
+//
+// Un média de board PARTAGÉ n'existe pas comme fichier ici : ses octets sont dans le magasin de
+// blobs et sont servis par le protocole natif, qui accorde bien le CORS à l'origine du renderer
+// (src-tauri/src/collab/blobs.rs#protocol_response). C'est donc la seule voie lisible pour lui —
+// le core ne peut pas ouvrir `collab:<hash>` comme un chemin, et l'élément affiché à l'écran, lui,
+// est chargé sans `crossOrigin` et teinte le canvas.
 function readableSrc(ref: string): string {
   if (!ref) return "";
   if (/^(https?:|data:|blob:)/i.test(ref)) return ref;
+  if (isCollabRef(ref)) return collabMediaSrc(ref);
   try {
     return nr.mediaUrl(ref);
   } catch {
@@ -196,7 +205,9 @@ async function samplePixels(item: BoardItem, budget: number, stats: SampleStats)
   // 1. Lecture par le CORE, directement sur le fichier. Le PNG rendu arrive en `data:` URL : aucune
   //    origine, donc aucun canvas teinté, quelle que soit la nature du média. Une vidéo est lue sur
   //    toute sa portée, chaque cadre pesant sa part du budget de pixels de l'item.
-  if (ref && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
+  // `collab:` n'est pas un chemin : le core ne peut rien en ouvrir, et le compter comme un essai
+  // ferait passer un board partagé pour un core muet (« relance la fenêtre »).
+  if (ref && !isCollabRef(ref) && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
     stats.coreTried++;
     const shot = await nr.reference.sampleFrame(ref, {
       at: range.from,

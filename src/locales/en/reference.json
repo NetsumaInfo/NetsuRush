@@ -547,7 +547,20 @@
     "deleteProject": "Delete completely",
     "deleteProjectTitle": "Delete “{{name}}”?",
     "deleteProjectWarning": "The .netsu file and its .medias folder will be permanently deleted. External source media will not be touched.",
-    "projectMissing": "File not found"
+    "projectMissing": "File not found",
+    "sharedBoard": "Shared",
+    "cardStatus": {
+      "key": "Key needed",
+      "media": "Media wanted",
+      "changed": "Changed"
+    },
+    "invites": {
+      "body": "invites you to a shared board",
+      "join": "Join",
+      "decline": "Decline",
+      "later": "Later",
+      "failed": "Could not join this board"
+    }
   },
   "item": {
     "doubleClickEdit": "Double-click to edit…",
@@ -560,7 +573,10 @@
     "mediaFallback": "media",
     "interactiveActive": "Interactive — click elsewhere to move",
     "interactiveHint": "Double-click to interact",
-    "relocateAll": "Relocate all ({{count}})"
+    "relocateAll": "Relocate all ({{count}})",
+    "mediaWaiting": "Waiting for a device that holds this media",
+    "mediaRemoved": "Media removed from the project",
+    "retryMedia": "Try again"
   },
   "sequence": {
     "loop": "Loop",
@@ -782,5 +798,8 @@
     "off": "Take the mouse back",
     "warning": "Clicks and wheel will go to the application underneath, and the window stays on top. To take control back: give it focus again (Alt+Tab).",
     "dontAskAgain": "Don't ask again"
+  },
+  "collab": {
+    "saveAsBlocked": "A collaborative project remains owned by its shared scene. Use export to create a local copy."
   }
 }

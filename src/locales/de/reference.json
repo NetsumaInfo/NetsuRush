@@ -547,7 +547,20 @@
     "deleteProject": "Vollständig löschen",
     "deleteProjectTitle": "„{{name}}“ löschen?",
     "deleteProjectWarning": "Die .netsu-Datei und ihr .medias-Ordner werden endgültig gelöscht. Externe Quelldateien bleiben erhalten.",
-    "projectMissing": "Datei nicht gefunden"
+    "projectMissing": "Datei nicht gefunden",
+    "sharedBoard": "Geteilt",
+    "cardStatus": {
+      "key": "Schlüssel nötig",
+      "media": "Medium gesucht",
+      "changed": "Geändert"
+    },
+    "invites": {
+      "body": "lädt dich zu einem geteilten Board ein",
+      "join": "Beitreten",
+      "decline": "Ablehnen",
+      "later": "Später",
+      "failed": "Diesem Board konnte nicht beigetreten werden"
+    }
   },
   "item": {
     "doubleClickEdit": "Doppelklick zum Bearbeiten…",
@@ -560,7 +573,10 @@
     "mediaFallback": "Medium",
     "interactiveActive": "Interaktiv — daneben klicken zum Bewegen",
     "interactiveHint": "Doppelklick zum Interagieren",
-    "relocateAll": "Alle neu verknüpfen ({{count}})"
+    "relocateAll": "Alle neu verknüpfen ({{count}})",
+    "mediaWaiting": "Warten auf ein Gerät mit diesem Medium",
+    "mediaRemoved": "Medium aus dem Projekt entfernt",
+    "retryMedia": "Erneut versuchen"
   },
   "sequence": {
     "loop": "Schleife",
@@ -782,5 +798,8 @@
     "off": "Maus zurückholen",
     "warning": "Klicks und Scrollen gehen an die Anwendung darunter, das Fenster bleibt im Vordergrund. Zurückholen: dem Fenster wieder den Fokus geben (Alt+Tab).",
     "dontAskAgain": "Nicht mehr fragen"
+  },
+  "collab": {
+    "saveAsBlocked": "Ein kollaboratives Projekt bleibt an seine geteilte Szene gebunden. Exportiere es für eine lokale Kopie."
   }
 }

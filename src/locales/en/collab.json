@@ -124,5 +124,9 @@
     "rotation": "Key rotation pending: new publications wait for one of the owner's devices.",
     "waitingKey": "{{count}} member(s) waiting for the key. Stay online to pass it on.",
     "nobodyReachable": "Nobody is reachable right now: your changes will go out when they return."
+  },
+  "board": {
+    "noScene": "Save this board to the scene library first.",
+    "willAdopt": "This board will be copied into the scene library. The .netsu file stays on your disk."
   }
 }

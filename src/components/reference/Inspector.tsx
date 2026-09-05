@@ -15,7 +15,7 @@ import { useBoard } from "./useReferenceBoard";
 import { useHideOnBlur } from "./useAppFocus";
 import { IconToggle, IconAction } from "./inspectorControls";
 import { TrimControls, TextControls, FrameControls, ArrangeBar, PlayModeControls, EmbedControls } from "./inspectorPanels";
-import { displaySrc, probeImage, youtubeId, isRemoteRef, paletteSize, type PaletteLayout } from "./referenceShared";
+import { displaySrc, probeImage, youtubeId, isCollabRef, isCoreFileRef, paletteSize, type PaletteLayout } from "./referenceShared";
 import { convertToEmbed, downloadMediaFromEmbed, downloadYoutube } from "./boardMediaActions";
 import { quickUpscale } from "./boardUpscale";
 import { extractPaletteToBoard, regeneratePalette } from "./boardPaletteActions";
@@ -82,9 +82,15 @@ export function Inspector() {
   // Upscalable = image/vidéo. Un média DISTANT/extrait (ref http, ex. vidéo tirée d'un post) est
   // accepté : la popup résout d'abord un fichier local (resolveMedia/extractMedia) avant d'upscaler.
   // Seuls data:/blob: (non résolubles côté serveur) sont exclus. YouTube/embed = autres kinds.
-  const upscalable = (item.kind === "image" || item.kind === "video") && !/^(data:|blob:)/i.test(item.ref);
+  // Un média de board PARTAGÉ est exclu : l'upscale passe par ffmpeg, qui a besoin d'un fichier, et
+  // ce média n'en est pas un. Le refus existait au fond de la chaîne, pas ici — la baguette était
+  // donc offerte, le dialogue s'ouvrait en entier, et l'échec tombait à la fin sous un libellé faux
+  // (« média distant »). Mieux vaut ne rien proposer que proposer ce qui ne peut pas aboutir.
+  const upscalable = (item.kind === "image" || item.kind === "video")
+    && !/^(data:|blob:)/i.test(item.ref)
+    && !isCollabRef(item.ref);
   // Extractible en frames = vidéo à FICHIER local (décomposée en images → item séquence).
-  const framesExtractable = item.kind === "video" && !isRemoteRef(item.ref);
+  const framesExtractable = item.kind === "video" && isCoreFileRef(item.ref);
   // Média extrait d'un post (rebasculable en carte embed) ; lien à ouvrir dans le navigateur.
   const extracted = (item.kind === "image" || item.kind === "video") && !!item.sourceUrl;
   const linkUrl =

@@ -6,6 +6,7 @@
 import { nr, type NetsuEmbed, type NetsuLevel, type NetsuQuality } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { comboFromEvent, isCompleteCombo, type ShortcutMap } from "@/lib/shortcuts";
+import { collabMediaSrc, isCollabRef, isCoreFileRef } from "@/lib/collab/currentProject";
 import { embedSrc } from "./embeds";
 import type { ColorFormat } from "./colorFormat";
 
@@ -259,6 +260,11 @@ export interface BoardItem {
   // Lien d'origine d'un média EXTRAIT (yt-dlp/gallery-dl depuis un post social) → permet de
   // rebasculer l'item en carte embed ancrée (et inversement de re-télécharger depuis l'embed).
   sourceUrl?: string;
+  // Type du média quand le localisateur ne le dit pas. Un board PARTAGÉ adresse ses médias par
+  // empreinte (`http://collab.localhost/<projet>/<hash>`) : plus d'extension, donc plus moyen de
+  // reconnaître un GIF — que « Tout figer » doit pourtant arrêter comme les autres animations.
+  // Renseigné par la projection collaborative ; absent sur un board local, où l'extension suffit.
+  mime?: string;
   // Sauvegarde du média AVANT upscale → permet de revenir en arrière (non destructif : l'upscale
   // ne supprime plus l'ancien fichier). Présent ⇒ l'item a été upscalé et peut être restauré.
   // Aussi réutilisé par la séquence pour MÉMORISER le média d'origine (vidéo/YouTube) → bouton « revenir
@@ -277,6 +283,9 @@ export interface BoardItem {
     kind: string;
     locator?: string;
     frameLocators?: Array<string | null>;
+    // Board PARTAGÉ : pourquoi le média n'est pas là. « waiting » = les octets voyagent encore,
+    // « removed » = plus aucun détenteur ne les a. Un board local n'a que le cas « local ».
+    reason?: "local" | "waiting" | "removed";
   };
 }
 
@@ -426,6 +435,9 @@ export interface BoardScene {
   // seule, cas d'une archive v1). Absent = scène de la bibliothèque interne.
   filePath?: string | null;
   fileReadonly?: boolean;
+  // Projet collaboratif lié à CETTE scène, jamais à un réglage global du renderer. Le rôle est
+  // volontairement absent : Rust le relit depuis Convex (ou son cache natif signé) à l'ouverture.
+  collaboration?: { projectId: string } | null;
   items: BoardItem[];
   // Vue sauvegardée (pan/zoom) pour rouvrir la scène cadrée pareil.
   view?: BoardView;
@@ -475,6 +487,12 @@ export function uid(): string {
 export function isRemoteRef(ref: string): boolean {
   return /^(https?:|data:|blob:)/i.test(ref);
 }
+
+// Média d'un board partagé (`collab:<empreinte>`) : ses octets vivent dans le magasin de la coquille
+// et se servent par le protocole `collab.localhost` — le service core ne sait NI les lire, NI les
+// couper, NI en tirer une affiche. Ce n'est donc ni un lien distant ni un fichier : ça ne va jamais
+// au core. Réexportés depuis `@/lib/collab/currentProject`, où vit la règle.
+export { isCollabRef, isCoreFileRef };
 
 // z-index max / min d'une liste d'items (plan d'empilement). SOURCE UNIQUE du calcul (ajout d'item,
 // duplication, fusion en séquence, premier/arrière-plan). Liste vide → 0.
@@ -586,6 +604,10 @@ export function displaySrc(kind: ItemKind, ref: string): string {
   if (kind === "embed") return embedSrc(ref);
   if (!ref) return "";
   if (isRemoteRef(ref)) return ref;
+  // Un média de board partagé n'est pas un fichier : ses octets vivent dans le magasin de blobs et
+  // sont servis par le protocole natif, à une adresse qui dépend du projet ouvert. Le passer au
+  // core rendrait une adresse morte, que la reprise prendrait pour un fichier disparu.
+  if (isCollabRef(ref)) return collabMediaSrc(ref);
   // Vidéo locale : mp4/mov/webm lisibles tels quels ; mkv & co passent par /stream copy, un remux
   // ffmpeg en direct — celui-là ne peut pas sortir du serveur HTTP, il n'existe pas comme fichier.
   if (kind === "video" && !playsNatively(ref)) return nr.streamUrl(ref, 0, "copy");

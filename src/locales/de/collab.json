@@ -124,5 +124,9 @@
     "rotation": "Schlüsselwechsel ausstehend: neue Veröffentlichungen warten auf ein Gerät des Eigentümers.",
     "waitingKey": "{{count}} Mitglied(er) warten auf den Schlüssel. Bleib online, um ihn zu übergeben.",
     "nobodyReachable": "Gerade ist niemand erreichbar: deine Änderungen gehen raus, sobald jemand zurück ist."
+  },
+  "board": {
+    "noScene": "Speichere dieses Board zuerst in der Szenenbibliothek.",
+    "willAdopt": "Dieses Board wird in die Szenenbibliothek kopiert. Die .netsu-Datei bleibt auf deiner Festplatte."
   }
 }

@@ -1,10 +1,11 @@
 // Page « Référence » (onglet) : board mood-board + barre d'outils + gestion de scènes +
 // inspecteur d'item + sélecteur de rushs/plans du projet.
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
+import { convexConfigured } from "@/lib/convexEnv";
 import { Toolbar } from "./Toolbar";
 import { BoardContextMenu } from "./BoardMenu";
 import { SceneDialog } from "./SceneDialog";
@@ -18,6 +19,12 @@ import { ReferenceHome } from "./ReferenceHome";
 import { ReferenceBoard, type BoardHandle } from "./ReferenceBoard";
 import { PaletteStudio } from "./PaletteStudio";
 import { useBoard } from "./useReferenceBoard";
+// LAZY : tire `convex/react`, qui ne doit pas entrer dans le bundle d'entrée d'une app qui
+// s'ouvre sans backend. Ne rend rien — c'est le pont entre le store du board et le document
+// partagé.
+const CollabHost = lazy(() =>
+  import("./CollabHost").then((module) => ({ default: module.CollabHost })),
+);
 import { useScenePersistence } from "./useScenePersistence";
 import { useBoardShortcuts } from "./useBoardShortcuts";
 import { useProjectActions } from "./useProjectActions";
@@ -173,6 +180,11 @@ export function ReferencePanel() {
       vertical ? "flex-row" : "flex-col",
       pinned && "nr-shell-bg bg-[var(--color-bg)]",
     )}>
+      {convexConfigured && (
+        <Suspense fallback={null}>
+          <CollabHost />
+        </Suspense>
+      )}
       {!barAfter && bar}
       <BoardContextMenu
         board={boardRef}

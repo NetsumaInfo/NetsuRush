@@ -124,5 +124,9 @@
     "rotation": "Rotation de clé en attente : les nouvelles publications attendent un appareil du propriétaire.",
     "waitingKey": "{{count}} membre(s) attendent la clé. Reste en ligne pour la leur transmettre.",
     "nobodyReachable": "Personne n'est joignable pour l'instant : tes modifications partiront à leur retour."
+  },
+  "board": {
+    "noScene": "Enregistre d'abord ce board dans la bibliothèque de scènes.",
+    "willAdopt": "Ce board sera copié dans la bibliothèque de scènes. Le fichier .netsu reste sur ton disque."
   }
 }

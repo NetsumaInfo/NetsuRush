@@ -9,8 +9,17 @@ test('NetsuBoard home renders projects only inside one Recent section', () => {
   assert.doesNotMatch(source, /t\("home\.projects"\)/);
   assert.equal((source.match(/t\("home\.recent"\)/g) || []).length, 1);
   const recentSection = source.slice(source.indexOf('{t("home.recent")}'));
-  assert.match(recentSection, /projects\.map\(\(entry\)\s*=>/);
+  assert.match(recentSection, /visibleProjects\.map\(\(entry\)\s*=>/);
   assert.match(recentSection, /<ProjectCard/);
+});
+
+// Partager un board ouvert depuis un fichier le CONVERTIT en scène de la bibliothèque, et le
+// `.netsu` reste sur disque en export figé. Les deux cartes montreraient alors « le même » board,
+// et la carte fichier — la plus reconnaissable — est la mauvaise à éditer.
+test('the file card of a board converted into a shared scene is hidden', () => {
+  assert.match(source, /collabSceneIds/);
+  assert.match(source, /recent\.filter\(\(s\) => s\.collaboration\)/);
+  assert.match(source, /!\(entry\.sourceSceneId && collabSceneIds\.has\(entry\.sourceSceneId\)\)/);
 });
 
 test('file-backed source scenes are filtered from internal recents', () => {

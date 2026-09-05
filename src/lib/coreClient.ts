@@ -476,6 +476,8 @@ const reference: RefApi = {
   saveScene: (scene) => call("reference:saveScene", [scene]),
   deleteScene: (id) => call("reference:deleteScene", [id]),
   saveAsset: (bytes, ext) => call("reference:saveAsset", [{ __b64: abToB64(bytes) }, ext]),
+  collabPreview: (srcPath) => call("reference:collabPreview", [srcPath]),
+  locateMedia: (refs, projectPath) => call("reference:locateMedia", [refs, projectPath]),
   fetchAsset: (url, options) => call("reference:fetchAsset", [url, options || {}]),
   resolveMedia: (url, options) => call("reference:resolveMedia", [url, options || {}]),
   upscaleItem: (opts) => call("reference:upscaleItem", [opts]),
@@ -506,6 +508,7 @@ const reference: RefApi = {
   closeProject: (filePath) => call("netsu:closeProject", [filePath]),
   recentProjects: (type) => call("netsu:recents", [type]),
   forgetProject: (filePath) => call("netsu:forget", [filePath]),
+  linkSource: (filePath, sourceSceneId) => call("netsu:linkSource", [filePath, sourceSceneId]),
   deleteProject: (filePath) => call("netsu:deleteProject", [filePath]),
   // No-op : aucune garde de fermeture (l'autosave protège déjà le board). Conservé pour l'API.
   setDirty: () => {},

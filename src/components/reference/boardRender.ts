@@ -7,7 +7,8 @@
 // l'utilisateur voit, pas les coordonnées stockées.
 
 import { nr } from "@/lib/bridge";
-import { paletteGrid, type BoardItem, type DrawShape } from "./referenceShared";
+import { collabMediaSrc } from "@/lib/collab/currentProject";
+import { isCollabRef, paletteGrid, type BoardItem, type DrawShape } from "./referenceShared";
 import { rotatedBBox } from "./boardArrange";
 import { formatColor } from "./colorFormat";
 import { resolveShapes } from "./drawAnchor";
@@ -79,9 +80,16 @@ function liveMedia(id: string): HTMLImageElement | HTMLVideoElement | HTMLCanvas
 
 // Source relisible par un canvas : le serveur HTTP du core autorise la lecture cross-origin, le
 // protocole d'asset de la coquille non (il teinte le canvas, et `toBlob`/`toDataURL` lèvent alors).
+//
+// Le média d'un board PARTAGÉ n'existe pas comme fichier : il est servi par le protocole natif des
+// blobs, qui accorde bien le CORS à l'origine du renderer — c'est donc sa seule voie relisible. Sans
+// elle, l'export retombait sur l'élément affiché à l'écran, chargé sans `crossOrigin` : canvas
+// teinté, `toDataURL` levée, et l'export image échouait ENTIÈREMENT dès qu'un média partagé entrait
+// dans le cadre.
 function readableSrc(ref: string): string {
   if (!ref) return "";
   if (/^(https?:|data:|blob:)/i.test(ref)) return ref;
+  if (isCollabRef(ref)) return collabMediaSrc(ref);
   try {
     return nr.mediaUrl(ref);
   } catch {
@@ -139,7 +147,8 @@ function naturalSize(el: CanvasImageSource): { w: number; h: number } {
 async function mediaSource(item: BoardItem, side = 1600): Promise<CanvasImageSource | null> {
   const ref = item.kind === "sequence" ? item.frames?.[item.frame ?? 0] ?? item.ref : item.ref;
 
-  if (ref && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
+  // `collab:` n'est pas un chemin : le core ne peut rien en ouvrir, la voie relisible est la suivante.
+  if (ref && !isCollabRef(ref) && !/^(https?:|data:|blob:)/i.test(ref) && nr.reference?.sampleFrame) {
     const shot = await nr.reference.sampleFrame(ref, {
       at: item.kind === "video" ? item.trimIn ?? 0 : 0,
       side: Math.max(16, Math.min(4096, Math.round(side))),

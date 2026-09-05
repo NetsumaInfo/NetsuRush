@@ -1378,18 +1378,42 @@ export interface RefSceneMeta {
   id: string;
   name: string;
   updatedAt: number;
+  collaboration?: { projectId: string } | null;
 }
 export interface RefSceneIn {
   id?: string;
   name: string;
   items: unknown[];
   view?: unknown;
+  collaboration?: { projectId: string } | null;
+  // Localisateurs durables des médias locaux du board, indépendants de `items`. Une scène
+  // collaborative ne garde AUCUN item — le document fait foi — alors que la coquille autorise
+  // l'import d'un fichier local contre la scène ENREGISTRÉE : sans cette liste, plus rien ne peut
+  // entrer dans un board partagé.
+  media?: string[];
+  // Disposition en lecture seule d'un board collaboratif : de quoi dessiner sa vignette d'accueil,
+  // jamais de quoi être une seconde copie modifiable.
+  preview?: ScenePreviewItem[];
+}
+export interface ScenePreviewItem {
+  id: string;
+  kind: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  z: number;
+  rotation: number;
+  ref?: string;
 }
 export interface RefSceneOut {
   id: string;
   name: string;
   items: unknown[];
   view: unknown | null;
+  collaboration?: { projectId: string } | null;
+  media?: string[];
+  preview?: ScenePreviewItem[];
   updatedAt: number;
 }
 // ---- Partage « .netsu » (board → conteneur SQLite type-routé) ----
@@ -1518,6 +1542,12 @@ export interface RefApi {
   saveScene(scene: RefSceneIn): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
   deleteScene(id: string): Promise<{ ok: boolean; error?: string }>;
   saveAsset(bytes: ArrayBuffer, ext: string): Promise<{ ok: boolean; path?: string; error?: string }>;
+  // Aperçu JPEG d'un média local, écrit en asset de l'app — la collaboration l'envoie aux pairs
+  // avant l'original, pour qu'une image de 40 Mo montre quelque chose en quelques Ko.
+  collabPreview(srcPath: string): Promise<{ ok: boolean; path?: string; error?: string }>;
+  /** Chemins morts → chemins vivants des mêmes octets (empreinte portée par le nom). Aucune
+      écriture, aucun octet lu. `dead` : ceux qu'aucune source n'a rendus. */
+  locateMedia(refs: string[], projectPath?: string): Promise<{ ok: boolean; moves: Record<string, string>; dead: string[] }>;
   fetchAsset(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
   // Résout le vrai média de N'IMPORTE quel lien (fichier direct, ou page web via OpenGraph) → asset
   // disque. Catch-all générique : GIF (giphy/tenor), imgur, articles, CDN sans extension propre.
@@ -1573,6 +1603,8 @@ export interface RefApi {
   closeProject(filePath: string): Promise<{ ok: boolean; closed?: boolean }>;
   recentProjects(type?: string): Promise<NetsuRecent[]>;
   forgetProject(filePath: string): Promise<NetsuRecent[]>;
+  /** Lie un `.netsu` à la scène qui l'a remplacé (partage d'un board ouvert depuis un fichier). */
+  linkSource(filePath: string, sourceSceneId: string): Promise<NetsuRecent[]>;
   deleteProject(filePath: string): Promise<{ ok: boolean; projectRemoved?: boolean; mediaRemoved?: boolean; recents: NetsuRecent[]; error?: string }>;
   setDirty(unsaved: boolean): void;
   detach(): void;
@@ -3474,12 +3506,18 @@ const mock: NrApi = {
         const o = read();
         const id = scene.id || Math.random().toString(36).slice(2, 10);
         const updatedAt = Date.now();
-        o[id] = { id, name: scene.name, items: scene.items, view: scene.view ?? null, updatedAt };
+        o[id] = {
+          id, name: scene.name, items: scene.items, view: scene.view ?? null,
+          collaboration: scene.collaboration ?? null, media: scene.media ?? [],
+          preview: scene.preview ?? [], updatedAt,
+        };
         write(o);
         return { ok: true, id, updatedAt };
       },
       deleteScene: async (id: string) => { const o = read(); delete o[id]; write(o); return { ok: true }; },
       saveAsset: async () => ({ ok: false, error: "mock" }),
+      collabPreview: async () => ({ ok: false, error: "mock" }),
+      locateMedia: async () => ({ ok: true, moves: {}, dead: [] }),
       fetchAsset: async () => ({ ok: false, error: "mock" }),
       resolveMedia: async (_url, _options) => ({ ok: false, error: "mock" }),
       upscaleItem: async () => ({ ok: false, error: "mock" }),
@@ -3509,6 +3547,7 @@ const mock: NrApi = {
       closeProject: async () => ({ ok: true, closed: false }),
       recentProjects: async () => [],
       forgetProject: async () => [],
+      linkSource: async () => [],
       deleteProject: async () => ({ ok: false, recents: [], error: i18n.t("common:mock.appUnavailable") }),
       setDirty: () => {},
       detach: () => {},

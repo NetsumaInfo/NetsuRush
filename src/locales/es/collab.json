@@ -124,5 +124,9 @@
     "rotation": "Rotación de clave pendiente: las nuevas publicaciones esperan a un dispositivo del propietario.",
     "waitingKey": "{{count}} miembro(s) esperan la clave. Mantente en línea para entregársela.",
     "nobodyReachable": "Ahora mismo no hay nadie accesible: tus cambios saldrán cuando vuelvan."
+  },
+  "board": {
+    "noScene": "Guarda primero este tablero en la biblioteca de escenas.",
+    "willAdopt": "Este tablero se copiará a la biblioteca de escenas. El archivo .netsu permanece en tu disco."
   }
 }

@@ -663,11 +663,16 @@ function MissingContent({ item }: { item: Item }) {
     if (!p) return;
     patchItem(item.id, { ref: p, src: displaySrc(item.kind, p), missing: undefined });
   };
+  // Board PARTAGÉ : le média n'est pas introuvable, il n'est pas ENCORE là (« waiting ») ou plus
+  // aucun détenteur ne l'a (« removed »). Aucun sélecteur de fichiers ne peut le rendre, et son
+  // seul recours est de redemander aux pairs.
+  const collaborativeReason = item.missing?.reason;
+  const retry = () => window.dispatchEvent(new Event("nr-collab-retry-media"));
   // Un média venu d'internet ne se retrouve pas dans un sélecteur de fichiers : il se RETÉLÉCHARGE.
   // Sans cette action, la seule issue offerte à un trou de synchronisation ou à un asset repris par
   // le ménage était d'aller chercher à la main un fichier qui n'a jamais existé sur ce disque.
   const [reloading, setReloading] = useState(false);
-  const canReload = reloadableMedia(item);
+  const canReload = !collaborativeReason && reloadableMedia(item);
   const reload = async () => {
     if (reloading) return;
     setReloading(true);
@@ -676,7 +681,13 @@ function MissingContent({ item }: { item: Item }) {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted/30 p-3 text-center">
       <FileQuestion className="size-7 shrink-0 text-muted-foreground" strokeWidth={1.5} />
-      <p className="line-clamp-2 text-xs font-medium text-foreground break-all">{item.missing?.name || t("item.missingMedia")}</p>
+      <p className="line-clamp-2 text-xs font-medium text-foreground break-all">
+        {collaborativeReason === "waiting"
+          ? t("item.mediaWaiting")
+          : collaborativeReason === "removed"
+            ? t("item.mediaRemoved")
+            : item.missing?.name || t("item.missingMedia")}
+      </p>
       {!!item.missing?.size && <p className="text-[10px] text-muted-foreground">{t("item.notBundled", { size: humanSize(item.missing.size) })}</p>}
       {/* Le lien d'origine passe DEVANT le sélecteur de fichiers : quand il existe, c'est la voie qui
           rend le média sans rien demander à l'utilisateur. */}
@@ -695,7 +706,7 @@ function MissingContent({ item }: { item: Item }) {
       <button
         type="button"
         onPointerDown={(e) => e.stopPropagation()}
-        onClick={() => void relocate()}
+        onClick={() => collaborativeReason === "waiting" ? retry() : void relocate()}
         className={cn(
           "inline-flex items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium",
           canReload
@@ -703,11 +714,11 @@ function MissingContent({ item }: { item: Item }) {
             : "mt-1 bg-primary text-primary-foreground hover:bg-primary/90",
         )}
       >
-        <FolderSearch className="size-3.5" /> {t("item.relocate")}
+        <FolderSearch className="size-3.5" /> {t(collaborativeReason === "waiting" ? "item.retryMedia" : "item.relocate")}
       </button>
       {/* Un board reçu arrive rarement avec UN seul trou : proposer le dossier entier depuis la
           première tuile évite de répéter le même geste autant de fois qu'il y a de rushs. */}
-      {missingCount > 1 && (
+      {!collaborativeReason && missingCount > 1 && (
         <button
           type="button"
           onPointerDown={(e) => e.stopPropagation()}
@@ -742,12 +753,15 @@ function LoadingContent({ item }: { item: Item }) {
 // arrête l'animation. Dessiner une image d'une autre origine (Giphy) teinte le canvas — sans
 // importance, on l'affiche, on n'en relit jamais les pixels.
 const ANIMATED_IMAGE_RE = /\.(gif|webp|avif|apng)(?:$|[?#])/i;
+// Un média de board partagé est adressé par empreinte : son URL ne porte aucune extension, et le
+// type déclaré par le document est alors la seule façon de reconnaître une animation.
+const ANIMATED_MIME_RE = /^image\/(gif|webp|avif|apng)$/i;
 
 function ImageContent({ item }: { item: Item }) {
   const frozen = useBoard((s) => s.frozen);
   const imgRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animated = ANIMATED_IMAGE_RE.test(item.src ?? "");
+  const animated = ANIMATED_IMAGE_RE.test(item.src ?? "") || ANIMATED_MIME_RE.test(item.mime ?? "");
   const [painted, setPainted] = useState(false);
   // Affichée petite, une image passe par sa vignette : trente bannières en pleine définition saturent
   // le cache d'images décodées de Chromium, qui les évince et les laisse blanches jusqu'au repaint.
