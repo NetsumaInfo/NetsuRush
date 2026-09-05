@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "@/store";
 import { IS_REMOTE } from "@/lib/remote";
+import { startPreviewPlayback } from "@/lib/previewPlayback";
 
-// Aperçu vidéo hover/lecture-auto PARTAGÉ par les grilles rush (SceneCard) et recherche (ResultCard).
-// `play()` est appelé EXPLICITEMENT (pas seulement `autoPlay`) : dans WebView2 un <video autoPlay>
-// fraîchement monté ne démarre pas toujours seul → sans ce play() l'aperçu restait figé (bug search).
-// La lecture n'est JAMAIS suspendue par le défilement : les aperçus continuent de jouer pendant
-// qu'on parcourt la grille. Une pause au flick avait été essayée — elle rendait la grille figée
-// pendant le scroll, exactement ce qu'on ne veut pas. La fluidité vient d'ailleurs : DOM léger hors
-// écran, aucun backdrop-filter au-dessus d'une vidéo, nombre de lectures plafonné.
+// Shared grid player. Scrolling never pauses a still-visible preview; offscreen
+// cards retain a bounded cache of paused decoders for quick scroll reversals.
 export function PreviewVideo({
   url, label, onError, className, audible = false, paused = false,
 }: {
@@ -16,8 +12,7 @@ export function PreviewVideo({
   label: string;
   onError: () => void;
   className?: string;
-  // Cette carte est-elle SURVOLÉE ? Le son ne joue QUE sur la carte sous la souris : les aperçus en
-  // lecture automatique (jusqu'à ~24 simultanés) restent muets → pas de cacophonie. Défaut muet.
+  // Only the hovered card may play sound; autoplay remains muted.
   audible?: boolean;
   // La carte ne doit plus jouer (sortie d'écran, créneau rendu) mais on garde l'élément MONTÉ :
   // détruire puis recréer un élément média coûte un chargement + une init de décodeur, et au
@@ -47,20 +42,31 @@ export function PreviewVideo({
   // muet, sinon chaque survol relance du son (désagréable) sans possibilité de le couper depuis ici.
   const wantSound = !IS_REMOTE && audible && !hoverMuted && hoverVolume > 0 && playerVolume > 0;
   useEffect(() => {
+    const v = ref.current;
+    if (!v || animatedWebp) return;
+    if (v.getAttribute("src") !== url) v.setAttribute("src", url);
+    return () => {
+      // React removing the node does not synchronously release its decoder and
+      // pending reads. Explicit unloading prevents resource buildup on scroll.
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+    };
+  }, [animatedWebp, url]);
+  useEffect(() => {
     if (animatedWebp) return;
     const v = ref.current;
     if (!v) return;
     // `muted` est piloté impérativement (l'attribut JSX reste constant = autoplay toujours autorisé).
     v.volume = hoverVolume;
     v.muted = !wantSound;
-    // Rejouer un élément DÉJÀ en lecture relance inutilement le pipeline : on ne touche à l'état de
-    // lecture que sur un vrai changement (l'effet re-tourne aussi pour un simple réglage de volume).
-    if (paused) { if (!v.paused) v.pause(); return; }
-    if (!v.paused) return;
-    const p = v.play();
-    // Chromium peut bloquer un autoplay AVEC son → repli muet puis relecture (jamais d'aperçu figé).
-    if (p && typeof p.catch === "function") p.catch(() => { v.muted = true; v.play().catch(() => {}); });
-  }, [paused, wantSound, hoverVolume, animatedWebp]);
+  }, [wantSound, hoverVolume, animatedWebp, url]);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || animatedWebp) return;
+    if (paused) { v.pause(); return; }
+    return startPreviewPlayback(v);
+  }, [paused, animatedWebp, url, wantSound]);
   if (animatedWebp) {
     return (
       <img

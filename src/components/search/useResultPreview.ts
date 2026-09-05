@@ -1,29 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { nr, nextProxyToken } from "@/lib/bridge";
-import { acquirePlaySlot, PLAY_LEAD_PX } from "@/components/rushes/cutStudioShared";
 import { PREVIEW_SETTINGS_EVENT } from "@/lib/previewSettings";
 import { observeViewport } from "@/lib/viewportObserver";
 import { acquirePrefetchSlot } from "@/lib/previewPrefetch";
-import { retainPausedVideo, requestPreloadMount } from "@/lib/previewVideoPool";
+import { usePreviewActivity } from "@/lib/usePreviewActivity";
 import { useGranted } from "@/lib/useGranted";
 import { getThumb, setThumb as setThumbCache, subscribeThumbs } from "@/lib/thumbCache";
 import { claimHoverPreview } from "@/lib/hoverPreview";
 
 const THUMB_MARGIN_PX = 1600;
-// PRÉCHARGE. INVARIANT : cette bande couvre celle de la LECTURE (`PLAY_LEAD_PX`, la seule source de
-// l'avance, partagée avec la grille de plans). Au-delà, la carte MONTE déjà sa <video> en pause : le
-// fichier est lu et le décodeur initialisé pendant qu'elle approche, si bien que le créneau n'a plus
-// qu'à lever la pause. Cf. useSceneCardMedia — les deux grilles suivent la même mécanique.
-const VIDEO_MARGIN_PX = PLAY_LEAD_PX + 300;
 // Une carte doit rester dans la bande ce temps-là avant qu'on encode son proxy : un défilement
 // rapide la traverse en bien moins, donc n'émet aucune demande (cf. useSceneCardMedia).
 const PREFETCH_SETTLE_MS = 220;
-// Délai avant de DÉMONTER la <video> d'une carte sortie de la bande (cf. useSceneCardMedia).
-const VIDEO_RELEASE_MS = 400;
 
-// État + chargement paresseux d'une carte de résultat : vignette du cache PARTAGÉ (celui du
-// découpage — cf. `thumbTime`), montage différé de la <video> proxy via deux IntersectionObservers,
-// créneau de lecture (« Tout lire » échelonné, survol hors quota) et nouvelle tentative de proxy.
+// Search thumbnail/proxy loading. The same usePreviewActivity hook as shot cards
+// owns visibility, playback starts and decoder retention.
 export function useResultPreview(opts: {
   filePath: string;
   /** Instant de la vignette, donné par `thumbTime(in, out)` — la MÊME clé de cache que la grille de
@@ -45,8 +36,6 @@ export function useResultPreview(opts: {
   const [thumbErr, setThumbErr] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [nearThumb, setNearThumb] = useState(false);
-  const [nearVideo, setNearVideo] = useState(false);   // ±lookahead : pré-encode le proxy en avance
-  const [visible, setVisible] = useState(false);       // vraiment à l'écran : proxy en priorité 'high'
   const [fetchedUrl, setFetchedUrl] = useState<string | null>(null);
   // Le cache de la vue prime : quand il connaît déjà le proxy, la carte n'a RIEN à demander et monte
   // sa <video> dans ce rendu-ci. `bustProxy` vide l'entrée → repli sur le chemin asynchrone.
@@ -74,20 +63,18 @@ export function useResultPreview(opts: {
   // vignette est aspect-video pleine largeur) → jamais plus de pixels que ce qui s'affiche.
   const proxyHRef = useRef(0);
 
-  // Trois bandes, servies par des observateurs PARTAGÉS (un par marge pour toute la grille, cf.
-  // `viewportObserver`) : une paire d'observateurs par carte saccadait le défilement dès quelques
-  // centaines de résultats.
+  // Thumbnail observation is separate from the shared playback activity.
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
     proxyHRef.current = Math.round((el.clientWidth * 9 / 16) * (window.devicePixelRatio || 1));
     const stopThumb = observeViewport(el, THUMB_MARGIN_PX, setNearThumb);
-    // Marge large → proxy pré-encodé EN AVANCE (priorité 'low') avant d'arriver à l'écran.
-    const stopVideo = observeViewport(el, VIDEO_MARGIN_PX, setNearVideo);
-    // Bande de LECTURE (courte avance) : proxy en 'high' + créneau pris avant l'entrée à l'écran.
-    const stopVisible = observeViewport(el, PLAY_LEAD_PX, setVisible);
-    return () => { stopThumb(); stopVideo(); stopVisible(); };
+    return stopThumb;
   }, []);
+
+  const { nearVideo, visible, wantVideo, showVideo, videoPaused } = usePreviewActivity({
+    rootRef, index, play, hovered, url,
+  });
 
   // Priorité lue via ref : la faire entrer dans les dépendances relancerait l'effet au moment PRÉCIS
   // où la carte entre à l'écran, c'est-à-dire abandonnerait la demande qu'on attend.
@@ -121,53 +108,6 @@ export function useResultPreview(opts: {
       if (cached) { setThumb(cached); setThumbErr(false); }
     });
   }, [thumb, filePath, thumbAt]);
-
-  // « Tout lire » : créneau de lecture (échelonné, quota) — seulement pour les cartes VISIBLES
-  // (la marge lookahead ne vole pas de créneau). Le survol joue hors quota.
-  // Le survol N'ENTRE PAS dans cette condition : il y rendait le créneau en entrant sous le curseur
-  // et le redemandait en sortant, en repassant par la file — la carte se figeait alors qu'elle jouait
-  // déjà, et chaque passage de souris relançait le cycle. Cf. useSceneCardMedia.
-  // Droit accordé (cf. useGranted) : il retombe sans re-rendu à la sortie de la bande de lecture.
-  const slotGranted = useGranted(play && visible, (grant) => acquirePlaySlot(index, grant), [index]);
-
-  // On encode le proxy UNIQUEMENT quand la carte joue vraiment : survol (immédiat) ou créneau de
-  // lecture accordé (échelonné). PAS de pré-encode spéculatif de tout l'écran : « Tout
-  // lire » demandait sinon un proxy pour CHAQUE carte visible d'un coup → NVENC noyé (PROXY_MAX) →
-  // la plupart échouaient → la lecture ne démarrait pas. Le créneau pace les demandes (cf. derush).
-  const wantVideo = nearVideo && (hovered || slotGranted);
-
-  // L'élément naît DÈS la bande de préchauffe, sans attendre le créneau, et reste MONTÉ tant que la
-  // carte est dans la bande : on met en pause plutôt que de détruire l'élément média (chargement +
-  // init de décodeur à chaque re-montage). Préchauffe conditionnée à « lecture auto ou survol » :
-  // sinon une grille au repos monterait une <video> par carte de la bande. Cf. useSceneCardMedia.
-  const [held, setHeld] = useState(false);
-  // Le pool a démonté cet élément faute de place : ne PAS le remonter pour la simple préchauffe, le
-  // rendu et le pool se relanceraient sans fin. Veto levé à la sortie de bande.
-  const [preloadEvicted, setPreloadEvicted] = useState(false);
-  if (preloadEvicted && !nearVideo) setPreloadEvicted(false);
-  // Préchauffe RYTHMÉE par le même régulateur que la grille de plans (previewVideoPool) : le tour
-  // accordé pose `held` ; une carte qui doit jouer n'attend pas. Cf. useSceneCardMedia.
-  const preloadWanted = nearVideo && (play || hovered) && !preloadEvicted && !!url;
-  useEffect(() => {
-    if (!preloadWanted || wantVideo || held) return;
-    return requestPreloadMount(index, () => setHeld(true));
-  }, [preloadWanted, wantVideo, held, index]);
-  if (wantVideo && url && !held) setHeld(true);
-  if (held && !url) setHeld(false);
-  useEffect(() => {
-    if (!held || nearVideo) return;
-    const t = setTimeout(() => setHeld(false), VIDEO_RELEASE_MS);
-    return () => clearTimeout(t);
-  }, [held, nearVideo]);
-
-  const showVideo = held && !!url;
-  const videoPaused = !wantVideo;
-
-  // Plafond global des <video> retenues en pause (cf. previewVideoPool).
-  useEffect(() => {
-    if (!showVideo || !videoPaused) return;
-    return retainPausedVideo(() => { setHeld(false); setPreloadEvicted(true); });
-  }, [showVideo, videoPaused]);
 
   // Génère/récupère le proxy en HAUTE priorité (la carte est dans le focus). Démontage / perte de
   // focus → proxyCancel (kill encode / sort de la file) → le créneau NVENC repart aux visibles.

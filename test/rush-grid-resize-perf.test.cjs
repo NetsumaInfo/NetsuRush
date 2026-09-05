@@ -69,34 +69,16 @@ test('every preview grid publishes the real row height', () => {
   }
 });
 
-// Les budgets d'aperçu se lisent dans DEUX fichiers. Chromium cesse de créer un lecteur média
-// au-delà d'environ 75 par frame, et le fait SANS erreur : les dernières cartes d'un écran dense
-// restent alors figées sur leur vignette pour toujours. La somme des deux plafonds doit donc rester
-// sous cette borne — c'est le genre de règle qui se casse en retouchant un seul des deux nombres.
-test('play and preload video budgets stay under the browser media-player limit', () => {
-  const playing = Number(/const MAX_PLAYING_HARD = (\d+)/.exec(read('src/components/rushes/cutStudioShared.ts'))[1]);
-  const paused = Number(/const MAX_PAUSED = (\d+)/.exec(read('src/lib/previewVideoPool.ts'))[1]);
-  assert.ok(playing >= 40, `autoplay ceiling too low (${playing}): a dense grid strands its bottom rows`);
-  assert.ok(playing + paused <= 72, `budget ${playing}+${paused} leaves no headroom under Chromium's ~75 players`);
-});
-
-// La bande de PRÉCHARGE doit couvrir celle de la LECTURE : une carte à qui l'on accorde son créneau
-// alors que sa <video> n'est pas encore montée repart pour un chargement plus une init de décodeur,
-// c'est-à-dire exactement la vignette figée qu'on cherche à supprimer.
-test('the preload band covers the play band', () => {
-  const media = read('src/components/rushes/useSceneCardMedia.ts');
-  assert.match(media, /const VIDEO_MIN_MARGIN_PX = PLAY_LEAD_PX \+ (\d+)/,
-    'the preload band must be derived from PLAY_LEAD_PX, never restated as its own number');
-  assert.match(read('src/components/rushes/cutStudioShared.ts'), /Math\.ceil\(PLAY_LEAD_PX \/ rowH\)/,
-    'the autoplay ceiling must count the lead rows from the same constant the observer uses');
-});
-
-// Le créneau de lecture se rythme sur la FRAME : un minuteur travaille ENTRE les frames, donc en
-// concurrence avec le défilement, et son premier tick est un retard pur sur la carte qu'on regarde.
-test('play slots are granted on animation frames, not on a timer', () => {
-  const shared = read('src/components/rushes/cutStudioShared.ts');
-  assert.match(shared, /requestAnimationFrame/);
-  assert.doesNotMatch(shared, /setInterval\(/);
+test('all preview cards share strict visibility and paced starts', () => {
+  const activity = read('src/lib/usePreviewActivity.ts');
+  assert.match(activity, /observeViewport\(el, 0, setVisible\)/);
+  assert.match(activity, /play && visible/);
+  assert.match(activity, /visible && \(hovered \|\| started\)/);
+  for (const file of ['src/components/rushes/useSceneCardMedia.ts', 'src/components/search/useResultPreview.ts']) {
+    assert.match(read(file), /usePreviewActivity\(/);
+    assert.doesNotMatch(read(file), /acquirePlaySlot|requestPreloadMount|retainPausedVideo/);
+  }
+  assert.doesNotMatch(read('src/components/rushes/cutStudioShared.ts'), /MAX_PLAYING_HARD|playingActive/);
 });
 
 // Une carte dont l'URL de proxy est déjà résolue ne doit RIEN attendre : la lecture du cache est
@@ -113,9 +95,9 @@ test('cards read the resolved proxy URL synchronously while rendering', () => {
 // remonter cet élément au titre de la seule PRÉCHARGE, les deux se relanceraient sans fin : montage,
 // éviction, montage. Seule une carte qui doit vraiment jouer reprend sa place.
 test('an evicted preview is not remounted by the preload path alone', () => {
-  const media = read('src/components/rushes/useSceneCardMedia.ts');
+  const media = read('src/lib/usePreviewActivity.ts');
   assert.match(media, /retainPausedVideo\(\(\) => \{ setHeld\(false\); setPreloadEvicted\(true\); \}\)/);
-  assert.match(media, /const preloadWanted = nearVideo && \(play \|\| hovered\) && !preloadEvicted/);
+  assert.match(media, /const preloadWanted = nearVideo && play && !preloadEvicted/);
   assert.match(media, /if \(preloadEvicted && !nearVideo\) setPreloadEvicted\(false\)/,
     'the veto must be lifted when the card leaves the band, or it never preloads again');
   // La préchauffe est RYTHMÉE (créer un WebMediaPlayer bloque le thread principal), mais une carte
@@ -137,14 +119,6 @@ test('the preview-settings fingerprint is cached, not re-read from storage per c
     'the cache must be cleared before the event, or a listener reads the old value');
 });
 
-// La boucle de créneaux ne doit pas se réarmer quand elle n'a rien pu accorder : le plafond atteint,
-// elle trierait la file à chaque frame, sans fin, pendant que la grille est ouverte.
-test('the play-slot pump stops instead of spinning once the ceiling is reached', () => {
-  const shared = read('src/components/rushes/cutStudioShared.ts');
-  assert.match(shared, /if \(granted && slotQueue\.length\) pumpSlots\(\)/);
-  assert.match(shared, /if \(!slotQueue\.length \|\| playingActive >= maxPlaying\) return/);
-});
-
 // Un aperçu monté en avance est en pause : l'attribut autoPlay le ferait démarrer pour rien, juste
 // avant que l'effet ne le remette en pause — du décodage gaspillé par carte préchauffée.
 test('a preloaded preview loads without starting playback', () => {
@@ -153,25 +127,11 @@ test('a preloaded preview loads without starting playback', () => {
   assert.match(src, /preload="auto"/, 'the element must still load and prime its decoder while paused');
 });
 
-// La grille de RECHERCHE a son propre hook d'aperçu. Il doit suivre exactement la même mécanique que
-// celui des plans, sinon les deux dérivent et le module Recherche retombe, seul, sur les vignettes
-// figées au défilement. Ces règles sont celles qui coûtaient cher à trouver.
-test('the search preview hook follows the same playback mechanics as the shot grid', () => {
+test('search shares activity while keeping its cached URL and settled-request handling', () => {
   const src = read('src/components/search/useResultPreview.ts');
-  assert.match(src, /import \{ acquirePlaySlot, PLAY_LEAD_PX \}/,
-    'the play lead must come from the shared constant, not be restated here');
-  assert.match(src, /const VIDEO_MARGIN_PX = PLAY_LEAD_PX \+ (\d+)/,
-    'the preload band must be derived from the play band so it always covers it');
-  assert.match(src, /const url = fetchedUrl \?\? peekProxy\?\.\(\) \?\? null/,
-    'a resolved proxy URL must be read synchronously while rendering');
-  assert.match(src, /const preloadWanted = nearVideo && \(play \|\| hovered\) && !preloadEvicted/,
-    'the <video> must mount on the preload band, with the anti-loop veto');
-  assert.match(src, /requestPreloadMount\(index, \(\) => setHeld\(true\)\)/,
-    'speculative mounts must go through the shared pacer, like the shot grid');
-  assert.match(src, /useGranted\(play && visible, \(grant\) => acquirePlaySlot\(index, grant\), \[index\]\)/,
-    'hover must not make the card drop and re-queue its play slot');
-  assert.match(src, /if \(!settled\) nr\.proxyCancel\(token\)/,
-    'a request that already resolved has nothing left to cancel');
+  assert.match(src, /usePreviewActivity\(/);
+  assert.match(src, /const url = fetchedUrl \?\? peekProxy\?\.\(\) \?\? null/);
+  assert.match(src, /if \(!settled\) nr\.proxyCancel\(token\)/);
 });
 
 // Les deux vues résolvent leurs proxies en UN appel. Sans ça, chaque carte réclame le sien au core

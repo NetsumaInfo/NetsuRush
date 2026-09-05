@@ -87,11 +87,11 @@ test('une carte repartie avant son tour ne monte rien', () => {
   assert.deepStrictEqual(granted, ['restee']);
 });
 
-test('le remise à zéro vide la file (changement de rush)', () => {
+test('cancelling the last queued mount leaves no stale grant', () => {
   const { pool, tick } = loadPool();
   const granted = [];
-  for (let i = 0; i < 10; i++) pool.requestPreloadMount(i, () => granted.push(i));
-  pool.resetPreloadMounts();
+  const cancel = pool.requestPreloadMount(1, () => granted.push(1));
+  cancel();
   tick();
-  assert.strictEqual(granted.length, 0, 'aucune carte de l\'ancien rush ne doit être montée');
+  assert.deepStrictEqual(granted, []);
 });

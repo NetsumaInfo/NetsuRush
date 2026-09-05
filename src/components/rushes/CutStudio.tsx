@@ -15,7 +15,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
-import { autoplayCeiling, canFewerCols, canMoreCols, fmt, gridContainerStyle, gridMetrics, setMaxPlaying, stepCols, type Segment } from "./cutStudioShared";
+import { canFewerCols, canMoreCols, fmt, gridContainerStyle, gridMetrics, stepCols, type Segment } from "./cutStudioShared";
 import { RATE_LADDER } from "./cutShortcuts";
 import { useCutActions } from "./useCutActions";
 import { useCutShortcuts } from "./useCutShortcuts";
@@ -139,8 +139,6 @@ export function CutStudio() {
       const cw = el.clientWidth, ch = el.clientHeight;
       if (!cw || !ch) return;
       setGridW(cw);
-      const ceiling = autoplayCeiling(cw, ch, cols, narrow);
-      if (ceiling) setMaxPlaying(ceiling);
     };
     recompute();
     const ro = new ResizeObserver(recompute);

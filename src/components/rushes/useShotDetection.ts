@@ -7,7 +7,7 @@ import { detectionOptionsFor, detectionOptionsKey, detectionThreshold } from "@/
 import { createSmoothProgress } from "@/lib/smoothProgress";
 import { toast } from "@/components/ui/toast";
 import {
-  nextSegId, modelLabel, resetPlaySlots, PRESETS, MODELS, type Segment,
+  nextSegId, modelLabel, PRESETS, MODELS, type Segment,
 } from "./cutStudioShared";
 import { usePreviewCache, type GenerationState, type PreviewSource } from "./previewCache";
 
@@ -344,10 +344,6 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   const helpersRef = useRef({ warmThumbs, playScene });
   useEffect(() => { helpersRef.current = { warmThumbs, playScene }; }, [playScene, warmThumbs]);
 
-  // État des créneaux de lecture remis à zéro à l'entrée/sortie du studio (évite l'héritage
-  // d'un compteur faussé d'une session précédente → « Lecture auto » fiable à la réouverture).
-  useEffect(() => { resetPlaySlots(); return () => resetPlaySlots(); }, []);
-
   // Sonde de CHAQUE rush du flux, en parallèle. La table est posée d'un coup, dans l'ordre du flux :
   // les rushs n'apparaissent jamais un par un dans l'entête au rythme des réponses.
   useEffect(() => {
@@ -407,7 +403,6 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   // route, donc rien n'apparaît sous le curseur ni ne déplace ce qu'on est en train de regarder.
   useEffect(() => {
     let alive = true;
-    resetPlaySlots();
     // Vide l'état du flux précédent avant le rechargement async du cache (flux/modèle changé).
     setSegments([]); setActive(null); setActiveUrl(null);
     setErr(null);

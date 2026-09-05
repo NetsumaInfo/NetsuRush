@@ -16,7 +16,6 @@ import { ResultCard } from "@/components/search/ResultCard";
 import { hitKey, grid } from "@/components/search/searchHelpers";
 import { sendPathToBoard } from "@/components/reference/boardActions";
 import { ExportButton } from "@/components/export/ExportButton";
-import { setMaxPlaying, resetPlaySlots, MAX_PLAYING_HARD } from "@/components/rushes/cutStudioShared";
 import { usePreviewCache } from "@/components/rushes/previewCache";
 import { warmResolveThumbs } from "@/lib/thumbCache";
 import { thumbTime } from "@/lib/utils";
@@ -68,18 +67,8 @@ export function SearchResults() {
   // son proxy sans un seul ffmpeg de plus.
   const preview = usePreviewCache();
 
-  // Nouveaux résultats (et montage) → reset sélection + lecture auto + créneaux. Le cache d'aperçus,
-  // lui, SURVIT : il est indexé par (fichier, plage), donc un plan retrouvé par une autre recherche
-  // rejoue son proxy sans réencoder.
-  // (compteur partagé remis à zéro : évite un état faussé hérité de la grille derush qui affamerait
-  // la lecture auto). On remonte AUSSI le plafond de lecture simultanée : le pool est partagé avec la
-  // grille derush (cutStudioShared) et CutStudio a pu le laisser bas → toutes les cartes visibles
-  // jouent sous « Tout lire » (la visibilité stricte borne déjà le nombre réel de <video> montées).
-  // Plafond au maximum tenable : cette grille est en colonnes CSS (2 → 6 selon la largeur), il n'y a
-  // donc pas de géométrie à mesurer pour en déduire un nombre de cartes visibles. À 30, un grand
-  // écran en 6 colonnes laissait ses dernières rangées figées sur leur vignette sous « Tout lire ».
-  // La borne réelle reste la bande de lecture : seules les cartes qui l'atteignent réclament un créneau.
-  useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); resetPlaySlots(); setMaxPlaying(MAX_PLAYING_HARD); }, [searchHits]);
+  // The proxy cache survives result changes; each card owns its playback cleanup.
+  useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); }, [searchHits]);
 
   // Amorçage des vignettes DÉJÀ générées en UN appel (rien n'est encodé ici) : les résultats
   // portent souvent des rushs déjà découpés, dont les vignettes sont sur le disque. Sans ce

@@ -1,13 +1,8 @@
-// État commun d'une grille de plans hors derush (Collections, Timeline Live) : colonnes, lecture
-// auto, plafond de lecture recalculé sur la zone visible. Tout ce qui touche aux APERÇUS (cache
-// d'URL, préchauffe, boutons de génération) vient de `usePreviewCache` — la MÊME implémentation que
-// le Découpage, et plus une copie qui dérive.
-//
-// Densité et lecture auto viennent des réglages de NetsuCut (`cutCols`/`cutGridPlay`) : ces grilles
-// affichent les MÊMES cartes que le Découpage, une densité par module se réglait trois fois.
+// Collections and Timeline Live share the shot cards, preview cache and grid
+// preferences with Derush. Playback ownership lives on each visible card.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useApp } from "@/store";
-import { autoplayCeiling, gridMetrics, resetPlaySlots, setMaxPlaying } from "./cutStudioShared";
+import { gridMetrics } from "./cutStudioShared";
 import { usePreviewCache, type PreviewRange, type PreviewSource, type PreviewThumbRange } from "./previewCache";
 
 // Réexportés : les vues parlaient de `ProxyShot`/`ThumbShot` avant que le pipeline d'aperçu ne soit
@@ -31,11 +26,7 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
   const [gridPlay, setGridPlay] = useState(() => useApp.getState().cutGridPlay);
   const gridScrollRef = useRef<HTMLDivElement>(null);
 
-  // Créneaux de lecture remis à zéro à l'entrée/sortie (évite un compteur faussé hérité).
-  useEffect(() => { resetPlaySlots(); return () => resetPlaySlots(); }, []);
-
-  // Largeur de la zone défilante → géométrie de la grille ET plafond de lecture, recalculés au
-  // resize / changement de densité (mêmes formules que le Découpage).
+  // Resize only updates grid geometry; visibility controls playback independently.
   const [gridW, setGridW] = useState(0);
   useEffect(() => {
     const el = gridScrollRef.current;
@@ -44,8 +35,6 @@ export function useShotGrid({ narrow = false }: { narrow?: boolean } = {}) {
       const cw = el.clientWidth, ch = el.clientHeight;
       if (!cw || !ch) return;
       setGridW(cw);
-      const ceiling = autoplayCeiling(cw, ch, cols, narrow);
-      if (ceiling) setMaxPlaying(ceiling);
     };
     recompute();
     const ro = new ResizeObserver(recompute);

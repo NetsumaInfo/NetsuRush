@@ -85,7 +85,9 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
   const targets = items.filter((i) => sel.has(i.path) && i.canProxy);
 
   async function generate() {
-    const profile = getActiveExportProfile(profiles, activeId);
+    // A proxy is a LIGHTER copy of the rush: an upscale carried by the active profile is dropped
+    // here, since enlarging a proxy costs hours of GPU to produce the opposite of what it is for.
+    const profile = { ...getActiveExportProfile(profiles, activeId), upscale: undefined };
     const dir = await nr.chooseDir();
     if (!dir || !profile) return;
     setRunning(true);
