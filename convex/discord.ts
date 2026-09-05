@@ -1,4 +1,5 @@
 import { action } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { authComponent, createAuth } from "./auth";
 
 export interface DiscordProfile {
@@ -8,7 +9,9 @@ export interface DiscordProfile {
   /** Décoration d'avatar (cadre Nitro, centre transparent) ou null. */
   decorationUrl: string | null;
   accentColor: string | null;
+  /** Current unique Discord username, not the mutable display name. */
   username: string | null;
+  displayName: string | null;
 }
 
 // Profil Discord de l'utilisateur connecté via `GET /users/@me` (token OAuth stocké par Better Auth).
@@ -16,6 +19,8 @@ export interface DiscordProfile {
 export const getCurrentDiscordProfile = action({
   args: {},
   handler: async (ctx): Promise<DiscordProfile | null> => {
+    const user = await authComponent.safeGetAuthUser(ctx);
+    if (!user) return null;
     const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
 
     let accessToken: string | undefined;
@@ -50,6 +55,21 @@ export const getCurrentDiscordProfile = action({
     const accentColor =
       typeof u.accent_color === "number" ? `#${u.accent_color.toString(16).padStart(6, "0")}` : null;
 
-    return { id: u.id ?? null, avatarUrl, decorationUrl, accentColor, username: u.global_name ?? u.username ?? null };
+    // The friend directory is fed from the AUTHENTICATED Discord identity, never from a renderer
+    // claim: the account's stable snowflake and its current normalized username become exact
+    // lookup keys so someone can be added by what they already know (`docs/collab.md`).
+    const username = u.username?.trim().toLowerCase() || null;
+    const displayName = u.global_name?.trim() || null;
+    if (u.id && username) {
+      await ctx.runMutation(internal.social.syncDiscordProfile, {
+        userId: user._id,
+        discordId: u.id,
+        discordUsername: username,
+        name: displayName || user.name?.trim() || username,
+        ...(user.image ? { image: user.image } : {}),
+      });
+    }
+
+    return { id: u.id ?? null, avatarUrl, decorationUrl, accentColor, username, displayName };
   },
 });
