@@ -666,7 +666,8 @@
       "media": "Medien-Cache",
       "cleanup": "Bereinigung",
       "project": "Projekt-Cache",
-      "projects": "Projekte"
+      "projects": "Projekte",
+      "board": "NetsuBoard"
     },
     "system": {
       "updates": "Updates",
@@ -678,5 +679,42 @@
     "title": "Indizierung",
     "subtitle": "Das Rohmaterial wird zuerst in Einstellungen zerlegt, dann wird jede Einstellung analysiert. Was an den Ergebnissen nichts ändert, ist bereits aktiv.",
     "cutTitle": "Einstellungserkennung"
+  },
+  "boardAssets": {
+    "title": "Board-Speicher",
+    "intro": "Die App bewahrt eigene Medien auf: eingefügte Bilder, aus einem Link geholte Medien, extrahierte Frames, Upscale-Ergebnisse. Ein gespeichertes .netsu-Projekt legt diese Bytes in seinem Begleitordner ab — der Speicher hält dann nur noch ein Duplikat, das ohne Verlust freigegeben werden kann. Die Anzeige-Caches haben ihre eigene Seite.",
+    "disk": "{{free}} frei von {{total}}",
+    "scanning": "Speicher wird analysiert…",
+    "failed": "Vorgang fehlgeschlagen",
+    "freedNotice": "{{size}} freigegeben ({{count}} Dateien)",
+    "movedNotice": "{{size}} verschoben ({{count}} Dateien)",
+    "movedPartly": "{{count}} Dateien verschoben, {{failed}} fehlgeschlagen (bleiben liegen)",
+    "archivedNotice": "Board in „{{name}}“ gespeichert: seine Medien liegen jetzt im Projektordner",
+    "settling": "{{count}} werden gerade geschrieben",
+    "settlingHint": "Eine eben geschriebene Datei kann zu einem Import gehören, den das Board noch nicht platziert hat. Sie wird beim nächsten Durchgang bewertet.",
+    "footnote": "Medien von deiner eigenen Festplatte sind nie betroffen: die App rührt nur Dateien an, die sie selbst geschrieben hat.",
+    "safe": {
+      "hint": "Datei für Datei geprüft: diese Bytes liegen bereits im Begleitordner eines Projekts.",
+      "title": "Gefahrlos freigebbar",
+      "duplicated": "Medien, die bereits in einem Projekt liegen ({{count}})",
+      "duplicatedHint": "Ihre Bytes liegen im Begleitordner eines Projekts, zum Beispiel „{{project}}“.",
+      "duplicatedNone": "Bisher kein Duplikat gefunden.",
+      "action": "Freigeben"
+    },
+    "sole": {
+      "title": "Zuerst in Sicherheit bringen",
+      "hint": "Diese Medien existieren nirgendwo sonst. Nichts hier löscht sie: erst sichern, dann rücken sie in den Abschnitt darüber.",
+      "empty": "Nichts gefährdet: alles, was die App aufbewahrt, existiert auch anderswo.",
+      "untitled": "Board ohne Titel",
+      "sceneCount": "{{count}} Medien, die nur die App besitzt · {{size}}",
+      "shared": "Geteiltes Board",
+      "sharedHint": "Ein geteiltes Board hat keine Projektfassung: sein Dokument ist maßgeblich und die Zusammenarbeit verwaltet seine Medien.",
+      "openBoard": "Board geöffnet",
+      "openBoardHint": "Dieses Board ist geöffnet: benutze „Speichern unter…“ in seiner Werkzeugleiste.",
+      "archive": "Als Projekt speichern…",
+      "orphans": "Medien, die kein Board anfordert",
+      "orphansHint": "{{count}} Dateien · {{size}}. Nichts zeigt sie mehr an, aber dies ist die einzige Kopie.",
+      "move": "In einen Ordner verschieben…"
+    }
   }
 }

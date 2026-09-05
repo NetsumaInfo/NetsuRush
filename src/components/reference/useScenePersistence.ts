@@ -58,6 +58,15 @@ function retainedRefs(): string[] {
   return [...out];
 }
 
+/**
+ * Localisateurs locaux que le board AFFICHÉ peut encore réclamer, historique d'annulation compris.
+ * Paramètres › Stockage s'en sert pour ne pas prendre pour un orphelin un média posé à l'écran mais
+ * pas encore enregistré dans une scène.
+ */
+export function liveMediaRefs(): string[] {
+  return retainedRefs();
+}
+
 // ── Scène collaborative ─────────────────────────────────────────────────────────────────────────
 // Une scène partagée ne persiste AUCUN item : le document Loro fait foi, et une seconde copie
 // modifiable les ferait diverger. Elle garde en revanche deux choses que le document ne peut pas

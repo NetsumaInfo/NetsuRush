@@ -666,7 +666,8 @@
       "media": "素材缓存",
       "cleanup": "清理",
       "project": "项目缓存",
-      "projects": "项目"
+      "projects": "项目",
+      "board": "NetsuBoard"
     },
     "system": {
       "updates": "更新",
@@ -678,5 +679,42 @@
     "title": "索引",
     "subtitle": "素材先被切成镜头，再逐个镜头分析。不影响结果的设置已经默认开启。",
     "cutTitle": "镜头分割"
+  },
+  "boardAssets": {
+    "title": "板面存储",
+    "intro": "应用会保留属于自己的媒体：粘贴的图片、从链接取得的媒体、抽取的帧、放大结果。保存 .netsu 项目会把这些字节归档到其伴随文件夹 — 此后仓库只保留一份副本，可以放心释放。显示缓存另有专页。",
+    "disk": "{{total}} 中可用 {{free}}",
+    "scanning": "正在分析存储…",
+    "failed": "操作失败",
+    "freedNotice": "已释放 {{size}}（{{count}} 个文件）",
+    "movedNotice": "已移动 {{size}}（{{count}} 个文件）",
+    "movedPartly": "已移动 {{count}} 个文件，{{failed}} 个失败（保留原处）",
+    "archivedNotice": "板面已保存为“{{name}}”：其媒体现在位于项目文件夹中",
+    "settling": "{{count}} 个正在写入",
+    "settlingHint": "刚写入的文件可能属于板面尚未放置的导入。下次检查时再判定。",
+    "footnote": "你从自己磁盘添加的媒体绝不受影响：应用只处理它自己写入的文件。",
+    "safe": {
+      "hint": "逐个文件核对过：这些字节已存在于某个项目的伴随文件夹中。",
+      "title": "可安全释放",
+      "duplicated": "已归入项目的媒体（{{count}} 个）",
+      "duplicatedHint": "其字节位于某个项目的伴随文件夹中，例如“{{project}}”。",
+      "duplicatedNone": "目前未发现副本。",
+      "action": "释放"
+    },
+    "sole": {
+      "title": "请先妥善保存",
+      "hint": "这些媒体别处没有。这里不提供删除：先保存，它们就会移到上方那一节。",
+      "empty": "没有风险：应用保存的一切在别处也存在。",
+      "untitled": "未命名板面",
+      "sceneCount": "仅由应用保管的媒体 {{count}} 个 · {{size}}",
+      "shared": "共享板面",
+      "sharedHint": "共享板面没有项目版本：其文档为准，媒体由协作管理。",
+      "openBoard": "板面已打开",
+      "openBoardHint": "该板面已打开：请使用其工具栏中的“另存为…”。",
+      "archive": "保存为项目…",
+      "orphans": "没有板面需要的媒体",
+      "orphansHint": "{{count}} 个文件 · {{size}}。已无处显示，但这是唯一的副本。",
+      "move": "移动到文件夹…"
+    }
   }
 }

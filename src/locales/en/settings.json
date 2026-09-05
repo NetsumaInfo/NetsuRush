@@ -666,7 +666,8 @@
       "media": "Media cache",
       "cleanup": "Cleanup",
       "project": "Project cache",
-      "projects": "Projects"
+      "projects": "Projects",
+      "board": "NetsuBoard"
     },
     "system": {
       "updates": "Updates",
@@ -678,5 +679,42 @@
     "title": "Indexing",
     "subtitle": "Rushes are first cut into shots, then each shot is analysed. Settings that change nothing in the results are already on.",
     "cutTitle": "Shot detection"
+  },
+  "boardAssets": {
+    "title": "Board storage",
+    "intro": "The app keeps media of its own: pasted images, media fetched from a link, extracted frames, upscale results. Saving a .netsu project files those bytes in its companion folder — the store then holds only a duplicate, which can be freed without losing anything. Display caches have their own page.",
+    "disk": "{{free}} free of {{total}}",
+    "scanning": "Scanning storage…",
+    "failed": "Operation failed",
+    "freedNotice": "Freed {{size}} ({{count}} files)",
+    "movedNotice": "Moved {{size}} ({{count}} files)",
+    "movedPartly": "{{count}} files moved, {{failed}} failed (left in place)",
+    "archivedNotice": "Board saved to “{{name}}”: its media now live in the project folder",
+    "settling": "{{count}} still being written",
+    "settlingHint": "A file written moments ago may belong to an import the board has not placed yet. It will be judged on the next pass.",
+    "footnote": "Media you added from your own disk are never involved: the app only touches files it wrote itself.",
+    "safe": {
+      "hint": "Checked file by file: these bytes already exist inside a project's companion folder.",
+      "title": "Safe to free",
+      "duplicated": "Media already filed in a project ({{count}})",
+      "duplicatedHint": "Their bytes are in a project's companion folder, for example “{{project}}”.",
+      "duplicatedNone": "No duplicate found yet.",
+      "action": "Free up"
+    },
+    "sole": {
+      "title": "Save these somewhere first",
+      "hint": "These media exist nowhere else. Nothing here deletes them: save them first and they move to the section above.",
+      "empty": "Nothing at risk: everything the app keeps also exists elsewhere.",
+      "untitled": "Untitled board",
+      "sceneCount": "{{count}} media the app is the only holder of · {{size}}",
+      "shared": "Shared board",
+      "sharedHint": "A shared board has no project version: its document is authoritative and collaboration handles its media.",
+      "openBoard": "Board open",
+      "openBoardHint": "This board is open: use “Save as…” from its toolbar.",
+      "archive": "Save as project…",
+      "orphans": "Media no board asks for",
+      "orphansHint": "{{count}} files · {{size}}. Nothing displays them any more, but this is the only copy.",
+      "move": "Move to a folder…"
+    }
   }
 }

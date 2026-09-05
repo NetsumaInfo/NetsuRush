@@ -1374,6 +1374,41 @@ export interface DiscordState {
 
 // ---- Board de référence (mood-board) -------------------------------------
 // Les items/vue transitent en `unknown` (frontière IPC) ; le module renderer les re-type.
+// ---- Magasin d'assets du board (Paramètres › Stockage › Board) ----
+// `reference/assets` n'est PAS un cache : pour un board resté dans la bibliothèque, ses octets sont
+// la seule copie qui existe. L'audit sépare donc ce qui est DOUBLÉ dans le dossier compagnon d'un
+// projet .netsu (libérable) de ce dont l'app est seule dépositaire (jamais supprimé, sorti sur
+// demande). Détails et règle de sûreté : `core/boardStorage.js`.
+export interface StorageAssetSample {
+  name: string;
+  bytes: number;
+  /** Projet .netsu dont le dossier compagnon détient déjà ces octets. */
+  project?: string;
+}
+export interface StorageHolderScene {
+  id: string;
+  name: string;
+  collaborative: boolean;
+  files: number;
+  bytes: number;
+  /** Part dont ce magasin est le SEUL dépositaire — ce qui disparaîtrait avec lui. */
+  soleFiles: number;
+  soleBytes: number;
+}
+export interface StorageAudit {
+  ok: boolean;
+  error?: string;
+  disk?: { free: number; total: number } | null;
+  assets?: {
+    dir: string;
+    freeable: { files: number; bytes: number; entries: StorageAssetSample[] };
+    orphans: { files: number; bytes: number; entries: StorageAssetSample[] };
+    held: { files: number; bytes: number; scenes: StorageHolderScene[] };
+    /** Fichiers trop récents pour être jugés (import en cours). */
+    settling: number;
+  };
+}
+
 export interface RefSceneMeta {
   id: string;
   name: string;
@@ -1548,6 +1583,15 @@ export interface RefApi {
   /** Chemins morts → chemins vivants des mêmes octets (empreinte portée par le nom). Aucune
       écriture, aucun octet lu. `dead` : ceux qu'aucune source n'a rendus. */
   locateMedia(refs: string[], projectPath?: string): Promise<{ ok: boolean; moves: Record<string, string>; dead: string[] }>;
+  // Magasin d'assets du board. `liveRefs` = localisateurs du board AFFICHÉ : un média posé mais pas
+  // encore enregistré n'est référencé par aucune scène et passerait pour un orphelin.
+  storageAudit(opts?: { liveRefs?: string[] }): Promise<StorageAudit>;
+  // Portée, jamais des chemins : le core recalcule ce qui est libérable au moment de l'écriture.
+  storageFree(opts?: { liveRefs?: string[] }): Promise<{ ok: boolean; bytes: number; files: number; error?: string }>;
+  // Déplace les orphelins hors du magasin : copie, vérification de taille, puis retrait.
+  storageMoveOrphans(opts: { destDir: string; liveRefs?: string[] }): Promise<{ ok: boolean; bytes: number; files: number; failed?: string[]; error?: string }>;
+  // Écrit une scène de la bibliothèque en projet .netsu : ses médias rejoignent le dossier compagnon.
+  storageArchiveScene(opts: { sceneId: string; destPath: string }): Promise<NetsuProjectSave>;
   fetchAsset(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
   // Résout le vrai média de N'IMPORTE quel lien (fichier direct, ou page web via OpenGraph) → asset
   // disque. Catch-all générique : GIF (giphy/tenor), imgur, articles, CDN sans extension propre.
@@ -3518,6 +3562,10 @@ const mock: NrApi = {
       saveAsset: async () => ({ ok: false, error: "mock" }),
       collabPreview: async () => ({ ok: false, error: "mock" }),
       locateMedia: async () => ({ ok: true, moves: {}, dead: [] }),
+      storageAudit: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      storageFree: async () => ({ ok: false, bytes: 0, files: 0, error: i18n.t("common:mock.appUnavailable") }),
+      storageMoveOrphans: async () => ({ ok: false, bytes: 0, files: 0, error: i18n.t("common:mock.appUnavailable") }),
+      storageArchiveScene: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       fetchAsset: async () => ({ ok: false, error: "mock" }),
       resolveMedia: async (_url, _options) => ({ ok: false, error: "mock" }),
       upscaleItem: async () => ({ ok: false, error: "mock" }),

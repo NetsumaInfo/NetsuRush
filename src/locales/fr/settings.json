@@ -666,7 +666,8 @@
       "media": "Cache médias",
       "cleanup": "Nettoyage",
       "project": "Cache projet",
-      "projects": "Projets"
+      "projects": "Projets",
+      "board": "NetsuBoard"
     },
     "system": {
       "updates": "Mises à jour",
@@ -678,5 +679,42 @@
     "title": "Indexation",
     "subtitle": "Les rush sont d'abord découpés en plans, puis chaque plan est analysé. Les réglages qui ne changent rien aux résultats sont déjà actifs.",
     "cutTitle": "Découpe en plans"
+  },
+  "boardAssets": {
+    "title": "Stockage du board",
+    "intro": "L'application garde des médias pour elle : image collée, média récupéré d'un lien, frames extraites, résultat d'un upscale. Enregistrer un projet .netsu range ces octets dans son dossier compagnon — le magasin n'en garde alors qu'un double, libérable sans rien perdre. Les caches d'affichage, eux, ont leur propre page.",
+    "disk": "{{free}} libres sur {{total}}",
+    "scanning": "Analyse du stockage…",
+    "failed": "Opération impossible",
+    "freedNotice": "{{size}} libérés ({{count}} fichiers)",
+    "movedNotice": "{{size}} déplacés ({{count}} fichiers)",
+    "movedPartly": "{{count}} fichiers déplacés, {{failed}} en échec (laissés en place)",
+    "archivedNotice": "Board enregistré dans « {{name}} » : ses médias sont désormais dans le dossier du projet",
+    "settling": "{{count}} en cours d'écriture",
+    "settlingHint": "Un fichier écrit à l'instant peut appartenir à un import que le board n'a pas encore posé. Il sera jugé au prochain passage.",
+    "footnote": "Les médias que vous avez ajoutés depuis votre disque ne sont jamais concernés : l'application ne touche qu'aux fichiers qu'elle a écrits elle-même.",
+    "safe": {
+      "hint": "Vérifié fichier par fichier : ces octets existent déjà dans le dossier compagnon d'un projet.",
+      "title": "Libérable sans risque",
+      "duplicated": "Médias déjà rangés dans un projet ({{count}})",
+      "duplicatedHint": "Leurs octets sont dans le dossier compagnon d'un projet, par exemple « {{project}} ».",
+      "duplicatedNone": "Aucun double détecté pour l'instant.",
+      "action": "Libérer"
+    },
+    "sole": {
+      "title": "À mettre à l'abri d'abord",
+      "hint": "Ces médias n'existent nulle part ailleurs. Aucun bouton ne les supprime : enregistrez-les d'abord, ils passeront alors dans la section du dessus.",
+      "empty": "Rien à mettre à l'abri : tout ce que garde l'application existe ailleurs.",
+      "untitled": "Board sans titre",
+      "sceneCount": "{{count}} médias dont l'application est seule dépositaire · {{size}}",
+      "shared": "Board partagé",
+      "sharedHint": "Un board partagé n'a pas de version « projet » : son document fait foi et la collaboration gère ses médias.",
+      "openBoard": "Board ouvert",
+      "openBoardHint": "Ce board est ouvert : utilisez « Enregistrer sous… » depuis la barre d'outils.",
+      "archive": "Enregistrer en projet…",
+      "orphans": "Médias qu'aucun board ne réclame",
+      "orphansHint": "{{count}} fichiers · {{size}}. Plus rien ne les affiche, mais cette copie est la seule.",
+      "move": "Déplacer vers un dossier…"
+    }
   }
 }

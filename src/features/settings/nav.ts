@@ -5,7 +5,7 @@
 import {
   Bell, Boxes, Brush, Cpu, DatabaseBackup, Download, FolderKanban, HardDrive, Info,
   Languages, Mic, MonitorPlay, Palette, PanelLeft, RefreshCw, Scissors, Sparkles, Terminal,
-  UserRound, Users, Wrench,
+  UserRound, Users, Wrench, Archive,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { AdobeLogo } from "@/components/HostIcon";
@@ -79,6 +79,9 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
     tabs: [
       { id: "media", icon: HardDrive },
       { id: "cleanup", icon: Brush },
+      // Le magasin d'assets du board n'est PAS un cache : pour une scène restée dans la
+      // bibliothèque, ses octets sont la seule copie qui existe (docs/modules.md).
+      { id: "board", icon: Archive },
       { id: "project", icon: DatabaseBackup },
       { id: "projects", icon: FolderKanban },
     ],

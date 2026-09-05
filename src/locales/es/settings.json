@@ -666,7 +666,8 @@
       "media": "Caché de medios",
       "cleanup": "Limpieza",
       "project": "Caché del proyecto",
-      "projects": "Proyectos"
+      "projects": "Proyectos",
+      "board": "NetsuBoard"
     },
     "system": {
       "updates": "Actualizaciones",
@@ -678,5 +679,42 @@
     "title": "Indexación",
     "subtitle": "Los brutos se cortan primero en planos y luego se analiza cada plano. Los ajustes que no cambian nada en los resultados ya están activos.",
     "cutTitle": "División en planos"
+  },
+  "boardAssets": {
+    "title": "Almacenamiento del tablero",
+    "intro": "La aplicación guarda medios propios: imágenes pegadas, medios obtenidos de un enlace, fotogramas extraídos, resultados de upscale. Guardar un proyecto .netsu archiva esos bytes en su carpeta complementaria — el almacén solo conserva entonces un duplicado, liberable sin perder nada. Las cachés de visualización tienen su propia página.",
+    "disk": "{{free}} libres de {{total}}",
+    "scanning": "Analizando el almacenamiento…",
+    "failed": "Operación fallida",
+    "freedNotice": "{{size}} liberados ({{count}} archivos)",
+    "movedNotice": "{{size}} movidos ({{count}} archivos)",
+    "movedPartly": "{{count}} archivos movidos, {{failed}} con error (se quedan donde están)",
+    "archivedNotice": "Tablero guardado en «{{name}}»: sus medios están ahora en la carpeta del proyecto",
+    "settling": "{{count}} escribiéndose ahora",
+    "settlingHint": "Un archivo recién escrito puede pertenecer a una importación que el tablero aún no ha colocado. Se evaluará en la próxima pasada.",
+    "footnote": "Los medios que añadiste desde tu disco nunca se ven afectados: la aplicación solo toca archivos que ha escrito ella misma.",
+    "safe": {
+      "hint": "Comprobado archivo por archivo: estos bytes ya existen en la carpeta complementaria de un proyecto.",
+      "title": "Liberable sin riesgo",
+      "duplicated": "Medios ya archivados en un proyecto ({{count}})",
+      "duplicatedHint": "Sus bytes están en la carpeta acompañante de un proyecto, por ejemplo «{{project}}».",
+      "duplicatedNone": "Ningún duplicado detectado por ahora.",
+      "action": "Liberar"
+    },
+    "sole": {
+      "title": "Ponlos a salvo primero",
+      "hint": "Estos medios no existen en ningún otro sitio. Nada aquí los borra: guárdalos antes y pasarán a la sección de arriba.",
+      "empty": "Nada en riesgo: todo lo que guarda la aplicación existe también en otro sitio.",
+      "untitled": "Tablero sin título",
+      "sceneCount": "{{count}} medios de los que la aplicación es la única depositaria · {{size}}",
+      "shared": "Tablero compartido",
+      "sharedHint": "Un tablero compartido no tiene versión «proyecto»: su documento manda y la colaboración gestiona sus medios.",
+      "openBoard": "Tablero abierto",
+      "openBoardHint": "Este tablero está abierto: usa «Guardar como…» desde su barra de herramientas.",
+      "archive": "Guardar como proyecto…",
+      "orphans": "Medios que ningún tablero reclama",
+      "orphansHint": "{{count}} archivos · {{size}}. Ya nada los muestra, pero esta es la única copia.",
+      "move": "Mover a una carpeta…"
+    }
   }
 }

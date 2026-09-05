@@ -29,7 +29,7 @@ const voice = require("./voice"); // module voix : transcription + silences (sou
 const exportMod = require("./export"); // export fichier piloté par profil (remux/encode, GPU/CPU, merge)
 const audioLang = require("./audioLang"); // normalisation des étiquettes de langue des pistes audio
 const { createReferenceStore, scanFolder, writeExportFile } = require("./reference");
-const { createBoardMediaLocator } = require("./boardMediaLocator");
+const { createBoardStorage } = require("./boardStorage");
 const wallpaper = require("./wallpaper");
 const { createCollectionStore } = require("./collections"); // dossiers de plans gardés (bibliothèque)
 const { createCollectionArchive } = require("./collectionArchive"); // archivage disque d'une collection + changement de dossier
@@ -94,7 +94,7 @@ function createRpc() {
   logbus.attach(broadcast);
 
   const refStore = createReferenceStore(DATA_DIR);
-  const boardMediaLocator = createBoardMediaLocator({ assetsDir: refStore.assetsDir });
+  const boardStorage = createBoardStorage({ refStore, netsu });
   const collectionStore = createCollectionStore(DATA_DIR);
   // Sondes injectées : la bibliothèque met les métas au format Resolve (timecode/résolution/codec) pour
   // que les rushs importés se lisent comme ceux du Media Pool dans la même grille.
@@ -883,7 +883,13 @@ function createRpc() {
     // Chemin mort d'un média de board : le nom porte son empreinte, on le retrouve sans lire
     // un octet (compagnon du projet, magasin d'assets, compagnons des projets connus).
     "reference:locateMedia": ([refs, projectPath]) =>
-      boardMediaLocator.locateMedia({ refs, projectPath }),
+      boardStorage.locateMedia({ refs, projectPath }),
+    // Magasin d'assets du board : ce que l'app peut refabriquer contre ce qu'elle seule détient.
+    // Le renderer demande une PORTÉE, jamais des chemins — le core recalcule ce qui y entre.
+    "reference:storageAudit": ([opts]) => boardStorage.audit(opts || {}),
+    "reference:storageFree": ([opts]) => boardStorage.free(opts || {}),
+    "reference:storageMoveOrphans": ([opts]) => boardStorage.moveOrphans(opts || {}),
+    "reference:archiveScene": ([opts]) => boardStorage.archiveScene(opts || {}),
     "reference:fetchAsset": ([url, options]) => refStore.fetchAsset(url, options || {}),
     // Résout le vrai média de N'IMPORTE quel lien (fichier direct ou page via OpenGraph) → asset.
     "reference:resolveMedia": ([url, options]) => refStore.resolveMedia(url, options || {}),
@@ -1181,13 +1187,20 @@ function createRpc() {
 
   // Ménage du magasin d'assets du board, AU DÉMARRAGE et à ce moment-là seulement : aucun board
   // n'est encore ouvert, donc aucun fichier affiché ne peut disparaître sous les yeux de personne.
-  // Sans ça, sorties d'upscale, frames extraites et médias téléchargés s'empilent pour toujours.
+  //
+  // Il ne retire QUE les doubles — les fichiers dont le core a retrouvé les mêmes octets dans le
+  // dossier compagnon d'un projet (boardStorage#free). L'ancien balayage par ÂGE emportait aussi
+  // les copies uniques : une sortie d'upscale que plus aucune scène ne réclamait disparaissait au
+  // bout de deux semaines, alors qu'elle n'existait nulle part ailleurs. Ces fichiers-là sont
+  // désormais listés dans Paramètres › Stockage › NetsuBoard, qui propose de les SORTIR vers un
+  // dossier plutôt que de les supprimer.
   const ASSET_SWEEP_DELAY_MS = 20000;
   const assetSweepTimer = setTimeout(() => {
-    const swept = refStore.sweepAssets({});
-    if (swept.ok && swept.removed) {
-      logbus.emit("core", "info", `[board] ${swept.removed} asset(s) inutilisés retirés (${Math.round(swept.bytes / 1048576)} Mo)`);
-    }
+    void boardStorage.free({}).then((swept) => {
+      if (swept.ok && swept.files) {
+        logbus.emit("core", "info", `[board] ${swept.files} double(s) d'asset retirés (${Math.round(swept.bytes / 1048576)} Mo)`);
+      }
+    }).catch(() => { /* le magasin n'est pas critique : le prochain démarrage réessaiera */ });
   }, ASSET_SWEEP_DELAY_MS);
   assetSweepTimer.unref?.();
 
