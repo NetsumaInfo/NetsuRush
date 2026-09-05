@@ -15,6 +15,7 @@ import type * as discord from "../discord.js";
 import type * as downloads from "../downloads.js";
 import type * as http from "../http.js";
 import type * as ideas from "../ideas.js";
+import type * as site from "../site.js";
 import type * as waitlist from "../waitlist.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   downloads: typeof downloads;
   http: typeof http;
   ideas: typeof ideas;
+  site: typeof site;
   waitlist: typeof waitlist;
 }>;
 
