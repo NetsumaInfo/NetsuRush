@@ -6,7 +6,9 @@ authors = ["Haim Faraj"]
 license = "AGPL-3.0-only"
 repository = "https://github.com/NetsumaInfo/NetsuRush"
 edition = "2021"
-rust-version = "1.77.2"
+# Raised for iroh 1.x, the peer-to-peer transport of collaborative projects. Declaring the old
+# 1.77.2 made cargo silently resolve iroh 0.29 instead — a stale API for a security-sensitive layer.
+rust-version = "1.85"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -36,6 +38,32 @@ tauri-plugin-process = "2"
 base64 = "0.22"
 lazy_static = "1.5"
 libloading = "0.8"
+# ── Collaborative projects (`docs/collab.md`) ──────────────────────────────────────────────────
+# Device identity. The Ed25519 key IS the iroh identity — the same 32 secret bytes — so it is
+# generated once and never regenerated. The X25519 key is a SEPARATE exchange key: no key material
+# is derived from the Ed25519 identity.
+ed25519-dalek = "2.1"
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+# Secrets come straight from the OS CSPRNG. `rand` is deliberately absent: ed25519-dalek 2 speaks
+# rand_core 0.6 while rand 0.9 speaks 0.9, and mixing the two does not compile.
+getrandom = "0.3"
+zeroize = "1.8"
+# Peer-to-peer transport: QUIC dialled by public key, with NAT traversal and a relay fallback. The
+# endpoint is built from the SAME persisted Ed25519 secret as the device identity, so the key a
+# peer allowlists never changes.
+iroh = "1"
+# `sync` only, for a one-shot async initialiser. Tasks run on `tauri::async_runtime`, which already
+# is a tokio runtime — a second runtime here would deadlock the endpoint.
+tokio = { version = "1.53", features = ["sync", "rt", "macros", "time"] }
+loro = "1.13.9"
+hpke = { version = "0.14.0", default-features = false, features = ["alloc", "getrandom", "x25519", "chacha"] }
+chacha20poly1305 = "0.11.0"
+hkdf = "0.13.0"
+sha2 = "0.11.0"
+blake3 = "1.8.6"
+rand_core = { version = "0.6", features = ["getrandom"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 # Windows : accès COM bas niveau au WebView2 (désactivation de la Tracking Prevention,
 # sinon le lecteur YouTube embarqué casse → « Vidéo non disponible »). Versions alignées sur
 # celles que Tauri tire déjà (webview2-com 0.38 / windows-core 0.61) → zéro doublon de crate.
@@ -51,4 +79,8 @@ windows = { version = "0.61", features = [
   "Win32_System_Com",
   "Win32_System_RestartManager",
   "Win32_Graphics_Gdi",
+  # DPAPI (CryptProtectData/CryptUnprotectData): at-rest protection of the collaborative key ring,
+  # scoped to the current Windows account. No extra crate, so nothing more to package.
+  "Win32_Security_Cryptography",
+  "Win32_Storage_FileSystem",
 ] }

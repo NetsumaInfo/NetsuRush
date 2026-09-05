@@ -7,10 +7,21 @@ use std::hash::{BuildHasher, Hasher};
 use std::sync::{atomic::{AtomicBool, Ordering}, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Manager, RunEvent};
+use tauri::{AppHandle, Emitter as _, Manager, RunEvent};
 
+mod collab;
 mod player;
 mod state;
+
+use collab::commands::{
+    collab_configure_auth, collab_device_forget, collab_device_identity, collab_head_discard_stale,
+    collab_invite_cancel, collab_invite_respond, collab_media_grant_known, collab_media_import,
+    collab_media_path, collab_media_resolve, collab_member_remove, collab_member_set_role,
+    collab_project_abort, collab_project_apply, collab_project_close, collab_project_create,
+    collab_project_delete, collab_project_flush_checkpoint, collab_project_invite,
+    collab_project_leave, collab_project_open, collab_project_projection, collab_project_redo,
+    collab_project_status, collab_project_undo,
+};
 
 // Handle du process core, gardé en état managé → tué à la fermeture (RunEvent::Exit).
 struct CoreProcess(Mutex<Option<Child>>);
@@ -496,10 +507,18 @@ fn nr_attach_file_paths(app: AppHandle, label: String) -> bool {
                     return Ok(()); // message d'un autre émetteur
                 };
                 let paths = dropped_paths(&args);
+                // A trusted OS drop is one of the two origins allowed to authorise an import into
+                // a shared document (the other is the native picker below). The grant travels
+                // beside the path so the renderer never has to be believed about where a file
+                // came from.
+                let grants: Vec<String> = paths
+                    .iter()
+                    .map(|path| collab::blobs::issue_trusted_grant(path).unwrap_or_default())
+                    .collect();
                 let _ = emitter.emit_to(
                     target.as_str(),
                     "nr://file-paths",
-                    serde_json::json!({ "id": id, "paths": paths }),
+                    serde_json::json!({ "id": id, "paths": paths, "grants": grants }),
                 );
                 Ok(())
             })),
@@ -518,6 +537,65 @@ fn nr_attach_file_paths(app: AppHandle, label: String) -> bool {
 #[tauri::command]
 fn nr_attach_file_paths(_app: AppHandle, _label: String) -> bool {
     false
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TrustedFileSelection {
+    path: String,
+    grant: String,
+}
+
+/// Opens the OS picker inside Rust and returns a one-use import capability beside every path.
+///
+/// Only the picker being opened HERE is what authorises the import: the renderer proves nothing by
+/// naming a path. The filter is the caller's own — it authorises nothing, it only spares the user a
+/// directory full of files the module cannot read — so the label stays translated on the JS side.
+#[tauri::command]
+async fn nr_pick_trusted_files(
+    app: AppHandle,
+    label: String,
+    extensions: Vec<String>,
+    multiple: bool,
+) -> Result<Vec<TrustedFileSelection>, String> {
+    use tauri_plugin_dialog::DialogExt as _;
+
+    if label.len() > 64 || extensions.len() > 64 {
+        return Err("invalid native file picker filter".into());
+    }
+    let extensions: Vec<&str> = extensions
+        .iter()
+        .map(String::as_str)
+        .filter(|value| {
+            !value.is_empty()
+                && value.len() <= 16
+                && value.chars().all(|c| c.is_ascii_alphanumeric())
+        })
+        .collect();
+    let mut dialog = app.dialog().file();
+    if !extensions.is_empty() {
+        dialog = dialog.add_filter(if label.is_empty() { "Files" } else { &label }, &extensions);
+    }
+    let selected = if multiple {
+        dialog.blocking_pick_files().unwrap_or_default()
+    } else {
+        dialog.blocking_pick_file().into_iter().collect()
+    };
+    selected
+        .into_iter()
+        .map(|file| {
+            let path = file
+                .into_path()
+                .map_err(|error| format!("native file path: {error}"))?;
+            let path = path
+                .to_str()
+                .ok_or_else(|| "native file path is not valid Unicode".to_string())?
+                .to_owned();
+            let grant =
+                collab::blobs::issue_trusted_grant(&path).map_err(|error| error.to_string())?;
+            Ok(TrustedFileSelection { path, grant })
+        })
+        .collect()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -560,6 +638,11 @@ pub fn run() {
     }
 
     builder = builder
+        // Range-capable reader for a shared document's media. Its bytes live in the shell's blob
+        // store, never on disk where the core could open them.
+        .register_uri_scheme_protocol("collab", |_context, request| {
+            collab::blobs::protocol_response(request)
+        })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
@@ -568,10 +651,37 @@ pub fn run() {
         .manage(CoreProcess(Mutex::new(None)))
         .manage(FilePathBridge(Mutex::new(std::collections::HashSet::new())))
         .manage(state::AppState::new())
+        .manage(collab::service::CollabService::spawn())
         .invoke_handler(tauri::generate_handler![
             nr_attach_file_paths,
+            nr_pick_trusted_files,
             nr_core_port,
             nr_core_token,
+            collab_configure_auth,
+            collab_device_identity,
+            collab_project_open,
+            collab_project_create,
+            collab_project_abort,
+            collab_project_flush_checkpoint,
+            collab_project_invite,
+            collab_invite_respond,
+            collab_invite_cancel,
+            collab_member_set_role,
+            collab_member_remove,
+            collab_project_leave,
+            collab_project_delete,
+            collab_head_discard_stale,
+            collab_device_forget,
+            collab_media_grant_known,
+            collab_media_import,
+            collab_media_path,
+            collab_media_resolve,
+            collab_project_close,
+            collab_project_apply,
+            collab_project_projection,
+            collab_project_status,
+            collab_project_undo,
+            collab_project_redo,
             player::commands::control::player_load,
             player::commands::control::player_load_at,
             player::commands::control::player_claim,
@@ -615,6 +725,21 @@ pub fn run() {
             player::commands::media::player_get_frame_preview
         ])
         .setup(|app| {
+            // Every applied revision — this window's own included — is announced. A renderer that
+            // recognises its own apply consumes the announcement instead of reloading a projection
+            // mid-gesture (`docs/collab.md`).
+            let collab_app = app.handle().clone();
+            app.state::<collab::service::CollabService>()
+                .attach_change_sink(move |project_id, revision| {
+                    let _ = collab_app.emit(
+                        "nr-collab-changed",
+                        serde_json::json!({
+                            "projectId": project_id,
+                            "revision": revision,
+                        }),
+                    );
+                });
+
             // Coffre Stronghold (clés API BYOK du Chat IA) : clé dérivée d'argon2 sur un sel local.
             let salt_path = app
                 .path()
