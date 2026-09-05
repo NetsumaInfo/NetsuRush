@@ -43,6 +43,7 @@
       "end": "Am Ende der Komposition hinzufügen"
     },
     "container": "Container",
+    "upscale": "Upscale",
     "mergeToOne": "In eine Datei zusammenführen",
     "fileName": "Dateinamen",
     "fileNamePlaceholder": "{base}_{index}",
@@ -196,7 +197,8 @@
   "summary": {
     "timelineImport": "Import in die Timeline",
     "streamCopy": "Stream-Copy",
-    "merged": " · zusammengeführt"
+    "merged": " · zusammengeführt",
+    "upscaled": " · Upscale {{scale}}×"
   },
   "codecUnknown": "Unbekannter Codec"
 }

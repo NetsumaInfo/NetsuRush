@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem,
 } from "@/components/ui/select";
+import { UpscalePane } from "@/components/upscale/UpscalePane";
 import { ExportAudioSelect } from "./ExportAudioSelect";
 import { ExportNaming } from "./ExportNaming";
 import { ExportTimelineTarget } from "./ExportTimelineTarget";
@@ -224,6 +225,21 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
+
+      {/* Agrandir les plans PENDANT l'export. Mêmes contrôles que le panneau Traitements et que
+          l'archivage d'une collection — c'est le même composant, aucune copie. Hors ré-encodage le
+          volet DISPARAÎT au lieu d'être grisé : l'upscale remplace les pixels, une copie de flux ne
+          peut pas le faire, et c'est un bloc repliable, pas une ligne de réglage à largeur fixe
+          (même règle que le gabarit de nommage). Le réglage lui-même survit au changement de flux. */}
+      {encode && (
+        <UpscalePane
+          value={profile.upscale}
+          onChange={(patch) => set({ upscale: { ...profile.upscale, ...patch } })}
+          label={t("editor.upscale")}
+          onLabel={t("toggle.yes")}
+          offLabel={t("toggle.no")}
+        />
+      )}
 
       <Row label={t("editor.optimization")} disabled={!encode}>
         <Select

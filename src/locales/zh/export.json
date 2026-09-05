@@ -43,6 +43,7 @@
       "end": "添加到合成末尾"
     },
     "container": "封装格式",
+    "upscale": "超分辨率",
     "mergeToOne": "合并为单个文件",
     "fileName": "文件名",
     "fileNamePlaceholder": "{base}_{index}",
@@ -196,7 +197,8 @@
   "summary": {
     "timelineImport": "导入到时间线",
     "streamCopy": "流复制",
-    "merged": " · 已合并"
+    "merged": " · 已合并",
+    "upscaled": " · 超分 {{scale}}×"
   },
   "codecUnknown": "未知编码"
 }

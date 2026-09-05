@@ -163,6 +163,13 @@ export type ExportIcon =
   | { type: "emoji"; ch: string }
   | { type: "image"; src: string };
 
+// Upscale applied WHILE re-encoding: exactly NetsuLab's model settings (`UpSettings`), like a
+// collection's archive pane — the two screens must behave the same, so they share the settings shape
+// and the engine. Type-only import: nothing from the Traitements panel lands in this module.
+export interface ExportUpscale extends Partial<import("@/components/upscale/upscaleShared").UpSettings> {
+  enabled?: boolean;
+}
+
 export interface ExportProfile {
   id: string;
   name: string;
@@ -192,6 +199,9 @@ export interface ExportProfile {
   folderTarget?: string | null;
   // Timeline visée par l'import (workflow timeline_import) : "open" | "new" | "new:<nom>" | "tl:<nom>".
   timelineTarget?: TimelineTargetValue;
+  // Upscale run on every shot during the export. Only read on `video_encode`: replacing pixels is
+  // out of reach of a stream copy or of a timeline import. Absent = off.
+  upscale?: ExportUpscale;
 }
 
 // ---------------------------------------------------------------------------
@@ -667,11 +677,35 @@ export function getExportProfileSummary(profile: ExportProfile): string {
   if (isTimelineImport(profile.workflow)) return i18n.t("export:summary.timelineImport");
   const codecLabel = usesEncoding(profile.workflow) ? getExportCodecLabel(profile.codec) : i18n.t("export:summary.streamCopy");
   const mergeLabel = profile.mergeEnabled ? i18n.t("export:summary.merged") : "";
-  return `${codecLabel} · ${profile.container.toUpperCase()}${mergeLabel}`;
+  // An upscale multiplies the export time by ten: it belongs in the one line that says what the
+  // profile does, not only inside its editor.
+  const upscaleLabel = upscaleEnabled(profile) ? i18n.t("export:summary.upscaled", { scale: exportUpscaleScale(profile.upscale) }) : "";
+  return `${codecLabel} · ${profile.container.toUpperCase()}${upscaleLabel}${mergeLabel}`;
 }
 
 export function getActiveExportProfile(profiles: ExportProfile[], activeProfileId: string): ExportProfile {
   return profiles.find((p) => p.id === activeProfileId) ?? profiles[0] ?? DEFAULT_EXPORT_PROFILE;
+}
+
+// Effective scale: restoration models work at 1x (same rule as `core/upscaleArgs.js`, which the
+// engine applies for real).
+export function exportUpscaleScale(upscale: ExportUpscale | undefined): number {
+  if (!upscale) return 2;
+  if (upscale.mode === "restore") return 1;
+  return upscale.scale ?? 2;
+}
+
+// True when this profile really enlarges its shots: the option is only read on a re-encode.
+export function upscaleEnabled(profile: ExportProfile): boolean {
+  return !!profile.upscale?.enabled && usesEncoding(profile.workflow);
+}
+
+// Upscale settings are kept AS THEY ARE — they are NetsuLab's own shape, and the core normalizes
+// them when the job starts. Only `enabled` is coerced, so a profile whose option is switched off
+// keeps the model and the scale that were picked, ready for the next time.
+function normalizeExportUpscale(upscale: ExportUpscale | undefined | null): ExportUpscale | undefined {
+  if (!upscale || typeof upscale !== "object") return undefined;
+  return { ...upscale, enabled: !!upscale.enabled };
 }
 
 function normalizeExportIcon(icon: ExportIcon | undefined | null): ExportIcon | undefined {
@@ -718,6 +752,7 @@ export function normalizeExportProfile(profile: ExportProfile): ExportProfile {
     binTarget: typeof profile.binTarget === "string" ? profile.binTarget : null,
     folderTarget: typeof profile.folderTarget === "string" ? profile.folderTarget : null,
     timelineTarget: coerceTimelineTarget(profile.timelineTarget),
+    upscale: normalizeExportUpscale(profile.upscale),
   };
 }
 

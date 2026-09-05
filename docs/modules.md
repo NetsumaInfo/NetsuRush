@@ -81,6 +81,25 @@ whole studio at every clip boundary, rebuilding the grid's several hundred cards
 scrolling. Its label must pass the clip name to `SelectValue` explicitly — Base UI renders the raw
 value otherwise, which showed the index instead of a name.
 
+## Export profiles (`src/features/export/profiles.ts` + `core/export.js`)
+
+A profile says HOW shots leave the app: imported into a host timeline, remuxed, or re-encoded. A
+re-encode profile can also **enlarge** the shots on the way out.
+
+- **The upscale settings are NetsuLab's own** (`UpscalePane`, the same component the archive of a
+  collection uses) and the job runs on the same engines through `core/upscaleRun.js`. Copying either
+  side would let them drift apart at the first setting added.
+- **Upscaling only exists on a re-encode.** It replaces the pixels, which no stream copy and no
+  timeline import can do, so the pane is only rendered on that flow — a greyed-out one would read as
+  a setting the user may still reach. The stored settings survive a flow change and come back with it.
+- **The engine owns the whole shot**: it cuts, it upscales, it encodes with the profile's codec,
+  container and audio. ffmpeg is not in the loop, so the batch concurrency drops to what a GPU can
+  hold (one AI model, two Turbo shaders) whatever the ffmpeg pool would have allowed.
+- **The planned file name is a request, not a promise** — the RTX VSR CLI writes its own MP4 — so
+  `produceClip` returns the path that was really written and the batch records that one.
+- **A collection's archive strips `profile.upscale`**: its own pane decides there, and its ledger
+  (which shot was already enlarged, at which scale) only knows about what it produced itself.
+
 ## `.netsu` container
 
 `core/netsu/`, façade `core/netsu.js`. The share and project format is a **SQLite container**, no longer a ZIP.

@@ -43,6 +43,7 @@
       "end": "コンポジションの最後に追加"
     },
     "container": "コンテナ",
+    "upscale": "アップスケール",
     "mergeToOne": "1つのファイルに結合",
     "fileName": "ファイル名",
     "fileNamePlaceholder": "{base}_{index}",
@@ -196,7 +197,8 @@
   "summary": {
     "timelineImport": "タイムラインへ読み込み",
     "streamCopy": "ストリームコピー",
-    "merged": " · 結合済み"
+    "merged": " · 結合済み",
+    "upscaled": " · アップスケール {{scale}}×"
   },
   "codecUnknown": "不明なコーデック"
 }

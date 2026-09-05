@@ -25,12 +25,7 @@ const { sanitizeName } = require('./utils');
 const { t } = require('./i18n');
 const { planArchive, shotIdentity, nameAt } = require('./archivePlan');
 const { fingerprint, statSource } = require('./upscaleLedger');
-const { upscaleArgs, upscaleModelId, upscaleScale } = require('./upscaleArgs');
-
-// Encodes d'upscale menés de front. L'IA charge un modèle en VRAM et sature déjà le GPU à elle
-// seule ; les shaders Turbo (libplacebo) sont assez légers pour en tenir deux.
-const IA_CONCURRENCY = 1;
-const TURBO_CONCURRENCY = 2;
+const upscaleRun = require('./upscaleRun');
 
 // Registre inerte : sans lui injecté, l'archivage se comporte comme avant (il produit tout).
 const NO_LEDGER = {
@@ -117,20 +112,20 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
 
   /**
    * Réglages d'upscale normalisés, ou null si l'option est éteinte / inexploitable. Ce sont les
-   * réglages de NetsuLab tels quels : `core/upscaleArgs.js` en dérive moteur, modèle et arguments,
+   * réglages de NetsuLab tels quels : `core/upscaleRun.js` en dérive moteur, modèle et arguments,
    * pour que l'archivage et le panneau Traitements produisent le même résultat.
    */
-  function normalizeUpscale(u) {
-    if (!u || !u.enabled || !upscaleMod) return null;
-    const { engine, args } = upscaleArgs(u);
-    const model = upscaleModelId(u);
-    if (!model) return null;
-    return { enabled: true, engine, model, scale: upscaleScale(u), args };
-  }
+  const normalizeUpscale = (u) => (upscaleMod ? upscaleRun.normalizeUpscale(u) : null);
 
-  /** Upscaler impose un ré-encodage : la copie de flux ne peut pas changer les pixels. */
+  /**
+   * Upscaler impose un ré-encodage : la copie de flux ne peut pas changer les pixels.
+   *
+   * L'upscale porté par le PROFIL d'export est retiré : ici c'est le volet d'archivage qui en
+   * décide, et le tri de `archivePlan` (ledger, plans déjà agrandis) ne vaut que pour lui. Le
+   * laisser passer agrandirait une seconde fois, hors registre, les plans confiés à l'export.
+   */
   const effectiveProfile = (profile, upscale) =>
-    (upscale ? { ...profile, workflow: 'video_encode' } : profile);
+    ({ ...profile, upscale: undefined, ...(upscale ? { workflow: 'video_encode' } : null) });
 
   /** État d'archivage précédent, indexé par identité de plan (avec reprise des archives par index). */
   function readEntries(c) {
@@ -168,43 +163,23 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
     });
   }
 
-  /** Un job d'upscale : une plage source → un fichier, au nom EXACT attendu par l'archive. */
-  function upscaleJob(event, item, ctx) {
-    const { profile, upscale, dir, base } = ctx;
-    const args = {
-      ...upscale.args,
-      input: item.shot.path, savePath: item.file, outDir: dir, baseName: base,
-      whole: false, segments: [{ in: item.shot.in, out: item.shot.out }],
-      exportCodec: profile.codec, encoderMode: profile.encoderMode, speed: profile.speed,
-      container: profile.container, audioMode: profile.audioMode,
-      importBack: false,
-    };
-    // Le panier temps réel cache trois exécutions (GLSL, RTX, poids ONNX) : l'aiguillage vit dans
-    // core/turbo.js et nulle part ailleurs.
-    if (upscale.engine === 'turbo') return turboMod.runTurbo(upscaleMod, event, args);
-    return upscaleMod.runUpscale(event, args);
-  }
-
   /**
    * Produit les plans à upscaler. Chaque encode passe par le PORTAIL GLOBAL : un archivage lancé
    * pendant un rendu ne double pas le nombre de sessions d'encodage de la machine.
    */
   async function runUpscales(event, items, ctx, onDone) {
     if (!items.length) return;
-    const limit = ctx.upscale.engine === 'turbo' ? TURBO_CONCURRENCY : IA_CONCURRENCY;
+    const limit = upscaleRun.upscaleConcurrency(ctx.upscale);
     const slot = encodeGate ? encodeGate.register(limit) : null;
+    // Une plage source → un fichier, au nom EXACT attendu par l'archive.
+    const job = (item) => upscaleRun.runUpscaleClip(event, {
+      upscale: ctx.upscale, profile: ctx.profile, input: item.shot.path, out: item.file,
+      start: item.shot.in, end: item.shot.out, baseName: ctx.base,
+    }, { upscaleMod, turboMod });
     try {
       await mapWithLimit(items, limit, async (item) => {
-        let r = null;
-        try {
-          r = encodeGate
-            ? await encodeGate.withSlot(() => upscaleJob(event, item, ctx))
-            : await upscaleJob(event, item, ctx);
-        } catch (e) {
-          r = { ok: false, error: String((e && e.message) || e) };
-        }
-        const produced = r && r.ok && Array.isArray(r.outputs) && r.outputs[0];
-        onDone(item, produced || null, produced ? null : (r && r.error) || t('failed'));
+        const r = encodeGate ? await encodeGate.withSlot(() => job(item)) : await job(item);
+        onDone(item, r.file, r.file ? null : r.error || t('failed'));
       });
     } finally {
       if (slot) slot.release();
