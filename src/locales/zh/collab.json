@@ -36,9 +36,9 @@
       "pending": "已发送过。",
       "already": "已在你的列表中。",
       "self": "这是你自己。",
-      "unknown": "标识无效。",
+      "unknown": "没有找到这个人。检查用户名，或粘贴对方的 Discord ID。",
       "ambiguous": "匹配到多个人。请使用其 Discord ID。",
-      "error": "失败。",
+      "error": "没能查到。再试一次。",
       "invited": "邀请已发送。"
     }
   },
@@ -58,31 +58,37 @@
     "leave": "退出",
     "confirmDelete": "为所有人删除？",
     "confirmLeave": "退出该共享？",
-    "absent": "{{count}} 个共享不在本机",
     "role": {
       "owner": "所有者",
       "editor": "可编辑",
       "viewer": "仅查看"
-    }
+    },
+    "absent_one": "{{count}} 个共享不在本机",
+    "absent_other": "{{count}} 个共享不在本机"
   },
   "activity": {
     "title": "协作动态",
-    "changed": "你不在时有 {{count}} 人修改了文档。打开它以获取更改。",
-    "media": "{{count}} 人正在等待原始媒体。打开文档并保持在线以传输。",
-    "key": "{{count}} 位新成员正在等待加密访问。打开文档以传递项目密钥。",
-    "dismiss": "隐藏"
+    "dismiss": "隐藏",
+    "changed_one": "你不在时有 {{count}} 人修改了文档。打开它以获取更改。",
+    "changed_other": "你不在时有 {{count}} 人修改了文档。打开它以获取更改。",
+    "media_one": "{{count}} 人正在等待原始媒体。打开文档并保持在线以传输。",
+    "media_other": "{{count}} 人正在等待原始媒体。打开文档并保持在线以传输。",
+    "key_one": "{{count}} 位新成员正在等待加密访问。打开文档以传递项目密钥。",
+    "key_other": "{{count}} 位新成员正在等待加密访问。打开文档以传递项目密钥。"
   },
   "notConfigured": "此安装未配置登录。",
   "dialog": {
     "title": "协作",
     "subtitle": "选择要邀请到此文档的成员。",
     "noFriends": "请先在 设置 › 账号 › 共享 中添加成员。",
-    "invited": "已发送 {{n}} 份邀请。",
     "notice": "该文档将变为协作文档。受邀者会在下次启动时收到邀请。",
     "create": "创建并邀请",
     "invite": "邀请",
     "failed": "共享失败。",
-    "mediaMissing": "磁盘上找不到 {{count}} 个媒体文件：{{names}}。请先找回它们（文件夹是否移动过？）再重新共享。"
+    "mediaMissing_one": "磁盘上找不到 {{count}} 个媒体文件：{{names}}。请先找回它们（文件夹是否移动过？）再重新共享。",
+    "mediaMissing_other": "磁盘上找不到 {{count}} 个媒体文件：{{names}}。请先找回它们（文件夹是否移动过？）再重新共享。",
+    "invited_one": "已发送 {{count}} 份邀请。",
+    "invited_other": "已发送 {{count}} 份邀请。"
   },
   "rotationPending": "吊销已记录。新的发布需等待所有者的设备完成密钥轮换。",
   "staleHead": {
@@ -109,7 +115,8 @@
   "sync": {
     "queued": "有更改在此等待。一旦有可达设备便会自动发出。",
     "upToDate": "全部已同步。",
-    "peers": "{{count}} 台可达设备"
+    "peers_one": "{{count}} 台可达设备",
+    "peers_other": "{{count}} 台可达设备"
   },
   "panel": {
     "title": "共享状态",

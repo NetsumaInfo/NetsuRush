@@ -4,7 +4,8 @@
     "remove": "Quitar {{tag}}"
   },
   "rating": {
-    "stars": "Estrellas: {{n}}"
+    "stars_one": "{{count}} estrella",
+    "stars_other": "{{count}} estrellas"
   },
   "folder": {
     "new": "Nueva carpeta",
@@ -100,13 +101,11 @@
     "shotWord": "Plano",
     "removed": "«{{name}}» quitado — Ctrl+Z para deshacer.",
     "restored": "«{{name}}» restaurado.",
-    "toTimelineOk": "Planos enviados: {{count}} → «{{timeline}}».",
     "timelineFailed": "error de timeline",
     "mounting": "Montando…",
     "archived": "Colección archivada en disco.",
     "archiveFailed": "error al archivar",
     "all": "todo",
-    "shotCount": "Planos: {{count}}",
     "ofTotal": "de {{count}} planos",
     "selCount": " · {{count}} sel.",
     "selectAll": "Seleccionar todo",
@@ -129,7 +128,11 @@
     "emptyFolder": "Carpeta vacía — añade planos desde el visionado o la búsqueda.",
     "resize": "Redimensionar",
     "thumbSize": "Tamaño de las miniaturas",
-    "undoRemove": "Deshacer el retiro"
+    "undoRemove": "Deshacer el retiro",
+    "toTimelineOk_one": "{{count}} plano → «{{timeline}}».",
+    "toTimelineOk_other": "{{count}} planos → «{{timeline}}».",
+    "shotCount_one": "{{count}} plano",
+    "shotCount_other": "{{count}} planos"
   },
   "list": {
     "title": "Colecciones",
@@ -151,10 +154,11 @@
     "deleteFolderTitle": "¿Eliminar la carpeta «{{name}}»?",
     "deleteFolderDesc": "Las colecciones que contiene suben un nivel.",
     "newCollection": "Nueva colección",
-    "plansCount": "Planos: {{count}}",
     "emptyAll": "Ninguna colección. Crea una colección y luego añade planos desde el visionado o la búsqueda (botón «Añadir» en la miniatura).",
     "folderEmpty": "Esta carpeta está vacía",
-    "folderEmptyFilter": " para este filtro"
+    "folderEmptyFilter": " para este filtro",
+    "plansCount_one": "{{count}} plano",
+    "plansCount_other": "{{count}} planos"
   },
   "editor": {
     "iconSearch": "Buscar un icono…",
@@ -171,7 +175,6 @@
     "online": "en línea",
     "relinkMoved": "Revincular fuentes movidas.",
     "resync": "Resincronizar…",
-    "dotPlans": " · Planos: {{count}}",
     "relink": "Revincular…",
     "resyncHint": "«Resincronizar» indexa una carpeta de referencia y revincula automáticamente por nombre de archivo.",
     "disabledLower": "desactivado",
@@ -199,7 +202,9 @@
     "tabEmoji": "Emojis",
     "tabIcon": "Iconos",
     "tabImage": "Imagen",
-    "importImage": "Importar una imagen / GIF"
+    "importImage": "Importar una imagen / GIF",
+    "dotPlans_one": " · {{count}} plano",
+    "dotPlans_other": " · {{count}} planos"
   },
   "char": {
     "queryCharacter": "personaje: {{name}}",

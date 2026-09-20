@@ -37,11 +37,11 @@ import {
 import { FontPicker, NumberSpin, MiniSelect, fontLabel } from "./inspectorControls";
 
 const INTERVALS: { label: string; ms: number }[] = [
-  { label: "0,5 s", ms: 500 },
-  { label: "1 s", ms: 1000 },
-  { label: "2 s", ms: 2000 },
-  { label: "5 s", ms: 5000 },
-  { label: "10 s", ms: 10000 },
+  { label: "0,5 s", ms: 500 },
+  { label: "1 s", ms: 1000 },
+  { label: "2 s", ms: 2000 },
+  { label: "5 s", ms: 5000 },
+  { label: "10 s", ms: 10000 },
 ];
 
 const ZOOM_SPEEDS: { labelKey: string; v: number }[] = [
@@ -115,9 +115,9 @@ const SEQ_QUALITY: { labelKey: string; v: number }[] = [
 const SEQ_MAX = [60, 150, 300, 600];
 const SEQ_MARGIN: { label: string; v: number }[] = [
   { label: "0", v: 0 },
-  { label: "0,5 s", v: 0.5 },
-  { label: "1 s", v: 1 },
-  { label: "2 s", v: 2 },
+  { label: "0,5 s", v: 0.5 },
+  { label: "1 s", v: 1 },
+  { label: "2 s", v: 2 },
 ];
 
 // Bouton segment (choix exclusif) à la DA shadcn, sans dépendance ToggleGroup ici.

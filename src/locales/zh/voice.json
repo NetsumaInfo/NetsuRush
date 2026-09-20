@@ -122,7 +122,6 @@
     "removeFillers": "移除语气词（{{count}}）",
     "restoreFillers": "恢复语气词（{{count}}）",
     "kept": "已保留",
-    "removedOfPlans": "−{{removed}} 已移除，共 {{count}} 个镜头",
     "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = 重新编码 · FCPXML = 源时间码。",
@@ -139,7 +138,9 @@
       "padEnd": "每段语音「之后」保留的余量（句尾），与开头留白分开设置。",
       "noiseGate": "剔除被误判为语音的短促噪声（键盘、口水声）。0 = 关闭。"
     },
-    "off": "关"
+    "off": "关",
+    "removedOfPlans_one": "−{{removed}} 已移除，共 {{count}} 个镜头",
+    "removedOfPlans_other": "−{{removed}} 已移除，共 {{count}} 个镜头"
   },
   "params": {
     "threshold": "阈值",
@@ -258,12 +259,8 @@
   },
   "store": {
     "batchLoaded": "分析已载入（批量）",
-    "batchStopped": "分析已停止 — 完成 {{count}} 个片段",
-    "batchDone": "批量分析：{{count}} 个片段",
-    "batchErrorsSuffix": " · {{count}} 个错误",
     "silencesDetected": "{{silences}} 段静音 · {{speech}} 段语音",
     "errDetectSilences": "静音检测失败",
-    "fillersDetected": "检测到 {{count}} 个语气词（音频）",
     "noFillersDetected": "未检测到声学语气词。",
     "errDetectFillers": "语气词检测失败",
     "transcriptCached": "转录已载入（缓存）",
@@ -275,7 +272,15 @@
     "busyTranscribe": "正在转录…",
     "busyAnalyzeAllWithTranscribe": "分析：转录 ∥ 静音…",
     "busyAnalyzeAllSilencesOnly": "分析：静音…",
-    "busyAnalyzeAllFillers": "分析：语气词（音频）…"
+    "busyAnalyzeAllFillers": "分析：语气词（音频）…",
+    "batchStopped_one": "分析已停止 — 完成 {{count}} 个片段",
+    "batchStopped_other": "分析已停止 — 完成 {{count}} 个片段",
+    "batchDone_one": "批量分析：{{count}} 个片段",
+    "batchDone_other": "批量分析：{{count}} 个片段",
+    "batchErrorsSuffix_one": " · {{count}} 个错误",
+    "batchErrorsSuffix_other": " · {{count}} 个错误",
+    "fillersDetected_one": "检测到 {{count}} 个语气词（音频）",
+    "fillersDetected_other": "检测到 {{count}} 个语气词（音频）"
   },
   "export": {
     "timelineSuffixEdit": "剪辑版",
@@ -287,7 +292,6 @@
     "creatingColorTimeline": "正在创建彩色时间线…",
     "exportingFormat": "正在导出 {{format}}…",
     "errNothingToBuild": "没有可剪辑的内容（没有保留的片段）。",
-    "timelineBase": "时间线《{{name}}》· {{count}} 个片段",
     "removedSuffix": " · 移除 {{sec}} 秒",
     "createdSuffix": "（已创建）",
     "fpsMismatchSuffix": " · ⚠ 时间线 fps ≠ 片段",
@@ -299,11 +303,14 @@
     "coloredLegend": " · 🟢 语音 🔵 静音 🟠 语气词 🟦 重复",
     "errTimelineColored": "彩色时间线失败",
     "errNothingToExport": "没有可导出的内容（没有保留的片段）。",
-    "fileExported": "{{format}}（{{count}} 个镜头）→ {{path}}",
     "errExportFile": "{{format}} 导出失败",
     "errNoWords": "请先转录（没有词）。",
     "subtitlesExported": "字幕 {{format}}（{{count}} 行）→ {{path}}",
-    "errSubtitles": "字幕失败"
+    "errSubtitles": "字幕失败",
+    "timelineBase_one": "时间线《{{name}}》· {{count}} 个片段",
+    "timelineBase_other": "时间线《{{name}}》· {{count}} 个片段",
+    "fileExported_one": "{{format}}（{{count}} 个镜头）→ {{path}}",
+    "fileExported_other": "{{format}}（{{count}} 个镜头）→ {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve 离线 — 请用本地文件。",
@@ -316,11 +323,13 @@
     "profileHint": "渲染配置（编码、容器、音频）。右键切换配置。",
     "runningCount_one": "{{count}} 个渲染进行中",
     "runningCount_other": "{{count}} 个渲染进行中",
-    "done": "渲染完成：{{count}} 个素材 · 配置 {{profile}}",
-    "stopped": "渲染已停止 — 完成 {{count}} 个素材",
     "errProfile": "配置不完整：{{issue}}",
     "errNoDir": "渲染取消：未选择输出文件夹。",
     "errNoSegments": "没有可渲染的内容（未保留任何片段）。",
-    "errExport": "渲染失败"
+    "errExport": "渲染失败",
+    "done_one": "渲染完成：{{count}} 个素材 · 配置 {{profile}}",
+    "done_other": "渲染完成：{{count}} 个素材 · 配置 {{profile}}",
+    "stopped_one": "渲染已停止 — 完成 {{count}} 个素材",
+    "stopped_other": "渲染已停止 — 完成 {{count}} 个素材"
   }
 }

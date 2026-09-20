@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "Previews and thumbnails",
-    "subtitle": "Configure video previews and thumbnails.",
+    "subtitle": "Set up video previews and thumbnails.",
     "soundTitle": "Sound",
     "playerVolume": "Player volume",
     "playerVolumeHint": "Shared by NetsuCut, Collections, Voice and Upscale.",
@@ -238,7 +238,7 @@
     "restart": "Restart and install",
     "history": "What's new by version",
     "whatsNew": "What's new in version {{version}}",
-    "gotIt": "Let's go",
+    "gotIt": "Got it",
     "ytdlp": {
       "hint": "Library that resolves video links. Its extractors break often: it updates without waiting for the next NetsuRush release.",
       "update": "Update",
@@ -516,11 +516,13 @@
       "desc": "Grouped by source folder. Clear what belongs to a finished project without touching the rest.",
       "rushCount_one": "{{count}} clip",
       "rushCount_other": "{{count}} clips",
+      "selectFolder": "Select the folder {{name}}",
       "unattributed": "Unattributed",
       "unattributedHint": "Cache written before the index, or whose footage couldn't be found. Can be purged all at once.",
-      "selected": "{{count}} selected · {{size}}",
       "clearSelection": "Deselect",
-      "purgeSelection": "Clear selection"
+      "purgeSelection": "Clear selection",
+      "selected_one": "{{count}} selected · {{size}}",
+      "selected_other": "{{count}} selected · {{size}}"
     },
     "reindex": {
       "action": "Reindex",
@@ -542,8 +544,9 @@
       "leave": "Leave it",
       "leaveHint": "The old folder stays listed here and can be deleted.",
       "moving": "Moving… {{done}}/{{total}}",
-      "moved": "Files moved: {{count}}.",
-      "movedNone": "New folder applied."
+      "movedNone": "New folder applied.",
+      "moved_one": "{{count}} file moved.",
+      "moved_other": "{{count}} files moved."
     },
     "lifecycle": {
       "session": "Session temporary files",
@@ -570,7 +573,7 @@
       "sessionTitle": "Working caches",
       "sessionDesc": "Choose when each large derivative stops being useful. App exit always remains the safety net.",
       "sequenceTitle": "Model intermediate sequences",
-      "sequenceHint": "Frame folders created only to feed a model. User-exported sequences are never touched.",
+      "sequenceHint": "Frame folders created only to feed a model. Sequences you exported yourself are never touched.",
       "trigger": {
         "roto": "When changing shot",
         "upscaleTest": "When source or settings change",
@@ -593,15 +596,19 @@
     "confirm": {
       "title": "Delete this cache?",
       "descKinds": "{{size}} will be freed. The content rebuilds when needed.",
-      "descSources": "{{size}} will be freed for these clips ({{count}}). Other footage isn't touched.",
       "descUnattributed": "{{size}} of unattributed cache will be freed.",
       "expensive": "The search index is included: rebuilding it takes hours of GPU.",
       "cancel": "Cancel",
       "confirm": "Delete",
       "purging": "Deleting…",
-      "done": "{{size}} freed · {{files}} files",
-      "doneRows": "{{size}} freed · {{files}} files, {{rows}} database entries",
-      "skipped": " · {{count}} skipped (locked)"
+      "descSources_one": "{{size}} will be freed for {{count}} clip. Other footage isn't touched.",
+      "descSources_other": "{{size}} will be freed for {{count}} clips. Other footage isn't touched.",
+      "skipped_one": " · {{count}} skipped (locked)",
+      "skipped_other": " · {{count}} skipped (locked)",
+      "done_one": "{{size}} freed · {{count}} file",
+      "done_other": "{{size}} freed · {{count}} files",
+      "doneRows_one": "{{size}} freed · {{count}} file, {{rows}} database entries",
+      "doneRows_other": "{{size}} freed · {{count}} files, {{rows}} database entries"
     },
     "maintenance": {
       "title": "Maintenance",
@@ -631,10 +638,11 @@
       "rushCount_one": "{{count}} clip",
       "rushCount_other": "{{count}} clips",
       "scan": "Scan Resolve projects",
-      "scanDone": "{{count}} project(s) collected",
       "scanStarting": "Preparing…",
       "scanning": "{{project}} — {{done}}/{{total}}",
-      "title": "Projects known to search"
+      "title": "Projects known to search",
+      "scanDone_one": "{{count}} project collected",
+      "scanDone_other": "{{count}} projects collected"
     }
   },
   "navigation": {
@@ -711,7 +719,7 @@
     "intro": "The app keeps media of its own: pasted images, media fetched from a link, extracted frames, upscale results. Saving a .netsu project files those bytes in its companion folder — the store then holds only a duplicate, which can be freed without losing anything. Display caches have their own page.",
     "disk": "{{free}} free of {{total}}",
     "scanning": "Scanning storage…",
-    "failed": "Operation failed",
+    "failed": "That didn't go through. Try again.",
     "freedNotice": "Freed {{size}} ({{count}} files)",
     "movedNotice": "Moved {{size}} ({{count}} files)",
     "movedPartly": "{{count}} files moved, {{failed}} failed (left in place)",

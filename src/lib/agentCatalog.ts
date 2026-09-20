@@ -74,7 +74,7 @@ export const BYOK_PROVIDERS: ByokProvider[] = [
     // EU accounts are served from their own host; the US one is the default.
     baseUrl: {
       default: "https://api.x.ai/v1",
-      hint: "UE : https://eu-west-1.api.x.ai/v1",
+      hint: "UE : https://eu-west-1.api.x.ai/v1",
     },
     models: ["grok-4.6", "grok-4.5", "grok-4.3"],
   },

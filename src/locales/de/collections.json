@@ -4,7 +4,8 @@
     "remove": "{{tag}} entfernen"
   },
   "rating": {
-    "stars": "Sterne: {{n}}"
+    "stars_one": "{{count}} Stern",
+    "stars_other": "{{count}} Sterne"
   },
   "folder": {
     "new": "Neuer Ordner",
@@ -100,13 +101,11 @@
     "shotWord": "Einstellung",
     "removed": "„{{name}}“ entfernt — Ctrl+Z zum Rückgängigmachen.",
     "restored": "„{{name}}“ wiederhergestellt.",
-    "toTimelineOk": "Gesendete Einstellungen: {{count}} → „{{timeline}}“.",
     "timelineFailed": "Timeline fehlgeschlagen",
     "mounting": "Schnitt läuft…",
     "archived": "Sammlung auf Festplatte archiviert.",
     "archiveFailed": "Archivieren fehlgeschlagen",
     "all": "alle",
-    "shotCount": "Einstellungen: {{count}}",
     "ofTotal": "von {{count}} Shots",
     "selCount": " · {{count}} ausgew.",
     "selectAll": "Alles auswählen",
@@ -129,7 +128,11 @@
     "emptyFolder": "Ordner leer — Einstellungen aus der Sichtung oder Suche ablegen.",
     "resize": "Größe ändern",
     "thumbSize": "Miniaturgröße",
-    "undoRemove": "Entfernen rückgängig"
+    "undoRemove": "Entfernen rückgängig",
+    "toTimelineOk_one": "{{count}} Einstellung → „{{timeline}}“.",
+    "toTimelineOk_other": "{{count}} Einstellungen → „{{timeline}}“.",
+    "shotCount_one": "{{count}} Einstellung",
+    "shotCount_other": "{{count}} Einstellungen"
   },
   "list": {
     "title": "Sammlungen",
@@ -151,10 +154,11 @@
     "deleteFolderTitle": "Ordner „{{name}}“ löschen?",
     "deleteFolderDesc": "Die enthaltenen Sammlungen rücken eine Ebene höher.",
     "newCollection": "Neue Sammlung",
-    "plansCount": "Einstellungen: {{count}}",
     "emptyAll": "Keine Sammlung. Leg eine Sammlung an und lege dann Einstellungen aus der Sichtung oder der Suche ab (Button „Ablegen“ auf der Miniatur).",
     "folderEmpty": "Dieser Ordner ist leer",
-    "folderEmptyFilter": " für diesen Filter"
+    "folderEmptyFilter": " für diesen Filter",
+    "plansCount_one": "{{count}} Einstellung",
+    "plansCount_other": "{{count}} Einstellungen"
   },
   "editor": {
     "iconSearch": "Symbol suchen…",
@@ -171,7 +175,6 @@
     "online": "online",
     "relinkMoved": "Verschobene Quellen neu verknüpfen.",
     "resync": "Neu synchronisieren…",
-    "dotPlans": " · Einstellungen: {{count}}",
     "relink": "Verknüpfen…",
     "resyncHint": "„Neu synchronisieren“ indexiert einen Suchordner und verknüpft automatisch über den Dateinamen.",
     "disabledLower": "deaktiviert",
@@ -199,7 +202,9 @@
     "tabEmoji": "Emojis",
     "tabIcon": "Symbole",
     "tabImage": "Bild",
-    "importImage": "Bild / GIF importieren"
+    "importImage": "Bild / GIF importieren",
+    "dotPlans_one": " · {{count}} Einstellung",
+    "dotPlans_other": " · {{count}} Einstellungen"
   },
   "char": {
     "queryCharacter": "Figur: {{name}}",
@@ -222,7 +227,7 @@
     "missingMedia": "Medium nicht verfügbar",
     "retry": "Erneut versuchen",
     "preparing": "Vorbereitung…",
-    "failed": "Freigabe oder Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "failed": "Freigabe oder Speichern fehlgeschlagen. Versuch es noch einmal.",
     "unavailable": "Konfiguriere die Zusammenarbeit, um diese Sammlung zu teilen.",
     "signIn": "Melde dich an, um Personen auszuwählen.",
     "viaArchive": "Andere erhalten die archivierten Dateien der Sammlung, niemals die Quellvideos. Die Archivierung auf Festplatte wird mit der Freigabe aktiviert.",

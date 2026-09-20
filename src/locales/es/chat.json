@@ -1,6 +1,6 @@
 {
   "stream": {
-    "error": "Se ha producido un error."
+    "error": "La respuesta se ha cortado. Vuelve a enviarla."
   },
   "panel": {
     "copilot": "Copiloto NetsuRush",
@@ -64,7 +64,7 @@
     "notReady": "sin configurar",
     "none": "Sin motor",
     "model": "Modelo",
-    "default": "Por defecto",
+    "default": "Predeterminado",
     "freeId": "id libre: vendor/model…",
     "refreshModels": "Actualizar la lista de modelos",
     "source": {

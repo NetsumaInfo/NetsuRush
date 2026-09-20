@@ -1,6 +1,6 @@
 {
   "stream": {
-    "error": "发生错误。"
+    "error": "回答中断了。再发一次试试。"
   },
   "panel": {
     "copilot": "NetsuRush 助手",

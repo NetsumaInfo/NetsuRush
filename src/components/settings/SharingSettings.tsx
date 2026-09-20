@@ -288,7 +288,7 @@ function SharingInner() {
         {confirming ? (
           <>
             <span className="text-xs text-muted-foreground">
-              {t(own ? "collab.projects.confirmDelete" : "collab.projects.confirmLeave")}
+              {t(own ? "projects.confirmDelete" : "projects.confirmLeave")}
             </span>
             <Button
               size="sm"
@@ -296,7 +296,7 @@ function SharingInner() {
               disabled={busy}
               onClick={() => void removeProject(project)}
             >
-              {t(own ? "collab.projects.delete" : "collab.projects.leave")}
+              {t(own ? "projects.delete" : "projects.leave")}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setConfirmProject(null)}>
               <X className="size-3.5" />
@@ -313,7 +313,7 @@ function SharingInner() {
               size="icon-sm"
               variant="ghost"
               disabled={busy}
-              aria-label={t(own ? "collab.projects.delete" : "collab.projects.leave")}
+              aria-label={t(own ? "projects.delete" : "projects.leave")}
               onClick={() => setConfirmProject(project.projectId)}
             >
               <Trash2 />

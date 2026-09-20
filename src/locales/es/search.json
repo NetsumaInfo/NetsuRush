@@ -183,14 +183,15 @@
     "hint": "Añade fotos del personaje y luego haz clic en la cara a buscar. Más caras, resultado más fiable.",
     "addImage": "Añadir una imagen",
     "clearImages": "Vaciar",
-    "facesChosen": "Caras elegidas: {{count}}",
     "noFaceDetected": "Ninguna cara detectada — se usa la imagen entera.",
     "nameFaceAria": "Nombrar esta cara",
     "removeThisFace": "Quitar esta cara",
     "searchThisFace": "Buscar esta cara",
     "suggestionTooltip": "Buscar {{name}} ({{pct}}%)",
     "noImages": "Ninguna imagen — empieza por «Añadir una imagen».",
-    "search": "Buscar"
+    "search": "Buscar",
+    "facesChosen_one": "{{count}} cara elegida",
+    "facesChosen_other": "{{count}} caras elegidas"
   },
   "resultCard": {
     "previewAria": "Vista previa del plano",
@@ -262,7 +263,7 @@
     "scopeLabel": "Buscar en",
     "scopeProject": "Clips del proyecto",
     "scopeAll": "Todos los clips",
-    "placeholder": "Describe el plano…  (@ para mencionar un personaje)",
+    "placeholder": "Describe el plano… (@ para mencionar un personaje)",
     "searchByImageAria": "Buscar por imagen",
     "searchByImageTooltip": "Buscar por imagen del disco",
     "searchInRushesAria": "Buscar en mis clips",
@@ -315,11 +316,9 @@
     "faceIndexingFailed": "Fallos al indexar caras: {{failed}}/{{total}} clips — {{error}}",
     "dedupUnavailable": "Duplicados no disponibles: {{error}}",
     "clustersUnavailable": "Grupos no disponibles: {{error}}",
-    "indexingStopped": "Indexación detenida — clips procesados a medias: {{total}}.",
     "indexingFailed": "Fallos de indexación: {{failed}}/{{total}} clips — {{error}}",
     "timelineAddPartial": "Añadidos: {{ok}} · Fallos: {{fail}} — {{error}}",
     "timelineAddFailed": "Añadidos: {{ok}} · Fallos: {{fail}}.",
-    "timelineAddOk": "Planos añadidos a la timeline: {{count}}.",
     "addingToTimeline": "Añadiendo a la timeline {{i}}/{{total}}…",
     "queryDefault": "búsqueda",
     "querySimilarTo": "similares: {{name}}",
@@ -329,7 +328,11 @@
     "queryFaceSingle": "cara: 1 ref",
     "queryFaceMulti": "cara: {{count}} refs",
     "parallelRunning": "{{running}} en curso · {{conc}} en paralelo",
-    "unknownMention": "{{tokens}} no corresponde a ningún personaje: se quitó de la consulta (buscarlo como una palabra normal falsearía los resultados). Escribe «@» y elige el personaje en la lista."
+    "unknownMention": "{{tokens}} no corresponde a ningún personaje: se quitó de la consulta (buscarlo como una palabra normal falsearía los resultados). Escribe «@» y elige el personaje en la lista.",
+    "timelineAddOk_one": "{{count}} plano añadido a la timeline.",
+    "timelineAddOk_other": "{{count}} planos añadidos a la timeline.",
+    "indexingStopped_one": "Indexación detenida — {{count}} clip procesado en parte.",
+    "indexingStopped_other": "Indexación detenida — {{count}} clips procesados en parte."
   },
   "projectScope": {
     "activeMode": "Activo",

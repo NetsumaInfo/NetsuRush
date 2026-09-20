@@ -129,7 +129,7 @@
     "samplesEmpty": "没有人脸。从“已检测”中添加。",
     "removeSampleAria": "移除此人脸",
     "removeSampleTooltip": "从该角色移除此人脸",
-    "clickToSearch": "单击 = 搜索 · 右键 = 更多",
+    "clickToSearch": "点击 = 搜索 · 右键 = 更多",
     "addFaceFirstTag": "请先添加人脸（“已检测”标签页）",
     "animatedCount": "动画 {{count}}",
     "realCount": "真人 {{count}}",
@@ -183,14 +183,15 @@
     "hint": "添加该角色的照片，然后点击要查找的那张脸。脸越多，结果越稳。",
     "addImage": "添加图片",
     "clearImages": "清空",
-    "facesChosen": "已选 {{count}} 张人脸",
     "noFaceDetected": "未检测到人脸 — 使用整张图片。",
     "nameFaceAria": "命名此人脸",
     "removeThisFace": "移除此人脸",
     "searchThisFace": "搜索此人脸",
     "suggestionTooltip": "搜索 {{name}}（{{pct}}%）",
     "noImages": "没有图片 — 请先点击“添加图片”。",
-    "search": "搜索"
+    "search": "搜索",
+    "facesChosen_one": "已选 {{count}} 张人脸",
+    "facesChosen_other": "已选 {{count}} 张人脸"
   },
   "resultCard": {
     "previewAria": "镜头预览",
@@ -296,7 +297,7 @@
   },
   "characterChips": {
     "label": "角色：",
-    "citedTooltip": "已引用 @{{name}} — 单击可从搜索中移除",
+    "citedTooltip": "已引用 @{{name}} — 点击可从搜索中移除",
     "citeTooltip": "引用 @{{name}}：把搜索限定在该角色的镜头，再用键盘细化 · 双击重命名",
     "remove": "移除 @{{name}}",
     "cite": "引用 @{{name}}",
@@ -315,11 +316,9 @@
     "faceIndexingFailed": "{{failed}}/{{total}} 个片段失败（人脸）— {{error}}",
     "dedupUnavailable": "重复项不可用：{{error}}",
     "clustersUnavailable": "分组不可用：{{error}}",
-    "indexingStopped": "索引已停止 — {{total}} 个片段仅部分处理。",
     "indexingFailed": "{{failed}}/{{total}} 个片段失败 — {{error}}",
     "timelineAddPartial": "已添加 {{ok}} 个，{{fail}} 个失败 — {{error}}",
     "timelineAddFailed": "已添加 {{ok}} 个，{{fail}} 个失败。",
-    "timelineAddOk": "已向时间线添加 {{count}} 个镜头。",
     "addingToTimeline": "添加到时间线 {{i}}/{{total}}…",
     "queryDefault": "搜索",
     "querySimilarTo": "相似：{{name}}",
@@ -329,7 +328,11 @@
     "queryFaceSingle": "人脸：1 张参考",
     "queryFaceMulti": "人脸：{{count}} 张参考",
     "parallelRunning": "{{running}} 进行中 · {{conc}} 并行",
-    "unknownMention": "{{tokens}} 未匹配到任何角色：该词已从查询中移除（按普通词搜索会扭曲结果）。请输入“@”并从列表中选择角色。"
+    "unknownMention": "{{tokens}} 未匹配到任何角色：该词已从查询中移除（按普通词搜索会扭曲结果）。请输入“@”并从列表中选择角色。",
+    "timelineAddOk_one": "已向时间线添加 {{count}} 个镜头。",
+    "timelineAddOk_other": "已向时间线添加 {{count}} 个镜头。",
+    "indexingStopped_one": "索引已停止 — {{count}} 个片段仅部分处理。",
+    "indexingStopped_other": "索引已停止 — {{count}} 个片段仅部分处理。"
   },
   "projectScope": {
     "activeMode": "启用",

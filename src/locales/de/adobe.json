@@ -19,11 +19,11 @@
     "autoUpdateOff": "Aus",
     "updatePending": "Diese NetsuRush-Version liefert ein neueres Bedienfeld",
     "updateNow": "Jetzt aktualisieren",
-    "restartApps": "Bedienfeld aktualisiert – starten Sie {{apps}} neu, um es zu laden."
+    "restartApps": "Bedienfeld aktualisiert – starte {{apps}} neu, um es zu laden."
   },
   "diag": {
-    "verdictOk": "ERGEBNIS: Installation OK ✓ (Ordner + Manifest + PlayerDebugMode). Panel in Adobe öffnen: Fenster ▸ Erweiterungen ▸ NetsuRush.",
-    "verdictIncomplete": "ERGEBNIS: Installation unvollständig — siehe unten.",
+    "verdictOk": "Installation OK ✓ (Ordner + Manifest + PlayerDebugMode). Panel in Adobe öffnen: Fenster ▸ Erweiterungen ▸ NetsuRush.",
+    "verdictIncomplete": "Installation unvollständig — siehe unten.",
     "folder": "Ordner: {{dir}}",
     "manifestPresent": "Manifest vorhanden: {{yesNo}}",
     "yes": "JA",

@@ -36,9 +36,9 @@
       "pending": "Already sent.",
       "already": "Already on your list.",
       "self": "That is you.",
-      "unknown": "Invalid identifier.",
+      "unknown": "Nobody matches. Check the username, or paste their Discord ID.",
       "ambiguous": "Several people match. Use their Discord ID.",
-      "error": "Failed.",
+      "error": "The lookup failed. Try again.",
       "invited": "Invitation sent."
     }
   },
@@ -58,31 +58,37 @@
     "leave": "Leave",
     "confirmDelete": "Delete for everyone?",
     "confirmLeave": "Leave this share?",
-    "absent": "{{count}} document(s) not on this machine",
     "role": {
       "owner": "Owner",
       "editor": "Can edit",
       "viewer": "View only"
-    }
+    },
+    "absent_one": "{{count}} document not on this machine",
+    "absent_other": "{{count}} documents not on this machine"
   },
   "activity": {
     "title": "Collaboration activity",
-    "changed": "{{count}} people changed a document while you were away. Open it to retrieve the changes.",
-    "media": "{{count}} people are waiting for original media. Open the document and stay online to transfer it.",
-    "key": "{{count}} new member(s) are waiting for secure access. Open the document to deliver the project key.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "changed_one": "{{count}} person changed a document while you were away. Open it to retrieve the changes.",
+    "changed_other": "{{count}} people changed a document while you were away. Open it to retrieve the changes.",
+    "media_one": "{{count}} person is waiting for original media. Open the document and stay online to transfer it.",
+    "media_other": "{{count}} people are waiting for original media. Open the document and stay online to transfer it.",
+    "key_one": "{{count}} new member is waiting for secure access. Open the document to deliver the project key.",
+    "key_other": "{{count}} new members are waiting for secure access. Open the document to deliver the project key."
   },
   "notConfigured": "Sign-in is not configured on this installation.",
   "dialog": {
     "title": "Collaborate",
     "subtitle": "Pick the people to invite to this document.",
     "noFriends": "Add someone first in Settings › Account › Sharing.",
-    "invited": "{{n}} invitation(s) sent.",
     "notice": "The document becomes collaborative. Invited people receive the invitation on their next start.",
     "create": "Create and invite",
     "invite": "Invite",
     "failed": "Sharing failed.",
-    "mediaMissing": "{{count}} media file(s) missing from disk: {{names}}. Recover them (moved folder?) then share again."
+    "mediaMissing_one": "{{count}} media file missing from disk: {{names}}. Recover it (moved folder?) then share again.",
+    "mediaMissing_other": "{{count}} media files missing from disk: {{names}}. Recover them (moved folder?) then share again.",
+    "invited_one": "{{count}} invitation sent.",
+    "invited_other": "{{count}} invitations sent."
   },
   "rotationPending": "The revocation is recorded. New publications wait for an owner device to finish key rotation.",
   "staleHead": {
@@ -109,7 +115,8 @@
   "sync": {
     "queued": "Changes are waiting here. They will leave on their own as soon as a device is reachable.",
     "upToDate": "Everything is in sync.",
-    "peers": "{{count}} reachable device(s)"
+    "peers_one": "{{count}} reachable device",
+    "peers_other": "{{count}} reachable devices"
   },
   "panel": {
     "title": "Sharing status",

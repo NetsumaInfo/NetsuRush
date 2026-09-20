@@ -247,8 +247,9 @@
     "assetSweep": "未使用的媒体",
     "assetSweepHint": "删除没有任何场景引用的文件。看板中的内容不受影响。",
     "assetSweepAction": "清理",
-    "assetSweepDone": "已删除 {{count}} 个文件，释放 {{mb}} MB。",
-    "assetSweepFailed": "清理失败。"
+    "assetSweepFailed": "清理失败。",
+    "assetSweepDone_one": "已移除 {{count}} 个文件，释放 {{mb}} MB。",
+    "assetSweepDone_other": "已移除 {{count}} 个文件，释放 {{mb}} MB。"
   },
   "inspector": {
     "ytPlayer": "YouTube 播放器",
@@ -431,7 +432,8 @@
     "duplicate": "复制（Ctrl+D）",
     "unlink": "解除与媒体的关联",
     "relink": "关联到媒体",
-    "linkedTo": "已关联 {{count}} 个元素"
+    "linkedTo_one": "已关联 {{count}} 个元素",
+    "linkedTo_other": "已关联 {{count}} 个元素"
   },
   "media": {
     "browse": "浏览",
@@ -607,6 +609,7 @@
     "preparing": "正在准备视频…"
   },
   "embed": {
+    "onlineMedia": "在线媒体",
     "frozen": "播放已冻结",
     "level": {
       "link": "仅链接",
@@ -647,16 +650,18 @@
     "clipboardEmptyLink": "剪贴板为空或链接无法识别",
     "emptyTitle": "把图片、视频或 YouTube 链接拖到这里",
     "emptyHint": "粘贴（Ctrl+V）· 滚轮缩放 · 拖动背景平移",
-    "pastedItems": "已粘贴 {{count}} 个元素",
-    "copiedDone": "已复制 {{count}} 个元素",
-    "cutDone": "已剪切 {{count}} 个元素"
+    "pastedItems_one": "已粘贴 {{count}} 个元素",
+    "pastedItems_other": "已粘贴 {{count}} 个元素",
+    "copiedDone_one": "已复制 {{count}} 个元素",
+    "copiedDone_other": "已复制 {{count}} 个元素",
+    "cutDone_one": "已剪切 {{count}} 个元素",
+    "cutDone_other": "已剪切 {{count}} 个元素"
   },
   "notice": {
     "recoveringMedia": "正在恢复媒体…",
     "mediaUnrecoverable": "媒体无法恢复",
     "recoverFailed": "恢复失败",
     "recoveringOnline": "正在恢复在线媒体…（{{current}}/{{total}}）",
-    "mediaRecovered": "已恢复 {{count}} 个媒体",
     "redownloadAll": "全部重新下载（{{count}}）",
     "recoveryResult": "已恢复 {{recovered}} 个，失败 {{failed}} 个",
     "downloadingVideo": "正在下载视频…",
@@ -676,7 +681,6 @@
     "typeUnsupported": "不支持“{{type}}”类型",
     "importFailedWith": "导入失败：{{error}}",
     "unknown": "未知",
-    "imported": "已导入 · {{count}} 个元素",
     "boardImported": "画板已导入",
     "projectSaved": "已保存“{{name}}”",
     "projectOpened": "已打开“{{name}}”",
@@ -685,10 +689,15 @@
     "dropProjectFailed": "无法打开「{{name}}」，请使用「打开项目」。",
     "noProjectFile": "此看板未关联任何文件",
     "relocating": "正在文件夹中查找媒体…（{{count}}）",
-    "relocated": "已重新定位 {{count}}/{{total}} 个媒体",
     "relocatedNone": "此文件夹中未识别到媒体",
     "contentOpacity": "内容不透明度：{{percent}}%",
-    "itemOpacity": "媒体不透明度：{{percent}}%"
+    "itemOpacity": "媒体不透明度：{{percent}}%",
+    "mediaRecovered_one": "已恢复 {{count}} 个媒体",
+    "mediaRecovered_other": "已恢复 {{count}} 个媒体",
+    "imported_one": "已导入 · {{count}} 个元素",
+    "imported_other": "已导入 · {{count}} 个元素",
+    "relocated_one": "已重新定位 {{count}}/{{total}} 个媒体",
+    "relocated_other": "已重新定位 {{count}}/{{total}} 个媒体"
   },
   "tidy": {
     "title": "整理",
@@ -781,7 +790,7 @@
     "export": "导出",
     "done": "板面已导出",
     "failed": "导出失败：{{error}}",
-    "hint": "渲染基于板面内容：视频导出当前帧，在线播放器导出为卡片。",
+    "hint": "渲染按板面内容来：视频导出当前帧，在线播放器导出为卡片。",
     "noBridge": "在应用之外无法写入磁盘"
   },
   "ingest": {

@@ -22,13 +22,14 @@
     "jobsQueued_other": "キューに {{count}} ジョブ",
     "settingsRead": "パフォーマンス設定を読み込み済み",
     "cacheProxyKeys": "キャッシュ/プロキシ {{count}} キー",
-    "cacheFoldersDetected": "キャッシュフォルダー {{count}} 件を検出",
     "noCacheFolder": "キャッシュフォルダーを自動検出できません",
     "database": "データベース",
     "dbBig": "{{name}}・肥大化 → 分割を",
     "dbHealthy": "{{name}}・サイズは良好",
     "dbRemote": "PostgreSQL",
-    "dbMissing": "見つかりません"
+    "dbMissing": "見つかりません",
+    "cacheFoldersDetected_one": "キャッシュフォルダー {{count}} 件を検出",
+    "cacheFoldersDetected_other": "キャッシュフォルダー {{count}} 件を検出"
   },
   "memory": {
     "title": "セッションのメモリー",
@@ -59,7 +60,6 @@
     "pending_other": "未適用の変更 {{count}} 件",
     "apply": "適用して再起動",
     "reset": "取り消し",
-    "applyTitle": "変更 {{count}} 件を適用しますか？",
     "applyBody": "プロジェクトを保存し、現在の構成をバックアップし、Resolve を閉じて環境設定を書き込み、「{{project}}」で開き直します。1〜2分かかります。レンダリング中は避けてください。",
     "applyDone_one": "設定 {{count}} 件を適用 — Resolve を再起動しました。",
     "applyDone_other": "設定 {{count}} 件を適用 — Resolve を再起動しました。",
@@ -107,7 +107,9 @@
         "where": "環境設定 ▸ ユーザー ▸ 保存および読み込み",
         "body": "プロジェクト保存に加えて定期的にスナップショットを取ります。その日の最初だけ少し待つことがあり、以降は気づきません。"
       }
-    }
+    },
+    "applyTitle_one": "{{count}} 件の変更を適用しますか？",
+    "applyTitle_other": "{{count}} 件の変更を適用しますか？"
   },
   "gpu": {
     "title": "GPU / CPU / RAM モニター",
@@ -116,11 +118,12 @@
     "vramUnreadable": "このドライバーでは VRAM を表示できません。処理機能は引き続き利用できます。",
     "ramSystem": "システム RAM",
     "resolveRam": "Resolve.exe：{{size}}",
-    "deadKilledSuffix": " · 応答なし {{count}} 件を終了",
     "nothingToFree": "解放するものはありません",
     "ramFreed": "RAM を +{{mb}} MB 解放",
     "vramFreed": "VRAM -{{mb}} MB",
-    "residuesCleaned": "残留分を削除しました"
+    "residuesCleaned": "残留分を削除しました",
+    "deadKilledSuffix_one": " · 応答なし {{count}} 件を終了",
+    "deadKilledSuffix_other": " · 応答なし {{count}} 件を終了"
   },
   "process": {
     "title": "重いプロセス（PC 全体）",
@@ -134,12 +137,14 @@
     "noneListed": "プロセスなし（Windows のみ）。",
     "killed": "{{name}}（PID {{pid}}）を終了しました。",
     "noneBlocked": "整理する停止中のプロセスはありません。",
-    "cleaned": "停止中のプロセス {{count}} 件を整理しました。",
     "killTitle": "{{name}} を終了しますか？",
     "killForced": "強制終了 — 未保存の作業は失われます。",
-    "cleanTitle": "停止中のプロセス {{count}} 件を整理しますか？",
     "cleanBody": "フリーズしたプログラム（「応答なし」）です。強制終了 — 未保存の作業は失われます。",
-    "clean": "整理"
+    "clean": "整理",
+    "cleaned_one": "停止中のプロセス {{count}} 件を整理しました。",
+    "cleaned_other": "停止中のプロセス {{count}} 件を整理しました。",
+    "cleanTitle_one": "停止中のプロセス {{count}} 件を整理しますか？",
+    "cleanTitle_other": "停止中のプロセス {{count}} 件を整理しますか？"
   },
   "watchdog": {
     "title": "メモリー監視",
@@ -242,7 +247,7 @@
       "previewcodec": {
         "title": "プレビューコーデック",
         "where": "シーケンス ▸ シーケンス設定 ▸ ビデオプレビュー",
-        "body": "I-Frame MPEG はレンダリングが速い一方で再生が苦手、ProRes や CineForm は再生に強い代わりにレンダリングが遅くなります。カードとディスク次第です。"
+        "body": "I-Frame MPEG はレンダリングが速く、再生は苦手です。ProRes や CineForm は再生に強く、レンダリングは遅くなります。カードとディスク次第です。"
       },
       "cacheotherdisk": {
         "title": "素材と同じドライブのキャッシュ",
@@ -374,7 +379,7 @@
       "compatAeft": "After Effects 2020（17.0）から 2026（26.x）に対応。24.3 以降は「ディスクを含むすべて」がディスクキャッシュも消去します。",
       "compatPpro": "Premiere Pro 2020（14.0）から 2025（25.x）で確認済み。",
       "uxpEra": "Premiere Pro {{year}}：Adobe は UXP に移行し、ExtendScript は保守されず 2026 年 9 月にサポートが終了します。この呼び出しは黙って失敗する可能性があります。",
-      "uxpFallback": "上の「ディスクキャッシュ」は Adobe の API を一切使わずに同じ処理を行います。",
+      "uxpFallback": "上の「ディスクキャッシュ」は Adobe の API を一切使わずに同じことをします。",
       "hygiene": "プロジェクトの整理",
       "hygieneHint": "開いているプロジェクトに作用し、アプリケーション内で取り消せます。",
       "hygieneOps": {

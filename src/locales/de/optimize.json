@@ -22,13 +22,14 @@
     "jobsQueued_other": "{{count}} Jobs in der Warteschlange",
     "settingsRead": "Performance-Einstellungen gelesen",
     "cacheProxyKeys": "Cache-/Proxy-Schlüssel: {{count}}",
-    "cacheFoldersDetected": "Erkannte Cache-Ordner: {{count}}",
     "noCacheFolder": "Kein Cache-Ordner erkannt",
     "database": "Datenbank",
     "dbBig": "{{name}} · groß → aufteilen",
     "dbHealthy": "{{name}} · gesunde Größe",
     "dbRemote": "PostgreSQL",
-    "dbMissing": "Nicht gefunden"
+    "dbMissing": "Nicht gefunden",
+    "cacheFoldersDetected_one": "{{count}} Cache-Ordner erkannt",
+    "cacheFoldersDetected_other": "{{count}} Cache-Ordner erkannt"
   },
   "memory": {
     "title": "Sitzungsspeicher",
@@ -59,7 +60,6 @@
     "pending_other": "{{count}} offene Änderungen",
     "apply": "Anwenden und neu starten",
     "reset": "Abbrechen",
-    "applyTitle": "Änderungen anwenden ({{count}})?",
     "applyBody": "Das Projekt wird gespeichert, die aktuelle Konfiguration gesichert, Resolve geschlossen, die Einstellungen geschrieben, dann Resolve mit „{{project}}“ neu geöffnet. Dauert ein bis zwei Minuten. Nicht während eines Renderns.",
     "applyDone_one": "{{count}} Einstellung angewendet — Resolve neu gestartet.",
     "applyDone_other": "{{count}} Einstellungen angewendet — Resolve neu gestartet.",
@@ -107,7 +107,9 @@
         "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
         "body": "Regelmäßige Schnappschüsse zusätzlich zu den Projektsicherungen. Die erste am Tag kann hängen, die nächsten merkt man nicht."
       }
-    }
+    },
+    "applyTitle_one": "{{count}} Änderung anwenden?",
+    "applyTitle_other": "{{count}} Änderungen anwenden?"
   },
   "gpu": {
     "title": "Monitor GPU / CPU / RAM",
@@ -116,11 +118,12 @@
     "vramUnreadable": "Die VRAM-Anzeige ist für diesen Treiber nicht verfügbar. Die Verarbeitung bleibt verfügbar.",
     "ramSystem": "System-RAM",
     "resolveRam": "Resolve.exe: {{size}}",
-    "deadKilledSuffix": " · Geschlossene hängende Prozesse: {{count}}",
     "nothingToFree": "Nichts freizugeben",
     "ramFreed": "+{{mb}} MB RAM frei",
     "vramFreed": "-{{mb}} MB VRAM",
-    "residuesCleaned": "Reste bereinigt"
+    "residuesCleaned": "Reste bereinigt",
+    "deadKilledSuffix_one": " · {{count}} hängender Prozess geschlossen",
+    "deadKilledSuffix_other": " · {{count}} hängende Prozesse geschlossen"
   },
   "process": {
     "title": "Speicherfresser (ganzer PC)",
@@ -134,12 +137,14 @@
     "noneListed": "Keine Prozesse gelistet (nur Windows).",
     "killed": "{{name}} (PID {{pid}}) beendet.",
     "noneBlocked": "Keine hängenden Prozesse zu bereinigen.",
-    "cleaned": "Bereinigte hängende Prozesse: {{count}}.",
     "killTitle": "{{name}} beenden?",
     "killForced": "Erzwungenes Schließen — nicht Gespeichertes geht verloren.",
-    "cleanTitle": "Hängende Prozesse bereinigen ({{count}})?",
     "cleanBody": "Eingefrorene Programme („Reagiert nicht“). Erzwungenes Schließen — nicht Gespeichertes geht verloren.",
-    "clean": "Bereinigen"
+    "clean": "Bereinigen",
+    "cleaned_one": "{{count}} hängender Prozess bereinigt.",
+    "cleaned_other": "{{count}} hängende Prozesse bereinigt.",
+    "cleanTitle_one": "{{count}} hängenden Prozess bereinigen?",
+    "cleanTitle_other": "{{count}} hängende Prozesse bereinigen?"
   },
   "watchdog": {
     "title": "Speicherüberwachung",
@@ -150,7 +155,7 @@
     "gauges": "RAM verfügbar {{ram}} % · VRAM belegt {{vram}} %",
     "lastPurge": "{{freed}} an den Rechner zurückgegeben ({{count}} Aufgaben entlastet).",
     "suggestTitle": "Freigeben hat nicht gereicht",
-    "suggestBody": "Diese Hintergrundaufgaben belegen Speicher, den keine Freigabe zurückholt. Sie zu beenden ist Ihre Entscheidung.",
+    "suggestBody": "Diese Hintergrundaufgaben belegen Speicher, den keine Freigabe zurückholt. Sie zu beenden ist deine Entscheidung.",
     "stopThem_one": "Diese Aufgabe beenden",
     "stopThem_other": "Diese {{count}} Aufgaben beenden",
     "ignore": "Ignorieren",
@@ -232,7 +237,7 @@
       "mercurygpu": {
         "title": "Software-Render-Engine",
         "where": "Datei ▸ Projekteinstellungen ▸ Allgemein ▸ Renderer",
-        "body": "Mercury Playback Engine im Software-Modus rechnet alles auf der CPU. Wählen Sie GPU-Beschleunigung, wenn die Karte es zulässt."
+        "body": "Mercury Playback Engine im Software-Modus rechnet alles auf der CPU. Wähle GPU-Beschleunigung, wenn die Karte es zulässt."
       },
       "hwdecode": {
         "title": "Hardware-Dekodierung",
@@ -274,7 +279,7 @@
   "boost": {
     "degraded": {
       "title": "NetsuRush-Erweiterung nicht verbunden",
-      "body": "Festplatten-Caches, freier Speicher und Adobe-Prozesse bleiben lesbar. Leeren, Einstellungen und Proxys erfordern die geöffnete Anwendung mit der NetsuRush-Erweiterung."
+      "body": "Festplatten-Caches, freier Speicher und Adobe-Prozesse bleiben lesbar. Leeren, Einstellungen und Proxys benötigen die geöffnete Anwendung mit der NetsuRush-Erweiterung."
     },
     "status": {
       "installed": "Installiert",
@@ -285,9 +290,9 @@
       "panel": "CEP-Erweiterung",
       "panelConnected": "Verbunden",
       "panelSilent": "Stumm",
-      "panelInstalled": "Erweiterung installiert – starten Sie die Anwendung neu",
+      "panelInstalled": "Erweiterung installiert – starte die Anwendung neu",
       "installPanel": "Erweiterung installieren",
-      "panelHint": "Öffnen Sie die Anwendung und dann Fenster ▸ Erweiterungen ▸ NetsuRush.",
+      "panelHint": "Öffne die Anwendung und dann Fenster ▸ Erweiterungen ▸ NetsuRush.",
       "uxpHint": "Premiere Pro {{year}} lädt zuerst UXP. Fehlt die Erweiterung unter Fenster ▸ Erweiterungen, neu installieren und neu starten.",
       "caches": "Caches",
       "cacheFolders_one": "{{count}} Ordner erkannt",
@@ -308,7 +313,7 @@
       "notRegenerable": "Nicht wiederherstellbar",
       "slowRebuild": "Langsames Reconform",
       "dbWarning": "Das Leeren der Cache-Datenbank zwingt Adobe, beim nächsten Start alle Medien neu zu konformieren: Das dauert lange und lässt sich durch keine Einstellung beschleunigen.",
-      "autoSaveWarning": "Automatische Sicherungen sind Versionen Ihrer Arbeit, kein Cache: Einmal gelöscht, kommen sie nicht zurück.",
+      "autoSaveWarning": "Automatische Sicherungen sind Versionen deiner Arbeit, kein Cache: Einmal gelöscht, kommen sie nicht zurück.",
       "closePurgeReopen": "Schließen, leeren, erneut öffnen",
       "cleanSelection": "Auswahl löschen ({{size}})",
       "runningHint": "Die Anwendung ist geöffnet: NetsuRush schließt sie sauber, leert den Cache und öffnet das Projekt erneut.",
@@ -353,12 +358,12 @@
       "none": "Keine verbliebenen Adobe-Prozesse.",
       "killed": "{{name}} beendet",
       "killTitle": "{{name}} beenden?",
-      "killForced": "Das Beenden wird erzwungen: Nicht gespeicherte Arbeit dieses Prozesses geht verloren."
+      "killForced": "Erzwungenes Beenden: Nicht gespeicherte Arbeit dieses Prozesses geht verloren."
     },
     "purge": {
       "title": "Leeren",
       "subtitle": "Aktionen, die die NetsuRush-Erweiterung in der Anwendung ausführt.",
-      "needsPanel": "Erfordert die geöffnete Anwendung mit der NetsuRush-Erweiterung (Fenster ▸ Erweiterungen ▸ NetsuRush).",
+      "needsPanel": "Benötigt die geöffnete Anwendung mit der NetsuRush-Erweiterung (Fenster ▸ Erweiterungen ▸ NetsuRush).",
       "memoryInUse": "von After Effects belegt",
       "targets": {
         "memory": "RAM leeren",
@@ -393,7 +398,7 @@
     "prefs": {
       "title": "Leistungseinstellungen",
       "subtitle": "Vom Bedienfeld live gelesen und geschrieben: kein Schließen, keine geänderte Datei.",
-      "needsPanel": "Erfordert die geöffnete Anwendung mit der NetsuRush-Erweiterung (Fenster ▸ Erweiterungen ▸ NetsuRush).",
+      "needsPanel": "Benötigt die geöffnete Anwendung mit der NetsuRush-Erweiterung (Fenster ▸ Erweiterungen ▸ NetsuRush).",
       "warn": "Zu korrigieren",
       "advisory": "Maschinenabhängig",
       "volatile": "Nicht dauerhaft",
@@ -455,7 +460,7 @@
     "proxy": {
       "title": "Angehängte Proxys",
       "summary": "{{withProxy}} von {{total}} Clips haben einen Proxy",
-      "needsPanel": "Erfordert geöffnetes Premiere Pro mit der NetsuRush-Erweiterung.",
+      "needsPanel": "Benötigt geöffnetes Premiere Pro mit der NetsuRush-Erweiterung.",
       "useProxies": "Proxys abspielen",
       "rescan": "Erneut prüfen",
       "has": "Proxy",

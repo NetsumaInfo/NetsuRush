@@ -12,11 +12,11 @@
     "object-removal": "Eliminación de objetos en vídeo."
   },
   "title": "Modelos",
-  "subtitle": "No se descarga nada por defecto. Instalar lo necesario y eliminar en cualquier momento.",
+  "subtitle": "No se descarga nada de forma predeterminada. Instala lo que necesites y elimínalo cuando quieras.",
   "disk": "Disco:",
   "noneInstalled": "Sin modelos instalados — instalar uno, si no esta función no va a funcionar.",
   "badge": {
-    "default": "por defecto",
+    "default": "predeterminado",
     "heavy": "pesado",
     "exclusive": "exclusivo",
     "exclusiveTip": "SAMURAI y SAM2Long sustituyen el motor SAM 2 por el suyo: solo uno puede estar instalado a la vez. Instalar el segundo pide confirmación antes de quitar el primero; al borrarlo se restaura el motor original."
@@ -27,7 +27,7 @@
     "replace": "Instalar y quitar el otro"
   },
   "sort": {
-    "default": "Por defecto",
+    "default": "Predeterminado",
     "defaultTip": "Orden del catálogo: el recomendado primero.",
     "size": "Tamaño",
     "sizeTip": "Por tamaño en disco.",
@@ -61,7 +61,7 @@
   },
   "search": {
     "active": "Activo",
-    "activeTip": "Variante utilizada por la búsqueda",
+    "activeTip": "Variante que usa la búsqueda",
     "use": "Usar",
     "useTip": "Convertir esta variante en el modelo de búsqueda",
     "switchTitle": "Cambiar el modelo de búsqueda",
@@ -71,6 +71,6 @@
   },
   "advanced": {
     "label": "Avanzado",
-    "tip": "Muestra todo el catálogo: variantes, generaciones anteriores y motores experimentales. Por defecto solo se muestra la selección actual de cada tarea."
+    "tip": "Muestra todo el catálogo: variantes, generaciones anteriores y motores experimentales. De forma predeterminada solo se muestra la selección actual de cada tarea."
   }
 }

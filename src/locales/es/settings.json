@@ -516,11 +516,13 @@
       "desc": "Agrupado por carpeta de origen. Permite vaciar un proyecto terminado sin tocar el resto.",
       "rushCount_one": "{{count}} clip",
       "rushCount_other": "{{count}} clips",
+      "selectFolder": "Seleccionar la carpeta {{name}}",
       "unattributed": "Sin asignar",
       "unattributedHint": "Caché escrito antes del índice, o cuyo clip no se pudo encontrar. Se puede purgar en bloque.",
-      "selected": "Selección: {{count}} · {{size}}",
       "clearSelection": "Deseleccionar",
-      "purgeSelection": "Vaciar la selección"
+      "purgeSelection": "Vaciar la selección",
+      "selected_one": "{{count}} seleccionado · {{size}}",
+      "selected_other": "{{count}} seleccionados · {{size}}"
     },
     "reindex": {
       "action": "Reindexar",
@@ -533,7 +535,7 @@
     "dir": {
       "title": "Carpeta del caché",
       "desc": "Se aplica a las miniaturas y a las vistas previas de vídeo. La base de datos y los modelos no se mueven.",
-      "default": "Ubicación por defecto",
+      "default": "Ubicación predeterminada",
       "choose": "Elegir…",
       "reset": "Restablecer",
       "moveTitle": "¿Mover el caché existente?",
@@ -542,8 +544,9 @@
       "leave": "Dejar donde está",
       "leaveHint": "La carpeta anterior seguirá aquí y se podrá borrar.",
       "moving": "Moviendo… {{done}}/{{total}}",
-      "moved": "Archivos movidos: {{count}}.",
-      "movedNone": "Nueva carpeta aplicada."
+      "movedNone": "Nueva carpeta aplicada.",
+      "moved_one": "{{count}} archivo movido.",
+      "moved_other": "{{count}} archivos movidos."
     },
     "lifecycle": {
       "session": "Temporal de sesión",
@@ -557,7 +560,7 @@
     },
     "policy": {
       "title": "Limpieza automática",
-      "desc": "Las vistas previas rápidas tienen límites por defecto. Los análisis costosos se conservan.",
+      "desc": "Las vistas previas rápidas tienen límites predeterminados. Los análisis costosos se conservan.",
       "auto": "Limpieza auto",
       "quota": "Cuota",
       "quotaHint": "Al superarla, se van primero las entradas menos usadas.",
@@ -570,7 +573,7 @@
       "sessionTitle": "Cachés de trabajo",
       "sessionDesc": "Elige cuándo deja de ser útil cada derivado pesado. Cerrar la aplicación sigue siendo la red de seguridad.",
       "sequenceTitle": "Secuencias intermedias de modelos",
-      "sequenceHint": "Carpetas de fotogramas creadas solo para alimentar un modelo. Las secuencias exportadas por el usuario nunca se borran.",
+      "sequenceHint": "Carpetas de fotogramas creadas solo para alimentar un modelo. Las secuencias que exportas tú nunca se borran.",
       "trigger": {
         "roto": "Al cambiar de plano",
         "upscaleTest": "Al cambiar la fuente o los ajustes",
@@ -593,15 +596,19 @@
     "confirm": {
       "title": "¿Borrar este caché?",
       "descKinds": "Se liberarán {{size}}. El contenido se regenera cuando haga falta.",
-      "descSources": "Se liberarán {{size}} de estos clips ({{count}}). Los demás no se tocan.",
       "descUnattributed": "Se liberarán {{size}} de caché sin asignar.",
       "expensive": "Incluye el índice de búsqueda: reconstruirlo lleva horas de GPU.",
       "cancel": "Cancelar",
       "confirm": "Borrar",
       "purging": "Borrando…",
-      "done": "Espacio liberado: {{size}} · Archivos: {{files}}",
-      "doneRows": "Espacio liberado: {{size}} · Archivos: {{files}} · Entradas en la base: {{rows}}",
-      "skipped": " · Omitidos por estar bloqueados: {{count}}"
+      "descSources_one": "Se liberarán {{size}} de {{count}} clip. Los demás no se tocan.",
+      "descSources_other": "Se liberarán {{size}} de {{count}} clips. Los demás no se tocan.",
+      "skipped_one": " · {{count}} omitido por estar bloqueado",
+      "skipped_other": " · {{count}} omitidos por estar bloqueados",
+      "done_one": "{{size}} liberados · {{count}} archivo",
+      "done_other": "{{size}} liberados · {{count}} archivos",
+      "doneRows_one": "{{size}} liberados · {{count}} archivo, {{rows}} entradas en la base",
+      "doneRows_other": "{{size}} liberados · {{count}} archivos, {{rows}} entradas en la base"
     },
     "maintenance": {
       "title": "Mantenimiento",
@@ -631,10 +638,11 @@
       "rushCount_one": "{{count}} clip",
       "rushCount_other": "{{count}} clips",
       "scan": "Escanear proyectos de Resolve",
-      "scanDone": "{{count}} proyecto(s) recogido(s)",
       "scanStarting": "Preparando…",
       "scanning": "{{project}} — {{done}}/{{total}}",
-      "title": "Proyectos conocidos por la búsqueda"
+      "title": "Proyectos conocidos por la búsqueda",
+      "scanDone_one": "{{count}} proyecto recogido",
+      "scanDone_other": "{{count}} proyectos recogidos"
     }
   },
   "navigation": {
@@ -711,7 +719,7 @@
     "intro": "La aplicación guarda medios propios: imágenes pegadas, medios obtenidos de un enlace, fotogramas extraídos, resultados de upscale. Guardar un proyecto .netsu archiva esos bytes en su carpeta complementaria — el almacén solo conserva entonces un duplicado, liberable sin perder nada. Las cachés de visualización tienen su propia página.",
     "disk": "{{free}} libres de {{total}}",
     "scanning": "Analizando el almacenamiento…",
-    "failed": "Operación fallida",
+    "failed": "No se ha podido. Inténtalo otra vez.",
     "freedNotice": "{{size}} liberados ({{count}} archivos)",
     "movedNotice": "{{size}} movidos ({{count}} archivos)",
     "movedPartly": "{{count}} archivos movidos, {{failed}} con error (se quedan donde están)",

@@ -58,20 +58,20 @@ export function useFlowAttachments() {
       try {
         if (mediaType) {
           if (file.size > MAX_IMAGE_BYTES) {
-            setError(`${file.name} : image trop lourde (${Math.round(file.size / 1024)} Ko)`);
+            setError(`${file.name} : image trop lourde (${Math.round(file.size / 1024)} Ko)`);
             continue;
           }
           accepted.push({ kind: "image", name: file.name, mediaType, data: await toBase64(file) });
         } else if (TEXT_EXTENSIONS.includes(ext)) {
           if (file.size > MAX_TEXT_BYTES) {
-            setError(`${file.name} : fichier trop gros (${Math.round(file.size / 1024)} Ko)`);
+            setError(`${file.name} : fichier trop gros (${Math.round(file.size / 1024)} Ko)`);
             continue;
           }
           accepted.push({ kind: "text", name: file.name, text: await file.text() });
         } else {
           // Un refus dit lequel et pourquoi : une pièce jointe qui disparaît en
           // silence laisse croire qu'elle est partie avec le message.
-          setError(`${file.name} : format non pris en charge`);
+          setError(`${file.name} : format non pris en charge`);
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));

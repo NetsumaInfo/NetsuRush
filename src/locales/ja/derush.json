@@ -184,7 +184,6 @@
     "trimShot": "ショットをトリム",
     "playShotMenu": "ショットを再生",
     "shotPreview": "ショット {{n}} のプレビュー",
-    "shotsCount": "{{count}} ショット",
     "notCut": "未カット",
     "collapseFolder": "フォルダーを閉じる",
     "expandFolder": "フォルダーを開く",
@@ -202,7 +201,9 @@
     "presetMax": "最大",
     "modelHintTransnet": "高速、CPU で動作。ハードカットに最適。感度は精度プリセットで調整。",
     "modelHintOmni": "ディゾルブや緩やかな転換に最も強い。全自動、GPU が必要。",
-    "modelHintAutoShot": "速い編集や動きの大きい映像に強い。しきい値は詳細設定、GPU。"
+    "modelHintAutoShot": "速い編集や動きの大きい映像に強い。しきい値は詳細設定、GPU。",
+    "shotsCount_one": "{{count}} ショット",
+    "shotsCount_other": "{{count}} ショット"
   },
   "browser": {
     "sort": "並び替え",
@@ -248,18 +249,20 @@
     "addToPoolHint": "タイムラインへ送るには動画を Media Pool に追加。",
     "importExtracts": "書き出しを読み込む",
     "genStopped": "生成を停止 · プロキシ {{done}}/{{total}}",
-    "proxiesReady": "プロキシ完了 · {{count}} ショット",
     "thumbsStopped": "サムネイルを停止 · {{done}}/{{total}}",
     "thumbsReady": "サムネイル完了 · {{count}}",
     "genFailed": "プロキシ · {{failed}}/{{total}} 件失敗",
     "thumbsFailed": "サムネイル · {{failed}}/{{total}} 件失敗",
-    "proxiesUpToDate": "プロキシは最新 · {{count}} ショット、生成なし",
     "flowJump": "素材へ移動",
     "flowRushes_one": "{{count}} 素材",
     "flowRushes_other": "{{count}} 素材",
     "flowUncut_one": "未カットの素材 {{count}}",
     "flowUncut_other": "未カットの素材 {{count}}",
-    "flowUncutTip": "まだショットのない素材だけをカットします。ほかの素材はそのままです。"
+    "flowUncutTip": "まだショットのない素材だけをカットします。ほかの素材はそのままです。",
+    "proxiesReady_one": "プロキシ完了 · {{count}} ショット",
+    "proxiesReady_other": "プロキシ完了 · {{count}} ショット",
+    "proxiesUpToDate_one": "プロキシは最新 · {{count}} ショット、生成なし",
+    "proxiesUpToDate_other": "プロキシは最新 · {{count}} ショット、生成なし"
   },
   "rushGrid": {
     "home": "ホーム",
@@ -324,19 +327,22 @@
     "nameLabel": "タイムライン名",
     "nameLabelAppend": "名前（開いているタイムラインがない場合）",
     "send": "送信",
-    "sendN": "{{count}} ショットを送信"
+    "sendN_one": "{{count}} ショットを送信",
+    "sendN_other": "{{count}} ショットを送信"
   },
   "cutEditor": {
     "timelines": "タイムライン",
-    "selSuffix": " · {{count}} 選択",
     "mergeTip": "選択した隣り合うショットを結合（間のカットを削除）",
     "deleteTip": "選択したショットを編集から削除",
     "resetTip": "検出したカットをリセット",
     "rushRemoved": "素材を編集から削除しました。",
     "nameLabel": "カット済みタイムラインの名前",
     "building": "タイムラインを構築中…",
-    "created": "「{{name}}」を作成 — {{count}} ショット。元のタイムラインはそのままです。",
-    "build": "構築（{{count}}）"
+    "build": "構築（{{count}}）",
+    "created_one": "「{{name}}」を作成 — {{count}} ショット。元のタイムラインはそのままです。",
+    "created_other": "「{{name}}」を作成 — {{count}} ショット。元のタイムラインはそのままです。",
+    "selSuffix_one": " · {{count}} 選択",
+    "selSuffix_other": " · {{count}} 選択"
   },
   "cutTimeline": {
     "editHeader": "カットを編集 · {{name}}",
@@ -346,10 +352,8 @@
     "building": "構築中…",
     "analyzeFailed": "解析に失敗しました",
     "noShots": "ショットを検出できません。",
-    "itemDone": "{{count}} ショット →「{{name}}」",
     "title": "タイムライン",
     "count": "{{count}} タイムライン",
-    "selectedOf": "{{total}} 件中 {{count}} 件を選択",
     "defaultName": "{{name}} — カット済み",
     "modeNewTip": "元のタイムラインの隣に新規作成",
     "modeReplaceTip": "置き換え：元を削除し、カット済みを改名（重複なし）",
@@ -359,7 +363,11 @@
     "cutTipMany": "{{count}} 件のタイムラインを直接カット",
     "cutTipOne": "タイムラインを直接カット",
     "noneInProject": "このプロジェクトにタイムラインはありません。",
-    "noMedia": "このタイムラインに映像素材がありません。"
+    "noMedia": "このタイムラインに映像素材がありません。",
+    "itemDone_one": "{{count}} ショット →「{{name}}」",
+    "itemDone_other": "{{count}} ショット →「{{name}}」",
+    "selectedOf_one": "{{total}} 件中 {{count}} 件を選択",
+    "selectedOf_other": "{{total}} 件中 {{count}} 件を選択"
   },
   "timelineLive": {
     "readFailed": "読み込みに失敗しました",
@@ -371,35 +379,41 @@
     "backToTimelines": "タイムライン一覧に戻る",
     "addSelected": "選択した {{count}} ショットを追加",
     "addAll": "すべてのショットを追加",
-    "added": "{{count}} ショット →「{{name}}」。",
     "noShots": "このタイムラインに映像ショットはありません。",
     "noSnapshotTitle": "シーケンスを受信していません",
     "noSnapshotHint": "{{host}} で NetsuRush パネル（ウィンドウ ▸ 拡張機能）を開き、「NetsuRush に送信」をクリックしてください。",
     "tracks": "表示中のトラック",
     "allTracks": "すべてのトラック",
-    "trackFallback": "トラック {{index}}"
+    "trackFallback": "トラック {{index}}",
+    "added_one": "{{count}} ショット →「{{name}}」。",
+    "added_other": "{{count}} ショット →「{{name}}」。"
   },
   "export": {
     "extracting": "書き出し中…",
     "extractingN": "書き出し {{done}}/{{total}}…",
     "clipError": "クリップ {{index}}: {{error}}",
-    "extracted": "{{count}} ショットを書き出し（再エンコードなし）→ {{dir}}",
     "creatingTimeline": "タイムライン作成中…",
-    "timelineCreated": "タイムライン「{{name}}」を {{count}} ショットで作成",
     "sendingTimeline": "タイムラインへ送信中…",
-    "sentTimeline": "{{count}} ショット →「{{name}}」",
     "createdSuffix": "（作成）",
     "fpsSuffix": " · ⚠ タイムラインの FPS ≠ クリップ",
     "sendFailed": "タイムラインへ送信できません",
     "shotAdded": "ショットを「{{name}}」に追加",
     "addFailed": "タイムラインに追加できません",
     "importing": "読み込み中…",
-    "imported": "{{count}} ショット → {{dest}}",
-    "destProject": "プロジェクト"
+    "destProject": "プロジェクト",
+    "sentTimeline_one": "{{count}} ショット →「{{name}}」",
+    "sentTimeline_other": "{{count}} ショット →「{{name}}」",
+    "imported_one": "{{count}} ショット → {{dest}}",
+    "imported_other": "{{count}} ショット → {{dest}}",
+    "timelineCreated_one": "タイムライン「{{name}}」を {{count}} ショットで作成",
+    "timelineCreated_other": "タイムライン「{{name}}」を {{count}} ショットで作成",
+    "extracted_one": "{{count}} ショットを書き出し（再エンコードなし）→ {{dir}}",
+    "extracted_other": "{{count}} ショットを書き出し（再エンコードなし）→ {{dir}}"
   },
   "detection": {
     "proxyPrefix": "プロキシ：{{error}}",
-    "shotsWithModel": "{{count}} ショット · {{model}}"
+    "shotsWithModel_one": "{{count}} ショット · {{model}}",
+    "shotsWithModel_other": "{{count}} ショット · {{model}}"
   },
   "store": {
     "noProject": "プロジェクトを受信していません — NetsuRush パネルを開き「NetsuRush へ送信」を実行。",

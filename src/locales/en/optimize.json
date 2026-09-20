@@ -22,13 +22,14 @@
     "jobsQueued_other": "{{count}} jobs queued",
     "settingsRead": "Perf settings read",
     "cacheProxyKeys": "Cache/proxy keys: {{count}}",
-    "cacheFoldersDetected": "Cache folders found: {{count}}",
     "noCacheFolder": "No cache folder auto-detected",
     "database": "Database",
     "dbBig": "{{name}} · large → split it",
     "dbHealthy": "{{name}} · healthy size",
     "dbRemote": "PostgreSQL",
-    "dbMissing": "Not found"
+    "dbMissing": "Not found",
+    "cacheFoldersDetected_one": "{{count}} cache folder found",
+    "cacheFoldersDetected_other": "{{count}} cache folders found"
   },
   "memory": {
     "title": "Session memory",
@@ -59,7 +60,6 @@
     "pending_other": "{{count}} pending changes",
     "apply": "Apply and restart",
     "reset": "Cancel",
-    "applyTitle": "Apply changes ({{count}})?",
     "applyBody": "The project is saved, the current config is backed up, Resolve closes, the prefs are written, then Resolve reopens on \"{{project}}\". Takes a minute or two. Not mid-render.",
     "applyDone_one": "{{count}} setting applied — Resolve restarted.",
     "applyDone_other": "{{count}} settings applied — Resolve restarted.",
@@ -107,7 +107,9 @@
         "where": "Preferences ▸ User ▸ Project Save and Load",
         "body": "Periodic snapshots on top of project saves. The first one of the day can drag, the rest go unnoticed."
       }
-    }
+    },
+    "applyTitle_one": "Apply {{count}} change?",
+    "applyTitle_other": "Apply {{count}} changes?"
   },
   "gpu": {
     "title": "GPU / CPU / RAM monitor",
@@ -116,11 +118,12 @@
     "vramUnreadable": "Live VRAM monitoring is unavailable for this driver. Processing remains available.",
     "ramSystem": "System RAM",
     "resolveRam": "Resolve.exe: {{size}}",
-    "deadKilledSuffix": " · Frozen processes closed: {{count}}",
     "nothingToFree": "Nothing to free",
     "ramFreed": "+{{mb}} MB RAM freed",
     "vramFreed": "-{{mb}} MB VRAM",
-    "residuesCleaned": "Leftovers cleaned"
+    "residuesCleaned": "Leftovers cleaned",
+    "deadKilledSuffix_one": " · {{count}} frozen process closed",
+    "deadKilledSuffix_other": " · {{count}} frozen processes closed"
   },
   "process": {
     "title": "Heavy processes (whole PC)",
@@ -134,12 +137,14 @@
     "noneListed": "No processes listed (Windows only).",
     "killed": "{{name}} (PID {{pid}}) ended.",
     "noneBlocked": "No stuck processes to clean up.",
-    "cleaned": "Stuck processes cleaned up: {{count}}.",
     "killTitle": "End {{name}}?",
     "killForced": "Force close — unsaved work is lost.",
-    "cleanTitle": "Clean up stuck processes ({{count}})?",
     "cleanBody": "Frozen programs (\"Not responding\"). Force close — unsaved work is lost.",
-    "clean": "Clean up"
+    "clean": "Clean up",
+    "cleaned_one": "{{count}} stuck process cleaned up.",
+    "cleaned_other": "{{count}} stuck processes cleaned up.",
+    "cleanTitle_one": "Clean up {{count}} stuck process?",
+    "cleanTitle_other": "Clean up {{count}} stuck processes?"
   },
   "watchdog": {
     "title": "Memory watch",
@@ -353,7 +358,7 @@
       "none": "No leftover Adobe process.",
       "killed": "{{name}} killed",
       "killTitle": "Kill {{name}}?",
-      "killForced": "Termination is forced: any unsaved work in that process is lost."
+      "killForced": "Force-stop: any unsaved work in that process is lost."
     },
     "purge": {
       "title": "Purges",

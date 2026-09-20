@@ -5,10 +5,12 @@
   },
   "result": {
     "scriptPrefix": "スクリプト：{{name}}",
-    "clipsDone": "{{count}} ショット →「{{comp}}」コンポ。",
     "imported": "After Effects に読み込みました（プロジェクトパネルを確認）。",
     "launching": "After Effects を起動中 — 起動後に自動で読み込みます（プロジェクトを開いた状態が必要）。",
-    "missing": "ファイルのない {{count}} ショットをスキップしました。"
+    "clipsDone_one": "{{count}} ショット →「{{comp}}」コンポ。",
+    "clipsDone_other": "{{count}} ショット →「{{comp}}」コンポ。",
+    "missing_one": "ファイルのない {{count}} ショットをスキップしました。",
+    "missing_other": "ファイルのない {{count}} ショットをスキップしました。"
   },
   "run": {
     "busy": "書き出し中…",

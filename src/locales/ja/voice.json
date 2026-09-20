@@ -111,7 +111,7 @@
     "tics": "口ぐせ",
     "wordTypes": "語の種類",
     "customWords": "カスタム語",
-    "customWordsPlaceholder": "例：えっと, まあ, なんか",
+    "customWordsPlaceholder": "例：えっと、まあ、なんか",
     "customWordsTooltip": "独自のフィラー語をカンマ区切りで（辞書に追加されます）。",
     "timelineNamePlaceholder": "タイムライン名（空なら自動）",
     "cutSilences": "無音をカット",
@@ -122,7 +122,6 @@
     "removeFillers": "フィラーを削除（{{count}}）",
     "restoreFillers": "フィラーを復元（{{count}}）",
     "kept": "保持",
-    "removedOfPlans": "{{count}} ショット中 {{removed}} 件を除外",
     "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = 再エンコード · FCPXML = ソースのタイムコード。",
@@ -139,7 +138,9 @@
       "padEnd": "各テイクの「後」に残す余白（文末）。先頭の余白とは別設定。",
       "noiseGate": "発話と誤認された短い雑音（キーボード、口のノイズ）を除外。0 で無効。"
     },
-    "off": "オフ"
+    "off": "オフ",
+    "removedOfPlans_one": "{{count}} ショット中 {{removed}} 件を除外",
+    "removedOfPlans_other": "{{count}} ショット中 {{removed}} 件を除外"
   },
   "params": {
     "threshold": "しきい値",
@@ -258,12 +259,8 @@
   },
   "store": {
     "batchLoaded": "解析を読み込みました（一括）",
-    "batchStopped": "解析を停止しました — {{count}} クリップ完了",
-    "batchDone": "一括解析：{{count}} クリップ",
-    "batchErrorsSuffix": " · エラー {{count}} 件",
     "silencesDetected": "無音 {{silences}} · 発話セグメント {{speech}}",
     "errDetectSilences": "無音を検出できません",
-    "fillersDetected": "フィラー {{count}} 件を検出（音声）",
     "noFillersDetected": "音響的なフィラーは検出されませんでした。",
     "errDetectFillers": "フィラーを検出できません",
     "transcriptCached": "文字起こしを読み込みました（キャッシュ）",
@@ -275,7 +272,15 @@
     "busyTranscribe": "文字起こし中…",
     "busyAnalyzeAllWithTranscribe": "解析：文字起こし ∥ 無音…",
     "busyAnalyzeAllSilencesOnly": "解析：無音…",
-    "busyAnalyzeAllFillers": "解析：フィラー（音声）…"
+    "busyAnalyzeAllFillers": "解析：フィラー（音声）…",
+    "batchStopped_one": "解析を停止しました — {{count}} クリップ完了",
+    "batchStopped_other": "解析を停止しました — {{count}} クリップ完了",
+    "batchDone_one": "一括解析：{{count}} クリップ",
+    "batchDone_other": "一括解析：{{count}} クリップ",
+    "batchErrorsSuffix_one": " · エラー {{count}} 件",
+    "batchErrorsSuffix_other": " · エラー {{count}} 件",
+    "fillersDetected_one": "フィラー {{count}} 件を検出（音声）",
+    "fillersDetected_other": "フィラー {{count}} 件を検出（音声）"
   },
   "export": {
     "timelineSuffixEdit": "編集版",
@@ -287,7 +292,6 @@
     "creatingColorTimeline": "カラータイムラインを作成中…",
     "exportingFormat": "{{format}} を書き出し中…",
     "errNothingToBuild": "編集する内容がありません（残ったセグメントなし）。",
-    "timelineBase": "タイムライン「{{name}}」· {{count}} セグメント",
     "removedSuffix": " · {{sec}} 秒を削除",
     "createdSuffix": "（作成済み）",
     "fpsMismatchSuffix": " · ⚠ タイムラインの fps ≠ クリップ",
@@ -299,11 +303,14 @@
     "coloredLegend": " · 🟢 発話 🔵 無音 🟠 フィラー 🟦 重複",
     "errTimelineColored": "カラータイムラインに失敗しました",
     "errNothingToExport": "書き出す内容がありません（残ったセグメントなし）。",
-    "fileExported": "{{format}}（{{count}} ショット）→ {{path}}",
     "errExportFile": "{{format}} を書き出せません",
     "errNoWords": "先に文字起こししてください（語がありません）。",
     "subtitlesExported": "字幕 {{format}}（{{count}} 行）→ {{path}}",
-    "errSubtitles": "字幕に失敗しました"
+    "errSubtitles": "字幕に失敗しました",
+    "timelineBase_one": "タイムライン「{{name}}」· {{count}} セグメント",
+    "timelineBase_other": "タイムライン「{{name}}」· {{count}} セグメント",
+    "fileExported_one": "{{format}}（{{count}} ショット）→ {{path}}",
+    "fileExported_other": "{{format}}（{{count}} ショット）→ {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve がオフラインです。ローカルファイルを使ってください。",
@@ -316,11 +323,13 @@
     "profileHint": "書き出しプロファイル（コーデック・コンテナ・音声）。右クリックで切り替え。",
     "runningCount_one": "{{count}} 件を書き出し中",
     "runningCount_other": "{{count}} 件を書き出し中",
-    "done": "書き出し完了：{{count}} 本 · プロファイル {{profile}}",
-    "stopped": "書き出しを停止 — {{count}} 本完了",
     "errProfile": "プロファイルが未完成：{{issue}}",
     "errNoDir": "書き出しを中止：出力フォルダー未選択。",
     "errNoSegments": "書き出す対象がありません（残った区間なし）。",
-    "errExport": "書き出しに失敗"
+    "errExport": "書き出しに失敗",
+    "done_one": "書き出し完了：{{count}} 本 · プロファイル {{profile}}",
+    "done_other": "書き出し完了：{{count}} 本 · プロファイル {{profile}}",
+    "stopped_one": "書き出しを停止 — {{count}} 本完了",
+    "stopped_other": "書き出しを停止 — {{count}} 本完了"
   }
 }

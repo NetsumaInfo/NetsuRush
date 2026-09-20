@@ -4238,7 +4238,7 @@ const mock: NrApi = {
         if (!name) return { ok: false, error: i18n.t("common:mock.emptyFolderName") };
         if (/[\\/]/.test(name)) return { ok: false, error: i18n.t("common:mock.invalidFolderName") };
         if (all.some((x) => x.id !== id && (x.parentId ?? null) === parentId && x.name.toLowerCase() === name.toLowerCase())) {
-          return { ok: false, error: `Un dossier « ${name} » existe déjà ici` };
+          return { ok: false, error: `Un dossier « ${name} » existe déjà ici` };
         }
         const rec: LibraryFolder = { id, name, parentId };
         const i = all.findIndex((x) => x.id === id);

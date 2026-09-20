@@ -122,7 +122,6 @@
     "removeFillers": "Füllwörter entfernen ({{count}})",
     "restoreFillers": "Füllwörter zurückholen ({{count}})",
     "kept": "Behalten",
-    "removedOfPlans": "−{{removed}} entfernt · Einstellungen gesamt: {{count}}",
     "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = neu kodiert · FCPXML = Quell-Timecode.",
@@ -139,7 +138,9 @@
       "padEnd": "Luft NACH jeder Aufnahme (Satzenden), getrennt vom Rand am Anfang.",
       "noiseGate": "Verwirft kurze Geräusche, die als Sprache gelten (Tastatur, Mundgeräusche). 0 = aus."
     },
-    "off": "aus"
+    "off": "aus",
+    "removedOfPlans_one": "−{{removed}} aus {{count}} Einstellung entfernt",
+    "removedOfPlans_other": "−{{removed}} aus {{count}} Einstellungen entfernt"
   },
   "params": {
     "threshold": "Schwelle",
@@ -258,12 +259,8 @@
   },
   "store": {
     "batchLoaded": "Analyse geladen (Stapel)",
-    "batchStopped": "Analyse gestoppt — fertige Clips: {{count}}",
-    "batchDone": "Stapelanalyse · Clips: {{count}}",
-    "batchErrorsSuffix": " · {{count}} Fehler",
     "silencesDetected": "Stille: {{silences}} · Sprachsegmente: {{speech}}",
     "errDetectSilences": "Erkennung der Stille fehlgeschlagen",
-    "fillersDetected": "Im Audio erkannte Füllwörter: {{count}}",
     "noFillersDetected": "Keine akustischen Füllwörter erkannt.",
     "errDetectFillers": "Erkennung der Füllwörter fehlgeschlagen",
     "transcriptCached": "Transkription geladen (Cache)",
@@ -275,7 +272,15 @@
     "busyTranscribe": "Transkription…",
     "busyAnalyzeAllWithTranscribe": "Analyse: Transkription ∥ Stille…",
     "busyAnalyzeAllSilencesOnly": "Analyse: Stille…",
-    "busyAnalyzeAllFillers": "Analyse: Füllwörter (Audio)…"
+    "busyAnalyzeAllFillers": "Analyse: Füllwörter (Audio)…",
+    "batchStopped_one": "Analyse gestoppt — {{count}} Clip fertig",
+    "batchStopped_other": "Analyse gestoppt — {{count}} Clips fertig",
+    "batchDone_one": "Stapelanalyse — {{count}} Clip",
+    "batchDone_other": "Stapelanalyse — {{count}} Clips",
+    "batchErrorsSuffix_one": " · {{count}} Fehler",
+    "batchErrorsSuffix_other": " · {{count}} Fehler",
+    "fillersDetected_one": "{{count}} Füllwort im Audio erkannt",
+    "fillersDetected_other": "{{count}} Füllwörter im Audio erkannt"
   },
   "export": {
     "timelineSuffixEdit": "Schnitt",
@@ -287,7 +292,6 @@
     "creatingColorTimeline": "Farb-Timeline wird erstellt…",
     "exportingFormat": "{{format}} wird exportiert…",
     "errNothingToBuild": "Nichts zu schneiden (kein Segment behalten).",
-    "timelineBase": "Timeline „{{name}}“ · Segmente: {{count}}",
     "removedSuffix": " · {{sec}} s entfernt",
     "createdSuffix": " (erstellt)",
     "fpsMismatchSuffix": " · ⚠ fps Timeline ≠ Clip",
@@ -299,11 +303,14 @@
     "coloredLegend": " · 🟢 Sprache 🔵 Stille 🟠 Füllw. 🟦 Wdh.",
     "errTimelineColored": "Farb-Timeline fehlgeschlagen",
     "errNothingToExport": "Nichts zu exportieren (kein Segment behalten).",
-    "fileExported": "{{format}} · Einstellungen: {{count}} → {{path}}",
     "errExportFile": "{{format}}-Export fehlgeschlagen",
     "errNoWords": "Erst transkribieren (keine Wörter).",
     "subtitlesExported": "Untertitel {{format}} · Zeilen: {{count}} → {{path}}",
-    "errSubtitles": "Untertitel fehlgeschlagen"
+    "errSubtitles": "Untertitel fehlgeschlagen",
+    "timelineBase_one": "Timeline „{{name}}“ · {{count}} Segment",
+    "timelineBase_other": "Timeline „{{name}}“ · {{count}} Segmente",
+    "fileExported_one": "{{format}} ({{count}} Einstellung) → {{path}}",
+    "fileExported_other": "{{format}} ({{count}} Einstellungen) → {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve offline — lokale Datei verwenden.",
@@ -316,11 +323,13 @@
     "profileHint": "Render-Profil (Codec, Container, Audio). Rechtsklick zum Wechseln.",
     "runningCount_one": "{{count}} Rendering läuft",
     "runningCount_other": "{{count}} Renderings laufen",
-    "done": "Gerendert: {{count}} Rush(es) · Profil {{profile}}",
-    "stopped": "Rendern gestoppt — {{count}} Rush(es) fertig",
     "errProfile": "Unvollständiges Profil: {{issue}}",
     "errNoDir": "Rendern abgebrochen: kein Zielordner gewählt.",
     "errNoSegments": "Nichts zu rendern (kein Segment behalten).",
-    "errExport": "Rendern fehlgeschlagen"
+    "errExport": "Rendern fehlgeschlagen",
+    "done_one": "Gerendert: {{count}} Clip · Profil {{profile}}",
+    "done_other": "Gerendert: {{count}} Clips · Profil {{profile}}",
+    "stopped_one": "Rendern gestoppt — {{count}} Clip fertig",
+    "stopped_other": "Rendern gestoppt — {{count}} Clips fertig"
   }
 }

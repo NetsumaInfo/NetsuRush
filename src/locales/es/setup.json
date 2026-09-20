@@ -9,13 +9,14 @@
     "sceneDetection": "Corte de escenas",
     "included": "Incluido",
     "empty": "Ningún modelo coincide con la búsqueda.",
-    "selected": "{{count}} seleccionado(s)",
     "noExtraSpace": "sin espacio adicional",
     "tier": {
       "light": "ligero",
       "balanced": "equilibrado",
       "heavy": "pesado"
-    }
+    },
+    "selected_one": "{{count}} seleccionado",
+    "selected_other": "{{count}} seleccionados"
   },
   "packs": {
     "recommended": "Paquete recomendado",
@@ -27,10 +28,11 @@
   "review": {
     "title": "Listo para instalar",
     "downloads": "Espacio opcional",
-    "modelCount": "{{count}} descarga(s)",
     "noOptionalModels": "Sin descargas opcionales",
     "mandatoryOnly": "Solo base y corte de escenas",
-    "sceneDetection": "Corte de escenas incluido"
+    "sceneDetection": "Corte de escenas incluido",
+    "modelCount_one": "{{count}} descarga",
+    "modelCount_other": "{{count}} descargas"
   },
   "detectedBackend": "Motor de cálculo seleccionado: {{backend}}",
   "installFailed": "Error de instalación",

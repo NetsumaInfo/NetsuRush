@@ -247,8 +247,9 @@
     "assetSweep": "Unused media",
     "assetSweepHint": "Removes files no scene references. Nothing your boards hold is touched.",
     "assetSweepAction": "Clean up",
-    "assetSweepDone": "{{count}} file(s) removed, {{mb}} MB freed.",
-    "assetSweepFailed": "Cleanup failed."
+    "assetSweepFailed": "Cleanup failed.",
+    "assetSweepDone_one": "{{count}} file removed, {{mb}} MB freed.",
+    "assetSweepDone_other": "{{count}} files removed, {{mb}} MB freed."
   },
   "inspector": {
     "ytPlayer": "YouTube player",
@@ -431,7 +432,8 @@
     "duplicate": "Duplicate (Ctrl+D)",
     "unlink": "Unlink from media",
     "relink": "Link to media",
-    "linkedTo": "Linked to {{count}} item(s)"
+    "linkedTo_one": "Linked to {{count}} item",
+    "linkedTo_other": "Linked to {{count}} items"
   },
   "media": {
     "browse": "Browse",
@@ -607,6 +609,7 @@
     "preparing": "Preparing the video…"
   },
   "embed": {
+    "onlineMedia": "Online media",
     "frozen": "Playback frozen",
     "level": {
       "link": "Links only",
@@ -647,16 +650,18 @@
     "clipboardEmptyLink": "Clipboard empty or link not recognized",
     "emptyTitle": "Drag images, videos or a YouTube link here",
     "emptyHint": "Paste (Ctrl+V) · wheel to zoom · drag the background to navigate",
-    "pastedItems": "{{count}} item(s) pasted",
-    "copiedDone": "{{count}} item(s) copied",
-    "cutDone": "{{count}} item(s) cut"
+    "pastedItems_one": "{{count}} item pasted",
+    "pastedItems_other": "{{count}} items pasted",
+    "copiedDone_one": "{{count}} item copied",
+    "copiedDone_other": "{{count}} items copied",
+    "cutDone_one": "{{count}} item cut",
+    "cutDone_other": "{{count}} items cut"
   },
   "notice": {
     "recoveringMedia": "Recovering media…",
     "mediaUnrecoverable": "Media can't be recovered",
     "recoverFailed": "Recovery failed",
     "recoveringOnline": "Recovering online media… ({{current}}/{{total}})",
-    "mediaRecovered": "{{count}} media recovered",
     "redownloadAll": "Redownload all ({{count}})",
     "recoveryResult": "{{recovered}} recovered, {{failed}} failed",
     "downloadingVideo": "Downloading the video…",
@@ -676,7 +681,6 @@
     "typeUnsupported": "Type \"{{type}}\" not supported",
     "importFailedWith": "Import failed: {{error}}",
     "unknown": "unknown",
-    "imported": "Imported · Items: {{count}}",
     "boardImported": "Board imported",
     "projectSaved": "“{{name}}” saved",
     "projectOpened": "“{{name}}” opened",
@@ -685,10 +689,15 @@
     "dropProjectFailed": "Could not open \"{{name}}\" — use \"Open a project\".",
     "noProjectFile": "This board is not linked to a file",
     "relocating": "Searching the folder for media… ({{count}})",
-    "relocated": "{{count}}/{{total}} media relocated",
     "relocatedNone": "No media recognised in this folder",
     "contentOpacity": "Content opacity: {{percent}}%",
-    "itemOpacity": "Media opacity: {{percent}}%"
+    "itemOpacity": "Media opacity: {{percent}}%",
+    "mediaRecovered_one": "{{count}} media file recovered",
+    "mediaRecovered_other": "{{count}} media files recovered",
+    "imported_one": "Imported · {{count}} item",
+    "imported_other": "Imported · {{count}} items",
+    "relocated_one": "{{count}}/{{total}} media file relocated",
+    "relocated_other": "{{count}}/{{total}} media files relocated"
   },
   "tidy": {
     "title": "Tidy",

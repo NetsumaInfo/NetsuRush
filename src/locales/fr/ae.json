@@ -1,14 +1,16 @@
 {
   "header": {
     "title": "Export vers After Effects",
-    "subtitle": "Reconstruit fidèlement la timeline dans une composition After Effects : positions, pistes et coupes à l’image près."
+    "subtitle": "Reconstruit fidèlement la timeline dans une composition After Effects : positions, pistes et coupes à l'image près."
   },
   "result": {
-    "scriptPrefix": "Script : {{name}}",
-    "clipsDone": "{{count}} plan(s) → comp « {{comp}} ».",
+    "scriptPrefix": "Script : {{name}}",
     "imported": "Importé dans After Effects (vérifie le panneau Projet).",
     "launching": "After Effects se lance — import automatique au démarrage (projet ouvert requis).",
-    "missing": "{{count}} plan(s) sans fichier ignoré(s)."
+    "clipsDone_one": "{{count}} plan → comp « {{comp}} ».",
+    "clipsDone_other": "{{count}} plans → comp « {{comp}} ».",
+    "missing_one": "{{count}} plan sans fichier ignoré.",
+    "missing_other": "{{count}} plans sans fichier ignorés."
   },
   "run": {
     "busy": "Export en cours…",
@@ -23,7 +25,7 @@
     "no": "Non",
     "codec": "Codec",
     "container": "Conteneur",
-    "bakeForcesReencode": "Vitesse cuite : les plans sont réencodés, quel que soit le mode ci-dessus.",
+    "bakeForcesReencode": "Vitesse cuite : les plans sont réencodés, quel que soit le mode ci-dessus.",
     "mode": "Mode",
     "nestedFlatten": "Contenu",
     "nestedComp": "Précompo",
@@ -46,8 +48,8 @@
     "foldersLabel": "Ranger en dossiers (Rushes / Précomps / Audio / Images)",
     "none": "Aucun",
     "choose": "Choisir…",
-    "outDirWhy": "Fichiers écrits ici : {{reasons}}.",
-    "upscaleForcesReencode": "L’upscale remplace les pixels : le mode Réencode s’applique quel que soit le choix ci-dessus."
+    "outDirWhy": "Fichiers écrits ici : {{reasons}}.",
+    "upscaleForcesReencode": "L'upscale remplace les pixels : le mode Réencode s'applique quel que soit le choix ci-dessus."
   },
   "sections": {
     "timeline": "Timeline",
@@ -72,7 +74,7 @@
     },
     "reencode": {
       "label": "Réencode",
-      "hint": "Chaque plan transcodé en codec montage, coupé à l’image près, poignées incluses."
+      "hint": "Chaque plan transcodé en codec montage, coupé à l'image près, poignées incluses."
     }
   },
   "audioModes": {
@@ -93,7 +95,7 @@
     },
     "bake": {
       "label": "Réencodé",
-      "hint": "Vitesse et cadrage cuits dans le fichier, à la taille de la timeline — hors cadre en noir. Cadrage animé : rendu par Resolve, un par plan."
+      "hint": "Vitesse et cadrage cuits dans le fichier, à la taille de la timeline — hors cadre en noir. Cadrage animé : rendu par Resolve, un par plan."
     }
   },
   "errors": {

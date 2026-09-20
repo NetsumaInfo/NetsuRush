@@ -22,13 +22,14 @@
     "jobsQueued_other": "队列中 {{count}} 个任务",
     "settingsRead": "已读取性能设置",
     "cacheProxyKeys": "{{count}} 个缓存/代理文件键",
-    "cacheFoldersDetected": "检测到 {{count}} 个缓存文件夹",
     "noCacheFolder": "未自动检测到缓存文件夹",
     "database": "数据库",
     "dbBig": "{{name}} · 体积过大 → 建议拆分",
     "dbHealthy": "{{name}} · 体积正常",
     "dbRemote": "PostgreSQL",
-    "dbMissing": "未找到"
+    "dbMissing": "未找到",
+    "cacheFoldersDetected_one": "检测到 {{count}} 个缓存文件夹",
+    "cacheFoldersDetected_other": "检测到 {{count}} 个缓存文件夹"
   },
   "memory": {
     "title": "本次会话内存",
@@ -59,7 +60,6 @@
     "pending_other": "{{count}} 项待应用",
     "apply": "应用并重启",
     "reset": "取消",
-    "applyTitle": "应用 {{count}} 项更改？",
     "applyBody": "先保存项目并备份当前配置，再关闭 Resolve、写入首选项，然后重新打开“{{project}}”。约需一到两分钟，请勿在渲染时执行。",
     "applyDone_one": "已应用 {{count}} 项设置 —— Resolve 已重启。",
     "applyDone_other": "已应用 {{count}} 项设置 —— Resolve 已重启。",
@@ -107,7 +107,9 @@
         "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
         "body": "在项目保存之外定期做快照。当天第一次可能有点慢，之后几乎察觉不到。"
       }
-    }
+    },
+    "applyTitle_one": "应用 {{count}} 项更改？",
+    "applyTitle_other": "应用 {{count}} 项更改？"
   },
   "gpu": {
     "title": "GPU / CPU / RAM 监视器",
@@ -116,11 +118,12 @@
     "vramUnreadable": "此驱动无法读取显存。处理功能仍可使用。",
     "ramSystem": "系统 RAM",
     "resolveRam": "Resolve.exe：{{size}}",
-    "deadKilledSuffix": " · 已关闭 {{count}} 个无响应进程",
     "nothingToFree": "没有可释放的",
     "ramFreed": "已释放 +{{mb}} MB RAM",
     "vramFreed": "-{{mb}} MB VRAM",
-    "residuesCleaned": "残留已清理"
+    "residuesCleaned": "残留已清理",
+    "deadKilledSuffix_one": " · 已关闭 {{count}} 个无响应进程",
+    "deadKilledSuffix_other": " · 已关闭 {{count}} 个无响应进程"
   },
   "process": {
     "title": "占用大的进程（整机）",
@@ -134,12 +137,14 @@
     "noneListed": "没有列出进程（仅限 Windows）。",
     "killed": "{{name}}（PID {{pid}}）已结束。",
     "noneBlocked": "没有需要清理的无响应进程。",
-    "cleaned": "已清理 {{count}} 个无响应进程。",
     "killTitle": "结束 {{name}}？",
     "killForced": "强制关闭 —— 未保存的内容会丢失。",
-    "cleanTitle": "清理 {{count}} 个无响应进程？",
     "cleanBody": "此程序已卡死（“未响应”）。强制关闭会丢失未保存的内容。",
-    "clean": "清理"
+    "clean": "清理",
+    "cleaned_one": "已清理 {{count}} 个无响应进程。",
+    "cleaned_other": "已清理 {{count}} 个无响应进程。",
+    "cleanTitle_one": "清理 {{count}} 个无响应进程？",
+    "cleanTitle_other": "清理 {{count}} 个无响应进程？"
   },
   "watchdog": {
     "title": "内存监控",

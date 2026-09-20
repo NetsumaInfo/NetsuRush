@@ -9,13 +9,14 @@
     "sceneDetection": "场景切分",
     "included": "已包含",
     "empty": "没有匹配的模型。",
-    "selected": "已选择 {{count}} 项",
     "noExtraSpace": "不占额外空间",
     "tier": {
       "light": "轻量",
       "balanced": "均衡",
       "heavy": "大型"
-    }
+    },
+    "selected_one": "已选择 {{count}} 项",
+    "selected_other": "已选择 {{count}} 项"
   },
   "packs": {
     "recommended": "推荐包",
@@ -27,10 +28,11 @@
   "review": {
     "title": "可以安装",
     "downloads": "可选空间",
-    "modelCount": "{{count}} 项下载",
     "noOptionalModels": "无可选下载",
     "mandatoryOnly": "仅基础环境和场景切分",
-    "sceneDetection": "包含场景切分"
+    "sceneDetection": "包含场景切分",
+    "modelCount_one": "{{count}} 项下载",
+    "modelCount_other": "{{count}} 项下载"
   },
   "detectedBackend": "已选择的计算引擎：{{backend}}",
   "installFailed": "安装失败",

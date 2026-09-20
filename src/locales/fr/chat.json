@@ -1,6 +1,6 @@
 {
   "stream": {
-    "error": "Une erreur est survenue."
+    "error": "La réponse s'est interrompue. Relance la demande."
   },
   "panel": {
     "copilot": "Copilote NetsuRush",
@@ -32,7 +32,7 @@
     "keyAbsent": "absente",
     "cliAgents": "Agents",
     "rescan": "Re-scanner",
-    "noAgentsPre": "Aucun agent listé — clique « Re-scanner ». Si rien, installe ",
+    "noAgentsPre": "Aucun agent listé — clique « Re-scanner ». Si rien, installe ",
     "noAgentsPost": " et vérifie qu'ils sont dans le PATH du core.",
     "detected": "détecté",
     "absent": "absent",
@@ -53,10 +53,10 @@
     "resolveMcpServer": "Serveur officiel Blackmagic",
     "resolveMcpMissing": "Livré avec DaVinci Resolve Studio 21.1 ou plus récent. Introuvable sur cet ordinateur.",
     "resolveMcpSilent": "sans réponse",
-    "resolveMcpSilentHint": "Le serveur est là mais n’a pas répondu. Lance Resolve, puis relance la détection.",
-    "resolveMcpHint": "{{n}} outils ajoutés au copilote : scripts Python dans Resolve, recherche dans l’API de scripting, documentation, LUT et DCTL.",
+    "resolveMcpSilentHint": "Le serveur est là mais n'a pas répondu. Lance Resolve, puis relance la détection.",
+    "resolveMcpHint": "{{n}} outils ajoutés au copilote : scripts Python dans Resolve, recherche dans l'API de scripting, documentation, LUT et DCTL.",
     "resolveUnsafe": "Autoriser les scripts hors bac à sable",
-    "resolveUnsafeHint": "Ajoute bmd_run_script_unsafe : accès complet aux fichiers, au réseau et aux sous-processus. Aucun mode de permission ne peut le retenir une fois le script parti."
+    "resolveUnsafeHint": "Ajoute bmd_run_script_unsafe : accès complet aux fichiers, au réseau et aux sous-processus. Aucun mode de permission ne peut le retenir une fois le script parti."
   },
   "engine": {
     "agents": "Agents installés",
@@ -65,7 +65,7 @@
     "none": "Aucun moteur",
     "model": "Modèle",
     "default": "Par défaut",
-    "freeId": "id libre : vendor/model…",
+    "freeId": "id libre : vendor/model…",
     "refreshModels": "Actualiser la liste des modèles",
     "source": {
       "vendor": "à jour",
@@ -73,9 +73,9 @@
       "curated": "hors ligne"
     },
     "sourceHint": {
-      "vendor": "Liste renvoyée par le fournisseur avec votre clé : ces identifiants sont exacts.",
+      "vendor": "Liste renvoyée par le fournisseur avec ta clé : ces identifiants sont exacts.",
       "openrouter": "Catalogue public d'OpenRouter, sans clé. À jour, mais un identifiant peut différer de celui de l'API d'origine.",
-      "curated": "Réseau indisponible : liste de secours embarquée, peut-être dépassée."
+      "curated": "Réseau indisponible : liste de secours embarquée, peut-être dépassée."
     },
     "permissions": "Permissions",
     "thinking": "Réflexion",
@@ -88,7 +88,7 @@
   },
   "modeTitle": {
     "readonly": "Lecture seule — aucune écriture",
-    "ask": "Confirme seulement le risqué (fichiers/rendu/suppression média) ; le montage timeline passe",
+    "ask": "Confirme seulement le risqué (fichiers/rendu/suppression média) ; le montage timeline passe",
     "auto": "Écrit direct dans la timeline, sans confirmation"
   },
   "message": {
@@ -110,7 +110,7 @@
     "done": "ok"
   },
   "tool": {
-    "quoted": " « {{value}} »",
+    "quoted": " « {{value}} »",
     "resolveStatus": "État de Resolve",
     "listMediaPool": "Lecture du Media Pool",
     "searchClips": "Recherche{{q}}",
@@ -161,7 +161,7 @@
   },
   "duplicate": {
     "title": "Dupliquer avant de modifier",
-    "hint": "Travaille sur une copie de la timeline ; l'originale reste intacte."
+    "hint": "Travaille sur une copie de la timeline ; l'originale reste intacte."
   },
   "thinking": {
     "low": "Basse",

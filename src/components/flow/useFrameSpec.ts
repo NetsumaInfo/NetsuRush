@@ -57,7 +57,7 @@ export function useFrameSpec() {
   const load = useCallback(async (file: File) => {
     setError("");
     if (!looksLikeSpec(file.name)) {
-      setError(`format non lu : ${file.name}`);
+      setError(`format non lu : ${file.name}`);
       return false;
     }
     if (file.size > MAX_SPEC_BYTES) {

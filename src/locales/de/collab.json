@@ -14,7 +14,7 @@
     "subtitle": "Sein öffentlicher Schlüssel weist dich gegenüber deinen Mitarbeitenden aus. Der private Schlüssel verlässt diesen Rechner nie.",
     "ready": "Geschützte native Identität ist bereit.",
     "unavailable": "Native Zusammenarbeit ist nicht verfügbar.",
-    "desktopOnly": "Teilen erfordert die Desktop-Anwendung.",
+    "desktopOnly": "Teilen benötigt die Desktop-Anwendung.",
     "unnamed": "NetsuRush-Gerät",
     "current": "dieses Gerät",
     "revoke": "Dieses Gerät widerrufen"
@@ -36,9 +36,9 @@
       "pending": "Bereits gesendet.",
       "already": "Steht schon auf deiner Liste.",
       "self": "Das bist du.",
-      "unknown": "Ungültige Kennung.",
+      "unknown": "Niemand passt dazu. Prüf den Namen oder füg die Discord-ID ein.",
       "ambiguous": "Mehrere Personen passen. Nutze ihre Discord-ID.",
-      "error": "Fehlgeschlagen.",
+      "error": "Die Suche hat nicht geklappt. Versuch es noch einmal.",
       "invited": "Einladung gesendet."
     }
   },
@@ -58,31 +58,37 @@
     "leave": "Verlassen",
     "confirmDelete": "Für alle löschen?",
     "confirmLeave": "Diese Freigabe verlassen?",
-    "absent": "{{count}} Dokument(e) nicht auf diesem Rechner",
     "role": {
       "owner": "Eigentümer",
       "editor": "Kann bearbeiten",
       "viewer": "Nur lesen"
-    }
+    },
+    "absent_one": "{{count}} Dokument nicht auf diesem Rechner",
+    "absent_other": "{{count}} Dokumente nicht auf diesem Rechner"
   },
   "activity": {
     "title": "Aktivität der Zusammenarbeit",
-    "changed": "{{count}} Person(en) haben ein Dokument geändert, während du weg warst. Öffne es, um die Änderungen zu holen.",
-    "media": "{{count}} Person(en) warten auf eine Originaldatei. Öffne das Dokument und bleib online, um sie zu übertragen.",
-    "key": "{{count}} neue(s) Mitglied(er) warten auf den verschlüsselten Zugang. Öffne das Dokument, um den Projektschlüssel zu übergeben.",
-    "dismiss": "Ausblenden"
+    "dismiss": "Ausblenden",
+    "changed_one": "{{count}} Person hat ein Dokument geändert, während du weg warst. Öffne es, um die Änderungen zu holen.",
+    "changed_other": "{{count}} Personen haben ein Dokument geändert, während du weg warst. Öffne es, um die Änderungen zu holen.",
+    "media_one": "{{count}} Person wartet auf eine Originaldatei. Öffne das Dokument und bleib online, um sie zu übertragen.",
+    "media_other": "{{count}} Personen warten auf eine Originaldatei. Öffne das Dokument und bleib online, um sie zu übertragen.",
+    "key_one": "{{count}} neues Mitglied wartet auf den verschlüsselten Zugang. Öffne das Dokument, um den Projektschlüssel zu übergeben.",
+    "key_other": "{{count}} neue Mitglieder warten auf den verschlüsselten Zugang. Öffne das Dokument, um den Projektschlüssel zu übergeben."
   },
   "notConfigured": "Die Anmeldung ist in dieser Installation nicht konfiguriert.",
   "dialog": {
     "title": "Zusammenarbeiten",
     "subtitle": "Wähle die Personen, die du zu diesem Dokument einladen willst.",
     "noFriends": "Füge zuerst jemanden unter Einstellungen › Konto › Teilen hinzu.",
-    "invited": "{{n}} Einladung(en) gesendet.",
     "notice": "Das Dokument wird kollaborativ. Eingeladene erhalten die Einladung beim nächsten Start.",
     "create": "Erstellen und einladen",
     "invite": "Einladen",
     "failed": "Teilen fehlgeschlagen.",
-    "mediaMissing": "{{count}} Mediendatei(en) nicht auf der Festplatte gefunden: {{names}}. Stelle sie wieder her (Ordner verschoben?) und teile erneut."
+    "mediaMissing_one": "{{count}} Mediendatei nicht auf der Festplatte gefunden: {{names}}. Stelle sie wieder her (Ordner verschoben?) und teile erneut.",
+    "mediaMissing_other": "{{count}} Mediendateien nicht auf der Festplatte gefunden: {{names}}. Stelle sie wieder her (Ordner verschoben?) und teile erneut.",
+    "invited_one": "{{count}} Einladung verschickt.",
+    "invited_other": "{{count}} Einladungen verschickt."
   },
   "rotationPending": "Der Widerruf ist eingetragen. Neue Veröffentlichungen warten, bis ein Gerät des Eigentümers den Schlüsselwechsel abschließt.",
   "staleHead": {
@@ -109,7 +115,8 @@
   "sync": {
     "queued": "Hier warten Änderungen. Sie gehen von selbst raus, sobald ein Gerät erreichbar ist.",
     "upToDate": "Alles ist synchron.",
-    "peers": "{{count}} erreichbare(s) Gerät(e)"
+    "peers_one": "{{count}} erreichbares Gerät",
+    "peers_other": "{{count}} erreichbare Geräte"
   },
   "panel": {
     "title": "Status der Freigabe",

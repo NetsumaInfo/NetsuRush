@@ -183,14 +183,15 @@
     "hint": "Füge Fotos der Figur hinzu und klicke dann das gesuchte Gesicht an. Mehr Gesichter, sichereres Ergebnis.",
     "addImage": "Bild hinzufügen",
     "clearImages": "Leeren",
-    "facesChosen": "Ausgewählte Gesichter: {{count}}",
     "noFaceDetected": "Kein Gesicht erkannt — ganzes Bild genutzt.",
     "nameFaceAria": "Gesicht benennen",
     "removeThisFace": "Gesicht entfernen",
     "searchThisFace": "Dieses Gesicht suchen",
     "suggestionTooltip": "{{name}} suchen ({{pct}} %)",
     "noImages": "Keine Bilder — mit „Bild hinzufügen“ starten.",
-    "search": "Suchen"
+    "search": "Suchen",
+    "facesChosen_one": "{{count}} Gesicht ausgewählt",
+    "facesChosen_other": "{{count}} Gesichter ausgewählt"
   },
   "resultCard": {
     "previewAria": "Vorschau des Shots",
@@ -262,7 +263,7 @@
     "scopeLabel": "Suchen in",
     "scopeProject": "Rohmaterial im Projekt",
     "scopeAll": "Gesamtes Rohmaterial",
-    "placeholder": "Beschreibe die Einstellung…  (@ für eine Figur)",
+    "placeholder": "Beschreibe die Einstellung… (@ für eine Figur)",
     "searchByImageAria": "Per Bild suchen",
     "searchByImageTooltip": "Per Bild von der Festplatte suchen",
     "searchInRushesAria": "Im eigenen Rohmaterial suchen",
@@ -315,11 +316,9 @@
     "faceIndexingFailed": "Fehler bei der Gesichtsindizierung: {{failed}}/{{total}} Clips — {{error}}",
     "dedupUnavailable": "Duplikate nicht verfügbar: {{error}}",
     "clustersUnavailable": "Gruppen nicht verfügbar: {{error}}",
-    "indexingStopped": "Indizierung gestoppt — nur teilweise verarbeitete Clips: {{total}}.",
     "indexingFailed": "Indizierungsfehler: {{failed}}/{{total}} Clips — {{error}}",
     "timelineAddPartial": "{{ok}} hinzugefügt, {{fail}} fehlgeschlagen — {{error}}",
     "timelineAddFailed": "{{ok}} hinzugefügt, {{fail}} fehlgeschlagen.",
-    "timelineAddOk": "Zur Timeline hinzugefügte Einstellungen: {{count}}.",
     "addingToTimeline": "Zur Timeline hinzufügen {{i}}/{{total}}…",
     "queryDefault": "Suche",
     "querySimilarTo": "ähnlich: {{name}}",
@@ -329,7 +328,11 @@
     "queryFaceSingle": "Gesicht: 1 Ref",
     "queryFaceMulti": "Gesicht: {{count}} Refs",
     "parallelRunning": "{{running}} laufen · {{conc}} parallel",
-    "unknownMention": "{{tokens}} entspricht keiner Figur: Der Token wurde aus der Suchanfrage entfernt (als normales Wort gesucht würde er die Ergebnisse verfälschen). Tippe „@“ und wähle die Figur aus der Liste."
+    "unknownMention": "{{tokens}} entspricht keiner Figur: Der Token wurde aus der Suchanfrage entfernt (als normales Wort gesucht würde er die Ergebnisse verfälschen). Tippe „@“ und wähle die Figur aus der Liste.",
+    "timelineAddOk_one": "{{count}} Einstellung zur Timeline hinzugefügt.",
+    "timelineAddOk_other": "{{count}} Einstellungen zur Timeline hinzugefügt.",
+    "indexingStopped_one": "Indizierung gestoppt — {{count}} Clip teilweise verarbeitet.",
+    "indexingStopped_other": "Indizierung gestoppt — {{count}} Clips teilweise verarbeitet."
   },
   "projectScope": {
     "activeMode": "Aktiv",

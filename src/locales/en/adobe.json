@@ -22,8 +22,8 @@
     "restartApps": "Panel updated — restart {{apps}} to reload it."
   },
   "diag": {
-    "verdictOk": "VERDICT: Install OK ✓ (folder + manifest + PlayerDebugMode). Open the panel in Adobe: Window ▸ Extensions ▸ NetsuRush.",
-    "verdictIncomplete": "VERDICT: Install incomplete — see below.",
+    "verdictOk": "Installed ✓ (folder + manifest + PlayerDebugMode). Open the panel in Adobe: Window ▸ Extensions ▸ NetsuRush.",
+    "verdictIncomplete": "Installation incomplete — see below.",
     "folder": "Folder: {{dir}}",
     "manifestPresent": "Manifest present: {{yesNo}}",
     "yes": "YES",

@@ -66,7 +66,7 @@
     "tabBehavior": "Comportamiento",
     "tabKeys": "Atajos",
     "newFrames": "Marcos nuevos",
-    "frameColor": "Color por defecto",
+    "frameColor": "Color predeterminado",
     "frameFill": "Relleno",
     "fillNone": "Ninguno",
     "fillTint": "Tintado",
@@ -84,12 +84,12 @@
     "bgColor": "Color del fondo",
     "spacing": "Espaciado",
     "newNotes": "Notas nuevas",
-    "defaultFont": "Fuente por defecto",
-    "defaultSize": "Tamaño por defecto",
+    "defaultFont": "Fuente predeterminada",
+    "defaultSize": "Tamaño predeterminado",
     "textColor": "Color del texto",
-    "defaultTextColor": "Color del texto por defecto",
+    "defaultTextColor": "Color de texto predeterminado",
     "noteBg": "Fondo de la nota",
-    "defaultNoteBg": "Fondo de nota por defecto",
+    "defaultNoteBg": "Fondo de nota predeterminado",
     "favFonts": "Fuentes favoritas",
     "favHintBefore": "Marca con estrella ",
     "favHintAfter": " una fuente en el selector para fijarla aquí.",
@@ -125,13 +125,13 @@
     "qualityMax": "Máx",
     "max": "Máx",
     "margin": "Margen",
-    "upscaleDefault": "Escalado por defecto",
+    "upscaleDefault": "Escalado predeterminado",
     "upscaleQuick": "Rápido",
     "upscaleAsk": "Personalizado",
     "upscaleQuickHint": "El botón Escalar se ejecuta directamente con estos ajustes.",
     "upscaleAskHint": "El botón Escalar abre la ventana: modelo, escala, vista previa.",
     "model": "Modelo",
-    "upscaleModelDefault": "Modelo de escalado por defecto",
+    "upscaleModelDefault": "Modelo de escalado predeterminado",
     "factor": "Factor",
     "denoise": "Reducción de ruido",
     "downloadOnline": "Descargar los vídeos en línea",
@@ -247,8 +247,9 @@
     "assetSweep": "Medios sin usar",
     "assetSweepHint": "Elimina los archivos que ninguna escena referencia. Nada de tus tableros se toca.",
     "assetSweepAction": "Limpiar",
-    "assetSweepDone": "{{count}} archivo(s) eliminados, {{mb}} MB liberados.",
-    "assetSweepFailed": "La limpieza ha fallado."
+    "assetSweepFailed": "La limpieza ha fallado.",
+    "assetSweepDone_one": "{{count}} archivo retirado, {{mb}} MB liberados.",
+    "assetSweepDone_other": "{{count}} archivos retirados, {{mb}} MB liberados."
   },
   "inspector": {
     "ytPlayer": "Reproductor de YouTube",
@@ -431,7 +432,8 @@
     "duplicate": "Duplicar (Ctrl+D)",
     "unlink": "Desvincular del medio",
     "relink": "Vincular al medio",
-    "linkedTo": "Vinculado a {{count}} elemento(s)"
+    "linkedTo_one": "Vinculado a {{count}} elemento",
+    "linkedTo_other": "Vinculado a {{count}} elementos"
   },
   "media": {
     "browse": "Explorar",
@@ -607,6 +609,7 @@
     "preparing": "Preparando el vídeo…"
   },
   "embed": {
+    "onlineMedia": "Medio en línea",
     "frozen": "Reproducción congelada",
     "level": {
       "link": "Solo enlaces",
@@ -639,7 +642,7 @@
     "itemLabel": "Compartir: {{level}}",
     "settings": {
       "title": "Almacenamiento de medios",
-      "hint": "Lo que el .netsu se lleva por defecto. Ajustable por medio en el inspector."
+      "hint": "Lo que el .netsu se lleva de forma predeterminada. Ajustable por medio en el inspector."
     }
   },
   "board": {
@@ -647,16 +650,18 @@
     "clipboardEmptyLink": "Portapapeles vacío o enlace no reconocido",
     "emptyTitle": "Arrastra imágenes, vídeos o un enlace de YouTube aquí",
     "emptyHint": "Pegar (Ctrl+V) · rueda para zoom · arrastrar el fondo para navegar",
-    "pastedItems": "{{count}} elemento(s) pegado(s)",
-    "copiedDone": "{{count}} elemento(s) copiado(s)",
-    "cutDone": "{{count}} elemento(s) cortado(s)"
+    "pastedItems_one": "{{count}} elemento pegado",
+    "pastedItems_other": "{{count}} elementos pegados",
+    "copiedDone_one": "{{count}} elemento copiado",
+    "copiedDone_other": "{{count}} elementos copiados",
+    "cutDone_one": "{{count}} elemento cortado",
+    "cutDone_other": "{{count}} elementos cortados"
   },
   "notice": {
     "recoveringMedia": "Recuperando el medio…",
     "mediaUnrecoverable": "Medio irrecuperable",
     "recoverFailed": "Error al recuperar",
     "recoveringOnline": "Recuperando los medios en línea… ({{current}}/{{total}})",
-    "mediaRecovered": "Archivos multimedia recuperados: {{count}}",
     "redownloadAll": "Volver a descargar todo ({{count}})",
     "recoveryResult": "{{recovered}} recuperados, {{failed}} fallidos",
     "downloadingVideo": "Descargando el vídeo…",
@@ -676,7 +681,6 @@
     "typeUnsupported": "Tipo «{{type}}» no compatible",
     "importFailedWith": "Error al importar: {{error}}",
     "unknown": "desconocido",
-    "imported": "Importado · Elementos: {{count}}",
     "boardImported": "Tablero importado",
     "projectSaved": "«{{name}}» guardado",
     "projectOpened": "«{{name}}» abierto",
@@ -685,10 +689,15 @@
     "dropProjectFailed": "No se pudo abrir «{{name}}»: usa «Abrir un proyecto».",
     "noProjectFile": "Este tablero no está vinculado a ningún archivo",
     "relocating": "Buscando archivos multimedia en la carpeta… ({{count}})",
-    "relocated": "{{count}}/{{total}} archivos multimedia relocalizados",
     "relocatedNone": "Ningún archivo multimedia reconocido en esta carpeta",
     "contentOpacity": "Opacidad del contenido: {{percent}} %",
-    "itemOpacity": "Opacidad del medio: {{percent}} %"
+    "itemOpacity": "Opacidad del medio: {{percent}} %",
+    "mediaRecovered_one": "{{count}} archivo multimedia recuperado",
+    "mediaRecovered_other": "{{count}} archivos multimedia recuperados",
+    "imported_one": "Importado · {{count}} elemento",
+    "imported_other": "Importado · {{count}} elementos",
+    "relocated_one": "{{count}}/{{total}} archivo multimedia relocalizado",
+    "relocated_other": "{{count}}/{{total}} archivos multimedia relocalizados"
   },
   "tidy": {
     "title": "Ordenar",
@@ -720,9 +729,9 @@
     "working": "Extrayendo colores…",
     "done": "{{count}} colores extraídos",
     "doneSkipped": "{{count}} colores extraídos · {{skipped}} medios omitidos",
-    "failed": "Ningún color utilizable",
+    "failed": "Ningún color usable",
     "failedCore": "Lectura de archivos no disponible: reinicia la ventana",
-    "noSource": "Ningún medio utilizable en la selección",
+    "noSource": "Ningún medio usable en la selección",
     "sourcesGone": "Los medios de origen ya no están en el tablero",
     "regenerate": "Regenerar",
     "size": "Colores",

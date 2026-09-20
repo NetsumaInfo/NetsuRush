@@ -183,14 +183,15 @@
     "hint": "キャラクターの写真を追加し、探したい顔をクリックします。顔が多いほど結果が安定します。",
     "addImage": "画像を追加",
     "clearImages": "クリア",
-    "facesChosen": "{{count}} 件の顔を選択中",
     "noFaceDetected": "顔を検出できません — 画像全体を使用します。",
     "nameFaceAria": "この顔に名前を付ける",
     "removeThisFace": "この顔を削除",
     "searchThisFace": "この顔で検索",
     "suggestionTooltip": "{{name}} を検索（{{pct}}%）",
     "noImages": "画像がありません — まず「画像を追加」から。",
-    "search": "検索"
+    "search": "検索",
+    "facesChosen_one": "{{count}} 件の顔を選択中",
+    "facesChosen_other": "{{count}} 件の顔を選択中"
   },
   "resultCard": {
     "previewAria": "ショットのプレビュー",
@@ -315,11 +316,9 @@
     "faceIndexingFailed": "{{failed}}/{{total}} 件のクリップが失敗（顔）— {{error}}",
     "dedupUnavailable": "重複を利用できません：{{error}}",
     "clustersUnavailable": "グループを利用できません：{{error}}",
-    "indexingStopped": "索引を停止しました — {{total}} 件のクリップが途中まで処理されました。",
     "indexingFailed": "{{failed}}/{{total}} 件のクリップが失敗 — {{error}}",
     "timelineAddPartial": "{{ok}} 件追加、{{fail}} 件失敗 — {{error}}",
     "timelineAddFailed": "{{ok}} 件追加、{{fail}} 件失敗。",
-    "timelineAddOk": "{{count}} ショットをタイムラインに追加しました。",
     "addingToTimeline": "タイムラインに追加中 {{i}}/{{total}}…",
     "queryDefault": "検索",
     "querySimilarTo": "類似：{{name}}",
@@ -329,7 +328,11 @@
     "queryFaceSingle": "顔：1 件のリファレンス",
     "queryFaceMulti": "顔：{{count}} 件のリファレンス",
     "parallelRunning": "{{running}} 件実行中 · {{conc}} 件並列",
-    "unknownMention": "{{tokens}} に一致するキャラクターがありません。通常の単語として検索すると結果が歪むため、この語は検索から除外しました。「@」を入力してリストからキャラクターを選んでください。"
+    "unknownMention": "{{tokens}} に一致するキャラクターがありません。通常の単語として検索すると結果が歪むため、この語は検索から除外しました。「@」を入力してリストからキャラクターを選んでください。",
+    "timelineAddOk_one": "{{count}} ショットをタイムラインに追加しました。",
+    "timelineAddOk_other": "{{count}} ショットをタイムラインに追加しました。",
+    "indexingStopped_one": "インデックスを停止 — {{count}} クリップを部分的に処理しました。",
+    "indexingStopped_other": "インデックスを停止 — {{count}} クリップを部分的に処理しました。"
   },
   "projectScope": {
     "activeMode": "有効",

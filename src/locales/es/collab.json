@@ -36,9 +36,9 @@
       "pending": "Ya enviada.",
       "already": "Ya está en tu lista.",
       "self": "Eres tú.",
-      "unknown": "Identificador no válido.",
+      "unknown": "No coincide nadie. Revisa el nombre o pega su ID de Discord.",
       "ambiguous": "Coinciden varias personas. Usa su ID de Discord.",
-      "error": "Error.",
+      "error": "La búsqueda ha fallado. Inténtalo otra vez.",
       "invited": "Invitación enviada."
     }
   },
@@ -58,31 +58,37 @@
     "leave": "Salir",
     "confirmDelete": "¿Eliminar para todos?",
     "confirmLeave": "¿Salir de este documento compartido?",
-    "absent": "{{count}} documento(s) que no están en esta máquina",
     "role": {
       "owner": "Propietario",
       "editor": "Puede editar",
       "viewer": "Solo lectura"
-    }
+    },
+    "absent_one": "{{count}} documento que no está en esta máquina",
+    "absent_other": "{{count}} documentos que no están en esta máquina"
   },
   "activity": {
     "title": "Actividad colaborativa",
-    "changed": "{{count}} persona(s) modificaron un documento mientras no estabas. Ábrelo para recuperar los cambios.",
-    "media": "{{count}} persona(s) esperan un medio original. Abre el documento y mantente en línea para transferirlo.",
-    "key": "{{count}} miembro(s) nuevo(s) esperan el acceso cifrado. Abre el documento para entregar la clave del proyecto.",
-    "dismiss": "Ocultar"
+    "dismiss": "Ocultar",
+    "changed_one": "{{count}} persona modificó un documento mientras no estabas. Ábrelo para recuperar los cambios.",
+    "changed_other": "{{count}} personas modificaron un documento mientras no estabas. Ábrelo para recuperar los cambios.",
+    "media_one": "{{count}} persona espera un medio original. Abre el documento y mantente en línea para transferirlo.",
+    "media_other": "{{count}} personas esperan un medio original. Abre el documento y mantente en línea para transferirlo.",
+    "key_one": "{{count}} miembro nuevo espera el acceso cifrado. Abre el documento para entregar la clave del proyecto.",
+    "key_other": "{{count}} miembros nuevos esperan el acceso cifrado. Abre el documento para entregar la clave del proyecto."
   },
   "notConfigured": "El inicio de sesión no está configurado en esta instalación.",
   "dialog": {
     "title": "Colaborar",
     "subtitle": "Elige a las personas que quieres invitar a este documento.",
     "noFriends": "Añade a alguien primero en Ajustes › Cuenta › Compartir.",
-    "invited": "{{n}} invitación(es) enviada(s).",
     "notice": "El documento pasa a ser colaborativo. Las personas invitadas recibirán la invitación en su próximo inicio.",
     "create": "Crear e invitar",
     "invite": "Invitar",
     "failed": "No se pudo compartir.",
-    "mediaMissing": "{{count}} archivo(s) multimedia no encontrado(s) en el disco: {{names}}. Recupéralos (¿carpeta movida?) y vuelve a compartir."
+    "mediaMissing_one": "{{count}} archivo multimedia no encontrado en el disco: {{names}}. Recupéralo (¿carpeta movida?) y vuelve a compartir.",
+    "mediaMissing_other": "{{count}} archivos multimedia no encontrados en el disco: {{names}}. Recupéralos (¿carpeta movida?) y vuelve a compartir.",
+    "invited_one": "{{count}} invitación enviada.",
+    "invited_other": "{{count}} invitaciones enviadas."
   },
   "rotationPending": "La revocación está registrada. Las nuevas publicaciones esperan a que un dispositivo del propietario termine la rotación de clave.",
   "staleHead": {
@@ -109,7 +115,8 @@
   "sync": {
     "queued": "Hay cambios esperando aquí. Saldrán solos en cuanto haya un dispositivo accesible.",
     "upToDate": "Todo está sincronizado.",
-    "peers": "{{count}} dispositivo(s) accesible(s)"
+    "peers_one": "{{count}} dispositivo accesible",
+    "peers_other": "{{count}} dispositivos accesibles"
   },
   "panel": {
     "title": "Estado del uso compartido",

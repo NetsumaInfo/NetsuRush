@@ -40,7 +40,7 @@
     "cut": "剪切",
     "paste": "粘贴",
     "selectAll": "全选",
-    "derushHome": "Derush 主页",
+    "derushHome": "素材整理主页",
     "reloadRushes": "重新载入素材",
     "cutTimeline": "切分时间线",
     "section": "分区",
@@ -53,7 +53,7 @@
     "resultClusters": "分组",
     "resultDedup": "重复项",
     "clearRefs": "清空参考图",
-    "clearChain": "清空链路",
+    "clearChain": "清空处理链",
     "clearSources": "清空选择",
     "voice": "语音",
     "listen": "试听",
@@ -83,9 +83,10 @@
     "support": "支持 NetsuBoard"
   },
   "errorBadge": {
-    "aria": "{{count}} 个错误 — 打开控制台",
     "open": "打开控制台",
-    "markRead": "标为已读"
+    "markRead": "标为已读",
+    "aria_one": "{{count}} 个错误 — 打开控制台",
+    "aria_other": "{{count}} 个错误 — 打开控制台"
   },
   "errorBoundary": {
     "title": "NetsuRush 渲染崩溃",

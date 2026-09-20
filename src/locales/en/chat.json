@@ -1,6 +1,6 @@
 {
   "stream": {
-    "error": "Something went wrong."
+    "error": "The answer stopped partway. Send it again."
   },
   "panel": {
     "copilot": "NetsuRush Copilot",

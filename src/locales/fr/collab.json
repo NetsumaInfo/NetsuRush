@@ -1,6 +1,6 @@
 {
   "title": "Partage et collaboration",
-  "subtitle": "Ce qui est partagé avec ton compte : cet appareil, les personnes, les invitations et les documents que vous éditez à plusieurs.",
+  "subtitle": "Ce qui est partagé avec ton compte : cet appareil, les personnes, les invitations et les documents que vous éditez à plusieurs.",
   "signedOut": "Connecte-toi pour partager un document.",
   "surface": {
     "unknown": "Document partagé",
@@ -22,7 +22,7 @@
   "friends": {
     "title": "Personnes",
     "subtitle": "Ajoute par pseudo Discord ou identifiant NetsuRush. On ne partage qu'avec quelqu'un de cette liste.",
-    "yourHandle": "Toi : @{{handle}}",
+    "yourHandle": "Toi : @{{handle}}",
     "placeholder": "Pseudo Discord ou identifiant NetsuRush",
     "add": "Ajouter",
     "accept": "Accepter",
@@ -36,9 +36,9 @@
       "pending": "Déjà envoyée.",
       "already": "Déjà dans ta liste.",
       "self": "C'est toi.",
-      "unknown": "Identifiant invalide.",
+      "unknown": "Personne ne correspond. Vérifie le pseudo, ou colle son ID Discord.",
       "ambiguous": "Plusieurs personnes correspondent. Utilise son ID Discord.",
-      "error": "Échec.",
+      "error": "Recherche impossible. Réessaie.",
       "invited": "Invitation envoyée."
     }
   },
@@ -56,33 +56,39 @@
     "unnamed": "Partage du {{date}}",
     "delete": "Supprimer",
     "leave": "Quitter",
-    "confirmDelete": "Supprimer pour tous ?",
-    "confirmLeave": "Quitter ce partage ?",
-    "absent": "{{count}} document(s) absent(s) de cette machine",
+    "confirmDelete": "Supprimer pour tous ?",
+    "confirmLeave": "Quitter ce partage ?",
     "role": {
       "owner": "Propriétaire",
       "editor": "Peut modifier",
       "viewer": "Lecture seule"
-    }
+    },
+    "absent_one": "{{count}} document absent de cette machine",
+    "absent_other": "{{count}} documents absents de cette machine"
   },
   "activity": {
     "title": "Activité collaborative",
-    "changed": "{{count}} personne(s) ont modifié un document pendant ton absence. Ouvre-le pour récupérer les changements.",
-    "media": "{{count}} personne(s) attendent un média original. Ouvre le document et reste en ligne pour le transmettre.",
-    "key": "{{count}} nouveau(x) membre(s) attendent l'accès chiffré. Ouvre le document pour transmettre la clé du projet.",
-    "dismiss": "Masquer"
+    "dismiss": "Masquer",
+    "changed_one": "{{count}} personne a modifié un document pendant ton absence. Ouvre-le pour récupérer les changements.",
+    "changed_other": "{{count}} personnes ont modifié un document pendant ton absence. Ouvre-le pour récupérer les changements.",
+    "media_one": "{{count}} personne attend un média original. Ouvre le document et reste en ligne pour le transmettre.",
+    "media_other": "{{count}} personnes attendent un média original. Ouvre le document et reste en ligne pour le transmettre.",
+    "key_one": "{{count}} nouveau membre attend l'accès chiffré. Ouvre le document pour transmettre la clé du projet.",
+    "key_other": "{{count}} nouveaux membres attendent l'accès chiffré. Ouvre le document pour transmettre la clé du projet."
   },
   "notConfigured": "La connexion n'est pas configurée sur cette installation.",
   "dialog": {
     "title": "Collaborer",
     "subtitle": "Choisis les personnes à inviter sur ce document.",
     "noFriends": "Ajoute d'abord quelqu'un dans Paramètres › Compte › Partage.",
-    "invited": "{{n}} invitation(s) envoyée(s).",
     "notice": "Le document devient collaboratif. Les personnes invitées reçoivent l'invitation dès leur prochain démarrage.",
     "create": "Créer et inviter",
     "invite": "Inviter",
     "failed": "Le partage a échoué.",
-    "mediaMissing": "{{count}} média(s) introuvable(s) sur le disque : {{names}}. Retrouve-les (dossier déplacé ?) puis repartage."
+    "mediaMissing_one": "{{count}} média introuvable sur le disque : {{names}}. Retrouve-le (dossier déplacé ?) puis repartage.",
+    "mediaMissing_other": "{{count}} médias introuvables sur le disque : {{names}}. Retrouve-les (dossier déplacé ?) puis repartage.",
+    "invited_one": "{{count}} invitation envoyée.",
+    "invited_other": "{{count}} invitations envoyées."
   },
   "rotationPending": "La révocation est enregistrée. Les nouvelles publications attendent qu'un appareil du propriétaire termine la rotation de clé.",
   "staleHead": {
@@ -90,7 +96,7 @@
     "warning": "Un appareil n'a pas fusionné cette branche depuis plus de 30 jours.",
     "detail": "{{days}} j · {{size}} chiffrés",
     "discard": "Abandonner",
-    "confirmTitle": "Abandonner cette branche ?",
+    "confirmTitle": "Abandonner cette branche ?",
     "confirmWarning": "Les modifications publiées uniquement par cet appareil seront perdues définitivement. Continue seulement si cet appareil ne peut plus se reconnecter."
   },
   "members": {
@@ -101,20 +107,21 @@
   "lifecycle": {
     "leave": "Quitter le projet",
     "delete": "Supprimer le projet",
-    "leaveTitle": "Quitter ce projet ?",
-    "deleteTitle": "Supprimer ce projet ?",
+    "leaveTitle": "Quitter ce projet ?",
+    "deleteTitle": "Supprimer ce projet ?",
     "leaveWarning": "Tu gardes ce que ton appareil a déjà reçu, mais tu ne pourras plus synchroniser ce projet.",
     "deleteWarning": "Le rendez-vous, les invitations et les sauvegardes chiffrées seront supprimés pour tous les membres. Cette action est irréversible."
   },
   "sync": {
     "queued": "Des modifications attendent ici. Elles partiront toutes seules dès qu'un appareil sera joignable.",
     "upToDate": "Tout est synchronisé.",
-    "peers": "{{count}} appareil(s) joignable(s)"
+    "peers_one": "{{count}} appareil joignable",
+    "peers_other": "{{count}} appareils joignables"
   },
   "panel": {
     "title": "État du partage",
     "online": "{{count}} en ligne",
-    "alone": "Personne d’autre",
+    "alone": "Personne d'autre",
     "hereNow": "En ligne",
     "neverSeen": "Jamais connecté",
     "seenMinutes": "Il y a {{count}} min",
@@ -122,11 +129,11 @@
     "seenDays": "Il y a {{count}} j",
     "invited": "Invité",
     "unknownMember": "Membre",
-    "queued": "En attente d’envoi.",
+    "queued": "En attente d'envoi.",
     "upToDate": "Tout est envoyé.",
-    "rotation": "Nouvelle clé nécessaire. Le propriétaire doit ouvrir l’app.",
+    "rotation": "Nouvelle clé nécessaire. Le propriétaire doit ouvrir l'app.",
     "waitingKey": "{{count}} attendent la clé. Reste en ligne.",
-    "nobodyReachable": "Personne en ligne. Rien n’a été envoyé."
+    "nobodyReachable": "Personne en ligne. Rien n'a été envoyé."
   },
   "board": {
     "noScene": "Enregistre d'abord ce board dans la bibliothèque de scènes.",

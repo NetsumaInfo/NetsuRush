@@ -22,13 +22,14 @@
     "jobsQueued_other": "{{count}} trabajos en cola",
     "settingsRead": "Ajustes de rendimiento leídos",
     "cacheProxyKeys": "Claves de caché/proxy: {{count}}",
-    "cacheFoldersDetected": "Carpetas de caché detectadas: {{count}}",
     "noCacheFolder": "Ninguna carpeta de caché detectada",
     "database": "Base de datos",
     "dbBig": "{{name}} · muy grande → dividir",
     "dbHealthy": "{{name}} · tamaño correcto",
     "dbRemote": "PostgreSQL",
-    "dbMissing": "No encontrada"
+    "dbMissing": "No encontrada",
+    "cacheFoldersDetected_one": "{{count}} carpeta de caché detectada",
+    "cacheFoldersDetected_other": "{{count}} carpetas de caché detectadas"
   },
   "memory": {
     "title": "Memoria de sesión",
@@ -59,7 +60,6 @@
     "pending_other": "{{count}} cambios pendientes",
     "apply": "Aplicar y reiniciar",
     "reset": "Cancelar",
-    "applyTitle": "¿Aplicar los cambios ({{count}})?",
     "applyBody": "Se guarda el proyecto, se respalda la configuración actual, se cierra Resolve, se escriben las preferencias y se reabre Resolve en «{{project}}». Tarda uno o dos minutos. No hacerlo durante un renderizado.",
     "applyDone_one": "{{count}} ajuste aplicado — Resolve reiniciado.",
     "applyDone_other": "{{count}} ajustes aplicados — Resolve reiniciado.",
@@ -75,12 +75,12 @@
       "loadAllTimelines": {
         "label": "Cargar todas las timelines al abrir",
         "where": "Preferencias ▸ Usuario ▸ Guardar y cargar",
-        "body": "Activado, todas las timelines se cargan en RAM al abrir el proyecto. Blackmagic lo deja desactivado por defecto para acelerar los proyectos con muchas timelines."
+        "body": "Activado, todas las timelines se cargan en RAM al abrir el proyecto. Blackmagic lo deja desactivado de forma predeterminada para acelerar los proyectos con muchas timelines."
       },
       "resolveMemory": {
         "label": "Límite de memoria de Resolve",
         "where": "Preferencias ▸ Sistema ▸ Memoria y GPU",
-        "body": "Por defecto, el 75 % de la RAM. Bajarlo no acelera Resolve: reserva RAM para otras aplicaciones, incluidos los procesos de IA de NetsuRush. Depende de lo que se ejecute a la vez."
+        "body": "De forma predeterminada, el 75 % de la RAM. Bajarlo no acelera Resolve: reserva RAM para otras aplicaciones, incluidos los procesos de IA de NetsuRush. Depende de lo que se ejecute a la vez."
       },
       "fusionMemory": {
         "label": "Caché de memoria de Fusion",
@@ -107,7 +107,9 @@
         "where": "Preferencias ▸ Usuario ▸ Guardar y cargar",
         "body": "Instantáneas periódicas además de las copias del proyecto. La primera del día puede tardar, las siguientes son imperceptibles."
       }
-    }
+    },
+    "applyTitle_one": "¿Aplicar {{count}} cambio?",
+    "applyTitle_other": "¿Aplicar {{count}} cambios?"
   },
   "gpu": {
     "title": "Monitor GPU / CPU / RAM",
@@ -116,11 +118,12 @@
     "vramUnreadable": "El medidor de VRAM no está disponible para este controlador. Los procesos siguen disponibles.",
     "ramSystem": "RAM del sistema",
     "resolveRam": "Resolve.exe: {{size}}",
-    "deadKilledSuffix": " · Instancias bloqueadas cerradas: {{count}}",
     "nothingToFree": "Nada que liberar",
     "ramFreed": "+{{mb}} MB de RAM liberados",
     "vramFreed": "-{{mb}} MB de VRAM",
-    "residuesCleaned": "Residuos limpiados"
+    "residuesCleaned": "Residuos limpiados",
+    "deadKilledSuffix_one": " · {{count}} instancia bloqueada cerrada",
+    "deadKilledSuffix_other": " · {{count}} instancias bloqueadas cerradas"
   },
   "process": {
     "title": "Procesos exigentes (todo el PC)",
@@ -134,12 +137,14 @@
     "noneListed": "Ningún proceso listado (solo Windows).",
     "killed": "{{name}} (PID {{pid}}) terminado.",
     "noneBlocked": "Ningún proceso bloqueado que limpiar.",
-    "cleaned": "Procesos bloqueados limpiados: {{count}}.",
     "killTitle": "¿Terminar {{name}}?",
     "killForced": "Cierre forzado — se pierde el trabajo sin guardar.",
-    "cleanTitle": "¿Limpiar los procesos bloqueados ({{count}})?",
     "cleanBody": "Programas bloqueados («No responde»). Cierre forzado — se pierde el trabajo sin guardar.",
-    "clean": "Limpiar"
+    "clean": "Limpiar",
+    "cleaned_one": "{{count}} proceso bloqueado limpiado.",
+    "cleaned_other": "{{count}} procesos bloqueados limpiados.",
+    "cleanTitle_one": "¿Limpiar {{count}} proceso bloqueado?",
+    "cleanTitle_other": "¿Limpiar {{count}} procesos bloqueados?"
   },
   "watchdog": {
     "title": "Vigilancia de memoria",
@@ -212,7 +217,7 @@
       "cachessd": {
         "title": "Caché en SSD rápido",
         "where": "Ajustes del proyecto ▸ Generales ▸ Carpetas de trabajo",
-        "body": "Por defecto está en el disco del sistema, que ya aguanta el SO. Un NVMe aparte del disco de medios se nota al momento."
+        "body": "De forma predeterminada está en el disco del sistema, que ya aguanta el SO. Un NVMe aparte del disco de medios se nota al momento."
       },
       "playproxy": {
         "title": "Resolución proxy de timeline",
@@ -262,7 +267,7 @@
       "mfrcpu": {
         "title": "Porcentaje de CPU demasiado alto",
         "where": "Preferencias ▸ Memoria y rendimiento ▸ Render multifotograma",
-        "body": "After Effects quiere unos 4 GB por núcleo utilizado. Más allá de lo que la RAM soporta, añadir núcleos ralentiza el render."
+        "body": "After Effects quiere unos 4 GB por núcleo usado. Más allá de lo que la RAM admite, añadir núcleos ralentiza el render."
       },
       "bitdepth": {
         "title": "Proyecto de 32 bits",
@@ -353,7 +358,7 @@
       "none": "Ningún proceso de Adobe residual.",
       "killed": "{{name}} terminado",
       "killTitle": "¿Terminar {{name}}?",
-      "killForced": "La terminación es forzada: se pierde cualquier trabajo sin guardar de ese proceso."
+      "killForced": "Parada forzada: se pierde el trabajo sin guardar de ese proceso."
     },
     "purge": {
       "title": "Purgas",

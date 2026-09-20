@@ -51,9 +51,12 @@
     "removebg": "抠像"
   },
   "result": {
-    "files": "{{count}} 个文件",
-    "imported": "，已导入 {{count}} 个",
-    "failed": "{{count}} 个失败。"
+    "files_one": "{{count}} 个文件",
+    "files_other": "{{count}} 个文件",
+    "failed_one": "{{count}} 个失败。",
+    "failed_other": "{{count}} 个失败。",
+    "imported_one": "，已导入 {{count}} 个",
+    "imported_other": "，已导入 {{count}} 个"
   },
   "chain": {
     "title": "处理链",
@@ -427,7 +430,7 @@
     "depth-anything-v1-small": "DA V1 — 上一代，快速。",
     "depth-anything-v1-base": "DA V1 Base — 上一代。",
     "depth-anything-v1-large": "DA V1 Large — 上一代。",
-    "da3-small": "DA3 Small — 新一代单帧深度，快速。",
+    "da3-small": "DA3 Small — 较新的单帧深度，快速。",
     "da3-base": "DA3 Base — 画质与速度兼顾。",
     "da3-large": "DA3 Large — 细致的单帧深度。",
     "da3-metric-large": "DA3 度量版 — 绝对距离。",
@@ -453,7 +456,7 @@
     "frameBlack": "画面接近全黑（溶解？）— 移动播放头后重新测试。",
     "testFailed": "测试失败",
     "noShotSelected": "未选择镜头。",
-    "invalidRange": "范围无效。",
+    "invalidRange": "结束点要在起点之后。",
     "duplicateOutputNames": "多个源会生成相同的输出名称：请重命名，或在模板中加入编号。",
     "upscaleFailed": "超分失败",
     "interpolateFailed": "插帧失败",

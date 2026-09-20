@@ -60,7 +60,7 @@ export const VIEW_MODES: { id: RotoViewMode; labelKey: string; hintKey: string }
 // scintillement rendait le résultat inutilisable en vidéo.
 export const REMOVE_ENGINES: { id: string; label: string; hint: string }[] = [
   { id: "minimax-remover", label: "MiniMax-Remover", hint: "Diffusion en 6 étapes environ, cohérente dans le temps — plus propre sur les fonds en mouvement." },
-  { id: "diffueraser", label: "DiffuEraser", hint: "Suppression d’objet dans la vidéo. Moteur non connecté." },
+  { id: "diffueraser", label: "DiffuEraser", hint: "Suppression d'objet dans la vidéo. Moteur non connecté." },
 ];
 
 // Réglages de suppression d'objet. `steps` et `quality` ne concernent QUE la diffusion MiniMax ;
@@ -137,7 +137,7 @@ export const EXPORT_FORMATS: { id: string; label: string; hint: string }[] = [
 // the mask alone comes out to be reused elsewhere.
 export const STILL_EXPORT_FORMATS: { id: string; label: string; hint: string }[] = [
   { id: "png_alpha", label: "PNG (alpha)", hint: "Image détourée, fond transparent" },
-  { id: "jpeg_bgcolor", label: "JPEG (fond couleur)", hint: "Objet composé sur la couleur de fond du mode d’affichage" },
+  { id: "jpeg_bgcolor", label: "JPEG (fond couleur)", hint: "Objet composé sur la couleur de fond du mode d'affichage" },
   { id: "png_matte", label: "Masque N&B (PNG)", hint: "Masque noir et blanc seul" },
 ];
 

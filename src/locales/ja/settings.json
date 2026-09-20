@@ -293,7 +293,7 @@
     },
     "featureHints": {
       "netsucut": "プレビューを作成し、動画をエンコードします。",
-      "torchModels": "ショットを検出し、検索と画像改善を行います。",
+      "torchModels": "ショットを検出し、検索と画像処理に使います。",
       "onnxModels": "背景を削除し、ONNX モデルを実行します。",
       "transcription": "音声をテキストに変換します。",
       "notebook": "ノートを保存・整理します。GPU は不要です。"
@@ -390,11 +390,11 @@
     "expectedPlaceholder": "期待していた結果",
     "videoSource": "動画のリンク",
     "videoPlaceholder": "ダウンロードできるリンク",
-    "discord": "あなたの Discord",
+    "discord": "Discord アカウント",
     "discordPlaceholder": "@ユーザー名",
     "auto": "自動",
     "specs": {
-      "title": "あなたの PC",
+      "title": "このパソコン",
       "copy": "コピー",
       "refresh": "読み直す",
       "loading": "読み取り中…",
@@ -516,11 +516,13 @@
       "desc": "元フォルダーごとにまとめて表示。終わったプロジェクトの分だけ消せます。",
       "rushCount_one": "素材 {{count}} 件",
       "rushCount_other": "素材 {{count}} 件",
+      "selectFolder": "フォルダー {{name}} を選択",
       "unattributed": "未割り当て",
       "unattributedHint": "インデックス前に書かれた、または素材が見つからないキャッシュ。まとめて削除できます。",
-      "selected": "{{count}} 件選択 · {{size}}",
       "clearSelection": "選択解除",
-      "purgeSelection": "選択分を削除"
+      "purgeSelection": "選択分を削除",
+      "selected_one": "{{count}} 件選択 · {{size}}",
+      "selected_other": "{{count}} 件選択 · {{size}}"
     },
     "reindex": {
       "action": "再インデックス",
@@ -542,8 +544,9 @@
       "leave": "そのまま残す",
       "leaveHint": "旧フォルダーはここに残り、あとで削除できます。",
       "moving": "移動中… {{done}}/{{total}}",
-      "moved": "{{count}} 件のファイルを移動しました。",
-      "movedNone": "新しいフォルダーを適用しました。"
+      "movedNone": "新しいフォルダーを適用しました。",
+      "moved_one": "{{count}} 件のファイルを移動しました。",
+      "moved_other": "{{count}} 件のファイルを移動しました。"
     },
     "lifecycle": {
       "session": "セッション一時ファイル",
@@ -570,7 +573,7 @@
       "sessionTitle": "作業キャッシュ",
       "sessionDesc": "大きな作業ファイルをいつ削除するか選べます。アプリ終了時の削除は常に安全策として残ります。",
       "sequenceTitle": "モデルの中間フレーム列",
-      "sequenceHint": "モデル入力のためだけに作られるフレームフォルダーです。ユーザーが書き出したシーケンスは削除しません。",
+      "sequenceHint": "モデル入力のためだけに作られるフレームフォルダーです。自分で書き出したシーケンスは削除しません。",
       "trigger": {
         "roto": "ショット切り替え時",
         "upscaleTest": "ソースまたは設定の変更時",
@@ -593,15 +596,19 @@
     "confirm": {
       "title": "このキャッシュを削除しますか？",
       "descKinds": "{{size}} 空きます。中身は必要になれば作り直されます。",
-      "descSources": "素材 {{count}} 件ぶん、{{size}} 空きます。他の素材はそのままです。",
       "descUnattributed": "未割り当てのキャッシュ {{size}} を削除します。",
       "expensive": "検索インデックスを含みます。作り直しには GPU で数時間かかります。",
       "cancel": "キャンセル",
       "confirm": "削除",
       "purging": "削除中…",
-      "done": "{{size}} 空き · {{files}} 件のファイル",
-      "doneRows": "{{size}} 空き · {{files}} 件のファイル、DB {{rows}} 件",
-      "skipped": " · {{count}} 件スキップ（ロック中）"
+      "descSources_one": "素材 {{count}} 件ぶん、{{size}} 空きます。他の素材はそのままです。",
+      "descSources_other": "素材 {{count}} 件ぶん、{{size}} 空きます。他の素材はそのままです。",
+      "skipped_one": " · {{count}} 件スキップ（ロック中）",
+      "skipped_other": " · {{count}} 件スキップ（ロック中）",
+      "done_one": "{{size}} 解放 · {{count}} ファイル",
+      "done_other": "{{size}} 解放 · {{count}} ファイル",
+      "doneRows_one": "{{size}} 解放 · {{count}} ファイル、データベース {{rows}} 件",
+      "doneRows_other": "{{size}} 解放 · {{count}} ファイル、データベース {{rows}} 件"
     },
     "maintenance": {
       "title": "メンテナンス",
@@ -631,10 +638,11 @@
       "rushCount_one": "{{count}} 素材",
       "rushCount_other": "{{count}} 素材",
       "scan": "Resolve プロジェクトをスキャン",
-      "scanDone": "{{count}} 件のプロジェクトを収集しました",
       "scanStarting": "準備中…",
       "scanning": "{{project}} — {{done}}/{{total}}",
-      "title": "検索が把握しているプロジェクト"
+      "title": "検索が把握しているプロジェクト",
+      "scanDone_one": "{{count}} 件のプロジェクトを収集しました",
+      "scanDone_other": "{{count}} 件のプロジェクトを収集しました"
     }
   },
   "navigation": {
@@ -711,7 +719,7 @@
     "intro": "アプリは自前のメディアを保持します: 貼り付けた画像、リンクから取得したメディア、抽出フレーム、アップスケール結果。.netsu プロジェクトを保存するとそのバイトはコンパニオンフォルダーに収まり、この保管庫には複製だけが残ります — 何も失わずに解放できます。表示キャッシュには専用のページがあります。",
     "disk": "{{total}} 中 {{free}} 空き",
     "scanning": "ストレージを調べています…",
-    "failed": "操作できませんでした",
+    "failed": "実行できませんでした。もう一度お試しください。",
     "freedNotice": "{{size}} を解放しました（{{count}} 件）",
     "movedNotice": "{{size}} を移動しました（{{count}} 件）",
     "movedPartly": "{{count}} 件を移動、{{failed}} 件が失敗（そのまま残しました）",

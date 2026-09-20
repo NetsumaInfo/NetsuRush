@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "Vorschauen und Miniaturen",
-    "subtitle": "Video-Vorschauen und Miniaturen konfigurieren.",
+    "subtitle": "Video-Vorschauen und Miniaturen einrichten.",
     "soundTitle": "Ton",
     "playerVolume": "Player-Lautstärke",
     "playerVolumeHint": "Gemeinsam für NetsuCut, Sammlungen, Stimme und Upscale.",
@@ -516,11 +516,13 @@
       "desc": "Gruppiert nach Quellordner. Leere, was zu einem fertigen Projekt gehört, ohne die anderen anzurühren.",
       "rushCount_one": "{{count}} Clip",
       "rushCount_other": "{{count}} Clips",
+      "selectFolder": "Ordner {{name}} auswählen",
       "unattributed": "Nicht zugeordnet",
       "unattributedHint": "Cache, der vor dem Index entstand oder dessen Clip nicht gefunden wurde. Am Stück löschbar.",
-      "selected": "{{count}} ausgewählt · {{size}}",
       "clearSelection": "Auswahl aufheben",
-      "purgeSelection": "Auswahl leeren"
+      "purgeSelection": "Auswahl leeren",
+      "selected_one": "{{count}} ausgewählt · {{size}}",
+      "selected_other": "{{count}} ausgewählt · {{size}}"
     },
     "reindex": {
       "action": "Neu indizieren",
@@ -542,8 +544,9 @@
       "leave": "Liegen lassen",
       "leaveHint": "Der alte Ordner bleibt hier gelistet und löschbar.",
       "moving": "Verschieben… {{done}}/{{total}}",
-      "moved": "Verschobene Dateien: {{count}}.",
-      "movedNone": "Neuer Ordner übernommen."
+      "movedNone": "Neuer Ordner übernommen.",
+      "moved_one": "{{count}} Datei verschoben.",
+      "moved_other": "{{count}} Dateien verschoben."
     },
     "lifecycle": {
       "session": "Temporär pro Sitzung",
@@ -570,7 +573,7 @@
       "sessionTitle": "Arbeits-Caches",
       "sessionDesc": "Lege fest, wann große Arbeitsdateien nicht mehr gebraucht werden. Das Beenden der App bleibt immer das Sicherheitsnetz.",
       "sequenceTitle": "Modell-Zwischensequenzen",
-      "sequenceHint": "Frame-Ordner, die nur ein Modell speisen. Vom Benutzer exportierte Sequenzen werden nie gelöscht.",
+      "sequenceHint": "Frame-Ordner, die nur ein Modell speisen. Sequenzen, die du selbst exportierst, werden nie gelöscht.",
       "trigger": {
         "roto": "Beim Wechsel des Shots",
         "upscaleTest": "Bei Quellen- oder Einstellungswechsel",
@@ -593,15 +596,19 @@
     "confirm": {
       "title": "Diesen Cache löschen?",
       "descKinds": "{{size}} werden frei. Der Inhalt entsteht bei Bedarf neu.",
-      "descSources": "{{size}} werden für diese Clips frei ({{count}}). Andere Clips bleiben unberührt.",
       "descUnattributed": "{{size}} nicht zugeordneter Cache werden frei.",
       "expensive": "Der Suchindex ist dabei: ihn neu aufzubauen kostet Stunden GPU.",
       "cancel": "Abbrechen",
       "confirm": "Löschen",
       "purging": "Löschen…",
-      "done": "Freier Speicher: {{size}} · Dateien: {{files}}",
-      "doneRows": "Freier Speicher: {{size}} · Dateien: {{files}} · Datenbankeinträge: {{rows}}",
-      "skipped": " · {{count}} übersprungen (gesperrt)"
+      "descSources_one": "{{size}} werden für {{count}} Clip frei. Andere Clips bleiben unberührt.",
+      "descSources_other": "{{size}} werden für {{count}} Clips frei. Andere Clips bleiben unberührt.",
+      "skipped_one": " · {{count}} übersprungen (gesperrt)",
+      "skipped_other": " · {{count}} übersprungen (gesperrt)",
+      "done_one": "{{size}} frei · {{count}} Datei",
+      "done_other": "{{size}} frei · {{count}} Dateien",
+      "doneRows_one": "{{size}} frei · {{count}} Datei, {{rows}} Einträge in der Datenbank",
+      "doneRows_other": "{{size}} frei · {{count}} Dateien, {{rows}} Einträge in der Datenbank"
     },
     "maintenance": {
       "title": "Wartung",
@@ -631,10 +638,11 @@
       "rushCount_one": "{{count}} Clip",
       "rushCount_other": "{{count}} Clips",
       "scan": "Resolve-Projekte erfassen",
-      "scanDone": "{{count}} Projekt(e) erfasst",
       "scanStarting": "Vorbereitung…",
       "scanning": "{{project}} — {{done}}/{{total}}",
-      "title": "Der Suche bekannte Projekte"
+      "title": "Der Suche bekannte Projekte",
+      "scanDone_one": "{{count}} Projekt erfasst",
+      "scanDone_other": "{{count}} Projekte erfasst"
     }
   },
   "navigation": {
@@ -711,7 +719,7 @@
     "intro": "Die App bewahrt eigene Medien auf: eingefügte Bilder, aus einem Link geholte Medien, extrahierte Frames, Upscale-Ergebnisse. Ein gespeichertes .netsu-Projekt legt diese Bytes in seinem Begleitordner ab — der Speicher hält dann nur noch ein Duplikat, das ohne Verlust freigegeben werden kann. Die Anzeige-Caches haben ihre eigene Seite.",
     "disk": "{{free}} frei von {{total}}",
     "scanning": "Speicher wird analysiert…",
-    "failed": "Vorgang fehlgeschlagen",
+    "failed": "Hat nicht geklappt. Versuch es noch einmal.",
     "freedNotice": "{{size}} freigegeben ({{count}} Dateien)",
     "movedNotice": "{{size}} verschoben ({{count}} Dateien)",
     "movedPartly": "{{count}} Dateien verschoben, {{failed}} fehlgeschlagen (bleiben liegen)",

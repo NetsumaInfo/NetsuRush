@@ -183,14 +183,15 @@
     "hint": "Add photos of the character, then click the face to search for. More faces, safer result.",
     "addImage": "Add an image",
     "clearImages": "Clear",
-    "facesChosen": "Faces selected: {{count}}",
     "noFaceDetected": "No face detected — using the whole image.",
     "nameFaceAria": "Name this face",
     "removeThisFace": "Remove this face",
     "searchThisFace": "Search this face",
     "suggestionTooltip": "Search {{name}} ({{pct}}%)",
     "noImages": "No images — start with \"Add an image\".",
-    "search": "Search"
+    "search": "Search",
+    "facesChosen_one": "{{count}} face selected",
+    "facesChosen_other": "{{count}} faces selected"
   },
   "resultCard": {
     "previewAria": "Shot preview",
@@ -262,7 +263,7 @@
     "scopeLabel": "Search in",
     "scopeProject": "Project footage",
     "scopeAll": "All footage",
-    "placeholder": "Describe the shot…  (@ to mention a character)",
+    "placeholder": "Describe the shot… (@ to mention a character)",
     "searchByImageAria": "Search by image",
     "searchByImageTooltip": "Search by image from disk",
     "searchInRushesAria": "Search my footage",
@@ -315,11 +316,9 @@
     "faceIndexingFailed": "Face indexing failures: {{failed}}/{{total}} clips — {{error}}",
     "dedupUnavailable": "Duplicates unavailable: {{error}}",
     "clustersUnavailable": "Groups unavailable: {{error}}",
-    "indexingStopped": "Indexing stopped — clips partially processed: {{total}}.",
     "indexingFailed": "Indexing failures: {{failed}}/{{total}} clips — {{error}}",
     "timelineAddPartial": "{{ok}} added, {{fail}} failed — {{error}}",
     "timelineAddFailed": "{{ok}} added, {{fail}} failed.",
-    "timelineAddOk": "Shots added to the timeline: {{count}}.",
     "addingToTimeline": "Adding to timeline {{i}}/{{total}}…",
     "queryDefault": "search",
     "querySimilarTo": "similar to: {{name}}",
@@ -329,7 +328,11 @@
     "queryFaceSingle": "face: 1 ref",
     "queryFaceMulti": "face: {{count}} refs",
     "parallelRunning": "{{running}} running · {{conc}} in parallel",
-    "unknownMention": "{{tokens}} matches no character: the token was removed from the query (searching it as a plain word would skew the results). Type “@” and pick the character from the list."
+    "unknownMention": "{{tokens}} matches no character: the token was removed from the query (searching it as a plain word would skew the results). Type “@” and pick the character from the list.",
+    "timelineAddOk_one": "{{count}} shot added to the timeline.",
+    "timelineAddOk_other": "{{count}} shots added to the timeline.",
+    "indexingStopped_one": "Indexing stopped — {{count}} clip partly processed.",
+    "indexingStopped_other": "Indexing stopped — {{count}} clips partly processed."
   },
   "projectScope": {
     "activeMode": "Active",

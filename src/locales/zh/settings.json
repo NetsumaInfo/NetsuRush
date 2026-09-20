@@ -516,11 +516,13 @@
       "desc": "按源文件夹分组。清空已完结项目的缓存，不影响其他项目。",
       "rushCount_one": "{{count}} 个素材",
       "rushCount_other": "{{count}} 个素材",
+      "selectFolder": "选择文件夹 {{name}}",
       "unattributed": "未归属",
       "unattributedHint": "索引前写入的缓存，或找不到对应素材。可整批清除。",
-      "selected": "已选 {{count}} 项 · {{size}}",
       "clearSelection": "取消选择",
-      "purgeSelection": "清空所选"
+      "purgeSelection": "清空所选",
+      "selected_one": "已选 {{count}} 项 · {{size}}",
+      "selected_other": "已选 {{count}} 项 · {{size}}"
     },
     "reindex": {
       "action": "重建索引",
@@ -542,8 +544,9 @@
       "leave": "留在原处",
       "leaveHint": "旧文件夹仍会列在这里，可以删除。",
       "moving": "移动中… {{done}}/{{total}}",
-      "moved": "已移动 {{count}} 个文件。",
-      "movedNone": "已应用新文件夹。"
+      "movedNone": "已应用新文件夹。",
+      "moved_one": "已移动 {{count}} 个文件。",
+      "moved_other": "已移动 {{count}} 个文件。"
     },
     "lifecycle": {
       "session": "会话临时文件",
@@ -570,7 +573,7 @@
       "sessionTitle": "工作缓存",
       "sessionDesc": "选择每种大型衍生文件何时不再需要。退出应用始终作为最后保障。",
       "sequenceTitle": "模型中间图像序列",
-      "sequenceHint": "仅用于输入模型的帧文件夹。用户导出的图像序列绝不会被删除。",
+      "sequenceHint": "仅用于输入模型的帧文件夹。你自己导出的图像序列绝不会被删除。",
       "trigger": {
         "roto": "切换镜头时",
         "upscaleTest": "更换来源或设置时",
@@ -593,15 +596,19 @@
     "confirm": {
       "title": "删除该缓存？",
       "descKinds": "将释放 {{size}}。内容会在需要时重建。",
-      "descSources": "将为 {{count}} 个素材释放 {{size}}。其他素材不受影响。",
       "descUnattributed": "将释放 {{size}} 未归属缓存。",
       "expensive": "包含搜索索引：重建需要数小时 GPU。",
       "cancel": "取消",
       "confirm": "删除",
       "purging": "删除中…",
-      "done": "已释放 {{size}} · {{files}} 个文件",
-      "doneRows": "已释放 {{size}} · {{files}} 个文件，{{rows}} 条数据库记录",
-      "skipped": " · 已跳过 {{count}} 个（被占用）"
+      "descSources_one": "将为 {{count}} 个素材释放 {{size}}。其他素材不受影响。",
+      "descSources_other": "将为 {{count}} 个素材释放 {{size}}。其他素材不受影响。",
+      "skipped_one": " · 已跳过 {{count}} 个（被占用）",
+      "skipped_other": " · 已跳过 {{count}} 个（被占用）",
+      "done_one": "已释放 {{size}} · {{count}} 个文件",
+      "done_other": "已释放 {{size}} · {{count}} 个文件",
+      "doneRows_one": "已释放 {{size}} · {{count}} 个文件，数据库 {{rows}} 条",
+      "doneRows_other": "已释放 {{size}} · {{count}} 个文件，数据库 {{rows}} 条"
     },
     "maintenance": {
       "title": "维护",
@@ -631,10 +638,11 @@
       "rushCount_one": "{{count}} 个素材",
       "rushCount_other": "{{count}} 个素材",
       "scan": "扫描 Resolve 项目",
-      "scanDone": "已收集 {{count}} 个项目",
       "scanStarting": "准备中…",
       "scanning": "{{project}} — {{done}}/{{total}}",
-      "title": "搜索已知的项目"
+      "title": "搜索已知的项目",
+      "scanDone_one": "已收集 {{count}} 个项目",
+      "scanDone_other": "已收集 {{count}} 个项目"
     }
   },
   "navigation": {
@@ -711,7 +719,7 @@
     "intro": "应用会保留属于自己的媒体：粘贴的图片、从链接取得的媒体、抽取的帧、放大结果。保存 .netsu 项目会把这些字节归档到其伴随文件夹 — 此后仓库只保留一份副本，可以放心释放。显示缓存另有专页。",
     "disk": "{{total}} 中可用 {{free}}",
     "scanning": "正在分析存储…",
-    "failed": "操作失败",
+    "failed": "没能完成。再试一次。",
     "freedNotice": "已释放 {{size}}（{{count}} 个文件）",
     "movedNotice": "已移动 {{size}}（{{count}} 个文件）",
     "movedPartly": "已移动 {{count}} 个文件，{{failed}} 个失败（保留原处）",

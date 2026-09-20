@@ -113,7 +113,7 @@
     "deletedSubpage": "Gelöschte Unterseite",
     "subpage": "Unterseite",
     "rename": "Umbenennen",
-    "empty": "Keine Seiten — erstellen Sie eine"
+    "empty": "Keine Seiten — erstelle eine"
   },
   "tabs": {
     "prev": "Vorherige Seite",
@@ -420,7 +420,7 @@
     "columnOptions": "Spaltenoptionen",
     "hideColumn": "Spalte ausblenden",
     "addCard": "Karte hinzufügen",
-    "groupHint": "Wählen Sie ein Auswahlfeld zum Gruppieren der Karten (Einstellungen › Gruppieren nach).",
+    "groupHint": "Wähle ein Auswahlfeld zum Gruppieren der Karten (Einstellungen › Gruppieren nach).",
     "showColumn": "Spalte anzeigen"
   },
   "settings": {

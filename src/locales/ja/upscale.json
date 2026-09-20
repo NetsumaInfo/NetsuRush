@@ -51,9 +51,12 @@
     "removebg": "背景除去"
   },
   "result": {
-    "files": "{{count}} ファイル",
-    "imported": "、{{count}} 件取り込み",
-    "failed": "{{count}} 件失敗。"
+    "files_one": "{{count}} ファイル",
+    "files_other": "{{count}} ファイル",
+    "failed_one": "{{count}} 件失敗。",
+    "failed_other": "{{count}} 件失敗。",
+    "imported_one": "、{{count}} 件を読み込み",
+    "imported_other": "、{{count}} 件を読み込み"
   },
   "chain": {
     "title": "チェーン",
@@ -453,7 +456,7 @@
     "frameBlack": "ほぼ真っ黒なフレームです（ディゾルブ？）— 再生ヘッドを動かして再テスト。",
     "testFailed": "テスト失敗",
     "noShotSelected": "ショットが選択されていません。",
-    "invalidRange": "範囲が不正です。",
+    "invalidRange": "終了は開始より後にしてください。",
     "duplicateOutputNames": "複数のソースが同じ出力名になります。名前を変えるか、パターンに連番を入れてください。",
     "upscaleFailed": "アップスケール失敗",
     "interpolateFailed": "補間失敗",

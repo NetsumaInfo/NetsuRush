@@ -5,7 +5,7 @@
   },
   "home": {
     "title": "Voix",
-    "subtitle": "Sélectionne un ou plusieurs clips parlés : silences, hésitations et transcription analysés en parallèle.",
+    "subtitle": "Sélectionne un ou plusieurs clips parlés : silences, hésitations et transcription analysés en parallèle.",
     "addFiles": "Ajouter des fichiers vidéo",
     "addFilesHint": "Plusieurs fichiers du disque à la fois — ils rejoignent la liste dessous.",
     "mediaPool": "Media Pool",
@@ -70,7 +70,7 @@
     "modeRepeatsTooltip": "Lecture en sautant seulement les répétitions",
     "modeAll": "Tout",
     "modeAllTooltip": "Lecture du montage final (tout sauté)",
-    "noTranscriptYet": "« Transcrire » pour le texte éditable, ou « Détecter les silences » pour couper directement."
+    "noTranscriptYet": "« Transcrire » pour le texte éditable, ou « Détecter les silences » pour couper directement."
   },
   "controls": {
     "groupAnalyse": "Analyse",
@@ -90,12 +90,12 @@
     "analyzeAll": "Tout analyser",
     "analyzeAllTooltip": "Lance transcription, silences et hésitations d'un coup. Résultats dans le panneau Coupes.",
     "savePresetDialogTitle": "Enregistrer le préréglage",
-    "savePresetPlaceholder": "Nom (ex : Interview serrée)",
+    "savePresetPlaceholder": "Nom (ex : Interview serrée)",
     "transcribe": "Transcrire",
     "retranscribe": "Re-transcrire",
     "engine": "Moteur",
     "verbatim": "Verbatim (euh gardés)",
-    "verbatimTooltip": "Whisper garde les « euh » au lieu de les gommer, pour que la détection les voie. Re-transcris pour appliquer.",
+    "verbatimTooltip": "Whisper garde les « euh » au lieu de les gommer, pour que la détection les voie. Re-transcris pour appliquer.",
     "detectSilences": "Détecter les silences",
     "settings": "Réglages",
     "novaConfirm": "Confirmation anti-bruit (NOVA)",
@@ -111,7 +111,7 @@
     "tics": "Tics",
     "wordTypes": "Types de mots",
     "customWords": "Mots perso",
-    "customWordsPlaceholder": "ex : bof, pff, ouais",
+    "customWordsPlaceholder": "ex : bof, pff, ouais",
     "customWordsTooltip": "Tes propres mots d'hésitation, séparés par des virgules (ajoutés au lexique).",
     "timelineNamePlaceholder": "Nom de la timeline (auto si vide)",
     "cutSilences": "Couper les silences",
@@ -122,24 +122,25 @@
     "removeFillers": "Retirer les hésitations ({{count}})",
     "restoreFillers": "Rétablir les hésitations ({{count}})",
     "kept": "Conservé",
-    "removedOfPlans": "−{{removed}} retirés sur {{count}} plan(s)",
     "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = réencode · FCPXML = timecode source.",
     "hints": {
-      "threshold": "Sensibilité voix/silence : + haut = + de silences coupés.",
+      "threshold": "Sensibilité voix/silence : + haut = + de silences coupés.",
       "minSilence": "Durée mini d'un blanc pour qu'il soit coupé.",
       "minSpeech": "Ignore les bouts de parole plus courts (anti-hachage).",
       "pad": "Garde un peu d'air autour de la parole conservée.",
-      "novaConfidence": "Confiance mini « pas de voix » pour écarter une région. + haut = plus prudent (écarte moins).",
+      "novaConfidence": "Confiance mini « pas de voix » pour écarter une région. + haut = plus prudent (écarte moins).",
       "sensitivity": "+ haut = attrape plus (euh, sons tenus, mots traînés). Faux positifs barrables au clic.",
       "minDuration": "Durée mini d'un son tenu / mot traîné pour compter.",
       "maxDuration": "Au-dessus = vrai mot long, pas une hésitation. Plafonne sons tenus + mots traînés.",
-      "monotoneTolerance": "Audio : à quel point le son doit rester sur la même note. + haut = accepte plus de variation → attrape plus de « soooon » tenus. (Relancer « Détecter ».)",
+      "monotoneTolerance": "Audio : à quel point le son doit rester sur la même note. + haut = accepte plus de variation → attrape plus de « soooon » tenus. (Relancer « Détecter ».)",
       "padEnd": "Air gardé APRÈS chaque prise (fins de phrase), séparément de la marge de début.",
       "noiseGate": "Écarte les courts bruits pris pour de la parole (clavier, clic de bouche). 0 = désactivé."
     },
-    "off": "off"
+    "off": "off",
+    "removedOfPlans_one": "−{{removed}} retirés sur {{count}} plan",
+    "removedOfPlans_other": "−{{removed}} retirés sur {{count}} plans"
   },
   "params": {
     "threshold": "Seuil",
@@ -172,8 +173,8 @@
     "tabSilences": "Silences",
     "tabFillers": "Hésit.",
     "tabRepeats": "Répét.",
-    "emptySilences": "« Détecter les silences »",
-    "emptyFillers": "« Détecter les hésitations »",
+    "emptySilences": "« Détecter les silences »",
+    "emptyFillers": "« Détecter les hésitations »",
     "emptyRepeats": "Transcris pour détecter les répétitions",
     "lowConfidence": "Confiance faible — vérifier à l'écoute avant de couper",
     "reinclude": "Réinclure au montage",
@@ -184,7 +185,7 @@
     "play": "Lire"
   },
   "waveform": {
-    "scrubberAria": "Curseur de lecture de la forme d’onde"
+    "scrubberAria": "Curseur de lecture de la forme d'onde"
   },
   "thresholdPreview": {
     "thresholdLabel": "seuil"
@@ -193,7 +194,7 @@
     "helpAria": "Comprendre les réglages",
     "helpTooltip": "Comprendre les réglages (gros aperçu)",
     "dialogTitle": "Réglages des silences",
-    "description": "Bouge les curseurs : l'aperçu et les chiffres réagissent en direct",
+    "description": "Bouge les curseurs : l'aperçu et les chiffres réagissent en direct",
     "descriptionExampleSuffix": " (exemple — charge un clip pour voir TON audio)",
     "legendKept": "Parole gardée",
     "legendPad": "Marge",
@@ -238,15 +239,15 @@
   "presets": {
     "doux": {
       "label": "Doux",
-      "hint": "Ne coupe que l'évident : grandes pauses (≥ 0,9 s, marge large) et « euh » clairs. Zéro risque, montage aéré."
+      "hint": "Ne coupe que l'évident : grandes pauses (≥ 0,9 s, marge large) et « euh » clairs. Zéro risque, montage aéré."
     },
     "equilibre": {
       "label": "Équilibré",
-      "hint": "Le réglage juste : silences ≥ 0,5 s, hésitations nettes (euh, sons tenus, mots traînés), tics de langage exclus."
+      "hint": "Le réglage juste : silences ≥ 0,5 s, hésitations nettes (euh, sons tenus, mots traînés), tics de langage exclus."
     },
     "agressif": {
       "label": "Agressif",
-      "hint": "Coupe les silences dès 0,3 s avec une marge minimale et inclut les tics de langage. Vérifie ensuite le panneau Coupes."
+      "hint": "Coupe les silences dès 0,3 s avec une marge minimale et inclut les tics de langage. Vérifie ensuite le panneau Coupes."
     }
   },
   "fillerCats": {
@@ -258,24 +259,28 @@
   },
   "store": {
     "batchLoaded": "Analyse chargée (lot)",
-    "batchStopped": "Analyse arrêtée — {{count}} clip(s) terminé(s)",
-    "batchDone": "Analyse groupée : {{count}} clip(s)",
-    "batchErrorsSuffix": " · {{count}} erreur(s)",
-    "silencesDetected": "{{silences}} silence(s) · {{speech}} segment(s) de parole",
+    "silencesDetected": "Silences : {{silences}} · segments de parole : {{speech}}",
     "errDetectSilences": "échec détection silences",
-    "fillersDetected": "{{count}} hésitation(s) détectée(s) (audio)",
     "noFillersDetected": "Aucune hésitation acoustique détectée.",
     "errDetectFillers": "échec détection hésitations",
     "transcriptCached": "Transcription chargée (cache)",
-    "transcriptDone": "Transcription : {{count}} mots",
+    "transcriptDone": "Transcription : {{count}} mots",
     "errTranscribe": "échec transcription",
-    "analyzeAllDone": "Analyse : {{words}} mots · {{silences}} silence(s) · {{fillers}} hésitation(s) audio",
+    "analyzeAllDone": "Analyse : {{words}} mots · silences : {{silences}} · hésitations audio : {{fillers}}",
     "busyDetectSilences": "Détection des silences…",
     "busyDetectFillers": "Détection des hésitations (audio)…",
     "busyTranscribe": "Transcription…",
-    "busyAnalyzeAllWithTranscribe": "Analyse : transcription ∥ silences…",
-    "busyAnalyzeAllSilencesOnly": "Analyse : silences…",
-    "busyAnalyzeAllFillers": "Analyse : hésitations (audio)…"
+    "busyAnalyzeAllWithTranscribe": "Analyse : transcription ∥ silences…",
+    "busyAnalyzeAllSilencesOnly": "Analyse : silences…",
+    "busyAnalyzeAllFillers": "Analyse : hésitations (audio)…",
+    "batchStopped_one": "Analyse arrêtée — {{count}} clip terminé",
+    "batchStopped_other": "Analyse arrêtée — {{count}} clips terminés",
+    "batchDone_one": "Analyse groupée : {{count}} clip",
+    "batchDone_other": "Analyse groupée : {{count}} clips",
+    "batchErrorsSuffix_one": " · {{count}} erreur",
+    "batchErrorsSuffix_other": " · {{count}} erreurs",
+    "fillersDetected_one": "{{count}} hésitation détectée (audio)",
+    "fillersDetected_other": "{{count}} hésitations détectées (audio)"
   },
   "export": {
     "timelineSuffixEdit": "montage",
@@ -287,27 +292,29 @@
     "creatingColorTimeline": "Création de la timeline couleurs…",
     "exportingFormat": "Export {{format}}…",
     "errNothingToBuild": "Rien à monter (aucun segment conservé).",
-    "timelineBase": "Timeline « {{name}} » · {{count}} segment(s)",
     "removedSuffix": " · {{sec}} s retirés",
     "createdSuffix": " (créée)",
     "fpsMismatchSuffix": " · ⚠ fps timeline ≠ clip",
     "errTimeline": "échec timeline",
     "errNoDuration": "Durée du clip inconnue (charge la forme d'onde).",
     "errNothingToBuildColored": "Rien à monter (aucun segment).",
-    "timelineColoredBase": "Timeline « {{name}} » · {{count}} clips ({{cuts}} coupes) · {{colored}} colorés",
+    "timelineColoredBase": "Timeline « {{name}} » · {{count}} clips ({{cuts}} coupes) · {{colored}} colorés",
     "coloredRefused": " ⚠ Resolve a refusé les couleurs",
     "coloredLegend": " · 🟢 parole 🔵 silence 🟠 hésit. 🟦 répét.",
     "errTimelineColored": "échec timeline couleurs",
     "errNothingToExport": "Rien à exporter (aucun segment conservé).",
-    "fileExported": "{{format}} ({{count}} plan(s)) → {{path}}",
     "errExportFile": "échec export {{format}}",
-    "errNoWords": "Transcrivez d'abord (aucun mot).",
+    "errNoWords": "Transcris d'abord (aucun mot).",
     "subtitlesExported": "Sous-titres {{format}} ({{count}} lignes) → {{path}}",
-    "errSubtitles": "échec sous-titres"
+    "errSubtitles": "échec sous-titres",
+    "timelineBase_one": "Timeline « {{name}} » · {{count}} segment",
+    "timelineBase_other": "Timeline « {{name}} » · {{count}} segments",
+    "fileExported_one": "{{format}} ({{count}} plan) → {{path}}",
+    "fileExported_other": "{{format}} ({{count}} plans) → {{path}}"
   },
   "analysis": {
-    "resolveOffline": "Resolve hors ligne — utilisez un fichier local.",
-    "otherHostOffline": "{{host}} sélectionné — la source projet vient de Resolve. Utilisez un fichier local."
+    "resolveOffline": "Resolve hors ligne — prends un fichier local.",
+    "otherHostOffline": "{{host}} sélectionné — la source projet vient de Resolve. Prends un fichier local."
   },
   "render": {
     "action": "Rendre",
@@ -316,11 +323,13 @@
     "profileHint": "Profil de rendu (codec, conteneur, audio). Clic droit = changer de profil.",
     "runningCount_one": "{{count}} rendu en cours",
     "runningCount_other": "{{count}} rendus en cours",
-    "done": "Rendu : {{count}} rush(s) · profil {{profile}}",
-    "stopped": "Rendu arrêté — {{count}} rush(s) terminé(s)",
-    "errProfile": "Profil incomplet : {{issue}}",
-    "errNoDir": "Rendu annulé : aucun dossier de sortie choisi.",
+    "errProfile": "Profil incomplet : {{issue}}",
+    "errNoDir": "Rendu annulé : aucun dossier de sortie choisi.",
     "errNoSegments": "Rien à rendre (aucun segment conservé).",
-    "errExport": "échec du rendu"
+    "errExport": "échec du rendu",
+    "done_one": "Rendu : {{count}} rush · profil {{profile}}",
+    "done_other": "Rendu : {{count}} rushs · profil {{profile}}",
+    "stopped_one": "Rendu arrêté — {{count}} rush terminé",
+    "stopped_other": "Rendu arrêté — {{count}} rushs terminés"
   }
 }

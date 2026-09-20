@@ -28,7 +28,7 @@
     "panelOffline": "panneau hors ligne",
     "resolveConnected": "Resolve connecté",
     "resolveOffline": "Resolve hors ligne",
-    "project": "Projet : {{project}}",
+    "project": "Projet : {{project}}",
     "refresh": "Rafraîchir le statut",
     "resolveHint": "Le pont marche, Resolve ne répond pas. Ouvre <b1>Resolve Studio</b1> avec un projet, active <b2>Préférences ▸ Système ▸ Général ▸ Scripting externe = Local</b2>, puis redémarre-le.",
     "adobeHint": "Ouvre {{host}}, puis le panneau <b>Fenêtre ▸ Extensions ▸ NetsuRush</b> (à installer depuis l'onglet Adobe)."
@@ -83,9 +83,10 @@
     "support": "Soutenir NetsuBoard"
   },
   "errorBadge": {
-    "aria": "{{count}} erreur(s) — ouvrir la console",
     "open": "Ouvrir la console",
-    "markRead": "Marquer comme lu"
+    "markRead": "Marquer comme lu",
+    "aria_one": "{{count}} erreur — ouvrir la console",
+    "aria_other": "{{count}} erreurs — ouvrir la console"
   },
   "errorBoundary": {
     "title": "NetsuRush a planté au rendu",
@@ -102,7 +103,7 @@
   },
   "emoji": {
     "search": "Rechercher un emoji…",
-    "none": "Aucun emoji pour « {{q}} ».",
+    "none": "Aucun emoji pour « {{q}} ».",
     "cat": {
       "people": "Smileys & personnes",
       "nature": "Animaux & nature",
@@ -129,7 +130,7 @@
     "collapseCorner": "Réduire dans le coin",
     "dismiss": "Retirer",
     "dismissHint": "Retirer ce rappel",
-    "closeHostQ": "Fermer {{host}} ?",
+    "closeHostQ": "Fermer {{host}} ?",
     "freeRamDesc": "Libère RAM et GPU.",
     "resolveSafeCloseDesc": "Libère RAM et GPU. Projet sauvegardé avant.",
     "later": "Plus tard",

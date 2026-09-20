@@ -5,10 +5,12 @@
   },
   "result": {
     "scriptPrefix": "Script: {{name}}",
-    "clipsDone": "Planos procesados: {{count}} → composición «{{comp}}».",
     "imported": "Importado en After Effects (revisar el panel Proyecto).",
     "launching": "After Effects se está abriendo — import automático al arrancar (requiere un proyecto abierto).",
-    "missing": "Planos omitidos por falta de archivo: {{count}}."
+    "clipsDone_one": "{{count}} plano → composición «{{comp}}».",
+    "clipsDone_other": "{{count}} planos → composición «{{comp}}».",
+    "missing_one": "{{count}} plano omitido por falta de archivo.",
+    "missing_other": "{{count}} planos omitidos por falta de archivo."
   },
   "run": {
     "busy": "Exportando…",

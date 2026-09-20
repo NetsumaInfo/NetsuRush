@@ -4,7 +4,8 @@
     "remove": "移除 {{tag}}"
   },
   "rating": {
-    "stars": "{{n}} 星"
+    "stars_one": "{{count}} 星",
+    "stars_other": "{{count}} 星"
   },
   "folder": {
     "new": "新建文件夹",
@@ -100,13 +101,11 @@
     "shotWord": "镜头",
     "removed": "已移除《{{name}}》— 按 Ctrl+Z 撤销。",
     "restored": "已恢复《{{name}}》。",
-    "toTimelineOk": "{{count}} 个镜头 →《{{timeline}}》。",
     "timelineFailed": "时间线失败",
     "mounting": "剪辑中…",
     "archived": "合集已归档到磁盘。",
     "archiveFailed": "归档失败",
     "all": "全部",
-    "shotCount": "{{count}} 个镜头",
     "ofTotal": "共 {{count}} 个镜头",
     "selCount": " · 选中 {{count}} 个",
     "selectAll": "全选",
@@ -129,7 +128,11 @@
     "emptyFolder": "文件夹为空 — 从素材整理或搜索中归入镜头。",
     "resize": "调整大小",
     "thumbSize": "缩略图大小",
-    "undoRemove": "撤销移除"
+    "undoRemove": "撤销移除",
+    "toTimelineOk_one": "{{count}} 个镜头 →《{{timeline}}》。",
+    "toTimelineOk_other": "{{count}} 个镜头 →《{{timeline}}》。",
+    "shotCount_one": "{{count}} 个镜头",
+    "shotCount_other": "{{count}} 个镜头"
   },
   "list": {
     "title": "合集",
@@ -151,10 +154,11 @@
     "deleteFolderTitle": "删除文件夹《{{name}}》？",
     "deleteFolderDesc": "其中的合集将上移一级。",
     "newCollection": "新建合集",
-    "plansCount": "{{count}} 个镜头",
     "emptyAll": "暂无合集。先新建一个合集，再从素材整理或搜索中归入镜头（缩略图上的“归入”按钮）。",
     "folderEmpty": "此文件夹为空",
-    "folderEmptyFilter": "（当前筛选）"
+    "folderEmptyFilter": "（当前筛选）",
+    "plansCount_one": "{{count}} 个镜头",
+    "plansCount_other": "{{count}} 个镜头"
   },
   "editor": {
     "iconSearch": "搜索图标…",
@@ -171,7 +175,6 @@
     "online": "在线",
     "relinkMoved": "重新链接已移动的源文件。",
     "resync": "重新同步…",
-    "dotPlans": " · {{count}} 个镜头",
     "relink": "重新链接…",
     "resyncHint": "“重新同步”会索引一个查找文件夹，并按文件名自动重新链接。",
     "disabledLower": "已关闭",
@@ -199,7 +202,9 @@
     "tabEmoji": "表情",
     "tabIcon": "图标",
     "tabImage": "图片",
-    "importImage": "导入图片 / GIF"
+    "importImage": "导入图片 / GIF",
+    "dotPlans_one": " · {{count}} 个镜头",
+    "dotPlans_other": " · {{count}} 个镜头"
   },
   "char": {
     "queryCharacter": "角色：{{name}}",

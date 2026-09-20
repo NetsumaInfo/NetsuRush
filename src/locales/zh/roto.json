@@ -159,7 +159,7 @@
   "engineHint": {
     "minimax-remover": "约 6 步扩散并保持时间一致性 — 处理动态背景更干净。",
     "diffueraser": "高质量 — 引擎尚待接入。",
-    "matanyone": "基于记忆的跟踪 — 适合头发和边缘。",
+    "matanyone": "带记忆的跟踪 — 适合头发和边缘。",
     "matanyone2": "比 v1 的细节更好、更稳健。"
   },
   "exportRow": {

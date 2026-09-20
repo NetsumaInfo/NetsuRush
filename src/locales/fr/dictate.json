@@ -20,7 +20,7 @@
   },
   "settings": {
     "title": "Dictée vocale",
-    "intro": "Maintiens le raccourci n'importe où dans l'app, parle, relâche : le texte transcrit s'insère dans le champ ou l'éditeur où tu étais. Aucun bouton — juste une pastille discrète pendant l'écoute.",
+    "intro": "Maintiens le raccourci n'importe où dans l'app, parle, relâche : le texte transcrit s'insère dans le champ ou l'éditeur où tu étais. Aucun bouton — juste une pastille discrète pendant l'écoute.",
     "enableLabel": "Activer la dictée",
     "enableHint": "Écoute le raccourci global.",
     "enabledOn": "Activée",

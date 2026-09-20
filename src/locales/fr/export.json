@@ -23,13 +23,13 @@
     "profileCustom": "Personnalisé",
     "optimization": "Encodeur",
     "speed": "Compression",
-    "speedHint": "Effort de compression, à qualité d'image constante : plus elle est forte, plus le fichier est léger — et plus l'encodage est long.",
+    "speedHint": "Effort de compression, à qualité d'image constante : plus elle est forte, plus le fichier est léger — et plus l'encodage est long.",
     "codec": "Codec",
     "codecProfile": "Profil",
     "audio": "Audio",
     "audioCodec": "Codec audio",
     "timelineTarget": "Timeline cible",
-    "timelineInsertion": "Mode d’insertion — {{host}}",
+    "timelineInsertion": "Mode d'insertion — {{host}}",
     "insertionInsert": "Insérer",
     "insertionOverwrite": "Écraser",
     "insertionReplace": "Remplacer",
@@ -101,7 +101,7 @@
   },
   "issue": {
     "binTargetRequired": "Nomme le dossier de destination",
-    "profileIncomplete": "Profil incomplet : {{issue}}"
+    "profileIncomplete": "Profil incomplet : {{issue}}"
   },
   "audio": {
     "allTracks": "Toutes les pistes",
@@ -126,7 +126,7 @@
     "tabImages": "Images"
   },
   "notice": {
-    "cancelled": "Export annulé : aucune destination choisie.",
+    "cancelled": "Export annulé : aucune destination choisie.",
     "merging": "Fusion…",
     "exporting": "Export…",
     "exported_one": "{{count}} fichier exporté ({{profile}}) → {{dir}}{{failed}}",
@@ -140,7 +140,7 @@
     "remux": "Remux",
     "encode": "Réencodage",
     "remuxWarning": "Coupe non précise",
-    "remuxWarningDetail": "Le Remux copie le flux sans le ré-encoder : la coupe se cale sur les images clés de la source, donc quelques images en trop peuvent apparaître au début et à la fin du plan. Pour une coupe exacte à l'image, prends Réencodage."
+    "remuxWarningDetail": "Le Remux copie le flux sans le ré-encoder : la coupe se cale sur les images clés de la source, donc quelques images en trop peuvent apparaître au début et à la fin du plan. Pour une coupe exacte à l'image, prends Réencodage."
   },
   "audioMode": {
     "copy": "Copie",

@@ -58,7 +58,7 @@ function Thumb({ clip }: { clip: Clip }) {
       onMouseEnter={(event) => { drop.current = claimHoverPreview(event.currentTarget, hoverOff); setHovered(true); }}
       onMouseLeave={() => { drop.current?.(); hoverOff(); }}
       onClick={(event) => { event.preventDefault(); event.stopPropagation(); setPinned((value) => !value); }}
-      aria-label={pinned ? "Arrêter l’aperçu" : "Lire l’aperçu"}
+      aria-label={pinned ? "Arrêter l'aperçu" : "Lire l'aperçu"}
     >
       {thumb && <img src={nr.mediaUrl(thumb)} alt="" draggable={false} />}
       {active && preview && <PreviewVideo url={preview} label={clip.name} audible={hovered || pinned} onError={() => setPreview(null)} />}

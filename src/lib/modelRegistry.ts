@@ -84,7 +84,7 @@ const MB = 1024 ** 2;
 // ajoutées quand leur backend atterrit — le manifeste core doit suivre le même id.
 export const MODEL_REGISTRY: ModelEntry[] = [
   // ---- Détection de plans ----
-  { id: "transnetv2", label: "TransNetV2", task: "detect", engine: "transnetv2", license: "MIT", commercialUse: true, sizeBytes: 40 * MB, tier: "light", vramGB: 1, hint: "Rapide, sur processeur. Coupes franches ; sensibilité réglée au curseur de précision.", default: true, minBase: true, bundled: true },
+  { id: "transnetv2", label: "TransNetV2", task: "detect", engine: "transnetv2", license: "MIT", commercialUse: true, sizeBytes: 40 * MB, tier: "light", vramGB: 1, hint: "Rapide, sur processeur. Coupes franches ; sensibilité réglée au curseur de précision.", default: true, minBase: true, bundled: true },
   { id: "omnishotcut", label: "OmniShotCut", task: "detect", engine: "omnishotcut", license: "MIT", commercialUse: true, sizeBytes: 164 * MB, tier: "balanced", vramGB: 2, hint: "Le plus fiable sur fondus, volets et transitions progressives. Automatique, GPU." },
   { id: "autoshot", label: "AutoShot", task: "detect", engine: "autoshot", license: "MIT", commercialUse: true, sizeBytes: 57243097, tier: "balanced", vramGB: 2, hint: "Bon sur montages rapides et plans très animés. Seuil réglable en avancé, GPU.", advanced: true },
 
@@ -94,8 +94,8 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   { id: "siglip2-giant", label: "SigLIP 2 Giant", task: "search", engine: "siglip", license: "Apache-2.0", commercialUse: true, sizeBytes: 3600 * MB, tier: "heavy", vramGB: 8, hint: "1536-dim, qualité max. ⚠️ changer de variante = ré-indexer tout.", advanced: true },
 
   // ---- Recherche par visage (personnages) ----
-  { id: "face-real", label: "YuNet + SFace", task: "face", engine: "opencv-face", license: "Apache-2.0", commercialUse: true, sizeBytes: 40 * MB, tier: "light", vramGB: 0, content: "real", hint: "Visages réels : détection + identité. Requis pour les indexer/chercher." },
-  { id: "face-anime", label: "imgutils + CCIP", task: "face", engine: "ccip", license: "OpenRAIL", commercialUse: true, sizeBytes: 120 * MB, tier: "light", vramGB: 1, content: "anime", hint: "Visages animés : détection + identité. Poids tirés au 1er usage." },
+  { id: "face-real", label: "YuNet + SFace", task: "face", engine: "opencv-face", license: "Apache-2.0", commercialUse: true, sizeBytes: 40 * MB, tier: "light", vramGB: 0, content: "real", hint: "Visages réels : détection + identité. Requis pour les indexer/chercher." },
+  { id: "face-anime", label: "imgutils + CCIP", task: "face", engine: "ccip", license: "OpenRAIL", commercialUse: true, sizeBytes: 120 * MB, tier: "light", vramGB: 1, content: "anime", hint: "Visages animés : détection + identité. Poids tirés au 1er usage." },
 
   // ---- Voix : ASR ---- (push-to-talk : Whisper Small/Medium/Turbo/Large + Parakeet)
   { id: "whisper-small", label: "Whisper Small", task: "voice-asr", engine: "faster-whisper", license: "MIT", commercialUse: true, sizeBytes: 500 * MB, tier: "light", vramGB: 1, hint: "Faible VRAM — dictée courte." },
@@ -125,7 +125,7 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   { id: "fallin", label: "Fallin Soft", task: "upscale", engine: "spandrel", license: "MIT", commercialUse: true, sizeBytes: 12 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Anime 2× doux, anti-artefacts.", advanced: true },
   { id: "fallin_strong", label: "Fallin Strong", task: "upscale", engine: "spandrel", license: "MIT", commercialUse: true, sizeBytes: 12 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Anime 2× net, traits marqués.", advanced: true },
   { id: "adore", label: "Adore", task: "upscale", engine: "spandrel", license: "MIT", commercialUse: true, sizeBytes: 12 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Anime 2× rapide, image propre.", advanced: true },
-  { id: "ld_anime", label: "LD-Anime Compact 2x", task: "upscale", engine: "spandrel", license: "CC-BY-NC-SA-4.0", commercialUse: false, sizeBytes: 5 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Vieux DVD/VHS abîmés : bruit, halos, artefacts et bavures de couleur.", advanced: true },
+  { id: "ld_anime", label: "LD-Anime Compact 2x", task: "upscale", engine: "spandrel", license: "CC-BY-NC-SA-4.0", commercialUse: false, sizeBytes: 5 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Vieux DVD/VHS abîmés : bruit, halos, artefacts et bavures de couleur.", advanced: true },
   { id: "shufflespan", label: "sudo Shuffle SPAN 10.5M", task: "upscale", engine: "onnx", license: "MIT", commercialUse: true, sizeBytes: 4 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Anime 2× — ONNX, traité par fenêtres 1080p.", advanced: true },
   { id: "aniscale2", label: "AniScale-2 Compact", task: "upscale", engine: "spandrel", license: "CC-BY-NC-4.0", commercialUse: false, sizeBytes: 3 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Anime 2× compact : restauration de compression WEB/DVD et raffinement des traits.", advanced: true },
   { id: "open-proteus", label: "OpenProteus Compact", task: "upscale", engine: "spandrel", license: "unknown", commercialUse: false, sizeBytes: 3 * MB, tier: "light", vramGB: 2, content: "anime", hint: "Anime 2× compact.", advanced: true },
@@ -172,7 +172,7 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   // ---- Interpolation — sélection courante : la génération RIFE recommandée, sa variante légère, et
   //      le moteur à flot optique pour les grands mouvements. Les générations antérieures (4.15→4.22,
   //      runtime ncnn, DRBA) restent en avancé : ce sont des historiques, pas des situations. ----
-  { id: "tas-rife4.25", label: "RIFE 4.25", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 22 * MB, tier: "balanced", vramGB: 3, hint: "Recommandé sur la plupart des vidéos, meilleur sur l’anime.", default: true },
+  { id: "tas-rife4.25", label: "RIFE 4.25", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 22 * MB, tier: "balanced", vramGB: 3, hint: "Recommandé sur la plupart des vidéos, meilleur sur l'anime.", default: true },
   { id: "tas-rife4.25-lite", label: "RIFE 4.25 Lite", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 22 * MB, tier: "light", vramGB: 2, hint: "Variante légère de la 4.25, plus rapide." },
   { id: "tas-gmfss", label: "GMFSS Fortuna Union", task: "interpolate", engine: "gmfss", license: "MIT", commercialUse: true, sizeBytes: 230 * MB, tier: "heavy", vramGB: 6, hint: "Flot optique + fusion — plus lent que RIFE, meilleur sur les grands mouvements." },
 
@@ -182,11 +182,11 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   { id: "tas-rife4.22-lite", label: "RIFE 4.22 Lite", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 19 * MB, tier: "light", vramGB: 2, hint: "Même usage que la 4.22, avec moins de calcul.", advanced: true },
   { id: "tas-rife4.21", label: "RIFE 4.21", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 36 * MB, tier: "balanced", vramGB: 3, hint: "Généraliste — ralentis et hausse de fréquence.", advanced: true },
   { id: "tas-rife4.20", label: "RIFE 4.20", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 59 * MB, tier: "balanced", vramGB: 3, hint: "Généraliste, plus lourde que les 4.15 à 4.18.", advanced: true },
-  { id: "tas-rife4.18", label: "RIFE 4.18", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 21 * MB, tier: "light", vramGB: 2, hint: "Généraliste pour augmenter le nombre d’images.", advanced: true },
+  { id: "tas-rife4.18", label: "RIFE 4.18", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 21 * MB, tier: "light", vramGB: 2, hint: "Généraliste pour augmenter le nombre d'images.", advanced: true },
   { id: "tas-rife4.17", label: "RIFE 4.17", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 21 * MB, tier: "light", vramGB: 2, hint: "Préserve mieux les textures en mouvement.", advanced: true },
   { id: "tas-rife4.16-lite", label: "RIFE 4.16 Lite", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 11 * MB, tier: "light", vramGB: 2, hint: "Interpolation légère, temps de calcul réduit.", advanced: true },
   { id: "tas-rife4.15", label: "RIFE 4.15", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 21 * MB, tier: "light", vramGB: 2, hint: "Version standard 4.15.", advanced: true },
-  { id: "tas-rife4.15-lite", label: "RIFE 4.15 Lite", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 11 * MB, tier: "light", vramGB: 2, hint: "Variante légère de la 4.15 : moins de calcul.", advanced: true },
+  { id: "tas-rife4.15-lite", label: "RIFE 4.15 Lite", task: "interpolate", engine: "rife-torch", license: "MIT", commercialUse: true, sizeBytes: 11 * MB, tier: "light", vramGB: 2, hint: "Variante légère de la 4.15 : moins de calcul.", advanced: true },
   { id: "tas-distildrba", label: "DistillDRBA v1", task: "interpolate", engine: "drba", license: "MIT", commercialUse: true, sizeBytes: 23 * MB, tier: "balanced", vramGB: 3, hint: "Estimation guidée par l'image voisine — contexte exact au facteur 2.", advanced: true },
   { id: "tas-distildrba-lite", label: "DistillDRBA v2 Lite", task: "interpolate", engine: "drba", license: "MIT", commercialUse: true, sizeBytes: 21 * MB, tier: "light", vramGB: 2, hint: "Même principe que la v1, avec moins de calcul.", advanced: true },
 
@@ -222,7 +222,7 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   { id: "dpt-beit-base", label: "DPT BEiT Base", task: "depth", engine: "dpt", license: "MIT", commercialUse: true, sizeBytes: 443 * MB, tier: "balanced", vramGB: 3, hint: "384px.", advanced: true },
   { id: "dpt-swinv2-large", label: "DPT SwinV2 Large", task: "depth", engine: "dpt", license: "MIT", commercialUse: true, sizeBytes: 848 * MB, tier: "heavy", vramGB: 5, hint: "384px.", advanced: true },
   { id: "dpt-beit-large", label: "DPT BEiT Large", task: "depth", engine: "dpt", license: "MIT", commercialUse: true, sizeBytes: 1376 * MB, tier: "heavy", vramGB: 6, hint: "512px — qualité max de la famille DPT.", advanced: true },
-  { id: "dpt-large", label: "DPT Large", task: "depth", engine: "dpt", license: "Apache-2.0", commercialUse: true, sizeBytes: 1300 * MB, tier: "heavy", vramGB: 5, hint: "Profondeur relative à partir d’une seule image. Robuste sur des scènes variées.", advanced: true },
+  { id: "dpt-large", label: "DPT Large", task: "depth", engine: "dpt", license: "Apache-2.0", commercialUse: true, sizeBytes: 1300 * MB, tier: "heavy", vramGB: 5, hint: "Profondeur relative à partir d'une seule image. Robuste sur des scènes variées.", advanced: true },
   { id: "glpn-kitti", label: "GLPN KITTI", task: "depth", engine: "glpn", license: "Apache-2.0", commercialUse: true, sizeBytes: 245 * MB, tier: "light", vramGB: 2, hint: "Entraîné extérieur (KITTI). Très léger.", advanced: true },
   { id: "glpn-nyu", label: "GLPN NYU", task: "depth", engine: "glpn", license: "Apache-2.0", commercialUse: true, sizeBytes: 490 * MB, tier: "light", vramGB: 2, hint: "Entraîné intérieur (NYU). Léger.", advanced: true },
   { id: "zoedepth-nyu-kitti", label: "ZoeDepth", task: "depth", engine: "zoedepth", license: "MIT", commercialUse: true, sizeBytes: 1380 * MB, tier: "heavy", vramGB: 5, hint: "Distances absolues, intérieur + extérieur.", advanced: true },
@@ -245,7 +245,7 @@ export const MODEL_REGISTRY: ModelEntry[] = [
 
   // ---- Détourage (image et vidéo, calculé par image) ----
   { id: "birefnet", label: "BiRefNet", task: "matte-image", engine: "birefnet", license: "MIT", commercialUse: true, sizeBytes: 950 * MB, tier: "balanced", vramGB: 4, content: "real", hint: "Haute qualité, bords fins.", default: true },
-  { id: "lucida", label: "Lucida", task: "matte-image", engine: "lucida", license: "MIT", commercialUse: true, sizeBytes: 884_975_803, tier: "balanced", vramGB: 6, content: "any", hint: "Détourage des transparences, détails fins, textes et effets lumineux. Alpha doux à 1024 px." },
+  { id: "lucida", label: "Lucida", task: "matte-image", engine: "lucida", license: "MIT", commercialUse: true, sizeBytes: 884_975_803, tier: "balanced", vramGB: 6, content: "any", hint: "Détourage des transparences, détails fins, textes et effets lumineux. Alpha doux à 1024 px." },
   { id: "ben2", label: "BEN2", task: "matte-image", engine: "ben2", license: "MIT", commercialUse: true, sizeBytes: 220 * MB, tier: "balanced", vramGB: 3, content: "real", hint: "4K, cheveux/bords très fins." },
 
   // ---- Segmentation interactive (Roto Studio) ----
@@ -261,12 +261,12 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   // PREMIER clic — avant toute propagation, qui ajoute encore la mémoire multiplex. Il restait
   // 0,68 Gio libres sur la carte : le modèle ne tient pas sur 8 Go, et son moteur amont exige CUDA
   // sans repli processeur. D'où un seuil à 10, qui laisse l'avertissement s'afficher sur ces cartes.
-  { id: "sam3.1", label: "SAM 3.1", task: "segment", engine: "sam3", license: "SAM-License", commercialUse: true, sizeBytes: 3_502_755_717, tier: "heavy", vramGB: 10, hint: "Génération la plus récente, nettement meilleure que SAM 2.1 sur les objets qui se croisent ou disparaissent. Mesuré : 6,2 Gio de VRAM dès le premier clic, donc hors d'atteinte d'une carte de 8 Go." },
-  { id: "sam2.1-large", label: "SAM 2.1 Hiera Large", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 900 * MB, tier: "balanced", vramGB: 3, hint: "Meilleure qualité de masque. 2 Gio de VRAM mesurés, longueur de plan indifférente.", default: true },
+  { id: "sam3.1", label: "SAM 3.1", task: "segment", engine: "sam3", license: "SAM-License", commercialUse: true, sizeBytes: 3_502_755_717, tier: "heavy", vramGB: 10, hint: "Génération la plus récente, nettement meilleure que SAM 2.1 sur les objets qui se croisent ou disparaissent. Mesuré : 6,2 Gio de VRAM dès le premier clic, donc hors d'atteinte d'une carte de 8 Go." },
+  { id: "sam2.1-large", label: "SAM 2.1 Hiera Large", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 900 * MB, tier: "balanced", vramGB: 3, hint: "Meilleure qualité de masque. 2 Gio de VRAM mesurés, longueur de plan indifférente.", default: true },
   { id: "sam2.1", label: "SAM 2.1 Hiera Base+", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 350 * MB, tier: "balanced", vramGB: 2, hint: "Repli rapide, bas VRAM." },
-  { id: "samurai", label: "SAMURAI", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 12 * MB, tier: "balanced", vramGB: 3, hint: "Tient l'objet quand il passe derrière autre chose : mémoire guidée par le mouvement. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
-  { id: "sam2long", label: "SAM2Long", task: "segment", engine: "sam", license: "CC-BY-NC-4.0", commercialUse: false, sizeBytes: 12 * MB, tier: "balanced", vramGB: 3, hint: "Pour les plans longs : garde plusieurs pistes en parallèle et élague les mauvaises, donc l'erreur ne s'accumule pas. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
-  { id: "edgetam", label: "EdgeTAM", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 56_116_523, tier: "light", vramGB: 2, hint: "Le plus léger : 56 Mo, ~20× plus rapide que SAM 2 sur petite carte. Masques moins fins.", advanced: true },
+  { id: "samurai", label: "SAMURAI", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 12 * MB, tier: "balanced", vramGB: 3, hint: "Tient l'objet quand il passe derrière autre chose : mémoire guidée par le mouvement. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
+  { id: "sam2long", label: "SAM2Long", task: "segment", engine: "sam", license: "CC-BY-NC-4.0", commercialUse: false, sizeBytes: 12 * MB, tier: "balanced", vramGB: 3, hint: "Pour les plans longs : garde plusieurs pistes en parallèle et élague les mauvaises, donc l'erreur ne s'accumule pas. Tourne sur les poids SAM 2.1 déjà installés.", exclusive: "sam2-package", advanced: true },
+  { id: "edgetam", label: "EdgeTAM", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 56_116_523, tier: "light", vramGB: 2, hint: "Le plus léger : 56 Mo, ~20× plus rapide que SAM 2 sur petite carte. Masques moins fins.", advanced: true },
   { id: "sam2.1-small", label: "SAM 2.1 Hiera Small", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 184 * MB, tier: "light", vramGB: 3, hint: "Variante intermédiaire entre EdgeTAM et Base+.", advanced: true },
   { id: "sam2.1-tiny", label: "SAM 2.1 Hiera Tiny", task: "segment", engine: "sam", license: "Apache-2.0", commercialUse: true, sizeBytes: 156 * MB, tier: "light", vramGB: 2, hint: "La plus petite variante SAM 2.1.", advanced: true },
 

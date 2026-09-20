@@ -639,7 +639,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
       }
 
       await get().refreshSearchStatus();
-      if (stopped) set({ searchError: i18n.t("search:store.indexingStopped", { total }) });
+      if (stopped) set({ searchError: i18n.t("search:store.indexingStopped", { count: total }) });
       else if (failed) set({ searchError: i18n.t("search:store.indexingFailed", { failed, total, error: lastErr }) });
     },
     // Ajoute les plans directement à la timeline OUVERTE dans Resolve (mode 'append', frame-accurate).

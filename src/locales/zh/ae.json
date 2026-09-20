@@ -5,10 +5,12 @@
   },
   "result": {
     "scriptPrefix": "脚本：{{name}}",
-    "clipsDone": "{{count}} 个镜头 → 合成《{{comp}}》。",
     "imported": "已导入 After Effects（请查看项目面板）。",
     "launching": "After Effects 启动中 — 启动后自动导入（需已打开项目）。",
-    "missing": "已跳过 {{count}} 个无文件的镜头。"
+    "clipsDone_one": "{{count}} 个镜头 → 合成《{{comp}}》。",
+    "clipsDone_other": "{{count}} 个镜头 → 合成《{{comp}}》。",
+    "missing_one": "已跳过 {{count}} 个无文件的镜头。",
+    "missing_other": "已跳过 {{count}} 个无文件的镜头。"
   },
   "run": {
     "busy": "导出中…",

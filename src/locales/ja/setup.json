@@ -9,13 +9,14 @@
     "sceneDetection": "シーン分割",
     "included": "同梱",
     "empty": "検索に一致するモデルはありません。",
-    "selected": "{{count}} 件選択",
     "noExtraSpace": "追加容量なし",
     "tier": {
       "light": "軽量",
       "balanced": "標準",
       "heavy": "大容量"
-    }
+    },
+    "selected_one": "{{count}} 件選択",
+    "selected_other": "{{count}} 件選択"
   },
   "packs": {
     "recommended": "推奨パック",
@@ -27,10 +28,11 @@
   "review": {
     "title": "インストールの準備完了",
     "downloads": "任意の容量",
-    "modelCount": "ダウンロード {{count}} 件",
     "noOptionalModels": "任意のダウンロードなし",
     "mandatoryOnly": "基盤とシーン分割のみ",
-    "sceneDetection": "シーン分割を含む"
+    "sceneDetection": "シーン分割を含む",
+    "modelCount_one": "ダウンロード {{count}} 件",
+    "modelCount_other": "ダウンロード {{count}} 件"
   },
   "detectedBackend": "選択された計算エンジン：{{backend}}",
   "installFailed": "インストールに失敗しました",

@@ -4,7 +4,8 @@
     "remove": "Remove {{tag}}"
   },
   "rating": {
-    "stars": "Stars: {{n}}"
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars"
   },
   "folder": {
     "new": "New folder",
@@ -100,13 +101,11 @@
     "shotWord": "Shot",
     "removed": "\"{{name}}\" removed — Ctrl+Z to undo.",
     "restored": "\"{{name}}\" restored.",
-    "toTimelineOk": "Shots sent: {{count}} → \"{{timeline}}\".",
     "timelineFailed": "timeline failed",
     "mounting": "Building…",
     "archived": "Collection archived to disk.",
     "archiveFailed": "archiving failed",
     "all": "all",
-    "shotCount": "Shots: {{count}}",
     "ofTotal": "of {{count}} shots",
     "selCount": " · {{count}} sel.",
     "selectAll": "Select all",
@@ -129,7 +128,11 @@
     "emptyFolder": "Empty folder — add shots from logging or search.",
     "resize": "Resize",
     "thumbSize": "Thumbnail size",
-    "undoRemove": "Undo removal"
+    "undoRemove": "Undo removal",
+    "toTimelineOk_one": "{{count}} shot → \"{{timeline}}\".",
+    "toTimelineOk_other": "{{count}} shots → \"{{timeline}}\".",
+    "shotCount_one": "{{count}} shot",
+    "shotCount_other": "{{count}} shots"
   },
   "list": {
     "title": "Collections",
@@ -151,10 +154,11 @@
     "deleteFolderTitle": "Delete folder \"{{name}}\"?",
     "deleteFolderDesc": "The collections inside move up one level.",
     "newCollection": "New collection",
-    "plansCount": "Shots: {{count}}",
     "emptyAll": "No collections. Create a collection, then add shots from logging or search (\"Add\" button on the thumbnail).",
     "folderEmpty": "This folder is empty",
-    "folderEmptyFilter": " for this filter"
+    "folderEmptyFilter": " for this filter",
+    "plansCount_one": "{{count}} shot",
+    "plansCount_other": "{{count}} shots"
   },
   "editor": {
     "iconSearch": "Search icons…",
@@ -171,7 +175,6 @@
     "online": "online",
     "relinkMoved": "Relink moved sources.",
     "resync": "Resync…",
-    "dotPlans": " · Shots: {{count}}",
     "relink": "Relink…",
     "resyncHint": "\"Resync\" indexes a lookup folder and relinks automatically by file name.",
     "disabledLower": "disabled",
@@ -199,7 +202,9 @@
     "tabEmoji": "Emoji",
     "tabIcon": "Icons",
     "tabImage": "Image",
-    "importImage": "Import an image / GIF"
+    "importImage": "Import an image / GIF",
+    "dotPlans_one": " · {{count}} shot",
+    "dotPlans_other": " · {{count}} shots"
   },
   "char": {
     "queryCharacter": "character: {{name}}",
@@ -222,7 +227,7 @@
     "missingMedia": "Media unavailable",
     "retry": "Retry",
     "preparing": "Preparing…",
-    "failed": "Sharing or saving failed. Please retry.",
+    "failed": "Sharing or saving failed. Try again.",
     "unavailable": "Configure collaboration to share this collection.",
     "signIn": "Sign in to choose people.",
     "viaArchive": "Others receive the collection’s archived files, never the source videos. Archiving to disk turns on with sharing.",

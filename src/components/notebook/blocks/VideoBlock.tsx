@@ -99,7 +99,7 @@ export function VideoPlayer({ url, caption, width, trimStart = 0, trimEnd = 0, o
         <div className="flex items-center gap-2 border-t border-white/10 bg-black/80 px-3 py-2 text-[10px] text-white/75">
           <span className="w-6 font-semibold text-primary">IN</span>
           <input
-            aria-label="Point d’entrée"
+            aria-label="Point d'entrée"
             type="range"
             min={0}
             max={Math.max(0, outPoint - 0.05)}

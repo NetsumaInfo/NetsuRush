@@ -40,7 +40,7 @@
     "cut": "Cut",
     "paste": "Paste",
     "selectAll": "Select all",
-    "derushHome": "Logging home",
+    "derushHome": "Footage home",
     "reloadRushes": "Reload footage",
     "cutTimeline": "Cut a timeline",
     "section": "Section",
@@ -83,9 +83,10 @@
     "support": "Support NetsuBoard"
   },
   "errorBadge": {
-    "aria": "Errors: {{count}} — open the console",
     "open": "Open the console",
-    "markRead": "Mark as read"
+    "markRead": "Mark as read",
+    "aria_one": "{{count}} error — open the console",
+    "aria_other": "{{count}} errors — open the console"
   },
   "errorBoundary": {
     "title": "NetsuRush crashed while rendering",

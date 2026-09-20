@@ -122,7 +122,6 @@
     "removeFillers": "Remove fillers ({{count}})",
     "restoreFillers": "Restore fillers ({{count}})",
     "kept": "Kept",
-    "removedOfPlans": "−{{removed}} removed · Total shots: {{count}}",
     "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = re-encode · FCPXML = source timecode.",
@@ -139,7 +138,9 @@
       "padEnd": "Air kept AFTER each take (sentence endings), separate from the head padding.",
       "noiseGate": "Drops short noises mistaken for speech (keyboard, mouth clicks). 0 = off."
     },
-    "off": "off"
+    "off": "off",
+    "removedOfPlans_one": "−{{removed}} removed from {{count}} shot",
+    "removedOfPlans_other": "−{{removed}} removed from {{count}} shots"
   },
   "params": {
     "threshold": "Threshold",
@@ -258,12 +259,8 @@
   },
   "store": {
     "batchLoaded": "Analysis loaded (batch)",
-    "batchStopped": "Analysis stopped — clips completed: {{count}}",
-    "batchDone": "Batch analysis · Clips: {{count}}",
-    "batchErrorsSuffix": " · Errors: {{count}}",
     "silencesDetected": "Silences: {{silences}} · Speech segments: {{speech}}",
     "errDetectSilences": "silence detection failed",
-    "fillersDetected": "Audio fillers found: {{count}}",
     "noFillersDetected": "No acoustic fillers found.",
     "errDetectFillers": "filler detection failed",
     "transcriptCached": "Transcript loaded (cache)",
@@ -275,7 +272,15 @@
     "busyTranscribe": "Transcribing…",
     "busyAnalyzeAllWithTranscribe": "Analysis: transcription ∥ silences…",
     "busyAnalyzeAllSilencesOnly": "Analysis: silences…",
-    "busyAnalyzeAllFillers": "Analysis: fillers (audio)…"
+    "busyAnalyzeAllFillers": "Analysis: fillers (audio)…",
+    "batchStopped_one": "Analysis stopped — {{count}} clip done",
+    "batchStopped_other": "Analysis stopped — {{count}} clips done",
+    "batchDone_one": "Batch analysis — {{count}} clip",
+    "batchDone_other": "Batch analysis — {{count}} clips",
+    "batchErrorsSuffix_one": " · {{count}} error",
+    "batchErrorsSuffix_other": " · {{count}} errors",
+    "fillersDetected_one": "{{count}} audio filler found",
+    "fillersDetected_other": "{{count}} audio fillers found"
   },
   "export": {
     "timelineSuffixEdit": "edit",
@@ -287,7 +292,6 @@
     "creatingColorTimeline": "Creating color timeline…",
     "exportingFormat": "Exporting {{format}}…",
     "errNothingToBuild": "Nothing to edit (no segments kept).",
-    "timelineBase": "Timeline \"{{name}}\" · Segments: {{count}}",
     "removedSuffix": " · {{sec}} s removed",
     "createdSuffix": " (created)",
     "fpsMismatchSuffix": " · ⚠ timeline fps ≠ clip",
@@ -299,11 +303,14 @@
     "coloredLegend": " · 🟢 speech 🔵 silence 🟠 filler 🟦 repeat",
     "errTimelineColored": "color timeline failed",
     "errNothingToExport": "Nothing to export (no segments kept).",
-    "fileExported": "{{format}} · Shots: {{count}} → {{path}}",
     "errExportFile": "{{format}} export failed",
     "errNoWords": "Transcribe first (no words).",
     "subtitlesExported": "{{format}} subtitles · Lines: {{count}} → {{path}}",
-    "errSubtitles": "subtitles failed"
+    "errSubtitles": "subtitles failed",
+    "timelineBase_one": "Timeline \"{{name}}\" · {{count}} segment",
+    "timelineBase_other": "Timeline \"{{name}}\" · {{count}} segments",
+    "fileExported_one": "{{format}} ({{count}} shot) → {{path}}",
+    "fileExported_other": "{{format}} ({{count}} shots) → {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve is offline — use a local file.",
@@ -316,11 +323,13 @@
     "profileHint": "Render profile (codec, container, audio). Right-click to switch profile.",
     "runningCount_one": "{{count}} render running",
     "runningCount_other": "{{count}} renders running",
-    "done": "Rendered {{count}} rush(es) · profile {{profile}}",
-    "stopped": "Render stopped — {{count}} rush(es) done",
     "errProfile": "Incomplete profile: {{issue}}",
     "errNoDir": "Render cancelled: no output folder chosen.",
     "errNoSegments": "Nothing to render (no segment kept).",
-    "errExport": "render failed"
+    "errExport": "render failed",
+    "done_one": "Rendered {{count}} clip · profile {{profile}}",
+    "done_other": "Rendered {{count}} clips · profile {{profile}}",
+    "stopped_one": "Render stopped — {{count}} clip done",
+    "stopped_other": "Render stopped — {{count}} clips done"
   }
 }

@@ -1,7 +1,7 @@
 {
-  "title": "Configure NetsuRush",
+  "title": "Set up NetsuRush",
   "desc": "The foundation installs itself. The rest is optional.",
-  "progressAria": "Configuration steps",
+  "progressAria": "Setup steps",
   "models": {
     "title": "Optional downloads",
     "search": "Search models…",
@@ -9,13 +9,14 @@
     "sceneDetection": "Scene cutting",
     "included": "Included",
     "empty": "No model matches this search.",
-    "selected": "{{count}} selected",
     "noExtraSpace": "no extra space",
     "tier": {
       "light": "light",
       "balanced": "balanced",
       "heavy": "heavy"
-    }
+    },
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected"
   },
   "packs": {
     "recommended": "Recommended pack",
@@ -27,10 +28,11 @@
   "review": {
     "title": "Ready to install",
     "downloads": "Optional space",
-    "modelCount": "{{count}} download(s)",
     "noOptionalModels": "No optional downloads",
     "mandatoryOnly": "Foundation and scene cutting only",
-    "sceneDetection": "Scene cutting included"
+    "sceneDetection": "Scene cutting included",
+    "modelCount_one": "{{count}} download",
+    "modelCount_other": "{{count}} downloads"
   },
   "detectedBackend": "Selected compute engine: {{backend}}",
   "installFailed": "Installation failed",

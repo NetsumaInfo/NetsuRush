@@ -13,22 +13,22 @@
   },
   "title": "Modèles",
   "subtitle": "Rien n'est téléchargé d'office. Prends ce dont tu as besoin, supprime à tout moment.",
-  "disk": "Disque :",
+  "disk": "Disque :",
   "noneInstalled": "Aucun modèle installé — installe-en un, sinon cette fonction ne marchera pas.",
   "badge": {
     "default": "défaut",
     "heavy": "lourd",
     "exclusive": "exclusif",
-    "exclusiveTip": "SAMURAI et SAM2Long remplacent le moteur SAM 2 par le leur : un seul peut être installé à la fois. Installer le second demande d'abord confirmation, puis retire le premier ; le supprimer remet le moteur d'origine."
+    "exclusiveTip": "SAMURAI et SAM2Long remplacent le moteur SAM 2 par le leur : un seul peut être installé à la fois. Installer le second demande d'abord confirmation, puis retire le premier ; le supprimer remet le moteur d'origine."
   },
   "conflict": {
     "title": "Un seul des deux à la fois",
-    "body": "{{model}} remplace le moteur de {{other}}, déjà installé : les deux ne peuvent pas cohabiter. Installer {{model}} retire {{other}}.",
+    "body": "{{model}} remplace le moteur de {{other}}, déjà installé : les deux ne peuvent pas cohabiter. Installer {{model}} retire {{other}}.",
     "replace": "Installer et retirer l'autre"
   },
   "sort": {
     "default": "Défaut",
-    "defaultTip": "Ordre du catalogue : le recommandé en tête.",
+    "defaultTip": "Ordre du catalogue : le recommandé en tête.",
     "size": "Taille",
     "sizeTip": "Par taille sur disque.",
     "vram": "VRAM",
@@ -65,12 +65,12 @@
     "use": "Utiliser",
     "useTip": "Faire de cette variante le modèle de recherche",
     "switchTitle": "Changer de modèle de recherche",
-    "switchEmpty": "{{model}} n’a encore rien indexé : la recherche restera vide jusqu’à une ré-indexation complète. L’index de la variante actuelle reste sur le disque, intact.",
-    "switchPartial": "Rushs déjà indexés avec {{model}} : {{clips}}. Les autres devront être ré-indexés ; l’index de la variante actuelle reste sur le disque.",
+    "switchEmpty": "{{model}} n'a encore rien indexé : la recherche restera vide jusqu'à une ré-indexation complète. L'index de la variante actuelle reste sur le disque, intact.",
+    "switchPartial": "Rushs déjà indexés avec {{model}} : {{clips}}. Les autres devront être ré-indexés ; l'index de la variante actuelle reste sur le disque.",
     "switchConfirm": "Utiliser cette variante"
   },
   "advanced": {
     "label": "Avancé",
-    "tip": "Affiche tout le catalogue : variantes, générations antérieures et moteurs expérimentaux. Par défaut on ne montre que la sélection courante de chaque tâche."
+    "tip": "Affiche tout le catalogue : variantes, générations antérieures et moteurs expérimentaux. Par défaut on ne montre que la sélection courante de chaque tâche."
   }
 }

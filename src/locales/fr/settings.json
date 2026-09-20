@@ -41,7 +41,7 @@
     "playerVolume": "Volume des lecteurs",
     "playerVolumeHint": "Partagé par NetsuCut, Collections, Voix et Upscale.",
     "hoverVolume": "Volume au survol",
-    "hoverVolumeHint": "Volume de la vignette survolée ; les aperçus en lecture auto restent muets.",
+    "hoverVolumeHint": "Volume de la vignette survolée ; les aperçus en lecture auto restent muets.",
     "globalMuted": "Coupé par le volume des lecteurs.",
     "generation": {
       "proxyTitle": "Aperçus vidéo",
@@ -56,17 +56,17 @@
       "engineAuto": "Choisir automatiquement",
       "engineHint": "Choisis une carte ou laisse NetsuRush décider.",
       "preset": "Profil",
-      "presetHint": "Trois réglages simples : teste celui qui te convient le mieux.",
+      "presetHint": "Trois réglages simples : teste celui qui te convient le mieux.",
       "resolution": "Résolution",
       "resolutionHint": "480p est le réglage par défaut pour les cartes.",
       "audio": "Audio",
       "audioHint": "Ajoute le son au proxy vidéo.",
       "noWebpAudio": "Le WebP animé ne prend pas en charge le son.",
-      "audioUnavailable": "Aucun son dans l’aperçu configuré.",
+      "audioUnavailable": "Aucun son dans l'aperçu configuré.",
       "enabled": "Activé",
       "disabled": "Désactivé",
-      "thumbnailFormatHint": "WebP prend souvent moins de place ; JPEG est très compatible.",
-      "quality": "Qualité de l’image",
+      "thumbnailFormatHint": "WebP prend souvent moins de place ; JPEG est très compatible.",
+      "quality": "Qualité de l'image",
       "qualityLow": "Léger",
       "qualityStandard": "Équilibré",
       "qualityHigh": "Net",
@@ -205,7 +205,7 @@
     },
     "custom": {
       "title": "Mes thèmes",
-      "subtitle": "Enregistre l'apparence courante : palette, couleurs et fond.",
+      "subtitle": "Enregistre l'apparence courante : palette, couleurs et fond.",
       "create": "Nouveau thème",
       "save": "Enregistrer",
       "delete": "Supprimer ce thème",
@@ -213,7 +213,7 @@
       "namePlaceholder": "Nom du thème",
       "confirm": "Valider",
       "rename": "Renommer",
-      "unsaved": "« {{name}} » a des modifications non enregistrées."
+      "unsaved": "« {{name}} » a des modifications non enregistrées."
     }
   },
   "updates": {
@@ -240,7 +240,7 @@
     "whatsNew": "Nouveautés de la version {{version}}",
     "gotIt": "C'est parti",
     "ytdlp": {
-      "hint": "Bibliothèque qui résout les liens vidéo. Ses extracteurs cassent souvent : elle se met à jour sans attendre la prochaine version de NetsuRush.",
+      "hint": "Bibliothèque qui résout les liens vidéo. Ses extracteurs cassent souvent : elle se met à jour sans attendre la prochaine version de NetsuRush.",
       "update": "Mettre à jour",
       "updating": "Mise à jour…",
       "checking": "Lecture de la version…",
@@ -335,11 +335,11 @@
   },
   "bugReport": {
     "title": "Signaler un souci",
-    "type": "Il se passe quoi ?",
-    "module": "Où ça ?",
+    "type": "Il se passe quoi ?",
+    "module": "Où ça ?",
     "detail": "Dis-le en quelques mots",
-    "detailPlaceholder": "ex : le bouton Envoyer ne fait rien",
-    "severity": "C'est grave ?",
+    "detailPlaceholder": "ex : le bouton Envoyer ne fait rien",
+    "severity": "C'est grave ?",
     "frequency": "Ça arrive…",
     "groups": {
       "problem": "Un problème",
@@ -384,9 +384,9 @@
     "descriptionPlaceholder": "Ce que tu as fait, et ce qui a cloché…",
     "descriptionIdea": "Raconte ton idée",
     "descriptionIdeaPlaceholder": "Ce que tu aimerais faire, et pourquoi",
-    "steps": "Comment le refaire ?",
+    "steps": "Comment le refaire ?",
     "stepsPlaceholder": "1. J'ouvre… 2. Je clique sur… 3. …",
-    "expected": "Ça aurait dû faire quoi ?",
+    "expected": "Ça aurait dû faire quoi ?",
     "expectedPlaceholder": "Le résultat que tu attendais",
     "videoSource": "Lien de la vidéo",
     "videoPlaceholder": "un lien pour la télécharger",
@@ -401,7 +401,7 @@
       "more": "Tout voir",
       "less": "Réduire",
       "manual": "Écris-le toi-même",
-      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11"
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11"
     },
     "sending": "Envoi…",
     "send": "Envoyer",
@@ -414,7 +414,7 @@
       "detail": "Dis en quelques mots de quoi il s'agit.",
       "tooLarge": "Un fichier dépasse {{size}} Mo."
     },
-    "noWebhook": "Envoi désactivé : aucun canal. Renseigne <c1>bugWebhook</c1> dans nr.config.json, ou déploie le relais Convex (<c2>VITE_CONVEX_SITE_URL</c2>).",
+    "noWebhook": "Envoi désactivé : aucun canal. Renseigne <c1>bugWebhook</c1> dans nr.config.json, ou déploie le relais Convex (<c2>VITE_CONVEX_SITE_URL</c2>).",
     "descriptionOther": "Explique ta demande",
     "descriptionOtherPlaceholder": "Ta question, ou ce que tu veux nous dire…",
     "files": {
@@ -427,7 +427,7 @@
   },
   "outbox": {
     "opening": "Ouverture du cache…",
-    "intro": "Ferme Resolve/Premiere Pro pour libérer le GPU pendant les encodes lourds sans perdre tes envois : ils sont mis en cache et appliqués <b>automatiquement à la réouverture</b>.",
+    "intro": "Ferme Resolve/Premiere Pro pour libérer le GPU pendant les encodes lourds sans perdre tes envois : ils sont mis en cache et appliqués <b>automatiquement à la réouverture</b>.",
     "enabled": "File d'attente active",
     "enabledHint": "Sinon, un envoi vers un logiciel fermé échoue comme avant.",
     "on": "Activé",
@@ -451,12 +451,12 @@
     "offline": {
       "title": "Cache hors-ligne des timelines",
       "upToDate": "à jour",
-      "stats": "{{clips}} rush(s) · {{cached}}/{{total}} timeline(s) avec leurs plans.",
+      "stats": "Rushs : {{clips}} · {{cached}}/{{total}} timelines avec leurs plans.",
       "none": "Aucun cache — Resolve fermé, les timelines s'ouvrent vides.",
       "update": "Mettre à jour",
       "needResolve": "Resolve doit être connecté pour construire le cache.",
       "building": "Mise à jour en arrière-plan (cède la priorité aux médias)…",
-      "auto": "Se met à jour automatiquement en fond ; ne relit que les nouvelles timelines.",
+      "auto": "Se met à jour automatiquement en fond ; ne relit que les nouvelles timelines.",
       "rebuild": "Tout recalculer"
     }
   },
@@ -480,7 +480,7 @@
     "showProjectHint": "Peut révéler un nom de client.",
     "showElapsed": "Temps écoulé",
     "showLinks": "Carte cliquable",
-    "showLinksHint": "L’image ouvre le serveur Discord, la première ligne le dépôt."
+    "showLinksHint": "L'image ouvre le serveur Discord, la première ligne le dépôt."
   },
   "storage": {
     "empty": "Aucun cache pour l'instant.",
@@ -503,12 +503,12 @@
       "thumb": "Une image par plan. Régénération lente à froid.",
       "proxy": "Extraits courts encodés sur GPU. Régénérés en une seconde.",
       "voice": "WAV 16 kHz pour la transcription et la détection de silences.",
-      "upscaleTest": "Images pleine résolution des essais « et si ? ».",
+      "upscaleTest": "Images pleine résolution des essais « et si ? ».",
       "roto": "Frames et masques des sessions de segmentation.",
       "scenes": "Points de coupe détectés par IA. Régénération = une détection.",
       "transcripts": "Texte et horodatage des mots. Régénération = un passage ASR.",
-      "embeddings": "Un vecteur par plan, ce que le modèle a « vu ». Régénération = des heures de GPU.",
-      "indexThumbs": "Anciennes vignettes rangées dans l’index. La recherche affiche maintenant celles du découpage : tu peux vider ce qui reste.",
+      "embeddings": "Un vecteur par plan, ce que le modèle a « vu ». Régénération = des heures de GPU.",
+      "indexThumbs": "Anciennes vignettes rangées dans l'index. La recherche affiche maintenant celles du découpage : tu peux vider ce qui reste.",
       "faces": "Un vecteur d'identité par visage détecté. Régénération = une passe de détection."
     },
     "tree": {
@@ -516,15 +516,17 @@
       "desc": "Regroupé par dossier source. Vide ce qui appartient à un projet terminé sans toucher aux autres.",
       "rushCount_one": "{{count}} rush",
       "rushCount_other": "{{count}} rushs",
+      "selectFolder": "Sélectionner le dossier {{name}}",
       "unattributed": "Non attribué",
       "unattributedHint": "Cache écrit avant l'index, ou dont le rush n'a pas pu être retrouvé. Purgeable en bloc.",
-      "selected": "{{count}} sélectionné(s) · {{size}}",
       "clearSelection": "Désélectionner",
-      "purgeSelection": "Vider la sélection"
+      "purgeSelection": "Vider la sélection",
+      "selected_one": "{{count}} sélectionné · {{size}}",
+      "selected_other": "{{count}} sélectionnés · {{size}}"
     },
     "reindex": {
       "action": "Réindexer",
-      "hint": "Rattrape les caches déjà sur disque : l'index ne connaît que ce qui a été écrit depuis son introduction.",
+      "hint": "Rattrape les caches déjà sur disque : l'index ne connaît que ce qui a été écrit depuis son introduction.",
       "running": "Réindexation…",
       "done": "{{added}} entrée(s) indexée(s), {{attributed}} rattachée(s) à un rush.",
       "scan": "Lecture des rushs connus…",
@@ -536,20 +538,21 @@
       "default": "Emplacement par défaut",
       "choose": "Choisir…",
       "reset": "Rétablir le défaut",
-      "moveTitle": "Déplacer le cache existant ?",
+      "moveTitle": "Déplacer le cache existant ?",
       "moveDesc": "{{size}} sont déjà dans l'ancien dossier. Les déplacer évite de tout régénérer.",
       "moveNow": "Déplacer",
       "leave": "Laisser sur place",
       "leaveHint": "L'ancien dossier restera listé ici et supprimable.",
       "moving": "Déplacement… {{done}}/{{total}}",
-      "moved": "{{count}} fichier(s) déplacé(s).",
-      "movedNone": "Nouveau dossier appliqué."
+      "movedNone": "Nouveau dossier appliqué.",
+      "moved_one": "{{count}} fichier déplacé.",
+      "moved_other": "{{count}} fichiers déplacés."
     },
     "lifecycle": {
       "session": "Temporaire de session",
       "sessionDesc": "Frames, masques et tests utiles pendant les retouches en cours.",
       "sessionBadge": "Nettoyage automatique",
-      "sessionEmpty": "Rien d’écrit dans cette session.",
+      "sessionEmpty": "Rien d'écrit dans cette session.",
       "reusable": "Aperçus réutilisables",
       "reusableDesc": "Se refabriquent tout seuls quand ils manquent.",
       "durable": "Analyses conservées",
@@ -566,17 +569,17 @@
       "gb": "Go",
       "days": "jours",
       "manualOnly": "Purge manuelle uniquement",
-      "manualOnlyHint": "Ce type n'est pas suivi à l'usage : pas d'auto-purge possible.",
+      "manualOnlyHint": "Ce type n'est pas suivi à l'usage : pas d'auto-purge possible.",
       "sessionTitle": "Caches de travail",
-      "sessionDesc": "Choisis quand chaque dérivé volumineux cesse d’être utile. La fermeture reste toujours le filet de sécurité.",
+      "sessionDesc": "Choisis quand chaque dérivé volumineux cesse d'être utile. La fermeture reste toujours le filet de sécurité.",
       "sequenceTitle": "Séquences intermédiaires des modèles",
-      "sequenceHint": "Dossiers de frames créés uniquement pour alimenter un modèle. Les séquences exportées par l’utilisateur ne sont jamais touchées.",
+      "sequenceHint": "Dossiers de frames créés uniquement pour alimenter un modèle. Les séquences que tu exportes ne sont jamais touchées.",
       "trigger": {
         "roto": "Au changement de plan",
         "upscaleTest": "Au changement de source ou réglage",
         "page": "En quittant la page",
-        "app": "À la fermeture de l’app",
-        "immediate": "Juste après l’opération"
+        "app": "À la fermeture de l'app",
+        "immediate": "Juste après l'opération"
       },
       "sessionOnly": "À la fermeture",
       "sessionOnlyHint": "Le dossier complet est supprimé quand NetsuRush se ferme, puis vérifié au prochain démarrage après un crash.",
@@ -588,20 +591,24 @@
     },
     "warn": {
       "cache": "Le cache atteint {{size}}.",
-      "disk": "Disque presque plein : {{size}} libres."
+      "disk": "Disque presque plein : {{size}} libres."
     },
     "confirm": {
-      "title": "Supprimer ce cache ?",
+      "title": "Supprimer ce cache ?",
       "descKinds": "{{size}} seront libérés. Le contenu se régénère au besoin.",
-      "descSources": "{{size}} seront libérés pour {{count}} rush(s). Les autres rushs ne sont pas touchés.",
       "descUnattributed": "{{size}} de cache non attribué seront libérés.",
-      "expensive": "L'index de recherche est inclus : le reconstruire prend des heures de GPU.",
+      "expensive": "L'index de recherche est inclus : le reconstruire prend des heures de GPU.",
       "cancel": "Annuler",
       "confirm": "Supprimer",
       "purging": "Suppression…",
-      "done": "{{size}} libéré(s) · {{files}} fichier(s)",
-      "doneRows": "{{size}} libéré(s) · {{files}} fichier(s), {{rows}} entrée(s) en base",
-      "skipped": " · {{count}} ignoré(s) (verrouillé(s))"
+      "descSources_one": "{{size}} seront libérés pour {{count}} rush. Les autres rushs ne sont pas touchés.",
+      "descSources_other": "{{size}} seront libérés pour {{count}} rushs. Les autres rushs ne sont pas touchés.",
+      "skipped_one": " · {{count}} ignoré (verrouillé)",
+      "skipped_other": " · {{count}} ignorés (verrouillés)",
+      "done_one": "{{size}} libérés · {{count}} fichier",
+      "done_other": "{{size}} libérés · {{count}} fichiers",
+      "doneRows_one": "{{size}} libérés · {{count}} fichier, {{rows}} entrées en base",
+      "doneRows_other": "{{size}} libérés · {{count}} fichiers, {{rows}} entrées en base"
     },
     "maintenance": {
       "title": "Entretien",
@@ -609,7 +616,7 @@
     },
     "missing": {
       "title": "Rushs introuvables",
-      "desc": "Un disque externe débranché suffit à les faire disparaître : rien n'est supprimé sans toi.",
+      "desc": "Un disque externe débranché suffit à les faire disparaître : rien n'est supprimé sans toi.",
       "purge": "Vider leur cache",
       "none": "Tous les rushs indexés sont accessibles."
     },
@@ -624,17 +631,18 @@
     },
     "projects": {
       "current": "Ouvert",
-      "desc": "Les projets que la recherche connaît. Un projet y entre dès que NetsuRush a lu son Media Pool. « Recenser » va chercher les autres.",
+      "desc": "Les projets que la recherche connaît. Un projet y entre dès que NetsuRush a lu son Media Pool. « Recenser » va chercher les autres.",
       "empty": "Aucun projet connu pour l'instant.",
       "forget": "Oublier",
       "forgetTooltip": "Retire le projet de la liste (l'index et les fichiers ne sont pas touchés)",
       "rushCount_one": "{{count}} rush",
       "rushCount_other": "{{count}} rush",
       "scan": "Recenser les projets Resolve",
-      "scanDone": "{{count}} projet(s) relevé(s)",
       "scanStarting": "Préparation…",
       "scanning": "{{project}} — {{done}}/{{total}}",
-      "title": "Projets connus de la recherche"
+      "title": "Projets connus de la recherche",
+      "scanDone_one": "{{count}} projet relevé",
+      "scanDone_other": "{{count}} projets relevés"
     }
   },
   "navigation": {
@@ -657,7 +665,7 @@
     "ok": "Fin de tâche",
     "okHint": "Export terminé, envoi vers la timeline, réussites en général.",
     "error": "Erreur",
-    "errorHint": "Message rouge d'échec : il demande d'agir, donc il reste plus longtemps.",
+    "errorHint": "Message rouge d'échec : il demande d'agir, donc il reste plus longtemps.",
     "badge": "Indicateur d'erreurs",
     "badgeHint": "Pastille rouge du coin bas-droit. Les erreurs restent lisibles dans la console.",
     "seconds_one": "{{count}} seconde",
@@ -665,7 +673,7 @@
     "untilClick": "Jusqu'au clic"
   },
   "detection": {
-    "reindexHint": "Un autre modèle découpe les plans autrement : tes rush déjà indexés devront l'être à nouveau."
+    "reindexHint": "Un autre modèle découpe les plans autrement : tes rush déjà indexés devront l'être à nouveau."
   },
   "tab": {
     "account": {
@@ -708,35 +716,35 @@
   },
   "boardAssets": {
     "title": "Stockage du board",
-    "intro": "L'application garde des médias pour elle : image collée, média récupéré d'un lien, frames extraites, résultat d'un upscale. Enregistrer un projet .netsu range ces octets dans son dossier compagnon — le magasin n'en garde alors qu'un double, libérable sans rien perdre. Les caches d'affichage, eux, ont leur propre page.",
+    "intro": "L'application garde des médias pour elle : image collée, média récupéré d'un lien, frames extraites, résultat d'un upscale. Enregistrer un projet .netsu range ces octets dans son dossier compagnon — le magasin n'en garde alors qu'un double, libérable sans rien perdre. Les caches d'affichage, eux, ont leur propre page.",
     "disk": "{{free}} libres sur {{total}}",
     "scanning": "Analyse du stockage…",
-    "failed": "Opération impossible",
+    "failed": "Opération impossible. Réessaie.",
     "freedNotice": "{{size}} libérés ({{count}} fichiers)",
     "movedNotice": "{{size}} déplacés ({{count}} fichiers)",
     "movedPartly": "{{count}} fichiers déplacés, {{failed}} en échec (laissés en place)",
-    "archivedNotice": "Board enregistré dans « {{name}} » : ses médias sont désormais dans le dossier du projet",
+    "archivedNotice": "Board enregistré dans « {{name}} » : ses médias sont désormais dans le dossier du projet",
     "settling": "{{count}} en cours d'écriture",
     "settlingHint": "Un fichier écrit à l'instant peut appartenir à un import que le board n'a pas encore posé. Il sera jugé au prochain passage.",
-    "footnote": "Les médias que vous avez ajoutés depuis votre disque ne sont jamais concernés : l'application ne touche qu'aux fichiers qu'elle a écrits elle-même.",
+    "footnote": "Les médias que tu as ajoutés depuis ton disque ne sont jamais concernés : l'application ne touche qu'aux fichiers qu'elle a écrits elle-même.",
     "safe": {
-      "hint": "Vérifié fichier par fichier : ces octets existent déjà dans le dossier compagnon d'un projet.",
+      "hint": "Vérifié fichier par fichier : ces octets existent déjà dans le dossier compagnon d'un projet.",
       "title": "Libérable sans risque",
       "duplicated": "Médias déjà rangés dans un projet ({{count}})",
-      "duplicatedHint": "Leurs octets sont dans le dossier compagnon d'un projet, par exemple « {{project}} ».",
+      "duplicatedHint": "Leurs octets sont dans le dossier compagnon d'un projet, par exemple « {{project}} ».",
       "duplicatedNone": "Aucun double détecté pour l'instant.",
       "action": "Libérer"
     },
     "sole": {
       "title": "À mettre à l'abri d'abord",
-      "hint": "Ces médias n'existent nulle part ailleurs. Aucun bouton ne les supprime : enregistrez-les d'abord, ils passeront alors dans la section du dessus.",
-      "empty": "Rien à mettre à l'abri : tout ce que garde l'application existe ailleurs.",
+      "hint": "Ces médias n'existent nulle part ailleurs. Aucun bouton ne les supprime : enregistre-les d'abord, ils passeront alors dans la section du dessus.",
+      "empty": "Rien à mettre à l'abri : tout ce que garde l'application existe ailleurs.",
       "untitled": "Board sans titre",
       "sceneCount": "{{count}} médias dont l'application est seule dépositaire · {{size}}",
       "shared": "Board partagé",
-      "sharedHint": "Un board partagé n'a pas de version « projet » : son document fait foi et la collaboration gère ses médias.",
+      "sharedHint": "Un board partagé n'a pas de version « projet » : son document fait foi et la collaboration gère ses médias.",
       "openBoard": "Board ouvert",
-      "openBoardHint": "Ce board est ouvert : utilisez « Enregistrer sous… » depuis la barre d'outils.",
+      "openBoardHint": "Ce board est ouvert : passe par « Enregistrer sous… » dans la barre d'outils.",
       "archive": "Enregistrer en projet…",
       "orphans": "Médias qu'aucun board ne réclame",
       "orphansHint": "{{count}} fichiers · {{size}}. Plus rien ne les affiche, mais cette copie est la seule.",
@@ -745,11 +753,11 @@
   },
   "collaboration": {
     "title": "Collaboration",
-    "description": "Ces réglages restent sur cet ordinateur. Choisissez un profil global ou une exception par type de page.",
-    "profilesHint": "En direct : envoi toutes les 60 ms. Équilibré : 200 ms. Économie : 900 ms, sans téléchargement automatique des médias.",
+    "description": "Ces réglages restent sur cet ordinateur. Choisis un profil global ou une exception par type de page.",
+    "profilesHint": "En direct : envoi toutes les 60 ms. Équilibré : 200 ms. Économie : 900 ms, sans téléchargement automatique des médias.",
     "default": "Profil par défaut",
     "inherit": "Utiliser le profil par défaut",
-    "saveFailed": "Impossible d’enregistrer les préférences sur cet ordinateur.",
+    "saveFailed": "Impossible d'enregistrer les réglages sur cet ordinateur.",
     "profiles": {
       "live": "En direct",
       "balanced": "Équilibré",

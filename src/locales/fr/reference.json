@@ -129,7 +129,7 @@
     "upscaleQuick": "Rapide",
     "upscaleAsk": "Personnalisé",
     "upscaleQuickHint": "Le bouton Upscaler lance directement avec ces réglages.",
-    "upscaleAskHint": "Le bouton Upscaler ouvre la fenêtre : modèle, échelle, aperçu.",
+    "upscaleAskHint": "Le bouton Upscaler ouvre la fenêtre : modèle, échelle, aperçu.",
     "model": "Modèle",
     "upscaleModelDefault": "Modèle d'upscale par défaut",
     "factor": "Facteur",
@@ -157,7 +157,7 @@
     "gestureNavigate": "Naviguer (ou clic-milieu)",
     "gestureZoom": "Zoomer / dézoomer",
     "gestureMarquee": "Sélection au lasso",
-    "gestureConstrain": "Contraindre : angle 15° (ligne/flèche), carré/cercle (formes)",
+    "gestureConstrain": "Contraindre : angle 15° (ligne/flèche), carré/cercle (formes)",
     "gestureExitDraw": "Quitter le mode dessin",
     "keyArrows": "Flèches",
     "keySpace": "Espace",
@@ -202,7 +202,7 @@
     "penNav": "Navigation au stylet et au doigt",
     "penGestures": "Pincement pour zoomer, deux doigts pour naviguer",
     "penDragPans": "Glisser sur le fond navigue",
-    "penDragPansHint": "Auto : activé sur un tactile sans souris. Sinon, le glissé fait un lasso.",
+    "penDragPansHint": "Auto : activé sur un tactile sans souris. Sinon, le glissé fait un lasso.",
     "penBarrel": "Bouton latéral du stylet",
     "penBarrelMenu": "Menu contextuel",
     "penBarrelPan": "Naviguer",
@@ -213,13 +213,13 @@
     "penMinWidth": "Épaisseur à pression nulle",
     "penTilt": "Inclinaison",
     "penEraser": "Bout gomme du stylet",
-    "penStrokeHint": "Pression et inclinaison sont figées au tracé : changer un réglage ne redessine rien.",
+    "penStrokeHint": "Pression et inclinaison sont figées au tracé : changer un réglage ne redessine rien.",
     "penUi": "Interface",
     "penTouchUi": "Commandes toujours visibles",
-    "penTouchUiHint": "Auto : dès qu'un stylet est détecté, ou sur un tactile.",
+    "penTouchUiHint": "Auto : dès qu'un stylet est détecté, ou sur un tactile.",
     "penBigTargets": "Cibles plus grandes",
     "penProbe": "Matériel détecté",
-    "penProbeHint": "Survole avec le stylet : les valeurs se remplissent sans rien tracer.",
+    "penProbeHint": "Survole avec le stylet : les valeurs se remplissent sans rien tracer.",
     "penProbePen": "Stylet",
     "penProbePressure": "Pression",
     "penProbeTilt": "Inclinaison",
@@ -247,8 +247,9 @@
     "assetSweep": "Médias inutilisés",
     "assetSweepHint": "Supprime les fichiers qu'aucune scène ne référence. Rien de ce que portent tes boards n'est touché.",
     "assetSweepAction": "Nettoyer",
-    "assetSweepDone": "{{count}} fichier(s) retiré(s), {{mb}} Mo libérés.",
-    "assetSweepFailed": "Le nettoyage a échoué."
+    "assetSweepFailed": "Le nettoyage a échoué.",
+    "assetSweepDone_one": "{{count}} fichier retiré, {{mb}} Mo libérés.",
+    "assetSweepDone_other": "{{count}} fichiers retirés, {{mb}} Mo libérés."
   },
   "inspector": {
     "ytPlayer": "Lecteur YouTube",
@@ -331,7 +332,7 @@
     "chooseFile": "Choisir un fichier…",
     "targetItem": "Item cible",
     "remove": "Retirer le lien",
-    "sharedFile": "Ce fichier appartient au board partagé : il n'a pas d'emplacement sur ce disque."
+    "sharedFile": "Ce fichier appartient au board partagé : il n'a pas d'emplacement sur ce disque."
   },
   "font": {
     "label": "Police",
@@ -431,7 +432,8 @@
     "duplicate": "Dupliquer (Ctrl+D)",
     "unlink": "Délier du média",
     "relink": "Lier au média",
-    "linkedTo": "Lié à {{count}} élément(s)"
+    "linkedTo_one": "Lié à {{count}} élément",
+    "linkedTo_other": "Lié à {{count}} éléments"
   },
   "media": {
     "browse": "Parcourir",
@@ -461,7 +463,7 @@
     "shotLabel": "{{name}} · plan {{n}}",
     "searchPlaceholder": "Décris un plan…",
     "notIndexed": "Rien d'indexé. Indexe tes rushs dans l'onglet Recherche.",
-    "searchHint": "Décris un plan : « visage », « coucher de soleil »…",
+    "searchHint": "Décris un plan : « visage », « coucher de soleil »…",
     "noMatch": "Aucun plan ne correspond."
   },
   "boardMenu": {
@@ -510,7 +512,7 @@
     "scale": "Échelle",
     "denoise": "Débruitage",
     "moduleUnavailable": "module de référence indisponible",
-    "remoteFail": "média distant : impossible de récupérer un fichier local",
+    "remoteFail": "média distant : impossible de récupérer un fichier local",
     "previewFail": "aperçu impossible",
     "upscaleFail": "échec de l'upscale",
     "fetchingLocal": "Récupération du fichier local…",
@@ -548,10 +550,10 @@
     "openProject": "Ouvrir un projet",
     "openProjectHint": "Ouvrir un fichier .netsu — il devient le document de travail",
     "openProjectFile": "Ouvrir le projet",
-    "openProjectLocation": "Ouvrir l’emplacement",
+    "openProjectLocation": "Ouvrir l'emplacement",
     "forgetProject": "Retirer de la liste",
     "deleteProject": "Supprimer complètement",
-    "deleteProjectTitle": "Supprimer « {{name}} » ?",
+    "deleteProjectTitle": "Supprimer « {{name}} » ?",
     "deleteProjectWarning": "Le fichier .netsu et son dossier .medias seront supprimés définitivement. Les rushs externes ne seront pas touchés.",
     "projectMissing": "Fichier introuvable",
     "sharedBoard": "Partagé",
@@ -580,7 +582,7 @@
     "interactiveActive": "Interactif — clic ailleurs pour déplacer",
     "interactiveHint": "Double-clic pour interagir",
     "relocateAll": "Tout relocaliser ({{count}})",
-    "mediaWaiting": "Média en attente — ouvre l’appareil qui le possède",
+    "mediaWaiting": "Média en attente — ouvre l'appareil qui le possède",
     "mediaRemoved": "Média retiré du projet",
     "retryMedia": "Réessayer"
   },
@@ -607,6 +609,7 @@
     "preparing": "Préparation de la vidéo…"
   },
   "embed": {
+    "onlineMedia": "Média en ligne",
     "frozen": "Lecture figée",
     "level": {
       "link": "Liens seuls",
@@ -631,12 +634,12 @@
       "seconds": "{{count}} s"
     },
     "warn": {
-      "heavy": "{{size}} : trop lourd pour un envoi simple. « Extraits » suffit dans la plupart des cas.",
+      "heavy": "{{size}} : trop lourd pour un envoi simple. « Extraits » suffit dans la plupart des cas.",
       "long": "Une vidéo couvre une très longue plage — vérifie ses bornes de boucle."
     },
     "useDefault": "Réglage du board",
-    "itemTitle": "Ce qu’on garde de cette vidéo",
-    "itemLabel": "Partage : {{level}}",
+    "itemTitle": "Ce qu'on garde de cette vidéo",
+    "itemLabel": "Partage : {{level}}",
     "settings": {
       "title": "Stockage des médias",
       "hint": "Ce que le .netsu emporte par défaut. Réglable média par média dans l'inspecteur."
@@ -647,48 +650,54 @@
     "clipboardEmptyLink": "Presse-papiers vide ou lien non reconnu",
     "emptyTitle": "Glisse des images, vidéos ou un lien YouTube ici",
     "emptyHint": "Coller (Ctrl+V) · molette pour zoomer · glisser le fond pour naviguer",
-    "pastedItems": "{{count}} élément(s) collé(s)",
-    "copiedDone": "{{count}} élément(s) copié(s)",
-    "cutDone": "{{count}} élément(s) coupé(s)"
+    "pastedItems_one": "{{count}} élément collé",
+    "pastedItems_other": "{{count}} éléments collés",
+    "copiedDone_one": "{{count}} élément copié",
+    "copiedDone_other": "{{count}} éléments copiés",
+    "cutDone_one": "{{count}} élément coupé",
+    "cutDone_other": "{{count}} éléments coupés"
   },
   "notice": {
     "recoveringMedia": "Récupération du média…",
     "mediaUnrecoverable": "Média irrécupérable",
     "recoverFailed": "Échec de la récupération",
     "recoveringOnline": "Récupération des médias en ligne… ({{current}}/{{total}})",
-    "mediaRecovered": "{{count}} média(s) récupéré(s)",
     "redownloadAll": "Retélécharger tout ({{count}})",
-    "recoveryResult": "{{recovered}} récupéré(s), {{failed}} échec(s)",
+    "recoveryResult": "Récupérés : {{recovered}} · échecs : {{failed}}",
     "downloadingVideo": "Téléchargement de la vidéo…",
     "videoDownloaded": "Vidéo téléchargée",
     "downloadImpossible": "Téléchargement impossible",
     "downloadFailed": "Échec du téléchargement",
     "mediaNotFound": "Média introuvable",
     "extractFailed": "Échec de l'extraction",
-    "sceneSaved": "« {{name}} » enregistrée",
+    "sceneSaved": "« {{name}} » enregistrée",
     "saveFailed": "Échec de l'enregistrement",
-    "autosaveFailed": "Enregistrement auto en échec : {{error}}",
-    "failedWith": "Échec : {{error}}",
-    "exported": "Exporté · {{bundled}} embarqué(s), {{referenced}} référencé(s)",
+    "autosaveFailed": "Enregistrement auto en échec : {{error}}",
+    "failedWith": "Échec : {{error}}",
+    "exported": "Exporté · embarqués : {{bundled}} · référencés : {{referenced}}",
     "boardExported": "Board exporté",
     "exportFailed": "Échec de l'export",
-    "exportFailedWith": "Échec export : {{error}}",
-    "typeUnsupported": "Type « {{type}} » non pris en charge",
-    "importFailedWith": "Échec import : {{error}}",
+    "exportFailedWith": "Échec export : {{error}}",
+    "typeUnsupported": "Type « {{type}} » non pris en charge",
+    "importFailedWith": "Échec import : {{error}}",
     "unknown": "inconnu",
-    "imported": "Importé · {{count}} élément(s)",
     "boardImported": "Board importé",
     "projectSaved": "« {{name}} » enregistré",
     "projectOpened": "« {{name}} » ouvert",
     "projectOpenedLegacy": "« {{name}} » ouvert (ancien format : enregistre-le sous pour en faire un projet)",
     "openFailedWith": "Échec de l'ouverture : {{error}}",
-    "dropProjectFailed": "Impossible d'ouvrir « {{name}} » — utilisez « Ouvrir un projet ».",
+    "dropProjectFailed": "Impossible d'ouvrir « {{name}} » — passe par « Ouvrir un projet ».",
     "noProjectFile": "Ce board n'est lié à aucun fichier",
     "relocating": "Recherche des médias dans le dossier… ({{count}})",
-    "relocated": "{{count}}/{{total}} média(s) relocalisé(s)",
     "relocatedNone": "Aucun média reconnu dans ce dossier",
-    "contentOpacity": "Opacité des contenus : {{percent}} %",
-    "itemOpacity": "Opacité du média : {{percent}} %"
+    "contentOpacity": "Opacité des contenus : {{percent}} %",
+    "itemOpacity": "Opacité du média : {{percent}} %",
+    "mediaRecovered_one": "{{count}} média récupéré",
+    "mediaRecovered_other": "{{count}} médias récupérés",
+    "imported_one": "Importé · {{count}} élément",
+    "imported_other": "Importé · {{count}} éléments",
+    "relocated_one": "{{count}}/{{total}} média relocalisé",
+    "relocated_other": "{{count}}/{{total}} médias relocalisés"
   },
   "tidy": {
     "title": "Ranger",
@@ -719,7 +728,7 @@
     "empty": "Aucune couleur",
     "working": "Extraction des couleurs…",
     "done": "{{count}} couleurs extraites",
-    "doneSkipped": "{{count}} couleurs extraites · {{skipped}} média(s) ignoré(s)",
+    "doneSkipped": "{{count}} couleurs extraites · médias ignorés : {{skipped}}",
     "failed": "Aucune couleur exploitable",
     "failedCore": "Lecture des fichiers indisponible — relance la fenêtre",
     "noSource": "Aucun média exploitable dans la sélection",
@@ -780,8 +789,8 @@
     "transparent": "Fond transparent",
     "export": "Exporter",
     "done": "Board exporté",
-    "failed": "Export impossible : {{error}}",
-    "hint": "Le rendu repart du contenu du board : les vidéos sortent sur leur image courante, les lecteurs en ligne en cartouche.",
+    "failed": "Export impossible : {{error}}",
+    "hint": "Le rendu repart du contenu du board : les vidéos sortent sur leur image courante, les lecteurs en ligne en cartouche.",
     "noBridge": "Écriture disque indisponible hors de l'application"
   },
   "ingest": {
@@ -793,21 +802,21 @@
     "progress": "Import {{done}}/{{total}}…",
     "reading": "Lecture de {{count}} fichiers…",
     "done": "{{count}} médias importés",
-    "folderTruncated": "Dossier trop grand : {{count}} premiers médias importés",
+    "folderTruncated": "Dossier trop grand : {{count}} premiers médias importés",
     "importing": "Import de {{name}}…",
     "fetching": "Récupération du média…",
     "linkDone": "Média importé",
     "fetchingFrom": "Récupération depuis {{source}}…",
-    "copyFailed": "Copie de « {{name}} » impossible : le média sera perdu à la fermeture de l'app",
-    "copyFailedBatch": "{{count}} copies impossibles (dont « {{name}} ») : ces médias seront perdus à la fermeture de l'app"
+    "copyFailed": "Copie de « {{name}} » impossible : le média sera perdu à la fermeture de l'app",
+    "copyFailedBatch": "{{count}} copies impossibles (dont « {{name}} ») : ces médias seront perdus à la fermeture de l'app"
   },
   "mouseThrough": {
     "on": "Transparent à la souris",
     "off": "Reprendre la souris",
-    "warning": "Clics et molette iront à l'application du dessous, et la fenêtre reste au-dessus. Pour reprendre la main : redonne-lui le focus (Alt+Tab).",
+    "warning": "Clics et molette iront à l'application du dessous, et la fenêtre reste au-dessus. Pour reprendre la main : redonne-lui le focus (Alt+Tab).",
     "dontAskAgain": "Ne plus demander"
   },
   "collab": {
-    "saveAsBlocked": "Un projet collaboratif reste piloté par sa scène partagée. Utilise l’export pour créer une copie locale."
+    "saveAsBlocked": "Un projet collaboratif reste piloté par sa scène partagée. Utilise l'export pour créer une copie locale."
   }
 }

@@ -15,7 +15,7 @@ export function StarRating({ value, onChange, size = 14, className }: {
         const star = <Star style={{ width: size, height: size }} className={on ? "fill-amber-400 text-amber-400" : "text-muted-foreground/50"} />;
         if (!onChange) return <span key={n}>{star}</span>;
         return (
-          <button key={n} type="button" aria-label={t("rating.stars", { n })} onClick={(e) => { e.stopPropagation(); onChange(value === n ? 0 : n); }}
+          <button key={n} type="button" aria-label={t("rating.stars", { count: n })} onClick={(e) => { e.stopPropagation(); onChange(value === n ? 0 : n); }}
             className="transition-transform hover:scale-110 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
             {star}
           </button>

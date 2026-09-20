@@ -103,7 +103,7 @@
     "previewOwnClip": "(tu clip)",
     "previewExample": "(ejemplo)",
     "previewLabel": "Vista previa",
-    "resetDefaults": "por defecto",
+    "resetDefaults": "predeterminados",
     "detectFillersAudio": "Detectar (audio)",
     "heldSounds": "Sonidos alargados",
     "hesitationWords": "Palabras mulet.",
@@ -122,7 +122,6 @@
     "removeFillers": "Quitar las muletillas ({{count}})",
     "restoreFillers": "Restaurar las muletillas ({{count}})",
     "kept": "Conservado",
-    "removedOfPlans": "−{{removed}} quitados · Planos totales: {{count}}",
     "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = recodifica · FCPXML = timecode fuente.",
@@ -139,7 +138,9 @@
       "padEnd": "Aire conservado DESPUÉS de cada toma (finales de frase), aparte del margen inicial.",
       "noiseGate": "Descarta ruidos cortos tomados por voz (teclado, chasquidos). 0 = desactivado."
     },
-    "off": "off"
+    "off": "off",
+    "removedOfPlans_one": "−{{removed}} quitados de {{count}} plano",
+    "removedOfPlans_other": "−{{removed}} quitados de {{count}} planos"
   },
   "params": {
     "threshold": "Umbral",
@@ -201,7 +202,7 @@
     "statsKeptPct": "{{pct}}% conservado",
     "statsCuts_one": "{{count}} corte",
     "statsCuts_other": "{{count}} cortes",
-    "resetDefaults": "valores por defecto",
+    "resetDefaults": "valores predeterminados",
     "explains": {
       "threshold": "La línea de puntos de la vista previa. Por encima = habla, por debajo = pausa. + alto → corta más.",
       "minSilence": "Una pausa más corta que esto NO se corta — las respiraciones se mantienen.",
@@ -258,12 +259,8 @@
   },
   "store": {
     "batchLoaded": "Análisis cargado (lote)",
-    "batchStopped": "Análisis detenido — clips terminados: {{count}}",
-    "batchDone": "Análisis por lotes · Clips: {{count}}",
-    "batchErrorsSuffix": " · Errores: {{count}}",
     "silencesDetected": "Silencios: {{silences}} · Segmentos de habla: {{speech}}",
     "errDetectSilences": "error al detectar silencios",
-    "fillersDetected": "Muletillas detectadas en el audio: {{count}}",
     "noFillersDetected": "Sin muletillas acústicas detectadas.",
     "errDetectFillers": "error al detectar muletillas",
     "transcriptCached": "Transcripción cargada (caché)",
@@ -275,7 +272,15 @@
     "busyTranscribe": "Transcribiendo…",
     "busyAnalyzeAllWithTranscribe": "Análisis: transcripción ∥ silencios…",
     "busyAnalyzeAllSilencesOnly": "Análisis: silencios…",
-    "busyAnalyzeAllFillers": "Análisis: muletillas (audio)…"
+    "busyAnalyzeAllFillers": "Análisis: muletillas (audio)…",
+    "batchStopped_one": "Análisis detenido — {{count}} clip terminado",
+    "batchStopped_other": "Análisis detenido — {{count}} clips terminados",
+    "batchDone_one": "Análisis por lotes — {{count}} clip",
+    "batchDone_other": "Análisis por lotes — {{count}} clips",
+    "batchErrorsSuffix_one": " · {{count}} error",
+    "batchErrorsSuffix_other": " · {{count}} errores",
+    "fillersDetected_one": "{{count}} muletilla detectada en el audio",
+    "fillersDetected_other": "{{count}} muletillas detectadas en el audio"
   },
   "export": {
     "timelineSuffixEdit": "montaje",
@@ -287,7 +292,6 @@
     "creatingColorTimeline": "Creando la timeline de colores…",
     "exportingFormat": "Exportando {{format}}…",
     "errNothingToBuild": "Nada que montar (ningún segmento conservado).",
-    "timelineBase": "Timeline «{{name}}» · Segmentos: {{count}}",
     "removedSuffix": " · {{sec}} s quitados",
     "createdSuffix": " (creada)",
     "fpsMismatchSuffix": " · ⚠ fps de timeline ≠ clip",
@@ -299,11 +303,14 @@
     "coloredLegend": " · 🟢 habla 🔵 silencio 🟠 mulet. 🟦 repet.",
     "errTimelineColored": "error de timeline de colores",
     "errNothingToExport": "Nada que exportar (ningún segmento conservado).",
-    "fileExported": "{{format}} · Planos: {{count}} → {{path}}",
     "errExportFile": "error al exportar {{format}}",
     "errNoWords": "Transcribe primero (ninguna palabra).",
     "subtitlesExported": "Subtítulos {{format}} · Líneas: {{count}} → {{path}}",
-    "errSubtitles": "error de subtítulos"
+    "errSubtitles": "error de subtítulos",
+    "timelineBase_one": "Timeline «{{name}}» · {{count}} segmento",
+    "timelineBase_other": "Timeline «{{name}}» · {{count}} segmentos",
+    "fileExported_one": "{{format}} ({{count}} plano) → {{path}}",
+    "fileExported_other": "{{format}} ({{count}} planos) → {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve sin conexión — usa un archivo local.",
@@ -316,11 +323,13 @@
     "profileHint": "Perfil de renderizado (códec, contenedor, audio). Clic derecho para cambiar.",
     "runningCount_one": "{{count}} renderizado en curso",
     "runningCount_other": "{{count}} renderizados en curso",
-    "done": "Renderizado: {{count}} clip(s) · perfil {{profile}}",
-    "stopped": "Renderizado detenido — {{count}} clip(s) listo(s)",
     "errProfile": "Perfil incompleto: {{issue}}",
     "errNoDir": "Renderizado cancelado: sin carpeta de salida.",
     "errNoSegments": "Nada que renderizar (ningún segmento conservado).",
-    "errExport": "fallo del renderizado"
+    "errExport": "fallo del renderizado",
+    "done_one": "Renderizado: {{count}} clip · perfil {{profile}}",
+    "done_other": "Renderizado: {{count}} clips · perfil {{profile}}",
+    "stopped_one": "Renderizado detenido — {{count}} clip listo",
+    "stopped_other": "Renderizado detenido — {{count}} clips listos"
   }
 }

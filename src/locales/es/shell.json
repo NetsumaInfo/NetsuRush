@@ -83,9 +83,10 @@
     "support": "Apoyar NetsuBoard"
   },
   "errorBadge": {
-    "aria": "Errores: {{count}} — abrir la consola",
     "open": "Abrir la consola",
-    "markRead": "Marcar como leído"
+    "markRead": "Marcar como leído",
+    "aria_one": "{{count}} error — abrir la consola",
+    "aria_other": "{{count}} errores — abrir la consola"
   },
   "errorBoundary": {
     "title": "NetsuRush falló al renderizar",

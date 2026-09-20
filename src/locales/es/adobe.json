@@ -22,8 +22,8 @@
     "restartApps": "Panel actualizado: reinicia {{apps}} para recargarlo."
   },
   "diag": {
-    "verdictOk": "VEREDICTO: instalación OK ✓ (carpeta + manifest + PlayerDebugMode). Abrir el panel en Adobe: Ventana ▸ Extensiones ▸ NetsuRush.",
-    "verdictIncomplete": "VEREDICTO: instalación incompleta — ver abajo.",
+    "verdictOk": "Instalación correcta ✓ (carpeta + manifest + PlayerDebugMode). Abre el panel en Adobe: Ventana ▸ Extensiones ▸ NetsuRush.",
+    "verdictIncomplete": "Instalación incompleta — ver abajo.",
     "folder": "Carpeta: {{dir}}",
     "manifestPresent": "Manifest presente: {{yesNo}}",
     "yes": "SÍ",

@@ -1,13 +1,13 @@
 {
   "header": {
     "title": "Transfert entre logiciels",
-    "subtitle": "Recopie une timeline d’un logiciel de montage vers un autre, à l’image près."
+    "subtitle": "Recopie une timeline d'un logiciel de montage vers un autre, à l'image près."
   },
   "picker": {
     "source": "Depuis",
     "target": "Vers",
     "swap": "Inverser source et cible",
-    "offline": "Hors ligne : {{hosts}}.",
+    "offline": "Hors ligne : {{hosts}}.",
     "online": "connecté",
     "hostOffline": "hors ligne",
     "swapUnavailable": "Inversion impossible pour ce couple"
@@ -37,21 +37,25 @@
     "no": "Non",
     "choose": "Choisir…",
     "none": "Aucun",
-    "upscaleForcesReencode": "L’upscale remplace les pixels : le mode Réencode s’applique quel que soit le choix ci-dessus."
+    "upscaleForcesReencode": "L'upscale remplace les pixels : le mode Réencode s'applique quel que soit le choix ci-dessus."
   },
   "preview": {
     "clips": "Plans lus",
     "tracks": "Pistes",
     "duration": "Durée",
     "fps": "Cadence",
-    "missing": "{{count}} source(s) introuvable(s)",
     "fidelityExact": "Équivalence native prévue",
     "fidelityLimited": "Limites prévues avant transfert",
     "fidelityCounts": "{{exact}} exactes · {{approximated}} approchées · {{unsupported}} non garanties",
-    "animationUnavailable": "Images clés illisibles : le logiciel source a refusé l’export qui les porte. Le transfert posera les valeurs fixes.",
-    "mediaLess": "{{count}} élément(s) sans média (cache, calque d’effet) : aucun logiciel ne peut les recevoir.",
-    "graphics": "{{count}} titre(s) : recréés chez la cible depuis leur texte et leur style.",
-    "graphicsUnsupported": "{{count}} titre(s) : la cible ne sait pas les recréer, ils ne seront pas transférés."
+    "animationUnavailable": "Images clés illisibles : le logiciel source a refusé l'export qui les porte. Le transfert posera les valeurs fixes.",
+    "missing_one": "{{count}} source introuvable",
+    "missing_other": "{{count}} sources introuvables",
+    "mediaLess_one": "{{count}} élément sans média (cache, calque d'effet) : aucun logiciel ne peut le recevoir.",
+    "mediaLess_other": "{{count}} éléments sans média (cache, calque d'effet) : aucun logiciel ne peut les recevoir.",
+    "graphics_one": "{{count}} titre : recréé chez la cible depuis son texte et son style.",
+    "graphics_other": "{{count}} titres : recréés chez la cible depuis leur texte et leur style.",
+    "graphicsUnsupported_one": "{{count}} titre : la cible ne sait pas le recréer, il ne sera pas transféré.",
+    "graphicsUnsupported_other": "{{count}} titres : la cible ne sait pas les recréer, ils ne seront pas transférés."
   },
   "phases": {
     "read": "Lecture de la timeline",
@@ -64,26 +68,34 @@
     "busy": "Transfert en cours…"
   },
   "result": {
-    "done": "{{count}} plan(s) posé(s) dans « {{timeline}} » ({{host}}).",
-    "verified": "Propriétés relues : transfert vérifié.",
-    "unverified": "{{applied}} propriété(s) confirmée(s) · {{issues}} limite(s) ou écart(s).",
-    "animated": "{{count}} plan(s) avec images clés.",
-    "animatedNone": "Aucune image clé lue : DaVinci Resolve n’en expose pas par script, seul son export XML les porte.",
-    "containerFallback": "{{count}} fichier(s) écrit(s) en MOV : le MP4 ne porte ni ProRes, ni DNxHR, ni PCM.",
-    "tracksClamped": "Pistes rabattues : le logiciel cible n’a pas pu en créer assez.",
-    "missing": "{{count}} source(s) introuvable(s) sur le disque.",
-    "mediaLess": "{{count}} élément(s) sans média (cache, calque d’effet) : aucun logiciel ne peut les recevoir.",
-    "titles": "{{count}} titre(s) recréé(s).",
-    "titlesRetimed": "{{count}} titre(s) à la durée du modèle : DaVinci Resolve ne permet pas de la régler.",
-    "titlesFailed": "{{count}} titre(s) non posé(s).",
-    "vehicleImport": "Montage lu par DaVinci Resolve : images clés, niveaux audio et vitesse appliqués par le logiciel lui-même.",
-    "vehicleApi": "Plans posés un par un par script : les images clés viennent de la lecture de NetsuRush.",
-    "exchangeFile": "DaVinci Resolve a refusé le montage par script. Le même fichier s’importe correctement à la main — avec les images clés et les niveaux audio : Fichier ▸ Importer ▸ Timeline."
+    "verified": "Propriétés relues : transfert vérifié.",
+    "unverified": "Propriétés confirmées : {{applied}} · limites ou écarts : {{issues}}.",
+    "animatedNone": "Aucune image clé lue : DaVinci Resolve n'en expose pas par script, seul son export XML les porte.",
+    "tracksClamped": "Pistes rabattues : le logiciel cible n'a pas pu en créer assez.",
+    "vehicleImport": "Montage lu par DaVinci Resolve : images clés, niveaux audio et vitesse appliqués par le logiciel lui-même.",
+    "vehicleApi": "Plans posés un par un par script : les images clés viennent de la lecture de NetsuRush.",
+    "exchangeFile": "DaVinci Resolve a refusé le montage par script. Le même fichier s'importe correctement à la main — avec les images clés et les niveaux audio : Fichier ▸ Importer ▸ Timeline.",
+    "done_one": "{{count}} plan posé dans « {{timeline}} » ({{host}}).",
+    "done_other": "{{count}} plans posés dans « {{timeline}} » ({{host}}).",
+    "animated_one": "{{count}} plan avec images clés.",
+    "animated_other": "{{count}} plans avec images clés.",
+    "containerFallback_one": "{{count}} fichier écrit en MOV : le MP4 ne porte ni ProRes, ni DNxHR, ni PCM.",
+    "containerFallback_other": "{{count}} fichiers écrits en MOV : le MP4 ne porte ni ProRes, ni DNxHR, ni PCM.",
+    "missing_one": "{{count}} source introuvable sur le disque.",
+    "missing_other": "{{count}} sources introuvables sur le disque.",
+    "mediaLess_one": "{{count}} élément sans média (cache, calque d'effet) : aucun logiciel ne peut le recevoir.",
+    "mediaLess_other": "{{count}} éléments sans média (cache, calque d'effet) : aucun logiciel ne peut les recevoir.",
+    "titles_one": "{{count}} titre recréé.",
+    "titles_other": "{{count}} titres recréés.",
+    "titlesRetimed_one": "{{count}} titre à la durée du modèle : DaVinci Resolve ne permet pas de la régler.",
+    "titlesRetimed_other": "{{count}} titres à la durée du modèle : DaVinci Resolve ne permet pas de la régler.",
+    "titlesFailed_one": "{{count}} titre non posé.",
+    "titlesFailed_other": "{{count}} titres non posés."
   },
   "mediaModes": {
     "copy": {
       "label": "Liens directs",
-      "hint": "Fichiers d’origine liés tels quels. Aucun fichier écrit."
+      "hint": "Fichiers d'origine liés tels quels. Aucun fichier écrit."
     },
     "remux": {
       "label": "Remux",
@@ -91,7 +103,7 @@
     },
     "reencode": {
       "label": "Réencoder",
-      "hint": "Chaque plan transcodé en codec de montage, coupé à l’image près."
+      "hint": "Chaque plan transcodé en codec de montage, coupé à l'image près."
     }
   }
 }

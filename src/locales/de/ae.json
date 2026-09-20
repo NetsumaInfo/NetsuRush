@@ -5,10 +5,12 @@
   },
   "result": {
     "scriptPrefix": "Skript: {{name}}",
-    "clipsDone": "Verarbeitete Einstellungen: {{count}} → Komposition „{{comp}}“.",
     "imported": "In After Effects importiert (siehe Projekt-Panel).",
     "launching": "After Effects startet — Import läuft automatisch (offenes Projekt nötig).",
-    "missing": "Wegen fehlender Datei übersprungene Einstellungen: {{count}}."
+    "clipsDone_one": "{{count}} Einstellung → Komposition „{{comp}}“.",
+    "clipsDone_other": "{{count}} Einstellungen → Komposition „{{comp}}“.",
+    "missing_one": "{{count}} Einstellung übersprungen: Datei fehlt.",
+    "missing_other": "{{count}} Einstellungen übersprungen: Dateien fehlen."
   },
   "run": {
     "busy": "Export läuft…",

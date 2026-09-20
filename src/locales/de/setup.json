@@ -1,7 +1,7 @@
 {
-  "title": "NetsuRush konfigurieren",
+  "title": "NetsuRush einrichten",
   "desc": "Die Grundlage installiert sich selbst. Der Rest ist optional.",
-  "progressAria": "Konfigurationsschritte",
+  "progressAria": "Einrichtungsschritte",
   "models": {
     "title": "Optionale Downloads",
     "search": "Modelle suchen…",
@@ -9,13 +9,14 @@
     "sceneDetection": "Szenenschnitt",
     "included": "Enthalten",
     "empty": "Kein Modell entspricht der Suche.",
-    "selected": "{{count}} ausgewählt",
     "noExtraSpace": "kein zusätzlicher Speicher",
     "tier": {
       "light": "leicht",
       "balanced": "ausgewogen",
       "heavy": "groß"
-    }
+    },
+    "selected_one": "{{count}} ausgewählt",
+    "selected_other": "{{count}} ausgewählt"
   },
   "packs": {
     "recommended": "Empfohlenes Paket",
@@ -27,10 +28,11 @@
   "review": {
     "title": "Bereit zur Installation",
     "downloads": "Optionaler Speicher",
-    "modelCount": "{{count}} Download(s)",
     "noOptionalModels": "Keine optionalen Downloads",
     "mandatoryOnly": "Nur Grundlage und Szenenschnitt",
-    "sceneDetection": "Szenenschnitt enthalten"
+    "sceneDetection": "Szenenschnitt enthalten",
+    "modelCount_one": "{{count}} Download",
+    "modelCount_other": "{{count}} Downloads"
   },
   "detectedBackend": "Ausgewählte Rechen-Engine: {{backend}}",
   "installFailed": "Installation fehlgeschlagen",

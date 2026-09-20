@@ -184,7 +184,6 @@
     "trimShot": "裁剪镜头",
     "playShotMenu": "播放镜头",
     "shotPreview": "镜头 {{n}} 预览",
-    "shotsCount": "{{count}} 个镜头",
     "notCut": "未切分",
     "collapseFolder": "折叠文件夹",
     "expandFolder": "展开文件夹",
@@ -202,7 +201,9 @@
     "presetMax": "最高",
     "modelHintTransnet": "速度快，可在 CPU 上运行；灵敏度由精度档位决定。",
     "modelHintOmni": "对叠化和渐变转场最可靠。全自动，需要 GPU。",
-    "modelHintAutoShot": "适合快节奏剪辑和大幅运动画面。阈值见高级选项，需要 GPU。"
+    "modelHintAutoShot": "适合快节奏剪辑和大幅运动画面。阈值见高级选项，需要 GPU。",
+    "shotsCount_one": "{{count}} 个镜头",
+    "shotsCount_other": "{{count}} 个镜头"
   },
   "browser": {
     "sort": "排序",
@@ -248,18 +249,20 @@
     "addToPoolHint": "把视频加入 Media Pool 才能发送到时间线。",
     "importExtracts": "导入片段",
     "genStopped": "生成已停止 · {{done}}/{{total}} 个代理文件",
-    "proxiesReady": "代理文件就绪 · {{count}} 个镜头",
     "thumbsStopped": "缩略图已停止 · {{done}}/{{total}}",
     "thumbsReady": "缩略图就绪 · {{count}}",
     "genFailed": "代理文件 · {{failed}}/{{total}} 个失败",
     "thumbsFailed": "缩略图 · {{failed}}/{{total}} 个失败",
-    "proxiesUpToDate": "代理文件已是最新 · {{count}} 个镜头，无需生成",
     "flowJump": "跳转到素材",
     "flowRushes_one": "{{count}} 个素材",
     "flowRushes_other": "{{count}} 个素材",
     "flowUncut_one": "{{count}} 个素材待切分",
     "flowUncut_other": "{{count}} 个素材待切分",
-    "flowUncutTip": "仅切分尚无镜头的素材，其余素材保持不变。"
+    "flowUncutTip": "仅切分尚无镜头的素材，其余素材保持不变。",
+    "proxiesReady_one": "代理文件就绪 · {{count}} 个镜头",
+    "proxiesReady_other": "代理文件就绪 · {{count}} 个镜头",
+    "proxiesUpToDate_one": "代理文件已是最新 · {{count}} 个镜头，无需生成",
+    "proxiesUpToDate_other": "代理文件已是最新 · {{count}} 个镜头，无需生成"
   },
   "rushGrid": {
     "home": "首页",
@@ -324,19 +327,22 @@
     "nameLabel": "时间线名称",
     "nameLabelAppend": "名称（没有已打开的时间线时）",
     "send": "发送",
-    "sendN": "发送 {{count}} 个镜头"
+    "sendN_one": "发送 {{count}} 个镜头",
+    "sendN_other": "发送 {{count}} 个镜头"
   },
   "cutEditor": {
     "timelines": "时间线",
-    "selSuffix": " · 已选 {{count}}",
     "mergeTip": "合并所选的相邻镜头（删除它们之间的切点）",
     "deleteTip": "从剪辑中移除所选镜头",
     "resetTip": "重置检测到的切点",
     "rushRemoved": "素材已从剪辑中移除。",
     "nameLabel": "切分后时间线的名称",
     "building": "构建时间线…",
-    "created": "已创建“{{name}}” — {{count}} 个镜头。原时间线保持不变。",
-    "build": "构建（{{count}}）"
+    "build": "构建（{{count}}）",
+    "created_one": "已创建“{{name}}” — {{count}} 个镜头。原时间线保持不变。",
+    "created_other": "已创建“{{name}}” — {{count}} 个镜头。原时间线保持不变。",
+    "selSuffix_one": " · 已选 {{count}}",
+    "selSuffix_other": " · 已选 {{count}}"
   },
   "cutTimeline": {
     "editHeader": "编辑切点 · {{name}}",
@@ -346,10 +352,8 @@
     "building": "构建中…",
     "analyzeFailed": "分析失败",
     "noShots": "未检测到镜头。",
-    "itemDone": "{{count}} 个镜头 →“{{name}}”",
     "title": "时间线",
     "count": "{{count}} 条时间线",
-    "selectedOf": "已选 {{count}} / {{total}}",
     "defaultName": "{{name}} — 已切分",
     "modeNewTip": "在原时间线旁新建一条",
     "modeReplaceTip": "替换：删除原时间线，重命名切分结果（不留副本）",
@@ -359,7 +363,11 @@
     "cutTipMany": "直接切分这 {{count}} 条时间线",
     "cutTipOne": "直接切分该时间线",
     "noneInProject": "该项目中没有时间线。",
-    "noMedia": "此时间线中没有视频素材。"
+    "noMedia": "此时间线中没有视频素材。",
+    "itemDone_one": "{{count}} 个镜头 →“{{name}}”",
+    "itemDone_other": "{{count}} 个镜头 →“{{name}}”",
+    "selectedOf_one": "已选 {{count}} / {{total}}",
+    "selectedOf_other": "已选 {{count}} / {{total}}"
   },
   "timelineLive": {
     "readFailed": "读取失败",
@@ -371,35 +379,41 @@
     "backToTimelines": "返回时间线",
     "addSelected": "添加所选的 {{count}} 个镜头",
     "addAll": "添加全部镜头",
-    "added": "{{count}} 个镜头 →“{{name}}”。",
     "noShots": "该时间线没有视频镜头。",
     "noSnapshotTitle": "尚未收到序列",
     "noSnapshotHint": "在 {{host}} 中打开 NetsuRush 面板（窗口 ▸ 扩展），然后点击“发送到 NetsuRush”。",
     "tracks": "显示的轨道",
     "allTracks": "全部轨道",
-    "trackFallback": "轨道 {{index}}"
+    "trackFallback": "轨道 {{index}}",
+    "added_one": "{{count}} 个镜头 →“{{name}}”。",
+    "added_other": "{{count}} 个镜头 →“{{name}}”。"
   },
   "export": {
     "extracting": "提取中…",
     "extractingN": "提取 {{done}}/{{total}}…",
     "clipError": "片段 {{index}}：{{error}}",
-    "extracted": "已提取 {{count}} 个镜头（无重新编码）→ {{dir}}",
     "creatingTimeline": "创建时间线…",
-    "timelineCreated": "已创建时间线“{{name}}”，含 {{count}} 个镜头",
     "sendingTimeline": "发送到时间线…",
-    "sentTimeline": "{{count}} 个镜头 →“{{name}}”",
     "createdSuffix": "（已创建）",
     "fpsSuffix": " · ⚠ 时间线 fps ≠ 片段",
     "sendFailed": "发送到时间线失败",
     "shotAdded": "镜头已添加到“{{name}}”",
     "addFailed": "添加到时间线失败",
     "importing": "导入中…",
-    "imported": "{{count}} 个镜头 → {{dest}}",
-    "destProject": "项目"
+    "destProject": "项目",
+    "sentTimeline_one": "{{count}} 个镜头 →“{{name}}”",
+    "sentTimeline_other": "{{count}} 个镜头 →“{{name}}”",
+    "imported_one": "{{count}} 个镜头 → {{dest}}",
+    "imported_other": "{{count}} 个镜头 → {{dest}}",
+    "timelineCreated_one": "已创建时间线“{{name}}”，含 {{count}} 个镜头",
+    "timelineCreated_other": "已创建时间线“{{name}}”，含 {{count}} 个镜头",
+    "extracted_one": "已提取 {{count}} 个镜头（无重新编码）→ {{dir}}",
+    "extracted_other": "已提取 {{count}} 个镜头（无重新编码）→ {{dir}}"
   },
   "detection": {
     "proxyPrefix": "代理文件：{{error}}",
-    "shotsWithModel": "{{count}} 个镜头 · {{model}}"
+    "shotsWithModel_one": "{{count}} 个镜头 · {{model}}",
+    "shotsWithModel_other": "{{count}} 个镜头 · {{model}}"
   },
   "store": {
     "noProject": "未收到项目 — 打开 NetsuRush 面板，然后点击“发送到 NetsuRush”。",

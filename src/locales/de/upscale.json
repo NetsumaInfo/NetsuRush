@@ -51,9 +51,12 @@
     "removebg": "Freistellen"
   },
   "result": {
-    "files": "Dateien: {{count}}",
-    "imported": ", {{count}} importiert",
-    "failed": "{{count}} fehlgeschlagen."
+    "files_one": "{{count}} Datei",
+    "files_other": "{{count}} Dateien",
+    "failed_one": "{{count}} fehlgeschlagen.",
+    "failed_other": "{{count}} fehlgeschlagen.",
+    "imported_one": ", {{count}} importiert",
+    "imported_other": ", {{count}} importiert"
   },
   "chain": {
     "title": "Kette",
@@ -344,7 +347,7 @@
     "namingNumber": "Automatisch nummerieren",
     "namingRenamed": "{{count}} Medien umbenannt",
     "namingResetAll": "Zurücksetzen",
-    "outputRtxNote": "RTX VSR schreibt nur Video: Wählen Sie eine andere Engine für Bilder."
+    "outputRtxNote": "RTX VSR schreibt nur Video: Wähle eine andere Engine für Bilder."
   },
   "deband": {
     "none": "Keins",
@@ -453,7 +456,7 @@
     "frameBlack": "Frame fast schwarz (Blende?) — Abspielkopf verschieben und neu testen.",
     "testFailed": "Test fehlgeschlagen",
     "noShotSelected": "Kein Shot gewählt.",
-    "invalidRange": "Bereich ungültig.",
+    "invalidRange": "Das Ende muss nach dem Anfang liegen.",
     "duplicateOutputNames": "Mehrere Quellen würden denselben Ausgabenamen erzeugen: umbenennen oder Muster nummerieren.",
     "upscaleFailed": "Upscale fehlgeschlagen",
     "interpolateFailed": "Interpolation fehlgeschlagen",
@@ -466,7 +469,7 @@
     "depthUnavailable": "Depth nicht verfügbar: {{err}}. Prüfen, ob Core-Dienst und Python-venv laufen (NetsuRush neu starten).",
     "removebgUnavailable": "Freistellen nicht verfügbar: {{err}}. Prüfen, ob Core-Dienst und Python-venv laufen (NetsuRush neu starten).",
     "chainUnavailable": "Kette nicht verfügbar: {{err}}. Prüfen, ob Core und venv laufen.",
-    "emptyOutputName": "Das Muster ergibt keinen Namen: Fügen Sie mindestens {name} oder Text hinzu.",
+    "emptyOutputName": "Das Muster ergibt keinen Namen: Füge mindestens {name} oder Text hinzu.",
     "interpolateNeedsVideo": "Die Interpolation braucht zwei benachbarte Bilder: ein Standbild hat keine.",
     "interpolateSkippedStills": "{{count}} Standbild übersprungen: Interpolation gilt nur für Video.",
     "chainNeedsVideo": "Eine Kette verkettet Videodateien: ein Standbild passt nicht hinein.",

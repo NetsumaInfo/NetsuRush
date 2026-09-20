@@ -4,7 +4,8 @@
     "remove": "Retirer {{tag}}"
   },
   "rating": {
-    "stars": "{{n}} étoile(s)"
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles"
   },
   "folder": {
     "new": "Nouveau dossier",
@@ -17,14 +18,14 @@
     "profileName": "Archive",
     "onDisk": "Archiver sur disque",
     "videoFormat": "Format vidéo",
-    "processAudioNote": "La piste par langue ne s’applique pas à un traitement.",
+    "processAudioNote": "La piste par langue ne s'applique pas à un traitement.",
     "processMode": "Quand",
     "processModeNow": "Immédiat",
     "processModeIdle": "GPU libre",
-    "processNeedsEncode": "Un traitement remplace les pixels : la copie de flux est impossible.",
+    "processNeedsEncode": "Un traitement remplace les pixels : la copie de flux est impossible.",
     "queueRunning": "Archivage en cours",
-    "queuePending": "En attente d’un GPU libre",
-    "requiredForShare": "L’archivage porte le partage : il reste allumé."
+    "queuePending": "En attente d'un GPU libre",
+    "requiredForShare": "L'archivage porte le partage : il reste allumé."
   },
   "submenu": {
     "rangeIn": "Ranger dans une collection",
@@ -98,15 +99,13 @@
   },
   "detail": {
     "shotWord": "Plan",
-    "removed": "« {{name}} » retiré — Ctrl+Z pour annuler.",
-    "restored": "« {{name}} » restauré.",
-    "toTimelineOk": "{{count}} plan(s) → « {{timeline}} ».",
+    "removed": "« {{name}} » retiré — Ctrl+Z pour annuler.",
+    "restored": "« {{name}} » restauré.",
     "timelineFailed": "échec timeline",
     "mounting": "Montage…",
     "archived": "Collection archivée sur disque.",
     "archiveFailed": "échec de l'archivage",
     "all": "tout",
-    "shotCount": "{{count}} plan(s)",
     "ofTotal": "sur {{count}} plans",
     "selCount": " · {{count}} sél.",
     "selectAll": "Tout sélectionner",
@@ -129,7 +128,11 @@
     "emptyFolder": "Dossier vide — range des plans depuis le derush ou la recherche.",
     "resize": "Redimensionner",
     "thumbSize": "Taille des vignettes",
-    "undoRemove": "Annuler le retrait"
+    "undoRemove": "Annuler le retrait",
+    "toTimelineOk_one": "{{count}} plan → « {{timeline}} ».",
+    "toTimelineOk_other": "{{count}} plans → « {{timeline}} ».",
+    "shotCount_one": "{{count}} plan",
+    "shotCount_other": "{{count}} plans"
   },
   "list": {
     "title": "Collections",
@@ -144,17 +147,18 @@
     "description": "Description",
     "actions": "Actions",
     "moveTo": "Déplacer vers",
-    "deleteCollTitle": "Supprimer « {{name}} » ?",
+    "deleteCollTitle": "Supprimer « {{name}} » ?",
     "deleteCollDesc": "La collection et son organisation sont supprimées. Les fichiers source ne sont pas touchés.",
     "all": "Toutes",
     "folderActions": "Actions du dossier",
-    "deleteFolderTitle": "Supprimer le dossier « {{name}} » ?",
+    "deleteFolderTitle": "Supprimer le dossier « {{name}} » ?",
     "deleteFolderDesc": "Les collections qu'il contient remontent d'un niveau.",
     "newCollection": "Nouvelle collection",
-    "plansCount": "{{count}} plan(s)",
-    "emptyAll": "Aucune collection. Crée une collection puis range des plans depuis le derush ou la recherche (bouton « Ranger » sur la vignette).",
+    "emptyAll": "Aucune collection. Crée une collection puis range des plans depuis le derush ou la recherche (bouton « Ranger » sur la vignette).",
     "folderEmpty": "Ce dossier est vide",
-    "folderEmptyFilter": " pour ce filtre"
+    "folderEmptyFilter": " pour ce filtre",
+    "plansCount_one": "{{count}} plan",
+    "plansCount_other": "{{count}} plans"
   },
   "editor": {
     "iconSearch": "Rechercher une icône…",
@@ -171,9 +175,8 @@
     "online": "en ligne",
     "relinkMoved": "Relier des sources déplacées.",
     "resync": "Resynchroniser…",
-    "dotPlans": " · {{count}} plan(s)",
     "relink": "Relier…",
-    "resyncHint": "« Resynchroniser » indexe un dossier de renvoi et relie automatiquement par nom de fichier.",
+    "resyncHint": "« Resynchroniser » indexe un dossier de renvoi et relie automatiquement par nom de fichier.",
     "disabledLower": "désactivé",
     "on": "Activé",
     "off": "Désactivé",
@@ -199,19 +202,21 @@
     "tabEmoji": "Emojis",
     "tabIcon": "Icônes",
     "tabImage": "Image",
-    "importImage": "Importer une image / GIF"
+    "importImage": "Importer une image / GIF",
+    "dotPlans_one": " · {{count}} plan",
+    "dotPlans_other": " · {{count}} plans"
   },
   "char": {
-    "queryCharacter": "personnage : {{name}}",
-    "queryShots": "plans de : {{name}}",
-    "searchUnavailable": "Recherche personnage indisponible : {{error}}.",
-    "shotsUnavailable": "Plans du personnage indisponibles : {{error}}.",
+    "queryCharacter": "personnage : {{name}}",
+    "queryShots": "plans de : {{name}}",
+    "searchUnavailable": "Recherche personnage indisponible : {{error}}.",
+    "shotsUnavailable": "Plans du personnage indisponibles : {{error}}.",
     "cannotSaveFace": "Impossible d'enregistrer ce visage.",
     "mergeFailed": "Fusion impossible.",
-    "dupUnavailable": "Détection de doublons indisponible : {{error}}.",
-    "dlFailed": "Téléchargement {{id}} : {{error}}.",
-    "dlModelsUnavailable": "Téléchargement des modèles indisponible : {{error}}.",
-    "recognitionUnavailable": "Reconnaissance indisponible : {{error}}."
+    "dupUnavailable": "Détection de doublons indisponible : {{error}}.",
+    "dlFailed": "Téléchargement {{id}} : {{error}}.",
+    "dlModelsUnavailable": "Téléchargement des modèles indisponible : {{error}}.",
+    "recognitionUnavailable": "Reconnaissance indisponible : {{error}}."
   },
   "share": {
     "title": "Partage",
@@ -222,12 +227,12 @@
     "missingMedia": "Média indisponible",
     "retry": "Réessayer",
     "preparing": "Préparation…",
-    "failed": "Le partage ou l’enregistrement a échoué. Réessayez.",
-    "unavailable": "Configurez la collaboration pour partager cette collection.",
-    "signIn": "Connectez-vous pour choisir les personnes.",
-    "viaArchive": "Les autres reçoivent les fichiers archivés de la collection, jamais les vidéos sources. L’archivage sur disque s’allume avec le partage.",
-    "readOnly": "Partagée avec vous en lecture seule.",
-    "nobody": "Personne pour l’instant.",
+    "failed": "Le partage ou l'enregistrement a échoué. Réessaie.",
+    "unavailable": "Configure la collaboration pour partager cette collection.",
+    "signIn": "Connecte-toi pour choisir les personnes.",
+    "viaArchive": "Les autres reçoivent les fichiers archivés de la collection, jamais les vidéos sources. L'archivage sur disque s'allume avec le partage.",
+    "readOnly": "Partagée avec toi en lecture seule.",
+    "nobody": "Personne pour l'instant.",
     "pending": "En attente",
     "owner": "Propriétaire",
     "permView": "Lecture seule",
@@ -235,6 +240,6 @@
     "permAll": "Modification — tous les plans",
     "stop": "Arrêter le partage",
     "leave": "Quitter le partage",
-    "stopHint": "Les autres perdront l’accès aux plans partagés."
+    "stopHint": "Les autres perdront l'accès aux plans partagés."
   }
 }

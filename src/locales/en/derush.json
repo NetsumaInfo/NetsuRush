@@ -184,7 +184,6 @@
     "trimShot": "Trim shot",
     "playShotMenu": "Play shot",
     "shotPreview": "Preview of shot {{n}}",
-    "shotsCount": "Shots: {{count}}",
     "notCut": "not cut",
     "collapseFolder": "Collapse folder",
     "expandFolder": "Expand folder",
@@ -202,7 +201,9 @@
     "presetMax": "Max",
     "modelHintTransnet": "Fast, runs on CPU. Hard cuts; sensitivity set by the precision preset.",
     "modelHintOmni": "Most reliable on dissolves, wipes and gradual transitions. Automatic, GPU.",
-    "modelHintAutoShot": "Good on fast edits and very dynamic footage. Threshold in advanced, GPU."
+    "modelHintAutoShot": "Good on fast edits and very dynamic footage. Threshold in advanced, GPU.",
+    "shotsCount_one": "{{count}} shot",
+    "shotsCount_other": "{{count}} shots"
   },
   "browser": {
     "sort": "Sort",
@@ -248,18 +249,20 @@
     "addToPoolHint": "Add the video to the Media Pool to send it to the timeline.",
     "importExtracts": "Import extracts",
     "genStopped": "Generation stopped · Proxies: {{done}}/{{total}}",
-    "proxiesReady": "Proxies ready · Shots: {{count}}",
     "thumbsStopped": "Thumbnails stopped · {{done}}/{{total}}",
     "thumbsReady": "Thumbnails ready · {{count}}",
     "genFailed": "Proxies · {{failed}}/{{total}} failed",
     "thumbsFailed": "Thumbnails · {{failed}}/{{total}} failed",
-    "proxiesUpToDate": "Proxies already up to date · {{count}} shot(s), nothing to generate",
     "flowJump": "Jump to a clip",
     "flowRushes_one": "{{count}} clip",
     "flowRushes_other": "{{count}} clips",
     "flowUncut_one": "{{count}} clip to cut",
     "flowUncut_other": "{{count}} clips to cut",
-    "flowUncutTip": "Cuts only the clips of the flow that have no shots yet; the others keep theirs."
+    "flowUncutTip": "Cuts only the clips of the flow that have no shots yet; the others keep theirs.",
+    "proxiesReady_one": "Proxies ready · {{count}} shot",
+    "proxiesReady_other": "Proxies ready · {{count}} shots",
+    "proxiesUpToDate_one": "Proxies already up to date · {{count}} shot, nothing to generate",
+    "proxiesUpToDate_other": "Proxies already up to date · {{count}} shots, nothing to generate"
   },
   "rushGrid": {
     "home": "Home",
@@ -324,19 +327,22 @@
     "nameLabel": "Timeline name",
     "nameLabelAppend": "Name (if no timeline is open)",
     "send": "Send",
-    "sendN": "Send shots ({{count}})"
+    "sendN_one": "Send {{count}} shot",
+    "sendN_other": "Send {{count}} shots"
   },
   "cutEditor": {
     "timelines": "Timelines",
-    "selSuffix": " · {{count}} selected",
     "mergeTip": "Merge the selected adjacent shots (drops the cut between them)",
     "deleteTip": "Remove the selected shots from the edit",
     "resetTip": "Reset the detected cuts",
     "rushRemoved": "Clip removed from the edit.",
     "nameLabel": "Name of the cut timeline",
     "building": "Building the timeline…",
-    "created": "\"{{name}}\" created — shots: {{count}}. The original stays untouched.",
-    "build": "Build ({{count}})"
+    "build": "Build ({{count}})",
+    "created_one": "\"{{name}}\" created — {{count}} shot. The original stays untouched.",
+    "created_other": "\"{{name}}\" created — {{count}} shots. The original stays untouched.",
+    "selSuffix_one": " · {{count}} selected",
+    "selSuffix_other": " · {{count}} selected"
   },
   "cutTimeline": {
     "editHeader": "Edit the cuts · {{name}}",
@@ -346,10 +352,8 @@
     "building": "Building…",
     "analyzeFailed": "analysis failed",
     "noShots": "No shots detected.",
-    "itemDone": "Shots: {{count}} → \"{{name}}\"",
     "title": "Timeline",
     "count": "Timelines: {{count}}",
-    "selectedOf": "{{count}} selected of {{total}}",
     "defaultName": "{{name}} — cut",
     "modeNewTip": "New timeline next to the original",
     "modeReplaceTip": "Replace: deletes the original, renames the cut (no duplicate)",
@@ -359,7 +363,11 @@
     "cutTipMany": "Cut the {{count}} timelines right away",
     "cutTipOne": "Cut the timeline right away",
     "noneInProject": "No timeline in this project.",
-    "noMedia": "No video footage in this timeline."
+    "noMedia": "No video footage in this timeline.",
+    "itemDone_one": "{{count}} shot → \"{{name}}\"",
+    "itemDone_other": "{{count}} shots → \"{{name}}\"",
+    "selectedOf_one": "{{count}} selected of {{total}}",
+    "selectedOf_other": "{{count}} selected of {{total}}"
   },
   "timelineLive": {
     "readFailed": "read failed",
@@ -371,35 +379,41 @@
     "backToTimelines": "Back to timelines",
     "addSelected": "Add selected shots ({{count}})",
     "addAll": "Add every shot",
-    "added": "Shots added: {{count}} → \"{{name}}\".",
     "noShots": "No video shot in this timeline.",
     "noSnapshotTitle": "No sequence received",
     "noSnapshotHint": "Open the NetsuRush panel in {{host}} (Window ▸ Extensions), then click “Send to NetsuRush”.",
     "tracks": "Displayed track",
     "allTracks": "All tracks",
-    "trackFallback": "Track {{index}}"
+    "trackFallback": "Track {{index}}",
+    "added_one": "{{count}} shot → \"{{name}}\".",
+    "added_other": "{{count}} shots → \"{{name}}\"."
   },
   "export": {
     "extracting": "Extracting…",
     "extractingN": "Extracting {{done}}/{{total}}…",
     "clipError": "clip {{index}}: {{error}}",
-    "extracted": "Shots extracted without re-encoding: {{count}} → {{dir}}",
     "creatingTimeline": "Creating timeline…",
-    "timelineCreated": "Timeline \"{{name}}\" created · Shots: {{count}}",
     "sendingTimeline": "Sending to the timeline…",
-    "sentTimeline": "Shots sent: {{count}} → \"{{name}}\"",
     "createdSuffix": " (created)",
     "fpsSuffix": " · ⚠ timeline fps ≠ clip",
     "sendFailed": "timeline send failed",
     "shotAdded": "Shot added to \"{{name}}\"",
     "addFailed": "timeline add failed",
     "importing": "Importing…",
-    "imported": "Shots imported: {{count}} → {{dest}}",
-    "destProject": "project"
+    "destProject": "project",
+    "sentTimeline_one": "{{count}} shot → \"{{name}}\"",
+    "sentTimeline_other": "{{count}} shots → \"{{name}}\"",
+    "imported_one": "{{count}} shot → {{dest}}",
+    "imported_other": "{{count}} shots → {{dest}}",
+    "timelineCreated_one": "Timeline \"{{name}}\" created with {{count}} shot",
+    "timelineCreated_other": "Timeline \"{{name}}\" created with {{count}} shots",
+    "extracted_one": "{{count}} shot extracted without re-encoding → {{dir}}",
+    "extracted_other": "{{count}} shots extracted without re-encoding → {{dir}}"
   },
   "detection": {
     "proxyPrefix": "proxy: {{error}}",
-    "shotsWithModel": "Shots: {{count}} · {{model}}"
+    "shotsWithModel_one": "{{count}} shot · {{model}}",
+    "shotsWithModel_other": "{{count}} shots · {{model}}"
   },
   "store": {
     "noProject": "No project received — open the NetsuRush panel, then \"Send to NetsuRush\".",

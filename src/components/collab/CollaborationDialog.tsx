@@ -467,7 +467,7 @@ export function CollaborationDialog({
           </div>
         )}
 
-        {invited !== null && <p className="text-xs text-muted-foreground">{t("dialog.invited", { n: invited })}</p>}
+        {invited !== null && <p className="text-xs text-muted-foreground">{t("dialog.invited", { count: invited })}</p>}
         {blockerKey && <p className="text-xs text-destructive">{t(blockerKey)}</p>}
         {!blockerKey && !projectId && noticeKey && (
           <p className="text-xs text-muted-foreground">{t(noticeKey)}</p>

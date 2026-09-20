@@ -76,7 +76,7 @@ function FolderRow({ folder, selected, onToggle }: { folder: CacheFolder; select
       <div className="flex items-center gap-2 py-1.5 pr-2 text-xs">
         <input
           type="checkbox"
-          aria-label={t("cache.selectFolder", { name: folder.folder.split(/[\\/]/).filter(Boolean).pop() || folder.folder })}
+          aria-label={t("storage.tree.selectFolder", { name: folder.folder.split(/[\\/]/).filter(Boolean).pop() || folder.folder })}
           checked={all}
           // Un dossier partiellement sélectionné : ni coché ni vide, sinon on ne distingue pas
           // « rien » de « quelques rushs » en repliant.

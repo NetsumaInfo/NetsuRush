@@ -51,9 +51,12 @@
     "removebg": "Quitar fondo"
   },
   "result": {
-    "files": "Archivos: {{count}}",
-    "imported": ", importados: {{count}}",
-    "failed": "Fallos: {{count}}."
+    "files_one": "{{count}} archivo",
+    "files_other": "{{count}} archivos",
+    "failed_one": "{{count}} fallo.",
+    "failed_other": "{{count}} fallos.",
+    "imported_one": ", {{count}} importado",
+    "imported_other": ", {{count}} importados"
   },
   "chain": {
     "title": "Cadena",
@@ -289,12 +292,12 @@
     "rowVsrQuality": "Calidad VSR",
     "vsrQualityNote": "Nivel de reconstrucción del SDK: 1 el más rápido, 4 el más detallado.",
     "rowTrueHdr": "TrueHDR",
-    "trueHdrNote": "Convierte SDR a HDR10. Desactivado por defecto: el resultado solo se ve bien en una pantalla y un montaje HDR. Una fuente ya HDR se deja intacta.",
+    "trueHdrNote": "Convierte SDR a HDR10. Desactivado de forma predeterminada: el resultado solo se ve bien en una pantalla y un montaje HDR. Una fuente ya HDR se deja intacta.",
     "rowHdrContrast": "Contraste HDR",
     "rowHdrSaturation": "Saturación HDR",
     "rowHdrMidGray": "Gris medio",
     "rowHdrNits": "Luminancia máxima",
-    "hdrParamsNote": "Valores por defecto del SDK (125 / 100 / 25 / 1000 nits). La luminancia máxima se escribe en los metadatos del máster.",
+    "hdrParamsNote": "Valores predeterminados del SDK (125 / 100 / 25 / 1000 nits). La luminancia máxima se escribe en los metadatos del máster.",
     "scaleResampledNote": "Este modelo reconstruye a {{native}}×; los demás factores solo redimensionan su salida después.",
     "windowedModelNote": "Este modelo usa un grafo de dimensiones fijas: solo se puede ajustar el solape de las ventanas.",
     "sectionOutput": "Salida",
@@ -333,7 +336,7 @@
       "name": "Nombre del archivo de origen, sin extensión",
       "op": "Proceso aplicado (upscaled, interp, depth…)",
       "scale": "Factor de escala (4x, 2x)",
-      "model": "Modelo o shader utilizado",
+      "model": "Modelo o shader usado",
       "date": "Fecha de hoy (AAAA-MM-DD)",
       "n": "Posición en la selección",
       "nn": "Posición con 2 dígitos",
@@ -453,7 +456,7 @@
     "frameBlack": "Frame casi negro (¿fundido?) — mueve el cabezal y repite la prueba.",
     "testFailed": "error en la prueba",
     "noShotSelected": "Ningún plano seleccionado.",
-    "invalidRange": "Rango no válido.",
+    "invalidRange": "El final debe ir después del inicio.",
     "duplicateOutputNames": "Varias fuentes producirían el mismo nombre de salida: renómbralas o numera el patrón.",
     "upscaleFailed": "error de escalado",
     "interpolateFailed": "error de interpolación",

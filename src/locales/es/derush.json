@@ -20,9 +20,9 @@
     "tabGrid": "Cuadrícula",
     "tabExport": "Exportar",
     "tabKeys": "Atajos",
-    "defaultModel": "Modelo por defecto",
+    "defaultModel": "Modelo predeterminado",
     "defaultModelHint": "Modelo con el que se abre un clip. Un clip ya cortado se reabre con SU modelo.",
-    "defaultPreset": "Precisión por defecto",
+    "defaultPreset": "Precisión predeterminada",
     "defaultPresetHint": "Más a la derecha = corta más fino y detecta más lento.",
     "presetAutoHint": "OmniShotCut ajusta su precisión solo — nada que elegir.",
     "autoplay": "Reproducción automática de las vistas previas",
@@ -184,7 +184,6 @@
     "trimShot": "Recortar el plano",
     "playShotMenu": "Reproducir el plano",
     "shotPreview": "Vista previa del plano {{n}}",
-    "shotsCount": "Planos: {{count}}",
     "notCut": "sin cortar",
     "collapseFolder": "Plegar la carpeta",
     "expandFolder": "Desplegar la carpeta",
@@ -202,7 +201,9 @@
     "presetMax": "Máx.",
     "modelHintTransnet": "Rápido, en CPU. Cortes limpios; sensibilidad según el ajuste de precisión.",
     "modelHintOmni": "El más fiable con fundidos, cortinillas y transiciones graduales. Automático, GPU.",
-    "modelHintAutoShot": "Bueno en montajes rápidos y planos muy dinámicos. Umbral en avanzado, GPU."
+    "modelHintAutoShot": "Bueno en montajes rápidos y planos muy dinámicos. Umbral en avanzado, GPU.",
+    "shotsCount_one": "{{count}} plano",
+    "shotsCount_other": "{{count}} planos"
   },
   "browser": {
     "sort": "Ordenar",
@@ -248,18 +249,20 @@
     "addToPoolHint": "Añade el vídeo al Media Pool para enviarlo a la timeline.",
     "importExtracts": "Importar extractos",
     "genStopped": "Generación detenida · Proxies: {{done}}/{{total}}",
-    "proxiesReady": "Proxies listos · Planos: {{count}}",
     "thumbsStopped": "Miniaturas detenidas · {{done}}/{{total}}",
     "thumbsReady": "Miniaturas listas · {{count}}",
     "genFailed": "Proxies · {{failed}}/{{total}} fallidos",
     "thumbsFailed": "Miniaturas · {{failed}}/{{total}} fallidas",
-    "proxiesUpToDate": "Proxies ya al día · {{count}} plano(s), nada que generar",
     "flowJump": "Ir a un clip",
     "flowRushes_one": "{{count}} clip",
     "flowRushes_other": "{{count}} clips",
     "flowUncut_one": "{{count}} clip por cortar",
     "flowUncut_other": "{{count}} clips por cortar",
-    "flowUncutTip": "Corta solo los clips del flujo que aún no tienen planos; los demás conservan los suyos."
+    "flowUncutTip": "Corta solo los clips del flujo que aún no tienen planos; los demás conservan los suyos.",
+    "proxiesReady_one": "Proxies listos · {{count}} plano",
+    "proxiesReady_other": "Proxies listos · {{count}} planos",
+    "proxiesUpToDate_one": "Proxies ya al día · {{count}} plano, nada que generar",
+    "proxiesUpToDate_other": "Proxies ya al día · {{count}} planos, nada que generar"
   },
   "rushGrid": {
     "home": "Inicio",
@@ -324,19 +327,22 @@
     "nameLabel": "Nombre de la timeline",
     "nameLabelAppend": "Nombre (si no hay timeline abierta)",
     "send": "Enviar",
-    "sendN": "Enviar planos ({{count}})"
+    "sendN_one": "Enviar {{count}} plano",
+    "sendN_other": "Enviar {{count}} planos"
   },
   "cutEditor": {
     "timelines": "Timelines",
-    "selSuffix": " · Selección: {{count}}",
     "mergeTip": "Fusionar los planos adyacentes seleccionados (elimina el corte entre ellos)",
     "deleteTip": "Quitar los planos seleccionados del montaje",
     "resetTip": "Restablecer los cortes detectados",
     "rushRemoved": "Clip quitado del montaje.",
     "nameLabel": "Nombre de la timeline cortada",
     "building": "Construyendo la timeline…",
-    "created": "«{{name}}» creada — planos: {{count}}. La original queda intacta.",
-    "build": "Construir ({{count}})"
+    "build": "Construir ({{count}})",
+    "created_one": "«{{name}}» creada — {{count}} plano. La original queda intacta.",
+    "created_other": "«{{name}}» creada — {{count}} planos. La original queda intacta.",
+    "selSuffix_one": " · {{count}} seleccionado",
+    "selSuffix_other": " · {{count}} seleccionados"
   },
   "cutTimeline": {
     "editHeader": "Editar los cortes · {{name}}",
@@ -346,10 +352,8 @@
     "building": "Construyendo…",
     "analyzeFailed": "error al analizar",
     "noShots": "Ningún plano detectado.",
-    "itemDone": "Planos: {{count}} → «{{name}}»",
     "title": "Timeline",
     "count": "Timelines: {{count}}",
-    "selectedOf": "Selección: {{count}} de {{total}}",
     "defaultName": "{{name}} — cortado",
     "modeNewTip": "Nueva timeline junto a la original",
     "modeReplaceTip": "Reemplazar: elimina la original, renombra el corte (sin duplicado)",
@@ -359,7 +363,11 @@
     "cutTipMany": "Cortar las {{count}} timelines directamente",
     "cutTipOne": "Cortar la timeline directamente",
     "noneInProject": "Ninguna timeline en este proyecto.",
-    "noMedia": "No hay material de vídeo en esta línea de tiempo."
+    "noMedia": "No hay material de vídeo en esta línea de tiempo.",
+    "itemDone_one": "{{count}} plano → «{{name}}»",
+    "itemDone_other": "{{count}} planos → «{{name}}»",
+    "selectedOf_one": "{{count}} seleccionada de {{total}}",
+    "selectedOf_other": "{{count}} seleccionadas de {{total}}"
   },
   "timelineLive": {
     "readFailed": "error de lectura",
@@ -371,35 +379,41 @@
     "backToTimelines": "Volver a las timelines",
     "addSelected": "Añadir planos seleccionados ({{count}})",
     "addAll": "Añadir todos los planos",
-    "added": "Planos añadidos: {{count}} → «{{name}}».",
     "noShots": "Ningún plano de vídeo en esta timeline.",
     "noSnapshotTitle": "No se ha recibido ninguna secuencia",
     "noSnapshotHint": "Abre el panel NetsuRush en {{host}} (Ventana ▸ Extensiones) y pulsa «Enviar a NetsuRush».",
     "tracks": "Pista mostrada",
     "allTracks": "Todas las pistas",
-    "trackFallback": "Pista {{index}}"
+    "trackFallback": "Pista {{index}}",
+    "added_one": "{{count}} plano → «{{name}}».",
+    "added_other": "{{count}} planos → «{{name}}»."
   },
   "export": {
     "extracting": "Extrayendo…",
     "extractingN": "Extrayendo {{done}}/{{total}}…",
     "clipError": "clip {{index}}: {{error}}",
-    "extracted": "Planos extraídos sin recodificar: {{count}} → {{dir}}",
     "creatingTimeline": "Creando timeline…",
-    "timelineCreated": "Timeline «{{name}}» creada · Planos: {{count}}",
     "sendingTimeline": "Enviando a la timeline…",
-    "sentTimeline": "Planos enviados: {{count}} → «{{name}}»",
     "createdSuffix": " (creada)",
     "fpsSuffix": " · ⚠ fps timeline ≠ clip",
     "sendFailed": "error al enviar a la timeline",
     "shotAdded": "Plano añadido a «{{name}}»",
     "addFailed": "error al añadir a la timeline",
     "importing": "Importando…",
-    "imported": "Planos importados: {{count}} → {{dest}}",
-    "destProject": "proyecto"
+    "destProject": "proyecto",
+    "sentTimeline_one": "{{count}} plano → «{{name}}»",
+    "sentTimeline_other": "{{count}} planos → «{{name}}»",
+    "imported_one": "{{count}} plano → {{dest}}",
+    "imported_other": "{{count}} planos → {{dest}}",
+    "timelineCreated_one": "Timeline «{{name}}» creada con {{count}} plano",
+    "timelineCreated_other": "Timeline «{{name}}» creada con {{count}} planos",
+    "extracted_one": "{{count}} plano extraído sin recodificar → {{dir}}",
+    "extracted_other": "{{count}} planos extraídos sin recodificar → {{dir}}"
   },
   "detection": {
     "proxyPrefix": "proxy: {{error}}",
-    "shotsWithModel": "Planos: {{count}} · {{model}}"
+    "shotsWithModel_one": "{{count}} plano · {{model}}",
+    "shotsWithModel_other": "{{count}} planos · {{model}}"
   },
   "store": {
     "noProject": "Ningún proyecto recibido — abrir el panel NetsuRush y luego «Enviar a NetsuRush».",

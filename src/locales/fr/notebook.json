@@ -2,7 +2,7 @@
   "editor": {
     "uploadFailed": "Échec de l'envoi du fichier",
     "dateToday": "Date du jour",
-    "createNamed": "Créer « {{name}} »"
+    "createNamed": "Créer « {{name}} »"
   },
   "panel": {
     "scriptNotebook": "Carnet du script",
@@ -24,15 +24,15 @@
     "trash": "Corbeille",
     "settings": "Paramètres",
     "emptyNotebookHint": "Crée un carnet pour commencer.",
-    "emptyTitleHasNb": "Une page vierge vous attend",
+    "emptyTitleHasNb": "Une page vierge t'attend",
     "emptyTitleNoNb": "Bienvenue dans le Carnet",
-    "emptyBodyHasNb": "Notes, plans, brouillons, bases de données — posez vos idées en vrac.",
-    "emptyBodyNoNb": "Un bloc-notes : carnets, pages imbriquées, blocs riches et bases de données.",
+    "emptyBodyHasNb": "Notes, plans, brouillons, bases de données — pose tes idées en vrac.",
+    "emptyBodyNoNb": "Un bloc-notes : carnets, pages imbriquées, blocs riches et bases de données.",
     "createNotebook": "Créer un carnet",
-    "confirmDeleteNbTitle": "Supprimer « {{name}} » ?",
+    "confirmDeleteNbTitle": "Supprimer « {{name}} » ?",
     "confirmDeleteNbDesc": "Le carnet et TOUTES ses pages sont supprimés définitivement.",
-    "confirmTrashTitle": "Envoyer à la corbeille ?",
-    "confirmTrashDesc": "« {{name}} » et ses sous-pages partent à la corbeille (restaurables).",
+    "confirmTrashTitle": "Envoyer à la corbeille ?",
+    "confirmTrashDesc": "« {{name}} » et ses sous-pages partent à la corbeille (restaurables).",
     "sendToTrash": "Envoyer à la corbeille",
     "saveAsProject": "Enregistrer sous…",
     "openProject": "Ouvrir un carnet…"
@@ -61,7 +61,7 @@
     },
     "option": {
       "searchOrCreate": "Rechercher ou créer…",
-      "create": "Créer « {{label}} »"
+      "create": "Créer « {{label}} »"
     },
     "checklist": {
       "addTask": "Ajouter une tâche…"
@@ -78,7 +78,7 @@
     "searchTitle": "Rechercher dans le carnet",
     "searchDescription": "Recherche dans les titres et le contenu des pages",
     "searchPlaceholder": "Titre ou contenu…",
-    "noSearchResult": "Aucun résultat pour « {{query}} »",
+    "noSearchResult": "Aucun résultat pour « {{query}} »",
     "favorites": "Favoris",
     "recent": "Récents"
   },
@@ -86,7 +86,7 @@
     "deletedSubpage": "Sous-page supprimée",
     "subpage": "Sous-page",
     "rename": "Renommer",
-    "empty": "Aucune page — créez-en une"
+    "empty": "Aucune page — crées-en une"
   },
   "tabs": {
     "prev": "Page précédente",
@@ -118,7 +118,7 @@
     "restore": "Restaurer",
     "restoreWithChildren": "Restaurer (avec ses sous-pages)",
     "deleteForever": "Supprimer définitivement",
-    "confirmAll": "Tout supprimer définitivement ?",
+    "confirmAll": "Tout supprimer définitivement ?",
     "cancel": "Annuler",
     "deleteAll": "Tout supprimer",
     "emptyTrash": "Vider la corbeille"
@@ -327,10 +327,10 @@
     },
     "empty": "Équation vide — cliquer pour écrire du LaTeX",
     "templates": "Modèles",
-    "error": "Erreur LaTeX : {{error}}",
+    "error": "Erreur LaTeX : {{error}}",
     "hint": "LaTeX complet (KaTeX + chimie \\ce) · Ctrl+Entrée pour valider · Échap pour annuler",
-    "edit": "Modifier l’équation",
-    "input": "Code LaTeX de l’équation"
+    "edit": "Modifier l'équation",
+    "input": "Code LaTeX de l'équation"
   },
   "gallery": {
     "chooseImages": "Choisir des images…",
@@ -346,10 +346,10 @@
     "remove": "Retirer",
     "removeImage": "Retirer cette image",
     "caption": "Légende…",
-    "openImage": "Ouvrir l’image"
+    "openImage": "Ouvrir l'image"
   },
   "dbBasics": {
-    "noDateField": "Aucun champ « Date » pour placer les lignes.",
+    "noDateField": "Aucun champ « Date » pour placer les lignes.",
     "addDateField": "Ajouter un champ Date",
     "rowDetail": "Détail de la ligne",
     "previousRow": "Ligne précédente",
@@ -372,7 +372,7 @@
     "fields": "Champs",
     "rowHeight": "Hauteur des lignes",
     "groupBy": "Regrouper par",
-    "noSelectField": "Aucun champ « Sélection »",
+    "noSelectField": "Aucun champ « Sélection »",
     "addView": "Ajouter une vue",
     "newView": "Nouvelle vue",
     "databaseActions": "Actions de la base",
@@ -420,7 +420,7 @@
     "columnOptions": "Options de la colonne",
     "hideColumn": "Masquer la colonne",
     "addCard": "Ajouter une carte",
-    "groupHint": "Choisir un champ de type « Sélection » pour regrouper les cartes (Réglages › Regrouper par).",
+    "groupHint": "Choisir un champ de type « Sélection » pour regrouper les cartes (Réglages › Regrouper par).",
     "showColumn": "Afficher la colonne"
   },
   "settings": {
@@ -464,7 +464,7 @@
       "toggleSidebar": "Afficher/masquer la barre latérale"
     },
     "spellcheck": "Correcteur orthographique",
-    "spellcheckHint": "Souligne les fautes ; clic droit ou Ctrl+. pour corriger",
+    "spellcheckHint": "Souligne les fautes ; clic droit ou Ctrl+. pour corriger",
     "spellUnsupported": "Pas de dictionnaire pour cette langue — soulignement natif seul",
     "spellOn": "Actif",
     "spellOff": "Coupé",
@@ -542,7 +542,7 @@
     "loading": "Chargement…"
   },
   "subpage": {
-    "openHint": "Ouvrir la sous-page (clic du milieu : nouvel onglet)"
+    "openHint": "Ouvrir la sous-page (clic du milieu : nouvel onglet)"
   },
   "sideMenu": {
     "changeType": "Transformer en",
@@ -556,7 +556,7 @@
     "tooltip": "Lier à une page ou une URL",
     "placeholder": "Coller une URL ou rechercher une page…",
     "linkTo": "Lier à",
-    "hint": "Saisissez une URL ou un titre de page"
+    "hint": "Tape une URL ou un titre de page"
   },
   "mention": {
     "block": "Bloc",
@@ -565,7 +565,7 @@
     "showCard": "Afficher en carte",
     "refreshLabel": "Actualiser le libellé",
     "deletedPage": "Page supprimée",
-    "blockMissing": "Bloc introuvable (supprimé ?)",
+    "blockMissing": "Bloc introuvable (supprimé ?)",
     "deletedTitle": "{{title}} (supprimée)",
     "linkedBlock": "bloc lié",
     "type": {
@@ -607,14 +607,14 @@
   },
   "create": {
     "title": "Créer un carnet",
-    "description": "Donnez-lui un nom, un type et une langue. Vous pourrez tout modifier ensuite.",
+    "description": "Donne-lui un nom, un type et une langue. Tu pourras tout changer ensuite.",
     "namePlaceholder": "Nom du carnet…",
     "cancel": "Annuler",
     "submit": "Créer"
   },
   "edit": {
     "title": "Modifier le carnet",
-    "description": "Modifiez le nom, le type ou la langue de ce carnet.",
+    "description": "Change le nom, le type ou la langue de ce carnet.",
     "done": "Terminé"
   },
   "blockTypes": {
@@ -640,7 +640,7 @@
     "document": "Partager ce document",
     "notebook": "Partager le carnet",
     "failed": "Le partage a échoué.",
-    "manageRemoval": "Utilisez les paramètres de collaboration pour quitter ou supprimer ce partage.",
+    "manageRemoval": "Passe par les paramètres de collaboration pour quitter ou supprimer ce partage.",
     "retry": "Réessayer"
   }
 }

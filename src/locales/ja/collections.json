@@ -4,7 +4,8 @@
     "remove": "{{tag}} を外す"
   },
   "rating": {
-    "stars": "星 {{n}}"
+    "stars_one": "星 {{count}} つ",
+    "stars_other": "星 {{count}} つ"
   },
   "folder": {
     "new": "新規フォルダー",
@@ -100,13 +101,11 @@
     "shotWord": "ショット",
     "removed": "「{{name}}」を削除しました — 元に戻すには Ctrl+Z。",
     "restored": "「{{name}}」を元に戻しました。",
-    "toTimelineOk": "{{count}} 件のショット →「{{timeline}}」。",
     "timelineFailed": "タイムライン失敗",
     "mounting": "編集中…",
     "archived": "コレクションをディスクに保管しました。",
     "archiveFailed": "保管に失敗しました",
     "all": "すべて",
-    "shotCount": "{{count}} 件のショット",
     "ofTotal": "全 {{count}} プラン中",
     "selCount": " · {{count}} 件選択",
     "selectAll": "すべて選択",
@@ -129,7 +128,11 @@
     "emptyFolder": "空のフォルダー — 素材整理や検索からショットを追加してください。",
     "resize": "サイズ変更",
     "thumbSize": "サムネイルのサイズ",
-    "undoRemove": "削除を取り消す"
+    "undoRemove": "削除を取り消す",
+    "toTimelineOk_one": "{{count}} 件のショット →「{{timeline}}」。",
+    "toTimelineOk_other": "{{count}} 件のショット →「{{timeline}}」。",
+    "shotCount_one": "{{count}} 件のショット",
+    "shotCount_other": "{{count}} 件のショット"
   },
   "list": {
     "title": "コレクション",
@@ -151,10 +154,11 @@
     "deleteFolderTitle": "フォルダー「{{name}}」を削除しますか？",
     "deleteFolderDesc": "中のコレクションは一つ上の階層に移動します。",
     "newCollection": "新規コレクション",
-    "plansCount": "{{count}} 件のショット",
     "emptyAll": "コレクションがありません。コレクションを作成し、素材整理や検索からショットを追加してください（サムネイルの「追加」ボタン）。",
     "folderEmpty": "このフォルダーは空です",
-    "folderEmptyFilter": "（このフィルターでは）"
+    "folderEmptyFilter": "（このフィルターでは）",
+    "plansCount_one": "{{count}} 件のショット",
+    "plansCount_other": "{{count}} 件のショット"
   },
   "editor": {
     "iconSearch": "アイコンを検索…",
@@ -171,7 +175,6 @@
     "online": "オンライン",
     "relinkMoved": "移動したソースを再リンク。",
     "resync": "再同期…",
-    "dotPlans": " · {{count}} 件のショット",
     "relink": "再リンク…",
     "resyncHint": "「再同期」は参照フォルダーをインデックスし、ファイル名で自動的に再リンクします。",
     "disabledLower": "無効",
@@ -199,7 +202,9 @@
     "tabEmoji": "絵文字",
     "tabIcon": "アイコン",
     "tabImage": "画像",
-    "importImage": "画像 / GIF を読み込む"
+    "importImage": "画像 / GIF を読み込む",
+    "dotPlans_one": " · {{count}} 件のショット",
+    "dotPlans_other": " · {{count}} 件のショット"
   },
   "char": {
     "queryCharacter": "キャラクター：{{name}}",

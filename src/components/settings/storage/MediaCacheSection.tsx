@@ -147,8 +147,8 @@ export function MediaCacheSection() {
     setSel(new Set());
     if (!r.ok) return setNotice(r.error || t("common:action.error"));
     const base = r.rows
-      ? t("settings:storage.confirm.doneRows", { size: fmtBytes(r.freed), files: r.files ?? 0, rows: r.rows })
-      : t("settings:storage.confirm.done", { size: fmtBytes(r.freed), files: r.files ?? 0 });
+      ? t("settings:storage.confirm.doneRows", { size: fmtBytes(r.freed), count: r.files ?? 0, rows: r.rows })
+      : t("settings:storage.confirm.done", { size: fmtBytes(r.freed), count: r.files ?? 0 });
     setNotice(base + (r.skipped ? t("settings:storage.confirm.skipped", { count: r.skipped }) : ""));
   }
 

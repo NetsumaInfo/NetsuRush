@@ -247,8 +247,9 @@
     "assetSweep": "Ungenutzte Medien",
     "assetSweepHint": "Entfernt Dateien, die keine Szene referenziert. Nichts aus deinen Boards wird angetastet.",
     "assetSweepAction": "Aufräumen",
-    "assetSweepDone": "{{count}} Datei(en) entfernt, {{mb}} MB frei.",
-    "assetSweepFailed": "Aufräumen fehlgeschlagen."
+    "assetSweepFailed": "Aufräumen fehlgeschlagen.",
+    "assetSweepDone_one": "{{count}} Datei entfernt, {{mb}} MB frei.",
+    "assetSweepDone_other": "{{count}} Dateien entfernt, {{mb}} MB frei."
   },
   "inspector": {
     "ytPlayer": "YouTube-Player",
@@ -431,7 +432,8 @@
     "duplicate": "Duplizieren (Strg+D)",
     "unlink": "Vom Medium lösen",
     "relink": "Mit Medium verbinden",
-    "linkedTo": "Mit {{count}} Element(en) verbunden"
+    "linkedTo_one": "Mit {{count}} Element verbunden",
+    "linkedTo_other": "Mit {{count}} Elementen verbunden"
   },
   "media": {
     "browse": "Durchsuchen",
@@ -607,6 +609,7 @@
     "preparing": "Video wird vorbereitet…"
   },
   "embed": {
+    "onlineMedia": "Online-Medium",
     "frozen": "Wiedergabe angehalten",
     "level": {
       "link": "Nur Links",
@@ -647,16 +650,18 @@
     "clipboardEmptyLink": "Zwischenablage leer oder Link unbekannt",
     "emptyTitle": "Bilder, Videos oder einen YouTube-Link hierher ziehen",
     "emptyHint": "Einfügen (Strg+V) · Mausrad zum Zoomen · Hintergrund ziehen zum Navigieren",
-    "pastedItems": "{{count}} Element(e) eingefügt",
-    "copiedDone": "{{count}} Element(e) kopiert",
-    "cutDone": "{{count}} Element(e) ausgeschnitten"
+    "pastedItems_one": "{{count}} Element eingefügt",
+    "pastedItems_other": "{{count}} Elemente eingefügt",
+    "copiedDone_one": "{{count}} Element kopiert",
+    "copiedDone_other": "{{count}} Elemente kopiert",
+    "cutDone_one": "{{count}} Element ausgeschnitten",
+    "cutDone_other": "{{count}} Elemente ausgeschnitten"
   },
   "notice": {
     "recoveringMedia": "Medium wird wiederhergestellt…",
     "mediaUnrecoverable": "Medium nicht wiederherstellbar",
     "recoverFailed": "Wiederherstellen fehlgeschlagen",
     "recoveringOnline": "Online-Medien werden geholt… ({{current}}/{{total}})",
-    "mediaRecovered": "Wiederhergestellte Medien: {{count}}",
     "redownloadAll": "Alle erneut herunterladen ({{count}})",
     "recoveryResult": "{{recovered}} wiederhergestellt, {{failed}} fehlgeschlagen",
     "downloadingVideo": "Video wird geladen…",
@@ -676,19 +681,23 @@
     "typeUnsupported": "Typ „{{type}}“ nicht unterstützt",
     "importFailedWith": "Import fehlgeschlagen: {{error}}",
     "unknown": "unbekannt",
-    "imported": "Importiert · Elemente: {{count}}",
     "boardImported": "Board importiert",
     "projectSaved": "„{{name}}“ gespeichert",
     "projectOpened": "„{{name}}“ geöffnet",
     "projectOpenedLegacy": "„{{name}}“ geöffnet (altes Format – als Projekt speichern, um es zu bearbeiten)",
     "openFailedWith": "Öffnen fehlgeschlagen: {{error}}",
-    "dropProjectFailed": "„{{name}}\" konnte nicht geöffnet werden – nutze „Projekt öffnen\".",
+    "dropProjectFailed": "„{{name}}“ konnte nicht geöffnet werden – nutze „Projekt öffnen“.",
     "noProjectFile": "Dieses Board ist mit keiner Datei verknüpft",
     "relocating": "Medien im Ordner werden gesucht… ({{count}})",
-    "relocated": "{{count}}/{{total}} Medien neu verknüpft",
     "relocatedNone": "Keine Medien in diesem Ordner erkannt",
     "contentOpacity": "Deckkraft der Inhalte: {{percent}} %",
-    "itemOpacity": "Deckkraft des Mediums: {{percent}} %"
+    "itemOpacity": "Deckkraft des Mediums: {{percent}} %",
+    "mediaRecovered_one": "{{count}} Mediendatei wiederhergestellt",
+    "mediaRecovered_other": "{{count}} Mediendateien wiederhergestellt",
+    "imported_one": "Importiert · {{count}} Element",
+    "imported_other": "Importiert · {{count}} Elemente",
+    "relocated_one": "{{count}}/{{total}} Mediendatei neu verknüpft",
+    "relocated_other": "{{count}}/{{total}} Mediendateien neu verknüpft"
   },
   "tidy": {
     "title": "Ordnen",

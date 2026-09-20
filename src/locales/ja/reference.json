@@ -247,8 +247,9 @@
     "assetSweep": "未使用のメディア",
     "assetSweepHint": "どのシーンも参照していないファイルを削除します。ボードの内容には触れません。",
     "assetSweepAction": "クリーンアップ",
-    "assetSweepDone": "{{count}} 件削除、{{mb}} MB 解放。",
-    "assetSweepFailed": "クリーンアップに失敗しました。"
+    "assetSweepFailed": "クリーンアップに失敗しました。",
+    "assetSweepDone_one": "{{count}} 件のファイルを削除、{{mb}} MB 解放。",
+    "assetSweepDone_other": "{{count}} 件のファイルを削除、{{mb}} MB 解放。"
   },
   "inspector": {
     "ytPlayer": "YouTube プレーヤー",
@@ -431,7 +432,8 @@
     "duplicate": "複製（Ctrl+D）",
     "unlink": "メディアとの連結を解除",
     "relink": "メディアに連結",
-    "linkedTo": "{{count}} 件に連結中"
+    "linkedTo_one": "{{count}} 件に連結中",
+    "linkedTo_other": "{{count}} 件に連結中"
   },
   "media": {
     "browse": "参照",
@@ -607,6 +609,7 @@
     "preparing": "動画を準備中…"
   },
   "embed": {
+    "onlineMedia": "オンラインメディア",
     "frozen": "再生を停止中",
     "level": {
       "link": "リンクのみ",
@@ -647,16 +650,18 @@
     "clipboardEmptyLink": "クリップボードが空か、リンクを認識できません",
     "emptyTitle": "画像・動画・YouTube のリンクをここにドラッグ",
     "emptyHint": "貼り付け（Ctrl+V）· ホイールで拡大縮小 · 背景をドラッグで移動",
-    "pastedItems": "{{count}} 件を貼り付けました",
-    "copiedDone": "{{count}} 件をコピーしました",
-    "cutDone": "{{count}} 件を切り取りました"
+    "pastedItems_one": "{{count}} 件を貼り付けました",
+    "pastedItems_other": "{{count}} 件を貼り付けました",
+    "copiedDone_one": "{{count}} 件をコピーしました",
+    "copiedDone_other": "{{count}} 件をコピーしました",
+    "cutDone_one": "{{count}} 件を切り取りました",
+    "cutDone_other": "{{count}} 件を切り取りました"
   },
   "notice": {
     "recoveringMedia": "メディアを復元中…",
     "mediaUnrecoverable": "メディアを復元できません",
     "recoverFailed": "復元に失敗しました",
     "recoveringOnline": "オンラインメディアを復元中…（{{current}}/{{total}}）",
-    "mediaRecovered": "{{count}} 件のメディアを復元",
     "redownloadAll": "すべて再ダウンロード（{{count}}）",
     "recoveryResult": "{{recovered}} 件復元、{{failed}} 件失敗",
     "downloadingVideo": "動画をダウンロード中…",
@@ -676,7 +681,6 @@
     "typeUnsupported": "「{{type}}」は未対応です",
     "importFailedWith": "読み込みに失敗：{{error}}",
     "unknown": "不明",
-    "imported": "読み込み完了 · {{count}} 件",
     "boardImported": "ボードを読み込みました",
     "projectSaved": "「{{name}}」を保存しました",
     "projectOpened": "「{{name}}」を開きました",
@@ -685,10 +689,15 @@
     "dropProjectFailed": "「{{name}}」を開けませんでした。「プロジェクトを開く」をお使いください。",
     "noProjectFile": "このボードはファイルに紐づいていません",
     "relocating": "フォルダー内のメディアを検索中…（{{count}}）",
-    "relocated": "{{count}}/{{total}} 件のメディアの場所を指定",
     "relocatedNone": "このフォルダーで認識できるメディアはありません",
     "contentOpacity": "コンテンツの不透明度：{{percent}} %",
-    "itemOpacity": "メディアの不透明度：{{percent}} %"
+    "itemOpacity": "メディアの不透明度：{{percent}} %",
+    "mediaRecovered_one": "{{count}} 件のメディアを復元",
+    "mediaRecovered_other": "{{count}} 件のメディアを復元",
+    "imported_one": "読み込み完了 · {{count}} 件",
+    "imported_other": "読み込み完了 · {{count}} 件",
+    "relocated_one": "{{count}}/{{total}} 件のメディアの場所を指定",
+    "relocated_other": "{{count}}/{{total}} 件のメディアの場所を指定"
   },
   "tidy": {
     "title": "整列",

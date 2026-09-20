@@ -184,7 +184,6 @@
     "trimShot": "Einstellung zuschneiden",
     "playShotMenu": "Shot abspielen",
     "shotPreview": "Vorschau Shot {{n}}",
-    "shotsCount": "Einstellungen: {{count}}",
     "notCut": "nicht geschnitten",
     "collapseFolder": "Ordner zuklappen",
     "expandFolder": "Ordner aufklappen",
@@ -202,7 +201,9 @@
     "presetMax": "Max",
     "modelHintTransnet": "Schnell, auf der CPU. Harte Schnitte; Empfindlichkeit über die Genauigkeitsstufe.",
     "modelHintOmni": "Am zuverlässigsten bei Blenden, Wischern und weichen Übergängen. Automatisch, GPU.",
-    "modelHintAutoShot": "Gut bei schnellen Schnitten und bewegtem Material. Schwellenwert erweitert, GPU."
+    "modelHintAutoShot": "Gut bei schnellen Schnitten und bewegtem Material. Schwellenwert erweitert, GPU.",
+    "shotsCount_one": "{{count}} Einstellung",
+    "shotsCount_other": "{{count}} Einstellungen"
   },
   "browser": {
     "sort": "Sortieren",
@@ -248,18 +249,20 @@
     "addToPoolHint": "Video in den Media Pool legen, um es an die Timeline zu senden.",
     "importExtracts": "Extrakte importieren",
     "genStopped": "Erzeugung gestoppt · Proxys: {{done}}/{{total}}",
-    "proxiesReady": "Proxys bereit · Einstellungen: {{count}}",
     "thumbsStopped": "Miniaturen gestoppt · {{done}}/{{total}}",
     "thumbsReady": "Miniaturen bereit · {{count}}",
     "genFailed": "Proxys · {{failed}}/{{total}} fehlgeschlagen",
     "thumbsFailed": "Miniaturen · {{failed}}/{{total}} fehlgeschlagen",
-    "proxiesUpToDate": "Proxys bereits aktuell · {{count}} Einstellung(en), nichts zu erzeugen",
     "flowJump": "Zu einem Clip springen",
     "flowRushes_one": "{{count}} Clip",
     "flowRushes_other": "{{count}} Clips",
     "flowUncut_one": "{{count}} Clip zu schneiden",
     "flowUncut_other": "{{count}} Clips zu schneiden",
-    "flowUncutTip": "Schneidet nur die Clips der Abfolge ohne Shots; die übrigen behalten ihre."
+    "flowUncutTip": "Schneidet nur die Clips der Abfolge ohne Shots; die übrigen behalten ihre.",
+    "proxiesReady_one": "Proxys bereit · {{count}} Einstellung",
+    "proxiesReady_other": "Proxys bereit · {{count}} Einstellungen",
+    "proxiesUpToDate_one": "Proxys bereits aktuell · {{count}} Einstellung, nichts zu erzeugen",
+    "proxiesUpToDate_other": "Proxys bereits aktuell · {{count}} Einstellungen, nichts zu erzeugen"
   },
   "rushGrid": {
     "home": "Start",
@@ -324,19 +327,22 @@
     "nameLabel": "Name der Timeline",
     "nameLabelAppend": "Name (falls keine Timeline offen)",
     "send": "Senden",
-    "sendN": "Einstellungen senden ({{count}})"
+    "sendN_one": "{{count}} Einstellung senden",
+    "sendN_other": "{{count}} Einstellungen senden"
   },
   "cutEditor": {
     "timelines": "Timelines",
-    "selSuffix": " · {{count}} ausgewählt",
     "mergeTip": "Benachbarte gewählte Shots zusammenführen (löscht den Schnitt dazwischen)",
     "deleteTip": "Gewählte Shots aus dem Schnitt entfernen",
     "resetTip": "Erkannte Schnitte zurücksetzen",
     "rushRemoved": "Clip aus dem Schnitt entfernt.",
     "nameLabel": "Name der geschnittenen Timeline",
     "building": "Timeline wird gebaut…",
-    "created": "„{{name}}“ erstellt — Einstellungen: {{count}}. Das Original bleibt unberührt.",
-    "build": "Bauen ({{count}})"
+    "build": "Bauen ({{count}})",
+    "created_one": "„{{name}}“ erstellt — {{count}} Einstellung. Das Original bleibt unberührt.",
+    "created_other": "„{{name}}“ erstellt — {{count}} Einstellungen. Das Original bleibt unberührt.",
+    "selSuffix_one": " · {{count}} ausgewählt",
+    "selSuffix_other": " · {{count}} ausgewählt"
   },
   "cutTimeline": {
     "editHeader": "Schnitte bearbeiten · {{name}}",
@@ -346,10 +352,8 @@
     "building": "Wird gebaut…",
     "analyzeFailed": "Analyse fehlgeschlagen",
     "noShots": "Keine Shots erkannt.",
-    "itemDone": "Einstellungen: {{count}} → „{{name}}“",
     "title": "Timeline",
     "count": "Timelines: {{count}}",
-    "selectedOf": "{{count}} von {{total}} ausgewählt",
     "defaultName": "{{name}} — geschnitten",
     "modeNewTip": "Neue Timeline neben dem Original",
     "modeReplaceTip": "Ersetzen: löscht das Original, benennt den Schnitt um (kein Duplikat)",
@@ -359,7 +363,11 @@
     "cutTipMany": "Die {{count}} Timelines direkt schneiden",
     "cutTipOne": "Timeline direkt schneiden",
     "noneInProject": "Keine Timeline in diesem Projekt.",
-    "noMedia": "Kein Videomaterial in dieser Timeline."
+    "noMedia": "Kein Videomaterial in dieser Timeline.",
+    "itemDone_one": "{{count}} Einstellung → „{{name}}“",
+    "itemDone_other": "{{count}} Einstellungen → „{{name}}“",
+    "selectedOf_one": "{{count}} von {{total}} ausgewählt",
+    "selectedOf_other": "{{count}} von {{total}} ausgewählt"
   },
   "timelineLive": {
     "readFailed": "Lesen fehlgeschlagen",
@@ -371,35 +379,41 @@
     "backToTimelines": "Zurück zu den Timelines",
     "addSelected": "Ausgewählte Einstellungen hinzufügen ({{count}})",
     "addAll": "Alle Shots hinzufügen",
-    "added": "Hinzugefügte Einstellungen: {{count}} → „{{name}}“.",
     "noShots": "Keine Video-Shots in dieser Timeline.",
     "noSnapshotTitle": "Keine Sequenz empfangen",
     "noSnapshotHint": "Öffne das NetsuRush-Bedienfeld in {{host}} (Fenster ▸ Erweiterungen) und klicke „An NetsuRush senden“.",
     "tracks": "Angezeigte Spur",
     "allTracks": "Alle Spuren",
-    "trackFallback": "Spur {{index}}"
+    "trackFallback": "Spur {{index}}",
+    "added_one": "{{count}} Einstellung → „{{name}}“.",
+    "added_other": "{{count}} Einstellungen → „{{name}}“."
   },
   "export": {
     "extracting": "Extraktion…",
     "extractingN": "Extraktion {{done}}/{{total}}…",
     "clipError": "Clip {{index}}: {{error}}",
-    "extracted": "Verlustfrei extrahierte Einstellungen: {{count}} → {{dir}}",
     "creatingTimeline": "Timeline wird erstellt…",
-    "timelineCreated": "Timeline „{{name}}“ erstellt · Einstellungen: {{count}}",
     "sendingTimeline": "Wird an die Timeline gesendet…",
-    "sentTimeline": "Gesendete Einstellungen: {{count}} → „{{name}}“",
     "createdSuffix": " (erstellt)",
     "fpsSuffix": " · ⚠ fps Timeline ≠ Clip",
     "sendFailed": "Senden an Timeline fehlgeschlagen",
     "shotAdded": "Shot zu „{{name}}“ hinzugefügt",
     "addFailed": "Hinzufügen zur Timeline fehlgeschlagen",
     "importing": "Import…",
-    "imported": "Importierte Einstellungen: {{count}} → {{dest}}",
-    "destProject": "Projekt"
+    "destProject": "Projekt",
+    "sentTimeline_one": "{{count}} Einstellung → „{{name}}“",
+    "sentTimeline_other": "{{count}} Einstellungen → „{{name}}“",
+    "imported_one": "{{count}} Einstellung → {{dest}}",
+    "imported_other": "{{count}} Einstellungen → {{dest}}",
+    "timelineCreated_one": "Timeline „{{name}}“ mit {{count}} Einstellung erstellt",
+    "timelineCreated_other": "Timeline „{{name}}“ mit {{count}} Einstellungen erstellt",
+    "extracted_one": "{{count}} Einstellung verlustfrei extrahiert → {{dir}}",
+    "extracted_other": "{{count}} Einstellungen verlustfrei extrahiert → {{dir}}"
   },
   "detection": {
     "proxyPrefix": "Proxy: {{error}}",
-    "shotsWithModel": "Einstellungen: {{count}} · {{model}}"
+    "shotsWithModel_one": "{{count}} Einstellung · {{model}}",
+    "shotsWithModel_other": "{{count}} Einstellungen · {{model}}"
   },
   "store": {
     "noProject": "Kein Projekt empfangen — öffne das NetsuRush-Panel und dann „An NetsuRush senden“.",

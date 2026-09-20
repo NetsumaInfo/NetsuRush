@@ -40,7 +40,7 @@
     "cut": "Ausschneiden",
     "paste": "Einfügen",
     "selectAll": "Alles auswählen",
-    "derushHome": "Derush-Start",
+    "derushHome": "Rohmaterial-Start",
     "reloadRushes": "Rohmaterial neu laden",
     "cutTimeline": "Timeline schneiden",
     "section": "Abschnitt",
@@ -83,9 +83,10 @@
     "support": "NetsuBoard unterstützen"
   },
   "errorBadge": {
-    "aria": "{{count}} Fehler — Konsole öffnen",
     "open": "Konsole öffnen",
-    "markRead": "Als gelesen markieren"
+    "markRead": "Als gelesen markieren",
+    "aria_one": "{{count}} Fehler — Konsole öffnen",
+    "aria_other": "{{count}} Fehler — Konsole öffnen"
   },
   "errorBoundary": {
     "title": "NetsuRush ist beim Rendern abgestürzt",

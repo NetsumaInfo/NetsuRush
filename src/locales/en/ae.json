@@ -5,10 +5,12 @@
   },
   "result": {
     "scriptPrefix": "Script: {{name}}",
-    "clipsDone": "Shots processed: {{count}} → \"{{comp}}\" comp.",
     "imported": "Imported into After Effects (check the Project panel).",
     "launching": "After Effects is starting — it'll import on launch (needs an open project).",
-    "missing": "Shots skipped because the file was missing: {{count}}."
+    "clipsDone_one": "{{count}} shot → \"{{comp}}\" comp.",
+    "clipsDone_other": "{{count}} shots → \"{{comp}}\" comp.",
+    "missing_one": "{{count}} shot skipped: its file is missing.",
+    "missing_other": "{{count}} shots skipped: their files are missing."
   },
   "run": {
     "busy": "Exporting…",
