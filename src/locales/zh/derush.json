@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Derush",
+    "title": "素材整理",
     "subtitle": "选择素材来源，然后检测并切分镜头。",
     "openPool": "打开 Media Pool",
     "openProject": "打开项目",
@@ -276,7 +276,7 @@
   },
   "mediaTree": {
     "sendToTimeline": "发送到时间线",
-    "openInDerush": "在 Derush 中打开",
+    "openInDerush": "在 NetsuCut 中打开",
     "pickRush": "选择该素材"
   },
   "sceneCard": {

@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Derush",
+    "title": "Visionado",
     "subtitle": "Elegir la fuente de clips, luego detectar y cortar los planos.",
     "openPool": "Abrir el Media Pool",
     "openProject": "Abrir el proyecto",
@@ -190,7 +190,7 @@
     "searchTimeline": "Buscar una timeline…",
     "noTimelineFor": "Ninguna timeline para «{{q}}».",
     "noShots": "Sin planos.",
-    "defaultDerushName": "{{name}} — derush",
+    "defaultDerushName": "{{name}} — visionado",
     "failed": "error",
     "failedShort": "error",
     "failedTimeline": "error timeline",
@@ -276,7 +276,7 @@
   },
   "mediaTree": {
     "sendToTimeline": "Enviar a la timeline",
-    "openInDerush": "Abrir en el derush",
+    "openInDerush": "Abrir en NetsuCut",
     "pickRush": "Elegir este clip"
   },
   "sceneCard": {

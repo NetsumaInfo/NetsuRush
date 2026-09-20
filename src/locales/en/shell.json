@@ -34,13 +34,13 @@
     "adobeHint": "Open {{host}}, then the <b>Window ▸ Extensions ▸ NetsuRush</b> panel (install it from the Adobe tab)."
   },
   "menu": {
-    "derush": "Footage",
+    "derush": "Logging",
     "chat": "Chat",
     "edit": "Edit",
     "cut": "Cut",
     "paste": "Paste",
     "selectAll": "Select all",
-    "derushHome": "Footage home",
+    "derushHome": "Logging home",
     "reloadRushes": "Reload footage",
     "cutTimeline": "Cut a timeline",
     "section": "Section",

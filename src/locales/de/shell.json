@@ -34,13 +34,13 @@
     "adobeHint": "Öffne {{host}}, dann das Panel <b>Fenster ▸ Erweiterungen ▸ NetsuRush</b> (im Adobe-Tab installieren)."
   },
   "menu": {
-    "derush": "Rohmaterial",
+    "derush": "Sichtung",
     "chat": "Chat",
     "edit": "Bearbeiten",
     "cut": "Ausschneiden",
     "paste": "Einfügen",
     "selectAll": "Alles auswählen",
-    "derushHome": "Rohmaterial-Start",
+    "derushHome": "Sichtung – Start",
     "reloadRushes": "Rohmaterial neu laden",
     "cutTimeline": "Timeline schneiden",
     "section": "Abschnitt",

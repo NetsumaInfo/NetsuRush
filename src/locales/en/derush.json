@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Derush",
+    "title": "Logging",
     "subtitle": "Pick your footage source, then detect and cut the shots.",
     "openPool": "Open the Media Pool",
     "openProject": "Open the project",
@@ -276,7 +276,7 @@
   },
   "mediaTree": {
     "sendToTimeline": "Send to timeline",
-    "openInDerush": "Open in Derush",
+    "openInDerush": "Open in NetsuCut",
     "pickRush": "Pick this clip"
   },
   "sceneCard": {

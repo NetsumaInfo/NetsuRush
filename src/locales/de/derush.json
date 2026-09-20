@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Derush",
+    "title": "Sichtung",
     "subtitle": "Materialquelle wählen, dann Shots erkennen und schneiden.",
     "openPool": "Media Pool öffnen",
     "openProject": "Projekt öffnen",
@@ -276,7 +276,7 @@
   },
   "mediaTree": {
     "sendToTimeline": "An Timeline senden",
-    "openInDerush": "In Derush öffnen",
+    "openInDerush": "In NetsuCut öffnen",
     "pickRush": "Diesen Clip wählen"
   },
   "sceneCard": {

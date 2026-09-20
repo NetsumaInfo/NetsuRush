@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Derush",
+    "title": "Dérush",
     "subtitle": "Choisis ta source de rush, puis détecte et découpe les plans.",
     "openPool": "Ouvrir le Media Pool",
     "openProject": "Ouvrir le projet",
@@ -190,7 +190,7 @@
     "searchTimeline": "Rechercher une timeline…",
     "noTimelineFor": "Aucune timeline pour « {{q}} ».",
     "noShots": "Aucun plan.",
-    "defaultDerushName": "{{name}} — derush",
+    "defaultDerushName": "{{name}} — dérush",
     "failed": "échec",
     "failedShort": "échec",
     "failedTimeline": "échec timeline",

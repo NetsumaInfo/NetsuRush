@@ -1,6 +1,6 @@
 {
   "home": {
-    "title": "Derush",
+    "title": "素材整理",
     "subtitle": "素材のソースを選び、ショットを検出してカット。",
     "openPool": "Media Pool を開く",
     "openProject": "プロジェクトを開く",
@@ -276,7 +276,7 @@
   },
   "mediaTree": {
     "sendToTimeline": "タイムラインへ送信",
-    "openInDerush": "Derush で開く",
+    "openInDerush": "NetsuCut で開く",
     "pickRush": "この素材を選ぶ"
   },
   "sceneCard": {

@@ -59,8 +59,8 @@ export const VIEW_MODES: { id: RotoViewMode; labelKey: string; hintKey: string }
 // à l'invariant NC de lib/modelRegistry, assumée : Big LaMa reconstruisait image par image et son
 // scintillement rendait le résultat inutilisable en vidéo.
 export const REMOVE_ENGINES: { id: string; label: string; hint: string }[] = [
-  { id: "minimax-remover", label: "MiniMax-Remover", hint: "Diffusion en 6 étapes environ, cohérente dans le temps — plus propre sur les fonds en mouvement." },
-  { id: "diffueraser", label: "DiffuEraser", hint: "Suppression d'objet dans la vidéo. Moteur non connecté." },
+  { id: "minimax-remover", label: "MiniMax-Remover", hint: "Reconstruit le fond sans scintiller — le plus propre quand le fond bouge." },
+  { id: "diffueraser", label: "DiffuEraser", hint: "Suppression d'objet dans la vidéo. Moteur pas encore branché." },
 ];
 
 // Réglages de suppression d'objet. `steps` et `quality` ne concernent QUE la diffusion MiniMax ;
@@ -113,9 +113,9 @@ export const MATTE_SIZE_STEPS: { value: number; labelKey: string }[] = [
 
 // Moteurs de matte fin (affinent l'alpha du roto, cohérence temporelle).
 export const REFINE_ENGINES: { id: string; label: string; hint: string }[] = [
-  { id: "matanyone", label: "MatAnyone", hint: "Suivi par mémoire, adapté aux cheveux et aux bords fins." },
-  { id: "matanyone2", label: "MatAnyone 2", hint: "Détails plus fins et meilleure robustesse que la v1." },
-  { id: "videomama", label: "VideoMaMa", hint: "Diffusion par lots — bords très fins, plus lent et plus gourmand." },
+  { id: "matanyone", label: "MatAnyone", hint: "Se souvient de l'objet d'une image à l'autre — bon sur les cheveux et les bords fins." },
+  { id: "matanyone2", label: "MatAnyone 2", hint: "Comme la v1, en plus fin et plus fiable." },
+  { id: "videomama", label: "VideoMaMa", hint: "Bords très fins, mais lent et gourmand en mémoire." },
 ];
 
 // Moteurs qui traitent par LOTS au lieu de propager une mémoire (miroir de VIDEOMAMA_ENGINES côté
