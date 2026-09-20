@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "Vistas previas y miniaturas",
-    "subtitle": "Configura las vistas previas de vídeo y las miniaturas.",
+    "subtitle": "Cambiar un ajuste regenera las vistas previas a medida que navegas. Las anteriores se quedan en el disco hasta que las borres.",
     "soundTitle": "Sonido",
     "playerVolume": "Volumen de los reproductores",
     "playerVolumeHint": "Compartido por NetsuCut, Colecciones, Voz y Upscale.",
@@ -65,12 +65,12 @@
       "audioUnavailable": "La vista previa configurada no tiene audio.",
       "enabled": "Activado",
       "disabled": "Desactivado",
-      "thumbnailFormatHint": "WebP suele ocupar menos; JPEG es universal.",
+      "thumbnailFormatHint": "A igual nitidez, una miniatura JPEG pesa alrededor del doble que una WebP.",
       "quality": "Calidad de imagen",
       "qualityLow": "Ligero",
       "qualityStandard": "Equilibrado",
       "qualityHigh": "Nítido",
-      "qualityHint": "El nivel ajusta el detalle y la velocidad de generación.",
+      "qualityHint": "Ligero 360 px · Equilibrado 480 px · Nítido 720 px. Del más ligero al más nítido, una miniatura pasa de unos 5 a 16 kB.",
       "thumbnailTiming": "La miniatura se toma unas imágenes después del corte en modo rápido.",
       "cacheHint": "Las cachés existentes se conservan tras un cambio.",
       "cacheCleared": "Cachés antiguas eliminadas.",
@@ -104,7 +104,7 @@
   },
   "appearance": {
     "title": "Tema",
-    "subtitle": "Elige una paleta adecuada para tu espacio de trabajo.",
+    "subtitle": "Ocho paletas oscuras, tres claras. Cada una se retoca color por color justo debajo.",
     "group": {
       "dark": "Oscuros",
       "light": "Claros"
@@ -275,7 +275,7 @@
       "missing": "No disponible"
     },
     "thumbnailEngine": "Se genera intencionadamente en la CPU.",
-    "subtitle": "NetsuRush usa solo los motores disponibles en este equipo.",
+    "subtitle": "Qué se ejecuta en tu tarjeta, qué cae en la CPU y qué falta.",
     "refresh": "Comprobar",
     "hardware": "Componentes detectados",
     "gpu": "Tarjeta gráfica",
@@ -301,7 +301,7 @@
   },
   "power": {
     "title": "Cierre de los programas",
-    "subtitle": "Aviso que cierra Resolve o Adobe durante una tarea pesada.",
+    "subtitle": "Propone cerrar Resolve o Adobe durante una tarea pesada y volver a abrir tu proyecto después.",
     "offer": "Proponer cerrar",
     "reopen": "Recordar la reapertura",
     "nub": "Pestaña en el borde",

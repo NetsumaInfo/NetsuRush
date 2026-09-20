@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "プレビューとサムネイル",
-    "subtitle": "動画プレビューとサムネイルを設定します。",
+    "subtitle": "設定を変えると、閲覧しながらプレビューが作り直されます。古いものは削除するまでディスクに残ります。",
     "soundTitle": "サウンド",
     "playerVolume": "プレーヤーの音量",
     "playerVolumeHint": "NetsuCut・コレクション・音声・アップスケールで共有されます。",
@@ -65,12 +65,12 @@
       "audioUnavailable": "設定したプレビューに音声はありません。",
       "enabled": "有効",
       "disabled": "無効",
-      "thumbnailFormatHint": "WebPは小さく、JPEGは高い互換性があります。",
+      "thumbnailFormatHint": "同じ精細さなら、JPEG のサムネイルは WebP のおよそ 2 倍の容量になります。",
       "quality": "画像品質",
       "qualityLow": "軽量",
       "qualityStandard": "バランス",
       "qualityHigh": "高精細",
-      "qualityHint": "段階で精細さと生成速度が決まります。",
+      "qualityHint": "軽量 360 px・標準 480 px・高精細 720 px。軽量から高精細まで、サムネイル 1 枚はおよそ 5 kB から 16 kB になります。",
       "thumbnailTiming": "高速モードのまま、カットの数フレーム後を取得します。",
       "cacheHint": "設定変更後も既存キャッシュは保持されます。",
       "cacheCleared": "古いキャッシュを削除しました。",
@@ -104,7 +104,7 @@
   },
   "appearance": {
     "title": "テーマ",
-    "subtitle": "作業環境に合う配色を選択します。",
+    "subtitle": "暗いパレットが 8 つ、明るいパレットが 3 つ。すぐ下で色ごとに調整できます。",
     "group": {
       "dark": "ダーク",
       "light": "ライト"
@@ -275,7 +275,7 @@
       "missing": "利用不可"
     },
     "thumbnailEngine": "意図的にCPUで生成します。",
-    "subtitle": "NetsuRush はこの PC で利用できるエンジンだけを使用します。",
+    "subtitle": "GPU で動くもの、CPU に回るもの、足りないもの。",
     "refresh": "確認",
     "hardware": "検出されたコンポーネント",
     "gpu": "グラフィックカード",
@@ -301,7 +301,7 @@
   },
   "power": {
     "title": "編集ソフトの終了",
-    "subtitle": "重い処理の間に Resolve や Adobe を終了する通知。",
+    "subtitle": "重い処理の間だけ Resolve や Adobe を閉じ、終わったらプロジェクトを開き直すか尋ねます。",
     "offer": "終了を提案する",
     "reopen": "再開の通知",
     "nub": "端のつまみ",

@@ -7,7 +7,7 @@
   "settings": {
     "navLabel": "Sprache",
     "title": "Sprache",
-    "subtitle": "Sprache der Programmoberfläche.",
+    "subtitle": "Gilt sofort, ohne Neustart.",
     "fieldLabel": "Oberflächensprache"
   }
 }

@@ -7,7 +7,7 @@
   "settings": {
     "navLabel": "Langue",
     "title": "Langue",
-    "subtitle": "Langue de l'interface de l'application.",
+    "subtitle": "S'applique tout de suite, sans redémarrer.",
     "fieldLabel": "Langue de l'interface"
   }
 }

@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "Previews and thumbnails",
-    "subtitle": "Set up video previews and thumbnails.",
+    "subtitle": "Changing a setting regenerates the previews as you browse. The old ones stay on disk until you delete them.",
     "soundTitle": "Sound",
     "playerVolume": "Player volume",
     "playerVolumeHint": "Shared by NetsuCut, Collections, Voice and Upscale.",
@@ -65,12 +65,12 @@
       "audioUnavailable": "No audio in the configured preview.",
       "enabled": "Enabled",
       "disabled": "Disabled",
-      "thumbnailFormatHint": "WebP is often smaller; JPEG remains universal.",
+      "thumbnailFormatHint": "At the same sharpness, a JPEG thumbnail weighs about twice as much as a WebP one.",
       "quality": "Image quality",
       "qualityLow": "Light",
       "qualityStandard": "Balanced",
       "qualityHigh": "Sharp",
-      "qualityHint": "The step sets both detail and generation speed.",
+      "qualityHint": "Light 360 px · Balanced 480 px · Sharp 720 px. From lightest to sharpest, a thumbnail goes from about 5 to 16 kB.",
       "thumbnailTiming": "The thumbnail is still captured a few frames after the cut in fast mode.",
       "cacheHint": "Existing caches remain available after a change.",
       "cacheCleared": "Old caches removed.",
@@ -104,7 +104,7 @@
   },
   "appearance": {
     "title": "Theme",
-    "subtitle": "Choose a palette that suits your workspace.",
+    "subtitle": "Eight dark palettes, three light ones. Each can be tweaked colour by colour just below.",
     "group": {
       "dark": "Dark",
       "light": "Light"
@@ -275,7 +275,7 @@
       "missing": "Unavailable"
     },
     "thumbnailEngine": "Generated on the CPU by design.",
-    "subtitle": "NetsuRush uses only the engines available on this machine.",
+    "subtitle": "What runs on your card, what falls back to the CPU, and what is missing.",
     "refresh": "Check",
     "hardware": "Detected components",
     "gpu": "Graphics card",
@@ -301,7 +301,7 @@
   },
   "power": {
     "title": "Host shutdown",
-    "subtitle": "Prompt that closes Resolve or Adobe during a heavy task.",
+    "subtitle": "Offers to close Resolve or Adobe during a heavy task, then reopen your project afterwards.",
     "offer": "Offer to close",
     "reopen": "Reopen reminder",
     "nub": "Edge tab",

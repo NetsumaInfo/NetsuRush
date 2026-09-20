@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "预览和缩略图",
-    "subtitle": "配置视频预览和缩略图。",
+    "subtitle": "改动设置后，预览会在浏览时重新生成。旧的会留在磁盘上，直到你删除它们。",
     "soundTitle": "声音",
     "playerVolume": "播放器音量",
     "playerVolumeHint": "由 NetsuCut、合集、语音和放大共享。",
@@ -65,12 +65,12 @@
       "audioUnavailable": "当前预览没有音频。",
       "enabled": "已启用",
       "disabled": "已禁用",
-      "thumbnailFormatHint": "WebP通常更小；JPEG兼容性更高。",
+      "thumbnailFormatHint": "同样清晰度下，JPEG 缩略图的体积约为 WebP 的两倍。",
       "quality": "图像质量",
       "qualityLow": "轻量",
       "qualityStandard": "均衡",
       "qualityHigh": "清晰",
-      "qualityHint": "档位同时决定清晰度和生成速度。",
+      "qualityHint": "轻量 360 px · 均衡 480 px · 清晰 720 px。从最轻到最清晰，一张缩略图约从 5 kB 增到 16 kB。",
       "thumbnailTiming": "保持快速模式，在切点后几帧提取缩略图。",
       "cacheHint": "更改设置后仍保留现有缓存。",
       "cacheCleared": "旧缓存已删除。",
@@ -104,7 +104,7 @@
   },
   "appearance": {
     "title": "主题",
-    "subtitle": "选择适合工作环境的配色。",
+    "subtitle": "八套深色配色、三套浅色配色。每一套都能在下方逐色微调。",
     "group": {
       "dark": "深色",
       "light": "浅色"
@@ -275,7 +275,7 @@
       "missing": "不可用"
     },
     "thumbnailEngine": "按设计使用 CPU 生成。",
-    "subtitle": "NetsuRush 只使用此电脑上可用的运行引擎。",
+    "subtitle": "哪些跑在显卡上、哪些回落到 CPU、还缺什么。",
     "refresh": "检查",
     "hardware": "检测到的组件",
     "gpu": "显卡",
@@ -301,7 +301,7 @@
   },
   "power": {
     "title": "关闭剪辑软件",
-    "subtitle": "在繁重任务期间关闭 Resolve 或 Adobe 的提示。",
+    "subtitle": "在重任务期间提出关闭 Resolve 或 Adobe，任务结束后再打开你的项目。",
     "offer": "建议关闭",
     "reopen": "提醒重新打开",
     "nub": "边缘标签",

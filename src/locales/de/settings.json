@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "Vorschauen und Miniaturen",
-    "subtitle": "Video-Vorschauen und Miniaturen einrichten.",
+    "subtitle": "Eine Änderung erzeugt die Vorschauen beim Blättern neu. Die alten bleiben auf der Platte, bis du sie löschst.",
     "soundTitle": "Ton",
     "playerVolume": "Player-Lautstärke",
     "playerVolumeHint": "Gemeinsam für NetsuCut, Sammlungen, Stimme und Upscale.",
@@ -65,12 +65,12 @@
       "audioUnavailable": "Die konfigurierte Vorschau enthält kein Audio.",
       "enabled": "Aktiviert",
       "disabled": "Deaktiviert",
-      "thumbnailFormatHint": "WebP ist oft kleiner; JPEG bleibt universell.",
+      "thumbnailFormatHint": "Bei gleicher Schärfe wiegt eine JPEG-Miniatur rund doppelt so viel wie eine WebP-Miniatur.",
       "quality": "Bildqualität",
       "qualityLow": "Leicht",
       "qualityStandard": "Ausgewogen",
       "qualityHigh": "Scharf",
-      "qualityHint": "Die Stufe regelt Detail und Erzeugungstempo.",
+      "qualityHint": "Leicht 360 px · Ausgewogen 480 px · Scharf 720 px. Vom leichtesten zum schärfsten wächst eine Miniatur von rund 5 auf 16 kB.",
       "thumbnailTiming": "Die Miniatur wird weiterhin im Schnellmodus einige Frames nach dem Schnitt erfasst.",
       "cacheHint": "Vorhandene Caches bleiben nach einer Änderung erhalten.",
       "cacheCleared": "Alte Caches entfernt.",
@@ -104,7 +104,7 @@
   },
   "appearance": {
     "title": "Design",
-    "subtitle": "Wähle eine Palette für deinen Arbeitsbereich.",
+    "subtitle": "Acht dunkle Paletten, drei helle. Jede lässt sich direkt darunter Farbe für Farbe anpassen.",
     "group": {
       "dark": "Dunkel",
       "light": "Hell"
@@ -275,7 +275,7 @@
       "missing": "Nicht verfügbar"
     },
     "thumbnailEngine": "Wird absichtlich auf der CPU erzeugt.",
-    "subtitle": "NetsuRush verwendet nur die auf diesem Rechner verfügbaren Engines.",
+    "subtitle": "Was auf deiner Karte läuft, was auf die CPU zurückfällt und was fehlt.",
     "refresh": "Prüfen",
     "hardware": "Erkannte Komponenten",
     "gpu": "Grafikkarte",
@@ -301,7 +301,7 @@
   },
   "power": {
     "title": "Programme schließen",
-    "subtitle": "Einblendung, die Resolve oder Adobe bei schweren Aufgaben schließt.",
+    "subtitle": "Bietet an, Resolve oder Adobe während einer schweren Aufgabe zu schließen und dein Projekt danach wieder zu öffnen.",
     "offer": "Schließen anbieten",
     "reopen": "Erinnerung ans Öffnen",
     "nub": "Reiter am Rand",

@@ -36,7 +36,7 @@
   },
   "playback": {
     "title": "Lecture et miniatures",
-    "subtitle": "Configure les aperçus vidéo et les miniatures.",
+    "subtitle": "Changer un réglage regénère les aperçus au fil de la navigation. Les anciens restent sur le disque jusqu'à ce que tu les supprimes.",
     "soundTitle": "Son",
     "playerVolume": "Volume des lecteurs",
     "playerVolumeHint": "Partagé par NetsuCut, Collections, Voix et Upscale.",
@@ -65,12 +65,12 @@
       "audioUnavailable": "Aucun son dans l'aperçu configuré.",
       "enabled": "Activé",
       "disabled": "Désactivé",
-      "thumbnailFormatHint": "WebP prend souvent moins de place ; JPEG est très compatible.",
+      "thumbnailFormatHint": "À netteté égale, une vignette JPEG pèse environ deux fois plus lourd qu'en WebP.",
       "quality": "Qualité de l'image",
       "qualityLow": "Léger",
       "qualityStandard": "Équilibré",
       "qualityHigh": "Net",
-      "qualityHint": "Le cran règle la finesse et la vitesse de génération.",
+      "qualityHint": "Léger 360 px · Équilibré 480 px · Net 720 px. Du plus léger au plus net, une vignette passe d'environ 5 à 16 ko.",
       "thumbnailTiming": "La miniature est prise quelques frames après la coupe.",
       "cacheHint": "Les anciens caches restent disponibles après un changement.",
       "cacheCleared": "Anciens caches supprimés.",
@@ -104,7 +104,7 @@
   },
   "appearance": {
     "title": "Thème",
-    "subtitle": "Choisis une palette adaptée à ton espace de travail.",
+    "subtitle": "Huit palettes sombres, trois claires. Chacune se retouche couleur par couleur juste en dessous.",
     "group": {
       "dark": "Sombres",
       "light": "Clairs"
@@ -262,7 +262,7 @@
   },
   "compatibility": {
     "title": "Compatibilité de ce PC",
-    "subtitle": "NetsuRush utilise uniquement les moteurs disponibles sur cette machine.",
+    "subtitle": "Ce qui tourne sur ta carte, ce qui retombe sur le processeur, et ce qui manque.",
     "refresh": "Vérifier",
     "hardware": "Composants détectés",
     "gpu": "Carte graphique",
@@ -301,7 +301,7 @@
   },
   "power": {
     "title": "Fermeture des logiciels",
-    "subtitle": "Invite qui ferme Resolve ou Adobe pendant une tâche lourde.",
+    "subtitle": "Propose de fermer Resolve ou Adobe pendant un traitement lourd, puis de rouvrir ton projet ensuite.",
     "offer": "Proposer de fermer",
     "reopen": "Rappel de réouverture",
     "nub": "Languette au bord",
