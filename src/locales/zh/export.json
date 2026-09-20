@@ -19,11 +19,13 @@
     "defaultFolder": "NetsuRush — 剪切",
     "existingFolders": "已有文件夹",
     "mediaPoolFolders": "Media Pool 文件夹",
-    "profile": "配置",
+    "profile": "预设",
     "profileCustom": "自定义",
-    "optimization": "优化",
-    "speed": "速度",
+    "optimization": "编码器",
+    "speed": "压缩",
+    "speedHint": "在画质不变的前提下的压缩强度：压得越狠，文件越小，编码耗时也越长。",
     "codec": "编码格式",
+    "codecProfile": "规格",
     "audio": "音频",
     "audioCodec": "音频编码",
     "timelineTarget": "目标时间线",
@@ -43,7 +45,8 @@
       "end": "添加到合成末尾"
     },
     "container": "封装格式",
-    "upscale": "超分辨率",
+    "processStep": "处理 {{n}}",
+    "processKind": "类型",
     "mergeToOne": "合并为单个文件",
     "fileName": "文件名",
     "fileNamePlaceholder": "{base}_{index}",
@@ -76,20 +79,20 @@
   },
   "speed": {
     "fast": {
-      "label": "快速",
-      "hint": "优先编码速度"
+      "label": "最低",
+      "hint": "最快，文件较大"
     },
     "balanced": {
       "label": "均衡",
-      "hint": "速度与压缩兼顾"
+      "hint": "折中选择"
     },
     "quality": {
-      "label": "质量",
-      "hint": "更佳压缩"
+      "label": "高",
+      "hint": "文件更小，编码更慢"
     },
     "max": {
       "label": "最高",
-      "hint": "更慢且文件更小"
+      "hint": "文件最小，编码最慢"
     }
   },
   "toggle": {
@@ -145,13 +148,10 @@
     "aac": "AAC 192 kbps",
     "aac_256": "AAC 256 kbps",
     "aac_320": "AAC 320 kbps",
-    "opus_128": "Opus 128 kbps",
-    "opus": "Opus 160 kbps",
-    "opus_192": "Opus 192 kbps",
+    "ac3": "AC-3 448 kbps",
+    "ac3_640": "AC-3 640 kbps",
     "mp3_192": "MP3 192 kbps",
     "mp3": "MP3 320 kbps",
-    "flac": "FLAC",
-    "alac": "ALAC",
     "pcm16": "PCM 16 位",
     "pcm24": "PCM 24 位"
   },
@@ -160,10 +160,7 @@
     "lossless": "无损"
   },
   "codec": {
-    "bitDepth": "{{count}} 位",
-    "profile": "配置 {{count}}",
-    "losslessArchive": "无损（归档）",
-    "archive": "归档"
+    "bitDepth": "{{count}} 位"
   },
   "lang": {
     "ja": "日语",
@@ -187,10 +184,8 @@
     "prores422hq": "ProRes 422 HQ",
     "dnxhrHq": "DNxHR HQ",
     "mkvH265_10": "MKV H.265 10 位",
-    "webmAv1": "WebM AV1",
     "prores4444": "ProRes 4444（含 Alpha）",
     "dnxhrHqx": "DNxHR HQX 10 位",
-    "ffv1Archive": "FFV1 — 归档",
     "generic": "预设 {{index}}",
     "fallback": "导出预设"
   },
@@ -198,7 +193,7 @@
     "timelineImport": "导入到时间线",
     "streamCopy": "流复制",
     "merged": " · 已合并",
-    "upscaled": " · 超分 {{scale}}×"
+    "processed": " · {{label}}"
   },
   "codecUnknown": "未知编码"
 }

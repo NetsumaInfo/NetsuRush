@@ -51,8 +51,9 @@ export async function createCollaborativeProject(options: {
     throw new Error("Sign in is required to create a collaborative project");
   }
   const { projectId } = await createProject(options.surface);
-  const session = await openProject(projectId, options.subjectId, options.surface, "owner");
+  let session: Awaited<ReturnType<typeof openProject>> | undefined;
   try {
+    session = await openProject(projectId, options.subjectId, options.surface, "owner");
     if (options.seed) {
       const seeded = await options.seed(projectId);
       // Publishing is the one moment a media enters the shared document. A document that goes out
@@ -69,6 +70,6 @@ export async function createCollaborativeProject(options: {
     await abortProject(projectId).catch(() => undefined);
     throw error;
   } finally {
-    await closeProject(projectId, session.leaseId).catch(() => undefined);
+    if (session) await closeProject(projectId, session.leaseId).catch(() => undefined);
   }
 }

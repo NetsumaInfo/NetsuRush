@@ -18,9 +18,11 @@ import { useApp } from "@/store";
 import {
   EXPORT_AUDIO_OPTIONS,
   EXPORT_SPEED_OPTIONS,
-  getExportCodecLabel,
+  getCodecFamilyLabel,
+  getExportCodecProfileLabel,
   type ExportAudioMode,
   type ExportCodec,
+  type ExportCodecFamily,
   type ExportContainer,
   type ExportEncoderMode,
 } from "@/features/export/profiles";
@@ -141,29 +143,45 @@ export function ProcessEncodingRows({ v, patch, audioTracks, disabled, allowedCo
             }} items={profileItems} />
         </Row>
       )}
+
+      <Row label={te("editor.codec")}>
+        <Select value={fields.codecFamily} onValueChange={(value) => fields.pickCodecFamily(value as ExportCodecFamily)}
+          items={fields.codecFamilyOptions} disabled={disabled}>
+          <SelectTrigger className="w-[58%]"><SelectValue>{getCodecFamilyLabel(fields.codecFamily)}</SelectValue></SelectTrigger>
+          <SelectContent>
+            {fields.codecFamilyOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      {fields.codecProfileOptions.length > 1 && (
+        <Row label={te("editor.codecProfile")}>
+          <Select value={v.exportCodec} onValueChange={(value) => fields.pickCodec(value as ExportCodec)}
+            items={fields.codecProfileOptions} disabled={disabled}>
+            <SelectTrigger className="w-[58%]"><SelectValue>{getExportCodecProfileLabel(v.exportCodec)}</SelectValue></SelectTrigger>
+            <SelectContent>
+              {fields.codecProfileOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Row>
+      )}
+
       <Row label={te("editor.optimization")}>
         <Field value={fields.encoderMode} disabled={disabled}
           onChange={(value) => fields.pickEncoderMode(value as ExportEncoderMode)} items={fields.encoderItems} />
       </Row>
-      <Row label={te("editor.speed")}>
+
+      <Row label={te("editor.container")}>
+        <Field value={v.exportContainer} disabled={disabled}
+          onChange={(value) => fields.pickContainer(value as ExportContainer)} items={fields.containerOptions} />
+      </Row>
+
+      <Row label={te("editor.speed")} hint={te("editor.speedHint")}>
         <Field value={fields.speed} disabled={disabled || !fields.speedSettable}
           onChange={(value) => patch({ exportSpeed: value as ProcessExportSettings["exportSpeed"] })}
           items={EXPORT_SPEED_OPTIONS} />
       </Row>
-      <Row label={te("editor.codec")}>
-        <Select value={v.exportCodec} onValueChange={(value) => fields.pickCodec(value as ExportCodec)}
-          items={fields.codecOptions} disabled={disabled}>
-          <SelectTrigger className="w-[58%]"><SelectValue>{getExportCodecLabel(v.exportCodec)}</SelectValue></SelectTrigger>
-          <SelectContent>
-            {fields.codecGroups.map((group) => (
-              <SelectGroup key={group.key}>
-                <SelectGroupLabel>{group.label}</SelectGroupLabel>
-                {group.options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
-      </Row>
+
       <Row label={te("editor.audio")}>
         <Field value={trackValue} disabled={disabled}
           onChange={(value) => value === "none"
@@ -171,10 +189,11 @@ export function ProcessEncodingRows({ v, patch, audioTracks, disabled, allowedCo
             : patch({ audioTrack: Number(value), exportAudioMode: v.exportAudioMode === "none" ? "copy" : v.exportAudioMode })}
           items={trackItems} />
       </Row>
+
       <Row label={te("editor.audioCodec")}>
         <Select
           value={v.exportAudioMode === "none" ? (fields.audioOptions[0]?.value ?? "copy") : v.exportAudioMode}
-          onValueChange={(value) => patch({ exportAudioMode: value as ExportAudioMode })}
+          onValueChange={(value) => fields.pickAudio(value as ExportAudioMode)}
           items={fields.audioOptions.length ? fields.audioOptions : EXPORT_AUDIO_OPTIONS}
           disabled={disabled || v.exportAudioMode === "none"}>
           <SelectTrigger className="w-[58%]"><SelectValue /></SelectTrigger>
@@ -188,10 +207,6 @@ export function ProcessEncodingRows({ v, patch, audioTracks, disabled, allowedCo
             ))}
           </SelectContent>
         </Select>
-      </Row>
-      <Row label={te("editor.container")}>
-        <Field value={v.exportContainer} disabled={disabled}
-          onChange={(value) => fields.pickContainer(value as ExportContainer)} items={fields.containerOptions} />
       </Row>
     </Section>
   );
@@ -249,6 +264,7 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
           <FolderOpen className="h-4 w-4" /> <span className="truncate">{outDir ? basename(outDir) : t("settings.choose")}</span>
         </Button>
       </Row>
+
       <Row label={t("settings.rowImportPool")}>
         <Toggle pressed={importBack} onPressedChange={setImportBack} disabled={disabled}>
           {importBack ? t("settings.yes") : t("settings.no")}

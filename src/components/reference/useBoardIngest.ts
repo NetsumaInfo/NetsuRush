@@ -6,11 +6,13 @@
 import { useCallback } from "react";
 import { nr } from "@/lib/bridge";
 import i18n from "@/i18n";
+import { logError } from "@/lib/appLog";
 import {
   type ItemKind,
   type BoardItem,
   displaySrc,
   OG_POSTER_ONLY_PROVIDERS,
+  slideIndex,
   kindFromPath,
   youtubeId,
   youtubeNatSize,
@@ -51,6 +53,20 @@ function hostTitle(url: string): string {
 // Dernier segment d'un chemin → titre par défaut (sépare \ ou /).
 function baseTitle(path: string): string {
   return path.replace(/^.*[\\/]/, "");
+}
+
+// Copie durable impossible : l'item vit sur son objectURL le temps de la session, puis la
+// persistance l'écrit « manquant » (cf. useScenePersistence). Tu le sais MAINTENANT, pas au
+// prochain lancement devant une case vide.
+function assetCopyFailed(name: string, error?: string) {
+  logError("board:ingest", `copie en asset échouée — ${name}: ${error || "?"}`);
+  useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.copyFailed", { name }) });
+}
+
+// Destination de la copie durable d'un fichier sans chemin : le dossier compagnon du .netsu ouvert
+// quand il y en a un (même politique que les téléchargements web), sinon le magasin global.
+function assetOptions(title: string): { projectPath?: string; title: string } {
+  return { projectPath: useBoard.getState().filePath || undefined, title };
 }
 
 // Positions d'une grille centrée sur `c` (taille de cellule w×h + gouttière). Carré au plus juste
@@ -334,7 +350,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         // résolution du chemin disque — le pont WebView2 peut mettre jusqu'à 4 s (timeout) sur un
         // File sans chemin (presse-papier, pont pas encore attaché), et le chemin ne sert qu'au
         // localisateur durable, pas à l'affichage.
-        size = fitSizeOf(await probeNat(kind, blob), box, c);
+        size = fitSizeOf(await probeNat(kind, blob), box, liveCenter(id, c));
         useBoard.getState().patchItem(id, { loading: undefined, ...size }, false);
         [path] = await pending;
         // Chemin disque connu → c'est LUI le localisateur durable. La source d'affichage, elle, reste
@@ -346,7 +362,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         // le chemin disque — ici l'attente est structurelle.
         [path] = await pending;
         const src = displaySrc(kind, path || "");
-        size = src ? fitSizeOf(await probeNat(kind, src), box, c) : null;
+        size = src ? fitSizeOf(await probeNat(kind, src), box, liveCenter(id, c)) : null;
         useBoard.getState().patchItem(id, {
           loading: undefined,
           src,
@@ -359,17 +375,25 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       // arrière-plan — l'item est déjà à l'écran et le blob le tient jusqu'à ce que l'écriture aboutisse.
       if (!path && nr.reference?.saveAsset) {
         try {
-          const res = await nr.reference.saveAsset(await file.arrayBuffer(), extFromMime(file.type, kind));
+          const res = await nr.reference.saveAsset(
+            await file.arrayBuffer(),
+            extFromMime(file.type, kind),
+            assetOptions(file.name),
+          );
           if (res.ok && res.path) {
             const durable = displaySrc(kind, res.path);
             // Conteneur non lu par le webview : l'asset est sa PREMIÈRE source affichable, donc aussi
             // la première mesurable — le blob, lui, n'aurait rien rendu.
-            const late = (direct || size) ? null : fitSizeOf(await probeNat(kind, durable), box, c);
+            const late = (direct || size) ? null : fitSizeOf(await probeNat(kind, durable), box, liveCenter(id, c));
             useBoard.getState().patchItem(id, { ref: res.path, ...(direct ? null : { src: durable }), ...late }, false);
             if (!direct) URL.revokeObjectURL(blob);
+          } else {
+            assetCopyFailed(file.name, res.error);
+            return;
           }
-        } catch {
-          /* écriture refusée : le blob tient la session, la source d'origine reste sur disque */
+        } catch (e) {
+          assetCopyFailed(file.name, String(e));
+          return;
         }
       }
       useBoard.getState().setNotice({ kind: "ok", text: i18n.t("reference:ingest.done", { count: 1 }) });
@@ -474,6 +498,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
       // lot de 300 vidéos ne doit pas ouvrir 300 décodeurs d'un coup.
       let done = 0;
       const total = created.length;
+      const copyFailures: string[] = [];
       const tick = () => useBoard.getState().setNotice({ kind: "ok", sticky: true, text: i18n.t("reference:ingest.progress", { done, total }) });
       tick();
       await pool(created, 8, async (c) => {
@@ -483,15 +508,24 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
           useBoard.getState().patchItem(c.id, { natW: nat.w, natH: nat.h, w: size.w, h: size.h }, false);
         }
         if (c.file && nr.reference?.saveAsset && c.file.size <= ASSET_COPY_MAX) {
+          const name = c.file.name;
           try {
-            const res = await nr.reference.saveAsset(await c.file.arrayBuffer(), extFromMime(c.file.type, c.kind));
+            const res = await nr.reference.saveAsset(
+              await c.file.arrayBuffer(),
+              extFromMime(c.file.type, c.kind),
+              assetOptions(name),
+            );
             if (res.ok && res.path) {
               const durable = displaySrc(c.kind, res.path);
               useBoard.getState().patchItem(c.id, { ref: res.path, src: durable }, false);
               URL.revokeObjectURL(c.src);
+            } else {
+              logError("board:ingest", `copie en asset échouée — ${name}: ${res.error || "?"}`);
+              copyFailures.push(name);
             }
-          } catch {
-            // Écriture refusée : l'objectURL tient la session, la source d'origine reste sur disque.
+          } catch (e) {
+            logError("board:ingest", `copie en asset échouée — ${name}: ${String(e)}`);
+            copyFailures.push(name);
           }
         }
         done++;
@@ -542,7 +576,16 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         useBoard.setState({ items: state.items.map((it) => next.get(it.id) ?? it) });
       }
 
-      useBoard.getState().setNotice({ kind: "ok", text: i18n.t("reference:ingest.done", { count: total }) });
+      // Un lot dont des copies durables ont échoué n'est PAS un import réussi : ces items vivront
+      // sur leur objectURL puis rouvriront « manquants ». L'erreur remplace le « terminé ».
+      if (copyFailures.length) {
+        useBoard.getState().setNotice({
+          kind: "error",
+          text: i18n.t("reference:ingest.copyFailedBatch", { count: copyFailures.length, name: copyFailures[0] }),
+        });
+      } else {
+        useBoard.getState().setNotice({ kind: "ok", text: i18n.t("reference:ingest.done", { count: total }) });
+      }
     },
     [centerPoint],
   );
@@ -811,6 +854,8 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
         const res = await nr.reference.extractMedia(url, {
           projectPath: useBoard.getState().filePath || undefined,
           title: hostTitle(url),
+          // Lien qui désigne une slide précise → on ne rapporte que celle-là.
+          index: slideIndex(url) || undefined,
         });
         if (res.ok && res.items?.length) {
           await placeExtracted(res.items, url, at);

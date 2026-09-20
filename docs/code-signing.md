@@ -81,9 +81,9 @@ npm run package
 
 ## What the running app must not do
 
-Defender scores the **process tree**, not only the installer. A detection naming `app.exe` and its pid is a runtime verdict.
+Defender scores the **process tree**, not only the installer. A detection naming `NetsuRush.exe` and its pid is a runtime verdict.
 
-The chain here is `app.exe` → `resources\bin\node.exe` → `powershell.exe` → a Python venv → downloaded wheels and model weights. Every link is legitimate and none can be removed, so the shape of the calls is what is left to control:
+The chain here is `NetsuRush.exe` → `resources\bin\node.exe` → `powershell.exe` → a Python venv → downloaded wheels and model weights. Every link is legitimate and none can be removed, so the shape of the calls is what is left to control:
 
 - `core/setup.js` launches `setup.ps1` with **`-File`**. It previously used `-Command` with `& ([scriptblock]::Create([IO.File]::ReadAllText(...)))` — code built at runtime from a file read at runtime, under `-ExecutionPolicy Bypass`, in a hidden window. AMSI scans the constructed block, and that combination is what fileless loaders look like. `-File` is the ordinary shape and hides nothing.
 - The UTF-8 that scriptblock existed to force comes from the **BOM on `scripts/setup.ps1`**. Removing that BOM turns every accent in the setup UI into mojibake.

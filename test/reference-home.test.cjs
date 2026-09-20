@@ -93,7 +93,10 @@ test('the home drop path stays on the DOM event and reports a failed project ope
 
 test('the home exposes one netsu project opener and no archive import action', () => {
   const home = source.slice(source.indexOf('// ---------- Composant principal ----------'));
-  assert.equal((home.match(/onClick=\{onOpenProject\}/g) || []).length, 1);
+  // Un ouvreur visible dans la page, plus la même action dans le menu clic droit de l'accueil.
+  const [page, menu] = home.split('<ContextMenuContent>');
+  assert.equal((page.match(/onClick=\{onOpenProject\}/g) || []).length, 1);
+  assert.equal((menu.match(/onClick=\{onOpenProject\}/g) || []).length, 1);
   assert.doesNotMatch(home, /onImport/);
   assert.doesNotMatch(home, /home\.importNetsu/);
   assert.doesNotMatch(home, /home\.importBoard/);

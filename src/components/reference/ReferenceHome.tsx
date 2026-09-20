@@ -472,12 +472,17 @@ export function ReferenceHome({
   const visible = recent.filter((s) => !hidden.has(s.id) && !projectSceneIds.has(s.id));
 
   return (
-    <div
-      className="relative flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-bg)]"
-      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
-      onDragLeave={(e) => { if (e.target === e.currentTarget) setOver(false); }}
-      onDrop={onDrop}
-    >
+    <ContextMenu>
+      <ContextMenuTrigger
+        render={
+          <div
+            className="relative flex h-full min-h-0 flex-col overflow-y-auto bg-[var(--color-bg)]"
+            onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+            onDragLeave={(e) => { if (e.target === e.currentTarget) setOver(false); }}
+            onDrop={onDrop}
+          />
+        }
+      >
       {/* A .netsu file is always opened as the working project. */}
       <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
         {onOpenProject && (
@@ -625,6 +630,26 @@ export function ReferenceHome({
           </div>
         </div>
       )}
-    </div>
+      </ContextMenuTrigger>
+      {/* L'accueil n'a pas de barre d'outils : son clic droit porte les mêmes trois entrées que les
+          contrôles visibles, plus le dossier de stockage — les cartes gardent leur propre menu. */}
+      <ContextMenuContent>
+        <ContextMenuItem onClick={onNew}>
+          <FilePlus2 /> {t("home.createEmpty")}
+        </ContextMenuItem>
+        {onOpenProject && (
+          <ContextMenuItem onClick={onOpenProject}>
+            <FolderOpen /> {t("home.openProject")}
+          </ContextMenuItem>
+        )}
+        <ContextMenuItem onClick={() => void revealInternalProject()}>
+          <FolderSearch /> {t("home.openProjectLocation")}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={onSettings}>
+          <Settings2 /> {t("actions.settings")}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }

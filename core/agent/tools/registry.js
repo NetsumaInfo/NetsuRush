@@ -51,6 +51,15 @@ function createToolRegistry() {
     for (const t of list || []) register(t);
   }
 
+  /// Retire un outil. Le registre était fixe tant que tout venait du code ;
+  /// les outils tirés d'un serveur MCP tiers (cf. tools/resolveMcp.js) sont
+  /// découverts à chaud, et un serveur qui repart doit pouvoir remplacer sa
+  /// propre liste sans buter sur le refus des doublons.
+  /** @param {string} name */
+  function unregister(name) {
+    return tools.delete(name);
+  }
+
   /** @param {string} name */
   function get(name) {
     return tools.get(name) || null;
@@ -88,8 +97,9 @@ function createToolRegistry() {
     }));
   }
 
-  function toMcpTools() {
-    return list().map((t) => ({
+  /** @param {Surface} [surface] */
+  function toMcpTools(surface) {
+    return list(surface).map((t) => ({
       name: t.name,
       description: t.description,
       inputSchema: t.inputSchema,
@@ -110,7 +120,7 @@ function createToolRegistry() {
   }
 
   return {
-    register, registerAll, get, list, describe, SURFACES,
+    register, registerAll, unregister, get, list, describe, SURFACES,
     toAnthropicTools, toOpenAITools, toMcpTools, execute,
   };
 }

@@ -2,8 +2,10 @@ import { Download, Loader2, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUpdater } from "@/store/updater";
 import { UpdateStatusLine } from "@/components/updates/UpdateStatusLine";
+import { YtDlpRow } from "@/components/settings/YtDlpRow";
 import { ErrorReportButton } from "@/components/common/ErrorReportButton";
-import releases from "@/data/releases.json";
+import { releases } from "@/data/releases";
+import { ReleaseNotes } from "@/components/updates/ReleaseNotes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -85,13 +87,17 @@ export function UpdateSettings() {
             <p className="min-w-0 flex-1 break-words text-xs text-destructive">{error}</p>
             <ErrorReportButton
               error={error}
-              subject={`Échec de la mise à jour${info?.version ? ` vers la v${info.version}` : ""}`}
-              module="settings"
-              moduleLabel="Paramètres"
+              subject={t("updates.reportSubject", { version: info?.version ?? "?" })}
+              module="updates"
+              moduleLabel={t("updates.title")}
             />
           </div>
         )}
         {info?.body && <p className="whitespace-pre-line text-xs text-muted-foreground">{info.body}</p>}
+
+        {/* yt-dlp suit son propre rythme : ses extracteurs cassent bien plus vite que
+            l'application ne sort une version, donc la bibliothèque se met à jour sans en attendre une. */}
+        <YtDlpRow />
       </Card>
 
       <div>
@@ -104,9 +110,7 @@ export function UpdateSettings() {
                 <Badge variant="outline">v{release.version}</Badge>
                 <span className="ml-auto text-xs text-muted-foreground">{release.date}</span>
               </div>
-              <ul className="list-disc space-y-1 pl-4 text-xs text-muted-foreground">
-                {release.highlights[language].map((highlight) => <li key={highlight}>{highlight}</li>)}
-              </ul>
+              <ReleaseNotes release={release} compact />
             </Card>
           ))}
         </div>

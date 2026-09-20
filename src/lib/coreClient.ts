@@ -10,6 +10,7 @@ import { logError } from "@/lib/appLog";
 import { readPreviewSettings } from "@/lib/previewSettings";
 import { beginHeavyCall, isHeavyChannel } from "@/lib/busyBus";
 import { rememberImportGrants } from "@/lib/collab/importGrants";
+import { verifiedGridMediaOrigin } from "@/lib/gridMediaOrigin";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -94,6 +95,25 @@ function ensureBase(): Promise<void> {
 // d'échecs réseau, on refait la recherche au lieu de marteler une adresse morte.
 function forgetBase() {
   discovery = null;
+}
+
+// Grid media host outside Tauri: the core's other loopback name, once it has proven to be this core
+// (cf. gridMediaOrigin.ts). Until then, or if it never does, grids stay on BASE.
+let gridMedia: { base: string; origin: string } | null = null;
+if (!isTauri && typeof window !== "undefined") {
+  const probeGridMedia = async () => {
+    await ensureBase();
+    const base = BASE;
+    const origin = await verifiedGridMediaOrigin(base);
+    console.info("[NetsuRush] grid media origin:", origin ?? base);
+    if (origin) gridMedia = { base, origin };
+  };
+  // After `load`, so the first render is not what the probe ends up timing.
+  if (document.readyState === "complete") void probeGridMedia();
+  else window.addEventListener("load", () => void probeGridMedia(), { once: true });
+}
+function gridMediaBase(): string {
+  return gridMedia && gridMedia.base === BASE ? gridMedia.origin : BASE;
 }
 
 // Shared token: the Tauri shell draws it at launch and hands it over with the port
@@ -475,8 +495,9 @@ const reference: RefApi = {
   loadScene: (id) => call("reference:loadScene", [id]),
   saveScene: (scene) => call("reference:saveScene", [scene]),
   deleteScene: (id) => call("reference:deleteScene", [id]),
-  saveAsset: (bytes, ext) => call("reference:saveAsset", [{ __b64: abToB64(bytes) }, ext]),
+  saveAsset: (bytes, ext, options) => call("reference:saveAsset", [{ __b64: abToB64(bytes) }, ext, options]),
   collabPreview: (srcPath) => call("reference:collabPreview", [srcPath]),
+  ytDuration: (id) => call("reference:ytDuration", [id]),
   locateMedia: (refs, projectPath) => call("reference:locateMedia", [refs, projectPath]),
   storageAudit: (opts) => call("reference:storageAudit", [opts || {}]),
   storageFree: (opts) => call("reference:storageFree", [opts || {}]),
@@ -589,6 +610,8 @@ const script: ScriptApi = {
 };
 
 const collections: CollectionsApi = {
+  prepareShare: (id, opts) => call("collections:prepareShare", [id, opts]),
+  defaultArchiveDir: (name) => call("collections:defaultArchiveDir", [name]),
   list: () => call("collections:list"),
   load: (id) => call("collections:load", [id]),
   save: (c) => call("collections:save", [c]),
@@ -678,6 +701,9 @@ const cache: CacheApi = {
 };
 
 const notebook: NotebookApi = {
+  collaborationBindings: () => call("notebook:collaborationBindings"),
+  prepareCollaborationMedia: (surface, subjectId) => call("notebook:prepareCollaborationMedia", [surface, subjectId]),
+  setCollaborationBinding: (binding, projectId) => call("notebook:setCollaborationBinding", [binding, projectId]),
   list: () => call("notebook:list"),
   saveNotebook: (nb) => call("notebook:saveNotebook", [nb]),
   deleteNotebook: (id) => call("notebook:deleteNotebook", [id]),
@@ -752,18 +778,22 @@ const notebook: NotebookApi = {
 
 const chat: ChatApi = {
   agents: () => call("chat:agents"),
+  models: (request) => call("chat:models", [request]),
   configure: (cfg) => call("chat:configure", [cfg]),
   send: (opts) => call("chat:send", [opts]),
   cancel: (runId) => call("chat:cancel", [runId]),
   respondApproval: (callId, approved) => call("chat:approval:respond", [callId, approved]),
   tools: () => call("chat:tools"),
+  probe: (request) => call("chat:probe", [request]),
+  login: (request) => call("chat:login", [request]),
+  install: (request) => call("chat:install", [request]),
   onEvent: (cb) => on("chat:event", cb as (p: unknown) => void),
   onApproval: (cb) => on("chat:approval", cb as (p: unknown) => void),
   history: {
-    list: () => call("chat:history:list"),
-    load: (id) => call("chat:history:load", [id]),
+    list: (surface) => call("chat:history:list", [surface]),
+    load: (id, surface) => call("chat:history:load", [id, surface]),
     save: (conv) => call("chat:history:save", [conv]),
-    delete: (id) => call("chat:history:delete", [id]),
+    delete: (id, surface) => call("chat:history:delete", [id, surface]),
   },
 };
 
@@ -835,6 +865,8 @@ export function makeCoreClient(): NrApi {
     setupRun: (options) => call("setup:run", [options]),
     compatibilityStatus: (opts) => call("compat:status", [opts ?? {}]),
     onSetupProgress: (cb) => on("setup:progress", cb as (p: unknown) => void),
+    ytDlpStatus: (opts) => call("ytdlp:status", [opts ?? {}]),
+    ytDlpUpdate: () => call("ytdlp:update"),
     consoleLogs: () => call("console:logs").then((logs) => ({ ok: true, logs: logs || [] })),
     consoleClear: () => call("console:clear"),
     onConsoleLog: (cb) => on("console:log", cb as (p: unknown) => void),
@@ -1049,7 +1081,7 @@ export function makeCoreClient(): NrApi {
     // after an edit. `rev` is opaque here — it only has to change.
     flowFrameUrl: (frame, rev) =>
       `${BASE}/flow/frame?n=${frame}&rev=${encodeURIComponent(rev)}${tkParam}`,
-    assetUrl: (p) => assetSrc(p) ?? `${BASE}/media?p=${encodeURIComponent(p)}${tkParam}`,
+    assetUrl: (p) => assetSrc(p) ?? `${gridMediaBase()}/media?p=${encodeURIComponent(p)}${tkParam}`,
     ytStreamUrl: (id) => `${BASE}/ytstream?id=${encodeURIComponent(id)}${tkParam}`,
     openExternal: (url) => openUrl(url),
     openPath: (p) => openPath(p),

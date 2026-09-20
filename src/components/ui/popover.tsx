@@ -42,7 +42,10 @@ function PopoverContent({
         <Popover.Popup
           data-slot="popover-content"
           className={cn(
-            "z-50 w-72 overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-md outline-none",
+            // Même plafond que le menu déroulant et le sélecteur : sans lui un popover au contenu
+            // long (liste de participants) était coupé par le bas — et `overflow-hidden` seul ne
+            // laissait même pas de barre pour atteindre le reste.
+            "z-50 max-h-(--available-height) w-72 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-inset rounded-lg border border-border bg-popover text-popover-foreground shadow-md outline-none",
             "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-98",
             "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98",
             "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",

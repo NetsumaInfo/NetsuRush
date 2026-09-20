@@ -149,7 +149,7 @@ export function ColorPicker({
       />
       <Popover.Portal>
         <Popover.Positioner side={side} sideOffset={8} className="z-50 outline-none">
-          <Popover.Popup className="w-60 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
+          <Popover.Popup className="max-h-(--available-height) w-60 origin-[var(--transform-origin)] overflow-x-hidden overflow-y-auto scrollbar-inset rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
             {/* aire saturation (x) / luminosité (y) */}
             <div
               className="relative h-36 w-full cursor-crosshair touch-none rounded-lg"

@@ -543,6 +543,7 @@ export {
   isImageUrl,
   sourceName,
   OG_POSTER_ONLY_PROVIDERS,
+  slideIndex,
 } from "./embeds";
 export type { EmbedProvider } from "./embeds";
 

@@ -7,8 +7,10 @@ const root = path.join(__dirname, '..');
 
 test('timeline target reads the live-or-cached timeline channel without a renderer status gate', () => {
   const source = fs.readFileSync(path.join(root, 'src', 'components', 'export', 'ExportTimelineTarget.tsx'), 'utf8');
-  assert.match(source, /useTimelineList\(enabled\)/);
-  assert.doesNotMatch(source, /useTimelineList\(enabled\s*&&\s*connected\)/);
+  // Le sélecteur charge la liste dès qu'il est utilisable, et JAMAIS derrière l'état `connected` du
+  // Media Pool : l'API Resolve répond alors que ce drapeau est encore faux.
+  assert.match(source, /useTimelineList\(!disabled\)/);
+  assert.doesNotMatch(source, /useTimelineList\([^)]*connected[^)]*\)/);
 });
 
 test('timeline list keeps valid data when a transient live read fails', () => {

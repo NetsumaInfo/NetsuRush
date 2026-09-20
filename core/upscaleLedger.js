@@ -62,6 +62,8 @@ function stable(value) {
 /**
  * Empreinte d'un plan produit : tout ce qui détermine le contenu du fichier, et rien d'autre.
  * Fonction PURE (aucun accès disque) → testable sans registre.
+ * `upscale` porte les passes de traitement NORMALISÉES (une ou deux) : chacune change l'image, et
+ * l'empreinte doit changer avec elles.
  * @param {{ src: string, mtimeMs?: number, size?: number, in?: number, out?: number,
  *           encode?: any, upscale?: any }} input
  * @returns {string} sha1 hexadécimal
@@ -69,7 +71,6 @@ function stable(value) {
 function fingerprint(input) {
   const i = input || /** @type {any} */ ({});
   const e = i.encode || {};
-  const u = i.upscale || {};
   const payload = JSON.stringify([
     'v1',
     normPath(i.src),
@@ -83,7 +84,7 @@ function fingerprint(input) {
     String(e.container || 'mp4'),
     String(e.audioMode || 'copy'),
     audioTuple(e.audioSelect),
-    u.enabled ? stable(u) : null,
+    i.upscale ? stable(i.upscale) : null,
   ]);
   return crypto.createHash('sha1').update(payload).digest('hex');
 }
@@ -166,7 +167,7 @@ function createUpscaleLedger(opts) {
    * Enregistre un fichier produit. Ré-enregistrer la même empreinte remplace l'entrée (le fichier a
    * déménagé) plutôt que d'en accumuler deux.
    * @param {string} key @param {string} outFile
-   * @param {{ engine?: string, model?: string, scale?: number }} [meta]
+   * @param {{ engine?: string, model?: string, scale?: number, target?: number }} [meta]
    */
   function record(key, outFile, meta) {
     if (!key || !outFile) return null;
@@ -177,6 +178,8 @@ function createUpscaleLedger(opts) {
       engine: meta && meta.engine ? String(meta.engine) : undefined,
       model: meta && meta.model ? String(meta.model) : undefined,
       scale: meta && meta.scale != null ? Number(meta.scale) : undefined,
+      // Resolution class the output was fitted to; absent = it was sized by `scale`.
+      target: meta && meta.target ? Number(meta.target) : undefined,
     };
     entries[key] = entry;
     byFile.set(normPath(outFile), key);

@@ -92,6 +92,7 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
     tabs: [
       { id: "updates", icon: RefreshCw },
       { id: "compatibility", icon: Cpu },
+      { id: "collaboration", icon: Users },
       { id: "console", icon: Terminal },
     ],
   },

@@ -19,11 +19,13 @@
     "defaultFolder": "NetsuRush — Schnitte",
     "existingFolders": "Vorhandene Ordner",
     "mediaPoolFolders": "Media-Pool-Ordner",
-    "profile": "Profil",
+    "profile": "Vorgabe",
     "profileCustom": "Benutzerdefiniert",
-    "optimization": "Optimierung",
-    "speed": "Geschwindigkeit",
+    "optimization": "Encoder",
+    "speed": "Komprimierung",
+    "speedHint": "Komprimierungsaufwand bei gleichbleibender Bildqualität: je stärker, desto kleiner die Datei — und desto länger die Kodierung.",
     "codec": "Codec",
+    "codecProfile": "Profil",
     "audio": "Audio",
     "audioCodec": "Audio-Codec",
     "timelineTarget": "Ziel-Timeline",
@@ -43,7 +45,8 @@
       "end": "Am Ende der Komposition hinzufügen"
     },
     "container": "Container",
-    "upscale": "Upscale",
+    "processStep": "Verarbeitung {{n}}",
+    "processKind": "Typ",
     "mergeToOne": "In eine Datei zusammenführen",
     "fileName": "Dateinamen",
     "fileNamePlaceholder": "{base}_{index}",
@@ -76,20 +79,20 @@
   },
   "speed": {
     "fast": {
-      "label": "Schnell",
-      "hint": "Kodiergeschwindigkeit priorisieren"
+      "label": "Minimal",
+      "hint": "am schnellsten, größere Datei"
     },
     "balanced": {
       "label": "Ausgewogen",
       "hint": "guter Kompromiss"
     },
     "quality": {
-      "label": "Qualität",
-      "hint": "bessere Kompression"
+      "label": "Hoch",
+      "hint": "kleinere Datei, langsamer"
     },
     "max": {
       "label": "Maximal",
-      "hint": "langsamer und kompakter"
+      "hint": "kleinste Datei, am langsamsten"
     }
   },
   "toggle": {
@@ -145,13 +148,10 @@
     "aac": "AAC 192 kbps",
     "aac_256": "AAC 256 kbps",
     "aac_320": "AAC 320 kbps",
-    "opus_128": "Opus 128 kbps",
-    "opus": "Opus 160 kbps",
-    "opus_192": "Opus 192 kbps",
+    "ac3": "AC-3 448 kbps",
+    "ac3_640": "AC-3 640 kbps",
     "mp3_192": "MP3 192 kbps",
     "mp3": "MP3 320 kbps",
-    "flac": "FLAC",
-    "alac": "ALAC",
     "pcm16": "PCM 16 Bit",
     "pcm24": "PCM 24 Bit"
   },
@@ -160,10 +160,7 @@
     "lossless": "Verlustfrei"
   },
   "codec": {
-    "bitDepth": "{{count}} Bit",
-    "profile": "Profil {{count}}",
-    "losslessArchive": "Verlustfrei (Archivierung)",
-    "archive": "Archivierung"
+    "bitDepth": "{{count}} Bit"
   },
   "lang": {
     "ja": "Japanisch",
@@ -187,10 +184,8 @@
     "prores422hq": "ProRes 422 HQ",
     "dnxhrHq": "DNxHR HQ",
     "mkvH265_10": "MKV H.265 10 Bit",
-    "webmAv1": "WebM AV1",
     "prores4444": "ProRes 4444 (Alpha)",
     "dnxhrHqx": "DNxHR HQX 10 Bit",
-    "ffv1Archive": "FFV1 — Archiv",
     "generic": "Profil {{index}}",
     "fallback": "Export-Profil"
   },
@@ -198,7 +193,7 @@
     "timelineImport": "Import in die Timeline",
     "streamCopy": "Stream-Copy",
     "merged": " · zusammengeführt",
-    "upscaled": " · Upscale {{scale}}×"
+    "processed": " · {{label}}"
   },
   "codecUnknown": "Unbekannter Codec"
 }

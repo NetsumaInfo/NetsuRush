@@ -30,7 +30,7 @@ import { useCallback, useEffect, useState } from "react";
 import { nr } from "@/lib/bridge";
 import { onThumbsCleared } from "@/lib/thumbCache";
 import { useBoard } from "./useReferenceBoard";
-import { displaySrc, type BoardItem } from "./referenceShared";
+import { displaySrc, isCoreFileRef, type BoardItem } from "./referenceShared";
 
 // La source doit être BEAUCOUP plus définie que sa taille d'affichage : la vignette ne doit jamais
 // s'apercevoir, même en approchant un peu. Marge volontairement large.
@@ -64,7 +64,11 @@ export function lodEligible(item: BoardItem, zoom: number, onThumb: boolean): bo
   const screenW = item.w * zoom;
   return item.kind === "image"
     && !!item.ref
-    && !/^(https?:|data:|blob:)/i.test(item.ref)
+    // La vignette est fabriquée par le core à partir d'un FICHIER : le média d'un board partagé n'en
+    // est pas un. Sans cette exclusion, chaque ouverture de scène partagée lançait un RPC groupé
+    // voué à l'échec et le LOD ne s'engageait jamais — les images restaient toutes en définition
+    // pleine, soit exactement ce que ce module existe pour éviter.
+    && isCoreFileRef(item.ref)
     && !ANIMATED_RE.test(item.ref)
     && !item.loading
     && !item.missing
@@ -146,7 +150,8 @@ export function primeBoardThumbs(entries: { ref: string; time?: number }[]): voi
     const time = e.time ?? 0;
     const key = thumbKey(e.ref, time);
     if (!e.ref || seen.has(key) || resolved.has(key) || inflight.has(key)) continue;
-    if (/^(https?:|data:|blob:)/i.test(e.ref) || ANIMATED_RE.test(e.ref)) continue;
+    // Même règle que `lodEligible` : seul un fichier que le core peut ouvrir a une vignette.
+    if (!isCoreFileRef(e.ref) || ANIMATED_RE.test(e.ref)) continue;
     seen.add(key);
     wanted.push({ path: e.ref, time });
   }

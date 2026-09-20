@@ -4,7 +4,10 @@
   "signedOut": "登录后即可共享文档。",
   "surface": {
     "unknown": "共享文档",
-    "board": "参考板"
+    "board": "参考板",
+    "collection": "集合",
+    "notebook": "NetsuBook 笔记本",
+    "notebook-page": "NetsuBook 文档"
   },
   "device": {
     "title": "本设备",
@@ -111,19 +114,19 @@
   "panel": {
     "title": "共享状态",
     "online": "{{count}} 人在线",
-    "alone": "暂时没有其他人。",
+    "alone": "没有其他人",
     "hereNow": "在线",
-    "neverSeen": "尚未联系上",
-    "seenMinutes": "{{count}} 分钟前出现",
-    "seenHours": "{{count}} 小时前出现",
-    "seenDays": "{{count}} 天前出现",
-    "invited": "邀请待接受",
+    "neverSeen": "从未连接",
+    "seenMinutes": "{{count}} 分钟前",
+    "seenHours": "{{count}} 小时前",
+    "seenDays": "{{count}} 天前",
+    "invited": "已邀请",
     "unknownMember": "成员",
-    "queued": "有更改在此等待。一旦有可达设备便会自动发出。",
-    "upToDate": "全部已同步。",
-    "rotation": "等待密钥轮换：新的发布正在等待所有者的设备。",
-    "waitingKey": "{{count}} 位成员正在等待密钥。请保持在线以便传递。",
-    "nobodyReachable": "当前没有可达的成员：你的更改会在他们回来后发出。"
+    "queued": "等待发送。",
+    "upToDate": "已全部发送。",
+    "rotation": "需要新密钥。请所有者打开应用。",
+    "waitingKey": "{{count}} 人在等待密钥。请保持在线。",
+    "nobodyReachable": "无人在线，尚未发送。"
   },
   "board": {
     "noScene": "请先将此看板保存到场景库。",

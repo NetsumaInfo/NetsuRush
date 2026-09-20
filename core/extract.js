@@ -1,23 +1,56 @@
 // @ts-check
-// Extraction du VRAI média derrière un lien (réseaux sociaux + ~1800 sites) via yt-dlp (vidéo) et
-// gallery-dl (images), installés dans le venv (.venv). On télécharge le fichier dans le dossier
-// d'assets du board (durable) puis on renvoie le(s) chemin(s) + le type au renderer, qui pose un
-// item vidéo/image NATIF (pas une carte embed). Pour un projet ouvert, la destination est directement
-// son dossier compagnon organisé ; le magasin global ne sert que pour un board sans fichier.
+// Extraction du VRAI média derrière un lien (réseaux sociaux + ~1800 sites).
 //
-// Stratégie (jusqu'à 2 passes : sans cookies puis avec, le contenu public marche sans login) :
-//   1. yt-dlp → meilleure vidéo mp4 (merge HLS/DASH via ffmpeg) ;
-//   2. si pas de vidéo (post photo), gallery-dl → image(s) pleine résolution.
-// Cookies navigateur (--cookies-from-browser) en 2e passe pour le contenu nécessitant connexion.
+// yt-dlp et gallery-dl (images d'un post photo) sont installés dans le venv (.venv) par le setup ;
+// l'absence de gallery-dl n'empêche jamais l'extraction.
+//
+// On télécharge le fichier dans le dossier d'assets du board (durable) puis on renvoie le(s)
+// chemin(s) + le type au renderer, qui pose un item vidéo/image NATIF (pas une carte embed). Pour un
+// projet ouvert, la destination est directement son dossier compagnon organisé ; le magasin global
+// ne sert que pour un board sans fichier.
+//
+// A post is a LIST OF SLIDES, not a single medium:
+//   1. one metadata pass (`-J -i --ignore-no-formats-error`) enumerates the slides — without that
+//      flag a single photo slide makes yt-dlp exit non-zero and the whole post is discarded;
+//   2. slides WITH formats are downloaded by yt-dlp (best avc1 ≤1080p, merged to mp4);
+//   3. slides WITHOUT formats are photos: their largest thumbnail IS the full-resolution file.
+// X/Twitter exposes neither format nor thumbnail for a photo post, so it has a dedicated resolver on
+// the public syndication endpoint of the official embeds.
+//
+// Cookies: public pass first, then ONE authenticated pass — an exported cookies.txt if there is one,
+// otherwise the keyring of an installed browser.
 
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
-const { PYTHON, DETECT_ENV, DATA_DIR, ffBin, COOKIES_BROWSER, jsRuntimeArgs } = require('./config');
+const {
+  PYTHON, DETECT_ENV, DATA_DIR, ffBin,
+  cookieBrowserCandidates, ytCookiesFile, jsRuntimeArgs,
+} = require('./config');
 const { t } = require('./i18n');
+const { downloadBytes } = require('./reference');
 const sidecar = require('./netsu/sidecar');
 const downloadTarget = require('./netsu/downloadTarget');
+
+const ASSETS_DIR = path.join(DATA_DIR, 'reference', 'assets');
+const VIDEO_EXTS = new Set(['mp4', 'webm', 'mov', 'mkv', 'm4v', 'avi', 'ogv']);
+const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'avif', 'tiff', 'tif']);
+// Beyond this, a post is not a reference board any more. Same ceiling as the gallery-dl pass.
+const MAX_SLIDES = 20;
+// Public endpoint behind the official tweet embeds: the only route that still yields the photos of a
+// tweet without an account.
+const TWEET_ENDPOINT = 'https://cdn.syndication.twimg.com/tweet-result';
+
+function ensureDir(d) {
+  try { fs.mkdirSync(d, { recursive: true }); } catch (_) {}
+}
+
+// dossier de ffmpeg si fourni en absolu (bundle) → passé à yt-dlp ; sinon il le cherche dans le PATH.
+function ffmpegDir() {
+  const f = ffBin('ffmpeg');
+  return path.isAbsolute(f) ? path.dirname(f) : null;
+}
 
 // Python qui porte yt-dlp/gallery-dl : le venv local en priorité (dev, où `python` du PATH n'est
 // pas forcément le venv), sinon l'interpréteur configuré (packaging / CONFIG.python).
@@ -30,30 +63,34 @@ function resolvePython() {
 }
 const PY = resolvePython();
 
-const ASSETS_DIR = path.join(DATA_DIR, 'reference', 'assets');
-const VIDEO_EXTS = new Set(['mp4', 'webm', 'mov', 'mkv', 'm4v', 'avi', 'ogv']);
-const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'avif', 'tiff', 'tif']);
-
-function ensureDir(d) {
-  try { fs.mkdirSync(d, { recursive: true }); } catch (_) {}
+/** yt-dlp, toujours par son module : le venv porte le paquet, pas un exécutable autonome.
+ * @returns {{ bin: string, args: string[] }} */
+function ytDlpCommand() {
+  return { bin: PY, args: ['-m', 'yt_dlp'] };
 }
 
-// dossier de ffmpeg si fourni en absolu (bundle) → passé à yt-dlp ; sinon il le cherche dans le PATH.
-function ffmpegDir() {
-  const f = ffBin('ffmpeg');
-  return path.isAbsolute(f) ? path.dirname(f) : null;
+/** gallery-dl : même interpréteur, autre module. Il n'est pas obligatoire — son absence fait
+ * simplement sauter la passe images.
+ * @returns {{ bin: string, args: string[] } | null} */
+function galleryCommand() {
+  return PY ? { bin: PY, args: ['-m', 'gallery_dl'] } : null;
 }
 
-// Lance un process et résout { code, stdout, stderr }. Tué dur après `timeoutMs`.
-function run(args, timeoutMs) {
+// Lance un process et résout { code, stdout, stderr, missing }. Tué dur après `timeoutMs`.
+// `missing` = l'exécutable lui-même est absent (ENOENT) : ce n'est pas un lien qui échoue.
+function run(bin, args, timeoutMs) {
   return new Promise((resolve) => {
-    const child = spawn(PY, args, { env: DETECT_ENV });
+    const child = spawn(bin, args, { env: DETECT_ENV });
     let out = '', err = '';
     const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, timeoutMs);
     child.stdout.on('data', (d) => { out += d.toString(); });
     child.stderr.on('data', (d) => { err += d.toString(); });
-    child.on('error', (e) => { clearTimeout(killer); resolve({ code: -1, stdout: out, stderr: String(e) }); });
-    child.on('close', (code) => { clearTimeout(killer); resolve({ code: code ?? -1, stdout: out, stderr: err }); });
+    child.on('error', (e) => {
+      clearTimeout(killer);
+      const missing = /** @type {NodeJS.ErrnoException} */ (e)?.code === 'ENOENT';
+      resolve({ code: -1, stdout: out, stderr: String(e), missing });
+    });
+    child.on('close', (code) => { clearTimeout(killer); resolve({ code: code ?? -1, stdout: out, stderr: err, missing: false }); });
   });
 }
 
@@ -61,15 +98,27 @@ function extOf(p) { return (p.split('.').pop() || '').toLowerCase(); }
 
 let toolCheckPromise = null;
 
-async function toolAvailable(moduleName) {
-  const { code, stderr } = await run(['-m', moduleName, '--version'], 15000);
-  return { ok: code === 0, error: stderr.trim() };
+async function ytdlpAvailable() {
+  const cmd = ytDlpCommand();
+  const { code, stderr, missing } = await run(cmd.bin, [...cmd.args, '--version'], 20000);
+  return {
+    ok: code === 0,
+    missing,
+    error: missing ? `yt-dlp introuvable (${cmd.bin}) — relance l'installation pour poser l'outil` : stderr.trim(),
+  };
+}
+
+async function galleryAvailable() {
+  const cmd = galleryCommand();
+  if (!cmd) return { ok: false, missing: true, error: '' };
+  const { code, stderr, missing } = await run(cmd.bin, [...cmd.args, '--version'], 20000);
+  return { ok: code === 0, missing, error: stderr.trim() };
 }
 
 async function checkTools() {
   if (!toolCheckPromise) {
     toolCheckPromise = (async () => {
-      const [yt, gl] = await Promise.all([toolAvailable('yt_dlp'), toolAvailable('gallery_dl')]);
+      const [yt, gl] = await Promise.all([ytdlpAvailable(), galleryAvailable()]);
       return { yt, gl };
     })();
   }
@@ -88,18 +137,11 @@ const YTDLP_FORMAT = [
   'b',
 ].join('/');
 
-// yt-dlp : meilleure vidéo mp4 → fichier(s) dans ASSETS_DIR. Renvoie les chemins vidéo écrits.
-async function tryYtdlp(url, cookiesBrowser, outputDir) {
-  const outTpl = path.join(outputDir, 'nr-yt-%(id)s.%(ext)s');
+// Arguments communs à TOUTES les invocations yt-dlp : ce que l'outil doit savoir du poste (runtime
+// JS, ffmpeg, cookies) et de la plateforme visée, jamais ce qu'on lui demande de faire.
+function commonArgs(url, cookies) {
   const args = [
-    '-m', 'yt_dlp', url,
-    '-f', YTDLP_FORMAT,
-    '--merge-output-format', 'mp4',
-    '--no-playlist', '--no-warnings', '--no-progress', '--no-simulate',
-    '--socket-timeout', '30', '--max-filesize', '1024m',
-    '--restrict-filenames',
-    '-o', outTpl,
-    '--print', 'after_move:filepath',
+    '--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '30',
     ...jsRuntimeArgs(),
   ];
   // Instagram changes its public web API frequently. The current extractor plus browser
@@ -107,27 +149,131 @@ async function tryYtdlp(url, cookiesBrowser, outputDir) {
   if (/https?:\/\/(?:www\.)?instagram\.com\//i.test(url)) args.push('--impersonate', 'chrome');
   const ffDir = ffmpegDir();
   if (ffDir) args.push('--ffmpeg-location', ffDir);
-  if (cookiesBrowser) args.push('--cookies-from-browser', cookiesBrowser);
+  if (cookies && cookies.file) args.push('--cookies', cookies.file);
+  else if (cookies && cookies.browser) args.push('--cookies-from-browser', cookies.browser);
+  return args;
+}
 
-  const { code, stdout, stderr } = await run(args, 120000);
-  const paths = stdout.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-  const items = [];
-  for (const p of paths) if (fs.existsSync(p) && VIDEO_EXTS.has(extOf(p))) items.push({ path: p, kind: 'video' });
-  return code === 0 && items.length ? { ok: true, items } : { ok: false, error: stderr.trim() };
+/** Largest thumbnail of an entry — for a photo slide this IS the medium (yt-dlp points `thumbnail`
+ * at the uncapped variant).
+ * @returns {string} */
+function bestThumbUrl(entry) {
+  if (!entry) return '';
+  if (entry.thumbnail) return String(entry.thumbnail);
+  const list = (Array.isArray(entry.thumbnails) ? entry.thumbnails : []).filter((th) => th && th.url);
+  if (!list.length) return '';
+  const sized = list.filter((th) => Number(th.width) > 0 && Number(th.height) > 0);
+  // Sans dimension annoncée, l'ordre de yt-dlp fait foi : il classe du pire au meilleur.
+  if (!sized.length) return String(list[list.length - 1].url);
+  return String(sized.reduce((a, b) => (b.width * b.height > a.width * a.height ? b : a)).url);
+}
+
+/** Slides of a post, in order. `video` = a stream yt-dlp can download, `image` = fetch `thumb`.
+ * @returns {Promise<{ slides: { index: number, id: string, kind: 'video'|'image', thumb: string }[], error: string, missing: boolean }>} */
+async function dumpSlides(url, cookies) {
+  const cmd = ytDlpCommand();
+  const args = [url, '-J', '-i', '--ignore-no-formats-error', ...commonArgs(url, cookies)];
+  const { code, stdout, stderr, missing } = await run(cmd.bin, [...cmd.args, ...args], 120000);
+  let info = null;
+  try { info = JSON.parse(stdout); } catch (_) { info = null; }
+  if (!info) return { slides: [], error: missing ? `yt-dlp introuvable (${cmd.bin})` : (stderr.trim() || `yt-dlp a échoué (${code})`), missing };
+  const entries = info._type === 'playlist' && Array.isArray(info.entries) ? info.entries : [info];
+  const slides = [];
+  entries.slice(0, MAX_SLIDES).forEach((entry, i) => {
+    if (!entry) return;
+    const hasStream = Array.isArray(entry.formats) && entry.formats.length > 0;
+    const thumb = bestThumbUrl(entry);
+    if (!hasStream && !thumb) return;
+    slides.push({
+      index: i + 1,
+      id: String(entry.id || i + 1),
+      kind: hasStream ? 'video' : 'image',
+      thumb,
+    });
+  });
+  return { slides, error: stderr.trim(), missing: false };
+}
+
+// Les slides VIDÉO d'un post → fichiers mp4 dans `outputDir`.
+async function downloadVideos(url, slides, playlist, cookies, outputDir) {
+  if (!slides.length) return [];
+  const outTpl = path.join(outputDir, 'nr-yt-%(id)s.%(ext)s');
+  const args = [
+    url,
+    '-f', YTDLP_FORMAT,
+    '--merge-output-format', 'mp4',
+    '-i', '--ignore-no-formats-error',
+    '--no-simulate', '--max-filesize', '1024m', '--restrict-filenames',
+    '-o', outTpl,
+    '--print', 'after_move:filepath',
+    ...commonArgs(url, cookies),
+  ];
+  if (playlist) args.push('--playlist-items', slides.map((s) => s.index).join(','));
+  const cmd = ytDlpCommand();
+  const { stdout } = await run(cmd.bin, [...cmd.args, ...args], 300000);
+  const written = stdout.split(/\r?\n/).map((s) => s.trim())
+    .filter((p) => p && fs.existsSync(p) && VIDEO_EXTS.has(extOf(p)));
+  // L'id dans le nom de sortie rattache un fichier à sa position : une slide qui échoue n'imprime rien.
+  const out = [];
+  const left = [...written];
+  for (const slide of slides) {
+    const hit = left.findIndex((p) => path.basename(p).includes(slide.id));
+    const file = hit >= 0 ? left.splice(hit, 1)[0] : null;
+    if (file) out.push({ index: slide.index, path: file, kind: 'video' });
+  }
+  // Repli d'ordre : id absent du nom (`--restrict-filenames`).
+  slides.filter((s) => !out.some((o) => o.index === s.index)).forEach((slide, i) => {
+    if (left[i]) out.push({ index: slide.index, path: left[i], kind: 'video' });
+  });
+  return out;
+}
+
+// Extension d'un média téléchargé : type MIME renvoyé par le CDN d'abord (fiable), sinon l'URL.
+function extFor(contentType, url) {
+  const sub = String(contentType || '').split('/')[1] || '';
+  const fromMime = { jpeg: 'jpg', jpg: 'jpg', png: 'png', gif: 'gif', webp: 'webp', avif: 'avif', mp4: 'mp4', webm: 'webm', quicktime: 'mov' }[sub.toLowerCase()];
+  if (fromMime) return fromMime;
+  try {
+    const ext = extOf(new URL(url).pathname);
+    if (IMAGE_EXTS.has(ext) || VIDEO_EXTS.has(ext)) return ext;
+  } catch (_) {}
+  return 'jpg';
+}
+
+// Les slides PHOTO : octets pris sur le CDN (URL déjà signée) et écrits dans `outputDir`.
+async function downloadStills(slides, outputDir, prefix) {
+  const out = [];
+  for (const slide of slides) {
+    if (!slide.thumb) continue;
+    try {
+      const res = await downloadBytes(slide.thumb);
+      const kind = res.type.startsWith('video/') ? 'video' : 'image';
+      const file = path.join(outputDir, `${prefix}-${slide.id}-${String(slide.index).padStart(2, '0')}.${extFor(res.type, slide.thumb)}`);
+      fs.writeFileSync(file, res.buf);
+      out.push({ index: slide.index, path: file, kind });
+    } catch (_) {
+      // Une slide qui refuse ses octets ne condamne pas le reste du post.
+    }
+  }
+  return out;
 }
 
 // gallery-dl : images (post photo, carrousel) → un sous-dossier dédié, puis on liste les fichiers.
-async function tryGallery(url, cookiesBrowser, outputDir) {
+// Dernier recours : il n'est pas provisionné, il ne sert donc que sur un poste qui en a un.
+async function tryGallery(url, cookies, outputDir) {
+  const cmd = galleryCommand();
+  if (!cmd) return { ok: false, error: '' };
   const sub = path.join(outputDir, `nr-gl-${crypto.randomBytes(5).toString('hex')}`);
   ensureDir(sub);
   const args = [
-    '-m', 'gallery_dl', '-q', '-D', sub,
-    '--range', '1-20', '--filesize-max', '256M', '--no-mtime',
+    '-q', '-D', sub,
+    '--range', `1-${MAX_SLIDES}`, '--filesize-max', '256M', '--no-mtime',
     url,
   ];
-  if (cookiesBrowser) args.push('--cookies-from-browser', cookiesBrowser);
+  if (cookies && cookies.file) args.push('--cookies', cookies.file);
+  else if (cookies && cookies.browser) args.push('--cookies-from-browser', cookies.browser);
 
-  const { stderr } = await run(args, 120000);
+  const { stderr } = await run(cmd.bin, [...cmd.args, ...args], 120000);
   let files = [];
   try { files = fs.readdirSync(sub); } catch (_) {}
   const items = [];
@@ -140,8 +286,73 @@ async function tryGallery(url, cookiesBrowser, outputDir) {
   return items.length ? { ok: true, items } : { ok: false, error: stderr.trim() };
 }
 
+// --- X / Twitter -----------------------------------------------------------------------------
+// Son extracteur yt-dlp n'expose rien d'un post photo. L'endpoint public des embeds officiels rend
+// chaque média du tweet (photos et variantes vidéo) sans compte.
+
+function tweetId(url) {
+  const m = String(url || '').match(/(?:twitter\.com|x\.com)\/[^/]+\/status(?:es)?\/(\d+)/i);
+  return m ? m[1] : null;
+}
+
+// `name=orig` = le fichier original, pas la version recadrée servie dans la timeline.
+function photoOriginal(url) {
+  try {
+    const u = new URL(url);
+    u.searchParams.set('name', 'orig');
+    return u.toString();
+  } catch (_) { return url; }
+}
+
+// X ne sert que du H.264 (1080p au plus) : la variante au plus haut débit est sans risque pour la WebView.
+function bestVariant(info) {
+  const variants = (info && Array.isArray(info.variants) ? info.variants : [])
+    .filter((v) => v && v.url && String(v.content_type || '').includes('mp4'));
+  if (!variants.length) return '';
+  return variants.reduce((a, b) => (Number(b.bitrate || 0) > Number(a.bitrate || 0) ? b : a)).url;
+}
+
+/** @returns {Promise<{ index: number, id: string, kind: 'video'|'image', thumb: string }[]>} */
+async function tweetSlides(url) {
+  const id = tweetId(url);
+  if (!id) return [];
+  let data = null;
+  try {
+    const res = await downloadBytes(`${TWEET_ENDPOINT}?id=${id}&token=a&lang=en`);
+    data = JSON.parse(res.buf.toString('utf8'));
+  } catch (_) { return []; }
+  const details = data && Array.isArray(data.mediaDetails) ? data.mediaDetails : [];
+  const slides = [];
+  details.slice(0, MAX_SLIDES).forEach((media, i) => {
+    if (!media) return;
+    const isPhoto = media.type === 'photo';
+    const thumb = isPhoto ? photoOriginal(media.media_url_https) : bestVariant(media.video_info);
+    if (!thumb) return;
+    slides.push({ index: i + 1, id: `${id}-${i + 1}`, kind: isPhoto ? 'image' : 'video', thumb });
+  });
+  return slides;
+}
+
+/** Passes de cookies : la publique d'abord (le contenu public n'a rien à prouver), puis UNE passe
+ * authentifiée. Un cookies.txt exporté passe avant le trousseau d'un navigateur — il reste lisible
+ * même navigateur ouvert, là où Chrome verrouille sa base.
+ * @returns {({ file: string|null, browser: string|null }|null)[]} */
+function cookiePasses() {
+  const file = ytCookiesFile();
+  if (file) return [null, { file, browser: null }];
+  const browser = cookieBrowserCandidates()[0];
+  return browser ? [null, { file: null, browser }] : [null];
+}
+
+// Ne garde que la slide demandée (1-based). Hors bornes → le post entier.
+function pickSlide(slides, index) {
+  if (!index) return slides;
+  const one = slides.filter((s) => s.index === index);
+  return one.length ? one : slides;
+}
+
 // Extrait le média derrière `url`. Passe sans cookies d'abord (public), puis avec (contenu connecté).
-/** @param {string} url @param {{ projectPath?: string, title?: string }} [options] */
+/** @param {string} url @param {{ projectPath?: string, title?: string, index?: number }} [options] */
 async function extractMedia(url, options = {}) {
   if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: 'URL invalide' };
   const projectPath = String(options.projectPath || '');
@@ -149,17 +360,41 @@ async function extractMedia(url, options = {}) {
   const imageDir = projectPath ? downloadTarget.bucketDir(projectPath, 'image') : ASSETS_DIR;
   ensureDir(videoDir);
   ensureDir(imageDir);
+  const wanted = Number(options.index) > 0 ? Math.floor(Number(options.index)) : 0;
+  const finish = (items) => {
+    const ordered = items.slice().sort((a, b) => a.index - b.index).map((it) => ({ path: it.path, kind: it.kind }));
+    if (!ordered.length) return null;
+    return projectPath ? organizeProjectItems(projectPath, ordered, options.title) : { ok: true, items: ordered };
+  };
+
+  // X / Twitter : résolveur dédié EN PREMIER, seule voie vers les photos d'un tweet.
+  const tweet = pickSlide(await tweetSlides(url), wanted);
+  if (tweet.length) {
+    const stills = await downloadStills(tweet.filter((s) => s.kind === 'image'), imageDir, 'nr-tw');
+    const clips = await downloadStills(tweet.filter((s) => s.kind === 'video'), videoDir, 'nr-tw');
+    const done = finish([...stills, ...clips]);
+    if (done) return done;
+  }
+
   const tools = await checkTools();
   if (!tools.yt.ok && !tools.gl.ok) {
-    return { ok: false, error: t('extractToolsMissing') };
+    return { ok: false, error: tools.yt.error || t('extractToolsMissing') };
   }
-  const browsers = COOKIES_BROWSER ? [null, COOKIES_BROWSER] : [null];
   const errors = [];
-  for (const ck of browsers) {
+  for (const ck of cookiePasses()) {
     if (tools.yt.ok) {
-      const v = await tryYtdlp(url, ck, videoDir);
-      if (v.ok) return projectPath ? organizeProjectItems(projectPath, v.items, options.title) : v;
-      if (v.error) errors.push(v.error);
+      const { slides, error, missing } = await dumpSlides(url, ck);
+      if (error) errors.push(error);
+      if (!missing && slides.length) {
+        const picked = pickSlide(slides, wanted);
+        const playlist = slides.length > 1;
+        const videos = await downloadVideos(url, picked.filter((s) => s.kind === 'video'), playlist, ck, videoDir);
+        // Une slide vidéo dont le flux a échoué garde sa vignette plutôt que de disparaître.
+        const missed = picked.filter((s) => s.kind === 'video' && !videos.some((v) => v.index === s.index));
+        const stills = await downloadStills([...picked.filter((s) => s.kind === 'image'), ...missed], imageDir, 'nr-st');
+        const done = finish([...videos, ...stills]);
+        if (done) return done;
+      }
     }
     if (tools.gl.ok) {
       const g = await tryGallery(url, ck, imageDir);

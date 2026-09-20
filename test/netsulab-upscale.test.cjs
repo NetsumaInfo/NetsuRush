@@ -237,7 +237,10 @@ test('NetsuLab video modes share the general export profile taxonomy', async () 
   assert.match(fields, /supportedEncoderModes/);
   assert.match(fields, /supportedCodecGroups/);
   assert.match(fields, /compatibleContainersForExportCodec/);
-  assert.match(fields, /compatibleAudioForContainer/);
+  assert.match(fields, /isExportAudioContainerCompatible/);
+  // Le codec audio entraîne le conteneur au lieu d'être filtré par lui : sans ça le sans-perte
+  // (PCM, MOV/MKV seulement) disparaissait du menu dès que le profil était en MP4.
+  assert.match(fields, /pickAudio/);
   for (const file of ['export/ProfileEditor.tsx', 'collections/FolderEditor.tsx']) {
     assert.match(read(`src/components/${file}`), /useExportEncodingFields/);
   }

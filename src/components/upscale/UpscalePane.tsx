@@ -7,7 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Toggle } from "@/components/ui/toggle";
 import { UpscaleModelSettings } from "./UpscaleModelSettings";
-import { DEFAULT_SETTINGS, RESTORE_MODELS, SHADER_MODELS, UP_MODELS, type UpSettings } from "./upscaleShared";
+import { DEFAULT_SETTINGS, RESTORE_MODELS, SHADER_MODELS, UP_MODELS, isRtxShader, type UpSettings } from "./upscaleShared";
 
 /** Réglages d'upscale d'un écran hôte : ceux de NetsuLab, plus l'état de l'option. */
 export type PaneUpscale = Partial<UpSettings> & { enabled?: boolean };
@@ -47,7 +47,7 @@ export function SettingsPane({
 /** Réglages effectifs : les défauts de NetsuLab, écrasés par ce que l'écran hôte a retenu. */
 export const paneUpSettings = (value: PaneUpscale | undefined): UpSettings => ({ ...DEFAULT_SETTINGS, ...value });
 
-/** Résumé du volet fermé : traitement retenu + échelle. */
+/** Résumé du volet fermé : traitement retenu + classe de résolution, ou échelle sans classe. */
 export function UpscaleSummary({ value }: { value: PaneUpscale | undefined }) {
   if (!value?.enabled) return null;
   const s = paneUpSettings(value);
@@ -55,7 +55,10 @@ export function UpscaleSummary({ value }: { value: PaneUpscale | undefined }) {
   const id = turbo ? s.shader : s.model;
   const label = (turbo ? SHADER_MODELS.find((m) => m.id === s.shader)?.label : UP_MODELS.find((m) => m.id === s.model)?.label)
     ?? RESTORE_MODELS.find((m) => m.id === s.model)?.label ?? id;
-  return <>{`${label} · ${s.mode === "restore" ? 1 : s.scale}×`}</>;
+  // Same rules as `core/upscaleArgs.js`: restoration stays 1x, RTX VSR has its x2 imposed.
+  const rtx = turbo && isRtxShader(s.shader);
+  const size = s.mode === "restore" ? "1×" : !rtx && s.targetHeight ? `${s.targetHeight}p` : `${rtx ? 2 : s.scale}×`;
+  return <>{`${label} · ${size}`}</>;
 }
 
 /**

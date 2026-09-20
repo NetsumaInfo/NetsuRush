@@ -20,6 +20,7 @@
 - The Python modules to provision are therefore **derived from the selected models** (`src/lib/modules.ts`: a model's task gives its module, derush always included), since that is the only choice that costs disk space.
 - The models step applies the settings page's rule: current selection only, an **Advanced** button with a count for the rest, filtered by **real availability** (`models:list` → `available`) and hardware compatibility — a model with no engine would be checked and then silently dropped by the core.
 - **Degraded mode**: a "continue without" button gives an app with no ML modules. Full capability needs an **NVIDIA GPU** (encoding and AI) and **DaVinci Resolve Studio** for project features (external scripting = Local). The free edition of Resolve does not expose the scripting API.
+- **Nothing to package for Blackmagic's MCP server**: Studio 21.1+ installs `ResolveMCP.exe` itself, the copilot discovers it at runtime (`core/agent/mcp/resolveBin.js`), and its version must match the Resolve it drives — so it is never copied into the installer. Absent, the `bmd_*` tools simply do not exist and the rest of the copilot is unaffected.
 
 **Updates are one icon in the title bar**, left of the window controls, mounted in the window controls so it appears in the same corner during setup, on the gates and in the app — one reflex. It is absent when no version is waiting. It goes through the Tauri updater, so it stays clickable when the core is dead, which is exactly when the install screen is the only reachable one.
 

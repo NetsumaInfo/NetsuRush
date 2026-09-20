@@ -53,7 +53,15 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 shadow-xl shadow-black/50 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-98 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98",
+          // La hauteur est BORNÉE ici et nulle part ailleurs : sans plafond, un dialogue au contenu
+          // long (éditeur de profil d'export, réglages) dépasse le viewport et se fait couper en bas,
+          // sans barre pour aller chercher le reste. Chaque appelant qui le découvrait posait sa
+          // propre rustine (`max-h-[85vh] overflow-y-auto`), donc la moitié des dialogues restaient
+          // cassés. tailwind-merge laisse un appelant écraser ce plafond quand il gère sa hauteur.
+          // `overflow-x-hidden` est aussi délibéré que le plafond : un seul champ trop large (un
+          // chemin de fichier, un nom de profil) suffisait à faire pousser une barre HORIZONTALE
+          // sous le dialogue, alors qu'un dialogue ne se lit jamais de gauche à droite.
+          "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-inset rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 shadow-xl shadow-black/50 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-98 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98",
           className
         )}
         {...props}

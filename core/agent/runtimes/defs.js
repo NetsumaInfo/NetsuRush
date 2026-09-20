@@ -1,4 +1,11 @@
 // @ts-check
+// Registre data-driven des agents CLI.
+//
+// `modelsFrom` nomme le fournisseur dont l'agent sert les modeles, et c'est lui
+// qui alimente la liste (cf. core/agent/models.js) : les tableaux `models`
+// ci-dessous ne sont qu'un filet pour une machine hors ligne. Ils etaient la
+// seule source avant, et ils avaient pris une generation de retard sans que
+// rien ne le signale — choisir Codex proposait des modeles perimes.
 // Registre data-driven des agents CLI. Ajouter un agent = ajouter une entrée ici (façon open-design
 // runtimes/defs/*). Chaque def décrit comment LANCER le CLI et PARSER sa sortie ; les outils NetsuRush
 // sont fournis au CLI via le serveur MCP (.mcp.json injecté, cf. mcpInjection).
@@ -8,37 +15,51 @@ const DEFS = [
   {
     id: 'claude',
     name: 'Claude Code',
+    // `/login` est une commande DANS la session interactive, pas un argument :
+    // lancer le CLI nu ouvre la session, et l'utilisateur tape /login.
+    loginArgs: [],
     bin: 'claude',
     fallbackBins: ['claude.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'claude-stream-json',
     promptViaStdin: true,
     mcpInjection: 'mcp-config-flag',
-    models: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5-20251001'],
-    buildArgs: ({ model, mcpConfigPath }) => [
+    modelsFrom: 'anthropic',
+    models: ['claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5'],
+    // `--permission-mode bypassPermissions` a ete RETIRE. Il approuvait d'office
+    // TOUS les outils integres — Bash, Edit, Write — et la porte de permission
+    // de NetsuRush ne couvre que nos outils MCP : « Lecture seule » n'etait donc
+    // pas en lecture seule. A la place, une liste blanche stricte des seuls
+    // outils qu'on expose, et un refus explicite de l'ecriture et du shell.
+    buildArgs: ({ model, mcpConfigPath, allowedTools }) => [
       '-p',
       '--output-format', 'stream-json',
       '--verbose',
       ...(model ? ['--model', model] : []),
       ...(mcpConfigPath ? ['--mcp-config', mcpConfigPath] : []),
-      '--permission-mode', 'bypassPermissions',
+      ...(allowedTools && allowedTools.length ? ['--allowedTools', ...allowedTools] : []),
+      '--disallowedTools', 'Bash', 'Edit', 'Write', 'NotebookEdit', 'Task', 'WebFetch', 'WebSearch',
     ],
   },
   {
     id: 'codex',
     name: 'Codex',
+    loginArgs: ['login'],
     bin: 'codex',
     fallbackBins: ['codex.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'codex-json',
     promptViaStdin: false,
     mcpInjection: 'codex-config',
-    models: ['gpt-5-codex', 'o4-mini'],
+    modelsFrom: 'openai',
+    models: ['gpt-6-astra', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna'],
     buildArgs: ({ prompt, model }) => [
       'exec',
       '--json',
       '--skip-git-repo-check',
-      '--sandbox', 'workspace-write',
+      // `workspace-write` rendait le dossier de travail inscriptible. L'agent
+      // n'a que des outils MCP a appeler ici : rien a ecrire sur le disque.
+      '--sandbox', 'read-only',
       ...(model ? ['-c', `model=${model}`] : []),
       prompt,
     ],
@@ -46,13 +67,15 @@ const DEFS = [
   {
     id: 'gemini',
     name: 'Gemini CLI',
+    loginArgs: [],
     bin: 'gemini',
     fallbackBins: ['gemini.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'text',
     promptViaStdin: true,
     mcpInjection: null,
-    models: ['gemini-2.5-pro', 'gemini-2.5-flash'],
+    modelsFrom: 'google',
+    models: ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3-pro'],
     buildArgs: ({ model }) => (model ? ['-m', model] : []),
   },
   {
@@ -64,6 +87,9 @@ const DEFS = [
     streamFormat: 'text',
     promptViaStdin: false,
     mcpInjection: null,
+    // OpenCode parle a plusieurs fournisseurs : son catalogue est celui
+    // d'OpenRouter, slugs `editeur/modele` compris.
+    modelsFrom: 'openrouter',
     models: [],
     buildArgs: ({ prompt, model }) => ['run', ...(model ? ['--model', model] : []), prompt],
   },
@@ -76,7 +102,8 @@ const DEFS = [
     streamFormat: 'text',
     promptViaStdin: true, // fork de Gemini CLI : même interface (prompt sur stdin, sortie texte)
     mcpInjection: null,
-    models: ['qwen3-coder-plus', 'qwen3-coder-flash'],
+    modelsFrom: 'openrouter',
+    models: ['qwen3.8-max', 'qwen3.8-flash', 'qwen3-coder-plus'],
     buildArgs: ({ model }) => (model ? ['-m', model] : []),
   },
   {
@@ -86,12 +113,16 @@ const DEFS = [
     // tools are simply absent with no error to explain it.
     id: 'copilot',
     name: 'GitHub Copilot CLI',
+    loginArgs: ['login'],
     bin: 'copilot',
     fallbackBins: ['copilot.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'text',
     promptViaStdin: false,
     mcpInjection: 'copilot-additional-config',
+    // Copilot sert des modeles Anthropic ET OpenAI ; seul un catalogue
+    // multi-editeurs les couvre tous les deux.
+    modelsFrom: 'openrouter',
     models: [],
     buildArgs: ({ prompt, model, mcpConfigPath }) => [
       '-p', prompt,
@@ -106,13 +137,15 @@ const DEFS = [
     // reads it as-is rather than needing one of its own.
     id: 'grok',
     name: 'Grok Build',
+    loginArgs: ['login'],
     bin: 'grok',
     fallbackBins: ['grok.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'claude-stream-json',
     promptViaStdin: false,
     mcpInjection: null,
-    models: ['grok-4.6', 'grok-4.5'],
+    modelsFrom: 'xai',
+    models: ['grok-4.6', 'grok-4.5', 'grok-4.3'],
     buildArgs: ({ prompt, model }) => [
       '-p', prompt,
       '--output-format', 'streaming-messages-json',
@@ -126,12 +159,14 @@ const DEFS = [
     // Claude Code, including a real stream-json output format.
     id: 'antigravity',
     name: 'Antigravity',
+    loginArgs: ['login'],
     bin: 'agy',
     fallbackBins: ['agy.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'claude-stream-json',
     promptViaStdin: false,
     mcpInjection: null,
+    modelsFrom: 'google',
     models: [],
     buildArgs: ({ prompt, model }) => [
       '-p', prompt,
@@ -142,12 +177,14 @@ const DEFS = [
   {
     id: 'cursor',
     name: 'Cursor Agent',
+    loginArgs: ['login'],
     bin: 'cursor-agent',
     fallbackBins: ['cursor-agent.cmd'],
     versionArgs: ['--version'],
     streamFormat: 'text',
     promptViaStdin: false,
     mcpInjection: null,
+    modelsFrom: 'openrouter',
     models: [],
     buildArgs: ({ prompt, model }) => ['-p', ...(model ? ['--model', model] : []), prompt],
   },
@@ -160,6 +197,7 @@ const DEFS = [
     streamFormat: 'text',
     promptViaStdin: false,
     mcpInjection: null,
+    modelsFrom: 'openrouter',
     models: [],
     // --no-git : pas dans un dépôt ; --yes-always : one-shot sans confirmations interactives
     buildArgs: ({ prompt, model }) => ['--message', prompt, '--no-git', '--yes-always', ...(model ? ['--model', model] : [])],

@@ -1,12 +1,14 @@
 {
-  "stream": { "error": "发生错误。" },
+  "stream": {
+    "error": "发生错误。"
+  },
   "panel": {
     "copilot": "NetsuRush 助手",
-    "noCliAgent": "未检测到 CLI 代理 — 改用 Claude/OpenAI，或安装 claude/codex",
+    "noCliAgent": "未安装任何智能体 — 打开设置以安装或添加 API 密钥",
     "configureKey": "配置 API 密钥后开始"
   },
   "composer": {
-    "pickEngine": "先在设置 ⚙ 里配置引擎（API 密钥或 CLI 代理）才能发送。",
+    "pickEngine": "在菜单中选择一个可用引擎，或在设置 ⚙ 中配置。",
     "placeholder": "让 AI 操控 Resolve…",
     "attachFiles": "添加文件",
     "attachTip": "添加图片 / 文件",
@@ -14,7 +16,8 @@
     "stop": "停止",
     "send": "发送"
   },
-  "header": { "defaultTitle": "新建对话",
+  "header": {
+    "defaultTitle": "新建对话",
     "conversations": "对话",
     "newConv": "新建对话",
     "noConv": "暂无对话",
@@ -27,41 +30,72 @@
     "show": "显示",
     "keySet": "已配置",
     "keyAbsent": "未配置",
-    "cliAgents": "已检测到的 CLI 代理",
+    "cliAgents": "智能体",
     "rescan": "重新扫描",
     "noAgentsPre": "列表为空 — 点击“重新扫描”。仍无结果则安装 ",
     "noAgentsPost": "，并确认它们在 core 的 PATH 中。",
     "detected": "已检测到",
     "absent": "未找到",
-    "saved": "已保存"
+    "saved": "已保存",
+    "test": "测试",
+    "getKey": "获取密钥",
+    "reachable": "连接成功（{{ms}} ms）",
+    "connect": "连接（打开终端）",
+    "loginOpened": "已打开终端 — 请在其中完成登录",
+    "appNoCli": "仅有应用",
+    "appNoCliHint": "应用已安装，但其命令 {{bin}} 不在 PATH 中。请从应用中添加。",
+    "readyCount": "{{ready}} / {{total}} 就绪",
+    "installOpened": "已在终端中开始安装",
+    "docs": "文档",
+    "installPage": "官方安装页面",
+    "resolveMcp": "DaVinci Resolve MCP",
+    "resolveMcpTools": "{{n}} 个工具",
+    "resolveMcpServer": "Blackmagic 官方服务器",
+    "resolveMcpMissing": "随 DaVinci Resolve Studio 21.1 及更高版本一同提供。本机未找到。",
+    "resolveMcpSilent": "无响应",
+    "resolveMcpSilentHint": "服务器存在但没有响应。请启动 Resolve 后重新检测。",
+    "resolveMcpHint": "为副驾驶新增 {{n}} 个工具：在 Resolve 中运行 Python 脚本、检索脚本 API、查阅文档、生成 LUT 与 DCTL。",
+    "resolveUnsafe": "允许沙盒之外的脚本",
+    "resolveUnsafeHint": "新增 bmd_run_script_unsafe：完全访问文件、网络与子进程。脚本一旦运行，任何权限模式都拦不住它。"
   },
   "engine": {
-    "engine": "引擎",
-    "cliAgent": "CLI 代理",
-    "agent": "代理",
+    "agents": "已安装的智能体",
+    "apiKeys": "API 密钥",
+    "notReady": "未配置",
+    "none": "无引擎",
     "model": "模型",
     "default": "默认",
     "freeId": "自定义 id：vendor/model…",
-    "permissions": "权限"
+    "refreshModels": "刷新模型列表",
+    "source": {
+      "vendor": "最新",
+      "openrouter": "公开目录",
+      "curated": "离线"
+    },
+    "sourceHint": {
+      "vendor": "由服务商使用你的密钥返回：这些 ID 是准确的。",
+      "openrouter": "OpenRouter 的公开目录，无需密钥。内容最新，但 ID 可能与服务商自有 API 不同。",
+      "curated": "无网络：使用内置备用列表，可能已过时。"
+    },
+    "permissions": "权限",
+    "thinking": "思考",
+    "effort": "思考强度"
   },
   "mode": {
     "readonly": "只读",
     "ask": "询问",
-    "safe": "副本",
     "auto": "自动"
   },
   "modeTitle": {
     "readonly": "只读 — 不写入任何内容",
     "ask": "仅在有风险时确认（文件/渲染/删除素材）；时间线剪辑直接执行",
-    "safe": "写入前复制时间线 — 原时间线保持不变",
     "auto": "直接写入时间线，无需确认"
   },
   "message": {
     "thinking": "思考中…",
     "reasoning": "推理过程",
-    "hideReasoning": "隐藏推理过程",
-    "showReasoning": "显示推理过程",
-    "copyText": "复制文本"
+    "copyText": "复制文本",
+    "copyReasoning": "复制推理过程"
   },
   "toolcard": {
     "running": "进行中",
@@ -72,7 +106,8 @@
     "copyArgs": "复制参数",
     "copyResult": "复制结果",
     "collapse": "收起",
-    "expand": "展开"
+    "expand": "展开",
+    "done": "成功"
   },
   "tool": {
     "quoted": "“{{value}}”",
@@ -107,7 +142,8 @@
     "render": "渲染 · {{action}}",
     "timelineItem": "当前镜头 · {{action}}",
     "project": "项目 · {{action}}",
-    "resolveCall": "Resolve API · {{root}}"
+    "resolveCall": "Resolve API · {{root}}",
+    "bmd": "Resolve · {{action}}"
   },
   "approval": {
     "title": "允许此操作？",
@@ -122,5 +158,24 @@
   "store": {
     "convFallback": "对话",
     "error": "错误"
+  },
+  "duplicate": {
+    "title": "修改前先复制",
+    "hint": "在时间线副本上操作，原时间线保持不变。"
+  },
+  "thinking": {
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "xhigh": "很高",
+    "max": "最高"
+  },
+  "trace": {
+    "working": "处理中…",
+    "workedFor_one": "已处理 {{count}} 秒",
+    "workedFor_other": "已处理 {{count}} 秒"
+  },
+  "thinkingSlider": {
+    "reset": "恢复默认思考强度"
   }
 }

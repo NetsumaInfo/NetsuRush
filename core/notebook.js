@@ -672,6 +672,25 @@ function makeNotebookStore({ backend, assetsDir, kind }) {
  */
 function createNotebookStore(dataDir) {
   const dir = path.join(dataDir, 'notebook');
+  const bindingsPath = path.join(dir, 'collaboration.json');
+  const collaborationBindings = () => {
+    try { return JSON.parse(fs.readFileSync(bindingsPath, 'utf8')); }
+    catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+  };
+  const setCollaborationBinding = (binding, projectId) => {
+    if (typeof projectId !== 'string' || !projectId || projectId.length > 128) throw new Error('Invalid collaboration project');
+    const bindings = collaborationBindings().filter((entry) => entry.projectId !== projectId);
+    if (binding) {
+      if (!['notebook', 'notebook-page'].includes(binding.surface) || !binding.subjectId || !binding.notebookId || binding.projectId !== projectId) throw new Error('Invalid notebook binding');
+      if (bindings.some((entry) => entry.notebookId === binding.notebookId && (entry.surface === 'notebook' || binding.surface === 'notebook' || entry.subjectId === binding.subjectId))) throw new Error('Notebook document already shared');
+      bindings.push({ ...binding, sourcePath: projectOf(binding.notebookId)?.path });
+    }
+    const temporary = bindingsPath + '.tmp';
+    fs.writeFileSync(temporary, JSON.stringify(bindings), 'utf8');
+    fs.renameSync(temporary, bindingsPath);
+    return { ok: true };
+  };
+
   const assetsDir = path.join(dir, 'assets');
   fs.mkdirSync(assetsDir, { recursive: true }); // avant d'ouvrir la base : elle vit dans ce dossier
 
@@ -786,6 +805,9 @@ function createNotebookStore(dataDir) {
       } else {
         home.deleteNotebook(notebookId);
       }
+      for (const binding of collaborationBindings().filter((entry) => entry.notebookId === notebookId)) {
+        setCollaborationBinding(binding, binding.projectId);
+      }
       recents.remember({ path: session.path, title: dump.notebook.title, type: 'notebook' });
       return { ok: true, path: session.path, notebookId, ...written };
     } catch (e) {
@@ -814,6 +836,28 @@ function createNotebookStore(dataDir) {
     for (const key of [...files.keys()]) closeProject(key);
   }
 
+  function prepareCollaborationMedia(surface, subjectId) {
+    if (!['notebook', 'notebook-page'].includes(surface) || typeof subjectId !== 'string' || !subjectId) throw new Error('Invalid notebook surface');
+    const store = surface === 'notebook' ? byNotebook(subjectId) : byPage(subjectId);
+    const ids = surface === 'notebook' ? (store.loadNotebook(subjectId)?.pages || []).map((page) => page.id) : [subjectId];
+    const media = new Set();
+    const visit = (value, key = '') => {
+      if (typeof value === 'string') {
+        if (key === 'urls') { try { visit(JSON.parse(value), 'url'); } catch {} return; }
+        if (!['url', 'cover', 'src', 'path', 'ref'].includes(key)) return;
+        if (/^[a-z]:[\\/]|^\\\\/i.test(value)) media.add(value);
+        else { try { const url = new URL(value); if (['127.0.0.1', 'localhost'].includes(url.hostname) && url.pathname === '/media') { const source = url.searchParams.get('p') || url.searchParams.get('path'); if (source) media.add(source); } } catch {} }
+      } else if (Array.isArray(value)) value.forEach((child) => visit(child, key));
+      else if (value && typeof value === 'object') Object.entries(value).forEach(([key, child]) => visit(child, key));
+    };
+    for (const id of ids) { const page = store.loadPage(id); if (!page) throw new Error('Notebook page missing'); visit(page.page); }
+    const cachePath = path.join(dir, 'collaboration-media.json');
+    let cache = {}; try { cache = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    cache[`${surface}:${subjectId}`] = [...media];
+    fs.writeFileSync(cachePath + '.tmp', JSON.stringify(cache)); fs.renameSync(cachePath + '.tmp', cachePath);
+    return { ok: true };
+  }
+
   return {
     kind,
     // Carnets : la liste réunit NR_HOME et les documents ouverts, ces derniers en tête (ce sont ceux
@@ -836,6 +880,7 @@ function createNotebookStore(dataDir) {
     loadNotebook: (id) => byNotebook(id).loadNotebook(id),
 
     loadPage: (id) => byPage(id).loadPage(id),
+    collaborationBindings, setCollaborationBinding, prepareCollaborationMedia,
     savePage: (page) => (page && page.notebookId ? byNotebook(page.notebookId) : home).savePage(page),
     deletePage: (id) => byPage(id).deletePage(id),
     duplicatePage: (id) => byPage(id).duplicatePage(id),

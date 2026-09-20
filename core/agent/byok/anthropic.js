@@ -5,6 +5,7 @@
 // Boucle : appel → stream texte + blocs tool_use → exécute les outils (runTool, avec permission) →
 // renvoie les tool_result → recommence tant que stop_reason === 'tool_use'.
 
+const { bodyFor, maxTokensFor } = require('../thinking');
 const { readSSE } = require('./sse');
 const { toToolContent } = require('./format');
 const { imageAttachment } = require('./image');
@@ -17,18 +18,37 @@ const DEFAULT_MODEL = 'claude-opus-4-8';
 /**
  * @param {{
  *   apiKey:string, model?:string, system?:string, maxTokens?:number,
- *   messages:Array<{role:'user'|'assistant', content:any}>,
+ *   messages:Array<{role:'user'|'assistant', content:any, images?:Array<{mediaType:string,data:string}>}>,
  *   tools:any[],
  *   runTool:(name:string, input:any)=>Promise<any>,
  *   onEvent:(ev:any)=>void,
  *   signal?:AbortSignal,
+ *   thinking?:string,
  * }} opts
  */
 async function runAnthropic(opts) {
   const { apiKey, system, tools, runTool, onEvent, signal } = opts;
   const model = opts.model || DEFAULT_MODEL;
-  const maxTokens = opts.maxTokens || 4096;
-  const messages = opts.messages.slice();
+  const think = bodyFor('anthropic', opts.thinking);
+  // `max_tokens` doit DEPASSER `budget_tokens`, sinon l'API refuse. Le defaut
+  // du chat est plus petit que tous les paliers utiles : relever le plafond
+  // fait partie du reglage, pas d'un ajustement separe qu'on oublierait.
+  const maxTokens = maxTokensFor(opts.thinking, opts.maxTokens || 4096);
+  // Un message qui porte des images devient une LISTE de blocs : c'est la seule
+  // forme ou l'API Anthropic accepte autre chose que du texte. Sans images, on
+  // garde la chaine — la forme la plus simple qui marche.
+  const messages = opts.messages.map((m) => (m && Array.isArray(m.images) && m.images.length
+    ? {
+      role: m.role,
+      content: [
+        ...m.images.map((img) => ({
+          type: 'image',
+          source: { type: 'base64', media_type: img.mediaType, data: img.data },
+        })),
+        ...(m.content ? [{ type: 'text', text: m.content }] : []),
+      ],
+    }
+    : { role: m.role, content: m.content }));
   if (!apiKey) { onEvent({ type: 'error', message: `Anthropic: ${t('apiKeyMissing')}` }); onEvent({ type: 'done', stopReason: 'error' }); return; }
 
   let guard = 0;
@@ -53,6 +73,7 @@ async function runAnthropic(opts) {
         },
         body: JSON.stringify({
           model, max_tokens: maxTokens, stream: true,
+          ...think,
           ...(system ? { system } : {}),
           messages,
           ...(tools && tools.length ? { tools } : {}),

@@ -1,36 +1,50 @@
 // @ts-check
-// Porte de permission de l'agent IA. L'utilisateur choisit le MODE (cf. CLAUDE/réglages) :
-//   'read-only' — autorise la lecture, REFUSE écriture + destructif (sans confirmation)
+// Porte de permission de l'agent IA. TROIS modes, et une case à part :
+//   'read-only' — lecture seule : écriture et destructif REFUSÉS, sans rien demander
 //   'ask'       — confirme UNIQUEMENT le destructif (fichiers/rendu/suppression média) ; lecture et
-//                 écriture timeline (montage, audio, markers…) passent sans demander (recommandé, défaut)
-//   'auto'      — tout autorisé sans confirmation, écrit DIRECT dans la timeline (rapide, risqué)
-//   'safe'      — comme 'auto' mais DUPLIQUE la timeline courante avant la 1re écriture du tour,
-//                 puis travaille sur la copie (la timeline d'origine n'est jamais touchée). La
-//                 duplication est faite par la session (accès Resolve), pas ici.
+//                 écriture timeline (montage, audio, markers…) passent sans demander (défaut)
+//   'auto'      — tout autorisé sans confirmation
+//
+// Il y en avait un quatrième, 'safe', qui autorisait tout MAIS dupliquait la timeline avant la
+// première écriture. C'était une case à cocher déguisée en mode : la duplication est orthogonale au
+// niveau d'autorisation, et la coupler au mode le plus permissif rendait la doublure inaccessible à
+// qui voulait aussi être consulté. C'est `duplicateFirst` maintenant, combinable avec n'importe
+// quel mode et DÉCOCHÉ par défaut — dupliquer sans qu'on l'ait demandé laisse des timelines
+// orphelines dans le projet.
 //
 // Quand une confirmation est requise : diffuse `chat:approval` en SSE {runId,callId,name,input,risk}
 // → le renderer affiche allow/deny → `respond(callId, approved)` résout la promesse en attente.
 
-/** @typedef {'read-only'|'ask'|'auto'|'safe'} PermMode */
+/** @typedef {'read-only'|'ask'|'auto'} PermMode */
+
+const MODES = ['read-only', 'ask', 'auto'];
 
 /** @param {{broadcast:(ch:string,p:any)=>void}} deps */
 function createPermissions({ broadcast }) {
   /** @type {PermMode} */
   let mode = 'ask';
+  let duplicateFirst = false;
   let seq = 1;
   /** @type {Map<number,(approved:boolean)=>void>} */
   const pending = new Map();
 
   /** @param {PermMode} m */
   function setMode(m) {
-    if (m === 'auto' || m === 'safe' || m === 'ask' || m === 'read-only') mode = m;
+    // L'ancien 'safe' est reçu comme « auto + doublure » : un réglage persisté
+    // d'avant la scission ne doit pas retomber silencieusement sur le défaut.
+    if (String(m) === 'safe') { mode = 'auto'; duplicateFirst = true; return; }
+    if (MODES.includes(String(m))) mode = m;
   }
   function getMode() { return mode; }
+
+  /** @param {boolean} on */
+  function setDuplicateFirst(on) { duplicateFirst = !!on; }
+  function getDuplicateFirst() { return duplicateFirst; }
 
   // Décision SYNCHRONE selon le mode et le risque, ou 'prompt' si une confirmation est nécessaire.
   /** @param {'read'|'write'|'destructive'} risk @returns {'allow'|'deny'|'prompt'} */
   function decide(risk) {
-    if (mode === 'auto' || mode === 'safe') return 'allow';
+    if (mode === 'auto') return 'allow';
     if (mode === 'read-only') return risk === 'read' ? 'allow' : 'deny';
     // 'ask' : seul le DESTRUCTIF (touche fichiers/rendu/suppression média) demande confirmation ;
     // lecture + écriture timeline (montage, audio, markers, build…) passent directement.
@@ -68,7 +82,10 @@ function createPermissions({ broadcast }) {
     pending.clear();
   }
 
-  return { setMode, getMode, decide, check, respond, cancelAll };
+  return {
+    setMode, getMode, setDuplicateFirst, getDuplicateFirst,
+    decide, check, respond, cancelAll,
+  };
 }
 
 module.exports = { createPermissions };

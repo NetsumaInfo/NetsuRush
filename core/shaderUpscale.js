@@ -14,6 +14,7 @@ const { playInfo, probeMedia } = require('./ffmpeg');
 const { t } = require('./i18n');
 const { resolveProcessEncoding } = require('./processEncoding');
 const { outputKind, imageSpec, imageTarget, imageEncodeArgs } = require('./imageOutput');
+const { outputSize } = require('./upscaleArgs');
 
 // Shaders Turbo : id (renderer) → fichier .glsl custom (custom_shader_path) OU scaler libplacebo
 // intégré (`upscaler`, pas de fichier). Anime = CNN GLSL (ArtCNN) ; réel = lanczossharp.
@@ -190,7 +191,6 @@ function shaderDirError() {
     : `dossier des shaders absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})`;
 }
 
-const even = (n) => Math.max(2, n - (n % 2)); // yuv420 exige des dimensions paires
 // Une image de test ne doit jamais bloquer l'UI : un décodage qui patine est abandonné.
 const FRAME_TIMEOUT_MS = 60_000;
 
@@ -293,7 +293,7 @@ async function mapConcurrent(items, limit, fn) {
 // de sortie par job. Le renderer parallélise les sources ; ici, une source unique peut paralléliser
 // ses plans avec la même limite explicite de concurrence.
 async function runShaderUpscale(event, opts) {
-  const { input, shader = 'artcnn_c4f32', scale = 2,
+  const { input, shader = 'artcnn_c4f32', scale = 2, targetHeight = 0,
     quality = 20, preset = 'slow', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true,
     outDir, segments, whole, importBack, baseName, outputName, savePath, parallel = false, concurrency = 2 } = opts || {};
@@ -320,9 +320,7 @@ async function runShaderUpscale(event, opts) {
   let dims;
   try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
-  const s = scale | 0 || 1;
-  const ow = even(dims.width * s);
-  const oh = even(dims.height * s);
+  const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
 
   const ext = resolved ? (resolved.ext || codecExt(resolved.codec)) : spec.ext;
   const customName = typeof outputName === 'string' && outputName.trim();
@@ -338,7 +336,7 @@ async function runShaderUpscale(event, opts) {
   const results = await mapConcurrent(jobs, parallel ? Math.min(4, Math.max(2, concurrency | 0)) : 1, async (j, i) => {
     // `savePath` = destination EXACTE imposée par l'appelant (cf. runUpscale) ; un seul job, sinon
     // les N sorties s'écraseraient.
-    const suffix = customName ? '' : `_turbo_${s}x`;
+    const suffix = customName ? '' : (targetHeight ? `_turbo_${oh}p` : `_turbo_${scale | 0 || 1}x`);
     const target = kind === 'video' ? null
       : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
     const out = (total === 1 && savePath && kind === 'video')
@@ -391,7 +389,11 @@ async function runShaderUpscale(event, opts) {
 function writeFrame(bin, input, time, out, filter) {
   const args = ['-y', '-hide_banner', '-loglevel', 'error'];
   if (filter) args.push('-init_hw_device', 'vulkan');
-  args.push('-ss', String(Math.max(0, time)), '-i', input);
+  // `-ss` only when there is something to seek to: a still image holds a single frame with a
+  // nominal duration, so `-ss 0` seeks past it on the mjpeg and tga demuxers and ffmpeg writes
+  // nothing. Seeking to 0 is a no-op on a video, so dropping the option there costs nothing.
+  if (time > 0) args.push('-ss', String(time));
+  args.push('-i', input);
   if (filter) args.push('-vf', filter);
   args.push('-frames:v', '1', '-update', '1', '-f', 'image2', out);
   return new Promise((resolve) => {
@@ -406,7 +408,7 @@ function writeFrame(bin, input, time, out, filter) {
 // le moteur IA. Sans lui, l'aperçu n'existait tout simplement pas pour les shaders : le bouton
 // disparaissait dès qu'un shader était choisi et il fallait lancer l'encodage complet pour juger.
 async function runShaderFrame(opts) {
-  const { input, time, shader = 'artcnn_c4f32', scale = 2,
+  const { input, time, shader = 'artcnn_c4f32', scale = 2, targetHeight = 0,
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   const sh = SHADERS[shader];
@@ -422,9 +424,7 @@ async function runShaderFrame(opts) {
   try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
 
-  const s = scale | 0 || 1;
-  const ow = even(dims.width * s);
-  const oh = even(dims.height * s);
+  const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
   // Instant échantillonné. Sans consigne on prend le MILIEU du média : la frame 0 d'une vidéo est
   // presque toujours un noir, un fondu ou un plan volontairement flou, et l'aperçu donnait ce flou-là
   // à juger au lieu du travail du shader. Une image fixe a une durée nulle → elle reste à 0.
@@ -455,7 +455,7 @@ async function runShaderFrame(opts) {
 // This path writes ONE still frame, so an animated GIF is refused rather than silently flattened:
 // `-frames:v 1` would keep its first image only. Animated sources go to `runShaderGif`.
 async function runShaderImage(opts) {
-  const { input, out, shader = 'artcnn_c4f32', scale = 2,
+  const { input, out, shader = 'artcnn_c4f32', scale = 2, targetHeight = 0,
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   if (!out) return { ok: false, error: t('sourceMissing') };
@@ -473,9 +473,7 @@ async function runShaderImage(opts) {
   try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
 
-  const s = scale | 0 || 1;
-  const ow = even(dims.width * s);
-  const oh = even(dims.height * s);
+  const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
   await fsp.mkdir(path.dirname(out), { recursive: true });
   // yuv444p en sortie de filtre : l'encodeur PNG convertit ensuite en RGB sans sous-échantillonner.
   const filter = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix: 'yuv444p' });
@@ -495,7 +493,7 @@ async function runShaderImage(opts) {
 //
 // One ffmpeg pass, no intermediate frame dump: `palettegen` buffers the stream itself.
 async function runShaderGif(opts) {
-  const { input, out, shader = 'artcnn_c4f32', scale = 2,
+  const { input, out, shader = 'artcnn_c4f32', scale = 2, targetHeight = 0,
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   if (!out) return { ok: false, error: t('sourceMissing') };
@@ -512,9 +510,7 @@ async function runShaderGif(opts) {
   try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
 
-  const s = scale | 0 || 1;
-  const ow = even(dims.width * s);
-  const oh = even(dims.height * s);
+  const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
   await fsp.mkdir(path.dirname(out), { recursive: true });
   const placebo = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix: 'yuv444p' });
   const args = ['-y', '-hide_banner', '-loglevel', 'error', '-progress', 'pipe:1', '-nostats',

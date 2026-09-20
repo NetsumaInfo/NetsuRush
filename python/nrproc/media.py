@@ -155,11 +155,16 @@ def write_png_rgba(rgba, out_path):
 
 def decode_one_frame(input_path, time_sec, w, h):
     """Décode UNE frame bgr24 à time_sec → bytes (ou None si absente). Taille attendue = w*h*3."""
-    dec = subprocess.run(
-        [ffmpeg_bin(), "-nostdin", "-hide_banner", "-loglevel", "error",
-         "-ss", str(max(0.0, time_sec)), "-i", input_path,
-         "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:"],
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout
+    # A still image is a single frame with a nominal duration: `-ss 0` seeks past it on the mjpeg
+    # and tga demuxers and ffmpeg writes nothing. Seeking to 0 is a no-op on a video anyway, so the
+    # option is only added when there is something to seek to.
+    seek = max(0.0, float(time_sec or 0.0))
+    args = [ffmpeg_bin(), "-nostdin", "-hide_banner", "-loglevel", "error"]
+    if seek > 0:
+        args += ["-ss", str(seek)]
+    args += ["-i", input_path, "-frames:v", "1",
+             "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:"]
+    dec = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout
     if not dec or len(dec) < w * h * 3:
         return None
     return dec[:w * h * 3]

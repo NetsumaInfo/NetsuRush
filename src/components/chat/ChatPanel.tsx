@@ -12,6 +12,7 @@ import { ChatSettings } from "./ChatSettings";
 import { ChatComposer } from "./ChatComposer";
 import { ApprovalBar } from "./ApprovalBar";
 import { Message } from "./Message";
+import { buildEngines, toEngineId } from "@/lib/agentCatalog";
 
 export function ChatPanel() {
   const { t } = useTranslation("chat");
@@ -19,7 +20,8 @@ export function ChatPanel() {
   const messages = useApp((s) => s.chatMessages);
   const running = useApp((s) => s.chatRunning);
   const provider = useApp((s) => s.chatProvider);
-  const keysSet = useApp((s) => s.chatKeysSet);
+  const agentId = useApp((s) => s.chatAgentId);
+  const agents = useApp((s) => s.chatAgents);
   const ingest = useApp((s) => s.chatIngest);
   const setApproval = useApp((s) => s.chatSetApproval);
   const loadAgents = useApp((s) => s.chatLoadAgents);
@@ -38,19 +40,19 @@ export function ChatPanel() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
-  // CLI : on autorise toujours l'envoi — la détection du binaire sur le PATH est peu fiable (process
-  // lancé par Tauri), et le backend renvoie une erreur claire si claude/codex manque. BYOK : on exige
-  // la clé (sinon appel réseau voué à l'échec).
-  const ready =
-    provider === "anthropic" ? keysSet.anthropic
-    : provider === "openai" ? keysSet.openai
-    : provider === "openrouter" ? keysSet.openrouter
-    : true;
+  // « Prêt » se lit sur le moteur choisi, plus sur une chaîne de ternaires par
+  // fournisseur : celle-ci avait oublié xAI, qui retombait donc sur `true` et
+  // laissait envoyer sans clé — pour un appel réseau voué à l'échec.
+  const engine = buildEngines(agents).find((e) => e.id === toEngineId(provider, agentId));
+  const ready = engine?.ready ?? false;
 
   return (
     <div className="flex h-full flex-col">
       <ChatHeader onSettings={() => setShowSettings((s) => !s)} />
-      {showSettings && <ChatSettings onClose={() => setShowSettings(false)} />}
+      {showSettings ? (
+        <ChatSettings onClose={() => setShowSettings(false)} />
+      ) : (
+        <>
       <BetaNotice module="chat" className="mx-4 mt-4" />
 
       <div ref={scrollRef} className="flex-1 overflow-auto">
@@ -71,6 +73,8 @@ export function ChatPanel() {
           </div>
         )}
       </div>
+        </>
+      )}
 
       <ApprovalBar />
       <ChatComposer ready={ready} />

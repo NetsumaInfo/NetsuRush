@@ -243,7 +243,12 @@
     "contentOpacity": "内容不透明度",
     "seeThroughScope": "一并半透明",
     "seeThroughShell": "界面",
-    "seeThroughPlaceFrame": "放置边框"
+    "seeThroughPlaceFrame": "放置边框",
+    "assetSweep": "未使用的媒体",
+    "assetSweepHint": "删除没有任何场景引用的文件。看板中的内容不受影响。",
+    "assetSweepAction": "清理",
+    "assetSweepDone": "已删除 {{count}} 个文件，释放 {{mb}} MB。",
+    "assetSweepFailed": "清理失败。"
   },
   "inspector": {
     "ytPlayer": "YouTube 播放器",
@@ -325,7 +330,8 @@
     "kindItem": "画板项目",
     "chooseFile": "选择文件…",
     "targetItem": "目标项目",
-    "remove": "移除链接"
+    "remove": "移除链接",
+    "sharedFile": "该文件属于共享看板：在本机磁盘上没有位置。"
   },
   "font": {
     "label": "字体",
@@ -791,7 +797,9 @@
     "importing": "正在导入 {{name}}…",
     "fetching": "正在获取媒体…",
     "linkDone": "已导入媒体",
-    "fetchingFrom": "正在从 {{source}} 获取…"
+    "fetchingFrom": "正在从 {{source}} 获取…",
+    "copyFailed": "无法复制“{{name}}”：关闭应用后该媒体将丢失",
+    "copyFailedBatch": "{{count}} 个媒体复制失败（包括“{{name}}”）：关闭应用后这些媒体将丢失"
   },
   "mouseThrough": {
     "on": "鼠标穿透",

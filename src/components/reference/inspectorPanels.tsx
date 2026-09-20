@@ -304,7 +304,7 @@ function LinkControl({ item }: { item: BoardItem }) {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="top" sideOffset={8} className="z-50 outline-none">
-          <Popover.Popup className="w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
+          <Popover.Popup className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
             <div className="mb-2 grid grid-cols-3 gap-1">
               {KINDS.map(({ k, icon: Icon, label }) => (
                 <button type="button"

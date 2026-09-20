@@ -7,9 +7,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Grid2x2, Square, X, Star } from "lucide-react";
+import { Grid2x2, Square, X, Star, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { nr } from "@/lib/bridge";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -201,6 +203,32 @@ function PenProbe() {
 }
 export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { t } = useTranslation("reference");
+  const [sweeping, setSweeping] = useState(false);
+  const [sweepResult, setSweepResult] = useState<string | null>(null);
+
+  async function sweep() {
+    setSweeping(true);
+    setSweepResult(null);
+    try {
+      // Aucune grâce : l'utilisateur la demande MAINTENANT, et tout fichier qu'une scène référence
+      // encore est gardé de toute façon — le balayage part de la liste des scènes, pas de l'âge des
+      // fichiers.
+      const result = await nr.reference?.sweepAssets({ graceMs: 0 });
+      setSweepResult(
+        result?.ok
+          ? t("settings.assetSweepDone", {
+              count: result.removed,
+              mb: Math.max(1, Math.round(result.bytes / 1048576)),
+            })
+          : result?.error || t("settings.assetSweepFailed"),
+      );
+    } catch (error) {
+      setSweepResult(error instanceof Error ? error.message : String(error));
+    } finally {
+      setSweeping(false);
+    }
+  }
+
   // Raccourcis INHÉRENTS (non rebindables : gestes souris/molette, event navigateur, directionnels).
   const FIXED_SHORTCUTS: { keys: string[]; desc: string }[] = [
     { keys: ["Ctrl", "V"], desc: t("settings.gesturePaste") },
@@ -730,6 +758,23 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
         </>)}
 
         {tab === "media" && (<>
+        {/* Ménage des médias. Le core balaie déjà au démarrage, mais avec 14 jours de grâce — le
+            délai qui protège l'historique d'annulation. Ce bouton fait le même travail SANS grâce,
+            à un moment où l'utilisateur sait ce qu'il fait : rien de ce que porte une scène n'est
+            touché, seuls disparaissent les fichiers que plus aucune scène ne référence. */}
+        <section className="flex flex-col gap-2">
+          <h3 className="text-xs font-semibold text-foreground">{t("settings.assetSweep")}</h3>
+          <p className="-mt-1.5 text-[11px] leading-snug text-muted-foreground">{t("settings.assetSweepHint")}</p>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" disabled={sweeping} onClick={() => void sweep()}>
+              <Trash2 className="size-3.5" /> {t("settings.assetSweepAction")}
+            </Button>
+            {sweepResult && <span className="text-[11px] text-muted-foreground">{sweepResult}</span>}
+          </div>
+        </section>
+
+        <Separator />
+
         {/* Taille de pose : côté max (px board) d'un média fraîchement posé */}
         <section className="flex flex-col gap-2">
           <h3 className="text-xs font-semibold text-foreground">{t("settings.placeSize")}</h3>

@@ -942,7 +942,7 @@ async function adaptiveRequest(daemon, payload, onProgress, resolved) {
 const samePath = (a, b) => path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
 
 async function runUpscale(event, opts) {
-  const { input, model = 'light', scale = 4, denoise, tile = 0, tilePad = 10, prePad = 0,
+  const { input, model = 'light', scale = 4, targetHeight = 0, denoise, tile = 0, tilePad = 10, prePad = 0,
     cleanupNoise = 0, cleanupEdges = 0,
     fp32 = false, quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, segments, whole, importBack, baseName, outputName, savePath } = opts || {};
@@ -967,7 +967,7 @@ async function runUpscale(event, opts) {
     // `savePath` = destination EXACTE imposée par l'appelant (archivage d'une collection : le fichier
     // doit retomber sur le nom attendu du dossier de stockage). Un seul job, sinon les N sorties
     // s'écraseraient — le suffixe numéroté reprend la main.
-    const suffix = customName ? '' : `_upscaled_${scale}x`;
+    const suffix = customName ? '' : (targetHeight ? `_upscaled_${targetHeight | 0}p` : `_upscaled_${scale}x`);
     const target = kind === 'video' ? null
       : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
     const out = (total === 1 && savePath && kind === 'video')
@@ -977,7 +977,10 @@ async function runUpscale(event, opts) {
     const fileLabel = path.basename(out);
     const payload = {
       cmd: kind === 'image' ? 'image' : 'upscale',
-      input, out, model: String(model), outscale: scale | 0, codec: resolved ? resolved.codec : null,
+      input, out, model: String(model), outscale: scale | 0,
+      // Resolution class. The worker knows the native factor of the network, so it sizes its own
+      // input (python/upscaler/plan.py). 0 = the factor applies.
+      target: targetHeight | 0, codec: resolved ? resolved.codec : null,
       tile: tile | 0, tile_pad: tilePad | 0, pre_pad: prePad | 0,
       quality: quality | 0, preset: String(preset), bitdepth: bitDepth | 0, profile: resolved ? resolved.profile : null,
       audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr: abr | 0, atrack: audioTrack | 0,
@@ -1249,7 +1252,7 @@ async function runProcessFrame(opts) {
 
 // Test d'upscale sur UNE frame → 2 PNG (avant / après) dans un cache tmp, servis via HTTP local.
 async function runUpscaleFrame(opts) {
-  const { input, time = 0, model = 'light', scale = 2, denoise, tile = 0, tilePad = 10, prePad = 0,
+  const { input, time = 0, model = 'light', scale = 2, targetHeight = 0, denoise, tile = 0, tilePad = 10, prePad = 0,
     fp32 = false, cleanupNoise = 0, cleanupEdges = 0 } = opts || {};
   if (!input) return { ok: false, error: 'aucune source' };
   try { await fsp.mkdir(UPSCALE_TEST_DIR, { recursive: true }); } catch (_) {}
@@ -1258,7 +1261,7 @@ async function runUpscaleFrame(opts) {
   const out = path.join(UPSCALE_TEST_DIR, `up_${id}.png`);
   // Via le worker persistant → après le 1er test (modèle chargé), les suivants sont quasi instantanés.
   const res = await dUpscale.req({
-    cmd: 'frame', input, orig, out, time, model: String(model), outscale: scale | 0,
+    cmd: 'frame', input, orig, out, time, model: String(model), outscale: scale | 0, target: targetHeight | 0,
     tile: tile | 0, tile_pad: tilePad | 0, pre_pad: prePad | 0,
     denoise: denoise != null ? denoise : null, fp32: !!fp32,
     cleanup_noise: cleanupNoise, cleanup_edges: cleanupEdges,

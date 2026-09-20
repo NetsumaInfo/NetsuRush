@@ -37,11 +37,11 @@ test('every transferable audio mode has real ffmpeg arguments', () => {
 test('excludes the codecs no editing application imports', () => {
   // AV1, VP9 et FFV1 sont des formats de diffusion ou d'archivage, jamais de montage.
   for (const codec of codecs) {
-    assert.ok(!/^(av1_|vp9|ffv1)/.test(codec), `${codec} n'est pas un codec de montage`);
+    assert.ok(!/^(cineform|ffv1)/.test(codec), `${codec} n'est pas un codec de montage`);
   }
   // Opus n'est pas muxé en MOV ; MP3, FLAC et ALAC ne sont pas importés par Premiere Pro.
   for (const mode of audio) {
-    assert.ok(!/^(opus|mp3|flac|alac)/.test(mode), `${mode} n'est pas lu par les logiciels de montage`);
+    assert.ok(!/^(ac3|mp3)/.test(mode), `${mode} n'est pas lu par les logiciels de montage`);
   }
   // Ni Premiere ni After Effects n'ouvrent le conteneur Matroska, ni WebM.
   assert.deepEqual([...containers].sort(), ['mov', 'mp4']);

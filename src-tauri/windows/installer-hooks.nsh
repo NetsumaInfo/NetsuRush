@@ -33,15 +33,36 @@ UninstPage custom un.NetsuCleanupPage un.NetsuCleanupLeave
 !macro NSIS_HOOK_PREINSTALL
   ; Une installation manuelle peut être lancée alors que NetsuRush est encore ouvert. On demande
   ; une fermeture NORMALE de sa seule fenêtre : RunEvent::Exit arrête alors son core node.exe.
-  ; Aucun PowerShell, aucune énumération de processus et aucun arrêt forcé ne sont utilisés.
+  ; Aucun PowerShell, aucune énumération de processus et aucun arrêt forcé ne sont utilisés. La
+  ; correspondance porte sur le TITRE exact de la fenêtre : une fenêtre NetsuBoard à côté n'est
+  ; jamais visée.
   FindWindow $0 "" "NetsuRush"
   ${If} $0 <> 0
     SendMessage $0 ${WM_CLOSE} 0 0 /TIMEOUT=3000
     Sleep 1800
   ${EndIf}
   ; Les anciennes versions peuvent avoir laissé node.exe sans fenêtre après un crash. La copie
-  ; temporaire de l'app passe par Restart Manager pour libérer UNIQUEMENT ce fichier verrouillé.
-  File /oname=$PLUGINSDIR\netsurush-release-lock.exe "..\..\app.exe"
+  ; temporaire de l'app passe par Restart Manager, qui ne ferme QUE le processus dont l'image est
+  ; le fichier passé — un CHEMIN, jamais un nom d'image.
+  ;
+  ; Cette distinction est la raison d'être de cette étape à côté de celle de Tauri :
+  ; `CheckIfAppIsRunning` compare le NOM de l'image, et tant que le binaire principal s'appelait
+  ; `app.exe` — le nom du paquet Cargo, identique dans NetsuBoard — installer, mettre à jour ou
+  ; désinstaller NetsuRush appelait TerminateProcess sur TOUS les `app.exe` de la session :
+  ; NetsuBoard mourait avec, sans dialogue et sans pouvoir sauvegarder. `mainBinaryName` dans
+  ; tauri.conf.json en fait `NetsuRush.exe` ; rien ici ne doit revenir à un nom d'image nu.
+  ;
+  ; ${MAINBINARYNAME} plutôt qu'un nom écrit en dur, pour suivre la configuration. `app.exe` est
+  ; libéré APRÈS : une installation antérieure au renommage tourne sous l'ancien nom, et c'est
+  ; cette image-là qui tient le verrou. Les deux sont des chemins DANS cette installation, donc
+  ; l'homonyme de NetsuBoard reste hors de portée.
+  File /oname=$PLUGINSDIR\netsurush-release-lock.exe "${MAINBINARYSRCPATH}"
+  nsExec::ExecToLog '"$PLUGINSDIR\netsurush-release-lock.exe" --release-lock "$INSTDIR\${MAINBINARYNAME}.exe"'
+  Pop $0
+  nsExec::ExecToLog '"$PLUGINSDIR\netsurush-release-lock.exe" --release-lock "$INSTDIR\app.exe"'
+  Pop $0
+  ; Seul node.exe décide de l'abandon : le binaire principal peut très bien n'être tenu par
+  ; personne, et une installation d'avant le renommage n'a même pas de `NetsuRush.exe` à libérer.
   nsExec::ExecToLog '"$PLUGINSDIR\netsurush-release-lock.exe" --release-lock "$INSTDIR\resources\bin\node.exe"'
   Pop $0
   ${If} $0 != 0

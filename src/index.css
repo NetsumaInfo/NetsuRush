@@ -118,6 +118,43 @@ html {
   background: transparent;
 }
 
+/* Un panneau garde monte est masque par l'attribut `hidden`. La regle du
+   navigateur qui le cache (`display:none`) est une simple regle d'agent
+   utilisateur : la moindre classe utilitaire `flex` ou `grid` la bat, et le
+   panneau « cache » resterait visible, empile sur l'actif. Cette regle-ci
+   tranche le conflit une fois pour toutes. */
+[hidden] {
+  display: none !important;
+}
+
+/* Une bande qui se fait glisser plutôt que défiler : rangées d'onglets, listes de
+   puces. La règle `*::-webkit-scrollbar` ci-dessus habille TOUT ce qui déborde,
+   y compris ces bandes-là, où la gouttière mange la hauteur pour rien. */
+@utility scrollbar-none {
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+/* Barre EN RETRAIT, pour ce qui défile à l'intérieur d'une surface arrondie (dialogue, popover).
+   La barre globale de 8 px se colle au bord du popup et traverse l'arrondi : elle a l'air posée
+   de travers. Ici la piste est plus large que le pouce, et le pouce se rétrécit par une bordure
+   transparente découpée sur le padding — il paraît fin ET décollé du bord, sans rien changer à la
+   mise en page (une gouttière réservée, elle, décalerait le contenu de tous les dialogues). */
+@utility scrollbar-inset {
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+  }
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Inter Variable', sans-serif;
@@ -1055,6 +1092,37 @@ button:not(:disabled):active,
 @keyframes nrdot {
   0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
   40% { opacity: 1; transform: translateY(-2px); }
+}
+
+/* Trace de l'agent (cf. components/chat/AgentTrace.tsx).
+   `nr-pixel` : la grille 3×3 qui remplace le spinner tant que le tour tourne — un
+   spinner dit « ça charge », cette grille dit « ça travaille », et elle ne tourne
+   pas en rond au même endroit pendant deux minutes.
+   `nr-shimmer` : le libellé actif balayé de gauche à droite, sur un dégradé clippé
+   au texte. Il faut donc `background-size: 200%` et une couleur transparente. */
+@keyframes nr-pixel {
+  0%, 100% { opacity: 0.15; transform: scale(0.9); }
+  50% { opacity: 0.95; transform: scale(1.1); }
+}
+@keyframes nr-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nr-pixel-dot, .nr-shimmer { animation: none !important; }
+  .nr-shimmer { color: var(--color-foreground); -webkit-text-fill-color: currentColor; }
+}
+
+/* Invite « énergie hôte » (components/power/PowerPrompt) : entrée par la droite, comme les
+   pastilles d'état au-dessus desquelles elle s'empile. Purement CSS. */
+@media (prefers-reduced-motion: no-preference) {
+  .nr-power-in {
+    animation: nr-power-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes nr-power-in {
+    from { opacity: 0; translate: 1.5rem 0; scale: 0.98; }
+    to { opacity: 1; translate: none; scale: 1; }
+  }
 }
 
 /* Écrans de gate (login / accès) : sobres. Halo discret sous le bouton Discord + fondu d'entrée. */

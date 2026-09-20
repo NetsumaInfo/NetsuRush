@@ -3,7 +3,7 @@
 // fichier→fichier — la sortie de l'op i devient l'entrée de l'op i+1. Les intermédiaires vivent dans un
 // dossier temporaire (jamais importés) ; seule la dernière op écrit dans `outDir` et importe si demandé.
 //
-// On réutilise les orchestrateurs existants op par op (runUpscale / runShaderUpscale / runInterpolate)
+// On réutilise les orchestrateurs existants op par op (runUpscale / runTurbo / runInterpolate)
 // → frame-math, codecs et daemons chauds restent intacts. L'optimisation decode-once→ops→encode-once
 // (un seul flux rawvideo traversant toutes les ops) est une amélioration FUTURE : ici chaque op
 // décode/encode son propre fichier, ce qui est correct et simple (au prix d'I/O intermédiaires).
@@ -15,7 +15,8 @@ const path = require('path');
 const os = require('os');
 const { fsp } = require('./config');
 const sidecars = require('./sidecars');
-const shaderUpscale = require('./shaderUpscale');
+const turbo = require('./turbo');
+const { upscaleArgs } = require('./upscaleArgs');
 const { t } = require('./i18n');
 
 const CHAINABLE = new Set(['upscale', 'interpolate']);
@@ -58,13 +59,15 @@ async function runPipeline(event, opts) {
       const common = { input: cur, outDir: dir, importBack: last ? !!importBack : false,
         baseName: base, outputName: last ? outputName : undefined, whole: true, outputKind: 'video' };
       if (op.kind === 'upscale') {
+        // Settings arrive in the panel's shape: the shared mapping turns them into engine arguments
+        // (scale, target, Turbo options), exactly as for an export or an archive. The raw settings
+        // stay underneath for the encoding fields the mapping does not carry.
         const s = op.settings || {};
-        const routedModel = s.engine === 'turbo' && shaderUpscale.modelForShader(s.shader);
-        r = routedModel
-          ? await sidecars.runUpscale(sub, Object.assign({}, s, common, { model: routedModel }))
-          : s.engine === 'turbo'
-            ? await shaderUpscale.runShaderUpscale(sub, Object.assign({}, s, common))
-            : await sidecars.runUpscale(sub, Object.assign({}, s, common));
+        const { engine, args } = upscaleArgs(s);
+        const opts = Object.assign({}, s, args, common);
+        r = engine === 'turbo'
+          ? await turbo.runTurbo(sidecars, sub, opts)
+          : await sidecars.runUpscale(sub, opts);
       } else {
         r = await sidecars.runInterpolate(sub, Object.assign({}, op.settings || {}, common));
       }

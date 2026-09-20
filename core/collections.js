@@ -137,6 +137,7 @@ function createCollectionStore(dataDir) {
       tags: cleanTags(parsed.tags) || [],
       folderId: parsed.folderId || null,
       archive: parsed.archive && typeof parsed.archive === 'object' ? parsed.archive : null,
+      collaboration: parsed.collaboration || null,
       shots: Array.isArray(parsed.shots) ? parsed.shots : [],
       updatedAt: row.updated_at,
     };
@@ -152,6 +153,7 @@ function createCollectionStore(dataDir) {
       tags: c.tags || [],
       folderId: c.folderId || null,
       archive: c.archive || null,
+      collaboration: c.collaboration || null,
       shots: Array.isArray(shots) ? shots : (c.shots || []),
     });
   }
@@ -178,6 +180,7 @@ function createCollectionStore(dataDir) {
       preview, tags, labels: [...labelSet], collTags: c.tags || [], description: c.description || '', folderId: c.folderId || null,
       archive: c.archive || null,
       archived: !!(c.archive && c.archive.lastAt), autoSync: !!(c.archive && c.archive.autoSync),
+      collaboration: c.collaboration || null,
     };
   }
 
@@ -207,6 +210,7 @@ function createCollectionStore(dataDir) {
         tags: c.tags !== undefined ? (cleanTags(c.tags) || []) : (prev ? prev.tags : []),
         folderId: c.folderId !== undefined ? (c.folderId || null) : (prev ? prev.folderId : null),
         archive: c.archive !== undefined ? c.archive : (prev ? prev.archive : null),
+        collaboration: c.collaboration !== undefined ? c.collaboration : (prev ? prev.collaboration : null),
       };
       const name = c.name !== undefined ? (c.name || t('untitled')) : (prev ? prev.name : t('untitled'));
       const ts = Date.now();

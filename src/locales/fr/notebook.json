@@ -635,5 +635,12 @@
     "inProgress": "En cours",
     "done": "Terminé",
     "name": "Base de données"
+  },
+  "share": {
+    "document": "Partager ce document",
+    "notebook": "Partager le carnet",
+    "failed": "Le partage a échoué.",
+    "manageRemoval": "Utilisez les paramètres de collaboration pour quitter ou supprimer ce partage.",
+    "retry": "Réessayer"
   }
 }

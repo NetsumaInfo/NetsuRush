@@ -78,7 +78,9 @@
     "unpinShort": "Lösen",
     "minimize": "Minimieren",
     "restore": "Wiederherstellen",
-    "maximize": "Maximieren"
+    "maximize": "Maximieren",
+    "github": "Quellcode auf GitHub",
+    "support": "NetsuBoard unterstützen"
   },
   "errorBadge": {
     "aria": "{{count}} Fehler — Konsole öffnen",
@@ -123,13 +125,13 @@
     "closeNub": "{{host}} schließen (RAM/GPU frei)",
     "opInProgress": "Vorgang läuft…",
     "hostClosed": "{{host}} geschlossen",
-    "reopenToResume": "Zum Fortsetzen mit „{{project}}“ öffnen.",
-    "reopenToResumeNoProject": "Zum Fortsetzen erneut öffnen.",
     "collapse": "Einklappen",
     "collapseCorner": "In die Ecke einklappen",
+    "dismiss": "Ausblenden",
+    "dismissHint": "Diese Erinnerung ausblenden",
     "closeHostQ": "{{host}} schließen?",
-    "freeRamDesc": "Gibt RAM und GPU für die Aufgabe frei. Danach ein Klick zurück ins Projekt.",
-    "resolveSafeCloseDesc": "Gibt RAM und GPU frei. Vor dem Schließen speichert NetsuRush das Projekt und prüft den Cache.",
+    "freeRamDesc": "Gibt RAM und GPU frei.",
+    "resolveSafeCloseDesc": "Gibt RAM und GPU frei. Projekt vorher gespeichert.",
     "later": "Später",
     "closeHost": "{{host}} schließen",
     "failed": "fehlgeschlagen"

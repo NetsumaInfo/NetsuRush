@@ -43,17 +43,33 @@ const exportable = (items: BoardItem[]) =>
 // retient l'HISTORIQUE d'annulation. Supprimer une image déclenche un autosave une demi-seconde
 // plus tard ; sans cette liste, le ménage du core emporte ses octets et le Ctrl+Z suivant rend une
 // tuile vide. Les liens distants sont ignorés : ils ne coûtent rien et ne s'effacent pas.
+// Un instantané d'historique est immuable une fois enregistré, et sa liste de localisateurs ne
+// change donc jamais non plus. La mémoriser par tableau évite à `retainedRefs` de reparcourir TOUT
+// l'historique d'annulation à chaque écriture : seuls les instantanés jamais vus (en pratique les
+// items courants) sont visités.
+const snapshotRefs = new WeakMap<BoardItem[], string[]>();
+
+function refsOf(snapshot: BoardItem[]): string[] {
+  const cached = snapshotRefs.get(snapshot);
+  if (cached) return cached;
+  const out = new Set<string>();
+  const add = (ref?: string) => { if (ref && !/^(https?:|data:|blob:|collab:)/i.test(ref)) out.add(ref); };
+  for (const item of snapshot) {
+    add(item.ref);
+    item.frames?.forEach(add);
+    add(item.prevMedia?.ref);
+    add(item.localMedia?.ref);
+  }
+  const refs = [...out];
+  snapshotRefs.set(snapshot, refs);
+  return refs;
+}
+
 function retainedRefs(): string[] {
   const st = useBoard.getState();
   const out = new Set<string>();
-  const add = (ref?: string) => { if (ref && !/^(https?:|data:|blob:|collab:)/i.test(ref)) out.add(ref); };
   for (const snapshot of [...st.past, ...st.future, st.items]) {
-    for (const item of snapshot) {
-      add(item.ref);
-      item.frames?.forEach(add);
-      add(item.prevMedia?.ref);
-      add(item.localMedia?.ref);
-    }
+    for (const ref of refsOf(snapshot)) out.add(ref);
   }
   return [...out];
 }
@@ -347,6 +363,12 @@ export function useScenePersistence() {
         items,
         view: (sc.view as BoardView) ?? undefined,
       });
+      // Une scène de bibliothèque garde des chemins ABSOLUS : un dossier compagnon déplacé ou vidé
+      // depuis les laisse morts alors que les octets vivent encore ailleurs (le nom porte leur
+      // empreinte). Soin en arrière-plan, silencieux — au pire il ne trouve rien et rien ne change.
+      void import("./boardMediaActions")
+        .then((actions) => actions.healDeadMediaRefs())
+        .catch(() => undefined);
     },
     [api],
   );
@@ -367,6 +389,10 @@ export function useScenePersistence() {
   // un board anonyme va dans la scène réservée AUTOSAVE_ID, sans toucher l'indicateur dirty.
   const saveAuto = useCallback(async () => {
     const st = useBoard.getState();
+    // Une scène collaborative ne s'enregistre JAMAIS toute seule : `saveScene` réécrit la ligne
+    // entière, donc un enregistrement sans `collaboration`/`media`/`preview` délierait le projet et
+    // effacerait la liste de localisateurs qui autorise l'import d'un média. Le document fait foi.
+    if (st.collabProjectId) return;
     if (st.filePath && !st.fileReadonly) {
       try {
         const res = await api?.saveProject(st.filePath, savable(st.sceneName));

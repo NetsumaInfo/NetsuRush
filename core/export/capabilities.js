@@ -20,7 +20,7 @@ const { videoEncodeArgs, hwCandidates, listCodecs } = require('./encodeArgs');
 
 // Incrémenter à chaque changement des arguments d'encodage ou de la logique de sonde → invalide les
 // caches déjà écrits chez les utilisateurs.
-const PROBE_SCHEMA = 5;
+const PROBE_SCHEMA = 6;
 const CACHE_PATH = path.join(NR_HOME, 'export-caps.json');
 
 // 320x240 : NVENC REFUSE les dimensions trop petites (« Frame Dimension less than the minimum
@@ -119,7 +119,6 @@ function ffmpegSignature() {
  * @property {boolean} hasGpuEncoder
  * @property {string|null} h264Encoder
  * @property {string|null} h265Encoder
- * @property {string|null} av1Encoder
  * @property {boolean} webp
  * @property {number} schema
  * @property {string} signature
@@ -202,7 +201,6 @@ async function runProbe() {
   };
   const h264Encoder = pick('h264_');
   const h265Encoder = pick('h265_');
-  const av1Encoder = pick('av1_');
 
   return {
     codecs: available,
@@ -211,10 +209,9 @@ async function runProbe() {
     codecEncoderOptions,
     upscaleProfileEncoderOptions,
     hwEncoders: [...hwAlive].filter((e) => Object.values(codecEncoderOptions).some((options) => options.includes(e))),
-    hasGpuEncoder: !!(h264Encoder || h265Encoder || av1Encoder),
+    hasGpuEncoder: !!(h264Encoder || h265Encoder),
     h264Encoder,
     h265Encoder,
-    av1Encoder,
     webp,
     schema: PROBE_SCHEMA,
     signature: ffmpegSignature(),

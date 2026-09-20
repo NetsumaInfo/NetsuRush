@@ -97,7 +97,7 @@ Commands: `serve` (**JSON-lines daemon**, the nominal mode — models stay warm 
 
 - Cutting/extracting is **lossless**: `-c copy -avoid_negative_ts make_zero`. Never re-encode. **A stream copy is not frame-exact and that is accepted**: the cut snaps to the container keyframe before the in point (measured 24–70 extra frames on BluRay rips, whose GOPs run 10–23 s) and the open GOP drags 1–2 extra frames past the out point. This is a format limit — the frames between the keyframe and the cut point cannot be decoded without that keyframe — not something a flag fixes. The product decision is to keep the copy pure and **warn in the UI** (`export:workflow.remuxWarning`, shown under the workflow toggle in `ProfileEditor`); a frame-exact cut means picking a re-encode profile. Do not silently swap a remux for a re-encode, and do not weaken the warning.
 - **A re-encode, however, must be frame-exact** — `core/export/frameCut.js` `encodeCutBounds`: seek at −¼ frame (an mkv 1/1000 timebase rounds the stored pts below the target and the seek drops the first frame — measured, a 2-frame clip came out with 1) and bound the video with `-frames:v`, the only exact limit an encoder has; `-t` only bounds audio, whose end lands on the packet rounding and costs an extra frame.
-- **An upscale export does not go through `frameCut.js`.** When a profile carries upscale settings, the shot is cut AND encoded by the upscale engine (`core/upscaleRun.js`, shared with a collection's archive): it seeks with `-ss`/`-t` on decode (`python/upscaler/media.py`), so a bound can land one frame off instead of the exact `-frames:v` count. Do not "fix" it with an ffmpeg pre-cut: a lossless one puts the keyframe snap back, a re-encoded one pays the encode twice and resamples pixels the model has not seen yet.
+- **A processed export does not go through `frameCut.js`.** When a profile carries a processing pass (upscale, interpolation, depth), the shot is cut AND encoded by that engine (`core/processRun.js`, shared with a collection's archive): it seeks with `-ss`/`-t` on decode (`python/upscaler/media.py`), so a bound can land one frame off instead of the exact `-frames:v` count. Do not "fix" it with an ffmpeg pre-cut: a lossless one puts the keyframe snap back, a re-encoded one pays the encode twice and resamples pixels the model has not seen yet.
 - AMVerge-style smart cut (re-encoded head + stream-copied rest, concatenated) was **tried and removed**: measured corrupt on real streams — encoder SPS/PPS clash with the copied stream, and the resume "keyframe" is often an open-GOP recovery I (not IDR), so the decoder drags head state ("Missing reference picture", broken POC). The annexB in-band route corrupts the same way. Do not retry without a real bitstream tool.
 - `probe` returns duration and dimensions **only**. The full keyframe scan (`-skip_frame nokey`) was too slow on long files and was removed. Do not add it back.
 - `ffprobe` keyframes, when needed: `pts_time` + `pict_type==I` (not the deprecated `pkt_pts_time`).
@@ -120,6 +120,18 @@ Commands: `serve` (**JSON-lines daemon**, the nominal mode — models stay warm 
   - an **unknown token stays visible** in the name; silently erasing a typo looks like a broken template.
   - In **merge** mode the template resolves **without index** and `{duration}` is the **sum** of the shots, the only real length of the produced file. A destination imposed by the caller (`savePath`/`savePaths`) bypasses the template.
 - **Black spacer in merge mode** (`core/export/spacer.js`): end to end, two consecutive shots touch frame-exactly and nothing marks the cut. The spacer is **an encoded piece like the others, never a filter**, because merging goes through the `concat` demuxer in stream-copy mode, which refuses the moment a parameter changes between pieces. It is therefore built **after** the shots, at the dimensions / rate / codec / sample rate / channel count **read back from the first produced piece**: a 44.1 kHz silence in front of 48 kHz shots breaks the copy and re-encodes the whole thing. Three rules: shots **without an audio track** get a spacer without audio; in copy mode the silence is **encoded in the shots' codec** (you cannot copy a stream you just generated — hence a codec→encoder table for the four codecs whose encoder is not named after the decoder); and the spacer goes **between** shots, never at the ends, since a montage opening or closing on black looks truncated. A build failure does **not** abort the merge (logged fallback without spacer): losing the whole encode over a cosmetic detail would be worse.
+
+## Upscale sizing (`core/upscaleArgs.js#upscalePlan`, `python/upscaler/plan.py`)
+
+A network always outputs `native × input`, so sizing an upscale means choosing its **input**. Both implementations are held to the same table, `test/fixtures/upscale-plan.json`; change one, change both.
+
+- **A target is a resolution class, not a height.** 1080p is the 16:9 box 1920×1080, oriented like the source: a 1920×800 scope frame is 1080p and its 2160p output is 3840×1600, not 5184×2160. A 1080×1920 vertical frame is 1080p too.
+- **The network is never fed above the 1080p box.** A larger source is brought down to it first: above it the network pays 2–4× the time for detail most masters never had.
+- **The network is never fed below the source, or below the 1080p box.** Reducing the input to land exactly on the target (720p → 270p for a ×4 network aiming at 1080p) threw away the detail the network needed. Even 1080p → 1080p goes through the network and is reduced afterwards; a plain resize is never the plan.
+- **Nothing is enlarged after the network.** When it cannot reach the output from its input (a ×2 network, 720p → 2160p), the input is enlarged **before** it (Lanczos). Otherwise its overshoot is reduced to the output (`INTER_AREA`). Feed sizes round **up** so `native × input` never falls short by a pixel.
+- Restoration (×1) keeps the source size, cap included.
+- **Every surface carries the class the same way**: NetsuLab, export profiles, collection archives, AE export and the NetsuLab chain all map their settings through `upscaleArgs` (`targetHeight`). The archive only skips a source that is already one of our upscales when both were sized the same way (class against class, factor against factor).
+- Turbo shaders are free-size (libplacebo renders the class directly), but ArtCNN only runs when the output is more than 1.3× its input (`//!WHEN` in the `.glsl`): a Turbo job at or near the source class is a plain resample.
 
 ## Reference board at scale
 
@@ -156,6 +168,22 @@ Two rules make it safe:
 `dragDropEnabled` is **false** everywhere (`src-tauri/tauri.conf.json` and every window created from `coreClient.ts`): wry's OS drag-and-drop and DOM drag-and-drop are mutually exclusive, and the board needs the DOM one. So a file dropped from Explorer arrives as an ordinary `drop` event — and an **unhandled** drop makes the WebView navigate to that file, replacing the app with the video. `main.tsx` therefore cancels the default action for drags that carry `Files`, at window level, in the bubble phase (text drags keep their native behaviour so they can still be dropped into an input).
 
 The disk path is **not** in the DOM `File`. `nr.pathsForFiles()` posts the `File` objects back to the host through `chrome.webview.postMessageWithAdditionalObjects`, which reads `ICoreWebView2File::Path` (`nr_attach_file_paths`, `src-tauri/src/lib.rs`) and answers with a `nr://file-paths` event **addressed to the calling window** — request ids are per-renderer, so a broadcast would resolve the detached board's request with the main window's paths. The bytes are never read: a rush stays where it is. Requirements and fallbacks: WebView2 runtime **1.0.1774.30** or newer (`ICoreWebView2File`), only `File` objects may be passed, and anything else (older runtime, non-Windows, bridge not attached) resolves to empty paths — callers then open the native file picker instead of failing silently.
+
+## Installer identity
+
+- **The main binary is named after the product, never after the Cargo package.**
+  `mainBinaryName` in `src-tauri/tauri.conf.json` is `NetsuRush`, so the installed image is
+  `NetsuRush.exe`. Tauri's own `CheckIfAppIsRunning` closes the running app by matching the image
+  **name** (`nsis_tauri_utils::FindProcessCurrentUser` / `KillProcessCurrentUser`), with no path and
+  no window involved. NetsuBoard's Cargo package is also called `app`, so while this was unset,
+  installing, updating or uninstalling NetsuRush called `TerminateProcess` on every `app.exe` of the
+  session — **NetsuBoard was killed outright, without a prompt and without a chance to save**. The
+  two products share a machine by design; nothing in the packaging may address a process it does not
+  own.
+- `windows/installer-hooks.nsh` releases locks through Restart Manager on **paths** inside
+  `$INSTDIR`, never on image names, which is why it was already harmless. It still releases the
+  pre-rename `app.exe` beside `${MAINBINARYNAME}.exe`: an install provisioned before the rename runs
+  under the old name, and that is the image holding the lock.
 
 ## Console log and bug report
 

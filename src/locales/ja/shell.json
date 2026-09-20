@@ -78,7 +78,9 @@
     "unpinShort": "ピン留め解除",
     "minimize": "最小化",
     "restore": "元のサイズに戻す",
-    "maximize": "最大化"
+    "maximize": "最大化",
+    "github": "GitHub のソースコード",
+    "support": "NetsuBoard を支援"
   },
   "errorBadge": {
     "aria": "エラー {{count}} 件 — コンソールを開く",
@@ -123,13 +125,13 @@
     "closeNub": "{{host}} を閉じる（RAM/GPU を解放）",
     "opInProgress": "処理中…",
     "hostClosed": "{{host}} は終了済み",
-    "reopenToResume": "「{{project}}」を開いて再開します。",
-    "reopenToResumeNoProject": "開き直して再開します。",
     "collapse": "折りたたむ",
     "collapseCorner": "隅に折りたたむ",
+    "dismiss": "非表示",
+    "dismissHint": "この通知を非表示にする",
     "closeHostQ": "{{host}} を閉じますか？",
-    "freeRamDesc": "タスク用に RAM と GPU を解放します。終了後はワンクリックでプロジェクトを開き直せます。",
-    "resolveSafeCloseDesc": "RAM と GPU を解放します。終了前に NetsuRush がプロジェクトを保存し、キャッシュを確認します。",
+    "freeRamDesc": "RAM と GPU を解放。",
+    "resolveSafeCloseDesc": "RAM と GPU を解放。事前にプロジェクトを保存。",
     "later": "あとで",
     "closeHost": "{{host}} を閉じる",
     "failed": "失敗"

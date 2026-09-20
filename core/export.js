@@ -3,8 +3,9 @@
 //  - video_remux : copie de flux lossless (`-c copy`), fallback ré-encode si la copie échoue ;
 //  - video_encode : ré-encodage codec/audio. Moteur GPU/NVENC/AMF/QSV/CPU choisi par profil,
 //    limité aux encodeurs réellement sondés ; repli CPU si le moteur matériel échoue à l'ouverture.
-//    A profile may also carry UPSCALE settings: the shot is then cut AND encoded by the upscale
-//    engine (`core/upscaleRun.js`), never by ffmpeg — replacing pixels is out of reach of a copy.
+//    A profile may also carry a PROCESSING pass (upscale, interpolation, depth): the shot is then
+//    cut AND encoded by that engine (`core/processRun.js`), never by ffmpeg — replacing the pixels
+//    is out of reach of a copy.
 // Per-clip (un fichier par plan) OU fusion (merge → concat demuxer, un seul fichier).
 // Travaille en SECONDES (start/end) comme exportClip — ne touche pas la frame-math timeline.
 // Progression émise sur le canal SSE `export:progress` (compteur per-clip).
@@ -22,7 +23,7 @@ const { pickGpuEncoder } = require('./export/encoder');
 const frameCut = require('./export/frameCut');
 const encodeGate = require('./export/gate');
 const capabilities = require('./export/capabilities');
-const upscaleRun = require('./upscaleRun');
+const processRun = require('./processRun');
 const audioLang = require('./audioLang');
 const { t } = require('./i18n');
 
@@ -39,7 +40,7 @@ const { t } = require('./i18n');
  * @property {string} [encoderMode] @property {string} [speed] @property {string} [name] @property {string} [naming]
  * @property {number} [mergeGap]  noir intercalé entre les plans en fusion (millisecondes ; 0 = aucun)
  * @property {AudioSelectLike} [audioSelect]
- * @property {any} [upscale]  NetsuLab upscale settings (`{ enabled, engine, model, scale, ... }`)
+ * @property {any} [process]  processing pass (`{ enabled, kind, upscale|interpolate|depth }`)
  */
 
 /** @typedef {{ input: string, start: number, end: number, label?: string, audioTrack?: number|null }} ExportClipInput */
@@ -126,23 +127,23 @@ async function runPool(count, conc, worker) {
  * Nombre d'encodes simultanés. Remux (copie) = IO → 4 ; encode GPU = 3 (sessions NVENC + chevauchement
  * du décodage) ; encode CPU = 2 (chaque ffmpeg est déjà multi-thread → éviter la surcharge). Override
  * possible via opts.concurrency.
- * An upscale holds the GPU and its VRAM for minutes: its own limit wins over the ffmpeg one.
+ * A processing pass holds the GPU and its VRAM for minutes: its limit wins over the ffmpeg one.
  * @param {ExportProfileLike} profile @param {string|null} gpuEncoder @param {number} total
- * @param {number} [override] @param {any} [upscale] normalized upscale settings, or null
+ * @param {number} [override] @param {any} [proc] normalized processing settings, or null
  */
-function exportConcurrency(profile, gpuEncoder, total, override, upscale) {
+function exportConcurrency(profile, gpuEncoder, total, override, proc) {
   if (override && override > 0) return Math.min(override, total);
-  if (upscale) return Math.min(upscaleRun.upscaleConcurrency(upscale), total);
+  if (proc) return Math.min(processRun.processConcurrency(proc), total);
   if (profile.workflow !== 'video_encode') return Math.min(4, total);
   return Math.min(gpuEncoder ? 3 : 2, total);
 }
 
 /**
- * Upscale engines, loaded ON DEMAND: `core/sidecars.js` pulls in the Python paths and the model
- * catalogue, which an export has no reason to open until a profile actually asks for an upscale.
+ * Processing engines, loaded ON DEMAND: `core/sidecars.js` pulls in the Python paths and the model
+ * catalogue, which an export has no reason to open until a profile actually asks for a pass.
  */
-function upscaleDeps() {
-  return { upscaleMod: require('./sidecars'), turboMod: require('./turbo') };
+function processDeps() {
+  return { sidecars: require('./sidecars'), turbo: require('./turbo') };
 }
 
 /** @param {string} ext @returns {boolean} */
@@ -238,28 +239,29 @@ async function runClip(clip, out, profile, gpuEncoder) {
 }
 
 /**
- * Produces ONE output file from a shot: the upscale engine when the profile asks for one, ffmpeg
- * otherwise. Failure throws, exactly like `runClip` — callers already count the lost shots.
+ * Produces ONE output file from a shot: the processing engine when the profile asks for a pass,
+ * ffmpeg otherwise. Failure throws, exactly like `runClip` — callers already count the lost shots.
  * `onFraction` reports the progress of the CURRENT file (0..1); an ffmpeg cut reports nothing, it
  * is over in one step.
  *
- * Returns the file that was REALLY written: an upscale engine may impose its own container (the RTX
- * CLI only writes MP4), so the planned name is a request, not a promise.
+ * Returns the file that was REALLY written: an engine may impose its own container (the RTX CLI
+ * only writes MP4), so the planned name is a request, not a promise.
  * @param {ExportClipInput} clip @param {string} out
- * @param {{ profile: ExportProfileLike, gpuEncoder: string|null, upscale?: any, base?: string }} ctx
+ * @param {{ profile: ExportProfileLike, gpuEncoder: string|null, process?: any, base?: string }} ctx
  * @param {(fraction: number) => void} onFraction
  * @returns {Promise<string>}
  */
 async function produceClip(clip, out, ctx, onFraction) {
-  const { profile, gpuEncoder, upscale } = ctx;
-  if (!upscale) { await runClip(clip, out, profile, gpuEncoder); return out; }
+  const { profile, gpuEncoder } = ctx;
+  const proc = ctx.process;
+  if (!proc) { await runClip(clip, out, profile, gpuEncoder); return out; }
   // The engine speaks its own SSE channel: relay it as a fraction of THIS file, the batch counter
   // stays the caller's business.
   const relay = { sender: { send: (_ch, p) => onFraction(Math.min(1, Math.max(0, (Number(p && p.pct) || 0) / 100))) } };
-  const r = await upscaleRun.runUpscaleClip(relay, {
-    upscale, profile, input: clip.input, out, start: clip.start, end: clip.end,
+  const r = await processRun.runProcess(relay, {
+    process: proc, profile, input: clip.input, out, start: clip.start, end: clip.end,
     baseName: ctx.base, audioTrack: clip.audioTrack,
-  }, upscaleDeps());
+  }, processDeps());
   if (!r.ok || !r.file) throw new Error(r.error || t('exportFailed'));
   return r.file;
 }
@@ -287,15 +289,15 @@ async function exportClips(event, opts) {
   const base = sanitizeName(opts.baseName || 'export') || 'export';
   const total = clips.length;
   const gpuEncoder = await pickGpuEncoder(profile);
-  // Upscale settings only mean something on a re-encode: they replace the pixels, which neither a
+  // A processing pass only means something on a re-encode: it replaces the pixels, which neither a
   // stream copy nor a timeline import can do. The engine then owns the cut AND the encode.
-  const upscale = profile.workflow === 'video_encode' ? upscaleRun.normalizeUpscale(profile.upscale) : null;
-  const phase = upscale ? 'Upscale' : profile.workflow === 'video_encode' ? 'Encode' : 'Découpe';
+  const proc = profile.workflow === 'video_encode' ? processRun.normalizeProcessSettings(profile.process) : null;
+  const phase = proc ? 'Traitement' : profile.workflow === 'video_encode' ? 'Encode' : 'Découpe';
 
   // Horloge UNIQUE du lot : les jetons {date}/{time} doivent donner la même valeur pour tous les
   // plans, sinon un export à cheval sur une seconde sort des noms qui ne se rangent plus ensemble.
   const now = new Date();
-  if (merge && total > 1) return mergeExport(event, opts, { ext, base, gpuEncoder, profile, upscale, now });
+  if (merge && total > 1) return mergeExport(event, opts, { ext, base, gpuEncoder, profile, process: proc, now });
 
   const dir = opts.dir || '';
   // Noms planifiés AVANT le pool (ordre d'index stable, réservation anti-collision). Sautés quand
@@ -326,9 +328,9 @@ async function exportClips(event, opts) {
   // écrits dans un tableau indexé → l'ordre des fichiers reste stable malgré l'achèvement libre.
   // Chaque encode passe par le PORTAIL GLOBAL : plusieurs exports simultanés (rendu en lot) ne
   // dépassent jamais ensemble la limite de la machine.
-  const conc = exportConcurrency(profile, gpuEncoder, total, opts.concurrency, upscale);
+  const conc = exportConcurrency(profile, gpuEncoder, total, opts.concurrency, proc);
   const slot = encodeGate.register(conc);
-  const ctx = { profile, gpuEncoder, upscale, base };
+  const ctx = { profile, gpuEncoder, process: proc, base };
   try {
     await runPool(total, conc, async (i) => {
       // `savePaths` = destination IMPOSÉE par plan (archivage d'une collection : chaque fichier doit
@@ -428,7 +430,7 @@ async function buildSpacer(work, firstPart, ext, profile, gpuEncoder) {
  * Fusion : coupe chaque plan en temp puis concat demuxer (copy, fallback ré-encode) → 1 fichier.
  * @param {{ sender?: { send: (ch: string, p: any) => void } }} event
  * @param {{ clips: ExportClipInput[], dir?: string, savePath?: string, concurrency?: number, jobId?: string }} opts
- * @param {{ ext: string, base: string, gpuEncoder: string|null, profile: ExportProfileLike, upscale?: any, now?: Date }} ctx
+ * @param {{ ext: string, base: string, gpuEncoder: string|null, profile: ExportProfileLike, process?: any, now?: Date }} ctx
  * @returns {Promise<{ ok: boolean, files: string[], failed: number, error?: string }>}
  */
 async function mergeExport(event, opts, ctx) {
@@ -444,10 +446,10 @@ async function mergeExport(event, opts, ctx) {
     /** @type {string[]} */
     const parts = new Array(total);
     let done = 0;
-    const conc = exportConcurrency(profile, gpuEncoder, total, opts.concurrency, ctx.upscale);
+    const conc = exportConcurrency(profile, gpuEncoder, total, opts.concurrency, ctx.process);
     const slot = encodeGate.register(conc);
     // Same 0..1 per-file progress as the per-clip export: the parts of a merge are produced by the
-    // very same engine, upscale included.
+    // very same engine, processing pass included.
     const partials = new Array(total).fill(0);
     const sendParts = () => send(Math.round(((done + partials.reduce((sum, f) => sum + f, 0)) / total) * 80));
     try {

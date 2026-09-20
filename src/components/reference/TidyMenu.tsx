@@ -92,7 +92,7 @@ export function TidyMenu({ disabled, trigger }: { disabled?: boolean; trigger: R
       </Tooltip>
       <Popover.Portal>
         <Popover.Positioner side="bottom" sideOffset={8} className="z-50 outline-none">
-          <Popover.Popup className="w-80 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none">
+          <Popover.Popup className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-80 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none">
             <p className="mb-2 text-xs font-medium text-muted-foreground">{t("tidy.layout")}</p>
             {/* Grille de 3 : cinq dispositions ne tiennent pas sur une ligne sans tronquer les libellés. */}
             <div className="grid grid-cols-3 gap-1.5">

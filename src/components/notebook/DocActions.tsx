@@ -15,6 +15,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Star, MoreHorizontal, ExternalLink, Link2, Copy, FolderInput, FileDown, FileCode, Package, Trash2 } from "lucide-react";
 import { NBPAGE_LINK_PREFIX, pageStats, formatTimestamp, type NoteBlock } from "./notebookShared";
 import { blocksToMarkdown, blocksToStandaloneHtml, safeFileName, type ExportContext } from "./notebookExport";
+import { openNotebookSharing } from "./notebookCollabState";
 
 // Pied du menu : stats du document — monté seulement quand le menu est ouvert (pas de re-calcul à la frappe).
 function DocInfo({ blocks, updatedAt }: { blocks: NoteBlock[]; updatedAt: number }) {
@@ -122,6 +123,7 @@ export function DocActions({ onMove, onAskDelete }: {
           <DropdownMenuItem onClick={() => void openInNewTab(pageId)}><ExternalLink className="mr-1 h-3.5 w-3.5" /> {t("actions.openNewTab")}</DropdownMenuItem>
           <DropdownMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${pageId}`)}><Link2 className="mr-1 h-3.5 w-3.5" /> {t("actions.copyPageLink")}</DropdownMenuItem>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => openNotebookSharing("notebook-page", pageId)}>{t("share.document")}</DropdownMenuItem>
           <DropdownMenuItem onClick={() => void duplicate(pageId)}><Copy className="mr-1 h-3.5 w-3.5" /> {t("actions.duplicate")}</DropdownMenuItem>
           <DropdownMenuItem onClick={() => onMove(pageId)}><FolderInput className="mr-1 h-3.5 w-3.5" /> {t("navigation.moveTo")}</DropdownMenuItem>
           <DropdownMenuSeparator />

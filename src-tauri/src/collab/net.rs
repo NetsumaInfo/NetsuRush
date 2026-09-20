@@ -408,6 +408,33 @@ pub async fn sync(project_id: &str, id: &str) -> Result<SyncResult, String> {
     result
 }
 
+// Continuous typing must not start another QUIC exchange for every pending edit.
+// One worker owns a project/peer pair; edits during its exchange request one trailing pass.
+static SYNC_REQUESTS: Mutex<Option<HashMap<(String, String), bool>>> = Mutex::new(None);
+pub fn request_sync(project_id: String, peer: String) {
+    let key = (project_id, peer);
+    {
+        let Ok(mut state) = SYNC_REQUESTS.lock() else { return; };
+        let requests = state.get_or_insert_with(HashMap::new);
+        if let Some(pending) = requests.get_mut(&key) { *pending = true; return; }
+        requests.insert(key.clone(), false);
+    }
+    tauri::async_runtime::spawn(async move {
+        loop {
+            let result = sync(&key.0, &key.1).await;
+            let again = {
+                let Ok(mut state) = SYNC_REQUESTS.lock() else { return; };
+                let requests = state.get_or_insert_with(HashMap::new);
+                if result.is_ok() && requests.get(&key) == Some(&true) {
+                    requests.insert(key.clone(), false);
+                    true
+                } else { requests.remove(&key); false }
+            };
+            if !again { break; }
+        }
+    });
+}
+
 /// Serves media requests for the lifetime of one connection. Each request is one bi-stream with the
 /// same frame layout as always — (project, hash, offset) in, (total, chunk hash, chunk) out — so a
 /// peer that still opens one connection per chunk is served identically. A resuming downloader

@@ -8,7 +8,7 @@
 // document, parce que c'est une mesure du fichier et pas un réglage de la planche.
 
 import { nr } from "@/lib/bridge";
-import type { BoardItem } from "./referenceShared";
+import { isCoreFileRef, type BoardItem } from "./referenceShared";
 import { playerSeek, playerTime } from "./playhead";
 import { useBoard } from "./useReferenceBoard";
 
@@ -17,9 +17,12 @@ const fpsByRef = new Map<string, number>();
 // (lien distant, flux relayé) : le pas reste utilisable, il n'est simplement pas exact.
 const FALLBACK_FPS = 25;
 
-// Une source mesurable = un fichier sur disque. Un lien distant ou un blob n'a pas de chemin à sonder.
+// Une source mesurable = un fichier sur disque. Un lien distant, un blob ou le média d'un board
+// partagé n'a pas de chemin à sonder — et sans cette dernière exclusion la sonde échouait en
+// silence à CHAQUE pas, laissant la cadence bloquée sur le repli : le pas image existait mais
+// avançait de la mauvaise durée, indéfiniment.
 function measurable(item: BoardItem): boolean {
-  return item.kind === "video" && !/^(https?|blob|data):/i.test(item.ref);
+  return item.kind === "video" && isCoreFileRef(item.ref);
 }
 
 function fpsFor(item: BoardItem): number {

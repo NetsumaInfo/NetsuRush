@@ -11,8 +11,8 @@ const VAULT_PASSWORD = "netsurush-byok-vault-v1"; // chiffre le snapshot local (
 const CLIENT = "byok";
 const SNAPSHOT = "netsurush.stronghold";
 
-export type KeyName = "anthropic" | "openai" | "openrouter";
-export interface ApiKeys { anthropic: string; openai: string; openrouter: string }
+export type KeyName = "anthropic" | "openai" | "openrouter" | "xai";
+export interface ApiKeys { anthropic: string; openai: string; openrouter: string; xai: string }
 
 // Charge le module Stronghold sans que tsc/Vite n'exige sa présence (résolution dynamique).
 async function loadStronghold(): Promise<any | null> {
@@ -37,12 +37,17 @@ const enc = new TextEncoder();
 
 export async function loadKeys(): Promise<ApiKeys> {
   const sh = await loadStronghold();
-  if (!sh) return { anthropic: "", openai: "", openrouter: "" };
+  if (!sh) return { anthropic: "", openai: "", openrouter: "", xai: "" };
   const read = async (k: KeyName): Promise<string> => {
     try { const v = await sh.store.get(k); return v ? dec.decode(new Uint8Array(v)) : ""; }
     catch { return ""; }
   };
-  return { anthropic: await read("anthropic"), openai: await read("openai"), openrouter: await read("openrouter") };
+  return {
+    anthropic: await read("anthropic"),
+    openai: await read("openai"),
+    openrouter: await read("openrouter"),
+    xai: await read("xai"),
+  };
 }
 
 export async function saveKey(name: KeyName, value: string): Promise<boolean> {

@@ -179,6 +179,34 @@ export function useFlow() {
     void save({ vars: next });
   }, [overrides, save]);
 
+  /// Turns a reviewed proposal into one save.
+  ///
+  /// One call rather than one per operation: each save rebuilds the engine
+  /// session, so applying a three-operation proposal separately would rebuild
+  /// it three times and show the user two intermediate states nobody asked
+  /// for. This is also the ONLY path from a proposal to the composition —
+  /// the agent's tools cannot write, by design.
+  const applyProposal = useCallback(async (proposal: {
+    operations: Array<Record<string, unknown>>;
+  }) => {
+    const vars = { ...overrides };
+    let html: string | undefined;
+    let size: { width: number; height: number } | undefined;
+
+    for (const operation of proposal.operations) {
+      if (operation.type === 'variable.set' && typeof operation.variableId === 'string') {
+        vars[operation.variableId] = operation.value as FlowVarValue;
+      } else if (operation.type === 'format.set') {
+        size = { width: Number(operation.width), height: Number(operation.height) };
+      } else if (operation.type === 'source.replace' && typeof operation.source === 'string') {
+        html = operation.source;
+      }
+    }
+
+    setOverrides(vars);
+    await save({ vars, ...(html === undefined ? {} : { html }), ...(size ?? {}) });
+  }, [overrides, save]);
+
   const send = useCallback(() => run(() => nr.flowSend()), [run]);
 
   const frameUrl = useCallback(
@@ -189,6 +217,6 @@ export function useFlow() {
   return {
     status, state, overrides, busy, applying, error, frame, revision,
     setFrame, setError,
-    refreshStatus, start, stop, save, setVariable, send, frameUrl,
+    refreshStatus, start, stop, save, setVariable, send, frameUrl, applyProposal,
   };
 }

@@ -13,6 +13,7 @@ import { AdobeBridgePanel } from "@/components/adobe/AdobeBridgePanel";
 import { AccountSettings } from "./AccountSettings";
 import { DiscordSettings } from "./DiscordSettings";
 import { SharingSettings } from "./SharingSettings";
+import { CollaborationSettings } from "./CollaborationSettings";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { LanguageSettings } from "./LanguageSettings";
 import { NavigationSettings } from "./NavigationSettings";
@@ -40,7 +41,7 @@ const PANELS: Record<SettingsPage, Record<string, ComponentType>> = {
   export: { export: ExportProfileSettings },
   adobe: { adobe: AdobeBridgePanel },
   storage: { media: MediaCacheSection, cleanup: CleanupSettings, board: BoardAssetsSection, project: OutboxSettings, projects: ProjectsSection },
-  system: { updates: UpdateSettings, compatibility: CompatibilitySettings, console: ConsoleSettings },
+  system: { updates: UpdateSettings, compatibility: CompatibilitySettings, collaboration: CollaborationSettings, console: ConsoleSettings },
   about: { about: AboutSettings },
 };
 

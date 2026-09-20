@@ -45,7 +45,7 @@ async function status(opts = {}) {
   if (!opts.force && memo && Date.now() - memoAt < 30000) return memo;
   const [hardware, encoding, python] = await Promise.all([
     detectHardware({ force: !!opts.force }),
-    getCapabilities({ force: !!opts.force }).catch((e) => ({ codecs: [], codecEncoders: {}, codecEncoderOptions: {}, upscaleProfileEncoderOptions: {}, hwEncoders: [], hasGpuEncoder: false, h264Encoder: null, h265Encoder: null, av1Encoder: null, webp: false, error: String(e) })),
+    getCapabilities({ force: !!opts.force }).catch((e) => ({ codecs: [], codecEncoders: {}, codecEncoderOptions: {}, upscaleProfileEncoderOptions: {}, hwEncoders: [], hasGpuEncoder: false, h264Encoder: null, h265Encoder: null, webp: false, error: String(e) })),
     probePython(),
   ]);
   memo = {
@@ -56,7 +56,6 @@ async function status(opts = {}) {
     encoding: {
       h264: encoding.h264Encoder || null,
       h265: encoding.h265Encoder || null,
-      av1: encoding.av1Encoder || null,
       webp: !!encoding.webp,
       hardwareEncoders: encoding.hwEncoders || [],
       codecEncoders: encoding.codecEncoders || {},

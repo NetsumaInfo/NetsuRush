@@ -178,10 +178,20 @@ export default defineSchema({
     userId: v.string(),
     role: v.string(), // "owner" | "editor" | "viewer"
     addedAt: v.number(),
+    canDeleteOthers: v.optional(v.boolean()),
   })
     .index("by_project", ["projectId"])
     .index("by_user", ["userId"])
     .index("by_project_user", ["projectId", "userId"]),
+
+  // Authorization metadata only: collection contents remain encrypted in the native document.
+  collectionEntries: defineTable({
+    projectId: v.id("projects"),
+    entryId: v.string(),
+    contributorId: v.string(),
+    removed: v.boolean(),
+    createdAt: v.number(),
+  }).index("by_project", ["projectId"]).index("by_project_entry", ["projectId", "entryId"]),
 
   // Rare, bounded administrative actions only. No project name, content, file path, token or key.
   projectAuditEvents: defineTable({

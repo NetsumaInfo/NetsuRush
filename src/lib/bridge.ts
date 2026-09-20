@@ -411,6 +411,9 @@ export interface UpscaleOpts extends ProcessExportOpts {
   input: string;
   model: UpscaleModel;
   scale: 1 | 2 | 4;        // 1 = restauration taille d'origine ; 2/4 = agrandissement
+  // Resolution class (1080, 1440, 2160): the output fits the 16:9 box of that class, oriented like
+  // the source, ratio kept. Takes over `scale` when set. Absent = the factor applies (board, archive).
+  targetHeight?: number;
   codec: UpscaleCodec;
   denoise?: number;        // 0..1, modèle léger uniquement (DNI avec la variante débruitée)
   tile?: number;           // 0 = auto ; 256/512/1024 anti-OOM en 4K
@@ -458,6 +461,9 @@ export interface UpscaleShaderOpts extends ProcessExportOpts {
   shader: ShaderModel;
   scale: 1 | 2 | 4;
   codec: UpscaleCodec;
+  // Resolution class (1080, 1440, 2160): the output fits the 16:9 box of that class, oriented like
+  // the source, ratio kept. Takes over `scale` when set. Absent = the factor applies (board, archive).
+  targetHeight?: number;
   deband?: "none" | "light" | "medium" | "strong";  // anti-aplats (libplacebo deband)
   grain?: number;                                     // grain de débanding (masque les bandes résiduelles)
   sharp?: "soft" | "sharp";                          // noyau de redimensionnement (spline36 / lanczossharp)
@@ -507,6 +513,9 @@ export interface UpscaleFrameOpts {
   shader?: ShaderModel;
   model: UpscaleModel;
   scale: 1 | 2 | 4;
+  // Resolution class (1080, 1440, 2160): the output fits the 16:9 box of that class, oriented like
+  // the source, ratio kept. Takes over `scale` when set. Absent = the factor applies (board, archive).
+  targetHeight?: number;
   denoise?: number;
   tile?: number;
   tilePad?: number;
@@ -1266,6 +1275,30 @@ export interface SetupStatus {
   home: string;      // dossier de données écrivable (NR_HOME)
   items: SetupItem[];
 }
+// yt-dlp est la SEULE dépendance d'exécution qui pourrit : ses extracteurs sont cassés par les
+// plateformes toutes les quelques semaines. Le core la rafraîchit une fois par version de
+// l'application ; ces deux appels ouvrent la porte manuelle de Paramètres › Mises à jour, pour une
+// installation que personne n'a mise à jour depuis des mois (cf. core/ytdlpUpdate.js).
+export interface YtDlpStatus {
+  ok: true;
+  available: boolean;          // yt-dlp répond à `--version`
+  manager: "pip" | "binary";   // venv pip (NetsuRush) ou exécutable autonome (NetsuBoard)
+  owned: boolean;              // posé par ce produit → la mise à jour lui appartient
+  version: string | null;      // version installée
+  latest: string | null;       // dernière publiée, `null` si la sonde réseau n'a rien rendu
+  outdated: boolean;           // les deux sont connues ET diffèrent
+  checkedFor: string | null;   // version de l'app qui a déclenché le dernier rafraîchissement
+  checkedAt: number | null;    // horodatage du dernier rafraîchissement (ms)
+  appVersion: string;
+  reason?: string;
+}
+export interface YtDlpUpdateResult {
+  ok: boolean;
+  version: string | null;      // version après la tentative
+  previous: string | null;
+  changed: boolean;            // une version différente est réellement installée
+  error?: string;
+}
 // Suivi d'UN élément téléchargé (archive, roue pip, modèle). `total: 0` = taille inconnue :
 // l'interface montre alors une barre indéterminée plutôt qu'un pourcentage inventé.
 export interface SetupDownload {
@@ -1292,7 +1325,7 @@ export interface CompatibilityStatus {
     onnx: null | { configured: string; availableProviders: string[]; selectedProviders: string[]; version: string; accelerated: boolean };
     errors: string[];
   };
-  encoding: { h264: string | null; h265: string | null; av1: string | null; webp: boolean; hardwareEncoders: string[]; codecEncoders: Record<string, string | null>; codecEncoderOptions: Record<string, string[]>; upscaleProfileEncoderOptions: Record<string, string[]>; codecs: string[]; error: string | null };
+  encoding: { h264: string | null; h265: string | null; webp: boolean; hardwareEncoders: string[]; codecEncoders: Record<string, string | null>; codecEncoderOptions: Record<string, string[]>; upscaleProfileEncoderOptions: Record<string, string[]>; codecs: string[]; error: string | null };
 }
 
 export type PreviewProxyFormat = "hevc" | "h264" | "webm";
@@ -1338,15 +1371,14 @@ export interface PlayInfo {
 
 // ---- Rich Presence Discord (Paramètres › Compte) --------------------------
 // Réglages persistés CÔTÉ CORE (NR_HOME/discord-rpc.json) : une seule source de vérité, le renderer
-// les lit au montage. Les gabarits acceptent {module} et {projet} ; vides = lignes automatiques.
+// les lit au montage. Les lignes de la carte sont TOUJOURS générées par le core : la présence porte le
+// nom de l'app, donc ce qu'elle affiche se lit comme venant de NetsuRush.
 export interface DiscordPrefs {
   enabled: boolean;
   showModule: boolean;   // ligne « Derush », « Recherche »… selon l'onglet ouvert
   showProject: boolean;  // nom du projet/rush — off par défaut (un nom peut trahir un client)
   showElapsed: boolean;  // « 12:34 écoulées » depuis l'ouverture de l'app
   showLinks: boolean;    // l'art ouvre le serveur, la premiere ligne le depot
-  detailsTpl: string;
-  stateTpl: string;
 }
 // L'activité telle que Discord la reçoit. Les lignes absentes sont OMISES (une string vide est
 // rejetée), d'où les champs optionnels — l'aperçu doit refléter cette omission.
@@ -1576,10 +1608,13 @@ export interface RefApi {
   loadScene(id: string): Promise<RefSceneOut | null>;
   saveScene(scene: RefSceneIn): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
   deleteScene(id: string): Promise<{ ok: boolean; error?: string }>;
-  saveAsset(bytes: ArrayBuffer, ext: string): Promise<{ ok: boolean; path?: string; error?: string }>;
+  saveAsset(bytes: ArrayBuffer, ext: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; path?: string; error?: string }>;
   // Aperçu JPEG d'un média local, écrit en asset de l'app — la collaboration l'envoie aux pairs
   // avant l'original, pour qu'une image de 40 Mo montre quelque chose en quelques Ko.
   collabPreview(srcPath: string): Promise<{ ok: boolean; path?: string; error?: string }>;
+  /** Durée d'une vidéo YouTube en secondes, ou null. Borne le sélecteur de portée sans attendre
+      que le lecteur ait lu l'index du conteneur. */
+  ytDuration(id: string): Promise<number | null>;
   /** Chemins morts → chemins vivants des mêmes octets (empreinte portée par le nom). Aucune
       écriture, aucun octet lu. `dead` : ceux qu'aucune source n'a rendus. */
   locateMedia(refs: string[], projectPath?: string): Promise<{ ok: boolean; moves: Record<string, string>; dead: string[] }>;
@@ -1615,7 +1650,7 @@ export interface RefApi {
   // dans `pngs` — de quoi décrire une PORTÉE de vidéo et pas seulement son premier instant.
   sampleFrame(path: string, opts?: { at?: number; to?: number; count?: number; side?: number }): Promise<{ ok: boolean; png?: string; pngs?: string[]; error?: string }>;
   playInfo(filePath: string): Promise<{ duration: number; fps: number; codec: string; native: boolean; error?: string }>;
-  extractMedia(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
+  extractMedia(url: string, options?: { projectPath?: string; title?: string; index?: number }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
   // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
   // `fps` omis ou ≤ 0 = cadence de la source ; la réponse renvoie celle réellement employée.
@@ -1781,7 +1816,11 @@ export interface ScriptApi {
 }
 
 // ---- Carnet (Notebook) : carnets multi → pages imbriquées → databases -----
+export type NotebookCollabBinding = { projectId: string; surface: "notebook" | "notebook-page"; subjectId: string; notebookId: string; name: string; remoteSubjectId?: string; pending?: boolean; sourcePath?: string };
 export interface NotebookApi {
+  prepareCollaborationMedia(surface: "notebook" | "notebook-page", subjectId: string): Promise<{ ok: boolean }>;
+  collaborationBindings(): Promise<NotebookCollabBinding[]>;
+  setCollaborationBinding(binding: NotebookCollabBinding | null, projectId: string): Promise<{ ok: boolean }>;
   // Carnets (liste sidebar). save = crée (id absent) ou met à jour la méta.
   list(): Promise<NotebookMeta[]>;
   saveNotebook(nb: { id?: string; title: string; icon?: string | null; scriptId?: string | null; kind?: NotebookKind; language?: NotebookLanguage }): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
@@ -1905,7 +1944,16 @@ export interface CollectionPreviewShot {
   fps?: number;
 }
 // Méta d'une collection (sans les shots) → grille de dossiers.
+export interface CollectionCollaboration {
+  projectId?: string;
+  pendingProjectId?: string;
+  // Ce que CE compte a le droit de faire sur la collection partagée, tel que le serveur l'a dit au
+  // dernier chargement. Mémorisé ici parce que « Ranger » doit le savoir sans ouvrir la collection.
+  role?: "owner" | "editor" | "viewer";
+  publishedShotIds?: string[];
+}
 export interface CollectionMeta {
+  collaboration?: CollectionCollaboration | null;
   id: string;
   name: string;
   color: string | null;
@@ -1935,7 +1983,7 @@ export interface CollectionArchive {
   audioSelect?: AudioSelect; // sélection de piste par langue (multi-pistes) ; absent = "auto"
   profileId?: string;   // legacy (ancien : id d'un profil d'export) — ignoré
   autoSync?: boolean;   // ré-exporter à chaque ajout
-  upscale?: CollectionArchiveUpscale; // agrandir les plans au passage (impose le ré-encodage)
+  process?: CollectionArchiveProcess; // traiter les plans au passage (impose le ré-encodage)
   lastAt?: number;      // dernier archivage réussi
   // Fichiers écrits, ALIGNÉS sur `shots` (null = plan en échec) → sait quoi déplacer, et où, quand on
   // change de dossier de stockage. Écrit par le core, jamais par le renderer.
@@ -1944,14 +1992,13 @@ export interface CollectionArchive {
   // C'est elle qui permet de ne rien refaire quand rien n'a changé. Écrite par le core.
   entries?: Record<string, { file: string; key: string | null; at?: number }>;
 }
-// Upscale à l'archivage = EXACTEMENT les réglages de modèle de NetsuLab (`UpSettings`), pour que les
-// deux écrans se comportent pareil ; seul `when` est propre à l'archivage (tout de suite, ou quand la
-// machine ne fait plus d'encodage). Import de TYPE seulement : rien de `upscaleShared` n'atterrit
-// dans le bundle du bridge.
-export interface CollectionArchiveUpscale extends Partial<import("@/components/upscale/upscaleShared").UpSettings> {
-  enabled?: boolean;
+// Traitement à l'archivage = EXACTEMENT celui d'un profil d'export (une passe ou deux, mêmes ops et
+// mêmes réglages), pour que les deux écrans se comportent pareil ; seul `when` est propre à
+// l'archivage (tout de suite, ou quand la machine ne fait plus d'encodage). Import de TYPE seulement :
+// rien de `features/export` n'atterrit dans le bundle du bridge.
+export type CollectionArchiveProcess = import("@/features/export/profiles").ExportProcess & {
   when?: "now" | "idle";
-}
+};
 // Une entrée de la file d'archivage différé.
 export interface ArchiveQueueEntry {
   id: string;
@@ -1971,6 +2018,7 @@ export interface ArchiveQueueState {
 }
 // Collection COMPLÈTE (load) : méta d'organisation + shots. `tags` = tags de la collection.
 export interface Collection {
+  collaboration?: CollectionCollaboration | null;
   id: string;
   name: string;
   color: string | null;
@@ -1990,6 +2038,7 @@ export interface CollectionFolder {
 }
 // Patch de méta d'une collection (save) — tous optionnels, undefined = inchangé.
 export interface CollectionSave {
+  collaboration?: CollectionCollaboration | null;
   id?: string;
   name: string;
   color?: string | null;
@@ -2000,6 +2049,12 @@ export interface CollectionSave {
   archive?: CollectionArchive | null;
 }
 export interface CollectionsApi {
+  // Prépare les fichiers à partager : c'est l'ARCHIVAGE de la collection (mêmes réglages, mêmes
+  // fichiers), puis la liste de ce qui porte chaque plan. Partager = archiver.
+  prepareShare(id: string, opts: { dir?: string; profile: ExportProfile; autoSync?: boolean; process?: CollectionArchiveProcess }): Promise<{ ok: boolean; error?: string; prepared?: Array<{ shotId: string; path: string; name: string; duration: number }> }>;
+  // Dossier de stockage proposé quand l'archivage s'allume tout seul (partage) : dans les données
+  // de l'app, au nom de la collection. L'utilisateur peut en choisir un autre.
+  defaultArchiveDir(name: string): Promise<{ dir: string }>;
   list(): Promise<CollectionMeta[]>;
   load(id: string): Promise<Collection | null>;
   // Crée (id absent) ou met à jour la méta (name/color/icon/description/tags/folderId/archive).
@@ -2020,13 +2075,13 @@ export interface CollectionsApi {
   // Archivage : export de tous les plans vers un dossier via un profil (indépendant de la source).
   // `skipped`/`copied`/`rendered` disent ce que l'archivage a VRAIMENT fait : un dossier déjà à jour
   // ne réencode rien, et un plan déjà produit ailleurs est recopié plutôt que régénéré.
-  archive(id: string, opts: { dir?: string; profile: ExportProfile; autoSync?: boolean; upscale?: CollectionArchiveUpscale }): Promise<{ ok: boolean; files?: string[]; skipped?: number; copied?: number; rendered?: number; pruned?: number; failed?: number; error?: string }>;
+  archive(id: string, opts: { dir?: string; profile: ExportProfile; autoSync?: boolean; process?: CollectionArchiveProcess }): Promise<{ ok: boolean; files?: string[]; skipped?: number; copied?: number; rendered?: number; pruned?: number; failed?: number; error?: string }>;
   // Changement de dossier de stockage : déplace l'archive existante vers `dir` (le dossier n'est pas
   // figé) et ré-exporte les plans dont le fichier manque → la nouvelle cible est toujours complète.
-  relocateArchive(id: string, opts: { dir: string; profile: ExportProfile; autoSync?: boolean; upscale?: CollectionArchiveUpscale }): Promise<{ ok: boolean; files?: string[]; moved?: number; exported?: number; failed?: number; error?: string }>;
+  relocateArchive(id: string, opts: { dir: string; profile: ExportProfile; autoSync?: boolean; process?: CollectionArchiveProcess }): Promise<{ ok: boolean; files?: string[]; moved?: number; exported?: number; failed?: number; error?: string }>;
   // File des archivages différés : même opération, lancée quand la machine ne fait plus d'encodage.
   queueState(): Promise<ArchiveQueueState>;
-  queueEnqueue(id: string, req: { name?: string; mode?: "now" | "idle"; opts?: { dir?: string; profile: ExportProfile; autoSync?: boolean; upscale?: CollectionArchiveUpscale } }): Promise<{ ok: boolean; id?: string; error?: string }>;
+  queueEnqueue(id: string, req: { name?: string; mode?: "now" | "idle"; opts?: { dir?: string; profile: ExportProfile; autoSync?: boolean; process?: CollectionArchiveProcess } }): Promise<{ ok: boolean; id?: string; error?: string }>;
   queueCancel(entryId: string): Promise<{ ok: boolean; error?: string }>;
   onQueue(cb: (s: ArchiveQueueState) => void): () => void;
   // Médias hors-ligne (sources manquantes) + resynchronisation (relier par fichier ou dossier de renvoi).
@@ -2155,13 +2210,67 @@ export interface CutAnalysis {
 // 'cli' = agent CLI installé (claude/codex) piloté via MCP. Outils = modules NetsuRush + catalogue
 // Resolve. La permission (mode configurable) peut demander une approbation avant une action.
 export type ChatProvider = "anthropic" | "openai" | "openrouter" | "xai" | "cli";
-export type ChatPermMode = "read-only" | "ask" | "auto" | "safe";
-export interface ChatMessage { role: "user" | "assistant"; content: string }
-export interface ChatAgentInfo { id: string; name: string; available: boolean; version: string | null; models: string[] }
+export type ChatPermMode = "read-only" | "ask" | "auto";
+/// How hard the model should think before answering.
+///
+/// The ladder of `claude --effort`, which is the widest of the real ones — the
+/// others are a prefix of it. There is no `off`: none of these engines is
+/// driven "without reasoning" from a command line, and a level that sent
+/// nothing read as a fault. An engine that stops at `high` clamps down to its
+/// own ceiling in the core rather than failing the call.
+export type ChatThinking = "low" | "medium" | "high" | "xhigh" | "max";
+/// Une image jointe par l'utilisateur, deja encodee.
+///
+/// Le contenu voyage en base64 plutot qu'en chemin : un agent CLI tourne dans
+/// un dossier confine et ne peut PAS lire un fichier arbitraire du disque, et
+/// un fournisseur BYOK n'a jamais eu acces au disque du tout. Le chemin seul
+/// rendait donc le modele aveugle a ce qu'on lui montrait.
+export interface ChatImage { mediaType: string; data: string }
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  /** Images jointes au message. Ignorees par les moteurs sans vision. */
+  images?: ChatImage[];
+}
+export interface ChatAgentInfo {
+  /** `ready` runnable · `app-without-cli` the app is installed, its command is not · `missing`. */
+  state?: "ready" | "app-without-cli" | "missing";
+  /** Where the application was found, when only the application is there. */
+  appPath?: string;
+  /** The binary the detector actually resolved — a full path when it was off the PATH. */
+  bin?: string; id: string; name: string; available: boolean; version: string | null;
+  /** Offline fallback only. The live list comes from `modelsFrom`. */
+  models: string[];
+  /** Whose model catalogue this agent serves, so the UI can ask for the right one. */
+  modelsFrom?: string | null;
+}
+/**
+ * Blackmagic's own MCP server, shipped inside DaVinci Resolve Studio 21.1+.
+ *
+ * `installed` and `available` are not the same news: the binary can be there
+ * and the handshake still fail (Resolve mid-launch, server crashed), and the
+ * panel has to say which of the two happened rather than showing one grey line
+ * for both. `tools` is what it actually contributed to the registry.
+ */
+export interface ChatResolveMcp {
+  available: boolean;
+  installed: boolean;
+  path: string;
+  version: string;
+  server: string;
+  tools: string[];
+  /** `bmd_run_script_unsafe` registered — full disk, network and subprocess access. */
+  unsafe: boolean;
+  error: string;
+}
 export interface ChatAgentsInfo {
   mode: ChatPermMode;
+  /** Duplicate the timeline before the first write of a turn. Off by default. */
+  duplicateFirst: boolean;
   byok: { anthropic: boolean; openai: boolean; openrouter: boolean; xai: boolean };
   cli: ChatAgentInfo[];
+  /** null when the core predates the integration; absent server is `installed:false`. */
+  resolveMcp?: ChatResolveMcp | null;
 }
 // Événement normalisé poussé en SSE (chat:event). Champs présents selon `type`.
 export interface ChatEvent {
@@ -2179,10 +2288,31 @@ export interface ChatEvent {
   outputTokens?: number;
   costUsd?: number;
 }
+/// Where a model list came from. Not a logging detail: "your key says so" and
+/// "this is the offline fallback" do not deserve the same trust, and the panel
+/// says which one the user is looking at.
+export type ChatModelSource = "vendor" | "openrouter" | "curated";
+export interface ChatModelList { provider: string; models: string[]; source: ChatModelSource }
 export interface ChatApprovalReq { runId: string; callId: number; name: string; input: unknown; risk: "read" | "write" | "destructive" }
 export interface ChatConvMeta { id: string; title: string; updatedAt: number }
 export interface ChatConv { id: string; title: string; messages: ChatMessage[] }
-export interface ChatConfig { mode?: ChatPermMode; anthropicKey?: string; openaiKey?: string; openaiBaseUrl?: string; openrouterKey?: string }
+export interface ChatConfig {
+  mode?: ChatPermMode;
+  /** Duplicate the timeline before the first write of a turn. Orthogonal to the mode. */
+  duplicateFirst?: boolean;
+  anthropicKey?: string;
+  openaiKey?: string;
+  openaiBaseUrl?: string;
+  openrouterKey?: string;
+  xaiKey?: string;
+  xaiBaseUrl?: string;
+  /**
+   * Register `bmd_run_script_unsafe` from the Resolve MCP server. Off by
+   * default: it is the one tool there that leaves the sandbox (files, network,
+   * subprocess), which no permission mode can contain once the script runs.
+   */
+  resolveUnsafe?: boolean;
+}
 export interface ChatSendOpts {
   runId: string;
   provider: ChatProvider;
@@ -2192,21 +2322,39 @@ export interface ChatSendOpts {
   system?: string;
   /** Which window is asking. Picks the tool set, and must match the prompt. */
   surface?: "pilot" | "flow";
+  /** Reasoning effort. Ignored by engines that expose no setting for it. */
+  thinking?: ChatThinking;
 }
 export interface ChatApi {
   agents(): Promise<ChatAgentsInfo>;
+  /** Current model ids for a provider — fetched, never typed by hand. */
+  models(request: { provider: string; refresh?: boolean }): Promise<ChatModelList>;
   configure(cfg: ChatConfig): Promise<{ ok: boolean }>;
   send(opts: ChatSendOpts): Promise<{ ok: boolean }>;
   cancel(runId: string): Promise<{ ok: boolean }>;
   respondApproval(callId: number, approved: boolean): Promise<{ ok: boolean }>;
   tools(): Promise<{ name: string; description: string; risk: string }[]>;
+  /** Asks the provider whether the key actually works, rather than whether the field is non-empty. */
+  probe(request: { provider: string; key?: string; baseUrl?: string; model?: string }):
+    Promise<{ ok: boolean; reason: string; detail: string; ms: number }>;
+  /** Opens a terminal on the agent's own login command; the handshake is interactive by design. */
+  login(request: { id: string; bin?: string }): Promise<{ ok: boolean; command?: string; error?: string }>;
+  /** Runs the agent's own install command in a terminal. Bounded to known command shapes. */
+  install(request: { command: string }): Promise<{ ok: boolean; command?: string; error?: string }>;
   onEvent(cb: (e: { runId: string; ev: ChatEvent }) => void): () => void;
   onApproval(cb: (r: ChatApprovalReq) => void): () => void;
+  /**
+   * Conversations sauvegardées, par surface.
+   *
+   * `surface` absent = NetsuPilot, qui garde la racine du dossier : ses
+   * conversations y sont déjà, et les déplacer pour faire symétrique perdrait
+   * un historique existant. NetsuFlow écrit dans son propre sous-dossier.
+   */
   history: {
-    list(): Promise<ChatConvMeta[]>;
-    load(id: string): Promise<ChatConv | null>;
-    save(conv: { id?: string; title?: string; messages: ChatMessage[] }): Promise<{ ok: boolean; id?: string }>;
-    delete(id: string): Promise<{ ok: boolean }>;
+    list(surface?: string): Promise<ChatConvMeta[]>;
+    load(id: string, surface?: string): Promise<ChatConv | null>;
+    save(conv: { id?: string; title?: string; messages: ChatMessage[]; surface?: string }): Promise<{ ok: boolean; id?: string }>;
+    delete(id: string, surface?: string): Promise<{ ok: boolean }>;
   };
 }
 
@@ -2525,7 +2673,7 @@ export interface BugContext {
     backends: { ml: string; onnx: string; transcribe: string };
     ffmpeg: string | null;
   };
-  encoding: { h264: string | null; h265: string | null; av1: string | null; hardware: string[] } | null;
+  encoding: { h264: string | null; h265: string | null; hardware: string[] } | null;
   storage: { home: string; disk: { totalGB: number; freeGB: number } | null };
   setup: { completedAt: number | null; modules: string[]; models: string[]; pythonFound: boolean; ffmpegFound: boolean };
 }
@@ -2653,6 +2801,10 @@ export interface NrApi {
   setupRun(options: SetupRunOptions): Promise<SetupRunResult>;
   compatibilityStatus(opts?: { force?: boolean }): Promise<CompatibilityStatus>;
   onSetupProgress(cb: (p: SetupProgress) => void): () => void;
+  // yt-dlp seul, sans passer par une mise à jour de l'application. `remote: false` coupe la sonde
+  // réseau et ne rend que ce qui est lisible sur la machine.
+  ytDlpStatus(opts?: { remote?: boolean }): Promise<YtDlpStatus>;
+  ytDlpUpdate(): Promise<YtDlpUpdateResult>;
   // Console / journal (Paramètres › Console) : historique des logs core+python, vidage, flux temps réel.
   consoleLogs(): Promise<{ ok: boolean; logs: ConsoleLogEntry[] }>;
   consoleClear(): Promise<{ ok: boolean }>;
@@ -2932,7 +3084,8 @@ export interface NrApi {
   //
   // Sous Tauri on passe donc par le protocole ASSET (`convertFileSrc`) : la requête est interceptée
   // dans le processus par la coquille Rust, sans socket ni pool de connexions. Hors Tauri (panneau
-  // CEP, navigateur) il n'existe pas → repli sur `mediaUrl`.
+  // CEP, navigateur) il n'existe pas → même /media, mais sous l'AUTRE nom de loopback du core, dont
+  // le pool de connexions ne sert à rien d'autre (cf. `gridMediaOrigin`).
   assetUrl(filePath: string): string;
   // Flux d'une vidéo YouTube relayé par le core (yt-dlp résout, le core relaie) : source d'un
   // `<video>` ordinaire, donc AUCUN habillage YouTube — cf. core/ytstream.js.
@@ -3202,8 +3355,6 @@ const MOCK_DISCORD_PREFS: DiscordPrefs = {
   showProject: false,
   showElapsed: true,
   showLinks: true,
-  detailsTpl: "",
-  stateTpl: "",
 };
 function mockDiscordState(): DiscordState {
   let prefs = MOCK_DISCORD_PREFS;
@@ -3216,8 +3367,7 @@ function mockDiscordState(): DiscordState {
   // Le vrai `preview` est calculé par le core (buildActivity) ; hors app on en donne un échantillon
   // figé, juste pour que la carte d'aperçu ait quelque chose à mettre en forme.
   const preview = {
-    details: prefs.detailsTpl.trim() || "NetsuCut",
-    state: prefs.stateTpl.trim() || undefined,
+    details: prefs.showModule ? "NetsuCut" : undefined,
     timestamps: prefs.showElapsed ? { start: Math.floor(Date.now() / 1000) } : undefined,
   };
   // Le core résout le vrai nom/icône auprès de Discord ; hors app on ne fait pas l'appel réseau.
@@ -3331,9 +3481,15 @@ const mock: NrApi = {
     hardware: { gpus: [], cpus: [], vendors: [], primaryVendor: "cpu", initialMlBackend: "cpu", initialOnnxBackend: "cpu", windowsBuild: 0, label: "CPU" },
     configured: { torch: "cpu", onnx: "cpu", transcribe: "cpu" },
     runtime: { torch: null, onnx: null, errors: [] },
-    encoding: { h264: "h264_nvenc", h265: "hevc_nvenc", av1: null, webp: true, hardwareEncoders: ["h264_nvenc", "hevc_nvenc"], codecEncoders: { h264_main: "h264_nvenc", h264_high: "h264_nvenc", h265_main: "hevc_nvenc", h265_main10: "hevc_nvenc" }, codecEncoderOptions: { h264_main: ["h264_nvenc"], h265_main: ["hevc_nvenc"] }, upscaleProfileEncoderOptions: { h264_baseline: ["h264_nvenc"], h264_main: ["h264_nvenc"], h264_high: ["h264_nvenc"], h265_main: ["hevc_nvenc"], h265_main10: ["hevc_nvenc"], h265_rext444_8: ["hevc_nvenc"], h265_rext444_10: ["hevc_nvenc"] }, codecs: [], error: null },
+    encoding: { h264: "h264_nvenc", h265: "hevc_nvenc", webp: true, hardwareEncoders: ["h264_nvenc", "hevc_nvenc"], codecEncoders: { h264_main: "h264_nvenc", h264_high: "h264_nvenc", h265_main: "hevc_nvenc", h265_main10: "hevc_nvenc" }, codecEncoderOptions: { h264_main: ["h264_nvenc"], h265_main: ["hevc_nvenc"] }, upscaleProfileEncoderOptions: { h264_baseline: ["h264_nvenc"], h264_main: ["h264_nvenc"], h264_high: ["h264_nvenc"], h265_main: ["hevc_nvenc"], h265_main10: ["hevc_nvenc"], h265_rext444_8: ["hevc_nvenc"], h265_rext444_10: ["hevc_nvenc"] }, codecs: [], error: null },
   }),
   onSetupProgress: () => () => {},
+  // Hors app : aucun venv à interroger, donc rien à mettre à jour non plus.
+  ytDlpStatus: async () => ({
+    ok: true, available: false, manager: "pip", owned: false, version: null, latest: null,
+    outdated: false, checkedFor: null, checkedAt: null, appVersion: "",
+  }),
+  ytDlpUpdate: async () => ({ ok: false, version: null, previous: null, changed: false, error: i18n.t("common:mock.resolveUnavailable") }),
   status: async () => ({ connected: false, error: i18n.t("common:mock.resolveUnavailable") }),
   listMediaPool: async () => ({ connected: false, clips: [], error: i18n.t("common:mock.resolveUnavailable") }),
   importToMediaPool: async () => ({ ok: false, error: "mock" }),
@@ -3561,6 +3717,7 @@ const mock: NrApi = {
       deleteScene: async (id: string) => { const o = read(); delete o[id]; write(o); return { ok: true }; },
       saveAsset: async () => ({ ok: false, error: "mock" }),
       collabPreview: async () => ({ ok: false, error: "mock" }),
+      ytDuration: async () => null,
       locateMedia: async () => ({ ok: true, moves: {}, dead: [] }),
       storageAudit: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       storageFree: async () => ({ ok: false, bytes: 0, files: 0, error: i18n.t("common:mock.appUnavailable") }),
@@ -3706,6 +3863,9 @@ const mock: NrApi = {
     const rid = () => Math.random().toString(36).slice(2, 10);
     const normalizeNotebook = (notebook: NbRow): NbRow => ({ ...notebook, kind: notebook.kind || "notes", language: notebook.language || "fr" });
     return {
+      collaborationBindings: async () => Object.values(rd<NotebookCollabBinding>("nr-notebook-collab")),
+      prepareCollaborationMedia: async () => ({ ok: true }),
+      setCollaborationBinding: async (binding, projectId) => { const data = rd<NotebookCollabBinding>("nr-notebook-collab"); if (binding) data[projectId] = binding; else delete data[projectId]; wr("nr-notebook-collab", data); return { ok: true }; },
       list: async () => Object.values(rd<NbRow>(K_NB)).map(normalizeNotebook).sort((a, b) => b.updatedAt - a.updatedAt),
       saveNotebook: async (nb) => {
         const o = rd<NbRow>(K_NB);
@@ -3878,10 +4038,13 @@ const mock: NrApi = {
         tags: [...tagSet].sort(), labels: [...new Set(c.shots.map((sh) => sh.label).filter(Boolean) as string[])],
         collTags: c.tags ?? [], description: c.description ?? "", folderId: c.folderId ?? null,
         archive: c.archive ?? null, archived: !!c.archive?.lastAt, autoSync: !!c.archive?.autoSync,
+        collaboration: c.collaboration ?? null,
       };
     };
     return {
       list: async () => Object.values(read()).map(metaOf).sort((a, b) => b.updatedAt - a.updatedAt),
+      prepareShare: async () => ({ ok: false, error: "Media preparation requires the desktop app" }),
+      defaultArchiveDir: async () => ({ dir: "" }),
       load: async (id: string) => read()[id] ?? null,
       save: async (c) => {
         const o = read();
@@ -3896,6 +4059,7 @@ const mock: NrApi = {
           tags: c.tags !== undefined ? c.tags : (prev?.tags ?? []),
           folderId: c.folderId !== undefined ? c.folderId : (prev?.folderId ?? null),
           archive: c.archive !== undefined ? c.archive : (prev?.archive ?? null),
+          collaboration: c.collaboration !== undefined ? c.collaboration : (prev?.collaboration ?? null),
           shots: prev?.shots ?? [], updatedAt,
         };
         write(o);
@@ -4200,12 +4364,18 @@ const mock: NrApi = {
   } satisfies CacheApi,
   // Mock navigateur : Chat IA inerte (l'UI rend, aucun moteur). Les vrais appels passent par le core.
   chat: {
-    agents: async () => ({ mode: "ask", byok: { anthropic: false, openai: false, openrouter: false, xai: false }, cli: [] }),
+    agents: async () => ({ mode: "ask", duplicateFirst: false, byok: { anthropic: false, openai: false, openrouter: false, xai: false }, cli: [], resolveMcp: null }),
+    // Outside the app there is no core to fetch from, and an empty list is the
+    // honest answer — `curated` says so rather than implying a live lookup.
+    models: async (request) => ({ provider: request.provider, models: [], source: "curated" }),
     configure: async () => ({ ok: false }),
     send: async () => ({ ok: false }),
     cancel: async () => ({ ok: true }),
     respondApproval: async () => ({ ok: true }),
     tools: async () => [],
+    probe: async () => ({ ok: false, reason: "unavailable", detail: i18n.t("common:mock.appUnavailable"), ms: 0 }),
+    login: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+    install: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
     onEvent: () => () => {},
     onApproval: () => () => {},
     history: {

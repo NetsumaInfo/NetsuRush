@@ -19,11 +19,13 @@
     "defaultFolder": "NetsuRush — Cuts",
     "existingFolders": "Existing folders",
     "mediaPoolFolders": "Media Pool folders",
-    "profile": "Profile",
+    "profile": "Preset",
     "profileCustom": "Custom",
-    "optimization": "Optimization",
-    "speed": "Speed",
+    "optimization": "Encoder",
+    "speed": "Compression",
+    "speedHint": "Compression effort, at constant image quality: the stronger it is, the smaller the file — and the longer the encode.",
     "codec": "Codec",
+    "codecProfile": "Profile",
     "audio": "Audio",
     "audioCodec": "Audio codec",
     "timelineTarget": "Target timeline",
@@ -43,7 +45,8 @@
       "end": "Append at composition end"
     },
     "container": "Container",
-    "upscale": "Upscale",
+    "processStep": "Processing {{n}}",
+    "processKind": "Type",
     "mergeToOne": "Merge into one file",
     "fileName": "File names",
     "fileNamePlaceholder": "{base}_{index}",
@@ -76,20 +79,20 @@
   },
   "speed": {
     "fast": {
-      "label": "Fast",
-      "hint": "prioritize encoding speed"
+      "label": "Minimal",
+      "hint": "fastest, larger file"
     },
     "balanced": {
       "label": "Balanced",
-      "hint": "good compromise"
+      "hint": "good trade-off"
     },
     "quality": {
-      "label": "Quality",
-      "hint": "better compression"
+      "label": "High",
+      "hint": "smaller file, slower encode"
     },
     "max": {
       "label": "Maximum",
-      "hint": "slower and smaller"
+      "hint": "smallest file, slowest encode"
     }
   },
   "toggle": {
@@ -145,13 +148,10 @@
     "aac": "AAC 192 kbps",
     "aac_256": "AAC 256 kbps",
     "aac_320": "AAC 320 kbps",
-    "opus_128": "Opus 128 kbps",
-    "opus": "Opus 160 kbps",
-    "opus_192": "Opus 192 kbps",
+    "ac3": "AC-3 448 kbps",
+    "ac3_640": "AC-3 640 kbps",
     "mp3_192": "MP3 192 kbps",
     "mp3": "MP3 320 kbps",
-    "flac": "FLAC",
-    "alac": "ALAC",
     "pcm16": "PCM 16-bit",
     "pcm24": "PCM 24-bit"
   },
@@ -160,10 +160,7 @@
     "lossless": "Lossless"
   },
   "codec": {
-    "bitDepth": "{{count}}-bit",
-    "profile": "Profile {{count}}",
-    "losslessArchive": "Lossless (archive)",
-    "archive": "archive"
+    "bitDepth": "{{count}}-bit"
   },
   "lang": {
     "ja": "Japanese",
@@ -187,10 +184,8 @@
     "prores422hq": "ProRes 422 HQ",
     "dnxhrHq": "DNxHR HQ",
     "mkvH265_10": "MKV H.265 10-bit",
-    "webmAv1": "WebM AV1",
     "prores4444": "ProRes 4444 (alpha)",
     "dnxhrHqx": "DNxHR HQX 10-bit",
-    "ffv1Archive": "FFV1 — archive",
     "generic": "Profile {{index}}",
     "fallback": "Export profile"
   },
@@ -198,7 +193,7 @@
     "timelineImport": "Import into the timeline",
     "streamCopy": "Stream copy",
     "merged": " · merged",
-    "upscaled": " · Upscale {{scale}}×"
+    "processed": " · {{label}}"
   },
   "codecUnknown": "Unknown codec"
 }

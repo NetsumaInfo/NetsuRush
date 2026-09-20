@@ -13,6 +13,7 @@ import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as bugs from "../bugs.js";
 import type * as collabPolicy from "../collabPolicy.js";
+import type * as collectionAccess from "../collectionAccess.js";
 import type * as devices from "../devices.js";
 import type * as discord from "../discord.js";
 import type * as downloads from "../downloads.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   bugs: typeof bugs;
   collabPolicy: typeof collabPolicy;
+  collectionAccess: typeof collectionAccess;
   devices: typeof devices;
   discord: typeof discord;
   downloads: typeof downloads;

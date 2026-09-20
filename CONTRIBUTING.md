@@ -38,6 +38,16 @@ Vite must be up before Tauri. The Rust shell spawns the Node core itself, so the
 
 DaVinci Resolve Studio is only needed to test project, Media Pool and timeline features; enable external scripting (`Local`) in its preferences first. Everything else — ffmpeg, thumbnails, search, board — works without it.
 
+### Blackmagic's MCP server, for your own agent
+
+Resolve Studio 21.1+ installs `ResolveMCP.exe` next to Resolve. The app finds and drives it on its own (`docs/ai-agent-mcp.md` §4·B) — nothing to configure. To give the **coding agent you develop with** the same server, point it at the launcher in this repository, which resolves the path per platform instead of hard-coding one machine's:
+
+```json
+{ "mcpServers": { "davinci-resolve": { "command": "node", "args": ["scripts/resolve-mcp.cjs"] } } }
+```
+
+`.mcp.json` is git-ignored, like every other agent config here. Set `NR_RESOLVE_MCP` if your install is somewhere unusual.
+
 ### No account, no Convex, no backend needed
 
 **Do not configure Convex to run the app.** The login gate is conditional on a single environment variable: with `VITE_CONVEX_URL` unset — which is the default, since `.env.local` is git-ignored — `convexConfigured` is false and:

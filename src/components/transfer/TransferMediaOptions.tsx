@@ -37,7 +37,7 @@ export function TransferMediaOptions({ ctl }: { ctl: TransferCtl }) {
   const fields = useExportEncodingFields(
     { codec, container, audioMode, encoderMode, speed },
     applyEncoding,
-    { allowedCodecs: NLE_CODECS },
+    { allowedCodecs: NLE_CODECS, allowedContainers: NLE_CONTAINERS },
   );
 
   const encode = mediaMode === "reencode";

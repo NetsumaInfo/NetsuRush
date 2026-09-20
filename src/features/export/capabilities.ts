@@ -11,8 +11,9 @@ import { useEffect, useState } from "react";
 import { nr } from "@/lib/bridge";
 import { loadCompatibility } from "@/hooks/useCompatibility";
 import {
-  type ExportCodec, type ExportEncoderMode,
-  EXPORT_CODEC_OPTIONS, EXPORT_CODEC_GROUPS, getCodecFamily,
+  type ExportCodec, type ExportCodecFamily, type ExportEncoderMode,
+  EXPORT_CODEC_FAMILIES, EXPORT_CODEC_OPTIONS, EXPORT_CODEC_GROUPS,
+  codecsForFamily, getCodecFamily,
 } from "./profiles";
 
 export interface ExportCapabilities {
@@ -121,38 +122,30 @@ export function supportedCodecOptionsForEncoder(
   return EXPORT_CODEC_OPTIONS.filter((option) => isCodecSupportedForEncoder(caps, option.value, mode));
 }
 
-function automaticMode(caps: ExportCapabilities, codec: ExportCodec): Exclude<ExportEncoderMode, "gpu"> {
-  const encoder = (caps.codecEncoderOptions[codec] ?? [])[0] ?? "";
-  if (encoder.endsWith("_nvenc")) return "nvenc";
-  if (encoder.endsWith("_amf")) return "amf";
-  if (encoder.endsWith("_qsv")) return "qsv";
-  return "cpu";
+// Moteur qui s'impose pour un codec : « GPU » (auto) dès qu'un encodeur matériel a été SONDÉ pour
+// lui, CPU sinon. Choisir un codec règle donc l'optimisation tout seul, au lieu de laisser un couple
+// que la machine ne sait pas exécuter. `null` tant que la sonde n'a pas répondu : ne rien imposer
+// vaut mieux que retomber sur CPU pendant les deux secondes de sondage.
+export function encoderModeForCodec(caps: ExportCapabilities, codec: ExportCodec): ExportEncoderMode | null {
+  if (!caps.codecs) return null;
+  return (caps.codecEncoderOptions[codec] ?? []).length > 0 ? "gpu" : "cpu";
 }
 
-const MODE_LABELS: Record<Exclude<ExportEncoderMode, "gpu">, string> = {
-  nvenc: "GPU · NVIDIA NVENC",
-  amf: "GPU · AMD AMF",
-  qsv: "GPU · Intel Quick Sync",
-  cpu: "CPU",
-};
+// Groupé par FAMILLE, jamais par moteur : c'est le codec qui décide du moteur (encoderModeForCodec),
+// pas l'inverse. Préfixer les groupes du moteur (« CPU · FFV1 ») mettait les deux lignes en
+// concurrence — la liste des codecs annonçait un moteur que la ligne du dessous réglait déjà.
+export function supportedCodecGroups(caps: ExportCapabilities) {
+  return EXPORT_CODEC_GROUPS.map((group) => ({
+    key: group.family,
+    label: group.label,
+    options: group.options.filter((option) => isCodecSupported(caps, option.value)),
+  })).filter((group) => group.options.length > 0);
+}
 
-// Tri principal par moteur (GPU en premier, CPU en bas), puis par famille de codec.
-export function supportedCodecGroups(caps: ExportCapabilities, mode: ExportEncoderMode) {
-  if (!caps.codecs) {
-    return mode === "cpu" ? EXPORT_CODEC_GROUPS.map((group) => ({
-      key: group.family,
-      label: group.label,
-      options: group.options,
-    })) : [];
-  }
-  const modes = mode === "gpu" ? (["nvenc", "amf", "qsv"] as const) : [mode];
-  return modes.flatMap((groupMode) => EXPORT_CODEC_GROUPS.map((group) => ({
-    key: `${groupMode}-${group.family}`,
-    label: `${MODE_LABELS[groupMode as Exclude<ExportEncoderMode, "gpu">]} · ${group.label}`,
-    options: group.options.filter((option) => mode === "gpu"
-      ? automaticMode(caps, option.value) === groupMode && isCodecSupported(caps, option.value)
-      : isCodecSupportedForEncoder(caps, option.value, groupMode)),
-  }))).filter((group) => group.options.length > 0);
+/** Familles dont AU MOINS un profil s'exécute ici, quel que soit le moteur. */
+export function supportedCodecFamilies(caps: ExportCapabilities): ExportCodecFamily[] {
+  return EXPORT_CODEC_FAMILIES.filter((family) =>
+    codecsForFamily(family).some((codec) => isCodecSupported(caps, codec)));
 }
 
 // Codec de repli si celui du profil n'est pas exécutable ici (profil venu d'une autre machine, ou

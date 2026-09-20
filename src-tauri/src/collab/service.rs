@@ -1403,8 +1403,31 @@ fn batch_touches_media(ops: &[doc::Op]) -> bool {
                 | doc::Op::SetMediaManifest { .. }
                 | doc::Op::SetLink { .. }
                 | doc::Op::SetSequence { .. }
+                | doc::Op::SurfaceSetMedia { .. }
+                | doc::Op::SurfaceDeleteEntry { .. }
+                | doc::Op::SurfaceRestoreEntry { .. }
         )
     })
+}
+
+fn validate_surface_operations(surface: &str, ops: &[doc::Op]) -> Result<(), CollabError> {
+    use super::ops::SurfaceEntryKind;
+    for op in ops {
+        let allowed = match op {
+            doc::Op::SurfaceRestoreEntry { .. } => matches!(surface, "notebook" | "notebook-page"),
+            doc::Op::SurfaceSetEntry { kind, .. } => match surface {
+                "collection" => matches!(kind, SurfaceEntryKind::Collection | SurfaceEntryKind::CollectionItem),
+                "notebook" | "notebook-page" => matches!(kind, SurfaceEntryKind::Notebook | SurfaceEntryKind::Page | SurfaceEntryKind::Block | SurfaceEntryKind::Database),
+                _ => false,
+            },
+            doc::Op::SurfaceDeleteEntry { .. } | doc::Op::SurfaceTextInsert { .. }
+            | doc::Op::SurfaceTextDelete { .. } | doc::Op::SurfaceTextFormat { .. }
+            | doc::Op::SurfaceSetMedia { .. } => matches!(surface, "collection" | "notebook" | "notebook-page"),
+            _ => surface == "board",
+        };
+        if !allowed { return Err(CollabError::validation("operation does not belong to this surface")); }
+    }
+    Ok(())
 }
 
 fn refresh_media_retention(project_id: &ProjectId) -> Result<(), CollabError> {
@@ -1752,6 +1775,7 @@ async fn run_actor(
                         ));
                     }
                     batch.validate()?;
+                    validate_surface_operations(&project.surface, &batch.ops)?;
                     let mut key_epoch =
                         crypto::current_epoch(parsed.as_str()).map_err(crypto_error)?;
                     if key_epoch == 0 {
@@ -1766,7 +1790,7 @@ async fn run_actor(
                     debug_assert!(key_epoch > 0);
                     let base_version = project.store.publication_base()?;
                     let (update, head_delta) =
-                        doc::prepare_batch(parsed.as_str(), batch.protocol, &batch.ops, &base_version)
+                        doc::prepare_batch_at_revision(parsed.as_str(), batch.protocol, &batch.ops, &base_version, batch.base_revision)
                             .map_err(doc_error)?;
                     let sequence = project.store.next_sequence()?;
                     let sealed = crypto::seal(
@@ -1818,10 +1842,7 @@ async fn run_actor(
                             // One task per peer: an unreachable peer burns its own 30 s timeout
                             // without holding the delta back from the peers that are online.
                             for peer in peers {
-                                let sync_project = project_id.clone();
-                                tauri::async_runtime::spawn(async move {
-                                    let _ = super::net::sync(&sync_project, &peer).await;
-                                });
+                                super::net::request_sync(project_id.clone(), peer);
                             }
                         }
                     }
@@ -2128,9 +2149,9 @@ async fn run_actor(
                         )
                     })?;
                     let project_id = ProjectId::parse(request.project_id)?;
-                    if request.user_ids.is_empty() || request.user_ids.len() > 9 {
+                    if request.user_ids.is_empty() || request.user_ids.len() > 14 {
                         return Err(CollabError::validation(
-                            "invite needs between one and nine users",
+                            "invite needs between one and fourteen users",
                         ));
                     }
                     if request.role == ProjectRole::Owner {

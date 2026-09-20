@@ -2,7 +2,7 @@
 // Construction des arguments ffmpeg d'encodage (vidéo/audio) selon un profil d'export.
 // Un codec détaillé → -c:v + -profile:v + -pix_fmt + -crf|-cq.
 // GPU = encodeurs matériels multi-vendeurs (NVENC NVIDIA / QSV Intel / AMF AMD) ; CPU = libx264/
-// libx265/libsvtav1/libvpx-vp9/prores_ks/dnxhd/cfhd/ffv1. Le moteur core/export.js choisit GPU vs CPU
+// libx265/prores_ks/dnxhd. Le moteur core/export.js choisit GPU vs CPU
 // et passe l'encodeur GPU résolu (ou null) — encodeur validé par une VRAIE sonde d'encodage
 // (core/export/capabilities.js), jamais par la simple présence dans `ffmpeg -encoders`.
 
@@ -39,18 +39,13 @@ function isHardwareEncoder(enc) {
 const HW_CANDIDATES = {
   h264: ['h264_nvenc', 'h264_qsv', 'h264_amf'],
   h265: ['hevc_nvenc', 'hevc_qsv', 'hevc_amf'],
-  av1: ['av1_nvenc', 'av1_qsv', 'av1_amf'],
 };
 
 /** Famille d'un codec d'export (miroir de getCodecFamily côté renderer). @param {string} codec */
 function codecFamily(codec) {
   if (codec.startsWith('h264_')) return 'h264';
   if (codec.startsWith('h265_')) return 'h265';
-  if (codec.startsWith('av1_')) return 'av1';
-  if (codec.startsWith('vp9')) return 'vp9';
   if (codec.startsWith('dnxhr_')) return 'dnxhr';
-  if (codec.startsWith('cineform')) return 'cineform';
-  if (codec === 'ffv1') return 'ffv1';
   return 'prores';
 }
 
@@ -67,7 +62,7 @@ function hwCandidates(codec) {
  * Encodeur GPU disponible pour un codec, d'après les capacités SONDÉES.
  * `caps.codecEncoders` est le verdict empirique (codec → encodeur matériel qui encode vraiment).
  * @param {string} codec
- * @param {{ codecEncoders?: Record<string, string|null>, h264Encoder?: string|null, h265Encoder?: string|null, av1Encoder?: string|null }} caps
+ * @param {{ codecEncoders?: Record<string, string|null>, h264Encoder?: string|null, h265Encoder?: string|null }} caps
  * @returns {string|null}
  */
 function selectGpuEncoder(codec, caps) {
@@ -76,7 +71,6 @@ function selectGpuEncoder(codec, caps) {
   // Repli (capacités non sondées) : ancien comportement par famille.
   if (codec.startsWith('h264_')) return (caps && caps.h264Encoder) || null;
   if (codec.startsWith('h265_')) return (caps && caps.h265Encoder) || null;
-  if (codec.startsWith('av1_')) return (caps && caps.av1Encoder) || null;
   return null;
 }
 
@@ -108,8 +102,6 @@ const GPU_MAP = {
   h265_main422_10: { q: '21', nvenc: { profile: 'rext', pix: 'p210le' }, qsv: { profile: 'rext', pix: 'y210le' } },
   h265_main444: { q: '20', nvenc: { profile: 'rext', pix: 'yuv444p' }, qsv: { profile: 'rext', pix: 'vuyx' } },
   h265_main444_10: { q: '21', nvenc: { profile: 'rext', pix: 'yuv444p16le' }, qsv: { profile: 'rext', pix: 'xv30le' } },
-  av1_main: { q: '28', nvenc: { profile: 'main', pix: 'nv12' }, qsv: { profile: 'main', pix: 'nv12' }, amf: { profile: 'main', pix: 'nv12' } },
-  av1_main10: { q: '28', nvenc: { profile: 'main', pix: 'p010le' }, qsv: { profile: 'main', pix: 'p010le' }, amf: { profile: 'main', pix: 'p010le' } },
 };
 
 /** @param {string} codec @param {string} encoder */
@@ -170,12 +162,6 @@ const CPU_TABLE = {
   h264_high444: ['-c:v', 'libx264', '-profile:v', 'high444', '-pix_fmt', 'yuv444p', '-preset', 'slow', '-crf', '18'],
   h265_main444: ['-c:v', 'libx265', '-profile:v', 'main444-8', '-pix_fmt', 'yuv444p', '-preset', 'slow', '-crf', '20'],
   h265_main444_10: ['-c:v', 'libx265', '-profile:v', 'main444-10', '-pix_fmt', 'yuv444p10le', '-preset', 'slow', '-crf', '21'],
-  av1_main: ['-c:v', 'libsvtav1', '-pix_fmt', 'yuv420p', '-preset', '6', '-crf', '32'],
-  av1_main10: ['-c:v', 'libsvtav1', '-pix_fmt', 'yuv420p10le', '-preset', '6', '-crf', '32'],
-  // VP9 (libvpx-vp9) : web/WebM. `-b:v 0` = qualité constante pure (sinon le CRF est ignoré),
-  // `-row-mt 1` = multi-thread par rangées (libvpx est lent sans).
-  vp9: ['-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p', '-crf', '31', '-b:v', '0', '-row-mt', '1'],
-  vp9_10: ['-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p10le', '-crf', '31', '-b:v', '0', '-row-mt', '1'],
   prores_422_lt: ['-c:v', 'prores_ks', '-profile:v', '1', '-pix_fmt', 'yuv422p10le'],
   prores_422: ['-c:v', 'prores_ks', '-profile:v', '2', '-pix_fmt', 'yuv422p10le'],
   prores_422_hq: ['-c:v', 'prores_ks', '-profile:v', '3', '-pix_fmt', 'yuv422p10le'],
@@ -187,14 +173,6 @@ const CPU_TABLE = {
   dnxhr_hq: ['-c:v', 'dnxhd', '-profile:v', 'dnxhr_hq', '-pix_fmt', 'yuv422p'],
   dnxhr_hqx: ['-c:v', 'dnxhd', '-profile:v', 'dnxhr_hqx', '-pix_fmt', 'yuv422p10le'],
   dnxhr_444: ['-c:v', 'dnxhd', '-profile:v', 'dnxhr_444', '-pix_fmt', 'yuv444p10le'],
-  // GoPro CineForm (cfhd) : intermédiaire visually-lossless. Échelle `-quality` INVERSÉE et bornée
-  // (film3+ = 0 = meilleur … low = 12) : `filmscan1` n'existe pas côté ffmpeg et faisait échouer
-  // l'encodage → film3 = qualité haute, film3+ = maximum.
-  cineform: ['-c:v', 'cfhd', '-quality', 'film3', '-pix_fmt', 'yuv422p10le'],
-  cineform_hq: ['-c:v', 'cfhd', '-quality', 'film3+', '-pix_fmt', 'yuv422p10le'],
-  // FFV1 (archivage LOSSLESS, sans perte réelle) : level 3 + slices/slicecrc = résistance aux erreurs,
-  // `-g 1` = tout en intra (chaque image décodable seule, exigence d'archivage).
-  ffv1: ['-c:v', 'ffv1', '-level', '3', '-coder', '1', '-context', '1', '-g', '1', '-slices', '16', '-slicecrc', '1', '-pix_fmt', 'yuv422p10le'],
 };
 
 /** Tous les codecs d'export connus du core (source unique : la table CPU). @returns {string[]} */
@@ -208,21 +186,15 @@ function cpuVideoArgs(codec, speed = 'balanced') {
   const normalizedSpeed = ['fast', 'quality', 'max'].includes(speed) ? speed : 'balanced';
   const presetIndex = args.indexOf('-preset');
   if (presetIndex >= 0) {
-    if (codec.startsWith('av1_')) {
-      args[presetIndex + 1] = { fast: '10', balanced: '6', quality: '4', max: '2' }[normalizedSpeed];
-    } else {
-      args[presetIndex + 1] = { fast: 'veryfast', balanced: 'medium', quality: 'slow', max: 'veryslow' }[normalizedSpeed];
-    }
-  } else if (codec.startsWith('vp9')) {
-    args.push('-cpu-used', { fast: '5', balanced: '3', quality: '2', max: '1' }[normalizedSpeed]);
+    args[presetIndex + 1] = { fast: 'veryfast', balanced: 'medium', quality: 'slow', max: 'veryslow' }[normalizedSpeed];
   }
   return args;
 }
 
 // Arguments audio par mode. Table = liste de référence des codecs audio connus du core (miroir de
 // EXPORT_AUDIO_OPTIONS côté renderer) → tout nouveau codec s'ajoute ICI et nulle part ailleurs.
-// Trois codecs avec perte seulement (AAC diffusion, Opus web, MP3 compatibilité) déclinés en débits,
-// plus les sans-perte du montage. Un mode inconnu (profil d'une version antérieure) retombe sur AAC.
+// Trois codecs avec perte seulement (AAC diffusion, AC-3 broadcast/Dolby, MP3 compatibilité) déclinés
+// en débits, plus les sans-perte du montage. Un mode inconnu (profil antérieur) retombe sur AAC.
 /** @type {Record<string, string[]>} */
 const AUDIO_TABLE = {
   copy: ['-c:a', 'copy'],
@@ -231,13 +203,11 @@ const AUDIO_TABLE = {
   aac: ['-c:a', 'aac', '-b:a', '192k', '-ar', '48000'],
   aac_256: ['-c:a', 'aac', '-b:a', '256k', '-ar', '48000'],
   aac_320: ['-c:a', 'aac', '-b:a', '320k', '-ar', '48000'],
-  opus_128: ['-c:a', 'libopus', '-b:a', '128k', '-vbr', 'on', '-application', 'audio'],
-  opus: ['-c:a', 'libopus', '-b:a', '160k', '-vbr', 'on', '-application', 'audio'],
-  opus_192: ['-c:a', 'libopus', '-b:a', '192k', '-vbr', 'on', '-application', 'audio'],
+  // AC-3 : débit CONSTANT, et 640 kbps est le plafond du format (au-delà ffmpeg refuse).
+  ac3: ['-c:a', 'ac3', '-b:a', '448k', '-ar', '48000'],
+  ac3_640: ['-c:a', 'ac3', '-b:a', '640k', '-ar', '48000'],
   mp3_192: ['-c:a', 'libmp3lame', '-b:a', '192k'],
   mp3: ['-c:a', 'libmp3lame', '-b:a', '320k'],
-  flac: ['-c:a', 'flac', '-compression_level', '5'],
-  alac: ['-c:a', 'alac'],
   pcm16: ['-c:a', 'pcm_s16le', '-ar', '48000'],
   pcm24: ['-c:a', 'pcm_s24le', '-ar', '48000'],
 };

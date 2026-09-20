@@ -109,7 +109,10 @@ export interface BoardState {
   navigationHolds: number;     // compteur : plusieurs gestes peuvent brièvement se chevaucher
   drawMode: boolean;           // calque de dessin maison interactif
   drawBack: boolean;           // calque de dessin envoyé en ARRIÈRE-plan (sous les items)
-  drawSel: string | null;      // forme de dessin sélectionnée (hors mode dessin aussi)
+  // Formes de dessin sélectionnées (hors mode dessin aussi). Une LISTE : un lasso doit pouvoir en
+  // prendre plusieurs, exactement comme il prend plusieurs items. Poignées et inspecteur ne
+  // s'affichent qu'à UNE forme — au-delà, il n'y a pas de géométrie commune à éditer.
+  drawSel: string[];
   // `op` = opacité des NOUVEAUX tracés (1 = opaque ; le surligneur force ~0,45 si laissé à 1).
   pen: { color: string; width: number; tool: DrawTool; head1: ArrowHead; head2: ArrowHead; dash: DashStyle; route: RouteStyle; op: number };
   past: BoardItem[][];         // historique UNIFIÉ : snapshots d'`items` (tout le contenu, dessin inclus)
@@ -171,6 +174,10 @@ export interface BoardState {
   setDrawBack: (back: boolean) => void;
   setPen: (p: Partial<BoardState["pen"]>) => void;
   selectDrawShape: (id: string | null) => void;
+  selectDrawShapes: (ids: string[]) => void;
+  // Résultat d'UN lasso : items et formes de dessin posés ensemble, en une seule écriture. Deux
+  // appels séparés se seraient annulés l'un l'autre (chacun vide la sélection de l'autre).
+  selectRegion: (itemIds: string[], shapeIds: string[]) => void;
   // `tag` : coalesce les écritures répétées (nudge clavier d'une forme) en UNE entrée d'annulation.
   drawSetShapes: (next: DrawShape[], record?: boolean, tag?: string) => void;
   undo: () => void;
@@ -249,6 +256,10 @@ let noticeTimer: ReturnType<typeof setTimeout> | null = null;
 // copie dans un board, on colle dans un autre. `clipCount` en reflète la taille pour l'UI.
 let internalClipboard: BoardItem[] = [];
 
+// Sélection de dessin VIDE, partagée : une sélection vidée doit garder la même identité de tableau,
+// sinon chaque clic sur le fond rerend tous les abonnés pour un « rien » différent du précédent.
+const EMPTY_DRAW_SEL: string[] = [];
+
 // Recale la sélection/édition sur un jeu d'items restauré (undo/redo) : retire les références mortes.
 function reconcile(items: BoardItem[], s: BoardState) {
   const ids = new Set(items.map((i) => i.id));
@@ -257,7 +268,11 @@ function reconcile(items: BoardItem[], s: BoardState) {
   const editingId = s.editingId && ids.has(s.editingId) ? s.editingId : null;
   const croppingId = s.croppingId && ids.has(s.croppingId) ? s.croppingId : null;
   const shapes = items.find((i) => i.kind === "draw")?.shapes ?? [];
-  const drawSel = s.drawSel && shapes.some((sh) => sh.id === s.drawSel) ? s.drawSel : null;
+  const shapeIds = new Set(shapes.map((sh) => sh.id));
+  const kept = s.drawSel.filter((id) => shapeIds.has(id));
+  // Identité préservée quand rien n'est tombé : un nouveau tableau à chaque undo rerendrait tous
+  // les abonnés pour une sélection inchangée.
+  const drawSel = kept.length === s.drawSel.length ? s.drawSel : kept;
   return { selectedIds, selectedId, editingId, croppingId, drawSel };
 }
 
@@ -294,7 +309,7 @@ export const useBoard = create<BoardState>((set, get) => ({
   navigationHolds: 0,
   drawMode: false,
   drawBack: false,
-  drawSel: null,
+  drawSel: EMPTY_DRAW_SEL,
   pen: { color: "#f43f5e", width: 4, tool: "pen", head1: "none", head2: "arrow", dash: "solid", route: "straight", op: 1 },
   past: [],
   future: [],
@@ -315,7 +330,7 @@ export const useBoard = create<BoardState>((set, get) => ({
         items: [...s.items, { ...item, id, z } as BoardItem],
         selectedId: id,
         selectedIds: [id],
-        drawSel: null,
+        drawSel: EMPTY_DRAW_SEL,
         dirty: true,
       };
     });
@@ -424,7 +439,7 @@ export const useBoard = create<BoardState>((set, get) => ({
       const kill = new Set(ids);
       return {
         items: [...s.items.filter((it) => !kill.has(it.id)), seq],
-        selectedId: seq.id, selectedIds: [seq.id], drawSel: null, dirty: true,
+        selectedId: seq.id, selectedIds: [seq.id], drawSel: EMPTY_DRAW_SEL, dirty: true,
       };
     }),
 
@@ -450,7 +465,7 @@ export const useBoard = create<BoardState>((set, get) => ({
           x: 120, y: 120, w: fit.w, h: fit.h, rotation: 0, z: top,
           natW: dims?.w, natH: dims?.h, frames: fr, frame: 0, fps: playFps, speed: 1, seqPlay: true,
         };
-        return { items: [...s.items, seq], selectedId: seq.id, selectedIds: [seq.id], drawSel: null, dirty: true };
+        return { items: [...s.items, seq], selectedId: seq.id, selectedIds: [seq.id], drawSel: EMPTY_DRAW_SEL, dirty: true };
       }
       const fit = dims && dims.w > 0 && dims.h > 0 ? fitSize(dims.w, dims.h) : { w: src.w, h: src.h };
       const cx = src.x + src.w / 2, cy = src.y + src.h / 2; // recentre quand le ratio change
@@ -467,7 +482,7 @@ export const useBoard = create<BoardState>((set, get) => ({
       };
       return {
         items: s.items.map((it) => (it.id === src.id ? next : it)),
-        selectedId: src.id, selectedIds: [src.id], drawSel: null, dirty: true,
+        selectedId: src.id, selectedIds: [src.id], drawSel: EMPTY_DRAW_SEL, dirty: true,
       };
     }),
 
@@ -475,14 +490,14 @@ export const useBoard = create<BoardState>((set, get) => ({
     resetCoalesce();
     set((s) => {
       const ids = s.items.filter((it) => it.kind !== "draw").map((it) => it.id);
-      return { selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, editingId: null, drawSel: null };
+      return { selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, editingId: null, drawSel: EMPTY_DRAW_SEL };
     });
   },
 
   // Sélection d'item → vide la sélection de forme de dessin (et inversement) : exclusion mutuelle.
   select: (id) => {
     resetCoalesce();
-    set({ selectedId: id, selectedIds: id ? [id] : [], editingId: null, drawSel: null });
+    set({ selectedId: id, selectedIds: id ? [id] : [], editingId: null, drawSel: EMPTY_DRAW_SEL });
   },
 
   toggleSelect: (id) => {
@@ -490,13 +505,13 @@ export const useBoard = create<BoardState>((set, get) => ({
     set((s) => {
       const has = s.selectedIds.includes(id);
       const ids = has ? s.selectedIds.filter((x) => x !== id) : [...s.selectedIds, id];
-      return { selectedIds: ids, selectedId: has ? (ids[ids.length - 1] ?? null) : id, drawSel: null };
+      return { selectedIds: ids, selectedId: has ? (ids[ids.length - 1] ?? null) : id, drawSel: EMPTY_DRAW_SEL };
     });
   },
 
   selectMany: (ids) => {
     resetCoalesce();
-    set({ selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, editingId: null, drawSel: null });
+    set({ selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, editingId: null, drawSel: EMPTY_DRAW_SEL });
   },
 
   moveBy: (ids, dx, dy, record = true, tag) =>
@@ -621,7 +636,7 @@ export const useBoard = create<BoardState>((set, get) => ({
       });
       return {
         items: [...s.items, ...added],
-        ...(select ? { selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, drawSel: null } : {}),
+        ...(select ? { selectedIds: ids, selectedId: ids[ids.length - 1] ?? null, drawSel: EMPTY_DRAW_SEL } : {}),
         dirty: true,
       };
     });
@@ -707,7 +722,7 @@ export const useBoard = create<BoardState>((set, get) => ({
     if (on && isReadOnlyCollaborator(get())) return;
     resetCoalesce();
     set((s) => ({
-      drawMode: on, selectedId: null, selectedIds: [], editingId: null, drawSel: null,
+      drawMode: on, selectedId: null, selectedIds: [], editingId: null, drawSel: EMPTY_DRAW_SEL,
       // plus d'outil souris : à l'entrée, tomber sur le stylo si l'état portait encore "select".
       pen: on && s.pen.tool === "select" ? { ...s.pen, tool: "pen" } : s.pen,
     }));
@@ -719,7 +734,24 @@ export const useBoard = create<BoardState>((set, get) => ({
   setPen: (p) => set((s) => ({ pen: { ...s.pen, ...p } })),
 
   // Sélectionne une forme de dessin (handles + inspecteur) → vide la sélection d'items.
-  selectDrawShape: (id) => { resetCoalesce(); set({ drawSel: id, selectedId: null, selectedIds: [], editingId: null }); },
+  selectDrawShape: (id) => { resetCoalesce(); set({ drawSel: id ? [id] : EMPTY_DRAW_SEL, selectedId: null, selectedIds: [], editingId: null }); },
+
+  selectDrawShapes: (ids) => {
+    resetCoalesce();
+    set({ drawSel: ids.length ? ids : EMPTY_DRAW_SEL, selectedId: null, selectedIds: [], editingId: null });
+  },
+
+  // Un lasso ne connaît pas la frontière items/dessin : il pose les deux, et l'exclusion mutuelle
+  // ne vaut qu'entre deux sélections faites SÉPARÉMENT.
+  selectRegion: (itemIds, shapeIds) => {
+    resetCoalesce();
+    set({
+      selectedIds: itemIds,
+      selectedId: itemIds[itemIds.length - 1] ?? null,
+      drawSel: shapeIds.length ? shapeIds : EMPTY_DRAW_SEL,
+      editingId: null,
+    });
+  },
 
   // Écrit les formes du calque dessin (item singleton, créé au besoin). `record` empile une entrée
   // dans l'historique UNIFIÉ — passé à false pour les mises à jour live (drag du stylo, etc.).
@@ -858,7 +890,7 @@ export const useBoard = create<BoardState>((set, get) => ({
       studio: null,
       drawMode: false,
       drawBack: false,
-      drawSel: null,
+      drawSel: EMPTY_DRAW_SEL,
       past: [],
       future: [],
       dirty: false,
@@ -867,7 +899,7 @@ export const useBoard = create<BoardState>((set, get) => ({
 
   newScene: (name = i18n.t("reference:scene.untitled")) => {
     resetHistoryCtl();
-    set({ sceneId: null, sceneName: name, filePath: null, fileReadonly: false, collabProjectId: null, collabRole: null, collabKeyEpoch: 0, collabRotationRequired: false, collabPeerCandidates: 0, collabOfflineQueued: false, items: [], view: INITIAL_VIEW, selectedId: null, selectedIds: [], editingId: null, croppingId: null, studio: null, drawMode: false, drawBack: false, drawSel: null, past: [], future: [], dirty: false });
+    set({ sceneId: null, sceneName: name, filePath: null, fileReadonly: false, collabProjectId: null, collabRole: null, collabKeyEpoch: 0, collabRotationRequired: false, collabPeerCandidates: 0, collabOfflineQueued: false, items: [], view: INITIAL_VIEW, selectedId: null, selectedIds: [], editingId: null, croppingId: null, studio: null, drawMode: false, drawBack: false, drawSel: EMPTY_DRAW_SEL, past: [], future: [], dirty: false });
   },
 
   clearDirty: () => set({ dirty: false }),

@@ -4,7 +4,10 @@
   "signedOut": "Melde dich an, um ein Dokument zu teilen.",
   "surface": {
     "unknown": "Geteiltes Dokument",
-    "board": "Referenz-Board"
+    "board": "Referenz-Board",
+    "collection": "Sammlung",
+    "notebook": "NetsuBook-Notizbuch",
+    "notebook-page": "NetsuBook-Dokument"
   },
   "device": {
     "title": "Dieses Gerät",
@@ -111,19 +114,19 @@
   "panel": {
     "title": "Status der Freigabe",
     "online": "{{count}} online",
-    "alone": "Noch niemand sonst.",
+    "alone": "Sonst niemand",
     "hereNow": "Online",
-    "neverSeen": "Noch nicht erreicht",
-    "seenMinutes": "Vor {{count}} Min. gesehen",
-    "seenHours": "Vor {{count}} Std. gesehen",
-    "seenDays": "Vor {{count}} T. gesehen",
-    "invited": "Einladung ausstehend",
+    "neverSeen": "Nie verbunden",
+    "seenMinutes": "Vor {{count}} Min.",
+    "seenHours": "Vor {{count}} Std.",
+    "seenDays": "Vor {{count}} T.",
+    "invited": "Eingeladen",
     "unknownMember": "Mitglied",
-    "queued": "Hier warten Änderungen. Sie gehen von selbst raus, sobald ein Gerät erreichbar ist.",
-    "upToDate": "Alles ist synchron.",
-    "rotation": "Schlüsselwechsel ausstehend: neue Veröffentlichungen warten auf ein Gerät des Eigentümers.",
-    "waitingKey": "{{count}} Mitglied(er) warten auf den Schlüssel. Bleib online, um ihn zu übergeben.",
-    "nobodyReachable": "Gerade ist niemand erreichbar: deine Änderungen gehen raus, sobald jemand zurück ist."
+    "queued": "Warten auf Versand.",
+    "upToDate": "Alles gesendet.",
+    "rotation": "Neuer Schlüssel nötig. Der Eigentümer muss die App öffnen.",
+    "waitingKey": "{{count}} warten auf den Schlüssel. Bleib online.",
+    "nobodyReachable": "Niemand online. Nichts wurde gesendet."
   },
   "board": {
     "noScene": "Speichere dieses Board zuerst in der Szenenbibliothek.",

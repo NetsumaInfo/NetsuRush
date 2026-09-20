@@ -243,7 +243,12 @@
     "contentOpacity": "Opacidad del contenido",
     "seeThroughScope": "También translúcido",
     "seeThroughShell": "Interfaz",
-    "seeThroughPlaceFrame": "Marco de colocación"
+    "seeThroughPlaceFrame": "Marco de colocación",
+    "assetSweep": "Medios sin usar",
+    "assetSweepHint": "Elimina los archivos que ninguna escena referencia. Nada de tus tableros se toca.",
+    "assetSweepAction": "Limpiar",
+    "assetSweepDone": "{{count}} archivo(s) eliminados, {{mb}} MB liberados.",
+    "assetSweepFailed": "La limpieza ha fallado."
   },
   "inspector": {
     "ytPlayer": "Reproductor de YouTube",
@@ -325,7 +330,8 @@
     "kindItem": "Elemento del tablero",
     "chooseFile": "Elegir un archivo…",
     "targetItem": "Elemento destino",
-    "remove": "Quitar el enlace"
+    "remove": "Quitar el enlace",
+    "sharedFile": "Este archivo pertenece al tablero compartido: no tiene ubicación en este disco."
   },
   "font": {
     "label": "Fuente",
@@ -791,7 +797,9 @@
     "importing": "Importando {{name}}…",
     "fetching": "Obteniendo el medio…",
     "linkDone": "Medio importado",
-    "fetchingFrom": "Obteniendo de {{source}}…"
+    "fetchingFrom": "Obteniendo de {{source}}…",
+    "copyFailed": "No se pudo copiar «{{name}}»: este medio se perderá al cerrar la aplicación",
+    "copyFailedBatch": "{{count}} copias fallidas (incluida «{{name}}»): estos medios se perderán al cerrar la aplicación"
   },
   "mouseThrough": {
     "on": "Transparente al ratón",

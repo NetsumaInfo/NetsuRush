@@ -224,3 +224,20 @@ export function isImageUrl(u: string): boolean {
 // Providers whose OpenGraph only returns a poster of the post, never the medium: a failed extraction
 // falls back to the embed card rather than to a thumbnail that would pass for the medium.
 export const OG_POSTER_ONLY_PROVIDERS = new Set<EmbedProvider>(["instagram"]);
+
+/**
+ * Slide VISÉE par un lien de post, ou 0 pour le post entier. C'est ce qui distingue « ce média » de
+ * « ce post » : Instagram met `img_index=N`, X termine par `/photo/N` ou `/video/N`.
+ */
+export function slideIndex(url: string): number {
+  const s = url.trim();
+  try {
+    const u = new URL(s);
+    const q = u.searchParams.get("img_index") || u.searchParams.get("slide");
+    const n = q ? Number.parseInt(q, 10) : Number.NaN;
+    if (Number.isFinite(n) && n > 0) return n;
+  } catch { /* pas une URL absolue : le repli regex suffit */ }
+  const m = s.match(/\/(?:photo|video)\/(\d+)/i);
+  const n = m ? Number.parseInt(m[1], 10) : Number.NaN;
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}

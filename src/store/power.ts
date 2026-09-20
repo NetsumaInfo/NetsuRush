@@ -100,6 +100,9 @@ export const createPowerSlice: StateCreator<AppState, [], [], PowerSlice> = (set
   },
 
   offerCloseForRam: () => {
+    // Réglage : « proposer de fermer » peut être coupé dans Paramètres › Système › Énergie. Fermer
+    // reste possible à la main depuis le menu du voyant de la barre latérale.
+    if (!get().powerPrompt.offer) return;
     const showIfReady = () => {
       const s = get();
       if (s.ramPrompt || s.power?.closed || s.power?.busy) return true;

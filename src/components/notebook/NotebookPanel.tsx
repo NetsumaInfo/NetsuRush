@@ -15,6 +15,8 @@ import { nr } from "@/lib/bridge";
 import { coreAvailable } from "@/lib/coreClient";
 import { PageTree } from "./PageTree";
 import { NotebookDocument } from "./NotebookDocument";
+import { NotebookCollaboration } from "./NotebookCollaboration";
+import { openNotebookSharing } from "./notebookCollabState";
 import { NotebookBreadcrumb } from "./NotebookBreadcrumb";
 import { NotebookSidebarSections } from "./NotebookSidebarSections";
 import { NotebookSettings } from "./NotebookSettings";
@@ -206,6 +208,7 @@ export function NotebookPanel() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               {activeNb && <DropdownMenuItem onClick={() => setEditNotebookOpen(true)}><Pencil className="mr-1 h-3.5 w-3.5" /> {t("panel.editNotebook")}</DropdownMenuItem>}
+              {activeNb && <DropdownMenuItem onClick={() => openNotebookSharing("notebook")}>{t("share.notebook")}</DropdownMenuItem>}
               <DropdownMenuItem onClick={() => setCreateOpen(true)}><Plus className="mr-1 h-3.5 w-3.5" /> {t("panel.newNotebook")}</DropdownMenuItem>
               {activeNb && <DropdownMenuItem onClick={() => void importMarkdown()}><FileUp className="mr-1 h-3.5 w-3.5" /> {t("panel.importMarkdown")}</DropdownMenuItem>}
               {coreAvailable && (
@@ -325,7 +328,7 @@ export function NotebookPanel() {
       </aside>
       )}
 
-      {/* Zone d'édition : rangée du haut (réouverture sidebar + fil d'Ariane + actions du document) + document */}
+      {/* Zone d'édition : rangée du haut (réouverture sidebar + fil d'Ariane + partage + actions du document) + document */}
       <main className="flex min-w-0 flex-1 flex-col">
         <div className={`flex h-11 shrink-0 items-center gap-1 pr-3 ${nbPrefs.sidebarOpen ? "pl-14" : "pl-3"}`}>
           {!nbPrefs.sidebarOpen && (
@@ -347,6 +350,7 @@ export function NotebookPanel() {
           )}
           <NotebookBreadcrumb />
           <div className="min-w-0 flex-1" />
+          <NotebookCollaboration />
           <DocActions onMove={setMovePageId} onAskDelete={askDeletePage} />
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">

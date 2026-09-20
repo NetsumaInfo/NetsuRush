@@ -4,10 +4,7 @@
 // GLOBAL de tags (autocomplétion), et archivage (export indépendant de la source).
 import type { StateCreator } from "zustand";
 import { nr, type CollectionMeta, type CollectionIcon, type CollectionShot, type CollectionFolder, type CollectionArchive } from "@/lib/bridge";
-import {
-  coerceExportCodec, coerceExportContainer, coerceExportAudioMode, coerceAudioSelect,
-  coerceExportEncoderMode, coerceExportSpeed, type ExportProfile,
-} from "@/features/export/profiles";
+import { archiveProfile, archiveProcessing } from "@/features/export/archiveProfile";
 import type { AppState } from "./index";
 import i18n from "@/i18n";
 
@@ -69,21 +66,6 @@ export interface CollectionsSlice {
 // Un upscale REMPLACE les pixels : la copie de flux ne peut pas le faire. Activer l'agrandissement
 // impose donc le ré-encodage, quel que soit le réglage enregistré (le core applique la même règle —
 // l'UI et le core doivent conclure pareil, sinon le fichier produit ne correspond pas à l'aperçu).
-const archiveUpscaling = (a: CollectionArchive | null | undefined) => !!a?.upscale?.enabled;
-
-// Le core ne connaît pas les profils d'export → on FABRIQUE un profil de toutes pièces à partir des
-// réglages d'archivage d'une collection (format/codec/conteneur/audio choisis dans les réglages).
-function archiveProfile(a: CollectionArchive | null | undefined): ExportProfile {
-  return {
-    id: "__archive__", name: i18n.t("collections:archive.profileName"),
-    workflow: a?.workflow === "video_encode" || archiveUpscaling(a) ? "video_encode" : "video_remux",
-    codec: coerceExportCodec(a?.codec), audioMode: coerceExportAudioMode(a?.audioMode),
-    container: coerceExportContainer(a?.container), mergeEnabled: false,
-    encoderMode: coerceExportEncoderMode(a?.encoderMode), speed: coerceExportSpeed(a?.speed),
-    audioSelect: coerceAudioSelect(a?.audioSelect),
-  };
-}
-
 export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsSlice> = (set, get) => ({
   collections: [],
   collectionsLoading: false,
@@ -117,7 +99,8 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
     return r.id ?? null;
   },
   updateCollection: async (c) => {
-    await nr.collections?.save(c);
+    const result = await nr.collections?.save(c);
+    if (!result?.ok) throw new Error(result?.error || "Collection save failed");
     await Promise.all([get().loadCollections(), get().loadCollectionTags()]);
   },
   deleteCollection: async (id) => {
@@ -140,16 +123,34 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
     await get().loadCollections();
   },
   rangeShots: async (id, shots) => {
+    // Collection partagée en LECTURE SEULE : refuser AVANT d'écrire. Sans ce garde-fou, le plan
+    // entrait dans la copie locale, la publication était refusée par le serveur, et il restait là —
+    // invisible (la vue affiche la collection partagée) et jamais partagé.
+    const target = get().collections.find((c) => c.id === id);
+    if (target?.collaboration?.projectId && target.collaboration.role === "viewer") {
+      return { ok: false, error: i18n.t("collections:share.readOnly") };
+    }
     const r = await nr.collections?.addShots(id, shots);
     if (r?.ok) {
       await Promise.all([get().loadCollections(), get().loadCollectionTags()]);
       // Auto-sync : si la collection est configurée en archivage automatique, ré-exporte en fond.
-      // Avec upscale en mode « quand le GPU est libre », on met en FILE au lieu de partir : ranger un
-      // plan pendant qu'on travaille ne doit pas confisquer la carte pour plusieurs minutes.
+      // Avec un traitement en mode « quand le GPU est libre », on met en FILE au lieu de partir :
+      // ranger un plan pendant qu'on travaille ne doit pas confisquer la carte pour plusieurs minutes.
       const meta = get().collections.find((c) => c.id === id);
-      if (!meta?.autoSync) return { ok: true, added: r.added };
+      if (meta?.collaboration?.projectId) {
+        try {
+          const { shareCollection } = await import("@/lib/collab/collection/session");
+          await shareCollection(id);
+          await get().loadCollections();
+        } catch (error) {
+          return { ok: false, added: r.added, error: error instanceof Error ? error.message : String(error) };
+        }
+      }
+      // Publier a DÉJÀ archivé (partager = archiver) : relancer l'archivage ici ne ferait que
+      // reparcourir la collection pour tout sauter.
+      if (!meta?.autoSync || meta.collaboration?.projectId) return { ok: true, added: r.added };
       const a = meta.archive ?? null;
-      if (archiveUpscaling(a) && a?.upscale?.when === "idle") void get().queueArchive(id);
+      if (archiveProcessing(a) && a?.process?.when === "idle") void get().queueArchive(id);
       else void get().archiveCollection(id, { autoSync: true });
     }
     return { ok: !!r?.ok, added: r?.added, error: r?.error };
@@ -157,7 +158,7 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
   archiveCollection: async (id, opts) => {
     const a = get().collections.find((c) => c.id === id)?.archive ?? null;
     const r = await nr.collections?.archive?.(id, {
-      dir: opts.dir ?? a?.dir, profile: archiveProfile(a), autoSync: opts.autoSync, upscale: a?.upscale,
+      dir: opts.dir ?? a?.dir, profile: archiveProfile(a), autoSync: opts.autoSync, process: a?.process,
     });
     if (r?.ok) await get().loadCollections();
     return { ok: !!r?.ok, skipped: r?.skipped, copied: r?.copied, rendered: r?.rendered, error: r?.error };
@@ -166,15 +167,15 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
     const meta = get().collections.find((c) => c.id === id);
     const a = meta?.archive ?? null;
     const r = await nr.collections?.queueEnqueue?.(id, {
-      name: meta?.name, mode: mode ?? a?.upscale?.when ?? "idle",
-      opts: { dir: a?.dir, profile: archiveProfile(a), autoSync: a?.autoSync, upscale: a?.upscale },
+      name: meta?.name, mode: mode ?? a?.process?.when ?? "idle",
+      opts: { dir: a?.dir, profile: archiveProfile(a), autoSync: a?.autoSync, process: a?.process },
     });
     return { ok: !!r?.ok, error: r?.error };
   },
   relocateArchive: async (id, opts) => {
     const a = opts.archive ?? get().collections.find((c) => c.id === id)?.archive ?? null;
     const r = await nr.collections?.relocateArchive?.(id, {
-      dir: opts.dir, profile: archiveProfile(a), autoSync: opts.autoSync ?? a?.autoSync, upscale: a?.upscale,
+      dir: opts.dir, profile: archiveProfile(a), autoSync: opts.autoSync ?? a?.autoSync, process: a?.process,
     });
     if (r?.ok) await get().loadCollections();
     return { ok: !!r?.ok, moved: r?.moved, exported: r?.exported, error: r?.error };

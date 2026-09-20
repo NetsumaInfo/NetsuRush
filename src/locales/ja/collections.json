@@ -16,16 +16,15 @@
   "archive": {
     "profileName": "アーカイブ",
     "onDisk": "ディスクに書き出して保管",
-    "upscaleHint": "保管しながら各ショットを拡大します。再エンコードが必須になります。",
     "videoFormat": "映像形式",
-    "upscaleShort": "アップスケール",
-    "upscaleAudioNote": "言語ごとのトラック選択はアップスケールには適用されません。",
-    "upscaleMode": "実行時期",
-    "upscaleModeNow": "即時",
-    "upscaleModeIdle": "GPU 空き時",
-    "upscaleNeedsEncode": "アップスケールはピクセルを作り直すため、ストリームコピーはできません。",
+    "processAudioNote": "言語ごとのトラック選択は処理には適用されません。",
+    "processMode": "実行時期",
+    "processModeNow": "即時",
+    "processModeIdle": "GPU 空き時",
+    "processNeedsEncode": "処理はピクセルを作り直すため、ストリームコピーはできません。",
     "queueRunning": "保管中",
-    "queuePending": "GPU の空き待ち"
+    "queuePending": "GPU の空き待ち",
+    "requiredForShare": "共有は保管ファイルに依存するため、オンのままです。"
   },
   "submenu": {
     "rangeIn": "コレクションに追加",
@@ -213,5 +212,29 @@
     "dlFailed": "ダウンロード {{id}}：{{error}}。",
     "dlModelsUnavailable": "モデルのダウンロードを利用できません：{{error}}。",
     "recognitionUnavailable": "認識を利用できません：{{error}}。"
+  },
+  "share": {
+    "title": "共有",
+    "people": "共有相手を選択",
+    "hideLocal": "自分だけ非表示",
+    "removeGlobal": "全員から削除",
+    "restoreHidden": "非表示のショットを表示",
+    "missingMedia": "メディアを利用できません",
+    "retry": "再試行",
+    "preparing": "準備中…",
+    "failed": "共有または保存に失敗しました。再試行してください。",
+    "unavailable": "このコレクションを共有するには共同作業を設定してください。",
+    "signIn": "共有相手を選ぶにはログインしてください。",
+    "viaArchive": "相手に届くのはコレクションの保管ファイルだけで、元の動画は共有しません。共有をオンにするとディスクへの保管も有効になります。",
+    "readOnly": "読み取り専用で共有されています。",
+    "nobody": "まだ誰もいません。",
+    "pending": "保留中",
+    "owner": "オーナー",
+    "permView": "閲覧のみ",
+    "permOwn": "編集 — 自分のショット",
+    "permAll": "編集 — すべてのショット",
+    "stop": "共有を停止",
+    "leave": "共有から抜ける",
+    "stopHint": "ほかの人は共有されたショットにアクセスできなくなります。"
   }
 }

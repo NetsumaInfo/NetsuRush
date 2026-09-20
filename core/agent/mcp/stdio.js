@@ -36,7 +36,9 @@ async function handle(req) {
   if (method === 'notifications/initialized') return; // notification, pas de réponse
   if (method === 'ping') { reply(id, {}); return; }
   if (method === 'tools/list') {
-    try { reply(id, { tools: await rpc('agent:toolList', []) }); }
+    // The surface is what the bridge put in this process's environment when it
+    // wrote the config the CLI used to spawn us.
+    try { reply(id, { tools: await rpc('agent:toolList', [process.env.NR_SURFACE || 'pilot']) }); }
     catch (e) { fail(id, String((e && e.message) || e)); }
     return;
   }

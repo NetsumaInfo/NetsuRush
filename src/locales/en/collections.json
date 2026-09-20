@@ -16,16 +16,15 @@
   "archive": {
     "profileName": "Archive",
     "onDisk": "Archive to disk",
-    "upscaleHint": "Enlarges every shot while archiving. Forces re-encoding.",
     "videoFormat": "Video format",
-    "upscaleShort": "Upscale",
-    "upscaleAudioNote": "Track by language does not apply to upscaling.",
-    "upscaleMode": "When",
-    "upscaleModeNow": "Immediate",
-    "upscaleModeIdle": "GPU idle",
-    "upscaleNeedsEncode": "Upscaling replaces pixels: stream copy is impossible.",
+    "processAudioNote": "Track by language does not apply to a processing pass.",
+    "processMode": "When",
+    "processModeNow": "Immediate",
+    "processModeIdle": "GPU idle",
+    "processNeedsEncode": "A processing pass replaces pixels: stream copy is impossible.",
     "queueRunning": "Archiving now",
-    "queuePending": "Waiting for an idle GPU"
+    "queuePending": "Waiting for an idle GPU",
+    "requiredForShare": "Archiving carries the sharing, so it stays on."
   },
   "submenu": {
     "rangeIn": "Add to a collection",
@@ -213,5 +212,29 @@
     "dlFailed": "Download {{id}}: {{error}}.",
     "dlModelsUnavailable": "Model download unavailable: {{error}}.",
     "recognitionUnavailable": "Recognition unavailable: {{error}}."
+  },
+  "share": {
+    "title": "Sharing",
+    "people": "Choose people",
+    "hideLocal": "Hide for me",
+    "removeGlobal": "Remove for everyone",
+    "restoreHidden": "Show hidden shots",
+    "missingMedia": "Media unavailable",
+    "retry": "Retry",
+    "preparing": "Preparing…",
+    "failed": "Sharing or saving failed. Please retry.",
+    "unavailable": "Configure collaboration to share this collection.",
+    "signIn": "Sign in to choose people.",
+    "viaArchive": "Others receive the collection’s archived files, never the source videos. Archiving to disk turns on with sharing.",
+    "readOnly": "Shared with you as read-only.",
+    "nobody": "Nobody yet.",
+    "pending": "Pending",
+    "owner": "Owner",
+    "permView": "Read-only",
+    "permOwn": "Editing — their own shots",
+    "permAll": "Editing — every shot",
+    "stop": "Stop sharing",
+    "leave": "Leave the share",
+    "stopHint": "Others will lose access to the shared shots."
   }
 }

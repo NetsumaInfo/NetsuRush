@@ -129,7 +129,6 @@ async function collectBugContext() {
     encoding: capabilities ? {
       h264: capabilities.h264Encoder || null,
       h265: capabilities.h265Encoder || null,
-      av1: capabilities.av1Encoder || null,
       hardware: capabilities.hwEncoders || [],
     } : null,
     storage: { home: maskHome(NR_HOME), disk: diskUsage(NR_HOME) },
@@ -163,7 +162,7 @@ function formatBugContext(ctx) {
     `ffmpeg     : ${orDash(ctx.runtime?.ffmpeg, 'introuvable')}`,
   );
   if (ctx.encoding) {
-    lines.push(`Encodeurs  : h264 ${orDash(ctx.encoding.h264, 'aucun')} · h265 ${orDash(ctx.encoding.h265, 'aucun')} · av1 ${orDash(ctx.encoding.av1, 'aucun')}`);
+    lines.push(`Encodeurs  : h264 ${orDash(ctx.encoding.h264, 'aucun')} · h265 ${orDash(ctx.encoding.h265, 'aucun')}`);
   }
   const disk = ctx.storage?.disk;
   lines.push(`Stockage   : ${ctx.storage?.home}${disk ? ` · ${disk.freeGB} Go libres / ${disk.totalGB} Go` : ''}`);

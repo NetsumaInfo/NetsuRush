@@ -42,6 +42,13 @@ def _scale_args(max_edge):
             % (max_edge, max_edge)]
 
 
+def _seek_args(sec):
+    """`-ss` only when there is something to seek to. A still image holds a single frame with a
+    nominal duration: `-ss 0` seeks past it on the mjpeg and tga demuxers and ffmpeg writes nothing.
+    Seeking to 0 is a no-op on a video, so dropping the option there costs nothing."""
+    return ["-ss", "%.3f" % sec] if sec and sec > 0 else []
+
+
 def grab_ffmpeg(path, sec, accurate=False, timeout=GRAB_TIMEOUT, max_edge=0):
     """Extrait 1 frame à t=sec via ffmpeg → PIL. Par défaut seek KEYFRAME (rapide). `accurate=True`
     (mode Forcer) = seek précis (décode jusqu'au timestamp exact, plus lent mais récupère des frames
@@ -53,7 +60,8 @@ def grab_ffmpeg(path, sec, accurate=False, timeout=GRAB_TIMEOUT, max_edge=0):
     cmd = [ffmpeg_bin(), "-nostdin"]
     if not accurate:
         cmd.append("-noaccurate_seek")
-    cmd += ["-ss", "%.3f" % max(0.0, sec), "-i", path, "-frames:v", "1"]
+    cmd += _seek_args(sec)
+    cmd += ["-i", path, "-frames:v", "1"]
     cmd += _scale_args(max_edge)
     cmd += ["-f", "image2pipe", "-vcodec", "mjpeg", "-"]
     try:
@@ -90,7 +98,8 @@ def grab_shot(path, secs, max_edge=0, accurate=False, timeout=GRAB_TIMEOUT):
             for sec in timestamps:
                 if not accurate:
                     cmd.append("-noaccurate_seek")
-                cmd += ["-ss", "%.3f" % max(0.0, sec), "-i", path]
+                cmd += _seek_args(sec)
+                cmd += ["-i", path]
             outputs = []
             for index in range(len(timestamps)):
                 output = os.path.join(tmp, "frame-%d.jpg" % index)

@@ -13,6 +13,8 @@ import {
   Link2, Unlink2, RefreshCw,
 } from "lucide-react";
 import { enclosingFrame } from "./boardFrames";
+import { shifted } from "./drawGeometry";
+import { uid } from "./referenceShared";
 import { convertToEmbed, downloadMediaFromEmbed, reloadMedia, reloadableMedia, relocateMissingMedia } from "./boardMediaActions";
 import { iconForLink } from "./brandIcons";
 import { nr } from "@/lib/bridge";
@@ -78,6 +80,7 @@ export function BoardContextMenu({
   const frozen = useBoard((s) => s.frozen);
   const drawMode = useBoard((s) => s.drawMode);
   const drawBack = useBoard((s) => s.drawBack);
+  const drawSel = useBoard((s) => s.drawSel);
   const hasDraw = useBoard((s) => s.items.some((i) => i.kind === "draw" && (i.shapes?.length ?? 0) > 0));
   const background = useBoard((s) => s.background);
   const canUndo = useBoard((s) => s.past.length > 0);
@@ -89,12 +92,44 @@ export function BoardContextMenu({
 
   const store = useBoard.getState;
 
-  // Avant ouverture du menu : sélectionne l'item sous le curseur (ou désélectionne sur le vide).
+  // Avant ouverture du menu : on vise ce qui est sous le curseur. Un clic droit DANS une
+  // multi-sélection existante la garde (ses actions de groupe sont justement la raison de viser
+  // là) ; sinon l'item — ou la forme dessinée — sous le curseur devient la sélection, et le vide
+  // la vide.
   const onContextMenu = (e: React.MouseEvent) => {
-    const el = (e.target as HTMLElement).closest("[data-board-item]");
-    const id = el?.getAttribute("data-board-item") ?? null;
-    if (id) store().select(id);
-    else store().select(null);
+    const target = e.target as HTMLElement;
+    const id = target.closest("[data-board-item]")?.getAttribute("data-board-item") ?? null;
+    if (id) {
+      if (!store().selectedIds.includes(id)) store().select(id);
+      return;
+    }
+    const shapeId = target.closest("[data-draw-shape]")?.getAttribute("data-draw-shape") ?? null;
+    // Même règle que pour les items : viser une forme DÉJÀ dans le groupe garde le groupe, c'est
+    // justement pour ses actions collectives qu'on l'a visée.
+    if (shapeId) {
+      if (!store().drawSel.includes(shapeId)) store().selectDrawShape(shapeId);
+    } else store().select(null);
+  };
+
+  // Forme dessinée sélectionnée : les deux mêmes actions que ses raccourcis clavier (Ctrl+D / Suppr).
+  const duplicateShape = () => {
+    const st = store();
+    const shapes = st.items.find((i) => i.kind === "draw")?.shapes ?? [];
+    const off = 16 / st.view.scale;
+    const copies = st.drawSel
+      .map((id) => shapes.find((s) => s.id === id))
+      .filter((src): src is NonNullable<typeof src> => src != null)
+      .map((src) => ({ ...shifted(src, off, off), id: uid() }));
+    if (!copies.length) return;
+    st.drawSetShapes([...shapes, ...copies]);
+    st.selectDrawShapes(copies.map((copy) => copy.id));
+  };
+  const deleteShape = () => {
+    const st = store();
+    const shapes = st.items.find((i) => i.kind === "draw")?.shapes ?? [];
+    const gone = new Set(st.drawSel);
+    st.drawSetShapes(shapes.filter((s) => !gone.has(s.id)));
+    st.selectDrawShape(null);
   };
 
   return (
@@ -184,6 +219,18 @@ export function BoardContextMenu({
                 </ContextMenuItem>
               )}
               <ContextMenuItem variant="destructive" onClick={() => store().removeItem(item.id)}>
+                <Trash2 /> {t("common:action.delete")}
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+            </>
+          )}
+
+          {drawSel.length > 0 && (
+            <>
+              <ContextMenuItem onClick={duplicateShape}>
+                <Copy /> {t("actions.duplicate")}
+              </ContextMenuItem>
+              <ContextMenuItem variant="destructive" onClick={deleteShape}>
                 <Trash2 /> {t("common:action.delete")}
               </ContextMenuItem>
               <ContextMenuSeparator />

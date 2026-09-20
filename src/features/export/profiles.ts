@@ -8,7 +8,7 @@ import i18n from "@/i18n";
 
 export type ExportWorkflow = "timeline_import" | "video_remux" | "video_encode";
 
-export type ExportCodecFamily = "h264" | "h265" | "av1" | "vp9" | "prores" | "dnxhr" | "cineform" | "ffv1";
+export type ExportCodecFamily = "h264" | "h265" | "prores" | "dnxhr";
 
 export type ExportCodec =
   | "h264_baseline"
@@ -23,11 +23,6 @@ export type ExportCodec =
   | "h265_main422_10"
   | "h265_main444"
   | "h265_main444_10"
-  | "av1_main"
-  | "av1_main10"
-  | "vp9"
-  | "vp9_10"
-  | "ffv1"
   | "prores_422_lt"
   | "prores_422"
   | "prores_422_hq"
@@ -37,27 +32,24 @@ export type ExportCodec =
   | "dnxhr_sq"
   | "dnxhr_hq"
   | "dnxhr_hqx"
-  | "dnxhr_444"
-  | "cineform"
-  | "cineform_hq";
+  | "dnxhr_444";
 
-// Codecs audio RÉELLEMENT employés en post aujourd'hui, chacun à plusieurs débits. Volontairement
-// court : AC-3/E-AC-3 (livraison broadcast Dolby), Vorbis (remplacé par Opus), MP2 (legacy broadcast)
-// et PCM 32 bits flottant (mastering audio) n'ont pas leur place dans un outil de derush — ils
-// allongeaient le menu sans que personne ne les choisisse.
+// Codecs audio RÉELLEMENT employés en post aujourd'hui, chacun à plusieurs débits. Le critère est la
+// COMPATIBILITÉ : AAC (universel), AC-3 (livraison broadcast Dolby, lu par tous les NLE et tous les
+// lecteurs), MP3 (compatibilité héritée), et le sans-perte du montage — le PCM 16/24 bits, c'est-à-dire
+// le codec que porte un WAV. Écartés : Opus (ni Resolve ni les Adobe ne l'importent), ALAC (lu par le
+// seul monde Apple), FLAC (compresse sans perte mais reste un format de diffusion audio, refusé en MOV
+// et ignoré des monteurs), Vorbis, MP2 et PCM 32 bits flottant (mastering audio).
 export type ExportAudioMode =
   | "copy"
   | "aac_128"
   | "aac"
   | "aac_256"
   | "aac_320"
-  | "opus_128"
-  | "opus"
-  | "opus_192"
+  | "ac3"
+  | "ac3_640"
   | "mp3_192"
   | "mp3"
-  | "flac"
-  | "alac"
   | "pcm16"
   | "pcm24"
   | "none";
@@ -66,7 +58,7 @@ export type ExportAudioMode =
 // une liste plate se relit mal). « copy » n'appartient à aucune famille — c'est l'absence de ré-encodage.
 export type ExportAudioFamily = "lossy" | "lossless";
 
-export type ExportContainer = "mp4" | "mkv" | "mov" | "webm";
+export type ExportContainer = "mp4" | "mkv" | "mov";
 
 export type ExportEncoderMode = "gpu" | "nvenc" | "amf" | "qsv" | "cpu";
 export type ExportSpeed = "fast" | "balanced" | "quality" | "max";
@@ -163,11 +155,25 @@ export type ExportIcon =
   | { type: "emoji"; ch: string }
   | { type: "image"; src: string };
 
-// Upscale applied WHILE re-encoding: exactly NetsuLab's model settings (`UpSettings`), like a
-// collection's archive pane — the two screens must behave the same, so they share the settings shape
-// and the engine. Type-only import: nothing from the Traitements panel lands in this module.
-export interface ExportUpscale extends Partial<import("@/components/upscale/upscaleShared").UpSettings> {
+// Processing passes a profile can run WHILE re-encoding. Cutout is absent on purpose: its alpha
+// needs a codec a profile may not carry, and a silently flattened matte is worse than no option.
+export const EXPORT_PROCESS_KINDS = ["upscale", "interpolate", "depth"] as const;
+export type ExportProcessKind = (typeof EXPORT_PROCESS_KINDS)[number];
+
+// Two passes at most: the shots are decoded and re-encoded once per pass, so a third would cost a
+// generation of quality for an effect nobody asked for.
+export const EXPORT_PROCESS_MAX_STEPS = 2;
+
+// The settings of a pass are EXACTLY those of the Traitements panel, kept in one bucket per op: two
+// ops both have a `model` that means a different thing, and switching type must not throw away what
+// the other one was tuned to. `kinds` names the ops that run, in order — the same op twice would pay
+// the GPU twice for what one pass already did. Type-only imports: nothing of that panel lands here.
+export interface ExportProcess {
   enabled?: boolean;
+  kinds?: ExportProcessKind[];
+  upscale?: Partial<import("@/components/upscale/upscaleShared").UpSettings>;
+  interpolate?: Partial<import("@/components/upscale/processShared").InterpSettings>;
+  depth?: Partial<import("@/components/upscale/processShared").DepthSettings>;
 }
 
 export interface ExportProfile {
@@ -199,9 +205,9 @@ export interface ExportProfile {
   folderTarget?: string | null;
   // Timeline visée par l'import (workflow timeline_import) : "open" | "new" | "new:<nom>" | "tl:<nom>".
   timelineTarget?: TimelineTargetValue;
-  // Upscale run on every shot during the export. Only read on `video_encode`: replacing pixels is
-  // out of reach of a stream copy or of a timeline import. Absent = off.
-  upscale?: ExportUpscale;
+  // Processing pass run on every shot during the export. Only read on `video_encode`: replacing the
+  // pixels is out of reach of a stream copy or of a timeline import. Absent = off.
+  process?: ExportProcess;
 }
 
 // ---------------------------------------------------------------------------
@@ -227,11 +233,6 @@ export const EXPORT_CODEC_OPTIONS: { value: ExportCodec; label: string }[] = [
   { value: "h265_main422_10", get label() { return `H.265 — Main 4:2:2 ${i18n.t("export:codec.bitDepth", { count: 10 })}`; } },
   { value: "h265_main444", get label() { return `H.265 — Main 4:4:4 ${i18n.t("export:codec.bitDepth", { count: 8 })}`; } },
   { value: "h265_main444_10", get label() { return `H.265 — Main 4:4:4 ${i18n.t("export:codec.bitDepth", { count: 10 })}`; } },
-  { value: "av1_main", label: "AV1 — Main" },
-  { value: "av1_main10", get label() { return `AV1 — Main ${i18n.t("export:codec.bitDepth", { count: 10 })}`; } },
-  { value: "vp9", get label() { return `VP9 — ${i18n.t("export:codec.profile", { count: 0 })}`; } },
-  { value: "vp9_10", get label() { return `VP9 — ${i18n.t("export:codec.profile", { count: 2 })} (${i18n.t("export:codec.bitDepth", { count: 10 })})`; } },
-  { value: "ffv1", get label() { return `FFV1 — ${i18n.t("export:codec.losslessArchive")}`; } },
   { value: "prores_422_lt", label: "ProRes 422 LT" },
   { value: "prores_422", label: "ProRes 422" },
   { value: "prores_422_hq", label: "ProRes 422 HQ" },
@@ -242,8 +243,6 @@ export const EXPORT_CODEC_OPTIONS: { value: ExportCodec; label: string }[] = [
   { value: "dnxhr_hq", label: "DNxHR HQ" },
   { value: "dnxhr_hqx", get label() { return `DNxHR HQX ${i18n.t("export:codec.bitDepth", { count: 10 })}`; } },
   { value: "dnxhr_444", get label() { return `DNxHR 444 ${i18n.t("export:codec.bitDepth", { count: 10 })}`; } },
-  { value: "cineform", label: "GoPro CineForm" },
-  { value: "cineform_hq", label: "GoPro CineForm HQ" },
 ];
 
 // Codecs audio PROPOSÉS (ligne « Codec audio »). « none » n'y est pas : couper le son s'exprime une
@@ -255,20 +254,57 @@ export const EXPORT_AUDIO_OPTIONS: { value: ExportAudioMode; label: string }[] =
   { value: "aac", get label() { return i18n.t("export:audioMode.aac"); } },
   { value: "aac_256", get label() { return i18n.t("export:audioMode.aac_256"); } },
   { value: "aac_320", get label() { return i18n.t("export:audioMode.aac_320"); } },
-  { value: "opus_128", get label() { return i18n.t("export:audioMode.opus_128"); } },
-  { value: "opus", get label() { return i18n.t("export:audioMode.opus"); } },
-  { value: "opus_192", get label() { return i18n.t("export:audioMode.opus_192"); } },
+  { value: "ac3", get label() { return i18n.t("export:audioMode.ac3"); } },
+  { value: "ac3_640", get label() { return i18n.t("export:audioMode.ac3_640"); } },
   { value: "mp3_192", get label() { return i18n.t("export:audioMode.mp3_192"); } },
   { value: "mp3", get label() { return i18n.t("export:audioMode.mp3"); } },
-  { value: "flac", get label() { return i18n.t("export:audioMode.flac"); } },
-  { value: "alac", get label() { return i18n.t("export:audioMode.alac"); } },
   { value: "pcm16", get label() { return i18n.t("export:audioMode.pcm16"); } },
   { value: "pcm24", get label() { return i18n.t("export:audioMode.pcm24"); } },
 ];
 
+export const EXPORT_CODEC_PROFILE_LABELS: Record<ExportCodec, string> = {
+  h264_baseline: "Baseline",
+  h264_main: "Main",
+  h264_high: "High",
+  get h264_high10() { return `High ${i18n.t("export:codec.bitDepth", { count: 10 })}`; },
+  h264_high422: "High 4:2:2",
+  h264_high444: "High 4:4:4",
+  h265_main: "Main",
+  get h265_main10() { return `Main ${i18n.t("export:codec.bitDepth", { count: 10 })}`; },
+  get h265_main12() { return `Main ${i18n.t("export:codec.bitDepth", { count: 12 })}`; },
+  get h265_main422_10() { return `Main 4:2:2 ${i18n.t("export:codec.bitDepth", { count: 10 })}`; },
+  get h265_main444() { return `Main 4:4:4 ${i18n.t("export:codec.bitDepth", { count: 8 })}`; },
+  get h265_main444_10() { return `Main 4:4:4 ${i18n.t("export:codec.bitDepth", { count: 10 })}`; },
+  prores_422_lt: "422 LT",
+  prores_422: "422",
+  prores_422_hq: "422 HQ",
+  prores_4444: "4444",
+  prores_4444_xq: "4444 XQ",
+  dnxhr_lb: "LB",
+  dnxhr_sq: "SQ",
+  dnxhr_hq: "HQ",
+  get dnxhr_hqx() { return `HQX ${i18n.t("export:codec.bitDepth", { count: 10 })}`; },
+  get dnxhr_444() { return `444 ${i18n.t("export:codec.bitDepth", { count: 10 })}`; },
+};
+
+export function getExportCodecProfileLabel(codec: ExportCodec): string {
+  return EXPORT_CODEC_PROFILE_LABELS[codec] ?? getExportCodecLabel(codec);
+}
+
+/** Codecs d'une famille, dans l'ordre du catalogue. */
+export function codecsForFamily(family: ExportCodecFamily): ExportCodec[] {
+  return CODEC_FAMILY_TO_CODECS[family];
+}
+
+export function getCodecFamilyLabel(family: ExportCodecFamily): string {
+  return CODEC_FAMILY_LABELS[family];
+}
+
+export const EXPORT_CODEC_FAMILIES = ["h264", "h265", "prores", "dnxhr"] as const;
+
 const AUDIO_FAMILY_TO_MODES: Record<ExportAudioFamily, ExportAudioMode[]> = {
-  lossy: ["aac_128", "aac", "aac_256", "aac_320", "opus_128", "opus", "opus_192", "mp3_192", "mp3"],
-  lossless: ["flac", "alac", "pcm16", "pcm24"],
+  lossy: ["aac_128", "aac", "aac_256", "aac_320", "ac3", "ac3_640", "mp3_192", "mp3"],
+  lossless: ["pcm16", "pcm24"],
 };
 
 const AUDIO_FAMILY_LABELS: Record<ExportAudioFamily, string> = {
@@ -285,7 +321,6 @@ export const EXPORT_CONTAINER_OPTIONS: { value: ExportContainer; label: string }
   { value: "mp4", label: "MP4" },
   { value: "mkv", label: "MKV" },
   { value: "mov", label: "MOV" },
-  { value: "webm", label: "WebM" },
 ];
 
 export const EXPORT_SPEED_OPTIONS: { value: ExportSpeed; label: string; hint: string }[] = [
@@ -298,23 +333,15 @@ export const EXPORT_SPEED_OPTIONS: { value: ExportSpeed; label: string; hint: st
 const CODEC_FAMILY_LABELS: Record<ExportCodecFamily, string> = {
   h264: "H.264 / AVC",
   h265: "H.265 / HEVC",
-  av1: "AV1",
-  vp9: "VP9",
   prores: "ProRes",
   dnxhr: "DNxHR / DNxHD (Avid)",
-  cineform: "GoPro CineForm",
-  get ffv1() { return `FFV1 (${i18n.t("export:codec.archive")})`; },
 };
 
 const CODEC_FAMILY_TO_CODECS: Record<ExportCodecFamily, ExportCodec[]> = {
   h264: ["h264_baseline", "h264_main", "h264_high", "h264_high10", "h264_high422", "h264_high444"],
   h265: ["h265_main", "h265_main10", "h265_main12", "h265_main422_10", "h265_main444", "h265_main444_10"],
-  av1: ["av1_main", "av1_main10"],
-  vp9: ["vp9", "vp9_10"],
   prores: ["prores_422_lt", "prores_422", "prores_422_hq", "prores_4444", "prores_4444_xq"],
   dnxhr: ["dnxhr_lb", "dnxhr_sq", "dnxhr_hq", "dnxhr_hqx", "dnxhr_444"],
-  cineform: ["cineform", "cineform_hq"],
-  ffv1: ["ffv1"],
 };
 
 // Codecs groupés par famille (rendu du Select en sections).
@@ -417,18 +444,6 @@ export const DEFAULT_EXPORT_PROFILES: ExportProfile[] = [
     speed: "quality",
     icon: { type: "lucide", name: "Save" },
   },
-  {
-    id: "webm-av1",
-    name: i18n.t("export:profileName.webmAv1"),
-    workflow: "video_encode",
-    codec: "av1_main",
-    audioMode: "opus",
-    container: "webm",
-    mergeEnabled: false,
-    encoderMode: "gpu",
-    speed: "balanced",
-    icon: { type: "lucide", name: "Share2" },
-  },
   // Seul profil à couche alpha : ProRes 4444 la transporte, ni H.264/265 ni DNxHR HQX.
   {
     id: "prores-4444",
@@ -453,18 +468,6 @@ export const DEFAULT_EXPORT_PROFILES: ExportProfile[] = [
     encoderMode: "cpu",
     speed: "balanced",
     icon: { type: "lucide", name: "FileVideo" },
-  },
-  {
-    id: "ffv1-archive",
-    name: i18n.t("export:profileName.ffv1Archive"),
-    workflow: "video_encode",
-    codec: "ffv1",
-    audioMode: "flac",
-    container: "mkv",
-    mergeEnabled: false,
-    encoderMode: "cpu",
-    speed: "balanced",
-    icon: { type: "lucide", name: "Package" },
   },
 ];
 
@@ -493,11 +496,7 @@ export function getExportCodecLabel(codec: ExportCodec): string {
 export function getCodecFamily(codec: ExportCodec): ExportCodecFamily {
   if (codec.startsWith("h264_")) return "h264";
   if (codec.startsWith("h265_")) return "h265";
-  if (codec.startsWith("av1_")) return "av1";
-  if (codec.startsWith("vp9")) return "vp9";
   if (codec.startsWith("dnxhr_")) return "dnxhr";
-  if (codec.startsWith("cineform")) return "cineform";
-  if (codec === "ffv1") return "ffv1";
   return "prores";
 }
 
@@ -554,44 +553,30 @@ export function coerceExportSpeed(speed: string | undefined | null): ExportSpeed
 
 export function supportsExportSpeed(codec: ExportCodec): boolean {
   const family = getCodecFamily(codec);
-  return family === "h264" || family === "h265" || family === "av1" || family === "vp9";
+  return family === "h264" || family === "h265";
 }
 
 export function isExportCodecContainerCompatible(codec: ExportCodec, container: ExportContainer): boolean {
   const fam = getCodecFamily(codec);
-  // WebM n'accepte QUE VP8/VP9/AV1 (ffmpeg refuse le mux sinon) → jamais pour les autres familles.
-  if (container === "webm") return fam === "vp9" || fam === "av1";
-  // Intermédiaires montage (ProRes / DNxHR / CineForm) → conteneurs MOV/MKV (pas MP4).
-  if (fam === "prores" || fam === "dnxhr" || fam === "cineform") return container === "mov" || container === "mkv";
-  // AV1 → MP4/MKV seulement (MOV ne mux pas l'AV1 de façon fiable).
-  if (fam === "av1") return container === "mp4" || container === "mkv";
-  // VP9 → WebM/MKV (famille Matroska). MP4 accepte VP9 mais la lecture est très inégale.
-  if (fam === "vp9") return container === "mkv";
-  // FFV1 : mappage normalisé en Matroska (référence archivage) et MOV. Pas de mappage MP4 standard.
-  if (fam === "ffv1") return container === "mkv" || container === "mov";
+  // Intermédiaires montage (ProRes / DNxHR) → conteneurs MOV/MKV (pas MP4).
+  if (fam === "prores" || fam === "dnxhr") return container === "mov" || container === "mkv";
   return true; // h264/h265 → mp4/mov/mkv
 }
 
 // Conteneurs qui muxent RÉELLEMENT chaque codec audio. Table explicite plutôt qu'une suite de règles :
-// avec quinze codecs, une condition oubliée sortait un couple que ffmpeg refuse à l'exécution.
-//  - WebM ne mux qu'Opus (« Only ... Vorbis or Opus audio ... are supported for WebM ») ; « copy » y
-//    est exclu, la piste source est presque toujours AAC → l'échec serait la règle ;
-//  - MP4 ne porte pas le PCM de façon lisible par les monteurs → MOV/MKV pour ces modes ;
-//  - MOV ne mux ni Opus ni FLAC (« flac only supported in MP4 ») → le FLAC ne sort qu'en MKV, le MP4
-//    l'accepterait mais aucun logiciel de montage ne le lit.
+// une condition oubliée sortait un couple que ffmpeg refuse à l'exécution.
+//  - MP4 ne porte pas le PCM de façon lisible par les monteurs (son tag `ipcm` date de 2020 et
+//    aucun NLE ne le lit) → MOV/MKV pour ces modes, exactement là où vit le PCM d'un WAV.
 const AUDIO_CONTAINERS: Record<Exclude<ExportAudioMode, "none">, ExportContainer[]> = {
   copy: ["mp4", "mkv", "mov"],
   aac_128: ["mp4", "mkv", "mov"],
   aac: ["mp4", "mkv", "mov"],
   aac_256: ["mp4", "mkv", "mov"],
   aac_320: ["mp4", "mkv", "mov"],
-  opus_128: ["mp4", "mkv", "webm"],
-  opus: ["mp4", "mkv", "webm"],
-  opus_192: ["mp4", "mkv", "webm"],
+  ac3: ["mp4", "mkv", "mov"],
+  ac3_640: ["mp4", "mkv", "mov"],
   mp3_192: ["mp4", "mkv", "mov"],
   mp3: ["mp4", "mkv", "mov"],
-  flac: ["mkv"],
-  alac: ["mp4", "mkv", "mov"],
   pcm16: ["mkv", "mov"],
   pcm24: ["mkv", "mov"],
 };
@@ -606,11 +591,11 @@ export function compatibleAudioForContainer(container: ExportContainer): { value
   return EXPORT_AUDIO_OPTIONS.filter((o) => isExportAudioContainerCompatible(o.value, container));
 }
 
-// Mêmes options, groupées par famille pour le rendu en sections (« Copie » reste hors groupe, en tête).
-export function compatibleAudioGroupsForContainer(container: ExportContainer): {
+// Groupe une liste de codecs audio par famille pour le rendu en sections (« Copie » n'appartient à
+// aucune famille et reste hors groupe, en tête).
+export function groupAudioOptions(offered: { value: ExportAudioMode; label: string }[]): {
   family: ExportAudioFamily; label: string; options: { value: ExportAudioMode; label: string }[];
 }[] {
-  const offered = compatibleAudioForContainer(container);
   return (Object.keys(AUDIO_FAMILY_TO_MODES) as ExportAudioFamily[])
     .map((family) => ({
       family,
@@ -620,9 +605,14 @@ export function compatibleAudioGroupsForContainer(container: ExportContainer): {
     .filter((group) => group.options.length > 0);
 }
 
-// Codec audio de repli quand le conteneur refuse celui du profil (ex. bascule vers WebM → Opus).
-export function getRecommendedAudioForContainer(container: ExportContainer): ExportAudioMode {
-  if (container === "webm") return "opus";
+// Mêmes options, groupées par famille.
+export function compatibleAudioGroupsForContainer(container: ExportContainer) {
+  return groupAudioOptions(compatibleAudioForContainer(container));
+}
+
+// Codec audio de repli quand le conteneur refuse celui du profil (ex. MP4 après un profil PCM).
+// L'AAC est le seul codec que les trois conteneurs portent tous.
+export function getRecommendedAudioForContainer(_container: ExportContainer): ExportAudioMode {
   return "aac";
 }
 
@@ -633,10 +623,7 @@ export function compatibleContainersForExportCodec(codec: ExportCodec): { value:
 
 export function getRecommendedContainerForCodec(codec: ExportCodec): ExportContainer {
   const fam = getCodecFamily(codec);
-  if (fam === "prores" || fam === "dnxhr" || fam === "cineform") return "mov";
-  if (fam === "ffv1") return "mkv";
-  if (fam === "vp9") return "webm";
-  if (fam === "av1") return "mp4";
+  if (fam === "prores" || fam === "dnxhr") return "mov";
   return "mp4";
 }
 
@@ -677,35 +664,54 @@ export function getExportProfileSummary(profile: ExportProfile): string {
   if (isTimelineImport(profile.workflow)) return i18n.t("export:summary.timelineImport");
   const codecLabel = usesEncoding(profile.workflow) ? getExportCodecLabel(profile.codec) : i18n.t("export:summary.streamCopy");
   const mergeLabel = profile.mergeEnabled ? i18n.t("export:summary.merged") : "";
-  // An upscale multiplies the export time by ten: it belongs in the one line that says what the
-  // profile does, not only inside its editor.
-  const upscaleLabel = upscaleEnabled(profile) ? i18n.t("export:summary.upscaled", { scale: exportUpscaleScale(profile.upscale) }) : "";
-  return `${codecLabel} · ${profile.container.toUpperCase()}${upscaleLabel}${mergeLabel}`;
+  // A processing pass multiplies the export time by ten: it belongs in the one line that says what
+  // the profile does, not only inside its editor.
+  const processLabel = processEnabled(profile) ? i18n.t("export:summary.processed", { label: exportProcessLabel(profile.process) }) : "";
+  return `${codecLabel} · ${profile.container.toUpperCase()}${processLabel}${mergeLabel}`;
 }
 
 export function getActiveExportProfile(profiles: ExportProfile[], activeProfileId: string): ExportProfile {
   return profiles.find((p) => p.id === activeProfileId) ?? profiles[0] ?? DEFAULT_EXPORT_PROFILE;
 }
 
-// Effective scale: restoration models work at 1x (same rule as `core/upscaleArgs.js`, which the
-// engine applies for real).
-export function exportUpscaleScale(upscale: ExportUpscale | undefined): number {
-  if (!upscale) return 2;
-  if (upscale.mode === "restore") return 1;
-  return upscale.scale ?? 2;
+// Ops the passes run, in order: known, never repeated, never more than the ceiling. Empty falls back
+// on a single upscale, the op every screen offers.
+export function exportProcessKinds(proc: ExportProcess | undefined | null): ExportProcessKind[] {
+  const kinds = (proc?.kinds ?? []).filter((k, i, all) => EXPORT_PROCESS_KINDS.includes(k) && all.indexOf(k) === i);
+  return kinds.length ? kinds.slice(0, EXPORT_PROCESS_MAX_STEPS) : ["upscale"];
 }
 
-// True when this profile really enlarges its shots: the option is only read on a re-encode.
-export function upscaleEnabled(profile: ExportProfile): boolean {
-  return !!profile.upscale?.enabled && usesEncoding(profile.workflow);
+// True when this profile really processes its shots: the option is only read on a re-encode.
+export function processEnabled(profile: ExportProfile): boolean {
+  return !!profile.process?.enabled && usesEncoding(profile.workflow);
 }
 
-// Upscale settings are kept AS THEY ARE — they are NetsuLab's own shape, and the core normalizes
-// them when the job starts. Only `enabled` is coerced, so a profile whose option is switched off
-// keeps the model and the scale that were picked, ready for the next time.
-function normalizeExportUpscale(upscale: ExportUpscale | undefined | null): ExportUpscale | undefined {
-  if (!upscale || typeof upscale !== "object") return undefined;
-  return { ...upscale, enabled: !!upscale.enabled };
+// Name of one pass, with the number that changes what comes out: an upscale's resolution class or
+// factor (restoration works at 1x, RTX VSR ignores the class — same rules as `core/upscaleArgs.js`),
+// or an interpolation factor.
+export function exportProcessStepLabel(proc: ExportProcess | undefined | null, kind: ExportProcessKind): string {
+  const name = i18n.t(`upscale:ops.${kind}`);
+  if (kind === "interpolate") return `${name} ${proc?.interpolate?.factor ?? 2}×`;
+  if (kind !== "upscale") return name;
+  const up = proc?.upscale;
+  if (up?.mode === "restore") return `${name} 1×`;
+  // `isRtxShader` lives in upscaleShared, which imports this module back: compare the id here.
+  const rtx = up?.engine === "turbo" && up.shader === "rtx_vsr";
+  if (up?.targetHeight && !rtx) return `${name} ${up.targetHeight}p`;
+  return `${name} ${rtx ? 2 : up?.scale ?? 2}×`;
+}
+
+// The whole chain, in the order it runs.
+export function exportProcessLabel(proc: ExportProcess | undefined | null): string {
+  return exportProcessKinds(proc).map((k) => exportProcessStepLabel(proc, k)).join(" + ");
+}
+
+// Processing settings are kept AS THEY ARE — they are NetsuLab's own shape, and the core normalizes
+// them when the job starts. Only `enabled` and `kinds` are coerced, so a profile whose option is
+// switched off keeps every op it has tuned, ready for the next time.
+function normalizeExportProcess(proc: ExportProcess | undefined | null): ExportProcess | undefined {
+  if (!proc || typeof proc !== "object") return undefined;
+  return { ...proc, enabled: !!proc.enabled, kinds: exportProcessKinds(proc) };
 }
 
 function normalizeExportIcon(icon: ExportIcon | undefined | null): ExportIcon | undefined {
@@ -752,7 +758,7 @@ export function normalizeExportProfile(profile: ExportProfile): ExportProfile {
     binTarget: typeof profile.binTarget === "string" ? profile.binTarget : null,
     folderTarget: typeof profile.folderTarget === "string" ? profile.folderTarget : null,
     timelineTarget: coerceTimelineTarget(profile.timelineTarget),
-    upscale: normalizeExportUpscale(profile.upscale),
+    process: normalizeExportProcess(profile.process),
   };
 }
 

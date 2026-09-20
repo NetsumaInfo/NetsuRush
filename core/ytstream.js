@@ -61,9 +61,9 @@ function resolvePython() {
 }
 const PY = resolvePython();
 
-/** @type {Map<string, { url: string, at: number }>} */
+/** @type {Map<string, { url: string, at: number, duration: number|null }>} */
 const cache = new Map();
-/** @type {Map<string, Promise<{ ok: boolean, url?: string, error?: string }>>} */
+/** @type {Map<string, Promise<{ ok: boolean, url?: string, duration?: number|null, error?: string }>>} */
 const inflight = new Map();
 
 // Un id YouTube est un jeton opaque : tout le reste est refusé avant d'atteindre un spawn.
@@ -94,6 +94,11 @@ function runYtdlp(id, cookiesBrowser, cookiesFile) {
       "--no-playlist", "--no-warnings", "--no-progress",
       "--socket-timeout", "20",
       "-g",
+      // La DURÉE dans la MÊME invocation : yt-dlp la connaît déjà, et c'est elle qui borne le
+      // sélecteur de portée du board. Sans elle, la seule source était le `<video>`, qui ne
+      // l'apprend qu'après avoir lu l'index du conteneur — parfois presque tout le fichier, donc
+      // de longues secondes pendant lesquelles aucun point de sortie n'était posable.
+      "--print", "duration",
       ...jsRuntimeArgs(),
     ];
     if (cookiesFile) args.push("--cookies", cookiesFile);
@@ -119,11 +124,12 @@ function runYtdlp(id, cookiesBrowser, cookiesFile) {
       clearTimeout(killer);
       // Un manifeste (HLS/DASH) qui passerait malgré le filtre de protocole vaut un échec : mieux
       // vaut le repli sur le lecteur intégré qu'un `<video>` muré sur une source illisible.
-      const url = out
-        .split(/\r?\n/)
-        .map((s) => s.trim())
-        .find((s) => /^https:\/\//.test(s) && !/\.m3u8|\/manifest\//i.test(s));
-      if (code === 0 && url) resolve({ ok: true, url });
+      const lines = out.split(/\r?\n/).map((s) => s.trim());
+      const url = lines.find((s) => /^https:\/\//.test(s) && !/\.m3u8|\/manifest\//i.test(s));
+      // `--print duration` rend des secondes, entières ou décimales ; NA pour un direct.
+      const seconds = Number(lines.find((s) => /^[0-9]+(\.[0-9]+)?$/.test(s)));
+      const duration = Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+      if (code === 0 && url) resolve({ ok: true, url, duration });
       else resolve({ ok: false, error: err.trim() || `yt-dlp code ${code}` });
     });
   });
@@ -203,12 +209,12 @@ function firstLine(error) {
 async function resolveStream(id, force = false) {
   if (!validId(id)) return { ok: false, error: "bad id" };
   const hit = cache.get(id);
-  if (!force && hit && Date.now() - hit.at < CACHE_TTL_MS) return { ok: true, url: hit.url };
+  if (!force && hit && Date.now() - hit.at < CACHE_TTL_MS) return { ok: true, url: hit.url, duration: hit.duration };
   if (force) cache.delete(id);
   const pending = inflight.get(id);
   if (pending) return pending;
   const job = resolveWithFallback(id).then((r) => {
-    if (r.ok && r.url) cache.set(id, { url: r.url, at: Date.now() });
+    if (r.ok && r.url) cache.set(id, { url: r.url, at: Date.now(), duration: r.duration ?? null });
     inflight.delete(id);
     return r;
   });
@@ -326,15 +332,49 @@ async function serveYoutube(req, res, id) {
 
     await pump(head);
     while (!closed && cursor <= end) {
+      // Le budget de renouvellements vaut par PASSAGE À VIDE, pas pour la réponse entière : une URL
+      // googlevideo expire au bout de quelques dizaines de minutes, donc une vidéo longue lue d'un
+      // trait la renouvelle plusieurs fois légitimement. Compté globalement, le quatrième
+      // renouvellement d'une même lecture coupait le flux en plein milieu.
+      renewals = 0;
       const next = await slice(cursor, Math.min(cursor + CHUNK - 1, end));
       if (!next) break;
       await pump(next);
     }
-    res.end();
+    // `Content-Length` a déjà été annoncé. Fermer proprement une réponse plus COURTE que l'annonce
+    // fait voir au lecteur un fichier tronqué sans cause : il abandonne (MEDIA_ERR_NETWORK) au lieu
+    // de redemander la plage. Une coupure franche est ce qu'il sait rattraper.
+    if (!closed && cursor <= end) res.destroy();
+    else res.end();
   } catch (error) {
     if (!res.headersSent) res.writeHead(502).end("upstream error");
     else res.destroy();
   }
 }
 
-module.exports = { serveYoutube, resolveStream, needsCookies };
+/**
+ * Durée d'une vidéo YouTube, en secondes. Le board en a besoin pour borner son sélecteur de portée
+ * avant de pouvoir poser un point de sortie. Passe par le même cache que le flux — aucun lancement
+ * de yt-dlp supplémentaire quand la vidéo a déjà été lue.
+ * @param {string} id @returns {Promise<number|null>}
+ */
+// Une résolution coûte un PROCESSUS yt-dlp de plusieurs secondes. `inflight` déduplique par vidéo,
+// pas entre vidéos : une planche à douze cartes en lançait douze d'un coup à l'ouverture, sur une
+// information qui n'est qu'un confort. Elles passent donc une à une, derrière les lectures.
+let durationQueue = Promise.resolve();
+
+async function videoDuration(id) {
+  if (!validId(id)) return null;
+  const hit = cache.get(id);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.duration ?? null;
+  const job = durationQueue.then(async () => {
+    const again = cache.get(id); // une lecture a pu résoudre pendant l'attente
+    if (again && Date.now() - again.at < CACHE_TTL_MS) return again.duration ?? null;
+    const resolved = await resolveStream(id);
+    return resolved.ok ? resolved.duration ?? null : null;
+  });
+  durationQueue = job.then(() => undefined, () => undefined);
+  return job;
+}
+
+module.exports = { serveYoutube, resolveStream, needsCookies, videoDuration };

@@ -33,16 +33,34 @@ function shotIdentity(shot) {
 }
 
 /**
- * Upscale à appliquer à CE plan. Une source qui est elle-même une sortie d'upscale NetsuRush, à une
- * échelle au moins égale, n'est pas ré-agrandie : on n'y gagnerait aucun détail, on paierait la
- * génération une seconde fois et on empilerait les artefacts du premier passage.
- * @param {any} upscale @param {any} shot @param {any} ledger
+ * Traitement à appliquer à CE plan (passes NORMALISÉES, cf. `core/processRun.js` — null = option
+ * éteinte). Une source qui est elle-même une sortie d'upscale NetsuRush, à une échelle au moins
+ * égale, n'est pas ré-agrandie : on n'y gagnerait aucun détail, on paierait la génération une
+ * seconde fois et on empilerait les artefacts du premier passage. La règle ne vaut que si le
+ * traitement se RÉSUME à cet upscale : une chaîne fait autre chose que redimensionner.
+ * @param {any} process @param {any} shot @param {any} ledger
  */
-function upscaleForShot(upscale, shot, ledger) {
-  if (!upscale || !upscale.enabled) return null;
-  const already = ledger.describe(shot.path);
-  if (already && Number(already.scale || 0) >= Number(upscale.scale || 0)) return null;
-  return upscale;
+function processForShot(process, shot, ledger) {
+  if (!process) return null;
+  const steps = Array.isArray(process) ? process : [process];
+  if (steps.length === 1 && steps[0].kind === 'upscale') {
+    const already = ledger.describe(shot.path);
+    if (already && covers(already, steps[0])) return null;
+  }
+  return process;
+}
+
+/**
+ * Does an earlier output already reach this pass? Only when both were sized the same way: a
+ * resolution class is compared with a class, a factor with a factor. A mixed pair says nothing about
+ * the pixels, so the shot is processed.
+ * @param {{ scale?: number, target?: number }} already @param {{ scale?: number, target?: number }} step
+ */
+function covers(already, step) {
+  const wanted = Number(step.target || 0);
+  const had = Number(already.target || 0);
+  if (wanted || had) return !!wanted && !!had && had >= wanted;
+  return Number(already.scale || 0) >= Number(step.scale || 0);
 }
 
 /**
@@ -52,24 +70,24 @@ function upscaleForShot(upscale, shot, ledger) {
  * @param {string} args.base            base du nom de fichier (nom de la collection assaini)
  * @param {string} args.ext             extension du conteneur
  * @param {any} args.encode             réglages d'encodage effectifs (profil d'archive)
- * @param {any} args.upscale            réglages d'upscale ({enabled, engine, model, scale, denoise})
+ * @param {any} args.process            passes de traitement normalisées, ou null
  * @param {Record<string, any>} args.entries  état d'archivage précédent, par identité de plan
  * @param {any} args.ledger             registre des sorties déjà produites
  * @param {(p: string) => boolean} [args.exists]
  */
-function planArchive({ shots, dir, base, ext, encode, upscale, entries, ledger, exists = fs.existsSync }) {
+function planArchive({ shots, dir, base, ext, encode, process, entries, ledger, exists = fs.existsSync }) {
   const prev = entries || {};
   const items = shots.map((shot, index) => {
     const id = shotIdentity(shot);
     const out = path.join(dir, nameAt(base, index, ext));
-    const effUpscale = upscaleForShot(upscale, shot, ledger);
+    const effProcess = processForShot(process, shot, ledger);
     const stat = ledger.statSource(shot.path);
     const key = ledger.fingerprint({
       src: shot.path, mtimeMs: stat.mtimeMs, size: stat.size,
-      in: shot.in, out: shot.out, encode, upscale: effUpscale,
+      in: shot.in, out: shot.out, encode, upscale: effProcess,
     });
-    /** @type {{ shot: any, index: number, id: string, out: string, key: string, upscale: any, from: string|null }} */
-    const base_ = { shot, index, id, out, key, upscale: effUpscale, from: null };
+    /** @type {{ shot: any, index: number, id: string, out: string, key: string, process: any, from: string|null }} */
+    const base_ = { shot, index, id, out, key, process: effProcess, from: null };
 
     // 1. Ce plan a déjà été archivé avec ces réglages exacts, et son fichier est toujours là.
     const known = prev[id];
@@ -95,4 +113,4 @@ function planArchive({ shots, dir, base, ext, encode, upscale, entries, ledger, 
   return { items, counts };
 }
 
-module.exports = { planArchive, shotIdentity, upscaleForShot, nameAt };
+module.exports = { planArchive, shotIdentity, processForShot, nameAt };

@@ -4,7 +4,10 @@
   "signedOut": "ドキュメントを共有するにはサインインしてください。",
   "surface": {
     "unknown": "共有ドキュメント",
-    "board": "リファレンスボード"
+    "board": "リファレンスボード",
+    "collection": "コレクション",
+    "notebook": "NetsuBook ノートブック",
+    "notebook-page": "NetsuBook ドキュメント"
   },
   "device": {
     "title": "このデバイス",
@@ -111,19 +114,19 @@
   "panel": {
     "title": "共有の状態",
     "online": "オンライン {{count}} 人",
-    "alone": "まだ他に誰もいません。",
+    "alone": "他に誰もいません",
     "hereNow": "オンライン",
-    "neverSeen": "まだ未到達",
-    "seenMinutes": "{{count}} 分前に確認",
-    "seenHours": "{{count}} 時間前に確認",
-    "seenDays": "{{count}} 日前に確認",
-    "invited": "招待保留中",
+    "neverSeen": "未接続",
+    "seenMinutes": "{{count}} 分前",
+    "seenHours": "{{count}} 時間前",
+    "seenDays": "{{count}} 日前",
+    "invited": "招待済み",
     "unknownMember": "メンバー",
-    "queued": "変更がここで待機しています。デバイスに到達でき次第、自動的に送信されます。",
-    "upToDate": "すべて同期済みです。",
-    "rotation": "鍵の更新待ち: 新しい公開はオーナーのデバイスを待っています。",
-    "waitingKey": "{{count}} 人のメンバーが鍵を待っています。オンラインのままにして渡してください。",
-    "nobodyReachable": "現在到達できる相手がいません。変更は相手が戻ったときに送信されます。"
+    "queued": "送信待ちです。",
+    "upToDate": "すべて送信済みです。",
+    "rotation": "新しい鍵が必要です。所有者がアプリを開いてください。",
+    "waitingKey": "{{count}} 人が鍵を待っています。オンラインのままにしてください。",
+    "nobodyReachable": "オンラインの人がいません。まだ送信されていません。"
   },
   "board": {
     "noScene": "先にこのボードをシーンライブラリに保存してください。",

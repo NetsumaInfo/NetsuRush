@@ -635,5 +635,12 @@
     "inProgress": "进行中",
     "done": "已完成",
     "name": "数据库"
+  },
+  "share": {
+    "document": "共享此文档",
+    "notebook": "共享笔记本",
+    "failed": "共享失败。",
+    "manageRemoval": "请使用协作设置退出或删除此共享文档。",
+    "retry": "重试"
   }
 }

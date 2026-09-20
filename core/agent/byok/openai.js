@@ -14,11 +14,12 @@ const DEFAULT_MODEL = 'gpt-5-codex';
 /**
  * @param {{
  *   apiKey:string, model?:string, baseUrl?:string, system?:string,
- *   messages:Array<{role:string, content:any, tool_call_id?:string, tool_calls?:any[]}>,
+ *   messages:Array<{role:string, content:any, tool_call_id?:string, tool_calls?:any[], images?:Array<{mediaType:string,data:string}>}>,
  *   tools:any[],
  *   runTool:(name:string, input:any)=>Promise<any>,
  *   onEvent:(ev:any)=>void,
  *   signal?:AbortSignal,
+ *   extraBody?:Record<string,any>,
  * }} opts
  */
 async function runOpenAI(opts) {
@@ -29,7 +30,24 @@ async function runOpenAI(opts) {
 
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
-  messages.push(...opts.messages);
+  // Forme « parts » d'OpenAI : `image_url` accepte une URL de donnees, ce qui
+  // evite d'heberger l'image quelque part pour la montrer une fois.
+  for (const m of opts.messages) {
+    if (m && Array.isArray(m.images) && m.images.length) {
+      messages.push({
+        role: m.role,
+        content: [
+          ...(m.content ? [{ type: 'text', text: m.content }] : []),
+          ...m.images.map((img) => ({
+            type: 'image_url',
+            image_url: { url: `data:${img.mediaType};base64,${img.data}` },
+          })),
+        ],
+      });
+    } else {
+      messages.push(m);
+    }
+  }
 
   let guard = 0;
   for (;;) {
@@ -43,6 +61,9 @@ async function runOpenAI(opts) {
         headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({
           model, stream: true, messages,
+          // `reasoning_effort` chez OpenAI et xAI, `reasoning:{effort}` chez
+          // OpenRouter : c'est l'appelant qui sait lequel, pas cette boucle.
+          ...(opts.extraBody || {}),
           ...(tools && tools.length ? { tools, tool_choice: 'auto' } : {}),
         }),
       });

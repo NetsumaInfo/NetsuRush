@@ -17,7 +17,7 @@
     "h03": "node tools/h03-soak.mjs"
   },
   "dependencies": {
-    "@hyperframes/engine": "0.8.27"
+    "@hyperframes/engine": "0.8.30"
   },
   "devDependencies": {
     "pngjs": "7.0.0"

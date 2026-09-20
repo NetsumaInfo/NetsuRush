@@ -46,7 +46,8 @@
     "test:adobe-panel": "node --test test/adobe-panel-update.test.cjs",
     "test:transfer": "node --test test/transfer-doc.test.cjs test/transfer-place-jsx.test.cjs test/transfer-encoding.test.cjs test/transfer-xmeml-graphics.test.cjs test/transfer-xmeml-audio.test.cjs",
     "test:netsu": "node --test test/netsu-levels.test.cjs test/netsu-file.test.cjs test/netsu-project.test.cjs test/netsu-notebook.test.cjs",
-    "test:wallpaper": "node --test test/wallpaper.test.cjs"
+    "test:wallpaper": "node --test test/wallpaper.test.cjs",
+    "test:agent": "node --test test/agent-install-guard.test.cjs test/agent-permissions.test.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

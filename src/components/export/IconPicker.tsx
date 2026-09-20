@@ -126,7 +126,7 @@ export function IconPicker({ profile, onChange }: { profile: ExportProfile; onCh
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-50 outline-none">
-          <Popover.Popup className="w-[22rem] origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
+          <Popover.Popup className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-[22rem] origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
             <div className="mb-2 flex items-center gap-1 border-b border-border pb-2">
               {tabs.map((t) => (
                 <button key={t.id} type="button" onClick={() => setTab(t.id)}

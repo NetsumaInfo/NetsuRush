@@ -134,7 +134,19 @@ export type Stroke = {
   detached: boolean;
 };
 
+export type SurfaceEntryKind = "notebook" | "page" | "block" | "database" | "collection" | "collectionItem";
+export type SurfaceEntryProjection = { entryId: string; kind: SurfaceEntryKind; fields: Record<string, unknown>; texts: Record<string, string>; richTexts?: Record<string, { insert: string; attributes?: Record<string, string> | null }[]>; media: Record<string, MediaManifest> };
+
+export type SurfaceProjection = { revision: number; entries: SurfaceEntryProjection[]; localHashes: string[] };
+
 export type CollabOp =
+  | { type: "surfaceRestoreEntry"; entryId: string }
+  | { type: "surfaceTextFormat"; entryId: string; field: string; start: number; end: number; style: string; value: string | null }
+  | { type: "surfaceSetEntry"; entryId: string; kind: SurfaceEntryKind; fields: Record<string, unknown> }
+  | { type: "surfaceDeleteEntry"; entryId: string }
+  | { type: "surfaceTextInsert"; entryId: string; field: string; index: number; text: string }
+  | { type: "surfaceTextDelete"; entryId: string; field: string; index: number; length: number }
+  | { type: "surfaceSetMedia"; entryId: string; field: string; manifest: MediaManifest | null }
   | { type: "addItem"; itemId: string; kind: ItemKind; geometry: Geometry }
   | { type: "deleteItem"; itemId: string }
   | { type: "setGeometry"; itemId: string; geometry: Geometry }
@@ -159,6 +171,7 @@ export type CollabOp =
 
 export type OperationBatch = {
   protocol: typeof COLLAB_PROTOCOL_VERSION;
+  baseRevision?: number;
   ops: CollabOp[];
 };
 

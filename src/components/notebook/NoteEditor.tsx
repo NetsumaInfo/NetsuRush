@@ -10,6 +10,7 @@ import { filterSuggestionItems } from "@blocknote/core";
 import { fr as bnFr } from "@blocknote/core/locales";
 import { codeBlockOptions } from "@blocknote/code-block";
 import { TextSelection } from "prosemirror-state";
+import { notebookCanEdit, notebookCollabState } from "./notebookCollabState";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { spell } from "@/lib/spell/spellClient";
@@ -64,6 +65,8 @@ function NoteEditorInner({ page }: { page: NotebookPage }) {
   const language = useApp((s) => s.nbList.find((notebook) => notebook.id === s.nbActiveId)?.language ?? "fr");
   const spellEnabled = useApp((s) => s.nbPrefs.spellcheck);
   const editorWrap = useRef<HTMLDivElement>(null);
+  const applyingProjection = useRef(false);
+  const [canEdit, setCanEdit] = useState(() => notebookCanEdit(page.notebookId, page.id));
   // Ancre du menu « Coller comme » (null = fermé). Ouvert au collage d'un lien seul.
   const [pasteAnchor, setPasteAnchor] = useState<PasteAnchor | null>(null);
   // Mot fautif visé (clic droit / Ctrl+.) → panneau de suggestions.
@@ -163,6 +166,63 @@ function NoteEditorInner({ page }: { page: NotebookPage }) {
       return true;
     },
   });
+
+  useEffect(() => {
+    const updateRole = () => setCanEdit(notebookCanEdit(page.notebookId, page.id));
+    const apply = (event: Event) => {
+      const incoming = (event as CustomEvent<NotebookPage>).detail;
+      if (incoming.id !== page.id || notebookCollabState.composing) return;
+      const target = incoming.blocks as unknown as typeof editor.document;
+      if (JSON.stringify(editor.document) === JSON.stringify(target)) return;
+      const view = editor.prosemirrorView;
+      const before = view.state;
+      const locate = (position: number, doc: typeof before.doc) => {
+        let found: { id: string; pos: number; node: typeof doc; offset: number } | undefined;
+        doc.descendants((node, pos) => {
+          if (typeof node.attrs.id === "string" && pos <= position && position <= pos + node.nodeSize) found = { id: node.attrs.id, pos, node, offset: position - pos };
+        });
+        return found;
+      };
+      const anchor = locate(before.selection.anchor, before.doc), head = locate(before.selection.head, before.doc);
+      applyingProjection.current = true;
+      try {
+        editor.transact((transaction) => {
+        transaction.setMeta("addToHistory", false);
+        const wanted = new Set(target.map((block) => block.id));
+        const removed = editor.document.filter((block) => !wanted.has(block.id));
+        // Insert first so deleting the last old block never manufactures an extra empty block.
+        for (let i = 0; i < target.length; i++) {
+          const block = target[i];
+          const current = editor.getBlock(block.id);
+          if (!current) editor.insertBlocks([block], editor.document[Math.min(i, editor.document.length - 1)], "before");
+          else if (JSON.stringify(current) !== JSON.stringify(block)) editor.updateBlock(current, block);
+        }
+        if (removed.length) editor.removeBlocks(removed);
+        for (let i = 0; i < target.length; i++) {
+          let at = editor.document.findIndex((block) => block.id === target[i].id);
+          while (at > i) { editor.moveBlocksUp(target[i].id); at--; }
+        }
+        });
+        const mapped = (location: typeof anchor, fallback: number) => {
+          if (!location) return Math.min(fallback, view.state.doc.content.size);
+          let next: { pos: number; node: typeof before.doc } | undefined;
+          view.state.doc.descendants((node, pos) => { if (node.attrs.id === location.id) next = { pos, node }; });
+          if (!next) return Math.min(fallback, view.state.doc.content.size);
+          const match = next as { pos: number; node: typeof before.doc };
+          const start = location.node.content.findDiffStart(match.node.content);
+          const end = location.node.content.findDiffEnd(match.node.content);
+          let offset = location.offset - 1;
+          if (start !== null && end && offset > start) offset = offset >= end.a ? offset + end.b - end.a : end.b;
+          return Math.max(match.pos + 1, Math.min(match.pos + match.node.nodeSize - 1, match.pos + 1 + offset));
+        };
+        view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, mapped(anchor, before.selection.anchor), mapped(head, before.selection.head))).setMeta("addToHistory", false));
+      } finally { applyingProjection.current = false; }
+    };
+    updateRole();
+    window.addEventListener("nr-notebook-collab-state", updateRole);
+    window.addEventListener("nr-notebook-projection", apply);
+    return () => { window.removeEventListener("nr-notebook-collab-state", updateRole); window.removeEventListener("nr-notebook-projection", apply); };
+  }, [editor, page.id, page.notebookId]);
 
   // Correcteur natif de la WebView : gardé UNIQUEMENT pour les langues sans dictionnaire embarqué
   // (es/de/ja/zh — dictionnaires Hunspell sous licence GPL, non distribuables ici). Sinon il ferait
@@ -363,16 +423,18 @@ function NoteEditorInner({ page }: { page: NotebookPage }) {
   };
 
   return (
-    <div ref={editorWrap} className="bn-container" data-spellcheck-native="true" lang={language} onPointerDownCapture={onEditorPointerDown} onClickCapture={onClickCapture} onClick={onEmptyClick} onDropCapture={onDropCapture}>
+    <div ref={editorWrap} className="bn-container" data-spellcheck-native="true" lang={language} onPointerDownCapture={onEditorPointerDown} onClickCapture={onClickCapture} onClick={onEmptyClick} onDropCapture={onDropCapture}
+      onCompositionStart={() => { notebookCollabState.composing = true; }} onCompositionEnd={() => { notebookCollabState.composing = false; }}>
       <BlockNoteView
         editor={editor}
+        editable={canEdit}
         theme={nbTheme}
         lang={language}
         spellCheck={spellEnabled && !spellLang}
         slashMenu={false}
         sideMenu={false}
         formattingToolbar={false}
-        onChange={() => setBlocks(editor.document as unknown as NoteBlock[])}
+        onChange={() => { if (!applyingProjection.current && notebookCanEdit(page.notebookId, page.id)) setBlocks(editor.document as unknown as NoteBlock[]); }}
       >
         <FormattingToolbarController
           formattingToolbar={() => (

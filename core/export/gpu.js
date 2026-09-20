@@ -12,7 +12,6 @@ const capabilities = require('./capabilities');
  * @property {boolean} hasGpuEncoder
  * @property {string|null} h264Encoder
  * @property {string|null} h265Encoder
- * @property {string|null} av1Encoder
  * @property {Record<string, string|null>} [codecEncoders] codec → encodeur matériel SONDÉ (null = CPU)
  * @property {Record<string, string[]>} [codecEncoderOptions] codec → tous les moteurs matériels sondés
  */
@@ -25,12 +24,11 @@ async function detectGpuCaps() {
       hasGpuEncoder: caps.hasGpuEncoder,
       h264Encoder: caps.h264Encoder,
       h265Encoder: caps.h265Encoder,
-      av1Encoder: caps.av1Encoder,
       codecEncoders: caps.codecEncoders,
       codecEncoderOptions: caps.codecEncoderOptions,
     };
   } catch (_) {
-    return { hasGpuEncoder: false, h264Encoder: null, h265Encoder: null, av1Encoder: null, codecEncoders: {}, codecEncoderOptions: {} };
+    return { hasGpuEncoder: false, h264Encoder: null, h265Encoder: null, codecEncoders: {}, codecEncoderOptions: {} };
   }
 }
 

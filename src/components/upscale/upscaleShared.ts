@@ -163,6 +163,10 @@ export function familyOf(codec: UpscaleCodec): UpscaleFamily {
 // x1 = restauration/débruitage à la taille d'origine (le modèle nettoie puis redescend à la source).
 export const UP_SCALES: (1 | 2 | 4)[] = [1, 2, 4];
 
+// Résolutions cibles proposées par la page upscale. SÉPARÉ de `UP_SCALES` à dessein : le board
+// garde son facteur, et toucher l'un ne doit jamais bouger l'autre.
+export const UP_TARGETS: number[] = [1080, 1440, 2160];
+
 // Moteur d'upscale : IA (Real-ESRGAN/CUGAN, lent, qualité max) ou Turbo (shader GLSL libplacebo,
 // GPU temps réel, qualité « suffisante »). Le moteur Turbo réutilise échelle/codec/audio/export.
 type UpEngine = "ia" | "turbo";
@@ -321,6 +325,10 @@ export interface UpSource {
   // Exact output name (no extension) set by renaming this media in the tray. Absent = the shared
   // naming pattern applies. Carried by the source so a rename survives an op or page switch.
   outName?: string;
+  // Dimensions sondées de la source. Elles décident quelles résolutions cibles sont atteignables et
+  // ce qu'on donne au moteur : sans elles, la barre de résolutions ne peut rien proposer d'honnête.
+  width?: number;
+  height?: number;
 }
 
 export interface UpSettings extends ProcessExportSettings {
@@ -342,6 +350,9 @@ export interface UpSettings extends ProcessExportSettings {
   rtxHdrNits: number;         // luminance crête du master HDR
   model: UpscaleModel;
   scale: 1 | 2 | 4;
+  // Hauteur de sortie voulue ; 0 = aucune cible, le facteur s'applique. Opt-in : un profil déjà
+  // enregistré garde donc exactement le rendu qu'il produisait.
+  targetHeight: number;
   codec: UpscaleCodec;
   denoise: number;   // 0..1
   tile: number;
@@ -379,6 +390,7 @@ export const DEFAULT_SETTINGS: UpSettings = {
   rtxHdrNits: 1000,
   model: "anime",
   scale: 2,
+  targetHeight: 0,
   codec: "hevc_nvenc",   // choix GPU auto (NVENC/QSV/AMF), avec repli x265 CPU
   denoise: 0.5,
   tile: 0,               // Auto = inférence plein cadre (1 passe GPU, le plus rapide) ; repli tuilé sur OOM

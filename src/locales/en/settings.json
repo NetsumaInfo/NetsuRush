@@ -238,7 +238,27 @@
     "restart": "Restart and install",
     "history": "What's new by version",
     "whatsNew": "What's new in version {{version}}",
-    "gotIt": "Let's go"
+    "gotIt": "Let's go",
+    "ytdlp": {
+      "hint": "Library that resolves video links. Its extractors break often: it updates without waiting for the next NetsuRush release.",
+      "update": "Update",
+      "updating": "Updating…",
+      "checking": "Reading the version…",
+      "current": "Version {{version}} · up to date",
+      "available": "Version {{version}} · {{latest}} available",
+      "unknown": "Version {{version}}",
+      "updated": "Updated · version {{version}}",
+      "missing": "Not installed",
+      "notOwned": "Version {{version}} · installed outside the application",
+      "failed": "The update failed"
+    },
+    "kind": {
+      "feature": "New",
+      "fix": "Fixes",
+      "improvement": "Improvements",
+      "performance": "Performance"
+    },
+    "reportSubject": "Update to v{{version}} failed"
   },
   "compatibility": {
     "title": "This PC's compatibility",
@@ -278,6 +298,15 @@
       "transcription": "Turns speech into text.",
       "notebook": "Saves and organizes notes. No GPU required."
     }
+  },
+  "power": {
+    "title": "Host shutdown",
+    "subtitle": "Prompt that closes Resolve or Adobe during a heavy task.",
+    "offer": "Offer to close",
+    "reopen": "Reopen reminder",
+    "nub": "Edge tab",
+    "on": "On",
+    "off": "Off"
   },
   "exportProfiles": {
     "title": "Export profiles",
@@ -451,11 +480,7 @@
     "showProjectHint": "Can reveal a client's name.",
     "showElapsed": "Time elapsed",
     "showLinks": "Clickable card",
-    "showLinksHint": "The art opens the Discord server, the first line the repository.",
-    "custom": "Custom text",
-    "customHelp": "Replaces the automatic lines. {module} and {projet} get substituted.",
-    "details": "First line",
-    "state": "Second line"
+    "showLinksHint": "The art opens the Discord server, the first line the repository."
   },
   "storage": {
     "empty": "No cache yet.",
@@ -672,7 +697,8 @@
     "system": {
       "updates": "Updates",
       "compatibility": "Compatibility",
-      "console": "Console"
+      "console": "Console",
+      "collaboration": "Collaboration"
     }
   },
   "indexing": {
@@ -715,6 +741,25 @@
       "orphans": "Media no board asks for",
       "orphansHint": "{{count}} files · {{size}}. Nothing displays them any more, but this is the only copy.",
       "move": "Move to a folder…"
+    }
+  },
+  "collaboration": {
+    "title": "Collaboration",
+    "description": "These settings stay on this computer. Choose a default profile or an override for each page category.",
+    "profilesHint": "Live: sends every 60 ms. Balanced: 200 ms. Economy: 900 ms, with automatic media downloads disabled.",
+    "default": "Default profile",
+    "inherit": "Use default profile",
+    "saveFailed": "Could not save preferences on this computer.",
+    "profiles": {
+      "live": "Live",
+      "balanced": "Balanced",
+      "economy": "Economy"
+    },
+    "surfaces": {
+      "board": "Boards",
+      "collection": "Collections",
+      "notebook": "Notebooks",
+      "notebook-page": "Notebook pages"
     }
   }
 }

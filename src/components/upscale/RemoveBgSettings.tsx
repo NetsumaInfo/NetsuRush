@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import type { AudioTrack } from "@/lib/bridge";
 import type { ExportCodec } from "@/features/export/profiles";
 
-const ALPHA_EXPORT_CODECS = new Set<ExportCodec>(["prores_4444", "vp9"]);
+const ALPHA_EXPORT_CODECS = new Set<ExportCodec>(["prores_4444"]);
 
 interface Props {
   settings: SegVals;
@@ -22,7 +22,7 @@ interface Props {
 }
 
 // Panneau de réglages du mode removeBG (détourage) : modèle + format alpha + export.
-// Pas de codec/audio (sortie alpha dédiée : ProRes 4444 / séquence PNG / WebM VP9).
+// Pas de codec/audio (sortie alpha dédiée : ProRes 4444 ou séquence PNG).
 export function RemoveBgSettings({ settings, patch, audioTracks, outDir, chooseOut, importBack, setImportBack, disabled }: Props) {
   const { t } = useTranslation("upscale");
   const models = useModelOptions(SEG_MODELS, settings.model);

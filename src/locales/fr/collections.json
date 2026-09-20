@@ -16,16 +16,15 @@
   "archive": {
     "profileName": "Archive",
     "onDisk": "Archiver sur disque",
-    "upscaleHint": "Upscale chaque plan pendant l’archivage. Impose le réencodage.",
     "videoFormat": "Format vidéo",
-    "upscaleShort": "Upscale",
-    "upscaleAudioNote": "La piste par langue ne s’applique pas à l’upscale.",
-    "upscaleMode": "Quand",
-    "upscaleModeNow": "Immédiat",
-    "upscaleModeIdle": "GPU libre",
-    "upscaleNeedsEncode": "L’upscale remplace les pixels : la copie de flux est impossible.",
+    "processAudioNote": "La piste par langue ne s’applique pas à un traitement.",
+    "processMode": "Quand",
+    "processModeNow": "Immédiat",
+    "processModeIdle": "GPU libre",
+    "processNeedsEncode": "Un traitement remplace les pixels : la copie de flux est impossible.",
     "queueRunning": "Archivage en cours",
-    "queuePending": "En attente d’un GPU libre"
+    "queuePending": "En attente d’un GPU libre",
+    "requiredForShare": "L’archivage porte le partage : il reste allumé."
   },
   "submenu": {
     "rangeIn": "Ranger dans une collection",
@@ -213,5 +212,29 @@
     "dlFailed": "Téléchargement {{id}} : {{error}}.",
     "dlModelsUnavailable": "Téléchargement des modèles indisponible : {{error}}.",
     "recognitionUnavailable": "Reconnaissance indisponible : {{error}}."
+  },
+  "share": {
+    "title": "Partage",
+    "people": "Choisir les personnes",
+    "hideLocal": "Masquer pour moi",
+    "removeGlobal": "Retirer pour tout le monde",
+    "restoreHidden": "Afficher les plans masqués",
+    "missingMedia": "Média indisponible",
+    "retry": "Réessayer",
+    "preparing": "Préparation…",
+    "failed": "Le partage ou l’enregistrement a échoué. Réessayez.",
+    "unavailable": "Configurez la collaboration pour partager cette collection.",
+    "signIn": "Connectez-vous pour choisir les personnes.",
+    "viaArchive": "Les autres reçoivent les fichiers archivés de la collection, jamais les vidéos sources. L’archivage sur disque s’allume avec le partage.",
+    "readOnly": "Partagée avec vous en lecture seule.",
+    "nobody": "Personne pour l’instant.",
+    "pending": "En attente",
+    "owner": "Propriétaire",
+    "permView": "Lecture seule",
+    "permOwn": "Modification — ses plans",
+    "permAll": "Modification — tous les plans",
+    "stop": "Arrêter le partage",
+    "leave": "Quitter le partage",
+    "stopHint": "Les autres perdront l’accès aux plans partagés."
   }
 }

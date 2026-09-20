@@ -10,6 +10,11 @@ import { useApp } from "@/store";
 import { UpdateButton } from "@/components/updates/UpdateButton";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
+// Mise en forme d'un bouton de la barre de titre. Exportée : `HeaderLinks` pose les siens à côté
+// des contrôles de fenêtre, et deux styles voisins qui divergent se voient tout de suite.
+export const TITLEBAR_BTN =
+  "inline-flex h-9 w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset [&_svg]:size-3.5";
+
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 async function win() {
@@ -35,7 +40,7 @@ export function WindowControls() {
 
   if (!isTauri) return null;
 
-  const btn = "inline-flex h-9 w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset [&_svg]:size-3.5";
+  const btn = TITLEBAR_BTN;
   return (
     <div className="ml-auto flex items-center" data-no-drag>
       {/* Mise à jour disponible : même coin, à toutes les étapes (installation, gates, application).

@@ -4,7 +4,10 @@
   "signedOut": "Sign in to share a document.",
   "surface": {
     "unknown": "Shared document",
-    "board": "Reference board"
+    "board": "Reference board",
+    "collection": "Collection",
+    "notebook": "NetsuBook notebook",
+    "notebook-page": "NetsuBook document"
   },
   "device": {
     "title": "This device",
@@ -111,19 +114,19 @@
   "panel": {
     "title": "Sharing status",
     "online": "{{count}} online",
-    "alone": "Nobody else yet.",
+    "alone": "Nobody else",
     "hereNow": "Online",
-    "neverSeen": "Not reached yet",
-    "seenMinutes": "Seen {{count}} min ago",
-    "seenHours": "Seen {{count}} h ago",
-    "seenDays": "Seen {{count}} d ago",
-    "invited": "Invitation pending",
+    "neverSeen": "Never connected",
+    "seenMinutes": "{{count}} min ago",
+    "seenHours": "{{count}} h ago",
+    "seenDays": "{{count}} d ago",
+    "invited": "Invited",
     "unknownMember": "Member",
-    "queued": "Changes are waiting here. They will leave on their own as soon as a device is reachable.",
-    "upToDate": "Everything is in sync.",
-    "rotation": "Key rotation pending: new publications wait for one of the owner's devices.",
-    "waitingKey": "{{count}} member(s) waiting for the key. Stay online to pass it on.",
-    "nobodyReachable": "Nobody is reachable right now: your changes will go out when they return."
+    "queued": "Waiting to be sent.",
+    "upToDate": "Everything is sent.",
+    "rotation": "A new key is needed. The owner has to open the app.",
+    "waitingKey": "{{count}} waiting for the key. Stay online.",
+    "nobodyReachable": "Nobody online. Nothing has been sent."
   },
   "board": {
     "noScene": "Save this board to the scene library first.",

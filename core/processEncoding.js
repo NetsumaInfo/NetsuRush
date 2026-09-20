@@ -70,7 +70,7 @@ async function resolveProcessEncoding(opts) {
   // Valeur persistée devenue incompatible : le renderer la corrige après la sonde, le core garde
   // néanmoins un repli CPU sûr pour qu'un clic effectué pendant ce court délai ne casse pas le job.
   const speed = String(opts?.speed || 'balanced');
-  const container = ['mp4', 'mkv', 'mov', 'webm'].includes(String(opts?.container)) ? String(opts.container) : 'mp4';
+  const container = ['mp4', 'mkv', 'mov'].includes(String(opts?.container)) ? String(opts.container) : 'mp4';
   const audioMode = await audioModeForContainer(container, String(opts?.audioMode || 'copy'), opts);
   const videoArgs = [...videoEncodeArgs(exportCodec, gpuEncoder, speed), ...containerTagArgs(exportCodec, container)];
   const fallbackVideoArgs = gpuEncoder

@@ -1,12 +1,14 @@
 {
-  "stream": { "error": "エラーが発生しました。" },
+  "stream": {
+    "error": "エラーが発生しました。"
+  },
   "panel": {
     "copilot": "NetsuRush コパイロット",
-    "noCliAgent": "CLI エージェントが見つかりません — Claude/OpenAI に切り替えるか claude/codex をインストール",
+    "noCliAgent": "エージェントが未インストールです。設定から追加するか、API キーを登録してください",
     "configureKey": "開始するには API キーを設定"
   },
   "composer": {
-    "pickEngine": "送信するには設定 ⚙ でエンジン（API キーまたは CLI エージェント）を設定してください。",
+    "pickEngine": "メニューで使用可能なエンジンを選ぶか、設定 ⚙ で構成してください。",
     "placeholder": "AI に Resolve の操作を頼む…",
     "attachFiles": "ファイルを添付",
     "attachTip": "画像 / ファイルを添付",
@@ -14,7 +16,8 @@
     "stop": "停止",
     "send": "送信"
   },
-  "header": { "defaultTitle": "新しい会話",
+  "header": {
+    "defaultTitle": "新しい会話",
     "conversations": "会話",
     "newConv": "新しい会話",
     "noConv": "会話なし",
@@ -27,41 +30,72 @@
     "show": "表示",
     "keySet": "設定済み",
     "keyAbsent": "未設定",
-    "cliAgents": "検出された CLI エージェント",
+    "cliAgents": "エージェント",
     "rescan": "再スキャン",
     "noAgentsPre": "エージェントがありません —「再スキャン」をクリック。それでもなければ ",
     "noAgentsPost": " をインストールし、core の PATH にあるか確認してください。",
     "detected": "検出",
     "absent": "なし",
-    "saved": "保存しました"
+    "saved": "保存しました",
+    "test": "テスト",
+    "getKey": "キーを取得",
+    "reachable": "接続成功（{{ms}} ms）",
+    "connect": "接続（ターミナルを開く）",
+    "loginOpened": "ターミナルを開きました — そこでサインインしてください",
+    "appNoCli": "アプリのみ",
+    "appNoCliHint": "アプリはインストール済みですが、コマンド {{bin}} が PATH にありません。アプリから追加してください。",
+    "readyCount": "{{ready}} / {{total}} 利用可能",
+    "installOpened": "ターミナルでインストールを開始しました",
+    "docs": "ドキュメント",
+    "installPage": "公式インストールページ",
+    "resolveMcp": "DaVinci Resolve MCP",
+    "resolveMcpTools": "ツール {{n}} 個",
+    "resolveMcpServer": "Blackmagic 公式サーバー",
+    "resolveMcpMissing": "DaVinci Resolve Studio 21.1 以降に同梱されています。このコンピューターでは見つかりませんでした。",
+    "resolveMcpSilent": "応答なし",
+    "resolveMcpSilentHint": "サーバーはありますが応答しませんでした。Resolve を起動してから再検出してください。",
+    "resolveMcpHint": "コパイロットに {{n}} 個のツールを追加：Resolve 内での Python スクリプト、スクリプティング API 検索、ドキュメント、LUT と DCTL。",
+    "resolveUnsafe": "サンドボックス外のスクリプトを許可",
+    "resolveUnsafeHint": "bmd_run_script_unsafe を追加します：ファイル・ネットワーク・サブプロセスへの完全アクセス。スクリプトが動き出すと、どの権限モードでも止められません。"
   },
   "engine": {
-    "engine": "エンジン",
-    "cliAgent": "CLI エージェント",
-    "agent": "エージェント",
+    "agents": "インストール済みエージェント",
+    "apiKeys": "API キー",
+    "notReady": "未設定",
+    "none": "エンジンなし",
     "model": "モデル",
     "default": "デフォルト",
     "freeId": "自由入力 id：vendor/model…",
-    "permissions": "権限"
+    "refreshModels": "モデル一覧を更新",
+    "source": {
+      "vendor": "最新",
+      "openrouter": "公開カタログ",
+      "curated": "オフライン"
+    },
+    "sourceHint": {
+      "vendor": "あなたのキーでプロバイダーが返した一覧です。ID は正確です。",
+      "openrouter": "OpenRouter の公開カタログ（キー不要）。最新ですが、ID が提供元 API と異なる場合があります。",
+      "curated": "ネットワークなし。内蔵の予備リストのため、古い可能性があります。"
+    },
+    "permissions": "権限",
+    "thinking": "思考",
+    "effort": "思考量"
   },
   "mode": {
     "readonly": "読み取り",
     "ask": "確認",
-    "safe": "複製",
     "auto": "自動"
   },
   "modeTitle": {
     "readonly": "読み取り専用 — 書き込みなし",
     "ask": "危険な操作のみ確認（ファイル/レンダリング/メディア削除）。タイムライン編集はそのまま実行",
-    "safe": "書き込み前にタイムラインを複製 — 元は変更されません",
     "auto": "確認なしでタイムラインに直接書き込み"
   },
   "message": {
     "thinking": "思考中…",
     "reasoning": "推論",
-    "hideReasoning": "推論を非表示",
-    "showReasoning": "推論を表示",
-    "copyText": "テキストをコピー"
+    "copyText": "テキストをコピー",
+    "copyReasoning": "推論をコピー"
   },
   "toolcard": {
     "running": "実行中",
@@ -72,7 +106,8 @@
     "copyArgs": "引数をコピー",
     "copyResult": "結果をコピー",
     "collapse": "折りたたむ",
-    "expand": "展開"
+    "expand": "展開",
+    "done": "成功"
   },
   "tool": {
     "quoted": "「{{value}}」",
@@ -107,7 +142,8 @@
     "render": "レンダリング · {{action}}",
     "timelineItem": "現在のショット · {{action}}",
     "project": "プロジェクト · {{action}}",
-    "resolveCall": "Resolve API · {{root}}"
+    "resolveCall": "Resolve API · {{root}}",
+    "bmd": "Resolve · {{action}}"
   },
   "approval": {
     "title": "この操作を許可しますか？",
@@ -122,5 +158,24 @@
   "store": {
     "convFallback": "会話",
     "error": "エラー"
+  },
+  "duplicate": {
+    "title": "変更前に複製する",
+    "hint": "タイムラインのコピーで作業します。元のタイムラインは変更しません。"
+  },
+  "thinking": {
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "xhigh": "最高",
+    "max": "最大"
+  },
+  "trace": {
+    "working": "作業中…",
+    "workedFor_one": "{{count}} 秒かけて作業",
+    "workedFor_other": "{{count}} 秒かけて作業"
+  },
+  "thinkingSlider": {
+    "reset": "既定の思考量に戻す"
   }
 }

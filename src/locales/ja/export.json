@@ -19,11 +19,13 @@
     "defaultFolder": "NetsuRush — カット",
     "existingFolders": "既存のフォルダー",
     "mediaPoolFolders": "Media Pool のフォルダー",
-    "profile": "プロファイル",
+    "profile": "プリセット",
     "profileCustom": "カスタム",
-    "optimization": "最適化",
-    "speed": "速度",
+    "optimization": "エンコーダー",
+    "speed": "圧縮",
+    "speedHint": "画質を一定に保ったままの圧縮の強さ。強くするほどファイルは小さくなり、エンコードにかかる時間は長くなります。",
     "codec": "コーデック",
+    "codecProfile": "プロファイル",
     "audio": "オーディオ",
     "audioCodec": "オーディオコーデック",
     "timelineTarget": "対象タイムライン",
@@ -43,7 +45,8 @@
       "end": "コンポジションの最後に追加"
     },
     "container": "コンテナ",
-    "upscale": "アップスケール",
+    "processStep": "処理 {{n}}",
+    "processKind": "種類",
     "mergeToOne": "1つのファイルに結合",
     "fileName": "ファイル名",
     "fileNamePlaceholder": "{base}_{index}",
@@ -76,20 +79,20 @@
   },
   "speed": {
     "fast": {
-      "label": "高速",
-      "hint": "速度を優先"
+      "label": "最小",
+      "hint": "最速・ファイルは大きめ"
     },
     "balanced": {
       "label": "バランス",
-      "hint": "速度と圧縮の両立"
+      "hint": "扱いやすい設定"
     },
     "quality": {
-      "label": "高品質",
-      "hint": "圧縮効率を優先"
+      "label": "強",
+      "hint": "ファイルは小さく、処理は遅い"
     },
     "max": {
       "label": "最大",
-      "hint": "低速で最小サイズ"
+      "hint": "最小のファイル・最も遅い"
     }
   },
   "toggle": {
@@ -145,13 +148,10 @@
     "aac": "AAC 192 kbps",
     "aac_256": "AAC 256 kbps",
     "aac_320": "AAC 320 kbps",
-    "opus_128": "Opus 128 kbps",
-    "opus": "Opus 160 kbps",
-    "opus_192": "Opus 192 kbps",
+    "ac3": "AC-3 448 kbps",
+    "ac3_640": "AC-3 640 kbps",
     "mp3_192": "MP3 192 kbps",
     "mp3": "MP3 320 kbps",
-    "flac": "FLAC",
-    "alac": "ALAC",
     "pcm16": "PCM 16 bit",
     "pcm24": "PCM 24 bit"
   },
@@ -160,10 +160,7 @@
     "lossless": "可逆圧縮"
   },
   "codec": {
-    "bitDepth": "{{count}} ビット",
-    "profile": "プロファイル {{count}}",
-    "losslessArchive": "ロスレス（アーカイブ）",
-    "archive": "アーカイブ"
+    "bitDepth": "{{count}} ビット"
   },
   "lang": {
     "ja": "日本語",
@@ -187,10 +184,8 @@
     "prores422hq": "ProRes 422 HQ",
     "dnxhrHq": "DNxHR HQ",
     "mkvH265_10": "MKV H.265 10 bit",
-    "webmAv1": "WebM AV1",
     "prores4444": "ProRes 4444（アルファ）",
     "dnxhrHqx": "DNxHR HQX 10 bit",
-    "ffv1Archive": "FFV1 — アーカイブ",
     "generic": "プロファイル {{index}}",
     "fallback": "書き出しプロファイル"
   },
@@ -198,7 +193,7 @@
     "timelineImport": "タイムラインへ読み込み",
     "streamCopy": "ストリームコピー",
     "merged": " · 結合済み",
-    "upscaled": " · アップスケール {{scale}}×"
+    "processed": " · {{label}}"
   },
   "codecUnknown": "不明なコーデック"
 }

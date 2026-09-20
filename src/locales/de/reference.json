@@ -243,7 +243,12 @@
     "contentOpacity": "Deckkraft der Inhalte",
     "seeThroughScope": "Ebenfalls durchscheinend",
     "seeThroughShell": "Oberfläche",
-    "seeThroughPlaceFrame": "Platzierungsrahmen"
+    "seeThroughPlaceFrame": "Platzierungsrahmen",
+    "assetSweep": "Ungenutzte Medien",
+    "assetSweepHint": "Entfernt Dateien, die keine Szene referenziert. Nichts aus deinen Boards wird angetastet.",
+    "assetSweepAction": "Aufräumen",
+    "assetSweepDone": "{{count}} Datei(en) entfernt, {{mb}} MB frei.",
+    "assetSweepFailed": "Aufräumen fehlgeschlagen."
   },
   "inspector": {
     "ytPlayer": "YouTube-Player",
@@ -325,7 +330,8 @@
     "kindItem": "Board-Element",
     "chooseFile": "Datei wählen…",
     "targetItem": "Zielelement",
-    "remove": "Link entfernen"
+    "remove": "Link entfernen",
+    "sharedFile": "Diese Datei gehört zum geteilten Board: Sie hat keinen Ort auf dieser Festplatte."
   },
   "font": {
     "label": "Schrift",
@@ -791,7 +797,9 @@
     "importing": "{{name}} wird importiert…",
     "fetching": "Medium wird geladen…",
     "linkDone": "Medium importiert",
-    "fetchingFrom": "Wird von {{source}} geladen…"
+    "fetchingFrom": "Wird von {{source}} geladen…",
+    "copyFailed": "„{{name}}“ konnte nicht kopiert werden: dieses Medium geht beim Schließen der App verloren",
+    "copyFailedBatch": "{{count}} Kopien fehlgeschlagen (u. a. „{{name}}“): diese Medien gehen beim Schließen der App verloren"
   },
   "mouseThrough": {
     "on": "Für die Maus transparent",

@@ -1,6 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "NetsuRush",
+  "mainBinaryName": "NetsuRush",
   "version": "0.3.95",
   "identifier": "com.netsurush.app",
   "build": {

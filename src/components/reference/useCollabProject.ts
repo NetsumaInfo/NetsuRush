@@ -22,6 +22,7 @@ import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
 import { BOARD_SURFACE } from "./collabSurface";
 import { collabErrorMessage } from "@/lib/collab/client";
 import { describeUnresolved, importBoardAssets } from "@/lib/collab/board/media";
+import { getCollabCadence, subscribeCollabPreferences } from "@/lib/collab/preferences";
 
 type Resolution = "available" | "waiting" | "removed";
 
@@ -139,7 +140,7 @@ export function useCollabProject(projectId: string | null, sceneId: string | nul
     return projected;
   }, [projectId]);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (downloadRequested = false) => {
     if (!projectId) return;
     const generation = ++refreshGeneration.current;
     try {
@@ -203,7 +204,7 @@ export function useCollabProject(projectId: string | null, sceneId: string | nul
           // La génération borne AUSSI la boucle : sinon les chaînes en cours continuaient de
           // télécharger pour un projet en fermeture et d'écrire dans un cache désormais partagé
           // avec le projet suivant.
-          while (cursor < jobs.length && generation === refreshGeneration.current) {
+          while (cursor < jobs.length && generation === refreshGeneration.current && (downloadRequested || getCollabCadence("board").autoDownload)) {
             const job = jobs[cursor++];
             if (resolutionCache.current.get(job.hash) === "available") continue;
             const result = await resolveMedia(projectId, job);
@@ -216,11 +217,11 @@ export function useCollabProject(projectId: string | null, sceneId: string | nul
       // Originals saturate disk and CPU together (write + hash + decode as they land): a small
       // machine froze under four at once, so they arrive one or two at a time. Previews stay wide:
       // a few KiB each, latency-bound.
-      const originalWorkers = (navigator.hardwareConcurrency || 4) <= 4 ? 1 : 2;
+      const originalWorkers = Math.min((navigator.hardwareConcurrency || 4) <= 4 ? 1 : 2, getCollabCadence("board").mediaConcurrency);
       void (async () => {
         try {
           if (previewJobs.length) {
-            await resolveAll(previewJobs, 4);
+            await resolveAll(previewJobs, getCollabCadence("board").mediaConcurrency);
             if (generation === refreshGeneration.current) setItems(renderProjection(native));
           }
           await resolveAll(originalJobs, originalWorkers);
@@ -237,6 +238,9 @@ export function useCollabProject(projectId: string | null, sceneId: string | nul
       }
     }
   }, [projectId, renderProjection]);
+
+  // A cadence switch takes effect on open boards without closing their native session.
+  useEffect(() => subscribeCollabPreferences(() => { void refresh(); }), [refresh]);
 
   useEffect(() => {
     if (!projectId) {
@@ -330,7 +334,7 @@ export function useCollabProject(projectId: string | null, sceneId: string | nul
     const retry = () => {
       resolutionCache.current.clear();
       importFailures.current.clear();
-      void refresh();
+      void refresh(true);
     };
     window.addEventListener("nr-collab-retry-media", retry);
     return () => window.removeEventListener("nr-collab-retry-media", retry);

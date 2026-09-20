@@ -7,7 +7,7 @@ NetsuRush does not assume an NVIDIA card. On first launch the app inventories th
 | Feature | NVIDIA | AMD | Intel | No supported GPU |
 |---|---|---|---|---|
 | Cut proxies and video streams | NVENC | AMF | Quick Sync | libx264 (CPU) |
-| H.264 / HEVC / AV1 export | encoder probed per profile | encoder probed per profile | encoder probed per profile | matching CPU codec |
+| H.264 / HEVC export | encoder probed per profile | encoder probed per profile | encoder probed per profile | matching CPU codec |
 | PyTorch models | CUDA | ROCm on officially listed Windows hardware | XPU on supported Intel Arc | CPU |
 | ONNX models | CUDA EP | DirectML EP | DirectML EP | CPU EP |
 | Whisper / faster-whisper | CUDA | CPU | CPU | CPU |

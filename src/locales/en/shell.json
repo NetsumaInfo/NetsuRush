@@ -78,7 +78,9 @@
     "unpinShort": "Unpin",
     "minimize": "Minimize",
     "restore": "Restore",
-    "maximize": "Maximize"
+    "maximize": "Maximize",
+    "github": "Source code on GitHub",
+    "support": "Support NetsuBoard"
   },
   "errorBadge": {
     "aria": "Errors: {{count}} — open the console",
@@ -123,13 +125,13 @@
     "closeNub": "Close {{host}} (free RAM/GPU)",
     "opInProgress": "Operation in progress…",
     "hostClosed": "{{host}} closed",
-    "reopenToResume": "Reopen on \"{{project}}\" to resume.",
-    "reopenToResumeNoProject": "Reopen to resume.",
     "collapse": "Collapse",
     "collapseCorner": "Collapse to the corner",
+    "dismiss": "Dismiss",
+    "dismissHint": "Dismiss this reminder",
     "closeHostQ": "Close {{host}}?",
-    "freeRamDesc": "Frees RAM and GPU for the task. One-click reopen on the project when it's done.",
-    "resolveSafeCloseDesc": "Frees RAM and GPU. Before closing, NetsuRush saves the project and verifies its cache.",
+    "freeRamDesc": "Frees RAM and GPU.",
+    "resolveSafeCloseDesc": "Frees RAM and GPU. Project saved first.",
     "later": "Later",
     "closeHost": "Close {{host}}",
     "failed": "failed"

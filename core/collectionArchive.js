@@ -2,11 +2,12 @@
 // core/collectionArchive.js
 // Archivage d'une collection : export de tous ses plans vers un dossier de stockage, indépendant des
 // rushs source. Trois opérations : archiver (produire ce qui manque), changer de dossier (migrer
-// l'existant) et, en option, AGRANDIR les plans au passage (upscale).
+// l'existant) et, en option, TRAITER les plans au passage (upscale, interpolation, depth map — une
+// passe ou deux, comme dans un profil d'export).
 //
 // L'archivage est RÉPÉTITIF par nature : la synchro automatique le relance à chaque plan rangé. Il ne
 // refait donc que le strict nécessaire — `core/archivePlan.js` décide plan par plan entre « déjà là »,
-// « recopier depuis ailleurs » et « produire ». Sans ce tri, activer l'upscale rendait la synchro
+// « recopier depuis ailleurs » et « produire ». Sans ce tri, activer un traitement rendait la synchro
 // automatique inutilisable : chaque ajout aurait relancé le GPU sur toute la collection.
 //
 // Le dossier de stockage n'est PAS figé : `relocate()` déplace les fichiers déjà écrits vers la
@@ -25,7 +26,7 @@ const { sanitizeName } = require('./utils');
 const { t } = require('./i18n');
 const { planArchive, shotIdentity, nameAt } = require('./archivePlan');
 const { fingerprint, statSource } = require('./upscaleLedger');
-const upscaleRun = require('./upscaleRun');
+const processRun = require('./processRun');
 
 // Registre inerte : sans lui injecté, l'archivage se comporte comme avant (il produit tout).
 const NO_LEDGER = {
@@ -97,9 +98,9 @@ async function mapWithLimit(items, limit, fn) {
 /**
  * @param {{ collectionStore: any, exportMod: any,
  *           detectLang?: (input: string, track: number) => Promise<string|null>,
- *           upscaleMod?: any, turboMod?: any, ledger?: any, encodeGate?: any }} deps
+ *           sidecars?: any, turbo?: any, ledger?: any, encodeGate?: any }} deps
  */
-function createCollectionArchive({ collectionStore, exportMod, detectLang, upscaleMod, turboMod, ledger, encodeGate }) {
+function createCollectionArchive({ collectionStore, exportMod, detectLang, sidecars, turbo, ledger, encodeGate }) {
   const reg = ledger || NO_LEDGER;
   const clipOf = (s) => ({ input: s.path, start: s.in, end: s.out });
 
@@ -111,21 +112,21 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
   };
 
   /**
-   * Réglages d'upscale normalisés, ou null si l'option est éteinte / inexploitable. Ce sont les
-   * réglages de NetsuLab tels quels : `core/upscaleRun.js` en dérive moteur, modèle et arguments,
-   * pour que l'archivage et le panneau Traitements produisent le même résultat.
+   * Passes de traitement normalisées, ou null si l'option est éteinte / inexploitable. Ce sont les
+   * réglages de NetsuLab tels quels : `core/processRun.js` en dérive moteur, modèle et arguments,
+   * pour que l'archivage, l'export et le panneau Traitements produisent le même résultat.
    */
-  const normalizeUpscale = (u) => (upscaleMod ? upscaleRun.normalizeUpscale(u) : null);
+  const normalizeProcess = (p) => (sidecars ? processRun.normalizeProcessSettings(p) : null);
 
   /**
-   * Upscaler impose un ré-encodage : la copie de flux ne peut pas changer les pixels.
+   * Traiter impose un ré-encodage : la copie de flux ne peut pas changer les pixels.
    *
-   * L'upscale porté par le PROFIL d'export est retiré : ici c'est le volet d'archivage qui en
+   * Le traitement porté par le PROFIL d'export est retiré : ici c'est le volet d'archivage qui en
    * décide, et le tri de `archivePlan` (ledger, plans déjà agrandis) ne vaut que pour lui. Le
-   * laisser passer agrandirait une seconde fois, hors registre, les plans confiés à l'export.
+   * laisser passer traiterait une seconde fois, hors registre, les plans confiés à l'export.
    */
-  const effectiveProfile = (profile, upscale) =>
-    ({ ...profile, upscale: undefined, ...(upscale ? { workflow: 'video_encode' } : null) });
+  const effectiveProfile = (profile, proc) =>
+    ({ ...profile, process: undefined, ...(proc ? { workflow: 'video_encode' } : null) });
 
   /** État d'archivage précédent, indexé par identité de plan (avec reprise des archives par index). */
   function readEntries(c) {
@@ -164,18 +165,18 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
   }
 
   /**
-   * Produit les plans à upscaler. Chaque encode passe par le PORTAIL GLOBAL : un archivage lancé
+   * Produit les plans à traiter. Chaque encode passe par le PORTAIL GLOBAL : un archivage lancé
    * pendant un rendu ne double pas le nombre de sessions d'encodage de la machine.
    */
-  async function runUpscales(event, items, ctx, onDone) {
+  async function runProcesses(event, items, ctx, onDone) {
     if (!items.length) return;
-    const limit = upscaleRun.upscaleConcurrency(ctx.upscale);
+    const limit = processRun.processConcurrency(ctx.process);
     const slot = encodeGate ? encodeGate.register(limit) : null;
     // Une plage source → un fichier, au nom EXACT attendu par l'archive.
-    const job = (item) => upscaleRun.runUpscaleClip(event, {
-      upscale: ctx.upscale, profile: ctx.profile, input: item.shot.path, out: item.file,
+    const job = (item) => processRun.runProcess(event, {
+      process: ctx.process, profile: ctx.profile, input: item.shot.path, out: item.file,
       start: item.shot.in, end: item.shot.out, baseName: ctx.base,
-    }, { upscaleMod, turboMod });
+    }, { sidecars, turbo });
     try {
       await mapWithLimit(items, limit, async (item) => {
         const r = encodeGate ? await encodeGate.withSlot(() => job(item)) : await job(item);
@@ -190,7 +191,7 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
    * Exporte TOUS les plans de la collection vers son dossier de stockage. Les plans déjà à jour ne
    * sont pas retouchés ; ceux dont le contenu existe ailleurs sont recopiés.
    * @param {any} event @param {string} id
-   * @param {{ dir?: string, profile: any, autoSync?: boolean, upscale?: any }} opts
+   * @param {{ dir?: string, profile: any, autoSync?: boolean, process?: any }} opts
    */
   async function archive(event, id, opts) {
     const c = collectionStore.loadCollection(id);
@@ -200,13 +201,13 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
     if (!dir) return { ok: false, error: t('storageFolderMissing') };
     try { fs.mkdirSync(dir, { recursive: true }); } catch (e) { return { ok: false, error: String(e) }; }
 
-    const upscale = normalizeUpscale(opts.upscale);
-    const profile = effectiveProfile(opts.profile, upscale);
+    const proc = normalizeProcess(opts.process);
+    const profile = effectiveProfile(opts.profile, proc);
     const ext = String(profile.container || 'mp4').toLowerCase();
     const base = sanitizeName(c.name || 'export') || 'export';
     const prevEntries = readEntries(c);
     const { items } = planArchive({
-      shots: c.shots, dir, base, ext, encode: profile, upscale, entries: prevEntries, ledger: reg,
+      shots: c.shots, dir, base, ext, encode: profile, process: proc, entries: prevEntries, ledger: reg,
     });
 
     const total = c.shots.length;
@@ -224,7 +225,7 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
       if (item.action === 'skip') { outs[item.index] = item.file; skipped++; tick(item.file, 'Archive'); continue; }
       if (item.action === 'copy' && copyFile(item.from, item.file)) {
         outs[item.index] = item.file;
-        reg.record(item.key, item.file, item.upscale);
+        reg.record(item.key, item.file, processRun.upscaleStep(item.process));
         copied++;
         tick(item.file, 'Copie');
         continue;
@@ -232,10 +233,10 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
       renders.push(item); // jamais produit, ou recopie impossible → il faut vraiment l'encoder
     }
 
-    // Plans à upscaler d'un côté, plans à simplement découper de l'autre : une source déjà upscalée
-    // n'est pas ré-agrandie (cf. archivePlan.upscaleForShot) et repart par l'export normal.
-    const toUpscale = renders.filter((it) => it.upscale);
-    const toExport = renders.filter((it) => !it.upscale);
+    // Plans à traiter d'un côté, plans à simplement découper de l'autre : une source déjà upscalée
+    // n'est pas ré-agrandie (cf. archivePlan.processForShot) et repart par l'export normal.
+    const toProcess = renders.filter((it) => it.process);
+    const toExport = renders.filter((it) => !it.process);
 
     if (toExport.length) {
       const r = await exportMod.exportClips(event, {
@@ -250,10 +251,10 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
       });
     }
 
-    await runUpscales(event, toUpscale, { profile, upscale, dir, base }, (item, file, error) => {
-      if (file) { outs[item.index] = file; reg.record(item.key, file, upscale); }
+    await runProcesses(event, toProcess, { profile, process: proc, dir, base }, (item, file, error) => {
+      if (file) { outs[item.index] = file; reg.record(item.key, file, processRun.upscaleStep(proc)); }
       else errors.push(`plan ${item.index + 1}: ${error}`);
-      tick(item.file, 'Upscale');
+      tick(item.file, 'Traitement');
     });
 
     const files = outs.filter((f) => f != null);
@@ -267,7 +268,7 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
   /**
    * Change le dossier de stockage : migre l'archive existante vers `dir`, ré-exporte les manquants.
    * @param {any} event @param {string} id
-   * @param {{ dir: string, profile: any, autoSync?: boolean, upscale?: any }} opts
+   * @param {{ dir: string, profile: any, autoSync?: boolean, process?: any }} opts
    */
   async function relocate(event, id, opts) {
     const c = collectionStore.loadCollection(id);
@@ -281,8 +282,8 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
     if (!prev.lastAt || !from || path.resolve(from) === path.resolve(dir)) return archive(event, id, { ...opts, dir });
     try { fs.mkdirSync(dir, { recursive: true }); } catch (e) { return { ok: false, error: String(e) }; }
 
-    const upscale = normalizeUpscale(opts.upscale);
-    const profile = effectiveProfile(opts.profile, upscale);
+    const proc = normalizeProcess(opts.process);
+    const profile = effectiveProfile(opts.profile, proc);
     const ext = String(profile.container || 'mp4').toLowerCase();
     const base = sanitizeName(c.name || 'export') || 'export';
     const entries = readEntries(c);
@@ -314,7 +315,7 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, upsca
         // Le fichier a déménagé, son contenu n'a pas changé : le registre doit suivre, sinon la
         // prochaine archive croirait la sortie perdue et la régénérerait.
         const key = entries[id_] && entries[id_].key;
-        if (key) { moved[id_] = { file: dst, key, at: Date.now() }; reg.record(key, dst, upscale); }
+        if (key) { moved[id_] = { file: dst, key, at: Date.now() }; reg.record(key, dst, processRun.upscaleStep(proc)); }
         progress(event, `archive:${id}`, dst, ++done, total, 'Migration');
       } else missing.push(i);
     }

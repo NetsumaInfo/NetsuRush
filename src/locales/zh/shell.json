@@ -78,7 +78,9 @@
     "unpinShort": "取消固定",
     "minimize": "最小化",
     "restore": "还原",
-    "maximize": "最大化"
+    "maximize": "最大化",
+    "github": "GitHub 源代码",
+    "support": "支持 NetsuBoard"
   },
   "errorBadge": {
     "aria": "{{count}} 个错误 — 打开控制台",
@@ -123,13 +125,13 @@
     "closeNub": "关闭 {{host}}（释放 RAM/GPU）",
     "opInProgress": "操作进行中…",
     "hostClosed": "{{host}} 已关闭",
-    "reopenToResume": "重新打开“{{project}}”以继续。",
-    "reopenToResumeNoProject": "重新打开以继续。",
     "collapse": "收起",
     "collapseCorner": "收起到角落",
+    "dismiss": "移除",
+    "dismissHint": "移除此提醒",
     "closeHostQ": "关闭 {{host}}？",
-    "freeRamDesc": "为任务释放 RAM 和 GPU。结束后一键重新打开项目。",
-    "resolveSafeCloseDesc": "释放 RAM 和 GPU。关闭前，NetsuRush 会保存项目并验证缓存。",
+    "freeRamDesc": "释放 RAM 和 GPU。",
+    "resolveSafeCloseDesc": "释放 RAM 和 GPU。先保存项目。",
     "later": "稍后",
     "closeHost": "关闭 {{host}}",
     "failed": "失败"

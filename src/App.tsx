@@ -1,3 +1,4 @@
+import "@/components/notebook/collabSurface";
 import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import { nr } from "@/lib/bridge";
 import { useApp, type TabId } from "@/store";
@@ -16,6 +17,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorBadge } from "@/components/ErrorBadge";
 import { PowerPrompt } from "@/components/power/PowerPrompt";
 import { WindowControls } from "@/components/WindowControls";
+import { HeaderLinks } from "@/components/HeaderLinks";
 import { IS_REMOTE } from "@/lib/remote";
 import { WallpaperLayer } from "@/components/theme/WallpaperLayer";
 import { useHostSync } from "@/hooks/useHostSync";
@@ -33,6 +35,7 @@ import { GateFrame } from "@/components/auth/GateFrame";
 // BORD : les Paramètres doivent pouvoir nommer un board partagé même si l'onglet Référence
 // n'a jamais été ouvert (docs/collab.md).
 import "@/components/reference/collabSurface";
+import "@/components/collections/collabSurface";
 
 const ReferenceWindow = lazy(() => import("@/components/reference/ReferenceWindow").then((m) => ({ default: m.ReferenceWindow })));
 const NotebookWindow = lazy(() => import("@/components/notebook/NotebookWindow").then((m) => ({ default: m.NotebookWindow })));
@@ -260,8 +263,15 @@ function Shell() {
             <div className="pointer-events-auto"><SettingsSubnav /></div>
           </div>
         )}
-        {/* En remote (iframe dans le panneau Adobe) : pas de fenêtre OS à contrôler → pas de min/max/close. */}
-        {!IS_REMOTE && <WindowControls />}
+        {/* En remote (iframe dans le panneau Adobe) : pas de fenêtre OS à contrôler → pas de min/max/close.
+            Dépôt et soutien voisinent les contrôles, mais disparaissent en épinglé : la barre y est
+            trop étroite, et ce format ne sert qu'à travailler. */}
+        {!IS_REMOTE && (
+          <div className="ml-auto flex shrink-0 items-center" data-no-drag>
+            {!pinned && <HeaderLinks />}
+            <WindowControls />
+          </div>
+        )}
       </TitleBarMenu>
 
       <div className="flex flex-1 overflow-hidden">
@@ -282,6 +292,9 @@ function Shell() {
       {/* Colonne flottante du coin bas-droit : les pastilles d'état transitoires s'empilent au-dessus
           de l'indicateur d'erreur, qui reste ancré au bas. */}
       <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+        {/* Invite « fermer / rouvrir le logiciel de montage » : DANS la colonne, sinon elle se
+            superpose aux pastilles — or une tâche lourde en produit justement une de chaque. */}
+        <PowerPrompt />
         <Toaster />
         {/* APRÈS la pile : le gestionnaire de pastilles ne retient pas ce qu'on lui envoie avant que
             sa pile ne soit abonnée. Ce voyant peut émettre dès son montage (un export lancé depuis une
@@ -297,7 +310,6 @@ function Shell() {
           <CollaborationNotifications />
         </Suspense>
       )}
-      <PowerPrompt />
       <UpdateBootstrap />
     </div>
     </TooltipProvider>

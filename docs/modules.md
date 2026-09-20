@@ -10,7 +10,7 @@ Infinite canvas (pan/zoom) where images, local videos and YouTube videos are lai
 - **Gestures are native pointer events** (`usePointerTransform.ts`), not interact.js: move, resize (8 handles, locked ratio, local frame when rotated), rotate (15° snap with Shift). During a gesture the geometry lives in **local** state coalesced in rAF, so only the manipulated item re-renders; commit to the store on `pointerup`. `BoardItem` is `memo`, so panning does not re-render items.
 - **YouTube plays through a plain `<video>`, not the embedded player**: the embedded player repaints its chrome (big play button, end screen) on every seek and pause, which flashed on each loop — no `playerVars` removes it. `core/ytstream.js` resolves the stream URL with yt-dlp and relays it on `/ytstream?id=`, so the board reads it like any local video: same loop, ping-pong, trim and playhead. The relay renews the URL itself on a 403 (YouTube's URLs expire), which keeps `/ytstream?id=` a stable, persistable source. The format selector only accepts `protocol^=https` and prefers `avc1` capped at 1080p: WebView2 has no native HLS (YouTube's "Premium 1080p" itag 616 exists only as an m3u8 manifest), and a 4K VP9/AV1 stream falls back to software decoding — both end as a dead `<video>`. The same cap applies to downloads (`core/extract.js`), where a 4K AV1 file also weighs a hundred times a usable 1080p H.264. Reaching inside the iframe as AnimRef does (`contentDocument`, `--disable-site-isolation-trials`) is **not an option here**: those flags are process-wide, and `/media`+`/stream` serve arbitrary disk files relying on the browser's same-origin refusal.
 - Packaged NetsuBoard always provisions and verifies `yt-dlp` plus `gallery-dl`; they are Board runtime requirements, not optional module dependencies. A runtime-schema bump sends older incomplete installs through the normal repair flow.
-- **yt-dlp refreshes with the application.** It is the one runtime item that rots — the platforms break its extractors every few weeks, while ffmpeg, the shaders and the weights keep working for years — and the pin in `python/requirements-reference.txt` froze the venv on the day of the install. `core/ytdlpUpdate.js` runs `pip install --upgrade yt-dlp[default,curl-cffi]` on the **first boot of a new application version**, in the background, from `onListening`. The pin stays the floor for a fresh install and for a repair; this only carries an existing venv between two releases, and pip's default `only-if-needed` strategy keeps the torch/CUDA stack of the same venv out of it. The version checked is recorded as `ytDlpCheckedFor` in `nr.config.json`, and a **failure writes no marker**, so someone offline the day they updated gets the refresh at the next boot instead of losing it. NetsuBoard runs the same policy on its standalone binary, with `yt-dlp -U`.
+- **yt-dlp refreshes with the application.** It is the one runtime item that rots — the platforms break its extractors every few weeks, while ffmpeg, the shaders and the weights keep working for years — and the pin in `python/requirements-reference.txt` froze the venv on the day of the install. `core/ytdlpUpdate.js` runs `pip install --upgrade yt-dlp[default,curl-cffi]` on the **first boot of a new application version**, in the background, from `onListening`. The pin stays the floor for a fresh install and for a repair; this only carries an existing venv between two releases, and pip's default `only-if-needed` strategy keeps the torch/CUDA stack of the same venv out of it. The version checked is recorded as `ytDlpCheckedFor` in `nr.config.json`, and a **failure writes no marker**, so someone offline the day they updated gets the refresh at the next boot instead of losing it. That anchor leaves one hole: an installation nobody updates for months also stops refreshing the very thing that ages fastest, so **Settings › Updates carries a yt-dlp row** (`ytdlp:status` / `ytdlp:update`, `src/components/settings/YtDlpRow.tsx`). It reads the installed version, compares it with what PyPI publishes — a soft probe: no network means `latest: null`, never an error — **after canonicalising both**, since PyPI spells the same release `2026.8.19` where yt-dlp prints `2026.08.19` and comparing the raw strings announced an update against the build already installed. The comparison is an ORDER, not an inequality: a build newer than the published one is not outdated — and upgrades the library alone on demand, bypassing the per-release marker and then writing it, so the next boot does not repeat the work. NetsuBoard runs the same policy, and the same two channels, on its standalone binary with `yt-dlp -U`.
 - **yt-dlp needs a JavaScript runtime for YouTube**, and enables only `deno` by default — which nothing here ships. Without one it warns `No supported JavaScript runtime could be found … some formats may be missing`, falls back to a client it has already deprecated, and `--no-warnings` hides all of it. The core already runs on the bundled `node.exe` (v22.23.2, above yt-dlp's `v22 and up` floor), so `jsRuntimeArgs()` in `core/config.js` passes `--js-runtimes node:<process.execPath>` at both call sites — `extract.js` and `ytstream.js`. Deno keeps priority for a user who has one. The option exists since yt-dlp **2025.11.12**; `python/requirements.txt` pins a later build.
 - **YouTube fallback** = the embedded player (`YoutubeItem`), used when the relay fails (private, age-restricted, no yt-dlp). Exact `[in,out]` looping then needs the **IFrame Player API**, not an `end=` embed, which loops back to 0: create the player, read `getDuration`, poll and re-seek to `in` when `out` is passed. The player replaces the div, so the wrapper keeps `pointer-events:none` and `width/height:100%`. Trim changes without recreating the player (read through a ref in the poll).
 - **A YouTube card takes the ratio of its video, Shorts included.** The link is all that is known when the item is posed, so a `/shorts/` URL poses 9:16 and anything else 16:9. That is a hint, not the answer — a vertical video is just as often shared as a plain `watch?v=` link. The relayed stream is where the true ratio first appears (`videoWidth`/`videoHeight` on `loadedmetadata`), and the card is reshaped there around its own centre at constant area, which also repairs boards posed before the measurement existed. A proxy never feeds the measurement (its dimensions are the excerpt's), a cropped item is left alone (its box deliberately differs from the source), and the patch is not recorded in history — a measurement is not a user edit.
@@ -86,21 +86,37 @@ value otherwise, which showed the index instead of a name.
 ## Export profiles (`src/features/export/profiles.ts` + `core/export.js`)
 
 A profile says HOW shots leave the app: imported into a host timeline, remuxed, or re-encoded. A
-re-encode profile can also **enlarge** the shots on the way out.
+re-encode profile can also run a **processing pass** on the shots on the way out.
 
-- **The upscale settings are NetsuLab's own** (`UpscalePane`, the same component the archive of a
-  collection uses) and the job runs on the same engines through `core/upscaleRun.js`. Copying either
-  side would let them drift apart at the first setting added.
-- **Upscaling only exists on a re-encode.** It replaces the pixels, which no stream copy and no
-  timeline import can do, so the pane is only rendered on that flow — a greyed-out one would read as
-  a setting the user may still reach. The stored settings survive a flow change and come back with it.
-- **The engine owns the whole shot**: it cuts, it upscales, it encodes with the profile's codec,
+- **The pass reuses the Traitements panel whole**: its settings blocks are the same components
+  (`UpscaleModelSettings`, `ProcessModelSettings`) and the job runs on the same engines through
+  `core/processRun.js`. Copying either side would let them drift apart at the first option added.
+- **Three ops, not four**: upscale, interpolation, depth. Cutout is left out because its alpha needs
+  a codec a profile may not carry, and a silently flattened matte is worse than no option at all.
+- **Each op keeps its own settings** (`process.upscale`, `process.interpolate`, `process.depth`) and
+  `process.kinds` names the ones that run: two ops both have a `model` that means a different thing,
+  and switching type must not throw away what the other one was tuned to.
+- **Two passes at most, never the same op twice** (« Traitement 1 », « Traitement 2 »). They run file
+  to file: only the first cuts the shot, the ones after it take the whole file the previous one wrote
+  and **copy** its audio rather than encoding the same track again. The intermediate lives in a temp
+  folder and is deleted whatever happens. Each pass decodes and re-encodes — one generation of
+  quality per pass, the same trade-off as the chain of the Traitements panel, which is why there is
+  no third slot. Unlike that chain, a depth map may sit anywhere in the order here: the export runs
+  its own steps and a depth map is still a video file the next op can read.
+- **A pass only exists on a re-encode.** It replaces the pixels, which no stream copy and no timeline
+  import can do, so the pane is only rendered on that flow — a greyed-out one would read as a setting
+  the user may still reach. The stored settings survive a flow change and come back with it.
+- **The engine owns the whole shot**: it cuts, it processes, it encodes with the profile's codec,
   container and audio. ffmpeg is not in the loop, so the batch concurrency drops to what a GPU can
-  hold (one AI model, two Turbo shaders) whatever the ffmpeg pool would have allowed.
+  hold (one model, two Turbo shaders) whatever the ffmpeg pool would have allowed.
 - **The planned file name is a request, not a promise** — the RTX VSR CLI writes its own MP4 — so
   `produceClip` returns the path that was really written and the batch records that one.
-- **A collection's archive strips `profile.upscale`**: its own pane decides there, and its ledger
-  (which shot was already enlarged, at which scale) only knows about what it produced itself.
+- **A collection's archive carries the very same panes** (`ExportProcessPane`, same ops, same two
+  passes) plus one row of its own: *when* to work — right away, or once the GPU is idle. It therefore
+  **strips `profile.process`** from the export profile it hands to the core: its own pane decides
+  there, and its ledger only knows about what it produced itself. That ledger reasons about scale, so
+  it only skips a shot whose source is already one of our upscales when the pass is exactly that
+  upscale — a chain does more than resize.
 
 ## `.netsu` container
 

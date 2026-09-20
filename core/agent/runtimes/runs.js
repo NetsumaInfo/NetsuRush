@@ -9,16 +9,31 @@ const { parserFor } = require('./parsers');
 /**
  * @param {{
  *   def:import('./types').RuntimeAgentDef, prompt:string, model?:string,
- *   mcpConfigPath?:string, cwd?:string, env?:NodeJS.ProcessEnv,
- *   onEvent:(ev:any)=>void
+ *   mcpConfigPath?:string, cwd:string, env?:NodeJS.ProcessEnv,
+ *   onEvent:(ev:any)=>void, extraArgs?:string[], allowedTools?:string[]
  * }} opts
  * @returns {{ child:import('child_process').ChildProcess, done:Promise<void> }}
  */
 function startCliRun(opts) {
   const { def, prompt, model, mcpConfigPath, cwd, env, onEvent } = opts;
-  const args = def.buildArgs({ prompt, model, mcpConfigPath, cwd });
+  // En tete : chez Codex une cle `-c` doit preceder la sous-commande, et le
+  // prompt positionnel des autres reste le dernier argument.
+  // Node retombe sur `process.cwd()` quand `cwd` vaut `undefined` : omettre le
+  // dossier ferait donc SILENCIEUSEMENT revenir l'agent dans le depot. On refuse
+  // au lieu de lancer, parce que la panne serait invisible jusqu'a ce qu'un
+  // fichier bouge.
+  if (!cwd) throw new Error("startCliRun: dossier de travail requis (jamais le depot)");
+  const args = [...(opts.extraArgs || []), ...def.buildArgs({
+    prompt, model, mcpConfigPath, cwd, allowedTools: opts.allowedTools,
+  })];
   const child = spawn(def.bin, args, {
-    cwd: cwd || process.cwd(),
+    // JAMAIS `process.cwd()`. Le core demarre dans le depot NetsuRush, donc le
+    // defaut lachait un agent de code, tous droits ouverts, dans les sources de
+    // l'utilisateur : il modifiait les fichiers directement au lieu de passer
+    // par nos outils, ce qui declenchait le rechargement a chaud et redemarrait
+    // l'application. L'appelant fournit un dossier confine, et son absence est
+    // une erreur plutot qu'un repli dangereux.
+    cwd,
     env: { ...process.env, ...(env || {}) },
     windowsHide: true,
     shell: true, // résout claude.cmd / codex.cmd sur Windows

@@ -54,7 +54,7 @@ const CDN = 'https://cdn.discordapp.com';
 const TEXT_MIN = 2;             // Discord rejette une ligne de moins de 2 caractères
 const TEXT_MAX = 128;
 
-/** @typedef {{ enabled:boolean, showModule:boolean, showProject:boolean, showElapsed:boolean, showLinks:boolean, detailsTpl:string, stateTpl:string }} DiscordPrefs */
+/** @typedef {{ enabled:boolean, showModule:boolean, showProject:boolean, showElapsed:boolean, showLinks:boolean }} DiscordPrefs */
 
 /** @type {DiscordPrefs} */
 const DEFAULT_PREFS = {
@@ -63,14 +63,12 @@ const DEFAULT_PREFS = {
   showProject: false, // vie privée : un nom de projet peut trahir un client → opt-in explicite
   showElapsed: true,
   showLinks: true,
-  detailsTpl: '',
-  stateTpl: '',
 };
 
 /**
- * Réglages sûrs à partir de n'importe quoi. Les deux sources sont non typées à l'exécution (JSON sur
- * disque, patch venu du RPC) : sans ça, un `detailsTpl: null` fait exploser `.trim()` dans un callback
- * de timer — donc hors de tout try/catch, donc le core meurt.
+ * Safe prefs out of anything. Both sources are untyped at runtime (JSON on disk, patch from the RPC),
+ * and a bad value would blow up inside a timer callback — outside any try/catch, so the core dies.
+ * Unknown keys are dropped, which is how a prefs file written by an older build gets migrated.
  * @param {any} raw
  * @returns {DiscordPrefs}
  */
@@ -79,9 +77,6 @@ function sanitizePrefs(raw) {
   if (!raw || typeof raw !== 'object') return out;
   for (const k of /** @type {const} */ (['enabled', 'showModule', 'showProject', 'showElapsed', 'showLinks'])) {
     if (typeof raw[k] === 'boolean') out[k] = raw[k];
-  }
-  for (const k of /** @type {const} */ (['detailsTpl', 'stateTpl'])) {
-    if (typeof raw[k] === 'string') out[k] = raw[k];
   }
   return out;
 }
@@ -106,13 +101,6 @@ function clampText(s) {
   const t = String(s ?? '').trim();
   if (t.length < TEXT_MIN) return undefined;
   return t.length > TEXT_MAX ? t.slice(0, TEXT_MAX) : t;
-}
-
-/** Substitue {module} / {projet} dans un gabarit utilisateur. */
-function fillTemplate(tpl, ctx) {
-  return String(tpl)
-    .replace(/\{module\}/g, ctx.module || '')
-    .replace(/\{projet\}/g, ctx.project || '');
 }
 
 /**
@@ -144,6 +132,10 @@ function createDiscordRpc({ CONFIG, broadcast, dataDir }) {
   /** @type {{ name:string, imageUrl:string|null } | null} */
   let appInfo = null; // nom + vignette réels de l'app Discord (aperçu des Paramètres)
   let appInfoLoading = false;
+  // What goes into `assets.large_image`: the `nr_logo` asset key once it is published, the application
+  // icon url while it is not, `null` when neither is known (offline boot) — a card with no art.
+  /** @type {string | null} */
+  let largeImage = LARGE_IMAGE;
 
   /** @type {{ module:string|null, project:string|null }} */
   let ctx = { module: null, project: null };
@@ -177,14 +169,20 @@ function createDiscordRpc({ CONFIG, broadcast, dataDir }) {
     appInfoLoading = true;
     try {
       const rpc = await fetchJson(`${API}/v10/applications/${appId}/rpc`);
-      let imageUrl = rpc?.icon ? `${CDN}/app-icons/${appId}/${rpc.icon}.png?size=160` : null;
+      const icon = rpc?.icon ? `${CDN}/app-icons/${appId}/${rpc.icon}.png` : null;
+      let imageUrl = icon ? `${icon}?size=160` : null;
+      largeImage = icon ? `${icon}?size=512` : null;
       // `large_image` désigne l'asset s'il existe : il gagne sur l'icône.
       try {
         const assets = await fetchJson(`${API}/v9/oauth2/applications/${appId}/assets`);
         const hit = Array.isArray(assets) && assets.find((a) => a && a.name === LARGE_IMAGE);
-        if (hit) imageUrl = `${CDN}/app-assets/${appId}/${hit.id}.png?size=160`;
+        if (hit) {
+          imageUrl = `${CDN}/app-assets/${appId}/${hit.id}.png?size=160`;
+          largeImage = LARGE_IMAGE;
+        }
       } catch (_) { /* pas d'asset publié : l'icône fait le travail, comme sur le profil */ }
       appInfo = { name: String(rpc?.name || 'NetsuRush'), imageUrl };
+      push(); // the art (and the link on it) only becomes right once this resolves
       emit();
     } catch (_) {
       /* hors ligne ou App ID inconnue : l'aperçu garde son repli local, rien à signaler */
@@ -326,23 +324,25 @@ function createDiscordRpc({ CONFIG, broadcast, dataDir }) {
     if (!prefs.enabled && !force) return null;
     const moduleLabel = prefs.showModule ? (ctx.module || '') : '';
     const projectLabel = prefs.showProject ? (ctx.project || '') : '';
-    // Un gabarit renseigné REMPLACE la ligne auto (c'est tout l'intérêt de le proposer).
-    const details = prefs.detailsTpl.trim()
-      ? clampText(fillTemplate(prefs.detailsTpl, { module: moduleLabel, project: projectLabel }))
-      : clampText(moduleLabel);
-    const state = prefs.stateTpl.trim()
-      ? clampText(fillTemplate(prefs.stateTpl, { module: moduleLabel, project: projectLabel }))
-      : clampText(projectLabel);
+    // The lines are ours, never free text: a presence carries the app's name, so whatever it says is
+    // read as coming from NetsuRush.
+    const details = clampText(moduleLabel);
+    const state = clampText(projectLabel);
 
     /** @type {Record<string, any>} */
-    const activity = { assets: { large_image: LARGE_IMAGE, large_text: 'NetsuRush' } };
+    const activity = {};
+    // Art, and the only thing `large_url` can hang on. `nr_logo` is used once it is published in the
+    // dev portal; until then the application icon stands in as an EXTERNAL url — Discord accepts an
+    // https image in `large_image` and proxies it. An asset key that resolves to nothing leaves the
+    // card with no image at all, hence no clickable art.
+    if (largeImage) activity.assets = { large_image: largeImage, large_text: 'NetsuRush' };
     if (details) activity.details = details;
     if (state) activity.state = state;
     // Une url ne peut pas pendre sans sa ligne : chacune n'est posee qu'avec le contenu
     // qu'elle rend cliquable. La deuxieme ligne reste muette — deux liens cote a cote
     // encombrent la carte, et l'art couvre deja la seconde destination.
     if (prefs.showLinks) {
-      activity.assets.large_url = SERVER_URL;
+      if (activity.assets) activity.assets.large_url = SERVER_URL;
       if (details) activity.details_url = REPO_URL;
     }
     if (prefs.showElapsed) activity.timestamps = { start: startedAt }; // SECONDES (pas des ms)

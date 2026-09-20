@@ -73,6 +73,13 @@ export type CollaborationDialogProps = {
   noticeKey?: string | null;
   /** The project is gone: the host must leave the document rather than keep projecting it. */
   onRemoved?: () => void;
+  /**
+   * Does the dialog own the editor/viewer switch? A surface whose permission is richer than the two
+   * roles - a collection pairs the role with a removal delegation - sets its own, elsewhere, and
+   * turns this off so there are never two places to set the same thing. Removing a member and
+   * cancelling an invitation stay here either way.
+   */
+  memberRoles?: boolean;
 };
 
 function Avatar({ url }: { url: string | null }) {
@@ -100,6 +107,7 @@ export function CollaborationDialog({
   blockerKey = null,
   noticeKey = null,
   onRemoved,
+  memberRoles = true,
 }: CollaborationDialogProps) {
   const { t } = useTranslation(["collab", "common"]);
   const { isAuthenticated } = useConvexAuth();
@@ -334,22 +342,28 @@ export function CollaborationDialog({
                   <span className="min-w-0 flex-1 truncate text-sm">{member.name || member.handle}</span>
                   {effectiveRole === "owner" && member.role !== "owner" ? (
                     <>
-                      <Button
-                        size="sm"
-                        variant={member.role === "editor" ? "default" : "outline"}
-                        disabled={busy}
-                        onClick={() => void memberAction(() => setMemberRole(projectId!, member.userId, "editor"))}
-                      >
-                        {t("projects.role.editor")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={member.role === "viewer" ? "default" : "outline"}
-                        disabled={busy}
-                        onClick={() => void memberAction(() => setMemberRole(projectId!, member.userId, "viewer"))}
-                      >
-                        {t("projects.role.viewer")}
-                      </Button>
+                      {memberRoles ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant={member.role === "editor" ? "default" : "outline"}
+                            disabled={busy}
+                            onClick={() => void memberAction(() => setMemberRole(projectId!, member.userId, "editor"))}
+                          >
+                            {t("projects.role.editor")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={member.role === "viewer" ? "default" : "outline"}
+                            disabled={busy}
+                            onClick={() => void memberAction(() => setMemberRole(projectId!, member.userId, "viewer"))}
+                          >
+                            {t("projects.role.viewer")}
+                          </Button>
+                        </>
+                      ) : (
+                        <span className="shrink-0 text-xs text-muted-foreground">{t(`projects.role.${member.role}`)}</span>
+                      )}
                       <Button
                         size="icon-sm"
                         variant="ghost"

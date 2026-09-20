@@ -13,6 +13,7 @@ import {
 } from "@/components/notebook/notebookShared";
 import { readPrefs, PREFS_KEY, type NotebookPrefs } from "@/components/notebook/notebookPrefs";
 import i18n from "@/i18n";
+import { notebookCanEdit, notebookCollabState } from "@/components/notebook/notebookCollabState";
 
 interface NbOpenOpts {
   blockId?: string;   // ancre : scroller/surligner ce bloc à l'arrivée
@@ -35,6 +36,7 @@ export interface NotebookSlice {
   nbDatabases: Record<string, Database>;
   nbBacklinks: PageMeta[];
   nbLoading: boolean;
+  nbSaveError: string | null;
   nbDirty: boolean;              // page ouverte modifiée, en attente de flush
 
   // Onglets (multi-documents) + ancre de bloc + navigation.
@@ -111,6 +113,8 @@ const currentNotebookLanguage = (): NotebookLanguage => {
 };
 
 export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> = (set, get) => {
+  let pageSave: Promise<void> | null = null;
+
   // Sauvegarde l'état des onglets du carnet actif (restauré par nbOpenNotebook).
   const persistTabs = () => {
     const { nbActiveId, nbTabs, nbActiveTabId } = get();
@@ -147,6 +151,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     nbBacklinks: [],
     nbLoading: false,
     nbDirty: false,
+    nbSaveError: null,
 
     nbTabs: [],
     nbActiveTabId: null,
@@ -218,6 +223,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
 
     nbOpenNotebook: async (id) => {
       const a = api(); if (!a) return;
+      await get().nbFlushPage();
       set({ nbLoading: true });
       try {
         const res = await a.load(id);
@@ -266,6 +272,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     },
 
     nbDeleteNotebook: async (id) => {
+      if (notebookCollabState.binding?.notebookId === id) throw new Error(i18n.t("notebook:share.manageRemoval"));
       const a = api(); if (!a) return;
       await a.deleteNotebook(id);
       if (get().nbActiveId === id) set({ nbActiveId: null, nbPages: [], nbActivePageId: null, nbPage: null, nbDatabases: {}, nbTabs: [], nbActiveTabId: null, nbFavorites: [], nbRecents: [], nbTrash: [] });
@@ -281,6 +288,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     },
 
     nbCreatePage: async (parentId = null, opts) => {
+      if (!notebookCanEdit(get().nbActiveId, parentId)) return null;
       const a = api(); const nbIdCur = get().nbActiveId; if (!a || !nbIdCur) return null;
       const orderIdx = Date.now();
       const r = await a.savePage({ notebookId: nbIdCur, parentId, title: opts?.title || i18n.t("notebook:panel.untitled"), orderIdx, blocks: opts?.blocks || [] });
@@ -415,11 +423,13 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     },
 
     nbSetPageBlocks: (blocks) => {
+      if (!notebookCanEdit(get().nbActiveId, get().nbActivePageId)) return;
       const page = get().nbPage; if (!page) return;
       set({ nbPage: { ...page, blocks }, nbDirty: true });
     },
 
     nbSetPageMeta: (patch) => {
+      if (!notebookCanEdit(get().nbActiveId, get().nbActivePageId)) return;
       const page = get().nbPage; if (!page) return;
       const next = { ...page, ...patch };
       // Reflète le titre/icône dans l'arbre immédiatement (sidebar réactive).
@@ -428,20 +438,33 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     },
 
     nbFlushPage: async () => {
-      const a = api(); const page = get().nbPage; if (!a || !page) return;
-      set({ nbDirty: false });
-      try {
-        await a.savePage({
-          id: page.id, notebookId: page.notebookId, parentId: page.parentId,
-          title: page.title, icon: page.icon, cover: page.cover, orderIdx: page.orderIdx,
-          blocks: page.blocks,
-        });
-      } catch { /* réessaiera au prochain edit */ }
+      if (pageSave) { await pageSave; if (get().nbDirty) await get().nbFlushPage(); return; }
+      const a = api(); const page = get().nbPage;
+      if (!get().nbDirty || !page) return;
+      if (!a) throw new Error("Notebook storage is unavailable");
+      pageSave = (async () => {
+        try {
+          const result = await a.savePage({
+            id: page.id, notebookId: page.notebookId, parentId: page.parentId,
+            title: page.title, icon: page.icon, cover: page.cover, orderIdx: page.orderIdx,
+            blocks: page.blocks,
+          });
+          if (!result.ok) throw new Error(result.error || "Notebook save failed");
+          // Only acknowledge the exact immutable snapshot persisted by this request.
+          if (get().nbPage === page) set({ nbDirty: false, nbSaveError: null });
+        } catch (error) {
+          set({ nbSaveError: error instanceof Error ? error.message : String(error) });
+          throw error;
+        } finally { pageSave = null; }
+      })();
+      await pageSave;
+      if (get().nbDirty) await get().nbFlushPage();
     },
 
     // Suppression DOUCE : la page (et sa descendance) part à la corbeille ; les onglets qui la
     // montraient reculent dans leur historique vers une page encore vivante, sinon se ferment.
     nbDeletePage: async (id) => {
+      if (!notebookCanEdit(get().nbActiveId, id)) return;
       const a = api(); const nbIdCur = get().nbActiveId; if (!a || !nbIdCur) return;
       const r = await a.deletePage(id);
       const removed = new Set((r && "removed" in r && r.removed) || [id]);
@@ -493,6 +516,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     },
 
     nbSaveDatabase: async (db) => {
+      if (!notebookCanEdit(get().nbActiveId, get().nbActivePageId)) return;
       const a = api(); const pageId = get().nbActivePageId; if (!a || !pageId) return;
       set({ nbDatabases: { ...get().nbDatabases, [db.id]: db } });
       try { await a.saveDatabase({ ...db, pageId }); } catch { /* ignore */ }
@@ -505,6 +529,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
     },
 
     nbDeleteDatabase: async (id) => {
+      if (!notebookCanEdit(get().nbActiveId, get().nbActivePageId)) return;
       const a = api(); if (!a) return;
       const next = { ...get().nbDatabases };
       delete next[id];

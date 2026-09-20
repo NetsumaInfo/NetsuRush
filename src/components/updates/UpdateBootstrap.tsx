@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import releases from "@/data/releases.json";
+import { releases } from "@/data/releases";
+import { ReleaseNotes } from "./ReleaseNotes";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -32,9 +33,9 @@ export function UpdateBootstrap() {
           <DialogTitle>{t("updates.whatsNew", { version: latest.version })}</DialogTitle>
           <DialogDescription>{latest.title[language]}</DialogDescription>
         </DialogHeader>
-        <ul className="min-h-0 list-disc space-y-2 overflow-y-auto pr-1 pl-5 text-sm text-muted-foreground">
-          {latest.highlights[language].map((highlight) => <li key={highlight}>{highlight}</li>)}
-        </ul>
+        <div className="min-h-0 overflow-y-auto pr-1">
+          <ReleaseNotes release={latest} />
+        </div>
         <DialogFooter><Button onClick={close}>{t("updates.gotIt")}</Button></DialogFooter>
       </DialogContent>
     </Dialog>

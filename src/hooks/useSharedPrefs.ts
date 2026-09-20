@@ -4,7 +4,7 @@ import { IS_REMOTE } from "@/lib/remote";
 import { useApp } from "@/store";
 import type { AppState } from "@/store";
 import type { ExportProfile } from "@/features/export/profiles";
-import type { DetectModel, DetectOptions } from "@/lib/bridge";
+import type { DetectModel, DetectOptions, PreviewGenerationSettings } from "@/lib/bridge";
 import { DEFAULT_TIMELINE_INSERTIONS, type TimelineHost, type TimelineInsertionMode } from "@/features/timeline/insertion";
 import type { SearchPerfSettings } from "@/lib/searchPerf";
 import type { SamplingFrames } from "@/lib/sampling";
@@ -35,6 +35,9 @@ interface SharedPrefs {
   // Change les vecteurs produits : deux fenêtres qui n'échantillonnent pas pareil se renverraient
   // l'index l'une à l'autre comme « à refaire ».
   searchFrames: SamplingFrames;
+  // Part of the proxy and thumbnail cache keys: a panel left on the defaults re-encoded every
+  // preview the app had already produced under the user's settings.
+  previewSettings: PreviewGenerationSettings;
 }
 
 function snapshot(state: AppState): SharedPrefs {
@@ -48,6 +51,7 @@ function snapshot(state: AppState): SharedPrefs {
     timelineInsertions: state.timelineInsertions,
     searchPerf: state.searchPerf,
     searchFrames: state.searchFrames,
+    previewSettings: state.previewSettings,
   };
 }
 
@@ -63,6 +67,11 @@ function applyShared(patch: Partial<SharedPrefs>): void {
   }
   if (patch.searchPerf) state.setSearchPerf(patch.searchPerf);
   if (patch.searchFrames) state.setSearchFrames(patch.searchFrames);
+  // Every push carries the whole snapshot, and this setter resets every grid's thumbnails and
+  // proxies: apply it only when the value actually differs.
+  if (patch.previewSettings && JSON.stringify(patch.previewSettings) !== JSON.stringify(state.previewSettings)) {
+    state.setPreviewSettings(patch.previewSettings);
+  }
   if (patch.timelineInsertions) {
     for (const host of Object.keys(DEFAULT_TIMELINE_INSERTIONS) as TimelineHost[]) {
       const mode = patch.timelineInsertions[host];
@@ -83,15 +92,31 @@ export function useSharedPrefs(): void {
   useEffect(() => {
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | null = null;
+    // Keys the core is known to hold. The panel writes only those: every push carries the whole
+    // snapshot, and a key the app has not seeded yet would otherwise leave with the panel's defaults.
+    const known = new Set<string>();
+    // The core echoes every push back to its sender. Applying that echo after the user has moved on
+    // would revert the newer value, and cancel its pending push. Single use: kept any longer, it
+    // would swallow another renderer's legitimate return to the same values.
+    let lastSent: string | null = null;
 
     const push = (next: SharedPrefs) => {
       const json = JSON.stringify(next);
       if (json === lastPushed.current) return;
       lastPushed.current = json;
-      void nr.prefsSet(next as unknown as Record<string, unknown>).catch(() => { lastPushed.current = null; });
+      const payload = IS_REMOTE
+        ? Object.fromEntries(Object.entries(next).filter(([key]) => known.has(key)))
+        : next;
+      if (!Object.keys(payload).length) return;
+      lastSent = JSON.stringify(payload);
+      void nr.prefsSet(payload as unknown as Record<string, unknown>).catch(() => {
+        lastPushed.current = null;
+        lastSent = null;
+      });
     };
 
     const receive = (patch: Partial<SharedPrefs>) => {
+      for (const key of Object.keys(patch)) known.add(key);
       applying.current = true;
       try {
         applyShared(patch);
@@ -109,12 +134,22 @@ export function useSharedPrefs(): void {
       // Premier lancement (fichier vide) : seule l'APP sème les valeurs. Si le panneau CEP semait,
       // ses défauts (il n'a jamais rien réglé) deviendraient la référence et écraseraient les
       // réglages de l'app à son prochain démarrage.
+      // Idem pour un fichier ANTÉRIEUR à une clé partagée : c'est l'app qui sème la clé manquante.
       if (Object.keys(stored).length) receive(stored);
-      else if (!IS_REMOTE) push(snapshot(useApp.getState()));
+      const local = snapshot(useApp.getState());
+      if (!IS_REMOTE && Object.keys(local).some((key) => !(key in stored))) {
+        lastPushed.current = null;
+        push(local);
+      }
       hydrated.current = true;
     }).catch(() => { hydrated.current = true; /* core injoignable : réglages locaux, comme avant */ });
 
-    const offRemote = nr.onPrefsChanged((p) => { if (alive && p?.patch) receive(p.patch as Partial<SharedPrefs>); });
+    const offRemote = nr.onPrefsChanged((p) => {
+      if (!alive || !p?.patch) return;
+      const echo = JSON.stringify(p.patch) === lastSent;
+      lastSent = null;
+      if (!echo) receive(p.patch as Partial<SharedPrefs>);
+    });
 
     const offStore = useApp.subscribe((state) => {
       if (applying.current || !hydrated.current) return;

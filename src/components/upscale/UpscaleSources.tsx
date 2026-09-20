@@ -14,7 +14,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem,
 } from "@/components/ui/context-menu";
-import { cn, basename } from "@/lib/utils";
+import { cn, basename, parseResolution } from "@/lib/utils";
 import { LazyThumb } from "@/components/rushes/LazyThumb";
 import { THUMB_AUTO } from "@/lib/utils";
 import { srcKey, type ProcController } from "./useProcSources";
@@ -213,7 +213,8 @@ export function UpscaleSources({ up }: { up: ProcController }) {
   // Set des clés sélectionnées mémoïsé sur `sources` → identité stable tant que la sélection ne change
   // pas ; couplé aux lignes memo, un toggle ne re-rend QUE la ligne concernée (désélection instantanée).
   const selectedKeys = useMemo(() => new Set(sources.map(srcKey)), [sources]);
-  const onToggle = useCallback((c: Clip) => toggleSource({ name: c.name, path: c.path }), [toggleSource]);
+  // La définition affichée ligne 75 était jetée ici : la garder évite une sonde par source.
+  const onToggle = useCallback((c: Clip) => toggleSource({ name: c.name, path: c.path, ...(parseResolution(c.resolution) ?? {}) }), [toggleSource]);
 
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const toggle = useCallback((p: string) => setCollapsed((s) => { const n = new Set(s); n.has(p) ? n.delete(p) : n.add(p); return n; }), []);

@@ -243,7 +243,12 @@
     "contentOpacity": "Content opacity",
     "seeThroughScope": "Also translucent",
     "seeThroughShell": "Interface",
-    "seeThroughPlaceFrame": "Placement frame"
+    "seeThroughPlaceFrame": "Placement frame",
+    "assetSweep": "Unused media",
+    "assetSweepHint": "Removes files no scene references. Nothing your boards hold is touched.",
+    "assetSweepAction": "Clean up",
+    "assetSweepDone": "{{count}} file(s) removed, {{mb}} MB freed.",
+    "assetSweepFailed": "Cleanup failed."
   },
   "inspector": {
     "ytPlayer": "YouTube player",
@@ -325,7 +330,8 @@
     "kindItem": "Board item",
     "chooseFile": "Choose a file…",
     "targetItem": "Target item",
-    "remove": "Remove link"
+    "remove": "Remove link",
+    "sharedFile": "This file belongs to the shared board: it has no location on this disk."
   },
   "font": {
     "label": "Font",
@@ -791,7 +797,9 @@
     "importing": "Importing {{name}}…",
     "fetching": "Fetching the media…",
     "linkDone": "Media imported",
-    "fetchingFrom": "Fetching from {{source}}…"
+    "fetchingFrom": "Fetching from {{source}}…",
+    "copyFailed": "Could not copy “{{name}}”: this media will be lost when the app closes",
+    "copyFailedBatch": "{{count}} copies failed (including “{{name}}”): these media will be lost when the app closes"
   },
   "mouseThrough": {
     "on": "Transparent to mouse",

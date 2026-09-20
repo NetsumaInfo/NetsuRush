@@ -635,5 +635,12 @@
     "inProgress": "In progress",
     "done": "Done",
     "name": "Database"
+  },
+  "share": {
+    "document": "Share this document",
+    "notebook": "Share notebook",
+    "failed": "Sharing failed.",
+    "manageRemoval": "Use collaboration settings to leave or delete this shared document.",
+    "retry": "Retry"
   }
 }

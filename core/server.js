@@ -37,6 +37,7 @@ const { ffBin, NR_HOME } = require("./config");
 const { getCapabilities } = require("./export/capabilities");
 const { refreshYtDlpForAppVersion } = require("./ytdlpUpdate");
 const { controlRequestAllowed } = require("./httpSecurity");
+const { listenIpv6Loopback } = require("./ipv6Loopback");
 
 const HOST = "127.0.0.1";
 // Port IMPOSÉ par la coquille Tauri (elle en choisit un libre et le sert au renderer via
@@ -184,6 +185,8 @@ const server = http.createServer((req, res) => {
 });
 
 let activePort = FIXED_PORT || PORT_FIRST;
+/** @type {import('node:net').Server | null} */
+let ipv6Listener = null;
 
 // Le port retenu est publié sur disque : les clients HORS processus (panneau CEP, diagnostic) n'ont
 // aucun autre moyen de le connaître, et le renderer Tauri, lui, le tient de la coquille.
@@ -204,6 +207,11 @@ function onListening() {
   activePort = /** @type {any} */ (server.address())?.port || activePort;
   publishPort(activePort);
   console.log(`NetsuRush core: http://${HOST}:${activePort} (${rpc.channels.length} canaux)`);
+  // `localhost` then connects at once, not after the ::1 fallback (cf. ipv6Loopback.js).
+  void listenIpv6Loopback(server, activePort).then(({ listener, error }) => {
+    ipv6Listener = listener;
+    if (error) console.warn(`core: [::1]:${activePort} indisponible (${error.code}) — le panneau Adobe garde ses aperçus sur ${HOST}.`);
+  });
   // Chauffe la sonde d'encodeurs en arrière-plan : NetsuCut récupère ensuite immédiatement le bon
   // moteur NVENC/AMF/QSV (ou son repli CPU) au premier survol.
   void getCapabilities()
@@ -263,6 +271,7 @@ async function shutdown(code = 0) {
   try { killSidecars(); } catch {} // tue les daemons python avant de supprimer leurs fichiers de travail
   try { killRoto(); } catch {}
   await sessionCache.cleanup();
+  try { ipv6Listener?.close(); } catch {}
   await new Promise((resolve) => {
     try { server.close(resolve); } catch { resolve(); }
   });

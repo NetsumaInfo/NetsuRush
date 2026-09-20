@@ -4,5 +4,8 @@ export const DISCORD_INVITE = "https://discord.gg/Vq7K6mWNX5";
 
 // Guichets de dons. Deux, parce qu'ils ne servent pas le même geste : GitHub Sponsors pour un
 // soutien récurrent, Buy Me a Coffee pour un versement unique sans compte GitHub.
+// Dépôt public : cité par le raccourci de la barre de titre.
+export const GITHUB_REPO = "https://github.com/NetsumaInfo/NetsuRush";
+
 export const GITHUB_SPONSORS = "https://github.com/sponsors/NetsumaInfo";
 export const BUY_ME_A_COFFEE = "https://buymeacoffee.com/netsuma";

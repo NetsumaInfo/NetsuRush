@@ -65,7 +65,7 @@ test('une source LUE mais sans image n’est jamais déclarée manquante', () =>
 
 test('un lien distant est laissé à la récupération en ligne', () => {
   // Une URL morte ne se répare pas en la redemandant : c'est `recoverMedia` qui la retélécharge.
-  assert.match(retry, /if \(!item\.ref \|\| isRemoteRef\(item\.ref\)\) return false;/);
+  assert.match(retry, /if \(!isCoreFileRef\(item\.ref\)\) return false;/);
 });
 
 test('image, vidéo et séquence passent toutes par la reprise', () => {

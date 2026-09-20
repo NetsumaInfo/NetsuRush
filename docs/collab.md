@@ -1,12 +1,12 @@
 # Sharing and collaboration
 
-**Implementation status:** complete in source and statically verified — Convex rendezvous, native
-service, renderer bridge, account panel, and **one wired surface: the reference board** (Référence).
-Collections and Carnet are not wired yet; [Adding a surface](#adding-a-surface) is what that takes.
-Native changes need a Tauri window restart before the running application can exercise them, and
-nothing here has been validated in a live two-machine session.
+**Implementation status:** source integration covers the reference board, Collections, and NetsuBook
+(one page or an entire notebook). Static checks do not establish live-session correctness or latency.
+Native/core changes require a Tauri window restart; the running app still uses its previous native
+and core code until then. Two-machine acceptance and backend deployment remain unverified.
 
-NetsuRush supports local-first shared documents for **2 to 10 members**. On the reference board,
+NetsuRush supports local-first shared documents for **up to 15 members**, including the owner and
+reserved invitation seats. On the reference board,
 members can edit the complete persisted contract: item creation and deletion, geometry, ordering,
 text, drawing, crop and trim, appearance, playback, palettes, sequences, links, embeds, and media
 manifests.
@@ -37,10 +37,10 @@ a lowercase module label that travels with the project.
   bound, how to create one when an invitation is accepted, how to remove it when the project goes
   away.
 
-A project with no surface is read as `board`, the label collaboration shipped with — and the one
-surface currently registered (`src/components/reference/collabSurface.ts`, imported for its side
-effect from `App.tsx` so the account panel can name a shared board even when the Référence tab was
-never opened).
+A project with no surface is read as `board`, the label collaboration shipped with. Surfaces are
+registered from their module (`src/components/reference/collabSurface.ts`,
+`src/components/collections/collabSurface.ts`, `src/components/notebook/collabSurface.ts`), imported for their side effect from `App.tsx` so the
+account panel can name a shared document even when its tab was never opened.
 
 ### The board surface
 
@@ -69,6 +69,93 @@ project's companion — reading zero bytes, since the file name carries the cont
 stays dead but keeps an online origin is re-downloaded; whatever remains dead is marked missing on
 the board so the recovery gestures take over.
 
+### The collection surface
+
+**Sharing a collection is archiving it.** Both jobs asked the machine for the same thing — every
+shot as a standalone file that no longer depends on the source rush — so there is one pipeline and
+one set of settings. `core/collectionSharing.js` runs `collectionArchive.archive` and publishes the
+files it wrote; `archivePlan` already decides per shot between "already there", "copy from
+elsewhere" and "produce", so ranging a shot into a shared collection encodes that shot alone.
+
+Two consequences the interface states plainly:
+
+- Turning sharing on turns **Archive to disk** on, and holds it there. A collection that has no
+  folder of its own takes the one the app proposes (`collections:defaultArchiveDir`), which the
+  archive card then shows and the user is free to change.
+- Peers receive the collection **in the format its owner archives in**. The archive card is the only
+  place that format is chosen; there is no second, quieter profile behind the sharing panel.
+
+Only shot files travel. The source rush is never published, and an archive entry that resolved to
+the source is refused rather than sent whole.
+
+**Who may do what**, in one model, one menu per person in the collection's sharing card:
+
+| Menu entry | Role + delegation | May |
+|---|---|---|
+| Read-only | `viewer` | Receive the shots. Nothing else: no adding, no removing, no inviting. |
+| Editing — their own shots | `editor` | Add shots, and remove or edit **what they contributed**. The default. |
+| Editing — every shot | `editor` + `canDeleteOthers` | The same, over everyone's contributions. |
+| (the owner's row) | `owner` | Everything, without delegating anything to themselves — they can delete the project outright. |
+
+Sharing is a card in the collection editor with the same shape as **Media** and **Archive to disk**:
+one switch. Turning it on publishes the collection; turning it off deletes the shared project (the
+owner keeps the local collection) or leaves it (an invited member's copy goes with the share).
+
+`convex/collectionEntries` is the authority: one row per shared shot, carrying its contributor and
+whether it was removed. The projection walks those rows rather than the document's own tombstones,
+so removal is a membership decision, not a CRDT race. A row claimed but absent from the document —
+a publication that failed after claiming its identity — is skipped, never drawn as a nameless shot.
+
+The one thing the document cannot enforce is *field* ownership: a CRDT has no per-entry author, so
+"an editor does not rewrite someone else's shot metadata" is a renderer gate
+(`useSharedCollection#canEdit`), not a server rule. Existence, which is what matters, is server-ruled.
+
+Demoting an editor to viewer clears their delegated removal, so a later promotion does not hand it
+back silently. The role also travels with the local collection (`collaboration.role`), because
+**Range** and the collection list must know a read-only share without opening it — without that, the
+shot entered the local copy, publication was refused, and it stayed there invisible and unshared.
+
+### NetsuBook surfaces
+
+`notebook` shares the notebook tree; `notebook-page` shares only the selected document. The header
+opens the existing people/invitation dialog for either scope. Whole-notebook and individual-page
+bindings cannot overlap. NetsuDraft and local `scriptId` associations are excluded.
+
+Each page, block and database has a stable surface entry. Rich text uses independent LoroText
+containers and Unicode scalar offsets; marks are separate operations. An accepted edit carries its
+base revision, and the native service retains bounded historical frontiers so concurrent typing can
+merge against the state the editor actually saw. This does not provide cell-level merging for
+database JSON: concurrent changes to the same database field remain last-writer-wins.
+
+The editor applies changed blocks without adding remote changes to local undo history and defers
+projection during IME composition. These paths still need real editor acceptance for selection,
+undo, nested blocks, tables and simultaneous typing. Autosave retains dirty state on failure and
+serializes newer snapshots behind an in-flight save.
+
+Media import preflight writes a device-local allowlist from the actual notebook store, including
+file-backed notebooks. Native manifests carry hashes, never source paths. Downloads run in a bounded
+background queue so waiting for a file does not hold the text submission loop. Received documents
+use local page/database ids; binding metadata retains the local source file path for reopening.
+Portable export of downloaded collaboration media still needs separate acceptance; native display
+URLs must not be treated as portable asset addresses.
+
+### Device-local cadence
+
+General settings expose a default profile and overrides for Reference, Collections, NetsuBook and
+individual documents. A new device defaults to Live for writing and Balanced for other surfaces.
+Existing explicit preferences remain authoritative. No profile is stored in the shared document.
+
+| Profile | Edit batching | Concurrent bulk downloads | Automatic media |
+|---|---:|---:|---|
+| Live | 60 ms | 2 | Enabled |
+| Balanced | 200 ms | 2 | Enabled |
+| Economy | 900 ms | 1 | On explicit request |
+
+These are scheduling intervals, not measured end-to-end latency. Local typing is immediate in every
+profile. Native peer sync permits one active exchange and one trailing request per project/peer,
+which prevents edit bursts from spawning unbounded duplicate exchanges. Checkpoint publication
+retains the existing durable outbox and its independent schedule.
+
 ### Adding a surface
 
 1. **Register it** from the module, once, with `registerCollabSurface({ id, labelKey, listBindings,
@@ -83,7 +170,9 @@ the board so the recovery gestures take over.
    media can be authorised by name.
 4. **Mount the shared UI.** `CollaborationDialog` (invite, roles, rotation, leave/delete) and
    `CollabStatus` (presence pill) take props only; the module supplies `onShare`, which publishes
-   its document through `createCollaborativeProject`.
+   its document through `createCollaborativeProject`. A surface whose permission is richer than the
+   two roles sets `memberRoles={false}` and owns that choice itself, so it is never settable in two
+   places; removing a member and cancelling an invitation stay in the dialog either way.
 
 ## Runtime architecture
 
@@ -137,7 +226,7 @@ A module's own store is a render cache; the Loro document is authoritative. Four
 from fighting each other, and breaking any of them makes the document unusable rather than merely
 wrong:
 
-- **Local edits are coalesced.** Mutations are batched over a 150 ms window and leave as one
+- **Local edits are coalesced.** Mutations use the device's 60/200/900 ms profile and leave as one
   operation batch. One batch per pointer frame saturates the outbox and the publication debounce.
 - **A local apply never triggers a projection reload.** The native side announces every apply,
   including this window's own; the announcement carrying the revision the local apply just returned
@@ -325,12 +414,15 @@ patterns. It cannot read document plaintext, project keys, sender paths, or orig
 Collaboration uses these tables: `profiles`, `friends`, `friendRequests`, `userDevices`,
 `revokedDevices`, `deviceRegistrationChallenges`, `projects`, `projectMembers`, `projectInvites`,
 `projectKeyEnvelopes`, `projectCheckpoints`, `projectHeads`, `projectPayloadUploads`, `projectInbox`,
-`projectMediaRequests`, and the bounded `projectAuditEvents` security history.
+`projectMediaRequests`, `collectionEntries`, and the bounded `projectAuditEvents` security history.
+For Collections, the server additionally sees opaque entry ids, contributor ids and removal flags;
+it remains authoritative for global removal. This registry requires connectivity to load membership
+and remove an item globally. Local hiding never writes to it.
 
 Cost controls are structural:
 
 - live document and original-media traffic bypass Convex;
-- membership is capped at 10, devices at 5/account, and projects at 100/account;
+- membership is capped at 15, devices at 5/account, and projects at 100/account;
 - point-in-time recovery calls replace live document subscriptions;
 - Account settings reads lightweight project summaries; member profiles and pending invitations are
   fetched only for the single project whose collaboration dialog is open;
@@ -359,7 +451,7 @@ indexes; the renderer cannot claim either value. A request accepts that Discord 
 the existing NetsuRush handle. It performs bounded exact index reads, deduplicates one account found
 through multiple keys, and fails closed when distinct accounts match.
 
-Only people on that list may be invited. Invitations expire after seven days, reserve one of ten
+Only people on that list may be invited. Invitations expire after seven days, reserve one of fifteen
 seats, and grant editor or viewer — not owner.
 
 Project creation is transactional at product level: Convex metadata is created, Rust opens the local

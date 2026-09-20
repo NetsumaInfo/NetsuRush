@@ -8,7 +8,7 @@
 import { COLLAB_PROTOCOL_VERSION, type CollabOp, type ProjectRole } from "./types";
 import { takeImportGrant } from "./importGrants";
 
-export type ApplyResult = { revision: number; applied: number };
+export type ApplyResult = { revision: number; applied: number; authoredRevision?: number };
 export type CollabChanged = { projectId: string; revision: number };
 export type ProjectSession = {
   projectId: string;
@@ -200,11 +200,11 @@ export async function closeProject(projectId: string, leaseId: string): Promise<
   await (await invoker())("collab_project_close", { request: { projectId, leaseId } });
 }
 
-export async function applyOperations(projectId: string, ops: CollabOp[]): Promise<ApplyResult> {
+export async function applyOperations(projectId: string, ops: CollabOp[], baseRevision?: number): Promise<ApplyResult> {
   if (!ops.length) return { revision: 0, applied: 0 };
   return (await invoker())<ApplyResult>("collab_project_apply", {
     projectId,
-    batch: { protocol: COLLAB_PROTOCOL_VERSION, ops },
+    batch: { protocol: COLLAB_PROTOCOL_VERSION, ops, ...(baseRevision === undefined ? {} : { baseRevision }) },
   });
 }
 

@@ -16,6 +16,7 @@ function ytThumb(ref: string): string | null {
 
 function normalizeItems(items: unknown[]): BoardItem[] {
   return (items as BoardItem[])
+    .map((it) => ({ ...it, ref: it.ref ?? "", src: it.src ?? "" }))
     .filter((it) => it.w > 0 && it.h > 0)
     .sort((a, b) => a.z - b.z)
     .slice(0, MAX_ITEMS);
@@ -120,7 +121,11 @@ function SceneThumbInner({ id }: { id: string }) {
   useEffect(() => {
     let alive = true;
     void nr.reference?.loadScene(id).then((scene) => {
-      if (alive) setItems(normalizeItems(scene?.items ?? []));
+      if (!alive) return;
+      // Un board PARTAGÉ ne persiste aucun item : c'est son document qui les porte. Sa disposition
+      // est enregistrée à part, en lecture seule, pour que sa carte montre le board et non un vide.
+      const source = scene?.items?.length ? scene.items : scene?.preview ?? [];
+      setItems(normalizeItems(source));
     });
     return () => { alive = false; };
   }, [id]);

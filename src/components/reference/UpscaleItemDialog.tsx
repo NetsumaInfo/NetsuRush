@@ -118,7 +118,12 @@ export function UpscaleItemDialog({
         if (!r.ok || !r.out || !r.orig) return setError(r.error || t("upscale.previewFail"));
         setPreview({ origUrl: nr.mediaUrl(r.orig), outUrl: nr.mediaUrl(r.out), width: r.width || 0, height: r.height || 0, time: at ?? 0 });
       } else {
-        const r = await ref.upscaleItem({ path: input, kind: "image", model: choice.model, scale: choice.scale, denoise: choice.denoise });
+        // Le moteur ET le shader DOIVENT suivre la sélection : sans eux le core retombe sur son
+        // défaut et l'aperçu montrait un autre rendu que celui appliqué ensuite par « Valider ».
+        const r = await ref.upscaleItem({
+          path: input, kind: "image",
+          engine: choice.engine, model: choice.model, shader: choice.shader, scale: choice.scale, denoise: choice.denoise,
+        });
         if (!r.ok || !r.path) return setError(r.error || t("upscale.previewFail"));
         setPreviewPath(r.path);
         setPreview({ origUrl: item.src, outUrl: displaySrc("image", r.path), width: r.width || 0, height: r.height || 0, time: 0 });

@@ -9,7 +9,7 @@ import { ImagePlus, Smile, Shapes, Images as ImagesIcon, Search, X, FolderInput,
 import { lucideIcon, lucideNames, useLucideCatalog } from "@/lib/lucideCatalog";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
-import { nr, type CollectionIcon, type CollectionMeta, type CollectionArchive, type CollectionArchiveUpscale, type OfflineMedia } from "@/lib/bridge";
+import { nr, type CollectionIcon, type CollectionMeta, type CollectionArchive, type CollectionArchiveProcess, type OfflineMedia } from "@/lib/bridge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -34,10 +34,13 @@ import {
 } from "@/features/export/profiles";
 import { useExportEncodingFields } from "@/features/export/encodingFields";
 import { HintLabel } from "@/components/upscale/procSettingsParts";
-import { ArchivePane, ArchiveRow, ArchiveUpscaleRows, ArchiveUpscaleSummary, ArchiveUpscaleToggle } from "./archiveRows";
+import { ArchivePane, ArchiveRow, ArchiveProcessWhen } from "./archiveRows";
+import { ExportProcessPane } from "@/components/export/ExportProcessPane";
 import { folderTrail } from "./collectionShared";
 import { CollectionGlyph, DEFAULT_COLLECTION_COLOR } from "./collectionGlyph";
 import { cn } from "@/lib/utils";
+import { CollectionSharingControls } from "./CollectionSharingControls";
+import { syncCollectionMetadata } from "@/lib/collab/collection/session";
 
 const ROOT = "__root__";
 // Côté de la vignette du dossier, aligné sur la hauteur du champ de nom à côté.
@@ -131,14 +134,18 @@ export function FolderEditor({
   );
 
   const [sub, setSub] = useState<Sub>("");         // fenêtre ICÔNE (picker lourd → reste une fenêtre)
-  const [expanded, setExpanded] = useState<"" | "media" | "archive">("");   // section dépliée EN PLACE
-  const [pane, setPane] = useState<"" | "video" | "upscale">("");           // volet d'archivage ouvert (un seul)
+  const [expanded, setExpanded] = useState<"" | "share" | "media" | "archive">("");   // section dépliée EN PLACE
+  const [pane, setPane] = useState<"" | "video" | "process1" | "process2">("");   // volet d'archivage ouvert (un seul)
   const [name, setName] = useState("");
   const [color, setColor] = useState<string>(DEFAULT_COLLECTION_COLOR);
   const [icon, setIcon] = useState<CollectionIcon | null>(null);
   const [tab, setTab] = useState<Tab>("emoji");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareProjectId, setShareProjectId] = useState<string | null>(null);
+  const savedId = useRef<string | null>(null);
+  const saveInFlight = useRef<Promise<string> | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   // Organisation + archivage
   const [description, setDescription] = useState("");
@@ -154,7 +161,7 @@ export function FolderEditor({
   const [archiveAudio, setArchiveAudio] = useState<ExportAudioMode>("copy");
   const [archiveAudioSel, setArchiveAudioSel] = useState<AudioSelect>({ mode: "auto" });
   const [autoSync, setAutoSync] = useState(false);
-  const [upscale, setUpscale] = useState<CollectionArchiveUpscale>({});
+  const [process, setProcess] = useState<CollectionArchiveProcess>({});
   const [relocating, setRelocating] = useState(false);
   const [moveErr, setMoveErr] = useState<string | null>(null);
   const prevArchive = useRef<CollectionArchive | null>(null);
@@ -176,10 +183,11 @@ export function FolderEditor({
       if (patch.speed) setArchiveSpeed(patch.speed);
     },
   );
-  // Agrandir remplace les pixels : la copie de flux ne peut pas le faire. L'upscale actif IMPOSE donc
-  // le ré-encodage (le core applique la même règle) — Remux est grisé plutôt que silencieusement ignoré.
-  const upscaling = !!upscale.enabled;
-  const reencode = archiveWorkflow === "video_encode" || upscaling;
+  // Traiter remplace les pixels : la copie de flux ne peut pas le faire. Un traitement actif IMPOSE
+  // donc le ré-encodage (le core applique la même règle) — Remux est grisé plutôt que silencieusement
+  // ignoré.
+  const processing = !!process.enabled;
+  const reencode = archiveWorkflow === "video_encode" || processing;
 
   // Un profil d'export enregistré remplit tous les réglages d'un coup — même palette que le bouton
   // Télécharger. Les profils « timeline » sont écartés : l'archivage écrit des fichiers.
@@ -210,6 +218,8 @@ export function FolderEditor({
   // Réinitialise les champs à l'ouverture selon le dossier édité (ou défauts en création).
   useEffect(() => {
     if (!open) return;
+    savedId.current = editing?.id ?? null;
+    setShareProjectId(editing?.collaboration?.projectId ?? null);
     setSub(""); setExpanded(""); setPane("");
     void loadCollectionTags();
     void loadCollectionFolders();
@@ -233,7 +243,7 @@ export function FolderEditor({
     setArchiveAudio(coerceExportAudioMode(arch?.audioMode));
     setArchiveAudioSel(coerceAudioSelect(arch?.audioSelect));
     setAutoSync(!!arch?.autoSync);
-    setUpscale(arch?.upscale ?? {});
+    setProcess(arch?.process ?? {});
     setMoveErr(null);
     setOffline([]);
     void checkOffline(editing?.id);
@@ -245,6 +255,23 @@ export function FolderEditor({
   async function pickArchiveDir() {
     const d = await nr.chooseDir();
     if (d) { setArchiveDir(d); setArchiveOn(true); }
+  }
+
+  /**
+   * Enregistre la collection JUSTE avant de la publier. Partager, c'est envoyer les fichiers du
+   * dossier de stockage : l'archivage s'allume donc ici, et prend le dossier de l'app si l'utilisateur
+   * n'en a pas encore choisi un (il reste libre d'en changer dans la carte juste en dessous).
+   */
+  async function persistForShare(): Promise<string> {
+    let dir = archiveDir.trim();
+    if (!dir) {
+      const proposed = await nr.collections?.defaultArchiveDir(name.trim());
+      dir = proposed?.dir ?? "";
+      if (!dir) throw new Error(tr("share.failed"));
+      setArchiveDir(dir);
+    }
+    setArchiveOn(true);
+    return persistLocal({ archiveOn: true, archiveDir: dir });
   }
 
   async function checkOffline(cid?: string) {
@@ -284,36 +311,57 @@ export function FolderEditor({
     }
   }
 
-  async function save() {
+  // `override` sert au partage : il vient d'allumer l'archivage et de choisir un dossier, et doit
+  // enregistrer CES valeurs — les `setState` correspondants ne sont pas encore appliqués.
+  async function persistLocal(override?: { archiveOn: boolean; archiveDir: string }): Promise<string> {
+    if (saveInFlight.current) return saveInFlight.current;
+    const pending = persistLocalInner(override);
+    saveInFlight.current = pending;
+    try { return await pending; }
+    finally { saveInFlight.current = null; }
+  }
+
+  async function persistLocalInner(override?: { archiveOn: boolean; archiveDir: string }): Promise<string> {
     const n = name.trim();
-    if (!n) return;
-    const dir = archiveDir.trim();
+    if (!n) throw new Error(tr("folder.namePlaceholder"));
+    const on = override ? override.archiveOn : archiveOn;
+    const dir = (override ? override.archiveDir : archiveDir).trim();
     const prev = prevArchive.current;
     const settings = {
-      workflow: upscaling ? ("video_encode" as const) : archiveWorkflow,
+      workflow: processing ? ("video_encode" as const) : archiveWorkflow,
       codec: archiveCodec, encoderMode: archiveEncoder, speed: archiveSpeed,
       container: archiveContainer, audioMode: archiveAudio, audioSelect: archiveAudioSel, autoSync,
-      upscale: upscale.enabled ? upscale : undefined,
+      process: process.enabled ? process : undefined,
     };
     setSaving(true); setMoveErr(null);
     // Sur un changement de dossier, on enregistre en gardant l'ANCIEN : c'est la migration qui inscrit
     // le nouveau, une fois les fichiers arrivés. Si elle échoue, l'archive pointe donc toujours là où
     // les fichiers sont réellement. `files` est écrit par le core (quel fichier pour quel plan) — le
     // patch le reconduit, sinon l'enregistrement le perdrait et la migration ne saurait plus quoi déplacer.
-    const archive: CollectionArchive | null = archiveOn && dir
-      ? { ...settings, dir: dirChanged ? archivedDir : dir, lastAt: prev?.lastAt, files: prev?.files }
+    const archive: CollectionArchive | null = on && dir
+      ? { ...settings, dir: dirChanged ? archivedDir : dir, lastAt: prev?.lastAt, files: prev?.files, entries: prev?.entries }
       : null;
     const patch = { name: n, color, icon, description: description.trim(), tags, folderId, archive };
     try {
-      if (editing) await updateCollection({ id: editing.id, ...patch });
-      else await createCollection(patch);
+      if (savedId.current) await updateCollection({ id: savedId.current, ...patch });
+      else savedId.current = await createCollection(patch);
+      const id = savedId.current;
+      if (!id) throw new Error(tr("share.failed"));
       if (editing && dirChanged) {
         setRelocating(true);
         const r = await relocateArchive(editing.id, { dir, archive: { ...settings, dir } });
-        if (!r.ok) { setMoveErr(r.error || tr("editor.moveFailed")); return; }
+        if (!r.ok) throw new Error(r.error || tr("editor.moveFailed"));
+        prevArchive.current = { ...settings, dir };
       }
-      onOpenChange(false);
+      if (shareProjectId) await syncCollectionMetadata(id);
+      return id;
     } finally { setRelocating(false); setSaving(false); }
+  }
+
+  async function save() {
+    if (saving || sharing) return;
+    try { await persistLocal(); onOpenChange(false); }
+    catch (error) { setMoveErr(error instanceof Error ? error.message : tr("share.failed")); }
   }
 
   const currentLucide = icon?.kind === "lucide" ? icon.name : null;
@@ -326,7 +374,7 @@ export function FolderEditor({
   return (
     <>
       {/* Fenêtre PRINCIPALE — masquée dès qu'une petite fenêtre s'ouvre (ferme celle du dessus). */}
-      <Dialog open={open && !sub} onOpenChange={(v) => { if (!v) onOpenChange(false); }}>
+      <Dialog open={open && !sub} onOpenChange={(v) => { if (!v && !saving && !sharing) onOpenChange(false); }}>
         {/* La fenêtre ne dépasse JAMAIS l'écran : le corps défile, l'entête et les boutons restent. */}
         <DialogContent className="grid-rows-[auto_1fr_auto] gap-4 sm:max-w-md max-h-[calc(100dvh-3rem)]">
           <DialogHeader>
@@ -385,8 +433,17 @@ export function FolderEditor({
             </>
           )}
 
-          {/* Sous-réglages : chacun se DÉPLIE en place (accordéon), la fenêtre s'agrandit. */}
+          {/* Sous-réglages : chacun se DÉPLIE en place (accordéon), la fenêtre s'agrandit. Le partage
+              est une carte comme les autres — allumé, il allume et verrouille l'archivage juste en
+              dessous, puisque ce sont les fichiers archivés qui partent. */}
           <div className="space-y-2 border-t border-border pt-3">
+            <CollectionSharingControls key={editing?.id ?? "new"} projectId={shareProjectId}
+              collectionId={editing?.id ?? null}
+              disabled={!name.trim() || saving || sharing} saveLocal={persistForShare}
+              open={expanded === "share"} onToggleOpen={() => setExpanded((e) => (e === "share" ? "" : "share"))}
+              onPublished={(id) => { setShareProjectId(id); setArchiveOn(true); }}
+              onBusyChange={setSharing} onUnshared={() => setShareProjectId(null)}
+              onRemoved={() => onOpenChange(false)} />
             {editing?.id && (
               <div className="overflow-hidden rounded-lg border border-border bg-card">
                 <SettingRow icon={<FileWarning className="size-4" />} label={tr("editor.media")} open={expanded === "media"}
@@ -434,10 +491,16 @@ export function FolderEditor({
                   <span className="text-muted-foreground"><HardDrive className="size-4" /></span>
                   <span className="flex-1">{tr("archive.onDisk")}</span>
                 </button>
-                <Toggle size="sm" variant="outline" pressed={archiveOn} onPressedChange={setArchiveOn}
-                  className="mr-2.5 shrink-0 text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
-                  {archiveOn ? tr("editor.on") : tr("editor.off")}
-                </Toggle>
+                <Tooltip>
+                  <TooltipTrigger render={<div className="mr-2.5 shrink-0" />}>
+                    <Toggle size="sm" variant="outline" pressed={archiveOn} disabled={!!shareProjectId}
+                      onPressedChange={setArchiveOn}
+                      className="text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
+                      {archiveOn ? tr("editor.on") : tr("editor.off")}
+                    </Toggle>
+                  </TooltipTrigger>
+                  {shareProjectId && <TooltipContent>{tr("archive.requiredForShare")}</TooltipContent>}
+                </Tooltip>
                 <button type="button" aria-label={tr("archive.onDisk")} aria-expanded={expanded === "archive"}
                   onClick={() => setExpanded((e) => (e === "archive" ? "" : "archive"))}
                   className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
@@ -479,7 +542,7 @@ export function FolderEditor({
                             onValueChange={(v) => {
                               const w = v[0];
                               if (w !== "video_remux" && w !== "video_encode") return;
-                              if (w === "video_remux" && upscaling) return; // agrandir exige d'encoder
+                              if (w === "video_remux" && processing) return; // traiter exige d'encoder
                               setArchiveWorkflow(w);
                               // Passer au ré-encodage réaligne conteneur et codec audio sur le codec vidéo ;
                               // revenir en copie de flux impose « Copie » (seul choix offert, sinon le champ
@@ -487,12 +550,16 @@ export function FolderEditor({
                               if (w === "video_encode") encoding.pickCodec(archiveCodec);
                               else setArchiveAudio("copy");
                             }}>
-                            <ToggleGroupItem value="video_remux" className="flex-1 text-xs" disabled={upscaling}>{tr("editor.remux")}</ToggleGroupItem>
+                            <ToggleGroupItem value="video_remux" className="flex-1 text-xs" disabled={processing}>{tr("editor.remux")}</ToggleGroupItem>
                             <ToggleGroupItem value="video_encode" className="flex-1 text-xs">{tr("editor.reencode")}</ToggleGroupItem>
                           </ToggleGroup>
                         </TooltipTrigger>
-                        {upscaling && <TooltipContent>{tr("archive.upscaleNeedsEncode")}</TooltipContent>}
+                        {processing && <TooltipContent>{tr("archive.processNeedsEncode")}</TooltipContent>}
                       </Tooltip>
+                      {!reencode && <Tooltip>
+                        <TooltipTrigger render={<p className="text-[10px] text-amber-500">{te("workflow.remuxWarning")}</p>} />
+                        <TooltipContent className="max-w-72">{te("workflow.remuxWarningDetail")}</TooltipContent>
+                      </Tooltip>}
                       {reencode && (
                         <>
                           <ArchiveRow label={te("editor.optimization")}>
@@ -540,7 +607,7 @@ export function FolderEditor({
                         </Select>
                       </ArchiveRow>
                       <ArchiveRow label={te("editor.audioCodec")}>
-                        <Select value={archiveAudio} onValueChange={(v) => setArchiveAudio(v as ExportAudioMode)}>
+                        <Select value={archiveAudio} onValueChange={(v) => encoding.pickAudio(v as ExportAudioMode)}>
                           <SelectTrigger size="sm" className="flex-1"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             {archiveAudioOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
@@ -557,12 +624,12 @@ export function FolderEditor({
                           une langue = la piste de cette langue (tags + secours IA) ; Piste N = par numéro. */}
                       {archiveAudio !== "none" && (
                         <ArchiveRow label={tr("editor.track")}>
-                          {/* L'upscale passe par le moteur de traitement, qui ne sait pas choisir une
+                          {/* Un traitement passe par le moteur de NetsuLab, qui ne sait pas choisir une
                               piste par LANGUE (il prend la piste par numéro) → le choix est neutralisé
                               plutôt que silencieusement ignoré. */}
                           <Tooltip>
                             <TooltipTrigger render={<div className="flex-1" />}>
-                              <Select value={audioSelectValue(archiveAudioSel)} disabled={upscaling}
+                              <Select value={audioSelectValue(archiveAudioSel)} disabled={processing}
                                 onValueChange={(v) => v && setArchiveAudioSel(coerceAudioSelect(parseAudioSelectValue(v as string)))}>
                                 <SelectTrigger size="sm" className="w-full"><SelectValue>{audioSelectLabel(archiveAudioSel)}</SelectValue></SelectTrigger>
                                 <SelectContent>
@@ -578,24 +645,22 @@ export function FolderEditor({
                                 </SelectContent>
                               </Select>
                             </TooltipTrigger>
-                            {upscaling && <TooltipContent>{tr("archive.upscaleAudioNote")}</TooltipContent>}
+                            {processing && <TooltipContent>{tr("archive.processAudioNote")}</TooltipContent>}
                           </Tooltip>
                         </ArchiveRow>
                       )}
                       </ArchivePane>
 
-                      <ArchivePane open={pane === "upscale"}
-                        label={
-                          <Tooltip>
-                            <TooltipTrigger render={<span />}>{tr("archive.upscaleShort")}</TooltipTrigger>
-                            <TooltipContent>{tr("archive.upscaleHint")}</TooltipContent>
-                          </Tooltip>
-                        }
-                        summary={pane === "upscale" ? null : <ArchiveUpscaleSummary value={upscale} />}
-                        control={<ArchiveUpscaleToggle value={upscale} onChange={(patch) => setUpscale((u) => ({ ...u, ...patch }))} />}
-                        onToggle={() => setPane((p) => (p === "upscale" ? "" : "upscale"))}>
-                        <ArchiveUpscaleRows value={upscale} onChange={(patch) => setUpscale((u) => ({ ...u, ...patch }))} />
-                      </ArchivePane>
+                      {/* Traitement des plans pendant l'archivage : EXACTEMENT le volet d'un profil
+                          d'export (deux passes, mêmes ops, mêmes réglages) — c'est le même composant.
+                          Seul « Quand » est propre à l'archivage : lui seul peut différer le travail. */}
+                      <ExportProcessPane
+                        value={process}
+                        onChange={(patch) => setProcess((p) => ({ ...p, ...patch }))}
+                        open={pane === "process1" ? 0 : pane === "process2" ? 1 : null}
+                        onOpen={(i) => setPane(i == null ? "" : i === 0 ? "process1" : "process2")}
+                      />
+                      {processing && <ArchiveProcessWhen value={process} onChange={(patch) => setProcess((p) => ({ ...p, ...patch }))} />}
                       <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/50">
                         <HintLabel label={tr("editor.autoSyncLabel")} hint={tr("editor.autoSyncHint")}
                           className="min-w-0 flex-1 truncate text-xs font-medium text-foreground" />
@@ -613,8 +678,9 @@ export function FolderEditor({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>{tr("common:action.cancel")}</Button>
-            <Button onClick={save} disabled={!name.trim() || saving}>
+            {moveErr && <p role="alert" className="text-xs text-destructive">{moveErr}</p>}
+            <Button variant="outline" disabled={saving || sharing} onClick={() => onOpenChange(false)}>{tr("common:action.cancel")}</Button>
+            <Button onClick={save} disabled={!name.trim() || saving || sharing}>
               {saving && <Spinner className="size-4" />}
               {relocating ? tr("editor.moving") : editing ? tr("common:action.save") : tr("editor.create")}
             </Button>

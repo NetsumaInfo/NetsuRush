@@ -27,6 +27,7 @@ import {
 import { DEFAULT_PREVIEW_SETTINGS, readPreviewSettings, writePreviewSettings } from "@/lib/previewSettings";
 import { DEFAULT_SEARCH_PERF, readSearchPerf, writeSearchPerf, type SearchPerfSettings } from "@/lib/searchPerf";
 import { DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyDurations } from "@/lib/notifySettings";
+import { DEFAULT_POWER_PROMPT, readPowerPrompt, writePowerPrompt, type PowerPromptSettings } from "@/lib/powerSettings";
 import { readFrames, writeFrames, type SamplingFrames } from "@/lib/sampling";
 import type { PreviewGenerationSettings } from "@/lib/bridge";
 import {
@@ -261,6 +262,10 @@ export interface SettingsSlice {
   notify: NotifyDurations;
   setNotify: (patch: Partial<NotifyDurations>) => void;
   resetNotify: () => void;
+  // Ce que la surface « énergie hôte » a le droit de proposer d'elle-même (cf. lib/powerSettings).
+  powerPrompt: PowerPromptSettings;
+  setPowerPrompt: (patch: Partial<PowerPromptSettings>) => void;
+  resetPowerPrompt: () => void;
   // Options de performance de la recherche (partagées avec les autres fenêtres, cf. useSharedPrefs).
   searchPerf: SearchPerfSettings;
   setSearchPerf: (patch: Partial<SearchPerfSettings>) => void;
@@ -481,6 +486,9 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     notify: readNotify(),
     setNotify: (patch) => set({ notify: writeNotify({ ...get().notify, ...patch }) }),
     resetNotify: () => set({ notify: writeNotify(DEFAULT_NOTIFY) }),
+    powerPrompt: readPowerPrompt(),
+    setPowerPrompt: (patch) => set({ powerPrompt: writePowerPrompt({ ...get().powerPrompt, ...patch }) }),
+    resetPowerPrompt: () => set({ powerPrompt: writePowerPrompt(DEFAULT_POWER_PROMPT) }),
     searchPerf: readSearchPerf(),
     setSearchPerf: (patch) => set({ searchPerf: writeSearchPerf({ ...get().searchPerf, ...patch }) }),
     resetSearchPerf: () => set({ searchPerf: writeSearchPerf(DEFAULT_SEARCH_PERF) }),

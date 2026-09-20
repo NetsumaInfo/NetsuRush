@@ -38,6 +38,7 @@ import {
   makeFrameItem,
 } from "./referenceShared";
 import { shapeBBox } from "./drawGeometry";
+import { resolveShapes } from "./drawAnchor";
 import { isPalm, isTouchFirst, kindOf, usesBarrel, watchPen, type PointerKind } from "./tabletInput";
 import { boundsOf, rotatedBBox } from "./boardArrange";
 import { useLive } from "./boardLive";
@@ -131,7 +132,7 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
   const focusReq = useBoard((s) => s.focusReq);
   const setView = useBoard((s) => s.setView);
   const select = useBoard((s) => s.select);
-  const selectMany = useBoard((s) => s.selectMany);
+  const selectRegion = useBoard((s) => s.selectRegion);
   const addItem = useBoard((s) => s.addItem);
 
   const [over, setOver] = useState(false);
@@ -562,10 +563,23 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
       const a = screenToBoard(v, Math.min(m.x0, m.x1), Math.min(m.y0, m.y1));
       const b = screenToBoard(v, Math.max(m.x0, m.x1), Math.max(m.y0, m.y1));
       if (Math.abs(m.x1 - m.x0) > 4 || Math.abs(m.y1 - m.y0) > 4) {
-        const ids = useBoard.getState().items
+        const all = useBoard.getState().items;
+        const ids = all
+          .filter((it) => it.kind !== "draw")
           .filter((it) => it.x < b.x && it.x + it.w > a.x && it.y < b.y && it.y + it.h > a.y)
           .map((it) => it.id);
-        selectMany(ids);
+        // Le calque de dessin est UN item singleton de géométrie nulle : le test de boîte ci-dessus
+        // ne pouvait jamais l'attraper, et un lasso sur des tracés ne sélectionnait donc rien. Ce
+        // sont les FORMES qui portent une emprise, et c'est sur elles que le lasso doit porter.
+        // Résolues d'abord : une flèche ancrée à une image vit en coordonnées d'item, pas de monde.
+        const stored = all.find((it) => it.kind === "draw")?.shapes ?? [];
+        const shapeIds = resolveShapes(stored, all)
+          .filter((shape) => {
+            const [sx0, sy0, sx1, sy1] = shapeBBox(shape);
+            return sx0 < b.x && sx1 > a.x && sy0 < b.y && sy1 > a.y;
+          })
+          .map((shape) => shape.id);
+        selectRegion(ids, shapeIds);
       }
     }
     gesture.current = null;
@@ -575,7 +589,7 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     setMarquee(null);
     if (containerRef.current) containerRef.current.style.cursor = "";
     if (wasPanning) useBoard.getState().endNavigation();
-  }, [selectMany, setView]);
+  }, [selectRegion, setView]);
 
   // Cadre un ensemble d'items dans le viewport. Sans liste → tout le board ; la mesure porte sur
   // l'emprise TOURNÉE, sinon une image pivotée déborderait du cadrage.

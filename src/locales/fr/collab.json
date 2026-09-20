@@ -4,7 +4,10 @@
   "signedOut": "Connecte-toi pour partager un document.",
   "surface": {
     "unknown": "Document partagé",
-    "board": "Board de référence"
+    "board": "Board de référence",
+    "collection": "Collection",
+    "notebook": "Carnet NetsuBook",
+    "notebook-page": "Document NetsuBook"
   },
   "device": {
     "title": "Cet appareil",
@@ -111,19 +114,19 @@
   "panel": {
     "title": "État du partage",
     "online": "{{count}} en ligne",
-    "alone": "Personne d'autre pour l'instant.",
+    "alone": "Personne d’autre",
     "hereNow": "En ligne",
-    "neverSeen": "Pas encore joint",
-    "seenMinutes": "Vu il y a {{count}} min",
-    "seenHours": "Vu il y a {{count}} h",
-    "seenDays": "Vu il y a {{count}} j",
-    "invited": "Invitation en attente",
+    "neverSeen": "Jamais connecté",
+    "seenMinutes": "Il y a {{count}} min",
+    "seenHours": "Il y a {{count}} h",
+    "seenDays": "Il y a {{count}} j",
+    "invited": "Invité",
     "unknownMember": "Membre",
-    "queued": "Des modifications attendent ici. Elles partiront seules dès qu'un appareil sera joignable.",
-    "upToDate": "Tout est synchronisé.",
-    "rotation": "Rotation de clé en attente : les nouvelles publications attendent un appareil du propriétaire.",
-    "waitingKey": "{{count}} membre(s) attendent la clé. Reste en ligne pour la leur transmettre.",
-    "nobodyReachable": "Personne n'est joignable pour l'instant : tes modifications partiront à leur retour."
+    "queued": "En attente d’envoi.",
+    "upToDate": "Tout est envoyé.",
+    "rotation": "Nouvelle clé nécessaire. Le propriétaire doit ouvrir l’app.",
+    "waitingKey": "{{count}} attendent la clé. Reste en ligne.",
+    "nobodyReachable": "Personne en ligne. Rien n’a été envoyé."
   },
   "board": {
     "noScene": "Enregistre d'abord ce board dans la bibliothèque de scènes.",

@@ -10,7 +10,7 @@ import type { Id } from "./_generated/dataModel";
 import { recordProjectAudit } from "./audit";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const MAX_MEMBERS = 10;
+export const MAX_MEMBERS = 15;
 const MAX_PROJECTS_PER_ACCOUNT = 100;
 const MAX_VISIBLE_INVITES = 100;
 export type ProjectRole = "owner" | "editor" | "viewer";
@@ -197,6 +197,9 @@ export const abortEmptyProject = mutation({
       await ctx.db.delete(upload._id);
     }
     for (const member of members) await ctx.db.delete(member._id);
+    const abandonedEntries = await ctx.db.query("collectionEntries")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId)).take(5001);
+    for (const entry of abandonedEntries) await ctx.db.delete(entry._id);
     await ctx.db.delete(projectId);
     return { status: "aborted" as const };
   },
@@ -452,6 +455,7 @@ export const getProjectDetails = query({
         members.map(async (member) => ({
           ...(await profileFor(ctx, member.userId)),
           role: member.role,
+          canDeleteOthers: member.canDeleteOthers === true,
         })),
       ),
       pending: await Promise.all(
@@ -574,7 +578,9 @@ export const setMemberRole = mutation({
     if (!row || row.role === "owner")
       throw new Error("member cannot be changed");
     const downgrade = row.role === "editor" && next === "viewer";
-    await ctx.db.patch(row._id, { role: next });
+    // A viewer writes nothing, so any delegated removal goes with the role. Keeping it would give
+    // it back silently on a later promotion, without the owner ever granting it again.
+    await ctx.db.patch(row._id, next === "viewer" ? { role: next, canDeleteOthers: false } : { role: next });
     if (downgrade) await ctx.db.patch(projectId, { rotationRequired: true });
     await recordProjectAudit(ctx, {
       projectId,
@@ -774,6 +780,9 @@ export const deleteProject = mutation({
       .withIndex("by_project_created", (q) => q.eq("projectId", projectId))
       .collect();
     for (const event of auditEvents) await ctx.db.delete(event._id);
+    const collectionEntries = await ctx.db.query("collectionEntries")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId)).take(5001);
+    for (const entry of collectionEntries) await ctx.db.delete(entry._id);
     await ctx.db.delete(projectId);
     return { status: "deleted" as const };
   },

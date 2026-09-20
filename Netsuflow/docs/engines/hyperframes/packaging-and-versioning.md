@@ -2,8 +2,12 @@
 
 ## Baseline pin
 
-The prototype is pinned to `@hyperframes/engine` 0.8.27 (upgraded from 0.8.16
-on 2026-09-03: +2 root exports, 0 removals, pixel-identical references).
+The prototype is pinned to `@hyperframes/engine` 0.8.30 (upgraded from 0.8.27
+on 2026-09-07: 193 root exports before and after, 0 additions, 0 removals, and
+the seven reference frames pixel-identical to the 0.8.16 record — same
+`pixelsSha256` on every one, so the capture path has not moved across three
+minor versions). Earlier: 0.8.27, upgraded from 0.8.16 on 2026-09-03 (+2 root
+exports, 0 removals, pixel-identical references).
 The research snapshot found `@hyperframes/engine` 0.8.16 and Node `>=22` in
 the npm registry on 2026-08-27. Never use `latest` in a product build. Pin:
 

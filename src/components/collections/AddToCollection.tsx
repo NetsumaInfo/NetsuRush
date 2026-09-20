@@ -3,11 +3,12 @@
 // en un clic) + toutes les collections + création inline. Favoris persistés (localStorage). Partagé partout.
 import { useEffect, useMemo, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
-import { FolderPlus, Check, Plus, Search, Star } from "lucide-react";
+import { FolderPlus, Check, Plus, Search, Star, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type CollectionShot, type CollectionMeta } from "@/lib/bridge";
 import { CollectionGlyph, DEFAULT_COLLECTION_COLOR } from "./collectionGlyph";
 import { loadCollFavs, saveCollFavs } from "./collectionShared";
@@ -88,16 +89,26 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
     setName(""); setCreating(false); close();
   }
 
+  // Collection partagée EN LECTURE : on n'y range rien. Laisser essayer écrivait le plan dans la copie
+  // locale, la publication était refusée par le serveur, et il restait là — invisible et jamais partagé.
+  const readOnly = (c: CollectionMeta) => !!c.collaboration?.projectId && c.collaboration.role === "viewer";
+
   const Row = (c: CollectionMeta) => (
     <div key={c.id} className="group/row flex items-center gap-1 rounded-lg pr-1 transition-colors hover:bg-accent">
-      <button type="button" onClick={() => range(c.id)} disabled={!!busy}
+      <button type="button" onClick={() => range(c.id)} disabled={!!busy || readOnly(c)}
         className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm disabled:opacity-60">
         <CollectionGlyph icon={c.icon} color={c.color} size={22} />
         <span className="min-w-0 flex-1 truncate">{c.name}</span>
         {busy === c.id ? <Spinner className="size-3.5 text-muted-foreground" />
           : done === c.id ? <Check className="h-3.5 w-3.5 text-[var(--color-ok)]" strokeWidth={3} />
-          : <span className="text-[11px] tabular-nums text-muted-foreground">{c.count}</span>}
+          : !readOnly(c) && <span className="text-[11px] tabular-nums text-muted-foreground">{c.count}</span>}
       </button>
+      {/* Le cadenas vit HORS du bouton désactivé : un élément désactivé n'émet aucun survol, sa bulle
+          ne s'ouvrirait jamais. */}
+      {readOnly(c) && <Tooltip>
+        <TooltipTrigger render={<span className="shrink-0 text-muted-foreground" />}><Lock className="h-3 w-3" /></TooltipTrigger>
+        <TooltipContent>{t("share.readOnly")}</TooltipContent>
+      </Tooltip>}
       <button type="button" aria-label={favs.includes(c.id) ? t("fav.remove") : t("fav.pin")}
         onClick={(e) => { e.stopPropagation(); toggleFav(c.id); }}
         className={cn("shrink-0 rounded p-1 transition-opacity", favs.includes(c.id) ? "text-amber-400" : "text-muted-foreground opacity-0 hover:text-foreground group-hover/row:opacity-100")}>
@@ -114,7 +125,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
             // Les touches du popover ne redescendent JAMAIS à la carte porteuse : par un portail,
             // React les fait remonter dans son arbre, où une grille de plans écoute Espace/Entrée.
             onKeyDown={(e) => e.stopPropagation()}
-            className="w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]"
+            className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]"
           >
             <div className="px-1 pb-1.5 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {t("range.rangeTitle", { count: shots.length })}

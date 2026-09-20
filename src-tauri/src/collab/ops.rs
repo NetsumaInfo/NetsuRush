@@ -727,6 +727,13 @@ impl Stroke {
     rename_all_fields = "camelCase"
 )]
 pub enum CollabOp {
+    SurfaceRestoreEntry { entry_id: ItemId },
+    SurfaceSetEntry { entry_id: ItemId, kind: SurfaceEntryKind, fields: std::collections::BTreeMap<String, serde_json::Value> },
+    SurfaceDeleteEntry { entry_id: ItemId },
+    SurfaceTextInsert { entry_id: ItemId, field: String, index: u32, text: String },
+    SurfaceTextFormat { entry_id: ItemId, field: String, start: u32, end: u32, style: String, value: Option<String> },
+    SurfaceTextDelete { entry_id: ItemId, field: String, index: u32, length: u32 },
+    SurfaceSetMedia { entry_id: ItemId, field: String, manifest: Option<Box<MediaManifest>> },
     AddItem {
         item_id: ItemId,
         kind: ItemKind,
@@ -807,9 +814,42 @@ pub enum CollabOp {
     },
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum SurfaceEntryKind { Notebook, Page, Block, Database, Collection, CollectionItem }
+
+fn validate_surface_fields(fields: &std::collections::BTreeMap<String, serde_json::Value>) -> Result<(), CollabError> {
+    fn value(v: &serde_json::Value, depth: usize) -> Result<(), CollabError> {
+        if depth > 32 { return Err(CollabError::validation("surface field nesting exceeds limit")); }
+        match v {
+            serde_json::Value::Object(map) => for (key, child) in map { validate_id("surface key", key)?; value(child, depth + 1)?; },
+            serde_json::Value::Array(array) => { validate_count("surface array", array.len(), MAX_ARRAY_LEN)?; for child in array { value(child, depth + 1)?; } },
+            serde_json::Value::String(text) => validate_text("surface value", text, MAX_TEXT_LEN)?,
+            _ => (),
+        }
+        Ok(())
+    }
+    validate_count("surface fields", fields.len(), 256)?;
+    for (key, child) in fields { validate_id("surface field", key)?; value(child, 0)?; }
+    if serde_json::to_vec(fields).map_err(|_| CollabError::validation("invalid surface fields"))?.len() > 2 * MAX_TEXT_LEN { return Err(CollabError::validation("surface entry too large")); }
+    Ok(())
+}
+
 impl CollabOp {
     pub fn validate(&self) -> Result<(), CollabError> {
         match self {
+            Self::SurfaceRestoreEntry { entry_id } => entry_id.validate(),
+            Self::SurfaceSetEntry { entry_id, fields, .. } => { entry_id.validate()?; validate_surface_fields(fields) }
+            Self::SurfaceDeleteEntry { entry_id } => entry_id.validate(),
+            Self::SurfaceTextInsert { entry_id, field, text, .. } => { entry_id.validate()?; validate_id("text field", field)?; validate_text("inserted text", text, MAX_TEXT_LEN) }
+            Self::SurfaceTextFormat { entry_id, field, start, end, style, value } => {
+                entry_id.validate()?; validate_id("text field", field)?;
+                if start >= end || !["bold", "italic", "underline", "strike", "code", "textColor", "backgroundColor", "link", "inline"].contains(&style.as_str()) { return Err(CollabError::validation("invalid surface text format")); }
+                if let Some(value) = value { validate_text("text format", value, MAX_SHORT_TEXT_LEN)?; }
+                Ok(())
+            }
+            Self::SurfaceTextDelete { entry_id, field, .. } => { entry_id.validate()?; validate_id("text field", field) }
+            Self::SurfaceSetMedia { entry_id, field, manifest } => { entry_id.validate()?; validate_id("media field", field)?; if let Some(manifest) = manifest { manifest.validate()?; } Ok(()) }
             Self::AddItem {
                 item_id, geometry, ..
             }
@@ -912,6 +952,8 @@ impl CollabOp {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OperationBatch {
     pub protocol: u32,
+    #[serde(default)]
+    pub base_revision: Option<u64>,
     pub ops: Vec<CollabOp>,
 }
 
@@ -919,6 +961,7 @@ impl OperationBatch {
     pub fn v1(ops: Vec<CollabOp>) -> Self {
         Self {
             protocol: OP_PROTOCOL_VERSION,
+            base_revision: None,
             ops,
         }
     }

@@ -238,7 +238,27 @@
     "restart": "重启并安装",
     "history": "各版本新内容",
     "whatsNew": "版本 {{version}} 的新内容",
-    "gotIt": "开始使用"
+    "gotIt": "开始使用",
+    "ytdlp": {
+      "hint": "解析视频链接的库。它的解析器经常失效：无需等待 NetsuRush 的下一个版本即可更新。",
+      "update": "更新",
+      "updating": "正在更新…",
+      "checking": "正在读取版本…",
+      "current": "版本 {{version}} · 已是最新",
+      "available": "版本 {{version}} · 有 {{latest}}",
+      "unknown": "版本 {{version}}",
+      "updated": "已更新 · 版本 {{version}}",
+      "missing": "未安装",
+      "notOwned": "版本 {{version}} · 在应用外安装",
+      "failed": "更新失败"
+    },
+    "kind": {
+      "feature": "新功能",
+      "fix": "修复",
+      "improvement": "改进",
+      "performance": "性能"
+    },
+    "reportSubject": "更新到 v{{version}} 失败"
   },
   "compatibility": {
     "title": "此电脑的兼容性",
@@ -278,6 +298,15 @@
       "transcription": "将语音转换为文字。",
       "notebook": "保存并整理笔记，无需 GPU。"
     }
+  },
+  "power": {
+    "title": "关闭剪辑软件",
+    "subtitle": "在繁重任务期间关闭 Resolve 或 Adobe 的提示。",
+    "offer": "建议关闭",
+    "reopen": "提醒重新打开",
+    "nub": "边缘标签",
+    "on": "开",
+    "off": "关"
   },
   "exportProfiles": {
     "title": "导出配置",
@@ -451,11 +480,7 @@
     "showProjectHint": "可能泄露客户名称。",
     "showElapsed": "已用时间",
     "showLinks": "可点击的卡片",
-    "showLinksHint": "图片打开 Discord 服务器，第一行打开仓库。",
-    "custom": "自定义文本",
-    "customHelp": "替换自动生成的行。{module} 和 {projet} 会被替换。",
-    "details": "第一行",
-    "state": "第二行"
+    "showLinksHint": "图片打开 Discord 服务器，第一行打开仓库。"
   },
   "storage": {
     "empty": "暂无缓存。",
@@ -672,7 +697,8 @@
     "system": {
       "updates": "更新",
       "compatibility": "兼容性",
-      "console": "控制台"
+      "console": "控制台",
+      "collaboration": "协作"
     }
   },
   "indexing": {
@@ -715,6 +741,25 @@
       "orphans": "没有板面需要的媒体",
       "orphansHint": "{{count}} 个文件 · {{size}}。已无处显示，但这是唯一的副本。",
       "move": "移动到文件夹…"
+    }
+  },
+  "collaboration": {
+    "title": "协作",
+    "description": "这些设置仅保存在本机上。选择默认配置，或按页面类别单独设置。",
+    "profilesHint": "实时：每 60 毫秒发送一次。平衡：200 毫秒。节能：900 毫秒，禁用媒体自动下载。",
+    "default": "默认配置",
+    "inherit": "使用默认配置",
+    "saveFailed": "无法在本机上保存偏好设置。",
+    "profiles": {
+      "live": "实时",
+      "balanced": "平衡",
+      "economy": "节能"
+    },
+    "surfaces": {
+      "board": "画板",
+      "collection": "集合",
+      "notebook": "笔记本",
+      "notebook-page": "笔记本页面"
     }
   }
 }

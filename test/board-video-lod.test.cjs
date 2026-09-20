@@ -14,6 +14,8 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const rel = 'src/components/reference/boardVideoLod.ts';
 // Le module tire React, le store et boardImageLod : on ne garde que les décisions pures.
 const src = 'const isRemoteRef = (r) => /^(https?:|data:|blob:)/i.test(r);\n'
+  + 'const isCollabRef = (r) => /^collab:/i.test(r);\n'
+  + 'const isCoreFileRef = (r) => !!r && !isRemoteRef(r) && !isCollabRef(r);\n'
   + read(rel)
     .replace(/^import[^;]*;$/gm, '')
     .replace(/export function useVideoStill[\s\S]*$/m, '');
@@ -24,6 +26,11 @@ const { stillSized, videoLodEligible, posterTime } = mod.exports;
 
 // 200×120 unités board, fichier local.
 const vid = (over = {}) => ({ kind: 'video', ref: 'C:/rushes/a.mp4', w: 200, h: 120, ...over });
+
+// Un média de board PARTAGÉ est servi par la coquille : le core ne sait pas en tirer d'affiche.
+test('a shared board media is never swapped for a still', () => {
+  assert.equal(videoLodEligible(vid({ ref: `collab:${'a'.repeat(64)}` }), 0.5, false), false);
+});
 
 test('a video shrunk to a postage stamp is frozen to its poster frame', () => {
   assert.equal(videoLodEligible(vid(), 0.5, false), true, '60 px écran : figée');

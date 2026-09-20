@@ -108,39 +108,48 @@ MCP server "search"  ──(JSON {id,cmd,...})──►  python search.py serve 
 
 ---
 
-## 4·B. Serveur MCP `davinci-resolve` — agir DANS Resolve
+## 4·B. Serveur MCP officiel de Blackmagic — outils `bmd_*`
 
-Pour que le modèle **agisse** (pas seulement cherche), on branche [**davinci-resolve-mcp** (samuelgursky)](https://github.com/samuelgursky/davinci-resolve-mcp) : serveur MCP qui expose le **scripting API de Resolve Studio** comme tools.
+DaVinci Resolve **Studio 21.1+** livre son propre serveur MCP, `ResolveMCP.exe`, dans le dossier d'installation (un bundle `DaVinciResolve.mcpb` l'accompagne : même serveur, empaqueté pour l'installateur d'extensions de Claude Desktop). Aucun serveur tiers n'est vendoré, et rien n'est redistribué : le binaire vient de l'installation de l'utilisateur, et sa version suit celle de Resolve.
 
-- **Transport** : process **stdio** local (pas de listener réseau).
-- **Runtime** : **Python 3.10+**, lancé en sidecar (peut partager le `.venv`, sinon le sien).
-- **Connexion Resolve** : via le scripting API officiel → exige **Preferences > General > External scripting using = Local** (à vérifier/guider dans l'UI, comme `WorkflowIntegration.node`).
-- **Tools** : mode **compound (défaut, 32 tools)** — opérations groupées par paramètre d'action : *project management, media pool, timeline editing, markers/review, color grading, Fusion, audio/Fairlight, render/deliver, media analysis*. Mode **granulaire (341 tools)** = un tool par méthode API (power-user) — **éviter** : trop de tools noie le modèle et explose le contexte. Rester en compound.
+- **Transport** : stdio local, JSON-RPC ligne par ligne (aucun listener réseau).
+- **Découverte** : `core/agent/mcp/resolveBin.js` — emplacements d'installation par plateforme, `NR_RESOLVE_MCP` pour forcer un chemin. Absent = édition gratuite ou Resolve non installé ; le reste du copilote fonctionne.
+- **14 outils** : `run_script` / `run_script_unsafe` (Python 3.14 avec `resolve` et `project` pré-injectés), `search_scripting_api`, `get_scripting_api`, `get_scripting_docs`, `get_whats_new`, `list_luts` / `list_dctls`, `generate_lut`, `update_dctl`, `delete_lut` / `delete_dctl`, `launch_resolve`, `get_resolve_status`.
+
+### Consommé par le registre, jamais branché en direct
+
+Le serveur **n'est pas** ajouté au `.mcp.json` qu'on écrit pour les agents CLI. L'agent l'appellerait alors directement, or la porte de permission de NetsuRush ne voit que **nos** outils : « lecture seule » laisserait un script réécrire le projet.
+
+`core/agent/tools/resolveMcp.js` le consomme donc comme client (`core/agent/mcp/client.js`) et **réenregistre ses outils dans le registre**, préfixés `bmd_`. Conséquences : une seule porte de permission, la même trace d'appel dans le panneau, et les moteurs BYOK y ont accès comme les CLI.
 
 ```
-MCP client (backend agent)
-   ├─ search           (stdio) → search.py serve   (SigLIP)
-   └─ davinci-resolve  (stdio) → davinci-resolve-mcp (scripting API Resolve)
+core (registre d'outils)
+   ├─ resolve_*  → pont Resolve maison (Python, scripting externe)
+   ├─ bmd_*      → (stdio, client) ResolveMCP.exe        ← serveur officiel
+   └─ exposés aux agents CLI par mcp/stdio.js (un seul serveur : `netsurush`)
 ```
+
+La liste d'outils est **lue sur le serveur**, jamais tapée ici : les schémas sont livrés avec Resolve et changent avec lui. Seul le **risque** de chaque outil nous appartient, le serveur n'ayant aucune notion de nos modes de permission. Elle arrive donc dans le registre **après** le démarrage : `session.send` attend `resolveMcp.ready()` avant de composer sa liste d'outils.
 
 ### Deux chemins vers Resolve — ne pas les confondre
 
-NetsuRush touche Resolve par **deux mécanismes distincts** qui coexistent :
-
-| | **`main.js` (notre plugin)** | **davinci-resolve-mcp (agent)** |
+| | **`resolve_*` (pont maison)** | **`bmd_*` (serveur officiel)** |
 |---|---|---|
-| Accès | `WorkflowIntegration.node` (dans l'Electron de Resolve) | scripting API externe (`External scripting = Local`) |
-| Pilote | le code NetsuRush (derush, proxies, détection) | le **LLM**, à la volée |
-| Rôle | flux maison **déterministe** | actions **génériques/ouvertes** demandées en langage naturel |
+| Accès | scripting externe, pont Python du core | scripting externe, process de Blackmagic |
+| Pilote | code NetsuRush déterministe, exposé au modèle outil par outil | script Python écrit par le **LLM**, à la volée |
+| Rôle | derush, coupe, proxies, `resolve_call` pour un appel isolé | boucles et allers-retours longs, API à jour, LUT et DCTL |
 
-**Invariant à protéger** : la création de timeline **frame-accurate** (`buildTimeline` dans `main.js` → `AppendToTimeline`, cf. CLAUDE.md) reste **notre** chemin pour le derush précis. Le tool `build_timeline` (§3) route vers `main.js`, **pas** vers les tools timeline génériques du MCP Resolve (qui n'honorent pas les 3 règles : endFrame inclusif, `timelineFrameRate`, remap d'espace-frames). Le MCP Resolve sert les actions **larges** (créer un projet, ajouter des marqueurs, lancer un render, grader…), pas la coupe au frame près.
+**Invariant à protéger** : la création de timeline **frame-accurate** reste `core/timeline.js` (`endFrame` inclusif, fréquence posée avant création, remap des frames du détecteur — cf. `docs/invariants.md`). `build_timeline` route vers lui, jamais vers un script généré.
 
-### Garde-fous (agir = muter le projet)
+**Anti-hallucination** : `bmd_search_scripting_api` et `bmd_get_whats_new` interrogent la version **installée**. Le prompt pilote impose de chercher avant d'affirmer qu'une chose est impossible — l'agent inventait des limites d'API tirées de sa mémoire.
 
-Agir dans Resolve = le LLM peut **modifier le projet de l'user**. Donc :
-- **Confirmation** des actions destructives/irréversibles (supprimer, render, écraser) avant exécution — l'UI affiche l'action + args, l'user valide.
-- **Allowlist** de tools exposés au modèle (commencer lecture + éditions sûres ; gating sur le reste).
-- **Validation des args** (comme §5b) avant tout appel.
+### Garde-fous
+
+- **Risque par outil** (`RISK` dans `resolveMcp.js`) : lecture pour la doc et les listes, écriture pour `launch_resolve` / `update_dctl` / `generate_lut`, destructif pour les suppressions et pour `run_script` — son bac à sable protège les fichiers, pas le projet.
+- **`run_script` est jugé sur pièce** (`scriptRisk`) : un script qui n'appelle que des verbes de lecture (`Get`, `Is`, `Count`, `Find`…) redevient une **lecture**, donc silencieux en mode « demander » et autorisé en « lecture seule » — inspecter son projet est précisément ce qu'on attend de ce mode. Reconnaissance par **liste blanche** : verbe inconnu, appel dynamique (`exec`, `getattr`), ou l'une des méthodes de l'API qui empruntent un verbe de lecture (`AppendToTimeline`, `CopyGrades`, `CopyTimeline`) ⇒ destructif. Une méthode d'une version future de Resolve tombe donc du côté prudent sans que le fichier ait à la connaître. `run_script_unsafe` n'est **pas** jugé ainsi : hors du bac à sable, même une lecture atteint le disque et le réseau.
+- **Un outil inconnu est destructif** : une version future de Resolve qui ajoute un outil ne le fait pas entrer en lecture seule au motif que ce fichier ne le connaît pas.
+- **Plafond de résultat** (`MAX_CHARS`, 200 000 caractères) : un résultat trop gros est **refusé, jamais tronqué** — un stub d'API coupé fait lire au modèle l'absence d'une classe qui existe. Le plafond passe volontairement au-dessus du stub complet (146 000 caractères mesurés, ~36 500 tokens) : le couper ferait un outil qui échoue toujours. C'est le prompt pilote qui envoie chercher (`bmd_search_scripting_api`, ~1 700 tokens) avant de tout tirer.
+- **`run_script_unsafe` n'est pas enregistré par défaut.** Il donne fichiers, réseau et sous-processus complets — exactement ce que `runtimes/defs.js` refuse aux agents CLI (`--disallowedTools Bash Edit Write`), et qu'aucun mode de permission ne peut retenir une fois le script parti. Case à cocher dans les réglages du Chat, décochée.
 
 ---
 

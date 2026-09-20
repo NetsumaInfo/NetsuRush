@@ -22,7 +22,18 @@
           if (core) window.__NR_CORE__ = core;
           // ?tk=<token de core-port.json> : sans lui /media et /stream répondent 403, donc une grille
           // ouverte dans un navigateur reste sans vignette ni aperçu (cf. coreClient `TOKEN`).
+          // Retiré de l'adresse dès sa lecture : un moteur antérieur à Chromium 85 envoie l'URL
+          // complète en Referer aux sites tiers. Gardé pour la session, car l'app se recharge
+          // parfois elle-même (menu, écran d'erreur) sans repasser par le panneau.
           var tk = p.get("tk");
+          if (tk) {
+            try { sessionStorage.setItem("nr.core-token", tk); } catch (e1) {}
+            p.delete("tk");
+            var rest = p.toString();
+            history.replaceState(history.state, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+          } else {
+            try { tk = sessionStorage.getItem("nr.core-token"); } catch (e1) {}
+          }
           if (tk) window.__NR_TOKEN__ = tk;
           if (p.get("remote") === "1") window.__NR_REMOTE__ = true;
           var host = p.get("host");

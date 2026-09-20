@@ -635,5 +635,12 @@
     "inProgress": "In Arbeit",
     "done": "Erledigt",
     "name": "Datenbank"
+  },
+  "share": {
+    "document": "Dieses Dokument teilen",
+    "notebook": "Notizbuch teilen",
+    "failed": "Teilen fehlgeschlagen.",
+    "manageRemoval": "Verwende die Zusammenarbeitseinstellungen, um das geteilte Dokument zu verlassen oder zu löschen.",
+    "retry": "Erneut versuchen"
   }
 }

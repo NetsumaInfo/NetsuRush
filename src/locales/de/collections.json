@@ -16,16 +16,15 @@
   "archive": {
     "profileName": "Archiv",
     "onDisk": "Auf Festplatte archivieren",
-    "upscaleHint": "Vergrößert jede Einstellung beim Archivieren. Erzwingt eine Neukodierung.",
     "videoFormat": "Videoformat",
-    "upscaleShort": "Upscaling",
-    "upscaleAudioNote": "Die Spur nach Sprache gilt beim Upscaling nicht.",
-    "upscaleMode": "Wann",
-    "upscaleModeNow": "Sofort",
-    "upscaleModeIdle": "GPU frei",
-    "upscaleNeedsEncode": "Upscale ersetzt die Pixel: Stream-Kopie ist unmöglich.",
+    "processAudioNote": "Die Spur nach Sprache gilt bei einer Verarbeitung nicht.",
+    "processMode": "Wann",
+    "processModeNow": "Sofort",
+    "processModeIdle": "GPU frei",
+    "processNeedsEncode": "Eine Verarbeitung ersetzt die Pixel: Stream-Kopie ist unmöglich.",
     "queueRunning": "Wird gerade archiviert",
-    "queuePending": "Wartet auf eine freie GPU"
+    "queuePending": "Wartet auf eine freie GPU",
+    "requiredForShare": "Die Archivierung trägt die Freigabe und bleibt daher aktiv."
   },
   "submenu": {
     "rangeIn": "In Sammlung ablegen",
@@ -213,5 +212,29 @@
     "dlFailed": "Download {{id}}: {{error}}.",
     "dlModelsUnavailable": "Modell-Download nicht verfügbar: {{error}}.",
     "recognitionUnavailable": "Erkennung nicht verfügbar: {{error}}."
+  },
+  "share": {
+    "title": "Freigabe",
+    "people": "Personen auswählen",
+    "hideLocal": "Für mich ausblenden",
+    "removeGlobal": "Für alle entfernen",
+    "restoreHidden": "Ausgeblendete Shots anzeigen",
+    "missingMedia": "Medium nicht verfügbar",
+    "retry": "Erneut versuchen",
+    "preparing": "Vorbereitung…",
+    "failed": "Freigabe oder Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "unavailable": "Konfiguriere die Zusammenarbeit, um diese Sammlung zu teilen.",
+    "signIn": "Melde dich an, um Personen auszuwählen.",
+    "viaArchive": "Andere erhalten die archivierten Dateien der Sammlung, niemals die Quellvideos. Die Archivierung auf Festplatte wird mit der Freigabe aktiviert.",
+    "readOnly": "Schreibgeschützt mit dir geteilt.",
+    "nobody": "Noch niemand.",
+    "pending": "Ausstehend",
+    "owner": "Eigentümer",
+    "permView": "Nur lesen",
+    "permOwn": "Bearbeiten — eigene Shots",
+    "permAll": "Bearbeiten — alle Shots",
+    "stop": "Freigabe beenden",
+    "leave": "Freigabe verlassen",
+    "stopHint": "Andere verlieren den Zugriff auf die geteilten Shots."
   }
 }

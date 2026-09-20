@@ -112,3 +112,22 @@ test('YouTube relay logs the yt-dlp failure before returning 502', async () => {
     delete require.cache[require.resolve('../core/ytstream')];
   }
 });
+
+// YouTube refuse une part croissante de vidéos à un appelant sans session. La seconde passe lit les
+// cookies d'un navigateur : elle doit rester RÉSERVÉE à ce refus-là. L'élargir à tout échec ferait
+// ouvrir le trousseau de l'utilisateur pour une vidéo simplement privée ou supprimée.
+test('only a bot check earns a second pass with browser cookies', () => {
+  const { needsCookies } = require('../core/ytstream');
+  for (const message of [
+    "ERROR: [youtube] abc: Sign in to confirm you're not a bot. Use --cookies-from-browser",
+    'ERROR: HTTP Error 429: Too Many Requests',
+    'ERROR: [youtube] abc: Sign in to confirm your age',
+  ]) assert.equal(needsCookies(message), true, message);
+
+  for (const message of [
+    'ERROR: [youtube] abc: Private video',
+    'ERROR: [youtube] abc: Video unavailable',
+    'ERROR: unable to download video data: HTTP Error 403',
+    '',
+  ]) assert.equal(needsCookies(message), false, message);
+});

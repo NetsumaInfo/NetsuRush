@@ -1,12 +1,14 @@
 {
-  "stream": { "error": "Something went wrong." },
+  "stream": {
+    "error": "Something went wrong."
+  },
   "panel": {
     "copilot": "NetsuRush Copilot",
-    "noCliAgent": "No CLI agent detected — switch to Claude/OpenAI or install claude/codex",
+    "noCliAgent": "No agent installed — open the settings to install one or add an API key",
     "configureKey": "Set an API key to get started"
   },
   "composer": {
-    "pickEngine": "Set up an engine (API key or CLI agent) in settings ⚙ to send.",
+    "pickEngine": "Pick a ready engine in the menu, or set one up in the settings ⚙.",
     "placeholder": "Ask the AI to drive Resolve…",
     "attachFiles": "Attach files",
     "attachTip": "Attach image / file",
@@ -14,7 +16,8 @@
     "stop": "Stop",
     "send": "Send"
   },
-  "header": { "defaultTitle": "New conversation",
+  "header": {
+    "defaultTitle": "New conversation",
     "conversations": "Conversations",
     "newConv": "New conversation",
     "noConv": "No conversations",
@@ -27,41 +30,72 @@
     "show": "Show",
     "keySet": "set",
     "keyAbsent": "not set",
-    "cliAgents": "Detected CLI agents",
+    "cliAgents": "Agents",
     "rescan": "Rescan",
     "noAgentsPre": "No agents listed — click \"Rescan\". If still nothing, install ",
     "noAgentsPost": " and make sure they're in the core's PATH.",
     "detected": "detected",
     "absent": "not found",
-    "saved": "Saved"
+    "saved": "Saved",
+    "test": "Test",
+    "getKey": "Get a key",
+    "reachable": "connected ({{ms}} ms)",
+    "connect": "Connect (opens a terminal)",
+    "loginOpened": "terminal opened — finish signing in there",
+    "appNoCli": "app without command",
+    "appNoCliHint": "The application is installed, but its {{bin}} command is not on the PATH. Add it from the application.",
+    "readyCount": "{{ready}} / {{total}} ready",
+    "installOpened": "install started in a terminal",
+    "docs": "Documentation",
+    "installPage": "Official install page",
+    "resolveMcp": "DaVinci Resolve MCP",
+    "resolveMcpTools": "{{n}} tools",
+    "resolveMcpServer": "Blackmagic's own server",
+    "resolveMcpMissing": "Ships with DaVinci Resolve Studio 21.1 or newer. Not found on this computer.",
+    "resolveMcpSilent": "no answer",
+    "resolveMcpSilentHint": "The server is there but did not answer. Start Resolve, then scan again.",
+    "resolveMcpHint": "{{n}} tools added to the copilot: Python scripts inside Resolve, scripting API search, documentation, LUTs and DCTLs.",
+    "resolveUnsafe": "Allow scripts outside the sandbox",
+    "resolveUnsafeHint": "Adds bmd_run_script_unsafe: full access to files, network and subprocesses. No permission mode can hold it back once the script is running."
   },
   "engine": {
-    "engine": "Engine",
-    "cliAgent": "CLI agent",
-    "agent": "Agent",
+    "agents": "Installed agents",
+    "apiKeys": "API keys",
+    "notReady": "not set up",
+    "none": "No engine",
     "model": "Model",
     "default": "Default",
     "freeId": "custom id: vendor/model…",
-    "permissions": "Permissions"
+    "refreshModels": "Refresh the model list",
+    "source": {
+      "vendor": "current",
+      "openrouter": "public catalogue",
+      "curated": "offline"
+    },
+    "sourceHint": {
+      "vendor": "Returned by the provider using your key: these ids are exact.",
+      "openrouter": "OpenRouter's public catalogue, no key needed. Current, but an id may differ from the vendor's own API.",
+      "curated": "No network: built-in fallback list, possibly out of date."
+    },
+    "permissions": "Permissions",
+    "thinking": "Thinking",
+    "effort": "Effort"
   },
   "mode": {
     "readonly": "Read-only",
     "ask": "Ask",
-    "safe": "Duplicate",
     "auto": "Auto"
   },
   "modeTitle": {
     "readonly": "Read-only — no writes",
     "ask": "Only confirms risky actions (files/render/media deletion); timeline edits go through",
-    "safe": "Duplicates the timeline before writing — the original stays untouched",
     "auto": "Writes straight to the timeline, no confirmation"
   },
   "message": {
     "thinking": "Thinking…",
     "reasoning": "Reasoning",
-    "hideReasoning": "Hide reasoning",
-    "showReasoning": "Show reasoning",
-    "copyText": "Copy text"
+    "copyText": "Copy text",
+    "copyReasoning": "Copy the reasoning"
   },
   "toolcard": {
     "running": "running",
@@ -72,7 +106,8 @@
     "copyArgs": "Copy arguments",
     "copyResult": "Copy result",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "done": "ok"
   },
   "tool": {
     "quoted": " “{{value}}”",
@@ -107,7 +142,8 @@
     "render": "Render · {{action}}",
     "timelineItem": "Current shot · {{action}}",
     "project": "Project · {{action}}",
-    "resolveCall": "Resolve API · {{root}}"
+    "resolveCall": "Resolve API · {{root}}",
+    "bmd": "Resolve · {{action}}"
   },
   "approval": {
     "title": "Allow this action?",
@@ -122,5 +158,24 @@
   "store": {
     "convFallback": "Conversation",
     "error": "error"
+  },
+  "duplicate": {
+    "title": "Duplicate before modifying",
+    "hint": "Works on a copy of the timeline; the original is left untouched."
+  },
+  "thinking": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "xhigh": "Very high",
+    "max": "Max"
+  },
+  "trace": {
+    "working": "Working…",
+    "workedFor_one": "Worked for {{count}} second",
+    "workedFor_other": "Worked for {{count}} seconds"
+  },
+  "thinkingSlider": {
+    "reset": "Back to the default effort"
   }
 }

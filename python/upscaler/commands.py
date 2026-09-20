@@ -13,6 +13,17 @@ from .log import log
 from .media import (decode_one_frame, open_decoder, open_encoder,
                     open_gif_encoder, probe, probe_color, write_png)
 from .pipeline import run_stream
+from .plan import plan_size, resize_to
+
+
+def _plan(args, up, w, h):
+    """(feed, out) for this request: resolution class when given, factor otherwise."""
+    return plan_size(w, h, up.scale, int(getattr(args, "target", 0) or 0), args.outscale)
+
+
+def _decode_size(feed, w, h):
+    """Size the decoder must scale to, or None when the source goes to the network untouched."""
+    return None if tuple(feed) == (w, h) else feed
 
 
 def cmd_gif(args):
@@ -26,10 +37,10 @@ def cmd_gif(args):
     up = get_upsampler(args.model, args.tile, args.fp32, args.denoise,
                        getattr(args, "tile_pad", 10), getattr(args, "pre_pad", 0))
     log("STAGE:infer")
-    ow, oh = w * args.outscale, h * args.outscale
-    dec = open_decoder(args.input, None, None)
+    (fw, fh), (ow, oh) = _plan(args, up, w, h)
+    dec = open_decoder(args.input, None, None, None, _decode_size((fw, fh), w, h))
     enc = open_gif_encoder(args.out, ow, oh, fps_str)
-    done, err = run_stream(dec, enc, up, w, h, args.outscale, nb, "ffmpeg gif interrompu",
+    done, err = run_stream(dec, enc, up, fw, fh, (ow, oh), nb, "ffmpeg gif interrompu",
                            args.cleanup_noise, args.cleanup_edges)
 
     if err:
@@ -62,13 +73,14 @@ def cmd_upscale(args):
 
     # Colorimétrie source → round-trip YUV→RGB→YUV identité (sinon sortie plus foncée que l'aperçu).
     color = probe_color(args.input, w, h)
-    ow, oh = w * args.outscale, h * args.outscale
+    (fw, fh), (ow, oh) = _plan(args, up, w, h)
     # Les images sortent en RGB plein : pas de conversion colorimétrique de sortie, donc pas de
     # matrice à imposer au décodeur non plus (l'invariant bt709 ne concerne que la sortie YUV).
-    dec = open_decoder(args.input, args.start, args.end, None if images else color)
+    dec = open_decoder(args.input, args.start, args.end, None if images else color,
+                       _decode_size((fw, fh), w, h))
     enc = (open_image_writer(args.out, ow, oh, fps_str, spec) if images
            else open_encoder(args.out, ow, oh, fps_str, args, color))
-    done, err = run_stream(dec, enc, up, w, h, args.outscale, nb, t("encoder_stopped"),
+    done, err = run_stream(dec, enc, up, fw, fh, (ow, oh), nb, t("encoder_stopped"),
                            args.cleanup_noise, args.cleanup_edges)
 
     # Une image UNIQUE fait sortir ffmpeg après sa première frame : le tuyau se ferme alors que le
@@ -107,8 +119,10 @@ def cmd_frame(args):
     up = get_upsampler(args.model, args.tile, args.fp32, args.denoise,
                        getattr(args, "tile_pad", 10), getattr(args, "pre_pad", 0))
     log("STAGE:infer")
-    output, _ = up.enhance(frame, outscale=args.outscale)
-    output = cleanup_frame(output, args.cleanup_noise, args.cleanup_edges)
+    # Same sizing as the full run, so the preview shows the output the job will write.
+    feed, out_size = _plan(args, up, w, h)
+    output, _ = up.enhance(resize_to(frame, feed, before_network=True))
+    output = cleanup_frame(resize_to(output, out_size), args.cleanup_noise, args.cleanup_edges)
     if not write_png(output, args.out):
         return {"ok": False, "error": t("write_upscaled_png")}
 
@@ -153,8 +167,9 @@ def cmd_image(args):
     up = get_upsampler(args.model, args.tile, args.fp32, args.denoise,
                        getattr(args, "tile_pad", 10), getattr(args, "pre_pad", 0))
     log("STAGE:infer")
-    output, _ = up.enhance(bgr, outscale=args.outscale)
-    output = cleanup_frame(output, args.cleanup_noise, args.cleanup_edges)
+    feed, out_size = _plan(args, up, bgr.shape[1], bgr.shape[0])
+    output, _ = up.enhance(resize_to(bgr, feed, before_network=True))
+    output = cleanup_frame(resize_to(output, out_size), args.cleanup_noise, args.cleanup_edges)
     oh, ow = output.shape[:2]
     if alpha is not None:
         a = cv2.resize(alpha, (ow, oh), interpolation=cv2.INTER_LINEAR)
@@ -175,19 +190,20 @@ def cmd_image(args):
 
 
 # Valeurs par défaut d'une requête worker (les clés absentes du JSON prennent celles-ci).
-FRAME_DEFAULTS = {"time": 0.0, "model": "light", "outscale": 2, "denoise": None, "tile": 0,
+# `target` = resolution class (1080, 1440, 2160); 0 = the `outscale` factor applies.
+FRAME_DEFAULTS = {"time": 0.0, "model": "light", "outscale": 2, "target": 0, "denoise": None, "tile": 0,
                   "tile_pad": 10, "pre_pad": 0, "fp32": False,
                   "cleanup_noise": 0.0, "cleanup_edges": 0.0}
 # Sortie image commune aux commandes : "video" = comportement historique (les autres clés sont
 # alors ignorées), "sequence" = motif numéroté, "image" = fichier unique.
 IMAGE_OUT_DEFAULTS = {"out_kind": "video", "img_format": "png", "png_bits": 8,
                       "png_compression": 6, "jpeg_quality": 92, "seq_start": 1, "image_args": None}
-IMAGE_DEFAULTS = {"model": "light", "outscale": 2, "denoise": None, "tile": 0,
+IMAGE_DEFAULTS = {"model": "light", "outscale": 2, "target": 0, "denoise": None, "tile": 0,
                   "tile_pad": 10, "pre_pad": 0, "fp32": False,
                   "cleanup_noise": 0.0, "cleanup_edges": 0.0}
 IMAGE_DEFAULTS.update(IMAGE_OUT_DEFAULTS)
 GIF_DEFAULTS = dict(IMAGE_DEFAULTS)
-UPSCALE_DEFAULTS = {"model": "light", "outscale": 4, "codec": "x264", "start": None, "end": None,
+UPSCALE_DEFAULTS = {"model": "light", "outscale": 4, "target": 0, "codec": "x264", "start": None, "end": None,
                     "denoise": None, "tile": 0, "tile_pad": 10, "pre_pad": 0, "fp32": False,
                     "cleanup_noise": 0.0, "cleanup_edges": 0.0,
                     "quality": 20, "preset": "medium", "bitdepth": 8, "profile": None,

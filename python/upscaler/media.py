@@ -57,12 +57,16 @@ def probe_color(path, width, height):
     return {"matrix": matrix, "primaries": matrix, "transfer": matrix, "range": "pc" if full else "tv"}
 
 
-def _decode_vf(color):
-    """Filtre de décodage : interprète la source avec la matrice/range décidés → bgr24 plein (RGB).
-    None = comportement historique (laisse swscale deviner depuis les tags source)."""
+def _decode_vf(color, size=None):
+    """Decode filter: reads the source with the chosen matrix/range → full-range bgr24 (RGB).
+    color None = legacy behaviour (swscale guesses from the source tags).
+
+    `size` (w, h) resizes BEFORE the network (see upscaler/plan.py): down to the 1080p box, or up
+    so the network lands on the output. Lanczos, never the bicubic default."""
+    resize = "scale=%d:%d:flags=lanczos," % tuple(size) if size else ""
     if not color:
-        return []
-    return ["-vf", "scale=in_range=%s:in_color_matrix=%s,format=bgr24"
+        return ["-vf", resize + "format=bgr24"] if resize else []
+    return ["-vf", resize + "scale=in_range=%s:in_color_matrix=%s,format=bgr24"
             % (color["range"], color["matrix"])]
 
 
@@ -82,7 +86,7 @@ def _color_tags(color):
             "-color_trc", color["transfer"], "-color_range", color["range"]]
 
 
-def open_decoder(input_path, start, end, color=None):
+def open_decoder(input_path, start, end, color=None, size=None):
     # -hwaccel auto = décode GPU si dispo (NVDEC), repli CPU automatique sinon. Les frames sont
     # ramenées en mémoire pour le modèle (rawvideo bgr24) → transparent.
     args = [ffmpeg_bin(), "-nostdin", "-hide_banner", "-loglevel", "error", "-hwaccel", "auto"]
@@ -91,7 +95,7 @@ def open_decoder(input_path, start, end, color=None):
     if end is not None and start is not None:
         args += ["-t", str(max(0.0, end - start))]
     args += ["-i", input_path]
-    args += _decode_vf(color)
+    args += _decode_vf(color, size)
     args += ["-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:"]
     return subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
@@ -154,8 +158,14 @@ def write_png(bgr, out_path):
 def decode_one_frame(input_path, time_sec, w, h, color=None):
     """Décode UNE frame bgr24 à time_sec → bytes (ou None si absente). Taille attendue = w*h*3.
     color = même matrice que le décodeur de run → l'aperçu correspond à la vraie sortie."""
-    args = [ffmpeg_bin(), "-nostdin", "-hide_banner", "-loglevel", "error",
-            "-ss", str(max(0.0, time_sec)), "-i", input_path, "-frames:v", "1"]
+    # A still image is a single frame with a nominal duration: `-ss 0` seeks past it on the mjpeg
+    # and tga demuxers and ffmpeg writes nothing. Seeking to 0 is a no-op on a video anyway, so the
+    # option is only added when there is something to seek to.
+    seek = max(0.0, float(time_sec or 0.0))
+    args = [ffmpeg_bin(), "-nostdin", "-hide_banner", "-loglevel", "error"]
+    if seek > 0:
+        args += ["-ss", str(seek)]
+    args += ["-i", input_path, "-frames:v", "1"]
     args += _decode_vf(color)
     args += ["-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:"]
     dec = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout

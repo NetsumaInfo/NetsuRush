@@ -74,3 +74,10 @@ export function fmtBytes(n: number | undefined | null): string {
   }
   return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
 }
+
+// "1920x1080" → { width, height }. Resolve et la bibliothèque décrivent une définition par une
+// chaîne ; la barre de résolutions a besoin des deux nombres pour savoir ce qui est atteignable.
+export function parseResolution(r: string | null | undefined): { width: number; height: number } | null {
+  const m = (r ?? "").match(/(\d+)\s*[x×]\s*(\d+)/i);
+  return m ? { width: Number(m[1]), height: Number(m[2]) } : null;
+}

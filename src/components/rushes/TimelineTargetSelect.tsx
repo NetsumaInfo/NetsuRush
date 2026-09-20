@@ -52,7 +52,7 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-50 outline-none">
-          <Popover.Popup className="w-72 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-xl outline-none transition-[transform,opacity] data-[starting-style]:scale-98 data-[starting-style]:opacity-0">
+          <Popover.Popup className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-72 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-xl outline-none transition-[transform,opacity] data-[starting-style]:scale-98 data-[starting-style]:opacity-0">
             {/* destinations fixes */}
             <div className="space-y-1">
               {current && (

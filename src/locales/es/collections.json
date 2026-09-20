@@ -16,16 +16,15 @@
   "archive": {
     "profileName": "Archivo",
     "onDisk": "Archivar en disco",
-    "upscaleHint": "Amplía cada plano durante el archivado. Obliga a recodificar.",
     "videoFormat": "Formato de vídeo",
-    "upscaleShort": "Escalado",
-    "upscaleAudioNote": "La pista por idioma no se aplica al escalado.",
-    "upscaleMode": "Cuándo",
-    "upscaleModeNow": "Inmediato",
-    "upscaleModeIdle": "GPU libre",
-    "upscaleNeedsEncode": "El escalado reemplaza los píxeles: la copia de flujo es imposible.",
+    "processAudioNote": "La pista por idioma no se aplica a un procesamiento.",
+    "processMode": "Cuándo",
+    "processModeNow": "Inmediato",
+    "processModeIdle": "GPU libre",
+    "processNeedsEncode": "Un procesamiento reemplaza los píxeles: la copia de flujo es imposible.",
     "queueRunning": "Archivando ahora",
-    "queuePending": "Esperando una GPU libre"
+    "queuePending": "Esperando una GPU libre",
+    "requiredForShare": "El archivado sostiene el uso compartido: permanece activado."
   },
   "submenu": {
     "rangeIn": "Añadir a una colección",
@@ -213,5 +212,29 @@
     "dlFailed": "Descarga {{id}}: {{error}}.",
     "dlModelsUnavailable": "Descarga de modelos no disponible: {{error}}.",
     "recognitionUnavailable": "Reconocimiento no disponible: {{error}}."
+  },
+  "share": {
+    "title": "Compartir",
+    "people": "Elegir personas",
+    "hideLocal": "Ocultar para mí",
+    "removeGlobal": "Eliminar para todos",
+    "restoreHidden": "Mostrar planos ocultos",
+    "missingMedia": "Medio no disponible",
+    "retry": "Reintentar",
+    "preparing": "Preparando…",
+    "failed": "No se pudo compartir o guardar. Vuelve a intentarlo.",
+    "unavailable": "Configura la colaboración para compartir esta colección.",
+    "signIn": "Inicia sesión para elegir personas.",
+    "viaArchive": "Las demás personas reciben los archivos archivados de la colección, nunca los vídeos fuente. El archivado en disco se activa con el uso compartido.",
+    "readOnly": "Compartida contigo en solo lectura.",
+    "nobody": "Nadie por ahora.",
+    "pending": "Pendiente",
+    "owner": "Propietario",
+    "permView": "Solo lectura",
+    "permOwn": "Edición — sus planos",
+    "permAll": "Edición — todos los planos",
+    "stop": "Dejar de compartir",
+    "leave": "Salir del uso compartido",
+    "stopHint": "Las demás personas perderán el acceso a los planos compartidos."
   }
 }

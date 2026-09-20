@@ -204,7 +204,7 @@ function machineEmbed(ctx) {
   }
 
   const enc = ctx.encoding;
-  addField(fields, 'Encodeurs', enc ? `h264 ${val(enc.h264, 'aucun')} · h265 ${val(enc.h265, 'aucun')} · av1 ${val(enc.av1, 'aucun')}` : 'non sondés', false);
+  addField(fields, 'Encodeurs', enc ? `h264 ${val(enc.h264, 'aucun')} · h265 ${val(enc.h265, 'aucun')}` : 'non sondés', false);
   addField(fields, 'ffmpeg', val(ctx.runtime && ctx.runtime.ffmpeg, 'introuvable'), false);
   addField(fields, 'Node', val(ctx.runtime && ctx.runtime.node, '?'));
   addField(fields, 'Python', val(ctx.runtime && ctx.runtime.python, 'introuvable'));

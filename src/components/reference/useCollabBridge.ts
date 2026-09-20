@@ -5,12 +5,12 @@ import { releaseCollabProject, setCurrentCollabProject } from "@/lib/collab/curr
 import { useBoard } from "./useReferenceBoard";
 import { resetCollabMediaSync, syncCollabMedia } from "./useScenePersistence";
 import { useCollabProject } from "./useCollabProject";
+import { getCollabCadence, subscribeCollabPreferences } from "@/lib/collab/preferences";
 
 // A drag emits one store update per pointer frame. Sending each of them to the document as its own
 // batch cost an IPC round trip per frame and kept the outbox permanently behind, which is what the
 // toolbar reported as "sync pending". Local edits are coalesced over this window and leave as one
 // batch once the gesture rests; the document is never more than this far behind the screen.
-const COALESCE_MS = 150;
 
 /** Bidirectional adapter. Rust/Loro is always authoritative; the Zustand board is a render cache. */
 export function useCollabBridge() {
@@ -82,6 +82,8 @@ export function useCollabBridge() {
       const ids = new Set(items.map((item) => item.id));
       const selectedIds = state.selectedIds.filter((id) => ids.has(id));
       const shapes = items.find((item) => item.kind === "draw")?.shapes ?? [];
+      const shapeIds = new Set(shapes.map((shape) => shape.id));
+      const keptShapes = state.drawSel.filter((id) => shapeIds.has(id));
       return {
         items,
         dirty: false,
@@ -91,7 +93,9 @@ export function useCollabBridge() {
           : selectedIds[selectedIds.length - 1] ?? null,
         editingId: state.editingId && ids.has(state.editingId) ? state.editingId : null,
         croppingId: state.croppingId && ids.has(state.croppingId) ? state.croppingId : null,
-        drawSel: state.drawSel && shapes.some((shape) => shape.id === state.drawSel) ? state.drawSel : null,
+        // Identité conservée quand aucune forme sélectionnée n'a disparu : une annonce distante
+        // ne doit pas rerendre le calque pour une sélection qui n'a pas bougé.
+        drawSel: keptShapes.length === state.drawSel.length ? state.drawSel : keptShapes,
       };
     });
     applyingProjection.current = false;
@@ -103,6 +107,7 @@ export function useCollabBridge() {
     if (!projectId || !ready) return;
     lastSent.current = useBoard.getState().items;
     let timer: number | null = null;
+    let pendingSince = 0;
 
     // The projection held back during a gesture is re-read once the board is quiet, so a concurrent
     // remote edit is not lost — it simply arrives after the local one. Every path out of a pending
@@ -150,11 +155,21 @@ export function useCollabBridge() {
       if (state.items === lastSent.current) return;
       if (timer !== null) return;
       localPending.current += 1;
-      timer = window.setTimeout(flush, COALESCE_MS);
+      pendingSince = Date.now();
+      timer = window.setTimeout(flush, getCollabCadence("board").batchMs);
+    });
+    // Re-time the pending batch from its first edit, without resetting the gesture or its diff.
+    // Repeated profile switches can never defer it beyond the slowest profile's 900 ms window.
+    const stopPreferences = subscribeCollabPreferences(() => {
+      if (timer === null) return;
+      window.clearTimeout(timer);
+      const remaining = Math.max(0, getCollabCadence("board").batchMs - (Date.now() - pendingSince));
+      timer = window.setTimeout(flush, remaining);
     });
 
     return () => {
       stop();
+      stopPreferences();
       // Whatever the last gesture produced leaves before the adapter does: dropping the pending
       // window here would silently discard the final edit of every session.
       if (timer !== null) {

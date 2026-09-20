@@ -1,0 +1,56 @@
+{
+  "about": "Upscale sizing table shared by test/upscale-plan.test.cjs (core/upscaleArgs.js) and test/test_upscale_plan.py (python/upscaler/plan.py). target = resolution class (0 = factor), native = network factor (0 = free-size engine, JS only). feed = what the network is given, out = what is written, resample = what happens after the network.",
+  "cases": [
+    { "name": "720p to 1080p, x2 overshoots then reduces", "src": [1280, 720], "target": 1080, "scale": 2, "native": 2, "feed": [1280, 720], "out": [1920, 1080], "resample": "down" },
+    { "name": "720p to 1080p, x4 overshoots then reduces", "src": [1280, 720], "target": 1080, "scale": 2, "native": 4, "feed": [1280, 720], "out": [1920, 1080], "resample": "down" },
+    { "name": "720p to 1440p, x2 lands exactly", "src": [1280, 720], "target": 1440, "scale": 2, "native": 2, "feed": [1280, 720], "out": [2560, 1440], "resample": "none" },
+    { "name": "720p to 1440p, x4 overshoots then reduces", "src": [1280, 720], "target": 1440, "scale": 2, "native": 4, "feed": [1280, 720], "out": [2560, 1440], "resample": "down" },
+    { "name": "720p to 2160p, x2 enlarges before the network", "src": [1280, 720], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [3840, 2160], "resample": "none" },
+    { "name": "720p to 2160p, x4 overshoots then reduces", "src": [1280, 720], "target": 2160, "scale": 2, "native": 4, "feed": [1280, 720], "out": [3840, 2160], "resample": "down" },
+
+    { "name": "1080p to 1080p, x2 is never a plain copy", "src": [1920, 1080], "target": 1080, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [1920, 1080], "resample": "down" },
+    { "name": "1080p to 1080p, x4 is never a plain copy", "src": [1920, 1080], "target": 1080, "scale": 2, "native": 4, "feed": [1920, 1080], "out": [1920, 1080], "resample": "down" },
+    { "name": "1080p to 1440p, x2", "src": [1920, 1080], "target": 1440, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [2560, 1440], "resample": "down" },
+    { "name": "1080p to 2160p, x2 lands exactly", "src": [1920, 1080], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [3840, 2160], "resample": "none" },
+    { "name": "1080p to 2160p, x4 is never fed below the source", "src": [1920, 1080], "target": 2160, "scale": 2, "native": 4, "feed": [1920, 1080], "out": [3840, 2160], "resample": "down" },
+
+    { "name": "1440p to 1080p, fed at the 1080p cap", "src": [2560, 1440], "target": 1080, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [1920, 1080], "resample": "down" },
+    { "name": "1440p to 1440p, x4 fed at the cap", "src": [2560, 1440], "target": 1440, "scale": 2, "native": 4, "feed": [1920, 1080], "out": [2560, 1440], "resample": "down" },
+    { "name": "1440p to 2160p, x2 from the cap lands exactly", "src": [2560, 1440], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [3840, 2160], "resample": "none" },
+
+    { "name": "2160p to 2160p, x2 from the cap lands exactly", "src": [3840, 2160], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [3840, 2160], "resample": "none" },
+    { "name": "2160p to 2160p, x4 from the cap reduces", "src": [3840, 2160], "target": 2160, "scale": 2, "native": 4, "feed": [1920, 1080], "out": [3840, 2160], "resample": "down" },
+    { "name": "2160p to 1080p, x4 from the cap reduces", "src": [3840, 2160], "target": 1080, "scale": 2, "native": 4, "feed": [1920, 1080], "out": [1920, 1080], "resample": "down" },
+
+    { "name": "480p to 1080p, x2 enlarges before the network", "src": [854, 480], "target": 1080, "scale": 2, "native": 2, "feed": [960, 540], "out": [1920, 1078], "resample": "down" },
+    { "name": "480p to 1080p, x4 overshoots then reduces", "src": [854, 480], "target": 1080, "scale": 2, "native": 4, "feed": [854, 480], "out": [1920, 1078], "resample": "down" },
+    { "name": "480p to 2160p, x2 enlarges before the network", "src": [854, 480], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 1080], "out": [3840, 2158], "resample": "down" },
+    { "name": "480p to 2160p, x4 enlarges slightly before the network", "src": [854, 480], "target": 2160, "scale": 2, "native": 4, "feed": [960, 540], "out": [3840, 2158], "resample": "down" },
+
+    { "name": "scope 1920x800 is 1080p", "src": [1920, 800], "target": 1080, "scale": 2, "native": 2, "feed": [1920, 800], "out": [1920, 800], "resample": "down" },
+    { "name": "scope 1920x800 to 1440p follows the width", "src": [1920, 800], "target": 1440, "scale": 2, "native": 2, "feed": [1920, 800], "out": [2560, 1066], "resample": "down" },
+    { "name": "scope 1920x800 to 2160p, x2 lands exactly", "src": [1920, 800], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 800], "out": [3840, 1600], "resample": "none" },
+    { "name": "scope 1920x800 to 2160p, x4", "src": [1920, 800], "target": 2160, "scale": 2, "native": 4, "feed": [1920, 800], "out": [3840, 1600], "resample": "down" },
+    { "name": "scope 1920x886 to 2160p stays 3840 wide", "src": [1920, 886], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 886], "out": [3840, 1772], "resample": "none" },
+    { "name": "scope 720p to 1080p", "src": [1280, 534], "target": 1080, "scale": 2, "native": 2, "feed": [1280, 534], "out": [1920, 800], "resample": "down" },
+    { "name": "scope 720p to 2160p, x2 enlarges before the network", "src": [1280, 534], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 801], "out": [3840, 1602], "resample": "none" },
+    { "name": "scope 720p to 2160p, x4", "src": [1280, 534], "target": 2160, "scale": 2, "native": 4, "feed": [1280, 534], "out": [3840, 1602], "resample": "down" },
+    { "name": "scope 1440p fed at the cap", "src": [2560, 1066], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 800], "out": [3840, 1598], "resample": "down" },
+    { "name": "scope 4K fed at the cap, x2 lands exactly", "src": [3840, 1600], "target": 2160, "scale": 2, "native": 2, "feed": [1920, 800], "out": [3840, 1600], "resample": "none" },
+    { "name": "scope 4K to 1080p, x4 from the cap", "src": [3840, 1600], "target": 1080, "scale": 2, "native": 4, "feed": [1920, 800], "out": [1920, 800], "resample": "down" },
+
+    { "name": "vertical 1080x1920 is 1080p, fed whole", "src": [1080, 1920], "target": 1080, "scale": 2, "native": 2, "feed": [1080, 1920], "out": [1080, 1920], "resample": "down" },
+    { "name": "vertical 1080x1920 to 2160p", "src": [1080, 1920], "target": 2160, "scale": 2, "native": 2, "feed": [1080, 1920], "out": [2160, 3840], "resample": "none" },
+    { "name": "4:3 1440x1080 is 1080p", "src": [1440, 1080], "target": 2160, "scale": 2, "native": 2, "feed": [1440, 1080], "out": [2880, 2160], "resample": "none" },
+    { "name": "4:3 1440x1080 to 1080p, x4", "src": [1440, 1080], "target": 1080, "scale": 2, "native": 4, "feed": [1440, 1080], "out": [1440, 1080], "resample": "down" },
+
+    { "name": "factor x2 with a x4 network reduces after it", "src": [1280, 720], "target": 0, "scale": 2, "native": 4, "feed": [1280, 720], "out": [2560, 1440], "resample": "down" },
+    { "name": "factor x4 with a x2 network enlarges before it", "src": [1280, 720], "target": 0, "scale": 4, "native": 2, "feed": [2560, 1440], "out": [5120, 2880], "resample": "none" },
+    { "name": "factor x2 on 4K, a x2 network needs the whole source", "src": [3840, 2160], "target": 0, "scale": 2, "native": 2, "feed": [3840, 2160], "out": [7680, 4320], "resample": "none" },
+    { "name": "factor x2 on 4K with a x4 network is fed at the cap", "src": [3840, 2160], "target": 0, "scale": 2, "native": 4, "feed": [1920, 1080], "out": [7680, 4320], "resample": "none" },
+    { "name": "restoration keeps the source size, above the cap too", "src": [2560, 1440], "target": 0, "scale": 1, "native": 1, "feed": [2560, 1440], "out": [2560, 1440], "resample": "none" },
+
+    { "name": "free-size engine renders the class directly", "src": [1920, 886], "target": 2160, "scale": 2, "native": 0, "feed": [1920, 886], "out": [3840, 1772], "resample": "none" },
+    { "name": "free-size engine at the source class", "src": [1920, 1080], "target": 1080, "scale": 2, "native": 0, "feed": [1920, 1080], "out": [1920, 1080], "resample": "none" }
+  ]
+}

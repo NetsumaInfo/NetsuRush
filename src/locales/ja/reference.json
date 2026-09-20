@@ -243,7 +243,12 @@
     "contentOpacity": "コンテンツの不透明度",
     "seeThroughScope": "半透明にする対象",
     "seeThroughShell": "インターフェース",
-    "seeThroughPlaceFrame": "配置枠"
+    "seeThroughPlaceFrame": "配置枠",
+    "assetSweep": "未使用のメディア",
+    "assetSweepHint": "どのシーンも参照していないファイルを削除します。ボードの内容には触れません。",
+    "assetSweepAction": "クリーンアップ",
+    "assetSweepDone": "{{count}} 件削除、{{mb}} MB 解放。",
+    "assetSweepFailed": "クリーンアップに失敗しました。"
   },
   "inspector": {
     "ytPlayer": "YouTube プレーヤー",
@@ -325,7 +330,8 @@
     "kindItem": "ボードのアイテム",
     "chooseFile": "ファイルを選択…",
     "targetItem": "リンク先のアイテム",
-    "remove": "リンクを削除"
+    "remove": "リンクを削除",
+    "sharedFile": "このファイルは共有ボードのものです。このディスク上に場所がありません。"
   },
   "font": {
     "label": "フォント",
@@ -791,7 +797,9 @@
     "importing": "{{name}} をインポート中…",
     "fetching": "メディアを取得中…",
     "linkDone": "メディアをインポートしました",
-    "fetchingFrom": "{{source}} から取得中…"
+    "fetchingFrom": "{{source}} から取得中…",
+    "copyFailed": "「{{name}}」をコピーできませんでした。このメディアはアプリを閉じると失われます",
+    "copyFailedBatch": "{{count}} 件のコピーに失敗しました（「{{name}}」など）。これらのメディアはアプリを閉じると失われます"
   },
   "mouseThrough": {
     "on": "マウスを透過",

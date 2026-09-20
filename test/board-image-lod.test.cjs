@@ -13,7 +13,11 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const rel = 'src/components/reference/boardImageLod.ts';
 // Le module tire React, le pont et le store : on ne garde que la décision pure. L'abonnement à la
 // purge du cache (onThumbsCleared) vient d'un import strippé → stub inerte.
-const src = 'const onThumbsCleared = () => {};\n' + fs.readFileSync(path.join(root, rel), 'utf8')
+const src = 'const onThumbsCleared = () => {};\n'
+  // Le banc de fonctions pures retire les imports : on fournit le prédicat partagé dont le module
+  // se sert désormais pour tenir les refs d'un board partagé hors du chemin vignette du core.
+  + 'const isCoreFileRef = (ref) => !!ref && !/^(https?:|data:|blob:|collab:)/i.test(ref);\n'
+  + fs.readFileSync(path.join(root, rel), 'utf8')
   .replace(/^import[^;]*;$/gm, '')
   .replace(/export function useImageLod[\s\S]*$/m, '');
 const js = esbuild.transformSync(src, { loader: 'ts', format: 'cjs' }).code;

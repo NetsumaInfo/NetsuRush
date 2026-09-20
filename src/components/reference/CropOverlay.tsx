@@ -55,6 +55,7 @@ function Editor({ item }: { item: BoardItem }) {
   };
   const onUp = () => { drag.current = null; detach.current(); };
   const startDrag = (mode: "move" | Corner, e: React.PointerEvent) => {
+    if (e.button !== 0) return; // right-click never drags the crop box
     e.stopPropagation();
     drag.current = { mode, sx: e.clientX, sy: e.clientY, orig: rect };
     window.addEventListener("pointermove", onMove);

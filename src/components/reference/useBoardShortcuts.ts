@@ -65,10 +65,20 @@ export function useBoardShortcuts(
       if (!(e.ctrlKey || e.metaKey) && ARROWS[e.key]) {
         const step = (e.shiftKey ? 10 : 1) / st.view.scale;
         const [dx, dy] = ARROWS[e.key];
-        if (st.drawSel) {
+        if (st.drawSel.length) {
           e.preventDefault();
           const shapes = st.items.find((i) => i.kind === "draw")?.shapes ?? [];
-          st.drawSetShapes(shapes.map((s) => (s.id === st.drawSel ? shifted(s, dx * step, dy * step) : s)), true, `nudge-shape:${st.drawSel}`);
+          const moving = new Set(st.drawSel);
+          st.drawSetShapes(
+            shapes.map((s) => (moving.has(s.id) ? shifted(s, dx * step, dy * step) : s)),
+            true,
+            `nudge-shape:${st.drawSel.join(",")}`,
+          );
+          // Sélection mixte issue d'un lasso : les items suivent le même déplacement, sinon la
+          // flèche disloquerait ce que le lasso venait de réunir.
+          if (st.selectedIds.length) {
+            st.moveBy(st.selectedIds, dx * step, dy * step, true, `nudge:${st.selectedIds.join(",")}`);
+          }
           return;
         }
         if (!st.selectedIds.length) return;
@@ -104,10 +114,13 @@ export function useBoardShortcuts(
 
       switch (action) {
         case "delete":
-          if (st.drawSel) {
+          if (st.drawSel.length) {
             e.preventDefault();
-            st.drawSetShapes((st.items.find((i) => i.kind === "draw")?.shapes ?? []).filter((s) => s.id !== st.drawSel));
+            const gone = new Set(st.drawSel);
+            st.drawSetShapes((st.items.find((i) => i.kind === "draw")?.shapes ?? []).filter((s) => !gone.has(s.id)));
             st.selectDrawShape(null);
+            // Un lasso peut avoir pris les deux : supprimer ne doit pas laisser la moitié derrière.
+            if (st.selectedIds.length) st.removeSelected();
           } else if (st.selectedIds.length) {
             e.preventDefault();
             st.removeSelected();
@@ -122,15 +135,17 @@ export function useBoardShortcuts(
           break;
         case "duplicate":
           e.preventDefault();
-          if (st.drawSel) {
-            // Duplique la forme de dessin sélectionnée (décalée de ~16px écran).
+          if (st.drawSel.length) {
+            // Duplique les formes de dessin sélectionnées (décalées de ~16px écran).
             const shapes = st.items.find((i) => i.kind === "draw")?.shapes ?? [];
-            const src = shapes.find((s) => s.id === st.drawSel);
-            if (src) {
-              const off = 16 / st.view.scale;
-              const copy = { ...shifted(src, off, off), id: uid() };
-              st.drawSetShapes([...shapes, copy]);
-              st.selectDrawShape(copy.id);
+            const off = 16 / st.view.scale;
+            const copies = st.drawSel
+              .map((id) => shapes.find((s) => s.id === id))
+              .filter((src): src is NonNullable<typeof src> => src != null)
+              .map((src) => ({ ...shifted(src, off, off), id: uid() }));
+            if (copies.length) {
+              st.drawSetShapes([...shapes, ...copies]);
+              st.selectDrawShapes(copies.map((copy) => copy.id));
             }
           } else {
             // Duplication multi : les appels du même tick partagent un snapshot → 1 entrée d'undo.

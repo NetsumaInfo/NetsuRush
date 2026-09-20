@@ -28,6 +28,8 @@ import { canFewerCols, canMoreCols, fmt, gridContainerStyle, nextSegId, stepCols
 import { type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { CollectionGlyph } from "./collectionGlyph";
 import { FolderEditor } from "./FolderEditor";
+import { useSharedCollection } from "@/lib/collab/collection/useSharedCollection";
+import { patchSharedShot } from "@/lib/collab/collection/session";
 import { ShotInspector } from "./ShotInspector";
 import { CollectionSidePanel } from "./CollectionSidePanel";
 import {
@@ -47,7 +49,10 @@ export function CollectionDetail({ id }: { id: string }) {
     useShallow((s) => ({ closeCollection: s.closeCollection, connected: hostConnected(s), loadCollections: s.loadCollections, collectionTags: s.collectionTags, loadCollectionTags: s.loadCollectionTags, archiveCollection: s.archiveCollection })),
   );
   const pinned = useApp((s) => s.pinned);
-  const [coll, setColl] = useState<Collection | null>(null);
+  const [localColl, setColl] = useState<Collection | null>(null);
+  const shared = useSharedCollection(localColl);
+  const coll = shared.collection ?? (localColl?.collaboration?.projectId ? { ...localColl, shots: [] } : localColl);
+  const sharedProjectId = localColl?.collaboration?.projectId;
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
@@ -71,6 +76,12 @@ export function CollectionDetail({ id }: { id: string }) {
   // un clic (dé)sélectionne, un double-clic ouvre — sinon on ne peut plus lire un plan sans
   // vider la sélection, ni garder une sélection en regardant un plan.
   const [openShot, setOpenShot] = useState<CollectionShot | null>(null);
+  useEffect(() => {
+    if (!sharedProjectId || !shared.collection) return;
+    const available = new Map(shared.collection.shots.filter((shot) => shot.path).map((shot) => [shot.id, shot]));
+    setSel((previous) => [...previous].every((key) => available.has(key)) ? previous : new Set([...previous].filter((key) => available.has(key))));
+    setOpenShot((previous) => previous ? available.get(previous.id) ?? null : null);
+  }, [sharedProjectId, shared.collection]);
   // Plans retirés (pile d'annulation) → Ctrl+Z les restaure (pas de confirmation bloquante : window.confirm
   // est interdit par Tauri). On garde l'objet complet (tags/label/note) → restauration fidèle.
   const [undoStack, setUndoStack] = useState<CollectionShot[]>([]);
@@ -121,16 +132,21 @@ export function CollectionDetail({ id }: { id: string }) {
       // `out` FAIT PARTIE de l'instant de vignette (thumbTime borne l'avance à 40 % du plan) : sans
       // lui la préchauffe générait une image que la carte ne demanderait jamais, et chaque plan de
       // moins de 1,25 s repartait sur son propre RPC.
-      if (c?.shots?.length) grid.warmThumbs(c.shots.map((s) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps })));
+      if (c?.shots?.length && !c.collaboration?.projectId) grid.warmThumbs(c.shots.map((s) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps })));
     } finally { setLoading(false); }
   }
   useEffect(() => { void reload(); void loadCollectionTags(); setSel(new Set()); setFilter(EMPTY_FILTER); /* eslint-disable-next-line */ }, [id]);
+  useEffect(() => {
+    const changed = (event: Event) => { if ((event as CustomEvent<{ id: string }>).detail.id === id) void reload(); };
+    window.addEventListener("nr-collection-shared", changed);
+    return () => window.removeEventListener("nr-collection-shared", changed);
+  }, [id]);
 
   // Proxies déjà encodés résolus d'un coup : les cartes connaissent l'URL de leur aperçu avant
   // d'arriver à l'écran, donc le défilement n'émet plus un RPC par carte. Refait sur changement de
   // densité (le palier de hauteur entre dans la clé de cache).
   useEffect(() => {
-    const shots = coll?.shots ?? [];
+    const shots = (coll?.shots ?? []).filter((shot) => shot.path);
     if (!shots.length || !grid.cell) return;
     grid.warmProxies(
       shots.map((s) => ({ path: s.path, in: s.in, out: s.out })),
@@ -153,17 +169,17 @@ export function CollectionDetail({ id }: { id: string }) {
   // Cibles des traitements DE FOND (préchauffe des aperçus) : la sélection, sinon tout — préparer
   // toute la collection sans rien sélectionner est le cas nominal.
   const targets = (): CollectionShot[] => {
-    const list = coll?.shots ?? [];
+    const list = (coll?.shots ?? []).filter((shot) => shot.path);
     return sel.size ? list.filter((s) => s.id && sel.has(s.id)) : list;
   };
   // Cibles des actions qui ÉCRIVENT ailleurs (montage timeline, export fichier) : la sélection et
   // rien d'autre. Comme au Découpage, on n'envoie jamais une collection entière sur un clic distrait.
-  const selectedShots = (): CollectionShot[] => (coll?.shots ?? []).filter((s) => s.id && sel.has(s.id));
+  const selectedShots = (): CollectionShot[] => (coll?.shots ?? []).filter((s) => s.path && s.id && sel.has(s.id));
   // Cibles des pré-générations. Sans sélection, elles suivent la liste VIVANTE (ref réécrite à chaque
   // rendu) : un rechargement de la collection pendant un run le fait suivre au lieu de le laisser sur
   // la liste du clic. Une sélection, elle, est gelée au clic — cf. TimelineLiveView.
   const shotsRef = useRef<CollectionShot[]>([]);
-  shotsRef.current = coll?.shots ?? [];
+  shotsRef.current = (coll?.shots ?? []).filter((shot) => shot.path);
   const proxyRange = (s: CollectionShot) => ({ path: s.path, in: s.in, out: s.out });
   const thumbRange = (s: CollectionShot) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps });
   const proxyTargets = () => (sel.size ? targets().map(proxyRange) : () => shotsRef.current.map(proxyRange));
@@ -176,6 +192,13 @@ export function CollectionDetail({ id }: { id: string }) {
 
   // Édition optimiste des méta d'un plan (note/label/tags/annotation) : maj locale immédiate + persiste.
   function patchShot(shotId: string, patch: CollectionShotPatch) {
+    if (sharedProjectId) {
+      // Chacun gère SES contributions ; celles des autres demandent la délégation du propriétaire
+      // (cf. useSharedCollection.canEdit). Un lecteur ne touche à rien.
+      if (!shared.canEdit(shotId)) return;
+      void patchSharedShot(sharedProjectId, shotId, patch).then(shared.refresh).catch((cause) => setError(String(cause)));
+      return;
+    }
     setColl((c) => c ? { ...c, shots: c.shots.map((s) => {
       if (s.id !== shotId) return s;
       const n = { ...s };
@@ -189,6 +212,7 @@ export function CollectionDetail({ id }: { id: string }) {
   }
 
   async function removeShot(shotId?: string) {
+    if (sharedProjectId && shotId) { shared.hide(shotId); return; }
     if (!shotId || !coll) return;
     const s = coll.shots.find((x) => x.id === shotId);
     if (s) setUndoStack((st) => [...st, s]);           // mémorise pour Ctrl+Z (annulation)
@@ -202,6 +226,7 @@ export function CollectionDetail({ id }: { id: string }) {
 
   // Annule le dernier retrait : ré-ajoute le plan mémorisé (dédup côté core, fidèle : tags/label/note).
   async function undoRemove() {
+    if (sharedProjectId) { shared.restoreHidden(); return; }
     if (!coll || !undoStack.length) return;
     const last = undoStack[undoStack.length - 1];
     setUndoStack((st) => st.slice(0, -1));
@@ -452,7 +477,16 @@ export function CollectionDetail({ id }: { id: string }) {
           <div className="grid gap-3" style={gridStyle}>
             {items.map(({ shot, seg }, i) => {
               const nameKey = labelNameKey(shot.label);
+              if (sharedProjectId && !shot.path) return (
+                <Card key={seg.id} className="flex aspect-video flex-col items-center justify-center gap-2 p-3 text-xs">
+                  <span className="max-w-full truncate">{shot.name || tr("detail.shotWord")}</span>
+                  <span className="text-muted-foreground">{tr("share.missingMedia")}</span>
+                  <Button size="sm" variant="outline" onClick={shared.retry}>{tr("share.retry")}</Button>
+                  <Button size="sm" variant="ghost" onClick={() => shared.hide(shot.id!)}>{tr("share.hideLocal")}</Button>
+                </Card>
+              );
               return (
+                <div key={seg.id} className="min-w-0">
                 <ShotCard
                   key={seg.id}
                   seg={seg} index={i} clipPath={shot.path}
@@ -474,6 +508,12 @@ export function CollectionDetail({ id }: { id: string }) {
                   rating={shot.rating}
                   tagCount={shot.tags?.length}
                 />
+                {sharedProjectId && <div className="flex flex-wrap gap-1 pt-1">
+                  <Button size="sm" variant="ghost" onClick={() => shared.hide(shot.id!)}>{tr("share.hideLocal")}</Button>
+                  {shared.canRemove(shot.id!) && <Button size="sm" variant="ghost" className="text-destructive"
+                    onClick={() => void shared.remove(shot.id!).catch((cause) => setError(String(cause)))}>{tr("share.removeGlobal")}</Button>}
+                </div>}
+                </div>
               );
             })}
           </div>
@@ -527,15 +567,17 @@ export function CollectionDetail({ id }: { id: string }) {
         </div>)}
       </div>
 
-      {inspected && inspected.id && (
+      {inspected && inspected.id && (!sharedProjectId || shared.canEdit(inspected.id)) && (
         <ShotInspector shot={inspected} suggestions={tagSuggestions} onPatch={(p) => patchShot(inspected.id!, p)} onClose={() => setSel(new Set())} />
       )}
 
       {/* Bandeau d'état en PIED de vue, comme au Découpage : au-dessus de la grille il repoussait
           les vignettes vers le bas à chaque message. */}
-      {(error || undoStack.length > 0) && (
+      {(error || shared.error || shared.hiddenCount > 0 || undoStack.length > 0) && (
         <div className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-1.5 text-xs">
           {error && <span className="text-destructive">{error}</span>}
+          {shared.error && <span className="text-destructive">{shared.error}</span>}
+          {shared.hiddenCount > 0 && <Button size="sm" variant="ghost" onClick={shared.restoreHidden}>{tr("share.restoreHidden", { count: shared.hiddenCount })}</Button>}
           {undoStack.length > 0 && (
             <button type="button" onClick={() => void undoRemove()} className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <Undo2 className="size-3" /> {tr("detail.undoRemove")}

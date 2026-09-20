@@ -238,7 +238,27 @@
     "restart": "Reiniciar e instalar",
     "history": "Novedades por versión",
     "whatsNew": "Novedades de la versión {{version}}",
-    "gotIt": "Entendido"
+    "gotIt": "Entendido",
+    "ytdlp": {
+      "hint": "Biblioteca que resuelve los enlaces de vídeo. Sus extractores se rompen a menudo: se actualiza sin esperar a la próxima versión de NetsuRush.",
+      "update": "Actualizar",
+      "updating": "Actualizando…",
+      "checking": "Leyendo la versión…",
+      "current": "Versión {{version}} · actualizada",
+      "available": "Versión {{version}} · {{latest}} disponible",
+      "unknown": "Versión {{version}}",
+      "updated": "Actualizada · versión {{version}}",
+      "missing": "No instalada",
+      "notOwned": "Versión {{version}} · instalada fuera de la aplicación",
+      "failed": "La actualización ha fallado"
+    },
+    "kind": {
+      "feature": "Novedades",
+      "fix": "Correcciones",
+      "improvement": "Mejoras",
+      "performance": "Rendimiento"
+    },
+    "reportSubject": "Error al actualizar a la v{{version}}"
   },
   "compatibility": {
     "title": "Compatibilidad de este PC",
@@ -278,6 +298,15 @@
       "transcription": "Convierte la voz en texto.",
       "notebook": "Guarda y organiza notas. No necesita GPU."
     }
+  },
+  "power": {
+    "title": "Cierre de los programas",
+    "subtitle": "Aviso que cierra Resolve o Adobe durante una tarea pesada.",
+    "offer": "Proponer cerrar",
+    "reopen": "Recordar la reapertura",
+    "nub": "Pestaña en el borde",
+    "on": "Activado",
+    "off": "Desactivado"
   },
   "exportProfiles": {
     "title": "Perfiles de exportación",
@@ -451,11 +480,7 @@
     "showProjectHint": "Puede revelar el nombre de un cliente.",
     "showElapsed": "Tiempo transcurrido",
     "showLinks": "Tarjeta con enlaces",
-    "showLinksHint": "La imagen abre el servidor de Discord; la primera línea, el repositorio.",
-    "custom": "Textos personalizados",
-    "customHelp": "Sustituyen a las líneas automáticas. {module} y {projet} se reemplazan.",
-    "details": "Primera línea",
-    "state": "Segunda línea"
+    "showLinksHint": "La imagen abre el servidor de Discord; la primera línea, el repositorio."
   },
   "storage": {
     "empty": "Aún no hay caché.",
@@ -672,7 +697,8 @@
     "system": {
       "updates": "Actualizaciones",
       "compatibility": "Compatibilidad",
-      "console": "Consola"
+      "console": "Consola",
+      "collaboration": "Colaboración"
     }
   },
   "indexing": {
@@ -715,6 +741,25 @@
       "orphans": "Medios que ningún tablero reclama",
       "orphansHint": "{{count}} archivos · {{size}}. Ya nada los muestra, pero esta es la única copia.",
       "move": "Mover a una carpeta…"
+    }
+  },
+  "collaboration": {
+    "title": "Colaboración",
+    "description": "Estos ajustes permanecen en este equipo. Elige un perfil predeterminado o una excepción por categoría de página.",
+    "profilesHint": "En directo: envío cada 60 ms. Equilibrado: 200 ms. Ahorro: 900 ms, sin descarga automática de medios.",
+    "default": "Perfil predeterminado",
+    "inherit": "Usar el perfil predeterminado",
+    "saveFailed": "No se pudieron guardar las preferencias en este equipo.",
+    "profiles": {
+      "live": "En directo",
+      "balanced": "Equilibrado",
+      "economy": "Ahorro"
+    },
+    "surfaces": {
+      "board": "Tableros",
+      "collection": "Colecciones",
+      "notebook": "Cuadernos",
+      "notebook-page": "Páginas de cuaderno"
     }
   }
 }

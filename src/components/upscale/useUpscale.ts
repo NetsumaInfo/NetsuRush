@@ -93,7 +93,7 @@ export function useUpscale() {
     setTesting(true); setTestErr(null);
     try {
       const r = await nr.upscaleTestFrame({
-        input: active.path, time, model: modelId, scale: restoring ? 1 : settings.scale,
+        input: active.path, time, model: modelId, scale: restoring ? 1 : settings.scale, targetHeight: restoring ? 0 : settings.targetHeight,
         denoise: modelId === "light" ? settings.denoise : undefined,
         tile: settings.tile, tilePad: settings.tilePad, prePad: settings.prePad, fp32: settings.fp32,
         cleanupNoise: settings.cleanupNoise, cleanupEdges: settings.cleanupEdges,
@@ -181,7 +181,7 @@ export function useUpscale() {
         const r = !restoring && settings.engine === "turbo"
           ? await nr.upscaleShaderRun({
               input: src.path,
-              shader: settings.shader, scale: settings.scale, codec: settings.codec,
+              shader: settings.shader, scale: settings.scale, targetHeight: settings.targetHeight, codec: settings.codec,
               deband: settings.tDeband, grain: settings.tGrain, sharp: settings.tSharp,
               sigmoid: settings.tSigmoid, dither: settings.tDither,
               vsrQuality: settings.rtxQuality, hdr: settings.rtxHdr,
@@ -197,7 +197,7 @@ export function useUpscale() {
             })
           : await nr.upscaleRun({
               input: src.path,
-              model: settings.model, scale: restoring ? 1 : settings.scale, codec: settings.codec,
+              model: settings.model, scale: restoring ? 1 : settings.scale, targetHeight: restoring ? 0 : settings.targetHeight, codec: settings.codec,
               denoise: settings.model === "light" ? settings.denoise : undefined,
               tile: settings.tile, tilePad: settings.tilePad, prePad: settings.prePad, fp32: settings.fp32,
               cleanupNoise: settings.cleanupNoise, cleanupEdges: settings.cleanupEdges,

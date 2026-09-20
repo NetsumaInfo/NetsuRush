@@ -119,7 +119,7 @@ export function FontPicker({ value, onChange }: { value: string; onChange: (v: s
         </TooltipTrigger>
         <Popover.Portal>
           <Popover.Positioner side="top" sideOffset={8} className="z-50 outline-none">
-            <Popover.Popup className="w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
+            <Popover.Popup className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
               <input
                 value={query} placeholder={t("font.search")} aria-label={t("font.search")}
                 onChange={(e) => setQuery(e.target.value)}

@@ -7,11 +7,15 @@ import numpy as np
 
 from .cleanup import cleanup_frame
 from .log import log
+from .plan import resize_to
 
 
-def run_stream(dec, enc, up, w, h, outscale, nb, broken_msg, cleanup_noise=0.0, cleanup_edges=0.0):
-    """dec/enc = process ffmpeg ouverts ; up = upsampler. Retourne (done, err|None).
-    Ferme les pipes et attend les process dans tous les cas (même sur erreur)."""
+def run_stream(dec, enc, up, w, h, out_size, nb, broken_msg, cleanup_noise=0.0, cleanup_edges=0.0):
+    """dec/enc = open ffmpeg processes; up = upsampler. Returns (done, err|None).
+
+    w×h = frames as decoded, already sized for the network. out_size = (w, h) the encoder expects:
+    the network renders at its native factor and its result is reduced to that size.
+    Pipes are closed and processes awaited in every case, errors included."""
     frame_bytes = w * h * 3
     done = 0
     last_pct = -1
@@ -22,8 +26,8 @@ def run_stream(dec, enc, up, w, h, outscale, nb, broken_msg, cleanup_noise=0.0, 
             if not buf or len(buf) < frame_bytes:
                 break
             frame = np.frombuffer(buf, np.uint8).reshape(h, w, 3)
-            output, _ = up.enhance(frame, outscale=outscale)
-            output = cleanup_frame(output, cleanup_noise, cleanup_edges)
+            output, _ = up.enhance(frame)
+            output = cleanup_frame(resize_to(output, out_size), cleanup_noise, cleanup_edges)
             enc.stdin.write(np.ascontiguousarray(output).tobytes())
             done += 1
             if nb:

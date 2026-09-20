@@ -31,8 +31,10 @@ const audioLang = require("./audioLang"); // normalisation des étiquettes de la
 const { createReferenceStore, scanFolder, writeExportFile } = require("./reference");
 const { createBoardStorage } = require("./boardStorage");
 const wallpaper = require("./wallpaper");
+const { sanitizeName } = require("./utils");
 const { createCollectionStore } = require("./collections"); // dossiers de plans gardés (bibliothèque)
 const { createCollectionArchive } = require("./collectionArchive"); // archivage disque d'une collection + changement de dossier
+const { createCollectionSharing } = require("./collectionSharing");
 const { createArchiveQueue } = require("./archiveQueue"); // archivages différés (upscale = GPU pris longtemps)
 const { createUpscaleLedger } = require("./upscaleLedger"); // registre des sorties d'upscale (anti double production)
 const encodeGate = require("./export/gate"); // portail global du nombre d'encodages en vol
@@ -60,6 +62,7 @@ const { createProjectSnapshot } = require("./projectSnapshot"); // photo des lec
 const { createProjectRegistry } = require("./projectRegistry"); // registre projet → rushs (portée de recherche)
 const { createProjectScan } = require("./projectScan"); // recensement des projets existants (portée)
 const setup = require("./setup"); // provisionnement 1er lancement (venv/ffmpeg/poids)
+const ytdlp = require("./ytdlpUpdate"); // yt-dlp : état + mise à jour à la demande (la lib rote vite)
 const compatibility = require('./compatibility'); // matériel + runtimes IA/encodage réellement actifs
 const optimize = require("./optimize"); // onglet Optimisation : diagnostic + arrêt de tâches + nettoyage cache
 const resolvePrefs = require("./resolvePrefs"); // prefs Resolve sur disque (l'API de scripting ne les expose pas)
@@ -309,8 +312,9 @@ function createRpc() {
   const upLedger = createUpscaleLedger();
   const collArchive = createCollectionArchive({
     collectionStore, exportMod, detectLang: audioDetectLang,
-    upscaleMod: sidecars, turboMod: turbo, ledger: upLedger, encodeGate,
+    sidecars, turbo, ledger: upLedger, encodeGate,
   });
+  const collSharing = createCollectionSharing({ collectionStore, collectionArchive: collArchive });
   // File des archivages différés. « Au repos » = plus aucun encodage en vol (le portail global est la
   // seule vérité du nombre d'encodes de la machine).
   const archiveQueue = createArchiveQueue({
@@ -505,6 +509,13 @@ function createRpc() {
       return setup.runSetup(ev, options || {});
     },
     "compat:status": ([opts]) => compatibility.status(opts || {}),
+
+    // --- yt-dlp (Paramètres › Mises à jour) ---
+    // The only runtime dependency that rots on its own: the boot path refreshes it once per
+    // application release, and these two channels let it be refreshed WITHOUT one, for an install
+    // left alone for months (cf. core/ytdlpUpdate.js).
+    "ytdlp:status": ([opts]) => ytdlp.ytDlpStatus(opts || {}),
+    "ytdlp:update": () => ytdlp.updateYtDlpNow(),
 
     // --- Console / journal (debug + bêta-test) : historique des logs, vidage, rapport de bug ---
     // Le flux temps réel arrive en SSE `console:log` (core + sidecars python).
@@ -873,13 +884,14 @@ function createRpc() {
     "reference:saveScene": ([scene]) => refStore.saveScene(scene),
     "reference:deleteScene": ([id]) => refStore.deleteScene(id),
     // bytes arrive en base64 (transport JSON) → Buffer pour refStore.
-    "reference:saveAsset": ([bytes, ext]) => {
+    "reference:saveAsset": ([bytes, ext, options]) => {
       const buf = bytes && bytes.__b64 ? Buffer.from(bytes.__b64, "base64") : bytes;
-      return refStore.saveAsset(buf, ext);
+      return refStore.saveAsset(buf, ext, options || {});
     },
     // Télécharge un média distant côté core (sans CORS) puis le persiste en asset disque.
     // Aperçu léger envoyé aux pairs avant l'original d'un board partagé (docs/collab.md).
     "reference:collabPreview": ([srcPath]) => refStore.collabPreview(srcPath),
+    "reference:ytDuration": ([id]) => require("./ytstream").videoDuration(id),
     // Chemin mort d'un média de board : le nom porte son empreinte, on le retrouve sans lire
     // un octet (compagnon du projet, magasin d'assets, compagnons des projets connus).
     "reference:locateMedia": ([refs, projectPath]) =>
@@ -927,6 +939,9 @@ function createRpc() {
     "wallpaper:remove": ([id]) => wallpaper.removeWallpaper(id),
 
     // --- Carnet (Notebook) : carnets multi → pages imbriquées → databases (bloc /database) ---
+    "notebook:collaborationBindings": () => notebookStore.collaborationBindings(),
+    "notebook:prepareCollaborationMedia": ([surface, subjectId]) => notebookStore.prepareCollaborationMedia(surface, subjectId),
+    "notebook:setCollaborationBinding": ([binding, projectId]) => notebookStore.setCollaborationBinding(binding, projectId),
     "notebook:list": () => notebookStore.listNotebooks(),
     "notebook:saveNotebook": ([nb]) => notebookStore.saveNotebook(nb),
     "notebook:deleteNotebook": ([id]) => notebookStore.deleteNotebook(id),
@@ -990,6 +1005,8 @@ function createRpc() {
     "collections:move": ([id, folderId]) => collectionStore.moveCollection(id, folderId),
     "collections:allTags": () => collectionStore.allTags(),
     "collections:archive": ([id, opts]) => collArchive.archive(ev, id, opts || {}),
+    "collections:prepareShare": ([id, opts]) => collSharing.prepare(ev, id, opts || {}),
+    "collections:defaultArchiveDir": ([name]) => ({ dir: path.join(DATA_DIR, "collections", "archives", sanitizeName(name || "collection")) }),
     "collections:relocateArchive": ([id, opts]) => collArchive.relocate(ev, id, opts || {}),
     // Archivage DIFFÉRÉ : la même opération, mise en file au lieu de partir tout de suite (upscale =
     // GPU pris longtemps, on attend que la machine soit au repos).
@@ -1069,18 +1086,22 @@ function createRpc() {
 
     // --- Chat IA : moteur hybride (CLI + BYOK) + outils + permissions ---
     "chat:agents": () => agent.listAgents(),
+    "chat:models": ([request]) => agent.listModels(request || {}),
     "chat:configure": ([cfg]) => agent.configure(cfg || {}),
     // Lance un tour ; les événements (texte/outils/approbations) arrivent en SSE `chat:event`.
     "chat:send": ([opts]) => agent.send(opts),
     "chat:cancel": ([runId]) => agent.cancel(String(runId)),
     "chat:approval:respond": ([callId, approved]) => agent.respondApproval(callId, !!approved),
     "chat:tools": () => agent.describeTools(),
-    "chat:history:list": () => agent.listConversations(),
-    "chat:history:load": ([id]) => agent.loadConversation(id),
+    "chat:probe": ([request]) => agent.probe(request || {}),
+    "chat:login": ([request]) => agent.login(request || {}),
+    "chat:install": ([request]) => agent.install(request || {}),
+    "chat:history:list": ([surface]) => agent.listConversations(surface),
+    "chat:history:load": ([id, surface]) => agent.loadConversation(id, surface),
     "chat:history:save": ([conv]) => agent.saveConversation(conv),
-    "chat:history:delete": ([id]) => agent.deleteConversation(id),
+    "chat:history:delete": ([id, surface]) => agent.deleteConversation(id, surface),
     // Pont MCP (serveur stdio thin lancé par le CLI agent) : liste + exécution d'outils sous permission.
-    "agent:toolList": () => agent.toolList(),
+    "agent:toolList": ([surface]) => agent.toolList(surface ? String(surface) : undefined),
     "agent:toolCall": ([name, input]) => agent.toolCall(name, input),
   };
 

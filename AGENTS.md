@@ -48,6 +48,7 @@ NetsuRush is a standalone desktop app (Tauri shell + Node "core" service) that d
 | Runtime layout, IPC, UI system, theming, settings map | `docs/architecture.md` |
 | Rules that break correctness if violated | `docs/invariants.md` |
 | Per-module notes (board, `.netsu`, voice, models, roto) | `docs/modules.md` |
+| AI copilot: tool registry, permission gate, MCP servers | `docs/ai-agent-mcp.md` |
 | Adobe CEP panel and timeline transfer | `docs/host-bridges.md` |
 | Packaging, first-run setup, auth, presence | `docs/distribution.md` |
 | One-time Convex/Discord auth provisioning | `docs/auth-setup.md` |

@@ -10,6 +10,7 @@ import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, C
 import { ChevronRight, Plus, FileText, Trash2, Pencil, ExternalLink, Link2, Star, StarOff, Copy, FolderInput } from "lucide-react";
 import { buildPageTree, subtreeIds, NBPAGE_LINK_PREFIX, type PageMeta, type PageTreeNode } from "./notebookShared";
 import { renderPageIcon } from "./IconPicker";
+import { openNotebookSharing } from "./notebookCollabState";
 
 function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }: {
   node: PageTreeNode;
@@ -111,6 +112,7 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
         />
         <ContextMenuContent>
           <ContextMenuItem onClick={() => void openInNewTab(node.id)}><ExternalLink className="mr-1 h-3.5 w-3.5" /> {t("actions.openNewTab")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => openNotebookSharing("notebook-page", node.id)}>{t("share.document")}</ContextMenuItem>
           <ContextMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${node.id}`)}><Link2 className="mr-1 h-3.5 w-3.5" /> {t("actions.copyPageLink")}</ContextMenuItem>
           <ContextMenuItem onClick={() => toggleFav(node.id)}>
             {isFav ? <><StarOff className="mr-1 h-3.5 w-3.5" /> {t("actions.removeFavorite")}</> : <><Star className="mr-1 h-3.5 w-3.5" /> {t("actions.addFavorite")}</>}

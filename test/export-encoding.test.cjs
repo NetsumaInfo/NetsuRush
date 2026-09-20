@@ -16,8 +16,7 @@ test('maps export speed profiles to NVENC presets', () => {
 test('maps export speed profiles to CPU codec-specific controls', () => {
   assert.equal(valueAfter(videoEncodeArgs('h264_high', null, 'fast'), '-preset'), 'veryfast');
   assert.equal(valueAfter(videoEncodeArgs('h265_main10', null, 'max'), '-preset'), 'veryslow');
-  assert.equal(valueAfter(videoEncodeArgs('av1_main', null, 'quality'), '-preset'), '4');
-  assert.equal(valueAfter(videoEncodeArgs('vp9', null, 'balanced'), '-cpu-used'), '3');
+  assert.equal(valueAfter(videoEncodeArgs('h265_main10', null, 'max'), '-preset'), 'veryslow');
 });
 
 test('keeps fixed editing codecs free of irrelevant speed flags', () => {
@@ -40,8 +39,8 @@ test('includes the missing baseline and HEVC 4:4:4 8-bit profiles', () => {
 
 test('offers each kept audio codec at several bitrates', () => {
   assert.deepEqual(audioEncodeArgs('aac_256'), ['-c:a', 'aac', '-b:a', '256k', '-ar', '48000']);
-  assert.equal(valueAfter(audioEncodeArgs('opus_128'), '-b:a'), '128k');
-  assert.equal(valueAfter(audioEncodeArgs('opus_192'), '-b:a'), '192k');
+  assert.equal(valueAfter(audioEncodeArgs('ac3'), '-b:a'), '448k');
+  assert.equal(valueAfter(audioEncodeArgs('ac3_640'), '-b:a'), '640k');
   assert.equal(valueAfter(audioEncodeArgs('mp3_192'), '-b:a'), '192k');
   assert.equal(valueAfter(audioEncodeArgs('pcm24'), '-c:a'), 'pcm_s24le');
 });

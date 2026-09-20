@@ -106,7 +106,7 @@ export function formatContext(ctx: BugContext | null): string {
     `Backends   : torch ${ctx.runtime.backends.ml} · onnx ${ctx.runtime.backends.onnx} · asr ${ctx.runtime.backends.transcribe}`,
     `Node       : ${ctx.runtime.node}`,
     `ffmpeg     : ${ctx.runtime.ffmpeg ?? "introuvable"}`,
-    ctx.encoding ? `Encodeurs  : h264 ${ctx.encoding.h264 ?? "aucun"} · h265 ${ctx.encoding.h265 ?? "aucun"} · av1 ${ctx.encoding.av1 ?? "aucun"}` : "",
+    ctx.encoding ? `Encodeurs  : h264 ${ctx.encoding.h264 ?? "aucun"} · h265 ${ctx.encoding.h265 ?? "aucun"}` : "",
     `Stockage   : ${disk ? `${disk.freeGB} Go libres / ${disk.totalGB} Go` : "inconnu"}`,
     `Setup      : ${ctx.setup.completedAt ? new Date(ctx.setup.completedAt).toISOString().slice(0, 10) : "jamais"} · python ${ctx.setup.pythonFound ? "ok" : "absent"} · ffmpeg ${ctx.setup.ffmpegFound ? "ok" : "absent"}`,
   ];

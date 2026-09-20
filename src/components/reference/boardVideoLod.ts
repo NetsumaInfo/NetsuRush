@@ -15,7 +15,7 @@
 
 import { useEffect, useState } from "react";
 import { useBoard } from "./useReferenceBoard";
-import { isRemoteRef, type BoardItem } from "./referenceShared";
+import { isCoreFileRef, type BoardItem } from "./referenceShared";
 import { preload, thumbFor, zoomCeil } from "./boardImageLod";
 
 // Bande morte du mode timbre-poste, en hauteur ÉCRAN. À 96 px, le mouvement d'une vidéo est un
@@ -37,8 +37,7 @@ export function posterTime(item: BoardItem): number {
 /** Une vidéo LOCALE lisible peut être remplacée par son affiche ; un flux relayé ou distant, non. */
 export function videoLodEligible(item: BoardItem, zoom: number, onStill: boolean): boolean {
   return item.kind === "video"
-    && !!item.ref
-    && !isRemoteRef(item.ref)
+    && isCoreFileRef(item.ref)
     && !item.loading
     && !item.missing
     && stillSized(item, zoom, onStill);

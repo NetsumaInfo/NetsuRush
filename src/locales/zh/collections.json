@@ -16,16 +16,15 @@
   "archive": {
     "profileName": "归档",
     "onDisk": "归档到磁盘",
-    "upscaleHint": "归档时放大每个镜头，必须重新编码。",
     "videoFormat": "视频格式",
-    "upscaleShort": "超分",
-    "upscaleAudioNote": "按语言选择音轨对超分不生效。",
-    "upscaleMode": "时机",
-    "upscaleModeNow": "立即",
-    "upscaleModeIdle": "GPU 空闲时",
-    "upscaleNeedsEncode": "超分会重建像素：无法进行流复制。",
+    "processAudioNote": "按语言选择音轨对处理不生效。",
+    "processMode": "时机",
+    "processModeNow": "立即",
+    "processModeIdle": "GPU 空闲时",
+    "processNeedsEncode": "处理会重建像素：无法进行流复制。",
     "queueRunning": "正在归档",
-    "queuePending": "等待 GPU 空闲"
+    "queuePending": "等待 GPU 空闲",
+    "requiredForShare": "共享依赖归档，因此保持开启。"
   },
   "submenu": {
     "rangeIn": "归入合集",
@@ -213,5 +212,29 @@
     "dlFailed": "下载 {{id}}：{{error}}。",
     "dlModelsUnavailable": "模型下载不可用：{{error}}。",
     "recognitionUnavailable": "识别不可用：{{error}}。"
+  },
+  "share": {
+    "title": "共享",
+    "people": "选择人员",
+    "hideLocal": "仅对我隐藏",
+    "removeGlobal": "为所有人移除",
+    "restoreHidden": "显示隐藏的镜头",
+    "missingMedia": "媒体不可用",
+    "retry": "重试",
+    "preparing": "正在准备…",
+    "failed": "共享或保存失败，请重试。",
+    "unavailable": "请配置协作功能以共享此集合。",
+    "signIn": "登录后选择人员。",
+    "viaArchive": "其他人收到的是集合的归档文件，绝不会收到源视频。开启共享会同时开启归档到磁盘。",
+    "readOnly": "以只读方式与你共享。",
+    "nobody": "暂时还没有人。",
+    "pending": "待接受",
+    "owner": "所有者",
+    "permView": "只读",
+    "permOwn": "编辑 — 自己的镜头",
+    "permAll": "编辑 — 所有镜头",
+    "stop": "停止共享",
+    "leave": "退出共享",
+    "stopHint": "其他人将失去对已共享镜头的访问权限。"
   }
 }

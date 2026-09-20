@@ -129,6 +129,10 @@ def main():
     g.add_argument("--cleanup_noise", type=float, default=0.0)
     g.add_argument("--cleanup_edges", type=float, default=0.0)
 
+    # Resolution class (1080, 1440, 2160) the output fits in. 0 = the --outscale factor applies.
+    for sub_parser in (u, f, im, g):
+        sub_parser.add_argument("--target", type=int, default=0)
+
     # Sortie image : "video" (défaut) = comportement historique pour `upscale` ; `image` écrit
     # toujours un fichier image et n'y lit que le format / la profondeur / la compression.
     for sub_parser in (u, im):

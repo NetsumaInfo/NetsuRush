@@ -281,12 +281,24 @@ function createReferenceStore(dataDir) {
     try { backend.del(id); return { ok: true }; } catch (e) { return { ok: false, error: String(e) }; }
   }
 
-  // Écrit un blob d'image (collé) sur disque sous un nom = hash du contenu (dédup naturelle).
-  // Renvoie le chemin disque → le renderer le sert via HTTP local.
-  function saveAsset(bytes, ext) {
+  // Écrit un blob (collé, sans chemin disque) sur disque. Avec `options.projectPath`, le média
+  // appartient à un projet .netsu ouvert : il va dans son dossier compagnon, comme un média
+  // téléchargé (`persistDownloaded`) — même politique quelle que soit la voie d'entrée. Sans projet,
+  // ou si le compagnon est inaccessible (fichier déplacé, disque plein), repli sur le magasin
+  // global sous un nom = hash du contenu (dédup naturelle).
+  function saveAsset(bytes, ext, options = {}) {
     try {
       const buf = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
       const e = EXT_OK.has(String(ext || '').toLowerCase()) ? String(ext).toLowerCase() : 'png';
+      if (options.projectPath) {
+        try {
+          const kind = VIDEO_EXTS.has(e) ? 'video' : 'image';
+          return {
+            ok: true,
+            path: downloadTarget.writeBuffer(String(options.projectPath), kind, String(options.title || kind), buf, e),
+          };
+        } catch (_) { /* compagnon inaccessible → magasin global, l'item reste durable */ }
+      }
       const hash = crypto.createHash('md5').update(buf).digest('hex');
       const out = path.join(assetsDir, `${hash}.${e}`);
       if (!fs.existsSync(out)) fs.writeFileSync(out, buf);
@@ -538,4 +550,4 @@ function writeExportFile(filePath, data, encoding) {
   }
 }
 
-module.exports = { createReferenceStore, scanFolder, writeExportFile };
+module.exports = { createReferenceStore, scanFolder, writeExportFile, downloadBytes: download };

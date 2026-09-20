@@ -14,7 +14,7 @@ import { ModelPicker, useModelOptions } from "./ModelPicker";
 import { ShaderPicker } from "./ShaderPicker";
 import { ShaderAdvanced, RtxAdvanced } from "./turboAdvanced";
 import {
-  UP_MODELS, RESTORE_MODELS, UP_SCALES, UP_TILES, UP_TILEPAD, UP_PREPAD,
+  UP_MODELS, RESTORE_MODELS, UP_TARGETS, UP_TILES, UP_TILEPAD, UP_PREPAD,
   UP_DENOISE, nearestDenoise, UP_CLEANUP, shaderRuntimeModel, isRtxShader, modelCaps,
   type UpSettings,
 } from "./upscaleShared";
@@ -91,15 +91,16 @@ export function UpscaleModelSettings({ settings, patch, disabled }: {
 
       {!isRestore && (
         <Row
-          label={t("settings.rowScale")}
-          hint={settings.scale === 1 ? t("settings.scale1Note")
-            : caps && settings.scale !== caps.native ? t("settings.scaleResampledNote", { native: caps.native })
+          label={t("settings.rowTarget")}
+          hint={!settings.targetHeight ? t("settings.targetNoneNote", { scale: settings.scale })
+            : caps ? t("settings.targetNativeNote", { native: caps.native })
               : undefined}
         >
-          <ToggleGroup value={[String(settings.scale)]} onValueChange={(v) => v[0] && patch({ scale: Number(v[0]) as 1 | 2 | 4 })}>
-            {UP_SCALES.map((s) => (
-              <ToggleGroupItem key={s} value={String(s)} disabled={disabled || isRtx}>
-                {s}×{caps && s === caps.native ? " ★" : ""}
+          <ToggleGroup value={settings.targetHeight ? [String(settings.targetHeight)] : []}
+            onValueChange={(v) => v[0] && patch({ targetHeight: Number(v[0]) })}>
+            {UP_TARGETS.map((h) => (
+              <ToggleGroupItem key={h} value={String(h)} disabled={disabled || isRtx}>
+                {h}p
               </ToggleGroupItem>
             ))}
           </ToggleGroup>

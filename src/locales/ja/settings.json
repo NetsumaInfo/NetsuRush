@@ -238,7 +238,27 @@
     "restart": "再起動してインストール",
     "history": "バージョン別の新機能",
     "whatsNew": "バージョン {{version}} の新機能",
-    "gotIt": "始める"
+    "gotIt": "始める",
+    "ytdlp": {
+      "hint": "動画リンクを解決するライブラリ。抽出機能は頻繁に壊れるため、次の NetsuRush のリリースを待たずに更新されます。",
+      "update": "更新",
+      "updating": "更新中…",
+      "checking": "バージョンを確認中…",
+      "current": "バージョン {{version}} · 最新",
+      "available": "バージョン {{version}} · {{latest}} が利用可能",
+      "unknown": "バージョン {{version}}",
+      "updated": "更新済み · バージョン {{version}}",
+      "missing": "未インストール",
+      "notOwned": "バージョン {{version}} · アプリ外でインストール",
+      "failed": "更新に失敗しました"
+    },
+    "kind": {
+      "feature": "新機能",
+      "fix": "修正",
+      "improvement": "改善",
+      "performance": "パフォーマンス"
+    },
+    "reportSubject": "v{{version}} への更新に失敗しました"
   },
   "compatibility": {
     "title": "この PC の互換性",
@@ -278,6 +298,15 @@
       "transcription": "音声をテキストに変換します。",
       "notebook": "ノートを保存・整理します。GPU は不要です。"
     }
+  },
+  "power": {
+    "title": "編集ソフトの終了",
+    "subtitle": "重い処理の間に Resolve や Adobe を終了する通知。",
+    "offer": "終了を提案する",
+    "reopen": "再開の通知",
+    "nub": "端のつまみ",
+    "on": "オン",
+    "off": "オフ"
   },
   "exportProfiles": {
     "title": "書き出しプロファイル",
@@ -451,11 +480,7 @@
     "showProjectHint": "クライアント名が漏れる場合があります。",
     "showElapsed": "経過時間",
     "showLinks": "クリックできるカード",
-    "showLinksHint": "画像は Discord サーバーを、1 行目はリポジトリを開きます。",
-    "custom": "カスタムテキスト",
-    "customHelp": "自動の行を置き換えます。{module} と {projet} が差し替わります。",
-    "details": "1 行目",
-    "state": "2 行目"
+    "showLinksHint": "画像は Discord サーバーを、1 行目はリポジトリを開きます。"
   },
   "storage": {
     "empty": "キャッシュはまだありません。",
@@ -672,7 +697,8 @@
     "system": {
       "updates": "アップデート",
       "compatibility": "互換性",
-      "console": "コンソール"
+      "console": "コンソール",
+      "collaboration": "共同作業"
     }
   },
   "indexing": {
@@ -715,6 +741,25 @@
       "orphans": "どのボードも求めていないメディア",
       "orphansHint": "{{count}} 件 · {{size}}。もう表示されませんが、これが唯一のコピーです。",
       "move": "フォルダーへ移動…"
+    }
+  },
+  "collaboration": {
+    "title": "共同作業",
+    "description": "この設定はこのコンピューターにのみ保存されます。既定のプロファイル、またはページの種類ごとの設定を選択します。",
+    "profilesHint": "ライブ：60 ms ごとに送信。バランス：200 ms。省エネ：900 ms、メディアの自動ダウンロードは無効。",
+    "default": "既定のプロファイル",
+    "inherit": "既定のプロファイルを使用",
+    "saveFailed": "このコンピューターに設定を保存できませんでした。",
+    "profiles": {
+      "live": "ライブ",
+      "balanced": "バランス",
+      "economy": "省エネ"
+    },
+    "surfaces": {
+      "board": "ボード",
+      "collection": "コレクション",
+      "notebook": "ノートブック",
+      "notebook-page": "ノートブックのページ"
     }
   }
 }

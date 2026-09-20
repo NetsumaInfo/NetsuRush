@@ -152,6 +152,7 @@ export function useProcSources() {
   const activeKey = active ? (active.uid ?? active.path) : "";
   const [native, setNative] = useState(false);
   const [fps, setFps] = useState(0);
+  const [dims, setDims] = useState<{ width: number; height: number } | null>(null);
   const [duration, setDuration] = useState(0);
   // Plage : DÉRIVÉE de la source de manière SYNCHRONE (in/out du plan connus dès la sélection →
   // le lecteur reçoit la bonne plage au premier rendu, plus de fenêtre [0,0] où il démarrait à 0).
@@ -264,6 +265,14 @@ export function useProcSources() {
     if (!active) return;
     let on = true;
     const path = active.path;
+    // `playInfo` ne porte pas les dimensions. Un média venu du bac les apporte déjà (cf. UpscaleSources) ;
+    // un fichier choisi à la main, non — d'où la sonde, faite une seule fois par source.
+    setDims(active.width && active.height ? { width: active.width, height: active.height } : null);
+    if (!active.width || !active.height) {
+      nr.probe(path).then((m) => {
+        if (on && m?.width && m?.height) setDims({ width: m.width, height: m.height });
+      }).catch(() => {});
+    }
     nr.playInfo(path).then((info) => {
       if (!on) return;
       setDuration(info?.duration || 0); setNative(!!info?.native); setFps(info?.fps || 0);
@@ -302,7 +311,7 @@ export function useProcSources() {
   }, []);
 
   return {
-    sources, single, active, activeKey, activeIdx, setActiveIdx, native, fps, toggleSource, clearSources, removeSources, addSources, pickFiles,
+    sources, single, active, activeKey, activeIdx, setActiveIdx, native, fps, dims, toggleSource, clearSources, removeSources, addSources, pickFiles,
     scope, setScope, audioTracks,
     duration, range, setRange, setSourceRange,
     scenes, picked, detecting, detectScenes, toggleScene, setAllScenes,

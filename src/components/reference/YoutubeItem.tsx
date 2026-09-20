@@ -91,6 +91,10 @@ export function YoutubeItem({ item, interactive, onReady }: { item: BoardItem; i
   const playing = !suspended && (item.playMode ?? "loop") !== "off";
   // Portée courante lue par le poll (mise à jour sans recréer le player).
   const loop = useRef<{ in: number; out: number | null }>({ in: 0, out: null });
+  // La borne d'entrée du PREMIER rendu est déjà posée par le `start` du lecteur : la correction
+  // différée ci-dessous ne concerne qu'une portée modifiée APRÈS. Ce drapeau retombe avec la vidéo.
+  const rangeApplied = useRef(false);
+  useEffect(() => { rangeApplied.current = false; }, [item.ref]);
   useEffect(() => {
     loop.current = {
       in: item.trimIn && item.trimIn > 0 ? item.trimIn : 0,
@@ -101,6 +105,16 @@ export function YoutubeItem({ item, interactive, onReady }: { item: BoardItem; i
     // tout ce qui la précède avant de s'appliquer, plusieurs minutes durant, l'air figé.
     // Différé : les bornes changent à chaque pixel du curseur, et corriger à chaque événement
     // relancerait le chargement réseau qu'on vient justement d'éviter pendant le geste.
+    //
+    // JAMAIS au montage. Le lecteur y est encore à 0 — `start` n'est pas honoré dans la frame qui
+    // suit sa création — donc la correction voyait une position « hors portée » qui n'existait pas
+    // et lançait un seek EN CONCURRENCE du chargement initial. C'était la saccade de la première
+    // ouverture d'un board portant une vidéo rognée en plein milieu : le second montage trouvait le
+    // lecteur chaud, ne corrigeait rien, et tout semblait rentrer dans l'ordre.
+    if (!rangeApplied.current) {
+      rangeApplied.current = true;
+      return;
+    }
     const timer = setTimeout(() => {
       const p = playerRef.current;
       const now = p?.getCurrentTime?.();
@@ -178,6 +192,9 @@ export function YoutubeItem({ item, interactive, onReady }: { item: BoardItem; i
           onError: (e: { data: number }) => { setErr(e.data); onReady?.(); },
         },
       });
+      // Le lecteur vient de naître et va chercher sa borne d'entrée : le poll ne doit pas lire
+      // cette position transitoire comme une sortie de portée à rattraper.
+      lastSeekRef.current = Date.now();
       // Boucle sur [in, out], borne de fin toujours ramenée en deçà du terme de la vidéo.
       timer = setInterval(() => {
         const p = playerRef.current;
@@ -188,7 +205,11 @@ export function YoutubeItem({ item, interactive, onReady }: { item: BoardItem; i
         const dur = p.getDuration?.() || 0;
         const tail = dur > LOOP_TAIL_S ? dur - LOOP_TAIL_S : Infinity;
         const end = Math.min(out ?? Infinity, tail);
-        if (!Number.isFinite(end) || p.getCurrentTime() < end) return;
+        const now = p.getCurrentTime();
+        // Position encore EN AMONT de la borne d'entrée : le lecteur n'a pas fini d'honorer `start`.
+        // Reboucler ici ne ferait que relancer un seek par-dessus un chargement déjà en cours.
+        if (tin > 0 && now < tin - RANGE_SNAP_S) return;
+        if (!Number.isFinite(end) || now < end) return;
         lastSeekRef.current = Date.now();
         p.seekTo(tin, true);
       }, LOOP_POLL_MS);

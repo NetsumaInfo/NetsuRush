@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectGroupLabel, SelectItem,
 } from "@/components/ui/select";
-import { UpscalePane } from "@/components/upscale/UpscalePane";
+import { ExportProcessPane } from "./ExportProcessPane";
 import { ExportAudioSelect } from "./ExportAudioSelect";
 import { ExportNaming } from "./ExportNaming";
 import { ExportTimelineTarget } from "./ExportTimelineTarget";
@@ -30,7 +30,9 @@ import {
   EXPORT_AUDIO_OPTIONS,
   EXPORT_CONTAINER_OPTIONS,
   EXPORT_SPEED_OPTIONS,
-  getExportCodecLabel,
+  type ExportCodecFamily,
+  getCodecFamilyLabel,
+  getExportCodecProfileLabel,
   usesEncoding,
   usesFile,
   getExportProfileIssue,
@@ -46,10 +48,20 @@ import {
   secondsToMilliseconds,
 } from "./blackPause";
 
-function Row({ label, disabled, children }: { label: string; disabled?: boolean; children: React.ReactNode }) {
+function Row({ label, hint, disabled, children }: { label: string; hint?: string; disabled?: boolean; children: React.ReactNode }) {
   return (
     <div className={cn("flex items-center justify-between gap-3 transition-opacity", disabled && "opacity-40")}>
-      <span className="text-[0.8125rem] text-muted-foreground">{label}</span>
+      <span className="inline-flex min-w-0 items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
+        {label}
+        {hint && (
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex shrink-0" tabIndex={0} aria-label={hint} />}>
+              <CircleHelp className="size-3.5" />
+            </TooltipTrigger>
+            <TooltipContent side="right" align="center" className="max-w-64">{hint}</TooltipContent>
+          </Tooltip>
+        )}
+      </span>
       <div className="w-[56%] shrink-0">{children}</div>
     </div>
   );
@@ -92,6 +104,9 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
 
   // Dossiers Media Pool existants (suggestions du sélecteur de destination) : on peut en choisir un
   // OU en saisir un nouveau (créé à la volée côté Resolve). Chargés seulement pour l'import timeline.
+  // Volet de traitement déplié (rang, ou aucun) : un seul à la fois, comme dans l'archivage.
+  const [openProcess, setOpenProcess] = useState<number | null>(null);
+
   const [bins, setBins] = useState<string[]>([]);
   useEffect(() => {
     if (!isTimelineImport) return;
@@ -180,11 +195,12 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
       </div>
 
       {/* Timeline visée : celle ouverte, une nouvelle, ou une existante par son nom. Même valeur que
-          le sélecteur du panneau de droite (elle vit dans le profil). Toujours posée, grisée hors
-          import timeline — comme toutes les autres lignes, pour que l'UI ne saute pas. */}
-      <div className={cn("flex flex-col gap-1.5 transition-opacity", !isTimelineImport && "opacity-40")}>
+          le sélecteur du panneau de droite (elle vit dans le profil). Réglable dans tous les flux,
+          comme le dossier au-dessus : c'est un choix du profil, que seul l'import timeline exécute —
+          le griser empêchait de le préparer avant de basculer le flux. */}
+      <div className="flex flex-col gap-1.5">
         <span className="text-[0.8125rem] text-muted-foreground">{t("editor.timelineTarget")}</span>
-        <ExportTimelineTarget profile={profile} className="w-full" disabled={!isTimelineImport} />
+        <ExportTimelineTarget profile={profile} className="w-full" />
       </div>
 
       {/* Choix du flux APRÈS les réglages propres à la timeline : ce qui suit (moteur, codec,
@@ -226,19 +242,52 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         ))}
       </ToggleGroup>
 
-      {/* Agrandir les plans PENDANT l'export. Mêmes contrôles que le panneau Traitements et que
-          l'archivage d'une collection — c'est le même composant, aucune copie. Hors ré-encodage le
-          volet DISPARAÎT au lieu d'être grisé : l'upscale remplace les pixels, une copie de flux ne
-          peut pas le faire, et c'est un bloc repliable, pas une ligne de réglage à largeur fixe
-          (même règle que le gabarit de nommage). Le réglage lui-même survit au changement de flux. */}
+      {/* Traiter les plans PENDANT l'export (upscale, interpolation, depth map). Hors ré-encodage le
+          volet DISPARAÎT au lieu d'être grisé : un traitement remplace les pixels, une copie de flux
+          ne peut pas le faire, et c'est un bloc repliable, pas une ligne de réglage à largeur fixe
+          (même règle que le gabarit de nommage). Les réglages survivent au changement de flux. */}
       {encode && (
-        <UpscalePane
-          value={profile.upscale}
-          onChange={(patch) => set({ upscale: { ...profile.upscale, ...patch } })}
-          label={t("editor.upscale")}
-          onLabel={t("toggle.yes")}
-          offLabel={t("toggle.no")}
+        <ExportProcessPane
+          value={profile.process}
+          onChange={(patch) => set({ process: { ...profile.process, ...patch } })}
+          open={openProcess}
+          onOpen={setOpenProcess}
         />
+      )}
+
+      {/* Premier maillon de la cascade : la FAMILLE règle le profil, puis l'encodeur, le conteneur
+          et le codec audio. Deux lignes plutôt qu'une liste unique — « H.265 — Main 4:4:4 10 bits »
+          noyait le choix qui compte (le codec) sous ses variantes. */}
+      <Row label={t("editor.codec")} disabled={!encode}>
+        <Select
+          value={fields.codecFamily}
+          onValueChange={(v) => fields.pickCodecFamily(v as ExportCodecFamily)}
+          items={fields.codecFamilyOptions}
+          disabled={!encode}
+        >
+          <SelectTrigger><SelectValue>{getCodecFamilyLabel(fields.codecFamily)}</SelectValue></SelectTrigger>
+          <SelectContent>
+            {fields.codecFamilyOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      {/* Une famille à profil unique n'offre aucun choix : la ligne disparaît au lieu d'afficher un
+          menu à une entrée. */}
+      {fields.codecProfileOptions.length > 1 && (
+        <Row label={t("editor.codecProfile")} disabled={!encode}>
+          <Select
+            value={profile.codec}
+            onValueChange={(v) => fields.pickCodec(v as ExportProfile["codec"])}
+            items={fields.codecProfileOptions}
+            disabled={!encode}
+          >
+            <SelectTrigger><SelectValue>{getExportCodecProfileLabel(profile.codec)}</SelectValue></SelectTrigger>
+            <SelectContent>
+              {fields.codecProfileOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Row>
       )}
 
       <Row label={t("editor.optimization")} disabled={!encode}>
@@ -257,7 +306,21 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         </Select>
       </Row>
 
-      <Row label={t("editor.speed")} disabled={!speedSettable}>
+      <Row label={t("editor.container")} disabled={!file}>
+        <Select
+          value={profile.container}
+          onValueChange={(v) => fields.pickContainer(v as ExportProfile["container"])}
+          items={containerOptions}
+          disabled={!file}
+        >
+          <SelectTrigger><SelectValue>{profile.container.toUpperCase()}</SelectValue></SelectTrigger>
+          <SelectContent>
+            {containerOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Row>
+
+      <Row label={t("editor.speed")} hint={t("editor.speedHint")} disabled={!speedSettable}>
         <Select
           value={fields.speed}
           onValueChange={(value) => set({ speed: value as ExportProfile["speed"] })}
@@ -268,27 +331,6 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
           <SelectContent>
             {EXPORT_SPEED_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Row>
-
-      <Row label={t("editor.codec")} disabled={!encode}>
-        <Select
-          value={profile.codec}
-          // Cale le conteneur sur un choix compatible (ex. AV1 refuse MOV) → jamais de couple invalide,
-          // puis le codec audio sur le conteneur retenu (WebM → Opus).
-          onValueChange={(v) => fields.pickCodec(v as ExportProfile["codec"])}
-          items={fields.codecOptions}
-          disabled={!encode}
-        >
-          <SelectTrigger><SelectValue>{getExportCodecLabel(profile.codec)}</SelectValue></SelectTrigger>
-          <SelectContent>
-            {fields.codecGroups.map((g) => (
-              <SelectGroup key={g.key}>
-                <SelectGroupLabel>{g.label}</SelectGroupLabel>
-                {g.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-              </SelectGroup>
             ))}
           </SelectContent>
         </Select>
@@ -306,7 +348,7 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
             « Copie » en dur (le WebM ne l'offre pas → le champ serait vide). */}
         <Select
           value={profile.audioMode === "none" ? (audioOptions[0]?.value ?? "copy") : profile.audioMode}
-          onValueChange={(v) => set({ audioMode: v as ExportProfile["audioMode"] })}
+          onValueChange={(v) => fields.pickAudio(v as ExportProfile["audioMode"])}
           items={audioOptions}
           disabled={!codecSettable}
         >
@@ -323,19 +365,6 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
         </Select>
       </Row>
 
-      <Row label={t("editor.container")} disabled={!file}>
-        <Select
-          value={profile.container}
-          onValueChange={(v) => fields.pickContainer(v as ExportProfile["container"])}
-          items={containerOptions}
-          disabled={!file}
-        >
-          <SelectTrigger><SelectValue>{profile.container.toUpperCase()}</SelectValue></SelectTrigger>
-          <SelectContent>
-            {containerOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </Row>
 
       {/* Nom des fichiers produits. Hors flux fichier il n'y a aucun fichier à nommer (l'import
           timeline ne sort rien) → le bloc disparaît au lieu d'être grisé : c'est un champ libre avec

@@ -4,7 +4,10 @@
   "signedOut": "Inicia sesión para compartir un documento.",
   "surface": {
     "unknown": "Documento compartido",
-    "board": "Tablero de referencia"
+    "board": "Tablero de referencia",
+    "collection": "Colección",
+    "notebook": "Cuaderno NetsuBook",
+    "notebook-page": "Documento NetsuBook"
   },
   "device": {
     "title": "Este dispositivo",
@@ -111,19 +114,19 @@
   "panel": {
     "title": "Estado del uso compartido",
     "online": "{{count}} en línea",
-    "alone": "Nadie más por ahora.",
+    "alone": "Nadie más",
     "hereNow": "En línea",
-    "neverSeen": "Aún sin contacto",
-    "seenMinutes": "Visto hace {{count}} min",
-    "seenHours": "Visto hace {{count}} h",
-    "seenDays": "Visto hace {{count}} d",
-    "invited": "Invitación pendiente",
+    "neverSeen": "Nunca conectado",
+    "seenMinutes": "Hace {{count}} min",
+    "seenHours": "Hace {{count}} h",
+    "seenDays": "Hace {{count}} d",
+    "invited": "Invitado",
     "unknownMember": "Miembro",
-    "queued": "Hay cambios esperando aquí. Saldrán solos en cuanto haya un dispositivo accesible.",
-    "upToDate": "Todo está sincronizado.",
-    "rotation": "Rotación de clave pendiente: las nuevas publicaciones esperan a un dispositivo del propietario.",
-    "waitingKey": "{{count}} miembro(s) esperan la clave. Mantente en línea para entregársela.",
-    "nobodyReachable": "Ahora mismo no hay nadie accesible: tus cambios saldrán cuando vuelvan."
+    "queued": "Pendiente de envío.",
+    "upToDate": "Todo enviado.",
+    "rotation": "Hace falta una clave nueva. El propietario debe abrir la app.",
+    "waitingKey": "{{count}} esperan la clave. Sigue en línea.",
+    "nobodyReachable": "Nadie en línea. No se ha enviado nada."
   },
   "board": {
     "noScene": "Guarda primero este tablero en la biblioteca de escenas.",

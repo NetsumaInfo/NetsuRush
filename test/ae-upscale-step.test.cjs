@@ -32,6 +32,15 @@ test('le moteur suit le mode, comme dans le panneau Traitements', () => {
   assert.equal(turbo.scale, 2);   // échelle imposée par le SDK NVIDIA
 });
 
+test('the resolution class of the panel reaches the engine', () => {
+  const ia = upscaleStep({ enabled: true, model: 'anime', scale: 2, targetHeight: 2160 }, engines, {}, 'mp4');
+  assert.equal(ia.args.targetHeight, 2160);
+  const turbo = upscaleStep({ enabled: true, engine: 'turbo', shader: 'artcnn_c4f32', targetHeight: 1440 }, engines, {}, 'mp4');
+  assert.equal(turbo.args.targetHeight, 1440);
+  // AE fits each layer on the imported file's real size, so the class needs no layout change.
+  assert.equal(upscaleStep({ enabled: true, model: 'anime', scale: 2 }, engines, {}, 'mp4').args.targetHeight, 0);
+});
+
 test('le traitement audio du panneau AE se traduit pour le moteur', () => {
   // Le PCM n'a pas d'équivalent côté moteur : la copie du flux est ce qui s'en approche sans perte.
   assert.equal(aeEncoding('x264', 'pcm', 192).audio, 'copy');

@@ -1,12 +1,14 @@
 {
-  "stream": { "error": "Une erreur est survenue." },
+  "stream": {
+    "error": "Une erreur est survenue."
+  },
   "panel": {
     "copilot": "Copilote NetsuRush",
-    "noCliAgent": "Aucun agent CLI détecté — passe en Claude/OpenAI ou installe claude/codex",
+    "noCliAgent": "Aucun agent installé — ouvre les réglages pour en installer un ou poser une clé API",
     "configureKey": "Configurer une clé API pour démarrer"
   },
   "composer": {
-    "pickEngine": "Configure un moteur (clé API ou agent CLI) dans les réglages ⚙ pour envoyer.",
+    "pickEngine": "Choisis un moteur prêt dans le menu, ou configure-le dans les réglages ⚙.",
     "placeholder": "Demande à l'IA de piloter Resolve…",
     "attachFiles": "Joindre des fichiers",
     "attachTip": "Joindre image / fichier",
@@ -14,7 +16,8 @@
     "stop": "Stop",
     "send": "Envoyer"
   },
-  "header": { "defaultTitle": "Nouvelle conversation",
+  "header": {
+    "defaultTitle": "Nouvelle conversation",
     "conversations": "Conversations",
     "newConv": "Nouvelle conversation",
     "noConv": "Aucune conversation",
@@ -27,41 +30,72 @@
     "show": "Afficher",
     "keySet": "configurée",
     "keyAbsent": "absente",
-    "cliAgents": "Agents CLI détectés",
+    "cliAgents": "Agents",
     "rescan": "Re-scanner",
     "noAgentsPre": "Aucun agent listé — clique « Re-scanner ». Si rien, installe ",
     "noAgentsPost": " et vérifie qu'ils sont dans le PATH du core.",
     "detected": "détecté",
     "absent": "absent",
-    "saved": "Enregistré"
+    "saved": "Enregistré",
+    "test": "Tester",
+    "getKey": "Obtenir une clé",
+    "reachable": "connexion établie ({{ms}} ms)",
+    "connect": "Se connecter (ouvre un terminal)",
+    "loginOpened": "terminal ouvert — termine la connexion dedans",
+    "appNoCli": "app sans commande",
+    "appNoCliHint": "L'application est installée, mais sa commande {{bin}} n'est pas dans le PATH. Ajoute-la depuis l'application.",
+    "readyCount": "{{ready}} / {{total}} prêts",
+    "installOpened": "installation lancée dans un terminal",
+    "docs": "Documentation",
+    "installPage": "Page d'installation officielle",
+    "resolveMcp": "MCP DaVinci Resolve",
+    "resolveMcpTools": "{{n}} outils",
+    "resolveMcpServer": "Serveur officiel Blackmagic",
+    "resolveMcpMissing": "Livré avec DaVinci Resolve Studio 21.1 ou plus récent. Introuvable sur cet ordinateur.",
+    "resolveMcpSilent": "sans réponse",
+    "resolveMcpSilentHint": "Le serveur est là mais n’a pas répondu. Lance Resolve, puis relance la détection.",
+    "resolveMcpHint": "{{n}} outils ajoutés au copilote : scripts Python dans Resolve, recherche dans l’API de scripting, documentation, LUT et DCTL.",
+    "resolveUnsafe": "Autoriser les scripts hors bac à sable",
+    "resolveUnsafeHint": "Ajoute bmd_run_script_unsafe : accès complet aux fichiers, au réseau et aux sous-processus. Aucun mode de permission ne peut le retenir une fois le script parti."
   },
   "engine": {
-    "engine": "Moteur",
-    "cliAgent": "Agent CLI",
-    "agent": "Agent",
+    "agents": "Agents installés",
+    "apiKeys": "Clés API",
+    "notReady": "à configurer",
+    "none": "Aucun moteur",
     "model": "Modèle",
     "default": "Par défaut",
     "freeId": "id libre : vendor/model…",
-    "permissions": "Permissions"
+    "refreshModels": "Actualiser la liste des modèles",
+    "source": {
+      "vendor": "à jour",
+      "openrouter": "catalogue public",
+      "curated": "hors ligne"
+    },
+    "sourceHint": {
+      "vendor": "Liste renvoyée par le fournisseur avec votre clé : ces identifiants sont exacts.",
+      "openrouter": "Catalogue public d'OpenRouter, sans clé. À jour, mais un identifiant peut différer de celui de l'API d'origine.",
+      "curated": "Réseau indisponible : liste de secours embarquée, peut-être dépassée."
+    },
+    "permissions": "Permissions",
+    "thinking": "Réflexion",
+    "effort": "Effort"
   },
   "mode": {
     "readonly": "Lecture",
     "ask": "Demander",
-    "safe": "Doublure",
     "auto": "Auto"
   },
   "modeTitle": {
     "readonly": "Lecture seule — aucune écriture",
     "ask": "Confirme seulement le risqué (fichiers/rendu/suppression média) ; le montage timeline passe",
-    "safe": "Duplique la timeline avant d'écrire — l'originale reste intacte",
     "auto": "Écrit direct dans la timeline, sans confirmation"
   },
   "message": {
     "thinking": "Réflexion…",
     "reasoning": "Raisonnement",
-    "hideReasoning": "Masquer le raisonnement",
-    "showReasoning": "Afficher le raisonnement",
-    "copyText": "Copier le texte"
+    "copyText": "Copier le texte",
+    "copyReasoning": "Copier le raisonnement"
   },
   "toolcard": {
     "running": "en cours",
@@ -72,7 +106,8 @@
     "copyArgs": "Copier les arguments",
     "copyResult": "Copier le résultat",
     "collapse": "Replier",
-    "expand": "Déplier"
+    "expand": "Déplier",
+    "done": "ok"
   },
   "tool": {
     "quoted": " « {{value}} »",
@@ -107,7 +142,8 @@
     "render": "Rendu · {{action}}",
     "timelineItem": "Plan courant · {{action}}",
     "project": "Projet · {{action}}",
-    "resolveCall": "API Resolve · {{root}}"
+    "resolveCall": "API Resolve · {{root}}",
+    "bmd": "Resolve · {{action}}"
   },
   "approval": {
     "title": "Autoriser l'action ?",
@@ -122,5 +158,24 @@
   "store": {
     "convFallback": "Conversation",
     "error": "erreur"
+  },
+  "duplicate": {
+    "title": "Dupliquer avant de modifier",
+    "hint": "Travaille sur une copie de la timeline ; l'originale reste intacte."
+  },
+  "thinking": {
+    "low": "Basse",
+    "medium": "Moyenne",
+    "high": "Élevée",
+    "xhigh": "Très élevée",
+    "max": "Max"
+  },
+  "trace": {
+    "working": "Au travail…",
+    "workedFor_one": "Travaillé pendant {{count}} seconde",
+    "workedFor_other": "Travaillé pendant {{count}} secondes"
+  },
+  "thinkingSlider": {
+    "reset": "Revenir au réglage par défaut"
   }
 }

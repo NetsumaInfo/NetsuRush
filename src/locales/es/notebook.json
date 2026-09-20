@@ -635,5 +635,12 @@
     "inProgress": "En curso",
     "done": "Terminado",
     "name": "Base de datos"
+  },
+  "share": {
+    "document": "Compartir este documento",
+    "notebook": "Compartir cuaderno",
+    "failed": "No se pudo compartir.",
+    "manageRemoval": "Usa los ajustes de colaboración para salir o eliminar este documento compartido.",
+    "retry": "Reintentar"
   }
 }

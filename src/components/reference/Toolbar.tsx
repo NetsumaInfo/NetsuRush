@@ -162,14 +162,15 @@ export function Toolbar({
 
   // Buttons both bars can address: one definition, never two to keep in agreement.
   const B: Record<PinnedButtonId, React.ReactNode> = {
-    text: <IconBtn icon={Type} label={t("toolbar.addText")} action="addText" onClick={() => { leaveDraw(); board.current?.addText(); }} />,
-    frame: <IconBtn icon={Frame} label={t("toolbar.addFrame")} action="addFrame" onClick={() => { leaveDraw(); board.current?.addFrame(); }} />,
+    text: <IconBtn icon={Type} label={t("toolbar.addText")} action="addText" disabled={readOnly} onClick={() => { leaveDraw(); board.current?.addText(); }} />,
+    frame: <IconBtn icon={Frame} label={t("toolbar.addFrame")} action="addFrame" disabled={readOnly} onClick={() => { leaveDraw(); board.current?.addFrame(); }} />,
     draw: (
       <IconBtn
         icon={Pencil}
         label={drawMode ? t("toolbar.exitDraw") : t("toolbar.draw")}
         action="toggleDraw"
         active={drawMode}
+        disabled={readOnly}
         onClick={() => setDrawMode(!drawMode)}
       />
     ),
@@ -179,9 +180,9 @@ export function Toolbar({
       ? <IconBtn icon={Clapperboard} label={t("toolbar.fromProject")} onClick={() => { leaveDraw(); onProject(); }} />
       : null,
     // Palette generator: its open state lives in the store — the panel outlives this bar's renders.
-    palette: <IconBtn icon={SwatchBook} label={t("palette.studio.open")} onClick={() => { leaveDraw(); setStudio({ targetId: null }); }} />,
-    extractPalette: <IconBtn icon={Pipette} label={t("shortcut.extractPalette")} action="extractPalette" onClick={() => void extractPaletteToBoard()} />,
-    tidy: <IconBtn icon={LayoutGrid} label={t("shortcut.arrangeDefault")} action="arrangeDefault" onClick={tidySelection} />,
+    palette: <IconBtn icon={SwatchBook} label={t("palette.studio.open")} disabled={readOnly} onClick={() => { leaveDraw(); setStudio({ targetId: null }); }} />,
+    extractPalette: <IconBtn icon={Pipette} label={t("shortcut.extractPalette")} action="extractPalette" disabled={readOnly} onClick={() => void extractPaletteToBoard()} />,
+    tidy: <IconBtn icon={LayoutGrid} label={t("shortcut.arrangeDefault")} action="arrangeDefault" disabled={readOnly} onClick={tidySelection} />,
     // Aimant : accrochage bords/centres/coins. Alt le suspend le temps d'un geste, ce bouton l'éteint.
     snap: <IconBtn icon={Magnet} label={snap ? t("toolbar.snapOff") : t("toolbar.snapOn")} active={snap} onClick={() => setPrefs({ snap: !snap })} />,
     zoomOut: <IconBtn icon={ZoomOut} label={t("actions.zoomOut")} action="zoomOut" onClick={() => board.current?.zoomBy(0.8)} />,
@@ -195,8 +196,8 @@ export function Toolbar({
         onClick={toggleFrozen}
       />
     ),
-    undo: <IconBtn icon={Undo2} label={t("actions.undo")} action="undo" onClick={undo} disabled={!canUndo} />,
-    redo: <IconBtn icon={Redo2} label={t("actions.redo")} action="redo" onClick={redo} disabled={!canRedo} />,
+    undo: <IconBtn icon={Undo2} label={t("actions.undo")} action="undo" onClick={undo} disabled={readOnly || !canUndo} />,
+    redo: <IconBtn icon={Redo2} label={t("actions.redo")} action="redo" onClick={redo} disabled={readOnly || !canRedo} />,
     mouseThrough: (
       <IconBtn
         icon={mouseThrough ? MousePointer2 : MousePointerBan}

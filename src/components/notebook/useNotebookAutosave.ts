@@ -9,7 +9,13 @@ export function useNotebookAutosave() {
   const delayMs = useApp((s) => s.nbPrefs.autosaveMs);
   useEffect(() => {
     if (!dirty) return;
-    const t = setTimeout(() => { void flush(); }, delayMs || 700);
-    return () => clearTimeout(t);
+    let disposed = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const save = async () => {
+      try { await flush(); }
+      catch { if (!disposed) timer = setTimeout(() => { void save(); }, Math.max(delayMs || 700, 2000)); }
+    };
+    timer = setTimeout(() => { void save(); }, delayMs || 700);
+    return () => { disposed = true; clearTimeout(timer); };
   }, [dirty, flush, delayMs]);
 }

@@ -18,6 +18,9 @@ use loro::{ExportMode, LoroDoc, LoroMap, LoroMovableList, LoroValue, VersionVect
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
+#[path = "surface_doc.rs"]
+mod surface;
+
 use super::identity;
 use super::ids::ProjectId;
 pub use super::ops::CollabOp as Op;
@@ -79,7 +82,10 @@ impl From<loro::LoroError> for DocError {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ApplyResult {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub authored_revision: Option<u64>,
     pub revision: u64,
     pub applied: usize,
 }
@@ -119,6 +125,7 @@ pub struct ItemProjection {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProjectProjection {
+    pub entries: Vec<surface::SurfaceEntryProjection>,
     pub revision: u64,
     pub items: Vec<ItemProjection>,
     pub order: Vec<String>,
@@ -146,6 +153,8 @@ struct Project {
     /// poisoned it (rare: an invalid batch).
     shadow: LoroDoc,
     undo: loro::UndoManager,
+    revisions: std::collections::BTreeMap<u64, loro::Frontiers>,
+    prepared_author: Option<loro::Frontiers>,
     revision: u64,
     path: PathBuf,
     /// Snapshot write pending: the in-memory document is ahead of the `.loro` file.
@@ -248,6 +257,8 @@ fn open(project_id: &str) -> Result<Project, DocError> {
         shadow,
         undo,
         revision: 0,
+        revisions: std::collections::BTreeMap::new(),
+        prepared_author: None,
         path,
         dirty: false,
         last_save: Instant::now(),
@@ -480,6 +491,7 @@ fn project_projection_from_doc(
         });
     }
     Ok(ProjectProjection {
+        entries: surface::projection(doc)?,
         revision,
         items: projected_items,
         order: projected_order,
@@ -497,6 +509,7 @@ fn project_projection_from_doc(
 
 fn apply_one(doc: &LoroDoc, op: &CollabOp) -> Result<(), DocError> {
     match op {
+        CollabOp::SurfaceRestoreEntry { .. } | CollabOp::SurfaceTextFormat { .. } | CollabOp::SurfaceSetEntry { .. } | CollabOp::SurfaceDeleteEntry { .. } | CollabOp::SurfaceTextInsert { .. } | CollabOp::SurfaceTextDelete { .. } | CollabOp::SurfaceSetMedia { .. } => surface::apply(doc, op)?,
         CollabOp::AddItem {
             item_id,
             kind,
@@ -723,14 +736,18 @@ fn apply_batch_to_doc(doc: &LoroDoc, ops: &[Op]) -> Result<Vec<u8>, DocError> {
 ///   sealed outbox envelope carries.
 ///
 /// The service persists both in one SQLite transaction before calling `commit_update`, so a crash
-/// cannot leave visible work without a recoverable head. The shadow makes this O(batch), not
-/// O(document): the previous implementation exported and re-imported two full snapshots per 150 ms
-/// batch, which dominated every drag on a large board.
-pub fn prepare_batch(
+/// cannot leave visible work without a recoverable head. The shadow keeps the cost O(batch) rather
+/// than O(document): no full snapshot is exported or re-imported per 150 ms batch, which is what a
+/// drag on a large board is made of.
+///
+/// `base_revision` pins the batch to a past revision of a surface; `None` applies it to the live
+/// head.
+pub fn prepare_batch_at_revision(
     project_id: &str,
     protocol: u32,
     ops: &[Op],
     base_version: &[u8],
+    base_revision: Option<u64>,
 ) -> Result<(Vec<u8>, Vec<u8>), DocError> {
     if protocol != OP_PROTOCOL_VERSION {
         return Err(DocError::Protocol(protocol));
@@ -745,10 +762,23 @@ pub fn prepare_batch(
             .validate()
             .map_err(|error| DocError::Rejected(error.to_string()))?;
         sync_shadow(project)?;
+        project.prepared_author = None;
         let before = project.doc.oplog_vv();
         let applied = (|| {
-            for operation in ops {
-                apply_one(&project.shadow, operation)?;
+            if let Some(revision) = base_revision.filter(|revision| *revision != project.revision) {
+                let frontiers = project.revisions.get(&revision).ok_or_else(|| DocError::Rejected("surface base revision expired; refresh before retrying".into()))?;
+                // A historical fork gets a fresh Loro peer id, avoiding reuse of a counter already
+                // present in the live document. Transport attribution remains the signed device.
+                let branch = project.doc.fork_at(frontiers)?;
+                for operation in ops { apply_one(&branch, operation)?; }
+                branch.commit();
+                project.prepared_author = Some(branch.state_frontiers());
+                let delta = branch.export(ExportMode::updates(&before)).map_err(|error| DocError::Loro(error.to_string()))?;
+                project.shadow.import(&delta)?;
+            } else {
+                for operation in ops { apply_one(&project.shadow, operation)?; }
+                project.shadow.commit();
+                if base_revision.is_some() { project.prepared_author = Some(project.shadow.state_frontiers()); }
             }
             Ok(())
         })();
@@ -777,9 +807,16 @@ pub fn commit_update(
 ) -> Result<ApplyResult, DocError> {
     with_project(project_id, true, |project| {
         project.doc.import(update)?;
+        let authored_revision = project.prepared_author.take().map(|frontiers| {
+            project.revision += 1;
+            project.revisions.insert(project.revision, frontiers);
+            project.revision
+        });
         project.revision += 1;
         save(project)?;
+        while project.revisions.len() > 512 { project.revisions.pop_first(); }
         Ok(ApplyResult {
+            authored_revision,
             revision: project.revision,
             applied,
         })
@@ -821,6 +858,7 @@ pub fn merge(project_id: &str, update: &[u8]) -> Result<ApplyResult, DocError> {
     with_project(project_id, true, |project| {
         if !import_if_new(&project.doc, update)? {
             return Ok(ApplyResult {
+                authored_revision: None,
                 revision: project.revision,
                 applied: 0,
             });
@@ -828,6 +866,7 @@ pub fn merge(project_id: &str, update: &[u8]) -> Result<ApplyResult, DocError> {
         project.revision += 1;
         save(project)?;
         Ok(ApplyResult {
+            authored_revision: None,
             revision: project.revision,
             applied: 1,
         })
@@ -852,6 +891,7 @@ pub fn undo(project_id: &str) -> Result<ApplyResult, DocError> {
         project.revision += 1;
         save(project)?;
         Ok(ApplyResult {
+            authored_revision: None,
             revision: project.revision,
             applied: 1,
         })
@@ -868,6 +908,7 @@ pub fn redo(project_id: &str) -> Result<ApplyResult, DocError> {
         project.revision += 1;
         save(project)?;
         Ok(ApplyResult {
+            authored_revision: None,
             revision: project.revision,
             applied: 1,
         })
@@ -883,6 +924,8 @@ pub fn version(project_id: &str) -> Result<Vec<u8>, DocError> {
 
 pub fn projection(project_id: &str) -> Result<ProjectProjection, DocError> {
     with_project(project_id, false, |project| {
+        project.revisions.insert(project.revision, project.doc.state_frontiers());
+        while project.revisions.len() > 512 { project.revisions.pop_first(); }
         project_projection_from_doc(&project.doc, project.revision)
     })
 }
@@ -923,6 +966,13 @@ pub(crate) fn projection_media_hashes(
             if matches!(link.kind, crate::collab::ops::LinkKind::File) {
                 hashes.insert(link.target.clone());
             }
+        }
+    }
+    for entry in &projection.entries {
+        for manifest in entry.media.values() {
+            add_asset(&mut hashes, &manifest.primary);
+            if let Some(previous) = &manifest.previous { add_asset(&mut hashes, &previous.asset); }
+            if let Some(local) = &manifest.local { add_asset(&mut hashes, &local.asset); }
         }
     }
     hashes

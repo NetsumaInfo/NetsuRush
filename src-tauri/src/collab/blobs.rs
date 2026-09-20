@@ -199,8 +199,79 @@ fn collect_scene_refs(value: &serde_json::Value, output: &mut Vec<String>) {
 fn subject_data(surface: &str, subject_id: &str) -> Result<Option<serde_json::Value>, BlobError> {
     match surface {
         "board" => scene_data(subject_id),
+        "collection" => collection_data(subject_id),
+        "notebook" | "notebook-page" => notebook_data(surface, subject_id),
         _ => Ok(None),
     }
+}
+
+fn collection_data(id: &str) -> Result<Option<serde_json::Value>, BlobError> {
+    let dir = super::identity::board_data_dir().join("collections");
+    let database = dir.join("collections.db");
+    let data = if database.exists() {
+        let connection = rusqlite::Connection::open_with_flags(database, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e| BlobError::Io(e.to_string()))?;
+        let row: Option<String> = connection.query_row("SELECT data FROM collections WHERE id = ?1", [id], |row| row.get(0)).optional().map_err(|e| BlobError::Io(e.to_string()))?;
+        row.map(|v| serde_json::from_str::<serde_json::Value>(&v)).transpose().map_err(|e| BlobError::Io(e.to_string()))?
+    } else {
+        let path = dir.join("collections.json");
+        if !path.exists() { return Ok(None); }
+        let root: serde_json::Value = serde_json::from_slice(&fs::read(path).map_err(|e| BlobError::Io(e.to_string()))?).map_err(|e| BlobError::Io(e.to_string()))?;
+        root.get(id).and_then(|row| row.get("data")).and_then(|v| if let Some(text) = v.as_str() { serde_json::from_str(text).ok() } else { Some(v.clone()) })
+    };
+    // Collection originals never grant authority: only the prepared derivative list is eligible.
+    Ok(data.map(|v| serde_json::json!({"media": v.get("collaboration").and_then(|c| c.get("preparedPaths")).cloned().unwrap_or(serde_json::json!([]))})))
+}
+
+fn notebook_data(surface: &str, id: &str) -> Result<Option<serde_json::Value>, BlobError> {
+    let prepared = super::identity::board_data_dir().join("notebook").join("collaboration-media.json");
+    if prepared.exists() {
+        let cache: serde_json::Value = serde_json::from_slice(&fs::read(prepared).map_err(|e| BlobError::Io(e.to_string()))?).map_err(|e| BlobError::Io(e.to_string()))?;
+        if let Some(media) = cache.get(format!("{surface}:{id}")) { return Ok(Some(serde_json::json!({ "media": media }))); }
+    }
+    fn collect(value: &serde_json::Value, refs: &mut Vec<String>) {
+        match value {
+            serde_json::Value::Object(map) => for (key, child) in map {
+                if matches!(key.as_str(), "url" | "cover" | "src" | "ref") {
+                    if let Some(text) = child.as_str() {
+                        if let Ok(url) = reqwest::Url::parse(text) {
+                            if url.host_str() == Some("localhost") || url.host_str() == Some("127.0.0.1") {
+                                for (key, path) in url.query_pairs() { if key == "path" || key == "p" { refs.push(path.into_owned()); } }
+                            }
+                        } else { refs.push(text.to_owned()); }
+                    }
+                }
+                collect(child, refs);
+            },
+            serde_json::Value::Array(list) => for child in list { collect(child, refs); },
+            _ => (),
+        }
+    }
+    let dir = super::identity::board_data_dir().join("notebook");
+    let database = dir.join("notebook.db");
+    let mut refs = Vec::new();
+    if database.exists() {
+        let connection = rusqlite::Connection::open_with_flags(database, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e| BlobError::Io(e.to_string()))?;
+        let sql = if surface == "notebook-page" { "SELECT cover, data FROM page WHERE id = ?1" } else { "SELECT cover, data FROM page WHERE notebook_id = ?1 AND deleted_at IS NULL" };
+        let mut statement = connection.prepare(sql).map_err(|e| BlobError::Io(e.to_string()))?;
+        let rows = statement.query_map([id], |row| Ok((row.get::<_, Option<String>>(0)?, row.get::<_, String>(1)?))).map_err(|e| BlobError::Io(e.to_string()))?;
+        for row in rows {
+            let (cover, data) = row.map_err(|e| BlobError::Io(e.to_string()))?;
+            collect(&serde_json::json!({"cover": cover, "blocks": serde_json::from_str::<serde_json::Value>(&data).unwrap_or_default()}), &mut refs);
+        }
+    } else {
+        let path = dir.join("notebook.json");
+        if !path.exists() { return Ok(None); }
+        let root: serde_json::Value = serde_json::from_slice(&fs::read(path).map_err(|e| BlobError::Io(e.to_string()))?).map_err(|e| BlobError::Io(e.to_string()))?;
+        if let Some(pages) = root.get("pages").and_then(|v| v.as_object()) {
+            for (page_id, page) in pages {
+                if (surface == "notebook-page" && page_id == id) || (surface == "notebook" && page.get("notebook_id").and_then(|v| v.as_str()) == Some(id)) {
+                    collect(page, &mut refs);
+                    if let Some(text) = page.get("data").and_then(|v| v.as_str()) { collect(&serde_json::from_str::<serde_json::Value>(text).unwrap_or_default(), &mut refs); }
+                }
+            }
+        }
+    }
+    Ok(Some(serde_json::json!({"media": refs})))
 }
 
 fn scene_data(scene_id: &str) -> Result<Option<serde_json::Value>, BlobError> {
@@ -262,7 +333,7 @@ pub fn issue_known_grant(
     let canonical = canonical_regular_file(Path::new(source))?;
     let owned_root =
         fs::canonicalize(super::identity::board_data_dir().join("reference").join("assets")).ok();
-    let owned = owned_root
+    let owned = surface == "board" && owned_root
         .as_ref()
         .is_some_and(|root| canonical.starts_with(root) && canonical.as_path() != root.as_path());
     let mut referenced = false;

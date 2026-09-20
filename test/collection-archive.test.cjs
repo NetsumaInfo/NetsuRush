@@ -68,8 +68,8 @@ test('relocate re-exports every missing clip in a single batched call', async ()
 });
 
 // --- Ne rien refaire deux fois ---------------------------------------------------------------
-// Un archivage repart à chaque plan rangé (synchro auto). Sans ce tri, activer l'upscale rendait la
-// fonction inutilisable : chaque ajout relançait le GPU sur toute la collection.
+// Un archivage repart à chaque plan rangé (synchro auto). Sans ce tri, activer un traitement rendait
+// la fonction inutilisable : chaque ajout relançait le GPU sur toute la collection.
 
 const UP_PROFILE = { id: 'p1', container: 'mp4', workflow: 'video_encode', codec: 'h264_high' };
 const IDENT_SHOTS = [
@@ -77,7 +77,7 @@ const IDENT_SHOTS = [
   { id: 's2', path: 'B.mkv', in: 2, out: 3 },
 ];
 
-/** Collection à archiver dans un dossier neuf, avec des dépendances d'upscale entièrement simulées. */
+/** Collection à archiver dans un dossier neuf, avec des dépendances de traitement simulées. */
 function upscaleScenario({ shots = IDENT_SHOTS, archive = null, describe = () => null } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'nr-archive-up-'));
   const dir = path.join(root, 'archive');
@@ -94,7 +94,7 @@ function upscaleScenario({ shots = IDENT_SHOTS, archive = null, describe = () =>
     },
   };
   const upscaled = [];
-  const upscaleMod = {
+  const sidecars = {
     runUpscale: async (event, opts) => {
       upscaled.push(opts);
       fs.mkdirSync(path.dirname(opts.savePath), { recursive: true });
@@ -102,7 +102,7 @@ function upscaleScenario({ shots = IDENT_SHOTS, archive = null, describe = () =>
       return { ok: true, outputs: [opts.savePath] };
     },
   };
-  const turboMod = { isTurboShader: (id) => String(id).startsWith('artcnn'), runTurbo: (s, e, o) => s.runUpscale(e, o) };
+  const turbo = { isTurboShader: (id) => String(id).startsWith('artcnn'), runTurbo: (s, e, o) => s.runUpscale(e, o) };
   const recorded = [];
   const ledger = {
     fingerprint: (input) => JSON.stringify([input.src, input.in, input.out, input.upscale]),
@@ -113,16 +113,17 @@ function upscaleScenario({ shots = IDENT_SHOTS, archive = null, describe = () =>
   };
   return {
     root, dir, marks, exported, upscaled, recorded,
-    archive: createCollectionArchive({ collectionStore, exportMod, upscaleMod, turboMod, ledger }),
+    archive: createCollectionArchive({ collectionStore, exportMod, sidecars, turbo, ledger }),
   };
 }
 
-const UPSCALE = { enabled: true, model: 'fallin', scale: 2 };
+// Réglages tels que les écrit le volet d'archivage : une passe nommée, ses réglages dans son bac.
+const UPSCALE = { enabled: true, kinds: ['upscale'], upscale: { model: 'fallin', scale: 2 } };
 
 test('a shot already archived with the same settings is not produced again', async () => {
   const s = upscaleScenario();
   try {
-    const first = await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    const first = await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process: UPSCALE });
     assert.equal(first.ok, true);
     assert.equal(s.upscaled.length, 2, 'premier passage : les deux plans sont produits');
     assert.equal(first.rendered, 2);
@@ -130,7 +131,7 @@ test('a shot already archived with the same settings is not produced again', asy
     // Deuxième passage avec l'état d'archivage rendu par le premier : plus rien à faire.
     const s2 = upscaleScenario({ archive: { dir: s.dir, lastAt: 1, entries: s.marks[0].entries } });
     // Le second scénario a son propre dossier temporaire : on rejoue sur le dossier du premier.
-    const again = await s2.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    const again = await s2.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process: UPSCALE });
     assert.equal(again.ok, true);
     assert.equal(again.skipped, 2, 'rien n’a changé : aucun encodage');
     assert.equal(s2.upscaled.length, 0);
@@ -142,12 +143,12 @@ test('a shot already archived with the same settings is not produced again', asy
 test('the same content produced elsewhere is copied, never regenerated', async () => {
   const s = upscaleScenario();
   try {
-    await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process: UPSCALE });
     const produced = s.marks[0].entries;
 
     // Même collection, AUTRE dossier de stockage : le contenu existe, il n'y a rien à recalculer.
     const other = upscaleScenario({ archive: { dir: s.dir, lastAt: 1, entries: produced } });
-    const r = await other.archive.archive(null, 'c1', { dir: other.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    const r = await other.archive.archive(null, 'c1', { dir: other.dir, profile: UP_PROFILE, process: UPSCALE });
     assert.equal(r.copied, 2);
     assert.equal(other.upscaled.length, 0, 'le GPU ne doit pas être repayé pour un fichier existant');
     assert.equal(fs.existsSync(path.join(other.dir, 'Sel_001.mp4')), true);
@@ -159,7 +160,7 @@ test('a source that is already one of our upscales is not upscaled again', async
   // B.mkv a été produit par un upscale ×2 : le ré-agrandir en ×2 n'ajouterait aucun détail.
   const s = upscaleScenario({ describe: (p) => (p === 'B.mkv' ? { scale: 2, model: 'fallin' } : null) });
   try {
-    const r = await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    const r = await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process: UPSCALE });
     assert.equal(r.ok, true);
     assert.equal(s.upscaled.length, 1, 'seul le plan non upscalé passe par le GPU');
     assert.equal(s.upscaled[0].input, 'A.mkv');
@@ -168,10 +169,32 @@ test('a source that is already one of our upscales is not upscaled again', async
   } finally { fs.rmSync(s.root, { recursive: true, force: true }); }
 });
 
+test('an earlier upscale only counts when it was sized the same way', async () => {
+  const TARGET = { enabled: true, kinds: ['upscale'], upscale: { model: 'fallin', scale: 2, targetHeight: 2160 } };
+  const run = async (already, process) => {
+    const s = upscaleScenario({ shots: [IDENT_SHOTS[0]], describe: () => already });
+    try {
+      await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process });
+      return s.upscaled;
+    } finally { fs.rmSync(s.root, { recursive: true, force: true }); }
+  };
+  // Already fitted to 2160p: nothing to gain from a 2160p pass, nor from a 1440p one.
+  assert.equal((await run({ scale: 2, target: 2160 }, TARGET)).length, 0);
+  assert.equal((await run({ scale: 2, target: 2160 }, { ...TARGET, upscale: { ...TARGET.upscale, targetHeight: 1440 } })).length, 0);
+  // Fitted to 1080p only: a 2160p pass still has work to do.
+  assert.equal((await run({ scale: 2, target: 1080 }, TARGET)).length, 1);
+  // A x2 output says nothing about its class, and a class says nothing about a factor.
+  assert.equal((await run({ scale: 2 }, TARGET)).length, 1);
+  assert.equal((await run({ scale: 2, target: 2160 }, UPSCALE)).length, 1);
+  // The class is what the engine receives.
+  const [job] = await run(null, TARGET);
+  assert.equal(job.targetHeight, 2160);
+});
+
 test('upscaling forces re-encoding: a remux profile cannot stay a stream copy', async () => {
   const s = upscaleScenario({ describe: () => ({ scale: 9 }) }); // tout est déjà upscalé → export seul
   try {
-    await s.archive.archive(null, 'c1', { dir: s.dir, profile: { ...UP_PROFILE, workflow: 'video_remux' }, upscale: UPSCALE });
+    await s.archive.archive(null, 'c1', { dir: s.dir, profile: { ...UP_PROFILE, workflow: 'video_remux' }, process: UPSCALE });
     assert.equal(s.exported[0].profile.workflow, 'video_encode');
   } finally { fs.rmSync(s.root, { recursive: true, force: true }); }
 });
@@ -179,7 +202,7 @@ test('upscaling forces re-encoding: a remux profile cannot stay a stream copy', 
 test('archive entries survive shot removal (identity, not index)', async () => {
   const s = upscaleScenario();
   try {
-    await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    await s.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process: UPSCALE });
     const entries = s.marks[0].entries;
     assert.deepEqual(Object.keys(entries).sort(), ['s1', 's2']);
 
@@ -187,7 +210,7 @@ test('archive entries survive shot removal (identity, not index)', async () => {
     const after = upscaleScenario({
       shots: [IDENT_SHOTS[1]], archive: { dir: s.dir, lastAt: 1, entries },
     });
-    const r = await after.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, upscale: UPSCALE });
+    const r = await after.archive.archive(null, 'c1', { dir: s.dir, profile: UP_PROFILE, process: UPSCALE });
     // Les noms sont numérotés : le plan restant devient le n°1. Son contenu est RECOPIÉ (pas
     // régénéré), et l'ancien n°2 — un fichier que nous avions écrit — est retiré du dossier.
     assert.equal(after.upscaled.length, 0, 'aucun encodage : le contenu existait déjà');

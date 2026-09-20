@@ -227,20 +227,27 @@
     });
   }
 
-  // Sonde une URL (résout true/false, jamais de rejet). mode no-cors : Vite dev ne pose pas
-  // d'en-têtes CORS — la réponse opaque suffit à prouver que le serveur répond.
-  function probe(url, timeoutMs) {
+  // Sonde une URL (résout true/false, jamais de rejet). Sans `check`, mode no-cors : Vite dev ne pose
+  // pas d'en-têtes CORS — la réponse opaque suffit à prouver que le serveur répond. Avec `check`, la
+  // réponse est lue, ce que le moteur du panneau permet (--disable-web-security, cf. manifest).
+  function probe(url, timeoutMs, check) {
     return new Promise(function (resolve) {
       var done = false;
-      var t = setTimeout(function () { if (!done) { done = true; resolve(false); } }, timeoutMs || 1200);
+      var t = setTimeout(function () { finish(false); }, timeoutMs || 1200);
+      function finish(ok) { if (!done) { done = true; clearTimeout(t); resolve(!!ok); } }
       try {
-        fetch(url, { method: "GET", mode: "no-cors", cache: "no-store" }).then(function () {
-          if (!done) { done = true; clearTimeout(t); resolve(true); }
-        }).catch(function () {
-          if (!done) { done = true; clearTimeout(t); resolve(false); }
-        });
-      } catch (e) { if (!done) { done = true; clearTimeout(t); resolve(false); } }
+        fetch(url, { method: "GET", mode: check ? "cors" : "no-cors", cache: "no-store" })
+          .then(function (r) { return check ? check(r) : true; })
+          .then(finish, function () { finish(false); });
+      } catch (e) { finish(false); }
     });
+  }
+
+  // 1420 is the Tauri + Vite template port: any project in development may answer there, and the page
+  // chosen here receives the core token. Only NetsuRush's own index.html carries this marker.
+  function isNetsuRushPage(r) {
+    if (!r.ok) return false;
+    return r.text().then(function (html) { return html.indexOf("__NR_REMOTE__") >= 0; });
   }
 
   // ---- Statut core (poll léger + heartbeat panneau) ----
@@ -375,7 +382,7 @@
   var appBase = null; // résolue une fois par session (remise à zéro si le port du service change)
   function resolveAppBase() {
     if (appBase) return Promise.resolve(appBase);
-    return probe(DEV_URL + "/", 1000).then(function (dev) {
+    return probe(DEV_URL + "/", 1000, isNetsuRushPage).then(function (dev) {
       if (dev) { appBase = DEV_URL + "/"; return appBase; }
       return probe(CORE + "/app/", 1500).then(function (prod) {
         if (prod) { appBase = CORE + "/app/"; return appBase; }
@@ -383,8 +390,10 @@
       });
     });
   }
+  // `tk` is the only way the app learns the token outside Tauri (index.html, which strips it from the
+  // address once read). Without it /media refuses every thumbnail and proxy the grids ask for.
   function remoteUrl(base) {
-    return base + "?core=" + encodeURIComponent(CORE) + "&remote=1&host=" + APP;
+    return base + "?core=" + encodeURIComponent(CORE) + "&remote=1&host=" + APP + tkQuery("&");
   }
   var HOME_PREF = "nr.panelHome"; // "1" = l'utilisateur a fermé la vue app → rester sur l'accueil
   function prefHome() {
@@ -416,7 +425,14 @@
         log(tr("appUnavailable"), true);
         return;
       }
-      if (!el.appFrame.src) { armReadyWatchdog(); el.appFrame.src = remoteUrl(base); }
+      // Rebuilt whenever the address or the token moved: a core restarted on the same port draws a
+      // new token, and an iframe still holding the old one is refused on every thumbnail.
+      var url = remoteUrl(base);
+      if (el.appFrame.getAttribute("src") !== url) {
+        appReady = false;
+        armReadyWatchdog();
+        el.appFrame.src = url;
+      }
       el.remoteWrap.style.display = "flex";
     });
   }
