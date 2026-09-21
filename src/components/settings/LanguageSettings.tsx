@@ -16,7 +16,6 @@ export function LanguageSettings() {
   return (
     <section>
       <h2 className="text-sm font-medium">{t("settings.title")}</h2>
-      <p className="mt-1 text-xs text-muted-foreground">{t("settings.subtitle")}</p>
       <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-border p-4">
         <span className="block text-[0.8125rem]">{t("settings.fieldLabel")}</span>
         <Select

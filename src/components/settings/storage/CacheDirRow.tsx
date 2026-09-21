@@ -12,6 +12,7 @@ import { useApp } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import type { CacheOverview } from "@/lib/bridge";
 import { fmtBytes } from "./storageShared";
+import { InfoTip } from "../rows";
 
 interface Props {
   overview: CacheOverview;
@@ -56,8 +57,10 @@ export function CacheDirRow({ overview, onDone }: Props) {
 
   return (
     <div className="rounded-lg border border-border p-3">
-      <h4 className="text-xs font-medium text-foreground">{t("settings:storage.dir.title")}</h4>
-      <p className="mt-1 text-xs text-muted-foreground">{t("settings:storage.dir.desc")}</p>
+      <h4 className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+        {t("settings:storage.dir.title")}
+        <InfoTip text={t("settings:storage.dir.desc")} />
+      </h4>
 
       <div className="mt-3 flex items-center gap-2">
         <Tooltip>

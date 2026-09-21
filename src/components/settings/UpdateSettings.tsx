@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Toggle } from "@/components/ui/toggle";
+import { InfoTip, SectionTitle } from "./rows";
 
 export function UpdateSettings() {
   const { t, i18n } = useTranslation("settings");
@@ -35,17 +36,14 @@ export function UpdateSettings() {
 
   return (
     <section className="flex flex-col gap-5">
-      <header>
-        <h2 className="text-sm font-medium">{t("updates.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("updates.subtitle")}</p>
-      </header>
+      <SectionTitle title={t("updates.title")} info={t("updates.subtitle")} />
 
       <Card className="gap-4 p-4">
         <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium">{t("updates.auto")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{t("updates.autoHint")}</p>
-          </div>
+          <p className="flex items-center gap-1.5 text-sm font-medium">
+            {t("updates.auto")}
+            <InfoTip text={t("updates.autoHint")} />
+          </p>
           <Toggle pressed={autoCheck} onPressedChange={setAutoCheck} aria-label={t("updates.auto")}>
             {autoCheck ? t("updates.on") : t("updates.off")}
           </Toggle>
@@ -54,10 +52,10 @@ export function UpdateSettings() {
         {/* Unattended install. Second row rather than a third state of the first toggle: checking
             and restarting on their own are two different levels of consent. */}
         <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
-          <div>
-            <p className="text-sm font-medium">{t("updates.autoInstall")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{t("updates.autoInstallHint")}</p>
-          </div>
+          <p className="flex items-center gap-1.5 text-sm font-medium">
+            {t("updates.autoInstall")}
+            <InfoTip text={t("updates.autoInstallHint")} />
+          </p>
           <Toggle pressed={autoInstall} onPressedChange={setAutoInstall} aria-label={t("updates.autoInstall")}>
             {autoInstall ? t("updates.on") : t("updates.off")}
           </Toggle>

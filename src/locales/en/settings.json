@@ -29,14 +29,13 @@
   "account": {
     "title": "Account",
     "notConfigured": "Sign-in is not configured on this installation.",
-    "subtitle": "The Discord account connected to NetsuRush.",
     "none": "No account connected.",
     "discordUser": "Discord user",
     "signOut": "Sign out"
   },
   "playback": {
     "title": "Previews and thumbnails",
-    "subtitle": "Changing a setting regenerates the previews as you browse. The old ones stay on disk until you delete them.",
+    "subtitle": "A change regenerates the previews. The old ones stay on disk until you delete them.",
     "soundTitle": "Sound",
     "playerVolume": "Player volume",
     "playerVolumeHint": "Shared by NetsuCut, Collections, Voice and Upscale.",
@@ -82,20 +81,20 @@
     "indexingTitle": "Shot analysis",
     "accelerationTitle": "Acceleration",
     "shotDecode": "Grouped extraction",
-    "shotDecodeHint": "Pulls a shot's frames in one go instead of one by one. Up to 6× faster, for exactly the same frames.",
+    "shotDecodeHint": "Up to 6× faster, for the same frames.",
     "vramProfile": "Memory profile",
-    "vramProfileHint": "How much work runs at once. Lower it if the app gets in the way of your edit, raise it if the machine is free.",
+    "vramProfileHint": "Lower it if the app slows your edit down, raise it when the machine is free.",
     "vram": {
       "economy": "Economy",
       "balanced": "Balanced",
       "performance": "Performance"
     },
     "maxPatches": "Analysis resolution",
-    "maxPatchesHint": "How much detail the model sees in each frame. Higher catches small elements, but costs time and memory.",
+    "maxPatchesHint": "Higher catches small details, but takes more time and memory.",
     "patchesDefault": "{{value}} (default)",
     "reindexWarning": "At this resolution your rushes must be indexed again. Going back to 256 finds the original index intact.",
     "onnxGpu": "Faces and dictation on GPU",
-    "onnxGpuHint": "About 8× faster than the processor, for the same results. Turn it off if your graphics driver crashes.",
+    "onnxGpuHint": "About 8× faster. Turn it off if your graphics driver crashes.",
     "enabled": "On",
     "disabled": "Off",
     "reset": "Reset performance",
@@ -104,55 +103,43 @@
   },
   "appearance": {
     "title": "Theme",
-    "subtitle": "Eight dark palettes, three light ones. Each can be tweaked colour by colour just below.",
     "group": {
       "dark": "Dark",
       "light": "Light"
     },
     "theme": {
       "dark": {
-        "label": "Dark",
-        "hint": "Neutral with strong contrast."
+        "label": "Dark"
       },
       "midnight": {
-        "label": "Midnight",
-        "hint": "True black with discreet surfaces."
+        "label": "Midnight"
       },
       "blue": {
-        "label": "Night blue",
-        "hint": "Deep, vivid blue."
+        "label": "Night blue"
       },
       "light": {
-        "label": "Light",
-        "hint": "Clean white with crisp contrast."
+        "label": "Light"
       },
       "soft-light": {
-        "label": "Soft light",
-        "hint": "Blue-gray with reduced glare."
+        "label": "Soft light"
       },
       "graphite": {
-        "label": "Graphite",
-        "hint": "Neutral gray, no tint."
+        "label": "Graphite"
       },
       "forest": {
-        "label": "Forest",
-        "hint": "Deep green with an emerald accent."
+        "label": "Forest"
       },
       "ember": {
-        "label": "Ember",
-        "hint": "Warm charcoal with an amber accent."
+        "label": "Ember"
       },
       "plum": {
-        "label": "Plum",
-        "hint": "Muted purple with a mauve accent."
+        "label": "Plum"
       },
       "contrast": {
-        "label": "High contrast",
-        "hint": "Pure black with crisp borders."
+        "label": "High contrast"
       },
       "paper": {
-        "label": "Paper",
-        "hint": "Soft sepia with a terracotta accent."
+        "label": "Paper"
       }
     },
     "wallpaper": {
@@ -205,7 +192,7 @@
     },
     "custom": {
       "title": "My themes",
-      "subtitle": "Save the current look: palette, colors and background.",
+      "subtitle": "Keeps the palette, colours and wallpaper under a name.",
       "create": "New theme",
       "save": "Save",
       "delete": "Delete this theme",
@@ -275,7 +262,6 @@
       "missing": "Unavailable"
     },
     "thumbnailEngine": "Generated on the CPU by design.",
-    "subtitle": "What runs on your card, what falls back to the CPU, and what is missing.",
     "refresh": "Check",
     "hardware": "Detected components",
     "gpu": "Graphics card",
@@ -317,7 +303,7 @@
     "restore": "Restore",
     "restoreHint": "Restores the shipped presets missing from the list.",
     "cardButton": "Thumbnail button",
-    "cardButtonHint": "Action of the button shown when hovering a thumbnail."
+    "cardButtonHint": "The small button that appears when you hover a thumbnail."
   },
   "console": {
     "title": "Console",
@@ -427,9 +413,8 @@
   },
   "outbox": {
     "opening": "Opening cache…",
-    "intro": "Close Resolve/Premiere Pro to free the GPU during heavy encodes without losing your sends: they are cached and applied <b>automatically when the app reopens</b>.",
+    "intro": "Sends to an application that is closed wait here, then go out on their own when it reopens.",
     "enabled": "Queue enabled",
-    "enabledHint": "Otherwise, sending to a closed editing app fails as before.",
     "on": "Enabled",
     "off": "Disabled",
     "delay": "Delay before applying",
@@ -571,7 +556,7 @@
       "manualOnly": "Manual purge only",
       "manualOnlyHint": "This type isn't usage-tracked: no auto-purge possible.",
       "sessionTitle": "Working caches",
-      "sessionDesc": "Choose when each large derivative stops being useful. App exit always remains the safety net.",
+      "sessionDesc": "When to delete heavy temporary files. Quitting the app deletes them anyway.",
       "sequenceTitle": "Model intermediate sequences",
       "sequenceHint": "Frame folders created only to feed a model. Sequences you exported yourself are never touched.",
       "trigger": {
@@ -631,7 +616,7 @@
     },
     "projects": {
       "current": "Open",
-      "desc": "The projects search knows about. A project lands here once NetsuRush has read its Media Pool. “Scan” goes and finds the rest.",
+      "desc": "The projects search knows about. A project is added as soon as its Media Pool is read; \"Scan\" finds the others.",
       "empty": "No project known yet.",
       "forget": "Forget",
       "forgetTooltip": "Removes the project from the list (index and files are untouched)",
@@ -647,7 +632,6 @@
   },
   "navigation": {
     "title": "Pages and navigation order",
-    "subtitle": "Hide pages you do not use and choose their order in the sidebar.",
     "reset": "Restore all",
     "required": "Always available",
     "visible": "Visible",
@@ -660,7 +644,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "subtitle": "How long status badges stay on screen. A running task stays until it ends.",
+    "subtitle": "A task in progress stays on screen until it ends.",
     "reset": "Reset all",
     "ok": "Task completed",
     "okHint": "Export finished, sent to the timeline, successes in general.",
@@ -673,7 +657,7 @@
     "untilClick": "Until clicked"
   },
   "detection": {
-    "reindexHint": "Another model draws different shot boundaries: rushes already indexed will have to be indexed again."
+    "reindexHint": "Switching model means reindexing your clips."
   },
   "tab": {
     "account": {
@@ -711,12 +695,12 @@
   },
   "indexing": {
     "title": "Indexing",
-    "subtitle": "Rushes are first cut into shots, then each shot is analysed. Settings that change nothing in the results are already on.",
+    "subtitle": "Each clip is cut into shots, then each shot is analysed. What does not change the result is already on.",
     "cutTitle": "Shot detection"
   },
   "boardAssets": {
     "title": "Board storage",
-    "intro": "The app keeps media of its own: pasted images, media fetched from a link, extracted frames, upscale results. Saving a .netsu project files those bytes in its companion folder — the store then holds only a duplicate, which can be freed without losing anything. Display caches have their own page.",
+    "intro": "What the app keeps for itself: pasted images, media from links, frames, upscale results. Your own files are never touched.",
     "disk": "{{free}} free of {{total}}",
     "scanning": "Scanning storage…",
     "failed": "That didn't go through. Try again.",
@@ -726,7 +710,6 @@
     "archivedNotice": "Board saved to “{{name}}”: its media now live in the project folder",
     "settling": "{{count}} still being written",
     "settlingHint": "A file written moments ago may belong to an import the board has not placed yet. It will be judged on the next pass.",
-    "footnote": "Media you added from your own disk are never involved: the app only touches files it wrote itself.",
     "safe": {
       "hint": "Checked file by file: these bytes already exist inside a project's companion folder.",
       "title": "Safe to free",
@@ -737,7 +720,7 @@
     },
     "sole": {
       "title": "Save these somewhere first",
-      "hint": "These media exist nowhere else. Nothing here deletes them: save them first and they move to the section above.",
+      "hint": "The only copy there is: save the board first, and it moves to the section above.",
       "empty": "Nothing at risk: everything the app keeps also exists elsewhere.",
       "untitled": "Untitled board",
       "sceneCount": "{{count}} media the app is the only holder of · {{size}}",
@@ -753,7 +736,7 @@
   },
   "collaboration": {
     "title": "Collaboration",
-    "description": "These settings stay on this computer. Choose a default profile or an override for each page category.",
+    "description": "Specific to this computer. One profile for everything, or an exception per page type.",
     "profilesHint": "Live: sends every 60 ms. Balanced: 200 ms. Economy: 900 ms, with automatic media downloads disabled.",
     "default": "Default profile",
     "inherit": "Use default profile",

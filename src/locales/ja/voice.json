@@ -214,19 +214,19 @@
     "asr": {
       "whisperTurbo": {
         "label": "高精度",
-        "hint": "Whisper large-v3-turbo — 多言語、語単位のタイムスタンプが正確"
+        "hint": "多言語対応。単語ごとのタイムスタンプが正確です。"
       },
       "parakeetV3": {
         "label": "高速",
-        "hint": "Parakeet TDT v3 — 最速（お使いの GPU で要検証）"
+        "hint": "最速です。お使いの GPU で安定して動くか確認してください。"
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Whisper + wav2vec2 強制アライメント — SRT/VTT 用のフレーム精度な語タイムスタンプ（実装準備中）"
+        "hint": "SRT/VTT 字幕用に単語をフレーム単位で合わせます。エンジンは未接続です。"
       },
       "canary": {
         "label": "Canary",
-        "hint": "NVIDIA Canary-1B-v2 — EU 25 言語、語タイムスタンプなし、実装準備中。"
+        "hint": "ヨーロッパの 25 言語。単語ごとのタイムスタンプはありません。エンジンは未接続です。"
       }
     },
     "vad": {

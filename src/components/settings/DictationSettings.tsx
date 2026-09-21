@@ -13,6 +13,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { useModelManager } from "@/components/settings/models/useModelManager";
 import { hotkeyLabel, hotkeyFromEvent, isValidHotkey, isModifierCode, type DictateHotkey } from "@/components/dictate/dictateHotkey";
 import { buildMicOptions, micOptionValue, selectedMicLabel } from "@/components/settings/micOptions";
+import { InfoTip, SectionTitle } from "./rows";
 
 // Capture d'un raccourci : au clic on écoute le prochain keydown. Modificateurs seuls = maintenir la
 // combinaison puis relâcher valide ; sinon la 1re touche non-modificateur valide.
@@ -176,12 +177,10 @@ function CppEngineStatus() {
   return (
     <div className={cnRow(false)} style={{ cursor: "default" }}>
       <span className={st.ok ? "size-2 shrink-0 rounded-full bg-[var(--color-ok)]" : "size-2 shrink-0 rounded-full bg-[var(--color-warn)]"} />
-      <div className="min-w-0 flex-1">
-        <span className="block text-[0.8125rem]">{t("cpp.engine")} {st.ok ? t("cpp.ready", { backend: st.backend }) : t("cpp.notInstalled")}</span>
-        <span className="block text-xs text-muted-foreground">
-          {st.ok ? t("cpp.readyHint") : t("cpp.notInstalledHint")}
-        </span>
-      </div>
+      <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[0.8125rem]">
+        {t("cpp.engine")} {st.ok ? t("cpp.ready", { backend: st.backend }) : t("cpp.notInstalled")}
+        <InfoTip text={st.ok ? t("cpp.readyHint") : t("cpp.notInstalledHint")} />
+      </span>
     </div>
   );
 }
@@ -213,64 +212,57 @@ export function DictationSettings() {
 
   return (
     <section className="flex flex-col gap-6">
-      <div>
-        <h2 className="flex items-center gap-2 text-sm font-medium"><Mic className="size-4" /> {t("settings.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("settings.intro")}</p>
-      </div>
+      <SectionTitle icon={<Mic className="size-4" />} title={t("settings.title")} info={t("settings.intro")} />
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-        <div className="min-w-0">
-          <span className="block text-[0.8125rem]">{t("settings.enableLabel")}</span>
-          <span className="block text-xs text-muted-foreground">{t("settings.enableHint")}</span>
+      <div className="divide-y divide-border rounded-lg border border-border">
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[0.8125rem]">{t("settings.enableLabel")}</span>
+          <Toggle
+            size="sm" variant="outline" pressed={enabled} onPressedChange={setEnabled}
+            className="shrink-0 aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary"
+          >
+            {enabled ? t("settings.enabledOn") : t("settings.enabledOff")}
+          </Toggle>
         </div>
-        <Toggle
-          size="sm" variant="outline" pressed={enabled} onPressedChange={setEnabled}
-          className="shrink-0 aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary"
-        >
-          {enabled ? t("settings.enabledOn") : t("settings.enabledOff")}
-        </Toggle>
-      </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-        <div className="min-w-0">
-          <span className="block text-[0.8125rem]">{t("settings.micLabel")}</span>
-          <span className="block text-xs text-muted-foreground">{t("settings.micHint")}</span>
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="text-[0.8125rem]">{t("settings.micLabel")}</span>
+          <MicPicker value={mic} onChange={setMic} />
         </div>
-        <MicPicker value={mic} onChange={setMic} />
-      </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-        <div className="min-w-0">
-          <span className="block text-[0.8125rem]">{t("settings.hotkeyLabel")}</span>
-          <span className="block text-xs text-muted-foreground">{t("settings.hotkeyHint")}</span>
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="flex items-center gap-1.5 text-[0.8125rem]">
+            {t("settings.hotkeyLabel")}
+            <InfoTip text={t("settings.hotkeyHint")} />
+          </span>
+          <HotkeyCapture value={hotkey} onChange={setHotkey} />
         </div>
-        <HotkeyCapture value={hotkey} onChange={setHotkey} />
-      </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-        <div className="min-w-0">
-          <span className="block text-[0.8125rem]">{t("settings.unloadLabel")}</span>
-          <span className="block text-xs text-muted-foreground">{t("settings.unloadHint")}</span>
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="flex items-center gap-1.5 text-[0.8125rem]">
+            {t("settings.unloadLabel")}
+            <InfoTip text={t("settings.unloadHint")} />
+          </span>
+          <Select items={UNLOAD_ITEMS.map((it) => ({ value: it.value, label: t(it.labelKey) }))} value={String(unloadMs)} onValueChange={(v) => setUnloadMs(parseInt(String(v), 10) || 0)}>
+            <SelectTrigger size="sm" className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {UNLOAD_ITEMS.map((it) => <SelectItem key={it.value} value={it.value}>{t(it.labelKey)}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
-        <Select items={UNLOAD_ITEMS.map((it) => ({ value: it.value, label: t(it.labelKey) }))} value={String(unloadMs)} onValueChange={(v) => setUnloadMs(parseInt(String(v), 10) || 0)}>
-          <SelectTrigger size="sm" className="w-40"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {UNLOAD_ITEMS.map((it) => <SelectItem key={it.value} value={it.value}>{t(it.labelKey)}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-        <div className="min-w-0">
-          <span className="block text-[0.8125rem]">{t("settings.liveLabel")}</span>
-          <span className="block text-xs text-muted-foreground">{t("settings.liveHint")}</span>
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <span className="flex items-center gap-1.5 text-[0.8125rem]">
+            {t("settings.liveLabel")}
+            <InfoTip text={t("settings.liveHint")} />
+          </span>
+          <Toggle
+            size="sm" variant="outline" pressed={live} onPressedChange={setLive}
+            className="shrink-0 aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary"
+          >
+            {live ? t("settings.liveOn") : t("settings.liveOff")}
+          </Toggle>
         </div>
-        <Toggle
-          size="sm" variant="outline" pressed={live} onPressedChange={setLive}
-          className="shrink-0 aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary"
-        >
-          {live ? t("settings.liveOn") : t("settings.liveOff")}
-        </Toggle>
       </div>
 
       <div>

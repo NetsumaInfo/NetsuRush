@@ -157,10 +157,10 @@
     "testTip": "Tester sur l'image courante — aperçu seul, rien n'est écrit"
   },
   "engineHint": {
-    "minimax-remover": "Diffusion en 6 pas environ, cohérente dans le temps — plus propre sur fond animé.",
-    "diffueraser": "Qualité — moteur à câbler.",
-    "matanyone": "Suivi par mémoire — cheveux et bords.",
-    "matanyone2": "Détails fins et meilleure robustesse que la v1."
+    "minimax-remover": "Reconstruit le fond sans scintiller — le plus propre quand le fond bouge.",
+    "diffueraser": "Suppression d'objet dans la vidéo, haute qualité. Moteur pas encore branché.",
+    "matanyone": "Se souvient de l'objet d'une image à l'autre — bon sur les cheveux et les bords fins.",
+    "matanyone2": "Comme la v1, en plus fin et plus fiable."
   },
   "exportRow": {
     "allObjects": "Tous les objets",
@@ -187,8 +187,8 @@
     "pngMatteHint": "Masque noir et blanc seul"
   },
   "sam": {
-    "large": "Meilleure qualité de masque, plus de VRAM.",
-    "base": "Repli rapide, bas VRAM.",
+    "large": "Le meilleur masque. 2 Gio de VRAM mesurés, quelle que soit la longueur du plan.",
+    "base": "Le repli rapide, peu de VRAM.",
     "small": "Variante intermédiaire : moins de VRAM que Base+, masques un peu moins fins.",
     "tiny": "La plus petite variante SAM 2.1 — pour les cartes serrées en VRAM.",
     "edgetam": "Le plus léger (56 Mo) et le plus rapide. Masques moins fins que SAM 2.1.",

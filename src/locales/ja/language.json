@@ -7,7 +7,6 @@
   "settings": {
     "navLabel": "言語",
     "title": "言語",
-    "subtitle": "再起動せず、すぐに反映されます。",
     "fieldLabel": "表示言語"
   }
 }

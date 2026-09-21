@@ -157,10 +157,10 @@
     "testTip": "Am aktuellen Bild testen — nur Vorschau, nichts wird geschrieben"
   },
   "engineHint": {
-    "minimax-remover": "Etwa 6 Diffusionsschritte mit zeitlicher Konsistenz — sauberer bei bewegten Hintergründen.",
-    "diffueraser": "Qualität — Engine-Anbindung ausstehend.",
-    "matanyone": "Speicherbasiertes Tracking — Haare und Kanten.",
-    "matanyone2": "Feinere Details und robuster als v1."
+    "minimax-remover": "Baut den Hintergrund flackerfrei nach — am saubersten, wenn er sich bewegt.",
+    "diffueraser": "Hochwertige Objektentfernung im Video. Engine noch nicht angebunden.",
+    "matanyone": "Merkt sich das Objekt von Bild zu Bild — gut bei Haaren und feinen Kanten.",
+    "matanyone2": "Wie v1, feiner und zuverlässiger."
   },
   "exportRow": {
     "allObjects": "Alle Objekte",
@@ -187,8 +187,8 @@
     "pngMatteHint": "Nur Schwarz-Weiß-Maske"
   },
   "sam": {
-    "large": "Bessere Maskenqualität, mehr VRAM.",
-    "base": "Schneller Fallback, wenig VRAM.",
+    "large": "Die beste Maske. 2 GiB VRAM gemessen, unabhängig von der Länge der Einstellung.",
+    "base": "Die schnelle Rückfalloption, wenig VRAM.",
     "small": "Mittlere Variante: weniger VRAM als Base+, etwas gröbere Masken.",
     "tiny": "Kleinste SAM-2.1-Variante — für Karten mit knappem VRAM.",
     "edgetam": "Am leichtesten (56 MB) und am schnellsten. Gröbere Masken als SAM 2.1.",

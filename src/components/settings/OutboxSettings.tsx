@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { hostShort } from "@/lib/host";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
+import { InfoTip } from "./rows";
 
 // Cache HORS-LIGNE (lecture) : construit/rafraîchit en arrière-plan pendant que Resolve est ouvert →
 // à la fermeture tout est déjà là, et on peut ouvrir n'importe quelle timeline offline. Incrémental
@@ -102,54 +103,50 @@ export function OutboxSettings() {
 
   return (
     <section className="space-y-5">
-      {/* Pas de titre : l'onglet « Cache projet » de Paramètres › Stockage nomme déjà le panneau.
-          L'explication reste : ce que fait la file n'est pas devinable depuis son nom. */}
-      <p className="text-xs text-muted-foreground"><Trans t={t} i18nKey="outbox.intro" components={{ b: <b /> }} /></p>
-
       <OfflineCacheBlock />
 
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-        <div>
-          <span className="block text-[0.8125rem]">{t("outbox.enabled")}</span>
-          <span className="block text-[11px] text-muted-foreground">{t("outbox.enabledHint")}</span>
+      {/* No title: the « Cache projet » tab already names the panel. What the queue does cannot be
+          guessed from its name, so it sits behind the info icon of the switch that turns it on. */}
+      <div className="divide-y divide-border rounded-lg border border-border">
+        <div className="flex items-center justify-between gap-3 px-4 py-3">
+          <span className="flex items-center gap-1.5 text-[0.8125rem]">
+            {t("outbox.enabled")}
+            <InfoTip text={t("outbox.intro")} />
+          </span>
+          <Toggle pressed={settings.enabled} onPressedChange={(v) => void setSettings({ enabled: v })}
+            className="aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
+            {settings.enabled ? t("outbox.on") : t("outbox.off")}
+          </Toggle>
         </div>
-        <Toggle pressed={settings.enabled} onPressedChange={(v) => void setSettings({ enabled: v })}
-          className="aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
-          {settings.enabled ? t("outbox.on") : t("outbox.off")}
-        </Toggle>
-      </div>
 
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
-        <div className="flex items-center gap-2">
-          <Clock className="size-4 text-muted-foreground" />
-          <div>
-            <span className="block text-[0.8125rem]">{t("outbox.delay")}</span>
-            <span className="block text-[11px] text-muted-foreground">{t("outbox.delayHint")}</span>
+        <div className="flex items-center justify-between gap-3 px-4 py-3">
+          <span className="flex items-center gap-1.5 text-[0.8125rem]">
+            {t("outbox.delay")}
+            <InfoTip text={t("outbox.delayHint")} />
+          </span>
+          <div className="flex items-center gap-1.5">
+            <Input type="number" min={0} max={120} value={settings.delaySec}
+              onChange={(e) => void setSettings({ delaySec: Math.max(0, Math.min(120, Number(e.target.value) || 0)) })}
+              className="h-8 w-20 text-right" />
+            <span className="text-xs text-muted-foreground">s</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Input type="number" min={0} max={120} value={settings.delaySec}
-            onChange={(e) => void setSettings({ delaySec: Math.max(0, Math.min(120, Number(e.target.value) || 0)) })}
-            className="h-8 w-20 text-right" />
-          <span className="text-xs text-muted-foreground">s</span>
-        </div>
-      </div>
 
-      <div className="rounded-lg border border-border p-3">
-        <span className="block text-[0.8125rem]">{t("outbox.destination")}</span>
-        <ToggleGroup value={[settings.target]} onValueChange={(v) => { const t = v[0]; if (t === "new" || t === "single") void setSettings({ target: t }); }}
-          spacing={0} variant="outline" className="mt-2 grid grid-cols-2">
-          <ToggleGroupItem value="new" className="text-xs aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary">{t("outbox.targetNew")}</ToggleGroupItem>
-          <ToggleGroupItem value="single" className="text-xs aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary">{t("outbox.targetSingle")}</ToggleGroupItem>
-        </ToggleGroup>
-        {settings.target === "single" && (
-          <Input value={settings.targetName} onChange={(e) => void setSettings({ targetName: e.target.value })}
-            placeholder={t("outbox.targetPlaceholder")} className="mt-2 h-8 text-sm" />
-        )}
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          {settings.target === "single"
-            ? t("outbox.targetSingleHint") : t("outbox.targetNewHint")}
-        </p>
+        <div className="px-4 py-3">
+          <span className="flex items-center gap-1.5 text-[0.8125rem]">
+            {t("outbox.destination")}
+            <InfoTip text={settings.target === "single" ? t("outbox.targetSingleHint") : t("outbox.targetNewHint")} />
+          </span>
+          <ToggleGroup value={[settings.target]} onValueChange={(v) => { const t = v[0]; if (t === "new" || t === "single") void setSettings({ target: t }); }}
+            spacing={0} variant="outline" className="mt-2 grid grid-cols-2">
+            <ToggleGroupItem value="new" className="text-xs aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary">{t("outbox.targetNew")}</ToggleGroupItem>
+            <ToggleGroupItem value="single" className="text-xs aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary">{t("outbox.targetSingle")}</ToggleGroupItem>
+          </ToggleGroup>
+          {settings.target === "single" && (
+            <Input value={settings.targetName} onChange={(e) => void setSettings({ targetName: e.target.value })}
+              placeholder={t("outbox.targetPlaceholder")} className="mt-2 h-8 text-sm" />
+          )}
+        </div>
       </div>
 
       <div>

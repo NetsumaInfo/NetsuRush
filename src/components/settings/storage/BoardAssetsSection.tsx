@@ -20,6 +20,7 @@ import { logError } from "@/lib/appLog";
 import { useBoard } from "@/components/reference/useReferenceBoard";
 import { liveMediaRefs } from "@/components/reference/useScenePersistence";
 import { fmtBytes } from "./storageShared";
+import { InfoTip, SectionTitle } from "../rows";
 
 function fileLabel(filePath: string): string {
   return filePath.replace(/^.*[\\/]/, "").replace(/\.netsu$/i, "");
@@ -121,8 +122,7 @@ export function BoardAssetsSection() {
   return (
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-1">
-        <h2 className="text-sm font-medium">{t("settings:boardAssets.title")}</h2>
-        <p className="text-xs leading-relaxed text-muted-foreground">{t("settings:boardAssets.intro")}</p>
+        <SectionTitle title={t("settings:boardAssets.title")} info={t("settings:boardAssets.intro")} />
         {audit?.disk && (
           <p className="text-xs text-muted-foreground">
             {t("settings:boardAssets.disk", { free: fmtBytes(audit.disk.free), total: fmtBytes(audit.disk.total) })}
@@ -139,10 +139,12 @@ export function BoardAssetsSection() {
       {/* SECTION 1 — vérifié : ces octets existent ailleurs. */}
       <section className="flex flex-col gap-1 rounded-lg border border-border p-3.5">
         <div className="flex items-baseline justify-between gap-3">
-          <h3 className="text-sm font-medium text-foreground">{t("settings:boardAssets.safe.title")}</h3>
+          <h3 className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+            {t("settings:boardAssets.safe.title")}
+            <InfoTip text={t("settings:boardAssets.safe.hint")} />
+          </h3>
           <span className="text-sm font-medium tabular-nums text-foreground">{fmtBytes(freeableBytes)}</span>
         </div>
-        <p className="mb-1 text-xs leading-snug text-muted-foreground">{t("settings:boardAssets.safe.hint")}</p>
 
         <div className="flex items-start gap-2.5 border-t border-border py-2">
           <HardDrive className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
@@ -185,12 +187,12 @@ export function BoardAssetsSection() {
           <h3 className="flex items-center gap-1.5 text-sm font-medium text-foreground">
             <AlertTriangle className="size-3.5 text-amber-500" />
             {t("settings:boardAssets.sole.title")}
+            <InfoTip text={t("settings:boardAssets.sole.hint")} />
           </h3>
           <span className="text-sm font-medium tabular-nums text-foreground">
             {fmtBytes((orphans?.bytes ?? 0) + atRiskScenes.reduce((total, scene) => total + scene.soleBytes, 0))}
           </span>
         </div>
-        <p className="text-xs leading-snug text-muted-foreground">{t("settings:boardAssets.sole.hint")}</p>
 
         {!atRiskScenes.length && !orphans?.files && (
           <p className="py-1 text-xs text-muted-foreground">{t("settings:boardAssets.sole.empty")}</p>
@@ -245,8 +247,6 @@ export function BoardAssetsSection() {
           </div>
         )}
       </section>
-
-      <p className="text-[11px] leading-relaxed text-muted-foreground">{t("settings:boardAssets.footnote")}</p>
     </div>
   );
 }

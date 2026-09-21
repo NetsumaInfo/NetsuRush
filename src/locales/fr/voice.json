@@ -214,19 +214,19 @@
     "asr": {
       "whisperTurbo": {
         "label": "Précis",
-        "hint": "Whisper large-v3-turbo — multilingue, horodatage des mots fiable"
+        "hint": "Multilingue, horodatage de chaque mot fiable."
       },
       "parakeetV3": {
         "label": "Rapide",
-        "hint": "Parakeet TDT v3 — le plus rapide, à valider sur ton GPU"
+        "hint": "Le plus rapide. Vérifie qu'il tourne bien sur ta carte."
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Alignement mot à mot précis pour les sous-titres SRT/VTT · moteur bientôt disponible"
+        "hint": "Cale chaque mot à l'image près pour les sous-titres SRT/VTT. Moteur pas encore branché."
       },
       "canary": {
         "label": "Canary",
-        "hint": "25 langues européennes, sans horodatage mot à mot · moteur bientôt disponible"
+        "hint": "25 langues européennes. Pas d'horodatage mot par mot. Moteur pas encore branché."
       }
     },
     "vad": {

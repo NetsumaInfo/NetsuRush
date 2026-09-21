@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useApp } from "@/store";
 import { fmtBytes } from "./storageShared";
+import { InfoTip } from "../rows";
 
 function DbBlock() {
   const { t } = useTranslation("settings");
@@ -66,7 +67,10 @@ function MissingBlock() {
       <div className="flex items-center gap-3">
         <FileQuestion className="size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-foreground">{t("storage.missing.title")}</p>
+          <p className="flex items-center gap-1.5 text-xs text-foreground">
+            {t("storage.missing.title")}
+            {missing.length > 0 && <InfoTip text={t("storage.missing.desc")} />}
+          </p>
           <p className="text-[11px] tabular-nums text-muted-foreground">
             {missing.length ? `${missing.length} · ${fmtBytes(total)}` : t("storage.missing.none")}
           </p>
@@ -88,8 +92,6 @@ function MissingBlock() {
           </Button>
         )}
       </div>
-      {/* Le « pourquoi » n'apparaît que s'il y a quelque chose à décider. */}
-      {missing.length > 0 && <p className="mt-2 text-[11px] text-muted-foreground">{t("storage.missing.desc")}</p>}
     </div>
   );
 }
@@ -98,10 +100,10 @@ export function MaintenanceSection() {
   const { t } = useTranslation("settings");
   return (
     <section className="space-y-3">
-      <div>
-        <h3 className="text-sm font-medium text-foreground">{t("storage.maintenance.title")}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">{t("storage.maintenance.desc")}</p>
-      </div>
+      <h3 className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+        {t("storage.maintenance.title")}
+        <InfoTip text={t("storage.maintenance.desc")} />
+      </h3>
       <DbBlock />
       <MissingBlock />
     </section>

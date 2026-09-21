@@ -6,7 +6,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { DetectionModelSelect } from "@/components/rushes/DetectionControls";
 import { DetectionAdvancedSettings } from "@/components/rushes/DetectionAdvancedSettings";
 import { MAX_PATCHES_CHOICES, VRAM_PROFILES, needsReindex } from "@/lib/searchPerf";
-import { CompactSelect, SettingRow } from "./rows";
+import { CompactSelect, SectionTitle, SettingRow } from "./rows";
 
 // Tout ce qui décide de la fabrication de l'index de recherche, dans l'ordre où ça s'applique :
 // on découpe le rush en plans, on embed ces plans, puis on accélère ce qui n'est pas SigLIP. Le
@@ -24,18 +24,14 @@ export function IndexingSettings() {
 
   return (
     <section className="flex flex-col gap-7">
-      <header>
-        <h2 className="text-sm font-medium">{t("indexing.title")}</h2>
-        <p className="mt-1 max-w-[68ch] text-xs text-muted-foreground">{t("indexing.subtitle")}</p>
-      </header>
+      <SectionTitle title={t("indexing.title")} info={t("indexing.subtitle")} />
 
       <div>
-        <h3 className="text-xs font-medium text-muted-foreground">{t("indexing.cutTitle")}</h3>
+        <SectionTitle as="h3" title={t("indexing.cutTitle")} info={t("detection.reindexHint")} />
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <DetectionModelSelect model={cutModel} onChange={setCutModel} className="w-56" />
           <DetectionAdvancedSettings model={cutModel} compact />
         </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">{t("detection.reindexHint")}</p>
       </div>
 
       <div>

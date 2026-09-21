@@ -214,19 +214,19 @@
     "asr": {
       "whisperTurbo": {
         "label": "Präzise",
-        "hint": "Whisper large-v3-turbo — mehrsprachig, zuverlässige Wort-Timestamps"
+        "hint": "Mehrsprachig, zuverlässiger Zeitstempel für jedes Wort."
       },
       "parakeetV3": {
         "label": "Schnell",
-        "hint": "Parakeet TDT v3 — am schnellsten (auf deiner GPU zu prüfen)"
+        "hint": "Am schnellsten. Prüf, ob es auf deiner Karte gut läuft."
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Whisper + Forced Alignment über wav2vec2 — framegenaue Wort-Zeitstempel für SRT/VTT (Scaffold)"
+        "hint": "Richtet jedes Wort bildgenau für SRT/VTT-Untertitel aus. Engine noch nicht angebunden."
       },
       "canary": {
         "label": "Canary",
-        "hint": "NVIDIA Canary-1B-v2 — 25 EU-Sprachen, keine Wort-Timestamps; Scaffold."
+        "hint": "25 europäische Sprachen. Keine Zeitstempel pro Wort. Engine noch nicht angebunden."
       }
     },
     "vad": {

@@ -20,19 +20,17 @@
   },
   "settings": {
     "title": "Voice dictation",
-    "intro": "Hold the shortcut anywhere in the app, speak, then release it: the transcript appears in the field or editor you were using. No button — just a small indicator while it listens.",
+    "intro": "Hold the shortcut, speak, let go: the text lands where you were.",
     "enableLabel": "Enable dictation",
-    "enableHint": "Listens for the global shortcut.",
     "enabledOn": "On",
     "enabledOff": "Off",
     "micLabel": "Mic",
-    "micHint": "Audio input used for dictation.",
     "micDefault": "Default mic",
     "micNumbered": "Mic {{n}}",
     "hotkeyLabel": "Shortcut (hold)",
     "hotkeyHint": "Click, then press your combo. Esc to cancel.",
     "unloadLabel": "Unload the model after",
-    "unloadHint": "Idle this long → the model leaves VRAM (cold start next time).",
+    "unloadHint": "After this long without dictation, the model frees the VRAM; the next one starts slower.",
     "liveLabel": "Live preview",
     "liveHint": "Text shows up while you talk (periodic re-transcription).",
     "liveOn": "On",
@@ -57,8 +55,8 @@
     "engine": "transcribe.cpp engine",
     "ready": " · ready ({{backend}})",
     "notInstalled": " · not installed",
-    "readyHint": "Native binary found — GGUF models (Nemotron) are good to go.",
-    "notInstalledHint": "Needed for Nemotron. Drop transcribe-cli (GitHub prebuild) in NR_HOME/bin, or set transcribeCppBin in nr.config.json."
+    "readyHint": "Nemotron is ready to use.",
+    "notInstalledHint": "Needed for Nemotron. Not installable from the app yet: copy transcribe-cli into the NetsuRush bin folder."
   },
   "mic": {
     "busy": "Microphone busy in another application.",

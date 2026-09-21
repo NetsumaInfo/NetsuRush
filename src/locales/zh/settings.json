@@ -29,14 +29,13 @@
   "account": {
     "title": "账号",
     "notConfigured": "此安装尚未配置登录。",
-    "subtitle": "已连接到 NetsuRush 的 Discord 账号。",
     "none": "未连接任何账号。",
     "discordUser": "Discord 用户",
     "signOut": "退出登录"
   },
   "playback": {
     "title": "预览和缩略图",
-    "subtitle": "改动设置后，预览会在浏览时重新生成。旧的会留在磁盘上，直到你删除它们。",
+    "subtitle": "改动后会重新生成预览。旧的会留在磁盘上，直到你删除。",
     "soundTitle": "声音",
     "playerVolume": "播放器音量",
     "playerVolumeHint": "由 NetsuCut、合集、语音和放大共享。",
@@ -82,20 +81,20 @@
     "indexingTitle": "镜头分析",
     "accelerationTitle": "加速",
     "shotDecode": "批量取帧",
-    "shotDecodeHint": "一次取出整个镜头的画面，而不是逐张取。最快可达 6 倍，取到的画面完全相同。",
+    "shotDecodeHint": "最快 6 倍，帧完全相同。",
     "vramProfile": "内存档位",
-    "vramProfileHint": "同时进行多少工作。影响到剪辑就调低，机器空闲就调高。",
+    "vramProfileHint": "影响剪辑时调低，机器空闲时调高。",
     "vram": {
       "economy": "省内存",
       "balanced": "均衡",
       "performance": "性能"
     },
     "maxPatches": "分析分辨率",
-    "maxPatchesHint": "模型在每张画面里看到的细节量。调高能认出细小元素，但更耗时间和内存。",
+    "maxPatchesHint": "越高越能捕捉细节，但更耗时、更占内存。",
     "patchesDefault": "{{value}}（默认）",
     "reindexWarning": "在这个分辨率下素材需要重建索引。调回 256 会原封不动地找回原来的索引。",
     "onnxGpu": "人脸与听写用 GPU",
-    "onnxGpuHint": "比处理器快约 8 倍，结果完全一致。显卡驱动崩溃时可以关掉。",
+    "onnxGpuHint": "约快 8 倍。显卡驱动崩溃时请关闭。",
     "enabled": "开启",
     "disabled": "关闭",
     "reset": "重置性能设置",
@@ -104,55 +103,43 @@
   },
   "appearance": {
     "title": "主题",
-    "subtitle": "八套深色配色、三套浅色配色。每一套都能在下方逐色微调。",
     "group": {
       "dark": "深色",
       "light": "浅色"
     },
     "theme": {
       "dark": {
-        "label": "深色",
-        "hint": "中性且对比清晰。"
+        "label": "深色"
       },
       "midnight": {
-        "label": "午夜",
-        "hint": "纯黑背景与低调表面。"
+        "label": "午夜"
       },
       "blue": {
-        "label": "夜蓝",
-        "hint": "深邃明亮的蓝色。"
+        "label": "夜蓝"
       },
       "light": {
-        "label": "浅色",
-        "hint": "清爽且易读的白色。"
+        "label": "浅色"
       },
       "soft-light": {
-        "label": "柔和浅色",
-        "hint": "降低眩光的蓝灰色。"
+        "label": "柔和浅色"
       },
       "graphite": {
-        "label": "石墨",
-        "hint": "中性灰，无色偏。"
+        "label": "石墨"
       },
       "forest": {
-        "label": "森林",
-        "hint": "深绿配翡翠色强调。"
+        "label": "森林"
       },
       "ember": {
-        "label": "余烬",
-        "hint": "暖炭灰配琥珀色强调。"
+        "label": "余烬"
       },
       "plum": {
-        "label": "李紫",
-        "hint": "低饱和紫配藕荷色强调。"
+        "label": "李紫"
       },
       "contrast": {
-        "label": "高对比度",
-        "hint": "纯黑背景与清晰边框。"
+        "label": "高对比度"
       },
       "paper": {
-        "label": "纸张",
-        "hint": "柔和棕褐配陶土色强调。"
+        "label": "纸张"
       }
     },
     "wallpaper": {
@@ -205,7 +192,7 @@
     },
     "custom": {
       "title": "我的主题",
-      "subtitle": "保存当前外观：调色板、颜色和背景。",
+      "subtitle": "把配色、颜色和背景保存为一个名称。",
       "create": "新建主题",
       "save": "保存",
       "delete": "删除此主题",
@@ -275,7 +262,6 @@
       "missing": "不可用"
     },
     "thumbnailEngine": "按设计使用 CPU 生成。",
-    "subtitle": "哪些跑在显卡上、哪些回落到 CPU、还缺什么。",
     "refresh": "检查",
     "hardware": "检测到的组件",
     "gpu": "显卡",
@@ -317,7 +303,7 @@
     "restore": "恢复",
     "restoreHint": "恢复列表中缺失的内置预设。",
     "cardButton": "缩略图按钮",
-    "cardButtonHint": "悬停缩略图时显示的按钮所执行的操作。"
+    "cardButtonHint": "鼠标悬停在缩略图上时出现的小按钮。"
   },
   "console": {
     "title": "控制台",
@@ -427,9 +413,8 @@
   },
   "outbox": {
     "opening": "正在打开缓存…",
-    "intro": "在繁重编码期间关闭 Resolve/Premiere Pro 以释放 GPU，也不会丢失发送内容：它们会被缓存，并在<b>重新打开时自动应用</b>。",
+    "intro": "发往已关闭软件的内容会在这里等待，软件重新打开后自动发送。",
     "enabled": "启用队列",
-    "enabledHint": "否则，向已关闭的软件发送内容仍会像以前一样失败。",
     "on": "已启用",
     "off": "已禁用",
     "delay": "应用前等待",
@@ -571,7 +556,7 @@
       "manualOnly": "仅手动清除",
       "manualOnlyHint": "该类型不跟踪使用情况：无法自动清除。",
       "sessionTitle": "工作缓存",
-      "sessionDesc": "选择每种大型衍生文件何时不再需要。退出应用始终作为最后保障。",
+      "sessionDesc": "何时删除大型临时文件。退出应用时一定会删除。",
       "sequenceTitle": "模型中间图像序列",
       "sequenceHint": "仅用于输入模型的帧文件夹。你自己导出的图像序列绝不会被删除。",
       "trigger": {
@@ -631,7 +616,7 @@
     },
     "projects": {
       "current": "已打开",
-      "desc": "搜索已知的项目。NetsuRush 读取过某个项目的媒体池后，它就会出现在这里。「清点」会去找出其余的。",
+      "desc": "搜索已知的项目。读取过 Media Pool 的项目会自动加入，“收集”会去找其余的。",
       "empty": "尚无已知项目。",
       "forget": "移除",
       "forgetTooltip": "从列表中移除该项目（不影响索引与文件）",
@@ -647,7 +632,6 @@
   },
   "navigation": {
     "title": "页面与导航顺序",
-    "subtitle": "隐藏不用的页面，并调整它们在侧边栏中的顺序。",
     "reset": "全部恢复",
     "required": "始终可用",
     "visible": "显示",
@@ -660,7 +644,7 @@
   },
   "notifications": {
     "title": "通知",
-    "subtitle": "状态提示停留的时间。正在进行的任务会一直显示到结束。",
+    "subtitle": "进行中的任务会一直显示到结束。",
     "reset": "全部恢复默认",
     "ok": "任务完成",
     "okHint": "导出完成、发送到时间线等成功提示。",
@@ -673,7 +657,7 @@
     "untilClick": "点击后关闭"
   },
   "detection": {
-    "reindexHint": "换一个模型，镜头的分界也会不同：已经建好索引的素材需要重建。"
+    "reindexHint": "换模型后，素材需要重新建立索引。"
   },
   "tab": {
     "account": {
@@ -711,12 +695,12 @@
   },
   "indexing": {
     "title": "索引",
-    "subtitle": "素材先被切成镜头，再逐个镜头分析。不影响结果的设置已经默认开启。",
+    "subtitle": "每个素材先切成镜头，再逐个分析。不影响结果的设置已经开启。",
     "cutTitle": "镜头分割"
   },
   "boardAssets": {
     "title": "板面存储",
-    "intro": "应用会保留属于自己的媒体：粘贴的图片、从链接取得的媒体、抽取的帧、放大结果。保存 .netsu 项目会把这些字节归档到其伴随文件夹 — 此后仓库只保留一份副本，可以放心释放。显示缓存另有专页。",
+    "intro": "应用自己保存的内容：粘贴的图片、链接媒体、帧、超分结果。你自己的文件绝不会被改动。",
     "disk": "{{total}} 中可用 {{free}}",
     "scanning": "正在分析存储…",
     "failed": "没能完成。再试一次。",
@@ -726,7 +710,6 @@
     "archivedNotice": "板面已保存为“{{name}}”：其媒体现在位于项目文件夹中",
     "settling": "{{count}} 个正在写入",
     "settlingHint": "刚写入的文件可能属于板面尚未放置的导入。下次检查时再判定。",
-    "footnote": "你从自己磁盘添加的媒体绝不受影响：应用只处理它自己写入的文件。",
     "safe": {
       "hint": "逐个文件核对过：这些字节已存在于某个项目的伴随文件夹中。",
       "title": "可安全释放",
@@ -737,7 +720,7 @@
     },
     "sole": {
       "title": "请先妥善保存",
-      "hint": "这些媒体别处没有。这里不提供删除：先保存，它们就会移到上方那一节。",
+      "hint": "这是仅存的一份：先保存画板，它就会移到上方分区。",
       "empty": "没有风险：应用保存的一切在别处也存在。",
       "untitled": "未命名板面",
       "sceneCount": "仅由应用保管的媒体 {{count}} 个 · {{size}}",
@@ -753,7 +736,7 @@
   },
   "collaboration": {
     "title": "协作",
-    "description": "这些设置仅保存在本机上。选择默认配置，或按页面类别单独设置。",
+    "description": "只对这台电脑生效。可以统一一个配置，也可以按页面类型单独设置。",
     "profilesHint": "实时：每 60 毫秒发送一次。平衡：200 毫秒。节能：900 毫秒，禁用媒体自动下载。",
     "default": "默认配置",
     "inherit": "使用默认配置",

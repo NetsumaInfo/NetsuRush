@@ -157,10 +157,10 @@
     "testTip": "在当前帧测试 — 仅预览，不写入文件"
   },
   "engineHint": {
-    "minimax-remover": "约 6 步扩散并保持时间一致性 — 处理动态背景更干净。",
-    "diffueraser": "高质量 — 引擎尚待接入。",
-    "matanyone": "带记忆的跟踪 — 适合头发和边缘。",
-    "matanyone2": "比 v1 的细节更好、更稳健。"
+    "minimax-remover": "重建背景不闪烁 — 背景运动时最干净。",
+    "diffueraser": "高质量视频物体移除。引擎尚未接入。",
+    "matanyone": "逐帧记住目标 — 擅长头发和细边缘。",
+    "matanyone2": "与 v1 相同，更精细也更可靠。"
   },
   "exportRow": {
     "allObjects": "所有对象",
@@ -187,8 +187,8 @@
     "pngMatteHint": "仅黑白遮罩"
   },
   "sam": {
-    "large": "蒙版质量更好，占用更多 VRAM。",
-    "base": "快速备选，低 VRAM。",
+    "large": "最好的遮罩。实测显存 2 GiB，与镜头长度无关。",
+    "base": "快速备选，显存占用低。",
     "small": "中间档：显存低于 Base+，掩码略粗。",
     "tiny": "SAM 2.1 最小版本 — 适合显存紧张的显卡。",
     "edgetam": "最轻量（56 MB）也最快。掩码比 SAM 2.1 粗。",

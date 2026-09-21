@@ -214,19 +214,19 @@
     "asr": {
       "whisperTurbo": {
         "label": "精确",
-        "hint": "Whisper large-v3-turbo — 多语言，词级时间码可靠"
+        "hint": "多语言，每个词的时间码都可靠。"
       },
       "parakeetV3": {
         "label": "快速",
-        "hint": "Parakeet TDT v3 — 最快（需在你的 GPU 上验证）"
+        "hint": "速度最快。请确认它在你的显卡上运行正常。"
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Whisper + wav2vec2 强制对齐 — 词级时间码精确到帧，适合 SRT/VTT（功能待接入）"
+        "hint": "为 SRT/VTT 字幕把每个词精确对齐到帧。引擎尚未接入。"
       },
       "canary": {
         "label": "Canary",
-        "hint": "NVIDIA Canary-1B-v2 — 25 种欧洲语言，无词级时间码；功能待接入。"
+        "hint": "25 种欧洲语言。不提供逐词时间码。引擎尚未接入。"
       }
     },
     "vad": {

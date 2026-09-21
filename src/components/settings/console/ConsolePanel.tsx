@@ -9,6 +9,7 @@ import {
   subscribeConsole, clearConsole, serializeConsole, getConsoleSnapshot, type ConsoleEntry,
 } from "@/lib/appConsole";
 import { useTranslation } from "react-i18next";
+import { SectionTitle } from "../rows";
 
 const LEVEL_CLASS: Record<ConsoleEntry["level"], string> = {
   log: "text-foreground/80",
@@ -62,11 +63,8 @@ export function ConsolePanel() {
 
   return (
     <section>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-medium">{t("console.title")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("console.subtitle")}</p>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SectionTitle title={t("console.title")} info={t("console.subtitle")} />
         <div className="flex shrink-0 flex-wrap items-center gap-1.5">
           <Button variant="outline" size="sm" onClick={() => write(text, "view")}>
             {copied === "view" ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {t("console.copy")}

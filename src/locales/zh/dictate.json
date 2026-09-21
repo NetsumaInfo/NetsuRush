@@ -20,19 +20,17 @@
   },
   "settings": {
     "title": "语音输入",
-    "intro": "在应用任意位置按住快捷键，说话，松开：转录的文本会插入你所在的输入框或编辑器。没有按钮——聆听时只有一个小标记。",
+    "intro": "按住快捷键说话，松开后文字会插入到你刚才所在的位置。",
     "enableLabel": "启用语音输入",
-    "enableHint": "监听全局快捷键。",
     "enabledOn": "已启用",
     "enabledOff": "已禁用",
     "micLabel": "麦克风",
-    "micHint": "语音输入使用的音频输入。",
     "micDefault": "默认麦克风",
     "micNumbered": "麦克风 {{n}}",
     "hotkeyLabel": "快捷键（按住）",
     "hotkeyHint": "点击后按下组合键。按 Esc 取消。",
     "unloadLabel": "闲置后卸载模型",
-    "unloadHint": "闲置超过此时长 → 模型退出 VRAM（之后需冷启动）。",
+    "unloadHint": "超过这段时间没有语音输入，模型会释放显存，下次启动会慢一些。",
     "liveLabel": "实时预览",
     "liveHint": "说话时同步显示文本（定期重新转录）。",
     "liveOn": "已启用",
@@ -57,8 +55,8 @@
     "engine": "transcribe.cpp 引擎",
     "ready": " · 就绪（{{backend}}）",
     "notInstalled": " · 未安装",
-    "readyHint": "已检测到原生二进制——可使用 GGUF 模型（Nemotron）。",
-    "notInstalledHint": "Nemotron 必需。把 transcribe-cli（GitHub 预编译版）放到 NR_HOME/bin，或在 nr.config.json 中设置 transcribeCppBin。"
+    "readyHint": "Nemotron 已可使用。",
+    "notInstalledHint": "Nemotron 需要它。暂时无法在应用内安装：请把 transcribe-cli 复制到 NetsuRush 的 bin 文件夹。"
   },
   "mic": {
     "busy": "麦克风被其他应用占用。",

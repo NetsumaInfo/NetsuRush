@@ -43,7 +43,6 @@ function AccountInner() {
   return (
     <section>
       <h2 className="text-sm font-medium">{t("account.title")}</h2>
-      <p className="mt-1 text-xs text-muted-foreground">{t("account.subtitle")}</p>
 
       <div className="mt-4 rounded-lg border border-border p-4">
         {isLoading || user === undefined ? (

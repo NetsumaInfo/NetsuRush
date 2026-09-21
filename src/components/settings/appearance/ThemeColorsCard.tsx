@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { applyThemeColorVar, THEME_COLOR_KEYS, type ThemeColorKey, type ThemeColorOverrides } from "@/lib/themeColors";
 import { appearanceKey } from "@/lib/customThemes";
 import { useApp } from "@/store";
+import { InfoTip } from "../rows";
 
 /**
  * Repli STABLE pour un thème sans retouche. Un `?? {}` dans le sélecteur zustand fabriquerait un
@@ -84,10 +85,10 @@ export function ThemeColorsCard() {
 
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="text-sm font-medium">{t("appearance.colors.title")}</h3>
-        <p className="text-xs text-muted-foreground">{t("appearance.colors.perTheme")}</p>
-      </div>
+      <h3 className="flex items-center gap-1.5 text-sm font-medium">
+        {t("appearance.colors.title")}
+        <InfoTip text={t("appearance.colors.perTheme")} />
+      </h3>
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-2.5">
         {THEME_COLOR_KEYS.map((color) => {

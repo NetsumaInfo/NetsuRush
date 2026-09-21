@@ -12,6 +12,7 @@ import { themeAllowsWallpaper } from "@/lib/wallpaper";
 import { useApp } from "@/store";
 import { WallpaperControls } from "./WallpaperControls";
 import { WallpaperFramingDialog } from "./WallpaperFramingDialog";
+import { InfoTip } from "../rows";
 
 /** Une vignette de bibliothèque : assez large pour reconnaître une image, assez courte pour tenir en bande. */
 const THUMB_CLASS = "h-14 w-24 shrink-0 overflow-hidden rounded-md border object-cover transition-colors";
@@ -85,11 +86,11 @@ export function WallpaperCard() {
 
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="text-sm font-medium">{t("appearance.wallpaper.title")}</h3>
-        {/* Le fond ne suit PLUS le thème : le dire ici évite de chercher pourquoi il ne change pas. */}
-        <p className="text-xs text-muted-foreground">{t("appearance.wallpaper.global")}</p>
-      </div>
+      {/* The wallpaper no longer follows the theme: saying so saves looking for why it does not change. */}
+      <h3 className="flex items-center gap-1.5 text-sm font-medium">
+        {t("appearance.wallpaper.title")}
+        <InfoTip text={t("appearance.wallpaper.global")} />
+      </h3>
 
       {/* Bande de bibliothèque : les vignettes SONT le choix, et la tuile d'ajout vit dans la même
           rangée. Un grand cadre en pointillés pour une seule image donnait un vide disproportionné. */}

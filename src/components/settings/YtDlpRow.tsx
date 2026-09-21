@@ -6,11 +6,11 @@
 // It is a ROW, not a card: one line of state and one button, like the two toggles above it.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Info, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { nr, type YtDlpStatus } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { InfoTip } from "./rows";
 
 export function YtDlpRow() {
   const { t } = useTranslation("settings");
@@ -79,14 +79,7 @@ export function YtDlpRow() {
       <div className="min-w-0">
         <p className="flex items-center gap-1.5 text-sm font-medium">
           yt-dlp
-          <Tooltip>
-            <TooltipTrigger
-              render={<button type="button" className="text-muted-foreground transition-colors hover:text-foreground" aria-label={t("updates.ytdlp.hint")} />}
-            >
-              <Info className="size-3.5" />
-            </TooltipTrigger>
-            <TooltipContent>{t("updates.ytdlp.hint")}</TooltipContent>
-          </Tooltip>
+          <InfoTip text={t("updates.ytdlp.hint")} />
         </p>
         <p className={outcome?.failed ? "mt-1 break-words text-xs text-destructive" : "mt-1 text-xs text-muted-foreground"}>{line}</p>
       </div>

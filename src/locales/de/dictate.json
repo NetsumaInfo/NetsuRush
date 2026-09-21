@@ -20,19 +20,17 @@
   },
   "settings": {
     "title": "Sprachdiktat",
-    "intro": "Halte das Tastenkürzel an einer beliebigen Stelle in der App gedrückt, sprich und lass es los: Der Text erscheint im zuvor verwendeten Feld oder Editor. Keine Schaltfläche — während der Aufnahme ist nur ein dezenter Punkt zu sehen.",
+    "intro": "Tastenkürzel halten, sprechen, loslassen: Der Text landet dort, wo du warst.",
     "enableLabel": "Diktat aktivieren",
-    "enableHint": "Lauscht auf das globale Tastenkürzel.",
     "enabledOn": "Aktiviert",
     "enabledOff": "Deaktiviert",
     "micLabel": "Mikrofon",
-    "micHint": "Audioeingang für das Diktat.",
     "micDefault": "Standard-Mikrofon",
     "micNumbered": "Mikrofon {{n}}",
     "hotkeyLabel": "Kurzbefehl (halten)",
     "hotkeyHint": "Klicken, dann Kombination drücken. Esc bricht ab.",
     "unloadLabel": "Modell entladen nach",
-    "unloadHint": "So lange inaktiv → Modell verlässt den VRAM (danach Kaltstart).",
+    "unloadHint": "Nach dieser Zeit ohne Diktat gibt das Modell den VRAM frei; das nächste startet langsamer.",
     "liveLabel": "Live-Vorschau",
     "liveHint": "Text erscheint schon beim Sprechen (regelmäßige Neu-Transkription).",
     "liveOn": "Aktiviert",
@@ -57,8 +55,8 @@
     "engine": "transcribe.cpp-Engine",
     "ready": " · bereit ({{backend}})",
     "notInstalled": " · nicht installiert",
-    "readyHint": "Natives Binary erkannt — GGUF-Modelle (Nemotron) sind nutzbar.",
-    "notInstalledHint": "Für Nemotron nötig. transcribe-cli (GitHub-Prebuild) in NR_HOME/bin legen oder transcribeCppBin in nr.config.json setzen."
+    "readyHint": "Nemotron ist einsatzbereit.",
+    "notInstalledHint": "Für Nemotron nötig. Noch nicht aus der App installierbar: Kopiere transcribe-cli in den bin-Ordner von NetsuRush."
   },
   "mic": {
     "busy": "Mikrofon von einer anderen Anwendung belegt.",

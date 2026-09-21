@@ -8,6 +8,7 @@ import { ExportProfileIcon } from "@/components/export/exportIcons";
 import { CardActionPicker } from "@/components/export/CardActionPicker";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DEFAULT_EXPORT_PROFILES, getActiveExportProfile, getExportProfileSummary } from "@/features/export/profiles";
+import { InfoTip, SectionTitle } from "./rows";
 
 export function ExportProfileSettings() {
   const { t } = useTranslation("settings");
@@ -24,8 +25,7 @@ export function ExportProfileSettings() {
 
   return (
     <section>
-      <h2 className="text-sm font-medium">{t("exportProfiles.title")}</h2>
-      <p className="mt-1 text-xs text-muted-foreground">{t("exportProfiles.subtitle")}</p>
+      <SectionTitle title={t("exportProfiles.title")} info={t("exportProfiles.subtitle")} />
 
       <div className="mt-4 grid grid-cols-[minmax(0,12rem)_1fr] gap-5">
         <div className="flex flex-col gap-2">
@@ -78,10 +78,10 @@ export function ExportProfileSettings() {
             <p className="mt-3 text-[11px] text-muted-foreground">{getExportProfileSummary(active)}</p>
           </div>
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-4">
-            <div className="min-w-0">
-              <span className="block text-[0.8125rem]">{t("exportProfiles.cardButton")}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">{t("exportProfiles.cardButtonHint")}</span>
-            </div>
+            <span className="flex min-w-0 items-center gap-1.5 text-[0.8125rem]">
+              {t("exportProfiles.cardButton")}
+              <InfoTip text={t("exportProfiles.cardButtonHint")} />
+            </span>
             <div className="w-[44%] shrink-0"><CardActionPicker /></div>
           </div>
         </div>

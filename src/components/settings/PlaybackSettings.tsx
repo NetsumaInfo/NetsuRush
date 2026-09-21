@@ -7,7 +7,7 @@ import type { PreviewGenerationSettings, PreviewHeight, PreviewProxyEngine, Prev
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { VolumeSlider } from "@/components/player/VolumeSlider";
-import { CompactSelect, SettingRow, type Choice } from "./rows";
+import { CompactSelect, SectionTitle, SettingRow, type Choice } from "./rows";
 
 const HEIGHTS: PreviewHeight[] = [360, 480, 520, 720];
 
@@ -63,9 +63,10 @@ export function PlaybackSettings() {
     : engineChoices[0].value;
   // Un aperçu généré sans piste audio ne peut rien jouer ; un volume de lecteur à 0 coupe tout.
   const hoverAudioAvailable = settings.proxy.audio && playerVolume > 0;
-  const hoverHint = !settings.proxy.audio
+  // Why the slider is greyed out is state, so it stays on screen; what the slider does is not.
+  const hoverState = !settings.proxy.audio
     ? t("playback.generation.audioUnavailable")
-    : playerVolume === 0 ? t("playback.globalMuted") : t("playback.hoverVolumeHint");
+    : playerVolume === 0 ? t("playback.globalMuted") : undefined;
 
   function apply(next: PreviewGenerationSettings) {
     setSettings(next);
@@ -90,10 +91,7 @@ export function PlaybackSettings() {
 
   return (
     <section className="flex flex-col gap-7">
-      <header>
-        <h2 className="text-sm font-medium">{t("playback.title")}</h2>
-        <p className="mt-1 max-w-[68ch] text-xs text-muted-foreground">{t("playback.subtitle")}</p>
-      </header>
+      <SectionTitle title={t("playback.title")} info={t("playback.subtitle")} />
 
       <div>
         <h3 className="text-xs font-medium text-muted-foreground">{t("playback.generation.proxyTitle")}</h3>
@@ -151,7 +149,7 @@ export function PlaybackSettings() {
           <SettingRow label={t("playback.playerVolume")} hint={t("playback.playerVolumeHint")}>
             <VolumeSlider value={playerVolume} onChange={setPlayerVolume} showValue />
           </SettingRow>
-          <SettingRow label={t("playback.hoverVolume")} hint={hoverHint}>
+          <SettingRow label={t("playback.hoverVolume")} hint={t("playback.hoverVolumeHint")} state={hoverState}>
             <VolumeSlider
               value={volume}
               onChange={setVolume}

@@ -19,6 +19,7 @@ import type { WallpaperEntry } from "@/lib/bridge";
 import { appearanceMatches, type CustomTheme } from "@/lib/customThemes";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/store";
+import { InfoTip } from "../rows";
 
 /** Dialogue de saisie : même formulaire pour nommer un thème neuf et pour en renommer un. */
 interface NameDialogState {
@@ -101,10 +102,10 @@ export function CustomThemesCard() {
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-5">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div>
-          <h3 className="text-sm font-medium">{t("appearance.custom.title")}</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">{t("appearance.custom.subtitle")}</p>
-        </div>
+        <h3 className="flex items-center gap-1.5 text-sm font-medium">
+          {t("appearance.custom.title")}
+          <InfoTip text={t("appearance.custom.subtitle")} />
+        </h3>
         <div className="flex items-center gap-2">
           {/* Visible seulement quand il y a quelque chose à enregistrer : un bouton toujours actif
               n'apprend rien sur l'état du thème. */}

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { NOTIFY_CHOICES, type NotifyDurations } from "@/lib/notifySettings";
 import type { PowerPromptSettings } from "@/lib/powerSettings";
-import { CompactSelect, SettingRow, type Choice } from "./rows";
+import { CompactSelect, SectionTitle, SettingRow, type Choice } from "./rows";
 
 export function NotificationSettings() {
   const { t } = useTranslation("settings");
@@ -38,11 +38,8 @@ export function NotificationSettings() {
 
   return (
     <section className="flex flex-col gap-7">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-medium">{t("notifications.title")}</h2>
-          <p className="mt-1 max-w-[68ch] text-xs text-muted-foreground">{t("notifications.subtitle")}</p>
-        </div>
+      <header className="flex items-center justify-between gap-4">
+        <SectionTitle title={t("notifications.title")} info={t("notifications.subtitle")} />
         <Button variant="outline" size="sm" onClick={() => { resetNotify(); resetPower(); }}>
           <RotateCcw className="size-3.5" /> {t("notifications.reset")}
         </Button>
@@ -55,8 +52,7 @@ export function NotificationSettings() {
       </div>
 
       <div>
-        <h3 className="text-xs font-medium text-muted-foreground">{t("power.title")}</h3>
-        <p className="mt-1 max-w-[68ch] text-xs text-muted-foreground">{t("power.subtitle")}</p>
+        <SectionTitle as="h3" title={t("power.title")} info={t("power.subtitle")} />
         <div className="mt-2 divide-y divide-border rounded-lg border border-border">
           <SettingRow label={t("power.offer")}>{toggle("offer")}</SettingRow>
           <SettingRow label={t("power.reopen")}>{toggle("reopen")}</SettingRow>

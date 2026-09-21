@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { nr, type ProjectScopeEntry, type ProjectScanProgress } from "@/lib/bridge";
 import { useApp } from "@/store";
+import { InfoTip } from "../rows";
 
 function fmtDate(ms: number, locale: string): string {
   if (!ms) return "";
@@ -61,8 +62,10 @@ export function ProjectsSection() {
   return (
     <section className="space-y-3">
       <div className="rounded-lg border border-border p-3">
-        <h4 className="text-xs font-medium text-foreground">{t("settings:storage.projects.title")}</h4>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t("settings:storage.projects.desc")}</p>
+        <h4 className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+          {t("settings:storage.projects.title")}
+          <InfoTip text={t("settings:storage.projects.desc")} />
+        </h4>
         <div className="mt-3 flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => void runScan()} disabled={scanning}>
             {scanning ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}

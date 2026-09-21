@@ -6,9 +6,10 @@ import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HelpCircle, Images } from "lucide-react";
+import { Images } from "lucide-react";
 import type { CacheSettings, CacheKindPolicy, SessionCleanupTrigger } from "@/lib/bridge";
 import { CACHE_KIND_LIST, KIND_ICON, isDbKind, isSessionKind, type CacheKind } from "./storageShared";
+import { InfoTip } from "../rows";
 
 interface Props {
   settings: CacheSettings;
@@ -57,12 +58,7 @@ function KindRow({ kind, policy, onChange }: { kind: CacheKind; policy: CacheKin
       <div className="flex min-w-0 items-center gap-2">
         <Icon className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="truncate text-xs text-foreground">{t(`storage.kind.${kind}`)}</span>
-        <Tooltip>
-          <TooltipTrigger render={<span className="shrink-0 text-muted-foreground" />}>
-            <HelpCircle className="size-3" />
-          </TooltipTrigger>
-          <TooltipContent className="max-w-64">{t(`storage.kindHint.${kind}`)}</TooltipContent>
-        </Tooltip>
+        <InfoTip text={t(`storage.kindHint.${kind}`)} />
       </div>
       {manualOnly ? (
         <Tooltip>
@@ -102,10 +98,10 @@ function SessionPolicyRow({ kind, value, onChange }: {
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-border px-3 py-2.5 last:border-0">
       <Icon className="size-4 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
-        <p className="text-xs text-foreground">{t(`storage.kind.${kind}`)}</p>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{t(`storage.kindHint.${kind}`)}</p>
-      </div>
+      <p className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-foreground">
+        {t(`storage.kind.${kind}`)}
+        <InfoTip text={t(`storage.kindHint.${kind}`)} />
+      </p>
       <Select items={items} value={value} onValueChange={(next) => onChange(String(next) as SessionCleanupTrigger)}>
         <SelectTrigger size="sm" className="w-56 max-w-full shrink-0"><SelectValue>{current}</SelectValue></SelectTrigger>
         <SelectContent>
@@ -122,20 +118,20 @@ function SessionPolicies({ settings, onChange }: Props) {
     onChange({ session: { ...settings.session, [kind]: trigger } });
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-sm font-medium text-foreground">{t("storage.policy.sessionTitle")}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">{t("storage.policy.sessionDesc")}</p>
-      </div>
+      <h3 className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+        {t("storage.policy.sessionTitle")}
+        <InfoTip text={t("storage.policy.sessionDesc")} />
+      </h3>
       <div className="overflow-hidden rounded-lg border border-border">
         <SessionPolicyRow kind="roto" value={settings.session.roto} onChange={(v) => setSession("roto", v)} />
         <SessionPolicyRow kind="upscaleTest" value={settings.session.upscaleTest} onChange={(v) => setSession("upscaleTest", v)} />
         <SessionPolicyRow kind="voice" value={settings.session.voice} onChange={(v) => setSession("voice", v)} />
         <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
           <Images className="size-4 shrink-0 text-muted-foreground" />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-foreground">{t("storage.policy.sequenceTitle")}</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{t("storage.policy.sequenceHint")}</p>
-          </div>
+          <p className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-foreground">
+            {t("storage.policy.sequenceTitle")}
+            <InfoTip text={t("storage.policy.sequenceHint")} />
+          </p>
           <span className="shrink-0 text-[11px] font-medium text-foreground">{t("storage.policy.trigger.immediate")}</span>
         </div>
       </div>
@@ -152,10 +148,10 @@ export function CachePolicies({ settings, onChange }: Props) {
     <section className="space-y-7">
       <SessionPolicies settings={settings} onChange={onChange} />
 
-      <div>
-        <h3 className="text-sm font-medium text-foreground">{t("storage.policy.title")}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">{t("storage.policy.desc")}</p>
-      </div>
+      <h3 className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+        {t("storage.policy.title")}
+        <InfoTip text={t("storage.policy.desc")} />
+      </h3>
 
       <div className="rounded-lg border border-border px-3">
         <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 border-b border-border py-1.5 text-[11px] text-muted-foreground">

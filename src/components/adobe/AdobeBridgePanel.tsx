@@ -18,6 +18,7 @@ import { HostIcon } from "@/components/HostIcon";
 import { hostLabel } from "@/lib/host";
 import { AdobeStatusCard } from "./AdobeStatusCard";
 import { AdobeSnapshotView } from "./AdobeSnapshotView";
+import { InfoTip } from "@/components/settings/rows";
 
 export function AdobeBridgePanel() {
   const { t } = useTranslation(["adobe", "common"]);
@@ -46,6 +47,7 @@ export function AdobeBridgePanel() {
     setDiagBusy(true);
     try { setDiag(await nr.adobeDiagnose()); } finally { setDiagBusy(false); }
   }
+  const pendingPanelUpdate = !!(adobeStatus?.panelInstalled && adobeStatus.panelOutdated);
   const debugOk = diag ? Object.values(diag.playerDebug).some((v) => v === "1") : false;
   const installOk = !!(diag && diag.manifestExists && debugOk);
   const diagText = diag
@@ -81,13 +83,11 @@ export function AdobeBridgePanel() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-5 p-7">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-semibold">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="flex items-center gap-1.5 text-lg font-semibold">
+          {t("title")}
+          <InfoTip text={t("subtitle")} />
+        </h1>
         <Button variant="outline" disabled={adobeBusy} onClick={() => void installAdobePanel()}>
           <Download className="size-4" /> {adobeStatus?.panelInstalled ? t("reinstallPanel") : t("installPanel")}
         </Button>
@@ -96,38 +96,43 @@ export function AdobeBridgePanel() {
       {/* État d'installation du panneau CEP — persistant (le message d'install ci-dessous est fugace). */}
       <Card className="block p-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-muted-foreground">{t("panel.cepTitle")}</span>
+          {/* Where to open the panel sits behind the info icon; the folder it was copied to is in
+              the diagnostic below, which is where someone chasing an install problem looks. */}
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            {t("panel.cepTitle")}
+            <InfoTip
+              text={adobeStatus?.panelInstalled
+                ? `${t("panel.inApp")}${t("panel.menuPath")}${t("panel.restartHint")}`
+                : t("panel.installHint")}
+            />
+          </span>
           {adobeStatus?.panelInstalled ? (
             <Badge className="gap-1 bg-[var(--color-ok)]/15 text-[var(--color-ok)]"><Check className="size-3" /> {t("panel.installed")}</Badge>
           ) : (
             <Badge variant="outline" className="text-muted-foreground">{t("panel.notInstalled")}</Badge>
           )}
         </div>
-        {adobeStatus?.panelInstalled ? (
-          <p className="mt-2 text-xs text-muted-foreground">
-            {t("panel.copiedIn")} <code className="break-all text-foreground">{adobeStatus.panelDir}</code>.
-            <br />{t("panel.inApp")}<b className="text-foreground">{t("panel.menuPath")}</b>{t("panel.restartHint")}
-          </p>
-        ) : (
-          <p className="mt-2 text-xs text-muted-foreground">
-            {t("panel.installHint")}
-          </p>
-        )}
 
         {/* Mise à jour : la copie posée dans %APPDATA% ne suit pas les mises à jour de NetsuRush —
             le core la resynchronise au démarrage tant que cette option reste active. */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-muted/20 p-3">
           <div className="min-w-0">
-            <p className="text-xs font-medium">{t("panel.autoUpdate")}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {adobeStatus?.panelInstalled && adobeStatus.panelOutdated
-                ? t("panel.updatePending")
-                : t("panel.autoUpdateHint")}
-              {adobeStatus?.panelVersion ? ` · v${adobeStatus.panelInstalledVersion || adobeStatus.panelVersion}` : ""}
-              {/* L'empreinte identifie le build même quand la version du manifeste n'a pas bougé —
-                  c'est la seule chose exploitable dans un rapport de bêta-testeur. */}
-              {adobeStatus?.panelBuild ? ` (${adobeStatus.panelBuild})` : ""}
+            <p className="flex items-center gap-1.5 text-xs font-medium">
+              {t("panel.autoUpdate")}
+              <InfoTip text={t("panel.autoUpdateHint")} />
             </p>
+            {/* State only: a pending update, then the version. The build fingerprint identifies the
+                build even when the manifest version did not move — the one thing a beta report needs. */}
+            {(pendingPanelUpdate || adobeStatus?.panelVersion) && (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {[
+                  pendingPanelUpdate ? t("panel.updatePending") : null,
+                  adobeStatus?.panelVersion
+                    ? `v${adobeStatus.panelInstalledVersion || adobeStatus.panelVersion}${adobeStatus.panelBuild ? ` (${adobeStatus.panelBuild})` : ""}`
+                    : null,
+                ].filter(Boolean).join(" · ")}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {adobeStatus?.panelInstalled && adobeStatus.panelOutdated && (

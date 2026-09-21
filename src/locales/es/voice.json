@@ -214,19 +214,19 @@
     "asr": {
       "whisperTurbo": {
         "label": "Preciso",
-        "hint": "Whisper large-v3-turbo — multilingüe, marcas de tiempo de palabra fiables"
+        "hint": "Multilingüe, marca de tiempo fiable para cada palabra."
       },
       "parakeetV3": {
         "label": "Rápido",
-        "hint": "Parakeet TDT v3 — el más rápido (por validar en tu GPU)"
+        "hint": "El más rápido. Comprueba que va bien en tu tarjeta."
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Whisper + alineación forzada wav2vec2 — marcas de tiempo de palabra exactas al frame para SRT/VTT (scaffold)"
+        "hint": "Cuadra cada palabra al fotograma para subtítulos SRT/VTT. Motor aún no conectado."
       },
       "canary": {
         "label": "Canary",
-        "hint": "NVIDIA Canary-1B-v2 — 25 idiomas de la UE, sin marcas de tiempo de palabra; scaffold."
+        "hint": "25 idiomas europeos. Sin marcas de tiempo por palabra. Motor aún no conectado."
       }
     },
     "vad": {

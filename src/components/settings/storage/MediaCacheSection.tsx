@@ -15,6 +15,7 @@ import { CacheTree } from "./CacheTree";
 import { CacheDirRow } from "./CacheDirRow";
 import { CACHE_KIND_LIST, fmtBytes, KIND_ICON, KIND_TINT, isDbKind, isDurableKind, isExpensive, isSessionKind, type CacheKind } from "./storageShared";
 import type { CacheKindStat } from "@/lib/bridge";
+import { InfoTip } from "../rows";
 
 type Target = { kinds?: CacheKind[]; sources?: string[]; unattributed?: boolean; size: number };
 
@@ -80,10 +81,12 @@ function CacheGroup({ id, kinds, always = false, onPurge }: {
         <GroupIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xs font-medium text-foreground">{t(`storage.lifecycle.${id}`)}</h3>
+            <h3 className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+              {t(`storage.lifecycle.${id}`)}
+              <InfoTip text={t(`storage.lifecycle.${id}Desc`)} />
+            </h3>
             {id === "session" && <Badge variant="secondary">{t("storage.lifecycle.sessionBadge")}</Badge>}
           </div>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">{t(`storage.lifecycle.${id}Desc`)}</p>
         </div>
         <span className="shrink-0 text-xs tabular-nums text-foreground">{fmtBytes(total)}</span>
       </div>
@@ -258,10 +261,10 @@ export function MediaCacheSection() {
 
           {s.tree && (s.tree.folders.length > 0 || s.tree.unattributed.bytes > 0) && (
             <div className="space-y-2">
-              <div>
-                <h3 className="text-xs font-medium text-foreground">{t("settings:storage.tree.title")}</h3>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{t("settings:storage.tree.desc")}</p>
-              </div>
+              <h3 className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                {t("settings:storage.tree.title")}
+                <InfoTip text={t("settings:storage.tree.desc")} />
+              </h3>
               <CacheTree
                 tree={s.tree}
                 selected={sel}

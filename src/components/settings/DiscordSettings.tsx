@@ -9,6 +9,7 @@ import { BrandIcon } from "@/components/BrandIcon";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { InfoTip } from "./rows";
 
 const TOGGLE_CLASS = "shrink-0 aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary";
 
@@ -125,10 +126,10 @@ function Row({ title, hint, children }: {
 }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">
-      <div className="min-w-0">
-        <span className="block text-[0.8125rem]">{title}</span>
-        {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
-      </div>
+      <span className="flex min-w-0 items-center gap-1.5 text-[0.8125rem]">
+        {title}
+        {hint && <InfoTip text={hint} />}
+      </span>
       {children}
     </div>
   );

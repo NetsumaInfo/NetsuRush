@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { InfoTip } from "./rows";
 
 type RuntimeKind = "gpu" | "cpu" | "fallback" | "missing";
 type RuntimeRow = { key: string; kind: RuntimeKind; detail: string };
@@ -42,8 +43,10 @@ function FunctionRow({ row, t }: { row: RuntimeRow; t: (key: string) => string }
   return (
     <div className="flex items-center gap-3 px-3 py-3">
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium">{t(`compatibility.features.${row.key}`)}</p>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{t(`compatibility.featureHints.${row.key}`)}</p>
+        <p className="flex items-center gap-1.5 text-xs font-medium">
+          {t(`compatibility.features.${row.key}`)}
+          <InfoTip text={t(`compatibility.featureHints.${row.key}`)} />
+        </p>
         {row.detail && <p className="mt-1 truncate text-[11px] text-foreground/70">{row.detail}</p>}
       </div>
       <StateBadge kind={row.kind} t={t} />
@@ -87,11 +90,8 @@ export function CompatibilitySettings() {
 
   return (
     <section className="max-w-3xl">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-medium">{t("compatibility.title")}</h2>
-          <p className="mt-1 max-w-[68ch] text-xs text-muted-foreground">{t("compatibility.subtitle")}</p>
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-medium">{t("compatibility.title")}</h2>
         <Button variant="outline" size="sm" disabled={loading} onClick={() => void refresh()}>
           {loading ? <Spinner /> : <RefreshCw className="size-3.5" />}
           {t("compatibility.refresh")}

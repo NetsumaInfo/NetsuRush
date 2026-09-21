@@ -30,11 +30,8 @@ export function NavigationSettings() {
 
   return (
     <section className="flex flex-col gap-5">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-medium">{t("settings:navigation.title")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("settings:navigation.subtitle")}</p>
-        </div>
+      <header className="flex items-center justify-between gap-4">
+        <h2 className="text-sm font-medium">{t("settings:navigation.title")}</h2>
         <Button variant="outline" size="sm" onClick={resetAll}>
           <RotateCcw className="size-3.5" /> {t("settings:navigation.reset")}
         </Button>

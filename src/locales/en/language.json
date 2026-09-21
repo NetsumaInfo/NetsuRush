@@ -7,7 +7,6 @@
   "settings": {
     "navLabel": "Language",
     "title": "Language",
-    "subtitle": "Applies right away, no restart.",
     "fieldLabel": "Interface language"
   }
 }

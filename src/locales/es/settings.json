@@ -29,14 +29,13 @@
   "account": {
     "title": "Cuenta",
     "notConfigured": "El inicio de sesión no está configurado en esta instalación.",
-    "subtitle": "La cuenta de Discord conectada a NetsuRush.",
     "none": "No hay ninguna cuenta conectada.",
     "discordUser": "Usuario de Discord",
     "signOut": "Cerrar sesión"
   },
   "playback": {
     "title": "Vistas previas y miniaturas",
-    "subtitle": "Cambiar un ajuste regenera las vistas previas a medida que navegas. Las anteriores se quedan en el disco hasta que las borres.",
+    "subtitle": "Un cambio regenera las vistas previas. Las anteriores se quedan en el disco hasta que las borres.",
     "soundTitle": "Sonido",
     "playerVolume": "Volumen de los reproductores",
     "playerVolumeHint": "Compartido por NetsuCut, Colecciones, Voz y Upscale.",
@@ -82,20 +81,20 @@
     "indexingTitle": "Análisis de los planos",
     "accelerationTitle": "Aceleración",
     "shotDecode": "Extracción agrupada",
-    "shotDecodeHint": "Extrae las imágenes de un plano de una vez en lugar de una por una. Hasta 6× más rápido, con exactamente las mismas imágenes.",
+    "shotDecodeHint": "Hasta 6× más rápido, con los mismos fotogramas.",
     "vramProfile": "Perfil de memoria",
-    "vramProfileHint": "Cuánto trabajo se hace a la vez. Bájalo si la aplicación estorba a tu montaje, súbelo si la máquina está libre.",
+    "vramProfileHint": "Bájalo si la app entorpece tu montaje, súbelo si la máquina está libre.",
     "vram": {
       "economy": "Ahorro",
       "balanced": "Equilibrado",
       "performance": "Rendimiento"
     },
     "maxPatches": "Resolución de análisis",
-    "maxPatchesHint": "Nivel de detalle que el modelo ve en cada imagen. Más alto capta los elementos pequeños, pero cuesta tiempo y memoria.",
+    "maxPatchesHint": "Más alto detecta detalles pequeños, pero tarda más y usa más memoria.",
     "patchesDefault": "{{value}} (predeterminado)",
     "reindexWarning": "A esta resolución hay que volver a indexar tus brutos. Volver a 256 recupera el índice original intacto.",
     "onnxGpu": "Caras y dictado en la GPU",
-    "onnxGpuHint": "Unas 8× más rápido que el procesador, con los mismos resultados. Desactívalo si tu controlador gráfico falla.",
+    "onnxGpuHint": "Unas 8× más rápido. Desactívalo si tu controlador gráfico se cuelga.",
     "enabled": "Activado",
     "disabled": "Desactivado",
     "reset": "Restablecer el rendimiento",
@@ -104,55 +103,43 @@
   },
   "appearance": {
     "title": "Tema",
-    "subtitle": "Ocho paletas oscuras, tres claras. Cada una se retoca color por color justo debajo.",
     "group": {
       "dark": "Oscuros",
       "light": "Claros"
     },
     "theme": {
       "dark": {
-        "label": "Oscuro",
-        "hint": "Neutro y con buen contraste."
+        "label": "Oscuro"
       },
       "midnight": {
-        "label": "Medianoche",
-        "hint": "Negro puro y superficies discretas."
+        "label": "Medianoche"
       },
       "blue": {
-        "label": "Azul noche",
-        "hint": "Azul intenso y luminoso."
+        "label": "Azul noche"
       },
       "light": {
-        "label": "Claro",
-        "hint": "Blanco limpio y legible."
+        "label": "Claro"
       },
       "soft-light": {
-        "label": "Claro suave",
-        "hint": "Gris azulado con menos reflejos."
+        "label": "Claro suave"
       },
       "graphite": {
-        "label": "Grafito",
-        "hint": "Gris neutro, sin matiz."
+        "label": "Grafito"
       },
       "forest": {
-        "label": "Bosque",
-        "hint": "Verde profundo con acento esmeralda."
+        "label": "Bosque"
       },
       "ember": {
-        "label": "Brasa",
-        "hint": "Carbón cálido con acento ámbar."
+        "label": "Brasa"
       },
       "plum": {
-        "label": "Ciruela",
-        "hint": "Violeta apagado con acento malva."
+        "label": "Ciruela"
       },
       "contrast": {
-        "label": "Alto contraste",
-        "hint": "Negro puro y bordes marcados."
+        "label": "Alto contraste"
       },
       "paper": {
-        "label": "Papel",
-        "hint": "Sepia suave con acento terracota."
+        "label": "Papel"
       }
     },
     "wallpaper": {
@@ -205,7 +192,7 @@
     },
     "custom": {
       "title": "Mis temas",
-      "subtitle": "Guarda el aspecto actual: paleta, colores y fondo.",
+      "subtitle": "Guarda paleta, colores y fondo con un nombre.",
       "create": "Nuevo tema",
       "save": "Guardar",
       "delete": "Eliminar este tema",
@@ -275,7 +262,6 @@
       "missing": "No disponible"
     },
     "thumbnailEngine": "Se genera intencionadamente en la CPU.",
-    "subtitle": "Qué se ejecuta en tu tarjeta, qué cae en la CPU y qué falta.",
     "refresh": "Comprobar",
     "hardware": "Componentes detectados",
     "gpu": "Tarjeta gráfica",
@@ -317,7 +303,7 @@
     "restore": "Restaurar",
     "restoreHint": "Restaura los preajustes incluidos que faltan en la lista.",
     "cardButton": "Botón de miniatura",
-    "cardButtonHint": "Acción del botón que aparece al pasar el cursor por una miniatura."
+    "cardButtonHint": "El botón pequeño que aparece al pasar el cursor por una miniatura."
   },
   "console": {
     "title": "Consola",
@@ -427,9 +413,8 @@
   },
   "outbox": {
     "opening": "Abriendo la caché…",
-    "intro": "Cierra Resolve/Premiere Pro para liberar la GPU durante codificaciones pesadas sin perder los envíos: se guardan en caché y se aplican <b>automáticamente al volver a abrir</b>.",
+    "intro": "Los envíos a una aplicación cerrada esperan aquí y salen solos cuando se vuelve a abrir.",
     "enabled": "Cola activa",
-    "enabledHint": "De lo contrario, enviar a un programa cerrado falla como antes.",
     "on": "Activada",
     "off": "Desactivada",
     "delay": "Espera antes de aplicar",
@@ -571,7 +556,7 @@
       "manualOnly": "Solo purga manual",
       "manualOnlyHint": "Este tipo no registra su uso: no hay purga automática.",
       "sessionTitle": "Cachés de trabajo",
-      "sessionDesc": "Elige cuándo deja de ser útil cada derivado pesado. Cerrar la aplicación sigue siendo la red de seguridad.",
+      "sessionDesc": "Cuándo borrar los archivos temporales pesados. Salir de la app los borra de todos modos.",
       "sequenceTitle": "Secuencias intermedias de modelos",
       "sequenceHint": "Carpetas de fotogramas creadas solo para alimentar un modelo. Las secuencias que exportas tú nunca se borran.",
       "trigger": {
@@ -631,7 +616,7 @@
     },
     "projects": {
       "current": "Abierto",
-      "desc": "Los proyectos que conoce la búsqueda. Un proyecto entra aquí en cuanto NetsuRush lee su Media Pool. «Recensar» busca los demás.",
+      "desc": "Los proyectos que conoce la búsqueda. Un proyecto se añade en cuanto se lee su Media Pool; «Buscar» encuentra los demás.",
       "empty": "Todavía no hay proyectos conocidos.",
       "forget": "Olvidar",
       "forgetTooltip": "Quita el proyecto de la lista (el índice y los archivos no se tocan)",
@@ -647,7 +632,6 @@
   },
   "navigation": {
     "title": "Páginas y orden de navegación",
-    "subtitle": "Oculta las páginas que no usas y elige su orden en la barra lateral.",
     "reset": "Restablecer todo",
     "required": "Siempre disponible",
     "visible": "Visible",
@@ -660,7 +644,7 @@
   },
   "notifications": {
     "title": "Notificaciones",
-    "subtitle": "Cuánto tiempo permanecen los avisos de estado. Una tarea en curso permanece hasta terminar.",
+    "subtitle": "Una tarea en curso sigue visible hasta que termina.",
     "reset": "Restablecer todo",
     "ok": "Tarea terminada",
     "okHint": "Exportación terminada, envío a la timeline, aciertos en general.",
@@ -673,7 +657,7 @@
     "untilClick": "Hasta hacer clic"
   },
   "detection": {
-    "reindexHint": "Otro modelo corta los planos de otra manera: los brutos ya indexados habrá que indexarlos de nuevo."
+    "reindexHint": "Cambiar de modelo obliga a volver a indexar tus clips."
   },
   "tab": {
     "account": {
@@ -711,12 +695,12 @@
   },
   "indexing": {
     "title": "Indexación",
-    "subtitle": "Los brutos se cortan primero en planos y luego se analiza cada plano. Los ajustes que no cambian nada en los resultados ya están activos.",
+    "subtitle": "Cada clip se corta en planos y luego se analiza cada plano. Lo que no cambia el resultado ya está activo.",
     "cutTitle": "División en planos"
   },
   "boardAssets": {
     "title": "Almacenamiento del tablero",
-    "intro": "La aplicación guarda medios propios: imágenes pegadas, medios obtenidos de un enlace, fotogramas extraídos, resultados de upscale. Guardar un proyecto .netsu archiva esos bytes en su carpeta complementaria — el almacén solo conserva entonces un duplicado, liberable sin perder nada. Las cachés de visualización tienen su propia página.",
+    "intro": "Lo que la app guarda para sí: imágenes pegadas, medios de enlaces, fotogramas, resultados de escalado. Tus propios archivos nunca se tocan.",
     "disk": "{{free}} libres de {{total}}",
     "scanning": "Analizando el almacenamiento…",
     "failed": "No se ha podido. Inténtalo otra vez.",
@@ -726,7 +710,6 @@
     "archivedNotice": "Tablero guardado en «{{name}}»: sus medios están ahora en la carpeta del proyecto",
     "settling": "{{count}} escribiéndose ahora",
     "settlingHint": "Un archivo recién escrito puede pertenecer a una importación que el tablero aún no ha colocado. Se evaluará en la próxima pasada.",
-    "footnote": "Los medios que añadiste desde tu disco nunca se ven afectados: la aplicación solo toca archivos que ha escrito ella misma.",
     "safe": {
       "hint": "Comprobado archivo por archivo: estos bytes ya existen en la carpeta complementaria de un proyecto.",
       "title": "Liberable sin riesgo",
@@ -737,7 +720,7 @@
     },
     "sole": {
       "title": "Ponlos a salvo primero",
-      "hint": "Estos medios no existen en ningún otro sitio. Nada aquí los borra: guárdalos antes y pasarán a la sección de arriba.",
+      "hint": "La única copia que existe: guarda el tablero primero y pasará a la sección de arriba.",
       "empty": "Nada en riesgo: todo lo que guarda la aplicación existe también en otro sitio.",
       "untitled": "Tablero sin título",
       "sceneCount": "{{count}} medios de los que la aplicación es la única depositaria · {{size}}",
@@ -753,7 +736,7 @@
   },
   "collaboration": {
     "title": "Colaboración",
-    "description": "Estos ajustes permanecen en este equipo. Elige un perfil predeterminado o una excepción por categoría de página.",
+    "description": "Propio de este ordenador. Un perfil para todo o una excepción por tipo de página.",
     "profilesHint": "En directo: envío cada 60 ms. Equilibrado: 200 ms. Ahorro: 900 ms, sin descarga automática de medios.",
     "default": "Perfil predeterminado",
     "inherit": "Usar el perfil predeterminado",

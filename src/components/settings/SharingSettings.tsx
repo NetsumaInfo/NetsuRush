@@ -27,6 +27,7 @@ import { collabBindings, collabSurface, type CollabBinding } from "@/lib/collab/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { SectionTitle } from "./rows";
 
 type AuthUser = { name?: string | null; image?: string | null } | null | undefined;
 type Profile = {
@@ -329,14 +330,10 @@ function SharingInner() {
 
   return (
     <>
-      <section>
-        <h2 className="text-sm font-medium">{t("title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("subtitle")}</p>
-      </section>
+      <SectionTitle title={t("title")} info={t("subtitle")} />
 
       <section className="mt-6">
-        <h2 className="text-sm font-medium">{t("device.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("device.subtitle")}</p>
+        <SectionTitle title={t("device.title")} info={t("device.subtitle")} />
         <div className="mt-3 flex items-center gap-3 rounded-lg border border-border p-3">
           <Laptop className="size-4 shrink-0 text-muted-foreground" />
           {!collabAvailable() ? (
@@ -381,8 +378,7 @@ function SharingInner() {
       </section>
 
       <section className="mt-6">
-        <h2 className="text-sm font-medium">{t("friends.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("friends.subtitle")}</p>
+        <SectionTitle title={t("friends.title")} info={t("friends.subtitle")} />
         {/* The Discord username, not the internal handle. The stored handle carries a suffix
             derived from the account id so two people with the same name cannot collide or
             pre-claim each other's — useful as a key, meaningless to read, and nobody would ever
@@ -469,8 +465,7 @@ function SharingInner() {
 
       {!!projects?.length && (
         <section className="mt-6">
-          <h2 className="text-sm font-medium">{t("projects.title")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("projects.subtitle")}</p>
+          <SectionTitle title={t("projects.title")} info={t("projects.subtitle")} />
 
           {/* Documents on this machine: the name is enough — they open from their own module, and
               the only gesture left here is to part with them. */}

@@ -13,18 +13,18 @@ export type ThemeId =
   | "dark" | "midnight" | "blue" | "graphite" | "forest" | "ember" | "plum" | "contrast"
   | "light" | "soft-light" | "paper";
 export type ThemeMode = "dark" | "light";
-export const THEMES: { id: ThemeId; mode: ThemeMode; label: string; hint: string }[] = [
-  { id: "dark", mode: "dark", label: "Sombre", hint: "Neutre et contrasté" },
-  { id: "midnight", mode: "dark", label: "Minuit", hint: "Noir profond, surfaces discrètes" },
-  { id: "blue", mode: "dark", label: "Bleu nuit", hint: "Bleu profond façon Netsucord" },
-  { id: "graphite", mode: "dark", label: "Graphite", hint: "Gris neutre, sans teinte" },
-  { id: "forest", mode: "dark", label: "Forêt", hint: "Vert profond, accent émeraude" },
-  { id: "ember", mode: "dark", label: "Braise", hint: "Charbon chaud, accent ambre" },
-  { id: "plum", mode: "dark", label: "Prune", hint: "Violet sourd, accent mauve" },
-  { id: "contrast", mode: "dark", label: "Contraste élevé", hint: "Noir pur, bordures franches" },
-  { id: "light", mode: "light", label: "Clair", hint: "Blanc net et lisible" },
-  { id: "soft-light", mode: "light", label: "Clair doux", hint: "Gris bleuté, contraste apaisé" },
-  { id: "paper", mode: "light", label: "Papier", hint: "Sépia doux, accent terracotta" },
+export const THEMES: { id: ThemeId; mode: ThemeMode; label: string }[] = [
+  { id: "dark", mode: "dark", label: "Sombre" },
+  { id: "midnight", mode: "dark", label: "Minuit" },
+  { id: "blue", mode: "dark", label: "Bleu nuit" },
+  { id: "graphite", mode: "dark", label: "Graphite" },
+  { id: "forest", mode: "dark", label: "Forêt" },
+  { id: "ember", mode: "dark", label: "Braise" },
+  { id: "plum", mode: "dark", label: "Prune" },
+  { id: "contrast", mode: "dark", label: "Contraste élevé" },
+  { id: "light", mode: "light", label: "Clair" },
+  { id: "soft-light", mode: "light", label: "Clair doux" },
+  { id: "paper", mode: "light", label: "Papier" },
 ];
 
 export { basename } from "@/lib/utils";

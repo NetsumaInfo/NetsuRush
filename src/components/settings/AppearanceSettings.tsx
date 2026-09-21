@@ -27,7 +27,7 @@ function Swatch({ theme }: { theme: ThemeId }) {
   );
 }
 
-function ThemeCard({ id, label, hint }: { id: ThemeId; label: string; hint: string }) {
+function ThemeCard({ id, label }: { id: ThemeId; label: string }) {
   const { t } = useTranslation("settings");
   // `customThemeId` compte : un thème personnalisé s'appuie sur une palette livrée, qui ne doit pas
   // pour autant s'afficher comme sélectionnée — deux cartes cochées à la fois.
@@ -48,9 +48,6 @@ function ThemeCard({ id, label, hint }: { id: ThemeId; label: string; hint: stri
         {active && <Check className="size-4 shrink-0 text-primary" />}
       </div>
       <Swatch theme={id} />
-      <span className="text-xs leading-snug text-muted-foreground">
-        {t(`appearance.theme.${id}.hint`, { defaultValue: hint })}
-      </span>
     </button>
   );
 }
@@ -59,16 +56,13 @@ export function AppearanceSettings() {
   const { t } = useTranslation("settings");
   return (
     <section className="flex flex-col gap-6">
-      <header>
-        <h2 className="text-sm font-medium">{t("appearance.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("appearance.subtitle")}</p>
-      </header>
+      <h2 className="text-sm font-medium">{t("appearance.title")}</h2>
       {MODES.map((mode) => (
         <div key={mode} className="flex flex-col gap-2.5">
           <h3 className="text-xs font-medium text-muted-foreground">{t(`appearance.group.${mode}`)}</h3>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-2.5">
             {THEMES.filter((theme) => theme.mode === mode).map((theme) => (
-              <ThemeCard key={theme.id} id={theme.id} label={theme.label} hint={theme.hint} />
+              <ThemeCard key={theme.id} id={theme.id} label={theme.label} />
             ))}
           </div>
         </div>

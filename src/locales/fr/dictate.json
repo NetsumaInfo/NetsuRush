@@ -20,19 +20,17 @@
   },
   "settings": {
     "title": "Dictée vocale",
-    "intro": "Maintiens le raccourci n'importe où dans l'app, parle, relâche : le texte transcrit s'insère dans le champ ou l'éditeur où tu étais. Aucun bouton — juste une pastille discrète pendant l'écoute.",
+    "intro": "Maintiens le raccourci, parle, relâche : le texte s'insère là où tu étais.",
     "enableLabel": "Activer la dictée",
-    "enableHint": "Écoute le raccourci global.",
     "enabledOn": "Activée",
     "enabledOff": "Désactivée",
     "micLabel": "Micro",
-    "micHint": "Entrée audio utilisée pour la dictée.",
     "micDefault": "Micro par défaut",
     "micNumbered": "Micro {{n}}",
     "hotkeyLabel": "Raccourci (maintenir)",
     "hotkeyHint": "Clique puis appuie ta combinaison. Échap pour annuler.",
     "unloadLabel": "Décharger le modèle après",
-    "unloadHint": "Inactif ce délai → le modèle quitte la VRAM (relance à froid ensuite).",
+    "unloadHint": "Sans dictée pendant ce délai, le modèle libère la VRAM ; la suivante redémarre plus lentement.",
     "liveLabel": "Aperçu en direct",
     "liveHint": "Le texte s'affiche pendant que tu parles (re-transcription périodique).",
     "liveOn": "Activé",
@@ -57,8 +55,8 @@
     "engine": "Moteur transcribe.cpp",
     "ready": " · prêt ({{backend}})",
     "notInstalled": " · non installé",
-    "readyHint": "Binaire natif détecté — les modèles GGUF (Nemotron) sont utilisables.",
-    "notInstalledHint": "Requis pour Nemotron. Pose transcribe-cli (prébuild GitHub) dans NR_HOME/bin, ou règle transcribeCppBin dans nr.config.json."
+    "readyHint": "Nemotron est utilisable.",
+    "notInstalledHint": "Nécessaire pour Nemotron. Pas encore installable depuis l'app : copie transcribe-cli dans le dossier bin de NetsuRush."
   },
   "mic": {
     "busy": "Micro occupé par une autre application.",
