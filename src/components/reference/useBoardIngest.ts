@@ -32,6 +32,7 @@ import {
 } from "./referenceShared";
 import { useBoard } from "./useReferenceBoard";
 import { boundsOf, computeArrange } from "./boardArrange";
+import { errorText } from "@/lib/errorText";
 
 // Longest side of a freshly posed YouTube card. Kept apart from the media posing size (Settings):
 // a YouTube card is a player, not a reference image the user sizes to taste.
@@ -392,7 +393,7 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
             return;
           }
         } catch (e) {
-          assetCopyFailed(file.name, String(e));
+          assetCopyFailed(file.name, errorText(e));
           return;
         }
       }

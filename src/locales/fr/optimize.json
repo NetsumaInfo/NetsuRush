@@ -21,7 +21,6 @@
     "jobsQueued_one": "{{count}} job en file",
     "jobsQueued_other": "{{count}} jobs en file",
     "settingsRead": "Réglages perf lus",
-    "cacheProxyKeys": "{{count}} clés cache/proxy",
     "noCacheFolder": "Aucun dossier cache auto-détecté",
     "database": "Base de données",
     "dbBig": "{{name}} · volumineuse → scinder",
@@ -29,7 +28,9 @@
     "dbRemote": "PostgreSQL",
     "dbMissing": "Introuvable",
     "cacheFoldersDetected_one": "{{count}} dossier cache détecté",
-    "cacheFoldersDetected_other": "{{count}} dossiers cache détectés"
+    "cacheFoldersDetected_other": "{{count}} dossiers cache détectés",
+    "cacheProxyKeys_one": "{{count}} clé cache/proxy",
+    "cacheProxyKeys_other": "{{count}} clés cache/proxy"
   },
   "memory": {
     "title": "Mémoire de session",
@@ -37,7 +38,6 @@
     "drift": "Resolve.exe : {{now}} · {{drift}} depuis {{elapsed}}",
     "driftDown": "Resolve.exe : {{now}} · stable depuis {{elapsed}}",
     "vram": "VRAM : {{used}} / {{total}} Go",
-    "verdictOk": "Session saine.",
     "verdictWatch": "Resolve s'alourdit. Recharger le projet rend la RAM des timelines.",
     "verdictHigh": "Session très chargée. Seul un redémarrage rend la VRAM et le cache Fusion.",
     "reload": "Recharger le projet",
@@ -68,7 +68,6 @@
     "backupsHint": "Configuration d'avant chaque application. Restauration possible Resolve fermé.",
     "restore": "Restaurer",
     "restoreDone": "Configuration restaurée. Relance Resolve pour la voir prise en compte.",
-    "noBackups": "Aucune sauvegarde — la première application en créera une.",
     "on": "Activé",
     "off": "Désactivé",
     "items": {
@@ -153,7 +152,6 @@
     "on": "Activée",
     "off": "Désactivée",
     "gauges": "RAM disponible {{ram}} % · VRAM occupée {{vram}} %",
-    "lastPurge": "{{freed}} rendus à la machine ({{count}} tâches allégées).",
     "suggestTitle": "Libérer n'a pas suffi",
     "suggestBody": "Ces tâches de fond occupent de la mémoire qu'aucune libération ne rend. Les arrêter est ta décision.",
     "stopThem_one": "Arrêter cette tâche",
@@ -163,7 +161,9 @@
       "export": "un export",
       "proxy": "un encodage de proxy",
       "render": "un rendu"
-    }
+    },
+    "lastPurge_one": "{{freed}} rendus à la machine ({{count}} tâche allégée).",
+    "lastPurge_other": "{{freed}} rendus à la machine ({{count}} tâches allégées)."
   },
   "noise": {
     "title": "Tâches de fond inutiles",
@@ -200,8 +200,9 @@
     "cleanSelection": "Nettoyer la sélection ({{size}})",
     "confirmTitle": "Supprimer ces caches ?",
     "confirmBody": "{{size}} libérés. Ferme Resolve d'abord. Contenu supprimé, régénéré au besoin :",
-    "freed": "{{size}} libérés ({{count}} dossier·s).",
-    "cleanFailed": "Échec : {{error}}"
+    "cleanFailed": "Échec : {{error}}",
+    "freed_one": "{{size}} libérés ({{count}} dossier).",
+    "freed_other": "{{size}} libérés ({{count}} dossiers)."
   },
   "stop": {
     "title": "Arrêter des tâches",
@@ -471,9 +472,10 @@
       "generate_other": "Générer et attacher ({{count}})",
       "attached_one": "{{count}} proxy attaché",
       "attached_other": "{{count}} proxies attachés",
-      "attachedPartial": "{{count}} proxies attachés, {{missed}} en échec",
       "encodeFailed_one": "Encodage impossible pour {{count}} rush",
-      "encodeFailed_other": "Encodage impossible pour {{count}} rushs"
+      "encodeFailed_other": "Encodage impossible pour {{count}} rushs",
+      "attachedPartial_one": "{{count}} proxy attaché, {{missed}} en échec",
+      "attachedPartial_other": "{{count}} proxies attachés, {{missed}} en échec"
     }
   }
 }

@@ -1,11 +1,9 @@
 {
   "gate": {
-    "title": "Elegir idioma",
-    "subtitle": "Se puede cambiar en cualquier momento en Ajustes.",
-    "continue": "Continuar"
+    "title": "Elige tu idioma",
+    "subtitle": "Podrás cambiarlo en cualquier momento en Ajustes."
   },
   "settings": {
-    "navLabel": "Idioma",
     "title": "Idioma",
     "fieldLabel": "Idioma de la interfaz"
   }

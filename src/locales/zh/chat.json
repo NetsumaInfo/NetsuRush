@@ -4,7 +4,7 @@
   },
   "panel": {
     "copilot": "NetsuRush 助手",
-    "noCliAgent": "未安装任何智能体 — 打开设置以安装或添加 API 密钥",
+    "noCliAgent": "未安装任何智能体。打开设置来安装，或添加 API 密钥",
     "configureKey": "配置 API 密钥后开始"
   },
   "composer": {
@@ -12,7 +12,7 @@
     "placeholder": "让 AI 操控 Resolve…",
     "attachFiles": "添加文件",
     "attachTip": "添加图片 / 文件",
-    "attachedFilesPrompt": "附件（本地路径 — 如有需要请读取或查看）",
+    "attachedFilesPrompt": "附件（本地路径，如有需要请读取或查看）",
     "stop": "停止",
     "send": "发送"
   },
@@ -25,15 +25,13 @@
   },
   "settings": {
     "apiKeys": "API 密钥（BYOK）",
-    "noVault": "应用外无法使用加密保险库 — 密钥仅在本次会话内保留。",
+    "noVault": "应用外无法使用加密保险库，密钥仅在本次会话内保留。",
     "hide": "隐藏",
     "show": "显示",
     "keySet": "已配置",
     "keyAbsent": "未配置",
     "cliAgents": "智能体",
     "rescan": "重新扫描",
-    "noAgentsPre": "列表为空 — 点击“重新扫描”。仍无结果则安装 ",
-    "noAgentsPost": "，并确认它们在 core 的 PATH 中。",
     "detected": "已检测到",
     "absent": "未找到",
     "saved": "已保存",
@@ -41,7 +39,7 @@
     "getKey": "获取密钥",
     "reachable": "连接成功（{{ms}} ms）",
     "connect": "连接（打开终端）",
-    "loginOpened": "已打开终端 — 请在其中完成登录",
+    "loginOpened": "已打开终端，请在其中完成登录",
     "appNoCli": "仅有应用",
     "appNoCliHint": "应用已安装，但其命令 {{bin}} 不在 PATH 中。请从应用中添加。",
     "readyCount": "{{ready}} / {{total}} 就绪",
@@ -54,13 +52,14 @@
     "resolveMcpMissing": "随 DaVinci Resolve Studio 21.1 及更高版本一同提供。本机未找到。",
     "resolveMcpSilent": "无响应",
     "resolveMcpSilentHint": "服务器存在但没有响应。请启动 Resolve 后重新检测。",
-    "resolveMcpHint": "为副驾驶新增 {{n}} 个工具：在 Resolve 中运行 Python 脚本、检索脚本 API、查阅文档、生成 LUT 与 DCTL。",
+    "resolveMcpHint": "为助手新增 {{n}} 个工具：在 Resolve 中运行 Python 脚本、检索脚本 API、查阅文档、生成 LUT 与 DCTL。",
     "resolveUnsafe": "允许沙盒之外的脚本",
     "resolveUnsafeHint": "新增 bmd_run_script_unsafe：完全访问文件、网络与子进程。脚本一旦运行，任何权限模式都拦不住它。",
     "baseUrlHint": {
       "openai": "Ollama、LM Studio、本地代理…",
-      "xai": "欧盟: https://eu-west-1.api.x.ai/v1"
-    }
+      "xai": "欧盟：https://eu-west-1.api.x.ai/v1"
+    },
+    "noAgents": "未找到代理。点击“重新扫描”；如果仍然没有，请安装 <0>claude</0> 或 <1>codex</1>，并确认它们在 PATH 中。"
   },
   "engine": {
     "agents": "已安装的智能体",
@@ -91,7 +90,7 @@
     "auto": "自动"
   },
   "modeTitle": {
-    "readonly": "只读 — 不写入任何内容",
+    "readonly": "只读：不写入任何内容",
     "ask": "仅在有风险时确认（文件/渲染/删除素材）；时间线剪辑直接执行",
     "auto": "直接写入时间线，无需确认"
   },
@@ -102,7 +101,6 @@
     "copyReasoning": "复制推理过程"
   },
   "toolcard": {
-    "running": "进行中",
     "failed": "失败",
     "arguments": "参数",
     "result": "结果",
@@ -158,10 +156,6 @@
     "read": "读取",
     "write": "写入",
     "destructive": "破坏性"
-  },
-  "store": {
-    "convFallback": "对话",
-    "error": "错误"
   },
   "duplicate": {
     "title": "修改前先复制",

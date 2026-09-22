@@ -15,6 +15,7 @@ import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { scriptState, useScript } from "./useScript";
+import { errorText } from "@/lib/errorText";
 
 function fmtDate(ts: number, locale: string): string {
   return new Date(ts).toLocaleString(locale, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -30,7 +31,7 @@ export function VersionHistory({ onClose, save }: { onClose: () => void; save: (
 
   const refresh = useCallback(async () => {
     if (!doc) return;
-    try { setVersions((await nr.script?.listVersions(doc.id)) ?? []); } catch (e) { setError(String(e)); }
+    try { setVersions((await nr.script?.listVersions(doc.id)) ?? []); } catch (e) { setError(errorText(e)); }
   }, [doc]);
 
   useEffect(() => { void refresh(); }, [refresh]);
@@ -46,7 +47,7 @@ export function VersionHistory({ onClose, save }: { onClose: () => void; save: (
       if (!r?.ok) setError(r?.error ?? t("versions.saveFailed"));
       else { setLabel(""); await refresh(); }
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     } finally {
       setBusy(null);
     }
@@ -66,7 +67,7 @@ export function VersionHistory({ onClose, save }: { onClose: () => void; save: (
       await refresh();
       onClose();
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     } finally {
       setBusy(null);
     }
@@ -78,7 +79,7 @@ export function VersionHistory({ onClose, save }: { onClose: () => void; save: (
       await nr.script?.deleteVersion(id);
       await refresh();
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     } finally {
       setBusy(null);
     }

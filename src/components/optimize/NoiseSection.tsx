@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { nr } from "@/lib/bridge";
 import type { OptimizeProc } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
+import { errorText } from "@/lib/errorText";
 
 export function NoiseSection() {
   const { t } = useTranslation("optimize");
@@ -42,7 +43,7 @@ export function NoiseSection() {
       }
       setPicked(new Set());
     } catch (e) {
-      setNotice({ text: String(e), failed: true });
+      setNotice({ text: errorText(e), failed: true });
     } finally {
       setScanning(false);
     }
@@ -61,7 +62,7 @@ export function NoiseSection() {
       const r = await nr.optimizeKillNoise([...picked]);
       setNotice({ text: t("noise.stopped", { count: r.killed }), failed: false });
     } catch (e) {
-      setNotice({ text: String(e), failed: true });
+      setNotice({ text: errorText(e), failed: true });
     } finally {
       setKilling(false);
       void scan();

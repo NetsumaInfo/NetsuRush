@@ -1,28 +1,27 @@
 {
   "title": "Adobe",
-  "subtitle": "Das NetsuRush-Bedienfeld liest das in Premiere Pro oder After Effects (ab 2020) geöffnete Projekt und schickt es hierher.",
+  "subtitle": "Das NetsuRush-Panel liest das in Premiere Pro oder After Effects (ab 2020) geöffnete Projekt und schickt es hierher.",
   "installPanel": "Panel installieren",
   "reinstallPanel": "Panel neu installieren",
   "panel": {
-    "cepTitle": "NetsuRush-Bedienfeld",
+    "cepTitle": "NetsuRush-Panel",
     "installed": "Installiert",
     "notInstalled": "Nicht installiert",
-    "inApp": "In Premiere Pro/After Effects: ",
     "menuPath": "Fenster ▸ Erweiterungen ▸ NetsuRush",
-    "restartHint": " (App neu starten, falls sie schon offen war).",
     "installHint": "Auf „Panel installieren“ klicken, dann Premiere Pro/After Effects ▸ Fenster ▸ Erweiterungen ▸ NetsuRush öffnen.",
     "diagnose": "Diagnose",
     "autoUpdate": "Automatische Verwaltung",
-    "autoUpdateHint": "Das Bedienfeld wird installiert, sobald eine Adobe-App erkannt wird, und danach mit NetsuRush aktualisiert.",
-    "autoUpdateOn": "Ein",
-    "autoUpdateOff": "Aus",
-    "updatePending": "Diese NetsuRush-Version liefert ein neueres Bedienfeld",
+    "autoUpdateHint": "Das Panel wird installiert, sobald eine Adobe-App erkannt wird, und danach mit NetsuRush aktualisiert.",
+    "autoUpdateOn": "Aktiviert",
+    "autoUpdateOff": "Deaktiviert",
+    "updatePending": "Diese NetsuRush-Version enthält ein neueres Panel",
     "updateNow": "Jetzt aktualisieren",
-    "restartApps": "Bedienfeld aktualisiert – starte {{apps}} neu, um es zu laden."
+    "restartApps": "Panel aktualisiert – starte {{apps}} neu, um es zu laden.",
+    "openHint": "In Premiere Pro oder After Effects: {{menu}}. Starte die App neu, falls sie schon offen war."
   },
   "diag": {
     "verdictOk": "Installation OK ✓ (Ordner + Manifest + PlayerDebugMode). Panel in Adobe öffnen: Fenster ▸ Erweiterungen ▸ NetsuRush.",
-    "verdictIncomplete": "Installation unvollständig — siehe unten.",
+    "verdictIncomplete": "Installation unvollständig – siehe unten.",
     "folder": "Ordner: {{dir}}",
     "manifestPresent": "Manifest vorhanden: {{yesNo}}",
     "yes": "JA",
@@ -31,7 +30,7 @@
     "filesEmpty": "(leer)",
     "manifestHead": "Manifest (Anfang):",
     "cepLogFound": "CEP-Log (NetsuRush-Fehler gefunden):",
-    "cepLogNone": "CEP-Log: kein NetsuRush-FEHLER (normal — das Log nennt die Erweiterung nur bei Ladeproblemen)."
+    "cepLogNone": "CEP-Log: kein NetsuRush-FEHLER (normal – das Log nennt die Erweiterung nur bei Ladeproblemen)."
   },
   "status": {
     "installed": "Installiert",
@@ -57,7 +56,7 @@
     "thShot": "Shot",
     "thTimeline": "Timeline",
     "thSource": "Quelle",
-    "noProject": "Kein Projekt empfangen — NetsuRush-Panel in der App öffnen, dann „An NetsuRush senden“.",
+    "noProject": "Kein Projekt empfangen – NetsuRush-Panel in der App öffnen, dann „An NetsuRush senden“.",
     "receivedAt": "empfangen um {{time}}",
     "rushes": "Rohmaterial",
     "noFileMedia": "Keine Datei-Medien im Projekt."

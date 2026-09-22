@@ -111,8 +111,7 @@
     "trackGroup": "Piste",
     "trackN": "Piste {{n}}",
     "langResolved": "{{lang}} → Piste {{n}}",
-    "langUnresolved": "{{lang}} → aucune piste trouvée",
-    "timelineHint": "Resolve importe toutes les pistes audio ou aucune."
+    "langUnresolved": "{{lang}} → aucune piste trouvée"
   },
   "iconPicker": {
     "search": "Rechercher une icône…",

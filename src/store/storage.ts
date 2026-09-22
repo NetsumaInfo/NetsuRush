@@ -6,6 +6,7 @@ import type { AppState } from "./index";
 import { nr } from "@/lib/bridge";
 import { clearThumbs } from "@/lib/thumbCache";
 import type { CacheOverview, CacheTree, CacheSettings, CacheWarn, CacheProgress, CacheKind } from "@/lib/bridge";
+import { errorText } from "@/lib/errorText";
 
 function normalizeCacheSettings(settings: CacheSettings): CacheSettings {
   // Compat HMR avec un core encore en v2 : la fenêtre Tauri doit être redémarrée pour charger le
@@ -81,7 +82,7 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
       const [cacheOverview, cacheTree] = await Promise.all([nr.cache.overview(), nr.cache.tree()]);
       set({ cacheOverview, cacheTree, cacheLoading: false });
     } catch (e) {
-      set({ cacheLoading: false, cacheError: String(e) });
+      set({ cacheLoading: false, cacheError: errorText(e) });
     }
   },
 
@@ -90,7 +91,7 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
     try {
       set({ cacheSettings: normalizeCacheSettings(await nr.cache.settings()) });
     } catch (e) {
-      set({ cacheError: String(e) });
+      set({ cacheError: errorText(e) });
     }
   },
 
@@ -109,7 +110,7 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
       if (r.settings) set({ cacheSettings: normalizeCacheSettings(r.settings) });
       else if (!r.ok) set({ cacheSettings: prev, cacheError: r.error || null });
     } catch (e) {
-      set({ cacheSettings: prev, cacheError: String(e) });
+      set({ cacheSettings: prev, cacheError: errorText(e) });
     }
   },
 
@@ -125,8 +126,8 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
       await get().loadCache();
       return r;
     } catch (e) {
-      set({ cacheBusy: null, cacheError: String(e) });
-      return { ok: false, error: String(e) };
+      set({ cacheBusy: null, cacheError: errorText(e) });
+      return { ok: false, error: errorText(e) };
     }
   },
 
@@ -136,7 +137,7 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
     try {
       await nr.cache.reindex();
     } catch (e) {
-      set({ cacheError: String(e) });
+      set({ cacheError: errorText(e) });
     }
     set({ cacheBusy: null, cacheProgress: null });
     await get().loadCache();
@@ -148,7 +149,7 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
       const r = await nr.cache.missing();
       set({ cacheMissing: r.sources });
     } catch (e) {
-      set({ cacheError: String(e) });
+      set({ cacheError: errorText(e) });
     }
   },
 
@@ -162,7 +163,7 @@ export const createStorageSlice: StateCreator<AppState, [], [], StorageSlice> = 
       return r;
     } catch (e) {
       set({ cacheBusy: null });
-      return { ok: false, error: String(e) };
+      return { ok: false, error: errorText(e) };
     }
   },
 

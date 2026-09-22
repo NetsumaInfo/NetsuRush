@@ -27,10 +27,9 @@
   },
   "review": {
     "title": "可以安装",
-    "downloads": "可选空间",
+    "downloads": "可选内容占用",
     "noOptionalModels": "无可选下载",
     "mandatoryOnly": "仅基础环境和场景切分",
-    "sceneDetection": "包含场景切分",
     "modelCount_one": "{{count}} 项下载",
     "modelCount_other": "{{count}} 项下载"
   },

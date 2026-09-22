@@ -7,7 +7,7 @@
   },
   "studio": {
     "title": "Roto Studio",
-    "pickSource": "Marcar una fuente para empezar la rotoscopía.",
+    "pickSource": "Marca una fuente para empezar la rotoscopía.",
     "play": "Reproducir",
     "pause": "Pausa",
     "playTip": "Reproducir (L / Espacio) — J = atrás",
@@ -19,22 +19,17 @@
     "outHere": "Punto de salida aquí",
     "outTip": "Punto de salida en el fotograma actual (O — Mayús+O borra)",
     "range": "Rango {{from}}–{{to}}",
-    "clickHint": "Clic = {{mode}} (E alterna) · clic derecho = excluir · Mayús+cursor = vista previa · rueda = zoom · J/K/L · I/O · , ; = paso de seguimiento · 1-9 objeto",
-    "include": "incluir",
-    "exclude": "excluir",
     "showMask": "Mostrar la máscara",
     "hideOverlay": "Ocultar la superposición",
-    "showOverlay": "Mostrar la superposición",
-    "testTitle": "Prueba — {{label}}",
-    "testHint": "Solo vista previa — no se escribe nada. Si el resultado convence, lanzar la acción en todo el plano."
+    "showOverlay": "Mostrar la superposición"
   },
   "panels": {
     "model": "Modelo",
-    "noSam": "Ningún modelo SAM instalado — descargar SAM 2.1 en Ajustes › Modelos.",
+    "noSam": "Ningún modelo SAM instalado — descarga SAM 2.1 en Ajustes › Modelos.",
     "display": "Visualización",
     "maskRefine": "Retoque de la máscara",
     "output": "Salida",
-    "matteFine": "Matte fino",
+    "matteFine": "Ajuste de la máscara",
     "removeObject": "Eliminar el objeto",
     "track": "Seguimiento",
     "selection": "Selección",
@@ -50,7 +45,7 @@
     "excludeTip": "El clic izquierdo QUITA de la máscara (punto negativo) — corrige los desbordes",
     "nameAria": "Nombre del objeto",
     "removeAria": "Quitar {{name}}",
-    "setActive": "Definir activo",
+    "setActive": "Establecer como activo",
     "remove": "Eliminar el objeto"
   },
   "points": {
@@ -68,17 +63,17 @@
     "stepBackTip": "Sigue UN fotograma hacia atrás y se detiene (control fotograma a fotograma)",
     "stepFwd": "Paso →",
     "stepFwdTip": "Sigue UN fotograma hacia delante y se detiene (control fotograma a fotograma)",
-    "retrackBack": "Reseguir ←",
-    "retrackBackTip": "Repropaga hacia atrás desde el fotograma actual (corrección local)",
-    "retrackFwd": "Reseguir →",
-    "retrackFwdTip": "Repropaga hacia delante desde el fotograma actual (corrección local)",
+    "retrackBack": "Volver a seguir ←",
+    "retrackBackTip": "Vuelve a propagar hacia atrás desde el fotograma actual (corrección local)",
+    "retrackFwd": "Volver a seguir →",
+    "retrackFwdTip": "Vuelve a propagar hacia delante desde el fotograma actual (corrección local)",
     "dedupe": "Quitar duplicados",
-    "dedupeTip": "Animación: los fotogramas casi idénticos (sostenidos) reciben la MISMA matte — contorno estable. Reversible.",
-    "restoreMattesAria": "Restaurar las mattes",
-    "restoreMattesTip": "Restaurar las mattes previas a quitar duplicados",
+    "dedupeTip": "Reutiliza la misma máscara en los fotogramas casi idénticos para estabilizar el contorno. Se puede deshacer.",
+    "restoreMattesAria": "Restaurar los mattes",
+    "restoreMattesTip": "Restaurar los mattes previos a quitar duplicados",
     "resetAria": "Reiniciar el seguimiento",
     "resetTip": "Borra el seguimiento (mattes) MANTENIENDO todos los puntos",
-    "upToDate": "Seguimiento al día — corregir puntos y reseguir en parcial, o exportar."
+    "upToDate": "Seguimiento al día: corrige puntos y vuelve a seguir por partes, o exporta."
   },
   "view": {
     "outline": "Contornos",
@@ -89,20 +84,20 @@
   },
   "viewMode": {
     "editLabel": "Edición",
-    "editHint": "Fotograma + máscaras teñidas por objeto (modo de trabajo)",
-    "matteLabel": "Matte",
+    "editHint": "Fotograma y máscaras coloreadas por objeto para el trabajo de precisión",
+    "matteLabel": "Máscara",
     "matteHint": "Solo máscara en blanco y negro (control del borde)",
     "alphaLabel": "Alfa",
-    "alphaHint": "Fotograma recortado sobre cuadrícula (resultado real)",
+    "alphaHint": "Sujeto recortado sobre un fondo de cuadros para comprobar la transparencia",
     "bgcolorLabel": "Fondo de color",
-    "bgcolorHint": "Fotograma compuesto sobre un color plano (control del recorte)"
+    "bgcolorHint": "Sujeto compuesto sobre un color liso para comprobar los contornos"
   },
   "post": {
     "holes": "Tapar los huecos",
     "holesHint": "Rellena los huecos dentro de la máscara de hasta N × N píxeles de superficie.",
-    "dots": "Quitar el polvillo",
+    "dots": "Quitar motas",
     "dotsHint": "Borra las manchas aisladas fuera del sujeto de hasta N × N píxeles de superficie.",
-    "border": "Rebabas del encuadre",
+    "border": "Bordes sucios",
     "borderHint": "Limpia los N píxeles del borde de la imagen, a menudo sucios (viñeteado, compresión).",
     "grow": "Dilatar / erosionar",
     "growHint": "Desplaza el borde de la máscara hacia fuera (+) o hacia dentro (−), en píxeles.",
@@ -114,7 +109,7 @@
     "featherHint": "Extiende el borde de la máscara en degradado sobre el radio indicado, en píxeles.",
     "gamma": "Densidad (gamma)",
     "gammaHint": "Densifica (> 1) o aligera (< 1) todo el alfa de una vez. 1 = neutro.",
-    "resetTip": "Doble clic = reiniciar"
+    "resetTip": "Doble clic = restablecer"
   },
   "remove": {
     "steps": "Pasos de difusión",
@@ -126,7 +121,7 @@
     "harmonize": "Armonización",
     "harmonizeTip": "Ajusta el color y la nitidez de la zona reconstruida a su entorno — sin esto el parche se nota aunque el contenido sea correcto",
     "grain": "Grano",
-    "grainTip": "Reinyecta el grano medido alrededor de la zona: un relleno liso sobre una fuente con grano canta. Nulo en una fuente limpia",
+    "grainTip": "Reinyecta el grano medido alrededor de la zona: un relleno liso sobre una fuente con grano se nota mucho. Nulo en una fuente limpia",
     "quality": "Calidad",
     "qualityTip": "Resolución de difusión. Más alta = relleno más nítido, pero más VRAM; si falta memoria se usa automáticamente el nivel inferior",
     "qualityFast": "Rápida",
@@ -145,9 +140,9 @@
     "overlapTip": "Fotogramas comunes a dos ventanas, fundidos entre sí. A cero, la unión se ve como un salto.",
     "vaeTiling": "Descodificar por bloques",
     "vaeTilingTip": "Ahorra mucha memoria pero puede dejar uniones visibles. Desactívalo si la tarjeta aguanta.",
-    "cpuOffload": "Descargar en el procesador",
+    "cpuOffload": "Delegar en el procesador",
     "cpuOffloadTip": "Sube los pesos a la tarjeta solo durante su pasada. Bastante más lento, pero cabe en una tarjeta pequeña.",
-    "qualityTiny": "Mín.",
+    "qualityTiny": "Mini",
     "qualityUltra": "Ultra"
   },
   "engineRow": {
@@ -173,14 +168,14 @@
     "proresHint": "Vídeo + canal alfa — montaje (Resolve/AE)",
     "webmLabel": "WebM VP9 (alfa)",
     "webmHint": "Ligero, alfa — web/vista previa",
-    "ffv1Label": "FFV1 (alfa, lossless)",
+    "ffv1Label": "FFV1 (alfa, sin pérdidas)",
     "ffv1Hint": "Sin pérdidas, alfa — archivado (MKV)",
-    "matteLabel": "Matte B/N (MP4)",
+    "matteLabel": "Máscara B/N (MP4)",
     "matteHint": "Solo máscara en blanco y negro",
     "bgcolorLabel": "Fondo de color (MP4)",
     "bgcolorHint": "Objeto compuesto sobre el color de fondo del modo de visualización",
-    "pngLabel": "Secuencia PNG (matte)",
-    "pngHint": "Una imagen de matte por fotograma",
+    "pngLabel": "Secuencia PNG (máscara)",
+    "pngHint": "Una imagen de máscara por fotograma",
     "pngAlphaLabel": "PNG (alfa)",
     "pngAlphaHint": "Imagen recortada, fondo transparente",
     "jpegBgLabel": "JPEG (fondo de color)",
@@ -201,14 +196,14 @@
   "timeline": {
     "inHere": "Punto de entrada aquí (img {{n}})",
     "outHere": "Punto de salida aquí (img {{n}})",
-    "resetRange": "Reiniciar el rango"
+    "resetRange": "Restablecer el rango"
   },
   "viewer": {
     "zoomSuffix": "× — doble clic para encuadrar"
   },
   "test": {
-    "matteImage": "Matte fino — imagen {{n}}",
-    "removeImage": "Eliminación — imagen {{n}}"
+    "matteImage": "Ajuste de la máscara — fotograma {{n}}",
+    "removeImage": "Eliminación — fotograma {{n}}"
   },
   "busy": {
     "open": "Abriendo…",
@@ -218,12 +213,12 @@
     "track": "Seguimiento",
     "resetTrack": "Reinicio del seguimiento",
     "dedupe": "Quitando duplicados",
-    "restoreMattes": "Restauración de las mattes",
+    "restoreMattes": "Restauración de los mattes",
     "export": "Exportación",
-    "matteFine": "Matte fino",
+    "matteFine": "Ajuste de la máscara",
     "remove": "Eliminación",
-    "testMatte": "Prueba de matte (1 imagen)",
-    "testRemove": "Prueba de eliminación (1 imagen)"
+    "testMatte": "Prueba de máscara (1 fotograma)",
+    "testRemove": "Prueba de eliminación (1 fotograma)"
   },
   "note": {
     "canceled": "{{label}} cancelado — los fotogramas ya seguidos se conservan.",
@@ -231,7 +226,7 @@
     "done": "{{label}} terminado.",
     "unavailable": "{{label}} no disponible",
     "restored": "Sesión restaurada de la caché — puntos y seguimiento conservados.",
-    "dedupeOutput": "Grupos: {{groups}} · Imágenes unificadas: {{changed}}"
+    "dedupeOutput": "Grupos: {{groups}} · Fotogramas unificados: {{changed}}"
   },
   "errors": {
     "openFailed": "no se pudo abrir",
@@ -246,13 +241,13 @@
     "extract": "Extrayendo los fotogramas…",
     "extractwait": "Terminando la extracción…",
     "roi": "Recortando la zona útil…",
-    "refine": "Inferencia de la matte…",
+    "refine": "Calculando la máscara…",
     "export": "Codificando…",
     "remove": "Eliminando…",
     "dedupe": "Analizando duplicados…"
   },
   "summary": {
-    "tracked": "al día",
+    "tracked": "seguimiento al día",
     "notTracked": "sin seguimiento",
     "matteNone": "sin calcular",
     "matteOn": "activo",
@@ -266,14 +261,14 @@
     "post_other": "{{count}} ajustes"
   },
   "matte": {
-    "run": "Calcular el mate",
+    "run": "Calcular el matte",
     "test": "Probar",
     "testTip": "Afina solo el fotograma actual y muestra el resultado — no se escribe nada.",
-    "useRefined": "Usar el mate fino",
+    "useRefined": "Usar el matte fino",
     "useRefinedTip": "Alterna entre el alfa afinado y la máscara bruta del seguimiento, sin recalcular. La vista, la exportación y el borrado lo siguen.",
     "advanced": "Ajustes avanzados",
     "size": "Resolución de proceso",
-    "sizeTip": "Tope del lado corto que recibe el modelo. Más alto = bordes más finos, pero más lento y con más memoria.",
+    "sizeTip": "Tope del lado corto que recibe el modelo. Más alto = bordes más finos, pero más lento y consume más memoria.",
     "size480": "480",
     "size720": "720",
     "size1080": "1080",
@@ -283,14 +278,14 @@
     "combined": "Procesar los objetos juntos",
     "combinedTip": "Una sola pasada sobre la unión en vez de una por objeto. Mucho más rápido, pero exportar un objeto suelto vuelve a la máscara bruta.",
     "batch": "Fotogramas por lote",
-    "batchTip": "Fotogramas que el modelo trata de un bloque. Mayor = más coherente en el tiempo, pero la memoria sube igual.",
+    "batchTip": "Fotogramas que el modelo trata de un bloque. Mayor = más coherente en el tiempo, pero el uso de memoria sube en proporción.",
     "overlap": "Solapamiento",
     "overlapTip": "Fotogramas comunes a dos lotes. Se recalculan y se funden, y el lote siguiente parte del alfa anterior — sin esto la unión se ve."
   },
   "mask": {
     "stepModel": "afina el alfa",
     "stepManual": "sobre la máscara del seguimiento",
-    "stepOnRefined": "encima del mate fino"
+    "stepOnRefined": "encima del matte fino"
   },
   "output": {
     "exportStep": "Exportar"

@@ -33,6 +33,7 @@ import { hoverLiftLayer } from "@/components/common/hoverLift";
 import { previewSettingsFingerprint } from "@/lib/previewSettings";
 import { NR_MEDIA_DND, type NrMediaDrag, kindFromPath } from "./referenceShared";
 import type { BoardHandle } from "./ReferenceBoard";
+import { errorText } from "@/lib/errorText";
 
 type Mode = "browse" | "search";
 
@@ -204,7 +205,7 @@ function CutsView({ clip, proxies, board, onClose }: {
       const got = (r.scenes ?? []).filter((s) => s.end > s.start);
       setCuts(got);
       if (!got.length) setErr(t("media.noShotFound"));
-    } catch (e) { setErr(String(e)); }
+    } catch (e) { setErr(errorText(e)); }
     finally { off(); track.stop(); setDetecting(false); }
   }
 
@@ -293,7 +294,7 @@ function SearchView({ proxies, board }: { proxies: Map<string, string>; board: R
       const r = await nr.search(q.trim(), 60);
       if (r.error) { setErr(r.error); setHits([]); return; }
       setHits(r.hits ?? []);
-    } catch (e) { setErr(String(e)); setHits([]); }
+    } catch (e) { setErr(errorText(e)); setHits([]); }
     finally { setBusy(false); }
   }
 

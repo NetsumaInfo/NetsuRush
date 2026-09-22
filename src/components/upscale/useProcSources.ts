@@ -8,6 +8,7 @@ import {
   DEFAULT_PATTERN, EMPTY_TOKENS, resolveOutputName, reviewOutputNames,
   type NamingReport, type NamingTokens,
 } from "./outputNaming";
+import { errorText } from "@/lib/errorText";
 
 const SCOPE_KEY = "nr.netsulab.scope";
 const OUT_DIR_KEY = "nr.netsulab.outDir";
@@ -291,7 +292,7 @@ export function useProcSources() {
       setScenes(r.scenes || []);
       setPicked(new Set((r.scenes || []).map((_, i) => i)));
       if (r.error) setSourcesErr(r.error);
-    } catch (e) { setSourcesErr(String(e)); } finally { setDetecting(false); }
+    } catch (e) { setSourcesErr(errorText(e)); } finally { setDetecting(false); }
   }, [single]);
 
   const toggleScene = useCallback((i: number) => {

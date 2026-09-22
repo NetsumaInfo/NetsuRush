@@ -16,6 +16,7 @@ import { IMAGE_RE, ipcErr } from "@/components/search/searchHelpers";
 import { NameFaceMenu } from "@/components/search/NameFaceMenu";
 import { FaceModelsBanner } from "@/components/search/FaceModelsBanner";
 import { basename } from "@/store/types";
+import { errorText } from "@/lib/errorText";
 
 // Une image analysée : chemin source + visages détectés (ou repli image entière).
 interface Analyzed {
@@ -130,7 +131,7 @@ export function FaceRefPicker() {
           const r = await nr.faceDetect(p);
           out.push({ path: p, faces: r.faces ?? [], error: r.error ?? null });
         } catch (e) {
-          out.push({ path: p, faces: [], error: String(e) });
+          out.push({ path: p, faces: [], error: errorText(e) });
         }
       }
       setImages((prev) => [...prev, ...out]);

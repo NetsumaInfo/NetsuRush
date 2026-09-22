@@ -9,6 +9,7 @@ import {
 } from "./rotoShared";
 import { useApp } from "@/store";
 import i18n from "@/i18n";
+import { errorText } from "@/lib/errorText";
 
 const lsGet = (k: string, def: string) => { try { return localStorage.getItem(k) || def; } catch { return def; } };
 const lsSet = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* */ } };
@@ -146,7 +147,7 @@ export function useRotoSession(active: UpSource | null) {
           if (r.points?.length || r.tracked) setNote(i18n.t("roto:note.restored"));
         }
       })
-      .catch((e) => seqRef.current === seq && setErr(String(e)))
+      .catch((e) => seqRef.current === seq && setErr(errorText(e)))
       .finally(() => seqRef.current === seq && setBusy(null));
   }, [active?.path, active?.in, active?.out, samModel]);   // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -193,7 +194,7 @@ export function useRotoSession(active: UpSource | null) {
       .catch(() => {});
   }, [frame, dims, tracked, busy]);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  const fail = (e: unknown) => setErr(String(e));
+  const fail = (e: unknown) => setErr(errorText(e));
 
   // Pose un point (nx/ny normalisés 0..1 dans l'image) sur l'objet actif → overlay immédiat.
   const addPoint = useCallback(async (nx: number, ny: number, label: 0 | 1) => {

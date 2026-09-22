@@ -41,6 +41,7 @@ import { CollectionGlyph, DEFAULT_COLLECTION_COLOR } from "./collectionGlyph";
 import { cn } from "@/lib/utils";
 import { CollectionSharingControls } from "./CollectionSharingControls";
 import { syncCollectionMetadata } from "@/lib/collab/collection/session";
+import { errorText } from "@/lib/errorText";
 
 const ROOT = "__root__";
 // Côté de la vignette du dossier, aligné sur la hauteur du champ de nom à côté.
@@ -361,7 +362,7 @@ export function FolderEditor({
   async function save() {
     if (saving || sharing) return;
     try { await persistLocal(); onOpenChange(false); }
-    catch (error) { setMoveErr(error instanceof Error ? error.message : tr("share.failed")); }
+    catch (error) { setMoveErr(error instanceof Error ? errorText(error) : tr("share.failed")); }
   }
 
   const currentLucide = icon?.kind === "lucide" ? icon.name : null;

@@ -19,6 +19,7 @@ import { nr } from "@/lib/bridge";
 import type { OptimizeProc, OptimizeDeadProc } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
 import { useTranslation } from "react-i18next";
+import { errorText } from "@/lib/errorText";
 
 const vram = (mb: number) => fmtBytes(mb * 1024 * 1024);
 
@@ -42,7 +43,7 @@ export function ProcessSection() {
       else setNotice(r.error || t("notice.failed"));
       setScanned(true);
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setScanning(false);
     }
@@ -55,7 +56,7 @@ export function ProcessSection() {
       const r = await nr.optimizeKillProcess(target.pid);
       setNotice(r.ok ? t("process.killed", { name: target.name, pid: target.pid }) : r.error || t("notice.failed"));
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setKilling(false);
       setTarget(null);
@@ -74,7 +75,7 @@ export function ProcessSection() {
       else if (!killable.length) setNotice(t("process.noneBlocked"));
       else setDead(killable);
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setDeadBusy(false);
     }
@@ -86,7 +87,7 @@ export function ProcessSection() {
       const r = await nr.optimizeCleanDead();
       setNotice(r.ok ? t("process.cleaned", { count: r.killed || 0 }) : r.error || t("notice.failed"));
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setDeadBusy(false);
       setDead(null);

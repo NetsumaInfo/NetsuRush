@@ -1,14 +1,14 @@
 {
   "header": {
     "title": "导出到 After Effects",
-    "subtitle": "通过生成的脚本，把时间线还原成 After Effects 合成（位置、轨道、帧精确）。"
+    "subtitle": "把时间线忠实地重建为 After Effects 合成：位置、轨道和剪切点都精确到帧。"
   },
   "result": {
     "scriptPrefix": "脚本：{{name}}",
     "imported": "已导入 After Effects（请查看项目面板）。",
-    "launching": "After Effects 启动中 — 启动后自动导入（需已打开项目）。",
-    "clipsDone_one": "{{count}} 个镜头 → 合成《{{comp}}》。",
-    "clipsDone_other": "{{count}} 个镜头 → 合成《{{comp}}》。",
+    "launching": "After Effects 正在启动，启动后会自动导入（需要已打开项目）。",
+    "clipsDone_one": "{{count}} 个镜头 → 合成“{{comp}}”。",
+    "clipsDone_other": "{{count}} 个镜头 → 合成“{{comp}}”。",
     "missing_one": "已跳过 {{count}} 个无文件的镜头。",
     "missing_other": "已跳过 {{count}} 个无文件的镜头。"
   },
@@ -49,7 +49,7 @@
     "none": "无",
     "choose": "选择…",
     "outDirWhy": "将在此写入的文件：{{reasons}}。",
-    "upscaleForcesReencode": "超分会重建像素：无论上方选择为何，都会执行“重新编码”。"
+    "upscaleForcesReencode": "超分辨率会替换像素：无论上方如何选择，都会使用“重新编码”模式。"
   },
   "sections": {
     "timeline": "时间线",
@@ -66,7 +66,7 @@
   "videoModes": {
     "copy": {
       "label": "复制",
-      "hint": "使用源文件，在 AE 里切分 — 不转码。"
+      "hint": "使用源文件，在 AE 里切分，不转码。"
     },
     "remux": {
       "label": "Remux",
@@ -87,7 +87,7 @@
   "transformModes": {
     "none": {
       "label": "无",
-      "hint": "原始素材 — 忽略时间线的变换和速度。"
+      "hint": "原始素材，忽略时间线的变换和速度。"
     },
     "ae": {
       "label": "在 After Effects 中",
@@ -106,6 +106,6 @@
     "remux": "重新封装的镜头",
     "bake": "烘焙的速度",
     "nestedRender": "由 Resolve 渲染的嵌套时间线",
-    "audio": "导出的音频轨道"
+    "audio": "提取的音频轨道"
   }
 }

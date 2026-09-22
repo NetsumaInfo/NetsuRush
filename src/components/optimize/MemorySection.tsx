@@ -23,6 +23,7 @@ import { nr } from "@/lib/bridge";
 import type { OptimizeDiagnosis, OptimizeSessionHealth } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { fmtBytes } from "./optimizeShared";
+import { errorText } from "@/lib/errorText";
 
 type Action = "reload" | "restart";
 
@@ -73,7 +74,7 @@ export function MemorySection({ diag, onChanged }: { diag: OptimizeDiagnosis | n
         setNotice(r.ok ? t("memory.restartDone", { project: r.project ?? diag?.project }) : r.error || t("notice.failed"));
       }
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setBusy(null);
       onChanged();

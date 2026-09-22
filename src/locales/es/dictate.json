@@ -4,7 +4,7 @@
     "listening": "Escuchando…"
   },
   "hotkey": {
-    "capturePrompt": "Pulsar la combinación…",
+    "capturePrompt": "Pulsa la combinación…",
     "mod": {
       "ctrl": "Ctrl",
       "shift": "Mayús",
@@ -28,11 +28,11 @@
     "micDefault": "Micrófono predeterminado",
     "micNumbered": "Micrófono {{n}}",
     "hotkeyLabel": "Atajo (mantener pulsado)",
-    "hotkeyHint": "Hacer clic y pulsar la combinación. Esc para cancelar.",
-    "unloadLabel": "Descargar el modelo tras",
+    "hotkeyHint": "Haz clic y pulsa la combinación. Esc para cancelar.",
+    "unloadLabel": "Liberar el modelo tras",
     "unloadHint": "Sin dictado durante este tiempo, el modelo libera la VRAM; el siguiente arranca más lento.",
     "liveLabel": "Vista previa en directo",
-    "liveHint": "El texto aparece mientras se habla (retranscripción periódica).",
+    "liveHint": "El texto aparece mientras hablas (retranscripción periódica).",
     "liveOn": "Activado",
     "liveOff": "Desactivado",
     "modelLabel": "Modelo de transcripción"

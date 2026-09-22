@@ -69,7 +69,7 @@
     "archiveUnavailable": "El archivado no está disponible fuera de la aplicación.",
     "folderImportUnavailable": "La importación de carpetas no está disponible fuera de la aplicación.",
     "emptyFolderName": "El nombre de la carpeta está vacío",
-    "invalidFolderName": "El nombre de la carpeta no puede contener '/' ni '\\'",
+    "invalidFolderName": "El nombre de la carpeta no puede contener «/» ni «\\»",
     "folder": "Carpeta"
   },
   "spell": {
@@ -83,7 +83,7 @@
   },
   "beta": {
     "title": "Módulo en beta",
-    "body": "Aún faltan funciones y otras van a cambiar. Busco probadores: dime qué no funciona y qué te falta.",
+    "body": "Aún faltan funciones y otras van a cambiar. Busco gente que lo pruebe: dime qué no funciona y qué te falta.",
     "modules": {
       "script": {
         "title": "Todavía un prototipo",
@@ -114,5 +114,14 @@
   "host": {
     "offlineResolve": "Abre un proyecto con clips en Resolve y recarga, o importa vídeos del disco.",
     "offlineAdobe": "Abre {{app}} y luego el panel de NetsuRush (Ventana ▸ Extensiones), o importa vídeos del disco."
+  },
+  "error": {
+    "coreUnreachable": "El servicio de NetsuRush no responde. Vuelve a intentarlo; si sigue pasando, reinicia la app.",
+    "diskFull": "Disco lleno. Libera espacio y vuelve a intentarlo.",
+    "notFound": "No se encuentra el archivo. Puede que se haya movido o eliminado.",
+    "permission": "Acceso denegado. Puede que el archivo sea de solo lectura o esté abierto en otra app.",
+    "busy": "Otra app está usando el archivo. Ciérrala y vuelve a intentarlo.",
+    "timeout": "No hubo respuesta a tiempo. Vuelve a intentarlo.",
+    "internal": "Error interno de NetsuRush. El detalle está en Ajustes › Sistema › Consola."
   }
 }

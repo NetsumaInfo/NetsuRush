@@ -9,6 +9,7 @@ import i18n from "@/i18n";
 import { useBoard } from "./useReferenceBoard";
 import { type BoardItem, type BoardView, displaySrc } from "./referenceShared";
 import { recoverAllOnlineMedia, recoverOnlineEmbeds } from "./boardMediaActions";
+import { errorText } from "@/lib/errorText";
 
 // Scènes réservées (non listées) : handoff vers la fenêtre détachée, autosave de session.
 const HANDOFF_ID = "__handoff__";
@@ -250,8 +251,8 @@ export function useScenePersistence() {
       }
       return res;
     } catch (e) {
-      flash(tr("notice.failedWith", { error: String(e) }), "error");
-      return { ok: false, error: String(e) };
+      flash(tr("notice.failedWith", { error: errorText(e) }), "error");
+      return { ok: false, error: errorText(e) };
     }
   }, [api]);
 
@@ -284,8 +285,8 @@ export function useScenePersistence() {
       }
       return res;
     } catch (e) {
-      flash(tr("notice.failedWith", { error: String(e) }), "error");
-      return { ok: false, error: String(e) };
+      flash(tr("notice.failedWith", { error: errorText(e) }), "error");
+      return { ok: false, error: errorText(e) };
     }
   }, [api]);
 
@@ -345,8 +346,8 @@ export function useScenePersistence() {
         }
         return res;
       } catch (e) {
-        flash(tr("notice.failedWith", { error: String(e) }), "error");
-        return { ok: false, error: String(e) };
+        flash(tr("notice.failedWith", { error: errorText(e) }), "error");
+        return { ok: false, error: errorText(e) };
       }
     },
     [api, saveProject],
@@ -402,7 +403,7 @@ export function useScenePersistence() {
       } catch (e) {
         if (!autoErrShown) {
           autoErrShown = true;
-          flash(tr("notice.autosaveFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
+          flash(tr("notice.autosaveFailed", { error: errorText(e) }), "error");
         }
       }
       return;
@@ -420,7 +421,7 @@ export function useScenePersistence() {
     } catch (e) {
       if (!autoErrShown) {
         autoErrShown = true;
-        flash(tr("notice.autosaveFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
+        flash(tr("notice.autosaveFailed", { error: errorText(e) }), "error");
       }
     }
   }, [api]);
@@ -466,8 +467,8 @@ export function useScenePersistence() {
         }
         return res;
       } catch (e) {
-        flash(tr("notice.exportFailedWith", { error: String(e) }), "error");
-        return { ok: false, error: String(e) };
+        flash(tr("notice.exportFailedWith", { error: errorText(e) }), "error");
+        return { ok: false, error: errorText(e) };
       }
     },
     [api],

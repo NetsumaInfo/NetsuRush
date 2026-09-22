@@ -120,7 +120,6 @@
     "opened": "ouverte",
     "noTimelines": "Aucune timeline dans le projet.",
     "timelines": "Timelines",
-    "addAll": "Tout ajouter",
     "readingShots": "Lecture des plans…",
     "noShotFor": "Aucun plan pour « {{q}} ».",
     "noVideoShots": "Aucun plan vidéo dans cette timeline.",
@@ -171,12 +170,13 @@
     "minus1Frame": "-1 image",
     "plus1Frame": "+1 image",
     "rangeToUpscale": "Plage à upscaler",
-    "durationImg": "{{count}} img",
     "in": "Entrée",
     "out": "Sortie",
     "mark": "Marquer",
     "markAtHead": "Poser à la tête",
-    "img": "img"
+    "img": "img",
+    "durationImg_one": "{{count}} img",
+    "durationImg_other": "{{count}} img"
   },
   "compare": {
     "beforeAfter": "Avant ↔ Après",
@@ -184,8 +184,6 @@
     "reset": "Reset",
     "before": "Avant",
     "after": "Après",
-    "original": "original",
-    "upscaled": "upscalé",
     "originalLabel": "Original",
     "resultLabel": "Résultat",
     "leftModel": "Résultat à gauche",
@@ -214,27 +212,20 @@
   },
   "settings": {
     "sectionCodec": "Codec vidéo",
-    "sectionAudio": "Audio",
     "sectionExport": "Export",
     "sectionShaderTurbo": "Shader GPU",
     "sectionModelIa": "Modèle IA",
-    "rowCodec": "Codec",
-    "rowProfile": "Profil",
-    "rowMode": "Mode",
     "rowUpscaleMode": "Traitement",
     "modeUpscale": "Upscale",
     "modeRestore": "Restauration",
     "restoreModeNote": "Restaure les détails sans upscaler l'image.",
     "upscaleModeNote": "Upscale l'image avec un modèle IA.",
-    "rowBitrate": "Débit",
-    "rowTrack": "Piste",
     "rowFolder": "Dossier",
     "rowImportPool": "Importer au Media Pool",
     "rowOutputName": "Nom de sortie",
     "rowEngine": "Moteur",
     "engineAi": "IA",
     "engineTurbo": "Shader",
-    "rowScale": "Échelle",
     "rowTarget": "Résolution",
     "targetNoneNote": "Aucune cible : le facteur ×{{scale}} s'applique.",
     "targetNativeNote": "Le modèle reconstruit en {{native}}× depuis la source (ramenée à 1080p au-delà), puis le résultat est ajusté à la cible.",
@@ -264,16 +255,12 @@
     "rowDeadFrames": "Doublons",
     "rowColormap": "Palette de couleurs",
     "rowOutput": "Sortie",
-    "groupDiffusion": "Diffusion",
-    "groupEditing": "Montage",
     "shaderGpuNote": "Traitement GPU local — aucun téléchargement manuel.",
     "parallelShaderNote": "Réservé aux shaders légers. L'IA reste séquentielle pour éviter de saturer la VRAM.",
-    "trackLabel": "Piste {{n}} · {{codec}}{{channels}}{{lang}}",
     "choose": "Choisir…",
     "yes": "Oui",
     "no": "Non",
     "advanced": "Avancé",
-    "scale1Note": "Restauration à la taille d'origine (nettoie sans upscaler).",
     "debandNote": "Lisse les bandes visibles dans les dégradés (ciel, ombres). Plus = plus lisse.",
     "grainNote": "Petit bruit ajouté pour casser les bandes restantes.",
     "sharpNote": "Doux = image lissée · Net = contours plus marqués (peut durcir un peu).",
@@ -285,7 +272,6 @@
     "targetFpsFactorOnly": "Facteur seul",
     "deadFramesRemove": "Supprimer",
     "deadFramesKeep": "Conserver",
-    "kbps": "{{n}} kbps",
     "px": "{{n}} px",
     "removeBgHint": "ProRes 4444 s'importe directement dans Resolve avec son alpha.",
     "rtxNote": "RTX VSR upscale exactement ×2 et refuse les sources de 1440p ou plus. Sortie HEVC 10-bit NVENC.",
@@ -298,7 +284,6 @@
     "rowHdrMidGray": "Gris moyen",
     "rowHdrNits": "Luminance crête",
     "hdrParamsNote": "Valeurs par défaut du SDK (125 / 100 / 25 / 1000 nits). La luminance crête est écrite dans les métadonnées du master.",
-    "scaleResampledNote": "Ce modèle reconstruit en {{native}}× ; les autres facteurs redimensionnent sa sortie après coup.",
     "windowedModelNote": "Ce modèle tourne sur un graphe à dimensions figées : seul le recouvrement des fenêtres est réglable.",
     "sectionOutput": "Sortie",
     "outputHint": "Vidéo encodée, ou une image par frame dans un dossier dédié.",
@@ -342,12 +327,14 @@
       "nn": "Rang sur 2 chiffres",
       "nnn": "Rang sur 3 chiffres"
     },
-    "namingCollision": "{{count}} nom produit par plusieurs sources — la seconde sortie écraserait la première.",
     "namingCollisionSources": "{{count}} sources",
     "namingNumber": "Numéroter automatiquement",
-    "namingRenamed": "{{count}} média renommé",
     "namingResetAll": "Réinitialiser",
-    "outputRtxNote": "RTX VSR n'écrit que de la vidéo : choisis un autre moteur pour sortir des images."
+    "outputRtxNote": "RTX VSR n'écrit que de la vidéo : choisis un autre moteur pour sortir des images.",
+    "namingRenamed_one": "{{count}} média renommé",
+    "namingRenamed_other": "{{count}} médias renommés",
+    "namingCollision_one": "{{count}} nom produit par plusieurs sources — la seconde sortie écraserait la première.",
+    "namingCollision_other": "{{count}} noms produits par plusieurs sources — la seconde sortie écraserait la première."
   },
   "deband": {
     "none": "Aucun",
@@ -374,11 +361,6 @@
   },
   "tile": {
     "0": "Auto"
-  },
-  "audio": {
-    "aac": "AAC",
-    "copy": "Copier",
-    "none": "Aucun"
   },
   "depthColor": {
     "gray": "Niveaux de gris"
@@ -523,8 +505,10 @@
     "chainUnavailable": "Chaîne indisponible : {{err}}. Vérifie que le core et le venv sont actifs.",
     "emptyOutputName": "Le motif ne produit aucun nom : ajoute au moins {name} ou un texte.",
     "interpolateNeedsVideo": "L'interpolation a besoin de deux images voisines : une image fixe n'en a pas.",
-    "interpolateSkippedStills": "{{count}} image fixe ignorée : l'interpolation ne s'applique qu'à une vidéo.",
     "chainNeedsVideo": "Une chaîne enchaîne des fichiers vidéo : une image fixe n'y entre pas.",
-    "chainSkippedStills": "{{count}} image fixe ignorée par la chaîne."
+    "chainSkippedStills_one": "{{count}} image fixe ignorée par la chaîne.",
+    "chainSkippedStills_other": "{{count}} images fixes ignorées par la chaîne.",
+    "interpolateSkippedStills_one": "{{count}} image fixe ignorée : l'interpolation ne s'applique qu'à une vidéo.",
+    "interpolateSkippedStills_other": "{{count}} images fixes ignorées : l'interpolation ne s'applique qu'à une vidéo."
   }
 }

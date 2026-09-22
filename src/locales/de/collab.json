@@ -11,7 +11,7 @@
   },
   "device": {
     "title": "Dieses Gerät",
-    "subtitle": "Sein öffentlicher Schlüssel weist dich gegenüber deinen Mitarbeitenden aus. Der private Schlüssel verlässt diesen Rechner nie.",
+    "subtitle": "Sein öffentlicher Schlüssel identifiziert dich bei den Personen, mit denen du zusammenarbeitest. Der private Schlüssel verlässt diesen Rechner nie.",
     "ready": "Geschützte native Identität ist bereit.",
     "unavailable": "Native Zusammenarbeit ist nicht verfügbar.",
     "desktopOnly": "Teilen benötigt die Desktop-Anwendung.",
@@ -21,7 +21,7 @@
   },
   "friends": {
     "title": "Personen",
-    "subtitle": "Über Discord-Namen oder NetsuRush-Kennung hinzufügen. Geteilt wird nur mit jemandem aus dieser Liste.",
+    "subtitle": "Füge Personen über ihren Discord-Namen oder ihre NetsuRush-Kennung hinzu. Geteilt wird nur mit jemandem aus dieser Liste.",
     "yourHandle": "Du: @{{handle}}",
     "placeholder": "Discord-Name oder NetsuRush-Kennung",
     "add": "Hinzufügen",
@@ -76,7 +76,7 @@
     "key_one": "{{count}} neues Mitglied wartet auf den verschlüsselten Zugang. Öffne das Dokument, um den Projektschlüssel zu übergeben.",
     "key_other": "{{count}} neue Mitglieder warten auf den verschlüsselten Zugang. Öffne das Dokument, um den Projektschlüssel zu übergeben."
   },
-  "notConfigured": "Die Anmeldung ist in dieser Installation nicht konfiguriert.",
+  "notConfigured": "Die Anmeldung ist in dieser Installation nicht eingerichtet.",
   "dialog": {
     "title": "Zusammenarbeiten",
     "subtitle": "Wähle die Personen, die du zu diesem Dokument einladen willst.",
@@ -85,8 +85,8 @@
     "create": "Erstellen und einladen",
     "invite": "Einladen",
     "failed": "Teilen fehlgeschlagen.",
-    "mediaMissing_one": "{{count}} Mediendatei nicht auf der Festplatte gefunden: {{names}}. Stelle sie wieder her (Ordner verschoben?) und teile erneut.",
-    "mediaMissing_other": "{{count}} Mediendateien nicht auf der Festplatte gefunden: {{names}}. Stelle sie wieder her (Ordner verschoben?) und teile erneut.",
+    "mediaMissing_one": "{{count}} Mediendatei nicht auf der Festplatte gefunden: {{names}}. Finde sie wieder (Ordner verschoben?) und teile erneut.",
+    "mediaMissing_other": "{{count}} Mediendateien nicht auf der Festplatte gefunden: {{names}}. Finde sie wieder (Ordner verschoben?) und teile erneut.",
     "invited_one": "{{count}} Einladung verschickt.",
     "invited_other": "{{count}} Einladungen verschickt."
   },
@@ -113,7 +113,7 @@
     "deleteWarning": "Treffpunktdaten, Einladungen und verschlüsselte Sicherungen werden für alle Mitglieder gelöscht. Das lässt sich nicht rückgängig machen."
   },
   "sync": {
-    "queued": "Hier warten Änderungen. Sie gehen von selbst raus, sobald ein Gerät erreichbar ist.",
+    "queued": "Hier warten Änderungen. Sobald ein Gerät erreichbar ist, werden sie automatisch gesendet.",
     "upToDate": "Alles ist synchron.",
     "peers_one": "{{count}} erreichbares Gerät",
     "peers_other": "{{count}} erreichbare Geräte"
@@ -126,14 +126,15 @@
     "neverSeen": "Nie verbunden",
     "seenMinutes": "Vor {{count}} Min.",
     "seenHours": "Vor {{count}} Std.",
-    "seenDays": "Vor {{count}} T.",
+    "seenDays": "Vor {{count}} Tg.",
     "invited": "Eingeladen",
     "unknownMember": "Mitglied",
     "queued": "Warten auf Versand.",
     "upToDate": "Alles gesendet.",
     "rotation": "Neuer Schlüssel nötig. Der Eigentümer muss die App öffnen.",
-    "waitingKey": "{{count}} warten auf den Schlüssel. Bleib online.",
-    "nobodyReachable": "Niemand online. Nichts wurde gesendet."
+    "nobodyReachable": "Niemand online. Nichts wurde gesendet.",
+    "waitingKey_one": "Warten auf den Schlüssel: {{count}}. Bleib online.",
+    "waitingKey_other": "Warten auf den Schlüssel: {{count}}. Bleib online."
   },
   "board": {
     "noScene": "Speichere dieses Board zuerst in der Szenenbibliothek.",

@@ -21,7 +21,6 @@
     "jobsQueued_one": "キューに {{count}} ジョブ",
     "jobsQueued_other": "キューに {{count}} ジョブ",
     "settingsRead": "パフォーマンス設定を読み込み済み",
-    "cacheProxyKeys": "キャッシュ/プロキシ {{count}} キー",
     "noCacheFolder": "キャッシュフォルダーを自動検出できません",
     "database": "データベース",
     "dbBig": "{{name}}・肥大化 → 分割を",
@@ -29,15 +28,16 @@
     "dbRemote": "PostgreSQL",
     "dbMissing": "見つかりません",
     "cacheFoldersDetected_one": "キャッシュフォルダー {{count}} 件を検出",
-    "cacheFoldersDetected_other": "キャッシュフォルダー {{count}} 件を検出"
+    "cacheFoldersDetected_other": "キャッシュフォルダー {{count}} 件を検出",
+    "cacheProxyKeys_one": "キャッシュ/プロキシ {{count}} キー",
+    "cacheProxyKeys_other": "キャッシュ/プロキシ {{count}} キー"
   },
   "memory": {
     "title": "セッションのメモリー",
-    "measuring": "計測中 — 1分ほどで推移を表示します。",
+    "measuring": "計測中です。1分ほどで推移を表示します。",
     "drift": "Resolve.exe：{{now}}・{{elapsed}} で {{drift}}",
     "driftDown": "Resolve.exe：{{now}}・{{elapsed}} 安定",
     "vram": "VRAM：{{used}} / {{total}} GB",
-    "verdictOk": "セッションは良好です。",
     "verdictWatch": "Resolve が重くなっています。プロジェクトを再読み込みするとタイムラインの RAM が戻ります。",
     "verdictHigh": "セッションがかなり重い状態です。VRAM と Fusion キャッシュは再起動でしか戻りません。",
     "reload": "プロジェクトを再読み込み",
@@ -61,14 +61,13 @@
     "apply": "適用して再起動",
     "reset": "取り消し",
     "applyBody": "プロジェクトを保存し、現在の構成をバックアップし、Resolve を閉じて環境設定を書き込み、「{{project}}」で開き直します。1〜2分かかります。レンダリング中は避けてください。",
-    "applyDone_one": "設定 {{count}} 件を適用 — Resolve を再起動しました。",
-    "applyDone_other": "設定 {{count}} 件を適用 — Resolve を再起動しました。",
-    "applyNoRestart": "設定を書き込みました。Resolve を開き直せません：{{error}}",
+    "applyDone_one": "設定 {{count}} 件を適用し、Resolve を再起動しました。",
+    "applyDone_other": "設定 {{count}} 件を適用し、Resolve を再起動しました。",
+    "applyNoRestart": "設定を書き込みました。Resolve を開き直せませんでした：{{error}}",
     "backups": "バックアップ",
     "backupsHint": "適用前の構成です。Resolve を閉じた状態で復元できます。",
     "restore": "復元",
     "restoreDone": "構成を復元しました。反映には Resolve を再起動してください。",
-    "noBackups": "バックアップなし — 最初の適用時に作成されます。",
     "on": "オン",
     "off": "オフ",
     "items": {
@@ -95,12 +94,12 @@
       "hwDecode": {
         "label": "H.264/H.265 のハードウェアデコード",
         "where": "環境設定 ▸ システム ▸ デコードオプション",
-        "body": "デコードを GPU に任せます。8bit 4:2:0 では安定、4:2:2 と 4:4:4 はカード次第。ノイズが出るならオフに。"
+        "body": "デコードを GPU に任せます。8bit 4:2:0 では安定、4:2:2 と 4:4:4 はカード次第です。映像の乱れが出る場合はオフにしてください。"
       },
       "liveSave": {
         "label": "ライブ保存",
         "where": "環境設定 ▸ ユーザー ▸ 保存および読み込み",
-        "body": "編集のたびに保存します。マニュアルも推奨し、影響はごくわずかとしています。報告されている遅さはネットワークや低速ストレージでのもの。ローカル SSD ならオンのままで。"
+        "body": "編集のたびに保存します。マニュアルも推奨し、影響はごくわずかとしています。報告されている遅さはネットワークや低速ストレージでのもの。ローカル SSD ならオンのままにしてください。"
       },
       "timelineBackups": {
         "label": "タイムラインのバックアップ",
@@ -114,7 +113,7 @@
   "gpu": {
     "title": "GPU / CPU / RAM モニター",
     "free": "解放",
-    "saturated": "{{what}}が上限間近 — クラッシュの恐れ。今すぐ解放か再読み込みを。",
+    "saturated": "{{what}}が限界に達しています。クラッシュのおそれがあります。今すぐ解放するか、再読み込みしてください。",
     "vramUnreadable": "このドライバーでは VRAM を表示できません。処理機能は引き続き利用できます。",
     "ramSystem": "システム RAM",
     "resolveRam": "Resolve.exe：{{size}}",
@@ -127,7 +126,7 @@
   },
   "process": {
     "title": "重いプロセス（PC 全体）",
-    "cleanBlocked": "停止中を整理",
+    "cleanBlocked": "応答なしを整理",
     "scan": "スキャン",
     "colProcess": "プロセス",
     "colAction": "操作",
@@ -136,24 +135,23 @@
     "kill": "終了",
     "noneListed": "プロセスなし（Windows のみ）。",
     "killed": "{{name}}（PID {{pid}}）を終了しました。",
-    "noneBlocked": "整理する停止中のプロセスはありません。",
+    "noneBlocked": "整理する応答なしのプロセスはありません。",
     "killTitle": "{{name}} を終了しますか？",
-    "killForced": "強制終了 — 未保存の作業は失われます。",
-    "cleanBody": "フリーズしたプログラム（「応答なし」）です。強制終了 — 未保存の作業は失われます。",
+    "killForced": "強制終了します。未保存の作業は失われます。",
+    "cleanBody": "フリーズしたプログラム（「応答なし」）です。強制終了するため、未保存の作業は失われます。",
     "clean": "整理",
-    "cleaned_one": "停止中のプロセス {{count}} 件を整理しました。",
-    "cleaned_other": "停止中のプロセス {{count}} 件を整理しました。",
-    "cleanTitle_one": "停止中のプロセス {{count}} 件を整理しますか？",
-    "cleanTitle_other": "停止中のプロセス {{count}} 件を整理しますか？"
+    "cleaned_one": "応答なしのプロセス {{count}} 件を整理しました。",
+    "cleaned_other": "応答なしのプロセス {{count}} 件を整理しました。",
+    "cleanTitle_one": "応答なしのプロセス {{count}} 件を整理しますか？",
+    "cleanTitle_other": "応答なしのプロセス {{count}} 件を整理しますか？"
   },
   "watchdog": {
     "title": "メモリー監視",
-    "idle": "待機中 — レンダリングまたはエンコード中に有効になります。",
+    "idle": "待機中です。レンダリングまたはエンコード中に有効になります。",
     "armed": "有効：{{source}}が進行中です。",
     "on": "オン",
     "off": "オフ",
-    "gauges": "空きRAM {{ram}} % ・ VRAM使用 {{vram}} %",
-    "lastPurge": "{{freed}} をマシンに返しました（{{count}} 件のタスクを軽量化）。",
+    "gauges": "空きRAM {{ram}} %・VRAM使用 {{vram}} %",
     "suggestTitle": "解放だけでは足りません",
     "suggestBody": "これらのバックグラウンドタスクは、解放しても戻らないメモリーを占有しています。停止するかどうかはご判断ください。",
     "stopThem_one": "このタスクを停止",
@@ -163,12 +161,14 @@
       "export": "書き出し",
       "proxy": "プロキシのエンコード",
       "render": "レンダリング"
-    }
+    },
+    "lastPurge_one": "{{freed}} をマシンに返しました（{{count}} 件のタスクを軽量化）。",
+    "lastPurge_other": "{{freed}} をマシンに返しました（{{count}} 件のタスクを軽量化）。"
   },
   "noise": {
     "title": "不要なバックグラウンドタスク",
-    "subtitle": "アップデーター、オーバーレイ、同期 — 常時稼働し、編集中には役立ちません。",
-    "scan": "解析",
+    "subtitle": "アップデーター、オーバーレイ、同期。常に動いていますが、編集中は使いません。",
+    "scan": "スキャン",
     "none": "不要なバックグラウンドタスクは見つかりませんでした。",
     "stop_one": "停止（{{count}}）",
     "stop_other": "停止（{{count}}）",
@@ -195,13 +195,14 @@
     "rescan": "再スキャン",
     "folder": "フォルダー：{{path}}",
     "disk": "ディスク：空き {{free}} / {{total}}",
-    "diskFull": "ディスクがほぼ満杯 — Resolve が固まる恐れ。",
+    "diskFull": "ディスクがほぼいっぱいです。Resolve が固まるおそれがあります。",
     "noneFound": "ここに Resolve のキャッシュはありません。",
     "cleanSelection": "選択項目を削除（{{size}}）",
     "confirmTitle": "これらのキャッシュを削除しますか？",
     "confirmBody": "{{size}} 解放されます。先に Resolve を閉じてください。削除される内容（必要時に再生成）：",
-    "freed": "{{size}} 解放（フォルダー {{count}} 件）。",
-    "cleanFailed": "失敗：{{error}}"
+    "cleanFailed": "失敗：{{error}}",
+    "freed_one": "{{size}} 解放（フォルダー {{count}} 件）。",
+    "freed_other": "{{size}} 解放（フォルダー {{count}} 件）。"
   },
   "stop": {
     "title": "タスクを停止",
@@ -232,7 +233,7 @@
       "effectsheavy": {
         "title": "エフェクトとカラーの重ね掛け",
         "where": "再生 ▸ レンダーキャッシュ ▸ スマート",
-        "body": "効くのはタイムラインごとの負荷で、タイムラインの数ではありません。スマートキャッシュが重いノードを自動でキャッシュします。"
+        "body": "負担になるのはタイムラインごとの負荷で、タイムラインの数ではありません。スマートキャッシュが重いノードを自動でキャッシュします。"
       },
       "mercurygpu": {
         "title": "ソフトウェアレンダリングエンジン",
@@ -252,7 +253,7 @@
       "cacheotherdisk": {
         "title": "素材と同じドライブのキャッシュ",
         "where": "環境設定 ▸ スクラッチディスク",
-        "body": "キャッシュとメディアが同じボリュームにあると同じ読み取りを奪い合います。分けるのは設定ひとつで、効果はすぐ体感できます。"
+        "body": "キャッシュとメディアが同じボリュームにあると、同じ読み取りヘッドを奪い合います。分けるのは設定ひとつで、効果はすぐ体感できます。"
       },
       "diskcachessd": {
         "title": "ディスクキャッシュを SSD に",
@@ -279,7 +280,7 @@
   "boost": {
     "degraded": {
       "title": "NetsuRush 拡張機能が接続されていません",
-      "body": "ディスクキャッシュ、空き容量、Adobe プロセスは引き続き確認できます。消去、設定、プロキシにはアプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。"
+      "body": "ディスクキャッシュ、空き容量、Adobe プロセスは引き続き確認できます。消去、設定、プロキシには、アプリケーションを開いて NetsuRush 拡張機能を表示しておく必要があります。"
     },
     "status": {
       "installed": "インストール済み",
@@ -292,8 +293,8 @@
       "panelSilent": "応答なし",
       "panelInstalled": "拡張機能をインストールしました。アプリケーションを再起動してください",
       "installPanel": "拡張機能をインストール",
-      "panelHint": "アプリケーションを開き、ウィンドウ ▸ 拡張機能 ▸ NetsuRush を選択してください。",
-      "uxpHint": "Premiere Pro {{year}} は UXP を先に読み込みます。ウィンドウ ▸ 拡張機能に出ない場合は入れ直して再起動してください。",
+      "panelHint": "アプリケーションを開き、ウィンドウ ▸ エクステンション ▸ NetsuRush を選択してください。",
+      "uxpHint": "Premiere Pro {{year}} は UXP を先に読み込みます。ウィンドウ ▸ エクステンションに出ない場合は、再インストールしてから再起動してください。",
       "caches": "キャッシュ",
       "cacheFolders_one": "{{count}} 個のフォルダーを検出",
       "cacheFolders_other": "{{count}} 個のフォルダーを検出",
@@ -311,8 +312,8 @@
       "ageDays": "{{days}} 日以上",
       "shared": "共有",
       "notRegenerable": "再生成不可",
-      "slowRebuild": "再適合に時間",
-      "dbWarning": "キャッシュデータベースを空にすると、次回起動時に Adobe がすべてのメディアを再適合します。時間がかかり、設定では短縮できません。",
+      "slowRebuild": "再コンフォームに時間",
+      "dbWarning": "キャッシュデータベースを空にすると、次回起動時に Adobe がすべてのメディアを再コンフォームします。時間がかかり、設定では短縮できません。",
       "autoSaveWarning": "自動保存はキャッシュではなく作業のバージョンです。削除すると戻せません。",
       "closePurgeReopen": "終了 → 消去 → 再起動",
       "cleanSelection": "選択項目を削除（{{size}}）",
@@ -363,7 +364,7 @@
     "purge": {
       "title": "消去",
       "subtitle": "NetsuRush 拡張機能がアプリケーション内で実行する操作です。",
-      "needsPanel": "アプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。",
+      "needsPanel": "アプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ エクステンション ▸ NetsuRush）。",
       "memoryInUse": "After Effects が使用中",
       "targets": {
         "memory": "RAM を消去",
@@ -398,7 +399,7 @@
     "prefs": {
       "title": "パフォーマンス設定",
       "subtitle": "パネルが直接読み書きします。アプリの終了もファイルの改変もありません。",
-      "needsPanel": "アプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。",
+      "needsPanel": "アプリケーションを開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ エクステンション ▸ NetsuRush）。",
       "warn": "要修正",
       "advisory": "環境依存",
       "volatile": "非永続",
@@ -429,7 +430,7 @@
         },
         "maxMemPct": {
           "label": "最大メモリ",
-          "body": "After Effects が自身に許可するマシンの RAM の割合です。"
+          "body": "After Effects が使ってよいマシンの RAM の割合です。"
         },
         "mfrEnabled": {
           "label": "マルチフレームレンダリング",
@@ -460,7 +461,7 @@
     "proxy": {
       "title": "添付プロキシ",
       "summary": "{{total}} 件中 {{withProxy}} 件にプロキシがあります",
-      "needsPanel": "Premiere Pro を開き NetsuRush 拡張機能を表示する必要があります（ウィンドウ ▸ 拡張機能 ▸ NetsuRush）。",
+      "needsPanel": "Premiere Pro を開き、NetsuRush 拡張機能を表示しておく必要があります。",
       "useProxies": "プロキシで再生",
       "rescan": "再スキャン",
       "has": "プロキシ",
@@ -471,9 +472,10 @@
       "generate_other": "生成して添付（{{count}}）",
       "attached_one": "{{count}} 件のプロキシを添付しました",
       "attached_other": "{{count}} 件のプロキシを添付しました",
-      "attachedPartial": "{{count}} 件のプロキシを添付、{{missed}} 件が失敗しました",
       "encodeFailed_one": "{{count}} 件の素材をエンコードできませんでした",
-      "encodeFailed_other": "{{count}} 件の素材をエンコードできませんでした"
+      "encodeFailed_other": "{{count}} 件の素材をエンコードできませんでした",
+      "attachedPartial_one": "{{count}} 件のプロキシを添付、{{missed}} 件が失敗しました",
+      "attachedPartial_other": "{{count}} 件のプロキシを添付、{{missed}} 件が失敗しました"
     }
   }
 }

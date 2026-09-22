@@ -11,8 +11,8 @@
   },
   "device": {
     "title": "このデバイス",
-    "subtitle": "公開鍵が共同編集者に対する身元になります。秘密鍵はこのマシンから出ません。",
-    "ready": "保護されたネイティブ識別情報は準備できています。",
+    "subtitle": "公開鍵は共同編集者からの本人確認に使われます。秘密鍵がこのマシンの外に出ることはありません。",
+    "ready": "ネイティブ ID は保護され、準備ができています。",
     "unavailable": "ネイティブのコラボレーションは利用できません。",
     "desktopOnly": "共有にはデスクトップアプリが必要です。",
     "unnamed": "NetsuRush デバイス",
@@ -20,22 +20,22 @@
     "revoke": "このデバイスを失効させる"
   },
   "friends": {
-    "title": "相手",
-    "subtitle": "Discord ユーザー名または NetsuRush ハンドルで追加します。共有できるのはこの一覧の相手だけです。",
-    "yourHandle": "あなた: @{{handle}}",
-    "placeholder": "Discord ユーザー名または NetsuRush ハンドル",
+    "title": "共有相手",
+    "subtitle": "Discord ユーザー名または NetsuRush ID で追加します。共有できるのはこの一覧の相手だけです。",
+    "yourHandle": "自分：@{{handle}}",
+    "placeholder": "Discord ユーザー名または NetsuRush ID",
     "add": "追加",
     "accept": "承認",
     "remove": "削除",
     "awaiting": "保留中",
     "empty": "まだ誰もいません。",
-    "notYetJoined": "まだ未登録",
+    "notYetJoined": "未登録",
     "status": {
       "sent": "リクエストを送信しました。",
       "linked": "つながりました。",
       "pending": "送信済みです。",
       "already": "すでに一覧にあります。",
-      "self": "それはあなたです。",
+      "self": "自分自身です。",
       "unknown": "該当する人がいません。ユーザー名を確認するか、Discord ID を貼り付けてください。",
       "ambiguous": "複数の候補があります。Discord ID を使ってください。",
       "error": "検索できませんでした。もう一度お試しください。",
@@ -63,11 +63,11 @@
       "editor": "編集可能",
       "viewer": "閲覧のみ"
     },
-    "absent_one": "このマシンにない共有: {{count}} 件",
-    "absent_other": "このマシンにない共有: {{count}} 件"
+    "absent_one": "このマシンにないドキュメント：{{count}} 件",
+    "absent_other": "このマシンにないドキュメント：{{count}} 件"
   },
   "activity": {
-    "title": "コラボレーションの動き",
+    "title": "コラボレーションのアクティビティ",
     "dismiss": "非表示",
     "changed_one": "不在中に {{count}} 人がドキュメントを変更しました。開いて変更を取得してください。",
     "changed_other": "不在中に {{count}} 人がドキュメントを変更しました。開いて変更を取得してください。",
@@ -76,7 +76,7 @@
     "key_one": "{{count}} 人の新しいメンバーが暗号化アクセスを待っています。ドキュメントを開いてプロジェクト鍵を渡してください。",
     "key_other": "{{count}} 人の新しいメンバーが暗号化アクセスを待っています。ドキュメントを開いてプロジェクト鍵を渡してください。"
   },
-  "notConfigured": "このインストールではサインインが設定されていません。",
+  "notConfigured": "この環境ではサインインが設定されていません。",
   "dialog": {
     "title": "共同編集",
     "subtitle": "このドキュメントに招待する相手を選びます。",
@@ -85,8 +85,8 @@
     "create": "作成して招待",
     "invite": "招待",
     "failed": "共有に失敗しました。",
-    "mediaMissing_one": "ディスク上に見つからないメディアが {{count}} 件あります: {{names}}。復元してから（フォルダーを移動しましたか？）もう一度共有してください。",
-    "mediaMissing_other": "ディスク上に見つからないメディアが {{count}} 件あります: {{names}}。復元してから（フォルダーを移動しましたか？）もう一度共有してください。",
+    "mediaMissing_one": "ディスク上に見つからないメディアが {{count}} 件あります：{{names}}。場所を確認してから（フォルダーを移動しましたか？）、もう一度共有してください。",
+    "mediaMissing_other": "ディスク上に見つからないメディアが {{count}} 件あります：{{names}}。場所を確認してから（フォルダーを移動しましたか？）、もう一度共有してください。",
     "invited_one": "招待を {{count}} 件送りました。",
     "invited_other": "招待を {{count}} 件送りました。"
   },
@@ -131,9 +131,10 @@
     "unknownMember": "メンバー",
     "queued": "送信待ちです。",
     "upToDate": "すべて送信済みです。",
-    "rotation": "新しい鍵が必要です。所有者がアプリを開いてください。",
-    "waitingKey": "{{count}} 人が鍵を待っています。オンラインのままにしてください。",
-    "nobodyReachable": "オンラインの人がいません。まだ送信されていません。"
+    "rotation": "新しい鍵が必要です。オーナーがアプリを開く必要があります。",
+    "nobodyReachable": "オンラインの人がいません。まだ送信されていません。",
+    "waitingKey_one": "{{count}} 人が鍵を待っています。オンラインのままにしてください。",
+    "waitingKey_other": "{{count}} 人が鍵を待っています。オンラインのままにしてください。"
   },
   "board": {
     "noScene": "先にこのボードをシーンライブラリに保存してください。",

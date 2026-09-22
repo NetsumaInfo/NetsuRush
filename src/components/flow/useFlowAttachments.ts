@@ -11,6 +11,7 @@ import { useCallback, useState } from "react";
 import type { ChatImage } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { fmtBytes } from "@/lib/utils";
+import { errorText } from "@/lib/errorText";
 
 export type Attachment =
   | { kind: "image"; name: string; mediaType: string; data: string }
@@ -76,7 +77,7 @@ export function useFlowAttachments() {
           setError(i18n.t("flow:attachUnsupported", { name: file.name }));
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
+        setError(errorText(e));
       }
     }
     if (accepted.length) setFiles((list) => [...list, ...accepted]);

@@ -18,7 +18,7 @@
 // Keys are encrypted at rest through Stronghold and pushed to the core in RAM;
 // the core never reads the vault.
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Check, Clapperboard, Download, Eye, EyeOff, ExternalLink, KeyRound, LogIn, RefreshCw, ShieldAlert, Terminal, X } from "lucide-react";
 
 import { useApp } from "@/store";
@@ -415,7 +415,7 @@ export function ChatSettings({ onClose }: { onClose: () => void }) {
             </div>
             {cli.length === 0 ? (
               <div className="text-xs text-muted-foreground">
-                {t("settings.noAgentsPre")}<code>claude</code>/<code>codex</code>{t("settings.noAgentsPost")}
+                <Trans t={t} i18nKey="settings.noAgents" components={[<code key="claude" />, <code key="codex" />]} />
               </div>
             ) : cli.map((agent) => (
               <AgentRow key={agent.id} agent={agent} onRescan={() => void rescan()} />

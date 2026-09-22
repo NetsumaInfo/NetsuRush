@@ -1,6 +1,6 @@
 {
   "editor": {
-    "uploadFailed": "ファイルを送信できません",
+    "uploadFailed": "ファイルをアップロードできませんでした",
     "dateToday": "今日の日付",
     "createNamed": "「{{name}}」を作成"
   },
@@ -13,17 +13,17 @@
     "newNotebook": "新規ノートブック",
     "editNotebook": "このノートブックを編集",
     "importMarkdown": "Markdown を読み込み…",
-    "exportNetsu": "書き出し (.netsu)",
-    "importNetsu": "読み込み (.netsu)",
+    "exportNetsu": "書き出し（.netsu）",
+    "importNetsu": "読み込み（.netsu）",
     "deleteNotebook": "このノートブックを削除",
-    "collapseSidebar": "サイドバーを閉じる (Ctrl+\\)",
-    "expandSidebar": "サイドバーを表示 (Ctrl+\\)",
+    "collapseSidebar": "サイドバーを閉じる（Ctrl+\\）",
+    "expandSidebar": "サイドバーを表示（Ctrl+\\）",
     "search": "検索",
     "newPage": "新規ページ",
     "pages": "ページ",
     "trash": "ゴミ箱",
     "settings": "設定",
-    "emptyNotebookHint": "まずノートブックを作成します。",
+    "emptyNotebookHint": "まずノートブックを作成してください。",
     "emptyTitleHasNb": "白紙のページがあります",
     "emptyTitleNoNb": "ノートブックへようこそ",
     "emptyBodyHasNb": "メモ、構成、下書き、データベース。思いつくままに書けます。",
@@ -35,7 +35,7 @@
     "confirmTrashDesc": "「{{name}}」と下位ページがゴミ箱に移動します（復元できます）。",
     "sendToTrash": "ゴミ箱に入れる",
     "saveAsProject": "名前を付けて保存…",
-    "openProject": "ノートを開く…"
+    "openProject": "ノートブックを開く…"
   },
   "blocks": {
     "bookmark": {
@@ -392,7 +392,7 @@
     "style": "コールアウトのスタイル"
   },
   "window": {
-    "detach": "ノートを切り離す",
+    "detach": "ノートブックを切り離す",
     "unpin": "最前面表示を解除",
     "alwaysOnTop": "常に最前面",
     "stopAlwaysOnTop": "最前面表示をやめる",
@@ -464,8 +464,8 @@
       "toggleSidebar": "サイドバーを表示／非表示"
     },
     "spellcheck": "スペルチェック",
-    "spellcheckHint": "誤りに下線を引きます。右クリックまたは Ctrl+. で修正",
-    "spellUnsupported": "この言語の辞書はありません — ネイティブの下線のみ",
+    "spellcheckHint": "誤りに下線を引きます。右クリックまたは Ctrl+. で修正できます",
+    "spellUnsupported": "この言語の辞書はありません — 標準の下線表示のみです",
     "spellOn": "オン",
     "spellOff": "オフ",
     "personalDictionary": "ユーザー辞書",
@@ -586,13 +586,13 @@
     }
   },
   "meta": {
-    "name": "ノート名",
+    "name": "ノートブック名",
     "type": "種類",
     "languageLabel": "言語",
     "kind": {
       "notes": "ノート",
       "project": "プロジェクト",
-      "script": "脚本",
+      "script": "スクリプト",
       "research": "調査",
       "journal": "日記"
     },
@@ -606,9 +606,9 @@
     }
   },
   "create": {
-    "title": "ノートを作成",
+    "title": "ノートブックを作成",
     "description": "名前、種類、言語を設定します。後から変更できます。",
-    "namePlaceholder": "ノート名…",
+    "namePlaceholder": "ノートブック名…",
     "cancel": "キャンセル",
     "submit": "作成"
   },

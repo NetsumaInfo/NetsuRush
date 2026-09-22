@@ -6,7 +6,7 @@
     "duplicate": "Duplicate",
     "duplicateProfile": "Duplicate profile",
     "deleteProfile": "Delete profile",
-    "cardButton": "Card button",
+    "cardButton": "Thumbnail button",
     "menuLabel": "Export profile"
   },
   "editor": {
@@ -66,8 +66,8 @@
       "date": "Date",
       "time": "Time"
     },
-    "mergeGap": "Black pause",
-    "mergeGapHint": "Duration of the black inserted between each merged shot",
+    "mergeGap": "Black gap",
+    "mergeGapHint": "Duration of black inserted between merged shots",
     "seconds": "s"
   },
   "encoder": {
@@ -111,8 +111,7 @@
     "trackGroup": "Track",
     "trackN": "Track {{n}}",
     "langResolved": "{{lang}} → Track {{n}}",
-    "langUnresolved": "{{lang}} → no track found",
-    "timelineHint": "Resolve imports all the audio or none of it."
+    "langUnresolved": "{{lang}} → no track found"
   },
   "iconPicker": {
     "search": "Search icons…",
@@ -126,7 +125,7 @@
     "tabImages": "Images"
   },
   "notice": {
-    "cancelled": "Export cancelled: no destination chosen.",
+    "cancelled": "Export canceled: no destination chosen.",
     "merging": "Merging…",
     "exporting": "Exporting…",
     "exported_one": "{{count}} file exported ({{profile}}) → {{dir}}{{failed}}",

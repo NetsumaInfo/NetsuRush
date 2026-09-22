@@ -1,14 +1,14 @@
 {
   "header": {
     "title": "Export to After Effects",
-    "subtitle": "Rebuilds a timeline as a faithful After Effects comp (positions, tracks, frame-accurate) with a generated script."
+    "subtitle": "Faithfully rebuilds the timeline as an After Effects composition: positions, tracks and frame-accurate cuts."
   },
   "result": {
     "scriptPrefix": "Script: {{name}}",
     "imported": "Imported into After Effects (check the Project panel).",
-    "launching": "After Effects is starting — it'll import on launch (needs an open project).",
-    "clipsDone_one": "{{count}} shot → \"{{comp}}\" comp.",
-    "clipsDone_other": "{{count}} shots → \"{{comp}}\" comp.",
+    "launching": "After Effects is starting — import runs automatically on launch (needs an open project).",
+    "clipsDone_one": "{{count}} shot → “{{comp}}” comp.",
+    "clipsDone_other": "{{count}} shots → “{{comp}}” comp.",
     "missing_one": "{{count}} shot skipped: its file is missing.",
     "missing_other": "{{count}} shots skipped: their files are missing."
   },

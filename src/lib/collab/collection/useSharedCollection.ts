@@ -7,6 +7,7 @@ import { getCollabCadence, subscribeCollabPreferences } from "../preferences";
 import { setCurrentCollabProject, releaseCollabProject } from "../currentProject";
 import type { ProjectRole, SurfaceEntryProjection } from "../types";
 import { collectionBackend, rememberCollectionRole } from "./session";
+import { errorText } from "@/lib/errorText";
 
 type Access = { userId: string; role: ProjectRole; canDeleteOthers: boolean;
   entries: Array<{ entryId: string; contributorId: string; removed: boolean }> };
@@ -41,7 +42,7 @@ export function useSharedCollection(local: Collection | null) {
     let forced = false;
     let roster: Access | undefined;
     let starting = false;
-    const failed = (cause: unknown) => { if (!disposed) setError(cause instanceof Error ? cause.message : String(cause)); };
+    const failed = (cause: unknown) => { if (!disposed) setError(errorText(cause)); };
     const refresh = async () => {
       if (disposed || !lease || !roster) return;
       if (running) { queued = true; return; }

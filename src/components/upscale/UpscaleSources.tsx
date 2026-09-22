@@ -20,6 +20,7 @@ import { THUMB_AUTO } from "@/lib/utils";
 import { srcKey, type ProcController } from "./useProcSources";
 import type { UpSource } from "./upscaleShared";
 import { useTranslation } from "react-i18next";
+import { errorText } from "@/lib/errorText";
 
 // Vignette compacte (16:9, ~56px). LazyThumb = chargée seulement à l'approche de l'écran
 // (IntersectionObserver + cache) → un gros Media Pool / une longue timeline ne floode plus /rpc
@@ -246,7 +247,7 @@ export function UpscaleSources({ up }: { up: ProcController }) {
         if (r.ok) { setTimelines(r.timelines || []); setTlCached(!!r.cached); if (cached) setTlLoading(false); }
         else if (!cached) setTlErr(r.error || t("sources.resolveUnavailable"));
       },
-    ).catch((e) => setTlErr(String(e))).finally(() => setTlLoading(false));
+    ).catch((e) => setTlErr(errorText(e))).finally(() => setTlLoading(false));
   };
   // Charge les timelines au 1er passage en mode Timeline (et si vide). Tenté même hôte FERMÉ : le core
   // sert alors la liste cachée (snapshot) → le navigateur de timelines reste ouvrable hors ligne.
@@ -267,7 +268,7 @@ export function UpscaleSources({ up }: { up: ProcController }) {
           if (cached) setCutsLoading(false);
         },
       );
-    } catch (e) { setTlErr(String(e)); }
+    } catch (e) { setTlErr(errorText(e)); }
     finally { setCutsLoading(false); }
   }
 

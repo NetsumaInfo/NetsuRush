@@ -17,7 +17,7 @@
     "realLower": "real",
     "animeLower": "animación",
     "download": "Descargar",
-    "hint": "Real: YuNet + SFace (~40 MB). Anime: CCIP (~120 MB). También en Ajustes › Modelos."
+    "hint": "Real: YuNet + SFace (~40 MB). Animación: CCIP (~120 MB). También en Ajustes › Modelos."
   },
   "faceIndexPicker": {
     "title": "Elegir los clips donde indexar las caras",
@@ -31,13 +31,13 @@
     "facesShort_other": "{{count}} caras",
     "notIndexed": "sin indexar",
     "parallel": "Paralelo",
-    "parallelHint": "Procesar varios brutos a la vez, tantos como permita la VRAM libre",
+    "parallelHint": "Procesar varios clips a la vez, tantos como permita la VRAM libre",
     "reindex": "Reindexar",
-    "reindexHint": "Vuelve a localizar las caras, incluso en brutos ya hechos",
+    "reindexHint": "Vuelve a localizar las caras, incluso en los clips ya procesados",
     "indexFaces": "Indexar las caras"
   },
   "indexPicker": {
-    "title": "Elegir los clips a indexar",
+    "title": "Elegir los clips que indexar",
     "todo": "Pendiente",
     "all": "Todo",
     "deselect": "Deseleccionar",
@@ -55,9 +55,9 @@
     "detail": "Detalle:",
     "detailHint": "Fotogramas analizados por plano. Más alto: la búsqueda encuentra más, la indexación tarda más.",
     "parallel": "Paralelo",
-    "parallelHint": "Procesar varios brutos a la vez, tantos como permita la VRAM libre",
+    "parallelHint": "Procesar varios clips a la vez, tantos como permita la VRAM libre",
     "reindex": "Reindexar",
-    "reindexHint": "Rehace el índice aunque el bruto ya esté hecho, buscando más tiempo las imágenes ilegibles",
+    "reindexHint": "Rehace el índice aunque el clip ya esté indexado, buscando más tiempo las imágenes ilegibles",
     "index": "Indexar"
   },
   "faceHubDialog": {
@@ -77,9 +77,9 @@
     "indexRushAria": "Indexar clips",
     "indexingPlans": "Planos en curso…",
     "index": "Indexar",
-    "indexTooltip": "Cortar los brutos en planos y analizarlos para la búsqueda",
+    "indexTooltip": "Cortar clips en planos y analizarlos para la búsqueda",
     "indexFacesAria": "Indexar las caras",
-    "faces": "Rostros",
+    "faces": "Caras",
     "indexingFaces": "Caras en curso…",
     "indexFacesTooltip": "Localiza las caras plano a plano. Puede ejecutarse a la vez que la indexación de planos"
   },
@@ -123,7 +123,7 @@
   "rosterPanel": {
     "colorLabel": "Color del personaje",
     "namePlaceholder": "Nombre del personaje",
-    "tagsPlaceholder": "Tags (separados por comas)",
+    "tagsPlaceholder": "Etiquetas (separadas por comas)",
     "notesPlaceholder": "Notas…",
     "samplesUnavailable": "No disponible — reinicia la app.",
     "samplesEmpty": "Ninguna cara. Añade desde «Detectadas».",
@@ -141,7 +141,7 @@
     "searchInRushes": "Buscar en los clips",
     "recognizedShots": "Planos ya reconocidos",
     "savedFaces": "Caras guardadas",
-    "edit": "Editar (color, tags, notas)",
+    "edit": "Editar (color, etiquetas, notas)",
     "select": "Seleccionar",
     "deselect": "Deseleccionar",
     "mergeDuplicateHere": "Fusionar un duplicado aquí…",
@@ -170,17 +170,18 @@
     "noIndexedRushes": "Ningún clip indexado. Indexa clips para poder elegir una referencia.",
     "noRushMatch": "Ningún clip coincide con «{{query}}».",
     "noShots": "Ningún plano indexado para este clip.",
-    "loadingMore": "Cargando… ({{count}} restantes)",
     "removeFromRefs": "Quitar de las referencias",
     "addAsRef": "Añadir como referencia",
     "previewAria": "Vista previa del plano",
     "selectedCount_one": "{{count}} referencia seleccionada",
     "selectedCount_other": "{{count}} referencias seleccionadas",
-    "done": "Listo"
+    "done": "Listo",
+    "loadingMore_one": "Cargando… ({{count}} restante)",
+    "loadingMore_other": "Cargando… ({{count}} restantes)"
   },
   "faceRefPicker": {
     "title": "Búsqueda por cara",
-    "hint": "Añade fotos del personaje y luego haz clic en la cara a buscar. Más caras, resultado más fiable.",
+    "hint": "Añade fotos del personaje y luego haz clic en la cara que quieres buscar. Más caras, resultado más fiable.",
     "addImage": "Añadir una imagen",
     "clearImages": "Vaciar",
     "noFaceDetected": "Ninguna cara detectada — se usa la imagen entera.",
@@ -228,7 +229,6 @@
     "relevanceThresholdTooltip": "Umbral de relevancia",
     "selSuffix_one": " · {{count}} sel.",
     "selSuffix_other": " · {{count}} sel.",
-    "selectAllAria": "Seleccionar todo",
     "selectAllTooltip": "Seleccionar todo",
     "sendToBoardAria": "Enviar al tablero",
     "sendToBoardTooltip": "Enviar la selección al tablero de referencia",
@@ -237,15 +237,12 @@
     "shotsCount_one": "{{count}} plano",
     "shotsCount_other": "{{count}} planos",
     "showAll": "Mostrar todo",
-    "showMore": "Mostrar más ({{count}} restantes)",
     "stopPlayTooltip": "Detener la reproducción",
-    "summary_one": "{{shown}}/{{count}} resultado · «{{query}}»",
-    "summary_other": "{{shown}}/{{count}} resultados · «{{query}}»",
-    "tabClusters": "Grupos",
-    "tabClustersTooltip": "Agrupar por ambiente",
-    "tabDedup": "Duplicados",
+    "tabClustersTooltip": "Agrupar los planos por similitud visual",
     "tabDedupTooltip": "Tomas casi idénticas",
-    "tabFlat": "Lista"
+    "tabFlat": "Lista",
+    "showMore_one": "Mostrar más ({{count}} restante)",
+    "showMore_other": "Mostrar más ({{count}} restantes)"
   },
   "refTray": {
     "title": "Referencias ({{count}})",
@@ -255,13 +252,10 @@
     "findSimilarTooltip": "Buscar los planos similares",
     "clearAria": "Vaciar las referencias",
     "clearTooltip": "Vaciar las referencias",
-    "removeAria": "Quitar",
     "remove": "Quitar",
     "findSimilarMenu": "Buscar los similares"
   },
   "searchBar": {
-    "scopeLabel": "Buscar en",
-    "scopeProject": "Clips del proyecto",
     "scopeAll": "Todos los clips",
     "placeholder": "Describe el plano… (@ para mencionar un personaje)",
     "searchByImageAria": "Buscar por imagen",
@@ -277,7 +271,7 @@
     "negativePlaceholder": "Excluir… (ej.: sin gente, sin texto) — búsqueda negativa",
     "clearExclusionAria": "Borrar la exclusión",
     "excludeAria": "Excluir",
-    "excludeTooltip": "Consulta negativa: lo que no quieres ver"
+    "excludeTooltip": "Búsqueda negativa: lo que no quieres ver"
   },
   "searchPanel": {
     "dropImage": "Suelta una imagen",
@@ -289,7 +283,7 @@
     "readyToSearch": "Listo para buscar",
     "indexNotBuilt": "Índice sin construir",
     "readyHint": "Describe un plano, arrastra una imagen o busca por similitud. Afina con una búsqueda negativa y el umbral de relevancia.",
-    "emptyHint": "Indexa antes unos clips: NetsuRush embebe los planos detectados (SigLIP 2) en una caché local.",
+    "emptyHint": "Indexa antes unos clips: NetsuRush analiza los planos con SigLIP 2 y guarda el índice en local.",
     "clickIndex": "Haz clic en «Indexar»"
   },
   "shotBrowser": {
@@ -322,7 +316,6 @@
     "addingToTimeline": "Añadiendo a la timeline {{i}}/{{total}}…",
     "queryDefault": "búsqueda",
     "querySimilarTo": "similares: {{name}}",
-    "queryMoodboard": "moodboard: {{count}} refs",
     "queryIndexedFaceAnime": "cara detectada (animación)",
     "queryIndexedFaceReal": "cara detectada (real)",
     "queryFaceSingle": "cara: 1 ref",
@@ -332,7 +325,9 @@
     "timelineAddOk_one": "{{count}} plano añadido a la timeline.",
     "timelineAddOk_other": "{{count}} planos añadidos a la timeline.",
     "indexingStopped_one": "Indexación detenida — {{count}} clip procesado en parte.",
-    "indexingStopped_other": "Indexación detenida — {{count}} clips procesados en parte."
+    "indexingStopped_other": "Indexación detenida — {{count}} clips procesados en parte.",
+    "queryMoodboard_one": "moodboard: {{count}} ref",
+    "queryMoodboard_other": "moodboard: {{count}} refs"
   },
   "projectScope": {
     "activeMode": "Activo",
@@ -342,7 +337,7 @@
     "countBadge_other": "{{count}} proyectos",
     "current": "Actual",
     "empty": "Aún no hay proyectos registrados.",
-    "hint": "La búsqueda y los rostros solo abarcan los proyectos marcados. Un proyecto aparece aquí una vez abierto en NetsuRush.",
+    "hint": "La búsqueda y las caras solo abarcan los proyectos marcados. Un proyecto aparece aquí en cuanto se abre una vez en NetsuRush.",
     "loading": "Leyendo proyectos…",
     "open": "Proyectos",
     "openTooltip": "Elegir los proyectos que abarca la búsqueda",

@@ -13,8 +13,6 @@
     "close": "閉じる",
     "cancel": "キャンセル",
     "confirm": "確定",
-    "yes": "はい",
-    "no": "いいえ",
     "unknown": "不明"
   },
   "home": {
@@ -22,15 +20,14 @@
     "tagline": "書く、見せる、編集する — 書くように。",
     "settings": "設定",
     "settingsHint": "全般設定（スクリプトごとに上書き可能）",
-    "loading": "スクリプトを開いています…",
     "empty": "スクリプトはまだありません。",
     "createFirst": "最初のスクリプトを作成",
-    "emptyHint": "1段落 = 1カット。書いて、素材を紐づけて、そのままタイムラインへ。",
+    "emptyHint": "1段落 = 1カット。書いて、ショットを紐づけて、そのままタイムラインへ。",
     "search": "スクリプトを検索…",
     "clearSearch": "検索をクリア",
     "noResults": "「{{query}}」に一致するスクリプトはありません。",
     "onlyResume": "このプロジェクトには上のスクリプトしかありません。",
-    "sort": "並び替え",
+    "sort": "並べ替え",
     "sorts": {
       "recent": "最近",
       "title": "タイトル",
@@ -64,21 +61,21 @@
     }
   },
   "persistence": {
-    "listFailed": "スクリプト一覧を読み込めません: {{error}}",
+    "listFailed": "スクリプト一覧を読み込めません：{{error}}",
     "notFound": "スクリプトが見つかりません。",
-    "openFailed": "開けません: {{error}}",
-    "createFailed": "作成できません: {{error}}",
-    "saveFailed": "保存に失敗しました: {{error}}",
-    "deleteFailed": "削除できません: {{error}}"
+    "openFailed": "開けません：{{error}}",
+    "createFailed": "作成できません：{{error}}",
+    "saveFailed": "保存に失敗しました：{{error}}",
+    "deleteFailed": "削除できません：{{error}}"
   },
   "mediaEditor": {
     "noSpeech": "音声が検出されませんでした。",
     "transcriptionFailed": "文字起こしできません。",
     "enlargeWaveform": "波形を拡大",
-    "enlargePlayer": "プレイヤーを拡大",
+    "enlargePlayer": "プレーヤーを拡大",
     "reduce": "縮小",
     "fullscreen": "全画面",
-    "containerUnreadable": "このコンテナはプレビューできません（例: .mkv）。In/Outは秒単位で設定でき、タイムラインではフレーム精度でカットされます。",
+    "containerUnreadable": "このコンテナはプレビューできません（例：.mkv）。In/Outは秒単位で設定でき、タイムラインではフレーム精度でカットされます。",
     "pause": "一時停止",
     "play": "再生",
     "previousFrame": "前のフレーム（←）",
@@ -94,12 +91,12 @@
     "playSelection": "選択範囲を再生",
     "waveLoading": "音声を解析中…",
     "waveUnavailable": "この素材の波形はありません — プレーヤーで範囲を設定してください。",
-    "markIn": "再生ヘッドにINを打つ（I）",
-    "markOut": "再生ヘッドにOUTを打つ（O）",
+    "markIn": "再生ヘッドにIn点を打つ（I）",
+    "markOut": "再生ヘッドにOut点を打つ（O）",
     "rangePresets": "定型の範囲",
     "selectAll": "素材全体",
-    "fromPlayhead": "再生ヘッドをINに",
-    "toPlayhead": "再生ヘッドをOUTに",
+    "fromPlayhead": "再生ヘッド位置をIn点に",
+    "toPlayhead": "再生ヘッド位置をOut点に",
     "resetRange": "元の範囲に戻す"
   },
   "recordings": {
@@ -110,12 +107,10 @@
     "hoursAgo_other": "{{count}}時間前",
     "importFailed": "読み込みに失敗しました。",
     "title": "録音",
-    "importMediaPool": "Media Poolへ読み込む（Audiosフォルダー）",
-    "folder": "フォルダー: {{dir}}",
+    "folder": "フォルダー：{{dir}}",
     "chooseFolder": "録音フォルダーを選択",
     "chooseFolderEllipsis": "録音フォルダーを選択…",
     "empty": "このフォルダーに音声はありません。ここにナレーションを録音すると表示されます。",
-    "attachHint": "クリックで選択段落に添付 · または段落へドラッグ",
     "attach": "段落に添付",
     "importMediaPoolShort": "Media Poolへ読み込む",
     "openFile": "ファイルを開く",
@@ -123,7 +118,7 @@
     "imported_other": "{{count}} 件を Audios ビンに読み込みました（{{skipped}} 件はプロジェクトに既存）。"
   },
   "right": {
-    "ariaLabel": "ドキュメント: 履歴、アウトライン、タグ、タスク",
+    "ariaLabel": "ドキュメント：履歴、アウトライン、タグ、タスク",
     "document": "ドキュメント",
     "hide": "隠す（Ctrl+]）",
     "toc": "目次",
@@ -132,8 +127,8 @@
     "goTo": "移動",
     "uncheckExport": "書き出し対象から外す",
     "checkExport": "書き出し対象にする",
-    "sectionsSelected_one": "{{count}}セクションを選択中 → Import Timelineはこの範囲だけを編集します。",
-    "sectionsSelected_other": "{{count}}セクションを選択中 → Import Timelineはこれらの範囲だけを編集します。",
+    "sectionsSelected_one": "{{count}} セクションを選択中：「タイムラインへ」は選択したセクションだけを編集します。",
+    "sectionsSelected_other": "{{count}} セクションを選択中：「タイムラインへ」は選択したセクションだけを編集します。",
     "tags": "タグ",
     "tagsEmpty": "ブロックにタグを追加します（#）。",
     "removeFavorite": "お気に入りから削除",
@@ -166,14 +161,9 @@
     "all": "すべて",
     "speechPrompt": "文字起こし済み素材内の言葉を入力してください。",
     "noPassage": "該当箇所がありません。",
-    "otherSounds": "その他の音声",
     "loadingMediaPool": "Media Poolを読み込み中…",
     "empty": "素材がありません。エクスプローラーからファイルをドラッグするか、Resolve Studioでプロジェクトを開いてください。",
     "addFilesEllipsis": "ファイルを追加…",
-    "emptyTipBefore": "次に、ショットを",
-    "textSelection": "選択したテキスト",
-    "emptyTipAfter": "へドラッグして該当箇所にリンクするか、段落へドラッグして添付します。レールのショットをダブルクリックするとIn/Outを調整できます。",
-    "noOtherSound": "その他の音声はありません。",
     "noFile": "ファイルがありません。",
     "playPreview": "プレビューを再生",
     "stopPreview": "プレビューを停止"
@@ -188,18 +178,16 @@
     "dot": "ドット",
     "thumbnail": "サムネイル",
     "linkColors": "テキスト内のリンク色",
-    "linkColorsHint": "オフ: スクリプトは無彩色になり、レールの色は維持されます",
+    "linkColorsHint": "オフ：スクリプトは無彩色になり、レールの色は維持されます",
     "visible": "表示",
     "hidden": "非表示",
-    "showGaps": "空きを表示",
-    "showGapsHint": "ショットのない段落を余白に表示（「要素材」）",
     "colorAssignment": "色の割り当て",
-    "colorAssignmentHint": "自動: ショットごとに色を割り当て · ラベル: 1色を手動変更",
+    "colorAssignmentHint": "自動：ショットごとに色を割り当て · ラベル：1色のみ、手動で色を変更（例：青 = インタビュー）",
     "auto": "自動",
     "labels": "ラベル",
     "defaultColor": "既定の色",
     "multiHeadings": "複数の見出しレベル",
-    "multiHeadingsHint": "オフ: #、##、###は同じ見出しになります",
+    "multiHeadingsHint": "オフ：#、##、###は同じ見出しになります",
     "single": "1種類",
     "spellcheck": "スペルチェック",
     "spellcheckHint": "スペルミスを下線表示（フランス語）",
@@ -228,12 +216,12 @@
   "topbar": {
     "footages": "素材（Ctrl+[）",
     "stats": "{{paragraphs}}段落 • {{words}}語 • 約{{duration}}",
-    "notebookSplit": "スクリプト横にノートを表示（分割）",
+    "notebookSplit": "スクリプト横にノートブックを表示（分割）",
     "toTimeline": "タイムラインへ",
     "moreActions": "その他の操作",
-    "notebookName": "ノート — {{title}}",
-    "scriptNotebook": "スクリプトのノート",
-    "notebookWindow": "別ウィンドウでノートを開く",
+    "notebookName": "ノートブック — {{title}}",
+    "scriptNotebook": "スクリプト用ノートブック",
+    "notebookWindow": "別ウィンドウでノートブックを開く",
     "scriptSettings": "スクリプト設定",
     "keyboardShortcuts": "キーボードショートカット",
     "display": "表示",
@@ -244,9 +232,7 @@
     },
     "rightPanel": "アウトライン / タグ / タスク（Ctrl+]）",
     "buildTimeline": "タイムラインを作成",
-    "adobeSequence": " — {{host}}シーケンス",
-    "resolveNative": "（フレーム精度、Resolveネイティブ）",
-    "partialScope": "範囲: アウトラインで選択したセクション。",
+    "partialScope": "範囲：アウトラインで選択したセクション。",
     "newTimeline": "新規タイムライン",
     "currentTimeline": "現在のタイムライン",
     "commentsMarkers": "コメント → Resolveマーカー（{{count}}）",
@@ -261,8 +247,10 @@
       "footages": "素材パネル",
       "outline": "アウトライン/タグパネル"
     },
-    "buildSummary_one": "{{count}}ショットをスクリプト順に編集{{host}}。",
-    "buildSummary_other": "{{count}}ショットをスクリプト順に編集{{host}}。"
+    "buildSummaryResolve_one": "{{count}} ショットをスクリプト順に編集しました。フレーム単位で正確です（Resolve）。",
+    "buildSummaryResolve_other": "{{count}} ショットをスクリプト順に編集しました。フレーム単位で正確です（Resolve）。",
+    "buildSummaryAdobe_one": "{{count}} ショットをスクリプト順に {{host}} のシーケンスとして編集しました。",
+    "buildSummaryAdobe_other": "{{count}} ショットをスクリプト順に {{host}} のシーケンスとして編集しました。"
   },
   "export": {
     "comment": "コメント",
@@ -272,7 +260,7 @@
     "updated": "を更新しました",
     "mixedFps": "⚠ フレームレートが混在しています。",
     "shotProgress": "ショット {{current}}/{{total}}…",
-    "shotFailed": "ショット {{current}}/{{total}}: {{error}}。",
+    "shotFailed": "ショット {{current}}/{{total}}：{{error}}。",
     "failure": "失敗",
     "markersResolveOnly": "⚠ コメントマーカーはResolveのみ。",
     "resolveDone_one": "タイムライン「{{timeline}}」{{action}} — {{count}}ショット。",
@@ -290,7 +278,7 @@
     "textPlaceholder": "入力…「#」で見出し、「/」で挿入",
     "expandSection": "セクションを展開",
     "collapseSection": "セクションを折りたたむ",
-    "openNotebookPage": "ノートで{{label}}を開く",
+    "openNotebookPage": "ノートブックで{{label}}を開く",
     "tagPlaceholder": "タグ名…",
     "calloutStyle": "囲みのスタイル",
     "callout": {
@@ -299,7 +287,7 @@
       "warning": "注意",
       "alert": "警告"
     },
-    "resizeNotebook": "ノート領域のサイズ変更",
+    "resizeNotebook": "ノートブック領域のサイズを変更",
     "heading": "見出し",
     "heading1": "見出し1",
     "heading2": "見出し2",
@@ -325,15 +313,12 @@
     "blockActions": "ブロック操作",
     "dragActions": "ドラッグで移動 · クリックで操作",
     "linkSelectedText": "選択テキストにリンク",
-    "selectTextFirst": "先にテキストを選択",
+    "selectTextFirst": "先にテキストを選択してください",
     "adjustShot": "ショットのIn/Outを調整",
     "detach": "切り離す"
   },
   "storyboard": {
     "title": "ストーリーボード",
-    "alt": "ストーリーボード",
-    "pen": "ペン",
-    "eraser": "消しゴム",
     "color": "色 {{color}}",
     "clear": "絵を消去",
     "clickToDraw": "ストーリーボード — クリックして描画",
@@ -346,10 +331,6 @@
   "audioFolder": {
     "title": "音声フォルダー",
     "importFailed": "読み込みに失敗しました。",
-    "importMediaPool": "Media Poolへ読み込む（Audios）",
-    "folder": "音声フォルダー: {{dir}}",
-    "chooseFolder": "音声フォルダーを選択",
-    "chooseFolderEllipsis": "音声フォルダーを選択…",
     "empty": "このフォルダーに音声ファイルはありません。",
     "attach": "行に添付",
     "importMediaPoolShort": "Media Poolへ読み込む",
@@ -362,25 +343,19 @@
     "title": "音声ソース",
     "mediaPool": "Media Pool",
     "folder": "フォルダー",
-    "recordings": "録音",
-    "mediaPoolAudio": "Media Poolの音声"
+    "recordings": "録音"
   },
   "mentions": {
     "searchMedia": "ページとメディア",
-    "page": "ノートページ",
+    "page": "ノートブックのページ",
     "mediapool": "Media Pool",
     "folder": "音声フォルダー",
     "recording": "録音"
   },
   "mediaPanel": {
     "importFailed": "読み込みに失敗しました。",
-    "dropFailed": "ドロップしたファイルのパスを取得できませんでした。ファイル追加ボタンを使用してください。",
     "resize": "メディアパネルのサイズ変更",
-    "destination": "保存先",
-    "destinationMediaPool": "Media Pool",
-    "destinationMediaPoolHint": "新しい録音をMedia Poolへ自動読み込み",
-    "destinationFolder": "指定フォルダー",
-    "destinationFolderHint": "録音を指定フォルダーに保存"
+    "destination": "保存先"
   },
   "slash": {
     "text": {
@@ -390,32 +365,32 @@
     },
     "heading": {
       "label": "見出し",
-      "hint": "セクション (# )",
+      "hint": "セクション（# ）",
       "keywords": "見出し|タイトル|セクション|h"
     },
     "heading1": {
       "label": "見出し1",
-      "hint": "大セクション (# )",
+      "hint": "大セクション（# ）",
       "keywords": "見出し|セクション|h1"
     },
     "heading2": {
       "label": "見出し2",
-      "hint": "セクション (## )",
+      "hint": "セクション（## ）",
       "keywords": "見出し|セクション|h2"
     },
     "heading3": {
       "label": "見出し3",
-      "hint": "小セクション (### )",
+      "hint": "小セクション（### ）",
       "keywords": "見出し|セクション|h3"
     },
     "bullet": {
       "label": "箇条書き",
-      "hint": "シンプルなリスト (- )",
+      "hint": "シンプルなリスト（- ）",
       "keywords": "リスト|箇条書き|ul"
     },
     "numbered": {
       "label": "番号付きリスト",
-      "hint": "順序付き手順 (1. )",
+      "hint": "順序付き手順（1. ）",
       "keywords": "リスト|番号|ol|1"
     },
     "note": {

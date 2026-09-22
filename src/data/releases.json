@@ -5,7 +5,11 @@
     "date": "2026-08-30",
     "title": {
       "fr": "Améliorations et optimisations avant la 0.4",
-      "en": "Improvements and optimizations before 0.4"
+      "en": "Improvements and optimizations before 0.4",
+      "es": "Mejoras y optimizaciones antes de la 0.4",
+      "de": "Verbesserungen und Optimierungen vor Version 0.4",
+      "ja": "0.4 に向けた改善と最適化",
+      "zh": "0.4 版之前的改进与优化"
     },
     "highlights": {
       "fr": [
@@ -19,6 +23,30 @@
         "Export, notification, settings, and tooling flows are clearer and more reliable.",
         "Optimizations improve performance, responsiveness, and overall stability, including in NetsuBoard.",
         "This foundation prepares the upcoming major 0.4 update focused on file sharing."
+      ],
+      "es": [
+        "Esta versión trae una serie de pequeñas mejoras y correcciones en varias partes de NetsuRush.",
+        "Los flujos de exportación, notificaciones, ajustes y herramientas ganan en claridad y fiabilidad.",
+        "Varias optimizaciones mejoran el rendimiento, la capacidad de respuesta y la estabilidad general, sobre todo en NetsuBoard.",
+        "Esta base de NetsuBoard prepara la próxima gran actualización, dedicada a compartir archivos."
+      ],
+      "de": [
+        "Diese Version bringt eine Reihe kleiner Verbesserungen und Korrekturen in mehreren Bereichen von NetsuRush.",
+        "Die Abläufe für Export, Benachrichtigungen, Einstellungen und Werkzeuge werden klarer und zuverlässiger.",
+        "Optimierungen verbessern Leistung, Reaktionsfähigkeit und allgemeine Stabilität, vor allem in NetsuBoard.",
+        "Diese Grundlage in NetsuBoard bereitet das nächste große Update vor, bei dem es um das Teilen von Dateien geht."
+      ],
+      "ja": [
+        "このバージョンでは、NetsuRush の複数の箇所に細かな改善と修正を加えました。",
+        "書き出し、通知、設定、ツールまわりの操作がわかりやすくなり、信頼性も向上しました。",
+        "最適化により、NetsuBoard を中心に、パフォーマンス、応答性、全体の安定性が向上しました。",
+        "今回の NetsuBoard の基盤づくりは、ファイル共有に焦点を当てた次の大型アップデートに向けた準備です。"
+      ],
+      "zh": [
+        "此版本对 NetsuRush 的多个部分做了一系列小改进和修复。",
+        "导出、通知、设置和工具相关的流程更清晰、更可靠。",
+        "多项优化提升了性能、响应速度和整体稳定性，在 NetsuBoard 中尤为明显。",
+        "NetsuBoard 的这一基础为下一次聚焦文件共享的重大更新做准备。"
       ]
     }
   },
@@ -28,7 +56,11 @@
     "date": "2026-08-11",
     "title": {
       "fr": "Transferts créatifs plus fidèles",
-      "en": "More faithful creative transfers"
+      "en": "More faithful creative transfers",
+      "es": "Transferencias creativas más fieles",
+      "de": "Originalgetreuere kreative Übertragungen",
+      "ja": "再現性を高めた制作データの転送",
+      "zh": "还原度更高的创作内容传输"
     },
     "highlights": {
       "fr": [
@@ -42,6 +74,30 @@
         "After Effects gains more robust media preparation, recalculated transforms, and an integrated upscale transfer step.",
         "Premiere Pro receives titles through a Motion Graphics template bundled with the NetsuRush Adobe panel.",
         "NetsuBoard, bug reports, models, and several media workflows receive reliability and security fixes."
+      ],
+      "es": [
+        "Las transferencias entre Resolve, Premiere Pro y After Effects conservan más animaciones, títulos, rangos de origen y propiedades de los planos.",
+        "After Effects incorpora una preparación de medios más sólida, transformaciones recalculadas y un paso de escalado integrado en la transferencia.",
+        "Premiere Pro recibe los títulos a través de una plantilla de Motion Graphics incluida en el panel de NetsuRush para Adobe.",
+        "NetsuBoard, los informes de problemas, los modelos y varios flujos de medios reciben correcciones de fiabilidad y seguridad."
+      ],
+      "de": [
+        "Übertragungen zwischen Resolve, Premiere Pro und After Effects bewahren mehr Animationen, Titel, Quellbereiche und Shot-Eigenschaften.",
+        "After Effects erhält eine robustere Medienvorbereitung, neu berechnete Transformationen und einen Schritt zum Hochskalieren direkt in der Übertragung.",
+        "Premiere Pro erhält Titel über eine Motion-Graphics-Vorlage, die im NetsuRush-Panel für Adobe enthalten ist.",
+        "NetsuBoard, Problemmeldungen, Modelle und mehrere Medienabläufe erhalten Korrekturen für Zuverlässigkeit und Sicherheit."
+      ],
+      "ja": [
+        "Resolve、Premiere Pro、After Effects 間の転送で、アニメーション、タイトル、ソース範囲、ショットのプロパティをより多く保持できるようになりました。",
+        "After Effects では、メディアの準備がより確実になり、トランスフォームが再計算されるほか、転送にアップスケールの工程が組み込まれました。",
+        "Premiere Pro は、NetsuRush の Adobe パネルに同梱されたモーショングラフィックステンプレートでタイトルを受け取ります。",
+        "NetsuBoard、バグ報告、モデル、複数のメディア関連の処理に、信頼性とセキュリティに関する修正を加えました。"
+      ],
+      "zh": [
+        "Resolve、Premiere Pro 和 After Effects 之间的传输能保留更多动画、标题、源范围和镜头属性。",
+        "After Effects 的媒体准备更稳健，变换会重新计算，传输流程中还加入了超分辨率步骤。",
+        "Premiere Pro 通过 NetsuRush Adobe 面板附带的动态图形模板接收标题。",
+        "修复了 NetsuBoard、问题反馈、模型和多个媒体流程中的可靠性与安全性问题。"
       ]
     }
   },
@@ -51,7 +107,11 @@
     "date": "2026-08-10",
     "title": {
       "fr": "NetsuBoard enrichi et grilles plus fluides",
-      "en": "Expanded NetsuBoard and smoother grids"
+      "en": "Expanded NetsuBoard and smoother grids",
+      "es": "NetsuBoard ampliado y cuadrículas más fluidas",
+      "de": "Erweitertes NetsuBoard und flüssigere Raster",
+      "ja": "NetsuBoard の強化と、より滑らかなグリッド",
+      "zh": "NetsuBoard 功能增强，网格更流畅"
     },
     "highlights": {
       "fr": [
@@ -65,6 +125,30 @@
         "Recent projects are unified and easier to find, reveal, and delete, with downloads stored beside each project.",
         "Merged exports can add a configurable black pause between shots, defaulting to one second.",
         "Large shot grids remain smoother while scrolling, hovering, and changing thumbnail density."
+      ],
+      "es": [
+        "NetsuBoard importa más medios en línea, conserva su procedencia y recupera los archivos movidos o que faltan.",
+        "Los proyectos recientes están unificados y son más fáciles de encontrar, mostrar en el explorador y eliminar, con sus descargas guardadas junto al proyecto.",
+        "La exportación en un solo archivo permite ajustar una pausa en negro entre los planos, con una duración predeterminada de un segundo.",
+        "Las cuadrículas grandes de planos se mantienen más fluidas al desplazarse, al pasar el cursor y al cambiar la densidad."
+      ],
+      "de": [
+        "NetsuBoard importiert mehr Online-Medien, bewahrt ihre Herkunft und findet verschobene oder fehlende Dateien wieder.",
+        "Zuletzt verwendete Projekte sind vereinheitlicht und lassen sich leichter wiederfinden, im Explorer anzeigen und löschen; ihre Downloads liegen direkt neben dem Projekt.",
+        "Beim Export in eine Datei lässt sich eine Schwarzpause zwischen den Einstellungen festlegen, standardmäßig eine Sekunde lang.",
+        "Große Shot-Raster bleiben beim Scrollen, beim Überfahren mit der Maus und beim Ändern der Dichte flüssiger."
+      ],
+      "ja": [
+        "NetsuBoard で読み込めるオンラインメディアが増え、取得元も保持されるようになりました。移動したファイルや見つからないファイルも復旧されます。",
+        "最近のプロジェクトを一つの一覧にまとめ、探す、場所を表示する、削除するといった操作をしやすくしました。ダウンロードしたファイルはプロジェクトの隣に保存されます。",
+        "結合した書き出しで、ショット間の黒画面の間隔を設定できるようになりました。既定の長さは 1 秒です。",
+        "ショットの多い大きなグリッドでも、スクロール、マウスオーバー、表示密度の変更時の動きがより滑らかになりました。"
+      ],
+      "zh": [
+        "NetsuBoard 能导入更多在线媒体，保留其来源，并能找回已移动或缺失的文件。",
+        "最近项目已合并为一处，查找、定位和删除都更方便；下载的文件存放在对应项目旁边。",
+        "合并导出时可以设置镜头之间的黑场间隔，默认时长为 1 秒。",
+        "大型镜头网格在滚动、悬停和切换密度时更加流畅。"
       ]
     }
   },
@@ -74,7 +158,11 @@
     "date": "2026-08-10",
     "title": {
       "fr": "Améliorations et fiabilité",
-      "en": "Improvements and reliability"
+      "en": "Improvements and reliability",
+      "es": "Mejoras y fiabilidad",
+      "de": "Verbesserungen und Zuverlässigkeit",
+      "ja": "改善と信頼性の向上",
+      "zh": "改进与可靠性提升"
     },
     "highlights": {
       "fr": [
@@ -88,6 +176,30 @@
         "Collections, search, host transfers, and several settings are now more reliable.",
         "Update progress and installation messages are clearer during long operations.",
         "A large cleanup removes obsolete components, styles, dependencies, and internal APIs."
+      ],
+      "es": [
+        "El reproductor nativo, las vistas previas de vídeo y las interacciones con los medios son más estables.",
+        "Las colecciones, la búsqueda, las transferencias a las aplicaciones anfitrionas y varios ajustes ganan en fiabilidad.",
+        "El seguimiento de las actualizaciones y los mensajes de instalación son más claros durante las operaciones largas.",
+        "Una limpieza a fondo elimina los componentes, estilos, dependencias y API internas que ya no hacían falta."
+      ],
+      "de": [
+        "Der native Player, die Videovorschauen und die Interaktionen mit Medien laufen stabiler.",
+        "Sammlungen, Suche, Übertragungen an Host-Anwendungen und mehrere Einstellungen sind zuverlässiger.",
+        "Die Fortschrittsanzeige für Updates und die Installationsmeldungen sind bei langen Vorgängen klarer.",
+        "Eine große Aufräumaktion entfernt nicht mehr benötigte Komponenten, Styles, Abhängigkeiten und interne APIs."
+      ],
+      "ja": [
+        "ネイティブプレーヤー、動画プレビュー、メディア操作の安定性を強化しました。",
+        "コレクション、検索、ホストアプリへの転送、いくつかの設定の信頼性が向上しました。",
+        "時間のかかる処理の間も、アップデートの進行状況とインストール時のメッセージがわかりやすく表示されます。",
+        "不要になったコンポーネント、スタイル、依存関係、内部 API を大規模に整理して削除しました。"
+      ],
+      "zh": [
+        "原生播放器、视频预览和媒体交互更加稳定。",
+        "合集、搜索、向宿主软件的传输以及多项设置更加可靠。",
+        "在耗时较长的操作中，更新进度和安装提示更加清晰。",
+        "一次大规模清理移除了不再需要的组件、样式、依赖项和内部 API。"
       ]
     }
   },
@@ -97,7 +209,11 @@
     "date": "2026-08-09",
     "title": {
       "fr": "Première version publique",
-      "en": "First public release"
+      "en": "First public release",
+      "es": "Primera versión pública",
+      "de": "Erste öffentliche Version",
+      "ja": "初の一般公開版",
+      "zh": "首个公开版本"
     },
     "highlights": {
       "fr": [
@@ -111,6 +227,30 @@
         "Custom wallpapers, tailored themes, and appearance controls enrich the interface without slowing down heavy processing.",
         "The .netsu format now packages projects, the board, notebooks, and embedded media into a portable and resilient container.",
         "Transfers between Resolve, Premiere Pro, and After Effects, bug reports, and production tools receive extensive reliability fixes."
+      ],
+      "es": [
+        "NetsuRush se distribuye ahora desde su nuevo repositorio público, con un instalador completo para Windows y actualizaciones integradas.",
+        "Los fondos personalizados, los temas a medida y los ajustes de apariencia enriquecen la interfaz sin ralentizar los procesos pesados.",
+        "El formato .netsu reúne los proyectos, el tablero, el cuaderno y los medios incrustados en un contenedor portátil y sólido.",
+        "Las transferencias entre Resolve, Premiere Pro y After Effects, los informes de problemas y las herramientas de producción reciben numerosas correcciones de fiabilidad."
+      ],
+      "de": [
+        "NetsuRush wird jetzt über sein neues öffentliches Repository verteilt, mit einem vollständigen Windows-Installer und integrierten Updates.",
+        "Eigene Hintergründe, individuelle Designs und Darstellungseinstellungen bereichern die Oberfläche, ohne rechenintensive Aufgaben zu verlangsamen.",
+        "Das .netsu-Format fasst Projekte, Board, Notizbuch und eingebettete Medien in einem portablen, robusten Container zusammen.",
+        "Übertragungen zwischen Resolve, Premiere Pro und After Effects, Problemmeldungen und Produktionswerkzeuge erhalten zahlreiche Korrekturen für mehr Zuverlässigkeit."
+      ],
+      "ja": [
+        "NetsuRush は新しい公開リポジトリから配布されるようになりました。Windows 用の完全なインストーラーと、アプリ内アップデートを備えています。",
+        "カスタム背景、独自のテーマ、外観の設定でインターフェースが充実しました。負荷の高い処理を遅くすることはありません。",
+        ".netsu 形式は、プロジェクト、ボード、ノートブック、埋め込みメディアを、持ち運びやすく壊れにくい一つのコンテナにまとめます。",
+        "Resolve、Premiere Pro、After Effects 間の転送、バグ報告、制作ツールに、信頼性に関する多数の修正を加えました。"
+      ],
+      "zh": [
+        "NetsuRush 现在通过新的公开仓库发布，附带完整的 Windows 安装程序和内置更新。",
+        "自定义背景、定制主题和外观设置让界面更丰富，且不会拖慢繁重的处理任务。",
+        ".netsu 格式将项目、画板、笔记本和嵌入的媒体打包进一个便携且稳健的容器。",
+        "修复了 Resolve、Premiere Pro 与 After Effects 之间的传输、问题反馈和制作工具中的大量可靠性问题。"
       ]
     }
   },
@@ -120,7 +260,11 @@
     "date": "2026-08-04",
     "title": {
       "fr": "Démarrage fiable et mise à jour de secours",
-      "en": "Reliable startup and recovery updates"
+      "en": "Reliable startup and recovery updates",
+      "es": "Arranque fiable y actualización de emergencia",
+      "de": "Zuverlässiger Start und Update im Notfall",
+      "ja": "確実な起動と復旧用アップデート",
+      "zh": "可靠启动与应急更新"
     },
     "highlights": {
       "fr": [
@@ -134,6 +278,30 @@
         "The interface now allows enough time for the first core startup while still detecting later failures quickly.",
         "Updates can be checked and installed directly from the setup screen when the core remains unavailable.",
         "Update status is now shared between the recovery screen and system settings."
+      ],
+      "es": [
+        "La limpieza de las cachés de sesión ya no bloquea el arranque del servicio en segundo plano, ni siquiera tras una operación interrumpida con miles de archivos.",
+        "La interfaz espera ahora lo suficiente al primer arranque del core, sin dejar de detectar rápidamente los fallos posteriores.",
+        "Si el core sigue sin estar disponible, se puede buscar e instalar una actualización directamente desde la pantalla de configuración.",
+        "Los estados de actualización se comparten ahora entre la pantalla de recuperación y los ajustes del sistema."
+      ],
+      "de": [
+        "Das Leeren der Sitzungscaches blockiert den Start des Hintergrunddienstes nicht mehr, auch nicht nach einem unterbrochenen Vorgang mit Tausenden von Dateien.",
+        "Die Oberfläche wartet beim ersten Core-Start jetzt lange genug und erkennt spätere Ausfälle trotzdem schnell.",
+        "Bleibt der Core nicht verfügbar, lässt sich direkt im Einrichtungsbildschirm nach einem Update suchen und es installieren.",
+        "Der Update-Status wird jetzt zwischen dem Wiederherstellungsbildschirm und den Systemeinstellungen geteilt."
+      ],
+      "ja": [
+        "セッションキャッシュのクリーンアップで、バックグラウンドサービスの起動が止まることはなくなりました。数千のファイルを含む処理が中断された後でも同様です。",
+        "インターフェースは core の初回起動を十分に待つようになり、それ以降の障害は引き続きすばやく検出します。",
+        "core が利用できないままでも、セットアップ画面から直接アップデートを確認してインストールできます。",
+        "アップデートの状態が、復旧画面とシステム設定で共有されるようになりました。"
+      ],
+      "zh": [
+        "清理会话缓存不再阻塞后台服务启动，即使之前中断的操作涉及数千个文件也是如此。",
+        "界面现在会为 core 的首次启动留出足够的等待时间，同时仍能快速发现之后的故障。",
+        "当 core 一直不可用时，可以直接在配置界面检查并安装更新。",
+        "应急界面和系统设置现在共享更新状态。"
       ]
     }
   },
@@ -143,7 +311,11 @@
     "date": "2026-08-04",
     "title": {
       "fr": "Démarrage diagnostiqué et upscale du board corrigé",
-      "en": "Diagnosable startup and fixed board upscale"
+      "en": "Diagnosable startup and fixed board upscale",
+      "es": "Arranque con diagnóstico y escalado del tablero corregido",
+      "de": "Startdiagnose und korrigiertes Hochskalieren im Board",
+      "ja": "起動の診断とボードのアップスケール修正",
+      "zh": "启动问题可诊断，画板超分辨率已修复"
     },
     "highlights": {
       "fr": [
@@ -157,6 +329,30 @@
         "Board upscale now previews Turbo shaders and offers a quick mode using the saved defaults.",
         "rembg model downloads and removal now use the same actual directory, with more reliable MatAnyone2 installation.",
         "Board media now preserve local variants and preferences more reliably when switching playback or upscale modes."
+      ],
+      "es": [
+        "El servicio en segundo plano escribe ahora sus errores de arranque en un registro persistente y explica qué recursos o procesos fallan.",
+        "El escalado del tablero admite la vista previa de los shaders Turbo y ofrece un modo rápido con los ajustes predeterminados.",
+        "La descarga y la eliminación de los modelos rembg usan ahora la misma carpeta real, y las instalaciones de MatAnyone2 son más fiables.",
+        "Los medios del tablero conservan mejor sus variantes locales y sus preferencias al cambiar de reproductor o de escalado."
+      ],
+      "de": [
+        "Der Hintergrunddienst schreibt Startfehler jetzt in ein dauerhaftes Protokoll und erklärt, welche Ressourcen oder Prozesse ausfallen.",
+        "Das Hochskalieren im Board unterstützt die Vorschau der Turbo-Shader und bietet einen Schnellmodus mit den Standardeinstellungen.",
+        "Herunterladen und Entfernen der rembg-Modelle nutzen jetzt denselben tatsächlichen Ordner, und MatAnyone2 lässt sich zuverlässiger installieren.",
+        "Medien im Board behalten ihre lokalen Varianten und Einstellungen besser, wenn Player oder Hochskalierung gewechselt werden."
+      ],
+      "ja": [
+        "バックグラウンドサービスが起動時のエラーを永続的なログに記録し、問題のあるリソースやプロセスを示すようになりました。",
+        "ボードのアップスケールが Turbo シェーダーのプレビューに対応し、既定の設定で実行するクイックモードも使えるようになりました。",
+        "rembg モデルのダウンロードと削除で、実際に同じフォルダーを使うようになりました。MatAnyone2 のインストールもより確実になりました。",
+        "ボードのメディアは、プレーヤーやアップスケールを切り替えても、ローカルのバリアントと設定をより確実に保持します。"
+      ],
+      "zh": [
+        "后台服务现在会把启动错误写入持久化日志，并说明出问题的资源或进程。",
+        "画板超分辨率支持预览 Turbo 着色器，并提供使用默认设置的快速模式。",
+        "rembg 模型的下载和删除现在使用同一个实际文件夹，MatAnyone2 的安装也更可靠。",
+        "切换播放器或超分辨率时，画板中的媒体能更好地保留本地变体和偏好设置。"
       ]
     }
   },
@@ -166,7 +362,11 @@
     "date": "2026-08-04",
     "title": {
       "fr": "NetsuBridge et outils de production étendus",
-      "en": "NetsuBridge and expanded production tools"
+      "en": "NetsuBridge and expanded production tools",
+      "es": "NetsuBridge y herramientas de producción ampliadas",
+      "de": "NetsuBridge und erweiterte Produktionswerkzeuge",
+      "ja": "NetsuBridge と制作ツールの拡充",
+      "zh": "NetsuBridge 与制作工具扩展"
     },
     "highlights": {
       "fr": [
@@ -180,6 +380,30 @@
         "NetsuLab expands upscale, interpolation, and roto with new engines, community models, and cleanup tools.",
         "Optimization gains a watchdog, safer cache management, and new noise, boost, and GPU acceleration controls.",
         "Search, collections, export profiles, and Adobe integration receive new workflows and extensive reliability fixes."
+      ],
+      "es": [
+        "NetsuBridge transfiere secuencias y medios entre DaVinci Resolve, After Effects y Premiere Pro con ajustes de codificación adaptados.",
+        "NetsuLab amplía el escalado, la interpolación y la rotoscopía con nuevos motores, modelos de la comunidad y herramientas de limpieza.",
+        "La optimización incorpora una vigilancia de memoria, una gestión más segura de las cachés y nuevos controles para las tareas de fondo, el boost y la aceleración por GPU.",
+        "La búsqueda, las colecciones, los perfiles de exportación y la integración con Adobe reciben nuevos flujos y numerosas correcciones de fiabilidad."
+      ],
+      "de": [
+        "NetsuBridge überträgt Sequenzen und Medien zwischen DaVinci Resolve, After Effects und Premiere Pro mit passenden Kodierungseinstellungen.",
+        "NetsuLab erweitert Hochskalieren, Interpolation und Roto um neue Engines, Community-Modelle und Bereinigungswerkzeuge.",
+        "Die Optimierung erhält eine Speicherüberwachung, eine sicherere Cache-Verwaltung und neue Steuerungen für Hintergrundaufgaben, Boost und GPU-Beschleunigung.",
+        "Suche, Sammlungen, Exportprofile und die Adobe-Integration erhalten neue Abläufe und zahlreiche Korrekturen für mehr Zuverlässigkeit."
+      ],
+      "ja": [
+        "NetsuBridge は、DaVinci Resolve、After Effects、Premiere Pro の間で、シーケンスとメディアを適切なエンコード設定で転送します。",
+        "NetsuLab のアップスケール、補間、ロトに、新しいエンジン、コミュニティ製モデル、クリーンアップツールが加わりました。",
+        "最適化機能に、メモリー監視、より安全なキャッシュ管理、不要なバックグラウンドタスク・ブースト・GPU アクセラレーションの新しい設定が加わりました。",
+        "検索、コレクション、書き出しプロファイル、Adobe 連携に、新しい作業の流れと、信頼性に関する多数の修正を加えました。"
+      ],
+      "zh": [
+        "NetsuBridge 可在 DaVinci Resolve、After Effects 和 Premiere Pro 之间传输序列和媒体，并采用合适的编码设置。",
+        "NetsuLab 的超分辨率、插帧和转描新增了引擎、社区模型和清理工具。",
+        "优化功能新增内存监控、更安全的缓存管理，以及无用后台任务、Boost 和 GPU 加速的新控制项。",
+        "搜索、合集、导出配置和 Adobe 集成新增了多个流程，并修复了大量可靠性问题。"
       ]
     }
   },
@@ -189,7 +413,11 @@
     "date": "2026-07-26",
     "title": {
       "fr": "Modèles vérifiés et comparaison des rendus",
-      "en": "Verified models and render comparison"
+      "en": "Verified models and render comparison",
+      "es": "Modelos verificados y comparación de renderizados",
+      "de": "Geprüfte Modelle und Render-Vergleich",
+      "ja": "モデルの検証とレンダリング結果の比較",
+      "zh": "模型验证与渲染结果对比"
     },
     "highlights": {
       "fr": [
@@ -203,6 +431,30 @@
         "After a download, NetsuRush validates the installation and offers a real application restart.",
         "NetsuLab automatically opens the final render, keeps per-source history, and provides synchronized A/B or lossless frame comparison.",
         "Timeline Live refreshes its data without unnecessarily discarding valid thumbnails and proxies."
+      ],
+      "es": [
+        "Los modelos que se muestran se verifican ahora con su motor de Python; los que faltan o no están disponibles se ocultan y remiten a la reparación.",
+        "Tras una descarga, NetsuRush comprueba la instalación y ofrece un reinicio real de la aplicación.",
+        "NetsuLab abre automáticamente el renderizado final, conserva su historial por fuente y permite una comparación A/B sincronizada o de imagen sin pérdidas.",
+        "Timeline Live actualiza sus datos sin perder innecesariamente sus miniaturas y proxies válidos."
+      ],
+      "de": [
+        "Angezeigte Modelle werden jetzt mit ihrer Python-Engine geprüft; fehlende oder nicht verfügbare Modelle werden ausgeblendet und verweisen auf die Reparatur.",
+        "Nach einem Download prüft NetsuRush die Installation und bietet einen echten Neustart der App an.",
+        "NetsuLab öffnet das fertige Rendering automatisch, behält den Verlauf pro Quelle und ermöglicht einen synchronisierten A/B-Vergleich oder einen verlustfreien Bildvergleich.",
+        "Timeline Live aktualisiert die Daten, ohne gültige Miniaturen und Proxys unnötig zu verlieren."
+      ],
+      "ja": [
+        "表示されるモデルは、それぞれの Python エンジンで検証されるようになりました。見つからないモデルや利用できないモデルは非表示になり、修復へ案内されます。",
+        "ダウンロード後、NetsuRush がインストールを確認し、アプリの完全な再起動を提案します。",
+        "NetsuLab は最終レンダリングを自動で開き、ソースごとに履歴を保持します。同期した A/B 比較、またはロスレスのフレーム比較ができます。",
+        "Timeline Live は、有効なサムネイルやプロキシを無駄に失うことなくデータを更新します。"
+      ],
+      "zh": [
+        "显示的模型现在会用各自的 Python 引擎验证；缺失或不可用的模型会隐藏，并引导至修复。",
+        "下载完成后，NetsuRush 会检查安装，并提示完整重启应用。",
+        "NetsuLab 会自动打开最终渲染结果，按源文件保留历史记录，并支持同步 A/B 对比或无损单帧对比。",
+        "Timeline Live 刷新数据时，不会无谓地丢弃仍然有效的缩略图和代理文件。"
       ]
     }
   },
@@ -212,7 +464,11 @@
     "date": "2026-07-26",
     "title": {
       "fr": "Cache Timeline Live fiable",
-      "en": "Reliable Timeline Live cache"
+      "en": "Reliable Timeline Live cache",
+      "es": "Caché de Timeline Live fiable",
+      "de": "Zuverlässiger Cache für Timeline Live",
+      "ja": "Timeline Live キャッシュの信頼性向上",
+      "zh": "Timeline Live 缓存更可靠"
     },
     "highlights": {
       "fr": [
@@ -224,6 +480,26 @@
         "Timeline Live keeps thumbnails and proxies while the complete edit geometry remains unchanged.",
         "When a timeline changes, stale previews are removed before thumbnails return progressively; proxies remain on demand.",
         "Caching waits for the interface, reuses verified timelines, and reserves workers for visible cards."
+      ],
+      "es": [
+        "Timeline Live conserva las miniaturas y los proxies mientras la geometría completa del montaje no cambie.",
+        "Cuando una timeline cambia, se eliminan las vistas previas antiguas y después las miniaturas vuelven poco a poco; los proxies se siguen generando bajo demanda.",
+        "La caché espera a que la interfaz esté disponible, reutiliza las timelines ya verificadas y reserva workers para las tarjetas visibles."
+      ],
+      "de": [
+        "Timeline Live behält Miniaturen und Proxys, solange die gesamte Geometrie des Schnitts unverändert bleibt.",
+        "Ändert sich eine Timeline, werden die alten Vorschauen gelöscht und die Miniaturen kehren nach und nach zurück; Proxys werden weiterhin bei Bedarf erzeugt.",
+        "Der Cache wartet, bis die Oberfläche verfügbar ist, verwendet bereits geprüfte Timelines wieder und reserviert Worker für sichtbare Karten."
+      ],
+      "ja": [
+        "Timeline Live は、編集全体の構成が変わらない限り、サムネイルとプロキシを保持します。",
+        "タイムラインが変わると古いプレビューが削除され、その後サムネイルが少しずつ再表示されます。プロキシは引き続き必要なときに生成されます。",
+        "キャッシュはインターフェースが使える状態になるのを待ち、検証済みのタイムラインを再利用し、表示中のカード用にワーカーを確保します。"
+      ],
+      "zh": [
+        "只要整个剪辑的结构保持不变，Timeline Live 就会保留缩略图和代理文件。",
+        "时间线发生变化时，会先删除旧预览，再逐步恢复缩略图；代理文件仍按需生成。",
+        "缓存会等待界面就绪，复用已验证的时间线，并为可见卡片预留工作进程。"
       ]
     }
   },
@@ -233,7 +509,11 @@
     "date": "2026-07-26",
     "title": {
       "fr": "Proxy vidéo partagé et compatible",
-      "en": "Shared, compatible video previews"
+      "en": "Shared, compatible video previews",
+      "es": "Proxy de vídeo compartido y compatible",
+      "de": "Gemeinsamer, kompatibler Video-Proxy",
+      "ja": "互換性の高い共有動画プロキシ",
+      "zh": "共享且兼容的视频代理文件"
     },
     "highlights": {
       "fr": [
@@ -245,6 +525,26 @@
         "The NetsuCut grid and player use exactly the same proxy, generated only when it is missing.",
         "H.264 and HEVC proxies use NVENC when available; WebM VP8 remains a fast compatible fallback.",
         "Generation stays low-resolution and limited to formats the WebView2 player can decode."
+      ],
+      "es": [
+        "La cuadrícula y el reproductor de NetsuCut usan exactamente el mismo proxy, que solo se genera si falta.",
+        "Los proxies H.264 y HEVC usan NVENC cuando está disponible; WebM VP8 sigue siendo un formato de reserva rápido y compatible.",
+        "La generación se limita a una resolución baja y a formatos que el reproductor WebView2 puede decodificar."
+      ],
+      "de": [
+        "Raster und Player von NetsuCut verwenden genau denselben Proxy, der nur erzeugt wird, wenn er fehlt.",
+        "H.264- und HEVC-Proxys nutzen NVENC, wenn es verfügbar ist; WebM VP8 bleibt ein schnelles, kompatibles Ausweichformat.",
+        "Die Erzeugung ist auf eine niedrige Auflösung und auf Formate beschränkt, die der WebView2-Player dekodieren kann."
+      ],
+      "ja": [
+        "NetsuCut のグリッドとプレーヤーはまったく同じプロキシを使います。プロキシは存在しない場合にのみ生成されます。",
+        "H.264 と HEVC のプロキシは、利用できる場合は NVENC を使います。WebM VP8 は、高速で互換性のある代替手段として残ります。",
+        "生成は低解像度と、WebView2 のプレーヤーでデコードできる形式に限られます。"
+      ],
+      "zh": [
+        "NetsuCut 的网格和播放器使用完全相同的代理文件，仅在缺失时才生成。",
+        "H.264 和 HEVC 代理文件在可用时使用 NVENC；WebM VP8 仍作为快速且兼容的备选方案。",
+        "生成仅限低分辨率，以及 WebView2 播放器可以解码的格式。"
       ]
     }
   },
@@ -254,7 +554,11 @@
     "date": "2026-07-26",
     "title": {
       "fr": "Mise à jour sans verrou de fichiers",
-      "en": "Update without file locks"
+      "en": "Update without file locks",
+      "es": "Actualización sin archivos bloqueados",
+      "de": "Update ohne Dateisperren",
+      "ja": "ファイルロックのないアップデート",
+      "zh": "无文件锁定的更新"
     },
     "highlights": {
       "fr": [
@@ -266,6 +570,26 @@
         "The installer requests a normal NetsuRush shutdown before replacing files, without PowerShell or forced termination.",
         "NetsuRush now waits for its node.exe service to fully stop before exiting.",
         "After prerequisites are installed, the button directly relaunches the application."
+      ],
+      "es": [
+        "El instalador pide a NetsuRush que se cierre con normalidad antes de sustituir los archivos, sin PowerShell ni cierre forzado.",
+        "NetsuRush espera ahora a que su servicio node.exe se detenga por completo antes de cerrarse.",
+        "Tras instalar los requisitos, el botón vuelve a abrir la aplicación directamente."
+      ],
+      "de": [
+        "Der Installer fordert NetsuRush zum normalen Beenden auf, bevor er die Dateien ersetzt – ohne PowerShell und ohne erzwungenen Abbruch.",
+        "NetsuRush wartet jetzt, bis sein Dienst node.exe vollständig beendet ist, bevor es sich schließt.",
+        "Nach der Installation der Voraussetzungen startet der Button die App direkt neu."
+      ],
+      "ja": [
+        "インストーラーは、ファイルを置き換える前に NetsuRush を通常の手順で終了するよう要求します。PowerShell も強制終了も使いません。",
+        "NetsuRush は終了する前に、node.exe サービスが完全に停止するのを待つようになりました。",
+        "前提環境のインストール後は、ボタンからアプリを直接再起動します。"
+      ],
+      "zh": [
+        "安装程序会在替换文件前请求 NetsuRush 正常退出，不使用 PowerShell，也不强制终止。",
+        "NetsuRush 现在会等 node.exe 服务完全停止后再退出。",
+        "基础环境安装完成后，该按钮会直接重新启动应用。"
       ]
     }
   },
@@ -275,7 +599,11 @@
     "date": "2026-07-26",
     "title": {
       "fr": "Mise à jour allégée et plus sûre",
-      "en": "Lighter and safer update"
+      "en": "Lighter and safer update",
+      "es": "Actualización más ligera y segura",
+      "de": "Schlankeres und sichereres Update",
+      "ja": "より軽く安全になったアップデート",
+      "zh": "更轻量、更安全的更新"
     },
     "highlights": {
       "fr": [
@@ -285,6 +613,22 @@
       "en": [
         "After setup completes, NetsuRush performs only a quick local check at startup.",
         "The installer no longer runs a PowerShell script to enumerate or forcibly stop processes during an update."
+      ],
+      "es": [
+        "Una vez terminada la instalación, NetsuRush solo hace una comprobación local rápida al arrancar.",
+        "El instalador ya no ejecuta ningún script de PowerShell para enumerar ni forzar el cierre de los procesos durante una actualización."
+      ],
+      "de": [
+        "Nach abgeschlossener Installation führt NetsuRush beim Start nur eine schnelle lokale Prüfung aus.",
+        "Der Installer startet während eines Updates kein PowerShell-Skript mehr, um Prozesse aufzulisten oder zwangsweise zu beenden."
+      ],
+      "ja": [
+        "インストールが完了していれば、NetsuRush は起動時にローカルですばやく確認するだけです。",
+        "アップデート中に、インストーラーが PowerShell スクリプトでプロセスを列挙したり強制終了したりすることはなくなりました。"
+      ],
+      "zh": [
+        "安装完成后，NetsuRush 在启动时只做一次快速的本地检查。",
+        "更新期间，安装程序不再运行 PowerShell 脚本来枚举或强制结束进程。"
       ]
     }
   },
@@ -294,7 +638,11 @@
     "date": "2026-07-24",
     "title": {
       "fr": "Lecture proxy et détection stabilisées",
-      "en": "Stabilized proxy playback and detection"
+      "en": "Stabilized proxy playback and detection",
+      "es": "Reproducción de proxies y detección más estables",
+      "de": "Stabilere Proxy-Wiedergabe und Erkennung",
+      "ja": "プロキシ再生と検出の安定化",
+      "zh": "代理文件播放与检测更稳定"
     },
     "highlights": {
       "fr": [
@@ -306,6 +654,26 @@
         "NetsuCut now reloads the first scene's H.265 proxy when opening an already cut clip.",
         "OmniShotCut keeps a liveness signal during long GPU inference to avoid false timeouts.",
         "The installer shows Repair, Update, and Uninstall actions with the NetsuRush icon."
+      ],
+      "es": [
+        "El reproductor de NetsuCut vuelve a cargar ahora el proxy H.265 del primer plano en cuanto se abre un clip ya cortado.",
+        "OmniShotCut mantiene su señal de progreso durante las inferencias largas en la GPU para evitar falsos tiempos de espera agotados.",
+        "El instalador muestra las acciones Reparar, Actualizar y Desinstalar con el icono de NetsuRush."
+      ],
+      "de": [
+        "Der NetsuCut-Player lädt jetzt den H.265-Proxy der ersten Einstellung neu, sobald ein bereits geschnittener Clip geöffnet wird.",
+        "OmniShotCut hält sein Fortschrittssignal bei langen GPU-Inferenzen aufrecht, um fälschliche Zeitüberschreitungen zu vermeiden.",
+        "Der Installer zeigt die Aktionen Reparieren, Aktualisieren und Deinstallieren mit dem NetsuRush-Symbol."
+      ],
+      "ja": [
+        "カット済みの素材を開くと、NetsuCut のプレーヤーが最初のショットの H.265 プロキシをすぐに読み込み直すようになりました。",
+        "OmniShotCut は、時間のかかる GPU 推論の間も進行状況の信号を送り続け、誤ってタイムアウトと判定されるのを防ぎます。",
+        "インストーラーは「修復」「更新」「アンインストール」の各操作を NetsuRush のアイコン付きで表示します。"
+      ],
+      "zh": [
+        "打开已切分的素材时，NetsuCut 播放器现在会立即重新加载第一个镜头的 H.265 代理文件。",
+        "OmniShotCut 在长时间 GPU 推理期间会持续发送进度信号，避免误判超时。",
+        "安装程序会以 NetsuRush 图标显示“修复”“更新”和“卸载”操作。"
       ]
     }
   },
@@ -315,7 +683,11 @@
     "date": "2026-07-24",
     "title": {
       "fr": "Réparation fiable d'OmniShotCut",
-      "en": "Reliable OmniShotCut repair"
+      "en": "Reliable OmniShotCut repair",
+      "es": "Reparación fiable de OmniShotCut",
+      "de": "Zuverlässige Reparatur von OmniShotCut",
+      "ja": "OmniShotCut の確実な修復",
+      "zh": "OmniShotCut 修复更可靠"
     },
     "highlights": {
       "fr": [
@@ -325,6 +697,22 @@
       "en": [
         "Repair reinstalls OmniShotCut from the bundled package and verifies its import.",
         "Setup can no longer report success when OmniShotCut is missing from the local venv."
+      ],
+      "es": [
+        "El botón Reparar reinstala OmniShotCut desde el paquete incluido y luego comprueba de verdad que se puede importar.",
+        "La instalación ya no puede darse por terminada si falta OmniShotCut en el venv local."
+      ],
+      "de": [
+        "Der Button Reparieren installiert OmniShotCut aus dem mitgelieferten Paket neu und prüft dann tatsächlich, ob es sich importieren lässt.",
+        "Die Installation kann sich nicht mehr als abgeschlossen melden, wenn OmniShotCut im lokalen venv fehlt."
+      ],
+      "ja": [
+        "「修復」ボタンは、同梱のパッケージから OmniShotCut を再インストールし、実際にインポートできるかを確認します。",
+        "ローカルの venv に OmniShotCut がない場合、インストールが完了と表示されることはなくなりました。"
+      ],
+      "zh": [
+        "“修复”按钮会从随附的软件包重新安装 OmniShotCut，然后实际检查能否导入。",
+        "如果本地 venv 缺少 OmniShotCut，安装将不再显示为已完成。"
       ]
     }
   },
@@ -334,7 +722,11 @@
     "date": "2026-07-23",
     "title": {
       "fr": "Installation vérifiée et réparation",
-      "en": "Verified setup and repair"
+      "en": "Verified setup and repair",
+      "es": "Instalación verificada y reparación",
+      "de": "Geprüfte Installation und Reparatur",
+      "ja": "インストールの検証と修復",
+      "zh": "安装验证与修复"
     },
     "highlights": {
       "fr": [
@@ -346,6 +738,26 @@
         "Setup now verifies the runtime, models, and GPU backend before entering the app.",
         "The configuration page restores window controls, search, and recommended packs.",
         "NetsuCut no longer waits on the removed fake final scene loading step."
+      ],
+      "es": [
+        "La instalación comprueba ahora el entorno de ejecución, los modelos y el motor de cálculo de la GPU antes de entrar en la aplicación.",
+        "La página de configuración recupera los controles de ventana, la búsqueda y los paquetes recomendados.",
+        "El reproductor de NetsuCut ya no se queda bloqueado en la falsa carga final de las escenas."
+      ],
+      "de": [
+        "Die Installation prüft jetzt Laufzeitumgebung, Modelle und GPU-Rechen-Engine, bevor die App geöffnet wird.",
+        "Die Einrichtungsseite zeigt wieder die Fensterschaltflächen, die Suche und die empfohlenen Pakete.",
+        "Der NetsuCut-Player hängt nicht mehr beim vorgetäuschten letzten Ladeschritt der Szenen fest."
+      ],
+      "ja": [
+        "インストール時に、アプリに入る前にランタイム、モデル、GPU バックエンドを検証するようになりました。",
+        "セットアップページに、ウィンドウの操作ボタン、検索、推奨パックが戻りました。",
+        "NetsuCut のプレーヤーが、シーンの最後にあった見せかけの読み込み処理で止まらなくなりました。"
+      ],
+      "zh": [
+        "安装过程现在会在进入应用前验证运行时、模型和 GPU 后端。",
+        "配置页面恢复了窗口控制按钮、搜索和推荐包。",
+        "NetsuCut 播放器不再卡在场景最后的虚假加载步骤上。"
       ]
     }
   },
@@ -355,7 +767,11 @@
     "date": "2026-07-23",
     "title": {
       "fr": "Installation sur mesure",
-      "en": "A tailored installation"
+      "en": "A tailored installation",
+      "es": "Instalación a medida",
+      "de": "Installation nach Maß",
+      "ja": "環境に合わせたインストール",
+      "zh": "量身定制的安装"
     },
     "highlights": {
       "fr": [
@@ -367,6 +783,26 @@
         "Updates close NetsuRush cleanly before replacing its files.",
         "The core service reconnects and restarts automatically if it stops.",
         "Setup remains visible until Python, TransNetV2 and ffmpeg are ready."
+      ],
+      "es": [
+        "Las actualizaciones cierran NetsuRush de forma ordenada antes de sustituir sus archivos.",
+        "El servicio core se reconecta y se reinicia automáticamente si se detiene.",
+        "La instalación sigue en pantalla hasta que Python, TransNetV2 y ffmpeg estén listos."
+      ],
+      "de": [
+        "Updates beenden NetsuRush sauber, bevor sie seine Dateien ersetzen.",
+        "Der Core-Dienst stellt die Verbindung automatisch wieder her und startet neu, wenn er anhält.",
+        "Die Installation bleibt sichtbar, bis Python, TransNetV2 und ffmpeg bereit sind."
+      ],
+      "ja": [
+        "アップデートでは、ファイルを置き換える前に NetsuRush を正しく終了します。",
+        "core サービスが停止した場合は、自動的に再接続して再起動します。",
+        "Python、TransNetV2、ffmpeg の準備ができるまで、インストール画面が表示されたままになります。"
+      ],
+      "zh": [
+        "更新会在替换文件前正常关闭 NetsuRush。",
+        "core 服务停止时会自动重新连接并重新启动。",
+        "在 Python、TransNetV2 和 ffmpeg 准备就绪之前，安装界面会一直显示。"
       ]
     }
   }

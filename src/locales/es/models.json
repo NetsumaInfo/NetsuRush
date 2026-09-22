@@ -1,20 +1,8 @@
 {
-  "taskHint": {
-    "search": "Búsqueda visual y comparación de planos.",
-    "faces": "Detección y agrupación de rostros.",
-    "voice": "Transcripción automática de voz.",
-    "upscale": "Mejora de resolución de imágenes y vídeos.",
-    "restore": "Restauración y limpieza de imágenes.",
-    "interpolate": "Creación de fotogramas intermedios para obtener vídeos más fluidos.",
-    "depth": "Creación de mapas de profundidad.",
-    "matte-image": "Recorte y eliminación del fondo en imágenes.",
-    "matte-video": "Recorte y seguimiento de sujetos en vídeo.",
-    "object-removal": "Eliminación de objetos en vídeo."
-  },
   "title": "Modelos",
   "subtitle": "No se descarga nada de forma predeterminada. Instala lo que necesites y elimínalo cuando quieras.",
   "disk": "Disco:",
-  "noneInstalled": "Sin modelos instalados — instalar uno, si no esta función no va a funcionar.",
+  "noneInstalled": "No hay modelos instalados — instala uno o esta función no funcionará.",
   "badge": {
     "default": "predeterminado",
     "heavy": "pesado",
@@ -22,7 +10,7 @@
     "exclusiveTip": "SAMURAI y SAM2Long sustituyen el motor SAM 2 por el suyo: solo uno puede estar instalado a la vez. Instalar el segundo pide confirmación antes de quitar el primero; al borrarlo se restaura el motor original."
   },
   "conflict": {
-    "title": "Solo uno de los dos",
+    "title": "Solo uno de los dos a la vez",
     "body": "{{model}} sustituye el motor de {{other}}, ya instalado: los dos no pueden convivir. Instalar {{model}} quita {{other}}.",
     "replace": "Instalar y quitar el otro"
   },
@@ -51,7 +39,7 @@
     "removing": "Desinstalando…",
     "removeTip": "Eliminar del disco",
     "auto": "Auto",
-    "autoTip": "La librería lo obtiene al primer uso — no hay que descargar nada."
+    "autoTip": "La biblioteca lo obtiene al primer uso — no hay que descargar nada."
   },
   "action": {
     "resume": "Reanudar",

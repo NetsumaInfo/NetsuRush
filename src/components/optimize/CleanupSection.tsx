@@ -20,6 +20,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { nr } from "@/lib/bridge";
 import type { OptimizeCacheScan } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
+import { errorText } from "@/lib/errorText";
 
 export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
   const { t } = useTranslation(["optimize", "common"]);
@@ -41,7 +42,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
       const res = await nr.optimizeScanCache(r);
       setScan(res);
     } catch (e) {
-      setScan({ ok: false, error: String(e), entries: [], disk: null });
+      setScan({ ok: false, error: errorText(e), entries: [], disk: null });
     } finally {
       setScanning(false);
     }
@@ -77,7 +78,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
       const res = await nr.optimizeCleanCache(selEntries.map((e) => e.path));
       setNotice(res.ok ? t("cleanup.freed", { size: fmtBytes(res.freed), count: res.removed.length }) : t("cleanup.cleanFailed", { error: res.error || "?" }));
     } catch (e) {
-      setNotice(t("cleanup.cleanFailed", { error: String(e) }));
+      setNotice(t("cleanup.cleanFailed", { error: errorText(e) }));
     } finally {
       setCleaning(false);
       setConfirmOpen(false);

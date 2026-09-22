@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { nr } from "@/lib/bridge";
 import type { FlowState, FlowStatus, FlowVariable } from "@/lib/bridge";
+import { errorText } from "@/lib/errorText";
 
 /// A variable override, in the shape the composition itself declared.
 ///
@@ -83,7 +84,7 @@ export function useFlow() {
         const live = await nr.flowState();
         if (mounted.current) adopt(live);
       } catch (e) {
-        if (mounted.current) setError(e instanceof Error ? e.message : String(e));
+        if (mounted.current) setError(errorText(e));
       }
     })();
   }, [refreshStatus, adopt]);
@@ -94,7 +95,7 @@ export function useFlow() {
     try {
       return await work();
     } catch (e) {
-      if (mounted.current) setError(e instanceof Error ? e.message : String(e));
+      if (mounted.current) setError(errorText(e));
       return null;
     } finally {
       if (mounted.current) setBusy(false);
@@ -143,7 +144,7 @@ export function useFlow() {
         });
         if (mounted.current) adopt(next);
       } catch (e) {
-        if (mounted.current) setError(e instanceof Error ? e.message : String(e));
+        if (mounted.current) setError(errorText(e));
       } finally {
         if (mounted.current) setApplying(false);
       }

@@ -50,7 +50,7 @@
     "mergeToOne": "合并为单个文件",
     "fileName": "文件名",
     "fileNamePlaceholder": "{base}_{index}",
-    "insertToken": "插入标记",
+    "insertToken": "插入占位符",
     "tokens": {
       "base": "基础名称",
       "source": "源文件",
@@ -60,9 +60,9 @@
       "end": "结束",
       "duration": "时长",
       "label": "镜头标签",
-      "profile": "配置名称",
-      "codec": "编解码器",
-      "container": "容器",
+      "profile": "预设名称",
+      "codec": "编码格式",
+      "container": "封装格式",
       "date": "日期",
       "time": "时间"
     },
@@ -111,8 +111,7 @@
     "trackGroup": "轨道",
     "trackN": "轨道 {{n}}",
     "langResolved": "{{lang}} → 轨道 {{n}}",
-    "langUnresolved": "{{lang}} → 未找到轨道",
-    "timelineHint": "Resolve 导入音频只能全要或全不要。"
+    "langUnresolved": "{{lang}} → 未找到轨道"
   },
   "iconPicker": {
     "search": "搜索图标…",
@@ -140,7 +139,7 @@
     "remux": "Remux",
     "encode": "重新编码",
     "remuxWarning": "剪切不精确",
-    "remuxWarningDetail": "Remux 直接复制流而不重新编码：剪切点会对齐到源文件的关键帧，因此镜头开头和结尾可能多出几帧。需要精确到帧的剪切，请使用「重新编码」。"
+    "remuxWarningDetail": "Remux 直接复制流而不重新编码：剪切点会对齐到源文件的关键帧，因此镜头开头和结尾可能多出几帧。需要精确到帧的剪切，请使用“重新编码”。"
   },
   "audioMode": {
     "copy": "直接复制",

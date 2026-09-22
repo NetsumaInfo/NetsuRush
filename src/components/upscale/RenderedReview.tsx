@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import type { FrameCompare, RenderReview } from "./useProcSources";
 import { UpscalePlayer } from "./UpscalePlayer";
 import { useTranslation } from "react-i18next";
+import { errorText } from "@/lib/errorText";
 
 type ReviewSide = "before" | "after";
 
@@ -38,7 +39,7 @@ export function RenderedReview({
     setSide("after"); setProgress(0); setGoto(null); setError(null); setOutputInfo(null);
     nr.playInfo(review.outputPath)
       .then((info) => { if (active) { setOutputInfo(info); if (info.error) setError(info.error); } })
-      .catch((e) => { if (active) setError(String(e)); });
+      .catch((e) => { if (active) setError(errorText(e)); });
     return () => { active = false; };
   }, [review.id, review.outputPath]);
 
@@ -84,7 +85,7 @@ export function RenderedReview({
         sourceKey: review.id, configKey: "render-review", revision: Date.now(),
       });
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     } finally {
       setComparing(false);
     }

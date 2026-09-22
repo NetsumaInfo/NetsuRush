@@ -12,7 +12,7 @@
     "about": "About"
   },
   "about": {
-    "tagline": "Local rush-prep hub, wired to DaVinci Resolve, Premiere Pro and After Effects.",
+    "tagline": "Local logging hub, connected to DaVinci Resolve, Premiere Pro and After Effects.",
     "socialTitle": "Social",
     "social": {
       "discord": "Join the server"
@@ -34,7 +34,7 @@
     "signOut": "Sign out"
   },
   "playback": {
-    "title": "Previews and thumbnails",
+    "title": "Playback and thumbnails",
     "subtitle": "A change regenerates the previews. The old ones stay on disk until you delete them.",
     "soundTitle": "Sound",
     "playerVolume": "Player volume",
@@ -43,44 +43,31 @@
     "hoverVolumeHint": "Volume of the hovered thumbnail; auto-playing previews stay muted.",
     "globalMuted": "Muted by the player volume.",
     "generation": {
-      "proxyTitle": "Animated previews",
+      "proxyTitle": "Video previews",
       "thumbnailTitle": "Static thumbnails",
       "format": "Format",
-      "formatHint": {
-        "hevc": "Smaller files, best when HEVC decoding is smooth.",
-        "h264": "Highly compatible and generally quick to decode.",
-        "webp": "Silent grid preview with no audio track."
-      },
-      "engine": "Engine",
-      "engineAuto": "Automatic · recommended",
-      "engineHint": "Auto selects the best engine that actually works.",
-      "preset": "Profile",
-      "presetHint": "Actual FFmpeg values for the selected engine.",
+      "engine": "Graphics card or processor",
+      "engineAuto": "Automatic",
       "resolution": "Resolution",
-      "resolutionHint": "480p is the default setting for cards.",
       "audio": "Audio",
-      "audioHint": "Adds a lightweight AAC track to video proxies.",
-      "noWebpAudio": "Animated WebP does not support audio.",
       "audioUnavailable": "No audio in the configured preview.",
-      "enabled": "Enabled",
-      "disabled": "Disabled",
-      "thumbnailFormatHint": "At the same sharpness, a JPEG thumbnail weighs about twice as much as a WebP one.",
+      "enabled": "On",
+      "disabled": "Off",
+      "thumbnailFormatHint": "At the same sharpness, a JPEG thumbnail is about twice the size of a WebP one.",
       "quality": "Image quality",
       "qualityLow": "Light",
       "qualityStandard": "Balanced",
       "qualityHigh": "Sharp",
       "qualityHint": "Light 360 px · Balanced 480 px · Sharp 720 px. From lightest to sharpest, a thumbnail goes from about 5 to 16 kB.",
-      "thumbnailTiming": "The thumbnail is still captured a few frames after the cut in fast mode.",
-      "cacheHint": "Existing caches remain available after a change.",
-      "cacheCleared": "Old caches removed.",
+      "cacheCleared": "Old caches deleted.",
       "reset": "Reset",
-      "clearOld": "Remove old caches"
+      "clearOld": "Delete old caches"
     }
   },
   "performance": {
     "indexingTitle": "Shot analysis",
     "accelerationTitle": "Acceleration",
-    "shotDecode": "Grouped extraction",
+    "shotDecode": "Batch extraction",
     "shotDecodeHint": "Up to 6× faster, for the same frames.",
     "vramProfile": "Memory profile",
     "vramProfileHint": "Lower it if the app slows your edit down, raise it when the machine is free.",
@@ -92,7 +79,7 @@
     "maxPatches": "Analysis resolution",
     "maxPatchesHint": "Higher catches small details, but takes more time and memory.",
     "patchesDefault": "{{value}} (default)",
-    "reindexWarning": "At this resolution your rushes must be indexed again. Going back to 256 finds the original index intact.",
+    "reindexWarning": "At this resolution, your clips need to be reindexed. Switching back to 256 brings back the original index, untouched.",
     "onnxGpu": "Faces and dictation on GPU",
     "onnxGpuHint": "About 8× faster. Turn it off if your graphics driver crashes.",
     "enabled": "On",
@@ -115,7 +102,7 @@
         "label": "Midnight"
       },
       "blue": {
-        "label": "Night blue"
+        "label": "Navy"
       },
       "light": {
         "label": "Light"
@@ -143,13 +130,13 @@
       }
     },
     "wallpaper": {
-      "title": "Background",
+      "title": "Wallpaper",
       "choose": "Choose an image",
       "none": "None",
       "remove": "Remove from library",
-      "empty": "No background yet. Drop a file here.",
+      "empty": "No wallpaper yet. Drop a file here.",
       "importFailed": "Import failed.",
-      "blockedByTheme": "The High contrast theme takes no background.",
+      "blockedByTheme": "The High contrast theme doesn't support wallpaper.",
       "blur": "Blur",
       "opacity": "Opacity",
       "saturate": "Saturation",
@@ -163,7 +150,7 @@
       "groupMotion": "Motion",
       "reset": "Reset",
       "openFraming": "Frame the image",
-      "framingTitle": "Background framing",
+      "framingTitle": "Wallpaper framing",
       "rotateLeft": "Rotate left",
       "rotateRight": "Rotate right",
       "flipH": "Flip horizontally",
@@ -185,18 +172,18 @@
       "bg": "Background",
       "surface": "Panels",
       "border": "Borders",
-      "restore": "Back to theme",
+      "restore": "Reset to theme",
       "fromTheme": "From theme",
-      "resetAll": "Back to theme",
-      "resetAllHint": "Drops every tweak on this theme."
+      "resetAll": "Reset all to theme",
+      "resetAllHint": "Removes all your changes to this theme."
     },
     "custom": {
       "title": "My themes",
-      "subtitle": "Keeps the palette, colours and wallpaper under a name.",
+      "subtitle": "Keeps the palette, colors and wallpaper under a name.",
       "create": "New theme",
       "save": "Save",
       "delete": "Delete this theme",
-      "empty": "No saved theme yet.",
+      "empty": "No saved themes yet.",
       "namePlaceholder": "Theme name",
       "confirm": "Confirm",
       "rename": "Rename",
@@ -249,8 +236,8 @@
   },
   "compatibility": {
     "title": "This PC's compatibility",
-    "gpuFunctions": "GPU functions",
-    "cpuFunctions": "CPU or fallback functions",
+    "gpuFunctions": "Features that use the GPU",
+    "cpuFunctions": "Features that use the CPU or a fallback",
     "igpu": "iGPU",
     "dgpu": "dGPU",
     "driver": "Driver",
@@ -266,19 +253,16 @@
     "hardware": "Detected components",
     "gpu": "Graphics card",
     "cpu": "Processor",
-    "uses": "Features",
-    "notInstalled": "Unavailable",
-    "available": "Available",
     "unavailable": "NetsuRush could not check this PC's components.",
     "features": {
-      "netsucut": "NetsuCut",
+      "netsucut": "Video previews",
       "torchModels": "AI models",
       "onnxModels": "ONNX models",
       "transcription": "Transcription",
       "notebook": "NetsuBook"
     },
     "featureHints": {
-      "netsucut": "Creates previews and encodes video.",
+      "netsucut": "Encodes previews with the available engine.",
       "torchModels": "Detects shots, searches and improves images.",
       "onnxModels": "Removes backgrounds and runs ONNX models.",
       "transcription": "Turns speech into text.",
@@ -286,8 +270,8 @@
     }
   },
   "power": {
-    "title": "Host shutdown",
-    "subtitle": "Offers to close Resolve or Adobe during a heavy task, then reopen your project afterwards.",
+    "title": "Closing editing apps",
+    "subtitle": "Offers to close Resolve or Adobe during a heavy task, then reopen your project afterward.",
     "offer": "Offer to close",
     "reopen": "Reopen reminder",
     "nub": "Edge tab",
@@ -370,7 +354,7 @@
     "descriptionPlaceholder": "What you did, and what went wrong…",
     "descriptionIdea": "Tell us your idea",
     "descriptionIdeaPlaceholder": "What you'd like to do, and why",
-    "steps": "How to do it again?",
+    "steps": "How can we make it happen again?",
     "stepsPlaceholder": "1. I open… 2. I click… 3. …",
     "expected": "What should it have done?",
     "expectedPlaceholder": "The result you expected",
@@ -382,7 +366,7 @@
     "specs": {
       "title": "Your PC",
       "copy": "Copy",
-      "refresh": "Read again",
+      "refresh": "Refresh",
       "loading": "Reading…",
       "more": "See all",
       "less": "Collapse",
@@ -395,8 +379,6 @@
     "sending": "Sending…",
     "send": "Send",
     "download": "Save the message",
-    "logsAttached": "{{count}} log lines attached",
-    "logErrors": "{{count}} errors",
     "sendFailed": "Sending didn't work. Try again.",
     "validation": {
       "description": "Tell us what happened before sending.",
@@ -412,14 +394,18 @@
       "add": "Add",
       "remove": "Remove",
       "limit": "{{count}} files at most"
-    }
+    },
+    "logsAttached_one": "{{count}} log line attached",
+    "logsAttached_other": "{{count}} log lines attached",
+    "logErrors_one": "{{count}} error",
+    "logErrors_other": "{{count}} errors"
   },
   "outbox": {
     "opening": "Opening cache…",
-    "intro": "Sends to an application that is closed wait here, then go out on their own when it reopens.",
+    "intro": "Anything sent to a closed app waits here, then goes out on its own when the app reopens.",
     "enabled": "Queue enabled",
-    "on": "Enabled",
-    "off": "Disabled",
+    "on": "On",
+    "off": "Off",
     "delay": "Delay before applying",
     "delayHint": "Gives the editing app time to finish opening.",
     "destination": "Destination for cached sends",
@@ -463,12 +449,12 @@
       "disabled": "Your profile shows nothing.",
       "noAppId": "No Discord application set."
     },
-    "showModule": "Open module",
+    "showModule": "Current module",
     "showProject": "Project name",
     "showProjectHint": "Can reveal a client's name.",
     "showElapsed": "Time elapsed",
     "showLinks": "Clickable card",
-    "showLinksHint": "The art opens the Discord server, the first line the repository."
+    "showLinksHint": "The image opens the Discord server, the first line opens the repository."
   },
   "storage": {
     "empty": "No cache yet.",
@@ -491,12 +477,12 @@
       "thumb": "One image per shot. Slow to rebuild from cold.",
       "proxy": "Short clips encoded on GPU. Rebuilt in a second.",
       "voice": "16 kHz WAV for transcription and silence detection.",
-      "upscaleTest": "Full-res frames from \"what if?\" tests.",
+      "upscaleTest": "Full-resolution frames from “what if?” tests.",
       "roto": "Frames and masks from segmentation sessions.",
       "scenes": "AI-detected cut points. Rebuild = one detection pass.",
       "transcripts": "Text and word timings. Rebuild = one ASR pass.",
       "embeddings": "One vector per shot — what the model saw. Rebuild = hours of GPU.",
-      "indexThumbs": "Old thumbnails left inside the index. Search now shows the ones from cutting, so whatever remains here can go.",
+      "indexThumbs": "Old thumbnails stored in the index. Search now shows the ones from the cut, so you can clear what's left.",
       "faces": "One identity vector per detected face. Rebuild = one detection pass."
     },
     "tree": {
@@ -508,13 +494,13 @@
       "unattributed": "Unattributed",
       "unattributedHint": "Cache written before the index, or whose footage couldn't be found. Can be purged all at once.",
       "clearSelection": "Deselect",
-      "purgeSelection": "Clear selection",
+      "purgeSelection": "Clear selected",
       "selected_one": "{{count}} selected · {{size}}",
       "selected_other": "{{count}} selected · {{size}}"
     },
     "reindex": {
       "action": "Reindex",
-      "hint": "Picks up cache already on disk: the index only knows what was written since it landed.",
+      "hint": "Picks up caches already on disk: the index only knows what was written since it was introduced.",
       "running": "Reindexing…",
       "scan": "Reading known footage…",
       "index": "Scanning folders…"
@@ -543,11 +529,11 @@
       "reusable": "Reusable previews",
       "reusableDesc": "Rebuilt on their own whenever they are missing.",
       "durable": "Saved analyses",
-      "durableDesc": "Expensive results are only removed when you ask."
+      "durableDesc": "Results that are costly to recompute, deleted only when you ask."
     },
     "policy": {
       "title": "Automatic cleanup",
-      "desc": "Fast previews are bounded by default. Expensive analyses stay saved.",
+      "desc": "Fast previews are capped by default. Expensive analyses are kept.",
       "auto": "Auto cleanup",
       "quota": "Quota",
       "quotaHint": "Past this, the least recently used entries go first.",
@@ -556,7 +542,7 @@
       "gb": "GB",
       "days": "days",
       "manualOnly": "Manual purge only",
-      "manualOnlyHint": "This type isn't usage-tracked: no auto-purge possible.",
+      "manualOnlyHint": "Usage isn't tracked for this type, so it can't be purged automatically.",
       "sessionTitle": "Working caches",
       "sessionDesc": "When to delete heavy temporary files. Quitting the app deletes them anyway.",
       "sequenceTitle": "Model intermediate sequences",
@@ -568,8 +554,6 @@
         "app": "When closing the app",
         "immediate": "Right after the operation"
       },
-      "sessionOnly": "On app exit",
-      "sessionOnlyHint": "The whole folder is removed when NetsuRush closes and checked again on the next launch after a crash.",
       "warnTitle": "Warn me",
       "warnCache": "When the cache goes over",
       "warnDisk": "When there's less than",
@@ -577,7 +561,7 @@
       "warnNever": "Warning only — nothing gets deleted."
     },
     "warn": {
-      "cache": "Cache is up to {{size}}.",
+      "cache": "Cache has reached {{size}}.",
       "disk": "Disk almost full: {{size}} free."
     },
     "confirm": {
@@ -599,11 +583,11 @@
     },
     "maintenance": {
       "title": "Maintenance",
-      "desc": "Two corners that per-project cleanup doesn't cover."
+      "desc": "Two things per-project cleanup doesn't cover."
     },
     "missing": {
       "title": "Missing footage",
-      "desc": "Unplugging an external drive is enough to make it vanish: nothing gets deleted without you.",
+      "desc": "Unplugging an external drive is enough to make footage go missing: nothing is deleted unless you ask.",
       "purge": "Clear its cache",
       "none": "All indexed footage is reachable."
     },
@@ -618,8 +602,8 @@
     },
     "projects": {
       "current": "Open",
-      "desc": "The projects search knows about. A project is added as soon as its Media Pool is read; \"Scan\" finds the others.",
-      "empty": "No project known yet.",
+      "desc": "Projects that search knows about. A project is added as soon as its Media Pool is read; “Scan” finds the others.",
+      "empty": "No known projects yet.",
       "forget": "Forget",
       "forgetTooltip": "Removes the project from the list (index and files are untouched)",
       "rushCount_one": "{{count}} clip",
@@ -628,13 +612,13 @@
       "scanStarting": "Preparing…",
       "scanning": "{{project}} — {{done}}/{{total}}",
       "title": "Projects known to search",
-      "scanDone_one": "{{count}} project collected",
-      "scanDone_other": "{{count}} projects collected"
+      "scanDone_one": "{{count}} project found",
+      "scanDone_other": "{{count}} projects found"
     }
   },
   "navigation": {
     "title": "Pages and navigation order",
-    "reset": "Restore all",
+    "reset": "Reset all",
     "required": "Always available",
     "visible": "Visible",
     "hidden": "Hidden",
@@ -697,7 +681,7 @@
   },
   "indexing": {
     "title": "Indexing",
-    "subtitle": "Each clip is cut into shots, then each shot is analysed. What does not change the result is already on.",
+    "subtitle": "Each clip is cut into shots, then each shot is analyzed. Anything that doesn't change the result is already on.",
     "cutTitle": "Shot detection"
   },
   "boardAssets": {
@@ -706,12 +690,9 @@
     "disk": "{{free}} free of {{total}}",
     "scanning": "Scanning storage…",
     "failed": "That didn't go through. Try again.",
-    "freedNotice": "Freed {{size}} ({{count}} files)",
-    "movedNotice": "Moved {{size}} ({{count}} files)",
-    "movedPartly": "{{count}} files moved, {{failed}} failed (left in place)",
     "archivedNotice": "Board saved to “{{name}}”: its media now live in the project folder",
     "settling": "{{count}} still being written",
-    "settlingHint": "A file written moments ago may belong to an import the board has not placed yet. It will be judged on the next pass.",
+    "settlingHint": "A file written moments ago may belong to an import the board has not placed yet. It will be checked on the next pass.",
     "safe": {
       "hint": "Checked file by file: these bytes already exist inside a project's companion folder.",
       "title": "Safe to free",
@@ -722,19 +703,27 @@
     },
     "sole": {
       "title": "Save these somewhere first",
-      "hint": "The only copy there is: save the board first, and it moves to the section above.",
+      "hint": "This is the only copy: save the board first, and it moves to the section above.",
       "empty": "Nothing at risk: everything the app keeps also exists elsewhere.",
       "untitled": "Untitled board",
-      "sceneCount": "{{count}} media the app is the only holder of · {{size}}",
       "shared": "Shared board",
       "sharedHint": "A shared board has no project version: its document is authoritative and collaboration handles its media.",
       "openBoard": "Board open",
       "openBoardHint": "This board is open: use “Save as…” from its toolbar.",
       "archive": "Save as project…",
-      "orphans": "Media no board asks for",
-      "orphansHint": "{{count}} files · {{size}}. Nothing displays them any more, but this is the only copy.",
-      "move": "Move to a folder…"
-    }
+      "orphans": "Media no board uses",
+      "move": "Move to a folder…",
+      "sceneCount_one": "{{count}} media file only the app holds · {{size}}",
+      "sceneCount_other": "{{count}} media files only the app holds · {{size}}",
+      "orphansHint_one": "{{count}} file · {{size}}. Nothing displays it anymore, but this is the only copy.",
+      "orphansHint_other": "{{count}} files · {{size}}. Nothing displays them anymore, but this is the only copy."
+    },
+    "freedNotice_one": "Freed {{size}} ({{count}} file)",
+    "freedNotice_other": "Freed {{size}} ({{count}} files)",
+    "movedPartly_one": "{{count}} file moved, {{failed}} failed (left in place)",
+    "movedPartly_other": "{{count}} files moved, {{failed}} failed (left in place)",
+    "movedNotice_one": "Moved {{size}} ({{count}} file)",
+    "movedNotice_other": "Moved {{size}} ({{count}} files)"
   },
   "collaboration": {
     "title": "Collaboration",
@@ -742,7 +731,7 @@
     "profilesHint": "Live: sends every 60 ms. Balanced: 200 ms. Economy: 900 ms, with automatic media downloads disabled.",
     "default": "Default profile",
     "inherit": "Use default profile",
-    "saveFailed": "Could not save preferences on this computer.",
+    "saveFailed": "Couldn't save settings on this computer.",
     "profiles": {
       "live": "Live",
       "balanced": "Balanced",

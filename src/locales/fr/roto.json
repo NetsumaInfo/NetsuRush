@@ -19,14 +19,9 @@
     "outHere": "Borne de sortie ici",
     "outTip": "Borne de sortie à l'image courante (O — Maj+O efface)",
     "range": "Plage {{from}}–{{to}}",
-    "clickHint": "Clic = {{mode}} (E bascule) · clic droit = exclure · Maj+survol = aperçu · molette = zoom · J/K/L · I/O · , ; = pas de suivi · 1-9 objet",
-    "include": "inclure",
-    "exclude": "exclure",
     "showMask": "Afficher le masque",
     "hideOverlay": "Masquer la surimpression",
-    "showOverlay": "Afficher la surimpression",
-    "testTitle": "Test — {{label}}",
-    "testHint": "Aperçu seul — rien n'est écrit. Si le rendu convient, lance l'action sur tout le plan."
+    "showOverlay": "Afficher la surimpression"
   },
   "panels": {
     "model": "Modèle",

@@ -16,8 +16,8 @@
     "exportNetsu": "Exportieren (.netsu)",
     "importNetsu": "Importieren (.netsu)",
     "deleteNotebook": "Notizbuch löschen",
-    "collapseSidebar": "Seitenleiste einklappen (Ctrl+\\)",
-    "expandSidebar": "Seitenleiste einblenden (Ctrl+\\)",
+    "collapseSidebar": "Seitenleiste einklappen (Strg+\\)",
+    "expandSidebar": "Seitenleiste einblenden (Strg+\\)",
     "search": "Suchen",
     "newPage": "Neue Seite",
     "pages": "Seiten",
@@ -26,14 +26,14 @@
     "emptyNotebookHint": "Leg ein Notizbuch an, um zu starten.",
     "emptyTitleHasNb": "Eine leere Seite wartet",
     "emptyTitleNoNb": "Willkommen im Notizbuch",
-    "emptyBodyHasNb": "Notizen, Pläne, Entwürfe, Datenbanken — schreib deine Ideen einfach rein.",
-    "emptyBodyNoNb": "Ein Notizblock: Notizbücher, verschachtelte Seiten, Rich-Blöcke und Datenbanken.",
+    "emptyBodyHasNb": "Notizen, Pläne, Entwürfe, Datenbanken – schreib deine Ideen einfach rein.",
+    "emptyBodyNoNb": "Ein Notizblock: Notizbücher, verschachtelte Seiten, vielseitige Blöcke und Datenbanken.",
     "createNotebook": "Notizbuch erstellen",
     "confirmDeleteNbTitle": "„{{name}}“ löschen?",
     "confirmDeleteNbDesc": "Das Notizbuch und ALLE Seiten werden endgültig gelöscht.",
     "confirmTrashTitle": "In den Papierkorb legen?",
     "confirmTrashDesc": "„{{name}}“ und die Unterseiten wandern in den Papierkorb (wiederherstellbar).",
-    "sendToTrash": "In den Papierkorb",
+    "sendToTrash": "In den Papierkorb legen",
     "saveAsProject": "Speichern unter…",
     "openProject": "Notizbuch öffnen…"
   },
@@ -68,7 +68,7 @@
     }
   },
   "navigation": {
-    "notebookRoot": "Notizbuch-Stamm",
+    "notebookRoot": "Notizbuch (oberste Ebene)",
     "moveTo": "Verschieben nach…",
     "filterPages": "Seiten filtern…",
     "noMatch": "Keine passende Seite.",
@@ -97,8 +97,8 @@
   },
   "trash": {
     "title": "Papierkorb",
-    "count_one": "{{count}} gelöschte Seite — wiederherstellbar.",
-    "count_other": "{{count}} gelöschte Seiten — wiederherstellbar.",
+    "count_one": "{{count}} gelöschte Seite – wiederherstellbar.",
+    "count_other": "{{count}} gelöschte Seiten – wiederherstellbar.",
     "description": "Gelöschte Seiten werden hier angezeigt.",
     "empty": "Der Papierkorb ist leer.",
     "restore": "Wiederherstellen",
@@ -113,7 +113,7 @@
     "deletedSubpage": "Gelöschte Unterseite",
     "subpage": "Unterseite",
     "rename": "Umbenennen",
-    "empty": "Keine Seiten — erstelle eine"
+    "empty": "Keine Seiten – erstelle eine"
   },
   "tabs": {
     "prev": "Vorherige Seite",
@@ -132,32 +132,32 @@
     "subpage": {
       "title": "Unterseite",
       "desc": "Neue untergeordnete Seite, hier eingebettet",
-      "aliases": "unterseite|kindseite|seite"
+      "aliases": "subpage|unterseite|kindseite|seite|page"
     },
     "callout": {
       "title": "Hinweis",
       "desc": "Farbiger Bereich mit Emoji",
-      "aliases": "hinweis|notiz|info"
+      "aliases": "callout|hinweis|notiz|note|info"
     },
     "toggle": {
       "title": "Aufklappbereich",
       "desc": "Ein- und ausklappbarer Abschnitt",
-      "aliases": "aufklappen|einklappen|akkordeon"
+      "aliases": "toggle|aufklappen|einklappen|akkordeon"
     },
     "database": {
       "title": "Datenbank",
       "desc": "Tabelle und Kanban mit typisierten Spalten",
-      "aliases": "datenbank|tabelle|raster|kanban"
+      "aliases": "database|datenbank|tabelle|table|raster|kanban"
     },
     "equation": {
       "title": "Gleichung",
       "desc": "LaTeX-Formel (KaTeX)",
-      "aliases": "gleichung|mathe|latex|formel|katex"
+      "aliases": "equation|gleichung|math|mathe|latex|formel|katex"
     },
     "divider": {
       "title": "Trennlinie",
       "desc": "Linie, Striche, Punkte oder Sterne",
-      "aliases": "trenner|linie|hr|---"
+      "aliases": "divider|trennlinie|trenner|linie|hr|---"
     },
     "youtube": {
       "desc": "YouTube-Video einbetten",
@@ -165,12 +165,12 @@
     },
     "embed": {
       "title": "Einbettung",
-      "aliases": "einbetten|iframe|vimeo|twitter|tiktok"
+      "aliases": "embed|einbetten|einbettung|iframe|vimeo|twitter|tiktok"
     },
     "bookmark": {
       "title": "Lesezeichen",
       "desc": "Vorschau eines Weblinks",
-      "aliases": "lesezeichen|link|web"
+      "aliases": "bookmark|lesezeichen|link|web"
     },
     "video": {
       "title": "Video",
@@ -184,17 +184,17 @@
     "file": {
       "title": "Datei",
       "desc": "PDF, Word, Excel, ZIP… (PDF-Vorschau)",
-      "aliases": "datei|pdf|doc|dokument|zip|excel|word"
+      "aliases": "file|datei|pdf|doc|dokument|zip|excel|word"
     },
     "gallery": {
       "title": "Bildergalerie",
-      "desc": "Mehrere scrollbar angeordnete Bilder",
-      "aliases": "galerie|bilder|karussell|album"
+      "desc": "Mehrere Bilder in einer scrollbaren Reihe",
+      "aliases": "gallery|galerie|bilder|karussell|carousel|album"
     },
     "date": {
       "title": "Datum",
       "desc": "Datum in den Text einfügen",
-      "aliases": "datum|tag|kalender|heute"
+      "aliases": "date|datum|tag|kalender|heute"
     }
   },
   "dbUi": {
@@ -251,7 +251,7 @@
   "paste": {
     "mention": {
       "label": "Erwähnung",
-      "desc": "Kompakte Marke im Text"
+      "desc": "Kompakter Verweis im Text"
     },
     "url": {
       "label": "Link",
@@ -325,10 +325,10 @@
       "equilibrium": "Gleichgewicht",
       "ion": "Ion"
     },
-    "empty": "Leere Gleichung — klicken, um LaTeX einzugeben",
+    "empty": "Leere Gleichung – klicken, um LaTeX einzugeben",
     "templates": "Vorlagen",
     "error": "LaTeX-Fehler: {{error}}",
-    "hint": "Vollständiges LaTeX (KaTeX + Chemie \\ce) · Strg+Eingabe zum Anwenden · Escape zum Abbrechen",
+    "hint": "Vollständiges LaTeX (KaTeX + Chemie \\ce) · Strg+Eingabe zum Anwenden · Esc zum Abbrechen",
     "edit": "Gleichung bearbeiten",
     "input": "LaTeX-Code der Gleichung"
   },
@@ -384,8 +384,8 @@
     "basic": "Standard",
     "info": "Info",
     "tip": "Tipp",
-    "warning": "Warnung",
-    "alert": "Alarm",
+    "warning": "Achtung",
+    "alert": "Warnung",
     "changeEmoji": "Emoji ändern",
     "presets": "Voreinstellungen",
     "background": "Hintergrundfarbe",
@@ -425,11 +425,11 @@
   },
   "settings": {
     "title": "Notizbuch-Einstellungen",
-    "description": "Werden sofort angewendet und für alle Notizbücher übernommen.",
+    "description": "Werden sofort angewendet und gelten für alle Notizbücher.",
     "appearance": "Darstellung",
     "pageWidth": "Dokumentbreite",
     "fontScale": "Schriftgröße",
-    "breadcrumb": "Breadcrumb über dem Dokument",
+    "breadcrumb": "Pfadnavigation über dem Dokument",
     "visible": "Sichtbar",
     "hidden": "Ausgeblendet",
     "editor": "Editor",
@@ -440,7 +440,7 @@
     "shortcuts": "Tastenkürzel",
     "reset": "Zurücksetzen",
     "press": "Drücken…",
-    "shortcutHint": "Klicken und dann das neue Kürzel drücken (Escape bricht ab)",
+    "shortcutHint": "Klicken und dann das neue Kürzel drücken (Esc bricht ab)",
     "shortcutConflict": "Ein bereits verwendetes Kürzel wird mit der bisherigen Aktion getauscht.",
     "width": {
       "narrow": "Schmal",
@@ -452,7 +452,7 @@
       "newPage": "Neue Seite",
       "newTab": "Neuer Tab",
       "closeTab": "Tab schließen",
-      "reopenTab": "Geschlossenen Tab öffnen",
+      "reopenTab": "Geschlossenen Tab wieder öffnen",
       "nextTab": "Nächster Tab",
       "prevTab": "Vorheriger Tab",
       "back": "Vorherige Seite (Verlauf)",
@@ -465,7 +465,7 @@
     },
     "spellcheck": "Rechtschreibprüfung",
     "spellcheckHint": "Unterstreicht Fehler; Rechtsklick oder Strg+. zum Korrigieren",
-    "spellUnsupported": "Kein Wörterbuch für diese Sprache — nur native Unterstreichung",
+    "spellUnsupported": "Kein Wörterbuch für diese Sprache – nur native Unterstreichung",
     "spellOn": "Aktiv",
     "spellOff": "Aus",
     "personalDictionary": "Persönliches Wörterbuch",
@@ -504,7 +504,7 @@
     "search": "Symbol suchen…",
     "uploading": "Wird hochgeladen…",
     "chooseImage": "Bild auswählen",
-    "dropFile": "oder Datei hierherziehen",
+    "dropFile": "oder Datei hierher ziehen",
     "emojis": "Emojis",
     "icons": "Symbole",
     "upload": "Importieren"
@@ -592,7 +592,7 @@
     "kind": {
       "notes": "Notizen",
       "project": "Projekt",
-      "script": "Drehbuch",
+      "script": "Skript",
       "research": "Recherche",
       "journal": "Journal"
     },
@@ -649,7 +649,7 @@
     "nextImage": "Nächstes Bild",
     "previousMonth": "Vorheriger Monat",
     "nextMonth": "Nächster Monat",
-    "resizeMedia": "Größe ändern",
+    "resizeMedia": "Größe des Mediums ändern",
     "inPoint": "In-Punkt",
     "outPoint": "Out-Punkt",
     "renameView": "Ansicht umbenennen",

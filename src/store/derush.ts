@@ -10,6 +10,7 @@ import { createSmoothProgress, type SmoothProgress } from "@/lib/smoothProgress"
 import { rushesToClips, hostShort, hostImport } from "@/lib/host";
 import type { AppState } from "./index";
 import { basename, type DerushView, type DerushSection } from "./types";
+import { errorText } from "@/lib/errorText";
 
 // Un rush dans la file de découpe en lot.
 interface BatchDetectItem {
@@ -179,7 +180,7 @@ export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (s
         });
       } catch (e) {
         // Échec live : on GARDE ce qui est affiché (cache), l'erreur n'efface rien.
-        set({ clipsLoading: false, clipsRevalidating: false, clipsError: get().clips.length ? null : String(e) });
+        set({ clipsLoading: false, clipsRevalidating: false, clipsError: get().clips.length ? null : errorText(e) });
       }
     })().finally(() => {
       clipsInflight = null;
@@ -265,7 +266,7 @@ export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (s
           ? { status: "error", error: r.error, pct: 100 }
           : { status: "done", pct: 100, scenes: (r.scenes ?? []).length };
       } catch (e) {
-        result = { status: "error", error: String(e), pct: 100 };
+        result = { status: "error", error: errorText(e), pct: 100 };
       }
       // Arrêt AVANT l'état final : un tic en vol repousserait la barre sous les 100 % qu'on pose.
       tracks.delete(i);
@@ -375,7 +376,7 @@ export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (s
       set({ tlBusy: null, tlNotice: notice });
       return notice;
     } catch (e) {
-      return fail(String(e));
+      return fail(errorText(e));
     }
   },
 });

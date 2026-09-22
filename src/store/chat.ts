@@ -6,6 +6,7 @@ import type { AppState } from "./index";
 import i18n from "@/i18n";
 import { systemPromptFor } from "@/lib/agentPrompts";
 import { buildEngines, toEngineId, toWire } from "@/lib/agentCatalog";
+import { errorText } from "@/lib/errorText";
 
 export interface UiToolCall {
   id: string; name: string; input: unknown; ok?: boolean; result?: unknown; done: boolean;
@@ -284,7 +285,7 @@ export const createChatSlice: StateCreator<AppState, [], [], ChatSlice> = (set, 
       // not been given, which is the fastest way to make it invent them.
       surface: "pilot", system: systemPromptFor("pilot"),
     })
-      .catch((e) => set({ chatError: String(e), chatRunning: false, chatRunId: null }));
+      .catch((e) => set({ chatError: errorText(e), chatRunning: false, chatRunId: null }));
   },
 
   chatCancel: () => {

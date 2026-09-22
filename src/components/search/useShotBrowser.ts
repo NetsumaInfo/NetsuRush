@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { nr, type SearchHit } from "@/lib/bridge";
 import { basename, thumbTime } from "@/lib/utils";
+import { errorText } from "@/lib/errorText";
 export { basename };
 
 const PAGE = 80;   // plans affichés par lot (vignettes chargées paresseusement → modal instantané)
@@ -28,7 +29,7 @@ export function useShotBrowser() {
         const r = await nr.searchIndexed();
         setIndexedPaths(Object.keys(r.indexed || {}));
       } catch (e) {
-        setError(String(e));
+        setError(errorText(e));
       } finally {
         setLoading(false);
       }
@@ -89,7 +90,7 @@ export function useShotBrowser() {
       loadThumbs(path, list, 0, PAGE);
     } catch (e) {
       setShots([]);
-      setError(t("shotBrowser.cutsUnavailable", { error: String(e) }));
+      setError(t("shotBrowser.cutsUnavailable", { error: errorText(e) }));
     }
   }, [loadThumbs, t]);
 

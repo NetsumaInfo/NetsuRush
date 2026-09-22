@@ -28,6 +28,7 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { nr } from "@/lib/bridge";
 import type { AdobeApp, BoostDiagnosis, BoostPref } from "@/lib/bridge";
+import { errorText } from "@/lib/errorText";
 
 type Val = boolean | number | string;
 
@@ -147,7 +148,7 @@ export function BoostPrefsSection({ diag, app }: { diag: BoostDiagnosis | null; 
       setPrefs(r.prefs || []);
       setError(r.ok ? null : r.error || null);
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     }
   }, [app, ready]);
 
@@ -175,7 +176,7 @@ export function BoostPrefsSection({ diag, app }: { diag: BoostDiagnosis | null; 
       if (r.ok) setStaged({});
     } catch (e) {
       setFailed(true);
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setBusy(false);
       setConfirm(false);

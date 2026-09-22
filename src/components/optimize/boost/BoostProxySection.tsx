@@ -19,6 +19,7 @@ import { nr } from "@/lib/bridge";
 import type { AdobeApp, BoostDiagnosis, BoostProxyItem } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { getActiveExportProfile } from "@/features/export/profiles";
+import { errorText } from "@/lib/errorText";
 
 export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; app: AdobeApp }) {
   const { t } = useTranslation("optimize");
@@ -54,7 +55,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
       setSel(new Set((r.items || []).filter((i) => i.canProxy && !i.hasProxy).map((i) => i.path)));
     } catch (e) {
       setFailed(true);
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setLoading(false);
     }

@@ -1,20 +1,8 @@
 {
-  "taskHint": {
-    "search": "视觉搜索和镜头比较。",
-    "faces": "人脸检测和分组。",
-    "voice": "自动语音转写。",
-    "upscale": "提升图像和视频的分辨率。",
-    "restore": "图像恢复和清理。",
-    "interpolate": "生成中间帧，让视频更流畅。",
-    "depth": "生成深度图。",
-    "matte-image": "图像抠图和背景移除。",
-    "matte-video": "视频主体抠图和跟踪。",
-    "object-removal": "移除视频中的对象。"
-  },
   "title": "模型",
   "subtitle": "默认不下载任何东西。按需获取，随时删除。",
   "disk": "磁盘：",
-  "noneInstalled": "未安装模型 — 装一个，否则此功能无法使用。",
+  "noneInstalled": "未安装模型。请安装一个，否则此功能无法使用。",
   "badge": {
     "default": "默认",
     "heavy": "重型",
@@ -38,7 +26,7 @@
     "asc": "升序",
     "desc": "降序"
   },
-  "vramShort": "需要 {{need}} GB VRAM，你的显卡只有 {{have}}（{{gpu}}）— 跑不动。仍可下载。",
+  "vramShort": "需要 {{need}} GB VRAM，你的显卡只有 {{have}}（{{gpu}}），跑不动。仍可下载。",
   "stage": {
     "download": "下载中",
     "verify": "校验中",
@@ -51,11 +39,11 @@
     "removing": "正在卸载…",
     "removeTip": "从磁盘删除",
     "auto": "自动",
-    "autoTip": "首次使用时由库自动获取 — 无需下载。"
+    "autoTip": "首次使用时由库自动获取，无需下载。"
   },
   "action": {
     "resume": "继续",
-    "resumeTip": "下载未完成 — 继续获取缺失的权重和代码。",
+    "resumeTip": "下载未完成。继续获取缺失的权重和代码。",
     "download": "下载",
     "cancelDownload": "取消下载"
   },

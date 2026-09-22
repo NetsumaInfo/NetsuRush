@@ -19,7 +19,7 @@
     "fitAll": "全体表示",
     "newScene": "新規シーン",
     "detach": "切り離す",
-    "attach": "元に戻す",
+    "attach": "メインウィンドウに戻す",
     "pin": "ピン留め",
     "unpin": "ピン留め解除",
     "settings": "設定",
@@ -27,21 +27,15 @@
     "removeFavorite": "お気に入りから削除",
     "copy": "コピー",
     "cut": "切り取り",
-    "grayscale": "グレースケール",
     "reset": "リセット",
     "resetScale": "元のサイズ",
     "resetRotation": "回転",
     "resetFlip": "反転",
     "resetCrop": "トリミング",
-    "resetAll": "すべてリセット",
-    "fitSelection": "選択範囲に合わせる"
+    "resetAll": "すべてリセット"
   },
   "toolbar": {
     "home": "ホーム",
-    "addImage": "画像を追加",
-    "addVideo": "動画を追加",
-    "addSequence": "連番画像を追加",
-    "addLink": "リンクを追加",
     "addText": "テキストを追加",
     "addFrame": "フレームを追加",
     "draw": "描画",
@@ -92,7 +86,7 @@
     "defaultNoteBg": "デフォルトのノート背景",
     "favFonts": "お気に入りのフォント",
     "favHintBefore": "フォント選択で ",
-    "favHintAfter": " を押すとここにピン留め。",
+    "favHintAfter": " を押すと、ここにピン留めされます。",
     "navigation": "ナビゲーション",
     "invertWheel": "ホイールを反転",
     "inverted": "反転",
@@ -114,7 +108,7 @@
     "disabled": "オフ",
     "placeFrame": "配置エリアの枠",
     "pinnedToolbar": "ピン留め中のツールバー",
-    "pinnedToolbarHint": "ピン留め中は配置・描画・表示のみ。残りは右クリックメニューです。",
+    "pinnedToolbarHint": "ピン留め中は配置・描画・全体表示だけが残ります。ほかの操作は右クリックメニューにあります。",
     "decompose": "動画を連番画像に分解",
     "decomposeHint": "動画から抜き出した連番画像をボードに置きます。",
     "imagesPerSec": "画像 / 秒",
@@ -138,7 +132,7 @@
     "copyLocal": "ローカルメディアをプロジェクトにコピー",
     "copyLocalOn": "コピー",
     "copyLocalOff": "参照",
-    "copyLocalMax": "動画の上限 (MB)",
+    "copyLocalMax": "動画の上限（MB）",
     "embedSwitch": "プレーヤーへの切り替え",
     "embedSwitchKeep": "ファイルを保持",
     "embedSwitchDrop": "ファイルを削除",
@@ -148,9 +142,9 @@
     "interval": "間隔",
     "drawShortcuts": "描画のショートカット",
     "editShortcut": "{{label}} のショートカットを変更",
-    "pressLetter": "キーを1つ押す · Esc で中止",
+    "pressLetter": "文字キーを押してください · Esc でキャンセル",
     "keyboardShortcuts": "キーボードショートカット",
-    "pressCombo": "キーの組み合わせを押す · Esc で中止",
+    "pressCombo": "キーの組み合わせを押してください · Esc でキャンセル",
     "gestures": "操作",
     "gesturePaste": "貼り付け（画像 / リンク / YouTube）",
     "gestureMove": "選択を移動（Shift = ×10）",
@@ -192,17 +186,17 @@
     "provider_generic": "その他のサイト",
     "snapTitle": "スナップ",
     "snapEnabled": "他の要素にスナップ",
-    "snapThreshold": "スナップ距離 (px)",
+    "snapThreshold": "スナップ距離（px）",
     "snapStick": "吸着時の間隔",
     "arrangeTitle": "整列",
-    "autoArrangeOnImport": "読み込んだまとまりを自動で整列",
+    "autoArrangeOnImport": "まとめて読み込んだメディアを自動で整列",
     "autoAnchorDraw": "描画をメディアに自動連結",
     "paletteSize": "パレットあたりの色数",
     "tabPen": "ペン",
     "penNav": "ペンと指の操作",
     "penGestures": "ピンチでズーム、2本指で移動",
     "penDragPans": "空白のドラッグで移動",
-    "penDragPansHint": "自動：マウスのないタッチ機で有効。無効なら範囲選択になります。",
+    "penDragPansHint": "自動：マウスのないタッチデバイスで有効になります。無効のときは、ドラッグで範囲選択します。",
     "penBarrel": "ペンのサイドボタン",
     "penBarrelMenu": "コンテキストメニュー",
     "penBarrelPan": "移動",
@@ -213,11 +207,11 @@
     "penMinWidth": "筆圧ゼロのときの太さ",
     "penTilt": "傾き",
     "penEraser": "ペンの消しゴム側",
-    "penStrokeHint": "筆圧と傾きは描いた時点で確定。設定を変えても既存の線は変わりません。",
+    "penStrokeHint": "筆圧と傾きは描いた時点で確定します。設定を変えても、描いた線は変わりません。",
     "penUi": "インターフェース",
     "penTouchUi": "操作を常に表示",
-    "penTouchUiHint": "自動：ペンを検出したとき、またはタッチ機で。",
-    "penBigTargets": "当たり判定を大きく",
+    "penTouchUiHint": "自動：ペンを検出したとき、またはタッチデバイスで有効になります。",
+    "penBigTargets": "タッチ領域を大きく",
     "penProbe": "検出されたハードウェア",
     "penProbeHint": "ペンをかざすと、描かなくても値が入ります。",
     "penProbePen": "ペン",
@@ -248,8 +242,8 @@
     "assetSweepHint": "どのシーンも参照していないファイルを削除します。ボードの内容には触れません。",
     "assetSweepAction": "クリーンアップ",
     "assetSweepFailed": "クリーンアップに失敗しました。",
-    "assetSweepDone_one": "{{count}} 件のファイルを削除、{{mb}} MB 解放。",
-    "assetSweepDone_other": "{{count}} 件のファイルを削除、{{mb}} MB 解放。"
+    "assetSweepDone_one": "{{count}} 件のファイルを削除し、{{mb}} MB を解放しました。",
+    "assetSweepDone_other": "{{count}} 件のファイルを削除し、{{mb}} MB を解放しました。"
   },
   "inspector": {
     "ytPlayer": "YouTube プレーヤー",
@@ -260,7 +254,8 @@
     "undoUpscale": "アップスケールを取り消し",
     "longVideo": "長い動画 — プレビューは {{max}} フレームまで（ループ範囲で絞り込み）…",
     "extractingFrames": "フレームを抽出中…",
-    "sequenceCreated": "シーケンスを作成 · {{count}} フレーム"
+    "sequenceCreated_one": "シーケンスを作成 · {{count}} フレーム",
+    "sequenceCreated_other": "シーケンスを作成 · {{count}} フレーム"
   },
   "trim": {
     "start": "ループ開始（秒）",
@@ -320,9 +315,10 @@
     "hdist": "左右に等間隔",
     "vdist": "上下に等間隔",
     "grid": "グリッドに整列",
-    "selectedCount": "{{count}} 個選択",
     "groupSequence": "シーケンスにまとめる",
-    "deleteSelection": "選択を削除"
+    "deleteSelection": "選択を削除",
+    "selectedCount_one": "{{count}} 個を選択中",
+    "selectedCount_other": "{{count}} 個を選択中"
   },
   "link": {
     "label": "リンク",
@@ -386,7 +382,6 @@
     "normalizeArea": "面積を揃える",
     "arrangeDefault": "選択を整列",
     "resetAll": "すべてリセット",
-    "grayscale": "グレースケール",
     "toFront": "最前面へ",
     "toBack": "最背面へ",
     "extractPalette": "パレットを抽出",
@@ -415,7 +410,7 @@
     "straight": "直線",
     "curved": "曲線",
     "elbow": "折れ線",
-    "opacity": "不透明度 {{pct}} %"
+    "opacity": "不透明度 {{pct}}%"
   },
   "heads": {
     "none": "なし",
@@ -459,12 +454,13 @@
     "shotCount_other": "{{count}} ショット",
     "results_one": "{{count}} 件",
     "results_other": "{{count}} 件",
-    "selectedSuffix": " · {{count}} 個選択",
     "shotLabel": "{{name}} · ショット {{n}}",
     "searchPlaceholder": "ショットを説明…",
     "notIndexed": "インデックスがありません。検索タブで素材をインデックスしてください。",
     "searchHint": "ショットを説明：「顔」「夕焼け」…",
-    "noMatch": "一致するショットがありません。"
+    "noMatch": "一致するショットがありません。",
+    "selectedSuffix_one": " · {{count}} 個を選択中",
+    "selectedSuffix_other": " · {{count}} 個を選択中"
   },
   "boardMenu": {
     "downloadMedia": "メディアをダウンロード",
@@ -497,8 +493,8 @@
   },
   "export": {
     "title": "ボードを書き出し",
-    "subtitle": "このファイルが動画から持ち出すもの。",
-    "freezeLinks": "Web の画像も一緒に持ち出す",
+    "subtitle": "動画のうち、ファイルに含める内容。",
+    "freezeLinks": "Web の画像もファイルに含める",
     "freezeHint": "そのままだと、元ページが消えた日にボードからも消えます。",
     "weighing": "サイズを見積もり中…",
     "export": "書き出し",
@@ -546,15 +542,14 @@
     "recent": "最近",
     "resume": "セッションを再開",
     "currentBoard": "作業中のボード",
-    "projects": "プロジェクト",
     "openProject": "プロジェクトを開く",
-    "openProjectHint": ".netsu ファイルを開く — そのファイルが作業ドキュメントになります",
+    "openProjectHint": ".netsu ファイルを開くと、そのファイルが作業ドキュメントになります",
     "openProjectFile": "プロジェクトを開く",
     "openProjectLocation": "ファイルの場所を開く",
     "forgetProject": "一覧から削除",
     "deleteProject": "完全に削除",
     "deleteProjectTitle": "「{{name}}」を削除しますか？",
-    "deleteProjectWarning": ".netsu ファイルと .medias フォルダーは完全に削除されます。外部のソースメディアは削除されません。",
+    "deleteProjectWarning": ".netsu ファイルと .medias フォルダーは完全に削除されます。外部の素材は削除されません。",
     "projectMissing": "ファイルが見つかりません",
     "sharedBoard": "共有",
     "cardStatus": {
@@ -579,10 +574,10 @@
     "reloadMedia": "再ダウンロード",
     "downloading": "ダウンロード中…",
     "mediaFallback": "メディア",
-    "interactiveActive": "操作中 — 他をクリックで移動",
+    "interactiveActive": "操作中 — 外側をクリックすると移動できます",
     "interactiveHint": "ダブルクリックで操作",
     "relocateAll": "すべての場所を指定（{{count}}）",
-    "mediaWaiting": "このメディアを持つデバイスを待っています",
+    "mediaWaiting": "メディア待ち — このメディアがあるデバイスを起動してください",
     "mediaRemoved": "プロジェクトから削除されたメディア",
     "retryMedia": "再試行"
   },
@@ -619,9 +614,9 @@
     },
     "hint": {
       "link": "動画は入りません。開くには元ファイルが必要です。",
-      "preview": "ボードで再生している範囲だけ、軽く再エンコード。",
+      "preview": "ボードで再生しているループだけを、軽く再エンコードします。",
       "margin": "再生範囲に前後数秒を足して、あとから伸ばせます。",
-      "full": "元ファイルをそのまま丸ごと。"
+      "full": "元のファイルをそのまま丸ごと含めます。"
     },
     "quality": {
       "label": "画質",
@@ -642,7 +637,7 @@
     "itemLabel": "共有：{{level}}",
     "settings": {
       "title": "メディアの保存",
-      "hint": ".netsu が既定で持ち出す内容。メディアごとにインスペクターで変更できます。"
+      "hint": ".netsu に既定で含める内容。メディアごとにインスペクターで変更できます。"
     }
   },
   "board": {
@@ -684,20 +679,20 @@
     "boardImported": "ボードを読み込みました",
     "projectSaved": "「{{name}}」を保存しました",
     "projectOpened": "「{{name}}」を開きました",
-    "projectOpenedLegacy": "「{{name}}」を開きました（旧形式：名前を付けて保存すると編集できます）",
-    "openFailedWith": "開けませんでした: {{error}}",
+    "projectOpenedLegacy": "「{{name}}」を開きました（旧形式：名前を付けて保存するとプロジェクトになります）",
+    "openFailedWith": "開けませんでした：{{error}}",
     "dropProjectFailed": "「{{name}}」を開けませんでした。「プロジェクトを開く」をお使いください。",
     "noProjectFile": "このボードはファイルに紐づいていません",
     "relocating": "フォルダー内のメディアを検索中…（{{count}}）",
     "relocatedNone": "このフォルダーで認識できるメディアはありません",
-    "contentOpacity": "コンテンツの不透明度：{{percent}} %",
-    "itemOpacity": "メディアの不透明度：{{percent}} %",
-    "mediaRecovered_one": "{{count}} 件のメディアを復元",
-    "mediaRecovered_other": "{{count}} 件のメディアを復元",
+    "contentOpacity": "コンテンツの不透明度：{{percent}}%",
+    "itemOpacity": "メディアの不透明度：{{percent}}%",
+    "mediaRecovered_one": "{{count}} 件のメディアを復元しました",
+    "mediaRecovered_other": "{{count}} 件のメディアを復元しました",
     "imported_one": "読み込み完了 · {{count}} 件",
     "imported_other": "読み込み完了 · {{count}} 件",
-    "relocated_one": "{{count}}/{{total}} 件のメディアの場所を指定",
-    "relocated_other": "{{count}}/{{total}} 件のメディアの場所を指定"
+    "relocated_one": "{{count}}/{{total}} 件のメディアの場所を指定しました",
+    "relocated_other": "{{count}}/{{total}} 件のメディアの場所を指定しました"
   },
   "tidy": {
     "title": "整列",
@@ -718,7 +713,7 @@
     "sort": "順序",
     "sortCurrent": "現在の順",
     "sortName": "名前順",
-    "apply": "整列する"
+    "apply": "整列"
   },
   "palette": {
     "defaultTitle": "パレット",
@@ -727,14 +722,11 @@
     "copyFailed": "コピーできません",
     "empty": "色がありません",
     "working": "色を抽出中…",
-    "done": "{{count}} 色を抽出しました",
-    "doneSkipped": "{{count}} 色を抽出 ・ {{skipped}} 件のメディアを除外",
     "failed": "使える色がありません",
-    "failedCore": "ファイルの読み取りが利用できません — ウィンドウを再起動してください",
+    "failedCore": "ファイルを読み取れません — ウィンドウを再起動してください",
     "noSource": "選択に使えるメディアがありません",
     "sourcesGone": "元のメディアはボード上にありません",
     "regenerate": "再生成",
-    "size": "色数",
     "showHex": "値を表示",
     "formatHint": "{{format}} でコピー",
     "layoutRow": "横一列",
@@ -758,8 +750,6 @@
       "value": "カラー値",
       "place": "ボードに配置",
       "apply": "適用",
-      "placed": "{{count}} 色のパレットを配置しました",
-      "applied": "パレットを更新しました（{{count}} 色）",
       "addSwatch": "色を追加",
       "removeSwatch": "色を削除",
       "lock": "色をロック",
@@ -776,44 +766,53 @@
         "compound": "コンパウンド",
         "shades": "シェード",
         "monochromatic": "モノクロマティック"
-      }
-    }
+      },
+      "applied_one": "パレットを更新しました（{{count}} 色）",
+      "applied_other": "パレットを更新しました（{{count}} 色）",
+      "placed_one": "{{count}} 色のパレットを配置しました",
+      "placed_other": "{{count}} 色のパレットを配置しました"
+    },
+    "doneSkipped_one": "{{count}} 色を抽出 ・ {{skipped}} 件のメディアを除外",
+    "doneSkipped_other": "{{count}} 色を抽出 ・ {{skipped}} 件のメディアを除外",
+    "done_one": "{{count}} 色を抽出しました",
+    "done_other": "{{count}} 色を抽出しました"
   },
   "exportImage": {
     "menu": "画像として書き出し…",
-    "title": "ボードを書き出す",
-    "subtitle": "ボードを画像または SVG として描き出します。",
+    "title": "ボードを書き出し",
+    "subtitle": "ボードを画像または SVG にレンダリングします。",
     "width": "幅",
     "height": "高さ",
     "selectionOnly": "選択のみ（{{count}}）",
     "transparent": "背景を透過",
-    "export": "書き出す",
+    "export": "書き出し",
     "done": "ボードを書き出しました",
-    "failed": "書き出しに失敗しました: {{error}}",
-    "hint": "描画はボードの内容から行われます。動画は現在のフレーム、オンラインプレーヤーはカードとして書き出されます。",
+    "failed": "書き出しに失敗しました：{{error}}",
+    "hint": "ボードの内容からレンダリングします。動画は現在のフレーム、オンラインプレーヤーはカードとして書き出されます。",
     "noBridge": "アプリの外ではディスクへの書き出しができません"
   },
   "ingest": {
     "folderUnavailable": "フォルダーの読み込みは利用できません",
     "folderScanning": "フォルダーを読み込み中…",
     "folderEmpty": "このフォルダーにメディアがありません",
-    "folderDone": "{{count}} 件のメディアを読み込みました",
-    "folderDoneTruncated": "{{count}} 件を読み込みました（フォルダーは途中まで）",
     "progress": "読み込み中 {{done}}/{{total}}…",
-    "reading": "{{count}} 件のファイルを読み込み中…",
-    "done": "{{count}} 件のメディアを読み込みました",
     "folderTruncated": "フォルダーが大きすぎます：先頭 {{count}} 件を読み込みました",
-    "importing": "{{name}} をインポート中…",
+    "importing": "{{name}} を読み込み中…",
     "fetching": "メディアを取得中…",
-    "linkDone": "メディアをインポートしました",
+    "linkDone": "メディアを読み込みました",
     "fetchingFrom": "{{source}} から取得中…",
     "copyFailed": "「{{name}}」をコピーできませんでした。このメディアはアプリを閉じると失われます",
-    "copyFailedBatch": "{{count}} 件のコピーに失敗しました（「{{name}}」など）。これらのメディアはアプリを閉じると失われます"
+    "done_one": "{{count}} 件のメディアを読み込みました",
+    "done_other": "{{count}} 件のメディアを読み込みました",
+    "copyFailedBatch_one": "{{count}} 件のコピーに失敗しました（「{{name}}」など）。これらのメディアはアプリを閉じると失われます",
+    "copyFailedBatch_other": "{{count}} 件のコピーに失敗しました（「{{name}}」など）。これらのメディアはアプリを閉じると失われます",
+    "reading_one": "{{count}} 件のファイルを読み込み中…",
+    "reading_other": "{{count}} 件のファイルを読み込み中…"
   },
   "mouseThrough": {
     "on": "マウスを透過",
     "off": "マウスを戻す",
-    "warning": "クリックとホイールは下のアプリへ届き、ウィンドウは最前面に留まります。戻すにはフォーカスを与えてください（Alt+Tab）。",
+    "warning": "クリックとホイールは下のアプリに届き、ウィンドウは最前面に残ります。操作を戻すには、このウィンドウをアクティブにしてください（Alt+Tab）。",
     "dontAskAgain": "次回から表示しない"
   },
   "collab": {

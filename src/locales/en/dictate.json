@@ -42,7 +42,7 @@
     "m1": "1 minute",
     "m5": "5 minutes",
     "m15": "15 minutes",
-    "never": "Never (stay warm)"
+    "never": "Never (keep loaded)"
   },
   "model": {
     "default": "default",
@@ -59,8 +59,8 @@
     "notInstalledHint": "Needed for Nemotron. Not installable from the app yet: copy transcribe-cli into the NetsuRush bin folder."
   },
   "mic": {
-    "busy": "Microphone busy in another application.",
-    "denied": "Microphone denied. Allow microphone access to dictate.",
+    "busy": "Microphone is in use by another app.",
+    "denied": "Microphone access denied. Allow microphone access to dictate.",
     "fallback": "Chosen microphone unavailable — using the default one.",
     "missing": "No microphone available."
   }

@@ -30,7 +30,6 @@
     "downloads": "Espace optionnel",
     "noOptionalModels": "Aucun téléchargement optionnel",
     "mandatoryOnly": "Socle et découpage uniquement",
-    "sceneDetection": "Découpage des scènes inclus",
     "modelCount_one": "{{count}} téléchargement",
     "modelCount_other": "{{count}} téléchargements"
   },

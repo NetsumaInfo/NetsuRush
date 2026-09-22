@@ -21,7 +21,6 @@
     "jobsQueued_one": "队列中 {{count}} 个任务",
     "jobsQueued_other": "队列中 {{count}} 个任务",
     "settingsRead": "已读取性能设置",
-    "cacheProxyKeys": "{{count}} 个缓存/代理文件键",
     "noCacheFolder": "未自动检测到缓存文件夹",
     "database": "数据库",
     "dbBig": "{{name}} · 体积过大 → 建议拆分",
@@ -29,15 +28,16 @@
     "dbRemote": "PostgreSQL",
     "dbMissing": "未找到",
     "cacheFoldersDetected_one": "检测到 {{count}} 个缓存文件夹",
-    "cacheFoldersDetected_other": "检测到 {{count}} 个缓存文件夹"
+    "cacheFoldersDetected_other": "检测到 {{count}} 个缓存文件夹",
+    "cacheProxyKeys_one": "{{count}} 个缓存/代理文件键",
+    "cacheProxyKeys_other": "{{count}} 个缓存/代理文件键"
   },
   "memory": {
     "title": "本次会话内存",
-    "measuring": "测量中 — 一分钟内显示增长。",
+    "measuring": "正在测量，一分钟内显示内存增长。",
     "drift": "Resolve.exe：{{now}} · {{elapsed}} 内 {{drift}}",
     "driftDown": "Resolve.exe：{{now}} · {{elapsed}} 内稳定",
     "vram": "VRAM：{{used}} / {{total}} GB",
-    "verdictOk": "会话正常。",
     "verdictWatch": "Resolve 越来越重。重载项目可释放时间线占用的 RAM。",
     "verdictHigh": "会话负载很高。只有重启才能释放 VRAM 和 Fusion 缓存。",
     "reload": "重载项目",
@@ -51,7 +51,7 @@
   },
   "prefs": {
     "title": "Resolve 设置",
-    "subtitle": "从磁盘读取的真实值。脚本 API 不写这些偏好设置 —— 应用会关闭并重开 Resolve。",
+    "subtitle": "从磁盘读取的真实值。脚本 API 无法写入这些偏好设置，应用设置时会关闭并重新打开 Resolve。",
     "unavailable": "无法读取 Resolve 偏好设置：{{error}}",
     "warn": "待检查",
     "advisory": "视情况而定",
@@ -60,15 +60,14 @@
     "pending_other": "{{count}} 项待应用",
     "apply": "应用并重启",
     "reset": "取消",
-    "applyBody": "先保存项目并备份当前配置，再关闭 Resolve、写入首选项，然后重新打开“{{project}}”。约需一到两分钟，请勿在渲染时执行。",
-    "applyDone_one": "已应用 {{count}} 项设置 —— Resolve 已重启。",
-    "applyDone_other": "已应用 {{count}} 项设置 —— Resolve 已重启。",
+    "applyBody": "先保存项目并备份当前配置，再关闭 Resolve、写入偏好设置，然后重新打开“{{project}}”。约需一到两分钟，请勿在渲染时执行。",
+    "applyDone_one": "已应用 {{count}} 项设置，Resolve 已重启。",
+    "applyDone_other": "已应用 {{count}} 项设置，Resolve 已重启。",
     "applyNoRestart": "设置已写入。无法重开 Resolve：{{error}}",
     "backups": "备份",
     "backupsHint": "每次应用前的配置。可在 Resolve 关闭时恢复。",
     "restore": "恢复",
-    "restoreDone": "配置已恢复。重启 Resolve 生效。",
-    "noBackups": "暂无备份 —— 首次应用时会创建一个。",
+    "restoreDone": "配置已恢复。重启 Resolve 后生效。",
     "on": "开",
     "off": "关",
     "items": {
@@ -80,7 +79,7 @@
       "resolveMemory": {
         "label": "Resolve 内存上限",
         "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
-        "body": "默认为 RAM 的 75%。调低不会让 Resolve 更快：它把 RAM 留给其他程序 —— 包括 NetsuRush 的 AI 处理。按你同时在跑什么来权衡。"
+        "body": "默认为 RAM 的 75%。调低不会让 Resolve 更快：它把 RAM 留给其他程序，包括 NetsuRush 的 AI 处理。按你同时在跑什么来权衡。"
       },
       "fusionMemory": {
         "label": "Fusion 内存缓存",
@@ -114,8 +113,8 @@
   "gpu": {
     "title": "GPU / CPU / RAM 监视器",
     "free": "释放",
-    "saturated": "{{what}} 已占满 —— 有崩溃风险。现在就释放或重载。",
-    "vramUnreadable": "此驱动无法读取显存。处理功能仍可使用。",
+    "saturated": "{{what}} 已占满，有崩溃风险。现在就释放或重载。",
+    "vramUnreadable": "此驱动无法实时读取显存。处理功能仍可使用。",
     "ramSystem": "系统 RAM",
     "resolveRam": "Resolve.exe：{{size}}",
     "nothingToFree": "没有可释放的",
@@ -138,8 +137,8 @@
     "killed": "{{name}}（PID {{pid}}）已结束。",
     "noneBlocked": "没有需要清理的无响应进程。",
     "killTitle": "结束 {{name}}？",
-    "killForced": "强制关闭 —— 未保存的内容会丢失。",
-    "cleanBody": "此程序已卡死（“未响应”）。强制关闭会丢失未保存的内容。",
+    "killForced": "强制关闭：未保存的内容会丢失。",
+    "cleanBody": "已卡死的程序（“未响应”）。强制关闭会丢失未保存的内容。",
     "clean": "清理",
     "cleaned_one": "已清理 {{count}} 个无响应进程。",
     "cleaned_other": "已清理 {{count}} 个无响应进程。",
@@ -148,12 +147,11 @@
   },
   "watchdog": {
     "title": "内存监控",
-    "idle": "待机中 — 渲染或编码时自动启用。",
+    "idle": "待机中，渲染或编码时自动启用。",
     "armed": "已启用：{{source}}进行中。",
     "on": "开启",
     "off": "关闭",
     "gauges": "可用内存 {{ram}}% · 显存占用 {{vram}}%",
-    "lastPurge": "已归还 {{freed}}（{{count}} 个任务已减负）。",
     "suggestTitle": "释放内存仍不够",
     "suggestBody": "这些后台任务占用的内存无法通过释放收回。是否结束由你决定。",
     "stopThem_one": "结束该任务",
@@ -163,7 +161,9 @@
       "export": "导出",
       "proxy": "代理编码",
       "render": "渲染"
-    }
+    },
+    "lastPurge_one": "已归还 {{freed}}（{{count}} 个任务已减负）。",
+    "lastPurge_other": "已归还 {{freed}}（{{count}} 个任务已减负）。"
   },
   "noise": {
     "title": "无用的后台任务",
@@ -195,13 +195,14 @@
     "rescan": "重新扫描",
     "folder": "文件夹：{{path}}",
     "disk": "磁盘：剩余 {{free}} / 共 {{total}}",
-    "diskFull": "磁盘快满了 —— Resolve 有卡死风险。",
+    "diskFull": "磁盘快满了，Resolve 有卡死风险。",
     "noneFound": "这里没找到 Resolve 缓存。",
     "cleanSelection": "清理所选（{{size}}）",
     "confirmTitle": "删除这些缓存？",
     "confirmBody": "可释放 {{size}}。请先关闭 Resolve。以下内容会删除，需要时会重新生成：",
-    "freed": "已释放 {{size}}（{{count}} 个文件夹）。",
-    "cleanFailed": "失败：{{error}}"
+    "cleanFailed": "失败：{{error}}",
+    "freed_one": "已释放 {{size}}（{{count}} 个文件夹）。",
+    "freed_other": "已释放 {{size}}（{{count}} 个文件夹）。"
   },
   "stop": {
     "title": "停止任务",
@@ -279,7 +280,7 @@
   "boost": {
     "degraded": {
       "title": "NetsuRush 扩展未连接",
-      "body": "磁盘缓存、可用空间和 Adobe 进程仍可读取。清理、设置和代理需要应用处于打开状态并显示 NetsuRush 扩展（窗口 ▸ 扩展功能 ▸ NetsuRush）。"
+      "body": "磁盘缓存、可用空间和 Adobe 进程仍可读取。清理、设置和代理需要应用处于打开状态并显示 NetsuRush 扩展。"
     },
     "status": {
       "installed": "已安装",
@@ -290,9 +291,9 @@
       "panel": "CEP 扩展",
       "panelConnected": "已连接",
       "panelSilent": "无响应",
-      "panelInstalled": "扩展已安装 — 请重启应用",
+      "panelInstalled": "扩展已安装，请重启应用",
       "installPanel": "安装扩展",
-      "panelHint": "打开应用，然后选择 窗口 ▸ 扩展功能 ▸ NetsuRush。",
+      "panelHint": "打开应用，然后选择“窗口 ▸ 扩展功能 ▸ NetsuRush”。",
       "uxpHint": "Premiere Pro {{year}} 会先加载 UXP。若窗口 ▸ 扩展功能里没有该扩展，重新安装后重启。",
       "caches": "缓存",
       "cacheFolders_one": "检测到 {{count}} 个文件夹",
@@ -311,8 +312,8 @@
       "ageDays": "超过 {{days}} 天",
       "shared": "共享",
       "notRegenerable": "无法重新生成",
-      "slowRebuild": "重新一致化很慢",
-      "dbWarning": "清空缓存数据库会迫使 Adobe 在下次启动时重新一致化所有媒体：过程很慢，且没有设置能加速。",
+      "slowRebuild": "重建耗时长",
+      "dbWarning": "清空缓存数据库会迫使 Adobe 在下次启动时重新处理所有媒体：过程很慢，且没有设置能加速。",
       "autoSaveWarning": "自动保存是你作品的版本，不是缓存：一旦删除便无法恢复。",
       "closePurgeReopen": "关闭、清理、重开",
       "cleanSelection": "删除所选（{{size}}）",
@@ -389,8 +390,8 @@
       },
       "done": "完成",
       "doneFreed": "已释放 {{size}}",
-      "hygieneDone_one": "已移除 {{count}} 个项目",
-      "hygieneDone_other": "已移除 {{count}} 个项目",
+      "hygieneDone_one": "已移除 {{count}} 项",
+      "hygieneDone_other": "已移除 {{count}} 项",
       "previewsDone": "已删除渲染文件",
       "confirmHeavy": "磁盘缓存将被清空：预览需要重新计算。",
       "confirmHygiene": "会修改已打开的项目。该操作可在应用内撤销。"
@@ -460,7 +461,7 @@
     "proxy": {
       "title": "已附加代理",
       "summary": "{{total}} 个素材中有 {{withProxy}} 个已有代理",
-      "needsPanel": "需要打开 Premiere Pro 并显示 NetsuRush 扩展（窗口 ▸ 扩展功能 ▸ NetsuRush）。",
+      "needsPanel": "需要打开 Premiere Pro 并显示 NetsuRush 扩展。",
       "useProxies": "播放代理",
       "rescan": "重新扫描",
       "has": "代理",
@@ -471,9 +472,10 @@
       "generate_other": "生成并附加（{{count}}）",
       "attached_one": "已附加 {{count}} 个代理",
       "attached_other": "已附加 {{count}} 个代理",
-      "attachedPartial": "已附加 {{count}} 个代理，{{missed}} 个失败",
       "encodeFailed_one": "有 {{count}} 个素材无法编码",
-      "encodeFailed_other": "有 {{count}} 个素材无法编码"
+      "encodeFailed_other": "有 {{count}} 个素材无法编码",
+      "attachedPartial_one": "已附加 {{count}} 个代理，{{missed}} 个失败",
+      "attachedPartial_other": "已附加 {{count}} 个代理，{{missed}} 个失败"
     }
   }
 }

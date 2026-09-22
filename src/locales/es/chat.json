@@ -9,7 +9,7 @@
   },
   "composer": {
     "pickEngine": "Elige un motor listo en el menú, o configúralo en los ajustes ⚙.",
-    "placeholder": "Pedir a la IA que controle Resolve…",
+    "placeholder": "Pide a la IA que controle Resolve…",
     "attachFiles": "Adjuntar archivos",
     "attachTip": "Adjuntar imagen / archivo",
     "attachedFilesPrompt": "Archivos adjuntos (rutas locales — léelos o míralos si hace falta)",
@@ -25,22 +25,20 @@
   },
   "settings": {
     "apiKeys": "Claves API (BYOK)",
-    "noVault": "Baúl cifrado no disponible fuera de la aplicación — las claves solo duran la sesión.",
+    "noVault": "Almacén cifrado no disponible fuera de la aplicación — las claves solo duran la sesión.",
     "hide": "Ocultar",
     "show": "Mostrar",
     "keySet": "configurada",
     "keyAbsent": "ausente",
     "cliAgents": "Agentes",
     "rescan": "Volver a escanear",
-    "noAgentsPre": "Ningún agente en la lista — pulsar «Volver a escanear». Si no aparece nada, instalar ",
-    "noAgentsPost": " y comprobar que están en el PATH del core.",
     "detected": "detectado",
     "absent": "ausente",
     "saved": "Guardado",
     "test": "Probar",
     "getKey": "Obtener una clave",
     "reachable": "conectado ({{ms}} ms)",
-    "connect": "Conectar (abre un terminal)",
+    "connect": "Iniciar sesión (abre un terminal)",
     "loginOpened": "terminal abierto — termina de iniciar sesión allí",
     "appNoCli": "app sin comando",
     "appNoCliHint": "La aplicación está instalada, pero su comando {{bin}} no está en el PATH. Añádelo desde la aplicación.",
@@ -60,7 +58,8 @@
     "baseUrlHint": {
       "openai": "Ollama, LM Studio, proxy local…",
       "xai": "UE: https://eu-west-1.api.x.ai/v1"
-    }
+    },
+    "noAgents": "No se encontró ningún agente. Pulsa «Volver a escanear»; si no aparece nada, instala <0>claude</0> o <1>codex</1> y comprueba que están en el PATH."
   },
   "engine": {
     "agents": "Agentes instalados",
@@ -92,7 +91,7 @@
   },
   "modeTitle": {
     "readonly": "Solo lectura — no escribe nada",
-    "ask": "Confirma solo lo arriesgado (archivos/renderizado/borrado de medios); el montaje en la timeline pasa",
+    "ask": "Confirma solo lo arriesgado (archivos/renderizado/borrado de medios); el montaje en la timeline se aplica sin preguntar",
     "auto": "Escribe directo en la timeline, sin confirmar"
   },
   "message": {
@@ -102,7 +101,6 @@
     "copyReasoning": "Copiar el razonamiento"
   },
   "toolcard": {
-    "running": "en curso",
     "failed": "fallo",
     "arguments": "Argumentos",
     "result": "Resultado",
@@ -134,8 +132,8 @@
     "page": "Página {{page}}",
     "resolveApp": "Aplicación Resolve",
     "grabStill": "Captura de imagen",
-    "setTimecode": "Movimiento del reproductor",
-    "viewer": "Reproductor Resolve",
+    "setTimecode": "Movimiento del cabezal de reproducción",
+    "viewer": "Visor de Resolve",
     "removeAudio": "Eliminación del audio",
     "duplicate": "Duplicado de la timeline",
     "addMarker": "Añadir un marcador",
@@ -159,13 +157,9 @@
     "write": "escritura",
     "destructive": "destructivo"
   },
-  "store": {
-    "convFallback": "Conversación",
-    "error": "error"
-  },
   "duplicate": {
     "title": "Duplicar antes de modificar",
-    "hint": "Trabaja sobre una copia de la línea de tiempo; el original queda intacto."
+    "hint": "Trabaja sobre una copia de la timeline; la original queda intacta."
   },
   "thinking": {
     "low": "Baja",

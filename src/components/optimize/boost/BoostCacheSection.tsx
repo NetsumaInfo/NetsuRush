@@ -26,6 +26,7 @@ import type { AdobeApp, BoostCacheRoot, BoostDiagnosis } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { fmtBytes } from "../optimizeShared";
 import { AGE_FILTERS, cacheIcon, isSlowToRebuild, rootLabelKey, sortRoots, type AgeFilter } from "./boostShared";
+import { errorText } from "@/lib/errorText";
 
 interface RootRowProps {
   root: BoostCacheRoot;
@@ -155,7 +156,7 @@ export function BoostCacheSection({
       }
     } catch (e) {
       setFailed(true);
-      setNotice(t("boost.cache.cleanFailed", { error: String(e) }));
+      setNotice(t("boost.cache.cleanFailed", { error: errorText(e) }));
     } finally {
       setCleaning(false);
       setConfirmOpen(false);

@@ -12,6 +12,7 @@ import { nr } from "@/lib/bridge";
 import type { ChatEvent, ChatImage, ChatMessage, ChatProvider, ChatThinking } from "@/lib/bridge";
 import type { UiMessage } from "@/store/chat";
 import { systemPromptFor } from "@/lib/agentPrompts";
+import { errorText } from "@/lib/errorText";
 
 /// A change the agent proposes. It has been validated by `flow_propose`
 /// against the composition, so every operation here names something that
@@ -189,7 +190,7 @@ export function useFlowAgent({ provider, agent, model, thinking, frameSpec }: {
         system: systemPromptFor("flow", frameSpec),
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
       setRunning(false);
       setStatus("");
       runId.current = null;

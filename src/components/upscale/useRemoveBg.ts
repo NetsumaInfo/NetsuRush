@@ -8,6 +8,7 @@ import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import { isUpscaleCompareCompatible, mergeUpscaleModelResult } from "./upscaleCompareState";
 import { processExportPayload } from "./processExport";
 import { imageOutputPayload, outputKindFor } from "./imageOutput";
+import { errorText } from "@/lib/errorText";
 
 const SETTINGS_KEY = "nr.netsulab.removebg.settings";
 
@@ -79,7 +80,7 @@ export function useRemoveBg() {
         setTestErr(r.error || i18n.t("upscale:errors.testFailed"));
       }
     } catch (e) {
-      setTestErr(String(e));
+      setTestErr(errorText(e));
     } finally {
       if (seq === testSeq.current) setTesting(false);
     }
@@ -148,7 +149,7 @@ export function useRemoveBg() {
       setResult({ ok: outputs.length > 0, outputs, imported, failed, error: outputs.length ? null : lastErr });
       if (!outputs.length) setErr(lastErr);
     } catch (e) {
-      setErr(i18n.t("upscale:errors.removebgUnavailable", { err: String(e) }));
+      setErr(i18n.t("upscale:errors.removebgUnavailable", { err: errorText(e) }));
     } finally {
       off();
       setBusy(null); setBatch(null);

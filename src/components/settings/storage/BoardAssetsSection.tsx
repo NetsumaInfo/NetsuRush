@@ -21,6 +21,7 @@ import { useBoard } from "@/components/reference/useReferenceBoard";
 import { liveMediaRefs } from "@/components/reference/useScenePersistence";
 import { fmtBytes } from "./storageShared";
 import { InfoTip, SectionTitle } from "../rows";
+import { errorText } from "@/lib/errorText";
 
 function fileLabel(filePath: string): string {
   return filePath.replace(/^.*[\\/]/, "").replace(/\.netsu$/i, "");
@@ -43,7 +44,7 @@ export function BoardAssetsSection() {
       if (result && !result.ok && result.error) setNotice({ kind: "error", text: result.error });
     } catch (error) {
       logError("settings:storage", `audit échoué — ${String(error)}`);
-      setNotice({ kind: "error", text: String(error) });
+      setNotice({ kind: "error", text: errorText(error) });
     } finally {
       setBusy(null);
     }
@@ -65,7 +66,7 @@ export function BoardAssetsSection() {
         ? { kind: "ok", text: t("settings:boardAssets.freedNotice", { size: fmtBytes(result.bytes), count: result.files }) }
         : { kind: "error", text: result?.error ?? t("settings:boardAssets.failed") });
     } catch (error) {
-      setNotice({ kind: "error", text: String(error) });
+      setNotice({ kind: "error", text: errorText(error) });
     }
     await scan(null);
   }
@@ -89,7 +90,7 @@ export function BoardAssetsSection() {
         setNotice({ kind: "error", text: result?.error ?? t("settings:boardAssets.failed") });
       }
     } catch (error) {
-      setNotice({ kind: "error", text: String(error) });
+      setNotice({ kind: "error", text: errorText(error) });
     }
     await scan(null);
   }
@@ -105,7 +106,7 @@ export function BoardAssetsSection() {
         ? { kind: "ok", text: t("settings:boardAssets.archivedNotice", { name: fileLabel(destPath) }) }
         : { kind: "error", text: result?.error ?? t("settings:boardAssets.failed") });
     } catch (error) {
-      setNotice({ kind: "error", text: String(error) });
+      setNotice({ kind: "error", text: errorText(error) });
     }
     await scan(null);
   }

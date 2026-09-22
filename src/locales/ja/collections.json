@@ -57,7 +57,7 @@
     "renameShot": "ショット名を変更",
     "rating": "評価",
     "label": "ラベル",
-    "close": "インスペクタを閉じる",
+    "close": "インスペクターを閉じる",
     "notePlaceholder": "このショットのメモ…"
   },
   "label": {
@@ -101,13 +101,12 @@
     "shotWord": "ショット",
     "removed": "「{{name}}」を削除しました — 元に戻すには Ctrl+Z。",
     "restored": "「{{name}}」を元に戻しました。",
-    "timelineFailed": "タイムライン失敗",
-    "mounting": "編集中…",
+    "timelineFailed": "タイムラインを作成できませんでした。編集ソフトでプロジェクトが開いているか確認してから、もう一度試してください。",
+    "mounting": "タイムラインを作成中…",
     "archived": "コレクションをディスクに保管しました。",
     "archiveFailed": "保管に失敗しました",
     "all": "すべて",
-    "ofTotal": "全 {{count}} プラン中",
-    "selCount": " · {{count}} 件選択",
+    "selCount": " · {{count}} 件を選択中",
     "selectAll": "すべて選択",
     "deselectAll": "すべて選択解除",
     "editFolder": "フォルダーを編集",
@@ -116,8 +115,6 @@
     "pregen": "プレビューを事前生成 {{verb}}",
     "autoplay": "自動再生",
     "autoplayHint": "プレビューを自動再生",
-    "addToTimeline": "タイムラインに追加",
-    "addAllToTimeline": "すべてのショットをタイムラインに追加",
     "archiveDiskHint": "ディスクに保管（ソースから独立して書き出し）",
     "player": "プレーヤー",
     "playerHint": "プレーヤー（右パネル）",
@@ -131,7 +128,9 @@
     "toTimelineOk_one": "{{count}} 件のショット →「{{timeline}}」。",
     "toTimelineOk_other": "{{count}} 件のショット →「{{timeline}}」。",
     "shotCount_one": "{{count}} 件のショット",
-    "shotCount_other": "{{count}} 件のショット"
+    "shotCount_other": "{{count}} 件のショット",
+    "ofTotal_one": "全 {{count}} ショット中",
+    "ofTotal_other": "全 {{count}} ショット中"
   },
   "list": {
     "title": "コレクション",
@@ -154,10 +153,10 @@
     "deleteFolderDesc": "中のコレクションは一つ上の階層に移動します。",
     "newCollection": "新規コレクション",
     "emptyAll": "コレクションがありません。コレクションを作成し、素材整理や検索からショットを追加してください（サムネイルの「追加」ボタン）。",
-    "folderEmpty": "このフォルダーは空です",
-    "folderEmptyFilter": "（このフィルターでは）",
+    "folderEmpty": "このフォルダーは空です。",
     "plansCount_one": "{{count}} 件のショット",
-    "plansCount_other": "{{count}} 件のショット"
+    "plansCount_other": "{{count}} 件のショット",
+    "folderEmptyFiltered": "このフォルダーにはフィルターに一致するものがありません。"
   },
   "editor": {
     "iconSearch": "アイコンを検索…",
@@ -191,7 +190,7 @@
     "language": "言語",
     "trackN": "トラック {{n}}",
     "keepSync": "同期を維持（追加のたびに再保管）",
-    "autoSyncLabel": "追加時の自動アーカイブ",
+    "autoSyncLabel": "追加のたびに自動で保管",
     "autoSyncHint": "ショットが追加されたときに自動でディスク上のファイルを切り出して更新します。",
     "moveHint": "保管済みのファイルはここに移動します。不足分は再書き出しします。",
     "moving": "移動中…",
@@ -225,7 +224,6 @@
     "restoreHidden": "非表示のショットを表示",
     "missingMedia": "メディアを利用できません",
     "retry": "再試行",
-    "preparing": "準備中…",
     "failed": "共有または保存に失敗しました。再試行してください。",
     "unavailable": "このコレクションを共有するには共同作業を設定してください。",
     "signIn": "共有相手を選ぶにはログインしてください。",

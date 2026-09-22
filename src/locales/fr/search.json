@@ -170,13 +170,14 @@
     "noIndexedRushes": "Aucun rush indexé. Indexe des rushs pour pouvoir piocher une référence.",
     "noRushMatch": "Aucun rush ne correspond à « {{query}} ».",
     "noShots": "Aucun plan indexé pour ce rush.",
-    "loadingMore": "Chargement… ({{count}} restants)",
     "removeFromRefs": "Retirer des références",
     "addAsRef": "Ajouter en référence",
     "previewAria": "Aperçu du plan",
     "selectedCount_one": "{{count}} référence sélectionnée",
     "selectedCount_other": "{{count}} références sélectionnées",
-    "done": "Terminé"
+    "done": "Terminé",
+    "loadingMore_one": "Chargement… ({{count}} restant)",
+    "loadingMore_other": "Chargement… ({{count}} restants)"
   },
   "faceRefPicker": {
     "title": "Recherche par visage",
@@ -228,7 +229,6 @@
     "relevanceThresholdTooltip": "Seuil de pertinence",
     "selSuffix_one": " · {{count}} sél.",
     "selSuffix_other": " · {{count}} sél.",
-    "selectAllAria": "Tout sélectionner",
     "selectAllTooltip": "Tout sélectionner",
     "sendToBoardAria": "Envoyer au board",
     "sendToBoardTooltip": "Envoyer la sélection au board de référence",
@@ -237,15 +237,12 @@
     "shotsCount_one": "{{count}} plan",
     "shotsCount_other": "{{count}} plans",
     "showAll": "Tout afficher",
-    "showMore": "Afficher plus ({{count}} restants)",
     "stopPlayTooltip": "Arrêter la lecture",
-    "summary_one": "{{shown}}/{{count}} résultat · « {{query}} »",
-    "summary_other": "{{shown}}/{{count}} résultats · « {{query}} »",
-    "tabClusters": "Groupes",
     "tabClustersTooltip": "Regrouper les plans par similarité visuelle",
-    "tabDedup": "Doublons",
     "tabDedupTooltip": "Prises quasi-identiques",
-    "tabFlat": "À plat"
+    "tabFlat": "À plat",
+    "showMore_one": "Afficher plus ({{count}} restant)",
+    "showMore_other": "Afficher plus ({{count}} restants)"
   },
   "refTray": {
     "title": "Références ({{count}})",
@@ -255,13 +252,10 @@
     "findSimilarTooltip": "Chercher les plans similaires",
     "clearAria": "Vider les références",
     "clearTooltip": "Vider les références",
-    "removeAria": "Retirer",
     "remove": "Retirer",
     "findSimilarMenu": "Chercher les similaires"
   },
   "searchBar": {
-    "scopeLabel": "Rechercher dans",
-    "scopeProject": "Rush du projet",
     "scopeAll": "Tous les rushs",
     "placeholder": "Décris le plan… (@ pour citer un personnage)",
     "searchByImageAria": "Chercher par image",
@@ -322,7 +316,6 @@
     "addingToTimeline": "Ajout à la timeline {{i}}/{{total}}…",
     "queryDefault": "recherche",
     "querySimilarTo": "similaires : {{name}}",
-    "queryMoodboard": "moodboard : {{count}} réfs",
     "queryIndexedFaceAnime": "visage détecté (animé)",
     "queryIndexedFaceReal": "visage détecté (réel)",
     "queryFaceSingle": "visage : 1 réf",
@@ -332,7 +325,9 @@
     "timelineAddOk_one": "{{count}} plan ajouté à la timeline.",
     "timelineAddOk_other": "{{count}} plans ajoutés à la timeline.",
     "indexingStopped_one": "Indexation arrêtée — {{count}} clip traité partiellement.",
-    "indexingStopped_other": "Indexation arrêtée — {{count}} clips traités partiellement."
+    "indexingStopped_other": "Indexation arrêtée — {{count}} clips traités partiellement.",
+    "queryMoodboard_one": "moodboard : {{count}} réf",
+    "queryMoodboard_other": "moodboard : {{count}} réfs"
   },
   "projectScope": {
     "activeMode": "Actif",

@@ -26,6 +26,7 @@ import {
 import { nr } from "@/lib/bridge";
 import type { OptimizeDiagnosis, OptimizePref, OptimizePrefBackup } from "@/lib/bridge";
 import { useApp } from "@/store";
+import { errorText } from "@/lib/errorText";
 
 type Val = boolean | number | string;
 
@@ -134,7 +135,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
       const b = await nr.optimizePrefsBackups();
       setBackups(b.backups || []);
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     }
   }, []);
 
@@ -169,7 +170,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
         );
       }
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setBusy(false);
       await load();
@@ -184,7 +185,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
       const r = await nr.optimizeRestorePrefs(name);
       setNotice(r.ok ? t("prefs.restoreDone") : r.error || t("notice.failed"));
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setBusy(false);
       await load();

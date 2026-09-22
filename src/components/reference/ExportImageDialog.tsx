@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { useBoard } from "./useReferenceBoard";
 import { defaultExportSize, renderBoardCanvas, renderBoardSvg } from "./boardRender";
+import { errorText } from "@/lib/errorText";
 
 type Format = "png" | "jpg" | "svg";
 
@@ -79,7 +80,7 @@ export function ExportImageDialog({ open, onOpenChange }: { open: boolean; onOpe
       setNotice({ kind: "ok", text: t("exportImage.done") });
       onOpenChange(false);
     } catch (e) {
-      setNotice({ kind: "error", text: t("exportImage.failed", { error: String(e) }) });
+      setNotice({ kind: "error", text: t("exportImage.failed", { error: errorText(e) }) });
     } finally {
       setBusy(false);
     }

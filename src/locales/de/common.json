@@ -23,7 +23,7 @@
     "loading": "Wird geladen…"
   },
   "status": {
-    "loading": "Lädt…",
+    "loading": "Wird geladen…",
     "error": "Fehler",
     "ok": "OK",
     "empty": "Nichts anzuzeigen"
@@ -35,7 +35,7 @@
     "swatch": "Farbe {{color}}"
   },
   "player": {
-    "scenePreview": "Einstellungsvorschau",
+    "scenePreview": "Shot-Vorschau",
     "progress": "Fortschrittsleiste",
     "play": "Wiedergabe",
     "pause": "Pause",
@@ -57,8 +57,8 @@
     "visual": "Videos und Bilder"
   },
   "window": {
-    "reference": "Referenz",
-    "notebook": "Notizbuch"
+    "reference": "NetsuRush – Referenz",
+    "notebook": "NetsuRush – Notizbuch"
   },
   "mock": {
     "resolveUnavailable": "Resolve ist im Browser nicht verfügbar.",
@@ -69,7 +69,7 @@
     "archiveUnavailable": "Archivieren ist außerhalb der App nicht verfügbar.",
     "folderImportUnavailable": "Ordnerimport ist außerhalb der App nicht verfügbar.",
     "emptyFolderName": "Der Ordnername ist leer",
-    "invalidFolderName": "Der Ordnername darf weder '/' noch '\\\\' enthalten",
+    "invalidFolderName": "Der Ordnername darf weder „/“ noch „\\“ enthalten",
     "folder": "Ordner"
   },
   "spell": {
@@ -83,23 +83,23 @@
   },
   "beta": {
     "title": "Modul in der Beta",
-    "body": "Es fehlen noch Funktionen, andere ändern sich. Ich suche Tester: sag mir, was nicht funktioniert und was dir fehlt.",
+    "body": "Es fehlen noch Funktionen, andere ändern sich. Ich suche Tester: Sag mir, was nicht funktioniert und was dir fehlt.",
     "modules": {
       "script": {
         "title": "Noch ein Prototyp",
-        "body": "NetsuDraft ist sehr unvollständig und kaum getestet: vieles fehlt oder funktioniert noch nicht. Sag mir, was du zuerst brauchst."
+        "body": "NetsuDraft ist sehr unvollständig und kaum getestet: Vieles fehlt oder funktioniert noch nicht. Sag mir, was du zuerst brauchst."
       },
       "chat": {
         "title": "Funktioniert noch nicht",
-        "body": "NetsuPilot ist noch in Entwicklung: es tut bisher nichts Nützliches. Verfolge den Fortschritt auf Discord."
+        "body": "NetsuPilot ist noch in Entwicklung: Es tut bisher nichts Nützliches. Verfolge den Fortschritt auf Discord."
       },
       "voice": {
         "title": "Noch zu wenig getestet",
-        "body": "NetsuTalk funktioniert, wurde aber kaum im echten Einsatz verwendet. Sag mir Bescheid, wenn sich etwas seltsam verhält."
+        "body": "NetsuTalk funktioniert, wurde aber kaum im echten Einsatz verwendet. Sag mir Bescheid, wenn etwas nicht wie erwartet läuft."
       },
       "transfer": {
         "title": "Nicht auf allen Versionen getestet",
-        "body": "NetsuBridge wurde nur mit wenigen Versionen von Resolve, Premiere Pro und After Effects getestet: je nach deiner Version funktioniert die Übernahme ganz, nur teilweise oder gar nicht. Nenn mir deine Version und was nicht funktioniert."
+        "body": "NetsuBridge wurde nur mit wenigen Versionen von Resolve, Premiere Pro und After Effects getestet: Je nach deiner Version funktioniert die Übertragung ganz, nur teilweise oder gar nicht. Nenn mir deine Version und was nicht funktioniert."
       }
     },
     "discord": "Discord beitreten",
@@ -114,5 +114,14 @@
   "host": {
     "offlineResolve": "Öffne ein Projekt mit Clips in Resolve und lade neu, oder importiere Videos von der Festplatte.",
     "offlineAdobe": "Öffne {{app}} und dann das NetsuRush-Bedienfeld (Fenster ▸ Erweiterungen), oder importiere Videos von der Festplatte."
+  },
+  "error": {
+    "coreUnreachable": "Der NetsuRush-Dienst antwortet nicht. Versuch es noch einmal; wenn das anhält, starte die App neu.",
+    "diskFull": "Die Festplatte ist voll. Gib Speicherplatz frei und versuch es dann noch einmal.",
+    "notFound": "Datei nicht gefunden. Sie wurde vielleicht verschoben oder gelöscht.",
+    "permission": "Zugriff verweigert. Die Datei ist vielleicht schreibgeschützt oder in einer anderen App geöffnet.",
+    "busy": "Eine andere App verwendet die Datei. Schließe sie und versuch es dann noch einmal.",
+    "timeout": "Keine Antwort in der vorgesehenen Zeit. Versuch es noch einmal.",
+    "internal": "Interner Fehler in NetsuRush. Details findest du unter Einstellungen › System › Konsole."
   }
 }

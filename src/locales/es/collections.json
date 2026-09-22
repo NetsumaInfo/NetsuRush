@@ -15,7 +15,7 @@
     "renameTitle": "Renombrar la carpeta"
   },
   "archive": {
-    "profileName": "Archivo",
+    "profileName": "Archivado",
     "onDisk": "Archivar en disco",
     "videoFormat": "Formato de vídeo",
     "processAudioNote": "La pista por idioma no se aplica a un procesamiento.",
@@ -25,7 +25,7 @@
     "processNeedsEncode": "Un procesamiento reemplaza los píxeles: la copia de flujo es imposible.",
     "queueRunning": "Archivando ahora",
     "queuePending": "Esperando una GPU libre",
-    "requiredForShare": "El archivado sostiene el uso compartido: permanece activado."
+    "requiredForShare": "El uso compartido depende del archivado: se mantiene activado."
   },
   "submenu": {
     "rangeIn": "Añadir a una colección",
@@ -50,7 +50,7 @@
     "noResult": "Sin resultados."
   },
   "empty": {
-    "noneCreate": "Ninguna colección. Crea una."
+    "noneCreate": "No hay colecciones. Crea una."
   },
   "inspector": {
     "namePlaceholder": "Nombre del plano",
@@ -101,12 +101,11 @@
     "shotWord": "Plano",
     "removed": "«{{name}}» quitado — Ctrl+Z para deshacer.",
     "restored": "«{{name}}» restaurado.",
-    "timelineFailed": "error de timeline",
+    "timelineFailed": "No se pudo crear la timeline. Comprueba que tu programa de edición está abierto con un proyecto y vuelve a intentarlo.",
     "mounting": "Montando…",
     "archived": "Colección archivada en disco.",
     "archiveFailed": "error al archivar",
     "all": "todo",
-    "ofTotal": "de {{count}} planos",
     "selCount": " · {{count}} sel.",
     "selectAll": "Seleccionar todo",
     "deselectAll": "Deseleccionar todo",
@@ -116,8 +115,6 @@
     "pregen": "Pregenerar las vistas previas {{verb}}",
     "autoplay": "Reproducción auto",
     "autoplayHint": "Reproducción auto de las vistas previas",
-    "addToTimeline": "Añadir a la timeline",
-    "addAllToTimeline": "Añadir todos los planos a la timeline",
     "archiveDiskHint": "Archivar en disco (exportación independiente de la fuente)",
     "player": "Reproductor",
     "playerHint": "Reproductor (panel derecho)",
@@ -127,11 +124,13 @@
     "emptyFolder": "Carpeta vacía — añade planos desde el visionado o la búsqueda.",
     "resize": "Redimensionar",
     "thumbSize": "Tamaño de las miniaturas",
-    "undoRemove": "Deshacer el retiro",
+    "undoRemove": "Deshacer la retirada",
     "toTimelineOk_one": "{{count}} plano → «{{timeline}}».",
     "toTimelineOk_other": "{{count}} planos → «{{timeline}}».",
     "shotCount_one": "{{count}} plano",
-    "shotCount_other": "{{count}} planos"
+    "shotCount_other": "{{count}} planos",
+    "ofTotal_one": "de {{count}} plano",
+    "ofTotal_other": "de {{count}} planos"
   },
   "list": {
     "title": "Colecciones",
@@ -154,16 +153,16 @@
     "deleteFolderDesc": "Las colecciones que contiene suben un nivel.",
     "newCollection": "Nueva colección",
     "emptyAll": "Ninguna colección. Crea una colección y luego añade planos desde el visionado o la búsqueda (botón «Añadir» en la miniatura).",
-    "folderEmpty": "Esta carpeta está vacía",
-    "folderEmptyFilter": " para este filtro",
+    "folderEmpty": "Esta carpeta está vacía.",
     "plansCount_one": "{{count}} plano",
-    "plansCount_other": "{{count}} planos"
+    "plansCount_other": "{{count}} planos",
+    "folderEmptyFiltered": "Nada en esta carpeta coincide con el filtro."
   },
   "editor": {
     "iconSearch": "Buscar un icono…",
     "changeIcon": "Cambiar el icono",
     "folderColor": "Color de la carpeta",
-    "descPlaceholder": "Mini descripción (mostrada en la tarjeta)…",
+    "descPlaceholder": "Descripción breve (se muestra en la tarjeta)…",
     "groups": "Grupos",
     "groupTag": "+ grupo",
     "groupsHint": "Etiquetas de filtrado — varias posibles",
@@ -190,7 +189,7 @@
     "trackAll": "Todas las pistas",
     "language": "Idioma",
     "trackN": "Pista {{n}}",
-    "keepSync": "Mantener sincronizado (rearchiva en cada añadido)",
+    "keepSync": "Mantener sincronizado (vuelve a archivar cada vez que se añade algo)",
     "autoSyncLabel": "Archivado automático al añadir",
     "autoSyncHint": "Exporta y actualiza automáticamente los archivos en el disco cada vez que se añade un plano.",
     "moveHint": "Los archivos ya archivados se moverán aquí. Los que falten se reexportarán.",
@@ -225,7 +224,6 @@
     "restoreHidden": "Mostrar planos ocultos",
     "missingMedia": "Medio no disponible",
     "retry": "Reintentar",
-    "preparing": "Preparando…",
     "failed": "No se pudo compartir o guardar. Vuelve a intentarlo.",
     "unavailable": "Configura la colaboración para compartir esta colección.",
     "signIn": "Inicia sesión para elegir personas.",

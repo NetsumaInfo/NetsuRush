@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Sparkles, Wrench, Gauge, Bug } from "lucide-react";
-import { CHANGE_KINDS, releaseLines, type ChangeKind, type Release } from "@/data/releases";
+import { CHANGE_KINDS, releaseLines, releaseText, type ChangeKind, type Release } from "@/data/releases";
 import { cn } from "@/lib/utils";
 
 // Le contenu d'une version, classé par nature. Partagé par la fenêtre qui s'ouvre après une mise à
@@ -21,7 +21,7 @@ const SECTIONS: Record<ChangeKind, { icon: typeof Sparkles; tone: string }> = {
 
 export function ReleaseNotes({ release, compact = false }: { release: Release; compact?: boolean }) {
   const { t, i18n } = useTranslation("settings");
-  const language = i18n.language.startsWith("fr") ? "fr" : "en";
+  const language = i18n.language;
   const grouped = CHANGE_KINDS
     .map((kind) => ({
       kind,
@@ -56,7 +56,7 @@ export function ReleaseNotes({ release, compact = false }: { release: Release; c
             "mt-1.5 list-disc text-muted-foreground",
             compact ? "space-y-1 pl-6 text-xs" : "mt-2 space-y-2 pl-7 text-sm",
           )}>
-            {entries.map((change) => <li key={change.en}>{change[language]}</li>)}
+            {entries.map((change) => <li key={change.en}>{releaseText(change, language)}</li>)}
           </ul>
         </section>
       ))}

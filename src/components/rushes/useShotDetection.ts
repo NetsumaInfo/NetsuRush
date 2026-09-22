@@ -10,6 +10,7 @@ import {
   nextSegId, modelLabel, PRESETS, MODELS, type Segment,
 } from "./cutStudioShared";
 import { usePreviewCache, type GenerationState, type PreviewSource } from "./previewCache";
+import { errorText } from "@/lib/errorText";
 
 // Réapplique les fusions persistées à une liste de plans FRAÎCHEMENT détectés/rechargés. Recalage
 // par CHEVAUCHEMENT de frames (les bornes du détecteur peuvent bouger d'une passe à l'autre) : tout
@@ -311,7 +312,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
               : []);
           if (segs.length === 0 && dur > 0) segs = [{ id: nextSegId(), in: 0, out: dur, path }];
           fresh.set(path, applyEdits(segs, editsFor(editsRef.current, path)));   // rejoue les fusions/retraits gardés
-        } catch (e) { failed.push(String(e)); }
+        } catch (e) { failed.push(errorText(e)); }
         doneClips++;
         track.to(Math.round(doneClips * share));
       }
@@ -334,7 +335,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
       setSegments(all);
       toast.ok(t("detection.shotsWithModel", { count: all.length, model: modelLabel(model) }));
       warmThumbs(all, fpsHint);
-    } catch (e) { setErr(String(e)); }
+    } catch (e) { setErr(errorText(e)); }
     finally { off(); track.stop(); setDetecting(false); }
   }
 

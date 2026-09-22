@@ -8,6 +8,7 @@ import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import { processExportPayload } from "./processExport";
 import { imageOutputPayload, outputKindFor } from "./imageOutput";
 import { depthTokens } from "./processShared";
+import { errorText } from "@/lib/errorText";
 
 const SETTINGS_KEY = "nr.netsulab.depth.settings";
 
@@ -47,7 +48,7 @@ export function useDepth() {
         setTestErr(r.error || i18n.t("upscale:errors.testFailed"));
       }
     } catch (e) {
-      setTestErr(String(e));
+      setTestErr(errorText(e));
     } finally {
       setTesting(false);
     }
@@ -104,7 +105,7 @@ export function useDepth() {
       setResult({ ok: outputs.length > 0, outputs, imported, failed, error: outputs.length ? null : lastErr });
       if (!outputs.length) setErr(lastErr);
     } catch (e) {
-      setErr(i18n.t("upscale:errors.depthUnavailable", { err: String(e) }));
+      setErr(i18n.t("upscale:errors.depthUnavailable", { err: errorText(e) }));
     } finally {
       off();
       setBusy(null); setBatch(null);

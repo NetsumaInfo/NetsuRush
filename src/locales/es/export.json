@@ -33,10 +33,10 @@
     "insertionInsert": "Insertar",
     "insertionOverwrite": "Sobrescribir",
     "insertionReplace": "Reemplazar",
-    "insertionFit": "Ajustar al relleno",
+    "insertionFit": "Reemplazar y ajustar la velocidad",
     "insertionAbove": "Colocar encima",
     "insertionEnd": "Añadir al final",
-    "insertionRippleOverwrite": "Sobrescritura con ripple",
+    "insertionRippleOverwrite": "Sobrescribir con desplazamiento",
     "aeftInsertion": {
       "insert": "Insertar y desplazar capas",
       "replace": "Reemplazar capa",
@@ -88,11 +88,11 @@
     },
     "quality": {
       "label": "Alta",
-      "hint": "archivo más pequeño, más lento"
+      "hint": "archivo más pequeño, codificación más lenta"
     },
     "max": {
       "label": "Máxima",
-      "hint": "el archivo más pequeño, el más lento"
+      "hint": "el archivo más pequeño, la codificación más lenta"
     }
   },
   "toggle": {
@@ -100,7 +100,7 @@
     "no": "No"
   },
   "issue": {
-    "binTargetRequired": "Poner nombre a la carpeta de destino",
+    "binTargetRequired": "Ponle nombre a la carpeta de destino",
     "profileIncomplete": "Perfil incompleto: {{issue}}"
   },
   "audio": {
@@ -111,8 +111,7 @@
     "trackGroup": "Pista",
     "trackN": "Pista {{n}}",
     "langResolved": "{{lang}} → Pista {{n}}",
-    "langUnresolved": "{{lang}} → sin pista",
-    "timelineHint": "Resolve importa el audio entero o nada."
+    "langUnresolved": "{{lang}} → ninguna pista encontrada"
   },
   "iconPicker": {
     "search": "Buscar un icono…",
@@ -138,9 +137,9 @@
   "workflow": {
     "timeline": "Timeline",
     "remux": "Remux",
-    "encode": "Recodificar",
+    "encode": "Recodificación",
     "remuxWarning": "Corte no preciso",
-    "remuxWarningDetail": "Remux copia el flujo sin recodificarlo: el corte se ajusta a los fotogramas clave de la fuente, así que pueden aparecer algunos fotogramas de más al principio y al final del plano. Para un corte exacto al fotograma, usa Recodificar."
+    "remuxWarningDetail": "Remux copia el flujo sin recodificarlo: el corte se ajusta a los fotogramas clave de la fuente, así que pueden aparecer algunos fotogramas de más al principio y al final del plano. Para un corte exacto al fotograma, usa Recodificación."
   },
   "audioMode": {
     "copy": "Copia",
@@ -156,8 +155,8 @@
     "pcm24": "PCM 24 bits"
   },
   "audioGroup": {
-    "lossy": "Con pérdida",
-    "lossless": "Sin pérdida"
+    "lossy": "Con pérdidas",
+    "lossless": "Sin pérdidas"
   },
   "codec": {
     "bitDepth": "{{count}} bits"

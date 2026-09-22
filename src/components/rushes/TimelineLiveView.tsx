@@ -33,6 +33,7 @@ import { hostBuildTimeline, hostShort } from "@/lib/host";
 import { getActiveExportProfile } from "@/features/export/profiles";
 import { timelineBuildOptsFromProfile, newTimelineName } from "@/features/export/timelineTarget";
 import { canFewerCols, canMoreCols, fmt, gridContainerStyle, nextSegId, stepCols } from "./cutStudioShared";
+import { errorText } from "@/lib/errorText";
 
 // L'identité d'un plan ne suffit pas : sa fin, sa position timeline, son FPS ou même sa source peuvent
 // changer sans modifier `track:index:inFrame`. Cette empreinte pilote la réutilisation exacte du cache.
@@ -317,7 +318,7 @@ export function TimelineLiveView() {
       } else { cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setError(r.error || t("timelineLive.readFailed")); }
     } catch (e) {
       if (!isCurrent()) return;
-      cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setError(String(e));
+      cutsSigRef.current = null; cutsRef.current = []; setCuts([]); setError(errorText(e));
     } finally {
       if (isCurrent()) setLoading(false);
     }

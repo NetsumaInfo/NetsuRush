@@ -1,6 +1,6 @@
 {
   "app": {
-    "modulePreparing": "模块正在准备中 — 即将推出。"
+    "modulePreparing": "模块正在准备中，即将推出。"
   },
   "nav": {
     "derush": "NetsuCut",
@@ -17,7 +17,7 @@
   },
   "sidebar": {
     "settings": "设置",
-    "hostPicked": "控制的软件"
+    "hostPicked": "受控软件"
   },
   "status": {
     "connected": "已连接",
@@ -41,12 +41,12 @@
     "paste": "粘贴",
     "selectAll": "全选",
     "derushHome": "素材整理主页",
-    "reloadRushes": "重新载入素材",
+    "reloadRushes": "重新加载素材",
     "cutTimeline": "切分时间线",
     "section": "分区",
     "sectionDecoupage": "切分",
     "sectionCollections": "合集",
-    "sectionTimeline": "实时时间线",
+    "sectionTimeline": "Timeline Live",
     "search": "搜索",
     "resultView": "结果视图",
     "resultFlat": "平铺",
@@ -59,7 +59,7 @@
     "listen": "试听",
     "listenNone": "原始素材",
     "listenAll": "完整剪辑",
-    "listenSilences": "已剪静音",
+    "listenSilences": "去除静音",
     "listenFillers": "去除语气词",
     "listenRepeats": "去除重复",
     "reset": "重置",
@@ -67,7 +67,7 @@
     "gotoModule": "前往模块",
     "console": "控制台",
     "refreshStatus": "刷新状态",
-    "reloadApp": "重新载入 NetsuRush",
+    "reloadApp": "重新加载 NetsuRush",
     "pinned": "窗口已固定",
     "hideSidebar": "隐藏侧边栏",
     "pinAbove": "固定在最前"
@@ -85,21 +85,12 @@
   "errorBadge": {
     "open": "打开控制台",
     "markRead": "标为已读",
-    "aria_one": "{{count}} 个错误 — 打开控制台",
-    "aria_other": "{{count}} 个错误 — 打开控制台"
+    "aria_one": "{{count}} 个错误，打开控制台",
+    "aria_other": "{{count}} 个错误，打开控制台"
   },
   "errorBoundary": {
-    "title": "NetsuRush 渲染崩溃",
-    "reload": "重新载入"
-  },
-  "notebook": {
-    "untitled": "无标题",
-    "prev": "上一个",
-    "next": "下一个",
-    "closeTab": "关闭标签页",
-    "closeOthers": "关闭其他",
-    "allTabs": "全部标签页",
-    "newPageTab": "在新标签页中新建页面"
+    "title": "NetsuRush 渲染时崩溃",
+    "reload": "重新加载"
   },
   "emoji": {
     "search": "搜索表情…",
@@ -132,7 +123,7 @@
     "dismissHint": "移除此提醒",
     "closeHostQ": "关闭 {{host}}？",
     "freeRamDesc": "释放 RAM 和 GPU。",
-    "resolveSafeCloseDesc": "释放 RAM 和 GPU。先保存项目。",
+    "resolveSafeCloseDesc": "释放 RAM 和 GPU。关闭前会先保存项目。",
     "later": "稍后",
     "closeHost": "关闭 {{host}}",
     "failed": "失败"

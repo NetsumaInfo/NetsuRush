@@ -9,6 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { fmtClock, secToFrame } from "./scriptShared";
 import { scriptEditorApi } from "./editor/editorApi";
 import type { MediaSpec } from "./useScript";
+import { errorText } from "@/lib/errorText";
 
 // Marge de sortie après le dernier mot trouvé (le monteur affine dans l'éditeur in/out).
 const OUT_PAD_SEC = 1;
@@ -47,7 +48,7 @@ export function useTranscriptHits(query: string) {
         setError(r?.ok ? null : r?.error ?? null);
       } catch (e) {
         setHits([]);
-        setError(String(e));
+        setError(errorText(e));
       } finally {
         setBusy(false);
       }

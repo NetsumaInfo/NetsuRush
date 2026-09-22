@@ -1,12 +1,12 @@
 {
   "header": {
     "title": "Exportar a After Effects",
-    "subtitle": "Reconstruye una timeline como una composición fiel de After Effects (posiciones, pistas y precisión de fotograma) mediante un script generado."
+    "subtitle": "Reconstruye fielmente la timeline en una composición de After Effects: posiciones, pistas y cortes con precisión de fotograma."
   },
   "result": {
     "scriptPrefix": "Script: {{name}}",
-    "imported": "Importado en After Effects (revisar el panel Proyecto).",
-    "launching": "After Effects se está abriendo — import automático al arrancar (requiere un proyecto abierto).",
+    "imported": "Importado en After Effects (revisa el panel Proyecto).",
+    "launching": "After Effects se está abriendo — importación automática al arrancar (requiere un proyecto abierto).",
     "clipsDone_one": "{{count}} plano → composición «{{comp}}».",
     "clipsDone_other": "{{count}} planos → composición «{{comp}}».",
     "missing_one": "{{count}} plano omitido por falta de archivo.",
@@ -35,7 +35,7 @@
     "nestedHintFlatten": "Los planos de la timeline anidada se aplanan directamente en la composición. Siguen el modo Vídeo de arriba.",
     "outputFormat": "Formato de salida",
     "audioFormat": "Formato de audio (si la timeline es solo audio)",
-    "bitrate": "Bitrate",
+    "bitrate": "Tasa de bits",
     "handleSeconds": "Segundos antes / después",
     "precompEach": "Cada plano de vídeo en una precomposición",
     "target": "Destino",
@@ -49,7 +49,7 @@
     "none": "Ninguno",
     "choose": "Elegir…",
     "outDirWhy": "Archivos escritos aquí: {{reasons}}.",
-    "upscaleForcesReencode": "El escalado reemplaza los píxeles: se aplica Recodificar sea cual sea la opción de arriba."
+    "upscaleForcesReencode": "El escalado reemplaza los píxeles: se aplica el modo Recodificar sea cual sea la opción de arriba."
   },
   "sections": {
     "timeline": "Timeline",
@@ -103,9 +103,9 @@
   },
   "outDirReasons": {
     "reencode": "planos recodificados",
-    "remux": "planos reencapsulados",
+    "remux": "planos con Remux",
     "bake": "velocidad fijada",
-    "nestedRender": "líneas de tiempo anidadas renderizadas por Resolve",
+    "nestedRender": "timelines anidadas renderizadas por Resolve",
     "audio": "pistas de audio extraídas"
   }
 }

@@ -10,6 +10,7 @@ import { nr } from "@/lib/bridge";
 import type { OptimizeDiagnosis, OptimizeSnapshot } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
 import { useTranslation } from "react-i18next";
+import { errorText } from "@/lib/errorText";
 
 export function SnapshotSection({ diag }: { diag: OptimizeDiagnosis | null }) {
   const { t } = useTranslation("optimize");
@@ -40,7 +41,7 @@ export function SnapshotSection({ diag }: { diag: OptimizeDiagnosis | null }) {
       setNotice(r.ok ? t("snapshot.created", { size: fmtBytes(r.size) }) : r.error || t("notice.failed"));
       if (r.ok) void refresh();
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setBusy(false);
     }

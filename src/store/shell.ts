@@ -12,6 +12,7 @@ import {
   type ModuleId,
 } from "@/lib/modules";
 import { defaultSettingsTabs, settingsPageDef, type SettingsPage } from "@/features/settings/nav";
+import { errorText } from "@/lib/errorText";
 
 export interface ShellSlice {
   tab: TabId;
@@ -202,7 +203,7 @@ export const createShellSlice: StateCreator<AppState, [], [], ShellSlice> = (set
       // Le statut Resolve est un indicateur de disponibilité, pas une raison de produire une
       // promesse rejetée si le service local vient de redémarrer. L'UI reste explicitement hors
       // ligne et le prochain refresh réessaiera via le client core.
-      set({ status: { connected: false, error: String(cause) }, statusLoading: false });
+      set({ status: { connected: false, error: errorText(cause) }, statusLoading: false });
     }
   },
 

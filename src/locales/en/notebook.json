@@ -2,7 +2,7 @@
   "editor": {
     "uploadFailed": "Upload failed",
     "dateToday": "Today's date",
-    "createNamed": "Create \"{{name}}\""
+    "createNamed": "Create “{{name}}”"
   },
   "panel": {
     "scriptNotebook": "Script notebook",
@@ -29,10 +29,10 @@
     "emptyBodyHasNb": "Notes, outlines, drafts, databases — dump your ideas here.",
     "emptyBodyNoNb": "A notepad: notebooks, nested pages, rich blocks and databases.",
     "createNotebook": "Create a notebook",
-    "confirmDeleteNbTitle": "Delete \"{{name}}\"?",
+    "confirmDeleteNbTitle": "Delete “{{name}}”?",
     "confirmDeleteNbDesc": "The notebook and ALL its pages are gone for good.",
     "confirmTrashTitle": "Send to trash?",
-    "confirmTrashDesc": "\"{{name}}\" and its subpages go to the trash (you can restore them).",
+    "confirmTrashDesc": "“{{name}}” and its subpages go to the trash (you can restore them).",
     "sendToTrash": "Send to trash",
     "saveAsProject": "Save as…",
     "openProject": "Open notebook…"
@@ -61,7 +61,7 @@
     },
     "option": {
       "searchOrCreate": "Search or create…",
-      "create": "Create \"{{label}}\""
+      "create": "Create “{{label}}”"
     },
     "checklist": {
       "addTask": "Add a task…"
@@ -393,7 +393,7 @@
   },
   "window": {
     "detach": "Detach notebook",
-    "unpin": "Remove from foreground",
+    "unpin": "Unpin from top",
     "alwaysOnTop": "Always on top",
     "stopAlwaysOnTop": "Stop keeping on top",
     "keepOnTop": "Keep on top",
@@ -469,7 +469,7 @@
     "spellOn": "On",
     "spellOff": "Off",
     "personalDictionary": "Personal dictionary",
-    "personalEmpty": "No word added",
+    "personalEmpty": "No words added",
     "personalRemove": "Remove from dictionary"
   },
   "filterSort": {

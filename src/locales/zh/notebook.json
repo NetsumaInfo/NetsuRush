@@ -13,11 +13,11 @@
     "newNotebook": "新建笔记本",
     "editNotebook": "编辑此笔记本",
     "importMarkdown": "导入 Markdown…",
-    "exportNetsu": "导出 (.netsu)",
-    "importNetsu": "导入 (.netsu)",
+    "exportNetsu": "导出（.netsu）",
+    "importNetsu": "导入（.netsu）",
     "deleteNotebook": "删除此笔记本",
-    "collapseSidebar": "收起侧边栏 (Ctrl+\\)",
-    "expandSidebar": "显示侧边栏 (Ctrl+\\)",
+    "collapseSidebar": "收起侧边栏（Ctrl+\\）",
+    "expandSidebar": "显示侧边栏（Ctrl+\\）",
     "search": "搜索",
     "newPage": "新建页面",
     "pages": "页面",
@@ -97,8 +97,8 @@
   },
   "trash": {
     "title": "回收站",
-    "count_one": "已删除 {{count}} 个页面 — 可恢复。",
-    "count_other": "已删除 {{count}} 个页面 — 可恢复。",
+    "count_one": "已删除 {{count}} 个页面，可恢复。",
+    "count_other": "已删除 {{count}} 个页面，可恢复。",
     "description": "删除的页面会显示在这里。",
     "empty": "回收站为空。",
     "restore": "恢复",
@@ -113,7 +113,7 @@
     "deletedSubpage": "已删除的子页面",
     "subpage": "子页面",
     "rename": "重命名",
-    "empty": "没有页面 — 请创建一个"
+    "empty": "没有页面，请新建一个"
   },
   "tabs": {
     "prev": "上一页",
@@ -325,10 +325,10 @@
       "equilibrium": "平衡",
       "ion": "离子"
     },
-    "empty": "空公式 — 点击输入 LaTeX",
+    "empty": "空公式，点击输入 LaTeX",
     "templates": "模板",
     "error": "LaTeX 错误：{{error}}",
-    "hint": "完整 LaTeX（KaTeX + 化学 \\ce）· Ctrl+Enter 应用 · Escape 取消",
+    "hint": "完整 LaTeX（KaTeX + 化学 \\ce）· Ctrl+Enter 应用 · Esc 取消",
     "edit": "编辑公式",
     "input": "公式的 LaTeX 代码"
   },
@@ -336,7 +336,7 @@
     "chooseImages": "选择图片…",
     "dropFiles": "或拖放文件",
     "imageUrl": "…或粘贴图片 URL 后按 Enter",
-    "row": "横向条带",
+    "row": "横排（横向滚动）",
     "carousel": "轮播",
     "grid": "网格",
     "height": "高度 {{size}}",
@@ -397,7 +397,7 @@
     "alwaysOnTop": "始终置顶",
     "stopAlwaysOnTop": "不再置顶",
     "keepOnTop": "保持置顶",
-    "attach": "附加到主窗口",
+    "attach": "放回主窗口",
     "minimize": "最小化",
     "restore": "还原",
     "maximize": "最大化",
@@ -433,14 +433,14 @@
     "visible": "显示",
     "hidden": "隐藏",
     "editor": "编辑器",
-    "autosaveDelay": "自动保存间隔",
+    "autosaveDelay": "自动保存延迟",
     "confirmTrash": "移入回收站前确认",
     "yes": "是",
     "no": "否",
     "shortcuts": "键盘快捷键",
     "reset": "重置",
     "press": "请按键…",
-    "shortcutHint": "点击后按下新的组合键（Escape 取消）",
+    "shortcutHint": "点击后按下新的组合键（Esc 取消）",
     "shortcutConflict": "若快捷键已被使用，将与原操作的快捷键互换。",
     "width": {
       "narrow": "窄",
@@ -461,11 +461,11 @@
       "settings": "笔记本设置",
       "save": "保存页面",
       "trash": "打开回收站",
-      "toggleSidebar": "显示／隐藏侧栏"
+      "toggleSidebar": "显示/隐藏侧边栏"
     },
     "spellcheck": "拼写检查",
     "spellcheckHint": "为错误加下划线；右键或 Ctrl+. 修正",
-    "spellUnsupported": "该语言没有词典 — 仅原生下划线",
+    "spellUnsupported": "该语言没有词典，只显示系统自带的下划线",
     "spellOn": "开启",
     "spellOff": "关闭",
     "personalDictionary": "个人词典",
@@ -537,8 +537,8 @@
   },
   "preview": {
     "unavailable": "无法预览",
-    "openPdf": "打开PDF",
-    "loadingPdf": "正在加载PDF…（{{label}}）",
+    "openPdf": "打开 PDF",
+    "loadingPdf": "正在加载 PDF…（{{label}}）",
     "loading": "正在加载…"
   },
   "subpage": {
@@ -553,10 +553,10 @@
     "columnHeader": "标题列"
   },
   "linkPage": {
-    "tooltip": "链接到页面或URL",
-    "placeholder": "粘贴URL或搜索页面…",
+    "tooltip": "链接到页面或 URL",
+    "placeholder": "粘贴 URL 或搜索页面…",
     "linkTo": "链接到",
-    "hint": "输入URL或页面标题"
+    "hint": "输入 URL 或页面标题"
   },
   "mention": {
     "block": "区块",
@@ -574,9 +574,9 @@
       "video": "视频",
       "audio": "音频",
       "file": "文件",
-      "gallery": "图片库",
+      "gallery": "图片画廊",
       "database": "数据库",
-      "youtube": "YouTube视频",
+      "youtube": "YouTube 视频",
       "embed": "嵌入内容",
       "bookmark": "书签",
       "divider": "分隔线",

@@ -5,11 +5,9 @@
   },
   "home": {
     "title": "音声",
-    "subtitle": "話し声のクリップを選択。無音・フィラー・文字起こしを並列で解析します。",
-    "addFiles": "動画ファイルを追加",
-    "addFilesHint": "ディスクから複数まとめて。下のリストに追加されます。",
+    "subtitle": "話し声のクリップを 1 つ以上選択してください。無音・フィラー・文字起こしを並列で解析します。",
     "mediaPool": "Media Pool",
-    "mediaPoolHint": "Resolve プロジェクトのクリップを再読み込み。下にリスト表示。",
+    "mediaPoolHint": "Resolve プロジェクトのクリップを再読み込みします。リストは下に表示されます。",
     "presetLabel": "解析プリセット",
     "savedPresetHint": "保存済みプリセット",
     "customSettingsHint": "カスタム設定が有効（エディターのスライダー）。",
@@ -34,15 +32,14 @@
     "noMatch": "条件に合う素材がありません。",
     "folderView": "フォルダーでまとめる",
     "flatView": "フラット表示",
-    "renderThisClip": "このクリップを書き出す",
+    "renderThisClip": "このクリップをレンダリング",
     "renderFailed": "失敗",
-    "rendered": "完了"
+    "rendered": "レンダリング済み"
   },
   "clipRow": {
     "queued": "待機中…",
     "running": "解析中…",
     "errorFallback": "失敗",
-    "stats": "{{words}} 語 · 無音 {{silences}} · フィラー {{fillers}} — クリックで開く",
     "statsShort": "{{words}} 語 · 無音 {{silences}}"
   },
   "panel": {
@@ -70,7 +67,7 @@
     "modeRepeatsTooltip": "繰り返しだけスキップして再生",
     "modeAll": "すべて",
     "modeAllTooltip": "最終版を再生（すべての対象箇所をスキップ）",
-    "noTranscriptYet": "「文字起こし」で編集可能なテキストへ。すぐ切るなら「無音を検出」。"
+    "noTranscriptYet": "「文字起こし」で編集できるテキストを作成するか、「無音を検出」ですぐにカットします。"
   },
   "controls": {
     "groupAnalyse": "解析",
@@ -88,14 +85,14 @@
     "presetSavedHint": "プリセットを保存しました。解析とホームの一括処理に適用されます。",
     "presetCustomHint": "カスタム設定です。プリセットを選ぶと基準値に戻ります。",
     "analyzeAll": "すべて解析",
-    "analyzeAllTooltip": "文字起こし・無音・言い淀みをまとめて実行します。結果はカットパネルに出ます。",
+    "analyzeAllTooltip": "文字起こし・無音・フィラーをまとめて実行します。結果はカットパネルに表示されます。",
     "savePresetDialogTitle": "プリセットを保存",
     "savePresetPlaceholder": "名前（例：テンポの速いインタビュー）",
     "transcribe": "文字起こし",
     "retranscribe": "再文字起こし",
     "engine": "エンジン",
     "verbatim": "逐語（フィラーを残す）",
-    "verbatimTooltip": "Whisper が「えー」を消さずに書き起こすので、検出が拾えるようになります。適用するには再文字起こしを。",
+    "verbatimTooltip": "Whisper が「えー」を消さずに書き起こすので、検出で拾えるようになります。適用するには、もう一度文字起こししてください。",
     "detectSilences": "無音を検出",
     "settings": "設定",
     "novaConfirm": "ノイズ誤検出の確認（NOVA）",
@@ -118,11 +115,10 @@
     "sendToTimeline": "タイムラインへ送信",
     "editText": "テキストを編集（{{count}}）",
     "coloredTimeline": "色分けタイムライン",
-    "coloredTimelineTooltip": "クリップ全体を種類別（発話・無音・言い淀み）に色分けして並べ、DaVinci でカットを確認できます。",
+    "coloredTimelineTooltip": "クリップ全体を種類別（発話・無音・フィラー）に色分けして並べ、DaVinci でカットを確認できます。",
     "removeFillers": "フィラーを削除（{{count}}）",
     "restoreFillers": "フィラーを復元（{{count}}）",
     "kept": "保持",
-    "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = 再エンコード · FCPXML = ソースのタイムコード。",
     "hints": {
@@ -160,19 +156,19 @@
     "redo": "やり直し",
     "restoreCount": "復元（{{count}}）",
     "cutCount": "カット（{{count}}）",
-    "hint": "クリック = 再生 · Suppr = カット",
+    "hint": "クリック = 再生 · Delete = カット",
     "playHere": "ここから再生",
     "restoreSelection": "選択を復元（{{count}}）",
     "cutSelection": "選択をカット（{{count}}）",
     "restoreWord": "この語を復元",
-    "strikeWord": "この語を取り消し線",
+    "strikeWord": "この語に取り消し線を引く",
     "contextUndo": "元に戻す",
     "contextRedo": "やり直し"
   },
   "cuts": {
     "tabSilences": "無音",
     "tabFillers": "フィラー",
-    "tabRepeats": "重複",
+    "tabRepeats": "繰り返し",
     "emptySilences": "「無音を検出」",
     "emptyFillers": "「フィラーを検出」",
     "emptyRepeats": "文字起こしすると繰り返しを検出します",
@@ -194,8 +190,7 @@
     "helpAria": "設定について",
     "helpTooltip": "設定について（大きなプレビュー）",
     "dialogTitle": "無音の設定",
-    "description": "スライダーを動かすと、プレビューと数値がすぐ反映されます",
-    "descriptionExampleSuffix": "（サンプル — クリップを読み込むと自分の音声で確認できます）",
+    "description": "スライダーを動かすと、プレビューと数値がすぐに変わります。",
     "legendKept": "残す発話",
     "legendPad": "余白",
     "legendCut": "カット",
@@ -208,7 +203,8 @@
       "minSilence": "これより短い空白はカットしません。息継ぎは残ります。",
       "minSpeech": "これより短い発話は無視します（細切れ防止）。",
       "pad": "各テイクの前後に残す余白。プレビューの薄い緑です。"
-    }
+    },
+    "descriptionExample": "スライダーを動かすと、プレビューと数値がすぐに変わります。これはサンプルです。クリップを読み込むと自分の音声で確認できます。"
   },
   "shared": {
     "asr": {
@@ -247,7 +243,7 @@
     },
     "agressif": {
       "label": "強め",
-      "hint": "すべてカット：0.3 秒から無音を（余白最小）、感度高め、口ぐせも対象。テンポは詰まります。CUTS で確認を。"
+      "hint": "0.3 秒以上の無音を最小限の余白でカットし、口ぐせも対象にします。そのあとカットパネルで確認してください。"
     }
   },
   "fillerCats": {
@@ -264,7 +260,6 @@
     "noFillersDetected": "音響的なフィラーは検出されませんでした。",
     "errDetectFillers": "フィラーを検出できません",
     "transcriptCached": "文字起こしを読み込みました（キャッシュ）",
-    "transcriptDone": "文字起こし：{{count}} 語",
     "errTranscribe": "文字起こしに失敗しました",
     "analyzeAllDone": "解析：{{words}} 語 · 無音 {{silences}} · 音声フィラー {{fillers}}",
     "busyDetectSilences": "無音を検出中…",
@@ -273,14 +268,16 @@
     "busyAnalyzeAllWithTranscribe": "解析：文字起こし ∥ 無音…",
     "busyAnalyzeAllSilencesOnly": "解析：無音…",
     "busyAnalyzeAllFillers": "解析：フィラー（音声）…",
-    "batchStopped_one": "解析を停止しました — {{count}} クリップ完了",
-    "batchStopped_other": "解析を停止しました — {{count}} クリップ完了",
+    "batchStopped_one": "解析を停止しました（{{count}} クリップ完了）",
+    "batchStopped_other": "解析を停止しました（{{count}} クリップ完了）",
     "batchDone_one": "一括解析：{{count}} クリップ",
     "batchDone_other": "一括解析：{{count}} クリップ",
     "batchErrorsSuffix_one": " · エラー {{count}} 件",
     "batchErrorsSuffix_other": " · エラー {{count}} 件",
     "fillersDetected_one": "フィラー {{count}} 件を検出（音声）",
-    "fillersDetected_other": "フィラー {{count}} 件を検出（音声）"
+    "fillersDetected_other": "フィラー {{count}} 件を検出（音声）",
+    "transcriptDone_one": "文字起こし：{{count}} 語",
+    "transcriptDone_other": "文字起こし：{{count}} 語"
   },
   "export": {
     "timelineSuffixEdit": "編集版",
@@ -295,41 +292,43 @@
     "removedSuffix": " · {{sec}} 秒を削除",
     "createdSuffix": "（作成済み）",
     "fpsMismatchSuffix": " · ⚠ タイムラインの fps ≠ クリップ",
-    "errTimeline": "タイムラインに失敗しました",
+    "errTimeline": "タイムラインを作成できませんでした",
     "errNoDuration": "クリップの長さが不明です（波形を読み込んでください）。",
     "errNothingToBuildColored": "編集する内容がありません（セグメントなし）。",
-    "timelineColoredBase": "タイムライン「{{name}}」· {{count}} クリップ（{{cuts}} カット）· {{colored}} 件を色分け",
     "coloredRefused": " ⚠ Resolve が色分けを拒否しました",
-    "coloredLegend": " · 🟢 発話 🔵 無音 🟠 フィラー 🟦 重複",
-    "errTimelineColored": "カラータイムラインに失敗しました",
+    "coloredLegend": " · 🟢 発話 🔵 無音 🟠 フィラー 🟦 繰り返し",
+    "errTimelineColored": "カラータイムラインを作成できませんでした",
     "errNothingToExport": "書き出す内容がありません（残ったセグメントなし）。",
     "errExportFile": "{{format}} を書き出せません",
     "errNoWords": "先に文字起こししてください（語がありません）。",
-    "subtitlesExported": "字幕 {{format}}（{{count}} 行）→ {{path}}",
-    "errSubtitles": "字幕に失敗しました",
+    "errSubtitles": "字幕を書き出せませんでした",
     "timelineBase_one": "タイムライン「{{name}}」· {{count}} セグメント",
     "timelineBase_other": "タイムライン「{{name}}」· {{count}} セグメント",
     "fileExported_one": "{{format}}（{{count}} ショット）→ {{path}}",
-    "fileExported_other": "{{format}}（{{count}} ショット）→ {{path}}"
+    "fileExported_other": "{{format}}（{{count}} ショット）→ {{path}}",
+    "timelineColoredBase_one": "タイムライン「{{name}}」· {{count}} クリップ（{{cuts}} カット）· {{colored}} 件を色分け",
+    "timelineColoredBase_other": "タイムライン「{{name}}」· {{count}} クリップ（{{cuts}} カット）· {{colored}} 件を色分け",
+    "subtitlesExported_one": "字幕 {{format}}（{{count}} 行）→ {{path}}",
+    "subtitlesExported_other": "字幕 {{format}}（{{count}} 行）→ {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve がオフラインです。ローカルファイルを使ってください。",
-    "otherHostOffline": "{{host}} を選択中。プロジェクトのソースは Resolve からです。ローカルファイルを使ってください。"
+    "otherHostOffline": "{{host}} を選択中。プロジェクトのソースは Resolve から取得します。ローカルファイルを使ってください。"
   },
   "render": {
-    "action": "書き出す",
-    "actionCount_one": "{{count}} 本を書き出す",
-    "actionCount_other": "{{count}} 本を書き出す",
-    "profileHint": "書き出しプロファイル（コーデック・コンテナ・音声）。右クリックで切り替え。",
-    "runningCount_one": "{{count}} 件を書き出し中",
-    "runningCount_other": "{{count}} 件を書き出し中",
+    "action": "レンダリング",
+    "actionCount_one": "素材 {{count}} 件をレンダリング",
+    "actionCount_other": "素材 {{count}} 件をレンダリング",
+    "profileHint": "レンダリングプロファイル（コーデック・コンテナ・音声）。右クリックで切り替え。",
+    "runningCount_one": "{{count}} 件をレンダリング中",
+    "runningCount_other": "{{count}} 件をレンダリング中",
     "errProfile": "プロファイルが未完成：{{issue}}",
-    "errNoDir": "書き出しを中止：出力フォルダー未選択。",
-    "errNoSegments": "書き出す対象がありません（残った区間なし）。",
-    "errExport": "書き出しに失敗",
-    "done_one": "書き出し完了：{{count}} 本 · プロファイル {{profile}}",
-    "done_other": "書き出し完了：{{count}} 本 · プロファイル {{profile}}",
-    "stopped_one": "書き出しを停止 — {{count}} 本完了",
-    "stopped_other": "書き出しを停止 — {{count}} 本完了"
+    "errNoDir": "レンダリングを中止しました：出力フォルダーが選択されていません。",
+    "errNoSegments": "レンダリングする対象がありません（残った区間なし）。",
+    "errExport": "レンダリングに失敗しました",
+    "done_one": "レンダリング完了：素材 {{count}} 件 · プロファイル {{profile}}",
+    "done_other": "レンダリング完了：素材 {{count}} 件 · プロファイル {{profile}}",
+    "stopped_one": "レンダリングを停止しました（素材 {{count}} 件完了）",
+    "stopped_other": "レンダリングを停止しました（素材 {{count}} 件完了）"
   }
 }

@@ -7,10 +7,8 @@
     "cepTitle": "NetsuRush panel",
     "installed": "Installed",
     "notInstalled": "Not installed",
-    "inApp": "In Premiere Pro/After Effects: ",
     "menuPath": "Window ▸ Extensions ▸ NetsuRush",
-    "restartHint": " (restart the app if it was already open).",
-    "installHint": "Click \"Install panel\", then open Premiere Pro/After Effects ▸ Window ▸ Extensions ▸ NetsuRush.",
+    "installHint": "Click “Install panel”, then open Premiere Pro/After Effects ▸ Window ▸ Extensions ▸ NetsuRush.",
     "diagnose": "Diagnostics",
     "autoUpdate": "Automatic management",
     "autoUpdateHint": "The panel installs as soon as an Adobe app is detected, then updates with NetsuRush.",
@@ -18,7 +16,8 @@
     "autoUpdateOff": "Off",
     "updatePending": "A newer panel ships with this version of NetsuRush",
     "updateNow": "Update now",
-    "restartApps": "Panel updated — restart {{apps}} to reload it."
+    "restartApps": "Panel updated — restart {{apps}} to reload it.",
+    "openHint": "In Premiere Pro or After Effects: {{menu}}. Restart the app if it was already open."
   },
   "diag": {
     "verdictOk": "Installed ✓ (folder + manifest + PlayerDebugMode). Open the panel in Adobe: Window ▸ Extensions ▸ NetsuRush.",
@@ -57,7 +56,7 @@
     "thShot": "Shot",
     "thTimeline": "Timeline",
     "thSource": "Source",
-    "noProject": "No project received — open the NetsuRush panel in the app, then \"Send to NetsuRush\".",
+    "noProject": "No project received — open the NetsuRush panel in the app, then “Send to NetsuRush”.",
     "receivedAt": "received at {{time}}",
     "rushes": "Footage",
     "noFileMedia": "No file-based media in the project."

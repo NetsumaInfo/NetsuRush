@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { nr, type SearchModelEntry, type SearchModelState } from "@/lib/bridge";
+import { errorText } from "@/lib/errorText";
 
 // Variante SigLIP active + bascule. Les index sont SÉPARÉS par variante (colonne `model` des
 // embeddings) : basculer ne détruit rien, mais la variante choisie repart de son propre index —
@@ -39,7 +40,7 @@ export function useSearchModel(): SearchModelPicker {
       setState(next);
       return true;
     } catch (cause) {
-      if (alive.current) setError(String(cause));
+      if (alive.current) setError(errorText(cause));
       return false;
     } finally {
       if (alive.current) setBusy(null);

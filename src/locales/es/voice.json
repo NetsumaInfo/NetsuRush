@@ -6,8 +6,6 @@
   "home": {
     "title": "Voz",
     "subtitle": "Selecciona uno o varios clips hablados: silencios, muletillas y transcripción se analizan en paralelo.",
-    "addFiles": "Añadir archivos de vídeo",
-    "addFilesHint": "Varios archivos del disco a la vez — se añaden a la lista de abajo.",
     "mediaPool": "Media Pool",
     "mediaPoolHint": "Recarga los clips del proyecto Resolve — la lista aparece abajo.",
     "presetLabel": "Preajuste de análisis",
@@ -42,7 +40,6 @@
     "queued": "En cola…",
     "running": "Analizando…",
     "errorFallback": "error",
-    "stats": "{{words}} palabras · {{silences}} silencios · {{fillers}} mulet. — clic para abrir",
     "statsShort": "{{words}} palabras · {{silences}} silencios"
   },
   "panel": {
@@ -57,7 +54,7 @@
     "collapseAria": "Reducir",
     "expandTooltip": "Ampliar la forma de onda",
     "collapseTooltip": "Reducir la forma de onda",
-    "keptOfDuration": "se mantiene {{kept}} / {{total}}",
+    "keptOfDuration": "conservado {{kept}} / {{total}}",
     "waveformLabel": "Forma de onda",
     "listen": "Escuchar",
     "modeRaw": "Bruto",
@@ -69,7 +66,7 @@
     "modeRepeats": "Repet.",
     "modeRepeatsTooltip": "Reproducir saltando solo las repeticiones",
     "modeAll": "Todo",
-    "modeAllTooltip": "Reproducir el montaje final (todo saltado)",
+    "modeAllTooltip": "Reproducir el montaje final (saltando todo)",
     "noTranscriptYet": "«Transcribir» para el texto editable, o «Detectar los silencios» para cortar directamente."
   },
   "controls": {
@@ -99,7 +96,7 @@
     "detectSilences": "Detectar los silencios",
     "settings": "Ajustes",
     "novaConfirm": "Confirmación antirruido (NOVA)",
-    "novaConfirmTooltip": "Comprueba que el habla detectada lo sea de verdad (no una tos ni un teclado). Más lento, útil en material ruidoso.",
+    "novaConfirmTooltip": "Comprueba que el habla detectada lo sea de verdad (no una tos ni un teclado). Más lento, útil en clips ruidosos.",
     "previewOwnClip": "(tu clip)",
     "previewExample": "(ejemplo)",
     "previewLabel": "Vista previa",
@@ -111,7 +108,7 @@
     "tics": "Tics",
     "wordTypes": "Tipos de palabras",
     "customWords": "Palabras propias",
-    "customWordsPlaceholder": "ej.: bah, pff, sip",
+    "customWordsPlaceholder": "ej.: bah, pff, o sea",
     "customWordsTooltip": "Tus propias muletillas, separadas por comas (se añaden al léxico).",
     "timelineNamePlaceholder": "Nombre de la timeline (auto si se deja vacío)",
     "cutSilences": "Cortar los silencios",
@@ -122,19 +119,18 @@
     "removeFillers": "Quitar las muletillas ({{count}})",
     "restoreFillers": "Restaurar las muletillas ({{count}})",
     "kept": "Conservado",
-    "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = recodifica · FCPXML = timecode fuente.",
     "hints": {
       "threshold": "Sensibilidad voz/silencio: + alto = + silencios cortados.",
       "minSilence": "Duración mínima de una pausa para que se corte.",
-      "minSpeech": "Ignora los trozos de habla más cortos (evita el picado).",
+      "minSpeech": "Ignora los trozos de habla más cortos (evita que suene entrecortado).",
       "pad": "Deja un poco de aire alrededor del habla conservada.",
       "novaConfidence": "Confianza mínima de «sin voz» para descartar una región. + alto = más prudente (descarta menos).",
       "sensitivity": "+ alto = detecta más (eh, sonidos alargados, palabras arrastradas). Los falsos positivos se tachan con un clic.",
       "minDuration": "Duración mínima de un sonido alargado / palabra arrastrada para contar.",
       "maxDuration": "Por encima = palabra larga real, no una muletilla. Limita sonidos alargados + palabras arrastradas.",
-      "monotoneTolerance": "Audio: cuánto debe mantenerse el sonido en la misma nota. + alto = acepta más variación → detecta más «sooonidos» alargados. (Volver a lanzar «Detectar».)",
+      "monotoneTolerance": "Audio: cuánto debe mantenerse el sonido en la misma nota. + alto = acepta más variación → detecta más «sooonidos» alargados. (Vuelve a lanzar «Detectar».)",
       "padEnd": "Aire conservado DESPUÉS de cada toma (finales de frase), aparte del margen inicial.",
       "noiseGate": "Descarta ruidos cortos tomados por voz (teclado, chasquidos). 0 = desactivado."
     },
@@ -185,7 +181,7 @@
     "play": "Reproducir"
   },
   "waveform": {
-    "scrubberAria": "Scrubber de la forma de onda"
+    "scrubberAria": "Cursor de reproducción de la forma de onda"
   },
   "thresholdPreview": {
     "thresholdLabel": "umbral"
@@ -194,8 +190,7 @@
     "helpAria": "Entender los ajustes",
     "helpTooltip": "Entender los ajustes (vista previa grande)",
     "dialogTitle": "Ajustes de silencios",
-    "description": "Mueve los controles: la vista previa y las cifras reaccionan en directo",
-    "descriptionExampleSuffix": " (ejemplo — carga un clip para ver TU audio)",
+    "description": "Mueve los controles: la vista previa y las cifras cambian en directo.",
     "legendKept": "Habla conservada",
     "legendPad": "Margen",
     "legendCut": "Cortado",
@@ -206,9 +201,10 @@
     "explains": {
       "threshold": "La línea de puntos de la vista previa. Por encima = habla, por debajo = pausa. + alto → corta más.",
       "minSilence": "Una pausa más corta que esto NO se corta — las respiraciones se mantienen.",
-      "minSpeech": "Un trozo de habla más corto que esto se ignora (evita el picado).",
+      "minSpeech": "Un trozo de habla más corto que esto se ignora (evita que suene entrecortado).",
       "pad": "El aire conservado antes/después de cada toma — el verde claro de la vista previa."
-    }
+    },
+    "descriptionExample": "Mueve los controles: la vista previa y las cifras cambian en directo. Esto es un ejemplo: carga un clip para ver tu propio audio."
   },
   "shared": {
     "asr": {
@@ -247,7 +243,7 @@
     },
     "agressif": {
       "label": "Agresivo",
-      "hint": "Corta todo: silencios desde 0,3 s (margen mínimo), sensibilidad alta, tics de lenguaje incluidos. Ritmo ajustado — revisar en CUTS."
+      "hint": "Corta los silencios desde 0,3 s con un margen mínimo e incluye los tics de lenguaje. Revisa después el panel Cortes."
     }
   },
   "fillerCats": {
@@ -264,7 +260,6 @@
     "noFillersDetected": "Sin muletillas acústicas detectadas.",
     "errDetectFillers": "error al detectar muletillas",
     "transcriptCached": "Transcripción cargada (caché)",
-    "transcriptDone": "Transcripción · Palabras: {{count}}",
     "errTranscribe": "error al transcribir",
     "analyzeAllDone": "Análisis: {{words}} palabras · Silencios: {{silences}} · Muletillas de audio: {{fillers}}",
     "busyDetectSilences": "Detectando los silencios…",
@@ -280,7 +275,9 @@
     "batchErrorsSuffix_one": " · {{count}} error",
     "batchErrorsSuffix_other": " · {{count}} errores",
     "fillersDetected_one": "{{count}} muletilla detectada en el audio",
-    "fillersDetected_other": "{{count}} muletillas detectadas en el audio"
+    "fillersDetected_other": "{{count}} muletillas detectadas en el audio",
+    "transcriptDone_one": "Transcripción · Palabras: {{count}}",
+    "transcriptDone_other": "Transcripción · Palabras: {{count}}"
   },
   "export": {
     "timelineSuffixEdit": "montaje",
@@ -298,19 +295,21 @@
     "errTimeline": "error de timeline",
     "errNoDuration": "Duración del clip desconocida (carga la forma de onda).",
     "errNothingToBuildColored": "Nada que montar (ningún segmento).",
-    "timelineColoredBase": "Timeline «{{name}}» · Clips: {{count}} · Cortes: {{cuts}} · Coloreados: {{colored}}",
     "coloredRefused": " ⚠ Resolve rechazó los colores",
     "coloredLegend": " · 🟢 habla 🔵 silencio 🟠 mulet. 🟦 repet.",
     "errTimelineColored": "error de timeline de colores",
     "errNothingToExport": "Nada que exportar (ningún segmento conservado).",
     "errExportFile": "error al exportar {{format}}",
     "errNoWords": "Transcribe primero (ninguna palabra).",
-    "subtitlesExported": "Subtítulos {{format}} · Líneas: {{count}} → {{path}}",
     "errSubtitles": "error de subtítulos",
     "timelineBase_one": "Timeline «{{name}}» · {{count}} segmento",
     "timelineBase_other": "Timeline «{{name}}» · {{count}} segmentos",
     "fileExported_one": "{{format}} ({{count}} plano) → {{path}}",
-    "fileExported_other": "{{format}} ({{count}} planos) → {{path}}"
+    "fileExported_other": "{{format}} ({{count}} planos) → {{path}}",
+    "timelineColoredBase_one": "Timeline «{{name}}» · Clips: {{count}} · Cortes: {{cuts}} · Coloreados: {{colored}}",
+    "timelineColoredBase_other": "Timeline «{{name}}» · Clips: {{count}} · Cortes: {{cuts}} · Coloreados: {{colored}}",
+    "subtitlesExported_one": "Subtítulos {{format}} · Líneas: {{count}} → {{path}}",
+    "subtitlesExported_other": "Subtítulos {{format}} · Líneas: {{count}} → {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve sin conexión — usa un archivo local.",

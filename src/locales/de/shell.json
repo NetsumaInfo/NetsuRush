@@ -1,6 +1,6 @@
 {
   "app": {
-    "modulePreparing": "Modul in Arbeit — bald verfügbar."
+    "modulePreparing": "Modul in Arbeit – bald verfügbar."
   },
   "nav": {
     "derush": "NetsuCut",
@@ -85,21 +85,12 @@
   "errorBadge": {
     "open": "Konsole öffnen",
     "markRead": "Als gelesen markieren",
-    "aria_one": "{{count}} Fehler — Konsole öffnen",
-    "aria_other": "{{count}} Fehler — Konsole öffnen"
+    "aria_one": "{{count}} Fehler – Konsole öffnen",
+    "aria_other": "{{count}} Fehler – Konsole öffnen"
   },
   "errorBoundary": {
-    "title": "NetsuRush ist beim Rendern abgestürzt",
+    "title": "NetsuRush ist beim Anzeigen abgestürzt",
     "reload": "Neu laden"
-  },
-  "notebook": {
-    "untitled": "Ohne Titel",
-    "prev": "Zurück",
-    "next": "Weiter",
-    "closeTab": "Tab schließen",
-    "closeOthers": "Andere schließen",
-    "allTabs": "Alle Tabs",
-    "newPageTab": "Neue Seite im Tab"
   },
   "emoji": {
     "search": "Emoji suchen…",
@@ -123,7 +114,7 @@
   "power": {
     "reopenHost": "{{host}} erneut öffnen",
     "freeRam": "Schließen, um RAM freizugeben",
-    "closeNub": "{{host}} schließen (RAM/GPU frei)",
+    "closeNub": "{{host}} schließen (RAM/GPU freigeben)",
     "opInProgress": "Vorgang läuft…",
     "hostClosed": "{{host}} geschlossen",
     "collapse": "Einklappen",
@@ -132,7 +123,7 @@
     "dismissHint": "Diese Erinnerung ausblenden",
     "closeHostQ": "{{host}} schließen?",
     "freeRamDesc": "Gibt RAM und GPU frei.",
-    "resolveSafeCloseDesc": "Gibt RAM und GPU frei. Projekt vorher gespeichert.",
+    "resolveSafeCloseDesc": "Gibt RAM und GPU frei. Das Projekt wird vorher gespeichert.",
     "later": "Später",
     "closeHost": "{{host}} schließen",
     "failed": "fehlgeschlagen"

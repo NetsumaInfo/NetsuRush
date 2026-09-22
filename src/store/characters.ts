@@ -7,6 +7,7 @@ import i18n from "@/i18n";
 import { nr, type Character, type CharRef, type SearchHit, type DuplicatePair } from "@/lib/bridge";
 import type { AppState } from "./index";
 import { SEARCH_TOP_K, searchScopePaths } from "./search";
+import { errorText } from "@/lib/errorText";
 
 export interface CharacterSlice {
   characters: Character[];
@@ -113,7 +114,7 @@ export const createCharacterSlice: StateCreator<AppState, [], [], CharacterSlice
       const r = await nr.charSearch({ charId, topK: SEARCH_TOP_K, minScore: 0, filePaths: searchScopePaths(get()) });
       set({ searching: false, searchHits: r.hits ?? [], searchError: r.error ?? null });
     } catch (e) {
-      set({ searching: false, searchHits: [], searchError: i18n.t("collections:char.searchUnavailable", { error: String(e) }) });
+      set({ searching: false, searchHits: [], searchError: i18n.t("collections:char.searchUnavailable", { error: errorText(e) }) });
     }
   },
   filterByCharacter: async (charId, name) => {
@@ -123,7 +124,7 @@ export const createCharacterSlice: StateCreator<AppState, [], [], CharacterSlice
       const r = await nr.charShots({ charId, topK: SEARCH_TOP_K, filePaths: searchScopePaths(get()) });
       set({ searching: false, searchHits: r.hits ?? [], searchError: r.error ?? null });
     } catch (e) {
-      set({ searching: false, searchHits: [], searchError: i18n.t("collections:char.shotsUnavailable", { error: String(e) }) });
+      set({ searching: false, searchHits: [], searchError: i18n.t("collections:char.shotsUnavailable", { error: errorText(e) }) });
     }
   },
   // « C'est bien lui » : le visage confirmé devient un ÉCHANTILLON du personnage (le perso
@@ -159,7 +160,7 @@ export const createCharacterSlice: StateCreator<AppState, [], [], CharacterSlice
       const r = await nr.charDuplicates({ minScore: 0.55 });
       set({ duplicates: r.pairs ?? [], dupLoading: false });
     } catch (e) {
-      set({ dupLoading: false, searchError: i18n.t("collections:char.dupUnavailable", { error: String(e) }) });
+      set({ dupLoading: false, searchError: i18n.t("collections:char.dupUnavailable", { error: errorText(e) }) });
     }
   },
   clearDuplicates: () => set({ duplicates: null }),
@@ -180,7 +181,7 @@ export const createCharacterSlice: StateCreator<AppState, [], [], CharacterSlice
         if (!r.ok && r.error) set({ searchError: i18n.t("collections:char.dlFailed", { id, error: r.error }) });
       }
     } catch (e) {
-      set({ searchError: i18n.t("collections:char.dlModelsUnavailable", { error: String(e) }) });
+      set({ searchError: i18n.t("collections:char.dlModelsUnavailable", { error: errorText(e) }) });
     } finally {
       off();
       set({ faceModelsDl: null });
@@ -201,7 +202,7 @@ export const createCharacterSlice: StateCreator<AppState, [], [], CharacterSlice
       const r = await nr.charLabelIndex({ minScore: 0.5 });
       if (r.error) set({ searchError: r.error });
     } catch (e) {
-      set({ searchError: i18n.t("collections:char.recognitionUnavailable", { error: String(e) }) });
+      set({ searchError: i18n.t("collections:char.recognitionUnavailable", { error: errorText(e) }) });
     } finally {
       off();
       set({ charLabeling: null });

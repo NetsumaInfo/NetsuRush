@@ -21,7 +21,6 @@
     "jobsQueued_one": "{{count}} trabajo en cola",
     "jobsQueued_other": "{{count}} trabajos en cola",
     "settingsRead": "Ajustes de rendimiento leídos",
-    "cacheProxyKeys": "Claves de caché/proxy: {{count}}",
     "noCacheFolder": "Ninguna carpeta de caché detectada",
     "database": "Base de datos",
     "dbBig": "{{name}} · muy grande → dividir",
@@ -29,7 +28,9 @@
     "dbRemote": "PostgreSQL",
     "dbMissing": "No encontrada",
     "cacheFoldersDetected_one": "{{count}} carpeta de caché detectada",
-    "cacheFoldersDetected_other": "{{count}} carpetas de caché detectadas"
+    "cacheFoldersDetected_other": "{{count}} carpetas de caché detectadas",
+    "cacheProxyKeys_one": "Claves de caché/proxy: {{count}}",
+    "cacheProxyKeys_other": "Claves de caché/proxy: {{count}}"
   },
   "memory": {
     "title": "Memoria de sesión",
@@ -37,38 +38,36 @@
     "drift": "Resolve.exe: {{now}} · {{drift}} desde hace {{elapsed}}",
     "driftDown": "Resolve.exe: {{now}} · estable desde hace {{elapsed}}",
     "vram": "VRAM: {{used}} / {{total}} GB",
-    "verdictOk": "Sesión sana.",
-    "verdictWatch": "Resolve se está cargando. Recargar el proyecto devuelve la RAM de las timelines.",
+    "verdictWatch": "Resolve pesa cada vez más. Recargar el proyecto devuelve la RAM de las timelines.",
     "verdictHigh": "Sesión muy cargada. Solo un reinicio devuelve la VRAM y la caché de Fusion.",
     "reload": "Recargar el proyecto",
     "reloadTitle": "¿Recargar «{{project}}»?",
-    "reloadBody": "Se guarda, se cierra y se reabre: se devuelve la RAM de las timelines apiladas y se vuelve a la misma página. Sin pérdidas. No hacerlo durante un renderizado.",
+    "reloadBody": "Se guarda, se cierra y se reabre: se devuelve la RAM de las timelines apiladas y vuelves a tu página. Sin pérdidas. No lo hagas durante un renderizado.",
     "reloadDone": "Proyecto «{{project}}» recargado.",
     "restart": "Reiniciar Resolve",
     "restartTitle": "¿Reiniciar Resolve?",
-    "restartBody": "Se guarda, se cierra y se reabre en «{{project}}» en la página actual. Devuelve la VRAM y la caché de Fusion, que ninguna API purga durante la sesión. Tarda uno o dos minutos. No hacerlo durante un renderizado.",
+    "restartBody": "Se guarda, se cierra y se reabre en «{{project}}» en la página actual. Devuelve la VRAM y la caché de Fusion, que ninguna API purga durante la sesión. Tarda uno o dos minutos. No lo hagas durante un renderizado.",
     "restartDone": "Resolve reiniciado en «{{project}}»."
   },
   "prefs": {
     "title": "Ajustes de Resolve",
     "subtitle": "Valores reales leídos del disco. La API de scripting no escribe estas preferencias: aplicar cierra y reabre Resolve.",
     "unavailable": "No se pudieron leer las preferencias de Resolve: {{error}}",
-    "warn": "revisar",
+    "warn": "por revisar",
     "advisory": "según el caso",
     "recommended": "Recomendado: {{value}}",
     "pending_one": "{{count}} cambio pendiente",
     "pending_other": "{{count}} cambios pendientes",
     "apply": "Aplicar y reiniciar",
     "reset": "Cancelar",
-    "applyBody": "Se guarda el proyecto, se respalda la configuración actual, se cierra Resolve, se escriben las preferencias y se reabre Resolve en «{{project}}». Tarda uno o dos minutos. No hacerlo durante un renderizado.",
+    "applyBody": "Se guarda el proyecto, se respalda la configuración actual, se cierra Resolve, se escriben las preferencias y se reabre Resolve en «{{project}}». Tarda uno o dos minutos. No lo hagas durante un renderizado.",
     "applyDone_one": "{{count}} ajuste aplicado — Resolve reiniciado.",
     "applyDone_other": "{{count}} ajustes aplicados — Resolve reiniciado.",
     "applyNoRestart": "Preferencias escritas. No se pudo reabrir Resolve: {{error}}",
     "backups": "Copias de seguridad",
     "backupsHint": "Configuración previa a cada aplicación. Se puede restaurar con Resolve cerrado.",
     "restore": "Restaurar",
-    "restoreDone": "Configuración restaurada. Reiniciar Resolve para que surta efecto.",
-    "noBackups": "Sin copias — la primera aplicación creará una.",
+    "restoreDone": "Configuración restaurada. Reinicia Resolve para que surta efecto.",
     "on": "Activado",
     "off": "Desactivado",
     "items": {
@@ -80,7 +79,7 @@
       "resolveMemory": {
         "label": "Límite de memoria de Resolve",
         "where": "Preferencias ▸ Sistema ▸ Memoria y GPU",
-        "body": "De forma predeterminada, el 75 % de la RAM. Bajarlo no acelera Resolve: reserva RAM para otras aplicaciones, incluidos los procesos de IA de NetsuRush. Depende de lo que se ejecute a la vez."
+        "body": "De forma predeterminada, el 75 % de la RAM. Bajarlo no acelera Resolve: reserva RAM para otras aplicaciones, incluidos los procesos de IA de NetsuRush. Decide según lo que ejecutes a la vez."
       },
       "fusionMemory": {
         "label": "Caché de memoria de Fusion",
@@ -90,17 +89,17 @@
       "gpuMode": {
         "label": "Modo de procesamiento GPU",
         "where": "Preferencias ▸ Sistema ▸ Memoria y GPU",
-        "body": "Auto ya elige CUDA en NVIDIA. Forzarlo solo si aparece OpenCL seleccionado pese a tener una tarjeta NVIDIA."
+        "body": "Auto ya elige CUDA en NVIDIA. Fuérzalo solo si ves OpenCL seleccionado pese a tener una tarjeta NVIDIA."
       },
       "hwDecode": {
         "label": "Decodificación por hardware H.264/H.265",
         "where": "Preferencias ▸ Sistema ▸ Decodificación",
-        "body": "Descarga la decodificación en la GPU. Fiable en 8 bits 4:2:0; 4:2:2 y 4:4:4 dependen de la tarjeta. Desactivar si aparecen artefactos."
+        "body": "Descarga la decodificación en la GPU. Fiable en 8 bits 4:2:0; 4:2:2 y 4:4:4 dependen de la tarjeta. Desactívalo si ves artefactos."
       },
       "liveSave": {
         "label": "Guardado continuo",
         "where": "Preferencias ▸ Usuario ▸ Guardar y cargar",
-        "body": "Guarda en cada cambio. El manual lo recomienda y anuncia un impacto mínimo; las ralentizaciones reportadas se dan en almacenamiento en red o lento. En SSD local, mantenerlo."
+        "body": "Guarda en cada cambio. El manual lo recomienda y anuncia un impacto mínimo; las ralentizaciones observadas se dan en almacenamiento en red o lento. En un SSD local, mantenlo activado."
       },
       "timelineBackups": {
         "label": "Copias de la timeline",
@@ -114,7 +113,7 @@
   "gpu": {
     "title": "Monitor GPU / CPU / RAM",
     "free": "Liberar",
-    "saturated": "{{what}} saturada — riesgo de fallo. Liberar o recargar ahora.",
+    "saturated": "{{what}} saturada — riesgo de fallo. Libera o recarga ahora.",
     "vramUnreadable": "El medidor de VRAM no está disponible para este controlador. Los procesos siguen disponibles.",
     "ramSystem": "RAM del sistema",
     "resolveRam": "Resolve.exe: {{size}}",
@@ -153,7 +152,6 @@
     "on": "Activada",
     "off": "Desactivada",
     "gauges": "RAM disponible {{ram}} % · VRAM usada {{vram}} %",
-    "lastPurge": "{{freed}} devueltos al equipo ({{count}} tareas aligeradas).",
     "suggestTitle": "Liberar no ha bastado",
     "suggestBody": "Estas tareas en segundo plano ocupan memoria que ninguna liberación devuelve. Detenerlas es decisión tuya.",
     "stopThem_one": "Detener esta tarea",
@@ -163,7 +161,9 @@
       "export": "una exportación",
       "proxy": "una codificación de proxy",
       "render": "un renderizado"
-    }
+    },
+    "lastPurge_one": "{{freed}} devueltos al equipo ({{count}} tarea aligerada).",
+    "lastPurge_other": "{{freed}} devueltos al equipo ({{count}} tareas aligeradas)."
   },
   "noise": {
     "title": "Tareas de fondo inútiles",
@@ -199,9 +199,10 @@
     "noneFound": "No hay caché de Resolve aquí.",
     "cleanSelection": "Limpiar la selección ({{size}})",
     "confirmTitle": "¿Eliminar estas cachés?",
-    "confirmBody": "{{size}} liberados. Cerrar Resolve antes. Contenido eliminado, se regenera si hace falta:",
-    "freed": "{{size}} liberados · Carpetas: {{count}}.",
-    "cleanFailed": "Error: {{error}}"
+    "confirmBody": "{{size}} liberados. Cierra Resolve antes. Contenido eliminado, se regenera si hace falta:",
+    "cleanFailed": "Error: {{error}}",
+    "freed_one": "{{size}} liberados · Carpetas: {{count}}.",
+    "freed_other": "{{size}} liberados · Carpetas: {{count}}."
   },
   "stop": {
     "title": "Detener tareas",
@@ -212,7 +213,7 @@
     "queueEmpty": "Cola de renderizado vacía."
   },
   "advice": {
-    "heading": "Consejos (aplicar en Resolve)",
+    "heading": "Consejos (para aplicar en Resolve)",
     "items": {
       "cachessd": {
         "title": "Caché en SSD rápido",
@@ -235,7 +236,7 @@
         "body": "Lo que cuesta es la carga por timeline, no el número de timelines. La caché inteligente cachea sola los nodos pesados."
       },
       "mercurygpu": {
-        "title": "Motor de render por software",
+        "title": "Motor de renderizado por software",
         "where": "Archivo ▸ Configuración del proyecto ▸ General ▸ Motor de render",
         "body": "Mercury Playback Engine en modo software lo calcula todo en la CPU. Elige la aceleración GPU si la tarjeta lo permite."
       },
@@ -250,14 +251,14 @@
         "body": "I-Frame MPEG renderiza rápido pero se reproduce mal; ProRes o CineForm se reproducen bien pero renderizan más lento. La elección depende de la tarjeta y el disco."
       },
       "cacheotherdisk": {
-        "title": "Caché en el disco del material",
+        "title": "Caché en el disco de los clips",
         "where": "Preferencias ▸ Discos de trabajo",
         "body": "La caché y los medios en el mismo volumen compiten por el mismo cabezal. Separarlos cuesta un ajuste y se nota de inmediato."
       },
       "diskcachessd": {
         "title": "Caché de disco en SSD",
         "where": "Preferencias ▸ Memoria y rendimiento ▸ Caché de disco",
-        "body": "After Effects lee su caché de disco en cada previsualización. En un disco lento, o en el del material, anula su propio beneficio."
+        "body": "After Effects lee su caché de disco en cada previsualización. En un disco lento, o en el de los clips, anula su propio beneficio."
       },
       "diskcacheon": {
         "title": "Caché de disco desactivada",
@@ -267,7 +268,7 @@
       "mfrcpu": {
         "title": "Porcentaje de CPU demasiado alto",
         "where": "Preferencias ▸ Memoria y rendimiento ▸ Render multifotograma",
-        "body": "After Effects quiere unos 4 GB por núcleo usado. Más allá de lo que la RAM admite, añadir núcleos ralentiza el render."
+        "body": "After Effects quiere unos 4 GB por núcleo usado. Más allá de lo que la RAM admite, añadir núcleos ralentiza el renderizado."
       },
       "bitdepth": {
         "title": "Proyecto de 32 bits",
@@ -373,7 +374,7 @@
         "all": "Todo, incluido el disco"
       },
       "allCachesWarning": "«Todo, incluido el disco» también vacía la caché de disco: lenta de reconstruir. After Effects puede pedir confirmación en su propia ventana.",
-      "deletePreviews": "Eliminar los archivos de render",
+      "deletePreviews": "Eliminar los archivos de renderizado",
       "experimental": "Experimental",
       "qeExperimental": "Premiere Pro no expone ninguna API oficial de purga: esta llamada usa el QE DOM, una interfaz no documentada que cambia entre versiones. Si falla, la sección Cachés de disco hace lo mismo con la aplicación cerrada.",
       "compatAeft": "After Effects 2020 (17.0) hasta 2026 (26.x). Desde la 24.3, «Todo, incluido el disco» también vacía la caché de disco.",
@@ -391,7 +392,7 @@
       "doneFreed": "{{size}} liberados",
       "hygieneDone_one": "{{count}} elemento eliminado",
       "hygieneDone_other": "{{count}} elementos eliminados",
-      "previewsDone": "Archivos de render eliminados",
+      "previewsDone": "Archivos de renderizado eliminados",
       "confirmHeavy": "Se vaciará la caché de disco: habrá que recalcular las previsualizaciones.",
       "confirmHygiene": "Modifica el proyecto abierto. La operación se puede deshacer en la aplicación."
     },
@@ -399,7 +400,7 @@
       "title": "Ajustes de rendimiento",
       "subtitle": "Leídos y escritos en vivo por el panel: sin cerrar nada, sin modificar archivos.",
       "needsPanel": "Requiere la aplicación abierta con la extensión de NetsuRush (Ventana ▸ Extensiones ▸ NetsuRush).",
-      "warn": "Corregir",
+      "warn": "Por corregir",
       "advisory": "Según el equipo",
       "volatile": "No persistente",
       "writeOnly": "La aplicación no expone ninguna lectura de este ajuste: su valor actual es desconocido, solo se puede escribir.",
@@ -416,8 +417,8 @@
       "applyBody_other": "Se escribirán {{count}} ajustes en la aplicación. El lote se valida en bloque: nada queda a medias.",
       "items": {
         "gpuAccelType": {
-          "label": "Aceleración GPU del render",
-          "body": "Quedarse en render por software con una tarjeta disponible es una pérdida neta en cada fotograma."
+          "label": "Aceleración GPU del renderizado",
+          "body": "Quedarse en renderizado por software con una tarjeta disponible es una pérdida neta en cada fotograma."
         },
         "bitsPerChannel": {
           "label": "Profundidad del proyecto",
@@ -432,11 +433,11 @@
           "body": "Parte de la RAM del equipo que After Effects se permite usar."
         },
         "mfrEnabled": {
-          "label": "Render multifotograma",
-          "body": "Adobe restablece este ajuste al final de cada script: solo sirve para un render dirigido desde NetsuRush, no como ajuste duradero."
+          "label": "Renderizado multifotograma",
+          "body": "Adobe restablece este ajuste al final de cada script: solo sirve para un renderizado dirigido desde NetsuRush, no como ajuste duradero."
         },
         "mfrMaxCpuPct": {
-          "label": "Porcentaje de CPU del render multifotograma",
+          "label": "Porcentaje de CPU del renderizado multifotograma",
           "body": "After Effects quiere unos 4 GB por núcleo: subir este porcentaje en un equipo con poca RAM ralentiza en vez de acelerar."
         },
         "enableProxies": {
@@ -445,7 +446,7 @@
         },
         "scratchVideoPreviews": {
           "label": "Carpeta de previsualizaciones de vídeo",
-          "body": "Ponerlo en un SSD rápido, distinto del disco del material, es el ajuste de disco más rentable."
+          "body": "Ponerlo en un SSD rápido, distinto del disco de los clips, es el ajuste de disco más rentable."
         },
         "scratchAudioPreviews": {
           "label": "Carpeta de previsualizaciones de audio",
@@ -471,9 +472,10 @@
       "generate_other": "Generar y adjuntar ({{count}})",
       "attached_one": "{{count}} proxy adjuntado",
       "attached_other": "{{count}} proxies adjuntados",
-      "attachedPartial": "{{count}} proxies adjuntados, {{missed}} fallidos",
       "encodeFailed_one": "No se pudo codificar {{count}} clip",
-      "encodeFailed_other": "No se pudieron codificar {{count}} clips"
+      "encodeFailed_other": "No se pudieron codificar {{count}} clips",
+      "attachedPartial_one": "{{count}} proxy adjuntado, {{missed}} fallidos",
+      "attachedPartial_other": "{{count}} proxies adjuntados, {{missed}} fallidos"
     }
   }
 }

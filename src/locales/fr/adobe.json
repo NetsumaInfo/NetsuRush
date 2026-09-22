@@ -7,9 +7,7 @@
     "cepTitle": "Panneau NetsuRush",
     "installed": "Installé",
     "notInstalled": "Non installé",
-    "inApp": "Dans Premiere Pro/After Effects : ",
     "menuPath": "Fenêtre ▸ Extensions ▸ NetsuRush",
-    "restartHint": " (redémarre l'app si elle était déjà ouverte).",
     "installHint": "Clique « Installer le panneau » puis ouvre Premiere Pro/After Effects ▸ Fenêtre ▸ Extensions ▸ NetsuRush.",
     "diagnose": "Diagnostic",
     "autoUpdate": "Gestion automatique",
@@ -18,7 +16,8 @@
     "autoUpdateOff": "Désactivée",
     "updatePending": "Une version plus récente du panneau est livrée avec cette version de NetsuRush",
     "updateNow": "Mettre à jour",
-    "restartApps": "Panneau mis à jour — redémarre {{apps}} pour le recharger."
+    "restartApps": "Panneau mis à jour — redémarre {{apps}} pour le recharger.",
+    "openHint": "Dans Premiere Pro ou After Effects : {{menu}}. Redémarre l'app si elle était déjà ouverte."
   },
   "diag": {
     "verdictOk": "Installation OK ✓ (dossier + manifest + PlayerDebugMode). Ouvre le panneau dans Adobe : Fenêtre ▸ Extensions ▸ NetsuRush.",

@@ -171,7 +171,7 @@ export function systemPromptFor(surface: AgentSurface, frameSpec?: string | null
     "quelles, c'est ce qui rend la composition indépendante de la résolution de sortie.",
     "<<<FRAME_SPEC",
     body,
-    cut ? "… (tronqué : le cahier dépasse la taille jointe au prompt)" : "",
+    cut ? "… (tronqué : le cahier dépasse la taille jointe au prompt)" : "",
     "FRAME_SPEC>>>",
   ].filter(Boolean).join("\n");
 }

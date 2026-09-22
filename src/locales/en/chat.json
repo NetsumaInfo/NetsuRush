@@ -32,8 +32,6 @@
     "keyAbsent": "not set",
     "cliAgents": "Agents",
     "rescan": "Rescan",
-    "noAgentsPre": "No agents listed — click \"Rescan\". If still nothing, install ",
-    "noAgentsPost": " and make sure they're in the core's PATH.",
     "detected": "detected",
     "absent": "not found",
     "saved": "Saved",
@@ -50,7 +48,7 @@
     "installPage": "Official install page",
     "resolveMcp": "DaVinci Resolve MCP",
     "resolveMcpTools": "{{n}} tools",
-    "resolveMcpServer": "Blackmagic's own server",
+    "resolveMcpServer": "Official Blackmagic server",
     "resolveMcpMissing": "Ships with DaVinci Resolve Studio 21.1 or newer. Not found on this computer.",
     "resolveMcpSilent": "no answer",
     "resolveMcpSilentHint": "The server is there but did not answer. Start Resolve, then scan again.",
@@ -60,7 +58,8 @@
     "baseUrlHint": {
       "openai": "Ollama, LM Studio, local proxy…",
       "xai": "EU: https://eu-west-1.api.x.ai/v1"
-    }
+    },
+    "noAgents": "No agents found. Click “Rescan”; if that doesn't help, install <0>claude</0> or <1>codex</1> and make sure they're in your PATH."
   },
   "engine": {
     "agents": "Installed agents",
@@ -69,16 +68,16 @@
     "none": "No engine",
     "model": "Model",
     "default": "Default",
-    "freeId": "custom id: vendor/model…",
+    "freeId": "custom ID: vendor/model…",
     "refreshModels": "Refresh the model list",
     "source": {
       "vendor": "current",
-      "openrouter": "public catalogue",
+      "openrouter": "public catalog",
       "curated": "offline"
     },
     "sourceHint": {
-      "vendor": "Returned by the provider using your key: these ids are exact.",
-      "openrouter": "OpenRouter's public catalogue, no key needed. Current, but an id may differ from the vendor's own API.",
+      "vendor": "Returned by the provider using your key: these IDs are exact.",
+      "openrouter": "OpenRouter's public catalog, no key needed. Current, but an ID may differ from the vendor's own API.",
       "curated": "No network: built-in fallback list, possibly out of date."
     },
     "permissions": "Permissions",
@@ -102,7 +101,6 @@
     "copyReasoning": "Copy the reasoning"
   },
   "toolcard": {
-    "running": "running",
     "failed": "failed",
     "arguments": "Arguments",
     "result": "Result",
@@ -158,10 +156,6 @@
     "read": "read",
     "write": "write",
     "destructive": "destructive"
-  },
-  "store": {
-    "convFallback": "Conversation",
-    "error": "error"
   },
   "duplicate": {
     "title": "Duplicate before modifying",

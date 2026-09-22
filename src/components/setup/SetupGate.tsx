@@ -35,6 +35,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
 import { ErrorReportButton } from "@/components/common/ErrorReportButton";
+import { errorText } from "@/lib/errorText";
 
 type Phase = "checking" | "configure" | "running" | "error" | "restart" | "done";
 type ConfigureStep = "language" | "models" | "review";
@@ -174,7 +175,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
           setPhase("done");
           return;
         }
-        setError(String(cause));
+        setError(errorText(cause));
         setPhase("error");
       });
     return () => { alive = false; };
@@ -282,7 +283,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
         setPhase("error");
       }
     } catch (cause) {
-      setError(String(cause));
+      setError(errorText(cause));
       setPhase("error");
     } finally {
       off();

@@ -6,8 +6,6 @@
   "home": {
     "title": "Voix",
     "subtitle": "Sélectionne un ou plusieurs clips parlés : silences, hésitations et transcription analysés en parallèle.",
-    "addFiles": "Ajouter des fichiers vidéo",
-    "addFilesHint": "Plusieurs fichiers du disque à la fois — ils rejoignent la liste dessous.",
     "mediaPool": "Media Pool",
     "mediaPoolHint": "Recharge les clips du projet Resolve — la liste s'affiche dessous.",
     "presetLabel": "Préréglage d'analyse",
@@ -42,7 +40,6 @@
     "queued": "En file d'attente…",
     "running": "Analyse en cours…",
     "errorFallback": "échec",
-    "stats": "{{words}} mots · {{silences}} silences · {{fillers}} hésit. — clic pour ouvrir",
     "statsShort": "{{words}} mots · {{silences}} silences"
   },
   "panel": {
@@ -122,7 +119,6 @@
     "removeFillers": "Retirer les hésitations ({{count}})",
     "restoreFillers": "Rétablir les hésitations ({{count}})",
     "kept": "Conservé",
-    "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = réencode · FCPXML = timecode source.",
     "hints": {
@@ -194,8 +190,7 @@
     "helpAria": "Comprendre les réglages",
     "helpTooltip": "Comprendre les réglages (gros aperçu)",
     "dialogTitle": "Réglages des silences",
-    "description": "Bouge les curseurs : l'aperçu et les chiffres réagissent en direct",
-    "descriptionExampleSuffix": " (exemple — charge un clip pour voir TON audio)",
+    "description": "Bouge les curseurs : l'aperçu et les chiffres réagissent en direct.",
     "legendKept": "Parole gardée",
     "legendPad": "Marge",
     "legendCut": "Coupé",
@@ -208,7 +203,8 @@
       "minSilence": "Un blanc plus court que ça n'est PAS coupé — les respirations restent.",
       "minSpeech": "Un bout de parole plus court que ça est ignoré (anti-hachage).",
       "pad": "L'air gardé avant/après chaque prise — le vert clair de l'aperçu."
-    }
+    },
+    "descriptionExample": "Bouge les curseurs : l'aperçu et les chiffres réagissent en direct. C'est un exemple : charge un clip pour voir ton propre audio."
   },
   "shared": {
     "asr": {
@@ -264,7 +260,6 @@
     "noFillersDetected": "Aucune hésitation acoustique détectée.",
     "errDetectFillers": "échec détection hésitations",
     "transcriptCached": "Transcription chargée (cache)",
-    "transcriptDone": "Transcription : {{count}} mots",
     "errTranscribe": "échec transcription",
     "analyzeAllDone": "Analyse : {{words}} mots · silences : {{silences}} · hésitations audio : {{fillers}}",
     "busyDetectSilences": "Détection des silences…",
@@ -280,7 +275,9 @@
     "batchErrorsSuffix_one": " · {{count}} erreur",
     "batchErrorsSuffix_other": " · {{count}} erreurs",
     "fillersDetected_one": "{{count}} hésitation détectée (audio)",
-    "fillersDetected_other": "{{count}} hésitations détectées (audio)"
+    "fillersDetected_other": "{{count}} hésitations détectées (audio)",
+    "transcriptDone_one": "Transcription : {{count}} mot",
+    "transcriptDone_other": "Transcription : {{count}} mots"
   },
   "export": {
     "timelineSuffixEdit": "montage",
@@ -298,19 +295,21 @@
     "errTimeline": "échec timeline",
     "errNoDuration": "Durée du clip inconnue (charge la forme d'onde).",
     "errNothingToBuildColored": "Rien à monter (aucun segment).",
-    "timelineColoredBase": "Timeline « {{name}} » · {{count}} clips ({{cuts}} coupes) · {{colored}} colorés",
     "coloredRefused": " ⚠ Resolve a refusé les couleurs",
     "coloredLegend": " · 🟢 parole 🔵 silence 🟠 hésit. 🟦 répét.",
     "errTimelineColored": "échec timeline couleurs",
     "errNothingToExport": "Rien à exporter (aucun segment conservé).",
     "errExportFile": "échec export {{format}}",
     "errNoWords": "Transcris d'abord (aucun mot).",
-    "subtitlesExported": "Sous-titres {{format}} ({{count}} lignes) → {{path}}",
     "errSubtitles": "échec sous-titres",
     "timelineBase_one": "Timeline « {{name}} » · {{count}} segment",
     "timelineBase_other": "Timeline « {{name}} » · {{count}} segments",
     "fileExported_one": "{{format}} ({{count}} plan) → {{path}}",
-    "fileExported_other": "{{format}} ({{count}} plans) → {{path}}"
+    "fileExported_other": "{{format}} ({{count}} plans) → {{path}}",
+    "timelineColoredBase_one": "Timeline « {{name}} » · {{count}} clip ({{cuts}} coupes) · {{colored}} colorés",
+    "timelineColoredBase_other": "Timeline « {{name}} » · {{count}} clips ({{cuts}} coupes) · {{colored}} colorés",
+    "subtitlesExported_one": "Sous-titres {{format}} ({{count}} ligne) → {{path}}",
+    "subtitlesExported_other": "Sous-titres {{format}} ({{count}} lignes) → {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve hors ligne — prends un fichier local.",

@@ -7,10 +7,8 @@
     "cepTitle": "NetsuRush パネル",
     "installed": "インストール済み",
     "notInstalled": "未インストール",
-    "inApp": "Premiere Pro / After Effects で：",
     "menuPath": "ウィンドウ ▸ エクステンション ▸ NetsuRush",
-    "restartHint": "（起動中だった場合はアプリを再起動）。",
-    "installHint": "「パネルをインストール」をクリックし、Premiere Pro / After Effects ▸ ウィンドウ ▸ エクステンション ▸ NetsuRush を開きます。",
+    "installHint": "「パネルをインストール」をクリックしてから、Premiere Pro / After Effects ▸ ウィンドウ ▸ エクステンション ▸ NetsuRush を開いてください。",
     "diagnose": "診断",
     "autoUpdate": "自動管理",
     "autoUpdateHint": "Adobe アプリを検出するとパネルをインストールし、その後は NetsuRush と一緒に更新します。",
@@ -18,13 +16,14 @@
     "autoUpdateOff": "オフ",
     "updatePending": "このバージョンの NetsuRush には新しいパネルが含まれています",
     "updateNow": "今すぐ更新",
-    "restartApps": "パネルを更新しました — 再読み込みするには {{apps}} を再起動してください。"
+    "restartApps": "パネルを更新しました — 再読み込みするには {{apps}} を再起動してください。",
+    "openHint": "Premiere Pro または After Effects で：{{menu}}。起動中だった場合はアプリを再起動してください。"
   },
   "diag": {
-    "verdictOk": "判定：インストール済み ✓（フォルダー、manifest、PlayerDebugMode）。Adobe でパネルを開く：ウィンドウ ▸ エクステンション ▸ NetsuRush。",
-    "verdictIncomplete": "判定：インストールが不完全です。以下を確認してください。",
+    "verdictOk": "インストール OK ✓（フォルダー、manifest、PlayerDebugMode）。Adobe でパネルを開いてください：ウィンドウ ▸ エクステンション ▸ NetsuRush。",
+    "verdictIncomplete": "インストールが不完全です。以下を確認してください。",
     "folder": "フォルダー：{{dir}}",
-    "manifestPresent": "manifest：{{yesNo}}",
+    "manifestPresent": "manifest の有無：{{yesNo}}",
     "yes": "はい",
     "no": "いいえ",
     "files": "ファイル：{{files}}",
@@ -42,8 +41,8 @@
     "panelOffline": "パネル オフライン",
     "launch": "起動",
     "scanProject": "プロジェクトをスキャン",
-    "openPanelHint": "パネルを開く：ウィンドウ ▸ エクステンション ▸ NetsuRush。",
-    "launchThenOpenHint": "アプリを起動し、ウィンドウ ▸ エクステンション ▸ NetsuRush を開きます。"
+    "openPanelHint": "パネルを開いてください：ウィンドウ ▸ エクステンション ▸ NetsuRush。",
+    "launchThenOpenHint": "アプリを起動してから、ウィンドウ ▸ エクステンション ▸ NetsuRush を開いてください。"
   },
   "snapshot": {
     "timecodes": "タイムライン {{tlStart}} → {{tlEnd}} · ソース {{srcIn}} → {{srcOut}}",
@@ -67,8 +66,8 @@
     "alreadyOpen": "アプリは起動済みです",
     "panelUnreachable": "パネルに接続できません",
     "installFailed": "インストールできません",
-    "installedRestart": "パネルをインストールしました。{{apps}} を再起動し、ウィンドウ ▸ エクステンション ▸ NetsuRush を開きます。",
-    "installedOpen": "パネルをインストールしました。Premiere Pro / After Effects を開き、ウィンドウ ▸ エクステンション ▸ NetsuRush を開きます。",
+    "installedRestart": "パネルをインストールしました。{{apps}} を再起動してから、ウィンドウ ▸ エクステンション ▸ NetsuRush を開いてください。",
+    "installedOpen": "パネルをインストールしました。Premiere Pro / After Effects を開き、ウィンドウ ▸ エクステンション ▸ NetsuRush を開いてください。",
     "autoUpdateFailed": "アップデート設定を変更できませんでした"
   },
   "remote": {

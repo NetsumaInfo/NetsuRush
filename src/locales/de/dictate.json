@@ -4,7 +4,7 @@
     "listening": "Hört zu…"
   },
   "hotkey": {
-    "capturePrompt": "Tastenkombination drücken…",
+    "capturePrompt": "Drück die Tastenkombination…",
     "mod": {
       "ctrl": "Strg",
       "shift": "Umschalt",
@@ -20,17 +20,17 @@
   },
   "settings": {
     "title": "Sprachdiktat",
-    "intro": "Tastenkürzel halten, sprechen, loslassen: Der Text landet dort, wo du warst.",
+    "intro": "Halte das Tastenkürzel, sprich, lass los: Der Text landet dort, wo du warst.",
     "enableLabel": "Diktat aktivieren",
     "enabledOn": "Aktiviert",
     "enabledOff": "Deaktiviert",
     "micLabel": "Mikrofon",
     "micDefault": "Standard-Mikrofon",
     "micNumbered": "Mikrofon {{n}}",
-    "hotkeyLabel": "Kurzbefehl (halten)",
-    "hotkeyHint": "Klicken, dann Kombination drücken. Esc bricht ab.",
+    "hotkeyLabel": "Tastenkürzel (halten)",
+    "hotkeyHint": "Klicke und drück dann deine Kombination. Esc bricht ab.",
     "unloadLabel": "Modell entladen nach",
-    "unloadHint": "Nach dieser Zeit ohne Diktat gibt das Modell den VRAM frei; das nächste startet langsamer.",
+    "unloadHint": "Nach dieser Zeit ohne Diktat gibt das Modell den VRAM frei; das nächste Diktat startet langsamer.",
     "liveLabel": "Live-Vorschau",
     "liveHint": "Text erscheint schon beim Sprechen (regelmäßige Neu-Transkription).",
     "liveOn": "Aktiviert",
@@ -49,7 +49,7 @@
     "bundled": "Mitgeliefert",
     "installed": "Installiert",
     "removeTooltip": "Vom Datenträger löschen",
-    "get": "Laden"
+    "get": "Herunterladen"
   },
   "cpp": {
     "engine": "transcribe.cpp-Engine",
@@ -60,8 +60,8 @@
   },
   "mic": {
     "busy": "Mikrofon von einer anderen Anwendung belegt.",
-    "denied": "Mikrofon abgelehnt. Erlaube den Zugriff, um zu diktieren.",
-    "fallback": "Gewähltes Mikrofon nicht verfügbar — Standardmikrofon wird genutzt.",
+    "denied": "Mikrofonzugriff verweigert. Erlaube den Zugriff aufs Mikrofon, um zu diktieren.",
+    "fallback": "Gewähltes Mikrofon nicht verfügbar – Standardmikrofon wird genutzt.",
     "missing": "Kein Mikrofon verfügbar."
   }
 }

@@ -14,6 +14,7 @@ import {
 import { readPrefs, PREFS_KEY, type NotebookPrefs } from "@/components/notebook/notebookPrefs";
 import i18n from "@/i18n";
 import { notebookCanEdit, notebookCollabState } from "@/components/notebook/notebookCollabState";
+import { errorText } from "@/lib/errorText";
 
 interface NbOpenOpts {
   blockId?: string;   // ancre : scroller/surligner ce bloc à l'arrivée
@@ -453,7 +454,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
           // Only acknowledge the exact immutable snapshot persisted by this request.
           if (get().nbPage === page) set({ nbDirty: false, nbSaveError: null });
         } catch (error) {
-          set({ nbSaveError: error instanceof Error ? error.message : String(error) });
+          set({ nbSaveError: errorText(error) });
           throw error;
         } finally { pageSave = null; }
       })();

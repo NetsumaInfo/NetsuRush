@@ -44,8 +44,8 @@
     "tracks": "トラック",
     "duration": "長さ",
     "fps": "フレームレート",
-    "fidelityExact": "ネイティブ同等性を保持する見込みです",
-    "fidelityLimited": "転送前に制限があります",
+    "fidelityExact": "ネイティブと同等に転送できる見込みです",
+    "fidelityLimited": "転送で制限が見込まれます",
     "fidelityCounts": "正確 {{exact}} · 近似 {{approximated}} · 未保証 {{unsupported}}",
     "animationUnavailable": "キーフレームを読み取れません：それらを含む書き出しを転送元のアプリケーションが拒否しました。固定値で転送します。",
     "missing_one": "{{count}} 件のソースが見つかりません",
@@ -68,7 +68,7 @@
     "busy": "転送中…"
   },
   "result": {
-    "verified": "プロパティを再読込し、転送を検証しました。",
+    "verified": "プロパティを読み直し、転送を検証しました。",
     "unverified": "確認済み {{applied}} 件 · 制限または差異 {{issues}} 件。",
     "animatedNone": "キーフレームを読み取れません：DaVinci Resolve はスクリプトで公開せず、XML 書き出しだけが保持します。",
     "tracksClamped": "トラックを制限しました：転送先アプリケーションが十分な数を作成できませんでした。",
@@ -99,7 +99,7 @@
     },
     "remux": {
       "label": "Remux",
-      "hint": "無劣化で新しいコンテナーに入れ替えます。転送先が元のコンテナーを読めない場合に有効です。"
+      "hint": "ロスレスで新しいコンテナーに入れ替えます。転送先が元のコンテナーを読めない場合に有効です。"
     },
     "reencode": {
       "label": "再エンコード",

@@ -1,11 +1,9 @@
 {
   "gate": {
     "title": "言語を選択",
-    "subtitle": "設定でいつでも変更できます。",
-    "continue": "続ける"
+    "subtitle": "設定でいつでも変更できます。"
   },
   "settings": {
-    "navLabel": "言語",
     "title": "言語",
     "fieldLabel": "表示言語"
   }

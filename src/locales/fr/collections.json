@@ -101,12 +101,11 @@
     "shotWord": "Plan",
     "removed": "« {{name}} » retiré — Ctrl+Z pour annuler.",
     "restored": "« {{name}} » restauré.",
-    "timelineFailed": "échec timeline",
+    "timelineFailed": "Impossible de créer la timeline. Vérifie que ton logiciel de montage est ouvert sur un projet, puis réessaie.",
     "mounting": "Montage…",
     "archived": "Collection archivée sur disque.",
     "archiveFailed": "échec de l'archivage",
     "all": "tout",
-    "ofTotal": "sur {{count}} plans",
     "selCount": " · {{count}} sél.",
     "selectAll": "Tout sélectionner",
     "deselectAll": "Tout désélectionner",
@@ -116,8 +115,6 @@
     "pregen": "Pré-générer les aperçus {{verb}}",
     "autoplay": "Lecture auto",
     "autoplayHint": "Lecture auto des aperçus",
-    "addToTimeline": "Ajouter à la timeline",
-    "addAllToTimeline": "Ajouter tous les plans à la timeline",
     "archiveDiskHint": "Archiver sur disque (export indépendant de la source)",
     "player": "Lecteur",
     "playerHint": "Lecteur (panneau droit)",
@@ -131,7 +128,9 @@
     "toTimelineOk_one": "{{count}} plan → « {{timeline}} ».",
     "toTimelineOk_other": "{{count}} plans → « {{timeline}} ».",
     "shotCount_one": "{{count}} plan",
-    "shotCount_other": "{{count}} plans"
+    "shotCount_other": "{{count}} plans",
+    "ofTotal_one": "sur {{count}} plan",
+    "ofTotal_other": "sur {{count}} plans"
   },
   "list": {
     "title": "Collections",
@@ -154,10 +153,10 @@
     "deleteFolderDesc": "Les collections qu'il contient remontent d'un niveau.",
     "newCollection": "Nouvelle collection",
     "emptyAll": "Aucune collection. Crée une collection puis range des plans depuis le dérush ou la recherche (bouton « Ranger » sur la vignette).",
-    "folderEmpty": "Ce dossier est vide",
-    "folderEmptyFilter": " pour ce filtre",
+    "folderEmpty": "Ce dossier est vide.",
     "plansCount_one": "{{count}} plan",
-    "plansCount_other": "{{count}} plans"
+    "plansCount_other": "{{count}} plans",
+    "folderEmptyFiltered": "Rien dans ce dossier ne correspond au filtre."
   },
   "editor": {
     "iconSearch": "Rechercher une icône…",
@@ -225,7 +224,6 @@
     "restoreHidden": "Afficher les plans masqués",
     "missingMedia": "Média indisponible",
     "retry": "Réessayer",
-    "preparing": "Préparation…",
     "failed": "Le partage ou l'enregistrement a échoué. Réessaie.",
     "unavailable": "Configure la collaboration pour partager cette collection.",
     "signIn": "Connecte-toi pour choisir les personnes.",

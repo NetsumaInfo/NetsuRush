@@ -35,7 +35,7 @@
       "linked": "You are connected.",
       "pending": "Already sent.",
       "already": "Already on your list.",
-      "self": "That is you.",
+      "self": "That's you.",
       "unknown": "Nobody matches. Check the username, or paste their Discord ID.",
       "ambiguous": "Several people match. Use their Discord ID.",
       "error": "The lookup failed. Try again.",
@@ -85,8 +85,8 @@
     "create": "Create and invite",
     "invite": "Invite",
     "failed": "Sharing failed.",
-    "mediaMissing_one": "{{count}} media file missing from disk: {{names}}. Recover it (moved folder?) then share again.",
-    "mediaMissing_other": "{{count}} media files missing from disk: {{names}}. Recover them (moved folder?) then share again.",
+    "mediaMissing_one": "{{count}} media file missing from disk: {{names}}. Find it (moved folder?), then share again.",
+    "mediaMissing_other": "{{count}} media files missing from disk: {{names}}. Find them (moved folder?), then share again.",
     "invited_one": "{{count}} invitation sent.",
     "invited_other": "{{count}} invitations sent."
   },
@@ -113,7 +113,7 @@
     "deleteWarning": "Rendezvous data, invitations and encrypted recovery copies will be deleted for every member. This cannot be undone."
   },
   "sync": {
-    "queued": "Changes are waiting here. They will leave on their own as soon as a device is reachable.",
+    "queued": "Changes are waiting here. They'll be sent automatically as soon as a device is reachable.",
     "upToDate": "Everything is in sync.",
     "peers_one": "{{count}} reachable device",
     "peers_other": "{{count}} reachable devices"
@@ -132,8 +132,9 @@
     "queued": "Waiting to be sent.",
     "upToDate": "Everything is sent.",
     "rotation": "A new key is needed. The owner has to open the app.",
-    "waitingKey": "{{count}} waiting for the key. Stay online.",
-    "nobodyReachable": "Nobody online. Nothing has been sent."
+    "nobodyReachable": "Nobody online. Nothing has been sent.",
+    "waitingKey_one": "{{count}} waiting for the key. Stay online.",
+    "waitingKey_other": "{{count}} waiting for the key. Stay online."
   },
   "board": {
     "noScene": "Save this board to the scene library first.",

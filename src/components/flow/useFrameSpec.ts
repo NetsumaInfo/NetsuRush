@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState } from "react";
 import i18n from "@/i18n";
 import { fmtBytes } from "@/lib/utils";
+import { errorText } from "@/lib/errorText";
 
 export type FrameSpec = { name: string; text: string; at: number };
 
@@ -72,7 +73,7 @@ export function useFrameSpec() {
       setSpec({ name: file.name, text, at: Date.now() });
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
       return false;
     }
   }, []);

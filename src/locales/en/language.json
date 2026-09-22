@@ -1,11 +1,9 @@
 {
   "gate": {
     "title": "Choose your language",
-    "subtitle": "You can change it any time in Settings.",
-    "continue": "Continue"
+    "subtitle": "You can change it any time in Settings."
   },
   "settings": {
-    "navLabel": "Language",
     "title": "Language",
     "fieldLabel": "Interface language"
   }

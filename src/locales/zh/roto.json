@@ -19,22 +19,17 @@
     "outHere": "在此设出点",
     "outTip": "在当前帧设出点（O — Shift+O 清除）",
     "range": "范围 {{from}}–{{to}}",
-    "clickHint": "点击 = {{mode}}（E 切换）· 右键 = 排除 · Shift+悬停 = 预览 · 滚轮 = 缩放 · J/K/L · I/O · , ; = 单帧跟踪 · 1-9 切换对象",
-    "include": "包含",
-    "exclude": "排除",
     "showMask": "显示蒙版",
     "hideOverlay": "隐藏叠加层",
-    "showOverlay": "显示叠加层",
-    "testTitle": "测试 — {{label}}",
-    "testHint": "仅预览，不写入文件。效果满意就对整个镜头执行。"
+    "showOverlay": "显示叠加层"
   },
   "panels": {
     "model": "模型",
-    "noSam": "未安装 SAM 模型 — 请到“设置 › 模型”下载 SAM 2.1。",
+    "noSam": "未安装 SAM 模型。请到“设置 › 模型”下载 SAM 2.1。",
     "display": "显示",
     "maskRefine": "蒙版微调",
     "output": "输出",
-    "matteFine": "精细遮罩",
+    "matteFine": "蒙版细化",
     "removeObject": "移除对象",
     "track": "跟踪",
     "selection": "选择",
@@ -47,7 +42,7 @@
     "include": "包含",
     "includeTip": "左键点击会把该处加入当前对象的蒙版",
     "exclude": "排除",
-    "excludeTip": "左键点击会从蒙版中减去（负点）— 用来修掉溢出部分",
+    "excludeTip": "左键点击会从蒙版中减去（负点），用来修掉溢出部分",
     "nameAria": "对象名称",
     "removeAria": "移除 {{name}}",
     "setActive": "设为当前",
@@ -73,12 +68,12 @@
     "retrackFwd": "重跟踪 →",
     "retrackFwdTip": "从当前帧向前重新传播（局部修正）",
     "dedupe": "去重",
-    "dedupeTip": "动画：几乎相同的帧（定格）共用同一个遮罩 — 轮廓更稳。可撤销。",
+    "dedupeTip": "对几乎相同的帧复用同一个蒙版，让轮廓更稳定。可撤销。",
     "restoreMattesAria": "还原遮罩",
     "restoreMattesTip": "还原去重前的遮罩",
     "resetAria": "重置跟踪",
     "resetTip": "清除跟踪结果（遮罩），保留所有点",
-    "upToDate": "跟踪已是最新 — 可修点后局部重跟踪，或直接导出。"
+    "upToDate": "跟踪已是最新。可修点后局部重跟踪，或直接导出。"
   },
   "view": {
     "outline": "轮廓",
@@ -89,13 +84,13 @@
   },
   "viewMode": {
     "editLabel": "编辑",
-    "editHint": "画面 + 按对象着色的蒙版（工作模式）",
-    "matteLabel": "遮罩",
+    "editHint": "画面与按对象着色的蒙版，用于精细调整",
+    "matteLabel": "蒙版",
     "matteHint": "只看黑白蒙版（检查边缘）",
     "alphaLabel": "Alpha",
-    "alphaHint": "抠出的画面叠在棋盘格上（实际结果）",
+    "alphaHint": "抠出的主体叠在棋盘格上，用来检查透明度",
     "bgcolorLabel": "纯色背景",
-    "bgcolorHint": "画面合成在纯色上（检查抠像）"
+    "bgcolorHint": "主体合成在纯色上，用来检查轮廓"
   },
   "post": {
     "holes": "填补空洞",
@@ -120,11 +115,11 @@
     "steps": "扩散步数",
     "stepsTip": "步数越多填充越好，也越慢（12 = 平衡）",
     "grow": "擦除余量",
-    "growTip": "擦除前先扩张蒙版 — 覆盖对象的边缘和投影",
+    "growTip": "擦除前先扩张蒙版，覆盖对象的边缘和投影",
     "plate": "干净背景板",
     "plateTip": "在让模型凭空生成之前，先从相邻帧中取回真正拍到的背景：这些像素本来就有正确的颜色和颗粒",
     "harmonize": "融合",
-    "harmonizeTip": "把重建区域的颜色和锐度对齐到周围画面 — 没有它，即使内容正确也能看出补丁",
+    "harmonizeTip": "把重建区域的颜色和锐度对齐到周围画面。没有它，即使内容正确也能看出修补痕迹",
     "grain": "颗粒",
     "grainTip": "补回在周围测得的颗粒：光滑的填充放在有颗粒的素材上会很扎眼。素材干净时为零",
     "quality": "质量",
@@ -145,7 +140,7 @@
     "overlapTip": "相邻两个窗口共用并相互淡化的帧数。为 0 时接缝会表现为跳变。",
     "vaeTiling": "分块解码",
     "vaeTilingTip": "大幅节省显存，但可能留下分块接缝。显存够用时可以关闭。",
-    "cpuOffload": "卸载到处理器",
+    "cpuOffload": "卸载到 CPU",
     "cpuOffloadTip": "只在各自计算时才把权重放上显卡。明显更慢，但小显存也能跑。",
     "qualityTiny": "最小",
     "qualityUltra": "极高"
@@ -153,7 +148,7 @@
   "engineRow": {
     "noneInstalled": "尚未安装 {{label}} 引擎",
     "testAria": "在当前帧测试 {{label}}",
-    "testTip": "在当前帧测试 — 仅预览，不写入文件"
+    "testTip": "在当前帧测试：仅预览，不写入文件"
   },
   "engineHint": {
     "minimax-remover": "重建背景不闪烁 — 背景运动时最干净。",
@@ -175,25 +170,25 @@
     "webmHint": "体积小，带 alpha — 网页/预览",
     "ffv1Label": "FFV1（alpha，无损）",
     "ffv1Hint": "无损，带 alpha — 归档（MKV）",
-    "matteLabel": "黑白遮罩（MP4）",
+    "matteLabel": "黑白蒙版（MP4）",
     "matteHint": "只有黑白蒙版",
     "bgcolorLabel": "纯色背景（MP4）",
     "bgcolorHint": "对象合成在显示模式的背景色上",
-    "pngLabel": "PNG 序列（遮罩）",
-    "pngHint": "每帧一张遮罩图",
+    "pngLabel": "PNG 序列（蒙版）",
+    "pngHint": "每帧一张蒙版图",
     "pngAlphaLabel": "PNG（Alpha）",
     "pngAlphaHint": "抠像图片，背景透明",
     "jpegBgLabel": "JPEG（背景色）",
     "jpegBgHint": "对象合成在显示模式的背景色上",
-    "pngMatteLabel": "黑白遮罩（PNG）",
-    "pngMatteHint": "仅黑白遮罩"
+    "pngMatteLabel": "黑白蒙版（PNG）",
+    "pngMatteHint": "只有黑白蒙版"
   },
   "sam": {
-    "large": "最好的遮罩。实测显存 2 GiB，与镜头长度无关。",
+    "large": "蒙版效果最好。实测显存 2 GiB，与镜头长度无关。",
     "base": "快速备选，显存占用低。",
-    "small": "中间档：显存低于 Base+，掩码略粗。",
+    "small": "中间档：显存低于 Base+，蒙版略粗。",
     "tiny": "SAM 2.1 最小版本 — 适合显存紧张的显卡。",
-    "edgetam": "最轻量（56 MB）也最快。掩码比 SAM 2.1 粗。",
+    "edgetam": "最轻量（56 MB）也最快。蒙版比 SAM 2.1 粗。",
     "sam31": "最新一代：能跟住交错或消失的目标。需要 NVIDIA GPU。",
     "samurai": "目标被其他物体挡住时也能继续跟踪。使用 SAM 2.1，需先安装。",
     "sam2long": "适合长镜头：同时跟踪多条轨迹并保留正确的一条，误差不会累积。使用 SAM 2.1，需先安装。"
@@ -207,7 +202,7 @@
     "zoomSuffix": "× — 双击适配窗口"
   },
   "test": {
-    "matteImage": "精细遮罩 — 第 {{n}} 帧",
+    "matteImage": "蒙版细化 — 第 {{n}} 帧",
     "removeImage": "移除 — 第 {{n}} 帧"
   },
   "busy": {
@@ -220,17 +215,17 @@
     "dedupe": "去重",
     "restoreMattes": "还原遮罩",
     "export": "导出",
-    "matteFine": "精细遮罩",
+    "matteFine": "蒙版细化",
     "remove": "移除",
-    "testMatte": "遮罩测试（1 帧）",
+    "testMatte": "蒙版测试（1 帧）",
     "testRemove": "移除测试（1 帧）"
   },
   "note": {
-    "canceled": "{{label}}已取消 — 已跟踪的帧保留。",
+    "canceled": "{{label}}已取消，已跟踪的帧会保留。",
     "output": "{{label}} → {{output}}",
     "done": "{{label}}完成。",
     "unavailable": "{{label}}不可用",
-    "restored": "已从缓存恢复会话 — 点和跟踪都在。",
+    "restored": "已从缓存恢复会话，点和跟踪都在。",
     "dedupeOutput": "{{groups}} 个组，{{changed}} 帧已统一"
   },
   "errors": {
@@ -246,7 +241,7 @@
     "extract": "正在提取帧…",
     "extractwait": "正在完成提取…",
     "roi": "正在裁剪有效区域…",
-    "refine": "正在推理遮罩…",
+    "refine": "正在计算蒙版…",
     "export": "正在编码…",
     "remove": "正在移除…",
     "dedupe": "正在分析重复帧…"
@@ -266,10 +261,10 @@
     "post_other": "{{count}} 项设置"
   },
   "matte": {
-    "run": "计算蒙版",
+    "run": "计算遮罩",
     "test": "试算",
     "testTip": "只细化当前帧并显示结果，不写入任何文件。",
-    "useRefined": "使用精细蒙版",
+    "useRefined": "使用精细遮罩",
     "useRefinedTip": "在细化后的 alpha 与跟踪原始蒙版之间切换，无需重新计算。显示、导出和移除都会跟随。",
     "advanced": "高级设置",
     "size": "处理分辨率",
@@ -279,7 +274,7 @@
     "size1080": "1080",
     "sizeFull": "最大",
     "warmup": "稳定次数",
-    "warmupTip": "在每个起始帧上额外运行的次数。首次预测来自硬边蒙版，这些次数让它松弛下来。",
+    "warmupTip": "在每个起始帧上额外运行的次数。首次预测来自硬边蒙版，额外的几遍能让边缘逐渐柔和。",
     "combined": "合并处理所有对象",
     "combinedTip": "对并集只跑一遍，而不是每个对象各跑一遍。快得多，但导出单个对象会退回原始蒙版。",
     "batch": "每批帧数",
@@ -290,7 +285,7 @@
   "mask": {
     "stepModel": "细化 alpha",
     "stepManual": "作用于跟踪蒙版",
-    "stepOnRefined": "叠加在精细蒙版之上"
+    "stepOnRefined": "叠加在精细遮罩之上"
   },
   "output": {
     "exportStep": "导出"

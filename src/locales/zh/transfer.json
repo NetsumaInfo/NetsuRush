@@ -37,7 +37,7 @@
     "no": "否",
     "choose": "选择…",
     "none": "无",
-    "upscaleForcesReencode": "超分会重建像素：无论上方选择为何，都会执行“重新编码”。"
+    "upscaleForcesReencode": "超分辨率会替换像素：无论上方如何选择，都会使用“重新编码”模式。"
   },
   "preview": {
     "clips": "已读取镜头",
@@ -54,8 +54,8 @@
     "mediaLess_other": "{{count}} 个无媒体元素（遮罩、调整图层）：任何软件都无法接收。",
     "graphics_one": "{{count}} 个标题：将根据文字和样式在目标软件中重建。",
     "graphics_other": "{{count}} 个标题：将根据文字和样式在目标软件中重建。",
-    "graphicsUnsupported_one": "{{count}} 个标题：目标软件无法重建，将不会转移。",
-    "graphicsUnsupported_other": "{{count}} 个标题：目标软件无法重建，将不会转移。"
+    "graphicsUnsupported_one": "{{count}} 个标题：目标软件无法重建，将不会传输。",
+    "graphicsUnsupported_other": "{{count}} 个标题：目标软件无法重建，将不会传输。"
   },
   "phases": {
     "read": "正在读取时间线",
@@ -71,7 +71,7 @@
     "verified": "已回读属性：传输验证成功。",
     "unverified": "已确认 {{applied}} 项属性 · {{issues}} 项限制或差异。",
     "animatedNone": "未读取到关键帧：DaVinci Resolve 不通过脚本公开关键帧，只有其 XML 导出携带。",
-    "tracksClamped": "轨道已收敛：目标软件无法创建足够的轨道。",
+    "tracksClamped": "轨道已合并：目标软件无法创建足够的轨道。",
     "vehicleImport": "由 DaVinci Resolve 读取剪辑：关键帧、音频电平和速度由软件自身应用。",
     "vehicleApi": "通过脚本逐个放置片段：关键帧来自 NetsuRush 的读取结果。",
     "exchangeFile": "DaVinci Resolve 拒绝了脚本方式的剪辑。同一文件手动导入可正常工作（包含关键帧和音频电平）：文件 ▸ 导入 ▸ 时间线。",
@@ -103,7 +103,7 @@
     },
     "reencode": {
       "label": "重新编码",
-      "hint": "把每个镜头转码为剪辑编码，并逐帧裁切。"
+      "hint": "把每个镜头转码为剪辑编码，并精确到帧剪切。"
     }
   }
 }

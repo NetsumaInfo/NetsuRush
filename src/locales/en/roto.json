@@ -19,14 +19,9 @@
     "outHere": "Out point here",
     "outTip": "Out point at the current frame (O — Shift+O clears)",
     "range": "Range {{from}}–{{to}}",
-    "clickHint": "Click = {{mode}} (E toggles) · right-click = exclude · Shift+hover = preview · wheel = zoom · J/K/L · I/O · , ; = track step · 1-9 object",
-    "include": "include",
-    "exclude": "exclude",
     "showMask": "Show mask",
     "hideOverlay": "Hide overlay",
-    "showOverlay": "Show overlay",
-    "testTitle": "Test — {{label}}",
-    "testHint": "Preview only — nothing gets written. If it looks right, run it on the whole shot."
+    "showOverlay": "Show overlay"
   },
   "panels": {
     "model": "Model",
@@ -34,7 +29,7 @@
     "display": "Display",
     "maskRefine": "Mask tweaks",
     "output": "Output",
-    "matteFine": "Fine matte",
+    "matteFine": "Mask refinement",
     "removeObject": "Remove object",
     "track": "Tracking",
     "selection": "Selection",
@@ -73,7 +68,7 @@
     "retrackFwd": "Retrack →",
     "retrackFwdTip": "Re-propagates forward from the current frame (local fix)",
     "dedupe": "Dedupe",
-    "dedupeTip": "Animation: near-identical frames (holds) get the SAME matte — steady edge. Undoable.",
+    "dedupeTip": "Reuses the same matte on near-identical frames to steady the edge. You can undo this.",
     "restoreMattesAria": "Restore mattes",
     "restoreMattesTip": "Restore the mattes from before deduping",
     "resetAria": "Reset tracking",
@@ -89,13 +84,13 @@
   },
   "viewMode": {
     "editLabel": "Edit",
-    "editHint": "Frame + masks tinted per object (work mode)",
+    "editHint": "Frame and masks tinted per object, for precision work",
     "matteLabel": "Matte",
     "matteHint": "Black and white mask only (edge check)",
     "alphaLabel": "Alpha",
-    "alphaHint": "Frame cut out on checkerboard (real result)",
+    "alphaHint": "Subject cut out on a checkerboard, to check transparency",
     "bgcolorLabel": "Color background",
-    "bgcolorHint": "Frame comped over a solid color (key check)"
+    "bgcolorHint": "Subject comped over a solid color, to check edges"
   },
   "post": {
     "holes": "Fill holes",
@@ -105,11 +100,11 @@
     "border": "Frame edge bleed",
     "borderHint": "Cleans up the N pixels at the edge of the frame, often dirty (vignetting, compression).",
     "grow": "Grow / shrink",
-    "growHint": "Moves the mask edge outwards (+) or inwards (−), in pixels.",
+    "growHint": "Moves the mask edge outward (+) or inward (−), in pixels.",
     "smooth": "Smooth outline",
     "smoothHint": "Rounds the staircase steps of the outline without widening the edge or crushing the gradient.",
     "harden": "Harden alpha",
-    "hardenHint": "Removes the semi-transparent halo: the inside goes opaque, the background drops out. Higher, harder edge.",
+    "hardenHint": "Removes the semi-transparent halo: the inside goes opaque, the background drops out. Higher = harder edge.",
     "feather": "Feather edge",
     "featherHint": "Spreads the mask edge into a gradient over the given radius, in pixels.",
     "gamma": "Density (gamma)",
@@ -122,9 +117,9 @@
     "grow": "Erase margin",
     "growTip": "Grows the mask before erasing — covers the object's edges and shadow",
     "plate": "Clean plate",
-    "plateTip": "Pulls the background that was actually filmed in nearby frames before letting the model invent it — those pixels already have the right colour and grain",
-    "harmonize": "Harmonise",
-    "harmonizeTip": "Matches the colour and sharpness of the rebuilt area to its surroundings — without it the patch shows even when the content is right",
+    "plateTip": "Pulls the background that was actually filmed in nearby frames before letting the model invent it — those pixels already have the right color and grain",
+    "harmonize": "Harmonization",
+    "harmonizeTip": "Matches the color and sharpness of the rebuilt area to its surroundings — without it the patch shows even when the content is right",
     "grain": "Grain",
     "grainTip": "Adds back the grain measured around the area: a smooth fill on a grainy source stands out. Zero on a clean source",
     "quality": "Quality",
@@ -207,7 +202,7 @@
     "zoomSuffix": "× — double-click to fit"
   },
   "test": {
-    "matteImage": "Fine matte — frame {{n}}",
+    "matteImage": "Mask refinement — frame {{n}}",
     "removeImage": "Removal — frame {{n}}"
   },
   "busy": {
@@ -220,7 +215,7 @@
     "dedupe": "Deduping",
     "restoreMattes": "Restoring mattes",
     "export": "Export",
-    "matteFine": "Fine matte",
+    "matteFine": "Mask refinement",
     "remove": "Removal",
     "testMatte": "Matte test (1 frame)",
     "testRemove": "Removal test (1 frame)"
@@ -246,7 +241,7 @@
     "extract": "Extracting frames…",
     "extractwait": "Finishing extraction…",
     "roi": "Cropping to the working area…",
-    "refine": "Inferring the matte…",
+    "refine": "Computing the matte…",
     "export": "Encoding…",
     "remove": "Removing…",
     "dedupe": "Analyzing duplicates…"

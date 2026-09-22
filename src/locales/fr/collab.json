@@ -132,8 +132,9 @@
     "queued": "En attente d'envoi.",
     "upToDate": "Tout est envoyé.",
     "rotation": "Nouvelle clé nécessaire. Le propriétaire doit ouvrir l'app.",
-    "waitingKey": "{{count}} attendent la clé. Reste en ligne.",
-    "nobodyReachable": "Personne en ligne. Rien n'a été envoyé."
+    "nobodyReachable": "Personne en ligne. Rien n'a été envoyé.",
+    "waitingKey_one": "{{count}} attend la clé. Reste en ligne.",
+    "waitingKey_other": "{{count}} attendent la clé. Reste en ligne."
   },
   "board": {
     "noScene": "Enregistre d'abord ce board dans la bibliothèque de scènes.",

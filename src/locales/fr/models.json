@@ -1,16 +1,4 @@
 {
-  "taskHint": {
-    "search": "Recherche visuelle et comparaison des plans.",
-    "faces": "Détection et regroupement des visages.",
-    "voice": "Transcription automatique de la parole.",
-    "upscale": "Amélioration de la définition des images et vidéos.",
-    "restore": "Restauration et nettoyage des images.",
-    "interpolate": "Création d'images intermédiaires pour fluidifier la vidéo.",
-    "depth": "Création de cartes de profondeur.",
-    "matte-image": "Détourage et suppression de l'arrière-plan des images.",
-    "matte-video": "Détourage et suivi des sujets dans la vidéo.",
-    "object-removal": "Suppression d'objets dans la vidéo."
-  },
   "title": "Modèles",
   "subtitle": "Rien n'est téléchargé d'office. Prends ce dont tu as besoin, supprime à tout moment.",
   "disk": "Disque :",

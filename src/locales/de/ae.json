@@ -1,16 +1,16 @@
 {
   "header": {
     "title": "Export nach After Effects",
-    "subtitle": "Erstellt eine Timeline mit einem generierten Skript originalgetreu als After-Effects-Komposition nach (Positionen, Spuren und framegenau)."
+    "subtitle": "Baut die Timeline originalgetreu als After-Effects-Komposition nach: Positionen, Spuren und Schnitte bildgenau."
   },
   "result": {
     "scriptPrefix": "Skript: {{name}}",
-    "imported": "In After Effects importiert (siehe Projekt-Panel).",
-    "launching": "After Effects startet — Import läuft automatisch (offenes Projekt nötig).",
-    "clipsDone_one": "{{count}} Einstellung → Komposition „{{comp}}“.",
-    "clipsDone_other": "{{count}} Einstellungen → Komposition „{{comp}}“.",
-    "missing_one": "{{count}} Einstellung übersprungen: Datei fehlt.",
-    "missing_other": "{{count}} Einstellungen übersprungen: Dateien fehlen."
+    "imported": "In After Effects importiert (prüfe das Projektbedienfeld).",
+    "launching": "After Effects startet – Import läuft automatisch (offenes Projekt nötig).",
+    "clipsDone_one": "{{count}} Shot → Komposition „{{comp}}“.",
+    "clipsDone_other": "{{count}} Shots → Komposition „{{comp}}“.",
+    "missing_one": "{{count}} Shot übersprungen: Datei fehlt.",
+    "missing_other": "{{count}} Shots übersprungen: Dateien fehlen."
   },
   "run": {
     "busy": "Export läuft…",
@@ -32,7 +32,7 @@
     "nestedRender": "Rendern",
     "nestedHintComp": "Die verschachtelte Timeline wird zur eigenen Vorkomp (Audio darin enthalten).",
     "nestedHintRender": "Resolve rendert die verschachtelte Timeline als eine Datei (originalgetreu, langsam), Import als 1 Ebene.",
-    "nestedHintFlatten": "Die Shots der verschachtelten Timeline landen direkt in der Comp. Sie folgen dem Video-Modus oben.",
+    "nestedHintFlatten": "Die Shots der verschachtelten Timeline landen direkt in der Comp und folgen dem Video-Modus oben.",
     "outputFormat": "Ausgabeformat",
     "audioFormat": "Audioformat (bei reiner Audio-Timeline)",
     "bitrate": "Bitrate",
@@ -66,7 +66,7 @@
   "videoModes": {
     "copy": {
       "label": "Kopie",
-      "hint": "Quelldateien, Schnitt in AE — kein Transkodieren."
+      "hint": "Quelldateien, Schnitt in AE – kein Transkodieren."
     },
     "remux": {
       "label": "Remux",
@@ -87,7 +87,7 @@
   "transformModes": {
     "none": {
       "label": "Keine",
-      "hint": "Rohes Material — Transformationen und Tempo der Timeline werden ignoriert."
+      "hint": "Rohes Material – Transformationen und Tempo der Timeline werden ignoriert."
     },
     "ae": {
       "label": "In After Effects",

@@ -1,7 +1,7 @@
 {
-  "title": "NetsuRush の設定",
+  "title": "NetsuRush のセットアップ",
   "desc": "基盤は自動でインストールされます。他は任意です。",
-  "progressAria": "設定手順",
+  "progressAria": "セットアップの手順",
   "models": {
     "title": "任意のダウンロード",
     "search": "モデルを検索…",
@@ -30,7 +30,6 @@
     "downloads": "任意の容量",
     "noOptionalModels": "任意のダウンロードなし",
     "mandatoryOnly": "基盤とシーン分割のみ",
-    "sceneDetection": "シーン分割を含む",
     "modelCount_one": "ダウンロード {{count}} 件",
     "modelCount_other": "ダウンロード {{count}} 件"
   },
@@ -51,7 +50,7 @@
   },
   "adobe": {
     "title": "Adobe 拡張機能",
-    "detected": "検出: {{apps}}",
+    "detected": "検出：{{apps}}",
     "hint": "NetsuRush パネルをインストールし、自動的に最新の状態に保ちます。"
   },
   "issues": {

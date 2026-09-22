@@ -1,18 +1,18 @@
 {
   "stream": {
-    "error": "Die Antwort ist abgebrochen. Schick sie noch einmal."
+    "error": "Die Antwort wurde unterbrochen. Sende die Anfrage noch einmal."
   },
   "panel": {
-    "copilot": "NetsuRush Copilot",
-    "noCliAgent": "Kein Agent installiert — öffne die Einstellungen, um einen zu installieren oder einen API-Schlüssel zu hinterlegen",
+    "copilot": "NetsuRush-Kopilot",
+    "noCliAgent": "Kein Agent installiert – öffne die Einstellungen, um einen zu installieren oder einen API-Schlüssel zu hinterlegen",
     "configureKey": "API-Schlüssel einrichten, um zu starten"
   },
   "composer": {
     "pickEngine": "Wähle im Menü eine bereite Engine oder richte sie in den Einstellungen ⚙ ein.",
-    "placeholder": "Die KI bitten, Resolve zu steuern…",
+    "placeholder": "Bitte die KI, Resolve zu steuern…",
     "attachFiles": "Dateien anhängen",
     "attachTip": "Bild / Datei anhängen",
-    "attachedFilesPrompt": "Angehängte Dateien (lokale Pfade — bei Bedarf lesen oder ansehen)",
+    "attachedFilesPrompt": "Angehängte Dateien (lokale Pfade – lies sie oder sieh sie dir an, wenn es hilft)",
     "stop": "Stopp",
     "send": "Senden"
   },
@@ -25,23 +25,21 @@
   },
   "settings": {
     "apiKeys": "API-Schlüssel (BYOK)",
-    "noVault": "Verschlüsselter Tresor außerhalb der App nicht verfügbar — Schlüssel gelten nur für diese Sitzung.",
+    "noVault": "Verschlüsselter Tresor außerhalb der App nicht verfügbar – Schlüssel gelten nur für diese Sitzung.",
     "hide": "Ausblenden",
     "show": "Anzeigen",
     "keySet": "eingerichtet",
     "keyAbsent": "fehlt",
     "cliAgents": "Agenten",
     "rescan": "Neu suchen",
-    "noAgentsPre": "Kein Agent gelistet — auf „Neu suchen“ klicken. Wenn nichts kommt, ",
-    "noAgentsPost": " installieren und prüfen, ob sie im PATH des Core liegen.",
     "detected": "gefunden",
     "absent": "fehlt",
     "saved": "Gespeichert",
     "test": "Testen",
     "getKey": "Schlüssel holen",
     "reachable": "verbunden ({{ms}} ms)",
-    "connect": "Verbinden (öffnet ein Terminal)",
-    "loginOpened": "Terminal geöffnet — dort anmelden",
+    "connect": "Anmelden (öffnet ein Terminal)",
+    "loginOpened": "Terminal geöffnet – schließ die Anmeldung dort ab",
     "appNoCli": "App ohne Befehl",
     "appNoCliHint": "Die Anwendung ist installiert, ihr Befehl {{bin}} steht aber nicht im PATH. Füge ihn aus der Anwendung hinzu.",
     "readyCount": "{{ready}} / {{total}} bereit",
@@ -60,7 +58,8 @@
     "baseUrlHint": {
       "openai": "Ollama, LM Studio, lokaler Proxy…",
       "xai": "EU: https://eu-west-1.api.x.ai/v1"
-    }
+    },
+    "noAgents": "Kein Agent gefunden. Klicke auf „Neu suchen“; wenn nichts kommt, installiere <0>claude</0> oder <1>codex</1> und prüfe, ob sie im PATH liegen."
   },
   "engine": {
     "agents": "Installierte Agenten",
@@ -77,7 +76,7 @@
       "curated": "offline"
     },
     "sourceHint": {
-      "vendor": "Vom Anbieter mit deinem Schlüssel geliefert: diese IDs sind exakt.",
+      "vendor": "Vom Anbieter mit deinem Schlüssel geliefert: Diese IDs sind exakt.",
       "openrouter": "Öffentlicher Katalog von OpenRouter, ohne Schlüssel. Aktuell, aber eine ID kann von der API des Anbieters abweichen.",
       "curated": "Kein Netz: eingebaute Ersatzliste, möglicherweise veraltet."
     },
@@ -91,7 +90,7 @@
     "auto": "Auto"
   },
   "modeTitle": {
-    "readonly": "Nur lesen — kein Schreiben",
+    "readonly": "Nur lesen – kein Schreiben",
     "ask": "Fragt nur bei Riskantem nach (Dateien/Rendern/Medien löschen); Timeline-Schnitt läuft durch",
     "auto": "Schreibt direkt in die Timeline, ohne Rückfrage"
   },
@@ -99,14 +98,13 @@
     "thinking": "Denkt nach…",
     "reasoning": "Gedankengang",
     "copyText": "Text kopieren",
-    "copyReasoning": "Begründung kopieren"
+    "copyReasoning": "Gedankengang kopieren"
   },
   "toolcard": {
-    "running": "läuft",
     "failed": "fehlgeschlagen",
     "arguments": "Argumente",
     "result": "Ergebnis",
-    "copyName": "Tool-Namen kopieren",
+    "copyName": "Werkzeugnamen kopieren",
     "copyArgs": "Argumente kopieren",
     "copyResult": "Ergebnis kopieren",
     "collapse": "Einklappen",
@@ -118,23 +116,23 @@
     "resolveStatus": "Resolve-Status",
     "listMediaPool": "Media Pool lesen",
     "searchClips": "Suche{{q}}",
-    "indexClip": "Rohmaterial indexieren",
+    "indexClip": "Clip indizieren",
     "detectScenes": "Shot-Erkennung",
     "cachedScenes": "Shots aus Cache lesen",
     "listTimelines": "Timelines auflisten",
     "readTimeline": "Timeline lesen",
-    "buildTimeline": "Timeline bauen{{q}}",
+    "buildTimeline": "Timeline erstellen{{q}}",
     "cutTimeline": "Timeline schneiden",
     "probeMedia": "Medium analysieren",
     "makeThumbnail": "Miniatur erzeugen",
     "upscaleMedia": "Video hochskalieren",
-    "exportAe": "After Effects Export",
+    "exportAe": "After-Effects-Export",
     "importMedia": "In Media Pool importieren",
     "board": "Referenz-Board{{suffix}}",
     "page": "Seite {{page}}",
     "resolveApp": "Resolve-Anwendung",
     "grabStill": "Standbild aufnehmen",
-    "setTimecode": "Player bewegen",
+    "setTimecode": "Abspielkopf bewegen",
     "viewer": "Resolve-Player",
     "removeAudio": "Audio entfernen",
     "duplicate": "Timeline duplizieren",
@@ -144,7 +142,7 @@
     "timelineFallback": "Timeline · {{action}}",
     "mediaPool": "Media Pool · {{action}}",
     "render": "Rendern · {{action}}",
-    "timelineItem": "Aktuelle Einstellung · {{action}}",
+    "timelineItem": "Aktueller Shot · {{action}}",
     "project": "Projekt · {{action}}",
     "resolveCall": "Resolve-API · {{root}}",
     "bmd": "Resolve · {{action}}"
@@ -158,10 +156,6 @@
     "read": "Lesen",
     "write": "Schreiben",
     "destructive": "destruktiv"
-  },
-  "store": {
-    "convFallback": "Unterhaltung",
-    "error": "Fehler"
   },
   "duplicate": {
     "title": "Vor dem Ändern duplizieren",

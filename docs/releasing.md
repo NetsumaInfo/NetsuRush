@@ -15,7 +15,8 @@ Set `NETSURUSH_SIGN_COMMAND` in the same session to also Authenticode-sign the b
 ## GitHub artefacts
 
 1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`.
-2. Add an entry with a unique `id` to `src/data/releases.json`.
+2. Add an entry with a unique `id` to `src/data/releases.json`, with its title and lines in the six
+   interface languages (`fr`, `en`, `es`, `de`, `ja`, `zh`). A missing language falls back to English.
 3. Run `npm run package`.
 4. Run `npm run update:manifest`.
 5. Create the `v<version>` tag and attach to the GitHub release: the NSIS `.exe` installer, its `.exe.sig` signature, and `latest.json`.

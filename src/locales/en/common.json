@@ -69,7 +69,7 @@
     "archiveUnavailable": "Archiving is unavailable outside the app.",
     "folderImportUnavailable": "Folder import is unavailable outside the app.",
     "emptyFolderName": "Folder name is empty",
-    "invalidFolderName": "Folder names cannot contain '/' or '\\'",
+    "invalidFolderName": "Folder names cannot contain “/” or “\\”",
     "folder": "Folder"
   },
   "spell": {
@@ -114,5 +114,14 @@
   "host": {
     "offlineResolve": "Open a project with footage in Resolve, then reload, or import videos from disk.",
     "offlineAdobe": "Open {{app}}, then the NetsuRush panel (Window ▸ Extensions), or import videos from disk."
+  },
+  "error": {
+    "coreUnreachable": "NetsuRush's background service isn't responding. Try again; if it keeps happening, restart the app.",
+    "diskFull": "The disk is full. Free up some space, then try again.",
+    "notFound": "File not found. It may have been moved or deleted.",
+    "permission": "Access denied. The file may be read-only or open in another app.",
+    "busy": "Another app is using the file. Close it, then try again.",
+    "timeout": "No response in time. Try again.",
+    "internal": "Internal NetsuRush error. The details are in Settings › System › Console."
   }
 }

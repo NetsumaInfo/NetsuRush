@@ -36,6 +36,7 @@ import {
   collectTags, sortShots, filterShots, labelColor, labelNameKey, loadShotSort, saveShotSort,
   EMPTY_FILTER, SORT_KEYS, SORT_LABELS, type CollSortKey, type ShotFilter,
 } from "./collectionShared";
+import { errorText } from "@/lib/errorText";
 
 // Sous cette largeur la vue passe en colonne (lecteur en tête, grille dessous) et la grille garde
 // toujours MIN_GRID_W : mêmes seuils que le Découpage, qui vit dans les mêmes contenants étroits
@@ -196,7 +197,7 @@ export function CollectionDetail({ id }: { id: string }) {
       // Chacun gère SES contributions ; celles des autres demandent la délégation du propriétaire
       // (cf. useSharedCollection.canEdit). Un lecteur ne touche à rien.
       if (!shared.canEdit(shotId)) return;
-      void patchSharedShot(sharedProjectId, shotId, patch).then(shared.refresh).catch((cause) => setError(String(cause)));
+      void patchSharedShot(sharedProjectId, shotId, patch).then(shared.refresh).catch((cause) => setError(errorText(cause)));
       return;
     }
     setColl((c) => c ? { ...c, shots: c.shots.map((s) => {
@@ -511,7 +512,7 @@ export function CollectionDetail({ id }: { id: string }) {
                 {sharedProjectId && <div className="flex flex-wrap gap-1 pt-1">
                   <Button size="sm" variant="ghost" onClick={() => shared.hide(shot.id!)}>{tr("share.hideLocal")}</Button>
                   {shared.canRemove(shot.id!) && <Button size="sm" variant="ghost" className="text-destructive"
-                    onClick={() => void shared.remove(shot.id!).catch((cause) => setError(String(cause)))}>{tr("share.removeGlobal")}</Button>}
+                    onClick={() => void shared.remove(shot.id!).catch((cause) => setError(errorText(cause)))}>{tr("share.removeGlobal")}</Button>}
                 </div>}
                 </div>
               );

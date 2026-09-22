@@ -23,10 +23,10 @@
     "pages": "Páginas",
     "trash": "Papelera",
     "settings": "Ajustes",
-    "emptyNotebookHint": "Crear un cuaderno para empezar.",
-    "emptyTitleHasNb": "Una página en blanco espera",
-    "emptyTitleNoNb": "Bienvenido al Cuaderno",
-    "emptyBodyHasNb": "Notas, planes, borradores, bases de datos: volcar las ideas sin orden.",
+    "emptyNotebookHint": "Crea un cuaderno para empezar.",
+    "emptyTitleHasNb": "Una página en blanco te espera",
+    "emptyTitleNoNb": "Te damos la bienvenida al Cuaderno",
+    "emptyBodyHasNb": "Notas, planes, borradores, bases de datos: vuelca tus ideas sin orden.",
     "emptyBodyNoNb": "Un bloc de notas: cuadernos, páginas anidadas, bloques enriquecidos y bases de datos.",
     "createNotebook": "Crear un cuaderno",
     "confirmDeleteNbTitle": "¿Eliminar «{{name}}»?",
@@ -164,7 +164,7 @@
       "aliases": "youtube|video|yt"
     },
     "embed": {
-      "title": "Contenido integrado",
+      "title": "Contenido incrustado",
       "aliases": "insertar|iframe|vimeo|twitter|tiktok"
     },
     "bookmark": {
@@ -255,14 +255,14 @@
     },
     "url": {
       "label": "Enlace",
-      "desc": "Enlace en línea"
+      "desc": "Enlace clicable en el texto"
     },
     "bookmark": {
       "label": "Marcador",
       "desc": "Vista previa en tarjeta"
     },
     "embed": {
-      "label": "Contenido integrado",
+      "label": "Contenido incrustado",
       "desc": "Reproductor integrado (iframe / YouTube)"
     }
   },
@@ -328,7 +328,7 @@
     "empty": "Ecuación vacía — haz clic para escribir LaTeX",
     "templates": "Plantillas",
     "error": "Error de LaTeX: {{error}}",
-    "hint": "LaTeX completo (KaTeX + química \\ce) · Ctrl+Entrar para aplicar · Escape para cancelar",
+    "hint": "LaTeX completo (KaTeX + química \\ce) · Ctrl+Entrar para aplicar · Esc para cancelar",
     "edit": "Editar la ecuación",
     "input": "Código LaTeX de la ecuación"
   },
@@ -392,7 +392,7 @@
     "style": "Estilo del recuadro"
   },
   "window": {
-    "detach": "Separar cuaderno",
+    "detach": "Desacoplar el cuaderno",
     "unpin": "Quitar del primer plano",
     "alwaysOnTop": "Siempre en primer plano",
     "stopAlwaysOnTop": "Dejar de mantener en primer plano",
@@ -440,7 +440,7 @@
     "shortcuts": "Atajos de teclado",
     "reset": "Restablecer",
     "press": "Pulsa…",
-    "shortcutHint": "Haz clic y pulsa la nueva combinación (Escape cancela)",
+    "shortcutHint": "Haz clic y pulsa la nueva combinación (Esc cancela)",
     "shortcutConflict": "Si el atajo ya está en uso, se intercambia con la acción que lo tenía.",
     "width": {
       "narrow": "Estrecho",
@@ -467,7 +467,7 @@
     "spellcheckHint": "Subraya los errores; clic derecho o Ctrl+. para corregir",
     "spellUnsupported": "Sin diccionario para este idioma — solo subrayado nativo",
     "spellOn": "Activo",
-    "spellOff": "Apagado",
+    "spellOff": "Desactivado",
     "personalDictionary": "Diccionario personal",
     "personalEmpty": "Ningún término añadido",
     "personalRemove": "Quitar del diccionario"
@@ -640,7 +640,7 @@
     "document": "Compartir este documento",
     "notebook": "Compartir cuaderno",
     "failed": "No se pudo compartir.",
-    "manageRemoval": "Usa los ajustes de colaboración para salir o eliminar este documento compartido.",
+    "manageRemoval": "Usa los ajustes de colaboración para salir de este documento compartido o eliminarlo.",
     "retry": "Reintentar"
   },
   "a11y": {
@@ -649,7 +649,7 @@
     "nextImage": "Imagen siguiente",
     "previousMonth": "Mes anterior",
     "nextMonth": "Mes siguiente",
-    "resizeMedia": "Cambiar tamaño",
+    "resizeMedia": "Cambiar el tamaño del medio",
     "inPoint": "Punto de entrada",
     "outPoint": "Punto de salida",
     "renameView": "Cambiar nombre de la vista",

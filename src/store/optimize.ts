@@ -7,6 +7,7 @@ import type { StateCreator } from "zustand";
 import type { AppState } from "./index";
 import { nr } from "@/lib/bridge";
 import type { AdobeApp, BoostDiagnosis, BoostProgress, OptimizeDiagnosis } from "@/lib/bridge";
+import { errorText } from "@/lib/errorText";
 
 export interface OptimizeSlice {
   optDiag: OptimizeDiagnosis | null;
@@ -31,7 +32,7 @@ export const createOptimizeSlice: StateCreator<AppState, [], [], OptimizeSlice> 
       const diag = await nr.optimizeDiagnose();
       set({ optDiag: diag, optDiagLoading: false });
     } catch (e) {
-      set({ optDiagLoading: false, optDiagError: String(e) });
+      set({ optDiagLoading: false, optDiagError: errorText(e) });
     }
   },
   boostDiag: {},
@@ -44,7 +45,7 @@ export const createOptimizeSlice: StateCreator<AppState, [], [], OptimizeSlice> 
       const diag = await nr.boostDiagnose(app);
       set({ boostDiag: { ...get().boostDiag, [app]: diag }, boostLoading: false });
     } catch (e) {
-      set({ boostLoading: false, boostError: String(e) });
+      set({ boostLoading: false, boostError: errorText(e) });
     }
   },
   // Abonnement monté par le panneau NetsuBoost, pas par l'App : l'onglet est chargé en `lazy`, un

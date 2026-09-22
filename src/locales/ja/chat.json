@@ -25,23 +25,21 @@
   },
   "settings": {
     "apiKeys": "API キー（BYOK）",
-    "noVault": "アプリ外では暗号化保管庫を使えません — キーはセッション中のみ保持されます。",
+    "noVault": "アプリ外では暗号化保管庫を使えません。キーはセッション中のみ保持されます。",
     "hide": "非表示",
     "show": "表示",
     "keySet": "設定済み",
     "keyAbsent": "未設定",
     "cliAgents": "エージェント",
     "rescan": "再スキャン",
-    "noAgentsPre": "エージェントがありません —「再スキャン」をクリック。それでもなければ ",
-    "noAgentsPost": " をインストールし、core の PATH にあるか確認してください。",
     "detected": "検出",
     "absent": "なし",
     "saved": "保存しました",
     "test": "テスト",
     "getKey": "キーを取得",
     "reachable": "接続成功（{{ms}} ms）",
-    "connect": "接続（ターミナルを開く）",
-    "loginOpened": "ターミナルを開きました — そこでサインインしてください",
+    "connect": "サインイン（ターミナルを開く）",
+    "loginOpened": "ターミナルを開きました。そこでサインインを完了してください",
     "appNoCli": "アプリのみ",
     "appNoCliHint": "アプリはインストール済みですが、コマンド {{bin}} が PATH にありません。アプリから追加してください。",
     "readyCount": "{{ready}} / {{total}} 利用可能",
@@ -60,7 +58,8 @@
     "baseUrlHint": {
       "openai": "Ollama、LM Studio、ローカルプロキシ…",
       "xai": "EU: https://eu-west-1.api.x.ai/v1"
-    }
+    },
+    "noAgents": "エージェントが見つかりません。「再スキャン」をクリックしてください。それでも表示されない場合は、<0>claude</0> または <1>codex</1> をインストールし、PATH に含まれているか確認してください。"
   },
   "engine": {
     "agents": "インストール済みエージェント",
@@ -68,7 +67,7 @@
     "notReady": "未設定",
     "none": "エンジンなし",
     "model": "モデル",
-    "default": "デフォルト",
+    "default": "既定",
     "freeId": "自由入力 id：vendor/model…",
     "refreshModels": "モデル一覧を更新",
     "source": {
@@ -102,7 +101,6 @@
     "copyReasoning": "推論をコピー"
   },
   "toolcard": {
-    "running": "実行中",
     "failed": "失敗",
     "arguments": "引数",
     "result": "結果",
@@ -158,10 +156,6 @@
     "read": "読み取り",
     "write": "書き込み",
     "destructive": "破壊的"
-  },
-  "store": {
-    "convFallback": "会話",
-    "error": "エラー"
   },
   "duplicate": {
     "title": "変更前に複製する",

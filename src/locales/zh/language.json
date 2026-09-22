@@ -1,11 +1,9 @@
 {
   "gate": {
     "title": "选择语言",
-    "subtitle": "随时可在设置中更改。",
-    "continue": "继续"
+    "subtitle": "随时可在设置中更改。"
   },
   "settings": {
-    "navLabel": "语言",
     "title": "语言",
     "fieldLabel": "界面语言"
   }

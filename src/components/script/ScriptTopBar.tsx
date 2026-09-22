@@ -128,7 +128,7 @@ export function ScriptTopBar({ view, onSetView, save }: Props) {
         <DialogContent className="sm:max-w-sm">
           <DialogTitle className="flex items-center gap-2"><Clapperboard className="size-4" /> {t("topbar.buildTimeline")}</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {t("topbar.buildSummary", { count: clips.length, host: adobe ? t("topbar.adobeSequence", { host: hostShort(activeHost) }) : t("topbar.resolveNative") })}
+            {adobe ? t("topbar.buildSummaryAdobe", { count: clips.length, host: hostShort(activeHost) }) : t("topbar.buildSummaryResolve", { count: clips.length })}
             {partial ? ` ${t("topbar.partialScope")}` : ""}
           </p>
           <ToggleGroup className="w-full" value={[mode]} onValueChange={(v) => v[0] && setMode(v[0] as "new" | "append")}>

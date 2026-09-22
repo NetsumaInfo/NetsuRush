@@ -64,8 +64,9 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
 
 ## Ne PAS traduire (noms propres / produit / technique)
 
-- **Produit / modules** : NetsuRush, NetsuLab, Derush *(comme titre d'onglet — garder ; en usage
-  descriptif, employer le verbe local ci-dessus)*, Roto Studio.
+- **Produit / modules** : NetsuRush, les modules Netsu* (NetsuCut, NetsuSearch, NetsuBoard…),
+  Timeline Live, Roto Studio. « Derush » n'en fait pas partie : c'est le métier, traduit par le mot
+  local du tableau ci-dessus (titre de page compris).
 - **Hôtes** : DaVinci Resolve, Resolve, Premiere Pro, After Effects, Fusion, Media Pool, Adobe.
 - **Services** : Discord, Convex, YouTube, Hugging Face.
 - **Modèles / moteurs** : SigLIP2, Real-ESRGAN, Real-CUGAN, TransNetV2, OmniShotCut, Whisper,

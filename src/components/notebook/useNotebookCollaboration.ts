@@ -9,6 +9,7 @@ import type { ProjectRole, SurfaceEntryProjection, SurfaceProjection } from "@/l
 import { notebookCollabState } from "./notebookCollabState";
 import { decodeNotebook, diffNotebook, type NotebookSnapshot } from "./notebookCollabModel";
 import { displayNotebookMedia, loadNotebookSnapshot, notebookApi, notebookEntries } from "./notebookCollabSession";
+import { errorText } from "@/lib/errorText";
 
 function announce() { window.dispatchEvent(new Event("nr-notebook-collab-state")); }
 function remap<T>(value: T, ids: Map<string, string>): T {
@@ -41,7 +42,7 @@ export function useNotebookCollaboration(binding: NotebookCollabBinding | null) 
     const localIds = new Map<string, string>();
     notebookCollabState.binding = binding; notebookCollabState.role = null; announce();
     setError(null);
-    const failed = (cause: unknown) => { paused = true; if (!disposed) setError(cause instanceof Error ? cause.message : String(cause)); };
+    const failed = (cause: unknown) => { paused = true; if (!disposed) setError(errorText(cause)); };
 
     async function readLocal() {
       const state = useApp.getState();
@@ -129,7 +130,7 @@ export function useNotebookCollaboration(binding: NotebookCollabBinding | null) 
               if (resolved.status === "available") { refreshPending = true; schedule(); }
             }
           }));
-        })().catch((cause) => { if (!disposed && !closing) setError(String(cause)); }).finally(() => {
+        })().catch((cause) => { if (!disposed && !closing) setError(errorText(cause)); }).finally(() => {
           mediaRunning = false;
           if (refreshPending) schedule();
         });

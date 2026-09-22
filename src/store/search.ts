@@ -15,6 +15,7 @@ import { DEFAULT_FRAMES, type SamplingFrames } from "@/lib/sampling";
 import { batchCeiling, batchProgress, createSmoothProgress } from "@/lib/smoothProgress";
 import { warmGenerateThumbs } from "@/lib/thumbCache";
 import { thumbTime } from "@/lib/utils";
+import { errorText } from "@/lib/errorText";
 
 // Un daemon python qui meurt en plein clip (VRAM saturée, traceback, watchdog) ne fait échouer que
 // CE clip : le suivant relance un process neuf. On retente donc une fois avant de compter l'échec —
@@ -356,7 +357,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         const notices = [searchNotice, r.notice ?? null].filter((n): n is string => !!n);
         set({ searching: false, searchHits: hits, searchError: r.error ?? null, searchNotice: notices.join(" · ") || null });
       } catch (e) {   // core/sidecar indispo → erreur lisible, jamais de spinner infini
-        set({ searching: false, searchHits: [], searchError: i18n.t("search:store.searchUnavailable", { error: String(e) }) });
+        set({ searching: false, searchHits: [], searchError: i18n.t("search:store.searchUnavailable", { error: errorText(e) }) });
       }
     },
     findSimilar: async (hit, thumb = null) => {
@@ -394,7 +395,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         const r = await nr.faceSearch({ refs: [{ file_path: ref.file_path, scene_index: ref.scene_index, face_index: ref.face_index }], topK: SEARCH_TOP_K, minScore: 0, filePaths: searchScopePaths(get()) });
         set({ searching: false, searchHits: r.hits ?? [], searchError: r.error ?? null });
       } catch (e) {
-        set({ searching: false, searchHits: [], searchError: i18n.t("search:store.faceSearchUnavailable", { error: String(e) }) });
+        set({ searching: false, searchHits: [], searchError: i18n.t("search:store.faceSearchUnavailable", { error: errorText(e) }) });
       }
     },
     // Recherche par visage : visages choisis au picker (bbox + domaine → moteur d'identité CCIP/SFace).
@@ -415,7 +416,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         const r = await nr.faceSearch({ refs, topK: SEARCH_TOP_K, minScore: 0, filePaths: searchScopePaths(get()) });
         set({ searching: false, searchHits: r.hits ?? [], searchError: r.error ?? null });
       } catch (e) {
-        set({ searching: false, searchHits: [], searchError: i18n.t("search:store.faceSearchUnavailableRestart", { error: String(e) }) });
+        set({ searching: false, searchHits: [], searchError: i18n.t("search:store.faceSearchUnavailableRestart", { error: errorText(e) }) });
       }
     },
     // Indexe les visages d'une liste de clips (réutilise les plans déjà détectés). Barre + annulation
@@ -495,7 +496,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
                 const r = await withDaemonRetry(() => nr.faceIndex(paths[i], force, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().faceCancel);
                 if (isCanceled(r.error)) { stopped = true; running--; return; }
                 if (r.error) { failed++; lastErr = r.error; }
-              } catch (e) { failed++; lastErr = String(e); }
+              } catch (e) { failed++; lastErr = errorText(e); }
               running--; done++; bump();
             }
           };
@@ -520,7 +521,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         const r = await nr.dedup(opts);
         set({ analyzing: false, dedupGroups: r.groups ?? [], resultView: "dedup", searchError: r.error ?? null });
       } catch (e) {
-        set({ analyzing: false, searchError: i18n.t("search:store.dedupUnavailable", { error: String(e) }) });
+        set({ analyzing: false, searchError: i18n.t("search:store.dedupUnavailable", { error: errorText(e) }) });
       }
     },
     runCluster: async (scope) => {
@@ -533,7 +534,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         const r = await nr.cluster(opts);
         set({ analyzing: false, clusters: r.clusters ?? [], resultView: "clusters", searchError: r.error ?? null });
       } catch (e) {
-        set({ analyzing: false, searchError: i18n.t("search:store.clustersUnavailable", { error: String(e) }) });
+        set({ analyzing: false, searchError: i18n.t("search:store.clustersUnavailable", { error: errorText(e) }) });
       }
     },
     // Indexe une liste de clips (1 frame/plan → embedding SigLIP 2, cache SQLite, incrémental).
@@ -610,7 +611,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
               if (isCanceled(r.error)) { stopped = true; running--; return; }
               if (r.error) { failed++; lastErr = r.error; }
               else void warmIndexedThumbs(paths[i]);
-            } catch (e) { failed++; lastErr = String(e); }
+            } catch (e) { failed++; lastErr = errorText(e); }
             running--; done++; bump();
           }
         };

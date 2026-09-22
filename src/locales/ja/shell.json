@@ -46,7 +46,7 @@
     "section": "セクション",
     "sectionDecoupage": "カット",
     "sectionCollections": "コレクション",
-    "sectionTimeline": "ライブタイムライン",
+    "sectionTimeline": "Timeline Live",
     "search": "検索",
     "resultView": "結果の表示",
     "resultFlat": "フラット",
@@ -92,15 +92,6 @@
     "title": "NetsuRush の描画がクラッシュしました",
     "reload": "再読み込み"
   },
-  "notebook": {
-    "untitled": "無題",
-    "prev": "前へ",
-    "next": "次へ",
-    "closeTab": "タブを閉じる",
-    "closeOthers": "他を閉じる",
-    "allTabs": "すべてのタブ",
-    "newPageTab": "新しいタブでページを作成"
-  },
   "emoji": {
     "search": "絵文字を検索…",
     "none": "「{{q}}」に一致する絵文字はありません。",
@@ -131,8 +122,8 @@
     "dismiss": "非表示",
     "dismissHint": "この通知を非表示にする",
     "closeHostQ": "{{host}} を閉じますか？",
-    "freeRamDesc": "RAM と GPU を解放。",
-    "resolveSafeCloseDesc": "RAM と GPU を解放。事前にプロジェクトを保存。",
+    "freeRamDesc": "RAM と GPU を解放します。",
+    "resolveSafeCloseDesc": "RAM と GPU を解放します。閉じる前にプロジェクトを保存します。",
     "later": "あとで",
     "closeHost": "{{host}} を閉じる",
     "failed": "失敗"

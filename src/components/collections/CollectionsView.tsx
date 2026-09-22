@@ -425,7 +425,7 @@ export function CollectionsView() {
         )}
         {!s.collectionsLoading && s.collections.length > 0 && shown.length === 0 && subfolders.length === 0 && (
           <Card className="mt-4 flex items-center gap-2 p-6 text-sm text-muted-foreground">
-            <FolderInput className="size-4" /> {tr("list.folderEmpty")}{q ? tr("list.folderEmptyFilter") : ""}.
+            <FolderInput className="size-4" /> {q ? tr("list.folderEmptyFiltered") : tr("list.folderEmpty")}
           </Card>
         )}
 

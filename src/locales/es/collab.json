@@ -53,7 +53,7 @@
     "rotation": "rotación de clave pendiente",
     "add": "Añadir aquí",
     "failed": "No se pudo añadir este documento",
-    "unnamed": "Compartido del {{date}}",
+    "unnamed": "Compartido el {{date}}",
     "delete": "Eliminar",
     "leave": "Salir",
     "confirmDelete": "¿Eliminar para todos?",
@@ -132,8 +132,9 @@
     "queued": "Pendiente de envío.",
     "upToDate": "Todo enviado.",
     "rotation": "Hace falta una clave nueva. El propietario debe abrir la app.",
-    "waitingKey": "{{count}} esperan la clave. Sigue en línea.",
-    "nobodyReachable": "Nadie en línea. No se ha enviado nada."
+    "nobodyReachable": "Nadie en línea. No se ha enviado nada.",
+    "waitingKey_one": "{{count}} espera la clave. Sigue en línea.",
+    "waitingKey_other": "{{count}} esperan la clave. Sigue en línea."
   },
   "board": {
     "noScene": "Guarda primero este tablero en la biblioteca de escenas.",

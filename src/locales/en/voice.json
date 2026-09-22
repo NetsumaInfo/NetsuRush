@@ -6,8 +6,6 @@
   "home": {
     "title": "Voice",
     "subtitle": "Pick one or more spoken clips: silences, fillers and transcription run in parallel.",
-    "addFiles": "Add video files",
-    "addFilesHint": "Several files from disk at once — they land in the list below.",
     "mediaPool": "Media Pool",
     "mediaPoolHint": "Reloads the Resolve project clips — the list shows up below.",
     "presetLabel": "Analysis preset",
@@ -29,9 +27,9 @@
     "openEditor": "Open editor",
     "analyzeThisClip": "Analyze this clip",
     "addFilesShort": "Files",
-    "searchPlaceholder": "Filter rushes…",
+    "searchPlaceholder": "Filter clips…",
     "countSelected": "{{selected}}/{{total}} selected",
-    "noMatch": "No rush matches the filter.",
+    "noMatch": "No clips match the filter.",
     "folderView": "Group by folder",
     "flatView": "Flat list",
     "renderThisClip": "Render this clip",
@@ -42,7 +40,6 @@
     "queued": "Queued…",
     "running": "Analyzing…",
     "errorFallback": "failed",
-    "stats": "{{words}} words · {{silences}} silences · {{fillers}} fillers — click to open",
     "statsShort": "{{words}} words · {{silences}} silences"
   },
   "panel": {
@@ -70,7 +67,7 @@
     "modeRepeatsTooltip": "Play skipping repeats only",
     "modeAll": "All",
     "modeAllTooltip": "Play the final edit (everything skipped)",
-    "noTranscriptYet": "\"Transcribe\" for editable text, or \"Detect silences\" to cut right away."
+    "noTranscriptYet": "“Transcribe” for editable text, or “Detect silences” to cut right away."
   },
   "controls": {
     "groupAnalyse": "Analysis",
@@ -117,12 +114,11 @@
     "cutSilences": "Cut silences",
     "sendToTimeline": "Send to timeline",
     "editText": "Edit text ({{count}})",
-    "coloredTimeline": "Color timeline",
+    "coloredTimeline": "Color-coded timeline",
     "coloredTimelineTooltip": "Lays the whole clip on the timeline, colored by type (speech, silence, filler), to review the cuts in DaVinci.",
     "removeFillers": "Remove fillers ({{count}})",
     "restoreFillers": "Restore fillers ({{count}})",
     "kept": "Kept",
-    "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = re-encode · FCPXML = source timecode.",
     "hints": {
@@ -130,11 +126,11 @@
       "minSilence": "Shortest gap that gets cut.",
       "minSpeech": "Ignores shorter bits of speech (avoids choppiness).",
       "pad": "Keeps a little air around the speech you keep.",
-      "novaConfidence": "Minimum \"no voice\" confidence to drop a region. Higher = safer (drops less).",
+      "novaConfidence": "Minimum “no voice” confidence to drop a region. Higher = safer (drops less).",
       "sensitivity": "Higher = catches more (uhs, held sounds, drawn-out words). Strike false positives with a click.",
       "minDuration": "Shortest held sound / drawn-out word that counts.",
       "maxDuration": "Above this it's a real long word, not a filler. Caps held sounds + drawn-out words.",
-      "monotoneTolerance": "Audio: how steady the pitch has to stay. Higher = allows more variation → catches more held \"soooounds\". (Run \"Detect\" again.)",
+      "monotoneTolerance": "Audio: how steady the pitch has to stay. Higher = allows more variation → catches more held “soooounds”. (Run “Detect” again.)",
       "padEnd": "Air kept AFTER each take (sentence endings), separate from the head padding.",
       "noiseGate": "Drops short noises mistaken for speech (keyboard, mouth clicks). 0 = off."
     },
@@ -146,7 +142,7 @@
     "threshold": "Threshold",
     "minSilence": "Min silence",
     "minSpeech": "Min speech",
-    "pad": "Pad",
+    "pad": "Padding",
     "novaConfidence": "NOVA confidence",
     "sensitivity": "Sensitivity",
     "minDuration": "Min duration",
@@ -173,8 +169,8 @@
     "tabSilences": "Silences",
     "tabFillers": "Fillers",
     "tabRepeats": "Repeats",
-    "emptySilences": "\"Detect silences\"",
-    "emptyFillers": "\"Detect fillers\"",
+    "emptySilences": "“Detect silences”",
+    "emptyFillers": "“Detect fillers”",
     "emptyRepeats": "Transcribe to detect repeats",
     "lowConfidence": "Low confidence — listen before cutting",
     "reinclude": "Put back in the edit",
@@ -194,10 +190,9 @@
     "helpAria": "Understand the settings",
     "helpTooltip": "Understand the settings (big preview)",
     "dialogTitle": "Silence settings",
-    "description": "Move the sliders: the preview and numbers react live",
-    "descriptionExampleSuffix": " (example — load a clip to see YOUR audio)",
+    "description": "Move the sliders: the preview and the numbers update live.",
     "legendKept": "Speech kept",
-    "legendPad": "Pad",
+    "legendPad": "Padding",
     "legendCut": "Cut",
     "statsKeptPct": "{{pct}}% kept",
     "statsCuts_one": "{{count}} cut",
@@ -208,7 +203,8 @@
       "minSilence": "A gap shorter than this is NOT cut — breaths stay in.",
       "minSpeech": "A bit of speech shorter than this is ignored (avoids choppiness).",
       "pad": "The air kept before/after each take — the light green in the preview."
-    }
+    },
+    "descriptionExample": "Move the sliders: the preview and the numbers update live. This is an example: load a clip to see your own audio."
   },
   "shared": {
     "asr": {
@@ -239,7 +235,7 @@
   "presets": {
     "doux": {
       "label": "Gentle",
-      "hint": "Only cuts the obvious: long pauses (≥ 0.9 s, wide pad) and clear \"uhs\". Zero risk, relaxed pacing."
+      "hint": "Only cuts the obvious: long pauses (≥ 0.9 s, wide padding) and clear “uhs”. Zero risk, relaxed pacing."
     },
     "equilibre": {
       "label": "Balanced",
@@ -247,7 +243,7 @@
     },
     "agressif": {
       "label": "Aggressive",
-      "hint": "Cuts everything: silences from 0.3 s (min pad), high sensitivity, verbal tics included. Tight pacing — review in CUTS."
+      "hint": "Cuts silences from 0.3 s with minimal padding and includes verbal tics. Check the Cuts panel afterward."
     }
   },
   "fillerCats": {
@@ -264,7 +260,6 @@
     "noFillersDetected": "No acoustic fillers found.",
     "errDetectFillers": "filler detection failed",
     "transcriptCached": "Transcript loaded (cache)",
-    "transcriptDone": "Transcript · Words: {{count}}",
     "errTranscribe": "transcription failed",
     "analyzeAllDone": "Analysis: {{words}} words · Silences: {{silences}} · Audio fillers: {{fillers}}",
     "busyDetectSilences": "Detecting silences…",
@@ -280,7 +275,9 @@
     "batchErrorsSuffix_one": " · {{count}} error",
     "batchErrorsSuffix_other": " · {{count}} errors",
     "fillersDetected_one": "{{count}} audio filler found",
-    "fillersDetected_other": "{{count}} audio fillers found"
+    "fillersDetected_other": "{{count}} audio fillers found",
+    "transcriptDone_one": "Transcript · Words: {{count}}",
+    "transcriptDone_other": "Transcript · Words: {{count}}"
   },
   "export": {
     "timelineSuffixEdit": "edit",
@@ -298,19 +295,21 @@
     "errTimeline": "timeline failed",
     "errNoDuration": "Clip duration unknown (load the waveform).",
     "errNothingToBuildColored": "Nothing to edit (no segments).",
-    "timelineColoredBase": "Timeline \"{{name}}\" · Clips: {{count}} · Cuts: {{cuts}} · Colored: {{colored}}",
     "coloredRefused": " ⚠ Resolve refused the colors",
     "coloredLegend": " · 🟢 speech 🔵 silence 🟠 filler 🟦 repeat",
     "errTimelineColored": "color timeline failed",
     "errNothingToExport": "Nothing to export (no segments kept).",
     "errExportFile": "{{format}} export failed",
     "errNoWords": "Transcribe first (no words).",
-    "subtitlesExported": "{{format}} subtitles · Lines: {{count}} → {{path}}",
     "errSubtitles": "subtitles failed",
-    "timelineBase_one": "Timeline \"{{name}}\" · {{count}} segment",
-    "timelineBase_other": "Timeline \"{{name}}\" · {{count}} segments",
+    "timelineBase_one": "Timeline “{{name}}” · {{count}} segment",
+    "timelineBase_other": "Timeline “{{name}}” · {{count}} segments",
     "fileExported_one": "{{format}} ({{count}} shot) → {{path}}",
-    "fileExported_other": "{{format}} ({{count}} shots) → {{path}}"
+    "fileExported_other": "{{format}} ({{count}} shots) → {{path}}",
+    "timelineColoredBase_one": "Timeline “{{name}}” · Clips: {{count}} · Cuts: {{cuts}} · Colored: {{colored}}",
+    "timelineColoredBase_other": "Timeline “{{name}}” · Clips: {{count}} · Cuts: {{cuts}} · Colored: {{colored}}",
+    "subtitlesExported_one": "{{format}} subtitles · Lines: {{count}} → {{path}}",
+    "subtitlesExported_other": "{{format}} subtitles · Lines: {{count}} → {{path}}"
   },
   "analysis": {
     "resolveOffline": "Resolve is offline — use a local file.",
@@ -318,14 +317,14 @@
   },
   "render": {
     "action": "Render",
-    "actionCount_one": "Render {{count}} rush",
-    "actionCount_other": "Render {{count}} rushes",
+    "actionCount_one": "Render {{count}} clip",
+    "actionCount_other": "Render {{count}} clips",
     "profileHint": "Render profile (codec, container, audio). Right-click to switch profile.",
     "runningCount_one": "{{count}} render running",
     "runningCount_other": "{{count}} renders running",
     "errProfile": "Incomplete profile: {{issue}}",
-    "errNoDir": "Render cancelled: no output folder chosen.",
-    "errNoSegments": "Nothing to render (no segment kept).",
+    "errNoDir": "Render canceled: no output folder chosen.",
+    "errNoSegments": "Nothing to render (no segments kept).",
     "errExport": "render failed",
     "done_one": "Rendered {{count}} clip · profile {{profile}}",
     "done_other": "Rendered {{count}} clips · profile {{profile}}",

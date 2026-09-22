@@ -8,6 +8,7 @@ import type { ScriptDocMeta } from "./scriptShared";
 import { emptyDoc } from "./scriptShared";
 import type { HomeScope } from "./home/homeShared";
 import { scriptState, useScript } from "./useScript";
+import { errorText } from "@/lib/errorText";
 
 export interface Notice { kind: "ok" | "error"; text: string }
 
@@ -32,7 +33,7 @@ export function useScriptPersistence(project: string | null | undefined, scope: 
       const list = (await nr.script?.listDocs(scope === "all" ? null : project ?? null)) ?? [];
       setDocs(list);
     } catch (e) {
-      flash({ kind: "error", text: t("persistence.listFailed", { error: String(e) }) });
+      flash({ kind: "error", text: t("persistence.listFailed", { error: errorText(e) }) });
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,7 @@ export function useScriptPersistence(project: string | null | undefined, scope: 
       if (doc) useScript.getState().loadDoc(doc);
       else flash({ kind: "error", text: t("persistence.notFound") });
     } catch (e) {
-      flash({ kind: "error", text: t("persistence.openFailed", { error: String(e) }) });
+      flash({ kind: "error", text: t("persistence.openFailed", { error: errorText(e) }) });
     }
   }, [flash, t]);
 
@@ -59,7 +60,7 @@ export function useScriptPersistence(project: string | null | undefined, scope: 
       useScript.getState().markSaved();
       void refresh();
     } catch (e) {
-      flash({ kind: "error", text: t("persistence.createFailed", { error: String(e) }) });
+      flash({ kind: "error", text: t("persistence.createFailed", { error: errorText(e) }) });
     }
   }, [project, refresh, flash, t]);
 
@@ -76,7 +77,7 @@ export function useScriptPersistence(project: string | null | undefined, scope: 
         flash({ kind: "error", text: t("persistence.saveFailed", { error: r?.error ?? t("common.unknown") }) });
       }
     } catch (e) {
-      flash({ kind: "error", text: t("persistence.saveFailed", { error: String(e) }) });
+      flash({ kind: "error", text: t("persistence.saveFailed", { error: errorText(e) }) });
     }
   }, [refresh, flash, t]);
 
@@ -86,7 +87,7 @@ export function useScriptPersistence(project: string | null | undefined, scope: 
       if (scriptState().doc?.id === id) useScript.getState().closeDoc();
       void refresh();
     } catch (e) {
-      flash({ kind: "error", text: t("persistence.deleteFailed", { error: String(e) }) });
+      flash({ kind: "error", text: t("persistence.deleteFailed", { error: errorText(e) }) });
     }
   }, [refresh, flash, t]);
 

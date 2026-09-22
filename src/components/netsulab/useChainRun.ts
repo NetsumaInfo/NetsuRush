@@ -4,6 +4,7 @@ import { useApp } from "@/store";
 import { makeRenderReviews, useSharedProcSources, type RenderReview } from "@/components/upscale/useProcSources";
 import { isStillSource } from "@/components/upscale/imageOutput";
 import { useTranslation } from "react-i18next";
+import { errorText } from "@/lib/errorText";
 
 // Exécute la CHAÎNE ordonnée (nlChain) sur chaque source du bac via le pipeline core (fichier→fichier,
 // 1 sortie par source). Réutilise le dossier de sortie / import du contexte de sources partagé.
@@ -66,7 +67,7 @@ export function useChainRun() {
       if (!outputs.length) setErr(lastErr);
       else if (skipped) setErr(t("errors.chainSkippedStills", { count: skipped }));
     } catch (e) {
-      setErr(t("errors.chainUnavailable", { err: String(e) }));
+      setErr(t("errors.chainUnavailable", { err: errorText(e) }));
     } finally {
       off();
       setBusy(null); setBatch(null);

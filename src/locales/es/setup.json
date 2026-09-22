@@ -30,7 +30,6 @@
     "downloads": "Espacio opcional",
     "noOptionalModels": "Sin descargas opcionales",
     "mandatoryOnly": "Solo base y corte de escenas",
-    "sceneDetection": "Corte de escenas incluido",
     "modelCount_one": "{{count}} descarga",
     "modelCount_other": "{{count}} descargas"
   },

@@ -5,6 +5,7 @@ import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import type { AeVideoMode, AeAudioMode, AeVideoContainer, AeAudioContainer, AePrecompNaming, AePrecompTarget, AeTransformMode, AeNestedMode, AeAudioRenderFmt, UpscaleCodec, AeExportOpts, AeExportResult, AeProgress, TransferUpscale } from "@/lib/bridge";
 import { aeOutputReasons, audioContainersFor, videoContainersFor } from "./aeShared";
 import i18n from "@/i18n";
+import { errorText } from "@/lib/errorText";
 
 interface TimelineEntry {
   name: string;
@@ -184,7 +185,7 @@ export function useAeExport(host?: AeHostState) {
     try {
       setResult(await nr.aeExport(options));
     } catch (e) {
-      setResult({ ok: false, error: String(e) });
+      setResult({ ok: false, error: errorText(e) });
     } finally {
       setBusy(false);
       setProgress(null);

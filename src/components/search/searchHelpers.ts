@@ -1,6 +1,7 @@
 import type { SearchHit } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { useApp } from "@/store";
+import { errorText } from "@/lib/errorText";
 
 // Seuls les rush vidéo/image sont indexables (SigLIP 2 embed des images) — on exclut
 // l'audio (.flac/.wav/.mp3…) et le reste, sinon la détection de plans plante.
@@ -14,4 +15,4 @@ export const grid = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:gr
 
 // Erreur lisible si le core/sidecar est injoignable, au lieu d'un échec silencieux.
 export const ipcErr = (e: unknown) =>
-  useApp.setState({ searchError: i18n.t("search:store.genericUnavailable", { error: String(e) }) });
+  useApp.setState({ searchError: i18n.t("search:store.genericUnavailable", { error: errorText(e) }) });

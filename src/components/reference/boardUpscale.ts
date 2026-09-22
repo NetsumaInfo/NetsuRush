@@ -11,6 +11,7 @@ import { boardUpEngine, isRtxShader, UP_MODELS } from "@/components/upscale/upsc
 import { displaySrc, isCollabRef, isRemoteRef, type BoardItem } from "./referenceShared";
 import type { BoardPrefs } from "./boardPrefs";
 import { useBoard } from "./useReferenceBoard";
+import { errorText } from "@/lib/errorText";
 
 const tr = (key: string, opts?: Record<string, unknown>) => i18n.t(`reference:${key}`, opts);
 
@@ -119,7 +120,7 @@ export async function quickUpscale(id: string): Promise<boolean> {
     st.setNotice({ kind: "ok", text: tr("upscale.upscaled") });
     return true;
   } catch (e) {
-    st.setNotice({ kind: "error", text: tr("notice.failedWith", { error: String(e) }) });
+    st.setNotice({ kind: "error", text: tr("notice.failedWith", { error: errorText(e) }) });
     return false;
   } finally {
     offProgress?.();

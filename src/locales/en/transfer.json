@@ -60,7 +60,7 @@
   "phases": {
     "read": "Reading the timeline",
     "sources": "Resolving sources",
-    "build": "Editing",
+    "build": "Building",
     "done": "Done"
   },
   "run": {
@@ -70,10 +70,10 @@
   "result": {
     "verified": "Properties read back: transfer verified.",
     "unverified": "Properties confirmed: {{applied}} · limits or mismatches: {{issues}}.",
-    "animatedNone": "No keyframe read: DaVinci Resolve exposes none through scripting, only its XML export carries them.",
+    "animatedNone": "No keyframes read: DaVinci Resolve exposes none through scripting, only its XML export carries them.",
     "tracksClamped": "Tracks clamped: the target application could not create enough of them.",
     "vehicleImport": "Edit read by DaVinci Resolve: keyframes, audio levels and speed applied by the application itself.",
-    "vehicleApi": "Clips placed one by one by script: keyframes come from what NetsuRush read.",
+    "vehicleApi": "Shots placed one by one by script: keyframes come from what NetsuRush read.",
     "exchangeFile": "DaVinci Resolve refused the edit via scripting. The same file imports correctly by hand — keyframes and audio levels included: File ▸ Import ▸ Timeline.",
     "done_one": "{{count}} shot placed in “{{timeline}}” ({{host}}).",
     "done_other": "{{count}} shots placed in “{{timeline}}” ({{host}}).",
@@ -103,7 +103,7 @@
     },
     "reencode": {
       "label": "Re-encode",
-      "hint": "Every shot transcoded to an editing codec, cut frame accurate."
+      "hint": "Every shot transcoded to an editing codec, cut to the exact frame."
     }
   }
 }

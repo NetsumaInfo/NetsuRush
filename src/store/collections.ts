@@ -7,6 +7,7 @@ import { nr, type CollectionMeta, type CollectionIcon, type CollectionShot, type
 import { archiveProfile, archiveProcessing } from "@/features/export/archiveProfile";
 import type { AppState } from "./index";
 import i18n from "@/i18n";
+import { errorText } from "@/lib/errorText";
 
 // Navigation interne de l'onglet Collections : liste des dossiers ↔ détail d'un dossier.
 type CollectionsView = "list" | "detail";
@@ -143,7 +144,7 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
           await shareCollection(id);
           await get().loadCollections();
         } catch (error) {
-          return { ok: false, added: r.added, error: error instanceof Error ? error.message : String(error) };
+          return { ok: false, added: r.added, error: errorText(error) };
         }
       }
       // Publier a DÉJÀ archivé (partager = archiver) : relancer l'archivage ici ne ferait que

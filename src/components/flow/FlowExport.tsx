@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { nr } from "@/lib/bridge";
 import type { FlowExportInfo } from "@/lib/bridge";
+import { errorText } from "@/lib/errorText";
 
 const POLL_MS = 500;
 
@@ -36,7 +37,7 @@ export function FlowExport({ running, durationFrames }: {
       setName((current) => current || next.defaults.name);
       return next;
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     }
   }, [running]);
 
@@ -55,7 +56,7 @@ export function FlowExport({ running, durationFrames }: {
       await work();
       await refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     }
   }, [refresh]);
 

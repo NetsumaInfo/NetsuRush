@@ -19,24 +19,19 @@
     "outHere": "ここにアウト点",
     "outTip": "現在のフレームにアウト点（O — Shift+O で解除）",
     "range": "範囲 {{from}}–{{to}}",
-    "clickHint": "クリック = {{mode}}（E で切替）· 右クリック = 除外 · Shift+ホバー = プレビュー · ホイール = ズーム · J/K/L · I/O · , ; = ステップ · 1-9 オブジェクト",
-    "include": "含める",
-    "exclude": "除外",
     "showMask": "マスクを表示",
     "hideOverlay": "オーバーレイを隠す",
-    "showOverlay": "オーバーレイを表示",
-    "testTitle": "テスト — {{label}}",
-    "testHint": "プレビューのみ — 保存されません。問題なければショット全体に実行してください。"
+    "showOverlay": "オーバーレイを表示"
   },
   "panels": {
     "model": "モデル",
-    "noSam": "SAM モデルが未インストール — 設定 › モデルで SAM 2.1 をダウンロード。",
+    "noSam": "SAM モデルがインストールされていません — 設定 › モデルで SAM 2.1 をダウンロードしてください。",
     "display": "表示",
     "maskRefine": "マスクの微調整",
     "output": "出力",
-    "matteFine": "精細マット",
+    "matteFine": "マスクの精細化",
     "removeObject": "オブジェクト除去",
-    "track": "追跡",
+    "track": "トラッキング",
     "selection": "選択",
     "mask": "マスク"
   },
@@ -73,12 +68,12 @@
     "retrackFwd": "再トラッキング →",
     "retrackFwdTip": "現在のフレームから前方へ再伝播（局所修正）",
     "dedupe": "重複を統合",
-    "dedupeTip": "アニメ：ほぼ同じフレーム（止め）に同じマットを適用 — 輪郭が安定。取り消し可能。",
+    "dedupeTip": "ほぼ同じフレームに同じマスクを再利用して、輪郭を安定させます。取り消せます。",
     "restoreMattesAria": "マットを復元",
     "restoreMattesTip": "重複統合前のマットを復元",
     "resetAria": "トラッキングをリセット",
     "resetTip": "ポイントを全て保持したままトラッキング（マット）を消去",
-    "upToDate": "トラッキングは最新 — ポイントを修正して部分的に再トラッキング、または書き出し。"
+    "upToDate": "トラッキングは最新です。ポイントを修正して部分的に再トラッキングするか、書き出してください。"
   },
   "view": {
     "outline": "輪郭",
@@ -89,13 +84,13 @@
   },
   "viewMode": {
     "editLabel": "編集",
-    "editHint": "フレーム + オブジェクト別に着色したマスク（作業モード）",
-    "matteLabel": "マット",
+    "editHint": "フレームとオブジェクト別に色分けしたマスク（細かい作業向け）",
+    "matteLabel": "マスク",
     "matteHint": "白黒マスクのみ（エッジ確認）",
     "alphaLabel": "アルファ",
-    "alphaHint": "市松模様で切り抜き表示（実際の結果）",
+    "alphaHint": "切り抜いた被写体を市松模様の上に表示（透明部分の確認）",
     "bgcolorLabel": "背景色",
-    "bgcolorHint": "単色の上に合成（切り抜き確認）"
+    "bgcolorHint": "被写体を単色の上に合成（輪郭の確認）"
   },
   "post": {
     "holes": "穴を埋める",
@@ -109,7 +104,7 @@
     "smooth": "輪郭を滑らかに",
     "smoothHint": "境界を太らせず、グラデーションも潰さずに、輪郭の階段状のギザギザを丸めます。",
     "harden": "アルファを硬く",
-    "hardenHint": "半透明のふちを取り除きます。内側は不透明になり、背景は消えます。上げるほど硬いエッジ。",
+    "hardenHint": "半透明のふちを取り除きます。内側は不透明になり、背景は消えます。上げるほどエッジが硬くなります。",
     "feather": "エッジをぼかす",
     "featherHint": "指定した半径にわたって、マスクの境界をグラデーションに広げます（ピクセル）。",
     "gamma": "濃度（ガンマ）",
@@ -142,9 +137,9 @@
     "window": "ウィンドウ",
     "windowTip": "モデルが一度に扱うフレーム数。大きいほど時間的に一貫しますが、メモリを使います。",
     "overlap": "重なり",
-    "overlapTip": "隣り合うウィンドウが共有し、互いに溶け合うフレーム数。0 にすると継ぎ目が跳びとして見えます。",
+    "overlapTip": "隣り合うウィンドウが共有し、互いに溶け合うフレーム数。0 にすると、継ぎ目で映像が飛んで見えます。",
     "vaeTiling": "デコードをタイル分割",
-    "vaeTilingTip": "メモリを大きく節約しますが、タイルの継ぎ目が残ることがあります。余裕があれば切ってください。",
+    "vaeTilingTip": "メモリを大きく節約しますが、タイルの継ぎ目が残ることがあります。VRAM に余裕があればオフにしてください。",
     "cpuOffload": "CPU に退避",
     "cpuOffloadTip": "各処理の間だけ重みをカードに載せます。かなり遅くなりますが、小さなカードでも動きます。",
     "qualityTiny": "最小",
@@ -175,17 +170,17 @@
     "webmHint": "軽量、アルファ — Web/プレビュー",
     "ffv1Label": "FFV1（アルファ、ロスレス）",
     "ffv1Hint": "ロスレス、アルファ — 保存（MKV）",
-    "matteLabel": "白黒マット（MP4）",
+    "matteLabel": "白黒マスク（MP4）",
     "matteHint": "白黒マスクのみ",
     "bgcolorLabel": "背景色（MP4）",
     "bgcolorHint": "表示モードの背景色の上にオブジェクトを合成",
-    "pngLabel": "PNG シーケンス（マット）",
-    "pngHint": "1 フレームにつきマット画像 1 枚",
+    "pngLabel": "PNG シーケンス（マスク）",
+    "pngHint": "1 フレームにつきマスク画像 1 枚",
     "pngAlphaLabel": "PNG（アルファ）",
     "pngAlphaHint": "切り抜き画像、背景は透明",
     "jpegBgLabel": "JPEG（背景色）",
     "jpegBgHint": "表示モードの背景色の上に合成したオブジェクト",
-    "pngMatteLabel": "白黒マット（PNG）",
+    "pngMatteLabel": "白黒マスク（PNG）",
     "pngMatteHint": "白黒マスクのみ"
   },
   "sam": {
@@ -207,7 +202,7 @@
     "zoomSuffix": "× — ダブルクリックで全体表示"
   },
   "test": {
-    "matteImage": "精細マット — フレーム {{n}}",
+    "matteImage": "マスクの精細化 — フレーム {{n}}",
     "removeImage": "除去 — フレーム {{n}}"
   },
   "busy": {
@@ -220,9 +215,9 @@
     "dedupe": "重複の統合",
     "restoreMattes": "マットの復元",
     "export": "書き出し",
-    "matteFine": "精細マット",
+    "matteFine": "マスクの精細化",
     "remove": "除去",
-    "testMatte": "マットテスト（1 フレーム）",
+    "testMatte": "マスクのテスト（1 フレーム）",
     "testRemove": "除去テスト（1 フレーム）"
   },
   "note": {
@@ -246,7 +241,7 @@
     "extract": "フレームを抽出中…",
     "extractwait": "抽出の完了待ち…",
     "roi": "有効範囲を切り抜き中…",
-    "refine": "マットを推論中…",
+    "refine": "マスクを計算中…",
     "export": "エンコード中…",
     "remove": "除去中…",
     "dedupe": "重複を解析中…"

@@ -27,21 +27,15 @@
     "removeFavorite": "Retirer des favoris",
     "copy": "Copier",
     "cut": "Couper",
-    "grayscale": "Niveaux de gris",
     "reset": "Réinitialiser",
     "resetScale": "Taille d'origine",
     "resetRotation": "Rotation",
     "resetFlip": "Miroirs",
     "resetCrop": "Rognage",
-    "resetAll": "Tout réinitialiser",
-    "fitSelection": "Cadrer la sélection"
+    "resetAll": "Tout réinitialiser"
   },
   "toolbar": {
     "home": "Accueil",
-    "addImage": "Ajouter une image",
-    "addVideo": "Ajouter une vidéo",
-    "addSequence": "Ajouter une séquence",
-    "addLink": "Ajouter un lien",
     "addText": "Ajouter du texte",
     "addFrame": "Ajouter un cadre",
     "draw": "Dessiner",
@@ -260,7 +254,8 @@
     "undoUpscale": "Annuler l'upscale",
     "longVideo": "Vidéo longue — aperçu limité à {{max}} frames (affine la portée de boucle pour cibler)…",
     "extractingFrames": "Extraction des frames…",
-    "sequenceCreated": "Séquence créée · {{count}} frames"
+    "sequenceCreated_one": "Séquence créée · {{count}} frame",
+    "sequenceCreated_other": "Séquence créée · {{count}} frames"
   },
   "trim": {
     "start": "Début de boucle (s)",
@@ -320,9 +315,10 @@
     "hdist": "Répartir horizontalement",
     "vdist": "Répartir verticalement",
     "grid": "Ranger en grille",
-    "selectedCount": "{{count}} sélectionnés",
     "groupSequence": "Grouper en séquence",
-    "deleteSelection": "Supprimer la sélection"
+    "deleteSelection": "Supprimer la sélection",
+    "selectedCount_one": "{{count}} sélectionné",
+    "selectedCount_other": "{{count}} sélectionnés"
   },
   "link": {
     "label": "Lien",
@@ -386,7 +382,6 @@
     "normalizeArea": "Même surface",
     "arrangeDefault": "Ranger la sélection",
     "resetAll": "Tout réinitialiser",
-    "grayscale": "Niveaux de gris",
     "toFront": "Premier plan",
     "toBack": "Arrière-plan",
     "extractPalette": "Extraire la palette",
@@ -459,12 +454,13 @@
     "shotCount_other": "{{count}} plans",
     "results_one": "{{count}} résultat",
     "results_other": "{{count}} résultats",
-    "selectedSuffix": " · {{count}} sélectionnés",
     "shotLabel": "{{name}} · plan {{n}}",
     "searchPlaceholder": "Décris un plan…",
     "notIndexed": "Rien d'indexé. Indexe tes rushs dans l'onglet Recherche.",
     "searchHint": "Décris un plan : « visage », « coucher de soleil »…",
-    "noMatch": "Aucun plan ne correspond."
+    "noMatch": "Aucun plan ne correspond.",
+    "selectedSuffix_one": " · {{count}} sélectionné",
+    "selectedSuffix_other": " · {{count}} sélectionnés"
   },
   "boardMenu": {
     "downloadMedia": "Télécharger le média",
@@ -546,7 +542,6 @@
     "recent": "Récent",
     "resume": "Reprendre la session",
     "currentBoard": "Board en cours",
-    "projects": "Projets",
     "openProject": "Ouvrir un projet",
     "openProjectHint": "Ouvrir un fichier .netsu — il devient le document de travail",
     "openProjectFile": "Ouvrir le projet",
@@ -727,14 +722,11 @@
     "copyFailed": "Copie impossible",
     "empty": "Aucune couleur",
     "working": "Extraction des couleurs…",
-    "done": "{{count}} couleurs extraites",
-    "doneSkipped": "{{count}} couleurs extraites · médias ignorés : {{skipped}}",
     "failed": "Aucune couleur exploitable",
     "failedCore": "Lecture des fichiers indisponible — relance la fenêtre",
     "noSource": "Aucun média exploitable dans la sélection",
     "sourcesGone": "Les médias d'origine ne sont plus sur le board",
     "regenerate": "Régénérer",
-    "size": "Couleurs",
     "showHex": "Afficher les valeurs",
     "formatHint": "Copier en {{format}}",
     "layoutRow": "En bande",
@@ -758,8 +750,6 @@
       "value": "Valeur de la couleur",
       "place": "Poser sur le board",
       "apply": "Appliquer",
-      "placed": "Palette de {{count}} couleurs posée",
-      "applied": "Palette mise à jour ({{count}} couleurs)",
       "addSwatch": "Ajouter une couleur",
       "removeSwatch": "Retirer la couleur",
       "lock": "Verrouiller la couleur",
@@ -776,8 +766,16 @@
         "compound": "Composé",
         "shades": "Nuances",
         "monochromatic": "Monochrome"
-      }
-    }
+      },
+      "applied_one": "Palette mise à jour ({{count}} couleur)",
+      "applied_other": "Palette mise à jour ({{count}} couleurs)",
+      "placed_one": "Palette de {{count}} couleur posée",
+      "placed_other": "Palette de {{count}} couleurs posée"
+    },
+    "doneSkipped_one": "{{count}} couleur extraite · médias ignorés : {{skipped}}",
+    "doneSkipped_other": "{{count}} couleurs extraites · médias ignorés : {{skipped}}",
+    "done_one": "{{count}} couleur extraite",
+    "done_other": "{{count}} couleurs extraites"
   },
   "exportImage": {
     "menu": "Exporter en image…",
@@ -797,18 +795,19 @@
     "folderUnavailable": "Import de dossier indisponible",
     "folderScanning": "Lecture du dossier…",
     "folderEmpty": "Aucun média dans ce dossier",
-    "folderDone": "{{count}} médias importés",
-    "folderDoneTruncated": "{{count}} médias importés (dossier tronqué)",
     "progress": "Import {{done}}/{{total}}…",
-    "reading": "Lecture de {{count}} fichiers…",
-    "done": "{{count}} médias importés",
     "folderTruncated": "Dossier trop grand : {{count}} premiers médias importés",
     "importing": "Import de {{name}}…",
     "fetching": "Récupération du média…",
     "linkDone": "Média importé",
     "fetchingFrom": "Récupération depuis {{source}}…",
     "copyFailed": "Copie de « {{name}} » impossible : le média sera perdu à la fermeture de l'app",
-    "copyFailedBatch": "{{count}} copies impossibles (dont « {{name}} ») : ces médias seront perdus à la fermeture de l'app"
+    "done_one": "{{count}} média importé",
+    "done_other": "{{count}} médias importés",
+    "copyFailedBatch_one": "{{count}} copie impossible (« {{name}} ») : ce média sera perdu à la fermeture de l'app",
+    "copyFailedBatch_other": "{{count}} copies impossibles (dont « {{name}} ») : ces médias seront perdus à la fermeture de l'app",
+    "reading_one": "Lecture de {{count}} fichier…",
+    "reading_other": "Lecture de {{count}} fichiers…"
   },
   "mouseThrough": {
     "on": "Transparent à la souris",

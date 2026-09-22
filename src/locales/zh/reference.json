@@ -2,7 +2,7 @@
   "actions": {
     "undo": "撤销",
     "redo": "重做",
-    "duplicate": "复制",
+    "duplicate": "创建副本",
     "bringToFront": "移到最前",
     "sendToBack": "移到最后",
     "linkFrame": "链接到边框",
@@ -19,7 +19,7 @@
     "fitAll": "全部适配",
     "newScene": "新建场景",
     "detach": "分离",
-    "attach": "合并",
+    "attach": "放回主窗口",
     "pin": "固定",
     "unpin": "取消固定",
     "settings": "设置",
@@ -27,21 +27,15 @@
     "removeFavorite": "取消收藏",
     "copy": "复制",
     "cut": "剪切",
-    "grayscale": "黑白",
     "reset": "重置",
     "resetScale": "原始尺寸",
     "resetRotation": "旋转",
-    "resetFlip": "镜像",
+    "resetFlip": "翻转",
     "resetCrop": "裁剪",
-    "resetAll": "全部重置",
-    "fitSelection": "适配所选"
+    "resetAll": "全部重置"
   },
   "toolbar": {
     "home": "首页",
-    "addImage": "添加图片",
-    "addVideo": "添加视频",
-    "addSequence": "添加序列",
-    "addLink": "添加链接",
     "addText": "添加文字",
     "addFrame": "添加边框",
     "draw": "绘图",
@@ -114,7 +108,7 @@
     "disabled": "关",
     "placeFrame": "放置区边框",
     "pinnedToolbar": "固定后的工具栏",
-    "pinnedToolbarHint": "固定后只保留放置、绘制和取景。其余在右键菜单里。",
+    "pinnedToolbarHint": "固定后只保留放置、绘图和添加边框。其余在右键菜单里。",
     "decompose": "把视频拆成图片",
     "decomposeHint": "把从视频里抽取的一组图片放到画板上。",
     "imagesPerSec": "图片 / 秒",
@@ -128,8 +122,8 @@
     "upscaleDefault": "默认超分辨率",
     "upscaleQuick": "快速",
     "upscaleAsk": "自定义",
-    "upscaleQuickHint": "“放大”按钮将直接使用这些设置运行。",
-    "upscaleAskHint": "“放大”按钮打开窗口：模型、倍数、预览。",
+    "upscaleQuickHint": "“超分辨率”按钮会直接用这些设置运行。",
+    "upscaleAskHint": "“超分辨率”按钮会打开窗口：模型、倍数、预览。",
     "model": "模型",
     "upscaleModelDefault": "默认超分辨率模型",
     "factor": "倍数",
@@ -138,7 +132,7 @@
     "copyLocal": "将本地媒体复制到项目",
     "copyLocalOn": "复制",
     "copyLocalOff": "引用",
-    "copyLocalMax": "视频上限 (MB)",
+    "copyLocalMax": "视频上限（MB）",
     "embedSwitch": "切换回播放器",
     "embedSwitchKeep": "保留文件",
     "embedSwitchDrop": "删除文件",
@@ -169,7 +163,7 @@
     "keyEsc": "Esc",
     "sourceFps": "源",
     "customFps": "自定义帧率（张/秒）",
-    "noModelInstalled": "未安装放大模型。",
+    "noModelInstalled": "未安装超分辨率模型。",
     "downloadProviders": "自动下载的平台",
     "provider_twitter": "X",
     "provider_tiktok": "TikTok",
@@ -196,7 +190,7 @@
     "snapStick": "贴合间距",
     "arrangeTitle": "整理",
     "autoArrangeOnImport": "自动整理导入的批次",
-    "autoAnchorDraw": "自动把绘制与媒体关联",
+    "autoAnchorDraw": "自动把笔迹关联到媒体",
     "paletteSize": "每个调色板的颜色数",
     "tabPen": "手写笔",
     "penNav": "手写笔与手指导航",
@@ -243,9 +237,9 @@
     "contentOpacity": "内容不透明度",
     "seeThroughScope": "一并半透明",
     "seeThroughShell": "界面",
-    "seeThroughPlaceFrame": "放置边框",
+    "seeThroughPlaceFrame": "放置区边框",
     "assetSweep": "未使用的媒体",
-    "assetSweepHint": "删除没有任何场景引用的文件。看板中的内容不受影响。",
+    "assetSweepHint": "删除没有任何场景引用的文件。画板上的内容不受影响。",
     "assetSweepAction": "清理",
     "assetSweepFailed": "清理失败。",
     "assetSweepDone_one": "已移除 {{count}} 个文件，释放 {{mb}} MB。",
@@ -255,12 +249,13 @@
     "ytPlayer": "YouTube 播放器",
     "anchoredCard": "锚定卡片",
     "upscale": "超分辨率",
-    "upscaleQuick": "放大（预设）",
+    "upscaleQuick": "超分辨率（预设）",
     "extractFrames": "提取帧",
     "undoUpscale": "撤销超分辨率",
-    "longVideo": "视频过长 — 预览限制为 {{max}} 帧（调整循环范围来定位）…",
+    "longVideo": "视频较长：预览限制为 {{max}} 帧（调整循环范围来定位）…",
     "extractingFrames": "正在提取帧…",
-    "sequenceCreated": "序列已创建 · {{count}} 帧"
+    "sequenceCreated_one": "序列已创建 · {{count}} 帧",
+    "sequenceCreated_other": "序列已创建 · {{count}} 帧"
   },
   "trim": {
     "start": "循环起点（秒）",
@@ -320,9 +315,10 @@
     "hdist": "水平分布",
     "vdist": "垂直分布",
     "grid": "网格排列",
-    "selectedCount": "已选 {{count}} 个",
     "groupSequence": "组成序列",
-    "deleteSelection": "删除所选"
+    "deleteSelection": "删除所选",
+    "selectedCount_one": "已选 {{count}} 个",
+    "selectedCount_other": "已选 {{count}} 个"
   },
   "link": {
     "label": "链接",
@@ -332,7 +328,7 @@
     "chooseFile": "选择文件…",
     "targetItem": "目标项目",
     "remove": "移除链接",
-    "sharedFile": "该文件属于共享看板：在本机磁盘上没有位置。"
+    "sharedFile": "这个文件属于共享画板，在本机磁盘上没有对应位置。"
   },
   "font": {
     "label": "字体",
@@ -369,7 +365,7 @@
     "delete": "删除所选",
     "deselect": "取消选择",
     "selectAll": "全选",
-    "duplicate": "复制所选",
+    "duplicate": "为所选创建副本",
     "undo": "撤销",
     "redo": "重做",
     "save": "保存场景",
@@ -386,7 +382,6 @@
     "normalizeArea": "等面积",
     "arrangeDefault": "整理所选",
     "resetAll": "全部重置",
-    "grayscale": "黑白",
     "toFront": "移到最前",
     "toBack": "移到最后",
     "extractPalette": "提取调色板",
@@ -397,12 +392,12 @@
     "prevFrame": "上一帧",
     "nextFrame": "下一帧",
     "toggleMouseThrough": "鼠标穿透",
-    "newScene": "新场景",
+    "newScene": "新建场景",
     "openSettings": "设置",
     "togglePin": "固定窗口",
     "paletteStudio": "调色板生成器",
     "crop": "裁剪",
-    "groupSequence": "合并为序列"
+    "groupSequence": "组成序列"
   },
   "drawStyle": {
     "thin": "细线",
@@ -415,7 +410,7 @@
     "straight": "直线",
     "curved": "曲线",
     "elbow": "折线",
-    "opacity": "不透明度 {{pct}} %"
+    "opacity": "不透明度 {{pct}}%"
   },
   "heads": {
     "none": "无",
@@ -429,7 +424,7 @@
     "fill": "填充",
     "fillLabel": "填充",
     "rounded": "圆角",
-    "duplicate": "复制（Ctrl+D）",
+    "duplicate": "创建副本（Ctrl+D）",
     "unlink": "解除与媒体的关联",
     "relink": "关联到媒体",
     "linkedTo_one": "已关联 {{count}} 个元素",
@@ -459,12 +454,13 @@
     "shotCount_other": "{{count}} 个镜头",
     "results_one": "{{count}} 个结果",
     "results_other": "{{count}} 个结果",
-    "selectedSuffix": " · 已选 {{count}} 个",
     "shotLabel": "{{name}} · 镜头 {{n}}",
     "searchPlaceholder": "描述一个镜头…",
     "notIndexed": "还没有索引。请在搜索标签页索引素材。",
     "searchHint": "描述一个镜头：“人脸”、“日落”…",
-    "noMatch": "没有匹配的镜头。"
+    "noMatch": "没有匹配的镜头。",
+    "selectedSuffix_one": " · 已选 {{count}} 个",
+    "selectedSuffix_other": " · 已选 {{count}} 个"
   },
   "boardMenu": {
     "downloadMedia": "下载媒体",
@@ -492,13 +488,13 @@
   "linkDialog": {
     "title": "添加在线视频",
     "placeholder": "YouTube、Vimeo、TikTok、Twitter/X、Instagram、Reddit… 或任意链接",
-    "notFound": "链接无法识别或找不到媒体 — 请检查网址。",
+    "notFound": "链接无法识别或找不到媒体，请检查网址。",
     "adding": "添加中…"
   },
   "export": {
     "title": "导出画板",
-    "subtitle": "这个文件会带走视频的哪部分。",
-    "freezeLinks": "同时带走网络图片",
+    "subtitle": "文件中包含视频的哪些内容。",
+    "freezeLinks": "同时打包网络图片",
     "freezeHint": "否则原网页一失效，画板上的图也会跟着消失。",
     "weighing": "正在估算大小…",
     "export": "导出",
@@ -519,12 +515,12 @@
     "genPreviewVideo": "正在生成预览（1 帧）…",
     "genPreviewImage": "正在超分预览…",
     "upscaling": "超分辨率处理中…",
-    "upscalingPct": "正在放大… {{pct}}%",
-    "upscaled": "媒体已放大",
+    "upscalingPct": "超分辨率处理中… {{pct}}%",
+    "upscaled": "媒体超分辨率完成",
     "preview": "预览",
     "validate": "确定",
     "working": "处理中…",
-    "noModel": "未安装放大模型。"
+    "noModel": "未安装超分辨率模型。"
   },
   "scene": {
     "title": "参考场景",
@@ -546,15 +542,14 @@
     "recent": "最近",
     "resume": "继续上次",
     "currentBoard": "当前画板",
-    "projects": "项目",
     "openProject": "打开项目",
-    "openProjectHint": "打开 .netsu 文件 — 它将成为当前工作文档",
+    "openProjectHint": "打开 .netsu 文件，作为当前工作文档",
     "openProjectFile": "打开项目",
     "openProjectLocation": "打开文件位置",
     "forgetProject": "从列表中移除",
     "deleteProject": "彻底删除",
     "deleteProjectTitle": "删除“{{name}}”？",
-    "deleteProjectWarning": ".netsu 文件及其 .medias 文件夹将被永久删除。外部源媒体不会被删除。",
+    "deleteProjectWarning": ".netsu 文件及其 .medias 文件夹将被永久删除。外部素材不受影响。",
     "projectMissing": "找不到文件",
     "sharedBoard": "已共享",
     "cardStatus": {
@@ -563,11 +558,11 @@
       "changed": "有改动"
     },
     "invites": {
-      "body": "邀请你加入共享看板",
+      "body": "邀请你加入共享画板",
       "join": "加入",
       "decline": "拒绝",
       "later": "稍后",
-      "failed": "无法加入此看板"
+      "failed": "无法加入此画板"
     }
   },
   "item": {
@@ -579,10 +574,10 @@
     "reloadMedia": "重新下载",
     "downloading": "下载中…",
     "mediaFallback": "媒体",
-    "interactiveActive": "交互中 — 点击别处可移动",
+    "interactiveActive": "交互中，点击别处可移动",
     "interactiveHint": "双击进入交互",
     "relocateAll": "全部重新定位（{{count}}）",
-    "mediaWaiting": "正在等待拥有此媒体的设备",
+    "mediaWaiting": "媒体等待中：请打开存有此媒体的设备",
     "mediaRemoved": "媒体已从项目中移除",
     "retryMedia": "重试"
   },
@@ -625,7 +620,7 @@
     },
     "quality": {
       "label": "画质",
-      "eco": "节省",
+      "eco": "经济",
       "standard": "标准",
       "high": "高"
     },
@@ -634,7 +629,7 @@
       "seconds": "{{count}} 秒"
     },
     "warn": {
-      "heavy": "{{size}}：太大，不便直接发送。多数情况下「片段」就够了。",
+      "heavy": "{{size}}：太大，不便直接发送。多数情况下选“片段”就够了。",
       "long": "有一段视频的范围非常长——请检查它的循环边界。"
     },
     "useDefault": "画板设置",
@@ -642,7 +637,7 @@
     "itemLabel": "分享：{{level}}",
     "settings": {
       "title": "媒体存储",
-      "hint": ".netsu 默认带走的内容。可在检查器中逐个媒体设置。"
+      "hint": ".netsu 默认包含的内容。可在检查器中逐个媒体设置。"
     }
   },
   "board": {
@@ -684,10 +679,10 @@
     "boardImported": "画板已导入",
     "projectSaved": "已保存“{{name}}”",
     "projectOpened": "已打开“{{name}}”",
-    "projectOpenedLegacy": "已打开“{{name}}”（旧格式：另存为项目后即可编辑）",
+    "projectOpenedLegacy": "已打开“{{name}}”（旧格式：用“另存为”把它存成项目）",
     "openFailedWith": "无法打开：{{error}}",
-    "dropProjectFailed": "无法打开「{{name}}」，请使用「打开项目」。",
-    "noProjectFile": "此看板未关联任何文件",
+    "dropProjectFailed": "无法打开“{{name}}”，请使用“打开项目”。",
+    "noProjectFile": "此画板未关联任何文件",
     "relocating": "正在文件夹中查找媒体…（{{count}}）",
     "relocatedNone": "此文件夹中未识别到媒体",
     "contentOpacity": "内容不透明度：{{percent}}%",
@@ -727,14 +722,11 @@
     "copyFailed": "复制失败",
     "empty": "没有颜色",
     "working": "正在提取颜色…",
-    "done": "已提取 {{count}} 种颜色",
-    "doneSkipped": "已提取 {{count}} 种颜色 · 跳过 {{skipped}} 个媒体",
     "failed": "没有可用的颜色",
-    "failedCore": "无法读取文件 — 请重启窗口",
+    "failedCore": "无法读取文件，请重启窗口",
     "noSource": "所选中没有可用的媒体",
-    "sourcesGone": "原始媒体已不在板上",
+    "sourcesGone": "原始媒体已不在画板上",
     "regenerate": "重新生成",
-    "size": "颜色数量",
     "showHex": "显示色值",
     "formatHint": "以 {{format}} 复制",
     "layoutRow": "横排",
@@ -749,17 +741,15 @@
       "brightness": "明度",
       "tones": "色调",
       "fromSelection": "取自所选",
-      "fromBoard": "取自整个面板",
-      "noSelection": "请在面板上选择图片",
-      "noMedia": "面板上没有图片",
+      "fromBoard": "取自整个画板",
+      "noSelection": "请在画板上选择图片",
+      "noMedia": "画板上没有图片",
       "reset": "重置",
       "pick": "拾色器",
       "notation": "表示法",
       "value": "颜色值",
-      "place": "放到面板",
+      "place": "放到画板",
       "apply": "应用",
-      "placed": "已放置 {{count}} 色调色板",
-      "applied": "调色板已更新（{{count}} 色）",
       "addSwatch": "添加颜色",
       "removeSwatch": "移除颜色",
       "lock": "锁定颜色",
@@ -776,39 +766,48 @@
         "compound": "复合",
         "shades": "明暗渐变",
         "monochromatic": "单色"
-      }
-    }
+      },
+      "applied_one": "调色板已更新（{{count}} 色）",
+      "applied_other": "调色板已更新（{{count}} 色）",
+      "placed_one": "已放置 {{count}} 色调色板",
+      "placed_other": "已放置 {{count}} 色调色板"
+    },
+    "doneSkipped_one": "已提取 {{count}} 种颜色 · 跳过 {{skipped}} 个媒体",
+    "doneSkipped_other": "已提取 {{count}} 种颜色 · 跳过 {{skipped}} 个媒体",
+    "done_one": "已提取 {{count}} 种颜色",
+    "done_other": "已提取 {{count}} 种颜色"
   },
   "exportImage": {
     "menu": "导出为图片…",
-    "title": "导出板面",
-    "subtitle": "将板面渲染为图片或 SVG。",
+    "title": "导出画板",
+    "subtitle": "将画板渲染为图片或 SVG。",
     "width": "宽度",
     "height": "高度",
     "selectionOnly": "仅所选（{{count}}）",
     "transparent": "透明背景",
     "export": "导出",
-    "done": "板面已导出",
+    "done": "画板已导出",
     "failed": "导出失败：{{error}}",
-    "hint": "渲染按板面内容来：视频导出当前帧，在线播放器导出为卡片。",
+    "hint": "按画板当前内容渲染：视频导出当前帧，在线播放器导出为卡片。",
     "noBridge": "在应用之外无法写入磁盘"
   },
   "ingest": {
     "folderUnavailable": "文件夹导入不可用",
     "folderScanning": "正在读取文件夹…",
     "folderEmpty": "该文件夹中没有媒体",
-    "folderDone": "已导入 {{count}} 个媒体",
-    "folderDoneTruncated": "已导入 {{count}} 个媒体（文件夹被截断）",
     "progress": "正在导入 {{done}}/{{total}}…",
-    "reading": "正在读取 {{count}} 个文件…",
-    "done": "已导入 {{count}} 个媒体",
     "folderTruncated": "文件夹过大：已导入前 {{count}} 个媒体",
     "importing": "正在导入 {{name}}…",
     "fetching": "正在获取媒体…",
     "linkDone": "已导入媒体",
     "fetchingFrom": "正在从 {{source}} 获取…",
     "copyFailed": "无法复制“{{name}}”：关闭应用后该媒体将丢失",
-    "copyFailedBatch": "{{count}} 个媒体复制失败（包括“{{name}}”）：关闭应用后这些媒体将丢失"
+    "done_one": "已导入 {{count}} 个媒体",
+    "done_other": "已导入 {{count}} 个媒体",
+    "copyFailedBatch_one": "{{count}} 个媒体复制失败（包括“{{name}}”）：关闭应用后这些媒体将丢失",
+    "copyFailedBatch_other": "{{count}} 个媒体复制失败（包括“{{name}}”）：关闭应用后这些媒体将丢失",
+    "reading_one": "正在读取 {{count}} 个文件…",
+    "reading_other": "正在读取 {{count}} 个文件…"
   },
   "mouseThrough": {
     "on": "鼠标穿透",

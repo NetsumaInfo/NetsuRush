@@ -65,7 +65,7 @@ export function ThresholdHelpDialog() {
           <DialogContent className="w-[680px] max-w-[calc(100%-2rem)] gap-4 p-6">
             <DialogTitle className="text-base">{t("thresholdHelp.dialogTitle")}</DialogTitle>
             <DialogDescription>
-              {t("thresholdHelp.description")}{stats.real ? "" : t("thresholdHelp.descriptionExampleSuffix")}.
+              {stats.real ? t("thresholdHelp.description") : t("thresholdHelp.descriptionExample")}
             </DialogDescription>
 
             <ThresholdPreview params={p} peaks={voicePeaks} duration={voiceDuration} className="h-32" showThreshold />

@@ -13,8 +13,6 @@
     "close": "Fermer",
     "cancel": "Annuler",
     "confirm": "Valider",
-    "yes": "Oui",
-    "no": "Non",
     "unknown": "inconnu"
   },
   "home": {
@@ -22,7 +20,6 @@
     "tagline": "Écrire, illustrer, monter — comme on écrit.",
     "settings": "Paramètres",
     "settingsHint": "Paramètres généraux (défauts — surchargeables par script)",
-    "loading": "Ouverture des scripts…",
     "empty": "Aucun script pour l'instant.",
     "createFirst": "Créer le premier",
     "emptyHint": "Un paragraphe = une coupe. Écris, attache tes plans, envoie le tout à la timeline.",
@@ -110,12 +107,10 @@
     "hoursAgo_other": "il y a {{count}} h",
     "importFailed": "Échec de l'import.",
     "title": "Enregistrements",
-    "importMediaPool": "Importer dans le Media Pool (bin Audios)",
     "folder": "Dossier : {{dir}}",
     "chooseFolder": "Choisir le dossier des enregistrements",
     "chooseFolderEllipsis": "Choisir le dossier des enregistrements…",
     "empty": "Aucun audio dans ce dossier. Enregistre ta voix off dedans : elle apparaît ici.",
-    "attachHint": "Clic = attacher au paragraphe sélectionné · ou glisser sur un paragraphe",
     "attach": "Attacher au paragraphe",
     "importMediaPoolShort": "Importer dans le Media Pool",
     "openFile": "Ouvrir le fichier",
@@ -132,8 +127,8 @@
     "goTo": "Aller à",
     "uncheckExport": "Décocher l'export",
     "checkExport": "Cocher l'export",
-    "sectionsSelected_one": "{{count}} section cochée → « Import Timeline » ne montera que celle-ci.",
-    "sectionsSelected_other": "{{count}} sections cochées → « Import Timeline » ne montera que celles-ci.",
+    "sectionsSelected_one": "{{count}} section cochée : « Vers la timeline » ne montera que celle-ci.",
+    "sectionsSelected_other": "{{count}} sections cochées : « Vers la timeline » ne montera que celles-ci.",
     "tags": "Tags",
     "tagsEmpty": "Ajoute un tag à un bloc (#).",
     "removeFavorite": "Retirer des favoris",
@@ -166,14 +161,9 @@
     "all": "Tous",
     "speechPrompt": "Tape des mots prononcés dans un rush transcrit.",
     "noPassage": "Aucun passage trouvé.",
-    "otherSounds": "Autres sons",
     "loadingMediaPool": "Lecture du Media Pool…",
     "empty": "Aucun rush. Glisse des fichiers depuis l'explorateur, ou ouvre Resolve Studio avec un projet.",
     "addFilesEllipsis": "Ajouter des fichiers…",
-    "emptyTipBefore": "Ensuite : glisse un plan sur une",
-    "textSelection": "sélection de texte",
-    "emptyTipAfter": "pour le lier au passage, ou sur un paragraphe pour l'attacher. Double-clic sur un plan du rail = régler in/out.",
-    "noOtherSound": "Aucun autre son.",
     "noFile": "Aucun fichier.",
     "playPreview": "Lire l'aperçu",
     "stopPreview": "Arrêter l'aperçu"
@@ -191,8 +181,6 @@
     "linkColorsHint": "Décochée : le script redevient neutre (le rail garde ses couleurs)",
     "visible": "Visibles",
     "hidden": "Masquées",
-    "showGaps": "Signaler les trous",
-    "showGapsHint": "Tiret en marge des paragraphes sans plan (« à illustrer »)",
     "colorAssignment": "Attribution des couleurs",
     "colorAssignmentHint": "Auto : chaque plan reçoit la sienne · Étiquettes : couleur unique, re-teintée à la main (ex. bleu = interview)",
     "auto": "Auto",
@@ -244,8 +232,6 @@
     },
     "rightPanel": "Plan / Tags / À faire (Ctrl+])",
     "buildTimeline": "Construire la timeline",
-    "adobeSequence": " — séquence {{host}}",
-    "resolveNative": " (frame-accurate, natif Resolve)",
     "partialScope": "Périmètre : sections cochées dans l'onglet Plan.",
     "newTimeline": "Nouvelle timeline",
     "currentTimeline": "Timeline actuelle",
@@ -261,8 +247,10 @@
       "footages": "Panneau Footages",
       "outline": "Panneau Plan/Tags"
     },
-    "buildSummary_one": "{{count}} plan monté dans l'ordre du script{{host}}.",
-    "buildSummary_other": "{{count}} plans montés dans l'ordre du script{{host}}."
+    "buildSummaryResolve_one": "{{count}} plan monté dans l'ordre du script, à l'image près (Resolve).",
+    "buildSummaryResolve_other": "{{count}} plans montés dans l'ordre du script, à l'image près (Resolve).",
+    "buildSummaryAdobe_one": "{{count}} plan monté dans l'ordre du script, en séquence {{host}}.",
+    "buildSummaryAdobe_other": "{{count}} plans montés dans l'ordre du script, en séquence {{host}}."
   },
   "export": {
     "comment": "Commentaire",
@@ -331,9 +319,6 @@
   },
   "storyboard": {
     "title": "Storyboard",
-    "alt": "Storyboard",
-    "pen": "Stylo",
-    "eraser": "Gomme",
     "color": "Couleur {{color}}",
     "clear": "Effacer le dessin",
     "clickToDraw": "Storyboard — cliquer pour dessiner",
@@ -346,10 +331,6 @@
   "audioFolder": {
     "title": "Dossier audio",
     "importFailed": "Échec de l'import.",
-    "importMediaPool": "Importer dans le Media Pool (bin Audios)",
-    "folder": "Dossier audio : {{dir}}",
-    "chooseFolder": "Choisir le dossier audio",
-    "chooseFolderEllipsis": "Choisir un dossier audio…",
     "empty": "Aucun fichier audio dans ce dossier.",
     "attach": "Attacher à la ligne",
     "importMediaPoolShort": "Importer dans le Media Pool",
@@ -362,8 +343,7 @@
     "title": "Source audio",
     "mediaPool": "Media Pool",
     "folder": "Dossier",
-    "recordings": "Enregistrements",
-    "mediaPoolAudio": "Audios du Media Pool"
+    "recordings": "Enregistrements"
   },
   "mentions": {
     "searchMedia": "Pages et médias",
@@ -374,13 +354,8 @@
   },
   "mediaPanel": {
     "importFailed": "Import impossible.",
-    "dropFailed": "Le chemin des fichiers déposés n'a pas pu être récupéré. Utilise le bouton Ajouter des fichiers.",
     "resize": "Redimensionner le panneau des médias",
-    "destination": "Destination",
-    "destinationMediaPool": "Media Pool",
-    "destinationMediaPoolHint": "Importer automatiquement chaque nouvel enregistrement dans le Media Pool",
-    "destinationFolder": "Dossier prédéfini",
-    "destinationFolderHint": "Conserver les enregistrements dans le dossier prédéfini"
+    "destination": "Destination"
   },
   "slash": {
     "text": {

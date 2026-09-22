@@ -22,6 +22,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { nr } from "@/lib/bridge";
 import type { BoostProc } from "@/lib/bridge";
 import { fmtBytes } from "../optimizeShared";
+import { errorText } from "@/lib/errorText";
 
 export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
   const { t } = useTranslation(["optimize", "common"]);
@@ -42,7 +43,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
       setTotal(r.total || 0);
       if (!r.ok) setError(r.error || t("notice.failed"));
     } catch (e) {
-      setError(String(e));
+      setError(errorText(e));
     } finally {
       setScanning(false);
     }
@@ -59,7 +60,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
       const r = await nr.optimizeKillProcess(target.pid);
       setNotice(r.ok ? t("boost.procs.killed", { name: target.name }) : r.error || t("notice.failed"));
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setKilling(false);
       setTarget(null);

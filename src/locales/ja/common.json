@@ -17,7 +17,7 @@
     "apply": "適用",
     "open": "開く",
     "retry": "再試行",
-    "import": "インポート",
+    "import": "読み込み",
     "decrease": "減らす",
     "increase": "増やす",
     "loading": "読み込み中…"
@@ -36,7 +36,7 @@
   },
   "player": {
     "scenePreview": "ショットのプレビュー",
-    "progress": "進行バー",
+    "progress": "プログレスバー",
     "play": "再生",
     "pause": "一時停止",
     "prevFrame": "前のフレーム",
@@ -57,8 +57,8 @@
     "visual": "動画と画像"
   },
   "window": {
-    "reference": "リファレンス",
-    "notebook": "ノート"
+    "reference": "NetsuRush — リファレンス",
+    "notebook": "NetsuRush — ノートブック"
   },
   "mock": {
     "resolveUnavailable": "Resolve はブラウザーでは利用できません。",
@@ -67,14 +67,14 @@
     "pageNotFound": "ページが見つかりません",
     "collectionNotFound": "コレクションが見つかりません",
     "archiveUnavailable": "アプリ外ではアーカイブできません。",
-    "folderImportUnavailable": "アプリ外ではフォルダーをインポートできません。",
+    "folderImportUnavailable": "アプリ外ではフォルダーを読み込めません。",
     "emptyFolderName": "フォルダー名が空です",
-    "invalidFolderName": "フォルダー名に '/' または '\\\\' は使用できません",
+    "invalidFolderName": "フォルダー名に「/」や「\\」は使用できません",
     "folder": "フォルダー"
   },
   "spell": {
     "title": "スペルチェック",
-    "unknownWord": "未知の単語",
+    "unknownWord": "辞書にない単語",
     "searching": "候補を検索中…",
     "noSuggestion": "候補なし",
     "addToDictionary": "辞書に追加",
@@ -91,7 +91,7 @@
       },
       "chat": {
         "title": "まだ使えません",
-        "body": "NetsuPilot は開発中で、今のところ役に立つ機能はありません。進み具合は Discord でお知らせします。"
+        "body": "NetsuPilot は開発中で、今のところ役に立つ機能はありません。進み具合は Discord で確認できます。"
       },
       "voice": {
         "title": "テストがまだ足りません",
@@ -104,15 +104,24 @@
     },
     "discord": "Discord に参加",
     "feedback": "問題を報告",
-    "dismiss": "隠す"
+    "dismiss": "非表示"
   },
   "report": {
     "action": "エラーを報告",
-    "sent": "送信しました。ありがとう！",
-    "saved": "送信に失敗。メッセージを保存しました。"
+    "sent": "送信しました。ありがとうございます！",
+    "saved": "送信できませんでした。メッセージを保存しました。"
   },
   "host": {
     "offlineResolve": "素材のあるプロジェクトを Resolve で開いて再読み込みするか、ディスクから動画を読み込んでください。",
     "offlineAdobe": "{{app}} を開いて NetsuRush パネル（ウィンドウ ▸ エクステンション）を表示するか、ディスクから動画を読み込んでください。"
+  },
+  "error": {
+    "coreUnreachable": "NetsuRush のサービスが応答しません。もう一度試して、続く場合はアプリを再起動してください。",
+    "diskFull": "ディスクがいっぱいです。空き容量を作ってから、もう一度試してください。",
+    "notFound": "ファイルが見つかりません。移動または削除された可能性があります。",
+    "permission": "アクセスが拒否されました。ファイルが読み取り専用か、別のアプリで開かれている可能性があります。",
+    "busy": "別のアプリがファイルを使用しています。そのアプリを閉じてから、もう一度試してください。",
+    "timeout": "時間内に応答がありませんでした。もう一度試してください。",
+    "internal": "NetsuRush の内部エラーです。詳細は 設定 › システム › コンソール にあります。"
   }
 }

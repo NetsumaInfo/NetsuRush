@@ -1,12 +1,12 @@
 {
   "header": {
     "title": "After Effects へ書き出し",
-    "subtitle": "生成したスクリプトで、タイムラインを After Effects のコンポに忠実に再現します（位置・トラック・フレーム単位）。"
+    "subtitle": "タイムラインを After Effects のコンポジションに忠実に再現します。位置、トラック、カットをフレーム単位で合わせます。"
   },
   "result": {
     "scriptPrefix": "スクリプト：{{name}}",
     "imported": "After Effects に読み込みました（プロジェクトパネルを確認）。",
-    "launching": "After Effects を起動中 — 起動後に自動で読み込みます（プロジェクトを開いた状態が必要）。",
+    "launching": "After Effects を起動しています。起動後に自動で読み込みます（プロジェクトを開いておく必要があります）。",
     "clipsDone_one": "{{count}} ショット →「{{comp}}」コンポ。",
     "clipsDone_other": "{{count}} ショット →「{{comp}}」コンポ。",
     "missing_one": "ファイルのない {{count}} ショットをスキップしました。",
@@ -69,7 +69,7 @@
       "hint": "ソースファイルのまま、カットは AE 側 — 変換なし。"
     },
     "remux": {
-      "label": "リマックス",
+      "label": "Remux",
       "hint": "ロスレスの .mov コンテナ（-c copy）、カットは AE 側。"
     },
     "reencode": {
@@ -79,7 +79,7 @@
   },
   "audioModes": {
     "copy": "コピー",
-    "remux": "リマックス",
+    "remux": "Remux",
     "aac": "AAC",
     "pcm": "PCM",
     "none": "なし"
@@ -103,9 +103,9 @@
   },
   "outDirReasons": {
     "reencode": "再エンコードしたショット",
-    "remux": "リマックスしたショット",
+    "remux": "Remux したショット",
     "bake": "焼き込んだ速度",
-    "nestedRender": "Resolve がレンダリングする入れ子タイムライン",
-    "audio": "書き出したオーディオトラック"
+    "nestedRender": "Resolve がレンダリングするネストされたタイムライン",
+    "audio": "抽出したオーディオトラック"
   }
 }

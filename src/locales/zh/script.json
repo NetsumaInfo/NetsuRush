@@ -13,15 +13,12 @@
     "close": "关闭",
     "cancel": "取消",
     "confirm": "确认",
-    "yes": "是",
-    "no": "否",
     "unknown": "未知"
   },
   "home": {
     "project": "项目",
     "settings": "设置",
     "settingsHint": "通用设置（默认值，每个脚本都可覆盖）",
-    "loading": "正在打开脚本…",
     "createFirst": "创建第一个",
     "tagline": "像写作一样：书写、配图、剪辑。",
     "empty": "还没有脚本。",
@@ -93,7 +90,7 @@
     "insertTextHint": "将入点/出点范围内的词添加到区块",
     "playSelection": "播放选区",
     "waveLoading": "正在分析音频…",
-    "waveUnavailable": "该素材没有波形 — 请在播放器中设置范围。",
+    "waveUnavailable": "该素材没有波形，请在播放器中设置范围。",
     "markIn": "在播放头设入点（I）",
     "markOut": "在播放头设出点（O）",
     "rangePresets": "预设范围",
@@ -110,12 +107,10 @@
     "hoursAgo_other": "{{count}} 小时前",
     "importFailed": "导入失败。",
     "title": "录音",
-    "importMediaPool": "导入 Media Pool（Audios 文件夹）",
     "folder": "文件夹：{{dir}}",
     "chooseFolder": "选择录音文件夹",
     "chooseFolderEllipsis": "选择录音文件夹…",
     "empty": "此文件夹中没有音频。在这里录制旁白后，它会自动显示。",
-    "attachHint": "点击附加到所选段落 · 或拖到段落上",
     "attach": "附加到段落",
     "importMediaPoolShort": "导入 Media Pool",
     "openFile": "打开文件",
@@ -132,8 +127,8 @@
     "goTo": "跳转到",
     "uncheckExport": "从导出中排除",
     "checkExport": "加入导出",
-    "sectionsSelected_one": "已选 {{count}} 个章节 → Import Timeline 只剪辑该章节。",
-    "sectionsSelected_other": "已选 {{count}} 个章节 → Import Timeline 只剪辑这些章节。",
+    "sectionsSelected_one": "已选 {{count}} 个章节：“发送到时间线”只剪辑所选章节。",
+    "sectionsSelected_other": "已选 {{count}} 个章节：“发送到时间线”只剪辑所选章节。",
     "tags": "标签",
     "tagsEmpty": "为区块添加标签（#）。",
     "removeFavorite": "取消收藏",
@@ -166,14 +161,9 @@
     "all": "全部",
     "speechPrompt": "输入已转录素材中说出的词。",
     "noPassage": "未找到匹配片段。",
-    "otherSounds": "其他音频",
     "loadingMediaPool": "正在读取 Media Pool…",
     "empty": "没有素材。请从资源管理器拖入文件，或在 Resolve Studio 中打开项目。",
     "addFilesEllipsis": "添加文件…",
-    "emptyTipBefore": "然后将镜头拖到",
-    "textSelection": "所选文本",
-    "emptyTipAfter": "上以关联该段，或拖到段落上进行附加。双击侧栏中的镜头可调整入点/出点。",
-    "noOtherSound": "没有其他音频。",
     "noFile": "没有文件。",
     "playPreview": "播放预览",
     "stopPreview": "停止预览"
@@ -191,15 +181,13 @@
     "linkColorsHint": "关闭后脚本恢复中性色（侧栏保留颜色）",
     "visible": "显示",
     "hidden": "隐藏",
-    "showGaps": "标出空缺",
-    "showGapsHint": "在边栏标出没有镜头的段落（“待配画面”）",
     "colorAssignment": "颜色分配",
-    "colorAssignmentHint": "自动：每个镜头单独配色 · 标签：使用单一颜色并手动修改",
+    "colorAssignmentHint": "自动：每个镜头单独配色 · 色标：统一颜色，可手动改色（如蓝色 = 采访）",
     "auto": "自动",
-    "labels": "标签",
+    "labels": "色标",
     "defaultColor": "默认颜色",
     "multiHeadings": "多级标题",
-    "multiHeadingsHint": "关闭后 #、## 和 ### 都生成同一级标题",
+    "multiHeadingsHint": "关闭后 #、## 和 ### 都生成同一级标题（脚本不需要三级标题）",
     "single": "单级",
     "spellcheck": "拼写检查",
     "spellcheckHint": "为拼写错误加下划线（法语）",
@@ -244,8 +232,6 @@
     },
     "rightPanel": "目录 / 标签 / 待办（Ctrl+]）",
     "buildTimeline": "创建时间线",
-    "adobeSequence": " — {{host}} 序列",
-    "resolveNative": "（逐帧精确，Resolve 原生）",
     "partialScope": "范围：目录中勾选的章节。",
     "newTimeline": "新建时间线",
     "currentTimeline": "当前时间线",
@@ -261,8 +247,10 @@
       "footages": "素材面板",
       "outline": "目录/标签面板"
     },
-    "buildSummary_one": "按脚本顺序剪辑 {{count}} 个镜头{{host}}。",
-    "buildSummary_other": "按脚本顺序剪辑 {{count}} 个镜头{{host}}。"
+    "buildSummaryResolve_one": "已按脚本顺序剪辑 {{count}} 个镜头，逐帧精确（Resolve）。",
+    "buildSummaryResolve_other": "已按脚本顺序剪辑 {{count}} 个镜头，逐帧精确（Resolve）。",
+    "buildSummaryAdobe_one": "已按脚本顺序将 {{count}} 个镜头剪辑为 {{host}} 序列。",
+    "buildSummaryAdobe_other": "已按脚本顺序将 {{count}} 个镜头剪辑为 {{host}} 序列。"
   },
   "export": {
     "comment": "评论",
@@ -270,19 +258,19 @@
     "failed": "失败。",
     "created": "已创建",
     "updated": "已更新",
-    "mixedFps": "⚠ 帧率混用。",
+    "mixedFps": "⚠ 帧率不一致。",
     "shotProgress": "镜头 {{current}}/{{total}}…",
     "shotFailed": "镜头 {{current}}/{{total}}：{{error}}。",
     "failure": "失败",
     "markersResolveOnly": "⚠ 评论标记仅支持 Resolve。",
-    "resolveDone_one": "时间线“{{timeline}}”{{action}} — {{count}} 个镜头。",
-    "resolveDone_other": "时间线“{{timeline}}”{{action}} — {{count}} 个镜头。",
+    "resolveDone_one": "时间线“{{timeline}}”{{action}}，共 {{count}} 个镜头。",
+    "resolveDone_other": "时间线“{{timeline}}”{{action}}，共 {{count}} 个镜头。",
     "markersAdded_one": "{{count}} 个标记。",
     "markersAdded_other": "{{count}} 个标记。",
     "missingSources_one": "⚠ 找不到 {{count}} 个源文件。",
     "missingSources_other": "⚠ 找不到 {{count}} 个源文件。",
-    "adobeDone_one": "序列“{{timeline}}”（{{host}}）— {{count}} 个镜头。",
-    "adobeDone_other": "序列“{{timeline}}”（{{host}}）— {{count}} 个镜头。"
+    "adobeDone_one": "序列“{{timeline}}”（{{host}}），共 {{count}} 个镜头。",
+    "adobeDone_other": "序列“{{timeline}}”（{{host}}），共 {{count}} 个镜头。"
   },
   "editor": {
     "headingPlaceholder": "章节标题",
@@ -331,9 +319,6 @@
   },
   "storyboard": {
     "title": "故事板",
-    "alt": "故事板",
-    "pen": "画笔",
-    "eraser": "橡皮擦",
     "color": "颜色 {{color}}",
     "clear": "清除绘图",
     "clickToDraw": "故事板 — 点击绘制",
@@ -346,10 +331,6 @@
   "audioFolder": {
     "title": "音频文件夹",
     "importFailed": "导入失败。",
-    "importMediaPool": "导入 Media Pool（Audios）",
-    "folder": "音频文件夹：{{dir}}",
-    "chooseFolder": "选择音频文件夹",
-    "chooseFolderEllipsis": "选择音频文件夹…",
     "empty": "此文件夹中没有音频文件。",
     "attach": "附加到当前行",
     "importMediaPoolShort": "导入 Media Pool",
@@ -362,8 +343,7 @@
     "title": "音频来源",
     "mediaPool": "Media Pool",
     "folder": "文件夹",
-    "recordings": "录音",
-    "mediaPoolAudio": "Media Pool 音频"
+    "recordings": "录音"
   },
   "mentions": {
     "searchMedia": "页面和媒体",
@@ -374,48 +354,43 @@
   },
   "mediaPanel": {
     "importFailed": "导入失败。",
-    "dropFailed": "无法获取拖放文件的路径。请使用添加文件按钮。",
     "resize": "调整媒体面板大小",
-    "destination": "目标位置",
-    "destinationMediaPool": "Media Pool",
-    "destinationMediaPoolHint": "自动将每个新录音导入 Media Pool",
-    "destinationFolder": "预设文件夹",
-    "destinationFolderHint": "将录音保留在预设文件夹中"
+    "destination": "目标位置"
   },
   "slash": {
     "text": {
       "label": "段落",
-      "hint": "文本 = 一次剪切",
+      "hint": "一段文本 = 一个镜头",
       "keywords": "段落|文本|p"
     },
     "heading": {
       "label": "标题",
-      "hint": "章节 (# )",
+      "hint": "章节（# ）",
       "keywords": "标题|章节|h"
     },
     "heading1": {
       "label": "标题 1",
-      "hint": "大章节 (# )",
+      "hint": "大章节（# ）",
       "keywords": "标题|章节|h1"
     },
     "heading2": {
       "label": "标题 2",
-      "hint": "章节 (## )",
+      "hint": "章节（## ）",
       "keywords": "标题|章节|h2"
     },
     "heading3": {
       "label": "标题 3",
-      "hint": "子章节 (### )",
+      "hint": "子章节（### ）",
       "keywords": "标题|章节|h3"
     },
     "bullet": {
       "label": "项目符号列表",
-      "hint": "简单列表 (- )",
+      "hint": "简单列表（- ）",
       "keywords": "列表|项目符号|ul"
     },
     "numbered": {
       "label": "编号列表",
-      "hint": "有序步骤 (1. )",
+      "hint": "有序步骤（1. ）",
       "keywords": "列表|编号|ol|1"
     },
     "note": {

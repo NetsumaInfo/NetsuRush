@@ -1,36 +1,24 @@
 {
-  "taskHint": {
-    "search": "Visuelle Suche und Vergleich von Einstellungen.",
-    "faces": "Gesichtserkennung und -gruppierung.",
-    "voice": "Automatische Transkription von Sprache.",
-    "upscale": "Hochskalieren von Bildern und Videos.",
-    "restore": "Bildwiederherstellung und -bereinigung.",
-    "interpolate": "Erzeugung von Zwischenbildern für flüssigere Videos.",
-    "depth": "Erzeugung von Tiefenkarten.",
-    "matte-image": "Freistellen und Entfernen des Bildhintergrunds.",
-    "matte-video": "Freistellen und Verfolgen von Motiven im Video.",
-    "object-removal": "Entfernen von Objekten aus Videos."
-  },
   "title": "Modelle",
-  "subtitle": "Nichts wird automatisch geladen. Hol dir, was du brauchst, lösch es jederzeit wieder.",
-  "disk": "Speicher:",
-  "noneInstalled": "Kein Modell installiert — installier eins, sonst läuft diese Funktion nicht.",
+  "subtitle": "Nichts wird automatisch heruntergeladen. Hol dir, was du brauchst, und lösch es jederzeit wieder.",
+  "disk": "Speicherplatz:",
+  "noneInstalled": "Kein Modell installiert – installier eins, sonst läuft diese Funktion nicht.",
   "badge": {
     "default": "Standard",
     "heavy": "schwer",
     "exclusive": "exklusiv",
-    "exclusiveTip": "SAMURAI und SAM2Long ersetzen die SAM-2-Engine jeweils durch ihre eigene: nur eines kann gleichzeitig installiert sein. Das zweite zu installieren fragt zuerst nach und entfernt dann das erste; beim Löschen kehrt die ursprüngliche Engine zurück."
+    "exclusiveTip": "SAMURAI und SAM2Long ersetzen die SAM-2-Engine jeweils durch ihre eigene: Nur eines kann gleichzeitig installiert sein. Beim Installieren des zweiten wird zuerst nachgefragt und dann das erste entfernt; beim Löschen kehrt die ursprüngliche Engine zurück."
   },
   "conflict": {
     "title": "Nur eines von beiden",
-    "body": "{{model}} ersetzt die Engine von {{other}}, das bereits installiert ist: beide können nicht nebeneinander bestehen. {{model}} zu installieren entfernt {{other}}.",
+    "body": "{{model}} ersetzt die Engine von {{other}}, das bereits installiert ist: Beide können nicht gleichzeitig installiert sein. Beim Installieren von {{model}} wird {{other}} entfernt.",
     "replace": "Installieren und das andere entfernen"
   },
   "sort": {
     "default": "Standard",
     "defaultTip": "Reihenfolge im Katalog: Empfehlung zuerst.",
     "size": "Größe",
-    "sizeTip": "Nach Größe auf der Platte.",
+    "sizeTip": "Nach Größe auf der Festplatte.",
     "vram": "VRAM",
     "vramTip": "Nach benötigtem VRAM.",
     "name": "Name",
@@ -38,7 +26,7 @@
     "asc": "Aufsteigend",
     "desc": "Absteigend"
   },
-  "vramShort": "Braucht {{need}} GB VRAM, deine Karte hat {{have}} ({{gpu}}) — passt nicht. Laden geht trotzdem.",
+  "vramShort": "Braucht {{need}} GB VRAM, deine Karte hat {{have}} ({{gpu}}) – passt nicht. Herunterladen geht trotzdem.",
   "stage": {
     "download": "Download",
     "verify": "Prüfung",
@@ -46,17 +34,17 @@
   },
   "status": {
     "bundled": "Mitgeliefert",
-    "bundledTip": "Teil der Laufzeit (nicht löschbar).",
+    "bundledTip": "In der Laufzeitumgebung enthalten (nicht löschbar).",
     "installed": "Installiert",
-    "removing": "Deinstallation…",
-    "removeTip": "Von der Platte löschen",
+    "removing": "Wird deinstalliert…",
+    "removeTip": "Von der Festplatte löschen",
     "auto": "Auto",
-    "autoTip": "Wird beim ersten Einsatz von der Bibliothek geholt — nichts zu laden."
+    "autoTip": "Wird beim ersten Einsatz von der Bibliothek geholt – nichts herunterzuladen."
   },
   "action": {
     "resume": "Fortsetzen",
-    "resumeTip": "Download unvollständig — holt fehlende Gewichte und Code nach.",
-    "download": "Laden",
+    "resumeTip": "Download unvollständig – holt fehlende Gewichte und Code nach.",
+    "download": "Herunterladen",
     "cancelDownload": "Download abbrechen"
   },
   "search": {
@@ -65,7 +53,7 @@
     "use": "Verwenden",
     "useTip": "Diese Variante als Suchmodell festlegen",
     "switchTitle": "Suchmodell wechseln",
-    "switchEmpty": "{{model}} hat noch nichts indexiert: die Suche bleibt leer, bis vollständig neu indexiert wurde. Der Index der aktuellen Variante bleibt unverändert auf der Festplatte.",
+    "switchEmpty": "{{model}} hat noch nichts indexiert: Die Suche bleibt leer, bis vollständig neu indexiert wurde. Der Index der aktuellen Variante bleibt unverändert auf der Festplatte.",
     "switchPartial": "Mit {{model}} bereits indexierte Clips: {{clips}}. Der Rest muss neu indexiert werden; der Index der aktuellen Variante bleibt auf der Festplatte.",
     "switchConfirm": "Diese Variante verwenden"
   },
@@ -74,7 +62,7 @@
     "tip": "Zeigt den gesamten Katalog: Varianten, frühere Generationen und experimentelle Engines. Standardmäßig wird nur die aktuelle Auswahl je Aufgabe angezeigt."
   },
   "task": {
-    "detect": "Einstellungserkennung",
+    "detect": "Shot-Erkennung",
     "search": "Visuelle Suche",
     "face": "Gesichtersuche",
     "voice-asr": "Stimme – Transkription",
@@ -91,7 +79,7 @@
   "vram": "{{size}} VRAM",
   "catalogHint": {
     "siglip2-base": "Das leichteste.",
-    "siglip2-so400m": "Mehrsprachig, der beste Kompromiss.",
+    "siglip2-so400m": "Mehrsprachig, ein guter Kompromiss.",
     "siglip2-giant": "Das genaueste und das schwerste.",
     "face-real": "Echte Gesichter: findet sie und erkennt, wer es ist. Nötig für die Gesichtersuche.",
     "face-anime": "Anime-Gesichter: findet sie und erkennt, wer es ist. Wird beim ersten Einsatz heruntergeladen.",
@@ -99,6 +87,6 @@
     "whisper-medium": "Zwischen Tempo und Qualität.",
     "whisper-large-v3": "Die beste Transkription und die langsamste.",
     "nemotron-3.5-asr": "40 Sprachen, automatische Zeichensetzung und Großschreibung. Braucht transcribe-cli, das von Hand installiert wird.",
-    "silero-vad": "Erkennt Sprache, um das Diktat zu starten und zu stoppen. Schnell, läuft auf dem Prozessor."
+    "silero-vad": "Erkennt gesprochene Passagen, um das Diktat zu starten und zu stoppen. Schnell, läuft auf dem Prozessor."
   }
 }

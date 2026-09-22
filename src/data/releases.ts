@@ -15,7 +15,8 @@ export type Release = {
   version: string;
   date: string;
   title: Record<string, string>;
-  changes?: { kind: ChangeKind; fr: string; en: string }[];
+  /** Text per language: `fr` and `en` always, the other interface languages when translated. */
+  changes?: ({ kind: ChangeKind } & Record<string, string>)[];
   highlights?: Record<string, string[]>;
 };
 
@@ -26,10 +27,15 @@ export const CHANGE_KINDS: ChangeKind[] = ["feature", "improvement", "performanc
 
 /** Toutes les lignes d'une version, à plat, dans l'ordre de lecture — quelle que soit sa forme. */
 export function releaseLines(release: Release, language: string): string[] {
-  const lang = language.startsWith("fr") ? "fr" : "en";
   if (release.changes?.length) {
     return CHANGE_KINDS.flatMap((kind) =>
-      release.changes!.filter((change) => change.kind === kind).map((change) => change[lang]));
+      release.changes!.filter((change) => change.kind === kind).map((change) => releaseText(change, language)));
   }
-  return release.highlights?.[lang] ?? [];
+  const lang = language.slice(0, 2);
+  return release.highlights?.[lang] ?? release.highlights?.en ?? [];
+}
+
+/** A release text in the interface language; English when that language has no translation. */
+export function releaseText(text: Record<string, string>, language: string): string {
+  return text[language.slice(0, 2)] ?? text.en ?? text.fr ?? "";
 }

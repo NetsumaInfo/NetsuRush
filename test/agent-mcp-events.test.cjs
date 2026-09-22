@@ -14,6 +14,11 @@ const os = require("node:os");
 
 const { createAgent } = require("../core/agent/index.js");
 
+// createAgent starts Blackmagic's MCP server as a child process when Resolve is installed; an
+// agent left open keeps the test process alive after the last test.
+const agents = [];
+test.after(() => { for (const agent of agents) agent.cancelAll(); });
+
 function harness() {
   const events = [];
   const noop = () => {};
@@ -27,6 +32,7 @@ function harness() {
       guarded: (fn) => fn, rOp: (fn) => fn,
     },
   });
+  agents.push(agent);
   return { agent, events, chat: () => events.filter((e) => e.channel === "chat:event") };
 }
 

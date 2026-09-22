@@ -114,5 +114,14 @@
   "host": {
     "offlineResolve": "Ouvre un projet avec des rushs dans Resolve, puis recharge, ou importe des vidéos du disque.",
     "offlineAdobe": "Ouvre {{app}} puis le panneau NetsuRush (Fenêtre ▸ Extensions), ou importe des vidéos du disque."
+  },
+  "error": {
+    "coreUnreachable": "Le service de NetsuRush ne répond pas. Réessaie ; si ça dure, redémarre l'app.",
+    "diskFull": "Disque plein. Libère de l'espace, puis réessaie.",
+    "notFound": "Fichier introuvable. Il a peut-être été déplacé ou supprimé.",
+    "permission": "Accès refusé. Le fichier est peut-être en lecture seule ou ouvert dans une autre app.",
+    "busy": "Une autre app utilise le fichier. Ferme-la, puis réessaie.",
+    "timeout": "Pas de réponse à temps. Réessaie.",
+    "internal": "Problème interne de NetsuRush. Le détail est dans Paramètres › Système › Console."
   }
 }

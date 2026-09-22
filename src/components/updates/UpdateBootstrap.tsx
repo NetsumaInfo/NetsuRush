@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { releases } from "@/data/releases";
+import { releases, releaseText } from "@/data/releases";
 import { ReleaseNotes } from "./ReleaseNotes";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 // aussi sur les écrans d'installation où ce dialogue n'existe pas.
 export function UpdateBootstrap() {
   const { t, i18n } = useTranslation("settings");
-  const language = i18n.language.startsWith("fr") ? "fr" : "en";
+  const language = i18n.language;
   const latest = useMemo(() => releases[0], []);
   const [open, setOpen] = useState(() => {
     try { return !!latest && localStorage.getItem("nr.release.seen") !== latest.id; } catch { return false; }
@@ -31,7 +31,7 @@ export function UpdateBootstrap() {
       <DialogContent className="max-h-[calc(100vh-3rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("updates.whatsNew", { version: latest.version })}</DialogTitle>
-          <DialogDescription>{latest.title[language]}</DialogDescription>
+          <DialogDescription>{releaseText(latest.title, language)}</DialogDescription>
         </DialogHeader>
         <div className="min-h-0 overflow-y-auto pr-1">
           <ReleaseNotes release={latest} />

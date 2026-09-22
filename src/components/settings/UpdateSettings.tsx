@@ -4,7 +4,7 @@ import { useUpdater } from "@/store/updater";
 import { UpdateStatusLine } from "@/components/updates/UpdateStatusLine";
 import { YtDlpRow } from "@/components/settings/YtDlpRow";
 import { ErrorReportButton } from "@/components/common/ErrorReportButton";
-import { releases } from "@/data/releases";
+import { releases, releaseText } from "@/data/releases";
 import { ReleaseNotes } from "@/components/updates/ReleaseNotes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export function UpdateSettings() {
   const check = useUpdater((state) => state.check);
   const download = useUpdater((state) => state.download);
   const install = useUpdater((state) => state.install);
-  const language = i18n.language.startsWith("fr") ? "fr" : "en";
+  const language = i18n.language;
   const busy = phase === "checking" || phase === "downloading" || phase === "installing";
   // Même pourcentage exact que dans la barre de titre : une décimale, jamais d'arrondi à l'entier.
   const percent = progress == null
@@ -104,7 +104,7 @@ export function UpdateSettings() {
           {releases.map((release) => (
             <Card key={release.id} className="gap-2 p-4">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-medium">{release.title[language]}</p>
+                <p className="text-sm font-medium">{releaseText(release.title, language)}</p>
                 <Badge variant="outline">v{release.version}</Badge>
                 <span className="ml-auto text-xs text-muted-foreground">{release.date}</span>
               </div>

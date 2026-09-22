@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { nr } from "@/lib/bridge";
 import type { FlowBakeProgress } from "@/lib/bridge";
 import { fmtBytes } from "@/lib/utils";
+import { errorText } from "@/lib/errorText";
 
 const POLL_MS = 500;
 
@@ -26,7 +27,7 @@ export function FlowCache({ running }: { running: boolean }) {
       setProgress(next);
       return next;
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
       return null;
     }
   }, [running]);
@@ -47,7 +48,7 @@ export function FlowCache({ running }: { running: boolean }) {
       await work();
       await refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     } finally {
       setBusy(false);
     }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { nr } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { describeError, logCaught, logWarn } from "@/lib/appLog";
+import { errorText } from "@/lib/errorText";
 
 export type DictateState = "idle" | "recording" | "transcribing";
 
@@ -28,7 +29,7 @@ function micErrorText(e: unknown): string {
   if (name === "NotAllowedError" || name === "SecurityError") return i18n.t("dictate:mic.denied");
   if (name === "NotFoundError" || name === "OverconstrainedError") return i18n.t("dictate:mic.missing");
   if (name === "NotReadableError") return i18n.t("dictate:mic.busy");
-  return String(e);
+  return errorText(e);
 }
 
 // Dictée push-to-talk. Capture le micro en PCM brut (WebAudio) et envoie un WAV auto-suffisant au core

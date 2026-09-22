@@ -12,6 +12,7 @@ import type {
 import { readPersistedObject, writePersistedObject } from "@/lib/persistedJson";
 import { aeProducesFiles } from "@/components/ae/aeShared";
 import { canSwap, defaultTarget, hasRichAeOptions, isSupportedPair, loadPair, savePair } from "./transferShared";
+import { errorText } from "@/lib/errorText";
 
 interface HostTimelines {
   entries: { name: string; current: boolean }[];
@@ -65,7 +66,7 @@ async function fetchTimelines(host: TransferHost): Promise<HostTimelines> {
     if (!r.ok) return { entries: [], current: null, error: r.error ?? null };
     return { entries: r.timelines, current: r.current ?? r.timelines.find((t) => t.current)?.name ?? null, error: null };
   } catch (e) {
-    return { entries: [], current: null, error: String(e) };
+    return { entries: [], current: null, error: errorText(e) };
   }
 }
 
@@ -157,7 +158,7 @@ export function useTransfer() {
     setPreviewBusy(true);
     nr.transferRead({ host: from, to, timelineName })
       .then((r) => { if (alive) setPreview(r); })
-      .catch((e) => { if (alive) setPreview({ ok: false, error: String(e) }); })
+      .catch((e) => { if (alive) setPreview({ ok: false, error: errorText(e) }); })
       .finally(() => { if (alive) setPreviewBusy(false); });
     return () => { alive = false; };
   }, [from, to, timelineName]);
@@ -245,7 +246,7 @@ export function useTransfer() {
         ae: advanced && aeOptions ? { ...aeOptions, compName: name.trim() || undefined } : undefined,
       }));
     } catch (e) {
-      setResult({ ok: false, error: String(e) });
+      setResult({ ok: false, error: errorText(e) });
     } finally {
       setBusy(false);
       setProgress(null);

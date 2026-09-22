@@ -34,33 +34,22 @@
     "signOut": "Abmelden"
   },
   "playback": {
-    "title": "Vorschauen und Miniaturen",
+    "title": "Wiedergabe und Miniaturen",
     "subtitle": "Eine Änderung erzeugt die Vorschauen neu. Die alten bleiben auf der Platte, bis du sie löschst.",
     "soundTitle": "Ton",
     "playerVolume": "Player-Lautstärke",
-    "playerVolumeHint": "Gemeinsam für NetsuCut, Sammlungen, Stimme und Upscale.",
+    "playerVolumeHint": "Gilt für NetsuCut, Sammlungen, Stimme und Upscale.",
     "hoverVolume": "Lautstärke beim Überfahren",
     "hoverVolumeHint": "Lautstärke der überfahrenen Miniatur; automatisch abgespielte Vorschauen bleiben stumm.",
     "globalMuted": "Durch die Player-Lautstärke stummgeschaltet.",
     "generation": {
-      "proxyTitle": "Animierte Vorschauen",
+      "proxyTitle": "Video-Vorschauen",
       "thumbnailTitle": "Statische Miniaturen",
       "format": "Format",
-      "formatHint": {
-        "hevc": "Kleine Dateien bei flüssiger HEVC-Decodierung.",
-        "h264": "Sehr kompatibel und meist schnell zu decodieren.",
-        "webp": "Stumme Rastervorschau ohne Audiospur."
-      },
-      "engine": "Engine",
-      "engineAuto": "Automatisch · empfohlen",
-      "engineHint": "Auto wählt die beste tatsächlich verfügbare Engine.",
-      "preset": "Profil",
-      "presetHint": "Echte FFmpeg-Werte der ausgewählten Engine.",
+      "engine": "Grafikkarte oder Prozessor",
+      "engineAuto": "Automatisch wählen",
       "resolution": "Auflösung",
-      "resolutionHint": "480p ist die Standardeinstellung für Karten.",
       "audio": "Audio",
-      "audioHint": "Fügt dem Videoproxy eine leichte AAC-Spur hinzu.",
-      "noWebpAudio": "Animiertes WebP unterstützt keinen Ton.",
       "audioUnavailable": "Die konfigurierte Vorschau enthält kein Audio.",
       "enabled": "Aktiviert",
       "disabled": "Deaktiviert",
@@ -70,15 +59,13 @@
       "qualityStandard": "Ausgewogen",
       "qualityHigh": "Scharf",
       "qualityHint": "Leicht 360 px · Ausgewogen 480 px · Scharf 720 px. Vom leichtesten zum schärfsten wächst eine Miniatur von rund 5 auf 16 kB.",
-      "thumbnailTiming": "Die Miniatur wird weiterhin im Schnellmodus einige Frames nach dem Schnitt erfasst.",
-      "cacheHint": "Vorhandene Caches bleiben nach einer Änderung erhalten.",
-      "cacheCleared": "Alte Caches entfernt.",
+      "cacheCleared": "Alte Caches gelöscht.",
       "reset": "Zurücksetzen",
-      "clearOld": "Alte Caches entfernen"
+      "clearOld": "Alte Caches löschen"
     }
   },
   "performance": {
-    "indexingTitle": "Einstellungsanalyse",
+    "indexingTitle": "Shot-Analyse",
     "accelerationTitle": "Beschleunigung",
     "shotDecode": "Gebündelte Extraktion",
     "shotDecodeHint": "Bis zu 6× schneller, mit denselben Bildern.",
@@ -90,13 +77,13 @@
       "performance": "Leistung"
     },
     "maxPatches": "Analyseauflösung",
-    "maxPatchesHint": "Höher erkennt kleine Details, braucht aber mehr Zeit und Speicher.",
+    "maxPatchesHint": "Höhere Werte erkennen kleine Details, brauchen aber mehr Zeit und Speicher.",
     "patchesDefault": "{{value}} (Standard)",
-    "reindexWarning": "Bei dieser Auflösung muss dein Rohmaterial neu indiziert werden. Zurück auf 256 findet den ursprünglichen Index unversehrt wieder.",
+    "reindexWarning": "Bei dieser Auflösung muss dein Rohmaterial neu indiziert werden. Mit 256 bekommst du den ursprünglichen Index unverändert zurück.",
     "onnxGpu": "Gesichter und Diktat auf der GPU",
     "onnxGpuHint": "Etwa 8× schneller. Schalte es aus, wenn dein Grafiktreiber abstürzt.",
-    "enabled": "An",
-    "disabled": "Aus",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
     "reset": "Leistung zurücksetzen",
     "quick": "Leistung",
     "quickMore": "Alle Einstellungen…"
@@ -149,21 +136,21 @@
       "remove": "Aus der Bibliothek entfernen",
       "empty": "Noch kein Hintergrund. Datei hier ablegen.",
       "importFailed": "Import fehlgeschlagen.",
-      "blockedByTheme": "Das Design Hoher Kontrast nimmt keinen Hintergrund an.",
-      "blur": "Weichzeichnen",
+      "blockedByTheme": "Das Design „Hoher Kontrast“ unterstützt keinen Hintergrund.",
+      "blur": "Unschärfe",
       "opacity": "Deckkraft",
       "saturate": "Sättigung",
       "uiOpacity": "Deckkraft der Panels",
       "animate": "Animieren",
       "pauseUnfocused": "Im Hintergrund einfrieren",
-      "pauseWhileBusy": "Während Verarbeitung einfrieren",
+      "pauseWhileBusy": "Während der Verarbeitung einfrieren",
       "groupFraming": "Bildausschnitt",
       "groupRender": "Darstellung",
       "groupReadability": "Lesbarkeit",
       "groupMotion": "Animation",
       "reset": "Zurücksetzen",
-      "openFraming": "Bild ausrichten",
-      "framingTitle": "Bildausschnitt",
+      "openFraming": "Ausschnitt wählen",
+      "framingTitle": "Ausschnitt des Hintergrunds",
       "rotateLeft": "Nach links drehen",
       "rotateRight": "Nach rechts drehen",
       "flipH": "Horizontal spiegeln",
@@ -173,49 +160,49 @@
       "transform": "Ausrichtung",
       "applyFraming": "Übernehmen",
       "cropSize": "Größe des Ausschnitts",
-      "groupScope": "Geltung",
-      "onDetached": "Abgetrennte Fenster",
-      "global": "Von allen Designs geteilt"
+      "groupScope": "Geltungsbereich",
+      "onDetached": "Abgedockte Fenster",
+      "global": "Gilt für alle Designs"
     },
     "colors": {
       "title": "Farben",
-      "perTheme": "Für dieses Design gesetzt",
+      "perTheme": "Für dieses Design eingestellt",
       "primary": "Akzent",
       "fg": "Text",
       "bg": "Hintergrund",
       "surface": "Panels",
       "border": "Rahmen",
-      "restore": "Zurück zum Design",
+      "restore": "Auf Design zurücksetzen",
       "fromTheme": "Vom Design",
-      "resetAll": "Zurück zum Design",
+      "resetAll": "Alle auf Design zurücksetzen",
       "resetAllHint": "Entfernt alle Anpassungen dieses Designs."
     },
     "custom": {
       "title": "Meine Designs",
       "subtitle": "Speichert Palette, Farben und Hintergrund unter einem Namen.",
       "create": "Neues Design",
-      "save": "Sichern",
+      "save": "Speichern",
       "delete": "Dieses Design löschen",
-      "empty": "Noch kein Design gesichert.",
+      "empty": "Noch kein Design gespeichert.",
       "namePlaceholder": "Name des Designs",
       "confirm": "Bestätigen",
       "rename": "Umbenennen",
-      "unsaved": "„{{name}}“ hat ungesicherte Änderungen."
+      "unsaved": "„{{name}}“ hat nicht gespeicherte Änderungen."
     }
   },
   "updates": {
     "title": "Updates",
-    "subtitle": "Auf GitHub geprüft, Signatur vor der Installation validiert.",
+    "subtitle": "Versionen von GitHub, Signatur vor der Installation geprüft.",
     "auto": "Automatisch prüfen",
     "autoHint": "Sucht kurz nach dem Start nach einer neuen Version.",
     "autoInstall": "Automatisches Update beim Start",
     "autoInstallHint": "Installiert beim Start und startet neu, ohne Nachfrage.",
-    "on": "Aktiv",
-    "off": "Inaktiv",
+    "on": "Aktiviert",
+    "off": "Deaktiviert",
     "ready": "Bereit zur Prüfung",
     "checking": "Updates werden gesucht…",
     "available": "Version {{version}} ist verfügbar",
-    "downloading": "Download und Prüfung…",
+    "downloading": "Wird heruntergeladen und geprüft…",
     "downloaded": "Update bereit zur Installation",
     "installing": "Wird installiert…",
     "failed": "Die Prüfung ist fehlgeschlagen",
@@ -223,11 +210,11 @@
     "check": "Prüfen",
     "download": "Herunterladen",
     "restart": "Neu starten und installieren",
-    "history": "Neues nach Version",
+    "history": "Neuerungen nach Version",
     "whatsNew": "Neu in Version {{version}}",
     "gotIt": "Los geht's",
     "ytdlp": {
-      "hint": "Bibliothek, die Videolinks auflöst. Ihre Extraktoren brechen häufig: Sie wird aktualisiert, ohne auf die nächste NetsuRush-Version zu warten.",
+      "hint": "Bibliothek, die Videolinks auflöst. Da ihre Extraktoren oft kaputtgehen, aktualisiert sie sich, ohne auf die nächste NetsuRush-Version zu warten.",
       "update": "Aktualisieren",
       "updating": "Wird aktualisiert…",
       "checking": "Version wird gelesen…",
@@ -236,11 +223,11 @@
       "unknown": "Version {{version}}",
       "updated": "Aktualisiert · Version {{version}}",
       "missing": "Nicht installiert",
-      "notOwned": "Version {{version}} · außerhalb der Anwendung installiert",
+      "notOwned": "Version {{version}} · außerhalb der App installiert",
       "failed": "Die Aktualisierung ist fehlgeschlagen"
     },
     "kind": {
-      "feature": "Neu",
+      "feature": "Neuerungen",
       "fix": "Fehlerbehebungen",
       "improvement": "Verbesserungen",
       "performance": "Leistung"
@@ -266,20 +253,17 @@
     "hardware": "Erkannte Komponenten",
     "gpu": "Grafikkarte",
     "cpu": "Prozessor",
-    "uses": "Funktionen",
-    "notInstalled": "Nicht verfügbar",
-    "available": "Verfügbar",
     "unavailable": "Die Komponenten dieses PCs konnten nicht geprüft werden.",
     "features": {
-      "netsucut": "NetsuCut",
+      "netsucut": "Video-Vorschauen",
       "torchModels": "KI-Modelle",
       "onnxModels": "ONNX-Modelle",
       "transcription": "Transkription",
       "notebook": "NetsuBook"
     },
     "featureHints": {
-      "netsucut": "Erstellt Vorschauen und kodiert Videos.",
-      "torchModels": "Erkennt Einstellungen, sucht und verbessert Bilder.",
+      "netsucut": "Kodiert die Vorschauen mit der verfügbaren Engine.",
+      "torchModels": "Erkennt Shots, sucht und verbessert Bilder.",
       "onnxModels": "Entfernt Hintergründe und führt ONNX-Modelle aus.",
       "transcription": "Wandelt Sprache in Text um.",
       "notebook": "Speichert und organisiert Notizen. Keine GPU erforderlich."
@@ -287,22 +271,22 @@
   },
   "power": {
     "title": "Programme schließen",
-    "subtitle": "Bietet an, Resolve oder Adobe während einer schweren Aufgabe zu schließen und dein Projekt danach wieder zu öffnen.",
+    "subtitle": "Bietet an, Resolve oder Adobe während einer rechenintensiven Aufgabe zu schließen und dein Projekt danach wieder zu öffnen.",
     "offer": "Schließen anbieten",
-    "reopen": "Erinnerung ans Öffnen",
+    "reopen": "Erinnerung zum Wiederöffnen",
     "nub": "Reiter am Rand",
-    "on": "Ein",
-    "off": "Aus"
+    "on": "Aktiviert",
+    "off": "Deaktiviert"
   },
   "exportProfiles": {
     "title": "Exportprofile",
-    "subtitle": "Codec-Einstellungen für die Schaltfläche „Herunterladen“ auf Miniaturen und Suchergebnissen.",
+    "subtitle": "Codec-Einstellungen für den Button „Herunterladen“ auf Miniaturen und Suchergebnissen.",
     "new": "Neu",
     "duplicate": "Duplizieren",
     "deleteAria": "Profil löschen",
     "restore": "Wiederherstellen",
     "restoreHint": "Stellt die mitgelieferten Voreinstellungen wieder her, die in der Liste fehlen.",
-    "cardButton": "Vorschaubild-Schaltfläche",
+    "cardButton": "Miniatur-Button",
     "cardButtonHint": "Der kleine Button, der beim Überfahren einer Miniatur erscheint."
   },
   "console": {
@@ -345,9 +329,9 @@
       "download": "Ein Download schlägt fehl",
       "performance": "Es ist zu langsam",
       "ui": "Etwas sieht falsch aus",
-      "accessibility": "Schwer zu lesen oder zu treffen",
+      "accessibility": "Schwer zu lesen oder anzuklicken",
       "i18n": "Ein Tippfehler im Text",
-      "security": "Eine Datenschutz-Sache",
+      "security": "Ein Datenschutzproblem",
       "regression": "Früher ging es",
       "feature": "Ich hätte gern eine neue Funktion",
       "ux": "Eine Idee, es einfacher zu machen",
@@ -364,7 +348,7 @@
       "always": "Immer",
       "often": "Oft",
       "rare": "Selten",
-      "once": "1 Mal"
+      "once": "Einmal"
     },
     "description": "Erzähl, was passiert ist",
     "descriptionPlaceholder": "Was du gemacht hast und was schiefging…",
@@ -382,7 +366,7 @@
     "specs": {
       "title": "Dein PC",
       "copy": "Kopieren",
-      "refresh": "Neu lesen",
+      "refresh": "Neu einlesen",
       "loading": "Wird gelesen…",
       "more": "Alles zeigen",
       "less": "Einklappen",
@@ -392,27 +376,29 @@
       "ffmpegOk": "ffmpeg vorhanden",
       "ffmpegMissing": "ffmpeg fehlt"
     },
-    "sending": "Senden…",
+    "sending": "Wird gesendet…",
     "send": "Senden",
     "download": "Nachricht speichern",
-    "logsAttached": "{{count}} Protokollzeilen angehängt",
-    "logErrors": "{{count}} Fehler",
-    "sendFailed": "Das Senden hat nicht geklappt. Versuch es nochmal.",
+    "sendFailed": "Das Senden hat nicht geklappt. Versuch es noch einmal.",
     "validation": {
       "description": "Erzähl vor dem Senden, was passiert ist.",
       "detail": "Sag in wenigen Worten, worum es geht.",
       "tooLarge": "Eine Datei ist größer als {{size}} MB."
     },
-    "noWebhook": "Senden aus: kein Kanal. Setze <c1>bugWebhook</c1> in nr.config.json oder deploye das Convex-Relay (<c2>VITE_CONVEX_SITE_URL</c2>).",
-    "descriptionOther": "Sag uns mehr",
+    "noWebhook": "Senden deaktiviert: kein Kanal. Setze <c1>bugWebhook</c1> in nr.config.json oder stelle das Convex-Relay bereit (<c2>VITE_CONVEX_SITE_URL</c2>).",
+    "descriptionOther": "Erklär dein Anliegen",
     "descriptionOtherPlaceholder": "Deine Frage oder was du uns sagen möchtest…",
     "files": {
       "label": "Anhänge",
       "choose": "Datei anhängen",
       "add": "Hinzufügen",
       "remove": "Entfernen",
-      "limit": "höchstens {{count}} Dateien"
-    }
+      "limit": "Höchstens {{count}} Dateien"
+    },
+    "logsAttached_one": "{{count}} Protokollzeile angehängt",
+    "logsAttached_other": "{{count}} Protokollzeilen angehängt",
+    "logErrors_one": "{{count}} Fehler",
+    "logErrors_other": "{{count}} Fehler"
   },
   "outbox": {
     "opening": "Cache wird geöffnet…",
@@ -420,7 +406,7 @@
     "enabled": "Warteschlange aktiv",
     "on": "Aktiviert",
     "off": "Deaktiviert",
-    "delay": "Verzögerung vor Anwendung",
+    "delay": "Wartezeit vor dem Anwenden",
     "delayHint": "Gibt dem Programm Zeit, vollständig zu starten.",
     "destination": "Ziel zwischengespeicherter Sendungen",
     "targetNew": "Eine Timeline pro Sendung",
@@ -439,8 +425,8 @@
     "offline": {
       "title": "Offline-Timeline-Cache",
       "upToDate": "aktuell",
-      "stats": "{{clips}} Clips · {{cached}}/{{total}} Timelines mit Einstellungen.",
-      "none": "Kein Cache — bei geschlossenem Resolve öffnen Timelines leer.",
+      "stats": "{{clips}} Clips · {{cached}}/{{total}} Timelines mit Shots.",
+      "none": "Kein Cache – bei geschlossenem Resolve öffnen Timelines leer.",
       "update": "Aktualisieren",
       "needResolve": "Resolve muss zum Erstellen des Caches verbunden sein.",
       "building": "Aktualisierung im Hintergrund (Medien haben Vorrang)…",
@@ -459,7 +445,7 @@
     "off": "Deaktiviert",
     "status": {
       "connected": "Sichtbar im Profil von {{user}}.",
-      "searching": "Discord nicht gefunden — die Präsenz erscheint beim Start.",
+      "searching": "Discord nicht gefunden – die Präsenz erscheint beim Start.",
       "disabled": "Dein Profil zeigt nichts an.",
       "noAppId": "Keine Discord-Anwendung angegeben."
     },
@@ -488,15 +474,15 @@
       "faces": "Gesichtsindex"
     },
     "kindHint": {
-      "thumb": "Ein Bild pro Shot. Neu erzeugen dauert kalt lange.",
+      "thumb": "Ein Bild pro Shot. Neu erzeugen dauert beim Kaltstart lange.",
       "proxy": "Kurze Ausschnitte, auf der GPU kodiert. In einer Sekunde neu erzeugt.",
       "voice": "WAV 16 kHz für Transkription und Stille-Erkennung.",
       "upscaleTest": "Bilder in voller Auflösung aus den „Was wäre wenn?“-Tests.",
       "roto": "Frames und Masken der Segmentierungs-Sitzungen.",
       "scenes": "Von der KI erkannte Schnittpunkte. Neu erzeugen = eine Erkennung.",
       "transcripts": "Text und Wort-Timecodes. Neu erzeugen = ein ASR-Durchlauf.",
-      "embeddings": "Ein Vektor pro Shot — was das Modell gesehen hat. Neu erzeugen = Stunden auf der GPU.",
-      "indexThumbs": "Alte Miniaturen im Index. Die Suche zeigt jetzt die des Schnitts – der Rest hier kann weg.",
+      "embeddings": "Ein Vektor pro Shot – was das Modell gesehen hat. Neu erzeugen = Stunden auf der GPU.",
+      "indexThumbs": "Alte Miniaturen im Index. Die Suche zeigt jetzt die aus dem Schnitt: Den Rest kannst du leeren.",
       "faces": "Ein Identitätsvektor pro erkanntem Gesicht. Neu erzeugen = ein Erkennungslauf."
     },
     "tree": {
@@ -508,13 +494,13 @@
       "unattributed": "Nicht zugeordnet",
       "unattributedHint": "Cache, der vor dem Index entstand oder dessen Clip nicht gefunden wurde. Am Stück löschbar.",
       "clearSelection": "Auswahl aufheben",
-      "purgeSelection": "Auswahl leeren",
+      "purgeSelection": "Cache der Auswahl leeren",
       "selected_one": "{{count}} ausgewählt · {{size}}",
       "selected_other": "{{count}} ausgewählt · {{size}}"
     },
     "reindex": {
       "action": "Neu indizieren",
-      "hint": "Holt bereits vorhandenen Cache nach: der Index kennt nur, was seit seiner Einführung geschrieben wurde.",
+      "hint": "Erfasst auch Caches, die schon auf dem Datenträger liegen: Der Index kennt nur, was seit seiner Einführung geschrieben wurde.",
       "running": "Neuindizierung…",
       "scan": "Bekannte Clips werden gelesen…",
       "index": "Ordner werden analysiert…"
@@ -530,7 +516,7 @@
       "moveNow": "Verschieben",
       "leave": "Liegen lassen",
       "leaveHint": "Der alte Ordner bleibt hier gelistet und löschbar.",
-      "moving": "Verschieben… {{done}}/{{total}}",
+      "moving": "Wird verschoben… {{done}}/{{total}}",
       "movedNone": "Neuer Ordner übernommen.",
       "moved_one": "{{count}} Datei verschoben.",
       "moved_other": "{{count}} Dateien verschoben."
@@ -543,14 +529,14 @@
       "reusable": "Wiederverwendbare Vorschauen",
       "reusableDesc": "Werden von selbst neu erzeugt, wenn sie fehlen.",
       "durable": "Gespeicherte Analysen",
-      "durableDesc": "Aufwendige Ergebnisse werden nur auf Wunsch gelöscht."
+      "durableDesc": "Aufwendig neu zu berechnende Ergebnisse, die nur auf deinen Wunsch gelöscht werden."
     },
     "policy": {
       "title": "Automatische Bereinigung",
       "desc": "Schnelle Vorschauen sind standardmäßig begrenzt. Aufwendige Analysen bleiben erhalten.",
       "auto": "Auto-Bereinigung",
       "quota": "Kontingent",
-      "quotaHint": "Darüber fliegen die am längsten ungenutzten Einträge zuerst raus.",
+      "quotaHint": "Wird das überschritten, werden die am längsten ungenutzten Einträge zuerst entfernt.",
       "age": "Maximales Alter",
       "ageHint": "Löscht, was seit dieser Zeit nicht mehr gebraucht wurde.",
       "gb": "GB",
@@ -568,13 +554,11 @@
         "app": "Beim Beenden der App",
         "immediate": "Direkt nach dem Vorgang"
       },
-      "sessionOnly": "Beim Beenden",
-      "sessionOnlyHint": "Der gesamte Ordner wird beim Schließen von NetsuRush gelöscht und nach einem Absturz beim nächsten Start erneut geprüft.",
       "warnTitle": "Warnen",
       "warnCache": "Wenn der Cache größer wird als",
-      "warnDisk": "Wenn weniger frei bleibt als",
-      "warnDiskSuffix": "auf dem Datenträger",
-      "warnNever": "Nur warnen — nichts löschen."
+      "warnDisk": "Wenn auf dem Datenträger weniger als",
+      "warnDiskSuffix": "frei sind",
+      "warnNever": "Nur warnen – nichts löschen."
     },
     "warn": {
       "cache": "Der Cache erreicht {{size}}.",
@@ -583,11 +567,11 @@
     "confirm": {
       "title": "Diesen Cache löschen?",
       "descKinds": "{{size}} werden frei. Der Inhalt entsteht bei Bedarf neu.",
-      "descUnattributed": "{{size}} nicht zugeordneter Cache werden frei.",
-      "expensive": "Der Suchindex ist dabei: ihn neu aufzubauen kostet Stunden GPU.",
+      "descUnattributed": "{{size}} an nicht zugeordnetem Cache werden frei.",
+      "expensive": "Der Suchindex ist dabei: Der Neuaufbau kostet Stunden an GPU-Zeit.",
       "cancel": "Abbrechen",
       "confirm": "Löschen",
-      "purging": "Löschen…",
+      "purging": "Wird gelöscht…",
       "descSources_one": "{{size}} werden für {{count}} Clip frei. Andere Clips bleiben unberührt.",
       "descSources_other": "{{size}} werden für {{count}} Clips frei. Andere Clips bleiben unberührt.",
       "skipped_one": " · {{count}} übersprungen (gesperrt)",
@@ -603,8 +587,8 @@
     },
     "missing": {
       "title": "Clips nicht gefunden",
-      "desc": "Eine abgezogene externe Platte reicht schon: nichts wird ohne dich gelöscht.",
-      "purge": "Deren Cache leeren",
+      "desc": "Schon eine abgezogene externe Festplatte lässt sie verschwinden: Nichts wird ohne dich gelöscht.",
+      "purge": "Cache dieser Clips leeren",
       "none": "Alle indizierten Clips sind erreichbar."
     },
     "db": {
@@ -612,8 +596,8 @@
       "unavailable": "Datenbank nicht gefunden.",
       "vacuum": "Komprimieren",
       "vacuumHint": "Nach dem Leeren bleibt der Platz in der Datei reserviert. Komprimieren gibt ihn zurück.",
-      "vacuumDone": "{{size}} zurückgegeben.",
-      "vacuumBusy": "Nicht möglich, solange eine Aufgabe die Datenbank nutzt. Laufende Verarbeitungen beenden und erneut versuchen.",
+      "vacuumDone": "{{size}} freigegeben.",
+      "vacuumBusy": "Nicht möglich, solange eine Aufgabe die Datenbank nutzt. Beende laufende Verarbeitungen und versuch es noch einmal.",
       "faiss": "Vektorindex {{size}}"
     },
     "projects": {
@@ -626,7 +610,7 @@
       "rushCount_other": "{{count}} Clips",
       "scan": "Resolve-Projekte erfassen",
       "scanStarting": "Vorbereitung…",
-      "scanning": "{{project}} — {{done}}/{{total}}",
+      "scanning": "{{project}} – {{done}}/{{total}}",
       "title": "Der Suche bekannte Projekte",
       "scanDone_one": "{{count}} Projekt erfasst",
       "scanDone_other": "{{count}} Projekte erfasst"
@@ -651,15 +635,15 @@
     "ok": "Aufgabe beendet",
     "okHint": "Export fertig, an die Timeline gesendet, Erfolge allgemein.",
     "error": "Fehler",
-    "errorHint": "Rote Fehlermeldung: sie verlangt eine Reaktion und bleibt deshalb länger.",
+    "errorHint": "Rote Fehlermeldung: Weil sie eine Reaktion verlangt, bleibt sie länger.",
     "badge": "Fehleranzeige",
-    "badgeHint": "Rote Plakette unten rechts. Die Fehler bleiben in der Konsole lesbar.",
+    "badgeHint": "Roter Punkt unten rechts. Die Fehler bleiben in der Konsole lesbar.",
     "seconds_one": "{{count}} Sekunde",
     "seconds_other": "{{count}} Sekunden",
     "untilClick": "Bis zum Klick"
   },
   "detection": {
-    "reindexHint": "Ein anderes Modell bedeutet, deine Clips neu zu indizieren."
+    "reindexHint": "Nach einem Modellwechsel musst du deine Clips neu indizieren."
   },
   "tab": {
     "account": {
@@ -697,8 +681,8 @@
   },
   "indexing": {
     "title": "Indizierung",
-    "subtitle": "Jeder Clip wird in Einstellungen zerlegt, dann wird jede Einstellung analysiert. Was das Ergebnis nicht ändert, ist schon aktiv.",
-    "cutTitle": "Einstellungserkennung"
+    "subtitle": "Jeder Clip wird in Shots zerlegt, dann wird jeder Shot analysiert. Was das Ergebnis nicht ändert, ist schon aktiv.",
+    "cutTitle": "Aufteilung in Shots"
   },
   "boardAssets": {
     "title": "Board-Speicher",
@@ -706,35 +690,40 @@
     "disk": "{{free}} frei von {{total}}",
     "scanning": "Speicher wird analysiert…",
     "failed": "Hat nicht geklappt. Versuch es noch einmal.",
-    "freedNotice": "{{size}} freigegeben ({{count}} Dateien)",
-    "movedNotice": "{{size}} verschoben ({{count}} Dateien)",
-    "movedPartly": "{{count}} Dateien verschoben, {{failed}} fehlgeschlagen (bleiben liegen)",
-    "archivedNotice": "Board in „{{name}}“ gespeichert: seine Medien liegen jetzt im Projektordner",
-    "settling": "{{count}} werden gerade geschrieben",
-    "settlingHint": "Eine eben geschriebene Datei kann zu einem Import gehören, den das Board noch nicht platziert hat. Sie wird beim nächsten Durchgang bewertet.",
+    "archivedNotice": "Board in „{{name}}“ gespeichert: Seine Medien liegen jetzt im Projektordner",
+    "settling": "Wird geschrieben: {{count}}",
+    "settlingHint": "Eine eben geschriebene Datei kann zu einem Import gehören, den das Board noch nicht platziert hat. Beim nächsten Durchgang wird sie geprüft.",
     "safe": {
-      "hint": "Datei für Datei geprüft: diese Bytes liegen bereits im Begleitordner eines Projekts.",
+      "hint": "Datei für Datei geprüft: Diese Bytes liegen bereits im Begleitordner eines Projekts.",
       "title": "Gefahrlos freigebbar",
       "duplicated": "Medien, die bereits in einem Projekt liegen ({{count}})",
-      "duplicatedHint": "Ihre Bytes liegen im Begleitordner eines Projekts, zum Beispiel „{{project}}“.",
+      "duplicatedHint": "Die Bytes liegen im Begleitordner eines Projekts, zum Beispiel „{{project}}“.",
       "duplicatedNone": "Bisher kein Duplikat gefunden.",
       "action": "Freigeben"
     },
     "sole": {
       "title": "Zuerst in Sicherheit bringen",
       "hint": "Die einzige vorhandene Kopie: Speichere zuerst das Board, dann rückt sie in den Abschnitt darüber.",
-      "empty": "Nichts gefährdet: alles, was die App aufbewahrt, existiert auch anderswo.",
+      "empty": "Nichts in Sicherheit zu bringen: Alles, was die App aufbewahrt, gibt es auch anderswo.",
       "untitled": "Board ohne Titel",
-      "sceneCount": "{{count}} Medien, die nur die App besitzt · {{size}}",
       "shared": "Geteiltes Board",
-      "sharedHint": "Ein geteiltes Board hat keine Projektfassung: sein Dokument ist maßgeblich und die Zusammenarbeit verwaltet seine Medien.",
+      "sharedHint": "Ein geteiltes Board hat keine Projektfassung: Sein Dokument ist maßgeblich, und die Zusammenarbeit verwaltet seine Medien.",
       "openBoard": "Board geöffnet",
-      "openBoardHint": "Dieses Board ist geöffnet: benutze „Speichern unter…“ in seiner Werkzeugleiste.",
+      "openBoardHint": "Dieses Board ist geöffnet: Benutze „Speichern unter…“ in seiner Werkzeugleiste.",
       "archive": "Als Projekt speichern…",
-      "orphans": "Medien, die kein Board anfordert",
-      "orphansHint": "{{count}} Dateien · {{size}}. Nichts zeigt sie mehr an, aber dies ist die einzige Kopie.",
-      "move": "In einen Ordner verschieben…"
-    }
+      "orphans": "Medien, die kein Board verwendet",
+      "move": "In einen Ordner verschieben…",
+      "sceneCount_one": "{{count}} Medium, das nur die App besitzt · {{size}}",
+      "sceneCount_other": "{{count}} Medien, die nur die App besitzt · {{size}}",
+      "orphansHint_one": "{{count}} Datei · {{size}}. Nichts zeigt sie mehr an, aber dies ist die einzige Kopie.",
+      "orphansHint_other": "{{count}} Dateien · {{size}}. Nichts zeigt sie mehr an, aber dies ist die einzige Kopie."
+    },
+    "freedNotice_one": "{{size}} freigegeben ({{count}} Datei)",
+    "freedNotice_other": "{{size}} freigegeben ({{count}} Dateien)",
+    "movedPartly_one": "{{count}} Datei verschoben, {{failed}} fehlgeschlagen (bleiben liegen)",
+    "movedPartly_other": "{{count}} Dateien verschoben, {{failed}} fehlgeschlagen (bleiben liegen)",
+    "movedNotice_one": "{{size}} verschoben ({{count}} Datei)",
+    "movedNotice_other": "{{size}} verschoben ({{count}} Dateien)"
   },
   "collaboration": {
     "title": "Zusammenarbeit",

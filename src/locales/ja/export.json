@@ -33,7 +33,7 @@
     "insertionInsert": "挿入",
     "insertionOverwrite": "上書き",
     "insertionReplace": "置き換え",
-    "insertionFit": "フィットして上書き",
+    "insertionFit": "置き換えて速度を合わせる",
     "insertionAbove": "上に配置",
     "insertionEnd": "末尾に追加",
     "insertionRippleOverwrite": "リップル上書き",
@@ -84,10 +84,10 @@
     },
     "balanced": {
       "label": "バランス",
-      "hint": "扱いやすい設定"
+      "hint": "ほどよいバランス"
     },
     "quality": {
-      "label": "強",
+      "label": "高",
       "hint": "ファイルは小さく、処理は遅い"
     },
     "max": {
@@ -100,7 +100,7 @@
     "no": "オフ"
   },
   "issue": {
-    "binTargetRequired": "書き出し先のフォルダー名を入力",
+    "binTargetRequired": "書き出し先のフォルダー名を入力してください",
     "profileIncomplete": "プロファイルが未完成：{{issue}}"
   },
   "audio": {
@@ -111,8 +111,7 @@
     "trackGroup": "トラック",
     "trackN": "トラック {{n}}",
     "langResolved": "{{lang}} → トラック {{n}}",
-    "langUnresolved": "{{lang}} → 該当トラックなし",
-    "timelineHint": "Resolve はオーディオを全部か全く読み込まないかのどちらかです。"
+    "langUnresolved": "{{lang}} → 該当トラックなし"
   },
   "iconPicker": {
     "search": "アイコンを検索…",

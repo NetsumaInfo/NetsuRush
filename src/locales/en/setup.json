@@ -1,12 +1,12 @@
 {
   "title": "Set up NetsuRush",
-  "desc": "The foundation installs itself. The rest is optional.",
+  "desc": "The essentials install on their own. The rest is optional.",
   "progressAria": "Setup steps",
   "models": {
     "title": "Optional downloads",
     "search": "Search models…",
     "none": "No downloads",
-    "sceneDetection": "Scene cutting",
+    "sceneDetection": "Shot detection",
     "included": "Included",
     "empty": "No model matches this search.",
     "noExtraSpace": "no extra space",
@@ -29,8 +29,7 @@
     "title": "Ready to install",
     "downloads": "Optional space",
     "noOptionalModels": "No optional downloads",
-    "mandatoryOnly": "Foundation and scene cutting only",
-    "sceneDetection": "Scene cutting included",
+    "mandatoryOnly": "Essentials and shot detection only",
     "modelCount_one": "{{count}} download",
     "modelCount_other": "{{count}} downloads"
   },

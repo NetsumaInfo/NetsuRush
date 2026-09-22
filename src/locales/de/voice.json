@@ -5,16 +5,14 @@
   },
   "home": {
     "title": "Stimme",
-    "subtitle": "Einen oder mehrere Sprachclips wählen: Stille, Füllwörter und Transkription laufen parallel.",
-    "addFiles": "Videodateien hinzufügen",
-    "addFilesHint": "Mehrere Dateien von der Platte auf einmal — sie landen in der Liste unten.",
+    "subtitle": "Wähle einen oder mehrere Sprachclips: Stille, Füllwörter und Transkription werden parallel analysiert.",
     "mediaPool": "Media Pool",
-    "mediaPoolHint": "Lädt die Clips des Resolve-Projekts neu — Liste erscheint unten.",
+    "mediaPoolHint": "Lädt die Clips des Resolve-Projekts neu – Liste erscheint unten.",
     "presetLabel": "Analyse-Voreinstellung",
     "savedPresetHint": "Voreinstellung gespeichert",
     "customSettingsHint": "Eigene Werte aktiv (Regler im Editor).",
     "stop": "Stoppen",
-    "runningCount": "{{count}} laufen",
+    "runningCount": "{{count}} aktiv",
     "queuedSuffix": "{{count}} in Warteschlange",
     "analyzeSelection": "Auswahl analysieren",
     "analyzeCount_one": "{{count}} Clip analysieren",
@@ -23,15 +21,15 @@
     "selectNone": "Keine",
     "reloadMediaPool": "Media Pool neu laden",
     "loadingSource": "Quelle wird analysiert…",
-    "noClips": "Keine Clips. Resolve-Projekt öffnen oder Dateien von der Platte hinzufügen.",
+    "noClips": "Keine Clips. Öffne ein Resolve-Projekt oder füge Dateien von der Festplatte hinzu.",
     "select": "Auswählen",
     "deselect": "Abwählen",
     "openEditor": "Editor öffnen",
     "analyzeThisClip": "Diesen Clip analysieren",
     "addFilesShort": "Dateien",
-    "searchPlaceholder": "Rushes filtern…",
+    "searchPlaceholder": "Clips filtern…",
     "countSelected": "{{selected}}/{{total}} ausgewählt",
-    "noMatch": "Kein Rush passt zum Filter.",
+    "noMatch": "Kein Clip passt zum Filter.",
     "folderView": "Nach Ordner gruppieren",
     "flatView": "Flache Liste",
     "renderThisClip": "Diesen Clip rendern",
@@ -42,8 +40,7 @@
     "queued": "In Warteschlange…",
     "running": "Analyse läuft…",
     "errorFallback": "fehlgeschlagen",
-    "stats": "{{words}} Wörter · {{silences}} Stille · {{fillers}} Füllw. — zum Öffnen klicken",
-    "statsShort": "{{words}} Wörter · {{silences}} Stillen"
+    "statsShort": "{{words}} Wörter · Stille: {{silences}}"
   },
   "panel": {
     "sourceLocal": "Lokale Datei",
@@ -70,7 +67,7 @@
     "modeRepeatsTooltip": "Wiedergabe überspringt nur die Wiederholungen",
     "modeAll": "Alles",
     "modeAllTooltip": "Wiedergabe des Endschnitts (alles übersprungen)",
-    "noTranscriptYet": "„Transkribieren“ für editierbaren Text, oder „Stille erkennen“ zum direkten Schneiden."
+    "noTranscriptYet": "„Transkribieren“ für bearbeitbaren Text oder „Stille erkennen“, um direkt zu schneiden."
   },
   "controls": {
     "groupAnalyse": "Analyse",
@@ -85,17 +82,17 @@
     "deletePreset": "{{label}} löschen",
     "savePreset": "Speichern",
     "savePresetTooltip": "Speichert die aktuellen Regler (Stille + Füllwörter) als wiederverwendbare Voreinstellung.",
-    "presetSavedHint": "Voreinstellung gespeichert — gilt für Analyse und Stapel im Start.",
-    "presetCustomHint": "Eigene Werte — wähle eine Voreinstellung als Ausgangsbasis.",
+    "presetSavedHint": "Voreinstellung gespeichert – gilt für die Analyse und den Stapel auf der Startseite.",
+    "presetCustomHint": "Eigene Werte – wähle eine Voreinstellung als Ausgangsbasis.",
     "analyzeAll": "Alles analysieren",
-    "analyzeAllTooltip": "Startet Transkription, Stillen und Füllwörter in einem Durchgang. Ergebnisse im Schnitte-Panel.",
+    "analyzeAllTooltip": "Startet Transkription, Stille- und Füllworterkennung in einem Durchgang. Ergebnisse im Schnitte-Panel.",
     "savePresetDialogTitle": "Voreinstellung speichern",
-    "savePresetPlaceholder": "Name (z. B. Interview eng)",
+    "savePresetPlaceholder": "Name (z. B. Straffes Interview)",
     "transcribe": "Transkribieren",
     "retranscribe": "Neu transkribieren",
     "engine": "Engine",
     "verbatim": "Verbatim (Ähs behalten)",
-    "verbatimTooltip": "Whisper behält die „ähs“, statt sie zu glätten, damit die Erkennung sie sieht. Zum Anwenden neu transkribieren.",
+    "verbatimTooltip": "Whisper behält die „Ähs“, statt sie zu glätten, damit die Erkennung sie sieht. Transkribiere neu, um es anzuwenden.",
     "detectSilences": "Stille erkennen",
     "settings": "Einstellungen",
     "novaConfirm": "Störgeräusch-Prüfung (NOVA)",
@@ -122,7 +119,6 @@
     "removeFillers": "Füllwörter entfernen ({{count}})",
     "restoreFillers": "Füllwörter zurückholen ({{count}})",
     "kept": "Behalten",
-    "exportMp4": "MP4",
     "exportFcpxml": "FCPXML",
     "exportFormatsHint": "MP4 = neu kodiert · FCPXML = Quell-Timecode.",
     "hints": {
@@ -131,16 +127,16 @@
       "minSpeech": "Ignoriert kürzere Sprachfetzen (gegen Zerhacken).",
       "pad": "Lässt etwas Luft um die behaltene Sprache.",
       "novaConfidence": "Mindestsicherheit „keine Stimme“, um eine Region zu verwerfen. Höher = vorsichtiger (verwirft weniger).",
-      "sensitivity": "Höher = fängt mehr (äh, gedehnte Laute, gezogene Wörter). Fehltreffer per Klick durchstreichen.",
+      "sensitivity": "Höher = fängt mehr (äh, gedehnte Laute, gezogene Wörter). Fehltreffer lassen sich per Klick durchstreichen.",
       "minDuration": "Mindestlänge eines gedehnten Lauts / gezogenen Worts, damit es zählt.",
       "maxDuration": "Darüber = echtes langes Wort, kein Füllwort. Deckelt gedehnte Laute + gezogene Wörter.",
-      "monotoneTolerance": "Audio: wie stark der Laut auf derselben Tonhöhe bleiben muss. Höher = mehr Schwankung erlaubt → fängt mehr gedehnte „Laaaaute“. („Erkennen“ neu starten.)",
-      "padEnd": "Luft NACH jeder Aufnahme (Satzenden), getrennt vom Rand am Anfang.",
+      "monotoneTolerance": "Audio: wie stark der Laut auf derselben Tonhöhe bleiben muss. Höher = mehr Schwankung erlaubt → fängt mehr gedehnte „Laaaaute“. (Starte „Erkennen“ neu.)",
+      "padEnd": "Luft NACH jeder Aufnahme (Satzenden), getrennt vom Puffer am Anfang.",
       "noiseGate": "Verwirft kurze Geräusche, die als Sprache gelten (Tastatur, Mundgeräusche). 0 = aus."
     },
     "off": "aus",
-    "removedOfPlans_one": "−{{removed}} aus {{count}} Einstellung entfernt",
-    "removedOfPlans_other": "−{{removed}} aus {{count}} Einstellungen entfernt"
+    "removedOfPlans_one": "−{{removed}} aus {{count}} Shot entfernt",
+    "removedOfPlans_other": "−{{removed}} aus {{count}} Shots entfernt"
   },
   "params": {
     "threshold": "Schwelle",
@@ -152,12 +148,12 @@
     "minDuration": "Dauer min.",
     "maxDuration": "Dauer max.",
     "monotoneTolerance": "Monotonie-Toleranz",
-    "padEnd": "Rand am Ende",
+    "padEnd": "Puffer am Ende",
     "noiseGate": "Rauschsperre"
   },
   "transcript": {
     "undo": "Rückgängig",
-    "redo": "Wiederherstellen",
+    "redo": "Wiederholen",
     "restoreCount": "Zurückholen ({{count}})",
     "cutCount": "Schneiden ({{count}})",
     "hint": "Klick = abspielen · Entf = schneiden",
@@ -175,9 +171,9 @@
     "tabRepeats": "Wdh.",
     "emptySilences": "„Stille erkennen“",
     "emptyFillers": "„Füllwörter erkennen“",
-    "emptyRepeats": "Transkribieren, um Wiederholungen zu finden",
-    "lowConfidence": "Geringe Sicherheit — vor dem Schnitt anhören",
-    "reinclude": "Wieder in den Schnitt",
+    "emptyRepeats": "Transkribiere, um Wiederholungen zu finden",
+    "lowConfidence": "Geringe Sicherheit – vor dem Schnitt anhören",
+    "reinclude": "Wieder in den Schnitt aufnehmen",
     "exclude": "Aus dem Schnitt nehmen",
     "cutPassage": "Diese Stelle schneiden",
     "keepPassage": "Nicht schneiden",
@@ -194,21 +190,21 @@
     "helpAria": "Einstellungen verstehen",
     "helpTooltip": "Einstellungen verstehen (große Vorschau)",
     "dialogTitle": "Einstellungen für Stille",
-    "description": "Regler bewegen: Vorschau und Zahlen reagieren live",
-    "descriptionExampleSuffix": " (Beispiel — Clip laden, um DEIN Audio zu sehen)",
-    "legendKept": "Sprache behalten",
+    "description": "Beweg die Regler: Vorschau und Zahlen ändern sich live.",
+    "legendKept": "Behaltene Sprache",
     "legendPad": "Puffer",
     "legendCut": "Geschnitten",
-    "statsKeptPct": "{{pct}}% behalten",
+    "statsKeptPct": "{{pct}} % behalten",
     "statsCuts_one": "{{count}} Schnitt",
     "statsCuts_other": "{{count}} Schnitte",
     "resetDefaults": "Standardwerte",
     "explains": {
       "threshold": "Die gepunktete Linie in der Vorschau. Darüber = Sprache, darunter = Pause. Höher → schneidet mehr.",
-      "minSilence": "Eine kürzere Pause wird NICHT geschnitten — Atmer bleiben drin.",
+      "minSilence": "Eine kürzere Pause wird NICHT geschnitten – Atmer bleiben drin.",
       "minSpeech": "Ein kürzerer Sprachfetzen wird ignoriert (gegen Zerhacken).",
-      "pad": "Die Luft vor/nach jeder Passage — das Hellgrün in der Vorschau."
-    }
+      "pad": "Die Luft vor/nach jeder Passage – das Hellgrün in der Vorschau."
+    },
+    "descriptionExample": "Beweg die Regler: Vorschau und Zahlen ändern sich live. Das ist ein Beispiel: Lade einen Clip, um dein eigenes Audio zu sehen."
   },
   "shared": {
     "asr": {
@@ -247,7 +243,7 @@
     },
     "agressif": {
       "label": "Aggressiv",
-      "hint": "Schneidet alles: Stille ab 0,3 s (Mindestpuffer), hohe Empfindlichkeit, Sprechtics inklusive. Enger Rhythmus — in CUTS prüfen."
+      "hint": "Schneidet Stille ab 0,3 s mit minimalem Puffer und schließt Sprechtics ein. Prüfe danach das Schnitte-Panel."
     }
   },
   "fillerCats": {
@@ -264,23 +260,24 @@
     "noFillersDetected": "Keine akustischen Füllwörter erkannt.",
     "errDetectFillers": "Erkennung der Füllwörter fehlgeschlagen",
     "transcriptCached": "Transkription geladen (Cache)",
-    "transcriptDone": "Transkription · Wörter: {{count}}",
     "errTranscribe": "Transkription fehlgeschlagen",
-    "analyzeAllDone": "Analyse: {{words}} Wörter · {{silences}} Stille · {{fillers}} Füllwörter (Audio)",
+    "analyzeAllDone": "Analyse: {{words}} Wörter · Stille: {{silences}} · Füllwörter (Audio): {{fillers}}",
     "busyDetectSilences": "Stille wird erkannt…",
     "busyDetectFillers": "Füllwörter werden erkannt (Audio)…",
     "busyTranscribe": "Transkription…",
     "busyAnalyzeAllWithTranscribe": "Analyse: Transkription ∥ Stille…",
     "busyAnalyzeAllSilencesOnly": "Analyse: Stille…",
     "busyAnalyzeAllFillers": "Analyse: Füllwörter (Audio)…",
-    "batchStopped_one": "Analyse gestoppt — {{count}} Clip fertig",
-    "batchStopped_other": "Analyse gestoppt — {{count}} Clips fertig",
-    "batchDone_one": "Stapelanalyse — {{count}} Clip",
-    "batchDone_other": "Stapelanalyse — {{count}} Clips",
+    "batchStopped_one": "Analyse gestoppt – {{count}} Clip fertig",
+    "batchStopped_other": "Analyse gestoppt – {{count}} Clips fertig",
+    "batchDone_one": "Stapelanalyse – {{count}} Clip",
+    "batchDone_other": "Stapelanalyse – {{count}} Clips",
     "batchErrorsSuffix_one": " · {{count}} Fehler",
     "batchErrorsSuffix_other": " · {{count}} Fehler",
     "fillersDetected_one": "{{count}} Füllwort im Audio erkannt",
-    "fillersDetected_other": "{{count}} Füllwörter im Audio erkannt"
+    "fillersDetected_other": "{{count}} Füllwörter im Audio erkannt",
+    "transcriptDone_one": "Transkription · Wörter: {{count}}",
+    "transcriptDone_other": "Transkription · Wörter: {{count}}"
   },
   "export": {
     "timelineSuffixEdit": "Schnitt",
@@ -296,30 +293,32 @@
     "createdSuffix": " (erstellt)",
     "fpsMismatchSuffix": " · ⚠ fps Timeline ≠ Clip",
     "errTimeline": "Timeline fehlgeschlagen",
-    "errNoDuration": "Clip-Dauer unbekannt (Wellenform laden).",
+    "errNoDuration": "Clip-Dauer unbekannt (lade die Wellenform).",
     "errNothingToBuildColored": "Nichts zu schneiden (kein Segment).",
-    "timelineColoredBase": "Timeline „{{name}}“ · Clips: {{count}} · Schnitte: {{cuts}} · Gefärbt: {{colored}}",
     "coloredRefused": " ⚠ Resolve hat die Farben abgelehnt",
     "coloredLegend": " · 🟢 Sprache 🔵 Stille 🟠 Füllw. 🟦 Wdh.",
     "errTimelineColored": "Farb-Timeline fehlgeschlagen",
     "errNothingToExport": "Nichts zu exportieren (kein Segment behalten).",
     "errExportFile": "{{format}}-Export fehlgeschlagen",
-    "errNoWords": "Erst transkribieren (keine Wörter).",
-    "subtitlesExported": "Untertitel {{format}} · Zeilen: {{count}} → {{path}}",
+    "errNoWords": "Transkribiere zuerst (keine Wörter).",
     "errSubtitles": "Untertitel fehlgeschlagen",
     "timelineBase_one": "Timeline „{{name}}“ · {{count}} Segment",
     "timelineBase_other": "Timeline „{{name}}“ · {{count}} Segmente",
-    "fileExported_one": "{{format}} ({{count}} Einstellung) → {{path}}",
-    "fileExported_other": "{{format}} ({{count}} Einstellungen) → {{path}}"
+    "fileExported_one": "{{format}} ({{count}} Shot) → {{path}}",
+    "fileExported_other": "{{format}} ({{count}} Shots) → {{path}}",
+    "timelineColoredBase_one": "Timeline „{{name}}“ · Clips: {{count}} · Schnitte: {{cuts}} · Gefärbt: {{colored}}",
+    "timelineColoredBase_other": "Timeline „{{name}}“ · Clips: {{count}} · Schnitte: {{cuts}} · Gefärbt: {{colored}}",
+    "subtitlesExported_one": "Untertitel {{format}} · Zeilen: {{count}} → {{path}}",
+    "subtitlesExported_other": "Untertitel {{format}} · Zeilen: {{count}} → {{path}}"
   },
   "analysis": {
-    "resolveOffline": "Resolve offline — lokale Datei verwenden.",
-    "otherHostOffline": "{{host}} gewählt — die Projektquelle kommt aus Resolve. Lokale Datei verwenden."
+    "resolveOffline": "Resolve offline – nimm eine lokale Datei.",
+    "otherHostOffline": "{{host}} gewählt – die Projektquelle kommt aus Resolve. Nimm eine lokale Datei."
   },
   "render": {
     "action": "Rendern",
-    "actionCount_one": "{{count}} Rush rendern",
-    "actionCount_other": "{{count}} Rushes rendern",
+    "actionCount_one": "{{count}} Clip rendern",
+    "actionCount_other": "{{count}} Clips rendern",
     "profileHint": "Render-Profil (Codec, Container, Audio). Rechtsklick zum Wechseln.",
     "runningCount_one": "{{count}} Rendering läuft",
     "runningCount_other": "{{count}} Renderings laufen",
@@ -329,7 +328,7 @@
     "errExport": "Rendern fehlgeschlagen",
     "done_one": "Gerendert: {{count}} Clip · Profil {{profile}}",
     "done_other": "Gerendert: {{count}} Clips · Profil {{profile}}",
-    "stopped_one": "Rendern gestoppt — {{count}} Clip fertig",
-    "stopped_other": "Rendern gestoppt — {{count}} Clips fertig"
+    "stopped_one": "Rendern gestoppt – {{count}} Clip fertig",
+    "stopped_other": "Rendern gestoppt – {{count}} Clips fertig"
   }
 }

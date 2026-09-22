@@ -4,6 +4,7 @@
 import { nr } from "@/lib/bridge";
 import type { ScriptDoc } from "@/lib/bridge";
 import { uid } from "../scriptShared";
+import { errorText } from "@/lib/errorText";
 
 export interface DocActionResult { ok: boolean; error?: string }
 
@@ -18,7 +19,7 @@ export async function renameDoc(id: string, title: string): Promise<DocActionRes
     const r = await nr.script?.saveDoc({ ...doc, title });
     return r?.ok ? { ok: true } : { ok: false, error: r?.error ?? "save-failed" };
   } catch (e) {
-    return { ok: false, error: String(e) };
+    return { ok: false, error: errorText(e) };
   }
 }
 
@@ -42,6 +43,6 @@ export async function duplicateDoc(id: string, title: string): Promise<DocAction
     const r = await nr.script?.saveDoc(copy);
     return r?.ok ? { ok: true, id: copy.id } : { ok: false, error: r?.error ?? "save-failed" };
   } catch (e) {
-    return { ok: false, error: String(e) };
+    return { ok: false, error: errorText(e) };
   }
 }

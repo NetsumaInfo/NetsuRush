@@ -1,11 +1,9 @@
 {
   "gate": {
     "title": "Sprache wählen",
-    "subtitle": "Jederzeit in den Einstellungen änderbar.",
-    "continue": "Weiter"
+    "subtitle": "Jederzeit in den Einstellungen änderbar."
   },
   "settings": {
-    "navLabel": "Sprache",
     "title": "Sprache",
     "fieldLabel": "Oberflächensprache"
   }

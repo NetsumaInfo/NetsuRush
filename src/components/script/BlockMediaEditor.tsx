@@ -23,6 +23,7 @@ import { basename, cn } from "@/lib/utils";
 import { fmtFrames, fmtTimecode, frameToSec, parseFrames, type ScriptBlockMedia } from "./scriptShared";
 import { WaveTrim, type WaveTrimHandle, type WaveWindow } from "./WaveTrim";
 import { useNativePlayerSurface } from "@/components/player/useNativePlayerSurface";
+import { errorText } from "@/lib/errorText";
 
 // Timecode ÉDITABLE : l'affichage seul obligeait à viser une borne à la souris pour un réglage que
 // l'on connaît déjà au chiffre près. La frappe n'est validée qu'à Entrée / sortie de champ (une
@@ -164,7 +165,7 @@ export function BlockMediaEditor({ media, onClose, onCommit, onInsertTranscript 
       if (r?.ok) setWords(r.words);
       else setTranscriptError(r?.error || t("mediaEditor.transcriptionFailed"));
     } catch (e) {
-      setTranscriptError(String(e));
+      setTranscriptError(errorText(e));
     } finally {
       setTranscribing(false);
     }

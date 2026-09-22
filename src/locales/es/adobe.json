@@ -7,9 +7,7 @@
     "cepTitle": "Panel de NetsuRush",
     "installed": "Instalado",
     "notInstalled": "No instalado",
-    "inApp": "En Premiere Pro/After Effects: ",
     "menuPath": "Ventana ▸ Extensiones ▸ NetsuRush",
-    "restartHint": " (reiniciar la app si ya estaba abierta).",
     "installHint": "Usa «Instalar el panel» y luego abre Premiere Pro/After Effects ▸ Ventana ▸ Extensiones ▸ NetsuRush.",
     "diagnose": "Diagnóstico",
     "autoUpdate": "Gestión automática",
@@ -18,7 +16,8 @@
     "autoUpdateOff": "Desactivada",
     "updatePending": "Esta versión de NetsuRush incluye un panel más reciente",
     "updateNow": "Actualizar",
-    "restartApps": "Panel actualizado: reinicia {{apps}} para recargarlo."
+    "restartApps": "Panel actualizado: reinicia {{apps}} para recargarlo.",
+    "openHint": "En Premiere Pro o After Effects: {{menu}}. Reinicia la app si ya estaba abierta."
   },
   "diag": {
     "verdictOk": "Instalación correcta ✓ (carpeta + manifest + PlayerDebugMode). Abre el panel en Adobe: Ventana ▸ Extensiones ▸ NetsuRush.",
@@ -42,8 +41,8 @@
     "panelOffline": "Panel sin conexión",
     "launch": "Iniciar",
     "scanProject": "Escanear el proyecto",
-    "openPanelHint": "Abrir el panel: Ventana ▸ Extensiones ▸ NetsuRush.",
-    "launchThenOpenHint": "Iniciar la aplicación y luego abrir Ventana ▸ Extensiones ▸ NetsuRush."
+    "openPanelHint": "Abre el panel: Ventana ▸ Extensiones ▸ NetsuRush.",
+    "launchThenOpenHint": "Inicia la aplicación y luego abre Ventana ▸ Extensiones ▸ NetsuRush."
   },
   "snapshot": {
     "timecodes": "Timeline {{tlStart}} → {{tlEnd}} · Fuente {{srcIn}} → {{srcOut}}",
@@ -67,8 +66,8 @@
     "alreadyOpen": "Aplicación ya abierta",
     "panelUnreachable": "Panel inaccesible",
     "installFailed": "No se pudo instalar",
-    "installedRestart": "Panel instalado. REINICIAR {{apps}}, luego Ventana ▸ Extensiones ▸ NetsuRush.",
-    "installedOpen": "Panel instalado. Abrir Premiere Pro/After Effects y luego Ventana ▸ Extensiones ▸ NetsuRush.",
+    "installedRestart": "Panel instalado. REINICIA {{apps}} y luego abre Ventana ▸ Extensiones ▸ NetsuRush.",
+    "installedOpen": "Panel instalado. Abre Premiere Pro/After Effects y luego Ventana ▸ Extensiones ▸ NetsuRush.",
     "autoUpdateFailed": "No se pudo cambiar el ajuste de actualización"
   },
   "remote": {

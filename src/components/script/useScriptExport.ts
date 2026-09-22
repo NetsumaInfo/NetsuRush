@@ -10,6 +10,7 @@ import { useApp } from "@/store";
 import { hostBuildTimeline, hostShort } from "@/lib/host";
 import { docSections, frameToSec, parseLinkedIds, stripHtml, type ScriptBlockMedia, type ScriptDoc } from "./scriptShared";
 import { useScript } from "./useScript";
+import { errorText } from "@/lib/errorText";
 
 export type BuildState = { kind: "idle" } | { kind: "busy"; progress?: string } | { kind: "done"; text: string; warn?: boolean } | { kind: "error"; text: string };
 
@@ -147,7 +148,7 @@ export function useScriptExport(save: () => Promise<void> | void) {
         : await runAdobe(host, name, mode, clips, exportMarkers && markers.length > 0, (p) => setBuild({ kind: "busy", progress: p }));
       setBuild(result);
     } catch (e) {
-      setBuild({ kind: "error", text: String(e) });
+      setBuild({ kind: "error", text: errorText(e) });
     }
   }
 

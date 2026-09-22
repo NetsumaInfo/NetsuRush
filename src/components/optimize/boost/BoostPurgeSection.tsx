@@ -22,6 +22,7 @@ import { nr } from "@/lib/bridge";
 import type { AdobeApp, BoostDiagnosis } from "@/lib/bridge";
 import { fmtBytes } from "../optimizeShared";
 import { AEFT_PURGE_TARGETS, hostYear, hygieneOps, isUxpEraHost } from "./boostShared";
+import { errorText } from "@/lib/errorText";
 
 /** Une action en attente de confirmation : purge lourde ou hygiène projet. */
 type Pending = { kind: "purge"; id: string } | { kind: "hygiene"; id: string };
@@ -66,7 +67,7 @@ export function BoostPurgeSection({
           : t("boost.purge.done"),
       );
     } catch (e) {
-      report(false, String(e));
+      report(false, errorText(e));
     } finally {
       setBusy(null);
       setPending(null);
@@ -87,7 +88,7 @@ export function BoostPurgeSection({
           : r.error || t("notice.failed"),
       );
     } catch (e) {
-      report(false, String(e));
+      report(false, errorText(e));
     } finally {
       setBusy(null);
       setPending(null);
@@ -101,7 +102,7 @@ export function BoostPurgeSection({
       const r = await nr.boostDeletePreviews(app);
       report(!!r.ok, r.ok ? t("boost.purge.previewsDone") : r.error || t("notice.failed"));
     } catch (e) {
-      report(false, String(e));
+      report(false, errorText(e));
     } finally {
       setBusy(null);
       setPending(null);

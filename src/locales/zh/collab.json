@@ -1,11 +1,11 @@
 {
   "title": "共享与协作",
-  "subtitle": "这台设备、联系人、邀请以及你共享的文档。",
+  "subtitle": "这台设备、成员、邀请以及你共享的文档。",
   "signedOut": "登录后即可共享文档。",
   "surface": {
     "unknown": "共享文档",
-    "board": "参考板",
-    "collection": "集合",
+    "board": "参考画板",
+    "collection": "合集",
     "notebook": "NetsuBook 笔记本",
     "notebook-page": "NetsuBook 文档"
   },
@@ -63,8 +63,8 @@
       "editor": "可编辑",
       "viewer": "仅查看"
     },
-    "absent_one": "{{count}} 个共享不在本机",
-    "absent_other": "{{count}} 个共享不在本机"
+    "absent_one": "{{count}} 个文档不在本机",
+    "absent_other": "{{count}} 个文档不在本机"
   },
   "activity": {
     "title": "协作动态",
@@ -80,7 +80,7 @@
   "dialog": {
     "title": "协作",
     "subtitle": "选择要邀请到此文档的成员。",
-    "noFriends": "请先在 设置 › 账号 › 共享 中添加成员。",
+    "noFriends": "请先在“设置 › 账号 › 共享”中添加成员。",
     "notice": "该文档将变为协作文档。受邀者会在下次启动时收到邀请。",
     "create": "创建并邀请",
     "invite": "邀请",
@@ -132,11 +132,12 @@
     "queued": "等待发送。",
     "upToDate": "已全部发送。",
     "rotation": "需要新密钥。请所有者打开应用。",
-    "waitingKey": "{{count}} 人在等待密钥。请保持在线。",
-    "nobodyReachable": "无人在线，尚未发送。"
+    "nobodyReachable": "无人在线，尚未发送。",
+    "waitingKey_one": "{{count}} 人在等待密钥。请保持在线。",
+    "waitingKey_other": "{{count}} 人在等待密钥。请保持在线。"
   },
   "board": {
-    "noScene": "请先将此看板保存到场景库。",
-    "willAdopt": "此看板将复制到场景库。.netsu 文件仍保留在你的磁盘上。"
+    "noScene": "请先将此画板保存到场景库。",
+    "willAdopt": "此画板将复制到场景库。.netsu 文件仍保留在你的磁盘上。"
   }
 }

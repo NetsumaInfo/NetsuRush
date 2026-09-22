@@ -92,15 +92,6 @@
     "title": "NetsuRush a planté au rendu",
     "reload": "Recharger"
   },
-  "notebook": {
-    "untitled": "Sans titre",
-    "prev": "Précédent",
-    "next": "Suivant",
-    "closeTab": "Fermer l'onglet",
-    "closeOthers": "Fermer les autres",
-    "allTabs": "Tous les onglets",
-    "newPageTab": "Nouvelle page dans un onglet"
-  },
   "emoji": {
     "search": "Rechercher un emoji…",
     "none": "Aucun emoji pour « {{q}} ».",

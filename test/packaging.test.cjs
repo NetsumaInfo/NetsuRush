@@ -80,6 +80,13 @@ test('release metadata and updater manifest generator are present', () => {
   const generator = fs.readFileSync(path.join(root, 'scripts', 'create-update-manifest.mjs'), 'utf8');
   assert.ok(releases.length > 0);
   assert.ok(releases.every((release) => release.id && release.version && release.highlights.fr.length));
+  // The notes open in the interface language: a missing one shows English to that user.
+  for (const release of releases) {
+    for (const lang of ['fr', 'en', 'es', 'de', 'ja', 'zh']) {
+      assert.ok(release.title[lang], `${release.id}: title has no ${lang}`);
+      assert.equal(release.highlights[lang]?.length, release.highlights.fr.length, `${release.id}: highlights ${lang}`);
+    }
+  }
   assert.match(generator, /endsWith\("-setup\.exe"\)/);
   assert.match(generator, /name\.includes\(`_\$\{pkg\.version\}_`\)/);
   assert.doesNotMatch(generator, /\.nsis\.zip/);

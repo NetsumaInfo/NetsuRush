@@ -22,6 +22,7 @@ import { NR_FOOTAGE_DND, isAudioPath, type FootageDrag } from "./scriptShared";
 import { attachTranscriptHit, TranscriptHitRow, useTranscriptHits } from "./TranscriptSearch";
 import { useScript } from "./useScript";
 import { useDragEndReset } from "@/lib/dropZone";
+import { errorText } from "@/lib/errorText";
 
 const isAudio = (c: Clip) => isAudioPath(c.path);
 
@@ -211,7 +212,7 @@ export function FootagesPanel({ collapsed, width, onHome }: { collapsed: boolean
       setScriptPool(result.clips ?? []);
       setPoolError(result.error ?? null);
     } catch (error) {
-      setPoolError(String(error));
+      setPoolError(errorText(error));
     }
   }, []);
   useEffect(() => { if (!collapsed) void refreshPool(); }, [collapsed, connected, refreshPool]);

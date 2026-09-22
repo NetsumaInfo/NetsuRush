@@ -102,7 +102,7 @@ export function AdobeBridgePanel() {
             {t("panel.cepTitle")}
             <InfoTip
               text={adobeStatus?.panelInstalled
-                ? `${t("panel.inApp")}${t("panel.menuPath")}${t("panel.restartHint")}`
+                ? t("panel.openHint", { menu: t("panel.menuPath") })
                 : t("panel.installHint")}
             />
           </span>

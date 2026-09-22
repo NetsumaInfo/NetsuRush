@@ -31,7 +31,7 @@
     "project": "Proyecto: {{project}}",
     "refresh": "Actualizar estado",
     "resolveHint": "El puente funciona, Resolve no responde. Abre <b1>Resolve Studio</b1> con un proyecto, activa <b2>Preferencias ▸ Sistema ▸ General ▸ Scripting externo = Local</b2> y reinícialo.",
-    "adobeHint": "Abrir {{host}} y luego el panel <b>Ventana ▸ Extensiones ▸ NetsuRush</b> (se instala desde la pestaña Adobe)."
+    "adobeHint": "Abre {{host}} y luego el panel <b>Ventana ▸ Extensiones ▸ NetsuRush</b> (se instala desde la pestaña Adobe)."
   },
   "menu": {
     "derush": "Visionado",
@@ -46,7 +46,7 @@
     "section": "Sección",
     "sectionDecoupage": "Corte",
     "sectionCollections": "Colecciones",
-    "sectionTimeline": "Timeline en vivo",
+    "sectionTimeline": "Timeline Live",
     "search": "Búsqueda",
     "resultView": "Vista de resultados",
     "resultFlat": "Lista",
@@ -92,18 +92,9 @@
     "title": "NetsuRush falló al renderizar",
     "reload": "Recargar"
   },
-  "notebook": {
-    "untitled": "Sin título",
-    "prev": "Anterior",
-    "next": "Siguiente",
-    "closeTab": "Cerrar la pestaña",
-    "closeOthers": "Cerrar las demás",
-    "allTabs": "Todas las pestañas",
-    "newPageTab": "Nueva página en una pestaña"
-  },
   "emoji": {
     "search": "Buscar un emoji…",
-    "none": "Ningún emoji para «{{q}}».",
+    "none": "No hay emojis para «{{q}}».",
     "cat": {
       "people": "Emoticonos y personas",
       "nature": "Animales y naturaleza",
@@ -132,7 +123,7 @@
     "dismissHint": "Quitar este recordatorio",
     "closeHostQ": "¿Cerrar {{host}}?",
     "freeRamDesc": "Libera RAM y GPU.",
-    "resolveSafeCloseDesc": "Libera RAM y GPU. Proyecto guardado antes.",
+    "resolveSafeCloseDesc": "Libera RAM y GPU. El proyecto se guarda antes.",
     "later": "Más tarde",
     "closeHost": "Cerrar {{host}}",
     "failed": "error"

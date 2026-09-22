@@ -12,6 +12,7 @@ import { nr } from "@/lib/bridge";
 import type { OptimizeResources } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
 import { useTranslation } from "react-i18next";
+import { errorText } from "@/lib/errorText";
 
 const mib = (mb: number) => fmtBytes(mb * 1024 * 1024);
 
@@ -86,7 +87,7 @@ export function GpuSection() {
         setNotice(main + dead);
       }
     } catch (e) {
-      setNotice(String(e));
+      setNotice(errorText(e));
     } finally {
       setBusy(null);
     }

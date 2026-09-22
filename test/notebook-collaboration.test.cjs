@@ -56,6 +56,7 @@ function storeFixture(savePage) {
     '@/components/notebook/notebookPrefs': { readPrefs: () => ({}) },
     '@/components/notebook/notebookCollabState': { notebookCanEdit: () => true, notebookCollabState: {} },
     '@/i18n': { default: { t: (key) => key, language: 'en' } },
+    '@/lib/errorText': { errorText: (e) => (e instanceof Error ? e.message : String(e)) },
   });
   state = store.createNotebookSlice((patch) => { Object.assign(state, typeof patch === 'function' ? patch(state) : patch); }, () => state);
   Object.assign(state, { nbActiveId: 'nb', nbActivePageId: 'page', nbPage: snapshot().pages[0], nbDirty: true });

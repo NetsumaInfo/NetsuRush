@@ -4,12 +4,12 @@
   },
   "panel": {
     "title": "Optimierung",
-    "diagnose": "Diagnose",
+    "diagnose": "Diagnostizieren",
     "diagError": "Diagnosefehler: {{error}}"
   },
   "diagnostic": {
     "offline": "Resolve offline",
-    "offlineHint": "Braucht Resolve Studio offen + externes Scripting = Local. Cache bereinigen geht weiterhin.",
+    "offlineHint": "Benötigt ein geöffnetes Resolve Studio + externes Scripting = Local. Die Cache-Bereinigung funktioniert weiterhin.",
     "project": "Projekt",
     "timelineLabel": "Timeline: {{name}}",
     "noTimeline": "Keine aktive Timeline",
@@ -20,29 +20,29 @@
     "renderIdle": "Inaktiv",
     "jobsQueued_one": "{{count}} Job in der Warteschlange",
     "jobsQueued_other": "{{count}} Jobs in der Warteschlange",
-    "settingsRead": "Performance-Einstellungen gelesen",
-    "cacheProxyKeys": "Cache-/Proxy-Schlüssel: {{count}}",
+    "settingsRead": "Leistungseinstellungen gelesen",
     "noCacheFolder": "Kein Cache-Ordner erkannt",
     "database": "Datenbank",
     "dbBig": "{{name}} · groß → aufteilen",
-    "dbHealthy": "{{name}} · gesunde Größe",
+    "dbHealthy": "{{name}} · Größe in Ordnung",
     "dbRemote": "PostgreSQL",
     "dbMissing": "Nicht gefunden",
     "cacheFoldersDetected_one": "{{count}} Cache-Ordner erkannt",
-    "cacheFoldersDetected_other": "{{count}} Cache-Ordner erkannt"
+    "cacheFoldersDetected_other": "{{count}} Cache-Ordner erkannt",
+    "cacheProxyKeys_one": "Cache-/Proxy-Schlüssel: {{count}}",
+    "cacheProxyKeys_other": "Cache-/Proxy-Schlüssel: {{count}}"
   },
   "memory": {
     "title": "Sitzungsspeicher",
-    "measuring": "Messung läuft — der Anstieg erscheint in etwa einer Minute.",
+    "measuring": "Messung läuft – der Anstieg erscheint in etwa einer Minute.",
     "drift": "Resolve.exe: {{now}} · {{drift}} seit {{elapsed}}",
     "driftDown": "Resolve.exe: {{now}} · stabil seit {{elapsed}}",
     "vram": "VRAM: {{used}} / {{total}} GB",
-    "verdictOk": "Sitzung gesund.",
-    "verdictWatch": "Resolve wird schwer. Projekt neu laden gibt den RAM der Timelines frei.",
-    "verdictHigh": "Sitzung sehr voll. Nur ein Neustart gibt VRAM und Fusion-Cache frei.",
+    "verdictWatch": "Resolve belegt immer mehr Speicher. Ein Neuladen des Projekts gibt den RAM der Timelines frei.",
+    "verdictHigh": "Sitzung stark ausgelastet. Nur ein Neustart gibt VRAM und Fusion-Cache frei.",
     "reload": "Projekt neu laden",
     "reloadTitle": "„{{project}}“ neu laden?",
-    "reloadBody": "Gespeichert, geschlossen, wieder geöffnet: der RAM der gestapelten Timelines wird frei, du landest auf deiner Seite. Kein Verlust. Nicht während eines Renderns.",
+    "reloadBody": "Gespeichert, geschlossen, wieder geöffnet: Der RAM der gestapelten Timelines wird frei, du landest auf deiner Seite. Kein Verlust. Nicht während eines Renderns.",
     "reloadDone": "Projekt „{{project}}“ neu geladen.",
     "restart": "Resolve neu starten",
     "restartTitle": "Resolve neu starten?",
@@ -51,7 +51,7 @@
   },
   "prefs": {
     "title": "Resolve-Einstellungen",
-    "subtitle": "Echte Werte von der Festplatte gelesen. Die Scripting-API schreibt diese Einstellungen nicht — Anwenden schließt und öffnet Resolve neu.",
+    "subtitle": "Echte Werte von der Festplatte gelesen. Die Scripting-API schreibt diese Einstellungen nicht – Anwenden schließt und öffnet Resolve neu.",
     "unavailable": "Resolve-Einstellungen nicht lesbar: {{error}}",
     "warn": "prüfen",
     "advisory": "je nach Fall",
@@ -61,26 +61,25 @@
     "apply": "Anwenden und neu starten",
     "reset": "Abbrechen",
     "applyBody": "Das Projekt wird gespeichert, die aktuelle Konfiguration gesichert, Resolve geschlossen, die Einstellungen geschrieben, dann Resolve mit „{{project}}“ neu geöffnet. Dauert ein bis zwei Minuten. Nicht während eines Renderns.",
-    "applyDone_one": "{{count}} Einstellung angewendet — Resolve neu gestartet.",
-    "applyDone_other": "{{count}} Einstellungen angewendet — Resolve neu gestartet.",
+    "applyDone_one": "{{count}} Einstellung angewendet – Resolve neu gestartet.",
+    "applyDone_other": "{{count}} Einstellungen angewendet – Resolve neu gestartet.",
     "applyNoRestart": "Einstellungen geschrieben. Resolve ließ sich nicht neu öffnen: {{error}}",
     "backups": "Sicherungen",
     "backupsHint": "Konfiguration vor jedem Anwenden. Wiederherstellen bei geschlossenem Resolve möglich.",
     "restore": "Wiederherstellen",
-    "restoreDone": "Konfiguration wiederhergestellt. Resolve neu starten, damit sie greift.",
-    "noBackups": "Keine Sicherung — das erste Anwenden legt eine an.",
-    "on": "An",
-    "off": "Aus",
+    "restoreDone": "Konfiguration wiederhergestellt. Starte Resolve neu, damit sie greift.",
+    "on": "Aktiviert",
+    "off": "Deaktiviert",
     "items": {
       "loadAllTimelines": {
         "label": "Alle Timelines beim Öffnen laden",
         "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
-        "body": "Angeschaltet lädt jede Timeline beim Öffnen des Projekts in den RAM. Blackmagic lässt das standardmäßig aus, damit Projekte mit vielen Timelines schnell öffnen."
+        "body": "Wenn aktiviert, lädt Resolve beim Öffnen des Projekts alle Timelines in den RAM. Blackmagic lässt das standardmäßig aus, damit Projekte mit vielen Timelines schnell öffnen."
       },
       "resolveMemory": {
         "label": "Speicherlimit von Resolve",
         "where": "Einstellungen ▸ System ▸ Speicher und GPU",
-        "body": "Standard 75 % des RAM. Senken macht Resolve nicht schneller: es reserviert RAM für andere Programme — auch für die KI-Verarbeitung von NetsuRush. Richte dich danach, was parallel läuft."
+        "body": "Standard: 75 % des Arbeitsspeichers. Ein niedrigerer Wert macht Resolve nicht schneller: Er reserviert RAM für andere Programme – auch für die KI-Verarbeitung von NetsuRush. Richte dich danach, was parallel läuft."
       },
       "fusionMemory": {
         "label": "Fusion-Speichercache",
@@ -90,32 +89,32 @@
       "gpuMode": {
         "label": "GPU-Verarbeitungsmodus",
         "where": "Einstellungen ▸ System ▸ Speicher und GPU",
-        "body": "Auto wählt auf NVIDIA bereits CUDA. Nur erzwingen, wenn trotz NVIDIA-Karte OpenCL ausgewählt ist."
+        "body": "Auto wählt auf NVIDIA bereits CUDA. Erzwinge es nur, wenn trotz NVIDIA-Karte OpenCL ausgewählt ist."
       },
       "hwDecode": {
         "label": "Hardware-Dekodierung H.264/H.265",
         "where": "Einstellungen ▸ System ▸ Dekodierung",
-        "body": "Verlagert das Dekodieren auf die GPU. Zuverlässig bei 8 Bit 4:2:0; 4:2:2 und 4:4:4 hängen von der Karte ab. Bei Artefakten ausschalten."
+        "body": "Verlagert das Dekodieren auf die GPU. Zuverlässig bei 8 Bit 4:2:0; 4:2:2 und 4:4:4 hängen von der Karte ab. Schalte es aus, wenn du Artefakte siehst."
       },
       "liveSave": {
         "label": "Live Save",
         "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
-        "body": "Speichert bei jeder Änderung. Das Handbuch empfiehlt es und nennt den Einfluss minimal; gemeldete Bremsen treten auf Netzwerk- oder langsamem Speicher auf. Auf lokaler SSD anlassen."
+        "body": "Speichert bei jeder Änderung. Das Handbuch empfiehlt es und nennt den Einfluss minimal; gemeldete Verlangsamungen betreffen Netzwerk- oder langsamen Speicher. Lass es auf einer lokalen SSD an."
       },
       "timelineBackups": {
         "label": "Timeline-Sicherungen",
         "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
-        "body": "Regelmäßige Schnappschüsse zusätzlich zu den Projektsicherungen. Die erste am Tag kann hängen, die nächsten merkt man nicht."
+        "body": "Regelmäßige Schnappschüsse zusätzlich zu den Projektsicherungen. Die erste am Tag kann etwas dauern, die weiteren merkt man nicht."
       }
     },
     "applyTitle_one": "{{count}} Änderung anwenden?",
     "applyTitle_other": "{{count}} Änderungen anwenden?"
   },
   "gpu": {
-    "title": "Monitor GPU / CPU / RAM",
+    "title": "GPU-/CPU-/RAM-Monitor",
     "free": "Freigeben",
-    "saturated": "{{what}} voll — Absturzgefahr. Jetzt freigeben oder neu laden.",
-    "vramUnreadable": "Die VRAM-Anzeige ist für diesen Treiber nicht verfügbar. Die Verarbeitung bleibt verfügbar.",
+    "saturated": "{{what}} voll – Absturzgefahr. Gib jetzt Speicher frei oder lade neu.",
+    "vramUnreadable": "Live-VRAM-Anzeige für diesen Treiber nicht verfügbar. Die Verarbeitung funktioniert weiterhin.",
     "ramSystem": "System-RAM",
     "resolveRam": "Resolve.exe: {{size}}",
     "nothingToFree": "Nichts freizugeben",
@@ -128,7 +127,7 @@
   "process": {
     "title": "Speicherfresser (ganzer PC)",
     "cleanBlocked": "Hängende bereinigen",
-    "scan": "Scannen",
+    "scan": "Analysieren",
     "colProcess": "Prozess",
     "colAction": "Aktion",
     "protected": "(geschützt)",
@@ -138,8 +137,8 @@
     "killed": "{{name}} (PID {{pid}}) beendet.",
     "noneBlocked": "Keine hängenden Prozesse zu bereinigen.",
     "killTitle": "{{name}} beenden?",
-    "killForced": "Erzwungenes Schließen — nicht Gespeichertes geht verloren.",
-    "cleanBody": "Eingefrorene Programme („Reagiert nicht“). Erzwungenes Schließen — nicht Gespeichertes geht verloren.",
+    "killForced": "Erzwungenes Schließen – nicht Gespeichertes geht verloren.",
+    "cleanBody": "Eingefrorene Programme („Reagiert nicht“). Erzwungenes Schließen – nicht Gespeichertes geht verloren.",
     "clean": "Bereinigen",
     "cleaned_one": "{{count}} hängender Prozess bereinigt.",
     "cleaned_other": "{{count}} hängende Prozesse bereinigt.",
@@ -150,12 +149,11 @@
     "title": "Speicherüberwachung",
     "idle": "Im Ruhezustand – wird bei einem Rendering oder einer Kodierung aktiv.",
     "armed": "Aktiv: {{source}} läuft.",
-    "on": "Ein",
-    "off": "Aus",
+    "on": "Aktiviert",
+    "off": "Deaktiviert",
     "gauges": "RAM verfügbar {{ram}} % · VRAM belegt {{vram}} %",
-    "lastPurge": "{{freed}} an den Rechner zurückgegeben ({{count}} Aufgaben entlastet).",
     "suggestTitle": "Freigeben hat nicht gereicht",
-    "suggestBody": "Diese Hintergrundaufgaben belegen Speicher, den keine Freigabe zurückholt. Sie zu beenden ist deine Entscheidung.",
+    "suggestBody": "Diese Hintergrundaufgaben belegen Speicher, den keine Freigabe zurückholt. Ob du sie beendest, entscheidest du.",
     "stopThem_one": "Diese Aufgabe beenden",
     "stopThem_other": "Diese {{count}} Aufgaben beenden",
     "ignore": "Ignorieren",
@@ -163,7 +161,9 @@
       "export": "ein Export",
       "proxy": "eine Proxy-Kodierung",
       "render": "ein Rendering"
-    }
+    },
+    "lastPurge_one": "{{freed}} an den Rechner zurückgegeben ({{count}} Aufgabe entlastet).",
+    "lastPurge_other": "{{freed}} an den Rechner zurückgegeben ({{count}} Aufgaben entlastet)."
   },
   "noise": {
     "title": "Unnötige Hintergrundaufgaben",
@@ -179,7 +179,7 @@
       "updaters": "Updater",
       "overlays": "Overlay",
       "sync": "Synchronisierung",
-      "social": "Messaging",
+      "social": "Messenger",
       "browsers": "Browser"
     }
   },
@@ -192,16 +192,17 @@
   "cleanup": {
     "title": "Resolve-Cache bereinigen",
     "browse": "Durchsuchen",
-    "rescan": "Neu scannen",
+    "rescan": "Erneut analysieren",
     "folder": "Ordner: {{path}}",
     "disk": "Datenträger: {{free}} frei / {{total}}",
-    "diskFull": "Datenträger fast voll — Resolve kann einfrieren.",
+    "diskFull": "Datenträger fast voll – Resolve kann einfrieren.",
     "noneFound": "Kein Resolve-Cache hier gefunden.",
     "cleanSelection": "Auswahl bereinigen ({{size}})",
     "confirmTitle": "Diese Caches löschen?",
-    "confirmBody": "{{size}} frei. Resolve zuerst schließen. Inhalt gelöscht, bei Bedarf neu erzeugt:",
-    "freed": "{{size}} frei ({{count}} Ordner).",
-    "cleanFailed": "Fehlgeschlagen: {{error}}"
+    "confirmBody": "{{size}} werden frei. Schließ zuerst Resolve. Diese Inhalte werden gelöscht und bei Bedarf neu erzeugt:",
+    "cleanFailed": "Fehlgeschlagen: {{error}}",
+    "freed_one": "{{size}} frei ({{count}} Ordner).",
+    "freed_other": "{{size}} frei ({{count}} Ordner)."
   },
   "stop": {
     "title": "Aufgaben stoppen",
@@ -227,7 +228,7 @@
       "optimizedmedia": {
         "title": "Optimierte Medien",
         "where": "Rechtsklick auf die Clips ▸ Optimierte Medien erzeugen",
-        "body": "Einmal nach DNxHR wandeln, danach flüssige Wiedergabe. Das echte Mittel gegen zähes H.264/H.265, viel mehr als der Cache."
+        "body": "Einmal in DNxHR umwandeln, danach läuft die Wiedergabe flüssig. Das echte Mittel gegen ruckelndes H.264/H.265, viel mehr als der Cache."
       },
       "effectsheavy": {
         "title": "Gestapelte Effekte und Farbkorrekturen",
@@ -252,7 +253,7 @@
       "cacheotherdisk": {
         "title": "Cache auf dem Material-Laufwerk",
         "where": "Voreinstellungen ▸ Arbeitsvolumes",
-        "body": "Cache und Medien auf demselben Volume konkurrieren um denselben Lesekopf. Sie zu trennen kostet eine Einstellung und wirkt sofort."
+        "body": "Cache und Medien auf demselben Volume konkurrieren um denselben Lesekopf. Beides zu trennen kostet eine Einstellung und wirkt sofort."
       },
       "diskcachessd": {
         "title": "Festplatten-Cache auf SSD",
@@ -262,7 +263,7 @@
       "diskcacheon": {
         "title": "Festplatten-Cache deaktiviert",
         "where": "Voreinstellungen ▸ Speicher & Leistung ▸ Festplatten-Cache aktivieren",
-        "body": "Nicht aktiviert, beginnt jede Vorschau von vorn, sobald der Arbeitsspeicher voll ist. Das ist der leiseste Zeitfresser in After Effects."
+        "body": "Ist die Option deaktiviert, beginnt jede Vorschau von vorn, sobald der Arbeitsspeicher voll ist. Das ist der leiseste Zeitfresser in After Effects."
       },
       "mfrcpu": {
         "title": "CPU-Anteil zu hoch",
@@ -293,7 +294,7 @@
       "panelInstalled": "Erweiterung installiert – starte die Anwendung neu",
       "installPanel": "Erweiterung installieren",
       "panelHint": "Öffne die Anwendung und dann Fenster ▸ Erweiterungen ▸ NetsuRush.",
-      "uxpHint": "Premiere Pro {{year}} lädt zuerst UXP. Fehlt die Erweiterung unter Fenster ▸ Erweiterungen, neu installieren und neu starten.",
+      "uxpHint": "Premiere Pro {{year}} lädt zuerst UXP. Fehlt die Erweiterung unter Fenster ▸ Erweiterungen, installiere sie neu und starte die Anwendung neu.",
       "caches": "Caches",
       "cacheFolders_one": "{{count}} Ordner erkannt",
       "cacheFolders_other": "{{count}} Ordner erkannt",
@@ -308,10 +309,10 @@
       "noneFound": "Auf diesem Rechner wurde kein Cache gefunden.",
       "ageFilter": "Alter",
       "ageAll": "Alle",
-      "ageDays": "Über {{days}} T",
-      "shared": "Gemeinsam",
+      "ageDays": "Über {{days}} Tage",
+      "shared": "Gemeinsam genutzt",
       "notRegenerable": "Nicht wiederherstellbar",
-      "slowRebuild": "Langsames Reconform",
+      "slowRebuild": "Langsames Konformieren",
       "dbWarning": "Das Leeren der Cache-Datenbank zwingt Adobe, beim nächsten Start alle Medien neu zu konformieren: Das dauert lange und lässt sich durch keine Einstellung beschleunigen.",
       "autoSaveWarning": "Automatische Sicherungen sind Versionen deiner Arbeit, kein Cache: Einmal gelöscht, kommen sie nicht zurück.",
       "closePurgeReopen": "Schließen, leeren, erneut öffnen",
@@ -329,7 +330,7 @@
         "mediaCacheFiles": "Medien-Cache-Dateien",
         "mediaCacheDb": "Medien-Cache-Datenbank",
         "peakFiles": "Audio-Wellenformen",
-        "aeDiskCache": "After Effects Festplatten-Cache",
+        "aeDiskCache": "Festplatten-Cache von After Effects",
         "autoSave": "Automatische Sicherungen",
         "videoPreviews": "Video-Vorschauen",
         "audioPreviews": "Audio-Vorschauen",
@@ -349,11 +350,11 @@
       "subtitle": "Premiere Pro und After Effects lassen nach dem Schließen Hilfsprozesse laufen. Jeder für sich ist klein, ihre Summe nicht.",
       "summary_one": "{{count}} Prozess · {{size}}",
       "summary_other": "{{count}} Prozesse · {{size}}",
-      "scan": "Prüfen",
+      "scan": "Analysieren",
       "colProcess": "Prozess",
       "colAction": "Aktion",
       "protected": "geschützt",
-      "protectedTip": "Die Host-Anwendung läuft: Beenden würde den aktuellen Schnitt verlieren.",
+      "protectedTip": "Die Host-Anwendung läuft: Beim Beenden geht der aktuelle Schnitt verloren.",
       "kill": "Beenden",
       "none": "Keine verbliebenen Adobe-Prozesse.",
       "killed": "{{name}} beendet",
@@ -361,7 +362,7 @@
       "killForced": "Erzwungenes Beenden: Nicht gespeicherte Arbeit dieses Prozesses geht verloren."
     },
     "purge": {
-      "title": "Leeren",
+      "title": "Bereinigung",
       "subtitle": "Aktionen, die die NetsuRush-Erweiterung in der Anwendung ausführt.",
       "needsPanel": "Benötigt die geöffnete Anwendung mit der NetsuRush-Erweiterung (Fenster ▸ Erweiterungen ▸ NetsuRush).",
       "memoryInUse": "von After Effects belegt",
@@ -381,7 +382,7 @@
       "uxpEra": "Premiere Pro {{year}}: Adobe setzt auf UXP, ExtendScript wird nicht mehr gepflegt und der Support endet im September 2026. Dieser Aufruf kann stillschweigend fehlschlagen.",
       "uxpFallback": "Der Abschnitt Festplatten-Caches oben erledigt dasselbe ganz ohne Adobe-API.",
       "hygiene": "Projekt aufräumen",
-      "hygieneHint": "Wirkt auf das geöffnete Projekt und bleibt in der Anwendung widerrufbar.",
+      "hygieneHint": "Wirkt auf das geöffnete Projekt und lässt sich in der Anwendung rückgängig machen.",
       "hygieneOps": {
         "removeUnused": "Nicht verwendetes Material entfernen",
         "consolidate": "Doppeltes Material zusammenführen",
@@ -393,7 +394,7 @@
       "hygieneDone_other": "{{count}} Elemente entfernt",
       "previewsDone": "Renderdateien gelöscht",
       "confirmHeavy": "Der Festplatten-Cache wird geleert: Vorschauen müssen neu berechnet werden.",
-      "confirmHygiene": "Ändert das geöffnete Projekt. Der Vorgang bleibt in der Anwendung widerrufbar."
+      "confirmHygiene": "Ändert das geöffnete Projekt. Der Vorgang lässt sich in der Anwendung rückgängig machen."
     },
     "prefs": {
       "title": "Leistungseinstellungen",
@@ -403,8 +404,8 @@
       "advisory": "Maschinenabhängig",
       "volatile": "Nicht dauerhaft",
       "writeOnly": "Die Anwendung bietet keine Lesemöglichkeit für diese Einstellung: Der aktuelle Wert ist unbekannt, nur Schreiben ist möglich.",
-      "on": "Ein",
-      "off": "Aus",
+      "on": "Aktiviert",
+      "off": "Deaktiviert",
       "noPath": "Kein Ordner",
       "none": "In dieser Version keine lesbare Einstellung.",
       "apply_one": "Anwenden ({{count}})",
@@ -412,8 +413,8 @@
       "applied_one": "{{count}} Einstellung angewendet",
       "applied_other": "{{count}} Einstellungen angewendet",
       "applyTitle": "Einstellungen anwenden?",
-      "applyBody_one": "{{count}} Einstellung wird in die Anwendung geschrieben. Der Stapel wird als Ganzes geprüft: nichts wird halb angewendet.",
-      "applyBody_other": "{{count}} Einstellungen werden in die Anwendung geschrieben. Der Stapel wird als Ganzes geprüft: nichts wird halb angewendet.",
+      "applyBody_one": "{{count}} Einstellung wird in die Anwendung geschrieben. Der Stapel wird als Ganzes geprüft: Nichts wird halb angewendet.",
+      "applyBody_other": "{{count}} Einstellungen werden in die Anwendung geschrieben. Der Stapel wird als Ganzes geprüft: Nichts wird halb angewendet.",
       "items": {
         "gpuAccelType": {
           "label": "GPU-Beschleunigung beim Rendern",
@@ -433,7 +434,7 @@
         },
         "mfrEnabled": {
           "label": "Multi-Frame-Rendering",
-          "body": "Adobe setzt diese Einstellung am Ende jedes Skripts zurück: Sie gilt nur für ein von NetsuRush gesteuertes Rendering, nicht dauerhaft."
+          "body": "Adobe setzt diese Einstellung am Ende jedes Skripts zurück: Die Einstellung gilt nur für ein von NetsuRush gesteuertes Rendering, nicht dauerhaft."
         },
         "mfrMaxCpuPct": {
           "label": "CPU-Anteil für Multi-Frame-Rendering",
@@ -445,7 +446,7 @@
         },
         "scratchVideoPreviews": {
           "label": "Ordner für Video-Vorschauen",
-          "body": "Auf einer schnellen SSD getrennt vom Material-Laufwerk abzulegen, ist die lohnendste Datenträgereinstellung."
+          "body": "Den Ordner auf eine schnelle SSD getrennt vom Material-Laufwerk zu legen, ist die lohnendste Datenträgereinstellung."
         },
         "scratchAudioPreviews": {
           "label": "Ordner für Audio-Vorschauen",
@@ -453,7 +454,7 @@
         },
         "scratchAutoSave": {
           "label": "Ordner für automatische Sicherungen",
-          "body": "Auf einem anderen Laufwerk als das Projekt schützt es vor einem Ausfall des Volumes."
+          "body": "Liegt der Ordner auf einem anderen Laufwerk als das Projekt, schützt das vor einem Ausfall des Laufwerks."
         }
       }
     },
@@ -462,7 +463,7 @@
       "summary": "{{withProxy}} von {{total}} Clips haben einen Proxy",
       "needsPanel": "Benötigt geöffnetes Premiere Pro mit der NetsuRush-Erweiterung.",
       "useProxies": "Proxys abspielen",
-      "rescan": "Erneut prüfen",
+      "rescan": "Erneut analysieren",
       "has": "Proxy",
       "missing": "Kein Proxy",
       "cannot": "Nicht möglich",
@@ -471,9 +472,10 @@
       "generate_other": "Erzeugen und anhängen ({{count}})",
       "attached_one": "{{count}} Proxy angehängt",
       "attached_other": "{{count}} Proxys angehängt",
-      "attachedPartial": "{{count}} Proxys angehängt, {{missed}} fehlgeschlagen",
       "encodeFailed_one": "{{count}} Clip konnte nicht kodiert werden",
-      "encodeFailed_other": "{{count}} Clips konnten nicht kodiert werden"
+      "encodeFailed_other": "{{count}} Clips konnten nicht kodiert werden",
+      "attachedPartial_one": "{{count}} Proxy angehängt, {{missed}} fehlgeschlagen",
+      "attachedPartial_other": "{{count}} Proxys angehängt, {{missed}} fehlgeschlagen"
     }
   }
 }
