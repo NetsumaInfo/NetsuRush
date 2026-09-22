@@ -73,7 +73,7 @@
     "animatedNone": "キーフレームを読み取れません：DaVinci Resolve はスクリプトで公開せず、XML 書き出しだけが保持します。",
     "tracksClamped": "トラックを制限しました：転送先アプリケーションが十分な数を作成できませんでした。",
     "vehicleImport": "DaVinci Resolve が編集を読み込みました：キーフレーム、オーディオレベル、速度はアプリケーション自身が適用します。",
-    "vehicleApi": "スクリプトでクリップを1つずつ配置しました：キーフレームは NetsuRush が読み取った内容です。",
+    "vehicleApi": "スクリプトでクリップを 1 つずつ配置しました：キーフレームは NetsuRush が読み取った内容です。",
     "exchangeFile": "DaVinci Resolve がスクリプト経由の編集を拒否しました。同じファイルは手動なら正しく読み込めます（キーフレームとオーディオレベルを含む）：ファイル ▸ 読み込み ▸ タイムライン。",
     "done_one": "{{count}} 件のショットを「{{timeline}}」（{{host}}）に配置しました。",
     "done_other": "{{count}} 件のショットを「{{timeline}}」（{{host}}）に配置しました。",

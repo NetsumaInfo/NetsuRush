@@ -29,7 +29,7 @@
     "empty": "表示するものがありません"
   },
   "color": {
-    "hexValue": "16進カラー値",
+    "hexValue": "16 進カラー値",
     "transparent": "透明",
     "choose": "色を選択",
     "swatch": "色 {{color}}"

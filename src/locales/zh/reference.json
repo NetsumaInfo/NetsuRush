@@ -45,8 +45,8 @@
     "freezeAll": "全部冻结",
     "saveScene": "保存场景",
     "openScene": "打开场景",
-    "share": "分享",
-    "shareProject": "分享项目…",
+    "share": "共享",
+    "shareProject": "共享项目…",
     "unsaved": "未保存",
     "saveAs": "另存为…",
     "snapOn": "启用吸附",
@@ -633,7 +633,7 @@
     },
     "useDefault": "画板设置",
     "itemTitle": "这段视频保留什么",
-    "itemLabel": "分享：{{level}}",
+    "itemLabel": "共享：{{level}}",
     "settings": {
       "title": "媒体存储",
       "hint": ".netsu 默认包含的内容。可在检查器中逐个媒体设置。"

@@ -47,7 +47,7 @@
     "container": "コンテナ",
     "processStep": "処理 {{n}}",
     "processKind": "種類",
-    "mergeToOne": "1つのファイルに結合",
+    "mergeToOne": "1 つのファイルに結合",
     "fileName": "ファイル名",
     "fileNamePlaceholder": "{base}_{index}",
     "insertToken": "トークンを挿入",

@@ -34,7 +34,7 @@
   },
   "memory": {
     "title": "セッションのメモリー",
-    "measuring": "計測中です。1分ほどで推移を表示します。",
+    "measuring": "計測中です。1 分ほどで推移を表示します。",
     "drift": "Resolve.exe：{{now}}・{{elapsed}} で {{drift}}",
     "driftDown": "Resolve.exe：{{now}}・{{elapsed}} 安定",
     "vram": "VRAM：{{used}} / {{total}} GB",
@@ -46,7 +46,7 @@
     "reloadDone": "プロジェクト「{{project}}」を再読み込みしました。",
     "restart": "Resolve を再起動",
     "restartTitle": "Resolve を再起動しますか？",
-    "restartBody": "保存して閉じ、「{{project}}」の同じページで再起動します。セッション中はどの API でも消せない VRAM と Fusion キャッシュが戻ります。1〜2分かかります。レンダリング中は避けてください。",
+    "restartBody": "保存して閉じ、「{{project}}」の同じページで再起動します。セッション中はどの API でも消せない VRAM と Fusion キャッシュが戻ります。1〜2 分かかります。レンダリング中は避けてください。",
     "restartDone": "Resolve を再起動し「{{project}}」を開きました。"
   },
   "prefs": {
@@ -60,7 +60,7 @@
     "pending_other": "未適用の変更 {{count}} 件",
     "apply": "適用して再起動",
     "reset": "取り消し",
-    "applyBody": "プロジェクトを保存し、現在の構成をバックアップし、Resolve を閉じて環境設定を書き込み、「{{project}}」で開き直します。1〜2分かかります。レンダリング中は避けてください。",
+    "applyBody": "プロジェクトを保存し、現在の構成をバックアップし、Resolve を閉じて環境設定を書き込み、「{{project}}」で開き直します。1〜2 分かかります。レンダリング中は避けてください。",
     "applyDone_one": "設定 {{count}} 件を適用し、Resolve を再起動しました。",
     "applyDone_other": "設定 {{count}} 件を適用し、Resolve を再起動しました。",
     "applyNoRestart": "設定を書き込みました。Resolve を開き直せませんでした：{{error}}",
@@ -79,12 +79,12 @@
       "resolveMemory": {
         "label": "Resolve のメモリー上限",
         "where": "環境設定 ▸ システム ▸ メモリーおよび GPU",
-        "body": "既定は RAM の 75 %。下げても Resolve は速くなりません。NetsuRush の AI 処理を含む他のアプリに RAM を残すための設定です。同時に動かすものに合わせて決めてください。"
+        "body": "既定は RAM の 75%。下げても Resolve は速くなりません。NetsuRush の AI 処理を含む他のアプリに RAM を残すための設定です。同時に動かすものに合わせて決めてください。"
       },
       "fusionMemory": {
         "label": "Fusion メモリーキャッシュ",
         "where": "環境設定 ▸ システム ▸ メモリーおよび GPU",
-        "body": "Resolve の割り当てのうち Fusion に回す割合（上限 80 %）。高いほど Fusion の再生が滑らかになり、エディットとカラーに残る RAM は減ります。"
+        "body": "Resolve の割り当てのうち Fusion に回す割合（上限 80%）。高いほど Fusion の再生が滑らかになり、エディットとカラーに残る RAM は減ります。"
       },
       "gpuMode": {
         "label": "GPU 処理モード",
@@ -113,7 +113,7 @@
   "gpu": {
     "title": "GPU / CPU / RAM モニター",
     "free": "解放",
-    "saturated": "{{what}}が限界に達しています。クラッシュのおそれがあります。今すぐ解放するか、再読み込みしてください。",
+    "saturated": "{{what}} が限界に達しています。クラッシュのおそれがあります。今すぐ解放するか、再読み込みしてください。",
     "vramUnreadable": "このドライバーでは VRAM を表示できません。処理機能は引き続き利用できます。",
     "ramSystem": "システム RAM",
     "resolveRam": "Resolve.exe：{{size}}",
@@ -148,10 +148,10 @@
   "watchdog": {
     "title": "メモリー監視",
     "idle": "待機中です。レンダリングまたはエンコード中に有効になります。",
-    "armed": "有効：{{source}}が進行中です。",
+    "armed": "有効：{{source}} が進行中です。",
     "on": "オン",
     "off": "オフ",
-    "gauges": "空きRAM {{ram}} %・VRAM使用 {{vram}} %",
+    "gauges": "空き RAM {{ram}}%・VRAM 使用 {{vram}}%",
     "suggestTitle": "解放だけでは足りません",
     "suggestBody": "これらのバックグラウンドタスクは、解放しても戻らないメモリーを占有しています。停止するかどうかはご判断ください。",
     "stopThem_one": "このタスクを停止",

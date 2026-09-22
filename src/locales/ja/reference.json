@@ -192,7 +192,7 @@
     "paletteSize": "パレットあたりの色数",
     "tabPen": "ペン",
     "penNav": "ペンと指の操作",
-    "penGestures": "ピンチでズーム、2本指で移動",
+    "penGestures": "ピンチでズーム、2 本指で移動",
     "penDragPans": "空白のドラッグで移動",
     "penDragPansHint": "自動：マウスのないタッチデバイスで有効になります。無効のときは、ドラッグで範囲選択します。",
     "penBarrel": "ペンのサイドボタン",

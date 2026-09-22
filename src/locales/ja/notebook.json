@@ -83,22 +83,22 @@
     "recent": "最近使用"
   },
   "actions": {
-    "stats": "{{words}}語 · {{chars}}文字",
-    "modified": "{{date}}に更新",
+    "stats": "{{words}} 語 · {{chars}} 文字",
+    "modified": "{{date}} に更新",
     "removeFavorite": "お気に入りから削除",
     "addFavorite": "お気に入りに追加",
     "documentActions": "ドキュメントの操作",
     "openNewTab": "新しいタブで開く",
     "copyPageLink": "ページリンクをコピー",
     "duplicate": "複製",
-    "exportMarkdown": "Markdownで書き出し",
-    "exportHtml": "HTMLで書き出し",
-    "exportNetsu": ".netsuで書き出し（サブページを含む）"
+    "exportMarkdown": "Markdown で書き出し",
+    "exportHtml": "HTML で書き出し",
+    "exportNetsu": ".netsu で書き出し（サブページを含む）"
   },
   "trash": {
     "title": "ゴミ箱",
-    "count_one": "削除済みページ{{count}}件 — 復元できます。",
-    "count_other": "削除済みページ{{count}}件 — 復元できます。",
+    "count_one": "削除済みページ {{count}} 件 — 復元できます。",
+    "count_other": "削除済みページ {{count}} 件 — 復元できます。",
     "description": "削除したページがここに表示されます。",
     "empty": "ゴミ箱は空です。",
     "restore": "復元",
@@ -151,7 +151,7 @@
     },
     "equation": {
       "title": "数式",
-      "desc": "LaTeX数式（KaTeX）",
+      "desc": "LaTeX 数式（KaTeX）",
       "aliases": "数式|数学|latex|katex"
     },
     "divider": {
@@ -160,7 +160,7 @@
       "aliases": "区切り|線|hr|---"
     },
     "youtube": {
-      "desc": "YouTube動画を埋め込む",
+      "desc": "YouTube 動画を埋め込む",
       "aliases": "youtube|動画|yt"
     },
     "embed": {
@@ -169,12 +169,12 @@
     },
     "bookmark": {
       "title": "ブックマーク",
-      "desc": "Webリンクをプレビュー",
+      "desc": "Web リンクをプレビュー",
       "aliases": "ブックマーク|リンク|web"
     },
     "video": {
       "title": "動画",
-      "desc": "ローカルファイルまたはURLを内蔵プレーヤーで再生",
+      "desc": "ローカルファイルまたは URL を内蔵プレーヤーで再生",
       "aliases": "動画|mp4|映画|クリップ"
     },
     "audio": {
@@ -183,7 +183,7 @@
     },
     "file": {
       "title": "ファイル",
-      "desc": "PDF、Word、Excel、ZIP…（PDFプレビュー）",
+      "desc": "PDF、Word、Excel、ZIP…（PDF プレビュー）",
       "aliases": "ファイル|pdf|doc|文書|zip|excel|word"
     },
     "gallery": {
@@ -281,17 +281,17 @@
     "playbackSpeed": "再生速度",
     "chooseAudio": "音声を選択…",
     "audioDrop": "MP3、WAV、FLAC… またはドラッグ＆ドロップ",
-    "audioUrl": "…または音声URLを貼り付けてEnter",
+    "audioUrl": "…または音声 URL を貼り付けて Enter",
     "chooseFile": "ファイルを選択…",
     "fileDrop": "PDF、Word、Excel、ZIP… またはドラッグ＆ドロップ",
-    "fileUrl": "…またはファイルURLを貼り付けてEnter",
+    "fileUrl": "…またはファイル URL を貼り付けて Enter",
     "open": "開く",
     "download": "ダウンロード",
     "play": "再生",
     "fullscreen": "全画面",
     "chooseVideo": "動画を選択…",
     "dropFile": "またはファイルをドラッグ＆ドロップ",
-    "videoUrl": "…または動画URLを貼り付けてEnter",
+    "videoUrl": "…または動画 URL を貼り付けて Enter",
     "changeDivider": "区切り線のスタイルを変更",
     "today": "今日",
     "clear": "クリア"
@@ -306,7 +306,7 @@
     "template": {
       "fraction": "分数",
       "squareRoot": "平方根",
-      "nthRoot": "n乗根",
+      "nthRoot": "n 乗根",
       "exponent": "指数",
       "subscript": "添字",
       "binomial": "二項係数",
@@ -316,7 +316,7 @@
       "limit": "極限",
       "derivative": "微分",
       "partialDerivative": "偏微分",
-      "matrix": "2×2行列",
+      "matrix": "2×2 行列",
       "determinant": "行列式",
       "system": "連立方程式",
       "vector": "ベクトル",
@@ -325,23 +325,23 @@
       "equilibrium": "平衡",
       "ion": "イオン"
     },
-    "empty": "空の数式 — クリックしてLaTeXを入力",
+    "empty": "空の数式 — クリックして LaTeX を入力",
     "templates": "テンプレート",
-    "error": "LaTeXエラー：{{error}}",
-    "hint": "完全なLaTeX（KaTeX + 化学 \\ce）· Ctrl+Enterで確定 · Escapeでキャンセル",
+    "error": "LaTeX エラー：{{error}}",
+    "hint": "完全な LaTeX（KaTeX + 化学 \\ce）· Ctrl+Enter で確定 · Escape でキャンセル",
     "edit": "数式を編集",
     "input": "数式の LaTeX コード"
   },
   "gallery": {
     "chooseImages": "画像を選択…",
     "dropFiles": "またはファイルをドラッグ＆ドロップ",
-    "imageUrl": "…または画像URLを貼り付けてEnter",
+    "imageUrl": "…または画像 URL を貼り付けて Enter",
     "row": "ストリップ（横スクロール）",
     "carousel": "カルーセル",
     "grid": "グリッド",
     "height": "高さ {{size}}",
-    "imageCount_one": "{{count}}枚",
-    "imageCount_other": "{{count}}枚",
+    "imageCount_one": "{{count}} 枚",
+    "imageCount_other": "{{count}} 枚",
     "add": "追加",
     "remove": "削除",
     "removeImage": "この画像を削除",
@@ -358,8 +358,8 @@
     "delete": "削除",
     "calculation": "計算",
     "rowActions": "行の操作",
-    "rowCount_one": "{{count}}行",
-    "rowCount_other": "{{count}}行",
+    "rowCount_one": "{{count}} 行",
+    "rowCount_other": "{{count}} 行",
     "newRow": "新しい行"
   },
   "dbView": {
@@ -440,7 +440,7 @@
     "shortcuts": "キーボードショートカット",
     "reset": "リセット",
     "press": "キーを入力…",
-    "shortcutHint": "クリックして新しいキー操作を入力（Escapeでキャンセル）",
+    "shortcutHint": "クリックして新しいキー操作を入力（Escape でキャンセル）",
     "shortcutConflict": "使用中のショートカットは、元の操作と入れ替わります。",
     "width": {
       "narrow": "狭い",
@@ -537,8 +537,8 @@
   },
   "preview": {
     "unavailable": "プレビューを表示できません",
-    "openPdf": "PDFを開く",
-    "loadingPdf": "PDFを読み込み中…（{{label}}）",
+    "openPdf": "PDF を開く",
+    "loadingPdf": "PDF を読み込み中…（{{label}}）",
     "loading": "読み込み中…"
   },
   "subpage": {
@@ -553,10 +553,10 @@
     "columnHeader": "見出し列"
   },
   "linkPage": {
-    "tooltip": "ページまたはURLにリンク",
-    "placeholder": "URLを貼り付けるかページを検索…",
+    "tooltip": "ページまたは URL にリンク",
+    "placeholder": "URL を貼り付けるかページを検索…",
     "linkTo": "リンク先",
-    "hint": "URLまたはページタイトルを入力"
+    "hint": "URL またはページタイトルを入力"
   },
   "mention": {
     "block": "ブロック",
@@ -576,7 +576,7 @@
       "file": "ファイル",
       "gallery": "画像ギャラリー",
       "database": "データベース",
-      "youtube": "YouTube動画",
+      "youtube": "YouTube 動画",
       "embed": "埋め込み",
       "bookmark": "ブックマーク",
       "divider": "区切り線",

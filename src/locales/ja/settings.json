@@ -236,8 +236,8 @@
   },
   "compatibility": {
     "title": "この PC の互換性",
-    "gpuFunctions": "GPUを使う機能",
-    "cpuFunctions": "CPUまたはフォールバック機能",
+    "gpuFunctions": "GPU を使う機能",
+    "cpuFunctions": "CPU またはフォールバック機能",
     "igpu": "iGPU",
     "dgpu": "dGPU",
     "driver": "ドライバー",
@@ -245,10 +245,10 @@
     "state": {
       "gpu": "GPU",
       "cpu": "CPU",
-      "fallback": "CPUフォールバック",
+      "fallback": "CPU フォールバック",
       "missing": "利用不可"
     },
-    "thumbnailEngine": "意図的にCPUで生成します。",
+    "thumbnailEngine": "意図的に CPU で生成します。",
     "refresh": "確認",
     "hardware": "検出されたコンポーネント",
     "gpu": "グラフィックカード",
@@ -348,7 +348,7 @@
       "always": "毎回",
       "often": "よく",
       "rare": "たまに",
-      "once": "1回だけ"
+      "once": "1 回だけ"
     },
     "description": "何があったか教えてください",
     "descriptionPlaceholder": "やったこと、うまくいかなかったこと…",
@@ -410,12 +410,12 @@
     "delayHint": "編集ソフトが起動し終わるまで待ちます。",
     "destination": "キャッシュした送信の送り先",
     "targetNew": "送信ごとにタイムライン",
-    "targetSingle": "1つのタイムライン",
+    "targetSingle": "1 つのタイムライン",
     "targetPlaceholder": "集約タイムライン名",
-    "targetSingleHint": "保留中の送信を、再起動時に作成する1つのタイムラインへまとめます。",
+    "targetSingleHint": "保留中の送信を、再起動時に作成する 1 つのタイムラインへまとめます。",
     "targetNewHint": "直接送信と同様に、送信ごとに別のタイムラインを作成します。",
     "queue": "キュー",
-    "pendingCount": "{{count}}件保留",
+    "pendingCount": "{{count}} 件保留",
     "applyNow": "今すぐ適用",
     "clearHistory": "履歴を消去",
     "empty": "キャッシュされた送信はありません。",
@@ -425,10 +425,10 @@
     "offline": {
       "title": "タイムラインのオフラインキャッシュ",
       "upToDate": "最新",
-      "stats": "素材{{clips}}件 · {{cached}}/{{total}}タイムラインのショットを保存済み。",
-      "none": "キャッシュがありません。Resolveを閉じるとタイムラインは空で開きます。",
+      "stats": "素材 {{clips}} 件 · {{cached}}/{{total}} タイムラインのショットを保存済み。",
+      "none": "キャッシュがありません。Resolve を閉じるとタイムラインは空で開きます。",
       "update": "更新",
-      "needResolve": "キャッシュの作成にはResolveへの接続が必要です。",
+      "needResolve": "キャッシュの作成には Resolve への接続が必要です。",
       "building": "バックグラウンドで更新中（メディア処理を優先）…",
       "auto": "バックグラウンドで自動更新し、新しいタイムラインだけを読み込みます。",
       "rebuild": "すべて再計算"
@@ -622,11 +622,11 @@
     "required": "常に利用可能",
     "visible": "表示",
     "hidden": "非表示",
-    "moveUp": "{{module}}を上へ",
-    "moveDown": "{{module}}を下へ",
-    "requiredAria": "{{module}}は必須です",
-    "hideAria": "{{module}}を非表示",
-    "showAria": "{{module}}を表示"
+    "moveUp": "{{module}} を上へ",
+    "moveDown": "{{module}} を下へ",
+    "requiredAria": "{{module}} は必須です",
+    "hideAria": "{{module}} を非表示",
+    "showAria": "{{module}} を表示"
   },
   "notifications": {
     "title": "通知",

@@ -74,3 +74,13 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
   YuNet, SFace, MiniMax, Wan, ArtCNN.
 - **Formats / techno** : Remux, HEVC, H.264, mp4, mkv, SRT, VTT, FCPXML, ZXP, CEP, NVENC, ffmpeg, GPU, VRAM,
   RAM, FPS, ASR, VAD, HSB/RGB/hex.
+
+## Conventions par langue
+
+- **ja — espaces** : une espace demi-chasse entre le japonais et les lettres latines, les chiffres
+  ou un placeholder (`NetsuRush の設定`, `10 GB を超えたら`, `{{count}} 件`) ; aucune contre la
+  ponctuation pleine chasse, les crochets `「」（）` ou le point médian `・` ; `%` reste collé
+  (`75%`). Source : guide de style japonais de Microsoft (§4.1.11), guide de Mozilla.
+- **zh — partager** : 共享 partout (bouton, état 已共享, 与我共享, 共享链接, 共享画板/项目/合集,
+  停止共享) ; collaboration = 协作. 分享 seulement pour un envoi à sens unique vers l'extérieur
+  (réseau social). Source : Microsoft et Apple zh-CN, DaVinci Resolve (共享项目).
