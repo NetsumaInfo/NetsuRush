@@ -36,8 +36,8 @@
   },
   "range": {
     "trigger": "In Sammlung ablegen",
-    "rangeTitle_one": "Einstellung ablegen",
-    "rangeTitle_other": "{{count}} Einstellungen ablegen"
+    "rangeTitle_one": "Shot ablegen",
+    "rangeTitle_other": "{{count}} Shots ablegen"
   },
   "fav": {
     "remove": "Aus Favoriten entfernen",
@@ -53,12 +53,12 @@
     "noneCreate": "Keine Sammlung. Leg eine an."
   },
   "inspector": {
-    "namePlaceholder": "Name der Einstellung",
-    "renameShot": "Einstellung umbenennen",
+    "namePlaceholder": "Name des Shots",
+    "renameShot": "Shot umbenennen",
     "rating": "Bewertung",
     "label": "Label",
     "close": "Inspektor schließen",
-    "notePlaceholder": "Freie Notiz zu dieser Einstellung…"
+    "notePlaceholder": "Freie Notiz zu diesem Shot…"
   },
   "label": {
     "red": "Rot",
@@ -89,8 +89,8 @@
   "listSort": {
     "recent": "Geändert (neu)",
     "name": "Name (A→Z)",
-    "countDesc": "Einstellungen (mehr)",
-    "countAsc": "Einstellungen (weniger)"
+    "countDesc": "Shots (mehr)",
+    "countAsc": "Shots (weniger)"
   },
   "view": {
     "gallery": "Galerie",
@@ -98,7 +98,7 @@
     "compact": "Kompakt"
   },
   "detail": {
-    "shotWord": "Einstellung",
+    "shotWord": "Shot",
     "removed": "„{{name}}“ entfernt – Strg+Z zum Rückgängigmachen.",
     "restored": "„{{name}}“ wiederhergestellt.",
     "timelineFailed": "Die Timeline konnte nicht erstellt werden. Prüfe, ob dein Schnittprogramm mit einem Projekt geöffnet ist, und versuch es noch einmal.",
@@ -119,16 +119,16 @@
     "player": "Player",
     "playerHint": "Player (rechtes Panel)",
     "searchPlaceholder": "Suchen (Name, Tag)…",
-    "sortShots": "Einstellungen sortieren",
-    "noMatch": "Keine Einstellung passt zu den Filtern.",
-    "emptyFolder": "Ordner leer – Einstellungen aus der Sichtung oder Suche ablegen.",
+    "sortShots": "Shots sortieren",
+    "noMatch": "Kein Shot passt zu den Filtern.",
+    "emptyFolder": "Ordner leer – Shots aus der Sichtung oder Suche ablegen.",
     "resize": "Größe ändern",
     "thumbSize": "Miniaturgröße",
     "undoRemove": "Entfernen rückgängig machen",
-    "toTimelineOk_one": "{{count}} Einstellung → „{{timeline}}“.",
-    "toTimelineOk_other": "{{count}} Einstellungen → „{{timeline}}“.",
-    "shotCount_one": "{{count}} Einstellung",
-    "shotCount_other": "{{count}} Einstellungen",
+    "toTimelineOk_one": "{{count}} Shot → „{{timeline}}“.",
+    "toTimelineOk_other": "{{count}} Shots → „{{timeline}}“.",
+    "shotCount_one": "{{count}} Shot",
+    "shotCount_other": "{{count}} Shots",
     "ofTotal_one": "von {{count}} Shot",
     "ofTotal_other": "von {{count}} Shots"
   },
@@ -152,10 +152,10 @@
     "deleteFolderTitle": "Ordner „{{name}}“ löschen?",
     "deleteFolderDesc": "Die enthaltenen Sammlungen rücken eine Ebene höher.",
     "newCollection": "Neue Sammlung",
-    "emptyAll": "Keine Sammlung. Leg eine Sammlung an und lege dann Einstellungen aus der Sichtung oder der Suche ab (Button „Ablegen“ auf der Miniatur).",
+    "emptyAll": "Keine Sammlung. Leg eine Sammlung an und lege dann Shots aus der Sichtung oder der Suche ab (Button „Ablegen“ auf der Miniatur).",
     "folderEmpty": "Dieser Ordner ist leer.",
-    "plansCount_one": "{{count}} Einstellung",
-    "plansCount_other": "{{count}} Einstellungen",
+    "plansCount_one": "{{count}} Shot",
+    "plansCount_other": "{{count}} Shots",
     "folderEmptyFiltered": "Nichts in diesem Ordner passt zum Filter."
   },
   "editor": {
@@ -191,7 +191,7 @@
     "trackN": "Spur {{n}}",
     "keepSync": "Synchron halten (bei jedem Hinzufügen neu archivieren)",
     "autoSyncLabel": "Bei jedem Hinzufügen automatisch archivieren",
-    "autoSyncHint": "Exportiert und aktualisiert Dateien auf der Festplatte automatisch bei neu hinzugefügten Einstellungen.",
+    "autoSyncHint": "Exportiert und aktualisiert Dateien auf der Festplatte automatisch bei neu hinzugefügten Shots.",
     "moveHint": "Bereits archivierte Dateien werden hierher verschoben. Fehlende werden neu exportiert.",
     "moving": "Wird verschoben…",
     "moveFailed": "Verschieben fehlgeschlagen. Die Dateien bleiben im alten Ordner.",
@@ -201,14 +201,14 @@
     "tabIcon": "Symbole",
     "tabImage": "Bild",
     "importImage": "Bild / GIF importieren",
-    "dotPlans_one": " · {{count}} Einstellung",
-    "dotPlans_other": " · {{count}} Einstellungen"
+    "dotPlans_one": " · {{count}} Shot",
+    "dotPlans_other": " · {{count}} Shots"
   },
   "char": {
     "queryCharacter": "Figur: {{name}}",
-    "queryShots": "Einstellungen von: {{name}}",
+    "queryShots": "Shots von: {{name}}",
     "searchUnavailable": "Figurensuche nicht verfügbar: {{error}}.",
-    "shotsUnavailable": "Einstellungen der Figur nicht verfügbar: {{error}}.",
+    "shotsUnavailable": "Shots der Figur nicht verfügbar: {{error}}.",
     "cannotSaveFace": "Gesicht lässt sich nicht speichern.",
     "mergeFailed": "Zusammenführen fehlgeschlagen.",
     "dupUnavailable": "Duplikaterkennung nicht verfügbar: {{error}}.",

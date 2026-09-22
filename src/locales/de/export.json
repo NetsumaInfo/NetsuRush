@@ -54,12 +54,12 @@
     "tokens": {
       "base": "Basisname",
       "source": "Quelldatei",
-      "index": "Nummer der Einstellung",
-      "total": "Anzahl der Einstellungen",
+      "index": "Nummer des Shots",
+      "total": "Anzahl der Shots",
       "start": "Anfang",
       "end": "Ende",
       "duration": "Dauer",
-      "label": "Bezeichnung der Einstellung",
+      "label": "Bezeichnung des Shots",
       "profile": "Profilname",
       "codec": "Codec",
       "container": "Container",
@@ -67,7 +67,7 @@
       "time": "Uhrzeit"
     },
     "mergeGap": "Schwarzpause",
-    "mergeGapHint": "Dauer des Schwarzbilds zwischen zusammengeführten Einstellungen",
+    "mergeGapHint": "Dauer des Schwarzbilds zwischen zusammengeführten Shots",
     "seconds": "s"
   },
   "encoder": {
@@ -139,7 +139,7 @@
     "remux": "Remux",
     "encode": "Neu kodieren",
     "remuxWarning": "Schnitt nicht bildgenau",
-    "remuxWarningDetail": "Remux kopiert den Stream ohne Neukodierung: Der Schnitt richtet sich nach den Keyframes der Quelle, daher können am Anfang und am Ende der Einstellung einige Bilder zu viel erscheinen. Für einen bildgenauen Schnitt „Neu kodieren“ verwenden."
+    "remuxWarningDetail": "Remux kopiert den Stream ohne Neukodierung: Der Schnitt richtet sich nach den Keyframes der Quelle, daher können am Anfang und am Ende des Shots einige Bilder zu viel erscheinen. Für einen bildgenauen Schnitt „Neu kodieren“ verwenden."
   },
   "audioMode": {
     "copy": "Kopie",

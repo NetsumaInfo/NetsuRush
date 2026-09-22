@@ -174,7 +174,7 @@
     "followsGeneral": "folgen den allgemeinen Einstellungen.",
     "followGeneral": "Allgemeine Einstellungen verwenden",
     "leftRail": "Linker Rand",
-    "leftRailHint": "Punkt: unauffällig. Miniatur: du erkennst die Einstellung, ohne sie zu öffnen.",
+    "leftRailHint": "Punkt: unauffällig. Miniatur: du erkennst den Shot, ohne ihn zu öffnen.",
     "dot": "Punkt",
     "thumbnail": "Miniatur",
     "linkColors": "Verknüpfungsfarben im Text",
@@ -182,7 +182,7 @@
     "visible": "Sichtbar",
     "hidden": "Ausgeblendet",
     "colorAssignment": "Farbzuweisung",
-    "colorAssignmentHint": "Auto: Jede Einstellung erhält ihre eigene Farbe · Etiketten: eine Farbe, von Hand umgefärbt (z. B. Blau = Interview)",
+    "colorAssignmentHint": "Auto: Jeder Shot erhält seine eigene Farbe · Etiketten: eine Farbe, von Hand umgefärbt (z. B. Blau = Interview)",
     "auto": "Auto",
     "labels": "Etiketten",
     "defaultColor": "Standardfarbe",
@@ -247,10 +247,10 @@
       "footages": "Rohmaterial-Panel",
       "outline": "Gliederung/Tags-Panel"
     },
-    "buildSummaryResolve_one": "{{count}} Einstellung in Skriptreihenfolge geschnitten, bildgenau (Resolve).",
-    "buildSummaryResolve_other": "{{count}} Einstellungen in Skriptreihenfolge geschnitten, bildgenau (Resolve).",
-    "buildSummaryAdobe_one": "{{count}} Einstellung in Skriptreihenfolge geschnitten, als {{host}}-Sequenz.",
-    "buildSummaryAdobe_other": "{{count}} Einstellungen in Skriptreihenfolge geschnitten, als {{host}}-Sequenz."
+    "buildSummaryResolve_one": "{{count}} Shot in Skriptreihenfolge geschnitten, bildgenau (Resolve).",
+    "buildSummaryResolve_other": "{{count}} Shots in Skriptreihenfolge geschnitten, bildgenau (Resolve).",
+    "buildSummaryAdobe_one": "{{count}} Shot in Skriptreihenfolge geschnitten, als {{host}}-Sequenz.",
+    "buildSummaryAdobe_other": "{{count}} Shots in Skriptreihenfolge geschnitten, als {{host}}-Sequenz."
   },
   "export": {
     "comment": "Kommentar",
@@ -259,18 +259,18 @@
     "created": "erstellt",
     "updated": "aktualisiert",
     "mixedFps": "⚠ Gemischte Bildraten.",
-    "shotProgress": "Einstellung {{current}}/{{total}}…",
-    "shotFailed": "Einstellung {{current}}/{{total}}: {{error}}.",
+    "shotProgress": "Shot {{current}}/{{total}}…",
+    "shotFailed": "Shot {{current}}/{{total}}: {{error}}.",
     "failure": "fehlgeschlagen",
     "markersResolveOnly": "⚠ Kommentar-Marker: nur Resolve.",
-    "resolveDone_one": "Timeline „{{timeline}}“ {{action}} – {{count}} Einstellung.",
-    "resolveDone_other": "Timeline „{{timeline}}“ {{action}} – {{count}} Einstellungen.",
+    "resolveDone_one": "Timeline „{{timeline}}“ {{action}} – {{count}} Shot.",
+    "resolveDone_other": "Timeline „{{timeline}}“ {{action}} – {{count}} Shots.",
     "markersAdded_one": "{{count}} Marker hinzugefügt.",
     "markersAdded_other": "{{count}} Marker hinzugefügt.",
     "missingSources_one": "⚠ {{count}} Quelle fehlt.",
     "missingSources_other": "⚠ {{count}} Quellen fehlen.",
-    "adobeDone_one": "Sequenz „{{timeline}}“ ({{host}}) – {{count}} Einstellung.",
-    "adobeDone_other": "Sequenz „{{timeline}}“ ({{host}}) – {{count}} Einstellungen."
+    "adobeDone_one": "Sequenz „{{timeline}}“ ({{host}}) – {{count}} Shot.",
+    "adobeDone_other": "Sequenz „{{timeline}}“ ({{host}}) – {{count}} Shots."
   },
   "editor": {
     "headingPlaceholder": "Abschnittsüberschrift",
@@ -302,11 +302,11 @@
     "italic": "Kursiv",
     "underline": "Unterstrichen",
     "strike": "Durchgestrichen",
-    "linkSelection": "Auswahl mit Einstellung verknüpfen",
+    "linkSelection": "Auswahl mit Shot verknüpfen",
     "transformInto": "Umwandeln in",
     "duplicateBlock": "Block duplizieren",
     "addTag": "Tag hinzufügen…",
-    "attachShot": "Einstellung anhängen…",
+    "attachShot": "Shot anhängen…",
     "attachSound": "Audio anhängen…",
     "deleteBlock": "Block löschen",
     "insertBlock": "Block einfügen",
@@ -314,7 +314,7 @@
     "dragActions": "Zum Verschieben ziehen · für Aktionen klicken",
     "linkSelectedText": "Mit ausgewähltem Text verknüpfen",
     "selectTextFirst": "Zuerst Text auswählen",
-    "adjustShot": "In/Out der Einstellung setzen",
+    "adjustShot": "In/Out des Shots setzen",
     "detach": "Trennen"
   },
   "storyboard": {
@@ -419,7 +419,7 @@
       "keywords": "storyboard|zeichnung|skizze|sketch|canvas"
     },
     "footage": {
-      "label": "Einstellung anhängen",
+      "label": "Shot anhängen",
       "hint": "Resolve Media Pool",
       "keywords": "footage|rohmaterial|einstellung|shot|media|medien|clip|rush|anhängen"
     },

@@ -58,7 +58,7 @@
   },
   "track": {
     "clearFramePoints": "Punkte des Bildes löschen",
-    "trackAll": "Ganze Einstellung tracken",
+    "trackAll": "Ganzen Shot tracken",
     "stepBack": "Schritt ←",
     "stepBackTip": "Trackt EIN Bild rückwärts und stoppt dort (Bild für Bild)",
     "stepFwd": "Schritt →",
@@ -184,14 +184,14 @@
     "pngMatteHint": "Nur Schwarz-Weiß-Maske"
   },
   "sam": {
-    "large": "Die beste Maske. 2 GiB VRAM gemessen, unabhängig von der Länge der Einstellung.",
+    "large": "Die beste Maske. 2 GiB VRAM gemessen, unabhängig von der Länge des Shots.",
     "base": "Die schnelle Rückfalloption, wenig VRAM.",
     "small": "Mittlere Variante: weniger VRAM als Base+, etwas gröbere Masken.",
     "tiny": "Kleinste SAM-2.1-Variante – für Karten mit knappem VRAM.",
     "edgetam": "Am leichtesten (56 MB) und am schnellsten. Gröbere Masken als SAM 2.1.",
     "sam31": "Neueste Generation: verfolgt auch Objekte, die sich kreuzen oder verschwinden. NVIDIA-GPU erforderlich.",
     "samurai": "Verfolgt das Objekt, auch wenn es hinter etwas verschwindet. Nutzt SAM 2.1, das installiert sein muss.",
-    "sam2long": "Für lange Einstellungen: verfolgt mehrere Spuren und behält die richtige, damit sich Fehler nicht aufsummieren. Nutzt SAM 2.1, das installiert sein muss."
+    "sam2long": "Für lange Shots: verfolgt mehrere Spuren und behält die richtige, damit sich Fehler nicht aufsummieren. Nutzt SAM 2.1, das installiert sein muss."
   },
   "timeline": {
     "inHere": "In-Punkt hier (Bild {{n}})",
