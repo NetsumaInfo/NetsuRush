@@ -21,7 +21,7 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
 | FR (source) | EN | ES | DE | JA | ZH |
 |---|---|---|---|---|---|
 | rush (métrage source) | footage / clip | clip / metraje | Rohmaterial / Clip | 素材 / クリップ | 素材 |
-| plan (unité de découpe) | shot | plano / toma | Einstellung / Shot | ショット / カット | 镜头 |
+| plan (unité de découpe) | shot | plano / toma | Shot (Einstellung = seulement le champ de métadonnées Szene/Einstellung/Take ; au pluriel il se lit « réglages ») | ショット / カット | 镜头 |
 | derush (workflow) | logging | visionado / clasificación | Sichtung | 素材整理 | 素材整理 |
 | flux (rushs enchaînés dans une grille) | flow | flujo | Abfolge | 連続表示 | 连续浏览 |
 | découpe / coupe | cut | corte | Schnitt | カット | 剪切 / 切分 |
@@ -76,6 +76,11 @@ référence unique : tout agent traducteur DOIT l'appliquer pour la cohérence e
   RAM, FPS, ASR, VAD, HSB/RGB/hex.
 
 ## Conventions par langue
+
+- **Menus des logiciels hôtes** : un chemin cité (« Préférences ▸ Système ▸ Mémoire et GPU ») reprend
+  mot pour mot le libellé de Resolve / Premiere / After Effects DANS la langue de l'interface : les
+  trois logiciels existent dans les 6 langues. Vérifié sur Resolve 21.1, Premiere Pro 2026 et
+  After Effects 26 (textes livrés dans les logiciels).
 
 - **ja — espaces** : une espace demi-chasse entre le japonais et les lettres latines, les chiffres
   ou un placeholder (`NetsuRush の設定`, `10 GB を超えたら`, `{{count}} 件`) ; aucune contre la

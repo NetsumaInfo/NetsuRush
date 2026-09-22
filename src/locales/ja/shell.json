@@ -30,7 +30,7 @@
     "resolveOffline": "Resolve オフライン",
     "project": "プロジェクト：{{project}}",
     "refresh": "状態を更新",
-    "resolveHint": "ブリッジは動いていますが、Resolve が応答しません。<b1>Resolve Studio</b1> でプロジェクトを開き、<b2>環境設定 ▸ システム ▸ 一般 ▸ 外部スクリプティング = ローカル</b2> を有効にして再起動してください。",
+    "resolveHint": "ブリッジは動いていますが、Resolve が応答しません。<b1>Resolve Studio</b1> でプロジェクトを開き、<b2>環境設定 ▸ システム ▸ 一般 ▸ 外部スクリプトに使用 = ローカル</b2> を有効にして再起動してください。",
     "adobeHint": "{{host}} を開き、<b>ウィンドウ ▸ エクステンション ▸ NetsuRush</b> パネルを開いてください（Adobe タブからインストール）。"
   },
   "menu": {

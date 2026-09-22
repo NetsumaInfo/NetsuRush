@@ -73,37 +73,37 @@
     "items": {
       "loadAllTimelines": {
         "label": "打开时加载所有时间线",
-        "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
+        "where": "偏好设置 ▸ 用户 ▸ 项目保存和加载",
         "body": "开启后，打开项目时所有时间线都会载入 RAM。Blackmagic 默认关闭它，是为了多时间线项目的打开速度。"
       },
       "resolveMemory": {
         "label": "Resolve 内存上限",
-        "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
+        "where": "偏好设置 ▸ 系统 ▸ 内存和GPU",
         "body": "默认为 RAM 的 75%。调低不会让 Resolve 更快：它把 RAM 留给其他程序，包括 NetsuRush 的 AI 处理。按你同时在跑什么来权衡。"
       },
       "fusionMemory": {
         "label": "Fusion 内存缓存",
-        "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
+        "where": "偏好设置 ▸ 系统 ▸ 内存和GPU",
         "body": "Resolve 分配额中留给 Fusion 的比例（上限 80%）。调高则 Fusion 播放更流畅，留给剪辑和调色的 RAM 更少。"
       },
       "gpuMode": {
         "label": "GPU 处理模式",
-        "where": "偏好设置 ▸ 系统 ▸ 内存与 GPU",
+        "where": "偏好设置 ▸ 系统 ▸ 内存和GPU",
         "body": "自动模式在 NVIDIA 上已经会选 CUDA。只有当你发现装了 NVIDIA 显卡却选中 OpenCL 时才手动指定。"
       },
       "hwDecode": {
         "label": "H.264/H.265 硬件解码",
-        "where": "偏好设置 ▸ 系统 ▸ 解码",
+        "where": "偏好设置 ▸ 系统 ▸ 解码选项",
         "body": "把解码交给 GPU。8 bit 4:2:0 很可靠；4:2:2 和 4:4:4 取决于显卡。看到画面异常就关掉。"
       },
       "liveSave": {
         "label": "实时保存",
-        "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
+        "where": "偏好设置 ▸ 用户 ▸ 项目保存和加载",
         "body": "每次改动都保存。手册推荐开启，并称影响极小；报告中的卡顿都发生在网络或慢速存储上。本地 SSD 就留着开。"
       },
       "timelineBackups": {
         "label": "时间线备份",
-        "where": "偏好设置 ▸ 用户 ▸ 保存与加载",
+        "where": "偏好设置 ▸ 用户 ▸ 项目保存和加载",
         "body": "在项目保存之外定期做快照。当天第一次可能有点慢，之后几乎察觉不到。"
       }
     },
@@ -221,8 +221,8 @@
         "body": "默认在系统盘上，而系统盘本来就扛着操作系统。换成独立于素材盘的 NVMe，立刻见效。"
       },
       "playproxy": {
-        "title": "时间线代理分辨率",
-        "where": "播放 ▸ 时间线代理分辨率",
+        "title": "时间线播放分辨率",
+        "where": "播放 ▸ 时间线播放分辨率",
         "body": "剪辑时用二分之一或四分之一：4K 下用四分之一，GPU 负担少四倍。导出仍是全分辨率。"
       },
       "optimizedmedia": {
@@ -237,12 +237,12 @@
       },
       "mercurygpu": {
         "title": "软件渲染引擎",
-        "where": "文件 ▸ 项目设置 ▸ 常规 ▸ 渲染器",
+        "where": "文件 ▸ 项目设置 ▸ 常规 ▸ 渲染程序",
         "body": "Mercury Playback Engine 的软件模式把一切都交给 CPU。若显卡支持，请选择 GPU 加速。"
       },
       "hwdecode": {
         "title": "硬件解码",
-        "where": "首选项 ▸ 媒体 ▸ 硬件加速解码",
+        "where": "首选项 ▸ 媒体 ▸ 启用硬件加速解码",
         "body": "关闭时，每一帧 H.264、HEVC 或 AV1 都由 CPU 解码。这是播放卡顿的首要原因。"
       },
       "previewcodec": {
@@ -252,27 +252,27 @@
       },
       "cacheotherdisk": {
         "title": "缓存与素材同盘",
-        "where": "首选项 ▸ 暂存盘",
+        "where": "首选项 ▸ 媒体缓存",
         "body": "缓存与媒体在同一卷上会争抢同一读写通道。分开只需改一个设置，效果立竿见影。"
       },
       "diskcachessd": {
         "title": "磁盘缓存放在 SSD",
-        "where": "首选项 ▸ 内存与性能 ▸ 磁盘缓存",
+        "where": "首选项 ▸ 磁盘 ▸ 磁盘缓存",
         "body": "After Effects 每次预览都会读取磁盘缓存。放在慢盘或素材盘上，等于抵消了它自身的收益。"
       },
       "diskcacheon": {
         "title": "磁盘缓存已关闭",
-        "where": "首选项 ▸ 内存与性能 ▸ 启用磁盘缓存",
+        "where": "首选项 ▸ 磁盘 ▸ 启用磁盘缓存",
         "body": "未勾选时，内存一满每次预览都要从头再来。这是 After Effects 中最不易察觉的时间浪费。"
       },
       "mfrcpu": {
         "title": "CPU 占比设得过高",
-        "where": "首选项 ▸ 内存与性能 ▸ 多帧渲染",
+        "where": "首选项 ▸ 内存和 CPU ▸ 为其他应用程序保留 CPU",
         "body": "After Effects 每使用一个核心约需 4 GB 内存。超出内存能承受的范围后，增加核心反而更慢。"
       },
       "bitdepth": {
         "title": "32 位项目",
-        "where": "文件 ▸ 项目设置 ▸ 颜色 ▸ 深度",
+        "where": "文件 ▸ 项目设置 ▸ 颜色 ▸ 位深度",
         "body": "32 位只对高动态范围合成有意义。在 8 位素材上出于习惯打开，只会浪费时间。"
       }
     }
@@ -293,8 +293,8 @@
       "panelSilent": "无响应",
       "panelInstalled": "扩展已安装，请重启应用",
       "installPanel": "安装扩展",
-      "panelHint": "打开应用，然后选择“窗口 ▸ 扩展功能 ▸ NetsuRush”。",
-      "uxpHint": "Premiere Pro {{year}} 会先加载 UXP。若窗口 ▸ 扩展功能里没有该扩展，重新安装后重启。",
+      "panelHint": "打开应用，然后选择“窗口 ▸ 扩展 ▸ NetsuRush”。",
+      "uxpHint": "Premiere Pro {{year}} 会先加载 UXP。若窗口 ▸ 扩展里没有该扩展，重新安装后重启。",
       "caches": "缓存",
       "cacheFolders_one": "检测到 {{count}} 个文件夹",
       "cacheFolders_other": "检测到 {{count}} 个文件夹",

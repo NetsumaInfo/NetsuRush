@@ -30,7 +30,7 @@
     "resolveOffline": "Resolve 离线",
     "project": "项目：{{project}}",
     "refresh": "刷新状态",
-    "resolveHint": "桥接正常，但 Resolve 没有响应。打开带项目的 <b1>Resolve Studio</b1>，启用 <b2>偏好设置 ▸ 系统 ▸ 通用 ▸ 外部脚本 = Local</b2>，然后重启它。",
+    "resolveHint": "桥接正常，但 Resolve 没有响应。打开带项目的 <b1>Resolve Studio</b1>，启用 <b2>偏好设置 ▸ 系统 ▸ 常规 ▸ 外部脚本使用 = 本地</b2>，然后重启它。",
     "adobeHint": "打开 {{host}}，再打开面板 <b>窗口 ▸ 扩展 ▸ NetsuRush</b>（先在 Adobe 选项卡中安装）。"
   },
   "menu": {

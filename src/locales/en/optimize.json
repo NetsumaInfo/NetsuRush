@@ -221,8 +221,8 @@
         "body": "Defaults to the system disk, which already takes the OS load. An NVMe separate from your media disk pays off right away."
       },
       "playproxy": {
-        "title": "Timeline proxy resolution",
-        "where": "Playback ▸ Timeline Proxy Resolution",
+        "title": "Timeline playback resolution",
+        "where": "Playback ▸ Timeline Playback Resolution",
         "body": "Half or Quarter while editing: four times less GPU work at Quarter on 4K. Exports stay full resolution."
       },
       "optimizedmedia": {
@@ -242,7 +242,7 @@
       },
       "hwdecode": {
         "title": "Hardware decoding",
-        "where": "Preferences ▸ Media ▸ Hardware accelerated decoding",
+        "where": "Preferences ▸ Media ▸ Enable hardware accelerated decoding",
         "body": "Without it, every H.264, HEVC or AV1 frame is decoded by the CPU. This is the most common cause of stuttering playback."
       },
       "previewcodec": {
@@ -252,27 +252,27 @@
       },
       "cacheotherdisk": {
         "title": "Cache on the footage drive",
-        "where": "Preferences ▸ Scratch Disks",
+        "where": "Preferences ▸ Media Cache",
         "body": "Cache and media on the same volume fight for the same read head. Separating them costs one setting and is felt immediately."
       },
       "diskcachessd": {
         "title": "Disk cache on SSD",
-        "where": "Preferences ▸ Memory & Performance ▸ Disk Cache",
+        "where": "Preferences ▸ Disk ▸ Disk Cache",
         "body": "After Effects reads its disk cache on every preview. On a slow drive, or on the footage drive, it cancels its own benefit."
       },
       "diskcacheon": {
         "title": "Disk cache disabled",
-        "where": "Preferences ▸ Memory & Performance ▸ Enable Disk Cache",
+        "where": "Preferences ▸ Disk ▸ Enable Disk Cache",
         "body": "Unchecked, every preview restarts from scratch as soon as the RAM fills up. It is the quietest time sink in After Effects."
       },
       "mfrcpu": {
         "title": "CPU share set too high",
-        "where": "Preferences ▸ Memory & Performance ▸ Multi-Frame Rendering",
+        "where": "Preferences ▸ Memory & CPU ▸ % CPU reserved for other applications",
         "body": "After Effects wants about 4 GB per core it uses. Beyond what your RAM can handle, adding cores slows the render down."
       },
       "bitdepth": {
         "title": "32-bit project",
-        "where": "File ▸ Project Settings ▸ Color ▸ Depth",
+        "where": "File ▸ Project Settings ▸ Color ▸ Bit Depth",
         "body": "32-bit is only useful for high dynamic range compositions. Enabled out of habit on 8-bit sources, it costs nothing but time."
       }
     }

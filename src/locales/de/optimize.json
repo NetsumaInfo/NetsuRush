@@ -73,7 +73,7 @@
     "items": {
       "loadAllTimelines": {
         "label": "Alle Timelines beim Öffnen laden",
-        "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
+        "where": "Einstellungen ▸ Benutzer ▸ Projekt speichern und laden",
         "body": "Wenn aktiviert, lädt Resolve beim Öffnen des Projekts alle Timelines in den RAM. Blackmagic lässt das standardmäßig aus, damit Projekte mit vielen Timelines schnell öffnen."
       },
       "resolveMemory": {
@@ -93,17 +93,17 @@
       },
       "hwDecode": {
         "label": "Hardware-Dekodierung H.264/H.265",
-        "where": "Einstellungen ▸ System ▸ Dekodierung",
+        "where": "Einstellungen ▸ System ▸ Decodierungsoptionen",
         "body": "Verlagert das Dekodieren auf die GPU. Zuverlässig bei 8 Bit 4:2:0; 4:2:2 und 4:4:4 hängen von der Karte ab. Schalte es aus, wenn du Artefakte siehst."
       },
       "liveSave": {
-        "label": "Live Save",
-        "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
+        "label": "Live speichern",
+        "where": "Einstellungen ▸ Benutzer ▸ Projekt speichern und laden",
         "body": "Speichert bei jeder Änderung. Das Handbuch empfiehlt es und nennt den Einfluss minimal; gemeldete Verlangsamungen betreffen Netzwerk- oder langsamen Speicher. Lass es auf einer lokalen SSD an."
       },
       "timelineBackups": {
         "label": "Timeline-Sicherungen",
-        "where": "Einstellungen ▸ Benutzer ▸ Speichern und Laden",
+        "where": "Einstellungen ▸ Benutzer ▸ Projekt speichern und laden",
         "body": "Regelmäßige Schnappschüsse zusätzlich zu den Projektsicherungen. Die erste am Tag kann etwas dauern, die weiteren merkt man nicht."
       }
     },
@@ -221,8 +221,8 @@
         "body": "Standardmäßig auf der Systemplatte, die schon das OS trägt. Eine NVMe getrennt vom Medienlaufwerk merkt man sofort."
       },
       "playproxy": {
-        "title": "Timeline-Proxy-Auflösung",
-        "where": "Wiedergabe ▸ Timeline-Proxy-Auflösung",
+        "title": "Wiedergabeauflösung der Timeline",
+        "where": "Wiedergabe ▸ Wiedergabeauflösung (Timeline)",
         "body": "Halb oder Viertel beim Schneiden: bei 4K viermal weniger GPU-Last auf Viertel. Der Export bleibt in voller Auflösung."
       },
       "optimizedmedia": {
@@ -232,7 +232,7 @@
       },
       "effectsheavy": {
         "title": "Gestapelte Effekte und Farbkorrekturen",
-        "where": "Wiedergabe ▸ Render-Cache ▸ Smart",
+        "where": "Wiedergabe ▸ Render-Cache ▸ Intelligent",
         "body": "Die Last pro Timeline kostet, nicht die Zahl der Timelines. Der Smart-Cache cacht die schweren Nodes von allein."
       },
       "mercurygpu": {
@@ -242,7 +242,7 @@
       },
       "hwdecode": {
         "title": "Hardware-Dekodierung",
-        "where": "Voreinstellungen ▸ Medien ▸ Hardwarebeschleunigte Dekodierung",
+        "where": "Voreinstellungen ▸ Medien ▸ Hardwarebeschleunigte Decodierung aktivieren",
         "body": "Ohne sie dekodiert die CPU jedes H.264-, HEVC- oder AV1-Bild. Das ist die häufigste Ursache für ruckelnde Wiedergabe."
       },
       "previewcodec": {
@@ -252,27 +252,27 @@
       },
       "cacheotherdisk": {
         "title": "Cache auf dem Material-Laufwerk",
-        "where": "Voreinstellungen ▸ Arbeitsvolumes",
+        "where": "Voreinstellungen ▸ Medien-Cache",
         "body": "Cache und Medien auf demselben Volume konkurrieren um denselben Lesekopf. Beides zu trennen kostet eine Einstellung und wirkt sofort."
       },
       "diskcachessd": {
         "title": "Festplatten-Cache auf SSD",
-        "where": "Voreinstellungen ▸ Speicher & Leistung ▸ Festplatten-Cache",
+        "where": "Voreinstellungen ▸ Festplatte ▸ Disk-Cache",
         "body": "After Effects liest seinen Festplatten-Cache bei jeder Vorschau. Auf einem langsamen Laufwerk oder dem Material-Laufwerk hebt er seinen eigenen Nutzen auf."
       },
       "diskcacheon": {
         "title": "Festplatten-Cache deaktiviert",
-        "where": "Voreinstellungen ▸ Speicher & Leistung ▸ Festplatten-Cache aktivieren",
+        "where": "Voreinstellungen ▸ Festplatte ▸ Disk-Cache aktivieren",
         "body": "Ist die Option deaktiviert, beginnt jede Vorschau von vorn, sobald der Arbeitsspeicher voll ist. Das ist der leiseste Zeitfresser in After Effects."
       },
       "mfrcpu": {
         "title": "CPU-Anteil zu hoch",
-        "where": "Voreinstellungen ▸ Speicher & Leistung ▸ Multi-Frame-Rendering",
+        "where": "Voreinstellungen ▸ Arbeitsspeicher und CPU ▸ Für andere Programme reservierte CPU in %",
         "body": "After Effects benötigt etwa 4 GB pro genutztem Kern. Jenseits dessen, was der Arbeitsspeicher mitmacht, bremsen zusätzliche Kerne das Rendering."
       },
       "bitdepth": {
         "title": "32-Bit-Projekt",
-        "where": "Datei ▸ Projekteinstellungen ▸ Farbe ▸ Farbtiefe",
+        "where": "Datei ▸ Projekteinstellungen ▸ Farbe ▸ Bittiefe",
         "body": "32 Bit nützt nur Kompositionen mit hohem Dynamikumfang. Aus Gewohnheit bei 8-Bit-Quellen aktiviert, kostet es nur Zeit."
       }
     }

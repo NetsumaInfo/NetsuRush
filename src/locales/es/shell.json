@@ -30,7 +30,7 @@
     "resolveOffline": "Resolve sin conexión",
     "project": "Proyecto: {{project}}",
     "refresh": "Actualizar estado",
-    "resolveHint": "El puente funciona, Resolve no responde. Abre <b1>Resolve Studio</b1> con un proyecto, activa <b2>Preferencias ▸ Sistema ▸ General ▸ Scripting externo = Local</b2> y reinícialo.",
+    "resolveHint": "El puente funciona, Resolve no responde. Abre <b1>Resolve Studio</b1> con un proyecto, activa <b2>Preferencias ▸ Sistema ▸ General ▸ Programación externa mediante = Local</b2> y reinícialo.",
     "adobeHint": "Abre {{host}} y luego el panel <b>Ventana ▸ Extensiones ▸ NetsuRush</b> (se instala desde la pestaña Adobe)."
   },
   "menu": {

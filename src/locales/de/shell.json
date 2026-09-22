@@ -30,7 +30,7 @@
     "resolveOffline": "Resolve offline",
     "project": "Projekt: {{project}}",
     "refresh": "Status aktualisieren",
-    "resolveHint": "Die Brücke läuft, Resolve antwortet nicht. Öffne <b1>Resolve Studio</b1> mit einem Projekt, aktiviere <b2>Einstellungen ▸ System ▸ Allgemein ▸ Externes Scripting = Lokal</b2> und starte es neu.",
+    "resolveHint": "Die Brücke läuft, Resolve antwortet nicht. Öffne <b1>Resolve Studio</b1> mit einem Projekt, aktiviere <b2>Einstellungen ▸ System ▸ Allgemein ▸ Externe Skripterstellung per = Lokal</b2> und starte es neu.",
     "adobeHint": "Öffne {{host}}, dann das Panel <b>Fenster ▸ Erweiterungen ▸ NetsuRush</b> (im Adobe-Tab installieren)."
   },
   "menu": {

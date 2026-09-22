@@ -93,7 +93,7 @@
       },
       "hwDecode": {
         "label": "Décodage matériel H.264/H.265",
-        "where": "Préférences ▸ Système ▸ Décodage",
+        "where": "Préférences ▸ Système ▸ Options de décodage",
         "body": "Décharge le décodage sur le GPU. Fiable en 8 bits 4:2:0 ; le 4:2:2 et le 4:4:4 dépendent de la carte. Coupe-le si tu vois des artefacts."
       },
       "liveSave": {
@@ -221,8 +221,8 @@
         "body": "Par défaut sur le disque système, qui encaisse déjà l'OS. Un NVMe distinct du disque média se sent tout de suite."
       },
       "playproxy": {
-        "title": "Résolution proxy timeline",
-        "where": "Lecture ▸ Résolution proxy timeline",
+        "title": "Résolution de lecture de la timeline",
+        "where": "Lecture ▸ Résolution de lecture de la timeline",
         "body": "Demi ou Quart pendant le montage : quatre fois moins de travail GPU en Quart sur du 4K. L'export reste en pleine résolution."
       },
       "optimizedmedia": {
@@ -232,17 +232,17 @@
       },
       "effectsheavy": {
         "title": "Effets et étalonnages empilés",
-        "where": "Lecture ▸ Cache de rendu ▸ Intelligent",
+        "where": "Lecture ▸ Rendus ▸ Automatique",
         "body": "C'est la charge par timeline qui coûte, pas le nombre de timelines. Le cache intelligent met en cache les nœuds lourds tout seul."
       },
       "mercurygpu": {
         "title": "Moteur de rendu logiciel",
-        "where": "Fichier ▸ Réglages du projet ▸ Général ▸ Moteur de rendu",
+        "where": "Fichier ▸ Réglages du projet ▸ Général ▸ Système de rendu",
         "body": "Mercury Playback Engine en mode logiciel fait tout calculer au processeur. Choisir l'accélération GPU si la carte le permet."
       },
       "hwdecode": {
         "title": "Décodage matériel",
-        "where": "Préférences ▸ Média ▸ Décodage accéléré par le matériel",
+        "where": "Préférences ▸ Média ▸ Activer le décodage matériel accéléré",
         "body": "Sans lui, chaque image H.264, HEVC ou AV1 est décodée par le processeur. C'est la première cause d'une lecture qui saccade."
       },
       "previewcodec": {
@@ -252,27 +252,27 @@
       },
       "cacheotherdisk": {
         "title": "Cache sur le disque des rushs",
-        "where": "Préférences ▸ Disques de travail",
+        "where": "Préférences ▸ Cache de média",
         "body": "Cache et médias sur le même volume se disputent la même tête de lecture. Les séparer coûte un réglage et se sent tout de suite."
       },
       "diskcachessd": {
         "title": "Cache disque sur SSD",
-        "where": "Préférences ▸ Mémoire et performances ▸ Cache disque",
+        "where": "Préférences ▸ Disque ▸ Cache de disque",
         "body": "Le cache disque d'After Effects se lit à chaque prévisualisation. Sur un disque lent, ou sur celui des rushs, il annule son propre bénéfice."
       },
       "diskcacheon": {
         "title": "Cache disque désactivé",
-        "where": "Préférences ▸ Mémoire et performances ▸ Activer le cache disque",
+        "where": "Préférences ▸ Disque ▸ Activer le cache de disque",
         "body": "Décoché, chaque prévisualisation repart de zéro dès que la RAM est pleine. C'est la perte de temps la plus silencieuse d'After Effects."
       },
       "mfrcpu": {
         "title": "Part de CPU trop haute",
-        "where": "Préférences ▸ Mémoire et performances ▸ Rendu multi-images",
+        "where": "Préférences ▸ Mémoire et CPU ▸ % du processeur réservé aux autres applications",
         "body": "After Effects veut environ 4 Go par cœur mobilisé. Au-delà de ce que la RAM peut suivre, ajouter des cœurs ralentit le rendu."
       },
       "bitdepth": {
         "title": "Projet en 32 bits",
-        "where": "Fichier ▸ Réglages du projet ▸ Couleur ▸ Profondeur",
+        "where": "Fichier ▸ Paramètres du projet ▸ Couleur ▸ Résolution",
         "body": "Le 32 bits ne sert qu'aux compositions à forte plage dynamique. Activé par habitude sur des sources 8 bits, il ne coûte que du temps."
       }
     }

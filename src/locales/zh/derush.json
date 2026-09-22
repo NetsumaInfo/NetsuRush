@@ -348,7 +348,7 @@
     "backToTimelines": "返回时间线",
     "noShots": "该时间线没有视频镜头。",
     "noSnapshotTitle": "尚未收到序列",
-    "noSnapshotHint": "在 {{host}} 中打开 NetsuRush 面板（窗口 ▸ 扩展功能），然后点击“发送到 NetsuRush”。",
+    "noSnapshotHint": "在 {{host}} 中打开 NetsuRush 面板（窗口 ▸ 扩展），然后点击“发送到 NetsuRush”。",
     "tracks": "显示的轨道",
     "allTracks": "全部轨道",
     "trackFallback": "轨道 {{index}}",

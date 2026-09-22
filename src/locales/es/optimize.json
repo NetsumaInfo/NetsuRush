@@ -73,7 +73,7 @@
     "items": {
       "loadAllTimelines": {
         "label": "Cargar todas las timelines al abrir",
-        "where": "Preferencias ▸ Usuario ▸ Guardar y cargar",
+        "where": "Preferencias ▸ Usuario ▸ Guardar y abrir proyecto",
         "body": "Activado, todas las timelines se cargan en RAM al abrir el proyecto. Blackmagic lo deja desactivado de forma predeterminada para acelerar los proyectos con muchas timelines."
       },
       "resolveMemory": {
@@ -97,13 +97,13 @@
         "body": "Descarga la decodificación en la GPU. Fiable en 8 bits 4:2:0; 4:2:2 y 4:4:4 dependen de la tarjeta. Desactívalo si ves artefactos."
       },
       "liveSave": {
-        "label": "Guardado continuo",
-        "where": "Preferencias ▸ Usuario ▸ Guardar y cargar",
+        "label": "Constante",
+        "where": "Preferencias ▸ Usuario ▸ Guardar y abrir proyecto",
         "body": "Guarda en cada cambio. El manual lo recomienda y anuncia un impacto mínimo; las ralentizaciones observadas se dan en almacenamiento en red o lento. En un SSD local, mantenlo activado."
       },
       "timelineBackups": {
         "label": "Copias de la timeline",
-        "where": "Preferencias ▸ Usuario ▸ Guardar y cargar",
+        "where": "Preferencias ▸ Usuario ▸ Guardar y abrir proyecto",
         "body": "Instantáneas periódicas además de las copias del proyecto. La primera del día puede tardar, las siguientes son imperceptibles."
       }
     },
@@ -221,8 +221,8 @@
         "body": "De forma predeterminada está en el disco del sistema, que ya aguanta el SO. Un NVMe aparte del disco de medios se nota al momento."
       },
       "playproxy": {
-        "title": "Resolución proxy de timeline",
-        "where": "Reproducción ▸ Resolución proxy de timeline",
+        "title": "Resolución de reproducción de la timeline",
+        "where": "Reproducir ▸ Resolución de reproducción de línea de tiempo",
         "body": "Mitad o Cuarto al montar: cuatro veces menos trabajo de GPU en Cuarto con 4K. La exportación sigue a resolución completa."
       },
       "optimizedmedia": {
@@ -232,17 +232,17 @@
       },
       "effectsheavy": {
         "title": "Efectos y correcciones apilados",
-        "where": "Reproducción ▸ Caché de renderizado ▸ Inteligente",
+        "where": "Reproducir ▸ Renderizar en caché ▸ Automático",
         "body": "Lo que cuesta es la carga por timeline, no el número de timelines. La caché inteligente cachea sola los nodos pesados."
       },
       "mercurygpu": {
         "title": "Motor de renderizado por software",
-        "where": "Archivo ▸ Configuración del proyecto ▸ General ▸ Motor de render",
+        "where": "Archivo ▸ Ajustes del proyecto ▸ Generales ▸ Procesador",
         "body": "Mercury Playback Engine en modo software lo calcula todo en la CPU. Elige la aceleración GPU si la tarjeta lo permite."
       },
       "hwdecode": {
         "title": "Decodificación por hardware",
-        "where": "Preferencias ▸ Medios ▸ Decodificación acelerada por hardware",
+        "where": "Preferencias ▸ Medios ▸ Habilitar descodificación acelerada por hardware",
         "body": "Sin ella, cada fotograma H.264, HEVC o AV1 lo decodifica la CPU. Es la primera causa de una reproducción entrecortada."
       },
       "previewcodec": {
@@ -252,27 +252,27 @@
       },
       "cacheotherdisk": {
         "title": "Caché en el disco de los clips",
-        "where": "Preferencias ▸ Discos de trabajo",
+        "where": "Preferencias ▸ Caché de medios",
         "body": "La caché y los medios en el mismo volumen compiten por el mismo cabezal. Separarlos cuesta un ajuste y se nota de inmediato."
       },
       "diskcachessd": {
         "title": "Caché de disco en SSD",
-        "where": "Preferencias ▸ Memoria y rendimiento ▸ Caché de disco",
+        "where": "Preferencias ▸ Disco ▸ Caché de disco",
         "body": "After Effects lee su caché de disco en cada previsualización. En un disco lento, o en el de los clips, anula su propio beneficio."
       },
       "diskcacheon": {
         "title": "Caché de disco desactivada",
-        "where": "Preferencias ▸ Memoria y rendimiento ▸ Activar caché de disco",
+        "where": "Preferencias ▸ Disco ▸ Activar caché de disco",
         "body": "Sin marcar, cada previsualización empieza de cero en cuanto se llena la RAM. Es la pérdida de tiempo más silenciosa de After Effects."
       },
       "mfrcpu": {
         "title": "Porcentaje de CPU demasiado alto",
-        "where": "Preferencias ▸ Memoria y rendimiento ▸ Render multifotograma",
+        "where": "Preferencias ▸ Memoria y CPU ▸ % de CPU reservado para otras aplicaciones",
         "body": "After Effects quiere unos 4 GB por núcleo usado. Más allá de lo que la RAM admite, añadir núcleos ralentiza el renderizado."
       },
       "bitdepth": {
         "title": "Proyecto de 32 bits",
-        "where": "Archivo ▸ Configuración del proyecto ▸ Color ▸ Profundidad",
+        "where": "Archivo ▸ Ajustes del proyecto ▸ Color ▸ Profundidad de bits",
         "body": "Los 32 bits solo sirven para composiciones de alto rango dinámico. Activados por costumbre con fuentes de 8 bits, solo cuestan tiempo."
       }
     }
