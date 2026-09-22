@@ -694,10 +694,10 @@
     "settling": "{{count}} 个正在写入",
     "settlingHint": "刚写入的文件可能属于画板尚未放置的导入。下次检查时再判定。",
     "safe": {
-      "hint": "逐个文件核对过：这些字节已存在于某个项目的伴随文件夹中。",
+      "hint": "逐个文件核对过：这些文件可以重新生成，或已存在于某个项目文件夹中。",
       "title": "可安全释放",
       "duplicated": "已归入项目的媒体（{{count}} 个）",
-      "duplicatedHint": "其字节位于某个项目的伴随文件夹中，例如“{{project}}”。",
+      "duplicatedHint": "文件已在某个项目的文件夹中，例如“{{project}}”。",
       "duplicatedNone": "目前未发现副本。",
       "action": "释放"
     },

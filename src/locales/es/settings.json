@@ -694,10 +694,10 @@
     "settling": "{{count}} escribiéndose ahora",
     "settlingHint": "Un archivo recién escrito puede pertenecer a una importación que el tablero aún no ha colocado. Se evaluará en la próxima pasada.",
     "safe": {
-      "hint": "Comprobado archivo por archivo: estos bytes ya existen en la carpeta complementaria de un proyecto.",
+      "hint": "Comprobado archivo por archivo: estos archivos se rehacen, o ya existen dentro de la carpeta de un proyecto.",
       "title": "Liberable sin riesgo",
       "duplicated": "Medios ya archivados en un proyecto ({{count}})",
-      "duplicatedHint": "Sus bytes están en la carpeta complementaria de un proyecto, por ejemplo «{{project}}».",
+      "duplicatedHint": "Los archivos ya están en la carpeta de un proyecto, por ejemplo «{{project}}».",
       "duplicatedNone": "Ningún duplicado detectado por ahora.",
       "action": "Liberar"
     },

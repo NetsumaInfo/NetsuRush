@@ -694,10 +694,10 @@
     "settling": "Wird geschrieben: {{count}}",
     "settlingHint": "Eine eben geschriebene Datei kann zu einem Import gehören, den das Board noch nicht platziert hat. Beim nächsten Durchgang wird sie geprüft.",
     "safe": {
-      "hint": "Datei für Datei geprüft: Diese Bytes liegen bereits im Begleitordner eines Projekts.",
+      "hint": "Datei für Datei geprüft: Diese Dateien lassen sich neu erzeugen oder liegen bereits in einem Projektordner.",
       "title": "Gefahrlos freigebbar",
       "duplicated": "Medien, die bereits in einem Projekt liegen ({{count}})",
-      "duplicatedHint": "Die Bytes liegen im Begleitordner eines Projekts, zum Beispiel „{{project}}“.",
+      "duplicatedHint": "Die Dateien liegen bereits im Ordner eines Projekts, zum Beispiel „{{project}}“.",
       "duplicatedNone": "Bisher kein Duplikat gefunden.",
       "action": "Freigeben"
     },

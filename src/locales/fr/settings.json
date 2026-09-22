@@ -694,10 +694,10 @@
     "settling": "{{count}} en cours d'écriture",
     "settlingHint": "Un fichier écrit à l'instant peut appartenir à un import que le board n'a pas encore posé. Il sera jugé au prochain passage.",
     "safe": {
-      "hint": "Vérifié fichier par fichier : ces octets existent déjà dans le dossier compagnon d'un projet.",
+      "hint": "Vérifié fichier par fichier : ces fichiers se refabriquent, ou existent déjà dans le dossier d'un projet.",
       "title": "Libérable sans risque",
       "duplicated": "Médias déjà rangés dans un projet ({{count}})",
-      "duplicatedHint": "Leurs octets sont dans le dossier compagnon d'un projet, par exemple « {{project}} ».",
+      "duplicatedHint": "Leurs fichiers sont déjà dans le dossier d'un projet, par exemple « {{project}} ».",
       "duplicatedNone": "Aucun double détecté pour l'instant.",
       "action": "Libérer"
     },
@@ -713,8 +713,8 @@
       "archive": "Enregistrer en projet…",
       "orphans": "Médias qu'aucun board ne réclame",
       "move": "Déplacer vers un dossier…",
-      "sceneCount_one": "{{count}} média dont l'application est seule dépositaire · {{size}}",
-      "sceneCount_other": "{{count}} médias dont l'application est seule dépositaire · {{size}}",
+      "sceneCount_one": "{{count}} média que l'application est seule à garder · {{size}}",
+      "sceneCount_other": "{{count}} médias que l'application est seule à garder · {{size}}",
       "orphansHint_one": "{{count}} fichier · {{size}}. Plus rien ne l'affiche, mais cette copie est la seule.",
       "orphansHint_other": "{{count}} fichiers · {{size}}. Plus rien ne les affiche, mais cette copie est la seule."
     },

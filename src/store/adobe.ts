@@ -8,6 +8,9 @@ import type { AdobeApp, AdobeBridgeStatus, AdobeSnapshot } from "@/lib/bridge";
 import { hostLabel } from "@/lib/host";
 import type { AppState } from "./index";
 
+// "Premiere Pro and After Effects" is written by the language, not by a hardcoded conjunction.
+const listFormat = () => new Intl.ListFormat(i18n.language, { style: "long", type: "conjunction" });
+
 export interface AdobeSlice {
   adobeStatus: AdobeBridgeStatus | null;
   adobeSnapshots: Partial<Record<AdobeApp, AdobeSnapshot | null>>;
@@ -80,7 +83,7 @@ export const createAdobeSlice: StateCreator<AppState, [], [], AdobeSlice> = (set
         text = r.error || i18n.t("adobe:notice.installFailed");
       } else if (r.restart && r.restart.length) {
         // App déjà ouverte : CEP ne charge le panneau qu'au démarrage → redémarrage obligatoire.
-        text = i18n.t("adobe:notice.installedRestart", { apps: r.restart.map(hostLabel).join(" et ") });
+        text = i18n.t("adobe:notice.installedRestart", { apps: listFormat().format(r.restart.map(hostLabel)) });
       } else {
         text = i18n.t("adobe:notice.installedOpen");
       }

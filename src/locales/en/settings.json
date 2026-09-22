@@ -694,10 +694,10 @@
     "settling": "{{count}} still being written",
     "settlingHint": "A file written moments ago may belong to an import the board has not placed yet. It will be checked on the next pass.",
     "safe": {
-      "hint": "Checked file by file: these bytes already exist inside a project's companion folder.",
+      "hint": "Checked file by file: these files can be rebuilt, or already exist inside a project folder.",
       "title": "Safe to free",
       "duplicated": "Media already filed in a project ({{count}})",
-      "duplicatedHint": "Their bytes are in a project's companion folder, for example “{{project}}”.",
+      "duplicatedHint": "The files are already in a project's folder, for example “{{project}}”.",
       "duplicatedNone": "No duplicate found yet.",
       "action": "Free up"
     },
