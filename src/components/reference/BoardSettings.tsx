@@ -7,7 +7,7 @@
 // ou un clic ailleurs.
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Grid2x2, Square, X, Star, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
@@ -19,6 +19,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { UP_MODELS, UP_SCALES, boardUpEngine } from "@/components/upscale/upscaleShared";
 import { ModelsCta } from "@/components/upscale/ModelPicker";
 import { useOutsideDismiss } from "@/hooks/useOutsideDismiss";
+import { errorText } from "@/lib/errorText";
 import { useBoard } from "./useReferenceBoard";
 import { PinnedBarEditor } from "./PinnedBarEditor";
 import { PINNED_SIDES } from "./toolbarButtons";
@@ -226,7 +227,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
           : result?.error || t("settings.assetSweepFailed"),
       );
     } catch (error) {
-      setSweepResult(error instanceof Error ? error.message : String(error));
+      setSweepResult(errorText(error));
     } finally {
       setSweeping(false);
     }
@@ -453,7 +454,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
         <section className="flex flex-col gap-2">
           <h3 className="text-xs font-semibold text-foreground">{t("settings.favFonts")}</h3>
           {prefs.favFonts.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground">{t("settings.favHintBefore")}<Star className="inline size-3 -mt-0.5" />{t("settings.favHintAfter")}</p>
+            <p className="text-[11px] text-muted-foreground"><Trans t={t} i18nKey="settings.favHint" components={[<Star key="star" className="inline size-3 -mt-0.5" />]} /></p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {prefs.favFonts.map((f) => (

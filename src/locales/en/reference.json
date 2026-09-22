@@ -85,8 +85,6 @@
     "noteBg": "Note background",
     "defaultNoteBg": "Default note background",
     "favFonts": "Favorite fonts",
-    "favHintBefore": "Star ",
-    "favHintAfter": " a font in the picker to pin it here.",
     "navigation": "Navigation",
     "invertWheel": "Invert wheel",
     "inverted": "Inverted",
@@ -243,7 +241,8 @@
     "assetSweepAction": "Clean up",
     "assetSweepFailed": "Cleanup failed.",
     "assetSweepDone_one": "{{count}} file removed, {{mb}} MB freed.",
-    "assetSweepDone_other": "{{count}} files removed, {{mb}} MB freed."
+    "assetSweepDone_other": "{{count}} files removed, {{mb}} MB freed.",
+    "favHint": "Click <0/> next to a font in the picker to pin it here."
   },
   "inspector": {
     "ytPlayer": "YouTube player",

@@ -85,8 +85,6 @@
     "noteBg": "Fond de la note",
     "defaultNoteBg": "Fond de note par défaut",
     "favFonts": "Polices favorites",
-    "favHintBefore": "Étoile ",
-    "favHintAfter": " une police dans le sélecteur pour l'épingler ici.",
     "navigation": "Navigation",
     "invertWheel": "Inverser la molette",
     "inverted": "Inversé",
@@ -243,7 +241,8 @@
     "assetSweepAction": "Nettoyer",
     "assetSweepFailed": "Le nettoyage a échoué.",
     "assetSweepDone_one": "{{count}} fichier retiré, {{mb}} Mo libérés.",
-    "assetSweepDone_other": "{{count}} fichiers retirés, {{mb}} Mo libérés."
+    "assetSweepDone_other": "{{count}} fichiers retirés, {{mb}} Mo libérés.",
+    "favHint": "Clique sur <0/> à côté d'une police dans le sélecteur pour l'épingler ici."
   },
   "inspector": {
     "ytPlayer": "Lecteur YouTube",

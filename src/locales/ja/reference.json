@@ -85,8 +85,6 @@
     "noteBg": "ノートの背景",
     "defaultNoteBg": "デフォルトのノート背景",
     "favFonts": "お気に入りのフォント",
-    "favHintBefore": "フォント選択で ",
-    "favHintAfter": " を押すと、ここにピン留めされます。",
     "navigation": "ナビゲーション",
     "invertWheel": "ホイールを反転",
     "inverted": "反転",
@@ -243,7 +241,8 @@
     "assetSweepAction": "クリーンアップ",
     "assetSweepFailed": "クリーンアップに失敗しました。",
     "assetSweepDone_one": "{{count}} 件のファイルを削除し、{{mb}} MB を解放しました。",
-    "assetSweepDone_other": "{{count}} 件のファイルを削除し、{{mb}} MB を解放しました。"
+    "assetSweepDone_other": "{{count}} 件のファイルを削除し、{{mb}} MB を解放しました。",
+    "favHint": "フォント選択でフォントの横の <0/> を押すと、ここにピン留めされます。"
   },
   "inspector": {
     "ytPlayer": "YouTube プレーヤー",

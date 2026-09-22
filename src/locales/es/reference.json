@@ -85,8 +85,6 @@
     "noteBg": "Fondo de la nota",
     "defaultNoteBg": "Fondo de nota predeterminado",
     "favFonts": "Fuentes favoritas",
-    "favHintBefore": "Marca con estrella ",
-    "favHintAfter": " una fuente en el selector para fijarla aquí.",
     "navigation": "Navegación",
     "invertWheel": "Invertir la rueda",
     "inverted": "Invertida",
@@ -243,7 +241,8 @@
     "assetSweepAction": "Limpiar",
     "assetSweepFailed": "La limpieza ha fallado.",
     "assetSweepDone_one": "{{count}} archivo retirado, {{mb}} MB liberados.",
-    "assetSweepDone_other": "{{count}} archivos retirados, {{mb}} MB liberados."
+    "assetSweepDone_other": "{{count}} archivos retirados, {{mb}} MB liberados.",
+    "favHint": "Pulsa <0/> junto a una fuente en el selector para fijarla aquí."
   },
   "inspector": {
     "ytPlayer": "Reproductor de YouTube",

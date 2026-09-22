@@ -85,8 +85,6 @@
     "noteBg": "便签背景",
     "defaultNoteBg": "默认便签背景",
     "favFonts": "收藏字体",
-    "favHintBefore": "点击字体选择器里的星标 ",
-    "favHintAfter": " 即可固定到这里。",
     "navigation": "导航",
     "invertWheel": "反转滚轮",
     "inverted": "反转",
@@ -243,7 +241,8 @@
     "assetSweepAction": "清理",
     "assetSweepFailed": "清理失败。",
     "assetSweepDone_one": "已移除 {{count}} 个文件，释放 {{mb}} MB。",
-    "assetSweepDone_other": "已移除 {{count}} 个文件，释放 {{mb}} MB。"
+    "assetSweepDone_other": "已移除 {{count}} 个文件，释放 {{mb}} MB。",
+    "favHint": "在字体选择器中点击字体旁的 <0/>，即可固定到这里。"
   },
   "inspector": {
     "ytPlayer": "YouTube 播放器",

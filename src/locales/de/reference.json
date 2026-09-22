@@ -85,8 +85,6 @@
     "noteBg": "Notiz-Hintergrund",
     "defaultNoteBg": "Standard-Notizhintergrund",
     "favFonts": "Lieblingsschriften",
-    "favHintBefore": "Schrift im Auswahlfeld mit ",
-    "favHintAfter": " markieren, um sie hier anzuheften.",
     "navigation": "Navigation",
     "invertWheel": "Mausrad umkehren",
     "inverted": "Umgekehrt",
@@ -243,7 +241,8 @@
     "assetSweepAction": "Aufräumen",
     "assetSweepFailed": "Aufräumen fehlgeschlagen.",
     "assetSweepDone_one": "{{count}} Datei entfernt, {{mb}} MB freigegeben.",
-    "assetSweepDone_other": "{{count}} Dateien entfernt, {{mb}} MB freigegeben."
+    "assetSweepDone_other": "{{count}} Dateien entfernt, {{mb}} MB freigegeben.",
+    "favHint": "Klicke im Auswahlfeld neben einer Schrift auf <0/>, um sie hier anzuheften."
   },
   "inspector": {
     "ytPlayer": "YouTube-Player",
