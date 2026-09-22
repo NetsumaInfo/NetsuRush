@@ -22,7 +22,6 @@
     "clickHint": "点击 = {{mode}}（E 切换）· 右键 = 排除 · Shift+悬停 = 预览 · 滚轮 = 缩放 · J/K/L · I/O · , ; = 单帧跟踪 · 1-9 切换对象",
     "include": "包含",
     "exclude": "排除",
-    "pointsHere": "· 此处 {{count}} 个点",
     "showMask": "显示蒙版",
     "hideOverlay": "隐藏叠加层",
     "showOverlay": "显示叠加层",
@@ -158,9 +157,12 @@
   },
   "engineHint": {
     "minimax-remover": "重建背景不闪烁 — 背景运动时最干净。",
-    "diffueraser": "高质量视频物体移除。引擎尚未接入。",
+    "diffueraser": "高质量视频物体移除。暂不可用。",
     "matanyone": "逐帧记住目标 — 擅长头发和细边缘。",
-    "matanyone2": "与 v1 相同，更精细也更可靠。"
+    "matanyone2": "与 v1 相同，更精细也更可靠。",
+    "videomama": "边缘非常精细，但速度慢、占用内存多。",
+    "sam2matting": "实验性视频遮罩。",
+    "powerpaint": "填充用蒙版涂抹的区域。暂不可用。"
   },
   "exportRow": {
     "allObjects": "所有对象",
@@ -193,8 +195,8 @@
     "tiny": "SAM 2.1 最小版本 — 适合显存紧张的显卡。",
     "edgetam": "最轻量（56 MB）也最快。掩码比 SAM 2.1 粗。",
     "sam31": "最新一代：能跟住交错或消失的目标。需要 NVIDIA GPU。",
-    "samurai": "目标被遮挡也能继续跟踪（运动感知记忆）。使用已安装的 SAM 2.1 权重。",
-    "sam2long": "适合长镜头：保留多条假设并剪除较差的，误差不再累积。使用已安装的 SAM 2.1 权重。"
+    "samurai": "目标被其他物体挡住时也能继续跟踪。使用 SAM 2.1，需先安装。",
+    "sam2long": "适合长镜头：同时跟踪多条轨迹并保留正确的一条，误差不会累积。使用 SAM 2.1，需先安装。"
   },
   "timeline": {
     "inHere": "在此设入点（第 {{n}} 帧）",

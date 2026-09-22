@@ -110,5 +110,9 @@
     "action": "Signaler l'erreur",
     "sent": "Envoyé, merci !",
     "saved": "Envoi raté. Message enregistré."
+  },
+  "host": {
+    "offlineResolve": "Ouvre un projet avec des rushs dans Resolve, puis recharge, ou importe des vidéos du disque.",
+    "offlineAdobe": "Ouvre {{app}} puis le panneau NetsuRush (Fenêtre ▸ Extensions), ou importe des vidéos du disque."
   }
 }

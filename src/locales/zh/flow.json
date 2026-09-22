@@ -84,5 +84,12 @@
   "attach": "附加",
   "attachHint": "附加图片或文件",
   "removeAttachment": "移除附件",
-  "conversationNew": "新建"
+  "conversationNew": "新建",
+  "attachFileTooBig": "{{name}}：文件过大（{{size}}，上限 {{max}}）",
+  "attachUnsupported": "{{name}}：不支持此格式。请附加图片或文本文件。",
+  "specUnsupported": "{{name}}：无法读取此格式。请选择 .md、.txt 或 .yaml 文件。",
+  "specEmpty": "{{name}} 是空文件。",
+  "framesCount_one": "{{count}} 帧",
+  "framesCount_other": "{{count}} 帧",
+  "cacheLimit": "上限 {{size}}"
 }

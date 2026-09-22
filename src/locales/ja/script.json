@@ -174,7 +174,9 @@
     "textSelection": "選択したテキスト",
     "emptyTipAfter": "へドラッグして該当箇所にリンクするか、段落へドラッグして添付します。レールのショットをダブルクリックするとIn/Outを調整できます。",
     "noOtherSound": "その他の音声はありません。",
-    "noFile": "ファイルがありません。"
+    "noFile": "ファイルがありません。",
+    "playPreview": "プレビューを再生",
+    "stopPreview": "プレビューを停止"
   },
   "settings": {
     "documentPrefix": "このスクリプトの設定 —",
@@ -372,7 +374,6 @@
   },
   "mediaPanel": {
     "importFailed": "読み込みに失敗しました。",
-    "imported": "{{count}}件のメディアをMedia Poolへ読み込みました（{{skipped}}件は追加済み）。",
     "dropFailed": "ドロップしたファイルのパスを取得できませんでした。ファイル追加ボタンを使用してください。",
     "resize": "メディアパネルのサイズ変更",
     "destination": "保存先",

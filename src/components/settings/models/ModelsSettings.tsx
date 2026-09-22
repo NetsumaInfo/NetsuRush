@@ -7,9 +7,10 @@ import {
   ArrowUpNarrowWide, ArrowDownWideNarrow, type LucideIcon,
 } from "lucide-react";
 import {
-  MODEL_REGISTRY, TASK_ORDER, TASK_LABELS, fmtSize,
+  MODEL_REGISTRY, TASK_ORDER, fmtSize,
   type ModelEntry, type ModelTask,
 } from "@/lib/modelRegistry";
+import { MODEL_TEXT_NS, modelHint, taskLabel } from "@/lib/modelText";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { Badge } from "@/components/ui/badge";
@@ -76,31 +77,6 @@ const sizeOf = (m: ModelEntry, mgr: ModelManager) => {
   const st = mgr.status[m.id];
   return st?.installed && st.sizeBytes ? st.sizeBytes : m.sizeBytes;
 };
-
-const MODEL_HINT_KEYS: Partial<Record<string, string>> = {
-  transnetv2: "derush:shared.modelHintTransnet",
-  omnishotcut: "derush:shared.modelHintOmni",
-  autoshot: "derush:shared.modelHintAutoShot",
-  "whisper-turbo": "voice:shared.asr.whisperTurbo.hint",
-  "parakeet-v3": "voice:shared.asr.parakeetV3.hint",
-  whisperx: "voice:shared.asr.whisperx.hint",
-  "canary-1b-v2": "voice:shared.asr.canary.hint",
-  "sam2.1-large": "roto:sam.large",
-  "sam2.1": "roto:sam.base",
-};
-
-function modelHintKeys(m: ModelEntry): string[] {
-  const keys = [`models:catalogHint.${m.id}`];
-  const exact = MODEL_HINT_KEYS[m.id];
-  if (exact) keys.push(exact);
-  if (m.task === "upscale" || m.task === "interpolate") keys.push(`upscale:modelHint.${m.id}`);
-  if (m.task === "depth") keys.push(`upscale:depthModelHint.${m.id}`);
-  if (m.task === "matte-image" || m.task === "matte-video") keys.push(`upscale:segModelHint.${m.id}`);
-  if (m.task === "object-removal" || m.task === "matte-video") keys.push(`roto:engineHint.${m.id}`);
-  // Ne jamais finir par la description générique de la catégorie : i18next la considérerait comme
-  // une traduction valide et masquerait le `hint` propre au modèle passé en defaultValue.
-  return keys;
-}
 
 function sortModels(models: ModelEntry[], key: SortKey, dir: SortDir, mgr: ModelManager): ModelEntry[] {
   if (key === "default") return dir === "asc" ? models : [...models].reverse();
@@ -208,7 +184,7 @@ function ConflictDialog({ mgr }: { mgr: ModelManager }) {
 }
 
 function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search?: SearchModelPicker }) {
-  const { t } = useTranslation(["models", "common", "derush", "voice", "upscale", "roto"]);
+  const { t } = useTranslation([...MODEL_TEXT_NS, "common"]);
   const st = mgr.status[m.id];
   const installed = st?.installed ?? false;
   const dl = mgr.downloading[m.id];
@@ -217,7 +193,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
   const removing = mgr.removing[m.id] ?? false;
   const err = mgr.errors[m.id];
   const size = sizeOf(m, mgr);
-  const hint = m.hint ? t(modelHintKeys(m), { defaultValue: m.hint }) : "";
+  const hint = modelHint(t, m);
   // VRAM TOTALE de la carte, pas la libre : « ne tiendra jamais » est une propriété du matériel.
   // Sans GPU NVIDIA mesurable (mgr.gpu null), on n'avertit sur rien plutôt que d'alarmer à tort.
   const vramHaveGB = mgr.gpu ? Math.round(mgr.gpu.totalMB / 1024) : 0;
@@ -265,14 +241,14 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
               <TooltipTrigger
                 render={
                   <div className="flex items-center justify-end gap-1 text-[10px] text-[var(--color-warn)]">
-                    <AlertTriangle className="h-3 w-3" /> {m.vramGB} Go VRAM
+                    <AlertTriangle className="h-3 w-3" /> {t("vram", { size: fmtSize(m.vramGB * 1024 ** 3) })}
                   </div>
                 }
               />
               <TooltipContent>{t("vramShort", { need: m.vramGB, have: vramHaveGB, gpu: mgr.gpu?.name })}</TooltipContent>
             </Tooltip>
           ) : (
-            <div className="text-[10px] opacity-70">{m.vramGB} Go VRAM</div>
+            <div className="text-[10px] opacity-70">{t("vram", { size: fmtSize(m.vramGB * 1024 ** 3) })}</div>
           )
         )}
       </div>
@@ -434,7 +410,7 @@ export function ModelsSettings() {
           <section key={g.task}>
             <h3 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               <TaskIcon className="size-3.5 text-primary" />
-              {TASK_LABELS[g.task as ModelTask]}
+              {taskLabel(t, g.task as ModelTask)}
             </h3>
             {!usable && (
               <p className="mb-1 flex items-center gap-1.5 text-xs text-destructive">

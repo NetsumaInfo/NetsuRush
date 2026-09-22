@@ -8,6 +8,8 @@
 // Le fichier reste sur le disque de l'utilisateur : on n'en garde que le texte,
 // dans le stockage local, pour que le choix survive à un redémarrage.
 import { useCallback, useEffect, useState } from "react";
+import i18n from "@/i18n";
+import { fmtBytes } from "@/lib/utils";
 
 export type FrameSpec = { name: string; text: string; at: number };
 
@@ -57,16 +59,16 @@ export function useFrameSpec() {
   const load = useCallback(async (file: File) => {
     setError("");
     if (!looksLikeSpec(file.name)) {
-      setError(`format non lu : ${file.name}`);
+      setError(i18n.t("flow:specUnsupported", { name: file.name }));
       return false;
     }
     if (file.size > MAX_SPEC_BYTES) {
-      setError(`fichier trop gros (${Math.round(file.size / 1024)} Ko, maximum ${MAX_SPEC_BYTES / 1024} Ko)`);
+      setError(i18n.t("flow:attachFileTooBig", { name: file.name, size: fmtBytes(file.size), max: fmtBytes(MAX_SPEC_BYTES) }));
       return false;
     }
     try {
       const text = await file.text();
-      if (!text.trim()) { setError("fichier vide"); return false; }
+      if (!text.trim()) { setError(i18n.t("flow:specEmpty", { name: file.name })); return false; }
       setSpec({ name: file.name, text, at: Date.now() });
       return true;
     } catch (e) {

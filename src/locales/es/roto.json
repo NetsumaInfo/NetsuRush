@@ -22,7 +22,6 @@
     "clickHint": "Clic = {{mode}} (E alterna) · clic derecho = excluir · Mayús+cursor = vista previa · rueda = zoom · J/K/L · I/O · , ; = paso de seguimiento · 1-9 objeto",
     "include": "incluir",
     "exclude": "excluir",
-    "pointsHere": "· Puntos aquí: {{count}}",
     "showMask": "Mostrar la máscara",
     "hideOverlay": "Ocultar la superposición",
     "showOverlay": "Mostrar la superposición",
@@ -158,9 +157,12 @@
   },
   "engineHint": {
     "minimax-remover": "Reconstruye el fondo sin parpadeo — el más limpio cuando el fondo se mueve.",
-    "diffueraser": "Eliminación de objetos en vídeo, alta calidad. Motor aún no conectado.",
+    "diffueraser": "Eliminación de objetos en vídeo, alta calidad. Aún no disponible.",
     "matanyone": "Recuerda el objeto de un fotograma a otro — bueno con el pelo y los bordes finos.",
-    "matanyone2": "Como la v1, más fino y más fiable."
+    "matanyone2": "Como la v1, más fino y más fiable.",
+    "videomama": "Bordes muy finos, pero lento y exigente en memoria.",
+    "sam2matting": "Matte de vídeo experimental.",
+    "powerpaint": "Rellena la zona pintada con la máscara. Aún no disponible."
   },
   "exportRow": {
     "allObjects": "Todos los objetos",
@@ -193,8 +195,8 @@
     "tiny": "La variante más pequeña de SAM 2.1 — para tarjetas con poca VRAM.",
     "edgetam": "El más ligero (56 MB) y rápido. Máscaras menos finas que SAM 2.1.",
     "sam31": "Última generación: mantiene los objetos que se cruzan o desaparecen. Requiere GPU NVIDIA.",
-    "samurai": "Sigue el objeto aunque quede oculto (memoria guiada por el movimiento). Usa los pesos SAM 2.1 instalados.",
-    "sam2long": "Para planos largos: mantiene varias hipótesis y descarta las malas, el error deja de acumularse. Usa los pesos SAM 2.1 instalados."
+    "samurai": "Sigue el objeto aunque pase por detrás de otra cosa. Usa SAM 2.1, que debe estar instalado.",
+    "sam2long": "Para planos largos: sigue varias pistas y se queda con la buena, así el error no se acumula. Usa SAM 2.1, que debe estar instalado."
   },
   "timeline": {
     "inHere": "Punto de entrada aquí (img {{n}})",

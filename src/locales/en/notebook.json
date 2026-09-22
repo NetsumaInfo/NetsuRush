@@ -642,5 +642,24 @@
     "failed": "Sharing failed.",
     "manageRemoval": "Use collaboration settings to leave or delete this shared document.",
     "retry": "Retry"
+  },
+  "a11y": {
+    "addImage": "Add image",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "resizeMedia": "Resize media",
+    "inPoint": "In point",
+    "outPoint": "Out point",
+    "renameView": "Rename view",
+    "databaseName": "Database name",
+    "filterField": "Filter field",
+    "filterOperator": "Filter condition",
+    "filterValue": "Filter value",
+    "removeFilter": "Remove filter",
+    "editOption": "Edit option",
+    "removeTask": "Remove task",
+    "addTask": "Add task"
   }
 }

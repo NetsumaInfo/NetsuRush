@@ -38,23 +38,23 @@ export function FilterMenu({ fields, view, onChange }: { fields: DbField[]; view
           if (!field) return null;
           return (
             <div key={c.id} className="flex items-center gap-1 px-1 py-1">
-              <select aria-label="Filter field" value={c.fieldId} onChange={(e) => set(c.id, { fieldId: e.target.value, op: opsForField(fields.find((f) => f.id === e.target.value)!)[0] })} className="nb-sel min-w-0 flex-1 text-xs">
+              <select aria-label={i18n.t("notebook:a11y.filterField")} value={c.fieldId} onChange={(e) => set(c.id, { fieldId: e.target.value, op: opsForField(fields.find((f) => f.id === e.target.value)!)[0] })} className="nb-sel min-w-0 flex-1 text-xs">
                 {fields.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
-              <select aria-label="Filter operator" value={c.op} onChange={(e) => set(c.id, { op: e.target.value as FilterOp })} className="nb-sel text-xs">
+              <select aria-label={i18n.t("notebook:a11y.filterOperator")} value={c.op} onChange={(e) => set(c.id, { op: e.target.value as FilterOp })} className="nb-sel text-xs">
                 {opsForField(field).map((op) => <option key={op} value={op}>{opLabel(op)}</option>)}
               </select>
               {needsValue(c.op) && (
                 field.type === "select" ? (
-                  <select aria-label="Filter value" value={String(c.value ?? "")} onChange={(e) => set(c.id, { value: e.target.value })} className="nb-sel min-w-0 flex-1 text-xs">
+                  <select aria-label={i18n.t("notebook:a11y.filterValue")} value={String(c.value ?? "")} onChange={(e) => set(c.id, { value: e.target.value })} className="nb-sel min-w-0 flex-1 text-xs">
                     <option value="">—</option>
                     {(field.options || []).map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
                   </select>
                 ) : (
-                  <input aria-label="Filter value" value={String(c.value ?? "")} onChange={(e) => set(c.id, { value: e.target.value })} className="w-20 min-w-0 flex-1 rounded border border-border bg-[var(--color-surface-2)] px-1.5 py-0.5 text-xs outline-none focus:border-primary" />
+                  <input aria-label={i18n.t("notebook:a11y.filterValue")} value={String(c.value ?? "")} onChange={(e) => set(c.id, { value: e.target.value })} className="w-20 min-w-0 flex-1 rounded border border-border bg-[var(--color-surface-2)] px-1.5 py-0.5 text-xs outline-none focus:border-primary" />
                 )
               )}
-              <button type="button" aria-label="Remove filter" onClick={() => remove(c.id)} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+              <button type="button" aria-label={i18n.t("notebook:a11y.removeFilter")} onClick={() => remove(c.id)} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
             </div>
           );
         })}

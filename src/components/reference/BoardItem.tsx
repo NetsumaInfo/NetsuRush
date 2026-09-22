@@ -7,7 +7,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Trash2, FileQuestion, FolderSearch, Loader2, ImageOff, Link2, Unlink2, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, fmtBytes } from "@/lib/utils";
 import { nr, nextProxyToken } from "@/lib/bridge";
 import i18n from "@/i18n";
 import { type BoardItem as Item, type BoardLink, parseVideoEmbed, EMBED_PLAYER_PROVIDERS, displaySrc, isCollabRef, isCoreFileRef } from "./referenceShared";
@@ -721,14 +721,7 @@ function FrameContent({ item }: { item: Item }) {
   );
 }
 
-// Octets → libellé court (Ko/Mo/Go).
-function humanSize(n: number): string {
-  if (!n) return "";
-  const u = ["o", "Ko", "Mo", "Go"];
-  let i = 0, v = n;
-  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
-  return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${u[i]}`;
-}
+const humanSize = (n: number): string => (n ? fmtBytes(n) : "");
 
 // Placeholder d'un média MANQUANT après import d'un .netsu (gros fichier référencé non retrouvé) :
 // invite à relocaliser le fichier sur la machine locale → repointe `ref` et efface `missing`.

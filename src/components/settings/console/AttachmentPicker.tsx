@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, FileVideo, Film, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, fmtBytes } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
 // Plafonds annoncés par le service (ils dépendent du serveur Discord du webhook, cf. core/bugreport).
@@ -17,9 +17,6 @@ type Props = {
   maxMB?: number;
 };
 
-function sizeLabel(bytes: number): string {
-  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} Mo` : `${Math.round(bytes / 1024)} Ko`;
-}
 
 function iconFor(file: File) {
   if (file.type.startsWith("video/")) return FileVideo;
@@ -119,7 +116,7 @@ export function AttachmentPicker({ files, onChange, maxFiles = DEFAULT_MAX_FILES
                     </div>
                   )}
                   <p className="truncate px-1.5 pt-1 text-[10px] text-foreground/80">{file.name}</p>
-                  <p className="truncate px-1.5 pb-1 text-[10px] text-muted-foreground">{sizeLabel(file.size)}</p>
+                  <p className="truncate px-1.5 pb-1 text-[10px] text-muted-foreground">{fmtBytes(file.size)}</p>
                   <Tooltip>
                     <TooltipTrigger
                       render={

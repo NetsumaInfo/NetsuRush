@@ -84,5 +84,12 @@
   "attach": "Anhängen",
   "attachHint": "Bild oder Datei anhängen",
   "removeAttachment": "Anhang entfernen",
-  "conversationNew": "Neu"
+  "conversationNew": "Neu",
+  "attachFileTooBig": "{{name}}: Datei zu groß ({{size}}, maximal {{max}})",
+  "attachUnsupported": "{{name}}: Format nicht unterstützt. Hänge ein Bild oder eine Textdatei an.",
+  "specUnsupported": "{{name}}: Dieses Format wird nicht gelesen. Wähle eine .md-, .txt- oder .yaml-Datei.",
+  "specEmpty": "{{name}} ist leer.",
+  "framesCount_one": "{{count}} Bild",
+  "framesCount_other": "{{count}} Bilder",
+  "cacheLimit": "max. {{size}}"
 }

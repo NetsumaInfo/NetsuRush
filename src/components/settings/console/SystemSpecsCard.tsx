@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, fmtBytes } from "@/lib/utils";
 import type { BugContext } from "@/lib/bridge";
 import { formatContext } from "./bugReportShared";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+
+const MB = 1024 * 1024;
 
 // Assez pour situer une machine d'un coup d'œil ; le reste est dans le repli.
-function summaryLines(ctx: BugContext): string[] {
-  const vram = ctx.gpu.vram ? ` · ${Math.round(ctx.gpu.vram.totalMB / 1024)} Go VRAM` : "";
+function summaryLines(ctx: BugContext, t: TFunction<"settings">): string[] {
+  const vram = ctx.gpu.vram ? ` · ${fmtBytes(ctx.gpu.vram.totalMB * MB)} VRAM` : "";
   return [
-    `${ctx.gpu.label ?? "GPU inconnu"}${vram}`,
-    `${ctx.cpu.name} · ${Math.round(ctx.memory.totalMB / 1024)} Go RAM`,
+    `${ctx.gpu.label ?? t("bugReport.specs.unknownGpu")}${vram}`,
+    `${ctx.cpu.name} · ${fmtBytes(ctx.memory.totalMB * MB)} RAM`,
     `${ctx.os.label} · v${ctx.app.version || "?"}`,
-    `torch ${ctx.runtime.backends.ml} · onnx ${ctx.runtime.backends.onnx} · ${ctx.runtime.ffmpeg ? "ffmpeg ok" : "ffmpeg absent"}`,
+    `torch ${ctx.runtime.backends.ml} · onnx ${ctx.runtime.backends.onnx} · ${ctx.runtime.ffmpeg ? t("bugReport.specs.ffmpegOk") : t("bugReport.specs.ffmpegMissing")}`,
   ];
 }
 
@@ -82,7 +85,7 @@ export function SystemSpecsCard({ context, loading, onRefresh, manual, onManualC
       ) : (
         <>
           <ul className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
-            {summaryLines(context).map((line) => <li key={line} className="truncate">{line}</li>)}
+            {summaryLines(context, t).map((line) => <li key={line} className="truncate">{line}</li>)}
           </ul>
           <button
             type="button"

@@ -188,7 +188,7 @@ export function FlowPreview({ state, frame, onFrame, frameUrl, revision, editorP
           </Tooltip>
         ))}
         <span className="ml-2 text-xs tabular-nums text-muted-foreground">
-          {state.width} × {state.height} · {state.fps} fps · {state.durationFrames} {t("frames")}
+          {state.width} × {state.height} · {state.fps} fps · {t("framesCount", { count: state.durationFrames })}
         </span>
         <span className="flex-1" />
         {BACKDROPS.map((entry) => (

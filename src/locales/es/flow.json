@@ -84,5 +84,12 @@
   "attach": "Adjuntar",
   "attachHint": "Adjuntar una imagen o un archivo",
   "removeAttachment": "Quitar el adjunto",
-  "conversationNew": "Nueva"
+  "conversationNew": "Nueva",
+  "attachFileTooBig": "{{name}}: archivo demasiado grande ({{size}}, máximo {{max}})",
+  "attachUnsupported": "{{name}}: formato no compatible. Adjunta una imagen o un archivo de texto.",
+  "specUnsupported": "{{name}}: no se puede leer este formato. Elige un archivo .md, .txt o .yaml.",
+  "specEmpty": "{{name}} está vacío.",
+  "framesCount_one": "{{count}} fotograma",
+  "framesCount_other": "{{count}} fotogramas",
+  "cacheLimit": "{{size}} máx."
 }

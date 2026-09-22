@@ -117,7 +117,6 @@
     "autoplay": "自動再生",
     "autoplayHint": "プレビューを自動再生",
     "addToTimeline": "タイムラインに追加",
-    "addNToTimeline": "{{count}} 件のショットをタイムラインに追加",
     "addAllToTimeline": "すべてのショットをタイムラインに追加",
     "archiveDiskHint": "ディスクに保管（ソースから独立して書き出し）",
     "player": "プレーヤー",

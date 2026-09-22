@@ -92,7 +92,7 @@
     "maxPatches": "Résolution d'analyse",
     "maxPatchesHint": "Plus haut repère les petits détails, mais prend plus de temps et de mémoire.",
     "patchesDefault": "{{value}} (défaut)",
-    "reindexWarning": "À cette résolution, tes rush doivent être réindexés. Revenir à 256 retrouve l'index d'origine intact.",
+    "reindexWarning": "À cette résolution, tes rushs doivent être réindexés. Revenir à 256 retrouve l'index d'origine intact.",
     "onnxGpu": "Visages et dictée sur GPU",
     "onnxGpuHint": "Environ 8× plus rapide. Coupe-le si ton pilote graphique plante.",
     "enabled": "Activé",
@@ -387,7 +387,10 @@
       "more": "Tout voir",
       "less": "Réduire",
       "manual": "Écris-le toi-même",
-      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11"
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11",
+      "unknownGpu": "GPU inconnu",
+      "ffmpegOk": "ffmpeg présent",
+      "ffmpegMissing": "ffmpeg absent"
     },
     "sending": "Envoi…",
     "send": "Envoyer",
@@ -513,7 +516,6 @@
       "action": "Réindexer",
       "hint": "Rattrape les caches déjà sur disque : l'index ne connaît que ce qui a été écrit depuis son introduction.",
       "running": "Réindexation…",
-      "done": "{{added}} entrée(s) indexée(s), {{attributed}} rattachée(s) à un rush.",
       "scan": "Lecture des rushs connus…",
       "index": "Analyse des dossiers…"
     },

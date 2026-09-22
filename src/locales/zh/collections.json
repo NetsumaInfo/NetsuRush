@@ -117,7 +117,6 @@
     "autoplay": "自动播放",
     "autoplayHint": "自动播放预览",
     "addToTimeline": "添加到时间线",
-    "addNToTimeline": "将 {{count}} 个镜头添加到时间线",
     "addAllToTimeline": "将全部镜头添加到时间线",
     "archiveDiskHint": "归档到磁盘（独立于源文件导出）",
     "player": "播放器",

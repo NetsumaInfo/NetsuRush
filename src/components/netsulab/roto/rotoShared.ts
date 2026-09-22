@@ -60,7 +60,7 @@ export const VIEW_MODES: { id: RotoViewMode; labelKey: string; hintKey: string }
 // scintillement rendait le résultat inutilisable en vidéo.
 export const REMOVE_ENGINES: { id: string; label: string; hint: string }[] = [
   { id: "minimax-remover", label: "MiniMax-Remover", hint: "Reconstruit le fond sans scintiller — le plus propre quand le fond bouge." },
-  { id: "diffueraser", label: "DiffuEraser", hint: "Suppression d'objet dans la vidéo. Moteur pas encore branché." },
+  { id: "diffueraser", label: "DiffuEraser", hint: "Suppression d'objet dans la vidéo, haute qualité. Pas encore disponible." },
 ];
 
 // Réglages de suppression d'objet. `steps` et `quality` ne concernent QUE la diffusion MiniMax ;

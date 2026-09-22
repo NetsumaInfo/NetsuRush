@@ -244,7 +244,7 @@ function ProviderRow({ provider, keySet, value, onValue, baseUrl, onBaseUrl }: {
           className="mt-1.5 h-7 font-mono text-[11px]"
           value={baseUrl}
           onChange={(e) => onBaseUrl(e.target.value)}
-          placeholder={`${provider.baseUrl.default}  —  ${provider.baseUrl.hint}`}
+          placeholder={`${provider.baseUrl.default}  —  ${t(`settings.baseUrlHint.${provider.id}`, { defaultValue: provider.baseUrl.hint })}`}
           spellCheck={false}
         />
       ) : null}

@@ -72,5 +72,33 @@
   "advanced": {
     "label": "Avancé",
     "tip": "Affiche tout le catalogue : variantes, générations antérieures et moteurs expérimentaux. Par défaut on ne montre que la sélection courante de chaque tâche."
+  },
+  "task": {
+    "detect": "Détection de plans",
+    "search": "Recherche visuelle",
+    "face": "Recherche par visage",
+    "voice-asr": "Voix — transcription",
+    "voice-vad": "Voix — silences",
+    "upscale": "Upscale",
+    "restore": "Restauration",
+    "interpolate": "Interpolation",
+    "depth": "Profondeur",
+    "matte-video": "Matte vidéo",
+    "matte-image": "Détourage",
+    "segment": "Segmentation (roto)",
+    "object-removal": "Suppression d'objet"
+  },
+  "vram": "{{size}} de VRAM",
+  "catalogHint": {
+    "siglip2-base": "Le plus léger.",
+    "siglip2-so400m": "Multilingue, le bon compromis.",
+    "siglip2-giant": "Le plus précis, et le plus lourd.",
+    "face-real": "Visages réels : les repère et reconnaît qui c'est. Nécessaire pour la recherche par visage.",
+    "face-anime": "Visages d'anime : les repère et reconnaît qui c'est. Se télécharge au premier usage.",
+    "whisper-small": "Peu de VRAM — pour de la dictée courte.",
+    "whisper-medium": "Entre vitesse et qualité.",
+    "whisper-large-v3": "La meilleure transcription, et la plus lente.",
+    "nemotron-3.5-asr": "40 langues, ponctuation et majuscules automatiques. Demande transcribe-cli, à installer à la main.",
+    "silero-vad": "Repère les passages parlés pour lancer et couper la dictée. Rapide, sur le processeur."
   }
 }

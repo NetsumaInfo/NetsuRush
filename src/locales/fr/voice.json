@@ -222,11 +222,11 @@
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Cale chaque mot à l'image près pour les sous-titres SRT/VTT. Moteur pas encore branché."
+        "hint": "Cale chaque mot à l'image près pour les sous-titres SRT/VTT. Pas encore disponible."
       },
       "canary": {
         "label": "Canary",
-        "hint": "25 langues européennes. Pas d'horodatage mot par mot. Moteur pas encore branché."
+        "hint": "25 langues européennes. Pas d'horodatage mot par mot. Pas encore disponible."
       }
     },
     "vad": {

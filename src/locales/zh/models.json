@@ -72,5 +72,33 @@
   "advanced": {
     "label": "高级",
     "tip": "显示完整目录：各种变体、旧版本和实验性引擎。默认只显示每项任务的精选模型。"
+  },
+  "task": {
+    "detect": "镜头检测",
+    "search": "视觉搜索",
+    "face": "人脸搜索",
+    "voice-asr": "语音转录",
+    "voice-vad": "静音检测",
+    "upscale": "超分辨率",
+    "restore": "修复",
+    "interpolate": "插帧",
+    "depth": "深度",
+    "matte-video": "视频遮罩",
+    "matte-image": "抠图",
+    "segment": "分割（转描）",
+    "object-removal": "物体移除"
+  },
+  "vram": "VRAM {{size}}",
+  "catalogHint": {
+    "siglip2-base": "最轻量。",
+    "siglip2-so400m": "支持多语言，平衡之选。",
+    "siglip2-giant": "最精准，也最重。",
+    "face-real": "真人面孔：检测并识别是谁。人脸搜索需要它。",
+    "face-anime": "动漫面孔：检测并识别是谁。首次使用时下载。",
+    "whisper-small": "占用 VRAM 少，适合简短语音输入。",
+    "whisper-medium": "兼顾速度与质量。",
+    "whisper-large-v3": "转录效果最好，也最慢。",
+    "nemotron-3.5-asr": "支持 40 种语言，自动加标点和大写。需要手动安装 transcribe-cli。",
+    "silero-vad": "检测说话以开始和停止语音输入。速度快，在 CPU 上运行。"
   }
 }

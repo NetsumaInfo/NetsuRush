@@ -642,5 +642,24 @@
     "failed": "共享失败。",
     "manageRemoval": "请使用协作设置退出或删除此共享文档。",
     "retry": "重试"
+  },
+  "a11y": {
+    "addImage": "添加图片",
+    "previousImage": "上一张图片",
+    "nextImage": "下一张图片",
+    "previousMonth": "上个月",
+    "nextMonth": "下个月",
+    "resizeMedia": "调整大小",
+    "inPoint": "入点",
+    "outPoint": "出点",
+    "renameView": "重命名视图",
+    "databaseName": "数据库名称",
+    "filterField": "筛选字段",
+    "filterOperator": "筛选条件",
+    "filterValue": "筛选值",
+    "removeFilter": "移除筛选",
+    "editOption": "编辑选项",
+    "removeTask": "移除任务",
+    "addTask": "添加任务"
   }
 }

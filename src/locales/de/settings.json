@@ -387,7 +387,10 @@
       "more": "Alles zeigen",
       "less": "Einklappen",
       "manual": "Schreib es selbst",
-      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 GB, Windows 11"
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 GB, Windows 11",
+      "unknownGpu": "Unbekannte GPU",
+      "ffmpegOk": "ffmpeg vorhanden",
+      "ffmpegMissing": "ffmpeg fehlt"
     },
     "sending": "Senden…",
     "send": "Senden",
@@ -513,7 +516,6 @@
       "action": "Neu indizieren",
       "hint": "Holt bereits vorhandenen Cache nach: der Index kennt nur, was seit seiner Einführung geschrieben wurde.",
       "running": "Neuindizierung…",
-      "done": "Indizierte Einträge: {{added}} · Einem Clip zugeordnet: {{attributed}}.",
       "scan": "Bekannte Clips werden gelesen…",
       "index": "Ordner werden analysiert…"
     },

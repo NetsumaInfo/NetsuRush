@@ -174,7 +174,9 @@
     "textSelection": "text selection",
     "emptyTipAfter": "to link it to that passage, or onto a paragraph to attach it. Double-click a shot in the rail to set in/out.",
     "noOtherSound": "No other audio.",
-    "noFile": "No files."
+    "noFile": "No files.",
+    "playPreview": "Play preview",
+    "stopPreview": "Stop preview"
   },
   "settings": {
     "documentPrefix": "Settings for THIS script —",
@@ -372,7 +374,6 @@
   },
   "mediaPanel": {
     "importFailed": "Import failed.",
-    "imported": "{{count}} media file(s) imported into the Media Pool ({{skipped}} already present).",
     "dropFailed": "Could not retrieve the dropped file paths. Use the Add files button.",
     "resize": "Resize media panel",
     "destination": "Destination",

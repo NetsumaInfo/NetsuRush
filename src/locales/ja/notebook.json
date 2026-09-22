@@ -642,5 +642,24 @@
     "failed": "共有に失敗しました。",
     "manageRemoval": "共有の退出や削除は共同作業の設定で行ってください。",
     "retry": "再試行"
+  },
+  "a11y": {
+    "addImage": "画像を追加",
+    "previousImage": "前の画像",
+    "nextImage": "次の画像",
+    "previousMonth": "前の月",
+    "nextMonth": "次の月",
+    "resizeMedia": "サイズを変更",
+    "inPoint": "イン点",
+    "outPoint": "アウト点",
+    "renameView": "ビューの名前を変更",
+    "databaseName": "データベース名",
+    "filterField": "フィルターの項目",
+    "filterOperator": "フィルターの条件",
+    "filterValue": "フィルターの値",
+    "removeFilter": "フィルターを削除",
+    "editOption": "オプションを編集",
+    "removeTask": "タスクを削除",
+    "addTask": "タスクを追加"
   }
 }

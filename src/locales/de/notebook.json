@@ -642,5 +642,24 @@
     "failed": "Teilen fehlgeschlagen.",
     "manageRemoval": "Verwende die Zusammenarbeitseinstellungen, um das geteilte Dokument zu verlassen oder zu löschen.",
     "retry": "Erneut versuchen"
+  },
+  "a11y": {
+    "addImage": "Bild hinzufügen",
+    "previousImage": "Vorheriges Bild",
+    "nextImage": "Nächstes Bild",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "resizeMedia": "Größe ändern",
+    "inPoint": "In-Punkt",
+    "outPoint": "Out-Punkt",
+    "renameView": "Ansicht umbenennen",
+    "databaseName": "Name der Datenbank",
+    "filterField": "Filterfeld",
+    "filterOperator": "Filterbedingung",
+    "filterValue": "Filterwert",
+    "removeFilter": "Filter entfernen",
+    "editOption": "Option bearbeiten",
+    "removeTask": "Aufgabe entfernen",
+    "addTask": "Aufgabe hinzufügen"
   }
 }

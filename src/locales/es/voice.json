@@ -222,11 +222,11 @@
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Cuadra cada palabra al fotograma para subtítulos SRT/VTT. Motor aún no conectado."
+        "hint": "Cuadra cada palabra al fotograma para subtítulos SRT/VTT. Aún no disponible."
       },
       "canary": {
         "label": "Canary",
-        "hint": "25 idiomas europeos. Sin marcas de tiempo por palabra. Motor aún no conectado."
+        "hint": "25 idiomas europeos. Sin marcas de tiempo por palabra. Aún no disponible."
       }
     },
     "vad": {

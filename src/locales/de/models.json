@@ -72,5 +72,33 @@
   "advanced": {
     "label": "Erweitert",
     "tip": "Zeigt den gesamten Katalog: Varianten, frühere Generationen und experimentelle Engines. Standardmäßig wird nur die aktuelle Auswahl je Aufgabe angezeigt."
+  },
+  "task": {
+    "detect": "Einstellungserkennung",
+    "search": "Visuelle Suche",
+    "face": "Gesichtersuche",
+    "voice-asr": "Stimme – Transkription",
+    "voice-vad": "Stimme – Stille",
+    "upscale": "Hochskalieren",
+    "restore": "Restaurierung",
+    "interpolate": "Interpolation",
+    "depth": "Tiefe",
+    "matte-video": "Video-Matte",
+    "matte-image": "Freistellen",
+    "segment": "Segmentierung (Roto)",
+    "object-removal": "Objektentfernung"
+  },
+  "vram": "{{size}} VRAM",
+  "catalogHint": {
+    "siglip2-base": "Das leichteste.",
+    "siglip2-so400m": "Mehrsprachig, der beste Kompromiss.",
+    "siglip2-giant": "Das genaueste und das schwerste.",
+    "face-real": "Echte Gesichter: findet sie und erkennt, wer es ist. Nötig für die Gesichtersuche.",
+    "face-anime": "Anime-Gesichter: findet sie und erkennt, wer es ist. Wird beim ersten Einsatz heruntergeladen.",
+    "whisper-small": "Wenig VRAM – für kurzes Diktat.",
+    "whisper-medium": "Zwischen Tempo und Qualität.",
+    "whisper-large-v3": "Die beste Transkription und die langsamste.",
+    "nemotron-3.5-asr": "40 Sprachen, automatische Zeichensetzung und Großschreibung. Braucht transcribe-cli, das von Hand installiert wird.",
+    "silero-vad": "Erkennt Sprache, um das Diktat zu starten und zu stoppen. Schnell, läuft auf dem Prozessor."
   }
 }

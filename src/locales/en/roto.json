@@ -22,7 +22,6 @@
     "clickHint": "Click = {{mode}} (E toggles) · right-click = exclude · Shift+hover = preview · wheel = zoom · J/K/L · I/O · , ; = track step · 1-9 object",
     "include": "include",
     "exclude": "exclude",
-    "pointsHere": "· Points here: {{count}}",
     "showMask": "Show mask",
     "hideOverlay": "Hide overlay",
     "showOverlay": "Show overlay",
@@ -158,9 +157,12 @@
   },
   "engineHint": {
     "minimax-remover": "Rebuilds the background without flicker — the cleanest when the background moves.",
-    "diffueraser": "High-quality object removal in video. Engine not wired up yet.",
+    "diffueraser": "High-quality object removal in video. Not available yet.",
     "matanyone": "Remembers the object from frame to frame — good on hair and fine edges.",
-    "matanyone2": "Like v1, finer and more reliable."
+    "matanyone2": "Like v1, finer and more reliable.",
+    "videomama": "Very fine edges, but slow and memory-hungry.",
+    "sam2matting": "Experimental video matte.",
+    "powerpaint": "Fills the area you paint with the mask. Not available yet."
   },
   "exportRow": {
     "allObjects": "All objects",
@@ -193,8 +195,8 @@
     "tiny": "Smallest SAM 2.1 variant — for VRAM-tight cards.",
     "edgetam": "Lightest (56 MB) and fastest. Coarser masks than SAM 2.1.",
     "sam31": "Latest generation: holds objects that cross or disappear. NVIDIA GPU required.",
-    "samurai": "Keeps tracking through occlusions (motion-aware memory). Runs on the installed SAM 2.1 weights.",
-    "sam2long": "For long shots: keeps several hypotheses and prunes the bad ones, so error stops accumulating. Runs on the installed SAM 2.1 weights."
+    "samurai": "Keeps tracking the object when it passes behind something. Uses SAM 2.1, which must be installed.",
+    "sam2long": "For long shots: follows several tracks and keeps the right one, so errors don't pile up. Uses SAM 2.1, which must be installed."
   },
   "timeline": {
     "inHere": "In point here (frame {{n}})",

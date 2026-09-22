@@ -13,7 +13,7 @@ import type { OptimizeResources } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
 import { useTranslation } from "react-i18next";
 
-const go = (mb: number) => (mb / 1024).toFixed(1);
+const mib = (mb: number) => fmtBytes(mb * 1024 * 1024);
 
 function Gauge({ label, pct, detail, danger }: { label: string; pct: number; detail: string; danger: boolean }) {
   return (
@@ -126,7 +126,7 @@ export function GpuSection() {
           <Gauge
             label="VRAM"
             pct={vramPct ?? 0}
-            detail={`${go(gpu.usedMB)} / ${go(gpu.totalMB)} Go`}
+            detail={`${mib(gpu.usedMB)} / ${mib(gpu.totalMB)}`}
             danger={vramDanger}
           />
         ) : (

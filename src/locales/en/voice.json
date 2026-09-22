@@ -222,11 +222,11 @@
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Aligns every word to the frame for SRT/VTT subtitles. Engine not wired up yet."
+        "hint": "Aligns every word to the frame for SRT/VTT subtitles. Not available yet."
       },
       "canary": {
         "label": "Canary",
-        "hint": "25 European languages. No per-word timestamps. Engine not wired up yet."
+        "hint": "25 European languages. No per-word timestamps. Not available yet."
       }
     },
     "vad": {

@@ -117,7 +117,6 @@
     "autoplay": "Auto-Wiedergabe",
     "autoplayHint": "Vorschauen automatisch abspielen",
     "addToTimeline": "Zur Timeline hinzufügen",
-    "addNToTimeline": "Einstellungen zur Timeline hinzufügen ({{count}})",
     "addAllToTimeline": "Alle Einstellungen zur Timeline hinzufügen",
     "archiveDiskHint": "Auf Festplatte archivieren (Export unabhängig von der Quelle)",
     "player": "Player",

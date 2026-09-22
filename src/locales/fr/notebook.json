@@ -642,5 +642,24 @@
     "failed": "Le partage a échoué.",
     "manageRemoval": "Passe par les paramètres de collaboration pour quitter ou supprimer ce partage.",
     "retry": "Réessayer"
+  },
+  "a11y": {
+    "addImage": "Ajouter une image",
+    "previousImage": "Image précédente",
+    "nextImage": "Image suivante",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "resizeMedia": "Redimensionner le média",
+    "inPoint": "Point d'entrée",
+    "outPoint": "Point de sortie",
+    "renameView": "Renommer la vue",
+    "databaseName": "Nom de la base",
+    "filterField": "Champ du filtre",
+    "filterOperator": "Condition du filtre",
+    "filterValue": "Valeur du filtre",
+    "removeFilter": "Retirer le filtre",
+    "editOption": "Modifier l'option",
+    "removeTask": "Retirer la tâche",
+    "addTask": "Ajouter une tâche"
   }
 }

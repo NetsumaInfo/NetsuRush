@@ -11,6 +11,7 @@ import { Plus, X, Pencil, Check, Trash2 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { colorOf, formatNumber, formatDate, formatTimestamp, DB_COLORS, type ChecklistItem, type DbField, type SelectOption } from "../notebookShared";
 import { MiniCalendar } from "../blocks/MiniCalendar";
+import i18n from "@/i18n";
 
 // ---- Case à cocher harmonisée (remplace le <input type="checkbox"> natif partout dans la db) ------
 // Bouton stylé sur les tokens : coché = aplat primary + ✓ ; décoché = contour discret. Pas de natif.
@@ -148,7 +149,7 @@ export function OptionPicker({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <button type="button" aria-label="Edit option" onClick={() => setEditingId(o.id)} className="shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100">
+                      <button type="button" aria-label={i18n.t("notebook:a11y.editOption")} onClick={() => setEditingId(o.id)} className="shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100">
                         <Pencil className="h-3 w-3" />
                       </button>
                     }
@@ -204,7 +205,7 @@ export function ChecklistPicker({ value, onChange, trigger }: {
               onChange={(e) => set(items.map((x) => (x.id === it.id ? { ...x, label: e.target.value } : x)))}
               className={`min-w-0 flex-1 bg-transparent text-sm outline-none ${it.done ? "text-muted-foreground line-through" : ""}`}
             />
-            <button type="button" aria-label="Remove task" onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
           </div>
         ))}
         <div className="mt-1 flex items-center gap-1 border-t border-border px-1 pt-1.5">
@@ -215,7 +216,7 @@ export function ChecklistPicker({ value, onChange, trigger }: {
             placeholder={t("db.checklist.addTask")}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-          <button type="button" aria-label="Add task" onClick={add} className="text-muted-foreground hover:text-foreground"><Plus className="h-3.5 w-3.5" /></button>
+          <button type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="text-muted-foreground hover:text-foreground"><Plus className="h-3.5 w-3.5" /></button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

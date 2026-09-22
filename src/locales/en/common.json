@@ -110,5 +110,9 @@
     "action": "Report this error",
     "sent": "Sent, thanks!",
     "saved": "Sending failed. Message saved."
+  },
+  "host": {
+    "offlineResolve": "Open a project with footage in Resolve, then reload, or import videos from disk.",
+    "offlineAdobe": "Open {{app}}, then the NetsuRush panel (Window ▸ Extensions), or import videos from disk."
   }
 }

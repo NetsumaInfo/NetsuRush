@@ -222,11 +222,11 @@
       },
       "whisperx": {
         "label": "WhisperX",
-        "hint": "Richtet jedes Wort bildgenau für SRT/VTT-Untertitel aus. Engine noch nicht angebunden."
+        "hint": "Richtet jedes Wort bildgenau für SRT/VTT-Untertitel aus. Noch nicht verfügbar."
       },
       "canary": {
         "label": "Canary",
-        "hint": "25 europäische Sprachen. Keine Zeitstempel pro Wort. Engine noch nicht angebunden."
+        "hint": "25 europäische Sprachen. Keine Zeitstempel pro Wort. Noch nicht verfügbar."
       }
     },
     "vad": {

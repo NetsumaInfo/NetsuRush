@@ -19,7 +19,8 @@ import { nr } from "@/lib/bridge";
 import type { AdobeApp, ModelStatus, SetupDownload, SetupProgress, SetupStatus } from "@/lib/bridge";
 import { hostLabel } from "@/lib/host";
 import { modulesForModels } from "@/lib/modules";
-import { fmtSize, MODEL_REGISTRY, modelById, TASK_LABELS, TASK_ORDER, type ModelEntry } from "@/lib/modelRegistry";
+import { fmtSize, MODEL_REGISTRY, modelById, TASK_ORDER, type ModelEntry } from "@/lib/modelRegistry";
+import { MODEL_TEXT_NS, modelHint, taskLabel } from "@/lib/modelText";
 import { hasChosenLang, LANGUAGES, type LangCode } from "@/i18n";
 import { useApp } from "@/store";
 import { isModelCompatible, useCompatibility } from "@/hooks/useCompatibility";
@@ -94,7 +95,7 @@ function mlEngineName(backend?: string) {
 }
 
 export function SetupGate({ children }: { children: ReactNode }) {
-  const { t } = useTranslation(["setup", "common", "models", "language"]);
+  const { t } = useTranslation(["setup", "common", "language", ...MODEL_TEXT_NS]);
   const lang = useApp((state) => state.lang);
   const setLang = useApp((state) => state.setLang);
   // Le choix de la langue est la PREMIÈRE étape de l'installation, pas un écran à part : un écran de
@@ -190,7 +191,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
   const shown = catalog.filter((model) => advanced || !model.advanced || models.includes(model.id));
   const hiddenCount = catalog.length - shown.length;
   const needle = modelQuery.trim().toLocaleLowerCase();
-  const filteredModels = shown.filter((model) => `${model.label} ${model.hint ?? ""} ${TASK_LABELS[model.task]}`.toLocaleLowerCase().includes(needle));
+  const filteredModels = shown.filter((model) => `${model.label} ${modelHint(t, model)} ${taskLabel(t, model.task)}`.toLocaleLowerCase().includes(needle));
   const groupedModels = TASK_ORDER
     .map((task) => ({ task, models: filteredModels.filter((model) => model.task === task) }))
     .filter((group) => group.models.length);
@@ -383,7 +384,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
               <p className="rounded-lg border border-dashed border-border p-5 text-center text-sm text-muted-foreground">{t("setup:models.empty")}</p>
             ) : (
               <div className="max-h-80 space-y-4 overflow-auto pr-1">
-                {groupedModels.map((group) => <div key={group.task} className="space-y-2"><h3 className="text-xs font-medium text-muted-foreground">{TASK_LABELS[group.task]}</h3><div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{group.models.map((model) => {
+                {groupedModels.map((group) => <div key={group.task} className="space-y-2"><h3 className="text-xs font-medium text-muted-foreground">{taskLabel(t, group.task)}</h3><div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{group.models.map((model) => {
                   const selected = models.includes(model.id);
                   return (
                     <button

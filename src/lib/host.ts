@@ -3,6 +3,7 @@
 // mapping snapshot→Clip, et routage de la construction de timeline vers le bon canal.
 import { nr, type Clip, type AdobeApp, type AdobeSnapshot, type AdobeClip, type TimelineCut } from "@/lib/bridge";
 import type { HostId } from "@/store/types";
+import i18n from "@/i18n";
 
 export const HOSTS: { id: HostId; label: string; short: string }[] = [
   { id: "resolve", label: "DaVinci Resolve", short: "Resolve" },
@@ -23,8 +24,8 @@ export function isAdobeHost(id: HostId): id is AdobeApp {
 // Indice d'action contextualisé : Resolve = pont natif + Media Pool ; Adobe = panneau CEP.
 export function hostOfflineHint(id: HostId): string {
   return id === "resolve"
-    ? "Ouvre un projet avec des rush et recharge, ou importe des vidéos du disque."
-    : `Ouvre ${hostShort(id)} puis le panneau NetsuRush (Fenêtre ▸ Extensions), ou importe des vidéos du disque.`;
+    ? i18n.t("common:host.offlineResolve")
+    : i18n.t("common:host.offlineAdobe", { app: hostShort(id) });
 }
 
 // Rushs d'un snapshot Adobe → forme Clip du Derush (source "mediapool" = éligible timeline).

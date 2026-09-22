@@ -8,15 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { nr } from "@/lib/bridge";
 import type { FlowBakeProgress } from "@/lib/bridge";
+import { fmtBytes } from "@/lib/utils";
 
 const POLL_MS = 500;
-const GIB = 1024 * 1024 * 1024;
-const MIB = 1024 * 1024;
 
-/// Gibibytes read as "0,00" below a gigabyte, so the unit follows the number.
-function formatBytes(bytes: number) {
-  return bytes >= GIB ? `${(bytes / GIB).toFixed(2)} Gio` : `${Math.round(bytes / MIB)} Mio`;
-}
 
 export function FlowCache({ running }: { running: boolean }) {
   const { t } = useTranslation("flow");
@@ -69,10 +64,10 @@ export function FlowCache({ running }: { running: boolean }) {
       </h4>
 
       <div className="flex items-baseline gap-2">
-        <b className="text-2xl tabular-nums">{formatBytes(progress.bytes)}</b>
+        <b className="text-2xl tabular-nums">{fmtBytes(progress.bytes)}</b>
         <span className="text-xs text-muted-foreground">
-          {progress.frames} {t("frames")}
-          {progress.limit > 0 ? ` · ${Math.round(progress.limit / GIB)} Gio max` : ""}
+          {t("framesCount", { count: progress.frames })}
+          {progress.limit > 0 ? ` · ${t("cacheLimit", { size: fmtBytes(progress.limit) })}` : ""}
         </span>
       </div>
 

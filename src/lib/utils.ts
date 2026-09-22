@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import i18n from "@/i18n"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -61,18 +62,21 @@ export function fmtTime(t: number, opts: { centis?: boolean; hours?: boolean; pa
   return out;
 }
 
-// Octets → format lisible (Ko/Mo/Go). Source unique côté renderer : le poids d'un cache, d'un
-// fichier exporté ou d'un média embarqué s'écrit partout pareil.
+// Bytes → "1,5 Go" in French, "1.5 GB" in English: the unit and the decimal mark follow the UI
+// language. Single source on the renderer side, so a cache, an export or an embedded media file
+// shows its size the same way everywhere.
+const BYTE_UNITS = ["kilobyte", "megabyte", "gigabyte", "terabyte"] as const;
 export function fmtBytes(n: number | undefined | null): string {
-  if (!n || n <= 0) return "0 o";
-  const units = ["o", "Ko", "Mo", "Go", "To"];
-  let value = n;
+  const lang = i18n.language || "fr";
+  const bytes = n && n > 0 ? n : 0;
+  if (bytes < 1024) return `${new Intl.NumberFormat(lang).format(bytes)} ${lang.startsWith("fr") ? "o" : "B"}`;
+  let value = bytes / 1024;
   let i = 0;
-  while (value >= 1024 && i < units.length - 1) {
+  while (value >= 1024 && i < BYTE_UNITS.length - 1) {
     value /= 1024;
     i++;
   }
-  return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+  return new Intl.NumberFormat(lang, { style: "unit", unit: BYTE_UNITS[i], maximumFractionDigits: value >= 10 ? 0 : 1 }).format(value);
 }
 
 // "1920x1080" → { width, height }. Resolve et la bibliothèque décrivent une définition par une

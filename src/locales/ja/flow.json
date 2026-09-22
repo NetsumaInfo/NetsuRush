@@ -84,5 +84,12 @@
   "attach": "添付",
   "attachHint": "画像またはファイルを添付",
   "removeAttachment": "添付を削除",
-  "conversationNew": "新規"
+  "conversationNew": "新規",
+  "attachFileTooBig": "{{name}}：ファイルが大きすぎます（{{size}}、上限 {{max}}）",
+  "attachUnsupported": "{{name}}：この形式には対応していません。画像かテキストファイルを添付してください。",
+  "specUnsupported": "{{name}}：この形式は読み込めません。.md、.txt、.yaml のファイルを選んでください。",
+  "specEmpty": "{{name}} は空です。",
+  "framesCount_one": "{{count}} フレーム",
+  "framesCount_other": "{{count}} フレーム",
+  "cacheLimit": "上限 {{size}}"
 }

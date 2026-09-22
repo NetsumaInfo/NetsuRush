@@ -642,5 +642,24 @@
     "failed": "No se pudo compartir.",
     "manageRemoval": "Usa los ajustes de colaboración para salir o eliminar este documento compartido.",
     "retry": "Reintentar"
+  },
+  "a11y": {
+    "addImage": "Añadir imagen",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Imagen siguiente",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "resizeMedia": "Cambiar tamaño",
+    "inPoint": "Punto de entrada",
+    "outPoint": "Punto de salida",
+    "renameView": "Cambiar nombre de la vista",
+    "databaseName": "Nombre de la base de datos",
+    "filterField": "Campo del filtro",
+    "filterOperator": "Condición del filtro",
+    "filterValue": "Valor del filtro",
+    "removeFilter": "Quitar filtro",
+    "editOption": "Editar opción",
+    "removeTask": "Quitar tarea",
+    "addTask": "Añadir tarea"
   }
 }

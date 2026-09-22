@@ -43,7 +43,7 @@ function ViewTab({ view, active, canDelete, ops }: {
   if (renaming) {
     return (
       <input
-        aria-label="Rename view"
+        aria-label={i18n.t("notebook:a11y.renameView")}
         defaultValue={view.name}
         onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== view.name) ops.updateView(view.id, { name: v }); setRenaming(false); }}
         onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setRenaming(false); }}
@@ -160,7 +160,7 @@ function DatabaseCard({ db, ops, tall, onRemove, onToggleFull, full }: {
       {/* Barre d'outils : nom + onglets de vue | réglages, filtres, tris, ⋯ */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-2 py-1.5">
         <input
-          aria-label="Database name"
+          aria-label={i18n.t("notebook:a11y.databaseName")}
           defaultValue={db.name}
           key={db.name}
           onBlur={(e) => { if (e.target.value.trim() && e.target.value !== db.name) ops.rename(e.target.value.trim()); }}

@@ -174,7 +174,9 @@
     "textSelection": "Textauswahl",
     "emptyTipAfter": "um sie mit der Stelle zu verknüpfen, oder auf einen Absatz, um sie anzuhängen. Doppelklick auf eine Einstellung im Rand: In/Out setzen.",
     "noOtherSound": "Keine weiteren Audiodateien.",
-    "noFile": "Keine Dateien."
+    "noFile": "Keine Dateien.",
+    "playPreview": "Vorschau abspielen",
+    "stopPreview": "Vorschau stoppen"
   },
   "settings": {
     "documentPrefix": "Einstellungen DIESES Skripts –",
@@ -372,7 +374,6 @@
   },
   "mediaPanel": {
     "importFailed": "Import fehlgeschlagen.",
-    "imported": "{{count}} Mediendatei(en) in den Media Pool importiert ({{skipped}} bereits vorhanden).",
     "dropFailed": "Die Pfade der abgelegten Dateien konnten nicht gelesen werden. Verwende Dateien hinzufügen.",
     "resize": "Medienbereich vergrößern",
     "destination": "Ziel",

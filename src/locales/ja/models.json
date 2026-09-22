@@ -72,5 +72,33 @@
   "advanced": {
     "label": "詳細",
     "tip": "カタログ全体（派生モデル、旧世代、実験的エンジン）を表示します。既定では各タスクの厳選モデルのみを表示します。"
+  },
+  "task": {
+    "detect": "ショット検出",
+    "search": "ビジュアル検索",
+    "face": "顔検索",
+    "voice-asr": "文字起こし",
+    "voice-vad": "無音検出",
+    "upscale": "アップスケール",
+    "restore": "修復",
+    "interpolate": "補間",
+    "depth": "深度",
+    "matte-video": "動画マット",
+    "matte-image": "背景除去",
+    "segment": "セグメンテーション（ロト）",
+    "object-removal": "オブジェクト除去"
+  },
+  "vram": "VRAM {{size}}",
+  "catalogHint": {
+    "siglip2-base": "最も軽い。",
+    "siglip2-so400m": "多言語対応で、バランスがよい。",
+    "siglip2-giant": "最も正確で、最も重い。",
+    "face-real": "実写の顔を検出し、誰かを識別します。顔検索に必要です。",
+    "face-anime": "アニメの顔を検出し、誰かを識別します。初回使用時にダウンロードされます。",
+    "whisper-small": "VRAM が少なくて済む。短い音声入力向け。",
+    "whisper-medium": "速さと品質のバランス型。",
+    "whisper-large-v3": "文字起こしの精度は最高。ただし最も遅い。",
+    "nemotron-3.5-asr": "40 言語に対応し、句読点と大文字を自動で付けます。transcribe-cli（手動でインストール）が必要です。",
+    "silero-vad": "発話を検出して音声入力を開始・停止します。CPU で高速に動作します。"
   }
 }

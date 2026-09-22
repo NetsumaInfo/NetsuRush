@@ -174,7 +174,9 @@
     "textSelection": "所选文本",
     "emptyTipAfter": "上以关联该段，或拖到段落上进行附加。双击侧栏中的镜头可调整入点/出点。",
     "noOtherSound": "没有其他音频。",
-    "noFile": "没有文件。"
+    "noFile": "没有文件。",
+    "playPreview": "播放预览",
+    "stopPreview": "停止预览"
   },
   "settings": {
     "documentPrefix": "此脚本的设置 —",
@@ -372,7 +374,6 @@
   },
   "mediaPanel": {
     "importFailed": "导入失败。",
-    "imported": "已将 {{count}} 个媒体导入 Media Pool（{{skipped}} 个已存在）。",
     "dropFailed": "无法获取拖放文件的路径。请使用添加文件按钮。",
     "resize": "调整媒体面板大小",
     "destination": "目标位置",

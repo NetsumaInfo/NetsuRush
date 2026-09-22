@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { modelsForTask, fmtSize, type ModelEntry } from "@/lib/modelRegistry";
+import { MODEL_TEXT_NS, modelHint } from "@/lib/modelText";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -65,7 +66,7 @@ function ModelRow({ m, selected, onSelect, mgr }: {
   onSelect: () => void;
   mgr: ReturnType<typeof useModelManager>;
 }) {
-  const { t } = useTranslation(["dictate", "common"]);
+  const { t } = useTranslation(["dictate", "common", ...MODEL_TEXT_NS]);
   const st = mgr.status[m.id];
   const installed = st?.installed ?? false;
   const dl = mgr.downloading[m.id];
@@ -86,11 +87,11 @@ function ModelRow({ m, selected, onSelect, mgr }: {
           <Badge variant="secondary" className="text-[10px] text-muted-foreground">{m.license}</Badge>
           {!m.commercialUse && <Badge className="border-destructive/40 bg-destructive/10 text-[10px] text-destructive">NC</Badge>}
         </div>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">{m.hint}</p>
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">{modelHint(t, m)}</p>
         {err && <p className="mt-0.5 flex items-center gap-1 text-xs text-destructive"><AlertTriangle className="size-3" /> {err}</p>}
       </div>
       <span className="shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
-        {fmtSize(size)}{m.vramGB > 0 && <span className="ml-1 opacity-70">· {m.vramGB} Go</span>}
+        {fmtSize(size)}{m.vramGB > 0 && <span className="ml-1 opacity-70">· {t("models:vram", { size: fmtSize(m.vramGB * 1024 ** 3) })}</span>}
       </span>
       <span className="w-28 shrink-0 text-right" onClick={(e) => e.preventDefault()}>
         {busy ? (

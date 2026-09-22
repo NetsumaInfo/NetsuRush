@@ -57,8 +57,10 @@ test('the model installer keeps a specific description for every catalog entry',
     assert.match(line, /hint: "[^"]+"/, `${id} needs a concise model-specific hint`);
   }
 
-  const settings = read('src/components/settings/models/ModelsSettings.tsx');
-  const keyBuilder = settings.slice(settings.indexOf('function modelHintKeys'), settings.indexOf('function sortModels'));
+  const modelText = read('src/lib/modelText.ts');
+  const start = modelText.indexOf('export function modelHintKeys');
+  assert.ok(start >= 0, 'modelText.ts builds the description keys');
+  const keyBuilder = modelText.slice(start, modelText.indexOf('export const modelHint ='));
   assert.doesNotMatch(keyBuilder, /taskHint/, 'a generic task hint must not hide the model-specific fallback');
 });
 

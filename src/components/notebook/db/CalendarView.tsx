@@ -50,9 +50,9 @@ export function CalendarView({ db, view, ops, onOpenRow }: { db: Database; view:
   return (
     <div>
       <div className="mb-2 flex items-center gap-2">
-        <button type="button" aria-label="Previous month" onClick={() => setCursor(new Date(y, m - 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronLeft className="h-4 w-4" /></button>
+        <button type="button" aria-label={i18n.t("notebook:a11y.previousMonth")} onClick={() => setCursor(new Date(y, m - 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronLeft className="h-4 w-4" /></button>
         <span className="text-sm font-medium capitalize">{new Intl.DateTimeFormat(i18n.language, { month: "long", year: "numeric" }).format(new Date(y, m, 1))}</span>
-        <button type="button" aria-label="Next month" onClick={() => setCursor(new Date(y, m + 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronRight className="h-4 w-4" /></button>
+        <button type="button" aria-label={i18n.t("notebook:a11y.nextMonth")} onClick={() => setCursor(new Date(y, m + 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ChevronRight className="h-4 w-4" /></button>
         <button type="button" onClick={() => setCursor(new Date())} className="ml-auto rounded px-2 py-1 text-xs text-primary hover:bg-primary/10">{i18n.t("notebook:blocksUi.today")}</button>
       </div>
       <div className="grid grid-cols-7 overflow-hidden rounded-md border border-border">

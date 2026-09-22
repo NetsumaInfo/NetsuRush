@@ -72,5 +72,33 @@
   "advanced": {
     "label": "Avanzado",
     "tip": "Muestra todo el catálogo: variantes, generaciones anteriores y motores experimentales. De forma predeterminada solo se muestra la selección actual de cada tarea."
+  },
+  "task": {
+    "detect": "Detección de planos",
+    "search": "Búsqueda visual",
+    "face": "Búsqueda por rostro",
+    "voice-asr": "Voz — transcripción",
+    "voice-vad": "Voz — silencios",
+    "upscale": "Escalado",
+    "restore": "Restauración",
+    "interpolate": "Interpolación",
+    "depth": "Profundidad",
+    "matte-video": "Matte de vídeo",
+    "matte-image": "Eliminación de fondo",
+    "segment": "Segmentación (rotoscopía)",
+    "object-removal": "Eliminación de objetos"
+  },
+  "vram": "{{size}} de VRAM",
+  "catalogHint": {
+    "siglip2-base": "El más ligero.",
+    "siglip2-so400m": "Multilingüe, el mejor equilibrio.",
+    "siglip2-giant": "El más preciso, y el más pesado.",
+    "face-real": "Rostros reales: los detecta y reconoce quién es. Necesario para la búsqueda por rostro.",
+    "face-anime": "Rostros de anime: los detecta y reconoce quién es. Se descarga la primera vez que se usa.",
+    "whisper-small": "Poca VRAM — para dictados cortos.",
+    "whisper-medium": "Entre velocidad y calidad.",
+    "whisper-large-v3": "La mejor transcripción, y la más lenta.",
+    "nemotron-3.5-asr": "40 idiomas, con puntuación y mayúsculas automáticas. Necesita transcribe-cli, que se instala a mano.",
+    "silero-vad": "Detecta cuándo hablas para iniciar y detener el dictado. Rápido, funciona en el procesador."
   }
 }

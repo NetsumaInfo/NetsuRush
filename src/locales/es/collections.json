@@ -117,7 +117,6 @@
     "autoplay": "Reproducción auto",
     "autoplayHint": "Reproducción auto de las vistas previas",
     "addToTimeline": "Añadir a la timeline",
-    "addNToTimeline": "Añadir planos a la timeline ({{count}})",
     "addAllToTimeline": "Añadir todos los planos a la timeline",
     "archiveDiskHint": "Archivar en disco (exportación independiente de la fuente)",
     "player": "Reproductor",

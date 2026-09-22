@@ -56,7 +56,11 @@
     "resolveMcpSilentHint": "Der Server ist vorhanden, hat aber nicht geantwortet. Starte Resolve und suche erneut.",
     "resolveMcpHint": "{{n}} Werkzeuge für den Kopiloten: Python-Skripte in Resolve, Suche in der Scripting-API, Dokumentation, LUTs und DCTLs.",
     "resolveUnsafe": "Skripte außerhalb der Sandbox erlauben",
-    "resolveUnsafeHint": "Fügt bmd_run_script_unsafe hinzu: voller Zugriff auf Dateien, Netzwerk und Unterprozesse. Kein Berechtigungsmodus hält es auf, sobald das Skript läuft."
+    "resolveUnsafeHint": "Fügt bmd_run_script_unsafe hinzu: voller Zugriff auf Dateien, Netzwerk und Unterprozesse. Kein Berechtigungsmodus hält es auf, sobald das Skript läuft.",
+    "baseUrlHint": {
+      "openai": "Ollama, LM Studio, lokaler Proxy…",
+      "xai": "EU: https://eu-west-1.api.x.ai/v1"
+    }
   },
   "engine": {
     "agents": "Installierte Agenten",

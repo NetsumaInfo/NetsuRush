@@ -20,7 +20,7 @@ import type { OptimizeProc, OptimizeDeadProc } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
 import { useTranslation } from "react-i18next";
 
-const vram = (mb: number) => (mb >= 1024 ? `${(mb / 1024).toFixed(1)} Go` : `${mb} Mo`);
+const vram = (mb: number) => fmtBytes(mb * 1024 * 1024);
 
 export function ProcessSection() {
   const { t } = useTranslation("optimize");

@@ -56,7 +56,11 @@
     "resolveMcpSilentHint": "サーバーはありますが応答しませんでした。Resolve を起動してから再検出してください。",
     "resolveMcpHint": "コパイロットに {{n}} 個のツールを追加：Resolve 内での Python スクリプト、スクリプティング API 検索、ドキュメント、LUT と DCTL。",
     "resolveUnsafe": "サンドボックス外のスクリプトを許可",
-    "resolveUnsafeHint": "bmd_run_script_unsafe を追加します：ファイル・ネットワーク・サブプロセスへの完全アクセス。スクリプトが動き出すと、どの権限モードでも止められません。"
+    "resolveUnsafeHint": "bmd_run_script_unsafe を追加します：ファイル・ネットワーク・サブプロセスへの完全アクセス。スクリプトが動き出すと、どの権限モードでも止められません。",
+    "baseUrlHint": {
+      "openai": "Ollama、LM Studio、ローカルプロキシ…",
+      "xai": "EU: https://eu-west-1.api.x.ai/v1"
+    }
   },
   "engine": {
     "agents": "インストール済みエージェント",

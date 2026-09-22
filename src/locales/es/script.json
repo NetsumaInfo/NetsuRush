@@ -174,7 +174,9 @@
     "textSelection": "selección de texto",
     "emptyTipAfter": "para vincularlo al pasaje, o sobre un párrafo para adjuntarlo. Haz doble clic en un plano del margen para ajustar entrada/salida.",
     "noOtherSound": "No hay más audio.",
-    "noFile": "No hay archivos."
+    "noFile": "No hay archivos.",
+    "playPreview": "Reproducir vista previa",
+    "stopPreview": "Detener vista previa"
   },
   "settings": {
     "documentPrefix": "Ajustes de ESTE guion —",
@@ -372,7 +374,6 @@
   },
   "mediaPanel": {
     "importFailed": "Error de importación.",
-    "imported": "{{count}} archivo(s) multimedia importado(s) al Media Pool ({{skipped}} ya presentes).",
     "dropFailed": "No se pudieron obtener las rutas de los archivos. Usa el botón Añadir archivos.",
     "resize": "Redimensionar panel multimedia",
     "destination": "Destino",

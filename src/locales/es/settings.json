@@ -387,7 +387,10 @@
       "more": "Ver todo",
       "less": "Contraer",
       "manual": "Escríbelo tú",
-      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 GB, Windows 11"
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 GB, Windows 11",
+      "unknownGpu": "GPU desconocida",
+      "ffmpegOk": "ffmpeg presente",
+      "ffmpegMissing": "falta ffmpeg"
     },
     "sending": "Enviando…",
     "send": "Enviar",
@@ -513,7 +516,6 @@
       "action": "Reindexar",
       "hint": "Recupera los cachés ya en disco: el índice solo conoce lo escrito desde que existe.",
       "running": "Reindexando…",
-      "done": "Entradas indexadas: {{added}} · Asociadas a un clip: {{attributed}}.",
       "scan": "Leyendo los clips conocidos…",
       "index": "Analizando las carpetas…"
     },

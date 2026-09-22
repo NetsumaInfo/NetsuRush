@@ -39,14 +39,14 @@ export const UP_MODELS: UpModelEntry[] = [
   { id: "fallin_strong", label: "Fallin Strong", hint: "Anime 2× — traits nets et marqués.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "adore", label: "Adore", hint: "Anime 2× — rapide, image propre.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "ld_anime", label: "LD-Anime Compact 2x", hint: "Anime 2× — vieux DVD/VHS abîmés.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "aniscale2", label: "AniScale2S Compact", hint: "Anime 2× — sources WEB/DVD compressées.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "aniscale2", label: "AniScale2S Compact", hint: "Anime 2× — rattrape la compression des sources WEB et DVD.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "open-proteus", label: "OpenProteus Compact", hint: "Anime 2× — rendu doux.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "span", label: "ModernSpanimation V2", hint: "Anime 2× — polyvalent.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "rtmosr", label: "umzi Anime RTMoSR", hint: "Anime 2× — garde les traits fins.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "smosr", label: "SMoSR v1 2x", hint: "Anime 2× — traits nets.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "figsr", label: "FIGSR 2x", hint: "Anime 2× — autre méthode, à comparer sur ton plan.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "figsr", label: "FIGSR 2x", hint: "Anime 2× — une autre méthode, à comparer sur ton plan.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "saryn", label: "Saryn V1 Lite", hint: "Anime 2× — léger et rapide.", native: 2, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "shufflespan", label: "sudo Shuffle SPAN 10.5M", hint: "Anime 2× — traité par fenêtres de 1080p.", native: 2, tuning: "onnx-window", denoise: false, auto: true, board: false },
+  { id: "shufflespan", label: "sudo Shuffle SPAN 10.5M", hint: "Anime 2× — traite l'image par blocs de 1080p.", native: 2, tuning: "onnx-window", denoise: false, auto: true, board: false },
   // NTIRE 2026 Efficient SR (MIT) : ×4 photographique, poids minuscules, entraînés sur une réduction
   // bicubique propre — ils reconstruisent une source NETTE et ne corrigent ni bruit ni compression.
   { id: "ntire-span", label: "SPAN", hint: "Réel 4× (image déjà nette) — le repère du lot.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
@@ -57,7 +57,7 @@ export const UP_MODELS: UpModelEntry[] = [
   { id: "ntire-hfenet", label: "HFENet", hint: "Réel 4× (image déjà nette) — garde bien le détail, plus lent.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "ntire-vscinet", label: "VSCINet", hint: "Réel 4× (image déjà nette) — très compact, mais lent.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "ntire-dscf", label: "DSCF-Fused", hint: "Réel 4× (image déjà nette) — comme SPAN, un peu plus rapide.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "ntire-pkdsr", label: "PKDSR", hint: "Réel 4× (image déjà nette) — rapide, réseau allégé.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "ntire-pkdsr", label: "PKDSR", hint: "Réel 4× (image déjà nette) — rapide et léger.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "ntire-amcanet", label: "AMCANet", hint: "Réel 4× (image déjà nette) — compact, bon niveau de détail.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "ntire-disp", label: "DISP", hint: "Réel 4× (image déjà nette) — le plus rapide du lot.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
   { id: "ntire-bviesr", label: "BVI-SRF", hint: "Réel 4× (image déjà nette) — compact, joue la vitesse.", native: 4, tuning: "torch", denoise: false, auto: true, board: false },
@@ -69,43 +69,43 @@ export const UP_MODELS: UpModelEntry[] = [
 // (profils fixes, intra-frame, 10-bit). Les libellés sont les vrais noms de codec, pas des pseudo-presets.
 export type UpscaleFamily = "h264" | "hevc" | "prores" | "dnxhr";
 
-export const UP_FAMILIES: { id: UpscaleFamily; label: string; group: "diffusion" | "montage"; hint: string }[] = [
-  { id: "h264", label: "H.264", group: "diffusion", hint: "libx264 — diffusion universelle, MP4" },
-  { id: "hevc", label: "HEVC", group: "diffusion", hint: "libx265 — diffusion compacte, 8/10-bit, MP4" },
-  { id: "prores", label: "ProRes", group: "montage", hint: "Apple ProRes — intermédiaire montage, MOV" },
-  { id: "dnxhr", label: "DNxHR", group: "montage", hint: "Avid DNxHR — intermédiaire montage, MOV" },
+export const UP_FAMILIES: { id: UpscaleFamily; label: string; group: "diffusion" | "montage" }[] = [
+  { id: "h264", label: "H.264", group: "diffusion" },
+  { id: "hevc", label: "HEVC", group: "diffusion" },
+  { id: "prores", label: "ProRes", group: "montage" },
+  { id: "dnxhr", label: "DNxHR", group: "montage" },
 ];
 
 // Variantes par famille — libellés = noms complets explicites (l'utilisateur sait ce qu'il choisit).
-export const UP_VARIANTS: Record<UpscaleFamily, { id: UpscaleCodec; label: string; hint: string }[]> = {
+export const UP_VARIANTS: Record<UpscaleFamily, { id: UpscaleCodec; label: string }[]> = {
   h264: [
-    { id: "h264_gpu", label: "H.264 · GPU", hint: "Utilise automatiquement la carte graphique détectée." },
-    { id: "h264_nvenc", label: "H.264 · NVIDIA NVENC", hint: "Encode avec le moteur NVIDIA NVENC." },
-    { id: "h264_amf", label: "H.264 · AMD AMF", hint: "Encode avec le moteur AMD AMF." },
-    { id: "h264_qsv", label: "H.264 · Intel Quick Sync", hint: "Encode avec le moteur Intel Quick Sync." },
-    { id: "x264", label: "H.264 · CPU", hint: "libx264 — qualité max mais lent (CPU)" },
+    { id: "h264_gpu", label: "H.264 · GPU" },
+    { id: "h264_nvenc", label: "H.264 · NVIDIA NVENC" },
+    { id: "h264_amf", label: "H.264 · AMD AMF" },
+    { id: "h264_qsv", label: "H.264 · Intel Quick Sync" },
+    { id: "x264", label: "H.264 · CPU" },
   ],
   hevc: [
-    { id: "hevc_gpu", label: "HEVC · GPU", hint: "Utilise automatiquement la carte graphique détectée." },
-    { id: "hevc_nvenc", label: "HEVC · NVIDIA NVENC", hint: "Encode avec le moteur NVIDIA NVENC." },
-    { id: "hevc_amf", label: "HEVC · AMD AMF", hint: "Encode avec le moteur AMD AMF." },
-    { id: "hevc_qsv", label: "HEVC · Intel Quick Sync", hint: "Encode avec le moteur Intel Quick Sync." },
-    { id: "x265", label: "HEVC · CPU", hint: "libx265 — qualité max mais lent (CPU)" },
+    { id: "hevc_gpu", label: "HEVC · GPU" },
+    { id: "hevc_nvenc", label: "HEVC · NVIDIA NVENC" },
+    { id: "hevc_amf", label: "HEVC · AMD AMF" },
+    { id: "hevc_qsv", label: "HEVC · Intel Quick Sync" },
+    { id: "x265", label: "HEVC · CPU" },
   ],
   prores: [
-    { id: "prores_proxy", label: "ProRes 422 Proxy", hint: "le plus léger" },
-    { id: "prores_lt", label: "ProRes 422 LT", hint: "léger" },
-    { id: "prores_422", label: "ProRes 422", hint: "standard montage" },
-    { id: "prores_hq", label: "ProRes 422 HQ", hint: "haute qualité" },
-    { id: "prores_4444", label: "ProRes 4444", hint: "alpha, 10-bit" },
-    { id: "prores_4444xq", label: "ProRes 4444 XQ", hint: "débit max, alpha" },
+    { id: "prores_proxy", label: "ProRes 422 Proxy" },
+    { id: "prores_lt", label: "ProRes 422 LT" },
+    { id: "prores_422", label: "ProRes 422" },
+    { id: "prores_hq", label: "ProRes 422 HQ" },
+    { id: "prores_4444", label: "ProRes 4444" },
+    { id: "prores_4444xq", label: "ProRes 4444 XQ" },
   ],
   dnxhr: [
-    { id: "dnxhr_lb", label: "DNxHR LB", hint: "faible débit" },
-    { id: "dnxhr_sq", label: "DNxHR SQ", hint: "qualité standard" },
-    { id: "dnxhr_hq", label: "DNxHR HQ", hint: "haute qualité 8-bit" },
-    { id: "dnxhr_hqx", label: "DNxHR HQX", hint: "haute qualité 10-bit" },
-    { id: "dnxhr_444", label: "DNxHR 444", hint: "4:4:4 10-bit" },
+    { id: "dnxhr_lb", label: "DNxHR LB" },
+    { id: "dnxhr_sq", label: "DNxHR SQ" },
+    { id: "dnxhr_hq", label: "DNxHR HQ" },
+    { id: "dnxhr_hqx", label: "DNxHR HQX" },
+    { id: "dnxhr_444", label: "DNxHR 444" },
   ],
 };
 
@@ -178,14 +178,14 @@ type UpEngine = "ia" | "turbo";
 export const SHADER_MODELS: { id: ShaderModel; label: string; hint: string }[] = [
   { id: "artcnn_r16f96", label: "ArtCNN R16F96", hint: "Anime — qualité max." },
   { id: "artcnn_r8f64", label: "ArtCNN R8F64", hint: "Anime — qualité, plus rapide." },
-  { id: "artcnn_c4f32", label: "ArtCNN C4F32", hint: "Anime — équilibré." },
+  { id: "artcnn_c4f32", label: "ArtCNN C4F32", hint: "Anime — meilleur équilibre vitesse/qualité." },
   { id: "artcnn_c4f32_ds", label: "ArtCNN C4F32 DS", hint: "Anime — débruite, accentue." },
   { id: "artcnn_c4f32_dn", label: "ArtCNN C4F32 DN", hint: "Anime — débruite, adoucit." },
   { id: "artcnn_c4f16", label: "ArtCNN C4F16", hint: "Anime — le plus rapide." },
   { id: "artcnn_c4f16_ds", label: "ArtCNN C4F16 DS", hint: "Rapide — débruite, accentue." },
   { id: "artcnn_c4f16_dn", label: "ArtCNN C4F16 DN", hint: "Rapide — débruite, adoucit." },
   { id: "rtx_vsr", label: "NVIDIA RTX VSR", hint: "Réel et anime — 2× fixe, NVIDIA." },
-  { id: "lanczos", label: "Lanczos-sharp", hint: "Réel — sans IA, instantané." },
+  { id: "lanczos", label: "Lanczos-sharp", hint: "Réel/général — sans IA, instantané." },
 ];
 
 // RTX VSR n'agrandit qu'en ×2 (contrainte du SDK) et n'accepte pas les sources ≥ 1440p.
@@ -210,15 +210,15 @@ export const RTX_HDR_NITS: number[] = [400, 600, 1000, 1500, 4000];
 
 // Restauration : `native: 1` sur toute la liste — ces réseaux nettoient à la taille d'origine.
 export const RESTORE_MODELS: UpModelEntry[] = [
-  { id: "tas-anime1080fixer", label: "Anime1080Fixer", hint: "Anime 1× — défauts d'encodage et détails fins.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-deh264-real", label: "DeH264 Real-PLKSR", hint: "Réel 1× — artefacts H.264.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-scunet", label: "SCUNet Color Real PSNR", hint: "Réel 1× — débruitage photographique.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-nafnet", label: "NAFNet GoPro width64", hint: "Réel 1× — défloutage de mouvement.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-deh264-span", label: "DeH264 SPAN", hint: "Anime 1× — blocs et bavures H.264.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-dpir", label: "DRUNet Deblocking Color", hint: "1× — déblocage de compression.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-real-plksr", label: "Real-PLKSR DeJPEG", hint: "1× — artefacts JPEG et ringing.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-hurrdeblur", label: "HurrDeblur SuperUltraCompact", hint: "1× — défloutage compact et rapide.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
-  { id: "tas-dehalo", label: "DeHalo v1 Compact", hint: "1× — halos autour des contours.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-anime1080fixer", label: "Anime1080Fixer", hint: "Anime 1× — corrige les défauts d'encodage, garde les détails fins.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-deh264-real", label: "DeH264 Real-PLKSR", hint: "Réel 1× — efface les artefacts H.264.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-scunet", label: "SCUNet Color Real PSNR", hint: "Réel 1× — débruitage photo.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-nafnet", label: "NAFNet GoPro width64", hint: "Réel 1× — rattrape le flou de mouvement.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-deh264-span", label: "DeH264 SPAN", hint: "Anime 1× — efface les blocs et bavures H.264.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-dpir", label: "DRUNet Deblocking Color", hint: "1× — efface les blocs de compression.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-real-plksr", label: "Real-PLKSR DeJPEG", hint: "1× — efface les artefacts JPEG et les franges autour des contours.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-hurrdeblur", label: "HurrDeblur SuperUltraCompact", hint: "1× — enlève le flou, léger et rapide.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
+  { id: "tas-dehalo", label: "DeHalo v1 Compact", hint: "1× — efface les halos autour des contours.", native: 1, tuning: "torch", denoise: false, auto: true, board: false },
 ];
 
 // Ce que le modèle choisi rend RÉGLABLE. Le panneau s'en sert pour n'afficher que les contrôles qui

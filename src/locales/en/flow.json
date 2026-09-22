@@ -84,5 +84,12 @@
   "attach": "Attach",
   "attachHint": "Attach an image or a file",
   "removeAttachment": "Remove attachment",
-  "conversationNew": "New"
+  "conversationNew": "New",
+  "attachFileTooBig": "{{name}}: file too large ({{size}}, max {{max}})",
+  "attachUnsupported": "{{name}}: format not supported. Attach an image or a text file.",
+  "specUnsupported": "{{name}}: can't read this format. Choose a .md, .txt or .yaml file.",
+  "specEmpty": "{{name}} is empty.",
+  "framesCount_one": "{{count}} frame",
+  "framesCount_other": "{{count}} frames",
+  "cacheLimit": "{{size}} max"
 }

@@ -56,7 +56,11 @@
     "resolveMcpSilentHint": "The server is there but did not answer. Start Resolve, then scan again.",
     "resolveMcpHint": "{{n}} tools added to the copilot: Python scripts inside Resolve, scripting API search, documentation, LUTs and DCTLs.",
     "resolveUnsafe": "Allow scripts outside the sandbox",
-    "resolveUnsafeHint": "Adds bmd_run_script_unsafe: full access to files, network and subprocesses. No permission mode can hold it back once the script is running."
+    "resolveUnsafeHint": "Adds bmd_run_script_unsafe: full access to files, network and subprocesses. No permission mode can hold it back once the script is running.",
+    "baseUrlHint": {
+      "openai": "Ollama, LM Studio, local proxy…",
+      "xai": "EU: https://eu-west-1.api.x.ai/v1"
+    }
   },
   "engine": {
     "agents": "Installed agents",

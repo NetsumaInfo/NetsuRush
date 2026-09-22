@@ -174,7 +174,9 @@
     "textSelection": "sélection de texte",
     "emptyTipAfter": "pour le lier au passage, ou sur un paragraphe pour l'attacher. Double-clic sur un plan du rail = régler in/out.",
     "noOtherSound": "Aucun autre son.",
-    "noFile": "Aucun fichier."
+    "noFile": "Aucun fichier.",
+    "playPreview": "Lire l'aperçu",
+    "stopPreview": "Arrêter l'aperçu"
   },
   "settings": {
     "documentPrefix": "Réglages de CE script —",
@@ -372,7 +374,6 @@
   },
   "mediaPanel": {
     "importFailed": "Import impossible.",
-    "imported": "{{count}} média(s) importé(s) dans le Media Pool ({{skipped}} déjà présents).",
     "dropFailed": "Le chemin des fichiers déposés n'a pas pu être récupéré. Utilise le bouton Ajouter des fichiers.",
     "resize": "Redimensionner le panneau des médias",
     "destination": "Destination",

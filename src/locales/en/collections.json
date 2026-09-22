@@ -117,7 +117,6 @@
     "autoplay": "Autoplay",
     "autoplayHint": "Autoplay previews",
     "addToTimeline": "Add to timeline",
-    "addNToTimeline": "Add shots to timeline ({{count}})",
     "addAllToTimeline": "Add all shots to timeline",
     "archiveDiskHint": "Archive to disk (export independent of the source)",
     "player": "Player",

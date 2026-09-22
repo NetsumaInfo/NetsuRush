@@ -110,5 +110,9 @@
     "action": "报告错误",
     "sent": "已发送，谢谢！",
     "saved": "发送失败。消息已保存。"
+  },
+  "host": {
+    "offlineResolve": "在 Resolve 中打开包含素材的项目后重新加载，或从磁盘导入视频。",
+    "offlineAdobe": "打开 {{app}} 和 NetsuRush 面板（窗口 ▸ 扩展），或从磁盘导入视频。"
   }
 }

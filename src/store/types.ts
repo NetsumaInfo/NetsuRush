@@ -7,7 +7,7 @@ export type DerushView = "home" | "browser";
 // Sous-onglet de l'onglet Derush : découpage (flux existant), collections (bibliothèque), timeline live.
 export type DerushSection = "decoupage" | "collections" | "timeline";
 
-// Thèmes commutables (cf. blocs [data-theme] dans src/index.css). Les libellés/descriptions ici sont
+// Thèmes commutables (cf. blocs [data-theme] dans src/index.css). Les libellés ici sont
 // le repli hors i18n : l'UI lit d'abord `settings:appearance.theme.<id>`.
 export type ThemeId =
   | "dark" | "midnight" | "blue" | "graphite" | "forest" | "ember" | "plum" | "contrast"

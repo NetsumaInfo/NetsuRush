@@ -22,7 +22,6 @@
     "clickHint": "Clic = {{mode}} (E bascule) · clic droit = exclure · Maj+survol = aperçu · molette = zoom · J/K/L · I/O · , ; = pas de suivi · 1-9 objet",
     "include": "inclure",
     "exclude": "exclure",
-    "pointsHere": "· {{count}} point(s) ici",
     "showMask": "Afficher le masque",
     "hideOverlay": "Masquer la surimpression",
     "showOverlay": "Afficher la surimpression",
@@ -158,9 +157,12 @@
   },
   "engineHint": {
     "minimax-remover": "Reconstruit le fond sans scintiller — le plus propre quand le fond bouge.",
-    "diffueraser": "Suppression d'objet dans la vidéo, haute qualité. Moteur pas encore branché.",
+    "diffueraser": "Suppression d'objet dans la vidéo, haute qualité. Pas encore disponible.",
     "matanyone": "Se souvient de l'objet d'une image à l'autre — bon sur les cheveux et les bords fins.",
-    "matanyone2": "Comme la v1, en plus fin et plus fiable."
+    "matanyone2": "Comme la v1, en plus fin et plus fiable.",
+    "videomama": "Bords très fins, mais lent et gourmand en mémoire.",
+    "sam2matting": "Matte vidéo expérimental.",
+    "powerpaint": "Remplit la zone peinte au masque. Pas encore disponible."
   },
   "exportRow": {
     "allObjects": "Tous les objets",
@@ -193,8 +195,8 @@
     "tiny": "La plus petite variante SAM 2.1 — pour les cartes serrées en VRAM.",
     "edgetam": "Le plus léger (56 Mo) et le plus rapide. Masques moins fins que SAM 2.1.",
     "sam31": "Génération la plus récente : tient les objets qui se croisent ou disparaissent. GPU NVIDIA obligatoire.",
-    "samurai": "Suit l'objet même quand il passe derrière autre chose (mémoire guidée par le mouvement). Utilise les poids SAM 2.1 installés.",
-    "sam2long": "Pour les plans longs : garde plusieurs pistes et élague les mauvaises, l'erreur ne s'accumule pas. Utilise les poids SAM 2.1 installés."
+    "samurai": "Suit l'objet même quand il passe derrière autre chose. Utilise SAM 2.1, qui doit être installé.",
+    "sam2long": "Pour les plans longs : suit plusieurs pistes et garde la bonne, donc l'erreur ne s'accumule pas. Utilise SAM 2.1, qui doit être installé."
   },
   "timeline": {
     "inHere": "Point d'entrée ici (img {{n}})",

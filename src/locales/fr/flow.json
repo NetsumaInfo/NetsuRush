@@ -84,5 +84,12 @@
   "attach": "Joindre",
   "attachHint": "Joindre une image ou un fichier",
   "removeAttachment": "Retirer la pièce jointe",
-  "conversationNew": "Nouvelle"
+  "conversationNew": "Nouvelle",
+  "attachFileTooBig": "{{name}} : fichier trop gros ({{size}}, maximum {{max}})",
+  "attachUnsupported": "{{name}} : format non pris en charge. Joins une image ou un fichier texte.",
+  "specUnsupported": "{{name}} : format non lu. Choisis un fichier .md, .txt ou .yaml.",
+  "specEmpty": "{{name}} est vide.",
+  "framesCount_one": "{{count}} image",
+  "framesCount_other": "{{count}} images",
+  "cacheLimit": "{{size}} max"
 }

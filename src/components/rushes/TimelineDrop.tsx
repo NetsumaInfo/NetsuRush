@@ -1,4 +1,5 @@
 import { X, AlertTriangle, Check, CircleAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 // - après : toast de résultat (succès / avertissement fps / erreur), refermable.
 // (Le glisser d'un rush vers DaVinci est un drag OS natif géré côté carte — pas ici.)
 export function TimelineDrop() {
+  const { t } = useTranslation();
   const tlBusy = useApp((s) => s.tlBusy);
   const tlNotice = useApp((s) => s.tlNotice);
   const dismiss = useApp((s) => s.dismissTlNotice);
@@ -33,7 +35,7 @@ export function TimelineDrop() {
             : tlNotice.kind === "warn" ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-warn)]" />
             : <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
           <span className="min-w-0 flex-1">{tlNotice.text}</span>
-          <button type="button" aria-label="Fermer la notification" onClick={dismiss} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent">
+          <button type="button" aria-label={t("common:action.close")} onClick={dismiss} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent">
             <X className="h-4 w-4" />
           </button>
         </div>

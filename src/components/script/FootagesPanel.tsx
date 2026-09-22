@@ -29,6 +29,7 @@ const isAudio = (c: Clip) => isAudioPath(c.path);
 // badge sur l'image était du bruit (retour user). Instant AUTO : un rush entier commence presque
 // toujours par du noir → sans ça la liste est une colonne de cases noires.
 function Thumb({ clip }: { clip: Clip }) {
+  const { t } = useTranslation("script");
   const audio = isAudio(clip);
   const thumb = useThumb(audio ? "" : clip.path, THUMB_AUTO);
   const [hovered, setHovered] = useState(false);
@@ -58,7 +59,7 @@ function Thumb({ clip }: { clip: Clip }) {
       onMouseEnter={(event) => { drop.current = claimHoverPreview(event.currentTarget, hoverOff); setHovered(true); }}
       onMouseLeave={() => { drop.current?.(); hoverOff(); }}
       onClick={(event) => { event.preventDefault(); event.stopPropagation(); setPinned((value) => !value); }}
-      aria-label={pinned ? "Arrêter l'aperçu" : "Lire l'aperçu"}
+      aria-label={pinned ? t("footages.stopPreview") : t("footages.playPreview")}
     >
       {thumb && <img src={nr.mediaUrl(thumb)} alt="" draggable={false} />}
       {active && preview && <PreviewVideo url={preview} label={clip.name} audible={hovered || pinned} onError={() => setPreview(null)} />}

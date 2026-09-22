@@ -110,5 +110,9 @@
     "action": "Informar del error",
     "sent": "Enviado, ¡gracias!",
     "saved": "El envío falló. Mensaje guardado."
+  },
+  "host": {
+    "offlineResolve": "Abre un proyecto con clips en Resolve y recarga, o importa vídeos del disco.",
+    "offlineAdobe": "Abre {{app}} y luego el panel de NetsuRush (Ventana ▸ Extensiones), o importa vídeos del disco."
   }
 }

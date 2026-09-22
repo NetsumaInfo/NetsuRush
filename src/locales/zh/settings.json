@@ -387,7 +387,10 @@
       "more": "全部展开",
       "less": "收起",
       "manual": "自己填写",
-      "manualPlaceholder": "RTX 3060、Ryzen 5600X、32 GB、Windows 11"
+      "manualPlaceholder": "RTX 3060、Ryzen 5600X、32 GB、Windows 11",
+      "unknownGpu": "未知 GPU",
+      "ffmpegOk": "已找到 ffmpeg",
+      "ffmpegMissing": "缺少 ffmpeg"
     },
     "sending": "发送中…",
     "send": "发送",
@@ -513,7 +516,6 @@
       "action": "重建索引",
       "hint": "补上磁盘上已有的缓存：索引只认得引入之后写入的内容。",
       "running": "重建索引…",
-      "done": "已索引 {{added}} 项，其中 {{attributed}} 项归到素材。",
       "scan": "读取已知素材…",
       "index": "分析文件夹…"
     },

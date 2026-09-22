@@ -4,14 +4,14 @@
     "subtitle": "Choisis ta source de rush, puis détecte et découpe les plans.",
     "openPool": "Ouvrir le Media Pool",
     "openProject": "Ouvrir le projet",
-    "poolHintResolve": "Parcours les rush du projet Resolve, rangés par dossiers.",
-    "poolHintHost": "Parcours les rush du projet {{host}} (envoyés par le panneau NetsuRush).",
+    "poolHintResolve": "Parcours les rushs du projet Resolve, rangés par dossiers.",
+    "poolHintHost": "Parcours les rushs du projet {{host}} (envoyés par le panneau NetsuRush).",
     "import": "Importer des vidéos",
     "importHint": "Ajoute des rushs à ta bibliothèque, sans passer par le projet.",
     "cutTimeline": "Découper une timeline",
     "cutTimelineHint": "Détecte les plans de chaque rush d'une timeline et la remonte découpée — nouvelle ou en remplacement.",
     "browseMedia": "Parcourir mes médias",
-    "browseMediaHint": "Ta bibliothèque, plus les rush du projet quand il est ouvert."
+    "browseMediaHint": "Ta bibliothèque, plus les rushs du projet quand il est ouvert."
   },
   "settings": {
     "title": "Paramètres NetsuCut",
@@ -353,7 +353,6 @@
     "analyzeFailed": "échec de l'analyse",
     "noShots": "Aucun plan détecté.",
     "title": "Timeline",
-    "count": "{{count}} timeline(s)",
     "defaultName": "{{name}} — découpé",
     "modeNewTip": "Créer une timeline découpée sans modifier l'originale",
     "modeReplaceTip": "Remplacer l'originale par la timeline découpée",
@@ -377,7 +376,6 @@
     "reloadTimelines": "Actualiser les timelines",
     "noneInProject": "Aucune timeline dans le projet.",
     "backToTimelines": "Retour aux timelines",
-    "addSelected": "Ajouter {{count}} plan(s) sélectionné(s)",
     "addAll": "Ajouter tous les plans",
     "noShots": "Aucun plan vidéo dans cette timeline.",
     "noSnapshotTitle": "Aucune séquence reçue",

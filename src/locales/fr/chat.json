@@ -56,7 +56,11 @@
     "resolveMcpSilentHint": "Le serveur est là mais n'a pas répondu. Lance Resolve, puis relance la détection.",
     "resolveMcpHint": "{{n}} outils ajoutés au copilote : scripts Python dans Resolve, recherche dans l'API de scripting, documentation, LUT et DCTL.",
     "resolveUnsafe": "Autoriser les scripts hors bac à sable",
-    "resolveUnsafeHint": "Ajoute bmd_run_script_unsafe : accès complet aux fichiers, au réseau et aux sous-processus. Aucun mode de permission ne peut le retenir une fois le script parti."
+    "resolveUnsafeHint": "Ajoute bmd_run_script_unsafe : accès complet aux fichiers, au réseau et aux sous-processus. Aucun mode de permission ne peut le retenir une fois le script parti.",
+    "baseUrlHint": {
+      "openai": "Ollama, LM Studio, proxy local…",
+      "xai": "UE : https://eu-west-1.api.x.ai/v1"
+    }
   },
   "engine": {
     "agents": "Agents installés",

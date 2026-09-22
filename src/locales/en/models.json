@@ -72,5 +72,33 @@
   "advanced": {
     "label": "Advanced",
     "tip": "Show the whole catalog: variants, earlier generations and experimental engines. By default only each task's current selection is shown."
+  },
+  "task": {
+    "detect": "Shot detection",
+    "search": "Visual search",
+    "face": "Face search",
+    "voice-asr": "Voice — transcription",
+    "voice-vad": "Voice — silence detection",
+    "upscale": "Upscale",
+    "restore": "Restoration",
+    "interpolate": "Interpolation",
+    "depth": "Depth",
+    "matte-video": "Video matte",
+    "matte-image": "Background removal",
+    "segment": "Segmentation (roto)",
+    "object-removal": "Object removal"
+  },
+  "vram": "{{size}} VRAM",
+  "catalogHint": {
+    "siglip2-base": "The lightest.",
+    "siglip2-so400m": "Multilingual, the best balance.",
+    "siglip2-giant": "The most accurate, and the heaviest.",
+    "face-real": "Real faces: finds them and recognizes who it is. Needed for face search.",
+    "face-anime": "Anime faces: finds them and recognizes who it is. Downloads on first use.",
+    "whisper-small": "Little VRAM — for short dictation.",
+    "whisper-medium": "Between speed and quality.",
+    "whisper-large-v3": "The best transcription, and the slowest.",
+    "nemotron-3.5-asr": "40 languages, automatic punctuation and capitals. Needs transcribe-cli, installed by hand.",
+    "silero-vad": "Detects speech to start and stop dictation. Fast, runs on the CPU."
   }
 }

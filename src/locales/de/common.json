@@ -110,5 +110,9 @@
     "action": "Fehler melden",
     "sent": "Gesendet, danke!",
     "saved": "Senden fehlgeschlagen. Nachricht gespeichert."
+  },
+  "host": {
+    "offlineResolve": "Öffne ein Projekt mit Clips in Resolve und lade neu, oder importiere Videos von der Festplatte.",
+    "offlineAdobe": "Öffne {{app}} und dann das NetsuRush-Bedienfeld (Fenster ▸ Erweiterungen), oder importiere Videos von der Festplatte."
   }
 }
