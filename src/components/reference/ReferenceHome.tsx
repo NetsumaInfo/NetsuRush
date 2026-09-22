@@ -510,6 +510,7 @@ export function ReferenceHome({
           render={
             <button
               type="button"
+              data-settings-toggle
               aria-label={t("actions.settings")}
               onClick={onSettings}
               className="absolute right-4 top-4 z-10 inline-flex size-6 items-center justify-center rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"

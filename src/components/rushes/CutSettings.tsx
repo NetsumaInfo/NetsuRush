@@ -2,12 +2,14 @@
 // et son, grille/lecteur, export, et les raccourcis clavier.
 //
 // NON-MODAL (panneau flottant, sans voile), comme les Paramètres du board : l'accueil reste visible.
-// Fermeture : croix ou Échap — sauf pendant la capture d'un raccourci, où Échap annule la capture.
+// Fermeture : croix, Échap ou clic ailleurs — sauf pendant la capture d'un raccourci, où Échap
+// annule la capture et le clic lui appartient.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { X, Minus, Plus } from "lucide-react";
 import { useApp } from "@/store";
+import { useOutsideDismiss } from "@/hooks/useOutsideDismiss";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
@@ -62,6 +64,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 export function CutSettings({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { t } = useTranslation(["derush", "common"]);
   const [tab, setTab] = useState<CutTab>("detect");
+  const panelRef = useRef<HTMLDivElement>(null);
   const [capturing, setCapturing] = useState(false);
   // Le tri des rushs vit dans son module (rushSort) et se lit à l'init de RushGrid → miroir local ici.
   const [sortKey, setSortKey] = useState<SortKey>(loadSortKey);
@@ -100,12 +103,16 @@ export function CutSettings({ open, onOpenChange }: { open: boolean; onOpenChang
     return () => window.removeEventListener("keydown", onKey, true);
   }, [open, onOpenChange, capturing]);
 
+  // Cliquer ailleurs ferme, sauf pendant la capture d'un raccourci (le clic sert à la capture).
+  useOutsideDismiss(panelRef, open && !capturing, () => onOpenChange(false));
+
   if (!open) return null;
 
   const presetModel = modelUsesPreset(cutModel);
 
   return (
     <div
+      ref={panelRef}
       role="dialog"
       aria-label={t("settings.title")}
       className="absolute right-3 top-14 z-50 flex max-h-[calc(100%-4.5rem)] w-96 flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur"

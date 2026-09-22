@@ -3,7 +3,8 @@
 // intervalle), et la liste de référence des raccourcis clavier.
 //
 // NON-MODAL (panneau flottant, sans voile) : le board reste visible et interactif → les réglages
-// (couleur/mode de fond) se voient EN DIRECT pendant qu'on les change. Fermeture : croix ou Échap.
+// (couleur/mode de fond) se voient EN DIRECT pendant qu'on les change. Fermeture : croix, Échap,
+// ou un clic ailleurs.
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { UP_MODELS, UP_SCALES, boardUpEngine } from "@/components/upscale/upscaleShared";
 import { ModelsCta } from "@/components/upscale/ModelPicker";
+import { useOutsideDismiss } from "@/hooks/useOutsideDismiss";
 import { useBoard } from "./useReferenceBoard";
 import { PinnedBarEditor } from "./PinnedBarEditor";
 import { PINNED_SIDES } from "./toolbarButtons";
@@ -203,6 +205,7 @@ function PenProbe() {
 }
 export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { t } = useTranslation("reference");
+  const panelRef = useRef<HTMLDivElement>(null);
   const [sweeping, setSweeping] = useState(false);
   const [sweepResult, setSweepResult] = useState<string | null>(null);
 
@@ -306,10 +309,14 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
     return () => window.removeEventListener("keydown", onKey, true);
   }, [open, onOpenChange, capturing, cmdCapturing]);
 
+  // Cliquer ailleurs ferme — sauf pendant la capture d'un raccourci, où le clic appartient à la capture.
+  useOutsideDismiss(panelRef, open && !capturing && !cmdCapturing, () => onOpenChange(false));
+
   if (!open) return null;
 
   return (
     <div
+      ref={panelRef}
       role="dialog"
       aria-label={t("actions.settings")}
       className="absolute right-3 top-14 z-50 flex max-h-[calc(100%-4.5rem)] w-96 flex-col overflow-y-auto rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur"

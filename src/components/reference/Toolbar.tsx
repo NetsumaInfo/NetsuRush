@@ -51,16 +51,19 @@ import type { ShortcutAction } from "./referenceShared";
 
 // `action` = the command shortcut that does the SAME thing: its key shows in the tooltip, read from
 // the preferences, so a rebind is visible at once.
-function IconBtn({ icon: Icon, label, onClick, disabled, active, action }: {
+function IconBtn({ icon: Icon, label, onClick, disabled, active, action, settingsToggle }: {
   icon: typeof ImagePlus; label: string; onClick: () => void;
   disabled?: boolean; active?: boolean; action?: ShortcutAction;
+  // Marque le bouton qui ouvre un panneau flottant : useOutsideDismiss l'ignore, sinon la fermeture
+  // au pointerdown et la réouverture au click s'annuleraient.
+  settingsToggle?: boolean;
 }) {
   const combo = useBoard((s) => (action ? s.prefs.shortcutKeys[action] : ""));
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button variant={active ? "default" : "ghost"} size="icon-sm" onClick={onClick} disabled={disabled} aria-label={label} aria-pressed={active} />
+          <Button variant={active ? "default" : "ghost"} size="icon-sm" data-settings-toggle={settingsToggle || undefined} onClick={onClick} disabled={disabled} aria-label={label} aria-pressed={active} />
         }
       >
         <Icon />
@@ -207,7 +210,7 @@ export function Toolbar({
         onClick={askMouseThrough}
       />
     ),
-    settings: onSettings ? <IconBtn icon={Settings2} label={t("actions.settings")} onClick={onSettings} /> : null,
+    settings: onSettings ? <IconBtn icon={Settings2} label={t("actions.settings")} onClick={onSettings} settingsToggle /> : null,
     save: onSave ? <IconBtn icon={Save} label={t("toolbar.saveScene")} action="save" onClick={onSave} /> : null,
     saveAs: onSaveAs ? <IconBtn icon={SaveAll} label={t("toolbar.saveAs")} action="saveAs" onClick={onSaveAs} /> : null,
     openProject: onOpen ? <IconBtn icon={FolderOpen} label={t("toolbar.openScene")} action="openProject" onClick={onOpen} /> : null,

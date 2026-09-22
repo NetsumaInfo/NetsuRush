@@ -40,7 +40,7 @@ export function DerushHome() {
         </div>
         <Tooltip>
           <TooltipTrigger render={
-            <Button variant="ghost" size="icon-sm" aria-label={t("settings.title")} onClick={() => setSettings((v) => !v)} />
+            <Button variant="ghost" size="icon-sm" data-settings-toggle aria-label={t("settings.title")} onClick={() => setSettings((v) => !v)} />
           }>
             <Settings2 className="size-4" />
           </TooltipTrigger>
