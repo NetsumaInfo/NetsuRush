@@ -40,7 +40,7 @@ def cmd_gif(args):
     (fw, fh), (ow, oh) = _plan(args, up, w, h)
     dec = open_decoder(args.input, None, None, None, _decode_size((fw, fh), w, h))
     enc = open_gif_encoder(args.out, ow, oh, fps_str)
-    done, err = run_stream(dec, enc, up, fw, fh, (ow, oh), nb, "ffmpeg gif interrompu",
+    done, err = run_stream(dec, enc, up, fw, fh, (ow, oh), nb, t("encoder_stopped"),
                            args.cleanup_noise, args.cleanup_edges)
 
     if err:
@@ -64,7 +64,7 @@ def cmd_upscale(args):
 
     w, h, fps_str, _fps, nb = probe(args.input)
     if not w or not h:
-        return {"ok": False, "error": t("video_dimensions", detail=" : " + args.input)}
+        return {"ok": False, "error": t("video_dimensions", path=args.input)}
 
     log("STAGE:load")
     up = get_upsampler(args.model, args.tile, args.fp32, args.denoise,
@@ -103,7 +103,7 @@ def cmd_frame(args):
 
     w, h, _fps_str, _fps, _nb = probe(args.input)
     if not w or not h:
-        return {"ok": False, "error": t("video_dimensions", detail=" : " + args.input)}
+        return {"ok": False, "error": t("video_dimensions", path=args.input)}
 
     # Même matrice colorimétrique que le run → l'aperçu avant/après correspond à la vraie sortie.
     raw = decode_one_frame(args.input, args.time, w, h, probe_color(args.input, w, h))

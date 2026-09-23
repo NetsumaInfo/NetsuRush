@@ -11,6 +11,7 @@ import os
 import shutil
 
 import numpy as np
+from nri18n import t
 
 
 FRAME_MANIFEST_VERSION = 1
@@ -49,7 +50,7 @@ def build_frame_manifest(work, frames_dir, threshold=FRAME_DEDUPE_THR):
     names = sorted(n for n in os.listdir(frames_dir) if n.lower().endswith(".jpg"))
     sources = [int(os.path.splitext(n)[0]) for n in names]
     if not sources:
-        raise RuntimeError("aucune frame à dédupliquer")
+        raise RuntimeError(t("no_frame_to_process"))
     mapping = []
     unique_sources = []
     anchor_img = None

@@ -239,7 +239,7 @@ def ensure_weight(spec, kind="url"):
 
     tmp = target + ".tmp"
     log("STAGE:download")
-    log("Téléchargement modèle : %s" % filename)
+    log("Downloading model: %s" % filename)
     try:
         with urllib.request.urlopen(url, timeout=120) as res, open(tmp, "wb") as f:
             while True:

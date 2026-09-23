@@ -13,8 +13,8 @@ from .models import MODELS, build_model, ensure_weight
 
 
 def _device_line(name, backend, half):
-    """Ligne console explicite : le backend effectif est visible dans les rapports bêta."""
-    where = "GPU %s" % backend.upper() if backend != "cpu" else "CPU — LENT (repli compatible)"
+    """Explicit console line: the backend actually used shows up in beta reports."""
+    where = "GPU %s" % backend.upper() if backend != "cpu" else "CPU (slow compatibility fallback)"
     log("[upscale] %s → %s (%s)" % (name, where, "fp16" if half else "fp32"))
 
 
@@ -72,7 +72,7 @@ class TorchUpsampler:
         try:
             module = module.to(self.dev)
         except Exception as exc:  # noqa: BLE001 - backend/model non compatible → CPU universel
-            log("[upscale] %s indisponible pour %s (%s) → CPU" % (self.backend, label, exc))
+            log("[upscale] %s unavailable for %s (%s), falling back to CPU" % (self.backend, label, exc))
             self.backend, self.dev, self.half = "cpu", torch.device("cpu"), False
             module = module.to(self.dev)
         # `eval()` AVANT `half()` : les architectures reparamétrables (RepConv de RTMoSR) fusionnent
@@ -150,7 +150,7 @@ class TorchUpsampler:
         if self.half and float(out_rgb.std()) < 1e-3:
             # Sortie dégénérée (uniforme) → le fp16 a divergé pour ce modèle. Bascule fp32 DÉFINITIVE
             # (instance cachée) et refait une fois. Évite des frames noires/grises sur archs fragiles.
-            log("[upscale] fp16 instable → repli fp32 pour ce modèle")
+            log("[upscale] fp16 unstable, switching this model to fp32")
             self.half = False
             self.desc.float()
             out_rgb = self._infer_tiled(rgb) if use_tile else self._infer(rgb)
@@ -170,7 +170,7 @@ class TorchScriptUpsampler(TorchUpsampler):
     def __init__(self, model_path, scale, fp32, tile=0, tile_pad=10, pre_pad=0):
         import torch
         module = torch.jit.load(model_path, map_location="cpu")
-        self._setup(torch, module, scale, fp32, tile, tile_pad, pre_pad, "modèle TorchScript")
+        self._setup(torch, module, scale, fp32, tile, tile_pad, pre_pad, "TorchScript model")
 
 
 class SpandrelUpsampler(TorchUpsampler):
@@ -192,7 +192,7 @@ class SpandrelUpsampler(TorchUpsampler):
         desc = ModelLoader().load_from_file(model_path)
         if not isinstance(desc, ImageModelDescriptor):
             raise RuntimeError(t("spandrel_not_i2i", path=model_path))
-        self._setup(torch, desc, getattr(desc, "scale", 1), fp32, tile, tile_pad, pre_pad, "modèle Spandrel")
+        self._setup(torch, desc, getattr(desc, "scale", 1), fp32, tile, tile_pad, pre_pad, "Spandrel model")
 
 
 class ArtCNNUpsampler:
@@ -293,7 +293,7 @@ class AnimeSrUpsampler(TorchUpsampler):
         net = arch_module.MSRSWVSR(num_feat=self.FEATURES, num_block=self.BLOCKS, netscale=self.SCALE)
         net.load_state_dict(_state_dict(torch.load(model_path, map_location="cpu")), strict=True)
         self._reset()
-        self._setup(torch, net, self.SCALE, fp32, tile, tile_pad, pre_pad, "modèle AnimeSR")
+        self._setup(torch, net, self.SCALE, fp32, tile, tile_pad, pre_pad, "AnimeSR model")
 
     def _reset(self):
         self._prev = None       # image source précédente (tenseur LR)
@@ -377,7 +377,7 @@ class FixedOnnxUpsampler:
         self.tile_pad = self.overlap
         self.pre_pad = 0
         self.mod_scale = None
-        log("[upscale] ONNX à fenêtre figée %dx%d → %s"
+        log("[upscale] fixed-window ONNX %dx%d on %s"
             % (self.win_w, self.win_h, ", ".join(self.session.get_providers())))
 
     def _run_window(self, rgb_window):
@@ -483,7 +483,7 @@ def make_upsampler(model_name, tile, fp32, denoise, tile_pad=10, pre_pad=0):
             dni_weight = [denoise, 1.0 - denoise]
 
     half = backend != "cpu" and not fp32   # fp16 accélérateur = moins de mémoire, même rendu visuel
-    _device_line("modèle %s" % model_name, backend, half)
+    _device_line("model %s" % model_name, backend, half)
 
     def _make(active, use_half):
         return RealESRGANer(
@@ -496,6 +496,6 @@ def make_upsampler(model_name, tile, fp32, denoise, tile_pad=10, pre_pad=0):
     except Exception as exc:  # noqa: BLE001 - roue/ops constructeur incomplètes → CPU fiable
         if backend == "cpu":
             raise
-        log("[upscale] %s indisponible pour %s (%s) → CPU" % (backend, model_name, exc))
+        log("[upscale] %s unavailable for %s (%s), falling back to CPU" % (backend, model_name, exc))
         empty_torch_cache(torch, backend)
         return _make("cpu", False)

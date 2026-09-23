@@ -270,7 +270,7 @@ def _char_filtered_search(con, q_pos, top_k, min_score, q_neg, beta, aesthetic, 
     if empty:
         names = [r[0] for cid in empty
                  for r in con.execute("SELECT name FROM characters_v1 WHERE id=?", (cid,)).fetchall()]
-        who = ", ".join(names) if names else t("cited_character")
+        who = t("list_separator").join(names) if names else t("cited_character")
         n_lbl = con.execute("SELECT COUNT(*) FROM face_labels_v1 WHERE char_id IN (%s)"
                             % ",".join("?" * len(empty)), empty).fetchone()[0]
         if n_lbl:
@@ -468,7 +468,7 @@ def cmd_cluster(req):
             clusters.append({"size": len(hits), "rep": hits[0], "members": hits})
         clusters.sort(key=lambda g: g["size"], reverse=True)
         for idx, cl in enumerate(clusters):
-            cl["label"] = "Groupe %d" % (idx + 1)
+            cl["label"] = t("cluster_label", n=idx + 1)
         return {"clusters": clusters, "error": None}
     finally:
         con.close()

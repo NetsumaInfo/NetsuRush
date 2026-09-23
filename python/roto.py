@@ -8,10 +8,11 @@ Une seule session à la fois (une vidéo ouverte à l'instant t) — suffisant p
 import json
 import sys
 
-# Rend le package nrroto importable quel que soit le cwd du spawn.
+# Makes the nrroto package importable whatever the spawn cwd is.
 sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))
 
-from nrroto.session import RotoSession
+from nri18n import t  # noqa: E402
+from nrroto.session import RotoSession  # noqa: E402
 
 
 def serve():
@@ -83,7 +84,7 @@ def serve():
                                             req.get("overlap"), req.get("vaeTiling"),
                                             req.get("cpuOffload"))
             else:
-                res = {"ok": False, "error": "commande inconnue: %s" % cmd}
+                res = {"ok": False, "error": t("unknown_command", cmd=cmd)}
         except Exception as exc:  # noqa: BLE001
             res = {"ok": False, "error": str(exc)}
         if rid is not None:

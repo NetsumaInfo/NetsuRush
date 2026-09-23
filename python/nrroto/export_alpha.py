@@ -8,6 +8,8 @@ import os
 import shutil
 import subprocess
 
+from nri18n import t
+
 FFMPEG = os.environ.get("NETSURUSH_FFMPEG", "ffmpeg")
 
 # format -> (suffixe, args encodeur). ffv1 = lossless archivage (mkv, alpha bgra).
@@ -24,7 +26,7 @@ def _run(args):
     p = subprocess.run([FFMPEG, "-y", "-hide_banner", "-loglevel", "error"] + args,
                        capture_output=True, text=True)
     if p.returncode != 0:
-        raise RuntimeError((p.stderr or "ffmpeg a échoué").strip()[-400:])
+        raise RuntimeError((p.stderr or t("ffmpeg_failed")).strip()[-400:])
 
 
 def export(video, union_dir, fmt, out, fps, in_s=None, bg=None):
@@ -32,7 +34,7 @@ def export(video, union_dir, fmt, out, fps, in_s=None, bg=None):
     choisit la portée). Alpha : la matte est recalée sur la résolution source (scale2ref) puis
     fusionnée (alphamerge). bgcolor_mp4 : composite opaque sur couleur unie `bg` (hex)."""
     if not os.path.isdir(union_dir) or not os.listdir(union_dir):
-        raise RuntimeError("aucune matte propagée — lance le suivi d'abord")
+        raise RuntimeError(t("no_propagated_matte"))
     names = sorted(n for n in os.listdir(union_dir) if n.endswith(".png"))
     start = int(os.path.splitext(names[0])[0])
     pattern = os.path.join(union_dir, "%05d.png")

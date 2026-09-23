@@ -132,7 +132,8 @@ def _result_text(res, words):
     return " ".join(w["word"] for w in words).strip()
 
 
-def transcribe_parakeet(audio_path, lang="fr", model_dir=None):
+def transcribe_parakeet(audio_path, lang=None, model_dir=None):
+    """Parakeet v3 detects the spoken language itself: `lang` is only echoed back."""
     m = _load(model_dir)
     _emit("STAGE:infer")
     res = m.recognize(audio_path)

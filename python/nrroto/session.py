@@ -150,7 +150,7 @@ class RotoSession:
             return {"ok": False, "error": t("video_not_found", path=video)}
         w, h, _fps_str, fps, nb = probe(video)
         if not w or not h:
-            return {"ok": False, "error": t("video_dimensions", detail="")}
+            return {"ok": False, "error": t("video_dimensions", path=video)}
         self.close()
         self.sam_dir = sam_dir
         # Changer de génération change de moteur : on n'essaie pas de recycler l'ancien, ses poids et
@@ -250,7 +250,7 @@ class RotoSession:
             self._extract_error = t("ffmpeg_missing", error=exc)
             return
         except Exception as exc:  # arg invalide (None…) → ne jamais laisser le thread crasher (open() pendrait)
-            self._extract_error = "extraction impossible : %s" % exc
+            self._extract_error = t("frame_extraction_error", error=exc)
             return
         tail = []
         for line in p.stderr:
@@ -277,7 +277,7 @@ class RotoSession:
                 json.dump({"frames": n, "uniqueFrames": self.frame_manifest["uniqueCount"],
                            "w": self.w, "h": self.h, "fps": self.fps, "scale": self.scale}, fh)
         except Exception as exc:  # manifeste requis : SAM ne doit jamais voir un mapping incomplet
-            self._extract_error = "analyse des frames impossible : %s" % exc
+            self._extract_error = t("frame_analysis_failed", error=exc)
             return
         _stage("extractdone:%d" % n)
 

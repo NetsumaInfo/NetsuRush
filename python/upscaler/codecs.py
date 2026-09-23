@@ -140,7 +140,7 @@ def _hardware_args(codec, quality, preset, bitdepth, profile=None):
         args = ["-c:v", codec, "-usage", "transcoding", "-quality", "quality", "-rc", "cqp",
                 "-qp_i", str(quality), "-qp_p", str(quality)]
     else:
-        raise UnknownCodecError("encodeur matériel inconnu: %s" % codec)
+        raise UnknownCodecError("unknown hardware encoder: %s" % codec)
     if ffp:
         args += ["-profile:v", ffp]
     # QSV/AMF acceptent plus sûrement leurs surfaces natives pour les profils 4:2:0.
@@ -163,7 +163,7 @@ def video_codec_args(codec, quality, preset, bitdepth, profile=None):
         return _hardware_args(codec, quality, preset, bitdepth, profile)
     if codec in FIXED_CODECS:
         return FIXED_CODECS[codec]
-    raise UnknownCodecError("codec inconnu: %s" % codec)
+    raise UnknownCodecError("unknown codec: %s" % codec)
 
 
 def audio_codec_args(mode, abr):

@@ -61,7 +61,7 @@ def cmd_process(source, audio, payload):
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "process"
     if cmd != "process":
-        print(json.dumps({"ok": False, "error": t("unknown_command", detail="")}))
+        print(json.dumps({"ok": False, "error": t("unknown_command", cmd=cmd)}))
         return
     source = sys.argv[2] if len(sys.argv) > 2 else ""
     audio = sys.argv[3] if len(sys.argv) > 3 else source

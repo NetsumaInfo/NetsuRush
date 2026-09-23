@@ -113,7 +113,7 @@ class VideoMaMaEngine:
         expected = self.unet.add_embedding.linear_1.in_features
         got = self.unet.config.addition_time_embed_dim * len(ids)
         if expected != got:
-            raise RuntimeError("VideoMaMa : conditionnement temporel de taille %d, attendu %d" % (got, expected))
+            raise RuntimeError("VideoMaMa: time conditioning has size %d, expected %d" % (got, expected))
         return torch.tensor([ids], dtype=self.dtype, device=self.device)
 
     def run_batch(self, frames, masks, seed=42):

@@ -49,7 +49,7 @@ def serve():
             elif cmd == "upscale":
                 res = cmd_upscale(Req(req, UPSCALE_DEFAULTS))
             else:
-                res = {"ok": False, "error": t("unknown_command", detail=": %s" % cmd)}
+                res = {"ok": False, "error": t("unknown_command", cmd=cmd)}
         except Exception as exc:  # noqa: BLE001
             res = {"ok": False, "error": str(exc)}
         if rid is not None:
@@ -154,7 +154,7 @@ def main():
         elif args.cmd == "gif":
             res = cmd_gif(args)
         else:
-            res = {"ok": False, "error": t("unknown_command", detail="")}
+            res = {"ok": False, "error": t("unknown_command", cmd=args.cmd)}
     except Exception as exc:  # noqa: BLE001
         res = {"ok": False, "error": str(exc)}
     print(json.dumps(res))

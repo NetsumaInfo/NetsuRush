@@ -102,8 +102,8 @@ def _load_weights(net, state, optional_keys):
     missing, unexpected = net.load_state_dict(state, strict=False)
     missing = [key for key in missing if not key.endswith(optional_keys)]
     if missing or unexpected:
-        raise RuntimeError("état incompatible — manquantes %s, inattendues %s"
-                           % (missing[:3], list(unexpected)[:3]))
+        raise RuntimeError(t("weights_mismatch", detail="missing %s, unexpected %s"
+                             % (missing[:3], list(unexpected)[:3])))
 
 
 class CommunityUpsampler(TorchUpsampler):
@@ -114,7 +114,7 @@ class CommunityUpsampler(TorchUpsampler):
 
         entry = COMMUNITY_ARCHS.get(model_id)
         if not entry:
-            raise RuntimeError("architecture communautaire inconnue : %s" % model_id)
+            raise RuntimeError("unknown community architecture: %s" % model_id)
         _install_trainner_stub()
         try:
             arch_module = _load_arch(code_path, model_id)
@@ -126,6 +126,6 @@ class CommunityUpsampler(TorchUpsampler):
         if entry.get("reshape_params"):
             state = _reshape_to_model(net, dict(state))
         _load_weights(net, state, entry.get("optional_keys"))
-        log("[upscale] architecture communautaire %s (%s)" % (model_id, entry["class"]))
+        log("[upscale] community architecture %s (%s)" % (model_id, entry["class"]))
         self._setup(torch, net, entry["scale"], fp32, tile, tile_pad, pre_pad,
-                    "modèle %s" % entry["class"])
+                    "model %s" % entry["class"])

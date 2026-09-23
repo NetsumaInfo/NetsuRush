@@ -9,6 +9,7 @@ import numpy as np
 
 import nrident
 from detect import file_mtime
+from nri18n import t
 
 from . import media, model
 from . import sampling
@@ -47,7 +48,7 @@ def _index_image(path, mt, force=False):
     except Exception as exc:  # noqa: BLE001
         con.close()
         return {"ok": False, "file": path, "indexed": 0, "total": 1, "cached": False,
-                "error": "image illisible: %s" % exc}
+                "error": t("image_unreadable_error", error=exc)}
     con.execute("DELETE FROM frame_embeddings_v1 WHERE file_path=? AND model=? AND scene_index>0",
                 (path, MODEL_TAG))
     model.free_memory()

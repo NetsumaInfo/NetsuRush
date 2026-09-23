@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import torch
+from nri18n import t
 
 from .model import TransNetV2Supernet
 
@@ -14,10 +15,7 @@ OFFICIAL_WEIGHTS_URL = "https://drive.google.com/drive/folders/1xZN6tvefXXmpZlIZ
 class AutoShotModel:
     def __init__(self, checkpoint_path, device=None):
         if not checkpoint_path or not os.path.isfile(checkpoint_path):
-            raise FileNotFoundError(
-                "Checkpoint AutoShot ckpt_0_200_0.pth introuvable. "
-                "Téléchargement officiel : %s" % OFFICIAL_WEIGHTS_URL
-            )
+            raise FileNotFoundError(t("autoshot_ckpt_missing", url=OFFICIAL_WEIGHTS_URL))
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.model = TransNetV2Supernet().eval()
         state = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
@@ -25,7 +23,7 @@ class AutoShotModel:
         current = self.model.state_dict()
         compatible = {key: value for key, value in state.items() if key in current}
         if not compatible:
-            raise ValueError("Checkpoint AutoShot incompatible : aucune couche reconnue")
+            raise ValueError(t("autoshot_ckpt_incompatible"))
         current.update(compatible)
         self.model.load_state_dict(current)
         self.model.to(self.device).eval()
@@ -39,7 +37,7 @@ class AutoShotModel:
 
     def predict(self, frames, threshold=0.296, progress=None):
         if not isinstance(frames, np.ndarray) or frames.ndim != 4 or frames.shape[-1] != 3:
-            raise ValueError("AutoShot attend des frames (T,H,W,3)")
+            raise ValueError("AutoShot expects frames shaped (T, H, W, 3)")
         if len(frames) == 0:
             return np.zeros((0,), dtype=np.float32)
         batches = list(self._batches(frames))

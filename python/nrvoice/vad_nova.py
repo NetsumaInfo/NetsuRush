@@ -64,7 +64,7 @@ def _load():
         rf_path = _first_existing(models, ("nova_vad_rf.pkl", "rf.pkl"))
         sc_path = _first_existing(models, ("nova_vad_scaler.pkl", "scaler.pkl"))
         if not rf_path or not sc_path:
-            raise FileNotFoundError("poids NOVA-VAD absents dans %s" % models)
+            raise FileNotFoundError("NOVA-VAD weights missing in %s" % models)
         # Le dépôt vendoré fournit l'extraction EXACTE ayant servi à l'entraînement — la réimplémenter
         # décalerait les features et rendrait les prédictions fausses. On l'importe donc telle quelle.
         if nova not in sys.path:
@@ -80,7 +80,7 @@ def _load():
                   "speech_idx": speech_idx}
     except Exception as exc:  # noqa: BLE001 — indispo = dégradation gracieuse, jamais une erreur dure
         _emit("STAGE:nova-unavailable")
-        sys.stderr.write("NOVA-VAD indisponible : %s\n" % exc)
+        sys.stderr.write("NOVA-VAD unavailable: %s\n" % exc)
         _STATE = False
     return _STATE
 
@@ -107,7 +107,7 @@ def confirm_regions(audio_path, speech, min_conf=0.6, long_keep_s=1.5, win_s=1.0
     state = _load()
     if not state:
         return {"speech": speech, "dropped": 0, "available": False,
-                "error": "NOVA-VAD indisponible (poids/deps manquants)"}
+                "error": "NOVA-VAD unavailable (missing weights or dependencies)"}
     try:
         import numpy as np
         import soundfile as sf
@@ -152,5 +152,5 @@ def confirm_regions(audio_path, speech, min_conf=0.6, long_keep_s=1.5, win_s=1.0
                 pass
         return {"speech": kept, "dropped": dropped, "available": True, "error": None}
     except Exception as exc:  # noqa: BLE001
-        sys.stderr.write("NOVA-VAD : passe échouée : %s\n" % exc)
+        sys.stderr.write("NOVA-VAD pass failed: %s\n" % exc)
         return {"speech": speech, "dropped": 0, "available": False, "error": str(exc)}

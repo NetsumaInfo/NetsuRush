@@ -69,7 +69,7 @@ def load():
         try:
             _MODEL = _MODEL.to(_DEV).eval()
         except Exception as exc:  # noqa: BLE001 - accélérateur/runtime incomplet → CPU fiable
-            sys.stderr.write("[search] backend %s indisponible (%s) → CPU\n" % (_BACKEND, exc))
+            sys.stderr.write("[search] backend %s unavailable (%s), falling back to CPU\n" % (_BACKEND, exc))
             _BACKEND, _DEV = "cpu", "cpu"
             _MODEL = _load_model(torch.float32).to("cpu").eval()
     # Calibration : logit_scale/logit_bias appris du modèle → sigmoïde qui transforme le cosinus
@@ -96,7 +96,7 @@ def _pool(out):
     lhs = getattr(out, "last_hidden_state", None)
     if lhs is not None:
         return lhs.mean(dim=1)
-    raise RuntimeError("sortie d'embedding inattendue: %s" % type(out).__name__)
+    raise RuntimeError("unexpected embedding output: %s" % type(out).__name__)
 
 
 def _l2(t):
@@ -121,7 +121,7 @@ def _process_images(pil_list):
         inputs = _PROC(images=pil_list, return_tensors="pt", max_num_patches=MAX_PATCHES)
     except (TypeError, ValueError) as exc:
         _PATCHES_SUPPORTED = False
-        sys.stderr.write("[search] %s ignore max_num_patches (%s) → résolution d'analyse du modèle\n"
+        sys.stderr.write("[search] %s ignores max_num_patches (%s), using the model's analysis resolution\n"
                          % (type(_PROC).__name__, exc))
         return _PROC(images=pil_list, return_tensors="pt")
     _PATCHES_SUPPORTED = True

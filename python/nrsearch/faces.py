@@ -531,7 +531,7 @@ def _cluster_gallery(con, file_paths=None):
         if not rows:
             continue
         if len(rows) > MAX_GALLERY_FACES:
-            sys.stderr.write("gallery: %d visages '%s' → clustering plafonné aux %d plus récents\n"
+            sys.stderr.write("gallery: %d '%s' faces, clustering capped to the %d most recent\n"
                              % (len(rows), domain, MAX_GALLERY_FACES))
             rows = rows[:MAX_GALLERY_FACES]
         feats = [np.frombuffer(r[3], dtype=np.float32) for r in rows]

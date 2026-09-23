@@ -59,11 +59,11 @@ def cmd_depth(args):
     try:
         from .runner import get_depth
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("depth_unavailable", detail=" (transformers) : %s" % exc)}
+        return {"ok": False, "error": t("depth_unavailable", error="transformers: %s" % exc)}
 
     w, h, fps_str, _fps, nb = probe(args.input)
     if not w or not h:
-        return {"ok": False, "error": t("video_dimensions", detail=" : " + str(args.input))}
+        return {"ok": False, "error": t("video_dimensions", path=args.input)}
 
     bits = int(getattr(args, "bits", 8))
     colormap = getattr(args, "colormap", "gray") or "gray"
@@ -74,7 +74,7 @@ def cmd_depth(args):
     try:
         engine = get_depth(args.model)
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("load_depth_failed", detail=" (%s) : %s" % (args.model, exc))}
+        return {"ok": False, "error": t("load_depth_failed", error="%s: %s" % (args.model, exc))}
     log("STAGE:infer")
 
     import numpy as np

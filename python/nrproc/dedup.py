@@ -7,6 +7,7 @@ Deux usages :
   - per-frame (depth / removeBG) : `run_perframe_dedup` ne fait tourner le modèle que sur les frames
     UNIQUES et REDUPLIQUE le dernier résultat pour les frames mortes → même nombre d'images en sortie,
     mais N appels modèle = nb de frames uniques (accélérateur transverse P1)."""
+from nri18n import t
 
 # Seuil de différence moyenne (0..1) sous lequel deux frames sont jugées identiques (mortes).
 DEAD_THR = 0.006
@@ -51,5 +52,5 @@ def run_perframe_dedup(dec, np, w, h, nb, thr, process_fn, write_fn, log):
                     last_pct = pct
                     log("STAGE:prog:%d/%d" % (done, nb))
     except BrokenPipeError:
-        err = "ffmpeg encodeur interrompu (codec indisponible ?)"
+        err = t("encoder_stopped")
     return done, computed, err

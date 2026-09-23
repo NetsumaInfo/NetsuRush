@@ -30,7 +30,7 @@ def _faiss_ok():
             _HAS_FAISS = True
         except Exception:  # noqa: BLE001
             _HAS_FAISS = False
-            sys.stderr.write("FAISS indisponible → backend brute-force (pip install faiss-cpu)\n")
+            sys.stderr.write("FAISS unavailable, using the brute-force backend (pip install faiss-cpu)\n")
             sys.stderr.flush()
     return _HAS_FAISS
 
@@ -228,7 +228,7 @@ class SearchStore:
                 json.dump({"model": MODEL_TAG, "dim": self.dim,
                            "count": self.loaded_count, "max_rowid": self.loaded_max}, f)
         except Exception as exc:  # noqa: BLE001
-            sys.stderr.write("persist FAISS échec: %s\n" % exc); sys.stderr.flush()
+            sys.stderr.write("FAISS persist failed: %s\n" % exc); sys.stderr.flush()
 
     def _try_checkpoint(self, con, count, max_rowid):
         """Recharge l'index FAISS persisté + rejoue la queue SQLite (reconstruction rapide au boot).
@@ -259,7 +259,7 @@ class SearchStore:
             self.backend = FaissIndex.load(dim, ipath)
             self.kind = "faiss"
         except Exception as exc:  # noqa: BLE001
-            sys.stderr.write("read FAISS échec: %s\n" % exc); sys.stderr.flush()
+            sys.stderr.write("FAISS read failed: %s\n" % exc); sys.stderr.flush()
             return False
         self.loaded_count = ckpt_count; self.loaded_max = ckpt_max
         if count > ckpt_count:  # rejoue les plans ajoutés depuis le checkpoint

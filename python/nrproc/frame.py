@@ -16,7 +16,7 @@ def cmd_frame(args):
 
     w, h, _fps_str, fps, _nb = probe(args.input)
     if not w or not h:
-        return {"ok": False, "error": t("video_dimensions", detail=" : " + str(args.input))}
+        return {"ok": False, "error": t("video_dimensions", path=args.input)}
 
     raw = decode_one_frame(args.input, args.time, w, h)
     if raw is None:
@@ -42,12 +42,12 @@ def _frame_depth(args, frame, w, h):
         from .depth import _depth_gray_of, _depth_to_bgr
         from .runner import get_depth
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("depth_unavailable", detail=" : %s" % exc), "orig": args.orig}
+        return {"ok": False, "error": t("depth_unavailable", error=exc), "orig": args.orig}
     log("STAGE:load")
     try:
         engine = get_depth(args.model)
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("load_depth_failed", detail=" : %s" % exc), "orig": args.orig}
+        return {"ok": False, "error": t("load_depth_failed", error=exc), "orig": args.orig}
     log("STAGE:infer")
     gray8 = _depth_gray_of(engine, frame)
     bgr = _depth_to_bgr(gray8, getattr(args, "colormap", "gray") or "gray")
@@ -61,12 +61,12 @@ def _frame_removebg(args, frame, w, h):
         from .runner import get_seg
         from .seg import _cutout_rgba
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("removebg_unavailable", detail=" : %s" % exc), "orig": args.orig}
+        return {"ok": False, "error": t("removebg_unavailable", error=exc), "orig": args.orig}
     log("STAGE:load")
     try:
         engine = get_seg(args.model)
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("load_removebg_failed", detail=" : %s" % exc), "orig": args.orig}
+        return {"ok": False, "error": t("load_removebg_failed", error=exc), "orig": args.orig}
     log("STAGE:infer")
     rgba = _cutout_rgba(engine, frame)
     from .matte import cleanup_rgba
@@ -86,7 +86,7 @@ def _frame_interpolate(args, frame, w, h, fps):
     try:
         from .runner import get_rife
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("interpolation_unavailable", detail=" : %s" % exc), "orig": args.orig}
+        return {"ok": False, "error": t("interpolation_unavailable", error=exc), "orig": args.orig}
     # Frame suivante (≈ 1 frame après `time`) pour interpoler à mi-chemin.
     dt = 1.0 / float(fps or 24.0)
     raw_next = decode_one_frame(args.input, float(args.time) + dt, w, h)
@@ -100,7 +100,7 @@ def _frame_interpolate(args, frame, w, h, fps):
     try:
         rife = get_rife(args.model)
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("load_rife_failed", detail=" : %s" % exc), "orig": args.orig}
+        return {"ok": False, "error": t("load_rife_failed", error=exc), "orig": args.orig}
     log("STAGE:infer")
     mid = rife.process(frame, nxt, 0.5)
     if not write_png(np.ascontiguousarray(mid), args.out):

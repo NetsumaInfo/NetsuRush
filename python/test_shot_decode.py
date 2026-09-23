@@ -22,12 +22,12 @@ class ShotDecodeTests(unittest.TestCase):
 
     def setUp(self):
         if not self.clip:
-            self.skipTest("clip réel non fourni")
+            self.skipTest("no real clip given")
 
     def timestamps(self):
         _fps, _frames, scenes = media.get_scenes(self.clip)
         scene = next((value for value in scenes if value["end"] - value["start"] >= 1.0), None)
-        self.assertIsNotNone(scene, "aucun plan vidéo assez long")
+        self.assertIsNotNone(scene, "no video shot long enough")
         start = float(scene["start"])
         span = float(scene["end"]) - start
         return [start + span * ratio for ratio in (0.25, 0.5, 0.75)]
@@ -48,7 +48,7 @@ class ShotDecodeTests(unittest.TestCase):
 
     def test_grouped_decode_preserves_embeddings(self):
         if not model.MODEL_SRC or not pathlib.Path(model.MODEL_SRC).exists():
-            self.skipTest("poids SigLIP locaux non fournis")
+            self.skipTest("no local SigLIP weights given")
         legacy, grouped = self.decoded_frames()
         model.load()
         old_embeddings = model.embed_images(legacy)

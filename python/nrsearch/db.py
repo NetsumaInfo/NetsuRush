@@ -136,7 +136,7 @@ def migrate_legacy_model_tags(con):
     con.execute("INSERT OR REPLACE INTO index_migrations_v1 VALUES (?,?)", (marker, time.time()))
     con.commit()
     if moved:
-        sys.stderr.write("index repris sous le tag %s: %d ligne(s)\n" % (MODEL_TAG, moved))
+        sys.stderr.write("index moved to tag %s: %d row(s)\n" % (MODEL_TAG, moved))
         sys.stderr.flush()
     return moved
 
@@ -190,6 +190,6 @@ def purge_malformed_embeddings(con):
     if removed:
         con.commit()
         import sys
-        sys.stderr.write("purge embeddings corrompus: %d ligne(s)\n" % removed)
+        sys.stderr.write("purged corrupt embeddings: %d row(s)\n" % removed)
         sys.stderr.flush()
     return removed

@@ -34,11 +34,11 @@ def cmd_removebg(args):
     try:
         from .runner import get_seg
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("removebg_unavailable", detail=" (rembg) : %s" % exc)}
+        return {"ok": False, "error": t("removebg_unavailable", error="rembg: %s" % exc)}
 
     w, h, fps_str, _fps, nb = probe(args.input)
     if not w or not h:
-        return {"ok": False, "error": t("video_dimensions", detail=" : " + str(args.input))}
+        return {"ok": False, "error": t("video_dimensions", path=args.input)}
 
     fmt = getattr(args, "format", "prores_4444")
     dedup = bool(getattr(args, "dedup", False))
@@ -48,7 +48,7 @@ def cmd_removebg(args):
     try:
         engine = get_seg(args.model)
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("load_removebg_failed", detail=" (%s) : %s" % (args.model, exc))}
+        return {"ok": False, "error": t("load_removebg_failed", error="%s: %s" % (args.model, exc))}
     log("STAGE:infer")
 
     import numpy as np
@@ -94,7 +94,7 @@ def cmd_removebg(args):
                         last_pct = pct
                         log("STAGE:prog:%d/%d" % (done, nb))
     except BrokenPipeError:
-        err = "ffmpeg encodeur alpha interrompu"
+        err = t("encoder_stopped")
     finally:
         try:
             dec.stdout.close()

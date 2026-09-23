@@ -111,10 +111,22 @@ def detect_language_whisper(audio_path, model="whisper-turbo", model_dir=None):
     return {"lang": getattr(info, "language", None), "prob": float(getattr(info, "language_probability", 0.0) or 0.0)}
 
 
-def transcribe_whisper(audio_path, model="whisper-turbo", lang="fr", verbatim=False, model_dir=None):
+def _verbatim_prompt(m, audio_path, lang):
+    """Hesitation prompt in the spoken language. Without a language, detect it first: a prompt in
+    another language would push Whisper towards that language."""
+    if not lang:
+        try:
+            lang = m.detect_language(audio_path)[0]
+        except Exception:  # noqa: BLE001 — older faster-whisper without detect_language
+            lang = None
+    return _VERBATIM_PROMPTS.get(lang or "en", _VERBATIM_PROMPTS["en"])
+
+
+def transcribe_whisper(audio_path, model="whisper-turbo", lang=None, verbatim=False, model_dir=None):
+    """`lang` = ISO 639-1 code to transcribe in, or None to let Whisper detect it."""
     m = _load(model, model_dir)
     _emit("STAGE:infer")
-    prompt = _VERBATIM_PROMPTS.get(lang or "fr", _VERBATIM_PROMPTS["en"]) if verbatim else None
+    prompt = _verbatim_prompt(m, audio_path, lang) if verbatim else None
     segments, info = m.transcribe(
         audio_path,
         language=(lang or None),

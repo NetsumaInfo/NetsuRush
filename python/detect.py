@@ -32,6 +32,7 @@ import time
 
 import nrident
 from ffbin import ffmpeg_bin, ffprobe_bin
+from nri18n import t
 
 
 _last_pct = -1
@@ -519,8 +520,8 @@ def _detect_transnet(path, threshold):
     chunks = _prefetch(_iter_frame_chunks(path, on_frames=seen))
     arr = _transnet_predict(model, _transnet_windows(chunks), dev, nb)
     nframes = counted[0]
-    if not nframes:  # fichier illisible : sans ça la sortie contient un plan fantôme [0, -1]
-        raise ValueError("aucune frame décodée")
+    if not nframes:  # unreadable file: without this the output holds a ghost shot [0, -1]
+        raise ValueError(t("no_decoded_frame"))
     arr = arr[:nframes]
     _progress(96)
     fps = float(model.get_video_fps(path))
@@ -719,13 +720,8 @@ def cmd_detect(path, threshold, model, options=None, concurrency=1):
             normalized, options_key = _canonical_options(model, threshold, options)
             fps, nframes, scenes = _detect_transnet(path, threshold)
     except ImportError as exc:
-        hints = {
-            "omnishotcut": "OmniShotCut absent ou incomplet : ouvrez Paramètres › Modèles et relancez l'installation",
-            "autoshot": "AutoShot absent ou incomplet : installez einops et le checkpoint officiel",
-            "transnetv2": "TransNetV2 absent: pip install transnetv2-pytorch",
-        }
-        hint = hints.get(model, hints["transnetv2"])
-        return {"scenes": [], "model": model, "error": "%s (%s)" % (hint, exc)}
+        keys = {"omnishotcut": "omnishotcut_missing", "autoshot": "autoshot_missing"}
+        return {"scenes": [], "model": model, "error": t(keys.get(model, "transnetv2_missing"), error=exc)}
     except Exception as exc:  # noqa: BLE001
         return {"scenes": [], "model": model, "error": str(exc)}
 

@@ -53,7 +53,7 @@ MODEL_DILATE = 1
 
 
 def _log(message):
-    """Journal développeur relayé par logbus vers Paramètres › Système › Console."""
+    """Developer log, relayed by logbus to Settings › System › Console."""
     print("minimax: %s" % message, file=sys.stderr, flush=True)
 
 
@@ -63,8 +63,8 @@ def _require_vendor():
         from transformer_minimax_remover import Transformer3DModel  # type: ignore  # noqa: F401
     except Exception as exc:  # noqa: BLE001
         raise RuntimeError(
-            "code MiniMax absent : dépose pipeline_minimax_remover.py et transformer_minimax_remover.py "
-            "(dépôt zibojia/MiniMax-Remover) dans python/nrroto/vendor/ — %s" % exc)
+            "MiniMax code missing: put pipeline_minimax_remover.py and transformer_minimax_remover.py "
+            "(zibojia/MiniMax-Remover repository) in python/nrroto/vendor/ (%s)" % exc)
 
 
 def _load_pipe(weights_dir):
@@ -207,7 +207,7 @@ def _diffuse(pipe, images, masks, steps, ladder, generator=None):
         except Exception as exc:  # noqa: BLE001 — seul le manque de VRAM est rattrapable
             if not _is_out_of_memory(exc) or rank + 1 >= len(ladder):
                 raise
-            _log("mémoire insuffisante à %d px, repli sur %d px" % (maxdim, ladder[rank + 1]))
+            _log("out of memory at %d px, falling back to %d px" % (maxdim, ladder[rank + 1]))
             empty_torch_cache(torch, torch_backend(torch))
             continue
         return _from_model_space(result, used, roi_size)
@@ -332,7 +332,7 @@ def run_minimax_remover(frames_dir, mattes_root, weights_dir, out_path, fps, pro
         try:
             pipe.enable_model_cpu_offload()
         except Exception:  # noqa: BLE001
-            _log("déport CPU indisponible sur ce pipeline")
+            _log("CPU offload is not available on this pipeline")
     # Le découpage du VAE est le levier mémoire principal (son encode/decode plein cadre est le
     # plus gros pic), mais le tuilage laisse des raccords : à couper quand la VRAM suffit.
     methods = ("enable_tiling", "enable_slicing") if vae_tiling else ("enable_slicing",)

@@ -121,11 +121,11 @@ def cmd_interpolate(args):
     try:
         from .runner import get_rife
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("interpolation_unavailable", detail=" (rife) : %s" % exc)}
+        return {"ok": False, "error": t("interpolation_unavailable", error="rife: %s" % exc)}
 
     w, h, fps_str, fps_in, nb = probe(args.input)
     if not w or not h:
-        return {"ok": False, "error": t("video_dimensions", detail=" : " + str(args.input))}
+        return {"ok": False, "error": t("video_dimensions", path=args.input)}
 
     factor = max(2, int(getattr(args, "factor", 2)))
 
@@ -153,7 +153,7 @@ def cmd_interpolate(args):
     try:
         rife = get_rife(args.model)
     except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "error": t("load_rife_failed", detail=" (%s) : %s" % (args.model, exc))}
+        return {"ok": False, "error": t("load_rife_failed", error="%s: %s" % (args.model, exc))}
     log("STAGE:infer")
 
     import numpy as np

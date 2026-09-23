@@ -7,7 +7,7 @@ amont ; on transcrit ce WAV mais on indexe le cache sur la VIDÉO SOURCE (son mt
 qu'il survive à la régénération du WAV temporaire.
 
 Commandes :
-  python transcribe.py process <source> <audio_wav> [model] [lang] [verbatim]  -> transcript JSON
+  python transcribe.py process <source> <audio_wav> [model] [lang|auto] [verbatim]  -> transcript JSON
   python transcribe.py serve                                          -> daemon JSON ligne-à-ligne
 
 Sortie stdout = 1 ligne JSON :
@@ -21,14 +21,14 @@ import sys
 from nri18n import t
 
 
-def _process(source, audio, model="whisper-turbo", lang="fr", verbatim=False, model_dir=None):
+def _process(source, audio, model="whisper-turbo", lang=None, verbatim=False, model_dir=None):
     from nrvoice import db
-    from nrvoice.asr import transcribe
+    from nrvoice.asr import normalize_lang, transcribe
 
     model = model or "whisper-turbo"
-    lang = lang or "fr"
+    lang = normalize_lang(lang)  # None = the engine detects the spoken language
     verbatim = bool(verbatim)
-    # verbatim dans la clé de cache SEULEMENT si actif → les caches existants (non-verbatim) survivent.
+    # verbatim enters the cache key ONLY when on, so existing (non-verbatim) caches survive.
     key = {"lang": lang, "verbatim": True} if verbatim else {"lang": lang}
     phash = db.params_hash(key)
     cached = db.cache_get("transcript", source, phash, model)
@@ -38,6 +38,8 @@ def _process(source, audio, model="whisper-turbo", lang="fr", verbatim=False, mo
         return cached
 
     res = transcribe(audio, model, lang, verbatim=verbatim, model_dir=model_dir)
+    if res.get("error"):
+        return {"ok": False, "words": [], "error": res["error"]}
     out = {
         "ok": True,
         "words": res.get("words", []),
@@ -50,12 +52,14 @@ def _process(source, audio, model="whisper-turbo", lang="fr", verbatim=False, mo
     }
     try:
         db.cache_store("transcript", source, phash, model, out)
-    except Exception:  # noqa: BLE001 — cache best-effort, ne casse pas la transcription
+    except Exception:  # noqa: BLE001 — best-effort cache, never breaks the transcription
         pass
+    if res.get("note"):  # in the interface language of this run, so kept out of the cache
+        out["note"] = res["note"]
     return out
 
 
-def cmd_process(source, audio, model="whisper-turbo", lang="fr", verbatim=False, model_dir=None):
+def cmd_process(source, audio, model="whisper-turbo", lang=None, verbatim=False, model_dir=None):
     try:
         return _process(source, audio, model, lang, verbatim, model_dir)
     except ImportError as exc:
@@ -102,7 +106,7 @@ def serve():
                                  req.get("model", "whisper-turbo"), req.get("model_dir") or None)
             else:
                 res = cmd_process(req.get("source", ""), req.get("audio", ""),
-                                  req.get("model", "whisper-turbo"), req.get("lang", "fr"),
+                                  req.get("model", "whisper-turbo"), req.get("lang"),
                                   req.get("verbatim", False), req.get("model_dir") or None)
         real_out.write(json.dumps({"id": rid, "result": res}) + "\n")
         real_out.flush()
@@ -124,7 +128,7 @@ def main():
     source = sys.argv[2] if len(sys.argv) > 2 else ""
     audio = sys.argv[3] if len(sys.argv) > 3 else source
     model = sys.argv[4] if len(sys.argv) > 4 else "whisper-turbo"
-    lang = sys.argv[5] if len(sys.argv) > 5 else "fr"
+    lang = sys.argv[5] if len(sys.argv) > 5 else None
     verbatim = (sys.argv[6] if len(sys.argv) > 6 else "") in ("1", "true", "verbatim")
     with contextlib.redirect_stdout(sys.stderr):
         res = cmd_process(source, audio, model, lang, verbatim)

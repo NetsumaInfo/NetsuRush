@@ -41,7 +41,7 @@ def _dispatch(cmd, args):
         return cmd_removebg(args)
     if cmd == "frame":
         return cmd_frame(args)
-    return {"ok": False, "error": t("unknown_command", detail=": %s" % cmd)}
+    return {"ok": False, "error": t("unknown_command", cmd=cmd)}
 
 
 def serve():
@@ -65,7 +65,7 @@ def serve():
             elif cmd == "frame":
                 res = cmd_frame(Req(req, FRAME_DEFAULTS))
             else:
-                res = {"ok": False, "error": t("unknown_command", detail=": %s" % cmd)}
+                res = {"ok": False, "error": t("unknown_command", cmd=cmd)}
         except Exception as exc:  # noqa: BLE001
             res = {"ok": False, "error": str(exc)}
         if rid is not None:

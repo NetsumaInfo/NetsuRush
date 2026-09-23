@@ -78,7 +78,7 @@ class NtireUpsampler(TorchUpsampler):
 
         entry = NTIRE_ARCHS.get(model_id)
         if not entry:
-            raise RuntimeError("modèle NTIRE inconnu : %s" % model_id)
+            raise RuntimeError("unknown NTIRE model: %s" % model_id)
         class_name, args, kwargs = entry
         try:
             arch_module = _load_arch(code_path, model_id)
@@ -90,4 +90,4 @@ class NtireUpsampler(TorchUpsampler):
         # plausibles mais fausses — mieux vaut échouer en nommant le modèle.
         net.load_state_dict(_state_dict(torch.load(model_path, map_location="cpu")), strict=True)
         log("[upscale] NTIRE ESR %s (%s)" % (model_id, class_name))
-        self._setup(torch, net, NTIRE_SCALE, fp32, tile, tile_pad, pre_pad, "modèle %s" % class_name)
+        self._setup(torch, net, NTIRE_SCALE, fp32, tile, tile_pad, pre_pad, "model %s" % class_name)
