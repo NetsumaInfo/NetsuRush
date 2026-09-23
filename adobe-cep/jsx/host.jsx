@@ -1,8 +1,8 @@
 /*
- * host.jsx — ExtendScript entry point (loaded through the manifest's ScriptPath).
+ * host.jsx - ExtendScript entry point (loaded through the manifest's ScriptPath).
  * Dispatches per application: Premiere Pro (host-ppro.jsx) / After Effects (host-aeft.jsx).
  * Output contract: NR_getSnapshot(text) -> AdobeSnapshot JSON string
- *   { app, appVersion, project, at, rushes:[…], sequences:[{ name,fps,w,h,tracks:[{kind,index,clips:[…]}] }] }
+ *   { app, appVersion, project, at, rushes:[...], sequences:[{ name,fps,w,h,tracks:[{kind,index,clips:[...]}] }] }
  * Times ALWAYS in seconds (Premiere ticks are converted here).
  * Never a modal dialog: every error comes back as {ok:false,errorCode?,error}. `error` is English
  * developer text; the panel shows the user the text of `errorCode` in the interface language.
@@ -11,7 +11,7 @@
  */
 /* global $, File, BridgeTalk, NRJSON, NR_ppro_snapshot, NR_aeft_snapshot, NR_ppro_place, NR_aeft_place, NR_aeft_runScript, NR_ppro_exportXml */
 
-// Attempt to load the neighbours through $.fileName (often empty under CEP → try/catch).
+// Attempt to load the neighbours through $.fileName (often empty under CEP -> try/catch).
 // The reliable loading is done by the panel (bootHost, known extension path).
 (function () {
   try {
@@ -36,7 +36,7 @@ function NR_getSnapshot(text) {
 }
 
 /* Builds a sequence/comp from the cut shots. `payload` = a JS object already written as a literal
- * (the panel embeds the JSON in the eval'd code → no JSON.parse in ES3).
+ * (the panel embeds the JSON in the eval'd code -> no JSON.parse in ES3).
  * payload = { name, input, segments:[{in,out,inFrame,outFrame}], fps?, mode?, whole? }. */
 function NR_buildTimeline(payload) {
   try {
@@ -92,7 +92,7 @@ function NR_exportXml(payload) {
       return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "XML export is not supported by After Effects" });
     }
     // This dispatcher is the manifest's `ScriptPath`: Adobe only loads it when the application
-    // starts, while its neighbours are reloaded by the panel. The two can therefore diverge — it
+    // starts, while its neighbours are reloaded by the panel. The two can therefore diverge - it
     // is NAMED here, instead of letting through a ReferenceError that nothing explains.
     if (typeof NR_ppro_exportXml !== "function") {
       return NRJSON.stringify({ ok: false, errorCode: "HOST_STALE", error: "NR_ppro_exportXml missing: stale host scripts" });
@@ -143,7 +143,7 @@ function NR_import(payload) {
   }
 }
 
-/* NetsuBoost: cache purge, project hygiene, settings, proxies. payload = { op, … } — each host only
+/* NetsuBoost: cache purge, project hygiene, settings, proxies. payload = { op, ... } - each host only
  * implements the operations that make sense for it and returns UNSUPPORTED_OP for the others. */
 function NR_boost(payload) {
   try {

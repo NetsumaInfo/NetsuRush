@@ -35,7 +35,9 @@
     var c = cep();
     if (!c) return "";
     try {
-      var p = decodeURI(c.getSystemPath(type));
+      var raw = c.getSystemPath(type), p;
+      // A literal `%` in the path makes decodeURI throw: keep the raw path then.
+      try { p = decodeURI(raw); } catch (eUri) { p = String(raw || ""); }
       return p.replace(/^file:\/{2,3}/, "").replace(/^\/([A-Za-z]:)/, "$1");
     } catch (e) { return ""; }
   };

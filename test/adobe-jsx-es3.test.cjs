@@ -120,3 +120,17 @@ test('le détecteur voit réellement les cas qu\'il prétend attraper', () => {
   assert.equal(good.some((line) => /(^|[{,(]\s*)in\s*:/.test(line.text)), false);
   assert.equal(good.some((line) => /=>/.test(line.text)), false);
 });
+
+// The host scripts are loaded by `$.evalFile` without a BOM, so ExtendScript decodes them with the
+// system code page. Under Japanese Windows (CP932) one UTF-8 byte sequence swallows the next
+// character: `[xX` + U+00D7 + `]` lost its `]` and the whole Premiere panel stopped loading. Non-ASCII
+// text is written as \uXXXX escapes instead.
+test('host scripts are pure ASCII', () => {
+  const offenders = [];
+  for (const file of jsxFiles()) {
+    fs.readFileSync(path.join(JSX_DIR, file), 'utf8').split(/\r?\n/).forEach((line, index) => {
+      if (/[^\x00-\x7f]/.test(line)) offenders.push(`${file}:${index + 1}`);
+    });
+  }
+  assert.deepStrictEqual(offenders, []);
+});

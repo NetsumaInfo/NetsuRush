@@ -1,6 +1,6 @@
 /*
- * host-aeft.jsx — lecture projet/compositions After Effects (2020+, ExtendScript).
- * AE travaille déjà en secondes : inPoint/outPoint = bornes visibles dans la comp,
+ * host-aeft.jsx - lecture projet/compositions After Effects (2020+, ExtendScript).
+ * AE travaille deja en secondes : inPoint/outPoint = bornes visibles dans la comp,
  * startTime = position de la source sur la timeline -> trim source = inPoint - startTime.
  */
 /* global $, app, File, ImportOptions, CompItem, FootageItem, NRJSON, GpuAccelType, PurgeTarget */
@@ -10,11 +10,11 @@ function nrAeftFrame(sec, fps) {
   return Math.round(Number(sec) * fps);
 }
 
-/* Temps SOURCE d'un calque à un instant de COMP. `inPoint - startTime` ne suffit PAS : AE trime en
- * temps de comp, donc il faut défaire l'étirement, et passer par la courbe quand le remappage est
- * actif. Sans ça tout calque retimé ressort avec des bornes fausses — y compris les comps que
- * NetsuRush écrit lui-même en insertion « fit » (NR_aeft_build pose stretch = scale × 100 et
- * startTime = compIn − srcIn × scale). */
+/* Temps SOURCE d'un calque a un instant de COMP. `inPoint - startTime` ne suffit PAS : AE trime en
+ * temps de comp, donc il faut defaire l'etirement, et passer par la courbe quand le remappage est
+ * actif. Sans ca tout calque retime ressort avec des bornes fausses - y compris les comps que
+ * NetsuRush ecrit lui-meme en insertion " fit " (NR_aeft_build pose stretch = scale x 100 et
+ * startTime = compIn - srcIn x scale). */
 function nrAeftSourceTime(ly, compTime) {
   try {
     if (ly.timeRemapEnabled && ly.timeRemap) return Number(ly.timeRemap.valueAtTime(compTime, false));
@@ -24,10 +24,10 @@ function nrAeftSourceTime(ly, compTime) {
   return (Number(compTime) - Number(ly.startTime)) * (100 / stretch);
 }
 
-/* Descend jusqu'au MÉTRAGE. Un calque dont la source est une précomposition n'a pas de fichier :
+/* Descend jusqu'au METRAGE. Un calque dont la source est une precomposition n'a pas de fichier :
  * sans cette descente il ressortait avec path null et disparaissait de Timeline Live. Le temps
- * source du calque EST le temps interne de la précomp, donc on reporte les bornes à chaque niveau.
- * Profondeur bornée : garde-fou contre une comp qui se contient (AE l'autorise via expressions). */
+ * source du calque EST le temps interne de la precomp, donc on reporte les bornes a chaque niveau.
+ * Profondeur bornee : garde-fou contre une comp qui se contient (AE l'autorise via expressions). */
 function nrAeftResolveFootage(ly, srcIn, srcOut, depth) {
   var source = null;
   try { source = ly.source; } catch (e0) { return null; }
@@ -45,10 +45,10 @@ function nrAeftResolveFootage(ly, srcIn, srcOut, depth) {
   if (depth <= 0) return null;
   var numLayers = 0;
   try { numLayers = Number(source.numLayers) || 0; } catch (e4) {}
-  if (!numLayers) return null; // solide, calque de forme/texte : rien à prévisualiser
+  if (!numLayers) return null; // solide, calque de forme/texte : rien a previsualiser
 
-  // Un plan précomposé = le calque actif à cet instant DANS la précomp. Si la précomp contient
-  // elle-même un montage, seul le plan couvrant `srcIn` est remonté (voir limite documentée).
+  // Un plan precompose = le calque actif a cet instant DANS la precomp. Si la precomp contient
+  // elle-meme un montage, seul le plan couvrant `srcIn` est remonte (voir limite documentee).
   var inner = nrAeftLayerAt(source, srcIn);
   if (!inner) return null;
   return nrAeftResolveFootage(inner, nrAeftSourceTime(inner, srcIn), nrAeftSourceTime(inner, srcOut), depth - 1);
@@ -62,7 +62,7 @@ function nrAeftLayerClip(ly, comp) {
     srcIn = nrAeftSourceTime(ly, ly.inPoint);
     srcOut = nrAeftSourceTime(ly, ly.outPoint);
   } catch (e0) {}
-  // Calque inversé (stretch négatif, remappage décroissant) : les bornes sortent à l'envers.
+  // Calque inverse (stretch negatif, remappage decroissant) : les bornes sortent a l'envers.
   if (srcIn !== null && srcOut !== null && srcOut < srcIn) { var swap = srcIn; srcIn = srcOut; srcOut = swap; }
 
   var resolved = null;
@@ -71,7 +71,7 @@ function nrAeftLayerClip(ly, comp) {
   var path = resolved ? resolved.path : null;
   if (resolved) { srcIn = resolved.srcIn; srcOut = resolved.srcOut; }
 
-  // fps de la SOURCE (le métrage peut tourner à une autre cadence que la comp) ; repli sur la comp.
+  // fps de la SOURCE (le metrage peut tourner a une autre cadence que la comp) ; repli sur la comp.
   var srcFps = resolved ? resolved.fps : null;
   if (!srcFps) { try { srcFps = comp ? Number(comp.frameRate) : null; } catch (e2) {} }
   var outFrame = nrAeftFrame(srcOut, srcFps);
@@ -84,20 +84,20 @@ function nrAeftLayerClip(ly, comp) {
     srcOut: srcOut,
     srcFps: srcFps,
     srcInFrame: nrAeftFrame(srcIn, srcFps),
-    // Bornes source INCLUSIVES côté NetsuRush ; l'outPoint AE est la borne de sortie (exclusive).
+    // Bornes source INCLUSIVES cote NetsuRush ; l'outPoint AE est la borne de sortie (exclusive).
     srcOutFrame: outFrame === null ? null : outFrame - 1,
     srcFrames: resolved ? resolved.frames : null,
     tlStartFrame: nrAeftFrame(ly.inPoint, comp ? Number(comp.frameRate) : srcFps),
     // Borne de fin en frames : un transfert de timeline a besoin de l'OCCUPATION exacte du calque,
-    // que les secondes ne rendent pas sur cadence non entière.
+    // que les secondes ne rendent pas sur cadence non entiere.
     tlEndFrame: nrAeftFrame(ly.outPoint, comp ? Number(comp.frameRate) : srcFps)
   };
 }
 
-/* Retrouve un footage déjà importé (par chemin), sinon l'importe. Doit rester le MIROIR de
- * `core/ae/jsx.js` : les deux écrivent le même ExtendScript, une correction ici en exige une
- * là-bas. `missing` (optionnel) collecte les chemins absents du disque. AE ouvre
- * une boîte MODALE sur un import impossible, ce qui bloque ExtendScript et rend le panneau muet
+/* Retrouve un footage deja importe (par chemin), sinon l'importe. Doit rester le MIROIR de
+ * `core/ae/jsx.js` : les deux ecrivent le meme ExtendScript, une correction ici en exige une
+ * la-bas. `missing` (optionnel) collecte les chemins absents du disque. AE ouvre
+ * une boite MODALE sur un import impossible, ce qui bloque ExtendScript et rend le panneau muet
  * jusqu'au timeout du job. */
 function NR_ae_import(p, missing) {
   var file, want;
@@ -118,7 +118,7 @@ function NR_ae_import(p, missing) {
   } catch (e3) { return null; }
 }
 
-/* Composition portant ce nom (destination « timeline existante » du profil d'export). */
+/* Composition portant ce nom (destination " timeline existante " du profil d'export). */
 function nrAeftCompByName(name) {
   if (!name) return null;
   for (var i = 1; i <= app.project.numItems; i++) {
@@ -160,7 +160,7 @@ function nrAeftSnapDuration(comp, duration) {
   return Math.max(frameDuration, Math.round(Number(duration) / frameDuration) * frameDuration);
 }
 
-/* Montage After Effects : les modes sont exprimés avec les primitives natives de calques
+/* Montage After Effects : les modes sont exprimes avec les primitives natives de calques
  * (startTime/inPoint/outPoint/stretch), pas avec des noms de commandes NLE inexistantes dans AE. */
 function NR_aeft_build(p) {
   if (!p || !p.input) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "source path missing" });
@@ -176,8 +176,8 @@ function NR_aeft_build(p) {
     }
     var fps = f.frameRate || p.fps || 25;
 
-    // Les frames source sont prioritaires : elles évitent tout arrondi des secondes du détecteur.
-    // Un segment peut porter son propre `path` (Timeline Live enchaîne des sources DIFFÉRENTES) ;
+    // Les frames source sont prioritaires : elles evitent tout arrondi des secondes du detecteur.
+    // Un segment peut porter son propre `path` (Timeline Live enchaine des sources DIFFERENTES) ;
     // sans lui on reste sur la source unique `p.input` (Derush, Recherche, Voix).
     var footageCache = {};
     footageCache[p.input] = f;
@@ -208,7 +208,7 @@ function NR_aeft_build(p) {
 
     var insertion = p.insertion || "end";
     var comp = null, created = true;
-    // Comp VISÉE par son nom (destination du profil d'export), sinon celle ouverte dans le viewer.
+    // Comp VISEE par son nom (destination du profil d'export), sinon celle ouverte dans le viewer.
     if (p.mode === "append") {
       comp = nrAeftCompByName(p.timelineName);
       if (!comp && app.project.activeItem instanceof CompItem) comp = app.project.activeItem;
@@ -248,7 +248,7 @@ function NR_aeft_build(p) {
         var layerOut = nrAeftSnapTime(comp, tlPos + (elapsed + dur) * scale);
         if (layerOut <= layerIn) layerOut = layerIn + comp.frameDuration;
         lyr.startTime = layerIn - (r.inSec * scale);
-        lyr.inPoint = layerIn;              // inPoint avant outPoint (le setter AE décale sinon)
+        lyr.inPoint = layerIn;              // inPoint avant outPoint (le setter AE decale sinon)
         lyr.outPoint = layerOut;
         elapsed += dur;
         count++;
@@ -271,8 +271,8 @@ function NR_aeft_build(p) {
   }
 }
 
-/* Bornes source d'un plan du document d'échange, en secondes. Frames prioritaires (pas d'arrondi
- * des secondes) ; la borne de sortie est INCLUSIVE côté NetsuRush, exclusive côté AE. */
+/* Bornes source d'un plan du document d'echange, en secondes. Frames prioritaires (pas d'arrondi
+ * des secondes) ; la borne de sortie est INCLUSIVE cote NetsuRush, exclusive cote AE. */
 function nrAeftClipRange(c, fps) {
   var hasFrames = fps > 0 && typeof c.inFrame === "number" && typeof c.outFrame === "number";
   var inSec = hasFrames ? c.inFrame / fps : ((typeof c["in"] === "number") ? c["in"] : null);
@@ -282,11 +282,11 @@ function nrAeftClipRange(c, fps) {
 }
 
 /* ---------------------------------------------------------------------------
- * Transform et images clés d'un plan du document d'échange → calque After Effects.
+ * Transform et images cles d'un plan du document d'echange -> calque After Effects.
  * Conventions du document : `position` en pixels de TIMELINE depuis le centre (Y vers le bas),
  * `anchor` en pixels SOURCE depuis le coin haut-gauche, `scale` en facteur (1 = 100 %),
- * `rotation` en degrés, `opacity` de 0 à 100. AE compte la position depuis le coin haut-gauche de
- * la comp et l'ancrage en pixels source : seules ces deux-là demandent une conversion.
+ * `rotation` en degres, `opacity` de 0 a 100. AE compte la position depuis le coin haut-gauche de
+ * la comp et l'ancrage en pixels source : seules ces deux-la demandent une conversion.
  * ------------------------------------------------------------------------ */
 
 function nrAeftPoint(value, fallbackX, fallbackY) {
@@ -314,16 +314,16 @@ function nrAeftValuesClose(expected, actual) {
   return Math.abs(Number(expected) - Number(actual)) <= NR_AEFT_EPSILON;
 }
 
-/* Relecture de la valeur RÉELLE du calque : AE clampe et réinterprète certaines propriétés
- * (l'opacité au-delà de 100, l'échelle d'un calque verrouillé). Sans ce contrôle, on annoncerait
- * une pose réussie que le rendu contredit. */
+/* Relecture de la valeur REELLE du calque : AE clampe et reinterprete certaines proprietes
+ * (l'opacite au-dela de 100, l'echelle d'un calque verrouille). Sans ce controle, on annoncerait
+ * une pose reussie que le rendu contredit. */
 function nrAeftVerify(prop, expected, time) {
   try { return nrAeftValuesClose(expected, prop.valueAtTime(time, false)); } catch (e) { return false; }
 }
 
-/* Une propriété du document → une propriété AE. `convert` traduit la valeur du document dans
- * l'espace AE ; `timeOf` place une image clé du plan sur la ligne de temps de la comp.
- * Les images clés sont posées AVANT de fixer les interpolations : AE renumérote à chaque ajout. */
+/* Une propriete du document -> une propriete AE. `convert` traduit la valeur du document dans
+ * l'espace AE ; `timeOf` place une image cle du plan sur la ligne de temps de la comp.
+ * Les images cles sont posees AVANT de fixer les interpolations : AE renumerote a chaque ajout. */
 function nrAeftApplyProperty(prop, property, convert, timeOf) {
   var out = { applied: false, animated: false, verified: false };
   if (!prop || !property) return out;
@@ -376,10 +376,10 @@ function nrAeftReport(target, clipIndex, property, result) {
   });
 }
 
-/* Facteur d'ajustement source → comp, appliqué SELON L'HÔTE D'ORIGINE. Resolve AJUSTE la source à
+/* Facteur d'ajustement source -> comp, applique SELON L'HOTE D'ORIGINE. Resolve AJUSTE la source a
  * l'image de la timeline avant d'appliquer son zoom (Zoom 1,0 = plein cadre) ; Premiere et After
- * Effects posent la source à sa taille NATIVE (Échelle 100 % = pixels d'origine). Appliquer ce
- * facteur au mauvais hôte redimensionne tout le montage — un rush 4K arriverait quatre fois trop
+ * Effects posent la source a sa taille NATIVE (Echelle 100 % = pixels d'origine). Appliquer ce
+ * facteur au mauvais hote redimensionne tout le montage - un rush 4K arriverait quatre fois trop
  * grand dans une comp 1080p, ou quatre fois trop petit. */
 function nrAeftNativeScaleHost(clip) {
   var host = clip.identity && clip.identity.sourceHost;
@@ -409,7 +409,7 @@ function nrAeftApplyTransform(comp, lyr, footage, clip, clipIndex, layerIn, comp
     var point = nrAeftPoint(value, 0, 0);
     return [comp.width / 2 + point.x, comp.height / 2 + point.y];
   };
-  // AE n'a pas de miroir : une échelle NÉGATIVE est le miroir, c'est la même chose au rendu.
+  // AE n'a pas de miroir : une echelle NEGATIVE est le miroir, c'est la meme chose au rendu.
   var scale = function (value) {
     var point = nrAeftPoint(value, 1, 1);
     return [fit * point.x * 100 * flipX, fit * point.y * 100 * flipY];
@@ -431,8 +431,8 @@ function nrAeftApplyTransform(comp, lyr, footage, clip, clipIndex, layerIn, comp
     if (!pairs[i][2]) continue;
     nrAeftReport(report, clipIndex, pairs[i][0], nrAeftApplyProperty(pairs[i][1], pairs[i][2], pairs[i][3], timeOf));
   }
-  // Le miroir est CUIT dans le signe de l'échelle ci-dessus. Sans échelle déclarée, il faut quand
-  // même la poser, sinon un plan simplement retourné arriverait à l'endroit.
+  // Le miroir est CUIT dans le signe de l'echelle ci-dessus. Sans echelle declaree, il faut quand
+  // meme la poser, sinon un plan simplement retourne arriverait a l'endroit.
   if (flipX < 0 || flipY < 0) {
     if (transform.scale) report.push({ clip: clipIndex, property: "video.flip", status: "applied", readback: true });
     else nrAeftReport(report, clipIndex, "video.flip",
@@ -467,10 +467,10 @@ function nrAeftApplyAudio(lyr, clip, clipIndex, layerIn, compFps, report) {
   }
 }
 
-/* Vitesse et inversion : une remise en temps (time remap) LINÉAIRE entre les bornes source du plan
- * et son occupation sur la timeline. Elle couvre d'un coup le ralenti, l'accéléré, la marche
- * arrière (valeurs décroissantes) et l'arrêt sur image (valeurs égales) — c'est le seul mécanisme
- * d'AE qui les exprime tous. Renvoie true quand le calque a été calé par ce chemin.  */
+/* Vitesse et inversion : une remise en temps (time remap) LINEAIRE entre les bornes source du plan
+ * et son occupation sur la timeline. Elle couvre d'un coup le ralenti, l'accelere, la marche
+ * arriere (valeurs decroissantes) et l'arret sur image (valeurs egales) - c'est le seul mecanisme
+ * d'AE qui les exprime tous. Renvoie true quand le calque a ete cale par ce chemin.  */
 function nrAeftApplyTiming(lyr, clip, range, layerIn, layerOut, report, clipIndex) {
   var timing = clip.timing;
   if (!timing) return false;
@@ -486,7 +486,7 @@ function nrAeftApplyTiming(lyr, clip, range, layerIn, layerOut, report, clipInde
     var remap = lyr.property("ADBE Time Remapping");
     remap.setValueAtTime(layerIn, from);
     remap.setValueAtTime(layerOut, to);
-    // setValueAtTime pose aussi les clés d'origine du time remap : hors de la plage, elles
+    // setValueAtTime pose aussi les cles d'origine du time remap : hors de la plage, elles
     // rejoueraient le plan entier de part et d'autre du montage.
     for (var k = remap.numKeys; k >= 1; k--) {
       var time = remap.keyTime(k);
@@ -508,7 +508,7 @@ function nrAeftApplyTiming(lyr, clip, range, layerIn, layerOut, report, clipInde
 }
 
 /* Constat de pose relu sur le calque : AE recale silencieusement inPoint/outPoint quand ils
- * sortent de la durée de la comp. */
+ * sortent de la duree de la comp. */
 function nrAeftPlacementReport(report, clipIndex, lyr, layerIn, layerOut) {
   var placed = false;
   try { placed = Math.abs(lyr.inPoint - layerIn) < 1e-4 && Math.abs(lyr.outPoint - layerOut) < 1e-4; } catch (e) { placed = false; }
@@ -521,9 +521,9 @@ function nrAeftPlacementReport(report, clipIndex, lyr, layerIn, layerOut) {
   }
 }
 
-/* Ordre d'AJOUT des calques. comp.layers.add() insère en tête : le DERNIER ajouté finit en haut.
- * On pose donc l'audio d'abord, puis la vidéo par piste croissante — la piste la plus haute de la
- * timeline source se retrouve au sommet de la pile, comme à la source. */
+/* Ordre d'AJOUT des calques. comp.layers.add() insere en tete : le DERNIER ajoute finit en haut.
+ * On pose donc l'audio d'abord, puis la video par piste croissante - la piste la plus haute de la
+ * timeline source se retrouve au sommet de la pile, comme a la source. */
 function nrAeftSortClips(clips) {
   var rank = function (c) { return c.kind === "audio" ? 0 : 1; };
   return clips.slice(0).sort(function (a, b) {
@@ -533,12 +533,12 @@ function nrAeftSortClips(clips) {
   });
 }
 
-/* RECOPIE une timeline entière dans une composition : chaque plan garde sa position ABSOLUE.
- * NR_aeft_build enchaîne les plans bout-à-bout — bon pour une sélection de coupes, faux pour un
+/* RECOPIE une timeline entiere dans une composition : chaque plan garde sa position ABSOLUE.
+ * NR_aeft_build enchaine les plans bout-a-bout - bon pour une selection de coupes, faux pour un
  * transfert de montage, dont les trous font partie de l'information.
  * payload = { name, mode, timelineName, fps, width, height, duration, videoOnly,
  *             clips:[{ path, kind, track, name, fps, inFrame, outFrame, in, out, tlStart, tlEnd }] }
- * (tlStart/tlEnd en secondes depuis le début du document). */
+ * (tlStart/tlEnd en secondes depuis le debut du document). */
 function NR_aeft_place(p) {
   if (!app.project) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
   var clips = (p && p.clips) || [];
@@ -567,10 +567,10 @@ function NR_aeft_place(p) {
         Number(p.width) || 1920, Number(p.height) || 1080, 1, duration, compFps);
     }
 
-    // Le document part de 0 : sur une comp déjà montée, on le décale après le contenu existant.
+    // Le document part de 0 : sur une comp deja montee, on le decale apres le contenu existant.
     var origin = created ? 0 : nrAeftContentEnd(comp);
     // L'ordre de POSE n'est pas celui du document (les calques s'empilent), mais le rapport de
-    // fidélité s'aligne sur les index du document : on les mémorise avant de trier.
+    // fidelite s'aligne sur les index du document : on les memorise avant de trier.
     for (var n = 0; n < clips.length; n++) clips[n].nrIndex = n;
     var ordered = nrAeftSortClips(clips);
     var placed = 0;
@@ -599,7 +599,7 @@ function NR_aeft_place(p) {
         else if (p.videoOnly) { try { lyr.audioEnabled = false; } catch (e1) {} }
         if (!nrAeftApplyTiming(lyr, c, range, layerIn, layerOut, reportItems, index)) {
           lyr.startTime = layerIn - range.inSec;
-          lyr.inPoint = layerIn;            // inPoint avant outPoint (le setter AE décale sinon)
+          lyr.inPoint = layerIn;            // inPoint avant outPoint (le setter AE decale sinon)
           lyr.outPoint = layerOut;
         }
         nrAeftPlacementReport(reportItems, index, lyr, layerIn, layerOut);
@@ -628,10 +628,10 @@ function NR_aeft_place(p) {
   }
 }
 
-/* Exécute dans l'After Effects OUVERT un script écrit par NetsuRush. L'export riche
- * (core/aeExport.js) produit déjà ce .jsx ; le lancer via « AfterFX.exe -r » suppose qu'AE tourne
- * DÉJÀ avec un projet prêt — sinon le script part avant le projet et l'import se perd. Passer par
- * le panneau supprime cette condition. Le script journalise lui-même ses erreurs dans son .log. */
+/* Execute dans l'After Effects OUVERT un script ecrit par NetsuRush. L'export riche
+ * (core/aeExport.js) produit deja ce .jsx ; le lancer via " AfterFX.exe -r " suppose qu'AE tourne
+ * DEJA avec un projet pret - sinon le script part avant le projet et l'import se perd. Passer par
+ * le panneau supprime cette condition. Le script journalise lui-meme ses erreurs dans son .log. */
 function NR_aeft_runScript(p) {
   var scriptPath = p && p.path;
   if (!scriptPath) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "script path missing" });
@@ -646,7 +646,7 @@ function NR_aeft_runScript(p) {
   return NRJSON.stringify({ ok: true, count: 1 });
 }
 
-/* Importe des fichiers dans le projet After Effects (footages, dédup par chemin via NR_ae_import). */
+/* Importe des fichiers dans le projet After Effects (footages, dedup par chemin via NR_ae_import). */
 function NR_aeft_import(p) {
   if (!app.project) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
   var paths = (p && p.paths) || [];
@@ -700,8 +700,8 @@ function NR_aeft_snapshot(text) {
     } catch (e2) {}
   }
 
-  // Comp OUVERTE dans le viewer = l'équivalent AE de la « timeline ouverte » : NetsuRush s'en sert
-  // pour marquer la destination par défaut du montage.
+  // Comp OUVERTE dans le viewer = l'equivalent AE de la " timeline ouverte " : NetsuRush s'en sert
+  // pour marquer la destination par defaut du montage.
   var activeSequence = null;
   try { if (proj.activeItem instanceof CompItem) activeSequence = proj.activeItem.name; } catch (e3) {}
 
@@ -709,7 +709,7 @@ function NR_aeft_snapshot(text) {
     ok: true,
     app: "aeft",
     appVersion: String(app.version),
-    project: proj.file ? proj.file.name : ((text && text.untitledProject) || "Untitled"),
+    project: proj.file ? proj.file.displayName : ((text && text.untitledProject) || "Untitled"),
     projectPath: proj.file ? proj.file.fsName : null,
     activeSequence: activeSequence,
     at: new Date().getTime(),
@@ -719,15 +719,15 @@ function NR_aeft_snapshot(text) {
 }
 
 /* ---------------------------------------------------------------------------
- * NetsuBoost — optimisation After Effects.
- * AE est le plus scriptable des deux hôtes : purge de cache, allocation mémoire, GPU et profondeur
- * sont des API publiques. Un seul point d'entrée, dispatché sur p.op.
+ * NetsuBoost - optimisation After Effects.
+ * AE est le plus scriptable des deux hotes : purge de cache, allocation memoire, GPU et profondeur
+ * sont des API publiques. Un seul point d'entree, dispatche sur p.op.
  * ------------------------------------------------------------------------ */
 
 var NR_AEFT_GPU_NAMES = ["CUDA", "METAL", "OPENCL", "SOFTWARE"];
 
 /* Les enums ExtendScript ne se stringifient pas en nom lisible : on compare aux membres de
-   GpuAccelType pour retrouver le libellé. */
+   GpuAccelType pour retrouver le libelle. */
 function nrAeftGpuName(value) {
   if (value === null || value === undefined) return null;
   try {
@@ -774,7 +774,7 @@ function nrAeftStats() {
     ok: true,
     app: "aeft",
     appVersion: String(app.version),
-    project: proj && proj.file ? proj.file.name : null,
+    project: proj && proj.file ? proj.file.displayName : null,
     projectPath: proj && proj.file ? proj.file.fsName : null,
     items: items,
     bitsPerChannel: bpc,
@@ -785,9 +785,9 @@ function nrAeftStats() {
 }
 
 /* Cible de purge. ALL_MEMORY_CACHES (AE 24.3+) est le seul vidage SILENCIEUX : ALL_CACHES ouvre la
-   boîte « Clear Disk Cache » quand il est appelé depuis un panneau. Sur une version antérieure, on
-   RETOMBE sur les trois caches mémoire nommés — et on le DIT dans la réponse, sinon l'utilisateur
-   croirait avoir vidé le cache disque. */
+   boite " Clear Disk Cache " quand il est appele depuis un panneau. Sur une version anterieure, on
+   RETOMBE sur les trois caches memoire nommes - et on le DIT dans la reponse, sinon l'utilisateur
+   croirait avoir vide le cache disque. */
 function nrAeftPurgeTargets(target) {
   if (typeof PurgeTarget === "undefined" || !PurgeTarget) return { targets: [], missing: true };
   if (target === "all") return { targets: [PurgeTarget.ALL_CACHES], dialog: true };
@@ -830,16 +830,16 @@ function nrAeftPurge(target) {
   };
 }
 
-/* Hygiène projet : un projet qui traîne des métrages inutilisés ou dupliqués coûte en RAM et en
-   temps d'ouverture. Les deux opérations sont annulables (undo group), jamais silencieuses. */
+/* Hygiene projet : un projet qui traine des metrages inutilises ou dupliques coute en RAM et en
+   temps d'ouverture. Les deux operations sont annulables (undo group), jamais silencieuses. */
 function nrAeftHygiene(mode, text) {
   var proj = app.project;
   if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
   if (mode !== "removeUnused" && mode !== "consolidate") {
     return { ok: false, errorCode: "UNSUPPORTED_OP", error: "unknown operation: " + String(mode) };
   }
-  // The undo group name shows in Edit ▸ Undo: it comes in the interface language.
-  app.beginUndoGroup((text && text.hygieneUndo) || "NetsuRush — project cleanup");
+  // The undo group name shows in Edit \u25B8 Undo: it comes in the interface language.
+  app.beginUndoGroup((text && text.hygieneUndo) || "NetsuRush \u2014 project cleanup");
   try {
     var removed = mode === "removeUnused" ? proj.removeUnusedFootage() : proj.consolidateFootage();
     app.endUndoGroup();
@@ -850,9 +850,9 @@ function nrAeftHygiene(mode, text) {
   }
 }
 
-/* Lecture des réglages. AE n'expose AUCUN accesseur pour les limites mémoire ni pour le
-   multi-frame rendering (seulement des setters) : ces lignes sont déclarées écriture seule côté
-   core plutôt que lues via des clés de préférences non documentées et version-dépendantes. */
+/* Lecture des reglages. AE n'expose AUCUN accesseur pour les limites memoire ni pour le
+   multi-frame rendering (seulement des setters) : ces lignes sont declarees ecriture seule cote
+   core plutot que lues via des cles de preferences non documentees et version-dependantes. */
 function nrAeftPrefsRead() {
   var proj = app.project;
   var bpc = null;
@@ -898,8 +898,8 @@ function nrAeftPrefsApply(entries) {
     }
   }
 
-  // setMemoryUsageLimits prend les DEUX pourcentages : un seul réglé, l'autre doit être fourni tel
-  // quel — sans getter, on refuse plutôt que d'écraser l'autre avec une valeur inventée.
+  // setMemoryUsageLimits prend les DEUX pourcentages : un seul regle, l'autre doit etre fourni tel
+  // quel - sans getter, on refuse plutot que d'ecraser l'autre avec une valeur inventee.
   if (memory.imageCachePct !== null || memory.maxMemPct !== null) {
     if (memory.imageCachePct === null || memory.maxMemPct === null) {
       skipped.push({ id: "memory", reason: "NEEDS_BOTH" });
@@ -914,8 +914,8 @@ function nrAeftPrefsApply(entries) {
     }
   }
 
-  // Le MFR posé par un script est remis à zéro à la fin de CE script (documenté par Adobe) : on
-  // l'applique quand même — utile pour un rendu piloté dans la foulée — mais on le signale.
+  // Le MFR pose par un script est remis a zero a la fin de CE script (documente par Adobe) : on
+  // l'applique quand meme - utile pour un rendu pilote dans la foulee - mais on le signale.
   if (mfr.enabled !== null || mfr.cpu !== null) {
     try {
       app.setMultiFrameRenderingConfig(mfr.enabled === null ? true : mfr.enabled, mfr.cpu === null ? 100 : mfr.cpu);
@@ -936,6 +936,6 @@ function NR_aeft_boost(p) {
   if (op === "hygiene") return NRJSON.stringify(nrAeftHygiene(p.mode, p.nrText));
   if (op === "prefsRead") return NRJSON.stringify(nrAeftPrefsRead());
   if (op === "prefsApply") return NRJSON.stringify(nrAeftPrefsApply(p.entries));
-  // Les proxies et les fichiers de rendu sont des notions Premiere : AE n'a pas d'équivalent.
+  // Les proxies et les fichiers de rendu sont des notions Premiere : AE n'a pas d'equivalent.
   return NRJSON.stringify({ ok: false, code: "UNSUPPORTED_OP", error: "unknown operation: " + String(op) });
 }

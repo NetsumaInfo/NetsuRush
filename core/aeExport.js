@@ -14,6 +14,7 @@ const { prepareMedia } = require('./ae/prepareMedia');
 const { upscaleStep, aeEncoding } = require('./ae/upscaleStep');
 const { codecExt } = require('./utils');
 const { genAeScript } = require('./ae/jsx');
+const { sortNewestFirst } = require('./ae/installOrder');
 const { t } = require('./i18n');
 
 function findAfterFx(CONFIG) {
@@ -32,8 +33,7 @@ function findAfterFx(CONFIG) {
       if (fs.existsSync(exe)) found.push(exe);
     }
   }
-  found.sort().reverse();
-  return found[0] || null;
+  return sortNewestFirst(found)[0] || null;
 }
 
 function launchAe(afterFx, jsxPath, logPath) {
@@ -245,7 +245,7 @@ function createAeExport(deps) {
       };
 
       // AfterFX.exe -r casse sur un espace dans le chemin → dossier + nom sans espace ni accent.
-      const jsxDir = path.join(process.env['PUBLIC'] || os.tmpdir(), 'netsurush-ae');
+      const jsxDir = path.join(process.env['PUBLIC'] || process.env['ProgramData'] || os.tmpdir(), 'netsurush-ae');
       try { fs.mkdirSync(jsxDir, { recursive: true }); } catch (_) {}
       const fileBase = (sanitize(name)
         .replace(/[^\x20-\x7E]+/g, '_')

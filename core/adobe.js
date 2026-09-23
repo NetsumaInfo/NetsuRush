@@ -13,6 +13,7 @@ const { NR_HOME } = require('./config');
 const adobePanel = require('./adobePanel'); // installation / mise à jour de l'extension CEP
 const { isImageRunning, invalidate: invalidateProcessList } = require('./processList');
 const { HOST_IMAGES } = require('./hostImages');
+const { sortNewestFirst } = require('./ae/installOrder');
 
 /**
  * @typedef {Object} AdobeClip
@@ -82,8 +83,7 @@ function findAdobeExe(app, CONFIG) {
       }
     }
   }
-  found.sort().reverse(); // version la plus récente d'abord
-  return found[0] || null;
+  return sortNewestFirst(found)[0] || null; // newest version first
 }
 
 // Cache disque des snapshots. Sans lui, un redémarrage du core (ou Adobe fermé pour libérer la RAM)

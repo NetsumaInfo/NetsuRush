@@ -1,6 +1,6 @@
 /*
- * host-ppro.jsx — lecture projet/séquences Premiere Pro (2020+, ExtendScript DOM).
- * Toutes les durées sorties en SECONDES : les Time Premiere exposent .seconds ;
+ * host-ppro.jsx - lecture projet/sequences Premiere Pro (2020+, ExtendScript DOM).
+ * Toutes les durees sorties en SECONDES : les Time Premiere exposent .seconds ;
  * repli ticks/254016000000 (254 016 000 000 ticks par seconde, constante Adobe).
  */
 /* global app, NRJSON, File, Time, qe, ScratchDiskType, MediaType */
@@ -30,16 +30,16 @@ function nrPproSnapSec(seq, seconds) {
 
 var NR_PPRO_COMPONENTS = {
   motion: ["ae.adbe motion", "adbe motion", "motion", "trajectoire"],
-  // Titres et formes portent leur trajectoire dans un composant à part — « Trajectoire vectorielle »
-  // sur les formes, « Graphic Group » sur les titres. Sans ce repli, un titre déplacé arrive centré.
+  // Titres et formes portent leur trajectoire dans un composant a part - " Trajectoire vectorielle "
+  // sur les formes, " Graphic Group " sur les titres. Sans ce repli, un titre deplace arrive centre.
   vectorMotion: ["ae.adbe vector motion", "adbe vector motion", "vector motion", "trajectoire vectorielle",
     "ae.adbe graphic group", "adbe graphic group", "graphic group", "groupe graphique"],
   // Le texte d'un titre vit dans ce composant. `getMGTComponent()` ne le rend PAS sur un titre
-  // natif (mesuré : « absent » alors que `AE.ADBE Text` était bien dans la collection) — il ne
-  // couvre que les modèles d'animation graphique venus d'After Effects.
+  // natif (mesure : " absent " alors que `AE.ADBE Text` etait bien dans la collection) - il ne
+  // couvre que les modeles d'animation graphique venus d'After Effects.
   text: ["ae.adbe text", "adbe text", "text", "texte"],
-  opacity: ["ae.adbe opacity", "adbe opacity", "opacity", "opacité"],
-  // Le composant de niveau s'appelle « Volume » dans l'interface : ne lister que « Audio Levels »
+  opacity: ["ae.adbe opacity", "adbe opacity", "opacity", "opacit\u00E9"],
+  // Le composant de niveau s'appelle " Volume " dans l'interface : ne lister que " Audio Levels "
   // le rendait introuvable, donc tout transfert partait sans le moindre niveau audio.
   audioLevel: ["ae.adbe audio levels", "adbe audio levels", "audio levels", "niveaux audio",
     "ae.adbe volume", "adbe volume", "volume", "volume level"],
@@ -47,12 +47,12 @@ var NR_PPRO_COMPONENTS = {
 };
 var NR_PPRO_PARAMS = {
   position: ["position", "adbe position"],
-  scale: ["scale", "échelle", "adbe scale"],
-  scaleWidth: ["scale width", "largeur d’échelle", "largeur d'echelle"],
-  uniformScale: ["uniform scale", "echelle uniforme", "échelle uniforme"],
+  scale: ["scale", "\u00E9chelle", "adbe scale"],
+  scaleWidth: ["scale width", "largeur d\u2019\u00E9chelle", "largeur d'echelle"],
+  uniformScale: ["uniform scale", "echelle uniforme", "\u00E9chelle uniforme"],
   rotation: ["rotation", "adbe rotate z"],
-  anchor: ["anchor point", "anchor", "point d’ancrage", "point d'ancrage"],
-  opacity: ["opacity", "opacité"],
+  anchor: ["anchor point", "anchor", "point d\u2019ancrage", "point d'ancrage"],
+  opacity: ["opacity", "opacit\u00E9"],
   gainDb: ["level", "volume", "volume level", "niveau", "niveau de volume"],
   pan: ["balance", "pan", "panoramique"],
   mute: ["mute", "muet"],
@@ -62,8 +62,8 @@ var NR_PPRO_EPSILON = 0.000001;
 
 function nrPproName(value) {
   var s = String(value || "").toLowerCase();
-  s = s.replace(/[àáâä]/g, "a").replace(/[èéêë]/g, "e").replace(/[ìíîï]/g, "i");
-  s = s.replace(/[òóôö]/g, "o").replace(/[ùúûü]/g, "u").replace(/ç/g, "c");
+  s = s.replace(/[\u00E0\u00E1\u00E2\u00E4]/g, "a").replace(/[\u00E8\u00E9\u00EA\u00EB]/g, "e").replace(/[\u00EC\u00ED\u00EE\u00EF]/g, "i");
+  s = s.replace(/[\u00F2\u00F3\u00F4\u00F6]/g, "o").replace(/[\u00F9\u00FA\u00FB\u00FC]/g, "u").replace(/\u00E7/g, "c");
   return s.replace(/[^a-z0-9]+/g, " ").replace(/^\s+|\s+$/g, "");
 }
 
@@ -105,8 +105,72 @@ function nrPproComponent(ti, aliases) {
   try { return nrPproNamedItem(ti.components, aliases); } catch (e) { return null; }
 }
 
-function nrPproParam(component, aliases) {
-  try { return component ? nrPproNamedItem(component.properties, aliases) : null; } catch (e) { return null; }
+/* Intrinsic parameters are taken by their fixed INDEX inside a component recognised by its
+   matchName: display names follow the interface language, so a German or Japanese Premiere never
+   matched the aliases and lost every transform and audio level without a word. Each slot declares
+   the value type it holds, and the whole layout of the component is checked before an index is
+   trusted; any mismatch (another version, another layout) falls back to the display names. */
+var NR_PPRO_PARAM_SLOTS = {
+  motion: { position: [0, "point"], scale: [1, "number"], scaleWidth: [2, "number"],
+    uniformScale: [3, "bool"], rotation: [4, "number"], anchor: [5, "point"] },
+  opacity: { opacity: [0, "number"] },
+  audioLevel: { gainDb: [1, "number"] },
+  audioPan: { pan: [0, "number"] }
+};
+var NR_PPRO_SLOT_FAMILY = { motion: "motion", vectorMotion: "motion", opacity: "opacity",
+  audioLevel: "audioLevel", audioPan: "audioPan" };
+
+/* Family of a component, from its matchName only (never its display name). */
+function nrPproComponentFamily(component) {
+  var match = "", family, aliases, i;
+  try { match = nrPproName(component.matchName); } catch (e) { return null; }
+  if (!match) return null;
+  for (family in NR_PPRO_COMPONENTS) {
+    if (!NR_PPRO_COMPONENTS.hasOwnProperty(family)) continue;
+    aliases = NR_PPRO_COMPONENTS[family];
+    for (i = 0; i < aliases.length; i++) {
+      if (/^(ae\.)?adbe /.test(aliases[i]) && match === nrPproName(aliases[i])) return family;
+    }
+  }
+  return null;
+}
+
+function nrPproValueIs(value, type) {
+  if (value === undefined || value === null) return false;
+  if (type === "number") return typeof value === "number" && !isNaN(value);
+  if (type === "bool") return typeof value === "boolean" || value === 0 || value === 1;
+  if (type === "point") {
+    if (typeof value === "string") return false;
+    if (typeof value.length === "number") return value.length >= 2 && !isNaN(Number(value[0])) && !isNaN(Number(value[1]));
+    return typeof value.x === "number" && typeof value.y === "number";
+  }
+  return false;
+}
+
+function nrPproSlotParam(component, key) {
+  var family = NR_PPRO_SLOT_FAMILY[nrPproComponentFamily(component)];
+  var slots = family ? NR_PPRO_PARAM_SLOTS[family] : null;
+  var props, count, name, slot;
+  if (!slots || !slots[key]) return null;
+  try { props = component.properties; } catch (e0) { return null; }
+  count = nrPproCollectionLength(props);
+  for (name in slots) {
+    if (!slots.hasOwnProperty(name)) continue;
+    slot = slots[name];
+    if (slot[0] >= count) return null;
+    try {
+      if (!nrPproValueIs(nrPproParamValue(props[slot[0]]), slot[1])) return null;
+    } catch (e1) { return null; }
+  }
+  try { return props[slots[key][0]] || null; } catch (e2) { return null; }
+}
+
+/* `key` names an entry of NR_PPRO_PARAMS: index first, localized display names as the fallback. */
+function nrPproParam(component, key) {
+  if (!component) return null;
+  try {
+    return nrPproSlotParam(component, key) || nrPproNamedItem(component.properties, NR_PPRO_PARAMS[key] || []);
+  } catch (e) { return null; }
 }
 
 function nrPproPoint(value) {
@@ -119,37 +183,37 @@ function nrPproPoint(value) {
   return null;
 }
 
-/* Dimensions de l'image d'une séquence, avec un repli 1080p : une division par zéro transformerait
-   toute la trajectoire en NaN, et un NaN posé chez la cible y reste. */
+/* Dimensions de l'image d'une sequence, avec un repli 1080p : une division par zero transformerait
+   toute la trajectoire en NaN, et un NaN pose chez la cible y reste. */
 function nrPproFrameSize(seq) {
   var width = Number(seq && seq.frameSizeHorizontal) || 0;
   var height = Number(seq && seq.frameSizeVertical) || 0;
   return { width: width > 0 ? width : 1920, height: height > 0 ? height : 1080 };
 }
 
-/* Trajectoire Premiere (FRACTION de l'image, origine coin haut-gauche) → pixels depuis le CENTRE,
-   convention du document d'échange. */
+/* Trajectoire Premiere (FRACTION de l'image, origine coin haut-gauche) -> pixels depuis le CENTRE,
+   convention du document d'echange. */
 function nrPproPointToPixels(value, frame) {
   var p = nrPproPoint(value);
   if (!p) return { x: 0, y: 0 };
   return { x: (p.x - 0.5) * frame.width, y: (p.y - 0.5) * frame.height };
 }
 
-/* Conversion inverse, pour l'écriture. Premiere attend un tableau [x, y]. */
+/* Conversion inverse, pour l'ecriture. Premiere attend un tableau [x, y]. */
 function nrPproPointFromPixels(point, frame) {
   var p = nrPproPoint(point) || { x: 0, y: 0 };
   return [p.x / frame.width + 0.5, p.y / frame.height + 0.5];
 }
 
-/* Le paramètre « Niveau » de Premiere n'est PAS en décibels : `getValue()` rend un flottant 0..1
-   dont l'échelle porte un décalage de 15 dB (le fader monte jusqu'à +15). Mesuré en vrai : 0,0216
-   se lit −18,3 dB, et le passer tel quel pour un gain donnait un niveau absurde chez la cible.
-   ExtendScript n'a pas `Math.log10` — d'où la division par `Math.LN10`. */
+/* Le parametre " Niveau " de Premiere n'est PAS en decibels : `getValue()` rend un flottant 0..1
+   dont l'echelle porte un decalage de 15 dB (le fader monte jusqu'a +15). Mesure en vrai : 0,0216
+   se lit -18,3 dB, et le passer tel quel pour un gain donnait un niveau absurde chez la cible.
+   ExtendScript n'a pas `Math.log10` - d'ou la division par `Math.LN10`. */
 var NR_PPRO_LEVEL_OFFSET_DB = 15;
 
 function nrPproLevelToDb(value) {
   var level = Number(value);
-  // 0 = silence : le logarithme y diverge, et −∞ ne traverse aucun format d'échange.
+  // 0 = silence : le logarithme y diverge, et -\u221E ne traverse aucun format d'echange.
   if (!(level > 0)) return -96;
   return 20 * (Math.log(level) / Math.LN10) + NR_PPRO_LEVEL_OFFSET_DB;
 }
@@ -175,11 +239,11 @@ function nrPproIsTimeVarying(param) {
   try { return param.isTimeVarying() === true; } catch (e) { return false; }
 }
 
-/* ORIGINE DES TEMPS d'un paramètre de plan : le point d'ENTRÉE SOURCE, jamais la position du plan
- * dans la séquence. Mesuré sur Premiere 26.3 : les clés d'un plan posé à 1,4 s sur la timeline, avec
- * une animation qui démarre à son premier photogramme, sont rendues par `getKeys()` au temps 0.
- * Prendre `start` comme origine décalait donc toute lecture — et toute écriture — de la position du
- * plan sur la timeline (relu ici : des clés à l'image −35 pour une animation qui commence au plan). */
+/* ORIGINE DES TEMPS d'un parametre de plan : le point d'ENTREE SOURCE, jamais la position du plan
+ * dans la sequence. Mesure sur Premiere 26.3 : les cles d'un plan pose a 1,4 s sur la timeline, avec
+ * une animation qui demarre a son premier photogramme, sont rendues par `getKeys()` au temps 0.
+ * Prendre `start` comme origine decalait donc toute lecture - et toute ecriture - de la position du
+ * plan sur la timeline (relu ici : des cles a l'image -35 pour une animation qui commence au plan). */
 function nrPproKeyBase(ti) {
   var base = null;
   try { base = nrPproTimeSec(ti.inPoint); } catch (e0) { base = null; }
@@ -267,22 +331,39 @@ function nrPproMergeScaleWidth(scale, width, scaleParam, widthParam, ti, seqFps)
   return scale;
 }
 
-/* Paramètre d'un composant par son nom d'affichage. `getParamForDisplayName` est l'API prévue pour
-   ça, mais elle est absente des versions anciennes ET sensible à la langue de l'interface : on
+/* Parametre d'un composant par son nom d'affichage. `getParamForDisplayName` est l'API prevue pour
+   ca, mais elle est absente des versions anciennes ET sensible a la langue de l'interface : on
    retombe donc sur le parcours de la collection, qui teste tous les alias connus. */
-function nrPproParamNamed(component, displayName, aliases) {
+function nrPproParamNamed(component, displayName, key) {
   var param = null;
   try {
     if (component && component.properties && component.properties.getParamForDisplayName) {
       param = component.properties.getParamForDisplayName(displayName);
     }
   } catch (e) { param = null; }
-  return param || nrPproParam(component, aliases);
+  return param || nrPproParam(component, key);
 }
 
-/* Champ d'un JSON de paramètre, lu par MOTIF plutôt que par analyse. Deux raisons : ExtendScript
-   n'a pas de `JSON.parse` (ES3) et `eval` exécuterait le contenu d'un projet tiers pour en tirer
-   une chaîne. On ne cherche que des littéraux, ce qu'un motif fait sans rien exécuter. */
+/* The source-text parameter of a title, recognised by its VALUE (a JSON string carrying
+   `textEditValue`) rather than by "Source Text", which is localized. Display names stay the
+   fallback for a value that does not have that shape. */
+function nrPproTextParam(component) {
+  var props = null, count, i, param, value;
+  try { props = component.properties; } catch (e0) { props = null; }
+  count = nrPproCollectionLength(props);
+  for (i = 0; i < count; i++) {
+    try {
+      param = props[i];
+      value = param.getValue();
+      if (typeof value === "string" && value.indexOf("textEditValue") >= 0) return param;
+    } catch (e1) {}
+  }
+  return nrPproParamNamed(component, "Source Text", "sourceText");
+}
+
+/* Champ d'un JSON de parametre, lu par MOTIF plutot que par analyse. Deux raisons : ExtendScript
+   n'a pas de `JSON.parse` (ES3) et `eval` executerait le contenu d'un projet tiers pour en tirer
+   une chaine. On ne cherche que des litteraux, ce qu'un motif fait sans rien executer. */
 function nrPproJsonString(source, names) {
   var i, match;
   for (i = 0; i < names.length; i++) {
@@ -305,7 +386,7 @@ function nrPproJsonNumber(source, names) {
   return undefined;
 }
 
-/* Couleur en composantes 0..1, écrite en tableau dans le JSON du paramètre. */
+/* Couleur en composantes 0..1, ecrite en tableau dans le JSON du parametre. */
 function nrPproJsonColor(source, names) {
   var i, match, parts;
   for (i = 0; i < names.length; i++) {
@@ -318,12 +399,12 @@ function nrPproJsonColor(source, names) {
   return undefined;
 }
 
-/* Texte, police, corps et couleur d'un titre. Un titre n'a AUCUN fichier média : sans cette lecture
+/* Texte, police, corps et couleur d'un titre. Un titre n'a AUCUN fichier media : sans cette lecture
    il traverse le pont en simple trou de la timeline. `getMGTComponent` couvre les titres natifs
-   comme les modèles d'animation graphique — les deux sont des Essential Graphics. */
-/* Relevé de ce qu'un titre a rendu, quand il n'a rien rendu. Un élément sans média qui n'expose
-   ni composant graphique ni paramètre de texte se lit exactement comme un cache de couleur : sans
-   ce constat, « le texte n'est pas transféré » n'a aucune cause observable. */
+   comme les modeles d'animation graphique - les deux sont des Essential Graphics. */
+/* Releve de ce qu'un titre a rendu, quand il n'a rien rendu. Un element sans media qui n'expose
+   ni composant graphique ni parametre de texte se lit exactement comme un cache de couleur : sans
+   ce constat, " le texte n'est pas transfere " n'a aucune cause observable. */
 function nrPproGraphicProbe(ti) {
   var probe = { mgt: "absent", params: [] }, component = null, count, i;
   try { component = ti.getMGTComponent ? ti.getMGTComponent() : null; } catch (e0) { probe.mgt = "error"; }
@@ -344,18 +425,18 @@ function nrPproGraphicProbe(ti) {
 
 function nrPproGraphic(ti) {
   var component = null, param, raw, out, font, size, color;
-  // `getMGTComponent` d'abord (modèles venus d'After Effects), puis le composant texte de la
+  // `getMGTComponent` d'abord (modeles venus d'After Effects), puis le composant texte de la
   // collection : un titre NATIF de Premiere n'est rendu que par la seconde voie.
   try { component = ti.getMGTComponent ? ti.getMGTComponent() : null; } catch (e0) { component = null; }
   if (!component) component = nrPproComponent(ti, NR_PPRO_COMPONENTS.text);
   if (!component) return undefined;
-  param = nrPproParamNamed(component, "Source Text", NR_PPRO_PARAMS.sourceText);
+  param = nrPproTextParam(component);
   if (!param) return undefined;
   try { raw = param.getValue(); } catch (e1) { return undefined; }
   if (raw === undefined || raw === null) return undefined;
   raw = String(raw);
-  // La valeur est une CHAÎNE JSON, pas un nombre : c'est la seule forme qui porte le style avec le
-  // texte. Un contenu illisible reste le texte brut plutôt qu'une perte sèche.
+  // La valeur est une CHAINE JSON, pas un nombre : c'est la seule forme qui porte le style avec le
+  // texte. Un contenu illisible reste le texte brut plutot qu'une perte seche.
   out = { text: nrPproJsonString(raw, ["textEditValue", "text", "value"]) };
   if (out.text === undefined) return raw.indexOf("{") === 0 ? undefined : { text: raw };
   font = nrPproJsonString(raw, ["fontEditValue", "fontName", "font"]);
@@ -367,8 +448,8 @@ function nrPproGraphic(ti) {
   return out;
 }
 
-/* Relevé des composants d'un plan et de leurs paramètres, pour le seul diagnostic. Borné : un plan
-   chargé d'effets rendrait un snapshot illisible, et seuls les intrinsèques nous intéressent. */
+/* Releve des composants d'un plan et de leurs parametres, pour le seul diagnostic. Borne : un plan
+   charge d'effets rendrait un snapshot illisible, et seuls les intrinseques nous interessent. */
 function nrPproComponentNames(ti) {
   var names = [], count, i, component, label, params, p, limit;
   try { count = nrPproCollectionLength(ti.components); } catch (e0) { return ["<components inaccessible>"]; }
@@ -391,25 +472,25 @@ function nrPproComponentNames(ti) {
 function nrPproReadProperties(ti, seq, seqFps, kind) {
   var out = {};
   if (kind === "video") {
-    // « Trajectoire vectorielle » est la trajectoire des titres et formes : sans ce repli, un titre
-    // déplacé arrive au centre de l'image.
+    // " Trajectoire vectorielle " est la trajectoire des titres et formes : sans ce repli, un titre
+    // deplace arrive au centre de l'image.
     var motion = nrPproComponent(ti, NR_PPRO_COMPONENTS.motion)
       || nrPproComponent(ti, NR_PPRO_COMPONENTS.vectorMotion);
     var opacityComp = nrPproComponent(ti, NR_PPRO_COMPONENTS.opacity);
     var tr = {};
-    var positionParam = nrPproParam(motion, NR_PPRO_PARAMS.position);
-    var scaleParam = nrPproParam(motion, NR_PPRO_PARAMS.scale);
-    var scaleWidthParam = nrPproParam(motion, NR_PPRO_PARAMS.scaleWidth);
-    var anchorParam = nrPproParam(motion, NR_PPRO_PARAMS.anchor);
-    var rotationParam = nrPproParam(motion, NR_PPRO_PARAMS.rotation);
-    var opacityParam = nrPproParam(opacityComp, NR_PPRO_PARAMS.opacity);
+    var positionParam = nrPproParam(motion, "position");
+    var scaleParam = nrPproParam(motion, "scale");
+    var scaleWidthParam = nrPproParam(motion, "scaleWidth");
+    var anchorParam = nrPproParam(motion, "anchor");
+    var rotationParam = nrPproParam(motion, "rotation");
+    var opacityParam = nrPproParam(opacityComp, "opacity");
     var frame = nrPproFrameSize(seq);
     var source = nrPproSrcSize(ti) || frame;
     // Premiere compte sa trajectoire en FRACTION de l'image (0 = bord gauche/haut, 1 = bord
-    // droit/bas), pas en pixels. Traiter 0,5 comme un pixel donnait un décalage de la moitié d'une
-    // image — les transformations arrivaient énormes dans la cible.
+    // droit/bas), pas en pixels. Traiter 0,5 comme un pixel donnait un decalage de la moitie d'une
+    // image - les transformations arrivaient enormes dans la cible.
     var pointFromCenter = function (value) { return nrPproPointToPixels(value, frame); };
-    // L'ancre est normalisée elle aussi, mais sur la taille de la SOURCE : c'est la convention du
+    // L'ancre est normalisee elle aussi, mais sur la taille de la SOURCE : c'est la convention du
     // document (pixels source, origine coin haut-gauche).
     var pointRaw = function (value) {
       var p = nrPproPoint(value) || { x: 0, y: 0 };
@@ -422,10 +503,10 @@ function nrPproReadProperties(ti, seq, seqFps, kind) {
     tr.anchor = nrPproAnimated(anchorParam, ti, seqFps, pointRaw, "TrackItem Motion.Anchor");
     tr.rotation = nrPproAnimated(rotationParam, ti, seqFps, number, "TrackItem Motion.Rotation");
     tr.opacity = nrPproAnimated(opacityParam, ti, seqFps, number, "TrackItem Opacity.Opacity");
-    // « Échelle uniforme » COCHÉE : Premiere ignore « Largeur d'échelle », qui reste sur sa dernière
-    // valeur (100 par défaut). La fusionner quand même donnait une échelle horizontale de 100 % sur
-    // un plan mis à 140 % — un écart lu, jamais posé.
-    var uniform = nrPproParam(motion, NR_PPRO_PARAMS.uniformScale);
+    // " Echelle uniforme " COCHEE : Premiere ignore " Largeur d'echelle ", qui reste sur sa derniere
+    // valeur (100 par defaut). La fusionner quand meme donnait une echelle horizontale de 100 % sur
+    // un plan mis a 140 % - un ecart lu, jamais pose.
+    var uniform = nrPproParam(motion, "uniformScale");
     var uniformValue = uniform ? nrPproParamValue(uniform) : undefined;
     var uniformOn = uniformValue === true || uniformValue === 1;
     if (tr.scale && scaleWidthParam && !uniformOn) {
@@ -434,8 +515,8 @@ function nrPproReadProperties(ti, seq, seqFps, kind) {
     }
     if (tr.position || tr.scale || tr.anchor || tr.rotation || tr.opacity) out.video = { transform: tr };
     out.graphic = nrPproGraphic(ti);
-    // Un plan SANS média est un titre, un cache ou un calque d'effet. Si on n'a pas su en lire le
-    // texte, on rapporte ce que l'hôte a exposé — c'est la seule façon de distinguer les trois.
+    // Un plan SANS media est un titre, un cache ou un calque d'effet. Si on n'a pas su en lire le
+    // texte, on rapporte ce que l'hote a expose - c'est la seule facon de distinguer les trois.
     if (!out.graphic) {
       var hasMedia = true;
       try { hasMedia = !!(ti.projectItem && ti.projectItem.getMediaPath()); } catch (eMedia) { hasMedia = false; }
@@ -447,14 +528,14 @@ function nrPproReadProperties(ti, seq, seqFps, kind) {
     var numberAudio = function (value) { return Number(value) || 0; };
     var boolAudio = function (value) { return value === true || value === 1 || String(value).toLowerCase() === "true"; };
     var audio = {};
-    audio.gainDb = nrPproAnimated(nrPproParam(levelComp, NR_PPRO_PARAMS.gainDb), ti, seqFps, nrPproLevelToDb, "TrackItem AudioLevels.Level");
-    audio.pan = nrPproAnimated(nrPproParam(panComp, NR_PPRO_PARAMS.pan), ti, seqFps, numberAudio, "TrackItem Panner.Balance");
-    audio.mute = nrPproAnimated(nrPproParam(levelComp, NR_PPRO_PARAMS.mute), ti, seqFps, boolAudio, "TrackItem AudioLevels.Mute");
+    audio.gainDb = nrPproAnimated(nrPproParam(levelComp, "gainDb"), ti, seqFps, nrPproLevelToDb, "TrackItem AudioLevels.Level");
+    audio.pan = nrPproAnimated(nrPproParam(panComp, "pan"), ti, seqFps, numberAudio, "TrackItem Panner.Balance");
+    audio.mute = nrPproAnimated(nrPproParam(levelComp, "mute"), ti, seqFps, boolAudio, "TrackItem AudioLevels.Mute");
     if (audio.gainDb || audio.pan || audio.mute) out.audio = audio;
   }
-  // Rien de lu alors qu'un plan porte TOUJOURS ses composants intrinsèques : on rapporte ce que la
-  // collection contient réellement. Sans ce relevé, un composant renommé ou une collection vide se
-  // lisent pareil côté NetsuRush — un transfert sans la moindre transformation, et aucune trace.
+  // Rien de lu alors qu'un plan porte TOUJOURS ses composants intrinseques : on rapporte ce que la
+  // collection contient reellement. Sans ce releve, un composant renomme ou une collection vide se
+  // lisent pareil cote NetsuRush - un transfert sans la moindre transformation, et aucune trace.
   if (!out.video && !out.audio) out.components = nrPproComponentNames(ti);
   try { out.nodeId = String(ti.nodeId || "") || undefined; } catch (eNode) {}
   try {
@@ -466,9 +547,9 @@ function nrPproReadProperties(ti, seq, seqFps, kind) {
   return out;
 }
 
-/* Clé de comparaison d'un chemin média : Windows ne distingue pas la casse et Premiere rend ses
-   chemins avec des antislashs, alors que NetsuRush (bibliothèque, recherche, board) peut porter la
-   même source avec des barres obliques. Comparer les chaînes brutes faisait manquer le clip. */
+/* Cle de comparaison d'un chemin media : Windows ne distingue pas la casse et Premiere rend ses
+   chemins avec des antislashs, alors que NetsuRush (bibliotheque, recherche, board) peut porter la
+   meme source avec des barres obliques. Comparer les chaines brutes faisait manquer le clip. */
 function nrPproNormPath(p) {
   return String(p || "").replace(/\\/g, "/").toLowerCase();
 }
@@ -488,7 +569,7 @@ function nrPproRushes(root) {
         if (it.type === 2) { walk(it); continue; }
         p = null;
         try { p = it.getMediaPath(); } catch (e0) {}
-        if (!p) continue; // item synthétique (barres, titres…)
+        if (!p) continue; // item synthetique (barres, titres...)
         fps = null;
         try {
           interp = it.getFootageInterpretation();
@@ -502,15 +583,15 @@ function nrPproRushes(root) {
   return rushes;
 }
 
-/* Cadences hors desquelles une valeur n'est pas une cadence. Sur un élément AUDIO SEUL, Premiere
-   rend un `frameRate` aberrant — mesuré 2,754e-8 sur un .wav — qui écrase toute la frame-math à
-   zéro : les bornes source sortaient en 0/0, Resolve refusait le plan d'une frame ainsi obtenu, et
-   l'audio disparaissait du transfert sans un mot. Une cadence invraisemblable doit être REFUSÉE,
-   jamais propagée. */
+/* Cadences hors desquelles une valeur n'est pas une cadence. Sur un element AUDIO SEUL, Premiere
+   rend un `frameRate` aberrant - mesure 2,754e-8 sur un .wav - qui ecrase toute la frame-math a
+   zero : les bornes source sortaient en 0/0, Resolve refusait le plan d'une frame ainsi obtenu, et
+   l'audio disparaissait du transfert sans un mot. Une cadence invraisemblable doit etre REFUSEE,
+   jamais propagee. */
 var NR_PPRO_FPS_MIN = 1;
 var NR_PPRO_FPS_MAX = 1000;
 
-/* fps de la SOURCE du clip (≠ fps de la séquence) : les bornes in/out d'un TrackItem sont en temps
+/* fps de la SOURCE du clip (!= fps de la sequence) : les bornes in/out d'un TrackItem sont en temps
    source, donc leur conversion en frames se fait dans l'espace de la source, pas de la timeline. */
 function nrPproSrcFps(ti) {
   var interp, rate;
@@ -524,23 +605,23 @@ function nrPproSrcFps(ti) {
   return null;
 }
 
-/* Dimensions de la SOURCE d'un plan. Aucune API ne les expose directement ; les métadonnées de
-   projet portent la colonne intrinsèque « Video Info » sous la forme « 1920 x 1080 ». Le point
-   d'ancrage se compte en pixels source : sans ces dimensions, il ne peut pas être traduit vers
+/* Dimensions de la SOURCE d'un plan. Aucune API ne les expose directement ; les metadonnees de
+   projet portent la colonne intrinseque " Video Info " sous la forme " 1920 x 1080 ". Le point
+   d'ancrage se compte en pixels source : sans ces dimensions, il ne peut pas etre traduit vers
    Resolve, qui le compte depuis le centre de l'image. */
 function nrPproSrcSize(ti) {
   var meta = null;
   try { meta = ti.projectItem ? String(ti.projectItem.getProjectMetadata()) : null; } catch (e0) { meta = null; }
   if (!meta) return null;
-  var m = /VideoInfo[^>]*>\s*(\d+)\s*[xX×]\s*(\d+)/.exec(meta);
+  var m = /VideoInfo[^>]*>\s*(\d+)\s*[xX\u00D7]\s*(\d+)/.exec(meta);
   if (!m) return null;
   return { width: Number(m[1]), height: Number(m[2]) };
 }
 
-/* Ticks -> numéro de frame. Les ticks sont la représentation ENTIÈRE et exacte du temps chez
-   Premiere (254 016 000 000 par seconde, et un multiple exact de la durée d'une frame) ; `.seconds`
-   en est un quotient flottant. Partir des ticks retire donc un arrondi de la chaîne, ce qui compte
-   sur les cadences non entières (23,976 / 29,97). Repli sur les secondes si l'objet n'a pas .ticks. */
+/* Ticks -> numero de frame. Les ticks sont la representation ENTIERE et exacte du temps chez
+   Premiere (254 016 000 000 par seconde, et un multiple exact de la duree d'une frame) ; `.seconds`
+   en est un quotient flottant. Partir des ticks retire donc un arrondi de la chaine, ce qui compte
+   sur les cadences non entieres (23,976 / 29,97). Repli sur les secondes si l'objet n'a pas .ticks. */
 function nrPproFrame(t, fps) {
   if (t === null || t === undefined || !fps) return null;
   var ticks = null;
@@ -553,7 +634,7 @@ function nrPproFrame(t, fps) {
   return Math.round(ticks * fps / NR_TICKS_PER_SEC);
 }
 
-/* Séquence correspondant à un ProjectItem — c'est-à-dire une séquence IMBRIQUÉE posée sur la
+/* Sequence correspondant a un ProjectItem - c'est-a-dire une sequence IMBRIQUEE posee sur la
    timeline. Aucune API ne fait le lien directement : on apparie par nodeId. */
 function nrPproSequenceFor(proj, pitem) {
   var wanted = null;
@@ -568,7 +649,7 @@ function nrPproSequenceFor(proj, pitem) {
   return null;
 }
 
-/* Plan VISIBLE d'une séquence à un instant donné : on part de la piste du HAUT (index le plus
+/* Plan VISIBLE d'une sequence a un instant donne : on part de la piste du HAUT (index le plus
    grand), qui masque celles du dessous. */
 function nrPproTopClipAt(seq, time) {
   for (var t = seq.videoTracks.numTracks - 1; t >= 0; t--) {
@@ -580,11 +661,11 @@ function nrPproTopClipAt(seq, time) {
 
 var NR_PPRO_NEST_DEPTH = 4;
 
-/* Descend jusqu'au MÉTRAGE. Une séquence imbriquée n'a PAS de chemin média (getMediaPath vide) :
-   sans cette descente le plan sortait sans `path` et disparaissait de Timeline Live — exactement le
-   même trou que les précompositions côté After Effects. Le temps SOURCE d'un plan imbriqué EST le
-   temps de la séquence imbriquée, donc les bornes se reportent niveau par niveau.
-   `direct` distingue le cas nominal (aucune imbrication), seul à conserver l'exactitude des ticks. */
+/* Descend jusqu'au METRAGE. Une sequence imbriquee n'a PAS de chemin media (getMediaPath vide) :
+   sans cette descente le plan sortait sans `path` et disparaissait de Timeline Live - exactement le
+   meme trou que les precompositions cote After Effects. Le temps SOURCE d'un plan imbrique EST le
+   temps de la sequence imbriquee, donc les bornes se reportent niveau par niveau.
+   `direct` distingue le cas nominal (aucune imbrication), seul a conserver l'exactitude des ticks. */
 function nrPproResolveMedia(proj, ti, inSec, outSec, depth, direct) {
   var pitem = null;
   try { pitem = ti.projectItem; } catch (e0) {}
@@ -598,7 +679,7 @@ function nrPproResolveMedia(proj, ti, inSec, outSec, depth, direct) {
 
   if (depth <= 0) return null;
   var nested = nrPproSequenceFor(proj, pitem);
-  if (!nested) return null; // titre, cache de couleur, calque d'effet : rien à prévisualiser
+  if (!nested) return null; // titre, cache de couleur, calque d'effet : rien a previsualiser
 
   var inner = nrPproTopClipAt(nested, inSec);
   if (!inner) return null;
@@ -613,10 +694,10 @@ function nrPproResolveMedia(proj, ti, inSec, outSec, depth, direct) {
   );
 }
 
-/* Bornes SOURCE d'un TrackItem, avec replis. Sur un plan audio posé depuis un fichier son,
-   `inPoint`/`outPoint` peuvent être illisibles (constaté : deux .wav dont les deux bornes sortaient
+/* Bornes SOURCE d'un TrackItem, avec replis. Sur un plan audio pose depuis un fichier son,
+   `inPoint`/`outPoint` peuvent etre illisibles (constate : deux .wav dont les deux bornes sortaient
    nulles, ce qui donnait un plan d'UNE frame que Resolve refusait de poser). Les bornes du
-   ProjectItem, puis la durée du plan, disent la même chose autrement. `mediaType` 1 = vidéo, 2 = audio. */
+   ProjectItem, puis la duree du plan, disent la meme chose autrement. `mediaType` 1 = video, 2 = audio. */
 function nrPproSourceBounds(ti, mediaType) {
   var inSec = nrPproTimeSec(ti.inPoint);
   var outSec = nrPproTimeSec(ti.outPoint);
@@ -631,9 +712,9 @@ function nrPproSourceBounds(ti, mediaType) {
     try { pOut = nrPproTimeSec(pitem.getOutPoint(mediaType)); } catch (e2) {}
     if (pIn !== null && pOut !== null && pOut > pIn) return { inSec: pIn, outSec: pOut, exact: false };
   }
-  // Dernier repli : la DURÉE du plan. Elle ne dit pas où commence la portion utilisée, mais un plan
-  // posé depuis le début de son média est le cas courant — et une longueur juste vaut mieux qu'une
-  // borne de sortie écrasée sur l'entrée.
+  // Dernier repli : la DUREE du plan. Elle ne dit pas ou commence la portion utilisee, mais un plan
+  // pose depuis le debut de son media est le cas courant - et une longueur juste vaut mieux qu'une
+  // borne de sortie ecrasee sur l'entree.
   var dur = nrPproTimeSec(ti.duration);
   if (dur === null) {
     var start = nrPproTimeSec(ti.start);
@@ -647,8 +728,8 @@ function nrPproSourceBounds(ti, mediaType) {
   return { inSec: inSec, outSec: outSec, exact: false };
 }
 
-/* Nom d'une piste (« V2 », « B-roll »…). `Track.name` est en lecture seule et absent des hôtes les
- * plus anciens : un échec rend la chaîne vide, la piste garde alors son seul numéro. */
+/* Nom d'une piste (" V2 ", " B-roll "...). `Track.name` est en lecture seule et absent des hotes les
+ * plus anciens : un echec rend la chaine vide, la piste garde alors son seul numero. */
 function nrPproTrackName(tr) {
   try { return tr && tr.name ? String(tr.name) : ""; } catch (e) { return ""; }
 }
@@ -668,20 +749,20 @@ function nrPproTracks(proj, seq, seqFps) {
           resolved = nrPproResolveMedia(
             proj, ti, bounds.inSec, bounds.outSec, NR_PPRO_NEST_DEPTH, true
           );
-          // Un média audio n'a AUCUNE cadence propre : ses bornes se comptent dans celle de la
-          // séquence. C'est déjà ce que fait le lecteur Resolve pour ses pistes son (timelineRead).
+          // Un media audio n'a AUCUNE cadence propre : ses bornes se comptent dans celle de la
+          // sequence. C'est deja ce que fait le lecteur Resolve pour ses pistes son (timelineRead).
           srcFps = kind === "audio" ? (seqFps || null) : ((resolved && resolved.fps) || seqFps || null);
           if (resolved && resolved.direct && bounds.exact) {
-            // Cas nominal : les ticks du TrackItem sont la vérité entière, on ne passe pas par
+            // Cas nominal : les ticks du TrackItem sont la verite entiere, on ne passe pas par
             // les secondes (cf. nrPproFrame).
             inFrame = nrPproFrame(ti.inPoint, srcFps);
             outFrame = nrPproFrame(ti.outPoint, srcFps);
           } else if (resolved && resolved.direct) {
-            // Bornes reconstituées : elles sont en secondes, l'exactitude des ticks n'existe pas.
+            // Bornes reconstituees : elles sont en secondes, l'exactitude des ticks n'existe pas.
             inFrame = nrPproFrame({ seconds: bounds.inSec }, srcFps);
             outFrame = nrPproFrame({ seconds: bounds.outSec }, srcFps);
           } else {
-            // Imbriqué : le report de bornes s'est fait en secondes, l'exactitude des ticks est perdue.
+            // Imbrique : le report de bornes s'est fait en secondes, l'exactitude des ticks est perdue.
             inFrame = resolved ? nrPproFrame({ seconds: resolved.inSec }, srcFps) : null;
             outFrame = resolved ? nrPproFrame({ seconds: resolved.outSec }, srcFps) : null;
           }
@@ -696,9 +777,9 @@ function nrPproTracks(proj, seq, seqFps) {
             ticks: {
               start: ti.start && ti.start.ticks !== undefined ? String(ti.start.ticks) : undefined,
               end: ti.end && ti.end.ticks !== undefined ? String(ti.end.ticks) : undefined,
-              // `in` est un MOT RÉSERVÉ ES3 : non quoté, il rend le fichier entier illisible pour
-              // ExtendScript, qui garde alors en mémoire sa dernière version valide — un fichier à
-              // jour sur le disque et un hôte qui n'en sait rien.
+              // `in` est un MOT RESERVE ES3 : non quote, il rend le fichier entier illisible pour
+              // ExtendScript, qui garde alors en memoire sa derniere version valide - un fichier a
+              // jour sur le disque et un hote qui n'en sait rien.
               "in": ti.inPoint && ti.inPoint.ticks !== undefined ? String(ti.inPoint.ticks) : undefined,
               out: ti.outPoint && ti.outPoint.ticks !== undefined ? String(ti.outPoint.ticks) : undefined
             },
@@ -709,12 +790,12 @@ function nrPproTracks(proj, seq, seqFps) {
             srcFps: srcFps,
             direct: !!(resolved && resolved.direct && bounds.exact),
             srcInFrame: inFrame,
-            // Convention NetsuRush : bornes source INCLUSIVES. L'outPoint Premiere est exclusif —
-            // c'est la même frontière que NR_ppro_build repose en (outFrame + 1) / fps.
+            // Convention NetsuRush : bornes source INCLUSIVES. L'outPoint Premiere est exclusif -
+            // c'est la meme frontiere que NR_ppro_build repose en (outFrame + 1) / fps.
             srcOutFrame: outFrame === null ? null : outFrame - 1,
             tlStartFrame: nrPproFrame(ti.start, seqFps),
             // Borne de fin en frames : un transfert de timeline a besoin de l'OCCUPATION exacte du
-            // plan, que les secondes ne rendent pas sur cadence non entière.
+            // plan, que les secondes ne rendent pas sur cadence non entiere.
             tlEndFrame: nrPproFrame(ti.end, seqFps),
             video: properties.video,
             audio: properties.audio,
@@ -774,9 +855,9 @@ function nrPproTrackList(seq, kind) {
   return kind === "audio" ? seq.audioTracks : seq.videoTracks;
 }
 
-/* Porte la collection de pistes à `index` + 1 pistes. TrackCollection n'a pas de addTrack dans
-   l'API publique. QE est le seul pont disponible dans CEP ; il reste gardé et son résultat est
-   vérifié par le nombre réel de pistes. Renvoie true si l'index demandé est utilisable. */
+/* Porte la collection de pistes a `index` + 1 pistes. TrackCollection n'a pas de addTrack dans
+   l'API publique. QE est le seul pont disponible dans CEP ; il reste garde et son resultat est
+   verifie par le nombre reel de pistes. Renvoie true si l'index demande est utilisable. */
 function nrPproAddTracks(seq, kind, index) {
   var have = nrPproTrackList(seq, kind).numTracks;
   if (have > index) return true;
@@ -791,15 +872,15 @@ function nrPproAddTracks(seq, kind, index) {
     try { qeName = String(qseq && qseq.name || ""); } catch (eName1) {}
     if (qseq && targetName && qeName === targetName) {
       var need = index + 1 - have;
-      // APRÈS la dernière piste. Mesuré : `have - 1` insère la piste AVANT la dernière et POUSSE son
-      // contenu d'un cran — un plan posé sur V3 se retrouvait sur V4 dès que la pose du plan suivant
-      // demandait une V4, avec V3 vide. Un index hors bornes est ramené à la fin par Premiere.
+      // APRES la derniere piste. Mesure : `have - 1` insere la piste AVANT la derniere et POUSSE son
+      // contenu d'un cran - un plan pose sur V3 se retrouvait sur V4 des que la pose du plan suivant
+      // demandait une V4, avec V3 vide. Un index hors bornes est ramene a la fin par Premiere.
       var at = have;
       if (kind === "audio") qseq.addTracks(0, 0, need, at);
       else qseq.addTracks(need, at, 0);
     }
   } catch (e) {}
-  // Relecture depuis la séquence : rien ne garantit que la collection renvoyée plus haut reflète
+  // Relecture depuis la sequence : rien ne garantit que la collection renvoyee plus haut reflete
   // les pistes que QE vient d'ajouter.
   return nrPproTrackList(seq, kind).numTracks > index;
 }
@@ -868,8 +949,8 @@ function nrPproSourceMatches(entry, source) {
   return actual && expected && nrPproNormPath(actual) === nrPproNormPath(expected);
 }
 
-/* overwriteClip ne rend qu'un booléen. La propriété ne peut être appliquée qu'après réconciliation
- * exacte du TrackItem créé ; une ambiguïté laisse le plan posé mais interdit toute mutation au hasard. */
+/* overwriteClip ne rend qu'un booleen. La propriete ne peut etre appliquee qu'apres reconciliation
+ * exacte du TrackItem cree ; une ambiguite laisse le plan pose mais interdit toute mutation au hasard. */
 function nrPproLocateOverwrite(track, before, source, start, range, seq) {
   var after = nrPproTrackSnapshot(track), candidates = [], i, entry, method;
   for (i = 0; i < after.length; i++) {
@@ -898,7 +979,7 @@ function nrPproLocateOverwrite(track, before, source, start, range, seq) {
   return { item: null, method: "unresolved", ambiguous: candidates.length > 1 };
 }
 
-/* Pose ÉCRASANTE à une position absolue, sur une piste vidéo ou audio quelconque. */
+/* Pose ECRASANTE a une position absolue, sur une piste video ou audio quelconque. */
 function nrPproOverwriteLocated(seq, kind, index, item, time, range) {
   var track = nrPproTrackList(seq, kind)[index];
   if (!track) return { ok: false, item: null, locate: { method: "trackMissing" } };
@@ -910,10 +991,10 @@ function nrPproOverwriteLocated(seq, kind, index, item, time, range) {
   if (!located.item && result === false) {
     return { ok: false, item: null, locate: { method: "overwriteRejected" } };
   }
-  // Une pose qui ne CHANGE PAS le nombre de plans de la piste n'a rien écrit, quoi qu'en dise la
-  // valeur de retour. C'est le seul signe qui distingue « posé mais introuvable à la relecture »
-  // (le plan est là, la timeline est juste) de « rien n'a été posé » (timeline vide) : les
-  // confondre faisait compter 7 plans posés sur une séquence restée vide.
+  // Une pose qui ne CHANGE PAS le nombre de plans de la piste n'a rien ecrit, quoi qu'en dise la
+  // valeur de retour. C'est le seul signe qui distingue " pose mais introuvable a la relecture "
+  // (le plan est la, la timeline est juste) de " rien n'a ete pose " (timeline vide) : les
+  // confondre faisait compter 7 plans poses sur une sequence restee vide.
   if (!located.item && nrPproCollectionLength(track.clips) === before.length) {
     return { ok: false, item: null, locate: { method: "overwriteNoOp" } };
   }
@@ -982,10 +1063,10 @@ function nrPproClearKeys(param) {
   return true;
 }
 
-/* Instant d'une clé, en SECONDES. `addKey`/`setValueAtKey` veulent un nombre : leur passer l'objet
- * `Time` que le reste du script manipule ne lève rien et pose TOUTES les clés au temps 0 — relu sur
- * Premiere 26.3, trois clés écrites devenaient une seule, portant la dernière valeur. C'est ce qui
- * faisait arriver un plan « juste tourné », sans animation. */
+/* Instant d'une cle, en SECONDES. `addKey`/`setValueAtKey` veulent un nombre : leur passer l'objet
+ * `Time` que le reste du script manipule ne leve rien et pose TOUTES les cles au temps 0 - relu sur
+ * Premiere 26.3, trois cles ecrites devenaient une seule, portant la derniere valeur. C'est ce qui
+ * faisait arriver un plan " juste tourne ", sans animation. */
 function nrPproKeyAt(clipStart, frame, fps) {
   if (!(fps > 0)) return null;
   return clipStart + (Number(frame) || 0) / fps;
@@ -1066,13 +1147,13 @@ function nrPproPushReports(target, reports) {
 function nrPproApplyVideo(ti, seq, clip, clipIndex, fps, report) {
   var transform = clip.video && clip.video.transform;
   if (!transform) return;
-  // Même repli qu'à la lecture : un titre ou une forme n'a pas de « Trajectoire », mais une
-  // « Trajectoire vectorielle » — sans ce repli, il reçoit ses transformations dans le vide.
+  // Meme repli qu'a la lecture : un titre ou une forme n'a pas de " Trajectoire ", mais une
+  // " Trajectoire vectorielle " - sans ce repli, il recoit ses transformations dans le vide.
   var motion = nrPproComponent(ti, NR_PPRO_COMPONENTS.motion)
     || nrPproComponent(ti, NR_PPRO_COMPONENTS.vectorMotion);
   var opacity = nrPproComponent(ti, NR_PPRO_COMPONENTS.opacity);
-  // Mêmes unités qu'à la lecture, dans l'autre sens : Premiere veut des FRACTIONS de l'image, le
-  // document porte des pixels depuis le centre. Poser les pixels tels quels envoyait le plan très
+  // Memes unites qu'a la lecture, dans l'autre sens : Premiere veut des FRACTIONS de l'image, le
+  // document porte des pixels depuis le centre. Poser les pixels tels quels envoyait le plan tres
   // loin hors cadre.
   var frame = nrPproFrameSize(seq);
   var source = nrPproSrcSize(ti) || frame;
@@ -1084,24 +1165,24 @@ function nrPproApplyVideo(ti, seq, clip, clipIndex, fps, report) {
   var number = function (value) { return Number(value) || 0; };
   var uniformScale = function (value) { var p = nrPproPoint(value) || { x: 1, y: 1 }; return p.y * 100; };
   var widthScale = function (value) { var p = nrPproPoint(value) || { x: 1, y: 1 }; return p.x * 100; };
-  var start = nrPproKeyBase(ti); // origine des clés = point d’entrée SOURCE
+  var start = nrPproKeyBase(ti); // origine des cles = point d'entree SOURCE
 
-  if (transform.position) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(motion, NR_PPRO_PARAMS.position), transform.position, pointFromCenter, start, fps, clipIndex, "video.position", "video.position.keyframes"));
-  if (transform.anchor) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(motion, NR_PPRO_PARAMS.anchor), transform.anchor, pointRaw, start, fps, clipIndex, "video.anchor", "video.anchor.keyframes"));
-  if (transform.rotation) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(motion, NR_PPRO_PARAMS.rotation), transform.rotation, number, start, fps, clipIndex, "video.rotation", "video.rotation.keyframes"));
-  if (transform.opacity) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(opacity, NR_PPRO_PARAMS.opacity), transform.opacity, number, start, fps, clipIndex, "video.opacity", "video.opacity.keyframes"));
+  if (transform.position) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(motion, "position"), transform.position, pointFromCenter, start, fps, clipIndex, "video.position", "video.position.keyframes"));
+  if (transform.anchor) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(motion, "anchor"), transform.anchor, pointRaw, start, fps, clipIndex, "video.anchor", "video.anchor.keyframes"));
+  if (transform.rotation) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(motion, "rotation"), transform.rotation, number, start, fps, clipIndex, "video.rotation", "video.rotation.keyframes"));
+  if (transform.opacity) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(opacity, "opacity"), transform.opacity, number, start, fps, clipIndex, "video.opacity", "video.opacity.keyframes"));
   if (transform.scale) {
-    var scale = nrPproParam(motion, NR_PPRO_PARAMS.scale);
-    var scaleWidth = nrPproParam(motion, NR_PPRO_PARAMS.scaleWidth);
+    var scale = nrPproParam(motion, "scale");
+    var scaleWidth = nrPproParam(motion, "scaleWidth");
     var value = nrPproPoint(transform.scale.value) || { x: 1, y: 1 };
     if (scaleWidth && Math.abs(value.x - value.y) > NR_PPRO_EPSILON) {
-      nrPproWriteStatic(nrPproParam(motion, NR_PPRO_PARAMS.uniformScale), false);
+      nrPproWriteStatic(nrPproParam(motion, "uniformScale"), false);
       nrPproPushReports(report, nrPproApplyProperty(scale, transform.scale, uniformScale, start, fps, clipIndex, "video.scale", "video.scale.keyframes"));
       nrPproPushReports(report, nrPproApplyProperty(scaleWidth, transform.scale, widthScale, start, fps, clipIndex, "video.scale", "video.scale.keyframes"));
     } else {
-      // Échelle carrée : on RECOCHE « Échelle uniforme ». Sans ça, un plan dont la case était
-      // décochée gardait sa largeur d'échelle d'avant, et seule la hauteur suivait le document.
-      nrPproWriteStatic(nrPproParam(motion, NR_PPRO_PARAMS.uniformScale), true);
+      // Echelle carree : on RECOCHE " Echelle uniforme ". Sans ca, un plan dont la case etait
+      // decochee gardait sa largeur d'echelle d'avant, et seule la hauteur suivait le document.
+      nrPproWriteStatic(nrPproParam(motion, "uniformScale"), true);
       nrPproPushReports(report, nrPproApplyProperty(scale, transform.scale, uniformScale, start, fps, clipIndex, "video.scale", "video.scale.keyframes"));
     }
   }
@@ -1112,20 +1193,20 @@ function nrPproApplyAudio(ti, clip, clipIndex, fps, report) {
   if (!audio) return;
   var level = nrPproComponent(ti, NR_PPRO_COMPONENTS.audioLevel);
   var pan = nrPproComponent(ti, NR_PPRO_COMPONENTS.audioPan);
-  var start = nrPproKeyBase(ti); // origine des clés = point d’entrée SOURCE
+  var start = nrPproKeyBase(ti); // origine des cles = point d'entree SOURCE
   var number = function (value) { return Number(value) || 0; };
   var bool = function (value) { return !!value; };
-  // Le document parle en dB, Premiere veut son niveau normalisé. Pas de conversion à la RELECTURE :
-  // la valeur attendue est déjà le niveau normalisé, et repasser l'une des deux en dB comparerait
-  // deux grandeurs différentes — le rapport annoncerait un écart là où la pose est exacte.
-  if (audio.gainDb) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(level, NR_PPRO_PARAMS.gainDb), audio.gainDb, nrPproDbToLevel, start, fps, clipIndex, "audio.gain", "audio.gain.keyframes"));
+  // Le document parle en dB, Premiere veut son niveau normalise. Pas de conversion a la RELECTURE :
+  // la valeur attendue est deja le niveau normalise, et repasser l'une des deux en dB comparerait
+  // deux grandeurs differentes - le rapport annoncerait un ecart la ou la pose est exacte.
+  if (audio.gainDb) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(level, "gainDb"), audio.gainDb, nrPproDbToLevel, start, fps, clipIndex, "audio.gain", "audio.gain.keyframes"));
   if (audio.volume) report.push(nrPproReport(clipIndex, "audio.volume", "unsupported", "premiereLinearVolumeMappingUnknown", false));
-  if (audio.pan) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(pan, NR_PPRO_PARAMS.pan), audio.pan, number, start, fps, clipIndex, "audio.pan", "audio.pan.keyframes"));
-  if (audio.mute) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(level, NR_PPRO_PARAMS.mute), audio.mute, bool, start, fps, clipIndex, "audio.mute", "audio.mute.keyframes"));
+  if (audio.pan) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(pan, "pan"), audio.pan, number, start, fps, clipIndex, "audio.pan", "audio.pan.keyframes"));
+  if (audio.mute) nrPproPushReports(report, nrPproApplyProperty(nrPproParam(level, "mute"), audio.mute, bool, start, fps, clipIndex, "audio.mute", "audio.mute.keyframes"));
 }
 
-/* Séquence QE de la séquence visée, ou null. QE ne travaille QUE sur la séquence active, et son
- * objet ne porte pas d'identifiant : le nom est la seule vérification possible (même garde que
+/* Sequence QE de la sequence visee, ou null. QE ne travaille QUE sur la sequence active, et son
+ * objet ne porte pas d'identifiant : le nom est la seule verification possible (meme garde que
  * nrPproAddTracks). */
 function nrPproQeSequence(seq) {
   try {
@@ -1139,8 +1220,8 @@ function nrPproQeSequence(seq) {
   } catch (e) { return null; }
 }
 
-/* Secondes d'un temps QE. Les objets QE ne rendent pas le même champ d'une version à l'autre
- * (ticks, secs, seconds) : on prend le premier lisible plutôt que de parier sur un seul. */
+/* Secondes d'un temps QE. Les objets QE ne rendent pas le meme champ d'une version a l'autre
+ * (ticks, secs, seconds) : on prend le premier lisible plutot que de parier sur un seul. */
 function nrPproQeSeconds(value) {
   if (value === undefined || value === null) return null;
   if (typeof value === "number") return value;
@@ -1155,7 +1236,7 @@ function nrPproQeSeconds(value) {
   return null;
 }
 
-/* Plan QE posé à `startSec` sur cette piste. QE indexe ses items dans l'ordre de la piste, sans
+/* Plan QE pose a `startSec` sur cette piste. QE indexe ses items dans l'ordre de la piste, sans
  * lien avec l'API publique : la position est le seul appariement fiable. */
 function nrPproQeItemAt(qseq, kind, trackIndex, startSec, seq) {
   var track = null;
@@ -1174,18 +1255,18 @@ function nrPproQeItemAt(qseq, kind, trackIndex, startSec, seq) {
   return null;
 }
 
-/* Vitesse d'un plan. AUCUNE API publique ne l'écrit ; QE le fait (`setSpeed`), et le résultat est
- * VÉRIFIÉ par l'occupation obtenue — un `setSpeed` muet laisserait sinon un plan à sa longueur
+/* Vitesse d'un plan. AUCUNE API publique ne l'ecrit ; QE le fait (`setSpeed`), et le resultat est
+ * VERIFIE par l'occupation obtenue - un `setSpeed` muet laisserait sinon un plan a sa longueur
  * source, donc trop long, mordant sur le plan suivant. `speed` = images source / images timeline. */
 function nrPproApplySpeed(seq, kind, trackIndex, ti, clip, clipIndex, report) {
   var timing = clip.timing || {};
   var ratio = timing.speed && Number(timing.speed.denominator)
     ? Number(timing.speed.numerator) / Number(timing.speed.denominator) : 1;
   var reverse = !!timing.reverse;
-  if (!reverse && Math.abs(ratio - 1) < 0.0005) return; // rien à retimer
+  if (!reverse && Math.abs(ratio - 1) < 0.0005) return; // rien a retimer
   var expected = (Number(clip.tlEnd) || 0) - (Number(clip.tlStart) || 0); // en secondes de timeline
-  // Un échec emporte l'INVERSION avec lui : c'est le même appel qui la porte, la taire ferait passer
-  // un plan lu à l'endroit pour un transfert complet.
+  // Un echec emporte l'INVERSION avec lui : c'est le meme appel qui la porte, la taire ferait passer
+  // un plan lu a l'endroit pour un transfert complet.
   var give = function (reason) {
     report.push(nrPproReport(clipIndex, "timing.speed", "unsupported", reason, false, ratio));
     if (reverse) report.push(nrPproReport(clipIndex, "timing.reverse", "unsupported", reason, false, true));
@@ -1196,7 +1277,7 @@ function nrPproApplySpeed(seq, kind, trackIndex, ti, clip, clipIndex, report) {
   var item = start === null ? null : nrPproQeItemAt(qseq, kind, trackIndex, start, seq);
   if (!item || !item.setSpeed) { give("premiereQeItemNotFound"); return; }
   try { item.setSpeed(ratio, "", reverse, false, false); } catch (e0) { give("premiereSetSpeedRefused"); return; }
-  // Relecture : l'occupation du plan doit être tombée à la durée du document.
+  // Relecture : l'occupation du plan doit etre tombee a la duree du document.
   var actual = null;
   try { actual = nrPproTimeSec(ti.end) - nrPproTimeSec(ti.start); } catch (e1) { actual = null; }
   if (actual === null) { give("premiereSpeedReadbackUnavailable"); return; }
@@ -1210,7 +1291,7 @@ function seqFpsOf(seq) {
   try { var base = Number(seq.timebase); return base > 0 ? NR_TICKS_PER_SEC / base : 25; } catch (e) { return 25; }
 }
 
-/* `retimed` : la vitesse a déjà été traitée par nrPproApplySpeed, qui rend son propre verdict. */
+/* `retimed` : la vitesse a deja ete traitee par nrPproApplySpeed, qui rend son propre verdict. */
 function nrPproReportTiming(clip, clipIndex, report, retimed) {
   var timing = clip.timing;
   if (!timing) return;
@@ -1220,9 +1301,9 @@ function nrPproReportTiming(clip, clipIndex, report, retimed) {
   if (timing.timeMap && timing.timeMap.length) report.push(nrPproReport(clipIndex, "timing.timeMap", "unsupported", "premiereRetimeWriteUnavailable", false));
 }
 
-/* `place` = { kind, trackIndex } quand le plan vient d'être posé : la vitesse s'écrit alors par QE,
- * juste après la pose et AVANT le plan suivant — un plan retimé occupe sa longueur SOURCE tant que
- * la vitesse n'est pas appliquée, et mordrait sur son voisin. */
+/* `place` = { kind, trackIndex } quand le plan vient d'etre pose : la vitesse s'ecrit alors par QE,
+ * juste apres la pose et AVANT le plan suivant - un plan retime occupe sa longueur SOURCE tant que
+ * la vitesse n'est pas appliquee, et mordrait sur son voisin. */
 function nrPproApplyClip(ti, seq, clip, clipIndex, fps, report, place) {
   if (clip.kind === "audio") nrPproApplyAudio(ti, clip, clipIndex, fps, report);
   else nrPproApplyVideo(ti, seq, clip, clipIndex, fps, report);
@@ -1243,7 +1324,7 @@ function nrPproPlace(seq, trackIndex, item, time, ripple) {
     var audioIndex = seq.audioTracks.numTracks > trackIndex ? trackIndex : 0;
     track.insertClip(item, nrPproTicks(time, seq), trackIndex, audioIndex);
   } catch (e) { return false; }
-  // insertClip retourne undefined même en cas de succès : seul le compte fait foi.
+  // insertClip retourne undefined meme en cas de succes : seul le compte fait foi.
   return track.clips.numItems > before;
 }
 
@@ -1253,7 +1334,7 @@ function nrPproPlace(seq, trackIndex, item, time, ripple) {
  * language (the panel adds it to the payload), with an English fallback. */
 function nrPproSubclipName(p, item, part) {
   var text = (p && p.nrText) || {};
-  var pattern = text.videoSubclip || "{name} — video {part}";
+  var pattern = text.videoSubclip || "{name} \u2014 video {part}";
   return pattern.split("{name}").join(String(item.name || "NetsuRush")).split("{part}").join(part);
 }
 function nrPproVideoOnlySubclip(item, inSec, outSec, label) {
@@ -1265,10 +1346,10 @@ function nrPproVideoOnlySubclip(item, inSec, outSec, label) {
 
 var NR_PPRO_BIN_DEPTH = 12;
 
-/* Index chemin normalisé -> ProjectItem, construit du même parcours que le snapshot.
+/* Index chemin normalise -> ProjectItem, construit du meme parcours que le snapshot.
    `findItemsMatchingMediaPath` est la voie officielle mais elle rend une liste VIDE sur des projets
-   où le média est pourtant présent (casse/séparateurs, sources rangées en sous-bins) : c'était LA
-   cause du « clip introuvable ou import échoué » alors que le rush était bien dans le projet. */
+   ou le media est pourtant present (casse/separateurs, sources rangees en sous-bins) : c'etait LA
+   cause du " clip introuvable ou import echoue " alors que le rush etait bien dans le projet. */
 function nrPproIndexProject(proj) {
   var index = {};
   function walk(item, depth) {
@@ -1291,9 +1372,9 @@ function nrPproIndexProject(proj) {
   return index;
 }
 
-/* Résolveur de sources d'un job : chemin média -> ProjectItem, import si le projet ne l'a pas.
- * Mémoïsé par appel (un montage Timeline Live enchaîne des dizaines de plans sur une poignée de
- * sources) et l'index n'est construit qu'à la première recherche infructueuse. */
+/* Resolveur de sources d'un job : chemin media -> ProjectItem, import si le projet ne l'a pas.
+ * Memoise par appel (un montage Timeline Live enchaine des dizaines de plans sur une poignee de
+ * sources) et l'index n'est construit qu'a la premiere recherche infructueuse. */
 function nrPproResolver(proj) {
   var cache = {};
   var index = null;
@@ -1311,7 +1392,7 @@ function nrPproResolver(proj) {
   }
 
   return {
-    /** Chemins refusés faute de fichier sur le disque (distingue le média absent du clip introuvable). */
+    /** Chemins refuses faute de fichier sur le disque (distingue le media absent du clip introuvable). */
     missing: missing,
     get: function (mediaPath) {
       if (!mediaPath) return null;
@@ -1319,9 +1400,9 @@ function nrPproResolver(proj) {
       if (cache[key] !== undefined) return cache[key];
       var item = find(mediaPath);
       if (!item) {
-        // Importer un fichier absent ouvre une boîte de dialogue MODALE côté Premiere (suppressUI ne
-        // la couvre pas) : ExtendScript reste bloqué et le panneau ne répond plus jusqu'au timeout du
-        // job. On refuse donc en amont plutôt que de figer l'hôte.
+        // Importer un fichier absent ouvre une boite de dialogue MODALE cote Premiere (suppressUI ne
+        // la couvre pas) : ExtendScript reste bloque et le panneau ne repond plus jusqu'au timeout du
+        // job. On refuse donc en amont plutot que de figer l'hote.
         if (!nrPproFileExists(mediaPath)) {
           missing.push(mediaPath);
           cache[key] = null;
@@ -1331,7 +1412,7 @@ function nrPproResolver(proj) {
           var bin = proj.getInsertionBin ? proj.getInsertionBin() : proj.rootItem;
           proj.importFiles([mediaPath], true, bin, false);
         } catch (e1) {}
-        index = null; // le projet a changé : l'index est périmé
+        index = null; // le projet a change : l'index est perime
         item = find(mediaPath);
       }
       cache[key] = item;
@@ -1340,13 +1421,13 @@ function nrPproResolver(proj) {
   };
 }
 
-/* Export FCP7 XML de la séquence visée, vers le chemin demandé par NetsuRush.
+/* Export FCP7 XML de la sequence visee, vers le chemin demande par NetsuRush.
    Pourquoi passer par un fichier alors que `ComponentParam` expose `getKeys()` : les composants
-   intrinsèques ne sont pas atteignables sur toutes les configurations (un scan qui rend les bornes
-   exactes peut malgré tout rendre `components` vide), et le XML porte en plus la vitesse et le
-   niveau audio dans une forme unique. C'est la MÊME source d'animation que celle déjà lue côté
-   Resolve, donc un seul analyseur et un seul greffon des deux côtés du pont.
-   Le XML ne monte jamais rien : il n'apporte que les images clés. */
+   intrinseques ne sont pas atteignables sur toutes les configurations (un scan qui rend les bornes
+   exactes peut malgre tout rendre `components` vide), et le XML porte en plus la vitesse et le
+   niveau audio dans une forme unique. C'est la MEME source d'animation que celle deja lue cote
+   Resolve, donc un seul analyseur et un seul greffon des deux cotes du pont.
+   Le XML ne monte jamais rien : il n'apporte que les images cles. */
 function NR_ppro_exportXml(p) {
   var proj = app.project, seq, ok;
   if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
@@ -1370,7 +1451,7 @@ function NR_ppro_exportXml(p) {
   return NRJSON.stringify({ ok: true, path: String(p.path), sequence: seq.name });
 }
 
-/* Séquence du projet portant ce nom (destination « timeline existante » du profil d'export). */
+/* Sequence du projet portant ce nom (destination " timeline existante " du profil d'export). */
 function nrPproSequenceByName(proj, name) {
   if (!name) return null;
   for (var s = 0; s < proj.sequences.numSequences; s++) {
@@ -1379,8 +1460,8 @@ function nrPproSequenceByName(proj, name) {
   return null;
 }
 
-/* Vide une séquence de tous ses plans. `createNewSequenceFromClips` y dépose le clip qui a servi de
- * gabarit : il doit partir avant le montage, sinon le premier plan est posé sur un plan déjà là. */
+/* Vide une sequence de tous ses plans. `createNewSequenceFromClips` y depose le clip qui a servi de
+ * gabarit : il doit partir avant le montage, sinon le premier plan est pose sur un plan deja la. */
 function nrPproEmptySequence(seq) {
   function clearTracks(tracks) {
     if (!tracks) return;
@@ -1395,12 +1476,12 @@ function nrPproEmptySequence(seq) {
   clearTracks(seq.audioTracks);
 }
 
-/* Crée une séquence SANS boîte de dialogue. `createNewSequence(name, id)` ouvre « Nouvelle séquence »
- * dans les versions récentes de Premiere : le montage reste bloqué tant qu'un humain ne valide pas,
- * et le nom passé est ignoré (la boîte propose son propre numéro). `createNewSequenceFromClips` ne
- * demande rien, honore le nom, et cale en prime les réglages de séquence sur le média — la cadence
- * de séquence n'est plus laissée au hasard, faute d'API pour la forcer.
- * `seedItem` = ProjectItem du premier plan à poser (gabarit). Repli sur l'ancien appel si absent. */
+/* Cree une sequence SANS boite de dialogue. `createNewSequence(name, id)` ouvre " Nouvelle sequence "
+ * dans les versions recentes de Premiere : le montage reste bloque tant qu'un humain ne valide pas,
+ * et le nom passe est ignore (la boite propose son propre numero). `createNewSequenceFromClips` ne
+ * demande rien, honore le nom, et cale en prime les reglages de sequence sur le media - la cadence
+ * de sequence n'est plus laissee au hasard, faute d'API pour la forcer.
+ * `seedItem` = ProjectItem du premier plan a poser (gabarit). Repli sur l'ancien appel si absent. */
 function nrPproNewSequence(proj, name, seedItem) {
   var seq = null;
   var seqName = name || "NetsuRush";
@@ -1418,11 +1499,11 @@ function nrPproNewSequence(proj, name, seedItem) {
   return (seq && seq !== 0) ? nrPproFreshSequence(proj, seq) : null;
 }
 
-/* Reprend la séquence dans la COLLECTION du projet. L'objet rendu par une création — et celui qui
- * survit à une écriture de réglages ou à une suppression de plans — porte des collections de pistes
- * qui ne se rafraîchissent pas : `overwriteClip` s'y exécute sans erreur et sans rien poser, et la
- * relecture ne trouve alors aucun plan (« trackItemNotLocated » sur TOUS les plans, timeline vide).
- * Un objet repris du projet est neuf ; à défaut d'y retrouver la séquence, on garde l'objet d'origine. */
+/* Reprend la sequence dans la COLLECTION du projet. L'objet rendu par une creation - et celui qui
+ * survit a une ecriture de reglages ou a une suppression de plans - porte des collections de pistes
+ * qui ne se rafraichissent pas : `overwriteClip` s'y execute sans erreur et sans rien poser, et la
+ * relecture ne trouve alors aucun plan (" trackItemNotLocated " sur TOUS les plans, timeline vide).
+ * Un objet repris du projet est neuf ; a defaut d'y retrouver la sequence, on garde l'objet d'origine. */
 function nrPproFreshSequence(proj, seq) {
   if (!seq) return seq;
   var id = null, name = null;
@@ -1439,16 +1520,16 @@ function nrPproFreshSequence(proj, seq) {
   return byName || seq;
 }
 
-/* Cale la séquence sur la CADENCE du document transféré. Les positions sont posées en ticks arrondis
- * à la grille de la séquence (nrPproTicks) : une séquence à 23,976 qui reçoit une timeline à 25
- * décale chaque plan d'un peu plus que le précédent — plans mal placés, trous et recouvrements.
- * `setSettings` est la seule voie publique ; elle manque sur les vieilles versions, d'où le garde-fou
+/* Cale la sequence sur la CADENCE du document transfere. Les positions sont posees en ticks arrondis
+ * a la grille de la sequence (nrPproTicks) : une sequence a 23,976 qui recoit une timeline a 25
+ * decale chaque plan d'un peu plus que le precedent - plans mal places, trous et recouvrements.
+ * `setSettings` est la seule voie publique ; elle manque sur les vieilles versions, d'ou le garde-fou
  * et la relecture du timebase par l'appelant. */
 function nrPproApplySequenceSettings(seq, fps, width, height) {
   if (!(Number(fps) > 0) || !seq.getSettings || !seq.setSettings) return false;
-  // Déjà à la bonne cadence (cas courant : la séquence est calée sur le média du gabarit) → ne RIEN
-  // écrire. `setSettings` reconstruit la séquence côté Premiere ; l'appeler pour rien exposait tout
-  // transfert à une réécriture inutile.
+  // Deja a la bonne cadence (cas courant : la sequence est calee sur le media du gabarit) -> ne RIEN
+  // ecrire. `setSettings` reconstruit la sequence cote Premiere ; l'appeler pour rien exposait tout
+  // transfert a une reecriture inutile.
   var current = 0;
   try { current = NR_TICKS_PER_SEC / Number(seq.timebase); } catch (eNow) {}
   if (current > 0 && Math.abs(current - Number(fps)) < 0.01) return true;
@@ -1468,14 +1549,14 @@ function nrPproApplySequenceSettings(seq, fps, width, height) {
   return Math.abs(applied - Number(fps)) < 0.01;
 }
 
-/* Ouvre la séquence visée : l'insertion à la tête de lecture lit le player de la séquence ACTIVE, et
+/* Ouvre la sequence visee : l'insertion a la tete de lecture lit le player de la sequence ACTIVE, et
  * l'utilisateur doit voir le montage qu'il vient de demander. */
 function nrPproActivate(proj, seq) {
   try {
     var active = proj.activeSequence;
     if (active && active.sequenceID === seq.sequenceID) return;
     if (proj.openSequence) proj.openSequence(seq.sequenceID);
-  } catch (e) { /* version sans openSequence : on monte dans la séquence sans l'ouvrir */ }
+  } catch (e) { /* version sans openSequence : on monte dans la sequence sans l'ouvrir */ }
 }
 
 function nrPproItemFps(item, fallback) {
@@ -1486,8 +1567,8 @@ function nrPproItemFps(item, fallback) {
   return fallback;
 }
 
-/* Poser un trim écrase les In/Out du ProjectItem : on note les valeurs d'origine de CHAQUE source
- * touchée pour les rendre au projet à la fin (sinon les clips restent tronqués dans le Media Pool). */
+/* Poser un trim ecrase les In/Out du ProjectItem : on note les valeurs d'origine de CHAQUE source
+ * touchee pour les rendre au projet a la fin (sinon les clips restent tronques dans le Media Pool). */
 function nrPproRemember(touched, item, mediaType) {
   for (var k = 0; k < touched.length; k++) {
     if (touched[k].item === item && touched[k].mediaType === mediaType) return;
@@ -1505,10 +1586,10 @@ function nrPproRestore(touched) {
   }
 }
 
-/* Monte une séquence Premiere depuis les plans découpés (frame-accurate côté SOURCE).
- * Trim source via setInPoint/setOutPoint (secondes du détecteur, déjà au vrai fps),
- * clips posés bout-à-bout (insertClip en secondes). Limite connue : createNewSequence
- * n'expose PAS le fps → la fps de séquence peut différer du clip (pas d'API pour la forcer). */
+/* Monte une sequence Premiere depuis les plans decoupes (frame-accurate cote SOURCE).
+ * Trim source via setInPoint/setOutPoint (secondes du detecteur, deja au vrai fps),
+ * clips poses bout-a-bout (insertClip en secondes). Limite connue : createNewSequence
+ * n'expose PAS le fps -> la fps de sequence peut differer du clip (pas d'API pour la forcer). */
 function NR_ppro_build(p) {
   var proj = app.project;
   if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
@@ -1527,9 +1608,9 @@ function NR_ppro_build(p) {
     });
   }
 
-  // Séquence : celle VISÉE par son nom (destination du profil d'export), sinon l'active en mode
-  // append, sinon une neuve. Sans le ciblage par nom, choisir une séquence existante dans NetsuRush
-  // n'avait aucun effet : tout tombait dans la séquence active.
+  // Sequence : celle VISEE par son nom (destination du profil d'export), sinon l'active en mode
+  // append, sinon une neuve. Sans le ciblage par nom, choisir une sequence existante dans NetsuRush
+  // n'avait aucun effet : tout tombait dans la sequence active.
   var seq = null;
   var created = true;
   if (p.mode === "append") {
@@ -1561,7 +1642,7 @@ function NR_ppro_build(p) {
     var sourceSegs = p.segments || [];
     for (var ri = 0; ri < sourceSegs.length; ri++) {
       var rs = sourceSegs[ri];
-      // Timeline Live enchaîne des plans de sources DIFFÉRENTES : un segment peut porter son propre
+      // Timeline Live enchaine des plans de sources DIFFERENTES : un segment peut porter son propre
       // chemin. Sans `path`, on reste sur la source unique `p.input` (Derush, Recherche, Voix).
       var segItem = rs.path ? sources.get(rs.path) : pitem;
       if (!segItem) continue;
@@ -1597,8 +1678,8 @@ function NR_ppro_build(p) {
     }
   }
 
-  // Rush entier : neutraliser tout In/Out laissé par un montage précédent, puis le restaurer.
-  // (Le chemin par plages a son propre suivi, par source touchée : cf. nrPproRemember.)
+  // Rush entier : neutraliser tout In/Out laisse par un montage precedent, puis le restaurer.
+  // (Le chemin par plages a son propre suivi, par source touchee : cf. nrPproRemember.)
   if (p.whole) {
     var originalIn = null;
     var originalOut = null;
@@ -1665,9 +1746,9 @@ function NR_ppro_build(p) {
     errorCode: count > 0 ? undefined : "NO_SHOTS_INSERTED", error: count > 0 ? undefined : "no shots inserted" });
 }
 
-/* Bornes source d'un plan du document d'échange, en secondes. Les frames sont prioritaires (elles
- * évitent l'arrondi des secondes) et la borne de sortie est INCLUSIVE côté NetsuRush, exclusive
- * côté Premiere — d'où le +1, comme dans NR_ppro_build. */
+/* Bornes source d'un plan du document d'echange, en secondes. Les frames sont prioritaires (elles
+ * evitent l'arrondi des secondes) et la borne de sortie est INCLUSIVE cote NetsuRush, exclusive
+ * cote Premiere - d'ou le +1, comme dans NR_ppro_build. */
 function nrPproClipRange(c, fallbackFps) {
   var fps = Number(c.fps) || Number(fallbackFps) || 0;
   var hasFrames = fps > 0 && typeof c.inFrame === "number" && typeof c.outFrame === "number";
@@ -1677,11 +1758,11 @@ function nrPproClipRange(c, fallbackFps) {
   return { inSec: inSec, outSec: outSec };
 }
 
-/* RECOPIE une timeline entière : chaque plan est posé à sa position ABSOLUE, sur sa piste.
- * NR_ppro_build enchaîne les plans bout-à-bout sur une seule piste — c'est ce qu'il faut pour une
- * sélection de coupes, mais un transfert de montage y perdrait ses trous et son empilement.
+/* RECOPIE une timeline entiere : chaque plan est pose a sa position ABSOLUE, sur sa piste.
+ * NR_ppro_build enchaine les plans bout-a-bout sur une seule piste - c'est ce qu'il faut pour une
+ * selection de coupes, mais un transfert de montage y perdrait ses trous et son empilement.
  * payload = { name, mode, timelineName, clips:[{ path, kind, track, name, fps,
- *             inFrame, outFrame, in, out, tlStart (secondes depuis le début du document) }] }. */
+ *             inFrame, outFrame, in, out, tlStart (secondes depuis le debut du document) }] }. */
 function NR_ppro_place(p) {
   var proj = app.project;
   if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
@@ -1698,8 +1779,8 @@ function NR_ppro_place(p) {
     if (seq) created = false;
   }
   if (!seq) {
-    // Gabarit de la séquence neuve : le premier plan VIDÉO résolu (ses réglages deviennent ceux de
-    // la séquence). À défaut, n'importe quel plan résolu — mieux qu'une séquence au petit bonheur.
+    // Gabarit de la sequence neuve : le premier plan VIDEO resolu (ses reglages deviennent ceux de
+    // la sequence). A defaut, n'importe quel plan resolu - mieux qu'une sequence au petit bonheur.
     var seed = null;
     for (var si = 0; si < clips.length && !seed; si++) {
       if (clips[si].kind === "audio") continue;
@@ -1709,16 +1790,16 @@ function NR_ppro_place(p) {
     seq = nrPproNewSequence(proj, p.name, seed);
     if (!seq) return NRJSON.stringify({ ok: false, errorCode: "SEQUENCE_CREATE_FAILED", error: "sequence creation failed" });
     fpsApplied = nrPproApplySequenceSettings(seq, p.fps, p.width, p.height);
-    seq = nrPproFreshSequence(proj, seq); // les réglages réécrits périment l'objet
+    seq = nrPproFreshSequence(proj, seq); // les reglages reecrits periment l'objet
   }
   nrPproActivate(proj, seq);
-  // Une fois la séquence OUVERTE, `activeSequence` en est l'objet le plus frais que l'API rende.
+  // Une fois la sequence OUVERTE, `activeSequence` en est l'objet le plus frais que l'API rende.
   try {
     var opened = proj.activeSequence;
     if (opened && String(opened.sequenceID) === String(seq.sequenceID)) seq = opened;
   } catch (eOpened) {}
 
-  // Le document part de 0 : sur une séquence déjà montée, on le décale après le contenu existant.
+  // Le document part de 0 : sur une sequence deja montee, on le decale apres le contenu existant.
   var origin = created ? 0 : nrPproTrackEnd(seq);
   var touched = [];
   var placed = 0;
@@ -1728,9 +1809,9 @@ function NR_ppro_place(p) {
   var seqFps = Number(p.fps) || 25;
   try { if (Number(seq.timebase) > 0) seqFps = NR_TICKS_PER_SEC / Number(seq.timebase); } catch (eFps) {}
 
-  // Toutes les pistes du document sont créées AVANT la première pose. Les créer au fil de l'eau
-  // faisait grandir la séquence au milieu d'un montage déjà commencé : le contenu posé pouvait
-  // changer de piste sous nos pieds, et le rapport annonçait la piste demandée, pas celle obtenue.
+  // Toutes les pistes du document sont creees AVANT la premiere pose. Les creer au fil de l'eau
+  // faisait grandir la sequence au milieu d'un montage deja commence : le contenu pose pouvait
+  // changer de piste sous nos pieds, et le rapport annoncait la piste demandee, pas celle obtenue.
   var wantedTracks = { video: 0, audio: 0 };
   for (var w = 0; w < clips.length; w++) {
     var wKind = clips[w].kind === "audio" ? "audio" : "video";
@@ -1748,7 +1829,7 @@ function NR_ppro_place(p) {
     if (!item) { failed++; continue; }
 
     var kind = c.kind === "audio" ? "audio" : "video";
-    var wanted = Math.max(1, Number(c.track) || 1) - 1; // pistes 0-based côté Premiere
+    var wanted = Math.max(1, Number(c.track) || 1) - 1; // pistes 0-based cote Premiere
     var index = wanted;
     if (!nrPproAddTracks(seq, kind, wanted)) {
       index = nrPproTrackList(seq, kind).numTracks - 1;
@@ -1756,8 +1837,8 @@ function NR_ppro_place(p) {
     }
     if (index < 0) { failed++; continue; }
 
-    // MediaType 1 = vidéo seule, 2 = audio seule : le plan vidéo ne repose pas son audio lié, que
-    // le document porte déjà comme plan audio distinct quand il existe.
+    // MediaType 1 = video seule, 2 = audio seule : le plan video ne repose pas son audio lie, que
+    // le document porte deja comme plan audio distinct quand il existe.
     var mediaType = kind === "audio" ? 2 : 1;
     nrPproRemember(touched, item, mediaType);
     try {
@@ -1768,8 +1849,8 @@ function NR_ppro_place(p) {
     var at = nrPproSnapSec(seq, origin + (Number(c.tlStart) || 0));
     var placement = nrPproOverwriteLocated(seq, kind, index, item, at, range);
     if (!placement.ok) {
-      // Le motif de l'échec sort dans le rapport : « aucun plan posé » ne dit pas si la piste
-      // manquait, si Premiere a refusé l'écriture, ou si elle n'a simplement rien produit.
+      // Le motif de l'echec sort dans le rapport : " aucun plan pose " ne dit pas si la piste
+      // manquait, si Premiere a refuse l'ecriture, ou si elle n'a simplement rien produit.
       failed++;
       reportItems.push(nrPproReport(i, "clip.media", "unsupported", placement.locate.method || "overwriteFailed", false));
       continue;
@@ -1799,16 +1880,16 @@ function NR_ppro_place(p) {
   }
   nrPproRestore(touched);
 
-  // Les TITRES après les plans : un graphique posé sur une piste que la vidéo n'a pas encore créée
-  // ferait grandir la séquence en cours de montage.
+  // Les TITRES apres les plans : un graphique pose sur une piste que la video n'a pas encore creee
+  // ferait grandir la sequence en cours de montage.
   var titles = nrPproPlaceTitles(seq, p.graphics || [], p.mogrt, reportItems);
 
   if (!placed && sources.missing.length) {
     return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: sources.missing[0],
       error: "file not found on disk: " + sources.missing[0] });
   }
-  // Cadence RÉELLE de la séquence : les positions sont arrondies à SA grille. Un écart avec celle du
-  // document veut dire des plans décalés — le taire ferait passer un montage faux pour un succès.
+  // Cadence REELLE de la sequence : les positions sont arrondies a SA grille. Un ecart avec celle du
+  // document veut dire des plans decales - le taire ferait passer un montage faux pour un succes.
   var fpsMismatch = Number(p.fps) > 0 && Math.abs(seqFps - Number(p.fps)) > 0.01;
   return NRJSON.stringify({ ok: placed > 0, timeline: seq.name, count: placed, created: created,
     titles: titles || undefined,
@@ -1820,9 +1901,9 @@ function NR_ppro_place(p) {
     error: placed > 0 ? undefined : "no shots placed" });
 }
 
-/* Paramètres TEXTE d'un graphique essentiel. `getMGTComponent()` ne rend rien sur un titre hérité :
- * seul un graphique venu d'un `.mogrt` expose ses contrôles, et c'est justement pour ça qu'on passe
- * par un modèle. Les contrôles de texte du modèle sont reconnus à leur capacité `setValue`. */
+/* Parametres TEXTE d'un graphique essentiel. `getMGTComponent()` ne rend rien sur un titre herite :
+ * seul un graphique venu d'un `.mogrt` expose ses controles, et c'est justement pour ca qu'on passe
+ * par un modele. Les controles de texte du modele sont reconnus a leur capacite `setValue`. */
 function nrPproMgtTextParams(ti) {
   var out = [];
   var mgt = null;
@@ -1833,7 +1914,7 @@ function nrPproMgtTextParams(ti) {
     try {
       var param = mgt.properties[i];
       if (!param || !param.setValue || !param.getValue) continue;
-      // Un contrôle de texte rend une CHAÎNE ; les autres (position, couleur) rendent des nombres
+      // Un controle de texte rend une CHAINE ; les autres (position, couleur) rendent des nombres
       // ou des tableaux. C'est la seule distinction que l'API expose sans deviner un nom de calque.
       var value = null;
       try { value = param.getValue(); } catch (e1) { continue; }
@@ -1843,10 +1924,10 @@ function nrPproMgtTextParams(ti) {
   return out;
 }
 
-/* Pose les TITRES du document, un par `.mogrt` importé. C'est la seule voie qui crée un vrai
- * graphique essentiel : aucune API n'écrit un titre à partir de rien, et l'import d'un générateur
- * FCP7 hérité rend un objet dont ni le corps ni le multi-ligne ne suivent (mesuré).
- * `graphics` = [{ track, text, tlStart, tlEnd (secondes) }], `mogrt` = modèle livré avec le panneau. */
+/* Pose les TITRES du document, un par `.mogrt` importe. C'est la seule voie qui cree un vrai
+ * graphique essentiel : aucune API n'ecrit un titre a partir de rien, et l'import d'un generateur
+ * FCP7 herite rend un objet dont ni le corps ni le multi-ligne ne suivent (mesure).
+ * `graphics` = [{ track, text, tlStart, tlEnd (secondes) }], `mogrt` = modele livre avec le panneau. */
 function nrPproPlaceTitles(seq, graphics, mogrt, report) {
   var placed = 0;
   if (!graphics || !graphics.length) return placed;
@@ -1877,8 +1958,8 @@ function nrPproPlaceTitles(seq, graphics, mogrt, report) {
     }
     placed++;
 
-    // Le texte du modèle est REMPLACÉ par celui du document. Le modèle porte le style (police, corps,
-    // couleur) : c'est lui qui décide de l'allure, le document ne fournit que les mots.
+    // Le texte du modele est REMPLACE par celui du document. Le modele porte le style (police, corps,
+    // couleur) : c'est lui qui decide de l'allure, le document ne fournit que les mots.
     var params = nrPproMgtTextParams(ti);
     var wrote = false;
     for (var p = 0; p < params.length; p++) {
@@ -1890,8 +1971,8 @@ function nrPproPlaceTitles(seq, graphics, mogrt, report) {
       wrote ? "premiereTitleStyleFromTemplate" : "premiereTitleTextWriteUnavailable",
       actual !== null, graphic.text, actual === null ? undefined : actual));
 
-    // Durée : le modèle arrive avec la sienne. Réglable par `end`, vérifié par relecture — un titre
-    // qui garde la durée du modèle déborderait sur la suite du montage.
+    // Duree : le modele arrive avec la sienne. Reglable par `end`, verifie par relecture - un titre
+    // qui garde la duree du modele deborderait sur la suite du montage.
     var wantedEnd = Number(graphic.tlEnd);
     if (wantedEnd > at) {
       var endTime = nrPproTime(wantedEnd);
@@ -1905,14 +1986,14 @@ function nrPproPlaceTitles(seq, graphics, mogrt, report) {
   return placed;
 }
 
-/* IMPORTE une timeline d'échange (FCP7 XML) comme séquence Premiere. payload = { path, name }.
+/* IMPORTE une timeline d'echange (FCP7 XML) comme sequence Premiere. payload = { path, name }.
  *
- * C'est la SEULE voie qui pose un titre : aucune API publique ne crée de texte dans Premiere
- * (`importMGT` exigerait un `.mogrt` livré). L'importeur, lui, lit le `<generatoritem>` du XML et
- * applique en prime les images clés et la vitesse sans passer par nos écritures.
+ * C'est la SEULE voie qui pose un titre : aucune API publique ne cree de texte dans Premiere
+ * (`importMGT` exigerait un `.mogrt` livre). L'importeur, lui, lit le `<generatoritem>` du XML et
+ * applique en prime les images cles et la vitesse sans passer par nos ecritures.
  *
- * La séquence créée est retrouvée par DIFFÉRENCE : `importFiles` ne rend pas ce qu'il a créé, et un
- * XML peut apporter plusieurs séquences (timelines imbriquées). On garde celle qui porte le plus de
+ * La sequence creee est retrouvee par DIFFERENCE : `importFiles` ne rend pas ce qu'il a cree, et un
+ * XML peut apporter plusieurs sequences (timelines imbriquees). On garde celle qui porte le plus de
  * plans, puis on la renomme et on l'ouvre. */
 function NR_ppro_importTimeline(p) {
   var proj = app.project;
@@ -1983,7 +2064,7 @@ function NR_ppro_import(p) {
   try {
     var bin = proj.getInsertionBin ? proj.getInsertionBin() : proj.rootItem;
     for (var i = 0; i < paths.length; i++) {
-      // Fichier absent = boîte modale Premiere (cf. nrPproResolver) → on ne l'envoie jamais à l'import.
+      // Fichier absent = boite modale Premiere (cf. nrPproResolver) -> on ne l'envoie jamais a l'import.
       if (!nrPproFileExists(paths[i])) { missing++; continue; }
       try { if (proj.importFiles([paths[i]], true, bin, false)) count++; } catch (e0) {}
     }
@@ -2004,7 +2085,7 @@ function NR_ppro_snapshot() {
   for (s = 0; s < proj.sequences.numSequences; s++) {
     seq = proj.sequences[s];
     try {
-      // timebase = ticks par frame -> fps exact (gère 23.976 etc.)
+      // timebase = ticks par frame -> fps exact (gere 23.976 etc.)
       fps = null;
       try { fps = NR_TICKS_PER_SEC / Number(seq.timebase); } catch (e0) {}
       w = null; h = null;
@@ -2019,8 +2100,8 @@ function NR_ppro_snapshot() {
     } catch (e3) {}
   }
 
-  // Séquence OUVERTE : aucune API ne l'expose dans la liste, mais NetsuRush en a besoin pour
-  // marquer « (ouverte) » et pour que la destination par défaut du montage soit la bonne.
+  // Sequence OUVERTE : aucune API ne l'expose dans la liste, mais NetsuRush en a besoin pour
+  // marquer " (ouverte) " et pour que la destination par defaut du montage soit la bonne.
   var activeSequence = null;
   try { if (proj.activeSequence) activeSequence = proj.activeSequence.name; } catch (e4) {}
 
@@ -2038,12 +2119,12 @@ function NR_ppro_snapshot() {
 }
 
 /* ---------------------------------------------------------------------------
- * NetsuBoost — optimisation Premiere Pro.
- * Un seul point d'entrée, dispatché sur p.op, pour n'ajouter qu'UNE commande au panneau.
+ * NetsuBoost - optimisation Premiere Pro.
+ * Un seul point d'entree, dispatche sur p.op, pour n'ajouter qu'UNE commande au panneau.
  * ------------------------------------------------------------------------ */
 
-/* Parcourt tous les clips du projet (bins compris). Même parcours que nrPproIndexProject, mais sans
-   dédoublonnage : deux ProjectItems peuvent pointer le même média et chacun a son propre proxy. */
+/* Parcourt tous les clips du projet (bins compris). Meme parcours que nrPproIndexProject, mais sans
+   dedoublonnage : deux ProjectItems peuvent pointer le meme media et chacun a son propre proxy. */
 function nrPproWalkClips(proj, visit) {
   function walk(item, depth) {
     var children = null;
@@ -2061,8 +2142,8 @@ function nrPproWalkClips(proj, visit) {
 }
 
 /* Emplacements des fichiers de travail. Adobe documente setScratchDiskPath mais AUCUN getter : selon
-   la version l'accesseur existe ou non. Absent → null, et la ligne disparaît de l'UI (mergeRead
-   omet les valeurs nulles) plutôt que d'afficher un chemin inventé. */
+   la version l'accesseur existe ou non. Absent -> null, et la ligne disparait de l'UI (mergeRead
+   omet les valeurs nulles) plutot que d'afficher un chemin invente. */
 function nrPproScratch(proj) {
   var out = { videoPreviews: null, audioPreviews: null, autoSave: null };
   var keys = [["videoPreviews", "FirstVideoPreviewFolder"], ["audioPreviews", "FirstAudioPreviewFolder"], ["autoSave", "FirstAutoSaveFolder"]];
@@ -2123,10 +2204,10 @@ function nrPproStats() {
   };
 }
 
-/* Supprime les fichiers de rendu de la séquence (équivalent Séquence ▸ Supprimer les fichiers de
-   rendu). Passe par le QE DOM : c'est la SEULE voie, et Adobe ne le supporte pas — il change d'un
-   build à l'autre. D'où la détection préalable et la signature d'appel tentée dans plusieurs formes
-   plutôt qu'une erreur opaque. */
+/* Supprime les fichiers de rendu de la sequence (equivalent Sequence \u25B8 Supprimer les fichiers de
+   rendu). Passe par le QE DOM : c'est la SEULE voie, et Adobe ne le supporte pas - il change d'un
+   build a l'autre. D'ou la detection prealable et la signature d'appel tentee dans plusieurs formes
+   plutot qu'une erreur opaque. */
 function nrPproDeletePreviews() {
   try { app.enableQE(); } catch (e0) {}
   if (typeof qe === "undefined" || !qe || !qe.project) {
@@ -2175,8 +2256,8 @@ function nrPproPrefsRead() {
   };
 }
 
-/* Applique un lot de réglages. Chaque entrée est indépendante : une propriété en lecture seule est
-   SAUTÉE avec sa raison, elle ne fait pas échouer les autres. */
+/* Applique un lot de reglages. Chaque entree est independante : une propriete en lecture seule est
+   SAUTEE avec sa raison, elle ne fait pas echouer les autres. */
 function nrPproPrefsApply(entries) {
   var proj = app.project;
   var list = entries || [];
@@ -2234,9 +2315,9 @@ function nrPproProxyAudit() {
   return { ok: true, items: items, enableProxies: enableProxies };
 }
 
-/* Attache des proxies déjà encodés. On n'importe JAMAIS ici : un chemin absent du projet est signalé,
-   pas importé en douce (l'import d'un fichier manquant ouvre une modale qui fige l'hôte, cf.
-   nrPproResolver). Les proxies sont activés une seule fois pour tout le lot. */
+/* Attache des proxies deja encodes. On n'importe JAMAIS ici : un chemin absent du projet est signale,
+   pas importe en douce (l'import d'un fichier manquant ouvre une modale qui fige l'hote, cf.
+   nrPproResolver). Les proxies sont actives une seule fois pour tout le lot. */
 function nrPproAttachProxy(pairs) {
   var proj = app.project;
   if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
@@ -2252,7 +2333,7 @@ function nrPproAttachProxy(pairs) {
     if (!item || !item.attachProxy) { failed.push(pair.path); continue; }
     if (!nrPproFileExists(pair.proxy)) { failed.push(pair.path); continue; }
     try {
-      // attachProxy(mediaPath, isHiRes) : 0 = média proxy, et 0 en retour = succès.
+      // attachProxy(mediaPath, isHiRes) : 0 = media proxy, et 0 en retour = succes.
       if (item.attachProxy(pair.proxy, 0) === 0) attached++;
       else failed.push(pair.path);
     } catch (e1) {
@@ -2279,6 +2360,6 @@ function NR_ppro_boost(p) {
       return NRJSON.stringify({ ok: false, error: String(e) });
     }
   }
-  // purge : After Effects seul expose une API de purge de cache ; Premiere n'a rien d'équivalent.
+  // purge : After Effects seul expose une API de purge de cache ; Premiere n'a rien d'equivalent.
   return NRJSON.stringify({ ok: false, code: "UNSUPPORTED_OP", error: "unknown operation: " + String(op) });
 }

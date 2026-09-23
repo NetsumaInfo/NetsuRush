@@ -5,27 +5,33 @@
 
 const { t } = require('../i18n');
 
-/// Names written into the user's After Effects project, in the interface language. Non-ASCII is
-/// escaped so the script reads the same whatever encoding After Effects assumes for the file.
+/// Every non-ASCII character escaped as \uXXXX. The generated script has no BOM, so After Effects
+/// decodes it with the system code page: a raw non-ASCII path or name (a `C:\Users\<Japanese name>`
+/// profile) would break the import, or the whole script under CP932. The escape is valid in strings
+/// and harmless in comments, so it is applied to the finished script.
+function asciiOnly(text) {
+  return text.replace(/[\u0080-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+}
+
+/// Names written into the user's After Effects project, in the interface language.
 function projectNames() {
-  const names = {
+  return JSON.stringify({
     precomp: t('aePrecompName'),
     precompFolder: t('aePrecompFolder'),
     timelinesFolder: t('aeTimelinesFolder'),
     footageFolder: t('aeFootageFolder'),
     audioFolder: t('aeAudioFolder'),
     imagesFolder: t('aeImagesFolder'),
-  };
-  return JSON.stringify(names).replace(/[\u0080-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+  });
 }
 
 function genAeScript(payload, logPath) {
   const json = JSON.stringify(payload);
   const logJson = JSON.stringify(logPath);
-  return `var DATA = ${json};
+  return asciiOnly(`var DATA = ${json};
 var NR_LOG = ${logJson};
 var NR_NAMES = ${projectNames()};
-function nrLog(s) { try { var f = new File(NR_LOG); f.open("a"); f.write(s + "\\n"); f.close(); } catch (e) {} }
+function nrLog(s) { try { var f = new File(NR_LOG); f.encoding = "UTF-8"; f.open("a"); f.write(s + "\\n"); f.close(); } catch (e) {} }
 app.beginUndoGroup("NetsuRush -> After Effects");
 try {
   var comp = app.project.items.addComp(DATA.comp.name, DATA.comp.w, DATA.comp.h, 1.0, DATA.comp.dur, DATA.comp.fps);
@@ -262,7 +268,7 @@ try {
   nrLog("ERROR: " + err.toString() + " (line " + err.line + ")");
 }
 app.endUndoGroup();
-`;
+`);
 }
 
 module.exports = { genAeScript };

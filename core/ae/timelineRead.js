@@ -10,6 +10,11 @@ const { t } = require('../i18n');
 // `collect` below names its track index `t`.
 const tr = t;
 
+/// A number read from Resolve, which may come localized ("23,976") on some systems.
+function localeFloat(value) {
+  return parseFloat(String(value === undefined || value === null ? '' : value).replace(',', '.'));
+}
+
 // "HH:MM:SS:FF" (ou ";FF" drop) → frames. Le TC tourne au fps NOMINAL (round : 24 pour 23.976).
 function tcToFrames(tc, fps) {
   const m = /^(\d+):(\d+):(\d+)[:;](\d+)$/.exec(String(tc || '').trim());
@@ -67,7 +72,7 @@ async function sourceRange(it, tlStart, tlEnd, tcFrames = 0, maxFrame = Infinity
 // mappées côté AE. Renvoie null si l'API n'expose rien (identité).
 async function readTransform(it) {
   const g = async (k, d) => {
-    try { const v = parseFloat(await it.GetProperty(k)); return Number.isFinite(v) ? v : d; }
+    try { const v = localeFloat(await it.GetProperty(k)); return Number.isFinite(v) ? v : d; }
     catch (_) { return d; }
   };
   // FlipX/FlipY sont des booléens → parseFloat(true) = NaN. Lire la valeur brute.
@@ -148,7 +153,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
   if (!tl) tl = await proj.GetCurrentTimeline();
   if (!tl) return { ok: false, error: t('noTimeline') };
 
-  const fps = parseFloat(await tl.GetSetting('timelineFrameRate')) || 24;
+  const fps = localeFloat(await tl.GetSetting('timelineFrameRate')) || 24;
   const width = parseInt(await tl.GetSetting('timelineResolutionWidth'), 10) || 1920;
   const height = parseInt(await tl.GetSetting('timelineResolutionHeight'), 10) || 1080;
   let startFrame = 0;
@@ -283,7 +288,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
                 let file = null;
                 try { file = await doRender(sub, winStart, winStart + len - 1, nm, !hasVid); } catch (_) {}
                 if (file) {
-                  const subFps = parseFloat(await sub.GetSetting('timelineFrameRate')) || fps;
+                  const subFps = localeFloat(await sub.GetSetting('timelineFrameRate')) || fps;
                   items.push({ kind: hasVid ? 'video' : 'audio', track: t, path: file, name: nm,
                     fpsClip: hasVid ? subFps : fps, srcFrames: 0, srcIn: 0, srcOut: len - 1,
                     tlStart: tlS, tlEnd: tlE, xf: null, rendered: true });
@@ -302,7 +307,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
               // Mode 'comp' (au 1er niveau seulement) : la timeline imbriquée devient une précompo.
               if (nestedMode === 'comp' && !group && !place) {
                 const gid = `g${groups.length + 1}`;
-                const gFps = parseFloat(await sub.GetSetting('timelineFrameRate')) || fps;
+                const gFps = localeFloat(await sub.GetSetting('timelineFrameRate')) || fps;
                 const gW = parseInt(await sub.GetSetting('timelineResolutionWidth'), 10) || width;
                 const gH = parseInt(await sub.GetSetting('timelineResolutionHeight'), 10) || height;
                 groups.push({ id: gid, name: nm, w: gW, h: gH, fps: gFps,
@@ -337,7 +342,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
           }
           if (skipPaths && skipPaths.has(fp)) continue;
 
-          const fpsClip = type === 'video' ? (parseFloat(await mpi.GetClipProperty('FPS')) || fps) : fps;
+          const fpsClip = type === 'video' ? (localeFloat(await mpi.GetClipProperty('FPS')) || fps) : fps;
           const srcFrames = parseInt(await mpi.GetClipProperty('Frames'), 10) || 0;
           const tcFrames = type === 'video' ? await mediaStartTcFrames(mpi, fpsClip) : 0;
           const maxFrame = srcFrames > 0 ? srcFrames - 1 : Infinity;

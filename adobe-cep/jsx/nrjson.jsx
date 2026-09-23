@@ -1,6 +1,6 @@
 /*
- * NRJSON — sérialiseur JSON minimal pour ExtendScript (ES3, pas de JSON natif).
- * stringify uniquement (le parse se fait côté panneau, JSON natif de CEF).
+ * NRJSON - serialiseur JSON minimal pour ExtendScript (ES3, pas de JSON natif).
+ * stringify uniquement (le parse se fait cote panneau, JSON natif de CEF).
  */
 var NRJSON = (function () {
   var ESC = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f", "\r": "\\r", '"': '\\"', "\\": "\\\\" };
@@ -11,7 +11,9 @@ var NRJSON = (function () {
       c = s.charAt(i);
       if (ESC[c]) { out += ESC[c]; continue; }
       code = s.charCodeAt(i);
-      if (code < 32) {
+      // Everything outside printable ASCII is escaped: the panel then reads the same text whatever
+      // encoding the bridge assumes for the returned string.
+      if (code < 32 || code > 126) {
         out += "\\u" + ("0000" + code.toString(16)).slice(-4);
       } else {
         out += c;

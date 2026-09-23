@@ -25,7 +25,7 @@
   var coreToken = "";
   var es = null;
   var esRetryTimer = null;
-  var currentLang = "fr";
+  var currentLang = "en";
 
   var TEXT = {
     fr: {
@@ -73,11 +73,13 @@
     HOST_STALE:"errHostStale",QE_UNAVAILABLE:"errQeUnavailable",QE_CALL_FAILED:"errQeCallFailed",
     UNSUPPORTED:"errUnsupportedVersion",NO_PROXY_PAIRS:"errNoProxyPairs",PURGE_FAILED:"errPurgeFailed"
   };
-  function normalizeLang(value) {
+  // A supported panel language for a locale ("ja_JP", "de-DE"), or null.
+  function supportedLang(value) {
     var code = String(value || "").toLowerCase().split(/[-_]/)[0];
-    return TEXT[code] ? code : "fr";
+    return TEXT.hasOwnProperty(code) ? code : null;
   }
-  function tr(key) { return (TEXT[currentLang] && TEXT[currentLang][key]) || TEXT.fr[key] || key; }
+  function normalizeLang(value) { return supportedLang(value) || "en"; }
+  function tr(key) { return (TEXT[currentLang] && TEXT[currentLang][key]) || TEXT.en[key] || key; }
   function trf(key, values) {
     return tr(key).replace(/\{([^}]+)\}/g, function (_, name) {
       return values && values[name] !== undefined ? String(values[name]) : "";
@@ -145,7 +147,7 @@
     // Chaque fichier est évalué SÉPARÉMENT et son échec rapporté : concaténés, le premier refus
     // emportait les suivants sans dire lequel avait cassé.
     for (var i = 0; i < JSX_FILES.length; i++) {
-      code += 'try{$.evalFile("' + JSX_DIR + "/" + JSX_FILES[i] + '");}catch(e){f.push("' + JSX_FILES[i] + ': "+e);}';
+      code += 'try{$.evalFile(' + hostLiteral(JSX_DIR + "/" + JSX_FILES[i]) + ');}catch(e){f.push(' + hostLiteral(JSX_FILES[i] + ": ") + '+e);}';
     }
     cs.evalScript('var f=[];' + code + 'f.length?f.join(" | "):"ok"', function (r) {
       if (r === "ok") { hostStamp = stamp; log(trf("hostReady", { path: JSX_DIR })); }
@@ -187,7 +189,18 @@
     el.btnOpenApp.textContent = coreOnline ? tr("appOpen") : tr("openApp");
     installMenus();
   }
-  var browserLang = (navigator.languages && navigator.languages[0]) || navigator.language || "fr";
+  // Host UI language first, then every browser language, then English. The core's effective
+  // language replaces it on the first heartbeat (see `config:get` below).
+  function initialLang() {
+    var candidates = [hostEnv.appUILocale], i, found;
+    if (navigator.languages) for (i = 0; i < navigator.languages.length; i++) candidates.push(navigator.languages[i]);
+    candidates.push(navigator.language);
+    for (i = 0; i < candidates.length; i++) {
+      found = supportedLang(candidates[i]);
+      if (found) return found;
+    }
+    return "en";
+  }
 
   el.host.textContent = (APP === "ppro" ? "Premiere Pro " : "After Effects ") + hostEnv.appVersion;
 
@@ -313,7 +326,7 @@
         // app-wide, et l'utilisateur peut la changer dans NetsuRush pendant que le panneau est
         // ouvert. Sans ça la coquille restait figée sur la langue lue au chargement.
         rpc("config:get").then(function (cfg) {
-          if (cfg && cfg.lang && normalizeLang(cfg.lang) !== currentLang) applyLanguage(cfg.lang);
+          if (cfg && supportedLang(cfg.lang) && supportedLang(cfg.lang) !== currentLang) applyLanguage(cfg.lang);
         }).catch(function () {});
       })
       .catch(function () {
@@ -632,7 +645,7 @@
    } catch (eMenu) { /* CEP trop ancien pour les menus natifs → boutons de l'accueil */ }
   }
   installMenus.listenerAdded = false;
-  applyLanguage(browserLang);
+  applyLanguage(initialLang());
 
   // ---- Thème hôte : suit le fond du thème Adobe (l'app reste sombre, le panneau s'accorde). ----
   function applySkin() {
