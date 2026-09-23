@@ -318,7 +318,7 @@ function attachFiles(form, r, ctx, reportId) {
 function relayError(code, detail) {
   if (code === 429) return t('reportRateLimited');
   if (code === 503) return t('webhookMissing');
-  return `${t('reportSendFailed')} (HTTP ${code}). ${String(detail).slice(0, 200)}`;
+  return t('withDetail', { message: `${t('reportSendFailed')} (HTTP ${code})`, detail: String(detail).slice(0, 200) });
 }
 
 // Discord : message multipart (payload_json + fichiers). Même corps sur les deux voies — le relais
@@ -363,7 +363,7 @@ async function submitBugReport(request) {
     }
     return { ok: true, message: t('reportSent'), reportId };
   } catch (e) {
-    return { ok: false, message: t('reportSendFailed') + ' : ' + String((e && e.message) || e) };
+    return { ok: false, message: t('withDetail', { message: t('reportSendFailed'), detail: String((e && e.message) || e) }) };
   }
 }
 

@@ -226,12 +226,12 @@ function resolveToken(ctx, token, kindHint) {
   if (value.startsWith('asset:')) {
     const sha = value.slice(6);
     const info = blobs.blobInfo(ctx.handle.db, sha);
-    if (!info) return { path: '', missing: { name: 'média', size: 0, kind: kindHint } };
+    if (!info) return { path: '', missing: { name: t('mediaFallbackName'), size: 0, kind: kindHint } };
     // Nom déterministe = déduplication naturelle du cache d'assets : réimporter deux fois le même
     // board ne recopie pas les octets. L'extraction est EN FLUX (un « Original » peut peser des Go).
     const dest = path.join(ctx.refStore.assetsDir, `${sha}.${info.ext}`);
     if (!fs.existsSync(dest) && !blobs.extractTo(ctx.handle.db, sha, dest)) {
-      return { path: '', missing: { name: 'média', size: info.size, kind: kindHint } };
+      return { path: '', missing: { name: t('mediaFallbackName'), size: info.size, kind: kindHint } };
     }
     return { path: dest, missing: null };
   }

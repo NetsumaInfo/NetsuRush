@@ -156,7 +156,7 @@ function detokenizeV1Item(item, resolveToken) {
   if (!ref.startsWith('asset:') && !ref.startsWith('ref:')) return item;
   const { path: p, missing } = resolveToken(ref, item.kind);
   if (p) return { ...item, ref: p, missing: undefined };
-  return { ...item, ref: '', missing: missing || item.missing || { name: 'média', size: 0, kind: item.kind } };
+  return { ...item, ref: '', missing: missing || item.missing || { name: t('mediaFallbackName'), size: 0, kind: item.kind } };
 }
 
 /**

@@ -524,7 +524,7 @@ async function exportCapabilities(opts = {}) {
 
 // Plan FICTIF de l'aperçu de nommage : des valeurs qui exercent tous les jetons (une source nommée,
 // des bornes non rondes, un lot de plusieurs plans) sans toucher au disque.
-const PREVIEW_CLIP = { input: 'rush-01.mkv', start: 12.34, end: 18.5, label: 'plan' };
+const PREVIEW_CLIP = { input: 'rush-01.mkv', start: 12.34, end: 18.5 };
 const PREVIEW_TOTAL = 3;
 
 /**
@@ -551,7 +551,7 @@ function previewName(opts) {
     total,
     start: clip.start,
     end: clip.end,
-    label: clip.label,
+    label: clip.label ?? t('shotFileSuffix'),
     profile: profile.name,
     codec: profile.workflow === 'video_encode' ? profile.codec : 'copy',
     container: ext,

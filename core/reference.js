@@ -242,7 +242,7 @@ function createReferenceStore(dataDir) {
       const data = JSON.stringify({
         items: scene.items || [], view: scene.view || null, collaboration, media, preview,
       });
-      backend.put(id, scene.name || 'Sans titre', data, ts);
+      backend.put(id, scene.name || t('untitled'), data, ts);
       return { ok: true, id, updatedAt: ts };
     } catch (e) {
       return { ok: false, error: String(e) };
