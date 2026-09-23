@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 import {
   subscribeConsole, clearConsole, serializeConsole, getConsoleSnapshot, type ConsoleEntry,
 } from "@/lib/appConsole";
@@ -100,7 +100,7 @@ export function ConsolePanel() {
           ) : (
             visible.map((e) => (
               <div key={e.id} className={cn("flex gap-2 break-all whitespace-pre-wrap", LEVEL_CLASS[e.level])}>
-                <span className="shrink-0 text-muted-foreground">{new Date(e.t).toLocaleTimeString()}</span>
+                <span className="shrink-0 text-muted-foreground">{new Date(e.t).toLocaleTimeString(uiLocale())}</span>
                 <span className="shrink-0 text-muted-foreground">{e.source}</span>
                 <span className="min-w-0">{e.message}</span>
                 {(e.repeat ?? 1) > 1 && (

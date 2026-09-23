@@ -12,13 +12,14 @@ import {
 } from "./scriptShared";
 import { scriptEditorApi } from "./editor/editorApi";
 import { useScript } from "./useScript";
+import { uiLocale } from "@/lib/utils";
 
 function ago(ms: number): string {
   const d = Date.now() - ms;
   if (d < 60_000) return i18n.t("script:recordings.justNow");
   if (d < 3_600_000) return i18n.t("script:recordings.minutesAgo", { count: Math.floor(d / 60_000) });
   if (d < 86_400_000) return i18n.t("script:recordings.hoursAgo", { count: Math.floor(d / 3_600_000) });
-  return new Date(ms).toLocaleDateString();
+  return new Date(ms).toLocaleDateString(uiLocale());
 }
 
 export function readScriptAudioDirs() {

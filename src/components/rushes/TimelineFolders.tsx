@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, Folder, Check, Clapperboard, CheckSquare, FolderOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn, thumbTime } from "@/lib/utils";
+import { cn, thumbTime, uiLocale } from "@/lib/utils";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from "@/components/ui/context-menu";
 import { LazyThumb } from "./LazyThumb";
 import { warmGenerateThumbs, warmResolveThumbs } from "@/lib/thumbCache";
@@ -32,8 +32,8 @@ export function TimelineFolders({
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const toggleFolder = (p: string) => setCollapsed((s) => { const n = new Set(s); n.has(p) ? n.delete(p) : n.add(p); return n; });
   const cmp = (a: string, b: string) => sortDir === "az"
-    ? a.localeCompare(b, "fr", { numeric: true })
-    : b.localeCompare(a, "fr", { numeric: true });
+    ? a.localeCompare(b, uiLocale(), { numeric: true })
+    : b.localeCompare(a, uiLocale(), { numeric: true });
 
   const tree = useMemo(() => {
     const root: TLNode = { path: "", name: "", children: [], items: [] };

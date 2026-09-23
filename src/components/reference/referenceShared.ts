@@ -5,6 +5,7 @@
 
 import { nr, type NetsuEmbed, type NetsuLevel, type NetsuQuality } from "@/lib/bridge";
 import i18n from "@/i18n";
+import { uiLocale } from "@/lib/utils";
 import { comboFromEvent, isCompleteCombo, type ShortcutMap } from "@/lib/shortcuts";
 import { collabMediaSrc, isCollabRef, isCoreFileRef } from "@/lib/collab/currentProject";
 import { embedSrc } from "./embeds";
@@ -320,7 +321,7 @@ export async function loadSystemFonts(): Promise<string[]> {
     if (typeof q === "function") {
       const fonts = await q();
       const fams = Array.from(new Set(fonts.map((f) => f.family)))
-        .sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+        .sort((a, b) => a.localeCompare(b, uiLocale(), { sensitivity: "base" }));
       if (fams.length) return (_systemFonts = fams);
     }
   } catch { /* API absente ou permission refusée → repli */ }

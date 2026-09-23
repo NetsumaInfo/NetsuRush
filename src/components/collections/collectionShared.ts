@@ -1,5 +1,6 @@
 // Helpers partagés de l'onglet Collections : palette de labels couleur, tri, filtre, préférences de vue.
 import { type CollectionShot, type CollectionMeta, type CollectionFolder } from "@/lib/bridge";
+import { uiLocale } from "@/lib/utils";
 
 // Labels couleur (inspirés des couleurs de clip Resolve) — un seul label par plan, sert au tri/filtre.
 // `nameKey` = clé i18n (ns « collections ») résolue au rendu.
@@ -53,7 +54,7 @@ export function sortShots(list: CollectionShot[], key: CollSortKey): CollectionS
   const out = [...list];
   switch (key) {
     case "added-asc": return out.sort((a, b) => (a.addedAt ?? 0) - (b.addedAt ?? 0));
-    case "name": return out.sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+    case "name": return out.sort((a, b) => a.name.localeCompare(b.name, uiLocale(), { numeric: true }));
     case "dur-desc": return out.sort((a, b) => dur(b) - dur(a));
     case "dur-asc": return out.sort((a, b) => dur(a) - dur(b));
     case "rating-desc": return out.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || (b.addedAt ?? 0) - (a.addedAt ?? 0));
@@ -85,7 +86,7 @@ export function filterShots(list: CollectionShot[], f: ShotFilter): CollectionSh
 export function collectTags(list: CollectionShot[]): string[] {
   const set = new Set<string>();
   for (const s of list) for (const t of s.tags ?? []) set.add(t);
-  return [...set].sort((a, b) => a.localeCompare(b, "fr"));
+  return [...set].sort((a, b) => a.localeCompare(b, uiLocale()));
 }
 
 // ---------------------------------------------------------------------------
@@ -108,7 +109,7 @@ export const LIST_SORT_KEYS = Object.keys(LIST_SORT_LABELS) as CollListSort[];
 export function sortCollections(list: CollectionMeta[], key: CollListSort): CollectionMeta[] {
   const out = [...list];
   switch (key) {
-    case "name": return out.sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+    case "name": return out.sort((a, b) => a.name.localeCompare(b.name, uiLocale(), { numeric: true }));
     case "count-desc": return out.sort((a, b) => b.count - a.count || (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
     case "count-asc": return out.sort((a, b) => a.count - b.count || (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
     case "recent":
@@ -150,7 +151,7 @@ export function folderTrail(folders: CollectionFolder[], id: string | null): Col
   return out;
 }
 export function childFolders(folders: CollectionFolder[], parentId: string | null): CollectionFolder[] {
-  return folders.filter((f) => (f.parentId ?? null) === parentId).sort((a, b) => a.name.localeCompare(b.name, "fr", { numeric: true }));
+  return folders.filter((f) => (f.parentId ?? null) === parentId).sort((a, b) => a.name.localeCompare(b.name, uiLocale(), { numeric: true }));
 }
 // Préférences d'AFFICHAGE des cartes de collection (résumé du contenu) — persistées.
 export interface CollDisplay { labels: boolean; tags: boolean; description: boolean }

@@ -27,6 +27,7 @@ import { nr } from "@/lib/bridge";
 import type { OptimizeDiagnosis, OptimizePref, OptimizePrefBackup } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { errorText } from "@/lib/errorText";
+import { uiLocale } from "@/lib/utils";
 
 type Val = boolean | number | string;
 
@@ -252,7 +253,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
                 <TooltipTrigger render={
                   <Button variant="outline" size="sm" disabled={busy} onClick={() => restore(b.name)}>
                     <RotateCcw className="h-3.5 w-3.5" />
-                    {new Date(b.at).toLocaleString()}
+                    {new Date(b.at).toLocaleString(uiLocale())}
                   </Button>
                 } />
                 <TooltipContent>{t("prefs.restore")} · {b.files.join(", ")}</TooltipContent>

@@ -7,7 +7,7 @@ import {
   ImageUp, History, Settings2, FilePlus2, FolderOpen, FileCheck2, FileWarning,
   Star, Trash2, EyeOff, FolderSearch, Users,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
 import { logError } from "@/lib/appLog";
 import type { NetsuRecent, RefSceneMeta } from "@/lib/bridge";
@@ -33,15 +33,15 @@ const HomeCollabNotices = lazy(() =>
 );
 import type { CollabCardStatus } from "./HomeCollabNotices";
 
-const RTF = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
+const rtf = () => new Intl.RelativeTimeFormat(uiLocale(), { numeric: "auto" });
 function relDate(ts: number): string {
   const diff = ts - Date.now();
   const abs = Math.abs(diff);
   const min = 60_000, hour = 60 * min, day = 24 * hour;
-  if (abs < hour) return RTF.format(Math.round(diff / min), "minute");
-  if (abs < day) return RTF.format(Math.round(diff / hour), "hour");
-  if (abs < 30 * day) return RTF.format(Math.round(diff / day), "day");
-  return RTF.format(Math.round(diff / (30 * day)), "month");
+  if (abs < hour) return rtf().format(Math.round(diff / min), "minute");
+  if (abs < day) return rtf().format(Math.round(diff / hour), "hour");
+  if (abs < 30 * day) return rtf().format(Math.round(diff / day), "day");
+  return rtf().format(Math.round(diff / (30 * day)), "month");
 }
 
 const LS_FAV = "nr-ref-favorites";

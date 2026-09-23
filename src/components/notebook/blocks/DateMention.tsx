@@ -6,12 +6,13 @@ import { createReactInlineContentSpec } from "@blocknote/react";
 import { CalendarDays } from "lucide-react";
 import { MiniCalendar } from "./MiniCalendar";
 import { useViewportAnchor } from "@/lib/useViewportAnchor";
+import { uiLocale } from "@/lib/utils";
 
 // ISO (YYYY-MM-DD) → libellé FR lisible ; vide → « date ».
 function formatFr(iso: string): string {
   const d = iso ? new Date(iso + "T00:00:00") : null;
   if (!d || isNaN(d.getTime())) return "date";
-  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+  return d.toLocaleDateString(uiLocale(), { day: "numeric", month: "short", year: "numeric" });
 }
 
 function DateMentionView({ date, onChange }: { date: string; onChange: (iso: string) => void }) {

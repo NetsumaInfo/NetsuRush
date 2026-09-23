@@ -12,9 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import type { RefSceneMeta } from "@/lib/bridge";
 import { useBoard } from "./useReferenceBoard";
 import type { useScenePersistence } from "./useScenePersistence";
+import { uiLocale } from "@/lib/utils";
 
 function fmtDate(ts: number): string {
-  try { return new Date(ts).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }); }
+  try { return new Date(ts).toLocaleString(uiLocale(), { dateStyle: "short", timeStyle: "short" }); }
   catch { return ""; }
 }
 

@@ -2,6 +2,7 @@
 // à la fois par le store, les composants et le bridge. Un carnet = un espace ; il contient un ARBRE de
 // pages ; chaque page = un document par blocs (BlockNote) + d'éventuelles databases (bloc /database).
 import i18n from "@/i18n";
+import { uiLocale } from "@/lib/utils";
 
 // Bloc BlockNote sérialisé — on ne type pas l'intérieur (dépend de la lib) : c'est du JSON opaque.
 export type NoteBlock = Record<string, unknown>;
@@ -93,7 +94,7 @@ export function formatDate(value: unknown, fmt: DateFormat = "friendly", include
     case "iso": out = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; break;
     case "us": out = `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`; break;
     case "dmy": out = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`; break;
-    default: out = d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+    default: out = d.toLocaleDateString(uiLocale(), { day: "numeric", month: "short", year: "numeric" });
   }
   if (includeTime && s.length > 10) out += ` ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   return out;
@@ -103,7 +104,7 @@ export function formatDate(value: unknown, fmt: DateFormat = "friendly", include
 export function formatTimestamp(ms: unknown): string {
   const n = typeof ms === "number" ? ms : Number(ms);
   if (!n || isNaN(n)) return "";
-  return new Date(n).toLocaleString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(n).toLocaleString(uiLocale(), { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 // Élément d'une cellule « Liste de tâches » (checklist) : cases cochables + progression.

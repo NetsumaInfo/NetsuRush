@@ -7,7 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { basename } from "@/lib/utils";
+import { basename, uiLocale } from "@/lib/utils";
 import { useApp } from "@/store";
 import type { AdobeClip, AdobeSequence, AdobeSnapshot } from "@/lib/bridge";
 
@@ -129,7 +129,7 @@ export function AdobeSnapshotView({ snap }: { snap: AdobeSnapshot | null | undef
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <span className="font-medium text-foreground">{snap.project}</span>
         <span>· v{snap.appVersion}</span>
-        <span>· {t("snapshot.receivedAt", { time: new Date(snap.at).toLocaleTimeString() })}</span>
+        <span>· {t("snapshot.receivedAt", { time: new Date(snap.at).toLocaleTimeString(uiLocale()) })}</span>
       </div>
 
       <Card className="block p-4">

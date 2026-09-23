@@ -16,7 +16,7 @@ import { Check, ChevronDown, History, Sparkles, Undo2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 import { sourceDiff } from "@/lib/flowDiff";
 import type { FlowState } from "@/lib/bridge";
 import type { FlowOperation, FlowProposal } from "@/components/flow/useFlowAgent";
@@ -175,7 +175,7 @@ function ChangeSet({ summary, operations, state, previousHtml }: {
 
 /** Heure courte, sans dépendance : l'historique se lit dans la session en cours. */
 const clock = (at: number) =>
-  new Date(at).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  new Date(at).toLocaleTimeString(uiLocale(), { hour: "2-digit", minute: "2-digit" });
 
 /// Les modifications, DANS le fil de l'IA.
 ///

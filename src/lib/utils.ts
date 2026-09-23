@@ -62,12 +62,18 @@ export function fmtTime(t: number, opts: { centis?: boolean; hours?: boolean; pa
   return out;
 }
 
+// The locale every date, time, number and sort order is written in: the interface language,
+// never the OS locale nor a hardcoded "fr-FR".
+export function uiLocale(): string {
+  return i18n.language || "fr";
+}
+
 // Bytes → "1,5 Go" in French, "1.5 GB" in English: the unit and the decimal mark follow the UI
 // language. Single source on the renderer side, so a cache, an export or an embedded media file
 // shows its size the same way everywhere.
 const BYTE_UNITS = ["kilobyte", "megabyte", "gigabyte", "terabyte"] as const;
 export function fmtBytes(n: number | undefined | null): string {
-  const lang = i18n.language || "fr";
+  const lang = uiLocale();
   const bytes = n && n > 0 ? n : 0;
   if (bytes < 1024) return `${new Intl.NumberFormat(lang).format(bytes)} ${lang.startsWith("fr") ? "o" : "B"}`;
   let value = bytes / 1024;

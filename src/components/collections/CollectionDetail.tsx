@@ -37,6 +37,7 @@ import {
   EMPTY_FILTER, SORT_KEYS, SORT_LABELS, type CollSortKey, type ShotFilter,
 } from "./collectionShared";
 import { errorText } from "@/lib/errorText";
+import { uiLocale } from "@/lib/utils";
 
 // Sous cette largeur la vue passe en colonne (lecteur en tête, grille dessous) et la grille garde
 // toujours MIN_GRID_W : mêmes seuils que le Découpage, qui vit dans les mêmes contenants étroits
@@ -297,7 +298,7 @@ export function CollectionDetail({ id }: { id: string }) {
   const selectAllVisible = () => setSel(selCount ? new Set() : new Set(items.map(({ shot }) => shot.id).filter((sid): sid is string => !!sid)));
   const inspected = selCount === 1 ? (coll?.shots.find((s) => s.id && sel.has(s.id)) ?? null) : null;
   // Suggestions de tags = tags de la collection + registre global (réutilisation cross-collections).
-  const tagSuggestions = useMemo(() => [...new Set([...allTags, ...collectionTags])].sort((a, b) => a.localeCompare(b, "fr")), [allTags, collectionTags]);
+  const tagSuggestions = useMemo(() => [...new Set([...allTags, ...collectionTags])].sort((a, b) => a.localeCompare(b, uiLocale())), [allTags, collectionTags]);
   // Plans ciblés par l'export du panneau (sélection ou tout).
   const panelExportClips = (): ExportClipInput[] => selectedShots().map((s) => ({ input: s.path, start: s.in, end: s.out }));
 

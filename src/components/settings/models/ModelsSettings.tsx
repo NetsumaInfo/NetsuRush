@@ -31,6 +31,7 @@ import { ErrorReportButton } from "@/components/common/ErrorReportButton";
 import { useModelManager, type ModelManager } from "./useModelManager";
 import { useSearchModel, type SearchModelPicker } from "./useSearchModel";
 import { isModelCompatible, useCompatibility } from "@/hooks/useCompatibility";
+import { uiLocale } from "@/lib/utils";
 
 // Tri APPLIQUÉ DANS chaque section (les sections gardent l'ordre métier de TASK_ORDER).
 // `default` = ordre du catalogue (recommandé en tête).
@@ -81,7 +82,7 @@ const sizeOf = (m: ModelEntry, mgr: ModelManager) => {
 function sortModels(models: ModelEntry[], key: SortKey, dir: SortDir, mgr: ModelManager): ModelEntry[] {
   if (key === "default") return dir === "asc" ? models : [...models].reverse();
   const cmp = key === "name"
-    ? (a: ModelEntry, b: ModelEntry) => a.label.localeCompare(b.label, "fr")
+    ? (a: ModelEntry, b: ModelEntry) => a.label.localeCompare(b.label, uiLocale())
     : key === "vram"
       ? (a: ModelEntry, b: ModelEntry) => a.vramGB - b.vramGB || sizeOf(a, mgr) - sizeOf(b, mgr)
       : (a: ModelEntry, b: ModelEntry) => sizeOf(a, mgr) - sizeOf(b, mgr);

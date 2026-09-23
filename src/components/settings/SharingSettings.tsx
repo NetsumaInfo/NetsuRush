@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { SectionTitle } from "./rows";
+import { uiLocale } from "@/lib/utils";
 
 type AuthUser = { name?: string | null; image?: string | null } | null | undefined;
 type Profile = {
@@ -226,7 +227,7 @@ function SharingInner() {
     setBusy(true);
     try {
       const name = t("projects.unnamed", {
-        date: new Date(project.createdAt).toLocaleDateString(),
+        date: new Date(project.createdAt).toLocaleDateString(uiLocale()),
       });
       const binding = await surface.adopt(project.projectId, name);
       setBindings((current) => new Map(current).set(binding.projectId, binding));
@@ -494,7 +495,7 @@ function SharingInner() {
                   {absent.map((project) => projectRow(
                     project,
                     t("projects.unnamed", {
-                      date: new Date(project.createdAt).toLocaleDateString(),
+                      date: new Date(project.createdAt).toLocaleDateString(uiLocale()),
                     }),
                     true,
                   ))}
