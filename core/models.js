@@ -827,7 +827,9 @@ function extractZipByBasename(archive, outDir, names) {
     ].join('\n');
     const p = spawn(PYTHON, ['-c', code, archive, outDir, ...names], { env: DETECT_ENV, windowsHide: true });
     let stdout = '', tail = '';
+    p.stdout.setEncoding('utf8');
     p.stdout.on('data', (b) => { stdout += b.toString(); });
+    p.stderr.setEncoding('utf8');
     p.stderr.on('data', (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); });
     p.on('close', (exitCode) => resolve(exitCode === 0
       ? { ok: true, extracted: stdout.trim().split('|').filter(Boolean) }
@@ -1375,6 +1377,7 @@ function pyImportState(mods) {
     let out = '';
     const finish = (state, detail = '') => { if (!done) { done = true; resolve({ state, detail }); } };
     const p = spawn(PYTHON, ['-c', PY_IMPORT_PROBE, ...mods], { env: DETECT_ENV });
+    p.stdout.setEncoding('utf8');
     p.stdout.on('data', (b) => { out += b.toString(); });
     p.on('close', (code) => finish(code === 0 ? 'ok' : code === 4 ? 'broken' : 'missing', out.trim()));
     p.on('error', () => finish('missing'));
@@ -1446,6 +1449,7 @@ async function torchConstraintFile() {
   const pins = await new Promise((resolve) => {
     let out = '';
     const p = spawn(PYTHON, ['-c', code], { env: DETECT_ENV, windowsHide: true });
+    p.stdout.setEncoding('utf8');
     p.stdout.on('data', (b) => { out += b.toString(); });
     p.on('close', (c) => resolve(c === 0 ? out.trim() : ''));
     p.on('error', () => resolve(''));
@@ -1480,7 +1484,9 @@ function pipInstall(id, args, env, ctrl) {
     const unbind = bindCancelable(ctrl, p);
     let tail = '';
     const cap = (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); };
+    p.stdout.setEncoding('utf8');
     p.stdout.on('data', cap);
+    p.stderr.setEncoding('utf8');
     p.stderr.on('data', cap);
     p.on('close', (code) => {
       unbind();
@@ -1497,6 +1503,7 @@ function pipUninstall(packageName) {
     const p = spawn(PYTHON, ['-m', 'pip', 'uninstall', '--yes', packageName], { env: DETECT_ENV, windowsHide: true });
     let tail = '';
     const cap = (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); };
+    p.stdout.setEncoding('utf8'); p.stderr.setEncoding('utf8');
     p.stdout.on('data', cap); p.stderr.on('data', cap);
     p.on('close', (code) => resolve(code === 0 ? { ok: true } : { ok: false, error: tail.trim().split(/\r?\n/).pop() || `pip code ${code}` }));
     p.on('error', (e) => resolve({ ok: false, error: String(e) }));
@@ -1509,7 +1516,9 @@ function extractZipMember(archive, member, outDir, ctrl) {
     const p = spawn(PYTHON, ['-c', code, archive, member, outDir], { env: DETECT_ENV, windowsHide: true });
     const unbind = bindCancelable(ctrl, p);
     let stdout = '', tail = '';
+    p.stdout.setEncoding('utf8');
     p.stdout.on('data', (b) => { stdout += b.toString(); });
+    p.stderr.setEncoding('utf8');
     p.stderr.on('data', (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); });
     p.on('close', (code) => {
       unbind();
@@ -1534,6 +1543,7 @@ function extractZipArchive(archive, outDir, ctrl) {
     const p = spawn(PYTHON, ['-c', code, archive, outDir], { env: DETECT_ENV, windowsHide: true });
     const unbind = bindCancelable(ctrl, p);
     let tail = '';
+    p.stderr.setEncoding('utf8');
     p.stderr.on('data', (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); });
     p.on('close', (exitCode) => {
       unbind();
@@ -1732,6 +1742,7 @@ function prefetchModels(code, emit, id) {
     const p = spawn(PYTHON, ['-c', code], { env: DETECT_ENV });
     let tail = '';
     const cap = (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); };
+    p.stdout.setEncoding('utf8'); p.stderr.setEncoding('utf8');
     p.stdout.on('data', cap); p.stderr.on('data', cap);
     p.on('close', (c) => resolve(c === 0 ? { ok: true } : { ok: false, error: `${t('downloadFailed')} (${tail.trim().split('\n').pop() || 'code ' + c})` }));
     p.on('error', (e) => resolve({ ok: false, error: t('withDetail', { message: `Python — ${t('unavailable')}`, detail: String(e) }) }));

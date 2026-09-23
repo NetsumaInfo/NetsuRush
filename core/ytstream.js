@@ -107,7 +107,9 @@ function runYtdlp(id, cookiesBrowser, cookiesFile) {
     const child = spawn(PY, args, { env: DETECT_ENV });
     let out = "", err = "";
     const killer = setTimeout(() => { try { child.kill("SIGKILL"); } catch (_) {} }, RESOLVE_TIMEOUT_MS);
+    child.stdout.setEncoding("utf8");
     child.stdout.on("data", (d) => { out += d.toString(); });
+    child.stderr.setEncoding("utf8");
     child.stderr.on("data", (d) => { err += d.toString(); });
     // ENOENT = the tool is absent, not an invalid link. The raw message ("spawn python ENOENT")
     // named neither what is missing nor how to put it there: the user saw an empty player and a log

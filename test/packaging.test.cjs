@@ -128,7 +128,7 @@ test('first-run setup imports each selected module pack before declaring success
   assert.match(probes, /voice\s*=\s*'import faster_whisper, onnx_asr, silero_vad, soundfile, librosa'/);
   assert.doesNotMatch(probes, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
   assert.match(probes, /_patch_basicsr\(\); import realesrgan, basicsr, spandrel, rembg/);
-  assert.match(probes, /Fail "Le module \$moduleId est installé mais inutilisable/);
+  assert.match(probes, /Fail \(\(T 'moduleBroken'\) -f \$moduleId\)/);
   // Sondé APRÈS la normalisation ONNX : rembg tirerait sinon le runtime qu'on s'apprête à remplacer.
   assert.ok(setup.indexOf('ONNX Runtime $OnnxBackend') < setup.indexOf('$packProbes'));
 });
@@ -180,7 +180,7 @@ test('first-run setup downgrades the ONNX backend when its provider is missing',
   assert.match(setup, /from nrdevice import prepare_onnx_dlls/);
   assert.match(setup, /CUDAExecutionProvider/);
   assert.match(setup, /DmlExecutionProvider/);
-  assert.match(setup, /-> configuration en CPU/);
+  assert.match(setup, /-> using CPU/);
   // La sonde doit précéder l'écriture de nr.config.json, sinon elle ne corrige rien.
   assert.ok(setup.indexOf('InferenceSession') < setup.indexOf('onnxBackend   = $OnnxBackend'));
 });
@@ -223,7 +223,7 @@ test('anime face model installs its own ONNX Runtime when the venv has none', ()
 test('first-run setup refuses to start without enough free disk space', () => {
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
   assert.match(setup, /\$MinFreeGb = 3/);
-  assert.match(setup, /Fail "Espace disque insuffisant/);
+  assert.match(setup, /Fail \(\(T 'diskLow'\) -f /);
   // Mesuré AVANT le premier téléchargement, sinon le contrôle ne sert à rien.
   assert.ok(setup.indexOf('$MinFreeGb') < setup.indexOf("Stage 'python'"));
 });
@@ -231,7 +231,7 @@ test('first-run setup refuses to start without enough free disk space', () => {
 test('first-run setup verifies the mandatory TransNetV2 import', () => {
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
   assert.match(setup, /import transnetv2_pytorch; from transnetv2_pytorch import TransNetV2/);
-  assert.match(setup, /TransNetV2 absent ou non importable/);
+  assert.match(setup, /Fail \(T 'transnetFailed'\)/);
   const coreSetup = fs.readFileSync(path.join(root, 'core', 'setup.js'), 'utf8');
   assert.match(coreSetup, /function probeRuntime\(config = CONFIG\)/);
   assert.match(coreSetup, /from transnetv2_pytorch import TransNetV2/);
@@ -391,7 +391,7 @@ test('OmniShotCut is installed and verified from the bundled local package', () 
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
   assert.match(setup, /vendor\\OmniShotCut/);
   assert.match(setup, /import omnishotcut; import decord/);
-  assert.match(setup, /Fail "OmniShotCut absent ou non importable"/);
+  assert.match(setup, /Fail \(T 'omniImport'\)/);
   const models = fs.readFileSync(path.join(root, 'core', 'models.js'), 'utf8');
   assert.match(models, /OMNISHOTCUT_PIP/);
   assert.match(models, /pipCheck: \['omnishotcut', 'decord'\]/);

@@ -9,18 +9,18 @@
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
-const { CONFIG, PYTHON, DETECT_ENV, ROTO_DIR, ML_BACKEND } = require('./config');
+const { PYTHON, DETECT_ENV, ROTO_DIR, ML_BACKEND } = require('./config');
 const { modelDir } = require('./models');
 const { hasFiles: hasWeights } = require('./utils');
 const logbus = require('./logbus');
-const { t } = require('./i18n');
+const { t, language } = require('./i18n');
 
 // Env du daemon roto : poids SAM + MatAnyone (refine) + LaMa/MiniMax (removal), pris dans
 // NR_HOME/models via le manager. Le python retombe sur le cache HF si un chemin manque.
 function samEnv() {
   // NR_LANG: the sidecar writes its messages in the interface language (python/nri18n.py).
   /** @type {NodeJS.ProcessEnv} */
-  const env = { ...DETECT_ENV, NR_LANG: CONFIG.lang || 'fr' };
+  const env = { ...DETECT_ENV, NR_LANG: language() };
   // Du meilleur masque au plus léger : on prend le premier réellement installé. EdgeTAM ferme la
   // marche — 56 Mo, il tourne là où SAM 2.1 ne tient pas, mais ses masques sont plus grossiers.
   for (const id of ['sam2.1-large', 'sam2.1', 'sam2.1-small', 'sam2.1-tiny', 'edgetam']) {
@@ -58,6 +58,7 @@ function makeRotoDaemon() {
   function start() {
     if (proc) return;
     proc = spawn(PYTHON, [ROTO_SCRIPT, 'serve'], { env: samEnv() });
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (b) => {
       buf += b.toString();
       let i;
@@ -71,6 +72,7 @@ function makeRotoDaemon() {
         } catch (_) { /* ligne non-JSON ignorée */ }
       }
     });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (b) => { const s = b.toString(); logbus.py('roto', s); if (curProg) curProg(s); });
     const onDead = () => { proc = null; for (const p of pending.values()) p({ ok: false, error: t('rotoInterrupted') }); pending.clear(); };
     proc.on('close', onDead); proc.on('error', onDead);

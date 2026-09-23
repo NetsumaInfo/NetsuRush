@@ -22,8 +22,8 @@ test('a manifest URL counts as a resolve failure, not a playable stream', async 
   const originalSpawn = childProcess.spawn;
   childProcess.spawn = () => {
     const child = new EventEmitter();
-    child.stdout = new EventEmitter();
-    child.stderr = new EventEmitter();
+    child.stdout = Object.assign(new EventEmitter(), { setEncoding() {} });
+    child.stderr = Object.assign(new EventEmitter(), { setEncoding() {} });
     child.kill = () => {};
     process.nextTick(() => {
       child.stdout.emit('data', Buffer.from('https://manifest.googlevideo.com/api/manifest/hls_playlist/x/index.m3u8\n'));
@@ -52,8 +52,8 @@ test('the YouTube resolve hands yt-dlp the bundled node as its JS runtime', asyn
   childProcess.spawn = (_bin, args) => {
     captured = args;
     const child = new EventEmitter();
-    child.stdout = new EventEmitter();
-    child.stderr = new EventEmitter();
+    child.stdout = Object.assign(new EventEmitter(), { setEncoding() {} });
+    child.stderr = Object.assign(new EventEmitter(), { setEncoding() {} });
     child.kill = () => {};
     process.nextTick(() => {
       child.stdout.emit('data', Buffer.from('https://rr5---sn-example.googlevideo.com/videoplayback?itag=22\n'));
@@ -83,8 +83,8 @@ test('YouTube relay logs the yt-dlp failure before returning 502', async () => {
   const errors = [];
   childProcess.spawn = () => {
     const child = new EventEmitter();
-    child.stdout = new EventEmitter();
-    child.stderr = new EventEmitter();
+    child.stdout = Object.assign(new EventEmitter(), { setEncoding() {} });
+    child.stderr = Object.assign(new EventEmitter(), { setEncoding() {} });
     child.kill = () => {};
     process.nextTick(() => {
       child.stderr.emit('data', Buffer.from("No module named 'yt_dlp'"));

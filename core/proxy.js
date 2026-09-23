@@ -279,6 +279,7 @@ function ffSpawnCancellable(args, token, timeout) {
     if (token != null) proxyChildren.set(token, ch);
     let err = '';
     const to = setTimeout(() => { try { ch.kill('SIGKILL'); } catch (_) {} }, timeout);
+    ch.stderr.setEncoding('utf8');
     ch.stderr.on('data', (d) => { err += d.toString(); });
     ch.on('error', (e) => { clearTimeout(to); if (token != null) proxyChildren.delete(token); /** @type {FfError} */ (e).stderr = err; reject(e); });
     ch.on('close', (code, signal) => {

@@ -348,7 +348,9 @@ async function runSetup(ev, options = {}) {
       let nl;
       while ((nl = buf.indexOf('\n')) >= 0) { onLine(buf.slice(0, nl)); buf = buf.slice(nl + 1); }
     };
+    ps.stdout.setEncoding('utf8');
     ps.stdout.on('data', pump);
+    ps.stderr.setEncoding('utf8');
     ps.stderr.on('data', (d) => { errTail = (errTail + d.toString()).slice(-1000); pump(d); });
 
     ps.on('error', (e) => { running = false; resolve({ ok: false, error: String(e) }); });
@@ -392,7 +394,9 @@ async function runSetup(ev, options = {}) {
           } catch { send({ line }); }
         }
       };
+      worker.stdout.setEncoding('utf8');
       worker.stdout.on('data', pumpWorker);
+      worker.stderr.setEncoding('utf8');
       worker.stderr.on('data', (chunk) => { workerTail = (workerTail + chunk.toString()).slice(-1000); pumpWorker(chunk); });
       worker.on('error', (error) => {
         running = false;

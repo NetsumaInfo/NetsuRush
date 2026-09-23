@@ -368,9 +368,31 @@ const EXTRA = {
   agentApiKeyMissingFor: ['{provider} : clé API manquante','{provider}: API key is missing','{provider}: falta la clave API','{provider}: API-Schlüssel fehlt','{provider}：API キーがありません','{provider}：缺少 API 密钥'],
 };
 
+const LANGUAGES = ['fr', 'en', 'es', 'de', 'ja', 'zh'];
+
+/**
+ * The supported interface language named by a locale tag (`ja-JP`, `zh_CN`, `de`), or null.
+ * @param {unknown} tag
+ * @returns {string | null}
+ */
+function supportedLanguage(tag) {
+  const code = String(tag || '').trim().toLowerCase().split(/[-_.]/)[0];
+  return LANGUAGES.includes(code) ? code : null;
+}
+
+/** The OS locale the core runs under, as ICU reports it. */
+function systemLocale() {
+  try { return Intl.DateTimeFormat().resolvedOptions().locale; } catch (_) { return ''; }
+}
+
+/**
+ * The interface language. The renderer stores the user's choice in `CONFIG.lang` as soon as it
+ * connects; until then the OS locale stands in. Anything unsupported reads English. French is only
+ * the source language that fills a missing key.
+ */
 function language() {
-  const code = String(CONFIG.lang || 'fr').toLowerCase().split(/[-_]/)[0];
-  return Object.prototype.hasOwnProperty.call(MESSAGES, code) ? code : 'fr';
+  if (CONFIG.lang) return supportedLanguage(CONFIG.lang) || 'en';
+  return supportedLanguage(systemLocale()) || 'en';
 }
 /**
  * A message in the interface language. `{name}` placeholders are filled from `vars`.
@@ -379,7 +401,7 @@ function language() {
  */
 function t(key, vars) {
   let text;
-  if (EXTRA[key]) text = EXTRA[key][['fr','en','es','de','ja','zh'].indexOf(language())] || EXTRA[key][0];
+  if (EXTRA[key]) text = EXTRA[key][LANGUAGES.indexOf(language())] || EXTRA[key][0];
   else {
     /** @type {Record<string,string>} */ const selected = MESSAGES[language()];
     /** @type {Record<string,string>} */ const fallback = MESSAGES.fr;
@@ -389,4 +411,4 @@ function t(key, vars) {
   return text.replace(/\{(\w+)\}/g, (whole, name) => (Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : whole));
 }
 
-module.exports = { language, t };
+module.exports = { LANGUAGES, language, supportedLanguage, t };

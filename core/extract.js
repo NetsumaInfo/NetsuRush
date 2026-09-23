@@ -83,7 +83,9 @@ function run(bin, args, timeoutMs) {
     const child = spawn(bin, args, { env: DETECT_ENV });
     let out = '', err = '';
     const killer = setTimeout(() => { try { child.kill('SIGKILL'); } catch (_) {} }, timeoutMs);
+    child.stdout.setEncoding('utf8');
     child.stdout.on('data', (d) => { out += d.toString(); });
+    child.stderr.setEncoding('utf8');
     child.stderr.on('data', (d) => { err += d.toString(); });
     child.on('error', (e) => {
       clearTimeout(killer);

@@ -22,7 +22,10 @@ const LOAD_SAMPLE_MS = 700; // assez long pour un delta CPU lisible, assez court
 
 // `Path` et `TotalProcessorTime` lèvent sur les processus protégés (noyau, services système) : sans
 // try/catch PowerShell interrompt TOUT le pipeline et le scan revient vide.
+// UTF-8 output: in the OEM code page a process path under `C:\Users\山田` decoded as mojibake, and a
+// Shift-JIS trail byte 0x5C read as a JSON escape that made the whole scan come back empty.
 const SCAN_SCRIPT =
+  "[Console]::OutputEncoding=[Text.Encoding]::UTF8;" +
   "Get-Process | Select-Object Id,Name," +
   "@{N='ws';E={$_.WorkingSet64}}," +
   "@{N='cpuMs';E={try{$_.TotalProcessorTime.TotalMilliseconds}catch{0}}}," +

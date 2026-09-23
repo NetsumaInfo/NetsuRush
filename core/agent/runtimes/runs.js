@@ -45,6 +45,7 @@ function startCliRun(opts) {
   let errTail = '';
   let emittedDone = false;
 
+  child.stdout.setEncoding('utf8');
   child.stdout.on('data', (d) => {
     const s = d.toString();
     if (mode === 'raw') { for (const e of fn(s)) emit(e); return; }
@@ -56,6 +57,7 @@ function startCliRun(opts) {
       for (const e of fn(line)) emit(e);
     }
   });
+  child.stderr.setEncoding('utf8');
   child.stderr.on('data', (d) => { errTail = (errTail + d.toString()).slice(-2000); });
 
   function emit(e) {

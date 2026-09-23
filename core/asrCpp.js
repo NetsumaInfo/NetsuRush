@@ -22,7 +22,9 @@ function spawnText(bin, args, timeoutMs = 120000) {
     try { proc = spawn(bin, args); }
     catch (e) { return resolve({ code: -1, out: '', err: String(e) }); }
     const t = setTimeout(() => { try { proc.kill(); } catch (_) {} }, timeoutMs);
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => { out += d.toString(); });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (d) => { err += d.toString(); });
     proc.on('error', (e) => { err += String(e); finish(-1); });
     proc.on('close', (code) => finish(code == null ? -1 : code));

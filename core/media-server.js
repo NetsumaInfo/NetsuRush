@@ -274,6 +274,7 @@ function createMediaServer({ host = "127.0.0.1", port = 0, poc = null, ffmpegBin
     }
     if (poc && u.pathname === "/poc-report" && req.method === "POST") {
       let body = "";
+      req.setEncoding("utf8");
       req.on("data", (c) => (body += c));
       req.on("end", () => {
         let json = {};

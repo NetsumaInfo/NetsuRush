@@ -11,7 +11,7 @@
 const path = require("path");
 const { CONFIG, DATA_DIR, saveConfig } = require("./config");
 const { watchModules } = require("./devReload");
-const { t } = require("./i18n");
+const { t, language, supportedLanguage } = require("./i18n");
 const ffmpeg = require("./ffmpeg");
 const thumbs = require("./thumbs");
 const proxy = require("./proxy");
@@ -410,7 +410,7 @@ function createRpc() {
 
     // --- Langue de l'UI : copie durable dans nr.config.json (lue au prochain boot). Le renderer
     // applique le changement immédiatement via localStorage ; ici c'est la persistance de fond. ---
-    "config:get": () => ({ lang: CONFIG.lang || null }),
+    "config:get": () => ({ lang: language() }),
 
     // --- Réglages partagés entre renderers (localStorage est par ORIGINE, cf. core/prefs.js) ---
     "prefs:get": () => prefs.get(),
@@ -425,8 +425,7 @@ function createRpc() {
     "uistate:get": () => uiState.get(),
     "uistate:set": ([patch]) => uiState.set(patch || {}),
     "config:setLang": ([lang]) => {
-      const code = String(lang || "fr").toLowerCase().split(/[-_]/)[0];
-      return saveConfig({ lang: ["fr", "en", "es", "de", "ja", "zh"].includes(code) ? code : "fr" });
+      return saveConfig({ lang: supportedLanguage(lang) || "en" });
     },
 
     // --- Snapshot projet : état du cache offline (badge « hors-ligne (cache) ») + effacement manuel ---
@@ -1242,6 +1241,7 @@ function createRpc() {
     // Invocation : POST /rpc
     if (u.pathname === "/rpc" && req.method === "POST") {
       let body = "";
+      req.setEncoding("utf8");
       req.on("data", (c) => (body += c));
       req.on("end", async () => {
         let msg = {};

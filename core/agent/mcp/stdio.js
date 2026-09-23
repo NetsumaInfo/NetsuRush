@@ -56,6 +56,7 @@ async function handle(req) {
 }
 
 let buf = '';
+process.stdin.setEncoding('utf8');
 process.stdin.on('data', (d) => {
   buf += d.toString();
   let nl;

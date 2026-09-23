@@ -257,6 +257,7 @@ function runOne(event, bin, jobArgs, fileLabel, i, total, frames) {
     const cp = spawn(bin, jobArgs, { cwd: SHADER_DIR });
     let errTail = '';
     let buf = '';
+    cp.stdout.setEncoding('utf8');
     cp.stdout.on('data', (d) => {
       buf += d.toString();
       let nl;
@@ -267,6 +268,7 @@ function runOne(event, bin, jobArgs, fileLabel, i, total, frames) {
         else if (line === 'progress=end') send(100, 'upscale');
       }
     });
+    cp.stderr.setEncoding('utf8');
     cp.stderr.on('data', (d) => { errTail = (errTail + d.toString()).slice(-800); });
     cp.on('error', (e) => resolve({ ok: false, error: t('ffmpegMissing', { detail: e.message }) }));
     cp.on('close', (code) => {

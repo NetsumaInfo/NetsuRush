@@ -26,7 +26,9 @@ function probePython() {
       try { cp.kill(); } catch (_) {}
       finish({ torch: null, onnx: null, errors: ['Python diagnostic timed out'] });
     }, 30000);
+    cp.stdout.setEncoding('utf8');
     cp.stdout.on('data', (b) => { out += b.toString(); });
+    cp.stderr.setEncoding('utf8');
     cp.stderr.on('data', (b) => { err = (err + b.toString()).slice(-1000); });
     cp.on('error', (e) => finish({ torch: null, onnx: null, errors: [String(e.message || e)] }));
     cp.on('close', (code) => {

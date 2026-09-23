@@ -122,11 +122,17 @@ function buildHardwareProfile(gpus, opts = {}) {
   return { gpus, cpus, vendors, primaryVendor, initialMlBackend, initialOnnxBackend, windowsBuild, label };
 }
 
+// Windows PowerShell writes a redirected stdout in the OEM code page (cp932 on a Japanese Windows):
+// a device name outside ASCII came back as mojibake, and a Shift-JIS byte 0x5C inside it read as a
+// JSON escape. UTF-8 output is decoded as such below.
+const UTF8_OUTPUT = '[Console]::OutputEncoding=[Text.Encoding]::UTF8;';
+
 /** @param {string} command @returns {Promise<string>} */
 function runPowerShell(command) {
   return new Promise((resolve, reject) => {
-    const ps = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], { windowsHide: true });
+    const ps = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', UTF8_OUTPUT + command], { windowsHide: true });
     let out = '';
+    ps.stdout.setEncoding('utf8');
     ps.stdout.on('data', (chunk) => { out += chunk.toString(); });
     ps.on('error', reject);
     ps.on('close', (code) => {

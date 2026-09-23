@@ -74,6 +74,7 @@ function createFlow() {
         reject(new Error(message));
       };
 
+      proc.stdout?.setEncoding("utf8");
       proc.stdout?.on("data", (chunk) => {
         buffer += String(chunk);
         let index;
@@ -99,6 +100,7 @@ function createFlow() {
       });
       // The engine writes its own diagnostics to stderr continuously, so this
       // is a log feed rather than an error channel; only an exit is fatal.
+      proc.stderr?.setEncoding("utf8");
       proc.stderr?.on("data", (chunk) => {
         const text = String(chunk).trim();
         if (text) logbus.emit("flow", "info", text.slice(0, 500));

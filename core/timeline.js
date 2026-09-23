@@ -8,7 +8,8 @@
 const path = require("path");
 const os = require("os");
 const { pathToFileURL } = require("url");
-const { fsp, yieldLoop } = require("./config");
+const { fsp, yieldLoop } = require("./config");
+const { parseHostFloat, parseHostInt } = require("./hostNumber"); // FPS / Frames text from Resolve, either decimal mark
 const { getResolve, findItemByPath } = require("./resolve");
 const { bridge } = require("./resolve-proxy");
 const { detectScenes, getCachedScenes } = require("./sidecars");
@@ -130,7 +131,7 @@ async function timelineItemSnapshot(item, fallbackTrackIndex, fallbackId, timeli
   const sourceEnd = Number(await item.GetSourceEndFrame());
   const media = await item.GetMediaPoolItem();
   let sourceFps = timelineFps;
-  try { sourceFps = parseFloat(await media.GetClipProperty("FPS")) || timelineFps; } catch (_) {}
+  try { sourceFps = parseHostFloat(await media.GetClipProperty("FPS")) || timelineFps; } catch (_) {}
   let trackIndex = fallbackTrackIndex;
   try {
     const track = await item.GetTrackTypeAndIndex();
@@ -178,7 +179,7 @@ async function applyExistingTimelineInsertion({ tl, mp, resolve, insertion, fps,
   const startFrame = parseInt(await tl.GetStartFrame(), 10) || 0;
   let startTimecode = null;
   try { startTimecode = await tl.GetStartTimecode(); } catch (_) {}
-  const timelineFps = parseFloat(await tl.GetSetting("timelineFrameRate")) || fps;
+  const timelineFps = parseHostFloat(await tl.GetSetting("timelineFrameRate")) || fps;
   if (!insertion || insertion === "end") {
     const result = await appendContiguousOrThrow(mp, clipInfos, {
       recordFrame: await videoContentEnd(tl), sourceFps, timelineFps,
@@ -232,7 +233,7 @@ async function applyExistingTimelineInsertion({ tl, mp, resolve, insertion, fps,
     finally { if (restoreFolder) { try { await mp.SetCurrentFolder(restoreFolder); } catch (_) {} } }
     const fitted = added && added[0];
     if (!fitted) throw new Error(t("timelineFitFailed"));
-    const fittedFrames = parseInt(await fitted.GetClipProperty("Frames"), 10) || targetFrames;
+    const fittedFrames = parseHostInt(await fitted.GetClipProperty("Frames")) || targetFrames;
     if (!(await finalizeTake(target.item, fitted, 0, Math.max(0, fittedFrames - 1)))) {
       throw new Error(t("timelineFitFailed"));
     }
@@ -275,7 +276,7 @@ async function buildTimeline(opts) {
   if (!item) return { ok: false, error: t("withDetail", { message: t("mediaImportFailed"), detail: input }) };
 
     const fpsStr = await item.GetClipProperty("FPS");
-    let fps = parseFloat(fpsStr);
+    let fps = parseHostFloat(fpsStr);
     if (!fps || Number.isNaN(fps)) fps = 24;
 
     let tl = null;
@@ -294,7 +295,7 @@ async function buildTimeline(opts) {
       } else tl = await proj.GetCurrentTimeline();
       if (tl) {
         const tlFpsStr = await tl.GetSetting("timelineFrameRate");
-        timelineFps = parseFloat(tlFpsStr);
+        timelineFps = parseHostFloat(tlFpsStr);
         if (timelineFps && !Number.isNaN(timelineFps) && Math.abs(timelineFps - fps) > 0.01) {
           fpsMismatch = true;
         }
@@ -329,7 +330,7 @@ async function buildTimeline(opts) {
       timelineFps = fps;
     }
 
-    const resFrames = parseInt(await item.GetClipProperty("Frames"), 10) || 0;
+    const resFrames = parseHostInt(await item.GetClipProperty("Frames")) || 0;
     const detFrames = parseInt(String(srcFrames), 10) || 0;
     let mapped = false;
     const toRes = (f) => {
@@ -487,13 +488,13 @@ async function buildTimelineFromBlocks(opts) {
       const item = await resolveItem(b.filePath);
       if (!item) { missing.push(b.filePath); continue; }
       const fpsStr = await item.GetClipProperty("FPS");
-      const fpsValid = fpsStr != null && !Number.isNaN(parseFloat(fpsStr));
-      let clipFps = parseFloat(fpsStr);
+      const fpsValid = fpsStr != null && !Number.isNaN(parseHostFloat(fpsStr));
+      let clipFps = parseHostFloat(fpsStr);
       if (!clipFps || Number.isNaN(clipFps)) clipFps = Number(b.fps) || 24;
       if (timelineFps == null) { timelineFps = clipFps; timelineFpsStr = fpsValid ? String(fpsStr) : String(clipFps); }
       else if (Math.abs(clipFps - timelineFps) > 0.01) fpsMismatch = true;
 
-      const resFrames = parseInt(await item.GetClipProperty("Frames"), 10) || 0;
+      const resFrames = parseHostInt(await item.GetClipProperty("Frames")) || 0;
       const maxFrame = resFrames > 0 ? resFrames - 1 : Number.MAX_SAFE_INTEGER;
       const startFrame = Math.min(maxFrame, Math.max(0, Math.round(b.inFrame || 0)));
       const endFrame =
@@ -523,7 +524,7 @@ async function buildTimelineFromBlocks(opts) {
       } else tl = await proj.GetCurrentTimeline();
       if (tl) {
         const tlFpsStr = await tl.GetSetting("timelineFrameRate");
-        const tlFps = parseFloat(tlFpsStr);
+        const tlFps = parseHostFloat(tlFpsStr);
         if (tlFps && !Number.isNaN(tlFps) && Math.abs(tlFps - timelineFps) > 0.01) fpsMismatch = true;
       }
     }
@@ -694,7 +695,7 @@ async function firstSourceClip(tl) {
         if (!mpi) continue;
         const fp = await mpi.GetClipProperty("File Path");
         if (!fp) continue;
-        let fps = parseFloat(await mpi.GetClipProperty("FPS"));
+        let fps = parseHostFloat(await mpi.GetClipProperty("FPS"));
         if (!fps || Number.isNaN(fps)) fps = 24;
         const ssf = parseInt(await it.GetSourceStartFrame(), 10);
         const inFrame = Number.isNaN(ssf) ? 0 : Math.max(0, ssf);
@@ -839,9 +840,9 @@ async function readTimelineCuts(opts = {}) {
         if (!fp) continue;
         let meta = propCache.get(fp);
         if (!meta) {
-          let fps = parseFloat(row.fps);
+          let fps = parseHostFloat(row.fps);
           if (!fps || Number.isNaN(fps)) fps = 24;
-          const srcFrames = parseInt(row.frames, 10) || 0;
+          const srcFrames = parseHostInt(row.frames) || 0;
           meta = { fps, srcFrames, name: row.clipName || "" };
           propCache.set(fp, meta);
         }
@@ -923,9 +924,9 @@ async function readTimelineCutsViaProxy(opts = {}) {
           if (!fp) continue;
           let meta = propCache.get(fp);
           if (!meta) {
-            let fps = parseFloat(props["FPS"]);
+            let fps = parseHostFloat(props["FPS"]);
             if (!fps || Number.isNaN(fps)) fps = 24;
-            const srcFrames = parseInt(props["Frames"], 10) || 0;
+            const srcFrames = parseHostInt(props["Frames"]) || 0;
             const name = props["Clip Name"] || (await mpi.GetName());
             meta = { fps, srcFrames, name };
             propCache.set(fp, meta);
@@ -979,13 +980,13 @@ async function computeCutClips(withScenes, fps0, onProg) {
   const fcpClips = [];
   for (let ci = 0; ci < withScenes.length; ci++) {
     const p = withScenes[ci];
-    const resFrames = parseInt(await p.item.GetClipProperty("Frames"), 10) || 0;
+    const resFrames = parseHostInt(await p.item.GetClipProperty("Frames")) || 0;
     const detFrames = p.detFrames;
     const maxFrame = resFrames > 0 ? resFrames - 1 : Number.MAX_SAFE_INTEGER;
     const maxExcl = resFrames > 0 ? resFrames : Number.MAX_SAFE_INTEGER;
     const toRes = (f) => (resFrames > 1 && detFrames > 1 && resFrames !== detFrames)
       ? Math.round((f * (resFrames - 1)) / (detFrames - 1)) : f;
-    const fpsNum = parseFloat(await p.item.GetClipProperty("FPS")) || p.fps || fps0;
+    const fpsNum = parseHostFloat(await p.item.GetClipProperty("FPS")) || p.fps || fps0;
     const rm = /(\d+)\s*x\s*(\d+)/.exec((await p.item.GetClipProperty("Resolution")) || "");
     const w = rm ? parseInt(rm[1], 10) : 0;
     const h = rm ? parseInt(rm[2], 10) : 0;
@@ -1086,8 +1087,8 @@ async function analyzeTimelineCut(event, opts = {}) {
   if (!withScenes.length) return { ok: false, error: t("noDetectedShots") };
 
     let fps0Str = await withScenes[0].item.GetClipProperty("FPS");
-    if (!fps0Str || Number.isNaN(parseFloat(fps0Str))) fps0Str = String(withScenes[0].fps || 24);
-    const fps0 = parseFloat(fps0Str) || 24;
+    if (!fps0Str || Number.isNaN(parseHostFloat(fps0Str))) fps0Str = String(withScenes[0].fps || 24);
+    const fps0 = parseHostFloat(fps0Str) || 24;
 
     const fcpClips = await computeCutClips(withScenes, fps0, (pct) => {
       // Les 10 % restants couvrent l'analyse et la préparation du FCPXML.

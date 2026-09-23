@@ -91,7 +91,9 @@ function runOne(event, bin, jobArgs, fileLabel, i, total, frames) {
       let m; const re = /frame=\s*(\d+)/g;
       while ((m = re.exec(text))) send(Math.min(99, Math.round((parseInt(m[1], 10) / frames) * 100)), 'upscale');
     };
+    cp.stdout.setEncoding('utf8');
     cp.stdout.on('data', onChunk);
+    cp.stderr.setEncoding('utf8');
     cp.stderr.on('data', onChunk);
     cp.on('error', (e) => resolve({ ok: false, error: `${path.basename(bin)}: ${e.message}` }));
     cp.on('close', (code) => {

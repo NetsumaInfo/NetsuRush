@@ -91,6 +91,7 @@ function createMcpClient(opts) {
       });
       child = c;
       let buf = '';
+      c.stdout.setEncoding('utf8');
       c.stdout.on('data', (d) => {
         buf += d.toString();
         let nl;
@@ -100,6 +101,7 @@ function createMcpClient(opts) {
           onLine(line);
         }
       });
+      c.stderr.setEncoding('utf8');
       c.stderr.on('data', (d) => { errTail = (errTail + d.toString()).slice(-2000); });
       c.on('error', (e) => reset(new Error(t('agentMcpLaunchFailed', { label, detail: String(e.message || e) }))));
       c.on('close', (code) => {

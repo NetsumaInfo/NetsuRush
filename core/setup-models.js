@@ -50,7 +50,9 @@ function runPython(args) {
     });
     let output = '';
     const append = (chunk) => { output = `${output}${chunk}`.slice(-2400); };
+    child.stdout.setEncoding('utf8');
     child.stdout.on('data', append);
+    child.stderr.setEncoding('utf8');
     child.stderr.on('data', append);
     child.once('error', reject);
     child.once('close', (code) => {

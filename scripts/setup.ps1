@@ -22,8 +22,11 @@ param(
   [string]$Resource = $env:NR_SETUP_RESOURCE,
   [string]$Lang = $env:NR_SETUP_LANG
 )
-$Lang = if ($Lang) { ($Lang.ToLower() -split '[-_]')[0] } else { 'fr' }
-if ($Lang -notin @('fr', 'en', 'es', 'de', 'ja', 'zh')) { $Lang = 'fr' }
+# The core always passes a supported language; a manual run falls back on the Windows display
+# language, then English.
+if (-not $Lang) { try { $Lang = (Get-UICulture).Name } catch {} }
+$Lang = if ($Lang) { ($Lang.ToLower() -split '[-_]')[0] } else { 'en' }
+if ($Lang -notin @('fr', 'en', 'es', 'de', 'ja', 'zh')) { $Lang = 'en' }
 
 # Profil produit par core/hardware.js. En exécution manuelle ou en cas d'inventaire WMI impossible,
 # le CPU est le choix sûr et universel ; aucun runtime constructeur n'est alors supposé.
@@ -49,30 +52,16 @@ function HasModule([string]$id) { return $SelectedModules -contains $id }
 function HasModel([string]$id) { return $SelectedModels -contains $id }
 
 $Text = @{
-  fr = @{ missingHome='NR_SETUP_HOME manquant'; missingResource='NR_SETUP_RESOURCE manquant'; pythonSearch='Recherche de Python…'; pythonDownload='Téléchargement de Python (autonome)…'; venvCreate='Création de l''environnement Python…'; pipUpdate='Mise à jour de pip…'; torchInstall='Installation de PyTorch CUDA (~2,5 Go)…'; depsInstall='Installation des dépendances ML…'; optionalDeps='Installation des dépendances optionnelles…'; ffmpegDownload='Téléchargement de ffmpeg…'; modelsDownload='Téléchargement des modèles…'; voicePrepare='Préparation des modèles voix…'; resolvePrepare='Configuration du pont DaVinci Resolve…'; processPrepare='Préparation des modèles de traitement…'; facesPrepare='Préparation des modèles de visage…'; rotoPrepare='Préparation du Roto Studio (SAM 2)…'; configWrite='Écriture de la configuration…'; done='Installation terminée'; pythonFailed='Échec de l''installation autonome de Python'; venvFailed='Échec de la création de l''environnement Python'; torchFailed='Échec de l''installation de PyTorch CUDA (consultez le journal pip ci-dessus : réseau/proxy, disque plein ou version de Python sans paquet cu124)'; requirementsFailed='Échec de l''installation des dépendances (consultez le journal pip ci-dessus)'; ffmpegExtract='ffmpeg introuvable après extraction'; ffmpegMissing='ffmpeg n''est pas installé' }
-  en = @{ missingHome='NR_SETUP_HOME is missing'; missingResource='NR_SETUP_RESOURCE is missing'; pythonSearch='Looking for Python…'; pythonDownload='Downloading standalone Python…'; venvCreate='Creating the Python environment…'; pipUpdate='Updating pip…'; torchInstall='Installing PyTorch CUDA (~2.5 GB)…'; depsInstall='Installing ML dependencies…'; optionalDeps='Installing optional dependencies…'; ffmpegDownload='Downloading ffmpeg…'; modelsDownload='Downloading models…'; voicePrepare='Preparing voice models…'; resolvePrepare='Configuring the DaVinci Resolve bridge…'; processPrepare='Preparing processing models…'; facesPrepare='Preparing face models…'; rotoPrepare='Preparing Roto Studio (SAM 2)…'; configWrite='Writing configuration…'; done='Installation complete'; pythonFailed='Standalone Python installation failed'; venvFailed='Could not create the Python environment'; torchFailed='PyTorch CUDA installation failed (see the pip log above: network/proxy, full disk, or Python version without a cu124 package)'; requirementsFailed='Dependency installation failed (see the pip log above)'; ffmpegExtract='ffmpeg was not found after extraction'; ffmpegMissing='ffmpeg is not installed' }
-  es = @{ missingHome='Falta NR_SETUP_HOME'; missingResource='Falta NR_SETUP_RESOURCE'; pythonSearch='Buscando Python…'; pythonDownload='Descargando Python autónomo…'; venvCreate='Creando el entorno Python…'; pipUpdate='Actualizando pip…'; torchInstall='Instalando PyTorch CUDA (~2,5 GB)…'; depsInstall='Instalando dependencias de ML…'; optionalDeps='Instalando dependencias opcionales…'; ffmpegDownload='Descargando ffmpeg…'; modelsDownload='Descargando modelos…'; voicePrepare='Preparando modelos de voz…'; resolvePrepare='Configurando el puente de DaVinci Resolve…'; processPrepare='Preparando modelos de procesamiento…'; facesPrepare='Preparando modelos de rostro…'; rotoPrepare='Preparando Roto Studio (SAM 2)…'; configWrite='Guardando la configuración…'; done='Instalación completada'; pythonFailed='Falló la instalación autónoma de Python'; venvFailed='No se pudo crear el entorno Python'; torchFailed='Falló la instalación de PyTorch CUDA (consulta el registro de pip: red/proxy, disco lleno o versión de Python sin paquete cu124)'; requirementsFailed='Falló la instalación de dependencias (consulta el registro de pip)'; ffmpegExtract='No se encontró ffmpeg después de extraerlo'; ffmpegMissing='ffmpeg no está instalado' }
-  de = @{ missingHome='NR_SETUP_HOME fehlt'; missingResource='NR_SETUP_RESOURCE fehlt'; pythonSearch='Python wird gesucht…'; pythonDownload='Eigenständiges Python wird heruntergeladen…'; venvCreate='Python-Umgebung wird erstellt…'; pipUpdate='pip wird aktualisiert…'; torchInstall='PyTorch CUDA wird installiert (~2,5 GB)…'; depsInstall='ML-Abhängigkeiten werden installiert…'; optionalDeps='Optionale Abhängigkeiten werden installiert…'; ffmpegDownload='ffmpeg wird heruntergeladen…'; modelsDownload='Modelle werden heruntergeladen…'; voicePrepare='Sprachmodelle werden vorbereitet…'; resolvePrepare='DaVinci-Resolve-Brücke wird eingerichtet…'; processPrepare='Verarbeitungsmodelle werden vorbereitet…'; facesPrepare='Gesichtsmodelle werden vorbereitet…'; rotoPrepare='Roto Studio (SAM 2) wird vorbereitet…'; configWrite='Konfiguration wird geschrieben…'; done='Installation abgeschlossen'; pythonFailed='Installation des eigenständigen Python ist fehlgeschlagen'; venvFailed='Python-Umgebung konnte nicht erstellt werden'; torchFailed='Installation von PyTorch CUDA ist fehlgeschlagen (siehe pip-Protokoll oben: Netzwerk/Proxy, voller Datenträger oder Python-Version ohne cu124-Paket)'; requirementsFailed='Installation der Abhängigkeiten ist fehlgeschlagen (siehe pip-Protokoll oben)'; ffmpegExtract='ffmpeg wurde nach dem Entpacken nicht gefunden'; ffmpegMissing='ffmpeg ist nicht installiert' }
+  fr = @{ missingHome='NR_SETUP_HOME manquant'; missingResource='NR_SETUP_RESOURCE manquant'; pythonSearch='Recherche de Python…'; pythonDownload='Téléchargement de Python (autonome)…'; venvCreate='Création de l''environnement Python…'; pipUpdate='Mise à jour de pip…'; torchInstall='Installation de PyTorch CUDA (~2,5 Go)…'; depsInstall='Installation des dépendances ML…'; optionalDeps='Installation des dépendances optionnelles…'; ffmpegDownload='Téléchargement de ffmpeg…'; modelsDownload='Téléchargement des modèles…'; voicePrepare='Préparation des modèles voix…'; resolvePrepare='Configuration du pont DaVinci Resolve…'; processPrepare='Préparation des modèles de traitement…'; facesPrepare='Préparation des modèles de visage…'; rotoPrepare='Préparation du Roto Studio (SAM 2)…'; configWrite='Écriture de la configuration…'; done='Installation terminée'; pythonFailed='Échec de l''installation autonome de Python'; venvFailed='Échec de la création de l''environnement Python'; torchFailed='Échec de l''installation de PyTorch CUDA (consulte le journal pip ci-dessus : réseau/proxy, disque plein ou version de Python sans paquet cu124)'; requirementsFailed='Échec de l''installation des dépendances (consulte le journal pip ci-dessus)'; ffmpegExtract='ffmpeg introuvable après extraction'; ffmpegMissing='ffmpeg n''est pas installé'; diskLow='Espace disque insuffisant sur {0} : {1} Go libres, il en faut environ {2} Go rien que pour l''environnement Python (les modèles s''y ajoutent).'; requirementsMissing='requirements-base.txt introuvable : {0}'; transnetFailed='TransNetV2 est absent ou ne s''importe pas (pip install transnetv2-pytorch a échoué)'; boardPackMissing='Pack NetsuBoard introuvable : {0}'; boardBroken='NetsuBoard est installé mais ses outils de liens sont inutilisables'; modulePackMissing='Pack de dépendances introuvable : {0}'; removalBroken='La suppression d''objet ne s''importe pas (nrroto incomplet ou dépendances manquantes)'; onnxBroken='ONNX Runtime est installé mais import onnxruntime échoue dans le venv'; moduleBroken='Le module {0} est installé mais inutilisable : un import a échoué (journal ci-dessus)'; omniBundleMissing='OmniShotCut introuvable dans le bundle : {0}'; omniDecord='OmniShotCut incomplet : decord ne s''installe pas'; omniInstall='OmniShotCut est absent ou impossible à installer'; omniImport='OmniShotCut est absent ou ne s''importe pas'; cpuTorchFailed='Échec de l''installation de PyTorch CPU (consulte le journal pip ci-dessus)'; torchCuda='Installation de PyTorch NVIDIA (CUDA)…'; torchRocm='Installation de PyTorch AMD (ROCm)…'; torchXpu='Installation de PyTorch Intel (XPU)…'; torchCpu='Installation de PyTorch CPU…' }
+  en = @{ missingHome='NR_SETUP_HOME is missing'; missingResource='NR_SETUP_RESOURCE is missing'; pythonSearch='Looking for Python…'; pythonDownload='Downloading standalone Python…'; venvCreate='Creating the Python environment…'; pipUpdate='Updating pip…'; torchInstall='Installing PyTorch CUDA (~2.5 GB)…'; depsInstall='Installing ML dependencies…'; optionalDeps='Installing optional dependencies…'; ffmpegDownload='Downloading ffmpeg…'; modelsDownload='Downloading models…'; voicePrepare='Preparing voice models…'; resolvePrepare='Configuring the DaVinci Resolve bridge…'; processPrepare='Preparing processing models…'; facesPrepare='Preparing face models…'; rotoPrepare='Preparing Roto Studio (SAM 2)…'; configWrite='Writing configuration…'; done='Installation complete'; pythonFailed='Standalone Python installation failed'; venvFailed='Could not create the Python environment'; torchFailed='PyTorch CUDA installation failed (see the pip log above: network/proxy, full disk, or Python version without a cu124 package)'; requirementsFailed='Dependency installation failed (see the pip log above)'; ffmpegExtract='ffmpeg was not found after extraction'; ffmpegMissing='ffmpeg is not installed'; diskLow='Not enough disk space on {0}: {1} GB free, about {2} GB are needed for the Python environment alone (models come on top).'; requirementsMissing='requirements-base.txt not found: {0}'; transnetFailed='TransNetV2 is missing or cannot be imported (pip install transnetv2-pytorch failed)'; boardPackMissing='NetsuBoard pack not found: {0}'; boardBroken='NetsuBoard is installed but its link tools do not work'; modulePackMissing='Dependency pack not found: {0}'; removalBroken='Object removal cannot be imported (nrroto is incomplete or dependencies are missing)'; onnxBroken='ONNX Runtime is installed but import onnxruntime fails in the venv'; moduleBroken='Module {0} is installed but unusable: an import failed (see the log above)'; omniBundleMissing='OmniShotCut not found in the bundle: {0}'; omniDecord='OmniShotCut is incomplete: decord cannot be installed'; omniInstall='OmniShotCut is missing or cannot be installed'; omniImport='OmniShotCut is missing or cannot be imported'; cpuTorchFailed='PyTorch CPU installation failed (see the pip log above)'; torchCuda='Installing PyTorch for NVIDIA (CUDA)…'; torchRocm='Installing PyTorch for AMD (ROCm)…'; torchXpu='Installing PyTorch for Intel (XPU)…'; torchCpu='Installing PyTorch for CPU…' }
+  es = @{ missingHome='Falta NR_SETUP_HOME'; missingResource='Falta NR_SETUP_RESOURCE'; pythonSearch='Buscando Python…'; pythonDownload='Descargando Python autónomo…'; venvCreate='Creando el entorno Python…'; pipUpdate='Actualizando pip…'; torchInstall='Instalando PyTorch CUDA (~2,5 GB)…'; depsInstall='Instalando dependencias de ML…'; optionalDeps='Instalando dependencias opcionales…'; ffmpegDownload='Descargando ffmpeg…'; modelsDownload='Descargando modelos…'; voicePrepare='Preparando modelos de voz…'; resolvePrepare='Configurando el puente de DaVinci Resolve…'; processPrepare='Preparando modelos de procesamiento…'; facesPrepare='Preparando modelos de rostro…'; rotoPrepare='Preparando Roto Studio (SAM 2)…'; configWrite='Guardando la configuración…'; done='Instalación completada'; pythonFailed='Falló la instalación autónoma de Python'; venvFailed='No se pudo crear el entorno Python'; torchFailed='Falló la instalación de PyTorch CUDA (consulta el registro de pip: red/proxy, disco lleno o versión de Python sin paquete cu124)'; requirementsFailed='Falló la instalación de dependencias (consulta el registro de pip)'; ffmpegExtract='No se encontró ffmpeg después de extraerlo'; ffmpegMissing='ffmpeg no está instalado'; diskLow='No hay suficiente espacio en {0}: quedan {1} GB libres y solo el entorno de Python necesita unos {2} GB (los modelos van aparte).'; requirementsMissing='No se encontró requirements-base.txt: {0}'; transnetFailed='TransNetV2 falta o no se puede importar (falló pip install transnetv2-pytorch)'; boardPackMissing='No se encontró el paquete de NetsuBoard: {0}'; boardBroken='NetsuBoard está instalado, pero sus herramientas de enlaces no funcionan'; modulePackMissing='No se encontró el paquete de dependencias: {0}'; removalBroken='La eliminación de objetos no se puede importar (nrroto está incompleto o faltan dependencias)'; onnxBroken='ONNX Runtime está instalado, pero import onnxruntime falla en el venv'; moduleBroken='El módulo {0} está instalado, pero no se puede usar: falló una importación (consulta el registro)'; omniBundleMissing='No se encontró OmniShotCut en el paquete: {0}'; omniDecord='OmniShotCut está incompleto: no se puede instalar decord'; omniInstall='OmniShotCut falta o no se puede instalar'; omniImport='OmniShotCut falta o no se puede importar'; cpuTorchFailed='Falló la instalación de PyTorch CPU (consulta el registro de pip)'; torchCuda='Instalando PyTorch para NVIDIA (CUDA)…'; torchRocm='Instalando PyTorch para AMD (ROCm)…'; torchXpu='Instalando PyTorch para Intel (XPU)…'; torchCpu='Instalando PyTorch para CPU…' }
+  de = @{ missingHome='NR_SETUP_HOME fehlt'; missingResource='NR_SETUP_RESOURCE fehlt'; pythonSearch='Python wird gesucht…'; pythonDownload='Eigenständiges Python wird heruntergeladen…'; venvCreate='Python-Umgebung wird erstellt…'; pipUpdate='pip wird aktualisiert…'; torchInstall='PyTorch CUDA wird installiert (~2,5 GB)…'; depsInstall='ML-Abhängigkeiten werden installiert…'; optionalDeps='Optionale Abhängigkeiten werden installiert…'; ffmpegDownload='ffmpeg wird heruntergeladen…'; modelsDownload='Modelle werden heruntergeladen…'; voicePrepare='Sprachmodelle werden vorbereitet…'; resolvePrepare='DaVinci-Resolve-Brücke wird eingerichtet…'; processPrepare='Verarbeitungsmodelle werden vorbereitet…'; facesPrepare='Gesichtsmodelle werden vorbereitet…'; rotoPrepare='Roto Studio (SAM 2) wird vorbereitet…'; configWrite='Konfiguration wird geschrieben…'; done='Installation abgeschlossen'; pythonFailed='Installation des eigenständigen Python ist fehlgeschlagen'; venvFailed='Python-Umgebung konnte nicht erstellt werden'; torchFailed='Installation von PyTorch CUDA ist fehlgeschlagen (siehe pip-Protokoll oben: Netzwerk/Proxy, voller Datenträger oder Python-Version ohne cu124-Paket)'; requirementsFailed='Installation der Abhängigkeiten ist fehlgeschlagen (siehe pip-Protokoll oben)'; ffmpegExtract='ffmpeg wurde nach dem Entpacken nicht gefunden'; ffmpegMissing='ffmpeg ist nicht installiert'; diskLow='Nicht genug Speicherplatz auf {0}: {1} GB frei, allein die Python-Umgebung braucht etwa {2} GB (die Modelle kommen hinzu).'; requirementsMissing='requirements-base.txt wurde nicht gefunden: {0}'; transnetFailed='TransNetV2 fehlt oder lässt sich nicht importieren (pip install transnetv2-pytorch ist fehlgeschlagen)'; boardPackMissing='NetsuBoard-Paket wurde nicht gefunden: {0}'; boardBroken='NetsuBoard ist installiert, aber seine Link-Werkzeuge funktionieren nicht'; modulePackMissing='Abhängigkeitspaket wurde nicht gefunden: {0}'; removalBroken='Die Objektentfernung lässt sich nicht importieren (nrroto ist unvollständig oder Abhängigkeiten fehlen)'; onnxBroken='ONNX Runtime ist installiert, aber import onnxruntime schlägt im venv fehl'; moduleBroken='Modul {0} ist installiert, aber unbrauchbar: Ein Import ist fehlgeschlagen (siehe Protokoll oben)'; omniBundleMissing='OmniShotCut wurde im Paket nicht gefunden: {0}'; omniDecord='OmniShotCut ist unvollständig: decord lässt sich nicht installieren'; omniInstall='OmniShotCut fehlt oder lässt sich nicht installieren'; omniImport='OmniShotCut fehlt oder lässt sich nicht importieren'; cpuTorchFailed='Installation von PyTorch CPU fehlgeschlagen (siehe pip-Protokoll oben)'; torchCuda='PyTorch für NVIDIA (CUDA) wird installiert…'; torchRocm='PyTorch für AMD (ROCm) wird installiert…'; torchXpu='PyTorch für Intel (XPU) wird installiert…'; torchCpu='PyTorch für CPU wird installiert…' }
   # Base64 keeps CJK text parseable by Windows PowerShell 5.1, which reads BOM-less scripts as ANSI.
-  ja = (ConvertFrom-Json ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyJtaXNzaW5nSG9tZSI6Ik5SX1NFVFVQX0hPTUUg44GM44GC44KK44G+44Gb44KTIiwibWlzc2luZ1Jlc291cmNlIjoiTlJfU0VUVVBfUkVTT1VSQ0Ug44GM44GC44KK44G+44Gb44KTIiwicHl0aG9uU2VhcmNoIjoiUHl0aG9uIOOCkuaknOe0ouOBl+OBpuOBhOOBvuOBmeKApiIsInB5dGhvbkRvd25sb2FkIjoi44K544K/44Oz44OJ44Ki44Ot44Oz54mIIFB5dGhvbiDjgpLjg4Djgqbjg7Pjg63jg7zjg4njgZfjgabjgYTjgb7jgZnigKYiLCJ2ZW52Q3JlYXRlIjoiUHl0aG9uIOeSsOWig+OCkuS9nOaIkOOBl+OBpuOBhOOBvuOBmeKApiIsInBpcFVwZGF0ZSI6InBpcCDjgpLmm7TmlrDjgZfjgabjgYTjgb7jgZnigKYiLCJ0b3JjaEluc3RhbGwiOiJQeVRvcmNoIENVREEg44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ77yI57SEIDIuNSBHQu+8ieKApiIsImRlcHNJbnN0YWxsIjoiTUwg5L6d5a2Y6Zai5L+C44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ4oCmIiwib3B0aW9uYWxEZXBzIjoi44Kq44OX44K344On44Oz44Gu5L6d5a2Y6Zai5L+C44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ4oCmIiwiZmZtcGVnRG93bmxvYWQiOiJmZm1wZWcg44KS44OA44Km44Oz44Ot44O844OJ44GX44Gm44GE44G+44GZ4oCmIiwibW9kZWxzRG93bmxvYWQiOiLjg6Ljg4fjg6vjgpLjg4Djgqbjg7Pjg63jg7zjg4njgZfjgabjgYTjgb7jgZnigKYiLCJ2b2ljZVByZXBhcmUiOiLpn7Plo7Djg6Ljg4fjg6vjgpLmupblgpnjgZfjgabjgYTjgb7jgZnigKYiLCJyZXNvbHZlUHJlcGFyZSI6IkRhVmluY2kgUmVzb2x2ZSDjg5bjg6rjg4PjgrjjgpLoqK3lrprjgZfjgabjgYTjgb7jgZnigKYiLCJwcm9jZXNzUHJlcGFyZSI6IuWHpueQhuODouODh+ODq+OCkua6luWCmeOBl+OBpuOBhOOBvuOBmeKApiIsImZhY2VzUHJlcGFyZSI6IumhlOODouODh+ODq+OCkua6luWCmeOBl+OBpuOBhOOBvuOBmeKApiIsInJvdG9QcmVwYXJlIjoiUm90byBTdHVkaW/vvIhTQU0gMu+8ieOCkua6luWCmeOBl+OBpuOBhOOBvuOBmeKApiIsImNvbmZpZ1dyaXRlIjoi6Kit5a6a44KS5pu444GN6L6844KT44Gn44GE44G+44GZ4oCmIiwiZG9uZSI6IuOCpOODs+OCueODiOODvOODq+OBjOWujOS6huOBl+OBvuOBl+OBnyIsInB5dGhvbkZhaWxlZCI6IuOCueOCv+ODs+ODieOCouODreODs+eJiCBQeXRob24g44Gu44Kk44Oz44K544OI44O844Or44Gr5aSx5pWX44GX44G+44GX44GfIiwidmVudkZhaWxlZCI6IlB5dGhvbiDnkrDlooPjgpLkvZzmiJDjgafjgY3jgb7jgZvjgpPjgafjgZfjgZ8iLCJ0b3JjaEZhaWxlZCI6IlB5VG9yY2ggQ1VEQSDjga7jgqTjg7Pjgrnjg4jjg7zjg6vjgavlpLHmlZfjgZfjgb7jgZfjgZ/vvIjkuIroqJjjga4gcGlwIOODreOCsOOCkueiuuiqjeOBl+OBpuOBj+OBoOOBleOBhO+8muODjeODg+ODiOODr+ODvOOCr++8j+ODl+ODreOCreOCt+OAgeODh+OCo+OCueOCr+WuuemHj+S4jei2s+OAgeOBvuOBn+OBryBjdTEyNCDjg5Hjg4PjgrHjg7zjgrjpnZ7lr77lv5zjga4gUHl0aG9uIOODkOODvOOCuOODp+ODs++8iSIsInJlcXVpcmVtZW50c0ZhaWxlZCI6IuS+neWtmOmWouS/guOBruOCpOODs+OCueODiOODvOODq+OBq+WkseaVl+OBl+OBvuOBl+OBn++8iOS4iuiomOOBriBwaXAg44Ot44Kw44KS56K66KqN44GX44Gm44GP44Gg44GV44GE77yJIiwiZmZtcGVnRXh0cmFjdCI6IuWxlemWi+W+jOOBqyBmZm1wZWcg44GM6KaL44Gk44GL44KK44G+44Gb44KTIiwiZmZtcGVnTWlzc2luZyI6ImZmbXBlZyDjgYzjgqTjg7Pjgrnjg4jjg7zjg6vjgZXjgozjgabjgYTjgb7jgZvjgpMifQ=='))))
-  zh = (ConvertFrom-Json ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyJtaXNzaW5nSG9tZSI6Iue8uuWwkSBOUl9TRVRVUF9IT01FIiwibWlzc2luZ1Jlc291cmNlIjoi57y65bCRIE5SX1NFVFVQX1JFU09VUkNFIiwicHl0aG9uU2VhcmNoIjoi5q2j5Zyo5p+l5om+IFB5dGhvbuKApiIsInB5dGhvbkRvd25sb2FkIjoi5q2j5Zyo5LiL6L2954us56uL54mIIFB5dGhvbuKApiIsInZlbnZDcmVhdGUiOiLmraPlnKjliJvlu7ogUHl0aG9uIOeOr+Wig+KApiIsInBpcFVwZGF0ZSI6Iuato+WcqOabtOaWsCBwaXDigKYiLCJ0b3JjaEluc3RhbGwiOiLmraPlnKjlronoo4UgUHlUb3JjaCBDVURB77yI57qmIDIuNSBHQu+8ieKApiIsImRlcHNJbnN0YWxsIjoi5q2j5Zyo5a6J6KOF5py65Zmo5a2m5Lmg5L6d6LWW6aG54oCmIiwib3B0aW9uYWxEZXBzIjoi5q2j5Zyo5a6J6KOF5Y+v6YCJ5L6d6LWW6aG54oCmIiwiZmZtcGVnRG93bmxvYWQiOiLmraPlnKjkuIvovb0gZmZtcGVn4oCmIiwibW9kZWxzRG93bmxvYWQiOiLmraPlnKjkuIvovb3mqKHlnovigKYiLCJ2b2ljZVByZXBhcmUiOiLmraPlnKjlh4blpIfor63pn7PmqKHlnovigKYiLCJyZXNvbHZlUHJlcGFyZSI6Iuato+WcqOmFjee9riBEYVZpbmNpIFJlc29sdmUg5qGl5o6l4oCmIiwicHJvY2Vzc1ByZXBhcmUiOiLmraPlnKjlh4blpIflpITnkIbmqKHlnovigKYiLCJmYWNlc1ByZXBhcmUiOiLmraPlnKjlh4blpIfkurrohLjmqKHlnovigKYiLCJyb3RvUHJlcGFyZSI6Iuato+WcqOWHhuWkhyBSb3RvIFN0dWRpb++8iFNBTSAy77yJ4oCmIiwiY29uZmlnV3JpdGUiOiLmraPlnKjlhpnlhaXphY3nva7igKYiLCJkb25lIjoi5a6J6KOF5a6M5oiQIiwicHl0aG9uRmFpbGVkIjoi54us56uL54mIIFB5dGhvbiDlronoo4XlpLHotKUiLCJ2ZW52RmFpbGVkIjoi5peg5rOV5Yib5bu6IFB5dGhvbiDnjq/looMiLCJ0b3JjaEZhaWxlZCI6IlB5VG9yY2ggQ1VEQSDlronoo4XlpLHotKXvvIjor7fmn6XnnIvkuIrmlrkgcGlwIOaXpeW/l++8mue9kee7nC/ku6PnkIbjgIHno4Hnm5jlt7Lmu6HvvIzmiJYgUHl0aG9uIOeJiOacrOayoeaciSBjdTEyNCDova/ku7bljIXvvIkiLCJyZXF1aXJlbWVudHNGYWlsZWQiOiLkvp3otZbpobnlronoo4XlpLHotKXvvIjor7fmn6XnnIvkuIrmlrkgcGlwIOaXpeW/l++8iSIsImZmbXBlZ0V4dHJhY3QiOiLop6PljovlkI7mib7kuI3liLAgZmZtcGVnIiwiZmZtcGVnTWlzc2luZyI6IuWwmuacquWuieijhSBmZm1wZWcifQ=='))))
+  ja = (ConvertFrom-Json ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyJtaXNzaW5nSG9tZSI6Ik5SX1NFVFVQX0hPTUUg44GM44GC44KK44G+44Gb44KTIiwibWlzc2luZ1Jlc291cmNlIjoiTlJfU0VUVVBfUkVTT1VSQ0Ug44GM44GC44KK44G+44Gb44KTIiwicHl0aG9uU2VhcmNoIjoiUHl0aG9uIOOCkuaknOe0ouOBl+OBpuOBhOOBvuOBmeKApiIsInB5dGhvbkRvd25sb2FkIjoi44K544K/44Oz44OJ44Ki44Ot44Oz54mIIFB5dGhvbiDjgpLjg4Djgqbjg7Pjg63jg7zjg4njgZfjgabjgYTjgb7jgZnigKYiLCJ2ZW52Q3JlYXRlIjoiUHl0aG9uIOeSsOWig+OCkuS9nOaIkOOBl+OBpuOBhOOBvuOBmeKApiIsInBpcFVwZGF0ZSI6InBpcCDjgpLmm7TmlrDjgZfjgabjgYTjgb7jgZnigKYiLCJ0b3JjaEluc3RhbGwiOiJQeVRvcmNoIENVREEg44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ77yI57SEIDIuNSBHQu+8ieKApiIsImRlcHNJbnN0YWxsIjoiTUwg5L6d5a2Y6Zai5L+C44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ4oCmIiwib3B0aW9uYWxEZXBzIjoi44Kq44OX44K344On44Oz44Gu5L6d5a2Y6Zai5L+C44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ4oCmIiwiZmZtcGVnRG93bmxvYWQiOiJmZm1wZWcg44KS44OA44Km44Oz44Ot44O844OJ44GX44Gm44GE44G+44GZ4oCmIiwibW9kZWxzRG93bmxvYWQiOiLjg6Ljg4fjg6vjgpLjg4Djgqbjg7Pjg63jg7zjg4njgZfjgabjgYTjgb7jgZnigKYiLCJ2b2ljZVByZXBhcmUiOiLpn7Plo7Djg6Ljg4fjg6vjgpLmupblgpnjgZfjgabjgYTjgb7jgZnigKYiLCJyZXNvbHZlUHJlcGFyZSI6IkRhVmluY2kgUmVzb2x2ZSDjg5bjg6rjg4PjgrjjgpLoqK3lrprjgZfjgabjgYTjgb7jgZnigKYiLCJwcm9jZXNzUHJlcGFyZSI6IuWHpueQhuODouODh+ODq+OCkua6luWCmeOBl+OBpuOBhOOBvuOBmeKApiIsImZhY2VzUHJlcGFyZSI6IumhlOODouODh+ODq+OCkua6luWCmeOBl+OBpuOBhOOBvuOBmeKApiIsInJvdG9QcmVwYXJlIjoiUm90byBTdHVkaW/vvIhTQU0gMu+8ieOCkua6luWCmeOBl+OBpuOBhOOBvuOBmeKApiIsImNvbmZpZ1dyaXRlIjoi6Kit5a6a44KS5pu444GN6L6844KT44Gn44GE44G+44GZ4oCmIiwiZG9uZSI6IuOCpOODs+OCueODiOODvOODq+OBjOWujOS6huOBl+OBvuOBl+OBnyIsInB5dGhvbkZhaWxlZCI6IuOCueOCv+ODs+ODieOCouODreODs+eJiCBQeXRob24g44Gu44Kk44Oz44K544OI44O844Or44Gr5aSx5pWX44GX44G+44GX44GfIiwidmVudkZhaWxlZCI6IlB5dGhvbiDnkrDlooPjgpLkvZzmiJDjgafjgY3jgb7jgZvjgpPjgafjgZfjgZ8iLCJ0b3JjaEZhaWxlZCI6IlB5VG9yY2ggQ1VEQSDjga7jgqTjg7Pjgrnjg4jjg7zjg6vjgavlpLHmlZfjgZfjgb7jgZfjgZ/vvIjkuIroqJjjga4gcGlwIOODreOCsOOCkueiuuiqjeOBl+OBpuOBj+OBoOOBleOBhO+8muODjeODg+ODiOODr+ODvOOCr++8j+ODl+ODreOCreOCt+OAgeODh+OCo+OCueOCr+WuuemHj+S4jei2s+OAgeOBvuOBn+OBryBjdTEyNCDjg5Hjg4PjgrHjg7zjgrjpnZ7lr77lv5zjga4gUHl0aG9uIOODkOODvOOCuOODp+ODs++8iSIsInJlcXVpcmVtZW50c0ZhaWxlZCI6IuS+neWtmOmWouS/guOBruOCpOODs+OCueODiOODvOODq+OBq+WkseaVl+OBl+OBvuOBl+OBn++8iOS4iuiomOOBriBwaXAg44Ot44Kw44KS56K66KqN44GX44Gm44GP44Gg44GV44GE77yJIiwiZmZtcGVnRXh0cmFjdCI6IuWxlemWi+W+jOOBqyBmZm1wZWcg44GM6KaL44Gk44GL44KK44G+44Gb44KTIiwiZmZtcGVnTWlzc2luZyI6ImZmbXBlZyDjgYzjgqTjg7Pjgrnjg4jjg7zjg6vjgZXjgozjgabjgYTjgb7jgZvjgpMiLCJkaXNrTG93IjoiezB9IOOBruepuuOBjeWuuemHj+OBjOS4jei2s+OBl+OBpuOBhOOBvuOBmeOAguepuuOBjeOBryB7MX0gR0Ig44Gn44GZ44GM44CBUHl0aG9uIOeSsOWig+OBoOOBkeOBp+e0hCB7Mn0gR0Ig5b+F6KaB44Gn44GZ77yI44Oi44OH44Or44Gv5Yil6YCU5b+F6KaB44Gn44GZ77yJ44CCIiwicmVxdWlyZW1lbnRzTWlzc2luZyI6InJlcXVpcmVtZW50cy1iYXNlLnR4dCDjgYzopovjgaTjgYvjgorjgb7jgZvjgpPvvJp7MH0iLCJ0cmFuc25ldEZhaWxlZCI6IlRyYW5zTmV0VjIg44GM44Gq44GE44GL44CB44Kk44Oz44Od44O844OI44Gn44GN44G+44Gb44KT77yIcGlwIGluc3RhbGwgdHJhbnNuZXR2Mi1weXRvcmNoIOOBq+WkseaVl+OBl+OBvuOBl+OBn++8iSIsImJvYXJkUGFja01pc3NpbmciOiJOZXRzdUJvYXJkIOODkeODg+OCr+OBjOimi+OBpOOBi+OCiuOBvuOBm+OCk++8mnswfSIsImJvYXJkQnJva2VuIjoiTmV0c3VCb2FyZCDjga/jgqTjg7Pjgrnjg4jjg7zjg6vjgZXjgozjgabjgYTjgb7jgZnjgYzjgIHjg6rjg7Pjgq/jg4Tjg7zjg6vjgYzli5XkvZzjgZfjgb7jgZvjgpMiLCJtb2R1bGVQYWNrTWlzc2luZyI6IuS+neWtmOmWouS/guODkeODg+OCr+OBjOimi+OBpOOBi+OCiuOBvuOBm+OCk++8mnswfSIsInJlbW92YWxCcm9rZW4iOiLjgqrjg5bjgrjjgqfjgq/jg4jpmaTljrvjgpLjgqTjg7Pjg53jg7zjg4jjgafjgY3jgb7jgZvjgpPvvIhucnJvdG8g44GM5LiN5a6M5YWo44GL44CB5L6d5a2Y6Zai5L+C44GM5LiN6Laz44GX44Gm44GE44G+44GZ77yJIiwib25ueEJyb2tlbiI6Ik9OTlggUnVudGltZSDjga/jgqTjg7Pjgrnjg4jjg7zjg6vjgZXjgozjgabjgYTjgb7jgZnjgYzjgIF2ZW52IOOBpyBpbXBvcnQgb25ueHJ1bnRpbWUg44Gr5aSx5pWX44GX44G+44GZIiwibW9kdWxlQnJva2VuIjoi44Oi44K444Ol44O844OrIHswfSDjga/jgqTjg7Pjgrnjg4jjg7zjg6vjgZXjgozjgabjgYTjgb7jgZnjgYzkvb/nlKjjgafjgY3jgb7jgZvjgpPjgILjgqTjg7Pjg53jg7zjg4jjgavlpLHmlZfjgZfjgb7jgZfjgZ/vvIjkuIroqJjjga7jg63jgrDjgpLnorroqo3jgZfjgabjgY/jgaDjgZXjgYTvvIkiLCJvbW5pQnVuZGxlTWlzc2luZyI6IuODkOODs+ODieODq+WGheOBqyBPbW5pU2hvdEN1dCDjgYzopovjgaTjgYvjgorjgb7jgZvjgpPvvJp7MH0iLCJvbW5pRGVjb3JkIjoiT21uaVNob3RDdXQg44GM5LiN5a6M5YWo44Gn44GZ77yaZGVjb3JkIOOCkuOCpOODs+OCueODiOODvOODq+OBp+OBjeOBvuOBm+OCkyIsIm9tbmlJbnN0YWxsIjoiT21uaVNob3RDdXQg44GM44Gq44GE44GL44CB44Kk44Oz44K544OI44O844Or44Gn44GN44G+44Gb44KTIiwib21uaUltcG9ydCI6Ik9tbmlTaG90Q3V0IOOBjOOBquOBhOOBi+OAgeOCpOODs+ODneODvOODiOOBp+OBjeOBvuOBm+OCkyIsImNwdVRvcmNoRmFpbGVkIjoiUHlUb3JjaCBDUFUg44Gu44Kk44Oz44K544OI44O844Or44Gr5aSx5pWX44GX44G+44GX44Gf77yI5LiK6KiY44GuIHBpcCDjg63jgrDjgpLnorroqo3jgZfjgabjgY/jgaDjgZXjgYTvvIkiLCJ0b3JjaEN1ZGEiOiJOVklESUHvvIhDVURB77yJ55SoIFB5VG9yY2gg44KS44Kk44Oz44K544OI44O844Or44GX44Gm44GE44G+44GZ4oCmIiwidG9yY2hSb2NtIjoiQU1E77yIUk9Dbe+8ieeUqCBQeVRvcmNoIOOCkuOCpOODs+OCueODiOODvOODq+OBl+OBpuOBhOOBvuOBmeKApiIsInRvcmNoWHB1IjoiSW50ZWzvvIhYUFXvvInnlKggUHlUb3JjaCDjgpLjgqTjg7Pjgrnjg4jjg7zjg6vjgZfjgabjgYTjgb7jgZnigKYiLCJ0b3JjaENwdSI6IkNQVSDnlKggUHlUb3JjaCDjgpLjgqTjg7Pjgrnjg4jjg7zjg6vjgZfjgabjgYTjgb7jgZnigKYifQ=='))))
+  zh = (ConvertFrom-Json ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('eyJtaXNzaW5nSG9tZSI6Iue8uuWwkSBOUl9TRVRVUF9IT01FIiwibWlzc2luZ1Jlc291cmNlIjoi57y65bCRIE5SX1NFVFVQX1JFU09VUkNFIiwicHl0aG9uU2VhcmNoIjoi5q2j5Zyo5p+l5om+IFB5dGhvbuKApiIsInB5dGhvbkRvd25sb2FkIjoi5q2j5Zyo5LiL6L2954us56uL54mIIFB5dGhvbuKApiIsInZlbnZDcmVhdGUiOiLmraPlnKjliJvlu7ogUHl0aG9uIOeOr+Wig+KApiIsInBpcFVwZGF0ZSI6Iuato+WcqOabtOaWsCBwaXDigKYiLCJ0b3JjaEluc3RhbGwiOiLmraPlnKjlronoo4UgUHlUb3JjaCBDVURB77yI57qmIDIuNSBHQu+8ieKApiIsImRlcHNJbnN0YWxsIjoi5q2j5Zyo5a6J6KOF5py65Zmo5a2m5Lmg5L6d6LWW6aG54oCmIiwib3B0aW9uYWxEZXBzIjoi5q2j5Zyo5a6J6KOF5Y+v6YCJ5L6d6LWW6aG54oCmIiwiZmZtcGVnRG93bmxvYWQiOiLmraPlnKjkuIvovb0gZmZtcGVn4oCmIiwibW9kZWxzRG93bmxvYWQiOiLmraPlnKjkuIvovb3mqKHlnovigKYiLCJ2b2ljZVByZXBhcmUiOiLmraPlnKjlh4blpIfor63pn7PmqKHlnovigKYiLCJyZXNvbHZlUHJlcGFyZSI6Iuato+WcqOmFjee9riBEYVZpbmNpIFJlc29sdmUg5qGl5o6l4oCmIiwicHJvY2Vzc1ByZXBhcmUiOiLmraPlnKjlh4blpIflpITnkIbmqKHlnovigKYiLCJmYWNlc1ByZXBhcmUiOiLmraPlnKjlh4blpIfkurrohLjmqKHlnovigKYiLCJyb3RvUHJlcGFyZSI6Iuato+WcqOWHhuWkhyBSb3RvIFN0dWRpb++8iFNBTSAy77yJ4oCmIiwiY29uZmlnV3JpdGUiOiLmraPlnKjlhpnlhaXphY3nva7igKYiLCJkb25lIjoi5a6J6KOF5a6M5oiQIiwicHl0aG9uRmFpbGVkIjoi54us56uL54mIIFB5dGhvbiDlronoo4XlpLHotKUiLCJ2ZW52RmFpbGVkIjoi5peg5rOV5Yib5bu6IFB5dGhvbiDnjq/looMiLCJ0b3JjaEZhaWxlZCI6IlB5VG9yY2ggQ1VEQSDlronoo4XlpLHotKXvvIjor7fmn6XnnIvkuIrmlrkgcGlwIOaXpeW/l++8mue9kee7nC/ku6PnkIbjgIHno4Hnm5jlt7Lmu6HvvIzmiJYgUHl0aG9uIOeJiOacrOayoeaciSBjdTEyNCDova/ku7bljIXvvIkiLCJyZXF1aXJlbWVudHNGYWlsZWQiOiLkvp3otZbpobnlronoo4XlpLHotKXvvIjor7fmn6XnnIvkuIrmlrkgcGlwIOaXpeW/l++8iSIsImZmbXBlZ0V4dHJhY3QiOiLop6PljovlkI7mib7kuI3liLAgZmZtcGVnIiwiZmZtcGVnTWlzc2luZyI6IuWwmuacquWuieijhSBmZm1wZWciLCJkaXNrTG93IjoiezB9IOejgeebmOepuumXtOS4jei2s++8muS7heWJqSB7MX0gR0LvvIzku4UgUHl0aG9uIOeOr+Wig+WwsemcgOimgee6piB7Mn0gR0LvvIjmqKHlnovlj6borqHvvInjgIIiLCJyZXF1aXJlbWVudHNNaXNzaW5nIjoi5om+5LiN5YiwIHJlcXVpcmVtZW50cy1iYXNlLnR4dO+8mnswfSIsInRyYW5zbmV0RmFpbGVkIjoiVHJhbnNOZXRWMiDnvLrlpLHmiJbml6Dms5Xlr7zlhaXvvIhwaXAgaW5zdGFsbCB0cmFuc25ldHYyLXB5dG9yY2gg5aSx6LSl77yJIiwiYm9hcmRQYWNrTWlzc2luZyI6IuaJvuS4jeWIsCBOZXRzdUJvYXJkIOWMhe+8mnswfSIsImJvYXJkQnJva2VuIjoiTmV0c3VCb2FyZCDlt7Llronoo4XvvIzkvYblhbbpk77mjqXlt6Xlhbfml6Dms5Xkvb/nlKgiLCJtb2R1bGVQYWNrTWlzc2luZyI6IuaJvuS4jeWIsOS+nei1luWMhe+8mnswfSIsInJlbW92YWxCcm9rZW4iOiLml6Dms5Xlr7zlhaXlr7nosaHnp7vpmaTvvIhucnJvdG8g5LiN5a6M5pW05oiW57y65bCR5L6d6LWW6aG577yJIiwib25ueEJyb2tlbiI6Ik9OTlggUnVudGltZSDlt7Llronoo4XvvIzkvYblnKggdmVudiDkuK0gaW1wb3J0IG9ubnhydW50aW1lIOWksei0pSIsIm1vZHVsZUJyb2tlbiI6IuaooeWdlyB7MH0g5bey5a6J6KOF5L2G5peg5rOV5L2/55So77ya5a+85YWl5aSx6LSl77yI6K+35p+l55yL5LiK5pa55pel5b+X77yJIiwib21uaUJ1bmRsZU1pc3NpbmciOiLlronoo4XljIXkuK3mib7kuI3liLAgT21uaVNob3RDdXTvvJp7MH0iLCJvbW5pRGVjb3JkIjoiT21uaVNob3RDdXQg5LiN5a6M5pW077ya5peg5rOV5a6J6KOFIGRlY29yZCIsIm9tbmlJbnN0YWxsIjoiT21uaVNob3RDdXQg57y65aSx5oiW5peg5rOV5a6J6KOFIiwib21uaUltcG9ydCI6Ik9tbmlTaG90Q3V0IOe8uuWkseaIluaXoOazleWvvOWFpSIsImNwdVRvcmNoRmFpbGVkIjoiUHlUb3JjaCBDUFUg5a6J6KOF5aSx6LSl77yI6K+35p+l55yL5LiK5pa5IHBpcCDml6Xlv5fvvIkiLCJ0b3JjaEN1ZGEiOiLmraPlnKjlronoo4XpgILnlKjkuo4gTlZJRElB77yIQ1VEQe+8ieeahCBQeVRvcmNo4oCmIiwidG9yY2hSb2NtIjoi5q2j5Zyo5a6J6KOF6YCC55So5LqOIEFNRO+8iFJPQ23vvInnmoQgUHlUb3JjaOKApiIsInRvcmNoWHB1Ijoi5q2j5Zyo5a6J6KOF6YCC55So5LqOIEludGVs77yIWFBV77yJ55qEIFB5VG9yY2jigKYiLCJ0b3JjaENwdSI6Iuato+WcqOWuieijhemAgueUqOS6jiBDUFUg55qEIFB5VG9yY2jigKYifQ=='))))
 }
-$CpuTorchFailed = @{
-  fr = 'Échec de l''installation de PyTorch CPU (consultez le journal pip ci-dessus)'
-  en = 'PyTorch CPU installation failed (see the pip log above)'
-  es = 'Falló la instalación de PyTorch CPU (consulta el registro de pip)'
-  de = 'Installation von PyTorch CPU fehlgeschlagen (siehe pip-Protokoll oben)'
-  ja = 'PyTorch CPU installation failed (see the pip log above)'
-  zh = 'PyTorch CPU installation failed (see the pip log above)'
-}
-$TorchBackendText = @{
-  fr = @{ cuda='Installation de PyTorch NVIDIA (CUDA)…'; rocm='Installation de PyTorch AMD (ROCm)…'; xpu='Installation de PyTorch Intel (XPU)…'; cpu='Installation de PyTorch CPU…' }
-  en = @{ cuda='Installing PyTorch for NVIDIA (CUDA)…'; rocm='Installing PyTorch for AMD (ROCm)…'; xpu='Installing PyTorch for Intel (XPU)…'; cpu='Installing PyTorch for CPU…' }
-  es = @{ cuda='Instalando PyTorch para NVIDIA (CUDA)…'; rocm='Instalando PyTorch para AMD (ROCm)…'; xpu='Instalando PyTorch para Intel (XPU)…'; cpu='Instalando PyTorch para CPU…' }
-  de = @{ cuda='PyTorch für NVIDIA (CUDA) wird installiert…'; rocm='PyTorch für AMD (ROCm) wird installiert…'; xpu='PyTorch für Intel (XPU) wird installiert…'; cpu='PyTorch für CPU wird installiert…' }
-  ja = @{ cuda='Installing PyTorch for NVIDIA (CUDA)…'; rocm='Installing PyTorch for AMD (ROCm)…'; xpu='Installing PyTorch for Intel (XPU)…'; cpu='Installing PyTorch for CPU…' }
-  zh = @{ cuda='Installing PyTorch for NVIDIA (CUDA)…'; rocm='Installing PyTorch for AMD (ROCm)…'; xpu='Installing PyTorch for Intel (XPU)…'; cpu='Installing PyTorch for CPU…' }
-}
+# Numbers inside messages follow the interface language (2,5 in French, 2.5 in English).
+$UiCulture = [Globalization.CultureInfo]::GetCultureInfo(@{ fr = 'fr-FR'; en = 'en-US'; es = 'es-ES'; de = 'de-DE'; ja = 'ja-JP'; zh = 'zh-CN' }[$Lang])
 function T([string]$key) {
   $table = $Text[$Lang]
   if ($table -is [hashtable]) { return $table[$key] }
@@ -82,6 +71,10 @@ function T([string]$key) {
 # Keep every marker UTF-8, including validation errors emitted before setup starts.
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 $OutputEncoding = [System.Text.Encoding]::UTF8
+# Python and pip print in the ANSI code page otherwise (cp932 on a Japanese Windows), which the UTF-8
+# console decoding above turns into mojibake in the log and in paths.
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
 
 if (-not $NrHome) { Write-Output "ERROR:$(T 'missingHome')"; exit 1 }
 if (-not $Resource) { Write-Output "ERROR:$(T 'missingResource')"; exit 1 }
@@ -156,7 +149,7 @@ if ($CurlExe -and -not $env:HTTPS_PROXY -and -not $env:https_proxy) {
 # archive used to start over from byte zero every time it dropped, and never completed.
 function Download([string]$url, [string]$dest) {
   $label = Split-Path $dest -Leaf
-  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Dl 'skip' 0 0 $label; Info "déjà présent: $label"; return }
+  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Dl 'skip' 0 0 $label; Info "already present: $label"; return }
   $dir = Split-Path $dest -Parent
   if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir -ErrorAction Stop | Out-Null }
   $tmp = "$dest.part"
@@ -218,7 +211,7 @@ function Download([string]$url, [string]$dest) {
       if ($after -le $before) { Remove-Item -Force $tmp -ErrorAction SilentlyContinue }
       if ($n -eq $attempts) { Dl 'error' $after $expected $label; throw }
       Dl 'retry' $after $expected $label
-      Info "téléchargement échoué ($(Split-Path $url -Leaf)), tentative $n/$attempts : $($_.Exception.Message)"
+      Info "download failed ($(Split-Path $url -Leaf)), attempt $n/${attempts}: $($_.Exception.Message)"
       Start-Sleep -Seconds ($n * 3)
     }
   }
@@ -228,14 +221,14 @@ function Download([string]$url, [string]$dest) {
 # sinon télécharge. Évite tout aller-réseau quand l'asset est embarqué dans l'installeur.
 function Provide([string]$local, [string]$url, [string]$dest) {
   $label = Split-Path $dest -Leaf
-  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Dl 'skip' 0 0 $label; Info "déjà présent: $label"; return }
+  if ((Test-Path $dest) -and ((Get-Item $dest).Length -gt 0)) { Dl 'skip' 0 0 $label; Info "already present: $label"; return }
   if ($local -and (Test-Path $local) -and ((Get-Item $local).Length -gt 0)) {
     $dir = Split-Path $dest -Parent
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
     Dl 'work' 0 0 $label
     Copy-Item -Force $local $dest
     Dl 'skip' 0 0 $label
-    Info "copié (bundle): $label"
+    Info "copied (bundle): $label"
     return
   }
   Download $url $dest
@@ -369,12 +362,12 @@ $MinFreeGb = 3
 try {
   $driveRoot = [IO.Path]::GetPathRoot($NrHome)
   $freeGb = [math]::Round((Get-PSDrive -Name $driveRoot.Substring(0, 1) -ErrorAction Stop).Free / 1GB, 1)
-  Info "espace libre sur $driveRoot : $freeGb Go"
+  Info "free space on ${driveRoot}: $freeGb GB"
   if ($freeGb -lt $MinFreeGb) {
-    Fail "Espace disque insuffisant sur $driveRoot : $freeGb Go libres, environ $MinFreeGb Go sont nécessaires rien que pour l'environnement Python (les modèles s'ajoutent)."
+    Fail ((T 'diskLow') -f $driveRoot, $freeGb.ToString('0.#', $UiCulture), $MinFreeGb.ToString($UiCulture))
   }
 } catch {
-  Info "espace disque non mesurable : $($_.Exception.Message)"
+  Info "free space not measurable: $($_.Exception.Message)"
 }
 
 # ── 1. Python de base ────────────────────────────────────────────────────────
@@ -393,7 +386,7 @@ if (-not $basePy) {
     $pv = (& python --version 2>&1) -replace '[^0-9.]', ''
     $pyOk = if ($MlBackend -eq 'rocm') { $pv -match '^3\.12\b' } else { $pv -match '^3\.(10|11|12)\b' }
     if ($LASTEXITCODE -eq 0 -and $pyOk) { $basePy = @('python') }
-    elseif ($LASTEXITCODE -eq 0) { Info "python système $pv ignoré (NetsuRush exige 3.10-3.12) → standalone 3.12" }
+    elseif ($LASTEXITCODE -eq 0) { Info "system python $pv skipped (NetsuRush needs 3.10-3.12) -> standalone 3.12" }
   } catch {}
 }
 if (-not $basePy) {
@@ -412,7 +405,7 @@ if (-not $basePy) {
   if (-not (Test-Path $pyExe)) { Fail (T 'pythonFailed') }
   $basePy = @($pyExe)
 }
-Info "python de base: $($basePy -join ' ')"
+Info "base python: $($basePy -join ' ')"
 Progress 10
 
 # ── 2. venv + torch adapté + requirements ────────────────────────────────────
@@ -423,7 +416,7 @@ if (Test-Path $venvPy) {
   $venvVer = (& $venvPy --version 2>&1) -replace '[^0-9.]', ''
   $venvOk = if ($MlBackend -eq 'rocm') { $venvVer -match '^3\.12\b' } else { $venvVer -match '^3\.(10|11|12)\b' }
   if (-not $venvOk) {
-    Info "venv périmé (Python $venvVer incompatible avec $MlBackend) → recréation"
+    Info "stale venv (Python $venvVer does not fit $MlBackend) -> recreating"
     Remove-Item -Recurse -Force $venvDir -ErrorAction SilentlyContinue
   }
 }
@@ -450,7 +443,7 @@ try {
 } catch {}
 $needTorch = (-not $installedTorch) -or ($MlBackend -ne 'cpu' -and $installedTorch -ne $MlBackend)
 if ($needTorch) {
-  $torchLabel = $TorchBackendText[$Lang][$MlBackend]
+  $torchLabel = T (@{ cuda = 'torchCuda'; rocm = 'torchRocm'; xpu = 'torchXpu'; cpu = 'torchCpu' }[$MlBackend])
   Stage 'torch' $torchLabel
   # ~2,5 Go sur le réseau du tester : timeouts/coupures fréquents. On laisse pip retenter (--retries),
   # on allonge le timeout socket, et on CAPTURE la sortie pour la réinjecter dans le journal en cas
@@ -487,13 +480,13 @@ if ($needTorch) {
       $torchLog = Invoke-Pip @('install', '--upgrade', '--force-reinstall', 'torch', 'torchvision', 'torchaudio',
         '--index-url', 'https://download.pytorch.org/whl/cpu', '--retries', '5', '--timeout', '120') 'PyTorch CPU'
     }
-    if ($LASTEXITCODE -ne 0) { $torchLog | ForEach-Object { Info "pip torch cpu> $_" }; Fail $CpuTorchFailed[$Lang] }
+    if ($LASTEXITCODE -ne 0) { $torchLog | ForEach-Object { Info "pip torch cpu> $_" }; Fail (T 'cpuTorchFailed') }
   }
 }
 # Le package installé ne suffit pas : pilote absent ou GPU occupé peut rendre le backend inutilisable.
 $actualTorch = (& $venvPy -c "import torch; hip=getattr(torch.version,'hip',None); c=torch.cuda.is_available(); x=hasattr(torch,'xpu') and torch.xpu.is_available(); print('rocm' if c and hip else ('cuda' if c else ('xpu' if x else 'cpu')))" 2>$null).Trim()
 if ($actualTorch -notin @('cuda', 'rocm', 'xpu')) { $actualTorch = 'cpu' }
-if ($actualTorch -ne $MlBackend) { Info "PyTorch $MlBackend non opérationnel → repli $actualTorch"; $MlBackend = $actualTorch }
+if ($actualTorch -ne $MlBackend) { Info "PyTorch $MlBackend does not work -> falling back to $actualTorch"; $MlBackend = $actualTorch }
 # ONNX CUDA n'a de sens que si CUDA NVIDIA a passé la sonde. AMD/Intel conservent DirectML.
 if ($OnnxBackend -eq 'cuda' -and $MlBackend -ne 'cuda') { $OnnxBackend = 'cpu' }
 Progress 55
@@ -519,7 +512,7 @@ if (Test-Path $req) {
     $depsLog | ForEach-Object { Info "pip deps> $_" }
     Fail (T 'requirementsFailed')
   }
-} else { Fail "requirements-base.txt introuvable: $req" }
+} else { Fail ((T 'requirementsMissing') -f $req) }
 
 # TransNetV2 est le moteur de détection obligatoire (et non un modèle optionnel). Une installation
 # pip peut toutefois annoncer un succès alors qu'un ancien venv conserve un paquet incomplet ou que
@@ -529,12 +522,12 @@ if (Test-Path $req) {
 $transnetCheck = & $venvPy -c "import transnetv2_pytorch; from transnetv2_pytorch import TransNetV2" 2>&1
 if ($LASTEXITCODE -ne 0) {
   $transnetCheck | ForEach-Object { Info "pip transnet> $_" }
-  Fail "TransNetV2 absent ou non importable (pip install transnetv2-pytorch a échoué)"
+  Fail (T 'transnetFailed')
 }
-Info "TransNetV2 prêt"
+Info "TransNetV2 ready"
 
 $boardReq = Join-Path $pyScripts 'requirements-reference.txt'
-if (-not (Test-Path $boardReq)) { Fail "pack NetsuBoard introuvable: $boardReq" }
+if (-not (Test-Path $boardReq)) { Fail ((T 'boardPackMissing') -f $boardReq) }
 Stage 'deps' "$(T 'depsInstall') · NetsuBoard"
 $boardLog = Invoke-Pip @('install', '-r', $boardReq, '--retries', '5', '--timeout', '120') 'NetsuBoard'
 if ($LASTEXITCODE -ne 0) {
@@ -544,7 +537,7 @@ if ($LASTEXITCODE -ne 0) {
 $boardProbe = & $venvPy -c 'import yt_dlp, gallery_dl, curl_cffi' 2>&1
 if ($LASTEXITCODE -ne 0) {
   $boardProbe | ForEach-Object { Info "probe NetsuBoard> $_" }
-  Fail "NetsuBoard est installé mais ses outils de liens sont inutilisables"
+  Fail (T 'boardBroken')
 }
 
 # Packs installés uniquement pour les pages retenues au premier lancement. Les poids restent séparés :
@@ -557,7 +550,7 @@ $moduleRequirements = [ordered]@{
 foreach ($moduleId in $moduleRequirements.Keys) {
   if (-not (HasModule $moduleId)) { continue }
   $moduleReq = Join-Path $pyScripts $moduleRequirements[$moduleId]
-  if (-not (Test-Path $moduleReq)) { Fail "pack de dépendances introuvable: $moduleReq" }
+  if (-not (Test-Path $moduleReq)) { Fail ((T 'modulePackMissing') -f $moduleReq) }
   Stage 'deps' "$(T 'depsInstall') · $moduleId"
   $moduleReqInstall = $moduleReq
   $moduleReqCpu = $null
@@ -582,9 +575,9 @@ foreach ($moduleId in $moduleRequirements.Keys) {
 $seamCheck = & $venvPy -c "import sys; sys.path.insert(0, r'$pyScripts'); import nrroto.harmonize, nrroto.cleanplate, nrroto.video" 2>&1
 if ($LASTEXITCODE -ne 0) {
   $seamCheck | ForEach-Object { Info "roto> $_" }
-  Fail "Raccord de suppression d'objet non importable (nrroto incomplet ou dépendances manquantes)"
+  Fail (T 'removalBroken')
 }
-Info "Suppression d'objet prête"
+Info "Object removal ready"
 
 # Un SEUL package ONNX Runtime à la fois : CUDA NVIDIA, DirectML AMD/Intel/DirectX 12, ou CPU.
 # Les extras requirements installent d'abord une base cohérente ; on normalise ensuite le provider.
@@ -639,7 +632,7 @@ print(','.join(ort.InferenceSession(m, providers=[sys.argv[2], 'CPUExecutionProv
     $providers = & $venvPy $probeFile $pyScripts $wantedProvider 2>$null
     Remove-Item -LiteralPath $probeFile -Force -ErrorAction SilentlyContinue
     if ($LASTEXITCODE -ne 0 -or "$providers" -notmatch $wantedProvider) {
-      Info "ONNX $OnnxBackend installé mais $wantedProvider ne se charge pas (session réelle : $providers) -> configuration en CPU"
+      Info "ONNX $OnnxBackend installed but $wantedProvider does not load (actual session: $providers) -> using CPU"
       $OnnxBackend = 'cpu'
     }
   }
@@ -649,7 +642,7 @@ print(','.join(ort.InferenceSession(m, providers=[sys.argv[2], 'CPUExecutionProv
   # premier modèle qui l'importe — visages animés, Parakeet, détourage — sous la forme d'un
   # `ModuleNotFoundError` opaque, très loin de l'installation. On le constate donc ici.
   & $venvPy -c "import onnxruntime" *> $null
-  if ($LASTEXITCODE -ne 0) { Fail "ONNX Runtime installé sans succès : ``import onnxruntime`` échoue dans le venv" }
+  if ($LASTEXITCODE -ne 0) { Fail (T 'onnxBroken') }
 }
 
 # Vérification RÉELLE des packs retenus. « Successfully installed » ne prouve rien : un paquet peut
@@ -666,9 +659,9 @@ foreach ($moduleId in $packProbes.Keys) {
   $probeLog = & $venvPy -c $packProbes[$moduleId] 2>&1
   if ($LASTEXITCODE -ne 0) {
     $probeLog | ForEach-Object { Info "verif $moduleId> $_" }
-    Fail "Le module $moduleId est installé mais inutilisable : un import a échoué (journal ci-dessus)"
+    Fail ((T 'moduleBroken') -f $moduleId)
   }
-  Info "module $moduleId vérifié"
+  Info "module $moduleId verified"
 }
 
 # RIFE n'est pas compilé pendant le setup : Paramètres › Modèles installe le wheel Windows officiel
@@ -681,7 +674,7 @@ Progress 72
 # installation existante ne serait jamais montée de version.
 $ffCurrent = Get-FfmpegVersion $ffExe
 if (-not (Test-FfmpegVersionValue $ffCurrent $FfmpegAccepted)) {
-  if ($ffCurrent) { Info "ffmpeg remplacé (version installée: $ffCurrent)" }
+  if ($ffCurrent) { Info "ffmpeg replaced (installed version: $ffCurrent)" }
   Stage 'ffmpeg' (T 'ffmpegDownload')
   # Dossier de décompression NEUF : les archives se déplient sous un nom qui porte leur version
   # (`ffmpeg-9.0-full_build/`), donc les extractions passées s'accumulaient dans runtime/ et la
@@ -701,13 +694,13 @@ if (-not (Test-FfmpegVersionValue $ffCurrent $FfmpegAccepted)) {
     $mirrored = $true
     Info "miroir ffmpeg $FfmpegVersion extrait"
   } catch {
-    Info "miroir ffmpeg $FfmpegVersion ignoré: $($_.Exception.Message)"
+    Info "ffmpeg mirror $FfmpegVersion skipped: $($_.Exception.Message)"
   }
   Remove-Item -Force $zip -ErrorAction SilentlyContinue
 
   if (-not $mirrored) {
     $fallbackZip = Join-Path $runtime 'ffmpeg.zip'
-    Info "repli sur le build zip $FfmpegFallbackVersion"
+    Info "falling back to the zip build $FfmpegFallbackVersion"
     Download $FfmpegFallbackUrl $fallbackZip
     Expand-Archive -Path $fallbackZip -DestinationPath $stage -Force -ErrorAction Stop
     Remove-Item -Force $fallbackZip -ErrorAction SilentlyContinue
@@ -733,8 +726,8 @@ if (-not (Test-FfmpegVersionValue $ffCurrent $FfmpegAccepted)) {
   # on le DIT au lieu d'échouer, sinon une machine sans extracteur 7z ne pourrait plus s'installer.
   # La version relue sert AUSSI à nr.config.json plus bas — d'où une seule lecture réutilisée.
   $ffCurrent = Get-FfmpegVersion $ffExe
-  if (Test-FfmpegVersionValue $ffCurrent @($FfmpegVersion)) { Info "ffmpeg $FfmpegVersion installé" }
-  else { Info "ffmpeg installé dans une version de repli: $ffCurrent" }
+  if (Test-FfmpegVersionValue $ffCurrent @($FfmpegVersion)) { Info "ffmpeg $FfmpegVersion installed" }
+  else { Info "ffmpeg installed in a fallback version: $ffCurrent" }
 }
 if (-not (Test-Path $ffExe)) { Fail (T 'ffmpegMissing') }
 Progress 82
@@ -754,7 +747,7 @@ foreach ($modelId in $realFiles.Keys) {
   if (-not (HasModel $modelId)) { continue }
   $asset = $realFiles[$modelId]
   New-Item -ItemType Directory -Force -Path $realdir | Out-Null
-  try { Provide (Join-Path $realVendor $asset.file) $asset.url (Join-Path $realdir $asset.file) } catch { Info "modèle ignoré ($modelId): $($_.Exception.Message)" }
+  try { Provide (Join-Path $realVendor $asset.file) $asset.url (Join-Path $realdir $asset.file) } catch { Info "model skipped ($modelId): $($_.Exception.Message)" }
 }
 if (HasModel 'face-real') {
   New-Item -ItemType Directory -Force -Path $faceDir | Out-Null
@@ -763,7 +756,7 @@ if (HasModel 'face-real') {
     'face_recognition_sface_2021dec.onnx' = 'https://huggingface.co/opencv/face_recognition_sface/resolve/main/face_recognition_sface_2021dec.onnx'
   }
   foreach ($k in $faceFiles.Keys) {
-    try { Provide (Join-Path $Resource "vendor\weights\face\$k") $faceFiles[$k] (Join-Path $faceDir $k) } catch { Info "poids visage ignoré ($k): $($_.Exception.Message)" }
+    try { Provide (Join-Path $Resource "vendor\weights\face\$k") $faceFiles[$k] (Join-Path $faceDir $k) } catch { Info "face weights skipped ($k): $($_.Exception.Message)" }
   }
 }
 if (HasModel 'omnishotcut') {
@@ -773,25 +766,25 @@ if (HasModel 'omnishotcut') {
   & $venvPy -c "import omnishotcut; import decord" *> $null
   if ($LASTEXITCODE -ne 0) {
     if (-not (Test-Path (Join-Path $omniPkg 'pyproject.toml'))) {
-      Fail "OmniShotCut introuvable dans le bundle : $omniPkg"
+      Fail ((T 'omniBundleMissing') -f $omniPkg)
     }
     $decordLog = Invoke-Pip @('install', 'decord', '--retries', '5', '--timeout', '120') 'decord'
     if ($LASTEXITCODE -ne 0) {
       $decordLog | ForEach-Object { Info "pip decord> $_" }
-      Fail "OmniShotCut incomplet : decord n'est pas installable"
+      Fail (T 'omniDecord')
     }
     $omniLog = Invoke-Pip @('install', $omniPkg, '--no-deps', '--retries', '5', '--timeout', '120') 'OmniShotCut'
     if ($LASTEXITCODE -ne 0) {
       $omniLog | ForEach-Object { Info "pip OmniShotCut> $_" }
-      Fail "OmniShotCut absent ou non installable"
+      Fail (T 'omniInstall')
     }
   }
   $omniCheck = & $venvPy -c "import omnishotcut; import decord" 2>&1
   if ($LASTEXITCODE -ne 0) {
     $omniCheck | ForEach-Object { Info "pip OmniShotCut> $_" }
-    Fail "OmniShotCut absent ou non importable"
+    Fail (T 'omniImport')
   }
-  Info "OmniShotCut prêt"
+  Info "OmniShotCut ready"
 }
 Progress 98
 
@@ -804,15 +797,15 @@ if (HasModel 'silero-vad') {
 # cuDNN 9 / cuBLAS servent uniquement au chemin NVIDIA. Le moteur CPU de faster-whisper reste
 # disponible ailleurs sans télécharger ces bibliothèques massives et inutilisables.
 if ((HasModule 'voice') -and $MlBackend -eq 'cuda') {
-  try { & $venvPy -m pip install "nvidia-cudnn-cu12>=9,<10" "nvidia-cublas-cu12" --quiet } catch { Info "cuDNN voix ignoré: $($_.Exception.Message)" }
+  try { & $venvPy -m pip install "nvidia-cudnn-cu12>=9,<10" "nvidia-cublas-cu12" --quiet } catch { Info "voice cuDNN skipped: $($_.Exception.Message)" }
 }
 # Pré-téléchargement Whisper large-v3-turbo (CTranslate2) → sinon DL au 1er usage.
 if ((HasModel 'whisper-turbo') -and (-not (Test-Path (Join-Path $whisperDir 'model.bin')))) {
-  try { & $venvPy -c "from faster_whisper import download_model; download_model('large-v3-turbo', output_dir=r'$whisperDir')" } catch { Info "Whisper voix ignoré: $($_.Exception.Message)" }
+  try { & $venvPy -c "from faster_whisper import download_model; download_model('large-v3-turbo', output_dir=r'$whisperDir')" } catch { Info "voice Whisper skipped: $($_.Exception.Message)" }
 }
 # Pré-téléchargement Parakeet TDT v3 ONNX (onnx-asr pose les .onnx dans le dossier).
 if ((HasModel 'parakeet-v3') -and (-not (Test-Path (Join-Path $parakeetDir 'encoder-model.onnx'))) -and -not (Test-Path (Join-Path $parakeetDir 'encoder-model.int8.onnx'))) {
-  try { & $venvPy -c "import onnx_asr; onnx_asr.load_model('nemo-parakeet-tdt-0.6b-v3', r'$parakeetDir')" } catch { Info "Parakeet voix ignoré: $($_.Exception.Message)" }
+  try { & $venvPy -c "import onnx_asr; onnx_asr.load_model('nemo-parakeet-tdt-0.6b-v3', r'$parakeetDir')" } catch { Info "voice Parakeet skipped: $($_.Exception.Message)" }
 }
 # NOVA-VAD : confirmation anti-bruit PAR-DESSUS Silero (ce n'est PAS un segmenteur). Le CODE (dépôt
 # MIT vendoré, ~200 Ko : extraction de features + classifieur) est livré dans l'installeur et posé
@@ -825,14 +818,14 @@ $novaModels = Join-Path $novaDir 'models'
 $novaBundle = Join-Path $Resource 'vendor\nova-vad'
 if (HasModule 'voice') {
   if ((Test-Path (Join-Path $novaBundle 'src\classifier.py')) -and (-not (Test-Path (Join-Path $novaDir 'src\classifier.py')))) {
-    try { Copy-Item -Recurse -Force $novaBundle $novaDir } catch { Info "NOVA-VAD (bundle) ignoré: $($_.Exception.Message)" }
+    try { Copy-Item -Recurse -Force $novaBundle $novaDir } catch { Info "NOVA-VAD (bundle) skipped: $($_.Exception.Message)" }
   }
   # Features NOVA = sklearn (RF+GBT) + joblib ; librosa/soundfile viennent du pack voix.
-  try { & $venvPy -m pip install scikit-learn joblib --quiet } catch { Info "NOVA-VAD deps ignorées: $($_.Exception.Message)" }
+  try { & $venvPy -m pip install scikit-learn joblib --quiet } catch { Info "NOVA-VAD deps skipped: $($_.Exception.Message)" }
   if (Test-Path (Join-Path $novaDir 'src\classifier.py')) {
     New-Item -ItemType Directory -Force -Path $novaModels | Out-Null
     if (-not (Test-Path (Join-Path $novaModels 'nova_vad_rf.pkl'))) {
-      Info "NOVA-VAD : code installé, poids absents (aucun modèle public) -> Silero seul. Déposez nova_vad_rf.pkl et nova_vad_scaler.pkl dans $novaModels"
+      Info "NOVA-VAD: code installed, weights missing (no public model) -> Silero only. Put nova_vad_rf.pkl and nova_vad_scaler.pkl in $novaModels"
     }
   }
 }
@@ -861,7 +854,7 @@ if (-not $resolvePy) {
       Move-Item (Join-Path $tmp313 'python') $rp313
       Remove-Item -Recurse -Force $tmp313 -ErrorAction SilentlyContinue
       Remove-Item -Force $tgz313 -ErrorAction SilentlyContinue
-    } catch { Info "python 3.13 (Resolve) ignoré: $($_.Exception.Message)" }
+    } catch { Info "python 3.13 (Resolve) skipped: $($_.Exception.Message)" }
   }
   if (Test-Path $rpExe) { $resolvePy = $rpExe }
 }
@@ -878,7 +871,7 @@ if (HasModule 'upscale') { New-Item -ItemType Directory -Force -Path $rembgDir, 
 # modèles que l'utilisateur n'a pas choisis. Seul le dossier de cache est provisionné.
 # depth : pré-DL Depth-Anything-V2-Small (HF) dans HF_HOME.
 if (HasModel 'depth-anything-v2-small') {
-  try { $env:HF_HOME = $procHf; & $venvPy -c "from transformers import pipeline; pipeline('depth-estimation', model='depth-anything/Depth-Anything-V2-Small-hf')" } catch { Info "depth ignoré: $($_.Exception.Message)" }
+  try { $env:HF_HOME = $procHf; & $venvPy -c "from transformers import pipeline; pipeline('depth-estimation', model='depth-anything/Depth-Anything-V2-Small-hf')" } catch { Info "depth skipped: $($_.Exception.Message)" }
 }
 # RIFE : runtime précompilé installé à la demande depuis Paramètres › Modèles.
 
@@ -891,10 +884,10 @@ if (HasModel 'depth-anything-v2-small') {
 if (HasModel 'face-anime') { Stage 'faces' (T 'facesPrepare') }
 $imgutilsPkg = if ($MlBackend -eq 'cuda') { 'dghs-imgutils[gpu]' } else { 'dghs-imgutils' }
 if (HasModel 'face-anime') {
-  try { & $venvPy -m pip install --no-deps $imgutilsPkg --quiet } catch { Info "imgutils ignoré: $($_.Exception.Message)" }
+  try { & $venvPy -m pip install --no-deps $imgutilsPkg --quiet } catch { Info "imgutils skipped: $($_.Exception.Message)" }
   try {
     & $venvPy -m pip install hbutils hfutils 'emoji<2.12' pilmoji shapely pyclipper deprecation bchlib piexif pyrfc6266 urlobject scikit-learn --quiet
-  } catch { Info "deps imgutils ignorées: $($_.Exception.Message)" }
+  } catch { Info "imgutils deps skipped: $($_.Exception.Message)" }
 }
 # Pré-DL des modèles animé dans le cache HF partagé ($procHf, déjà câblé HF_HOME côté core) :
 # déclenche les VRAIS téléchargements (détecteur v1.4 's' + CCIP) sur une image factice.
@@ -903,7 +896,7 @@ if (HasModel 'face-anime') { try {
   # `import onnxruntime` en tête : sans lui, imgutils installe la dernière roue onnxruntime-gpu
   # (branche CUDA 13) par-dessus celle bâtie pour le CUDA de torch et l'inférence ONNX retombe sur CPU.
   & $venvPy -c "import onnxruntime; from PIL import Image; from imgutils.detect import detect_faces; from imgutils.metrics import ccip_extract_feature; img = Image.new('RGB', (64, 64)); detect_faces(img, level='s', version='v1.4'); ccip_extract_feature(img)"
-} catch { Info "modèles visage animé ignorés: $($_.Exception.Message)" } }
+} catch { Info "anime face models skipped: $($_.Exception.Message)" } }
 
 # ── 4e. Roto Studio : package SAM 2 (segmentation vidéo interactive) ──────────
 # Le CODE de SAM 2 (build_sam2_video_predictor + configs Hydra sam2.1) ; les POIDS restent gérés
@@ -917,15 +910,15 @@ if (((HasModel 'sam2.1') -or (HasModel 'sam2.1-large')) -and $LASTEXITCODE -ne 0
   $env:SAM2_BUILD_ALLOW_ERRORS = '1'
   $samVendor = Join-Path $Resource 'vendor\sam2'
   if (Test-Path $samVendor) {
-    try { & $venvPy -m pip install $samVendor --no-build-isolation --quiet } catch { Info "SAM 2 (vendor) ignoré: $($_.Exception.Message)" }
+    try { & $venvPy -m pip install $samVendor --no-build-isolation --quiet } catch { Info "SAM 2 (vendor) skipped: $($_.Exception.Message)" }
   } else {
     # Tarball GitHub officiel (Meta, Apache-2.0) → pas besoin du binaire `git`. URL NUE : la dist
     # s'appelle « SAM-2 », un préfixe `sam2 @` casserait le name-match (retomberait sur un fork PyPI).
-    try { & $venvPy -m pip install "https://github.com/facebookresearch/sam2/archive/refs/heads/main.tar.gz" --retries 3 --timeout 180 2>&1 | Out-Null } catch { Info "SAM 2 ignoré: $($_.Exception.Message)" }
+    try { & $venvPy -m pip install "https://github.com/facebookresearch/sam2/archive/refs/heads/main.tar.gz" --retries 3 --timeout 180 2>&1 | Out-Null } catch { Info "SAM 2 skipped: $($_.Exception.Message)" }
   }
   & $venvPy -c "import sam2" *> $null
-  if ($LASTEXITCODE -eq 0) { Info 'SAM 2 installé' } else { Info 'SAM 2 indisponible → Roto Studio limité (installer le package sam2 plus tard)' }
-} elseif ((HasModel 'sam2.1') -or (HasModel 'sam2.1-large')) { Info 'SAM 2 déjà présent' }
+  if ($LASTEXITCODE -eq 0) { Info 'SAM 2 installed' } else { Info 'SAM 2 unavailable -> Roto Studio limited (install the sam2 package later)' }
+} elseif ((HasModel 'sam2.1') -or (HasModel 'sam2.1-large')) { Info 'SAM 2 already present' }
 
 # ── 5. nr.config.json ────────────────────────────────────────────────────────
 Stage 'config' (T 'configWrite')
@@ -961,7 +954,7 @@ $cfgPath = Join-Path $NrHome 'nr.config.json'
 # UTF-8 SANS BOM : Set-Content -Encoding UTF8 (PowerShell 5.1) ajoute un BOM → JSON.parse côté core
 # lève sur ce caractère de tête et IGNORE la config (l'app redemandait l'installation à chaque fois).
 [System.IO.File]::WriteAllText($cfgPath, ($cfg | ConvertTo-Json -Depth 6), [System.Text.UTF8Encoding]::new($false))
-Info "config écrite: $cfgPath"
+Info "config written: $cfgPath"
 Progress 100
 Stage 'done' (T 'done')
 exit 0

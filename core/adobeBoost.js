@@ -106,7 +106,7 @@ function createAdobeBoost({ adobeBridge, hostPower, broadcast, ev }) {
         [
           "-NoProfile",
           "-Command",
-          `$n=@(${names}); Get-Process | Where-Object { $n -contains $_.Name } | Select-Object Name,Id,@{N='ws';E={$_.WorkingSet64}} | ConvertTo-Json -Compress`,
+          `[Console]::OutputEncoding=[Text.Encoding]::UTF8; $n=@(${names}); Get-Process | Where-Object { $n -contains $_.Name } | Select-Object Name,Id,@{N='ws';E={$_.WorkingSet64}} | ConvertTo-Json -Compress`,
         ],
         { timeout: 8000 },
       );

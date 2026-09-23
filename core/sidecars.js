@@ -16,7 +16,7 @@ const { codecExt: upscaleExt, hasFiles, sanitizeName } = require('./utils');
 const { resolveProcessEncoding } = require('./processEncoding');
 const { outputKind, imageSpec, imageTarget, imagePayload } = require('./imageOutput');
 const { MANIFEST, modelDir, RIFE_TORCH_DIR, RIFE_ARCH_DIR, GMFSS_DIR, DRBA_DIR, DRBA_ARCH_DIR } = require('./models');   // dossiers de poids gérés (BEN2/MatAnyone…) → env sidecar
-const { t } = require('./i18n');
+const { t, language } = require('./i18n');
 const logbus = require('./logbus'); // journal Console : forward du stderr des sidecars python
 const mediaIdent = require('./mediaIdent'); // identité de contenu : le même rush sous un autre nom
 
@@ -56,7 +56,7 @@ function procEnv() {
 // workers, tout en conservant intégralement l'environnement ML existant.
 /** @param {NodeJS.ProcessEnv} [extra] @returns {NodeJS.ProcessEnv} */
 function langEnv(extra = {}) {
-  return { ...DETECT_ENV, ...perfEnv(), NR_LANG: CONFIG.lang || 'fr', ...extra };
+  return { ...DETECT_ENV, ...perfEnv(), NR_LANG: language(), ...extra };
 }
 
 // Scripts Python à la racine du dépôt (core/ → ../python). En bundle, surchargeable via env.
@@ -98,7 +98,9 @@ function runDetect(event, args, tagPath) {
         finish({ scenes: [], error: t('engineStalled') });
       }
     }, 5000);
+    py.stdout.setEncoding('utf8');
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
+    py.stderr.setEncoding('utf8');
     py.stderr.on('data', (d) => {
       last = Date.now();
       const s = d.toString();
@@ -135,6 +137,7 @@ function makeDetectDaemon() {
     if (proc) return;
     proc = spawn(PYTHON, [DETECT_SCRIPT, 'serve'], { env: langEnv() });
     touch();
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
       touch();
       buf += d.toString();
@@ -147,6 +150,7 @@ function makeDetectDaemon() {
         if (resolve) { pending.delete(msg.id); resolve(msg.result); }
       }
     });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (d) => { touch(); const s = d.toString(); logbus.py('detect', s); if (curProg) curProg(s); });
     const onDead = () => {
       proc = null; buf = '';
@@ -350,7 +354,9 @@ function runSilence(event, source, audio, params = {}) {
         finish({ ok: false, speech: [], silence: [], error: t('engineStalled') });
       }
     }, 5000);
+    py.stdout.setEncoding('utf8');
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
+    py.stderr.setEncoding('utf8');
     py.stderr.on('data', (d) => {
       last = Date.now();
       const s = d.toString();
@@ -385,7 +391,9 @@ function runFiller(event, source, audio, payload = {}) {
         finish({ ok: false, fillers: [], error: t('engineStalled') });
       }
     }, 5000);
+    py.stdout.setEncoding('utf8');
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
+    py.stderr.setEncoding('utf8');
     py.stderr.on('data', (d) => {
       last = Date.now();
       const s = d.toString();
@@ -438,6 +446,7 @@ function makeSearchDaemon(extraEnv, onStderr, idleKillMs) {
     if (proc) return;
     proc = spawn(PYTHON, [SEARCH_SCRIPT, 'serve'], { env: langEnv(extraEnv) });
     touch();
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
       touch();
       buf += d.toString();
@@ -450,6 +459,7 @@ function makeSearchDaemon(extraEnv, onStderr, idleKillMs) {
         if (resolve) { pending.delete(msg.id); resolve(msg.result); }
       }
     });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (d) => {
       touch();
       const s = d.toString();
@@ -672,6 +682,7 @@ function makeUpscaleDaemon() {
     if (proc) return;
     proc = spawn(PYTHON, [UPSCALE_SCRIPT, 'serve'], { env: langEnv() });
     const child = proc;
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
       buf += d.toString();
       let nl;
@@ -684,6 +695,7 @@ function makeUpscaleDaemon() {
         if (resolve) { pending.delete(msg.id); resolve(msg); }
       }
     });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (d) => { const s = d.toString(); logbus.py('upscale', s); if (curProg) curProg(s); });
     const onDead = () => {
       if (proc !== child) return;
@@ -750,6 +762,7 @@ function makeProcessDaemon() {
     if (proc) return;
     proc = spawn(PYTHON, [PROCESS_SCRIPT, 'serve'], { env: procEnv() });
     const child = proc;
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
       buf += d.toString();
       let nl;
@@ -765,6 +778,7 @@ function makeProcessDaemon() {
         if (resolve) { pending.delete(msg.id); resolve(msg); }
       }
     });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (d) => { const s = d.toString(); logbus.py('process', s); if (curProg) curProg(s); });
     const onDead = () => {
       if (proc !== child) return;
@@ -836,6 +850,7 @@ function makeTranscribeDaemon() {
   function start() {
     if (proc) return;
     proc = spawn(PYTHON, [TRANSCRIBE_SCRIPT, 'serve'], { env: langEnv() });
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
       buf += d.toString();
       let nl;
@@ -847,6 +862,7 @@ function makeTranscribeDaemon() {
         if (resolve) { pending.delete(msg.id); resolve(msg.result); }
       }
     });
+    proc.stderr.setEncoding('utf8');
     proc.stderr.on('data', (d) => { const s = d.toString(); logbus.py('transcribe', s); if (curProg) curProg(s); });
     const onDead = () => {
       proc = null; buf = '';
