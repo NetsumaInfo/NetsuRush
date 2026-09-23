@@ -7,7 +7,8 @@ import { getCollabCadence, subscribeCollabPreferences } from "../preferences";
 import { setCurrentCollabProject, releaseCollabProject } from "../currentProject";
 import type { ProjectRole, SurfaceEntryProjection } from "../types";
 import { collectionBackend, rememberCollectionRole } from "./session";
-import { errorText } from "@/lib/errorText";
+import { collabErrorText } from "../errors";
+import { collabFailure } from "../failure";
 
 type Access = { userId: string; role: ProjectRole; canDeleteOthers: boolean;
   entries: Array<{ entryId: string; contributorId: string; removed: boolean }> };
@@ -42,7 +43,7 @@ export function useSharedCollection(local: Collection | null) {
     let forced = false;
     let roster: Access | undefined;
     let starting = false;
-    const failed = (cause: unknown) => { if (!disposed) setError(errorText(cause)); };
+    const failed = (cause: unknown) => { if (!disposed) setError(collabErrorText(cause)); };
     const refresh = async () => {
       if (disposed || !lease || !roster) return;
       if (running) { queued = true; return; }
@@ -112,7 +113,7 @@ export function useSharedCollection(local: Collection | null) {
       if (starting || disposed) return;
       starting = true;
       try {
-      if (!(await refreshNativeCollaborationAuth())) throw new Error("Sign in required");
+      if (!(await refreshNativeCollaborationAuth())) throw collabFailure("sign_in", "sign in required");
       const backend = await collectionBackend();
       const initial = await backend.query(api.collectionAccess.list, { projectId }) as Access;
       if (disposed) return;

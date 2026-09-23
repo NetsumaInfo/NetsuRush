@@ -101,7 +101,7 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
   },
   updateCollection: async (c) => {
     const result = await nr.collections?.save(c);
-    if (!result?.ok) throw new Error(result?.error || "Collection save failed");
+    if (!result?.ok) throw new Error(result?.error || i18n.t("collections:share.failed"));
     await Promise.all([get().loadCollections(), get().loadCollectionTags()]);
   },
   deleteCollection: async (id) => {

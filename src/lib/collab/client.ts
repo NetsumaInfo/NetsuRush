@@ -7,6 +7,7 @@
 
 import { COLLAB_PROTOCOL_VERSION, type CollabOp, type ProjectRole } from "./types";
 import { takeImportGrant } from "./importGrants";
+import { collabFailure, type NativeCollabCode } from "./failure";
 
 export type ApplyResult = { revision: number; applied: number; authoredRevision?: number };
 export type CollabChanged = { projectId: string; revision: number };
@@ -38,11 +39,7 @@ export type ProjectStatus = {
 };
 export type ImportedMedia = { hash: string; name: string; mime: string; size: number };
 export type MediaResolution = { status: "available" | "waiting" | "removed"; hash: string };
-export type CollabFailure = {
-  code: "authorization" | "conflict" | "corrupt" | "key_pending" | "network"
-    | "read_only" | "storage" | "unavailable" | "validation";
-  message: string;
-};
+export type CollabFailure = { code: NativeCollabCode; message: string };
 
 export function collabErrorMessage(error: unknown, fallback: string): string {
   if (typeof error === "string" && error.trim()) return error;
@@ -69,7 +66,7 @@ export function collabErrorMessage(error: unknown, fallback: string): string {
 let invokePromise: Promise<typeof import("@tauri-apps/api/core")["invoke"]> | null = null;
 
 async function invoker() {
-  if (!("__TAURI_INTERNALS__" in window)) throw new Error("collaboration requires the desktop app");
+  if (!("__TAURI_INTERNALS__" in window)) throw collabFailure("desktop_only", "collaboration requires the desktop app");
   invokePromise ??= import("@tauri-apps/api/core").then((module) => module.invoke);
   return invokePromise;
 }

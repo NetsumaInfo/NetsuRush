@@ -14,9 +14,9 @@ import {
 import { api } from "@/lib/convexApi";
 import { convexConfigured } from "@/lib/convexEnv";
 import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
+import { collabErrorText } from "@/lib/collab/errors";
 import {
   collabAvailable,
-  collabErrorMessage,
   deviceIdentity,
   forgetDevice,
   deleteProject as deleteProjectNative,
@@ -155,7 +155,7 @@ function SharingInner() {
       .catch((error) => {
         if (cancelled) return;
         setNativeReady(false);
-        setNativeError(collabErrorMessage(error, t("device.unavailable")));
+        setNativeError(collabErrorText(error, t("device.unavailable")));
       });
     return () => { cancelled = true; };
   }, [isAuthenticated, t]);
@@ -215,7 +215,7 @@ function SharingInner() {
       if (!(await refreshNativeCollaborationAuth())) throw new Error(t("device.unavailable"));
       await forgetDevice(deviceId);
     } catch (error) {
-      setNativeError(collabErrorMessage(error, t("device.unavailable")));
+      setNativeError(collabErrorText(error, t("device.unavailable")));
     } finally {
       setBusy(false);
     }
@@ -232,7 +232,7 @@ function SharingInner() {
       const binding = await surface.adopt(project.projectId, name);
       setBindings((current) => new Map(current).set(binding.projectId, binding));
     } catch (error) {
-      setNativeError(collabErrorMessage(error, t("projects.failed")));
+      setNativeError(collabErrorText(error, t("projects.failed")));
     } finally {
       setBusy(false);
     }
@@ -262,7 +262,7 @@ function SharingInner() {
       surface?.onRemoved?.(project.projectId);
       setConfirmProject(null);
     } catch (error) {
-      setNativeError(collabErrorMessage(error, t("projects.failed")));
+      setNativeError(collabErrorText(error, t("projects.failed")));
     } finally {
       setBusy(false);
     }

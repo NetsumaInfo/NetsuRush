@@ -13,7 +13,8 @@ import { Check, Clock, UserRound, X } from "lucide-react";
 import { api } from "@/lib/convexApi";
 import { nr } from "@/lib/bridge";
 import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
-import { collabErrorMessage, respondInvite } from "@/lib/collab/client";
+import { respondInvite } from "@/lib/collab/client";
+import { collabErrorText } from "@/lib/collab/errors";
 import { collabSurface } from "@/lib/collab/surfaces";
 import { BOARD_SURFACE } from "./collabSurface";
 import { useBoard } from "./useReferenceBoard";
@@ -100,7 +101,7 @@ export function HomeCollabNotices({ onOpenScene, onCardStatus }: {
   const fail = (error: unknown) => {
     useBoard.getState().setNotice({
       kind: "error",
-      text: collabErrorMessage(error, t("home.invites.failed")),
+      text: collabErrorText(error, t("home.invites.failed")),
     });
   };
 

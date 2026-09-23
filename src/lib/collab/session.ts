@@ -14,6 +14,7 @@ import {
   flushCheckpoint,
   openProject,
 } from "./client";
+import { collabFailure } from "./failure";
 import type { CollabOp } from "./types";
 
 export type UnresolvedMedia = { ref: string; cause: string };
@@ -48,7 +49,7 @@ export async function createCollaborativeProject(options: {
   seed?: (projectId: string) => Promise<SeedResult>;
 }): Promise<{ projectId: string }> {
   if (!(await refreshNativeCollaborationAuth())) {
-    throw new Error("Sign in is required to create a collaborative project");
+    throw collabFailure("sign_in", "sign in is required to create a collaborative project");
   }
   const { projectId } = await createProject(options.surface);
   let session: Awaited<ReturnType<typeof openProject>> | undefined;

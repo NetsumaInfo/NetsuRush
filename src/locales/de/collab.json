@@ -139,5 +139,29 @@
   "board": {
     "noScene": "Speichere dieses Board zuerst in der Szenenbibliothek.",
     "willAdopt": "Dieses Board wird in die Szenenbibliothek kopiert. Die .netsu-Datei bleibt auf deiner Festplatte."
+  },
+  "error": {
+    "failed": "Synchronisierung fehlgeschlagen. Versuch es noch einmal.",
+    "signIn": "Melde dich an, um Freigaben zu nutzen.",
+    "authorization": "Zugriff auf dieses geteilte Dokument verweigert. Melde dich erneut an oder bitte den Eigentümer, dich noch einmal einzuladen.",
+    "conflict": "Gleichzeitig wurde eine andere Änderung übernommen. Versuch es gleich noch einmal.",
+    "corrupt": "Empfangene geteilte Daten sind beschädigt. Wenn das wieder passiert, sende einen Fehlerbericht.",
+    "keyPending": "Der Schlüssel dieses Dokuments ist noch nicht auf diesem Gerät angekommen. Bleib online: Er kommt, sobald ein anderes Mitglied das Dokument öffnet.",
+    "network": "Der Freigabeserver ist nicht erreichbar. Prüfe deine Verbindung und versuch es noch einmal.",
+    "readOnly": "Dieses Dokument ist schreibgeschützt mit dir geteilt.",
+    "storage": "Freigabedaten können auf diesem Laufwerk nicht gelesen oder geschrieben werden. Prüfe den freien Speicherplatz und versuch es noch einmal.",
+    "unavailable": "Die Freigabe ist gerade nicht verfügbar. Melde dich erneut an und öffne das Dokument noch einmal.",
+    "validation": "Die Freigabe konnte diese Anfrage nicht verarbeiten. Wenn das wieder passiert, sende einen Fehlerbericht.",
+    "server": "Der Freigabeserver hat den Vorgang abgelehnt. Versuch es noch einmal; wenn das wieder passiert, sende einen Fehlerbericht.",
+    "collectionMissing": "Diese Sammlung gibt es auf diesem Rechner nicht mehr.",
+    "collectionChanged": "Die Sammlung hat sich geändert, während ihre Medien vorbereitet wurden. Versuch es noch einmal.",
+    "collectionSave": "Die Freigabe dieser Sammlung kann nicht gespeichert werden. Versuch es noch einmal.",
+    "collectionMedia": "Die Medien dieser Sammlung können nicht für die Freigabe vorbereitet werden.",
+    "archiveFolder": "Diese Sammlung hat keinen Archivordner. Wähle einen und teile erneut.",
+    "notebookMissing": "Dieses Notizbuch oder diese Seite gibt es auf diesem Rechner nicht mehr.",
+    "notebookBound": "Dieses Notizbuch enthält bereits ein geteiltes Dokument.",
+    "notebookSave": "Die Freigabe dieses Notizbuchs kann nicht gespeichert werden. Versuch es noch einmal.",
+    "mediaNotShared_one": "{{count}} Mediendatei wird nicht geteilt, weil sie nicht lesbar ist: {{names}}. Finde sie wieder (Ordner verschoben?).",
+    "mediaNotShared_other": "{{count}} Mediendateien werden nicht geteilt, weil sie nicht lesbar sind: {{names}}. Finde sie wieder (Ordner verschoben?)."
   }
 }

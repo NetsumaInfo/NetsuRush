@@ -139,5 +139,29 @@
   "board": {
     "noScene": "Enregistre d'abord ce board dans la bibliothèque de scènes.",
     "willAdopt": "Ce board sera copié dans la bibliothèque de scènes. Le fichier .netsu reste sur ton disque."
+  },
+  "error": {
+    "failed": "La synchronisation a échoué. Réessaie.",
+    "signIn": "Connecte-toi pour utiliser le partage.",
+    "authorization": "Accès refusé à ce document partagé. Reconnecte-toi, ou demande au propriétaire de t'inviter à nouveau.",
+    "conflict": "Une autre modification est passée en même temps. Réessaie dans un instant.",
+    "corrupt": "Des données partagées reçues sont endommagées. Si ça se reproduit, envoie un rapport de bug.",
+    "keyPending": "La clé de ce document n'est pas encore arrivée sur cet appareil. Reste en ligne : elle arrive quand un autre membre ouvre le document.",
+    "network": "Impossible de joindre le serveur de partage. Vérifie ta connexion, puis réessaie.",
+    "readOnly": "Ce document est partagé avec toi en lecture seule.",
+    "storage": "Impossible de lire ou d'écrire les données de partage sur ce disque. Vérifie l'espace libre, puis réessaie.",
+    "unavailable": "Le partage n'est pas disponible pour l'instant. Reconnecte-toi, puis rouvre le document.",
+    "validation": "Le partage n'a pas pu traiter cette demande. Si ça se reproduit, envoie un rapport de bug.",
+    "server": "Le serveur de partage a refusé l'opération. Réessaie ; si ça se reproduit, envoie un rapport de bug.",
+    "collectionMissing": "Cette collection n'existe plus sur cette machine.",
+    "collectionChanged": "La collection a changé pendant la préparation de ses médias. Réessaie.",
+    "collectionSave": "Impossible d'enregistrer le partage de cette collection. Réessaie.",
+    "collectionMedia": "Impossible de préparer les médias de cette collection pour le partage.",
+    "archiveFolder": "Cette collection n'a pas de dossier d'archive. Choisis-en un, puis repartage.",
+    "notebookMissing": "Ce carnet ou cette page n'existe plus sur cette machine.",
+    "notebookBound": "Ce carnet contient déjà un document partagé.",
+    "notebookSave": "Impossible d'enregistrer le partage de ce carnet. Réessaie.",
+    "mediaNotShared_one": "{{count}} média n'est pas partagé, son fichier est illisible : {{names}}. Retrouve-le (dossier déplacé ?).",
+    "mediaNotShared_other": "{{count}} médias ne sont pas partagés, leurs fichiers sont illisibles : {{names}}. Retrouve-les (dossier déplacé ?)."
   }
 }

@@ -3,9 +3,10 @@ import { api } from "@/lib/convexApi";
 import { archiveProfile } from "@/features/export/archiveProfile";
 import { refreshNativeCollaborationAuth } from "../authBridge";
 import { abortProject, applyOperations, closeProject, createProject, flushCheckpoint, importMedia, openProject } from "../client";
+import { collabFailure } from "../failure";
 import type { CollabOp, ProjectRole } from "../types";
 
-export function collectionApi() { if (!nr.collections) throw new Error("Collections are unavailable"); return nr.collections; }
+export function collectionApi() { if (!nr.collections) throw collabFailure("unavailable", "collections are unavailable"); return nr.collections; }
 
 const jobs = new Map<string, Promise<{ projectId: string }>>();
 
@@ -26,10 +27,10 @@ export async function ensureArchiveTarget(collection: Collection): Promise<Colle
   const archive = collection.archive ?? {};
   if (archive.dir) return archive;
   const { dir } = await collectionApi().defaultArchiveDir(collection.name);
-  if (!dir) throw new Error("No archive folder for this collection");
+  if (!dir) throw collabFailure("archive_folder", "no archive folder for this collection");
   const next: CollectionArchive = { ...archive, dir };
   const saved = await collectionApi().save({ id: collection.id, name: collection.name, archive: next });
-  if (!saved.ok) throw new Error(saved.error || "Could not set the archive folder");
+  if (!saved.ok) throw saved.error ? new Error(saved.error) : collabFailure("collection_save", "could not set the archive folder");
   return next;
 }
 
@@ -45,7 +46,7 @@ export async function unbindCollection(id: string): Promise<void> {
   const collection = await collectionApi().load(id);
   if (!collection) return;
   const saved = await collectionApi().save({ id, name: collection.name, collaboration: null });
-  if (!saved.ok) throw new Error(saved.error || "Could not stop sharing this collection");
+  if (!saved.ok) throw saved.error ? new Error(saved.error) : collabFailure("collection_save", "could not stop sharing this collection");
 }
 
 /** What this account may do on the shared collection, kept locally for the views that never open it. */
@@ -56,7 +57,7 @@ export async function rememberCollectionRole(id: string, role: ProjectRole): Pro
 }
 export async function collectionBackend() {
   const { convexClient } = await import("@/lib/convexClient");
-  if (!convexClient) throw new Error("Collaboration is not configured");
+  if (!convexClient) throw collabFailure("not_configured", "collaboration is not configured");
   return convexClient;
 }
 
@@ -71,9 +72,9 @@ async function preparedOperations(id: string, projectId: string, archive: Collec
   const result = await collectionApi().prepareShare(id, {
     dir: archive.dir, profile: archiveProfile(archive), autoSync: archive.autoSync, process: archive.process,
   });
-  if (!result.ok || !result.prepared) throw new Error(result.error || "Media preparation failed");
+  if (!result.ok || !result.prepared) throw result.error ? new Error(result.error) : collabFailure("collection_media", "media preparation failed");
   const collection = await collectionApi().load(id);
-  if (!collection) throw new Error("Collection not found");
+  if (!collection) throw collabFailure("collection_missing", "collection not found");
   const published = new Set(collection.collaboration?.publishedShotIds ?? []);
   const ops: CollabOp[] = [metadata(collection)];
   const entryIds: string[] = [];
@@ -81,7 +82,7 @@ async function preparedOperations(id: string, projectId: string, archive: Collec
   for (const prepared of result.prepared) {
     if (published.has(prepared.shotId)) continue;
     const shot = collection.shots.find((candidate) => candidate.id === prepared.shotId);
-    if (!shot) throw new Error("Collection changed during media preparation; retry");
+    if (!shot) throw collabFailure("collection_changed", "collection changed during media preparation");
     const media = await importMedia(projectId, prepared.path, mimeOf(prepared.path));
     const entryId = `ci_${prepared.shotId}`;
     ops.push({ type: "surfaceSetEntry", entryId, kind: "collectionItem", fields: {
@@ -114,9 +115,9 @@ export function shareCollection(id: string): Promise<{ projectId: string }> {
 
 async function publish(id: string) {
   const collection = await collectionApi().load(id);
-  if (!collection) throw new Error("Collection not found");
-  if (collection.collaboration?.role === "viewer") throw new Error("This collection is shared with you as read-only");
-  if (!(await refreshNativeCollaborationAuth())) throw new Error("Sign in required");
+  if (!collection) throw collabFailure("collection_missing", "collection not found");
+  if (collection.collaboration?.role === "viewer") throw collabFailure("read_only", "this collection is shared as read-only");
+  if (!(await refreshNativeCollaborationAuth())) throw collabFailure("sign_in", "sign in required");
   const archive = await ensureArchiveTarget(collection);
   const previousId = collection.collaboration?.projectId ?? collection.collaboration?.pendingProjectId;
   const { projectId } = previousId ? { projectId: previousId } : await createProject("collection");
@@ -127,7 +128,7 @@ async function publish(id: string) {
       const reserved = await collectionApi().save({ id, name: collection.name, collaboration: {
         ...collection.collaboration, pendingProjectId: projectId, role: "owner",
       } });
-      if (!reserved.ok) throw new Error(reserved.error || "Could not reserve the shared project");
+      if (!reserved.ok) throw reserved.error ? new Error(reserved.error) : collabFailure("collection_save", "could not reserve the shared project");
     }
     const session = await openProject(projectId, id, "collection", previousId ? "editor" : "owner");
     lease = session.leaseId;
@@ -138,11 +139,11 @@ async function publish(id: string) {
     await registerEntries(projectId, prepared.entryIds);
     await flushCheckpoint(projectId);
     const latest = await collectionApi().load(id);
-    if (!latest) throw new Error("Collection removed during publication");
+    if (!latest) throw collabFailure("collection_missing", "collection removed during publication");
     const saved = await collectionApi().save({ id, name: latest.name, collaboration: {
       ...latest.collaboration, projectId, pendingProjectId: undefined, publishedShotIds: prepared.publishedShotIds,
     } });
-    if (!saved.ok) throw new Error(saved.error || "Could not save the shared collection binding");
+    if (!saved.ok) throw saved.error ? new Error(saved.error) : collabFailure("collection_save", "could not save the shared collection binding");
     window.dispatchEvent(new CustomEvent("nr-collection-shared", { detail: { id } }));
     return { projectId };
   } catch (error) {

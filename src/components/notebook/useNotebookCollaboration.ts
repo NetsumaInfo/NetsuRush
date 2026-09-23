@@ -9,7 +9,8 @@ import type { ProjectRole, SurfaceEntryProjection, SurfaceProjection } from "@/l
 import { notebookCollabState } from "./notebookCollabState";
 import { decodeNotebook, diffNotebook, type NotebookSnapshot } from "./notebookCollabModel";
 import { displayNotebookMedia, loadNotebookSnapshot, notebookApi, notebookEntries } from "./notebookCollabSession";
-import { errorText } from "@/lib/errorText";
+import { collabErrorText } from "@/lib/collab/errors";
+import { collabFailure } from "@/lib/collab/failure";
 
 function announce() { window.dispatchEvent(new Event("nr-notebook-collab-state")); }
 function remap<T>(value: T, ids: Map<string, string>): T {
@@ -42,7 +43,7 @@ export function useNotebookCollaboration(binding: NotebookCollabBinding | null) 
     const localIds = new Map<string, string>();
     notebookCollabState.binding = binding; notebookCollabState.role = null; announce();
     setError(null);
-    const failed = (cause: unknown) => { paused = true; if (!disposed) setError(errorText(cause)); };
+    const failed = (cause: unknown) => { paused = true; if (!disposed) setError(collabErrorText(cause)); };
 
     async function readLocal() {
       const state = useApp.getState();
@@ -101,13 +102,13 @@ export function useNotebookCollaboration(binding: NotebookCollabBinding | null) 
         const persisted = (value: typeof page | undefined) => value && { blocks: value.blocks, title: value.title, parentId: value.parentId, orderIdx: value.orderIdx, icon: value.icon, cover: value.cover };
         if (JSON.stringify(persisted(previous?.page)) === JSON.stringify(persisted(page))) continue;
         const result = await api.savePage(page);
-        if (!result.ok) throw new Error(result.error || "Could not persist shared page");
+        if (!result.ok) throw result.error ? new Error(result.error) : collabFailure("notebook_save", "could not persist shared page");
       }
       for (const db of Object.values(displayed.databases)) {
         const pageId = (db as unknown as { pageId?: string }).pageId;
         if (pageId && !disposed && version === at) {
           const result = await api.saveDatabase({ ...db, pageId });
-          if (!result.ok) throw new Error(result.error || "Could not persist shared database");
+          if (!result.ok) throw result.error ? new Error(result.error) : collabFailure("notebook_save", "could not persist shared database");
         }
       }
       if (previousSnapshot && surface === "notebook" && version === at) {
@@ -130,7 +131,7 @@ export function useNotebookCollaboration(binding: NotebookCollabBinding | null) 
               if (resolved.status === "available") { refreshPending = true; schedule(); }
             }
           }));
-        })().catch((cause) => { if (!disposed && !closing) setError(errorText(cause)); }).finally(() => {
+        })().catch((cause) => { if (!disposed && !closing) setError(collabErrorText(cause)); }).finally(() => {
           mediaRunning = false;
           if (refreshPending) schedule();
         });
@@ -177,7 +178,7 @@ export function useNotebookCollaboration(binding: NotebookCollabBinding | null) 
       if (starting || disposed || closing) return;
       starting = true;
       try {
-      if (!(await refreshNativeCollaborationAuth())) throw new Error("Sign in required");
+      if (!(await refreshNativeCollaborationAuth())) throw collabFailure("sign_in", "sign in required");
       const session = await openProject(projectId, binding!.subjectId, surface, "editor");
       if (disposed || closing) { await closeProject(projectId, session.leaseId); return; }
       lease = session.leaseId; setCurrentCollabProject(projectId);

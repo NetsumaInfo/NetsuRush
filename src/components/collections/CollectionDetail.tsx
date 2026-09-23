@@ -36,7 +36,7 @@ import {
   collectTags, sortShots, filterShots, labelColor, labelNameKey, loadShotSort, saveShotSort,
   EMPTY_FILTER, SORT_KEYS, SORT_LABELS, type CollSortKey, type ShotFilter,
 } from "./collectionShared";
-import { errorText } from "@/lib/errorText";
+import { collabErrorText } from "@/lib/collab/errors";
 import { uiLocale } from "@/lib/utils";
 
 // Sous cette largeur la vue passe en colonne (lecteur en tête, grille dessous) et la grille garde
@@ -198,7 +198,7 @@ export function CollectionDetail({ id }: { id: string }) {
       // Chacun gère SES contributions ; celles des autres demandent la délégation du propriétaire
       // (cf. useSharedCollection.canEdit). Un lecteur ne touche à rien.
       if (!shared.canEdit(shotId)) return;
-      void patchSharedShot(sharedProjectId, shotId, patch).then(shared.refresh).catch((cause) => setError(errorText(cause)));
+      void patchSharedShot(sharedProjectId, shotId, patch).then(shared.refresh).catch((cause) => setError(collabErrorText(cause, tr("share.failed"))));
       return;
     }
     setColl((c) => c ? { ...c, shots: c.shots.map((s) => {
@@ -513,7 +513,7 @@ export function CollectionDetail({ id }: { id: string }) {
                 {sharedProjectId && <div className="flex flex-wrap gap-1 pt-1">
                   <Button size="sm" variant="ghost" onClick={() => shared.hide(shot.id!)}>{tr("share.hideLocal")}</Button>
                   {shared.canRemove(shot.id!) && <Button size="sm" variant="ghost" className="text-destructive"
-                    onClick={() => void shared.remove(shot.id!).catch((cause) => setError(errorText(cause)))}>{tr("share.removeGlobal")}</Button>}
+                    onClick={() => void shared.remove(shot.id!).catch((cause) => setError(collabErrorText(cause, tr("share.failed"))))}>{tr("share.removeGlobal")}</Button>}
                 </div>}
                 </div>
               );

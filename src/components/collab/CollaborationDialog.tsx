@@ -15,7 +15,6 @@ import { AlertTriangle, LogOut, Trash2, UserRound, Users } from "lucide-react";
 import { api } from "@/lib/convexApi";
 import {
   cancelInvite,
-  collabErrorMessage,
   deleteProject,
   discardStaleHead,
   inviteMembers,
@@ -26,6 +25,7 @@ import {
   type ProjectStatus,
 } from "@/lib/collab/client";
 import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
+import { collabErrorText, unresolvedNames } from "@/lib/collab/errors";
 import { UnreadableMediaError } from "@/lib/collab/session";
 import type { ProjectRole } from "@/lib/collab/types";
 import {
@@ -189,13 +189,9 @@ export function CollaborationDialog({
       // Unreadable media after every automatic recovery: a wall of absolute paths and OS errors
       // says nothing actionable. Name the files instead; the host marks the missing pieces.
       if (err instanceof UnreadableMediaError) {
-        const names = err.unresolved
-          .slice(0, 3)
-          .map((entry) => entry.ref.split(/[\\/]/).pop() || entry.ref)
-          .join(" · ");
-        setError(t("dialog.mediaMissing", { count: err.unresolved.length, names }));
+        setError(t("dialog.mediaMissing", { count: err.unresolved.length, names: unresolvedNames(err.unresolved) }));
       } else {
-        setError(collabErrorMessage(err, t("dialog.failed")));
+        setError(collabErrorText(err, t("dialog.failed")));
       }
     } finally {
       setBusy(false);
@@ -210,7 +206,7 @@ export function CollaborationDialog({
       if (!(await refreshNativeCollaborationAuth())) throw new Error(t("signedOut"));
       await action();
     } catch (err) {
-      setError(collabErrorMessage(err, t("dialog.failed")));
+      setError(collabErrorText(err, t("dialog.failed")));
     } finally {
       setBusy(false);
     }

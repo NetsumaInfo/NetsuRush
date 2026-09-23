@@ -139,5 +139,29 @@
   "board": {
     "noScene": "Save this board to the scene library first.",
     "willAdopt": "This board will be copied into the scene library. The .netsu file stays on your disk."
+  },
+  "error": {
+    "failed": "Sync failed. Try again.",
+    "signIn": "Sign in to use sharing.",
+    "authorization": "Access to this shared document was refused. Sign in again, or ask the owner to invite you again.",
+    "conflict": "Another change went through at the same time. Try again in a moment.",
+    "corrupt": "Some shared data that arrived is damaged. If this happens again, send a bug report.",
+    "keyPending": "This document's key hasn't reached this device yet. Stay online: it arrives when another member opens the document.",
+    "network": "Can't reach the sharing server. Check your connection, then try again.",
+    "readOnly": "This document is shared with you as read-only.",
+    "storage": "Can't read or write sharing data on this disk. Check free space, then try again.",
+    "unavailable": "Sharing isn't available right now. Sign in again, then reopen the document.",
+    "validation": "Sharing couldn't process this request. If this happens again, send a bug report.",
+    "server": "The sharing server refused the operation. Try again; if this happens again, send a bug report.",
+    "collectionMissing": "This collection no longer exists on this machine.",
+    "collectionChanged": "The collection changed while its media were being prepared. Try again.",
+    "collectionSave": "Can't save sharing for this collection. Try again.",
+    "collectionMedia": "Can't prepare this collection's media for sharing.",
+    "archiveFolder": "This collection has no archive folder. Choose one, then share again.",
+    "notebookMissing": "This notebook or page no longer exists on this machine.",
+    "notebookBound": "This notebook already contains a shared document.",
+    "notebookSave": "Can't save sharing for this notebook. Try again.",
+    "mediaNotShared_one": "{{count}} media item isn't shared because its file can't be read: {{names}}. Find it (moved folder?).",
+    "mediaNotShared_other": "{{count}} media items aren't shared because their files can't be read: {{names}}. Find them (moved folder?)."
   }
 }

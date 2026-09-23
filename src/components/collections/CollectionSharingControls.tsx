@@ -18,7 +18,8 @@ import { ChevronRight, CircleHelp, UserRound, Users } from "lucide-react";
 import { api } from "@/lib/convexApi";
 import { convexConfigured } from "@/lib/convexEnv";
 import { shareCollection, unbindCollection } from "@/lib/collab/collection/session";
-import { collabErrorMessage, deleteProject, leaveProject, setMemberRole } from "@/lib/collab/client";
+import { deleteProject, leaveProject, setMemberRole } from "@/lib/collab/client";
+import { collabErrorText } from "@/lib/collab/errors";
 import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
 import { CollaborationDialog } from "@/components/collab/CollaborationDialog";
 import { Button } from "@/components/ui/button";
@@ -124,7 +125,7 @@ function SharingInner({ projectId, collectionId, disabled, open, onToggleOpen, s
       const result = await shareCollection(id);
       onPublished(result.projectId);
       if (!open) onToggleOpen();
-    } catch (cause) { setError(collabErrorMessage(cause, t("share.failed"))); }
+    } catch (cause) { setError(collabErrorText(cause, t("share.failed"))); }
     finally { setBusy(false); onBusyChange(false); }
   }
 
@@ -141,7 +142,7 @@ function SharingInner({ projectId, collectionId, disabled, open, onToggleOpen, s
         setStopping(false); onUnshared();
       }
       else { await leaveProject(projectId); onRemoved(); }
-    } catch (cause) { setError(collabErrorMessage(cause, t("share.failed"))); }
+    } catch (cause) { setError(collabErrorText(cause, t("share.failed"))); }
     finally { setBusy(false); onBusyChange(false); }
   }
 
@@ -220,7 +221,7 @@ function PermissionSelect({ projectId, member, onError }: {
         if (member.role !== "editor") await setMemberRole(projectId, member.userId, "editor");
         await setPermission({ projectId, userId: member.userId, allowed: next === "all" });
       }
-    } catch (cause) { onError(collabErrorMessage(cause, t("share.failed"))); }
+    } catch (cause) { onError(collabErrorText(cause, t("share.failed"))); }
     finally { setBusy(false); }
   }}>
     <SelectTrigger size="sm" className="w-44 shrink-0">

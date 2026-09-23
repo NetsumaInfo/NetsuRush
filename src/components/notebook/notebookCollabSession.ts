@@ -2,20 +2,21 @@ import { nr, type NotebookCollabBinding } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { abortProject, applyOperations, closeProject, createProject, flushCheckpoint, importMedia, mediaUrl, nativeProjection, openProject } from "@/lib/collab/client";
 import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
+import { collabFailure } from "@/lib/collab/failure";
 import type { SurfaceEntryProjection } from "@/lib/collab/types";
 import { encodeNotebook, diffNotebook, type NotebookSnapshot } from "./notebookCollabModel";
 import { notebookBindings } from "./collabSurface";
 
-export function notebookApi() { if (!nr.notebook) throw new Error("Notebook unavailable"); return nr.notebook; }
+export function notebookApi() { if (!nr.notebook) throw collabFailure("notebook_missing", "notebook unavailable"); return nr.notebook; }
 export async function loadNotebookSnapshot(binding: Pick<NotebookCollabBinding, "notebookId" | "subjectId" | "surface">): Promise<NotebookSnapshot> {
   const loaded = await notebookApi().load(binding.notebookId);
-  if (!loaded) throw new Error("Notebook unavailable");
+  if (!loaded) throw collabFailure("notebook_missing", "notebook unavailable");
   const pages: NotebookSnapshot["pages"] = [];
   const databases: NotebookSnapshot["databases"] = {};
   for (const meta of loaded.pages) {
     if (binding.surface === "notebook-page" && meta.id !== binding.subjectId) continue;
     const result = await notebookApi().loadPage(meta.id);
-    if (!result) throw new Error("Notebook page unavailable");
+    if (!result) throw collabFailure("notebook_missing", "notebook page unavailable");
     pages.push(result.page); Object.assign(databases, result.databases);
   }
   return { notebook: loaded.notebook, pages, databases };
@@ -90,19 +91,19 @@ export async function shareNotebook(notebookId: string, pageId?: string) {
   const existing = (await notebookBindings()).find((binding) => binding.notebookId === notebookId &&
     (binding.surface === "notebook" || !pageId || binding.subjectId === pageId));
   if (existing) {
-    if (existing.surface !== surface || existing.subjectId !== subjectId) throw new Error("This notebook already contains a shared document");
+    if (existing.surface !== surface || existing.subjectId !== subjectId) throw collabFailure("notebook_bound", "this notebook already contains a shared document");
     if (!existing.pending) return { projectId: existing.projectId };
   }
   const snapshot = await loadNotebookSnapshot({ notebookId, subjectId, surface });
   if (pageId) snapshot.pages = snapshot.pages.map((page) => ({ ...page, parentId: null }));
-  if (!(await refreshNativeCollaborationAuth())) throw new Error("Sign in required");
+  if (!(await refreshNativeCollaborationAuth())) throw collabFailure("sign_in", "sign in required");
   const created = existing ?? await createProject(surface);
   const name = pageId ? snapshot.pages[0]?.title ?? snapshot.notebook.title : snapshot.notebook.title;
   const binding: NotebookCollabBinding = { projectId: created.projectId, surface, subjectId, notebookId, name, remoteSubjectId: subjectId, pending: true };
   let applied = false, lease: string | undefined;
   try {
     const reserved = await notebookApi().setCollaborationBinding(binding, created.projectId);
-    if (!reserved.ok) throw new Error("Could not reserve notebook binding");
+    if (!reserved.ok) throw collabFailure("notebook_save", "could not reserve notebook binding");
     const session = await openProject(created.projectId, subjectId, surface, "owner"); lease = session.leaseId;
     const projectId = created.projectId;
     const entries = await notebookEntries(snapshot, projectId, [], { surface, subjectId });
@@ -111,7 +112,7 @@ export async function shareNotebook(notebookId: string, pageId?: string) {
     await applyOperations(projectId, diffNotebook(projection.entries, entries), projection.revision); applied = true;
     await flushCheckpoint(projectId);
     const saved = await notebookApi().setCollaborationBinding({ ...binding, pending: false }, projectId);
-    if (!saved.ok) throw new Error("Could not save notebook binding");
+    if (!saved.ok) throw collabFailure("notebook_save", "could not save notebook binding");
   } catch (error) {
     if (!existing && !applied) {
       try { await abortProject(created.projectId); await notebookApi().setCollaborationBinding(null, created.projectId); } catch { /* Retain reservation for retry. */ }

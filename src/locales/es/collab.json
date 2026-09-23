@@ -139,5 +139,29 @@
   "board": {
     "noScene": "Guarda primero este tablero en la biblioteca de escenas.",
     "willAdopt": "Este tablero se copiará a la biblioteca de escenas. El archivo .netsu permanece en tu disco."
+  },
+  "error": {
+    "failed": "No se pudo sincronizar. Vuelve a intentarlo.",
+    "signIn": "Inicia sesión para compartir.",
+    "authorization": "Acceso denegado a este documento compartido. Vuelve a iniciar sesión o pide al propietario que te invite de nuevo.",
+    "conflict": "Otro cambio se aplicó al mismo tiempo. Vuelve a intentarlo en un momento.",
+    "corrupt": "Algunos datos compartidos recibidos están dañados. Si vuelve a ocurrir, envía un informe de error.",
+    "keyPending": "La clave de este documento aún no ha llegado a este dispositivo. Mantente en línea: llegará cuando otro miembro abra el documento.",
+    "network": "No se puede conectar con el servidor de colaboración. Revisa tu conexión y vuelve a intentarlo.",
+    "readOnly": "Este documento se comparte contigo en solo lectura.",
+    "storage": "No se pueden leer ni escribir los datos de colaboración en este disco. Comprueba el espacio libre y vuelve a intentarlo.",
+    "unavailable": "La colaboración no está disponible ahora mismo. Vuelve a iniciar sesión y abre de nuevo el documento.",
+    "validation": "No se pudo procesar esta solicitud de colaboración. Si vuelve a ocurrir, envía un informe de error.",
+    "server": "El servidor de colaboración rechazó la operación. Vuelve a intentarlo; si vuelve a ocurrir, envía un informe de error.",
+    "collectionMissing": "Esta colección ya no existe en esta máquina.",
+    "collectionChanged": "La colección cambió mientras se preparaban sus archivos multimedia. Vuelve a intentarlo.",
+    "collectionSave": "No se pudo guardar el estado compartido de esta colección. Vuelve a intentarlo.",
+    "collectionMedia": "No se pudieron preparar los archivos multimedia de esta colección para compartirlos.",
+    "archiveFolder": "Esta colección no tiene carpeta de archivo. Elige una y vuelve a compartir.",
+    "notebookMissing": "Este cuaderno o esta página ya no existe en esta máquina.",
+    "notebookBound": "Este cuaderno ya contiene un documento compartido.",
+    "notebookSave": "No se pudo guardar el estado compartido de este cuaderno. Vuelve a intentarlo.",
+    "mediaNotShared_one": "{{count}} archivo multimedia no se comparte porque no se puede leer: {{names}}. Recupéralo (¿carpeta movida?).",
+    "mediaNotShared_other": "{{count}} archivos multimedia no se comparten porque no se pueden leer: {{names}}. Recupéralos (¿carpeta movida?)."
   }
 }
