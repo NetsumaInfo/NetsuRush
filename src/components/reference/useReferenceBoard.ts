@@ -5,6 +5,7 @@
 import { create } from "zustand";
 import i18n from "@/i18n";
 import type { MemberPresence } from "@/lib/collab/client";
+import { uiLocale } from "@/lib/utils";
 import {
   type BoardItem,
   type BoardView,
@@ -555,7 +556,7 @@ export const useBoard = create<BoardState>((set, get) => ({
       }
 
       // `keepSize` : une taille commune vient d'être imposée, le rangement ne doit pas la défaire.
-      const pos = computeArrange(sel, layout, { gap, sort, keepSize: !!uniform && uniform !== "none" });
+      const pos = computeArrange(sel, layout, { gap, sort, keepSize: !!uniform && uniform !== "none", locale: uiLocale() });
       if (!pos.size && items === s.items) return {};
       return {
         items: items.map((it) => (pos.has(it.id) ? { ...it, ...pos.get(it.id) } : it)),

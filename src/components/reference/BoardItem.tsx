@@ -585,7 +585,7 @@ function TextNote({ item, editing }: { item: Item; editing: boolean }) {
     // (blur, clic ailleurs, Échap) — pas de perte si le blur ne se déclenche pas.
     return (
       <textarea
-        aria-label={item.title || item.text || "Note"}
+        aria-label={item.title || item.text || t("boardMenu.text")}
         ref={taRef}
         value={item.text ?? ""}
         onChange={(e) => patchItem(item.id, { text: e.target.value })}

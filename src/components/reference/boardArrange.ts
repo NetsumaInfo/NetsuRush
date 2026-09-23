@@ -122,6 +122,8 @@ export interface ArrangeOpts {
   // hauteur, sinon la taille commune qu'on vient d'imposer se reperd d'une ligne à l'autre — et
   // ranger trente images en rendait cinq rangées régulières puis une dernière deux fois plus petite.
   keepSize?: boolean;
+  // Collation of the name sort: the interface language (the module stays free of i18n imports).
+  locale?: string;
 }
 
 const DEFAULT_GAP = 16;
@@ -136,10 +138,10 @@ export function itemName(it: { title?: string; ref?: string }): string {
 
 // Tri « par nom » naturel : `shot_2` avant `shot_10`. Les items sans nom finissent en queue, dans
 // leur ordre courant (comportement de BeeRef, qui range par nom de fichier puis par ordre d'ajout).
-function sortByName(sel: ArrangeBox[]): ArrangeBox[] {
+function sortByName(sel: ArrangeBox[], locale?: string): ArrangeBox[] {
   const named = sel.filter((i) => itemName(i));
   const rest = sel.filter((i) => !itemName(i));
-  named.sort((a, b) => itemName(a).localeCompare(itemName(b), undefined, { numeric: true, sensitivity: "base" }));
+  named.sort((a, b) => itemName(a).localeCompare(itemName(b), locale, { numeric: true, sensitivity: "base" }));
   return [...named, ...rest];
 }
 
@@ -190,13 +192,13 @@ function packRects(sizes: { w: number; h: number }[], maxWidth: number): { pos: 
 //
 // L'aire totale de la sélection est conservée : la planche rangée occupe la même surface qu'avant,
 // elle ne saute pas d'échelle sous le curseur.
-function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name", keepSize?: boolean): Map<string, ArrangePos> {
+function computeBlock(sel: ArrangeBox[], gap: number, sort?: "none" | "name", keepSize?: boolean, locale?: string): Map<string, ArrangePos> {
   const out = new Map<string, ArrangePos>();
   // « Actuel » = l'ordre de LECTURE de la planche (haut→bas, puis gauche→droite), pas l'ordre
   // d'insertion : ranger doit conserver ce que l'œil voit déjà, sinon la mosaïque paraît rebattue au
   // hasard alors qu'on n'a demandé qu'à la mettre au carré.
   const sorted = sort === "name"
-    ? sortByName(sel)
+    ? sortByName(sel, locale)
     : [...sel].sort((a, b) => rotatedBBox(a).y - rotatedBBox(b).y || rotatedBBox(a).x - rotatedBBox(b).x);
   const boxes = sorted
     .map((it) => ({ it, b: rotatedBBox(it) }))
@@ -291,7 +293,7 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
   if (sel.length < 2) return pos;
 
   const gap = Math.max(0, opts.gap ?? DEFAULT_GAP);
-  if (mode === "block") return computeBlock(sel, gap, opts.sort, opts.keepSize);
+  if (mode === "block") return computeBlock(sel, gap, opts.sort, opts.keepSize, opts.locale);
   const box = new Map(sel.map((i) => [i.id, rotatedBBox(i)]));
   const bb = (i: ArrangeBox) => box.get(i.id)!;
   // Décalage entre l'origine stockée et l'origine de l'emprise (nul si l'item n'est pas tourné).
@@ -344,7 +346,7 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
     let y = minY;
     sorted.forEach((i) => { pos.set(i.id, { y: y + offY(i) }); y += bb(i).h + step; });
   } else if (mode === "grid") {
-    const sorted = opts.sort === "name" ? sortByName(sel) : [...sel].sort((a, b) => bb(a).y - bb(b).y || bb(a).x - bb(b).x);
+    const sorted = opts.sort === "name" ? sortByName(sel, opts.locale) : [...sel].sort((a, b) => bb(a).y - bb(b).y || bb(a).x - bb(b).x);
     const cols = Math.ceil(Math.sqrt(sorted.length));
     const rows = Math.ceil(sorted.length / cols);
     const cellW = Math.max(...sel.map((i) => bb(i).w)) + gap;
@@ -359,7 +361,7 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
   } else if (mode === "row" || mode === "col") {
     const vertical = mode === "col";
     const sorted = opts.sort === "name"
-      ? sortByName(sel)
+      ? sortByName(sel, opts.locale)
       : [...sel].sort((a, b) => (vertical ? bb(a).y - bb(b).y : bb(a).x - bb(b).x));
     const total = sorted.reduce((t, i) => t + (vertical ? bb(i).h : bb(i).w), 0) + gap * (sorted.length - 1);
     let cursor = (vertical ? cy : cx) - total / 2;
@@ -373,7 +375,7 @@ export function computeArrange(sel: ArrangeBox[], mode: ArrangeMode, opts: Arran
       }
     });
   } else if (mode === "pack") {
-    const sorted = opts.sort === "name" ? sortByName(sel) : sel;
+    const sorted = opts.sort === "name" ? sortByName(sel, opts.locale) : sel;
     const sizes = sorted.map((i) => ({ w: bb(i).w + gap, h: bb(i).h + gap }));
     // Largeur de départ = côté d'un carré de même aire (avec un peu d'air), comme les packers usuels.
     const area = sizes.reduce((t, s) => t + s.w * s.h, 0);
