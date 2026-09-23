@@ -57,9 +57,6 @@ function currentBlockId(e: Editor): string | null {
   return d > 0 ? ($from.node(d).attrs.blockId as string) : null;
 }
 
-// Un script s'écrit en français : le correcteur (et l'attribut `lang` du DOM) n'ont pas de sélecteur
-// de langue ici, contrairement au Carnet où chaque carnet porte la sienne.
-const SCRIPT_LANG = "fr";
 
 function MentionVisual({ hit }: { hit: MentionHit }) {
   const thumb = useThumb(hit.kind === "media" && hit.mediaKind === "video" ? hit.path : "", THUMB_AUTO);
@@ -69,7 +66,10 @@ function MentionVisual({ hit }: { hit: MentionHit }) {
 }
 
 export function NotebookEditor() {
-  const { t } = useTranslation("script");
+  const { t, i18n } = useTranslation("script");
+  // A script has no language picker, unlike a notebook: it is written in the interface language.
+  // Without a bundled dictionary for it, the WebView's own spellchecker takes over.
+  const scriptLang = i18n.language;
   const docId = useScript((s) => s.doc?.id ?? null);
   const title = useScript((s) => s.doc?.title ?? "");
   const docSettings = useScript((s) => s.doc?.settings ?? null);
@@ -82,7 +82,7 @@ export function NotebookEditor() {
   // Mot fautif visé (clic droit / Ctrl+.) → panneau de suggestions, partagé avec le Carnet.
   const [spellTarget, setSpellTarget] = useState<SpellTarget | null>(null);
   // Lu par un plugin ProseMirror créé une seule fois : couper le correcteur ne recrée pas l'éditeur.
-  const spellLang: SpellLang | null = prefs.spellcheck ? spell.langFor(SCRIPT_LANG) : null;
+  const spellLang: SpellLang | null = prefs.spellcheck ? spell.langFor(scriptLang) : null;
   const spellLangRef = useRef(spellLang);
   spellLangRef.current = spellLang;
 
@@ -134,7 +134,7 @@ export function NotebookEditor() {
       onTarget: setSpellTarget,
     }),
     editorProps: {
-      attributes: { class: "nb-prose", spellcheck: "false", lang: SCRIPT_LANG },
+      attributes: { class: "nb-prose", spellcheck: "false", lang: scriptLang },
       handleKeyDown: (_view, event) => handleEditorKeyDown(event),
       // Re-drop d'une carte média : lâchée dans la marge gauche → flotte à gauche du texte ;
       // relâchée dans le flux → bloc pleine largeur. Sinon comportement natif (déplacement).
@@ -316,7 +316,7 @@ export function NotebookEditor() {
           value={title}
           placeholder={t("common.untitled")}
           spellCheck
-          lang="fr"
+          lang={scriptLang}
           onChange={(ev) => useScript.getState().setTitle(ev.target.value)}
           onKeyDown={(ev) => { if (ev.key === "Enter" && !ev.nativeEvent.isComposing) { ev.preventDefault(); editor?.commands.focus("start"); } }}
         />

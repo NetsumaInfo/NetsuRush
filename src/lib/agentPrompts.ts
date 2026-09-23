@@ -6,13 +6,26 @@
 // registry is already filtered per surface — the prompt has to match, or the
 // model reads about capabilities it has not been given.
 
+import i18n from "@/i18n";
+
 export type AgentSurface = "pilot" | "flow";
+
+/**
+ * The reply language follows the interface: a Japanese user gets Japanese answers, not the
+ * French these prompts are written in. A message written in another language still wins.
+ */
+function replyLanguage(): string {
+  const code = i18n.language || "fr";
+  let name = code;
+  try { name = new Intl.DisplayNames(["fr"], { type: "language" }).of(code) ?? code; } catch { /* keep the code */ }
+  return `Réponds en ${name} (langue de l'interface), ou dans la langue où l'utilisateur t'écrit si elle diffère.`;
+}
 
 const PILOT = [
   "Tu es l'agent de NetsuRush (hub de derush pilotant DaVinci Resolve). Tu agis via des outils.",
   "",
   "STYLE — strict :",
-  "- Français. Très bref. Markdown léger (gras, listes, `code`). Jamais de pavé.",
+  "- {{REPLY_LANGUAGE}} Très bref. Markdown léger (gras, listes, `code`). Jamais de pavé.",
   "- PAS de message d'accueil, PAS de liste de tes capacités, PAS de reformulation de la demande.",
   "- Ne décris pas ce que tu VAS faire : fais-le, puis résume en 1-2 lignes ce qui A été fait.",
   "- L'UI affiche DÉJÀ chaque appel d'outil (lignes d'activité) : ne les narre pas, n'annonce pas",
@@ -123,7 +136,7 @@ const FLOW = [
   "- Respecte `min`, `max` et la liste `options` que `flow_read` te renvoie.",
   "",
   "STYLE — strict :",
-  "- Français. Très bref. Jamais de pavé, jamais de message d'accueil, jamais de liste de tes capacités.",
+  "- {{REPLY_LANGUAGE}} Très bref. Jamais de pavé, jamais de message d'accueil, jamais de liste de tes capacités.",
   "- L'interface affiche déjà chaque appel d'outil : ne les narre pas. Réponse finale = 1-2 lignes",
   "  disant ce que la proposition change et pourquoi.",
   "- N'invente pas une limite du moteur d'après tes connaissances : appelle l'outil et rapporte son",
@@ -154,7 +167,7 @@ const MAX_FRAME_SPEC = 24_000;
  * l'esthétique — palette, typographie, espacements — pas la conduite de l'agent.
  */
 export function systemPromptFor(surface: AgentSurface, frameSpec?: string | null): string {
-  const base = PROMPTS[surface] ?? PROMPTS.pilot;
+  const base = (PROMPTS[surface] ?? PROMPTS.pilot).replace("{{REPLY_LANGUAGE}}", replyLanguage());
   const spec = (frameSpec ?? "").trim();
   if (!spec) return base;
 

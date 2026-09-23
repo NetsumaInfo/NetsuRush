@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BlockNoteView, type Theme } from "@blocknote/mantine";
 import { useCreateBlockNote, SuggestionMenuController, getDefaultReactSlashMenuItems, FormattingToolbarController, FormattingToolbar, getFormattingToolbarItems, type DefaultReactSuggestionItem } from "@blocknote/react";
 import { filterSuggestionItems } from "@blocknote/core";
-import { fr as bnFr } from "@blocknote/core/locales";
+import * as bnLocales from "@blocknote/core/locales";
 import { codeBlockOptions } from "@blocknote/code-block";
 import { TextSelection } from "prosemirror-state";
 import { notebookCanEdit, notebookCollabState } from "./notebookCollabState";
@@ -56,7 +56,7 @@ function bnThemeFromTokens(): Theme {
 // l'éditeur BlockNote gère son propre contenu → inutile de re-render à chaque touche (jank d'édition/
 // sélection évité). Les listes fraîches (mentions, arbre) restent à jour via les hooks useApp internes.
 function NoteEditorInner({ page }: { page: NotebookPage }) {
-  const { t } = useTranslation("notebook");
+  const { t, i18n } = useTranslation("notebook");
   const setBlocks = useApp((s) => s.nbSetPageBlocks);
   const saveDatabase = useApp((s) => s.nbSaveDatabase);
   const pages = useApp((s) => s.nbPages);
@@ -82,7 +82,9 @@ function NoteEditorInner({ page }: { page: NotebookPage }) {
 
   const editor = useCreateBlockNote({
     schema: notebookSchema,
-    dictionary: bnFr, // libellés BlockNote en français (menus par défaut, placeholders, toolbar)
+    // BlockNote's own menus, placeholders and toolbar speak the interface language (not the
+    // notebook's writing language, which only drives the spellchecker).
+    dictionary: bnLocales[i18n.language.slice(0, 2) as keyof typeof bnLocales] ?? bnLocales.en,
     // Correcteur MAISON : la WebView souligne les fautes mais ses suggestions n'existent que dans
     // son menu contextuel natif, que l'app supprime partout → sans ce plugin, aucune correction
     // n'est atteignable. Il apporte aussi le dictionnaire personnel et « remplacer partout ».
