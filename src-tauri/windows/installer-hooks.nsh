@@ -11,7 +11,7 @@ Var NRAllState
 
 LangString NRCleanupTitle 1036 "Désinstallation complète"
 LangString NRCleanupTitle 1033 "Complete uninstall"
-LangString NRCleanupSubtitle 1036 "Choisissez ce que NetsuRush doit supprimer de ce PC."
+LangString NRCleanupSubtitle 1036 "Choisis ce que NetsuRush doit supprimer de ce PC."
 LangString NRCleanupSubtitle 1033 "Choose what NetsuRush should remove from this PC."
 LangString NRAppLabel 1036 "Application NetsuRush"
 LangString NRAppLabel 1033 "NetsuRush application"
@@ -27,6 +27,8 @@ LangString NRUserDataHint 1036 "Boards, carnets, scripts, collections et histori
 LangString NRUserDataHint 1033 "Boards, notebooks, scripts, collections and history. Source media is never deleted."
 LangString NRAllLabel 1036 "Tout supprimer"
 LangString NRAllLabel 1033 "Remove everything"
+LangString NRReleaseLockFailed 1036 "NetsuRush n'a pas pu libérer son service de fond. Ferme NetsuRush puis réessaie."
+LangString NRReleaseLockFailed 1033 "NetsuRush could not release its background service. Close NetsuRush, then try again."
 
 UninstPage custom un.NetsuCleanupPage un.NetsuCleanupLeave
 
@@ -66,7 +68,7 @@ UninstPage custom un.NetsuCleanupPage un.NetsuCleanupLeave
   nsExec::ExecToLog '"$PLUGINSDIR\netsurush-release-lock.exe" --release-lock "$INSTDIR\resources\bin\node.exe"'
   Pop $0
   ${If} $0 != 0
-    MessageBox MB_ICONSTOP|MB_OK "NetsuRush n'a pas pu libérer son service de fond. Ferme NetsuRush puis réessaie."
+    MessageBox MB_ICONSTOP|MB_OK "$(NRReleaseLockFailed)"
     Abort
   ${EndIf}
   Delete "$PLUGINSDIR\netsurush-release-lock.exe"

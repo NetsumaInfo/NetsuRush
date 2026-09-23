@@ -69,7 +69,7 @@
     "windows": {
       "nsis": {
         "installMode": "currentUser",
-        "languages": ["French", "English"],
+        "languages": ["English", "French"],
         "customLanguageFiles": {
           "French": "windows/netsurush-installer-french.nsh",
           "English": "windows/netsurush-installer-english.nsh"
