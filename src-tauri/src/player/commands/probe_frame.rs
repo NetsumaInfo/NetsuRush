@@ -57,7 +57,7 @@ pub(super) fn probe_frame_preview_with_ffmpeg(
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| format!("ffmpeg indisponible ({}): {}", ffmpeg_bin.display(), e))?;
+        .map_err(|e| format!("ffmpeg unavailable ({}): {}", ffmpeg_bin.display(), e))?;
 
     let timeout = Duration::from_millis(3500);
     let output = match wait_with_output_timeout(child, timeout) {
@@ -69,14 +69,14 @@ pub(super) fn probe_frame_preview_with_ffmpeg(
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr).trim().to_string();
         return Err(if err.is_empty() {
-            "ffmpeg a échoué à extraire le frame".to_string()
+            "ffmpeg failed to extract the frame".to_string()
         } else {
             err
         });
     }
 
     if output.stdout.is_empty() {
-        return Err("Aucune image extraite".to_string());
+        return Err("no frame extracted".to_string());
     }
 
     let b64 = BASE64_STD.encode(output.stdout);
@@ -91,11 +91,11 @@ pub(super) fn probe_frame_preview_with_mpv(path: &str, seconds: f64) -> Result<S
     };
 
     let preview_player = crate::player::mpv_wrapper::MpvPlayer::new(None)
-        .map_err(|e| format!("mpv preview init impossible: {}", e))?;
+        .map_err(|e| format!("mpv preview init failed: {}", e))?;
 
     preview_player
         .load_file(path)
-        .map_err(|e| format!("mpv preview load impossible: {}", e))?;
+        .map_err(|e| format!("mpv preview load failed: {}", e))?;
     let _ = preview_player.pause();
 
     let start_load = Instant::now();
@@ -112,7 +112,7 @@ pub(super) fn probe_frame_preview_with_mpv(path: &str, seconds: f64) -> Result<S
 
     preview_player
         .seek(safe_seconds)
-        .map_err(|e| format!("mpv preview seek impossible: {}", e))?;
+        .map_err(|e| format!("mpv preview seek failed: {}", e))?;
     let _ = preview_player.pause();
     std::thread::sleep(Duration::from_millis(120));
 
@@ -125,7 +125,7 @@ pub(super) fn probe_frame_preview_with_mpv(path: &str, seconds: f64) -> Result<S
 
     preview_player
         .screenshot(&tmp_path_str)
-        .map_err(|e| format!("mpv preview screenshot impossible: {}", e))?;
+        .map_err(|e| format!("mpv preview screenshot failed: {}", e))?;
 
     let start_wait = Instant::now();
     let mut file_backoff = Duration::from_millis(25);
@@ -141,12 +141,12 @@ pub(super) fn probe_frame_preview_with_mpv(path: &str, seconds: f64) -> Result<S
 
     let bytes = fs::read(&tmp_path).map_err(|e| {
         let _ = fs::remove_file(&tmp_path);
-        format!("lecture preview impossible: {}", e)
+        format!("cannot read preview: {}", e)
     })?;
     let _ = fs::remove_file(&tmp_path);
 
     if bytes.is_empty() {
-        return Err("preview vide".to_string());
+        return Err("empty preview".to_string());
     }
 
     let mime = if is_jpeg(&bytes) {

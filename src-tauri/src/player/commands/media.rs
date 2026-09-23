@@ -95,7 +95,7 @@ pub async fn player_get_frame_preview(
     }
 
     if target_path.trim().is_empty() {
-        return Err("Aucun fichier vidéo disponible pour le preview".to_string());
+        return Err("no video file available for the preview".to_string());
     }
 
     let safe_width = width.unwrap_or(320).clamp(120, 640);

@@ -160,7 +160,7 @@ fn release_file_lock(resource: &Path) -> Result<(), String> {
     let mut session_key = [0u16; CCH_RM_SESSION_KEY as usize + 1];
     let started = unsafe { RmStartSession(&mut session, None, PWSTR(session_key.as_mut_ptr())) };
     if started != ERROR_SUCCESS {
-        return Err(format!("Restart Manager indisponible ({})", started.0));
+        return Err(format!("Restart Manager unavailable ({})", started.0));
     }
 
     let resource_wide = resource
@@ -172,7 +172,7 @@ fn release_file_lock(resource: &Path) -> Result<(), String> {
     let registered = unsafe { RmRegisterResources(session, Some(&files), None, None) };
     if registered != ERROR_SUCCESS {
         let _ = unsafe { RmEndSession(session) };
-        return Err(format!("Ressource non enregistrée ({})", registered.0));
+        return Err(format!("resource not registered ({})", registered.0));
     }
 
     // Restart Manager peut aussi voir un antivirus qui inspecte le fichier. On exclut toutes les
@@ -183,7 +183,7 @@ fn release_file_lock(resource: &Path) -> Result<(), String> {
     let listed = unsafe { RmGetList(session, &mut needed, &mut count, None, &mut reboot_reasons) };
     if listed != ERROR_SUCCESS && listed != ERROR_MORE_DATA {
         let _ = unsafe { RmEndSession(session) };
-        return Err(format!("Verrou non listable ({})", listed.0));
+        return Err(format!("cannot list lock holders ({})", listed.0));
     }
     let mut processes = vec![RM_PROCESS_INFO::default(); needed as usize];
     if needed > 0 {
@@ -199,7 +199,7 @@ fn release_file_lock(resource: &Path) -> Result<(), String> {
         };
         if listed != ERROR_SUCCESS {
             let _ = unsafe { RmEndSession(session) };
-            return Err(format!("Verrou non relu ({})", listed.0));
+            return Err(format!("cannot re-read lock holders ({})", listed.0));
         }
     }
     let target = resource.canonicalize().unwrap_or_else(|_| resource.to_path_buf());
@@ -259,13 +259,13 @@ fn release_file_lock(resource: &Path) -> Result<(), String> {
     if result == ERROR_SUCCESS {
         Ok(())
     } else {
-        Err(format!("Le verrou n'a pas été libéré ({})", result.0))
+        Err(format!("lock was not released ({})", result.0))
     }
 }
 
 #[cfg(not(target_os = "windows"))]
 fn release_file_lock(_resource: &Path) -> Result<(), String> {
-    Err("Restart Manager est disponible uniquement sous Windows".into())
+    Err("Restart Manager is only available on Windows".into())
 }
 
 // La fermeture de la fenêtre doit libérer node.exe AVANT que le processus Tauri disparaisse : un
@@ -335,11 +335,11 @@ fn supervise_core(app: &AppHandle) {
             let exited = match slot.as_mut() {
                 Some(child) => match child.try_wait() {
                     Ok(Some(status)) => {
-                        log_core(&format!("le service de fond s'est arrêté ({status})"));
+                        log_core(&format!("core service stopped ({status})"));
                         true
                     }
                     Err(error) => {
-                        log_core(&format!("état du service de fond illisible : {error}"));
+                        log_core(&format!("cannot read core service state: {error}"));
                         true
                     }
                     Ok(None) => false,
@@ -744,7 +744,7 @@ pub fn run() {
             let salt_path = app
                 .path()
                 .app_local_data_dir()
-                .expect("app_local_data_dir indisponible");
+                .expect("app_local_data_dir unavailable");
             let _ = std::fs::create_dir_all(&salt_path);
             app.handle().plugin(
                 tauri_plugin_stronghold::Builder::with_argon2(&salt_path.join("salt.txt")).build(),
@@ -805,7 +805,7 @@ fn spawn_core(_app: &AppHandle) -> Option<Child> {
         .join("core")
         .join("server.js");
     if !server.exists() {
-        eprintln!("[netsurush] core introuvable: {}", server.display());
+        eprintln!("[netsurush] core not found: {}", server.display());
         return None;
     }
     let app_exe = std::env::current_exe().ok();
@@ -820,11 +820,11 @@ fn spawn_core(_app: &AppHandle) -> Option<Child> {
     if let Some(exe) = app_exe { command.env("NETSURUSH_APP_EXE", exe); }
     match command.spawn() {
         Ok(child) => {
-            eprintln!("[netsurush] core spawné: {}", server.display());
+            eprintln!("[netsurush] core spawned: {}", server.display());
             Some(child)
         }
         Err(e) => {
-            eprintln!("[netsurush] échec spawn core (node dans le PATH ?): {e}");
+            eprintln!("[netsurush] failed to spawn core (is node on PATH?): {e}");
             None
         }
     }
@@ -838,7 +838,7 @@ fn spawn_core(app: &AppHandle) -> Option<Child> {
     let res = match app.path().resource_dir() {
         Ok(p) => p,
         Err(e) => {
-            log_core(&format!("resource_dir introuvable: {e}"));
+            log_core(&format!("resource_dir not found: {e}"));
             return None;
         }
     };
@@ -858,8 +858,8 @@ fn spawn_core(app: &AppHandle) -> Option<Child> {
     let res_root = res.join("resources");
     if !node.exists() || !server.exists() {
         log_core(&format!(
-            "sidecar incomplet — installation à réparer (node.exe présent={}, server.js présent={}, \
-             ressources={})",
+            "incomplete sidecar, the install needs repair (node.exe present={}, server.js present={}, \
+             resources={})",
             node.exists(),
             server.exists(),
             strip(&res_root),
@@ -894,11 +894,11 @@ fn spawn_core(app: &AppHandle) -> Option<Child> {
         .spawn()
     {
         Ok(child) => {
-            log_core(&format!("service de fond lancé (pid {}, port {port})", child.id()));
+            log_core(&format!("core service started (pid {}, port {port})", child.id()));
             Some(child)
         }
         Err(e) => {
-            log_core(&format!("échec spawn core bundlé ({}) : {e}", strip(&node)));
+            log_core(&format!("failed to spawn bundled core ({}): {e}", strip(&node)));
             None
         }
     }

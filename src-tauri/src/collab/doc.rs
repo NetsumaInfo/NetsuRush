@@ -1073,7 +1073,7 @@ mod path_tests {
         .expect("suppression");
 
         // Ctrl+Z : le même id revient.
-        apply_batch_to_doc(&doc, &[add()]).expect("l'annulation doit être acceptée");
+        apply_batch_to_doc(&doc, &[add()]).expect("the undo must be accepted");
         let projection = project_projection_from_doc(&doc, 0).expect("projection");
         assert_eq!(projection.items.len(), 1);
         // Une seule occurrence dans l'ordre : ressusciter ne doit pas empiler l'id deux fois.

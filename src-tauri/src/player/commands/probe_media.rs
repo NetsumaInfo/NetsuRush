@@ -26,7 +26,7 @@ fn probe_media_info_via_mediainfo(
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| format!("mediainfo indisponible: {}", e))?;
+        .map_err(|e| format!("mediainfo unavailable: {}", e))?;
 
     let timeout = Duration::from_millis(2500);
     let start = Instant::now();

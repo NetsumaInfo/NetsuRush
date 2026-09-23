@@ -19,7 +19,7 @@ pub fn run_ffprobe(path: &str) -> Result<Value, String> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| format!("ffprobe indisponible: {}", e))?;
+        .map_err(|e| format!("ffprobe unavailable: {}", e))?;
 
     let timeout = Duration::from_secs(4);
     let output = match wait_with_output_timeout(child, timeout) {
