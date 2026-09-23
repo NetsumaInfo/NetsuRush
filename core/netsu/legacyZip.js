@@ -148,7 +148,7 @@ function detokenizeV1Item(item, resolveToken) {
       frames,
       ref: frames.find(Boolean) || '',
       missing: allMissing
-        ? { name: `Séquence — ${tokens.length} image(s)`, size: missSize, kind: 'sequence' }
+        ? { name: t('sequenceFramesAllMissing', { total: tokens.length }), size: missSize, kind: 'sequence' }
         : undefined,
     };
   }
@@ -171,7 +171,7 @@ function readZipBoard(refStore, buf, fs) {
   let board;
   try { board = JSON.parse(boardRaw.toString('utf8')); } catch (_) { return { ok: false, error: t('unreadableFile') }; }
   if (board.format !== 'netsu') return { ok: false, error: t('unknownFormat') };
-  if (board.type !== 'board') return { ok: false, error: `${t('unsupportedType')}: ${board.type}`, type: board.type };
+  if (board.type !== 'board') return { ok: false, error: t('withDetail', { message: t('unsupportedType'), detail: board.type }), type: board.type };
 
   let manifest = { refs: [], counts: null };
   const manRaw = files.get('manifest.json');

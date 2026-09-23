@@ -148,7 +148,7 @@ function createNbFile({ notebookStore, dataDir }) {
       let manifest;
     try { manifest = JSON.parse(manRaw.toString('utf8')); } catch { return { ok: false, error: t('unreadableFile') }; }
     if (manifest.format !== FORMAT && manifest.format !== LEGACY_FORMAT) return { ok: false, error: t('unknownFormat') };
-    if (!['notebook', 'notebook-pages', 'pages'].includes(manifest.type)) return { ok: false, error: `${t('unsupportedType')}: ${manifest.type}` };
+    if (!['notebook', 'notebook-pages', 'pages'].includes(manifest.type)) return { ok: false, error: t('withDetail', { message: t('unsupportedType'), detail: manifest.type }) };
 
       // 1. Assets → disque (saveAsset dédup par contenu), token → URL /media locale.
       const tokenToUrl = new Map();
@@ -197,7 +197,7 @@ function createNbFile({ notebookStore, dataDir }) {
           kind: (manifest.notebook && manifest.notebook.kind) || (manifest.settings && manifest.settings.kind) || 'notes',
           language: (manifest.notebook && manifest.notebook.language) || (manifest.settings && manifest.settings.language) || 'fr',
         });
-        if (!created.ok) return { ok: false, error: created.error || 'création du carnet impossible' };
+        if (!created.ok) return { ok: false, error: created.error || t('notebookCreateFailed') };
         notebookId = created.id;
       }
 
@@ -219,12 +219,12 @@ function createNbFile({ notebookStore, dataDir }) {
           orderIdx: isRoot ? base + i : p.orderIdx,
           blocks: p.blocks || [],
         });
-        if (!r.ok) return { ok: false, error: r.error || `échec d'écriture de « ${p.title} »` };
+        if (!r.ok) return { ok: false, error: r.error || t('notebookPageWriteFailed', { title: p.title }) };
         i++;
       }
       for (const d of dbs) {
         const r = notebookStore.saveDatabase({ ...(d.data || {}), id: d.id, pageId: d.pageId });
-        if (!r.ok) return { ok: false, error: r.error || 'échec d\'écriture d\'une database' };
+        if (!r.ok) return { ok: false, error: r.error || t('notebookDatabaseWriteFailed') };
       }
 
       return { ok: true, notebookId, pages: pages.length, databases: dbs.length, rootIds };

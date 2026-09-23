@@ -33,6 +33,7 @@ const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const { hashFile, hashFileAsync } = require('./blobs');
+const { t } = require('../i18n');
 
 const TOKEN = 'sidecar:';
 // Suffixe du dossier. Volontairement lisible : l'utilisateur doit comprendre au premier coup d'œil
@@ -312,7 +313,7 @@ async function adoptAsync(netsuPath, filePath, opts) {
  */
 function planAdoption(netsuPath, filePath, opts, hash) {
   const stat = fs.statSync(filePath);
-  if (!stat.isFile()) throw new Error(`pas un fichier : ${filePath}`);
+  if (!stat.isFile()) throw new Error(t('notAFile', { path: filePath }));
   const dir = sidecarDirFor(netsuPath);
   const options = opts || {};
   // À plat, le nom de contenu du fichier source est repris TEL QUEL quand il en porte déjà un :

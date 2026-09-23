@@ -312,6 +312,8 @@ export interface TranscriptResult {
   model?: string;
   cached?: boolean;
   error?: string | null;
+  /** Engine caveat in the interface language (Canary: text only, no word timestamps). */
+  note?: string;
 }
 // Curseurs (millisecondes pour les durées) pilotant Silero VAD.
 export interface SilenceParams {
@@ -998,7 +1000,7 @@ export interface AdobeDiagnostic {
   manifestExists: boolean;
   files: string[];
   manifestHead: string | null;                 // 500 premiers caractères du manifest sur disque
-  playerDebug: Record<string, string>;          // CSXS.9..15 → "1" | "absent" | "défini≠1"
+  playerDebug: Record<string, string>;          // CSXS.9..15 → "1" | "absent" | "≠1"
   cepLogs: { file: string; lines: string[] }[]; // lignes du log CEP mentionnant NetsuRush
 }
 
@@ -1105,6 +1107,10 @@ export interface ClusterResult {
 
 export interface IndexResult {
   ok: boolean;
+  /** The search sidecar died mid-clip: worth one retry. */
+  daemonDown?: boolean;
+  /** Stopped by the user, not a failure. */
+  canceled?: boolean;
   file?: string;
   indexed?: number;
   total?: number;
@@ -3860,6 +3866,10 @@ const mock: NrApi = {
     type DbRow = Database & { pageId: string };
     const rd = <T,>(k: string): Record<string, T> => { try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch { return {}; } };
     const wr = (k: string, o: unknown) => localStorage.setItem(k, JSON.stringify(o));
+    const mockNotebookLanguage = (): NbRow["language"] => {
+      const code = i18n.language.split("-")[0];
+      return (["fr", "en", "es", "de", "ja", "zh"] as string[]).includes(code) ? code as NbRow["language"] : "fr";
+    };
     const rid = () => Math.random().toString(36).slice(2, 10);
     const normalizeNotebook = (notebook: NbRow): NbRow => ({ ...notebook, kind: notebook.kind || "notes", language: notebook.language || "fr" });
     return {
@@ -3894,7 +3904,7 @@ const mock: NrApi = {
         if (found) return { ok: true, notebook: found, created: false };
         const id = rid();
         const updatedAt = Date.now();
-        o[id] = { id, title: title || i18n.t("notebook:panel.scriptNotebook"), icon: null, scriptId, kind: "script", language: "fr", updatedAt };
+        o[id] = { id, title: title || i18n.t("notebook:panel.scriptNotebook"), icon: null, scriptId, kind: "script", language: mockNotebookLanguage(), updatedAt };
         wr(K_NB, o);
         return { ok: true, notebook: o[id], created: true };
       },
@@ -4238,7 +4248,7 @@ const mock: NrApi = {
         if (!name) return { ok: false, error: i18n.t("common:mock.emptyFolderName") };
         if (/[\\/]/.test(name)) return { ok: false, error: i18n.t("common:mock.invalidFolderName") };
         if (all.some((x) => x.id !== id && (x.parentId ?? null) === parentId && x.name.toLowerCase() === name.toLowerCase())) {
-          return { ok: false, error: `Un dossier « ${name} » existe déjà ici` };
+          return { ok: false, error: i18n.t("common:mock.folderExists", { name }) };
         }
         const rec: LibraryFolder = { id, name, parentId };
         const i = all.findIndex((x) => x.id === id);

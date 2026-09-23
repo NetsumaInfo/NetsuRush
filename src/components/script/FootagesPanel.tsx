@@ -11,7 +11,7 @@ import { ChevronRight, ChevronsLeft, Search, Loader2, House, FilePlus2, FolderPl
 import { useShallow } from "zustand/react/shallow";
 import { nextProxyToken, nr, type Clip, type ScriptBlockMedia } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { basename, THUMB_AUTO } from "@/lib/utils";
+import { basename, THUMB_AUTO, uiLocale } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { claimHoverPreview } from "@/lib/hoverPreview";
@@ -23,6 +23,7 @@ import { attachTranscriptHit, TranscriptHitRow, useTranscriptHits } from "./Tran
 import { useScript } from "./useScript";
 import { useDragEndReset } from "@/lib/dropZone";
 import { errorText } from "@/lib/errorText";
+import { binLabel } from "@/components/rushes/libraryShared";
 
 const isAudio = (c: Clip) => isAudioPath(c.path);
 
@@ -102,7 +103,7 @@ function FootageRow({ clip, source }: MediaEntry) {
       </TooltipTrigger>
       <TooltipContent side="left" className="max-w-64">
         <p className="font-medium">{clip.name || basename(clip.path)}</p>
-        <p className="break-all text-[10px] opacity-75">{clip.bin ? `${clip.bin} · ` : ""}{clip.path}</p>
+        <p className="break-all text-[10px] opacity-75">{clip.bin ? `${binLabel(clip.bin)} · ` : ""}{clip.path}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -136,13 +137,13 @@ function MediaFolder({ node, path, depth, collapsed, toggle }: {
       <button type="button" className="footage-folder-row" style={{ paddingLeft: 6 + depth * 12 }} onClick={() => toggle(path)}>
         <ChevronRight className={open ? "is-open" : ""} />
         <Folder />
-        <span>{node.name}</span>
+        <span>{depth === 0 ? binLabel(node.name) : node.name}</span>
         <small>{nodeCount(node)}</small>
       </button>
       {open && (
         <div>
           {node.entries.map((entry) => <FootageRow key={entry.clip.path} {...entry} />)}
-          {[...node.children.values()].sort((a, b) => a.name.localeCompare(b.name)).map((child) => (
+          {[...node.children.values()].sort((a, b) => a.name.localeCompare(b.name, uiLocale())).map((child) => (
             <MediaFolder key={child.name} node={child} path={`${path}/${child.name}`} depth={depth + 1} collapsed={collapsed} toggle={toggle} />
           ))}
         </div>
@@ -161,7 +162,7 @@ function MediaList({ entries }: { entries: MediaEntry[] }) {
   return (
     <>
       {tree.entries.map((entry) => <FootageRow key={entry.clip.path} {...entry} />)}
-      {[...tree.children.values()].sort((a, b) => a.name.localeCompare(b.name)).map((child) => (
+      {[...tree.children.values()].sort((a, b) => a.name.localeCompare(b.name, uiLocale())).map((child) => (
         <MediaFolder key={child.name} node={child} path={child.name} depth={0} collapsed={collapsed} toggle={toggle} />
       ))}
     </>

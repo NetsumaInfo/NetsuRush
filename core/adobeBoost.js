@@ -72,7 +72,7 @@ function createAdobeBoost({ adobeBridge, hostPower, broadcast, ev }) {
       const res = await adobeBridge.boost(ev, app, payload, timeoutMs);
       return res || { ok: false, error: t("emptyResult") };
     } catch (e) {
-      logbus.emit("adobe-boost", "error", `job ${payload && payload.op} (${app}) : ${msg(e)}`);
+      logbus.emit("adobe-boost", "error", `job ${payload && payload.op} (${app}): ${msg(e)}`);
       return { ok: false, error: msg(e) };
     }
   }
@@ -173,7 +173,7 @@ function createAdobeBoost({ adobeBridge, hostPower, broadcast, ev }) {
     try {
       broadcast("boost:progress", { msg: msgText, pct });
     } catch (e) {
-      logbus.emit("adobe-boost", "warn", `progression non diffusée : ${msg(e)}`);
+      logbus.emit("adobe-boost", "warn", `progress not broadcast: ${msg(e)}`);
     }
   }
 
@@ -224,7 +224,7 @@ function createAdobeBoost({ adobeBridge, hostPower, broadcast, ev }) {
     const re = await hostPower.reopen();
     say(null, 100);
     if (!re.ok) {
-      logbus.emit("adobe-boost", "warn", `réouverture ${app} échouée : ${re.error}`);
+      logbus.emit("adobe-boost", "warn", `reopening ${app} failed: ${re.error}`);
       return { ...cleaned, restarted: false, reopenError: re.error || t("adobeReopenFailed") };
     }
     return { ...cleaned, restarted: true };
@@ -284,7 +284,7 @@ function createAdobeBoost({ adobeBridge, hostPower, broadcast, ev }) {
       const res = await job(app, { op: "attachProxy", pairs: chunk });
       if (!res.ok) {
         failed.push(...chunk.map((c) => c.path));
-        logbus.emit("adobe-boost", "warn", `lot de proxies refusé (${chunk.length}) : ${res.error}`);
+        logbus.emit("adobe-boost", "warn", `proxy batch refused (${chunk.length}): ${res.error}`);
         continue;
       }
       attached += Number(res.attached) || 0;

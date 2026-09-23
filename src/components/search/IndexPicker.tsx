@@ -13,6 +13,7 @@ import { DetectionModelSelect } from "@/components/rushes/DetectionControls";
 import { DetectionAdvancedSettings } from "@/components/rushes/DetectionAdvancedSettings";
 import { cn } from "@/lib/utils";
 import { isMedia } from "@/components/search/searchHelpers";
+import { binLabel } from "@/components/rushes/libraryShared";
 import { SearchPerfMenu } from "@/components/search/SearchPerfMenu";
 import { FRAME_CHOICES, framesOfMode, framesSatisfied, type SamplingFrames } from "@/lib/sampling";
 
@@ -141,7 +142,7 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
                   </Tooltip>
                 )}
                 <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                {c.bin && <span className="shrink-0 text-[11px] text-muted-foreground">{c.bin}</span>}
+                {c.bin && <span className="shrink-0 text-[11px] text-muted-foreground">{binLabel(c.bin)}</span>}
                 {tag.t && <span className={cn("shrink-0 text-[11px] font-medium", tag.cls)}>{tag.t}</span>}
               </button>
             );

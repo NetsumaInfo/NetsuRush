@@ -267,7 +267,7 @@ function setupScript() {
 function installAdobePanel(send) {
   send({ stage: 'adobePanel', label: t('setupAdobePanel') });
   const result = require('./adobePanel').installPanel();
-  if (!result.ok) send({ stage: 'error', label: `${t('setupAdobePanelFailed')} : ${result.error || ''}`.trim() });
+  if (!result.ok) send({ stage: 'error', label: result.error ? t('withDetail', { message: t('setupAdobePanelFailed'), detail: result.error }) : t('setupAdobePanelFailed') });
   return { ok: result.ok, dir: result.dir || null, version: result.version || null, error: result.error || null };
 }
 
@@ -402,11 +402,11 @@ async function runSetup(ev, options = {}) {
         running = false;
         if (workerBuffer.trim()) pumpWorker('\n');
         if (workerCode === 0) {
-          send({ pct: 99, stage: 'verify', label: 'Vérification de l’installation…' });
+          send({ pct: 99, stage: 'verify', label: t('setupVerifying') });
           const fresh = readInstalledConfig();
           const verified = probeRuntime(fresh);
           if (!ffmpegReady(fresh) || verified !== true && !verified.ok) {
-            resolve({ ok: false, error: verified !== true && verified.error ? verified.error : 'La vérification finale du runtime a échoué' });
+            resolve({ ok: false, error: verified !== true && verified.error ? verified.error : t('setupVerifyFailed') });
             return;
           }
           // Extension Adobe : optionnelle et sans impact sur le runtime → un échec est signalé mais

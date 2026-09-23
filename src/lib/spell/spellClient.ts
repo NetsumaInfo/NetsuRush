@@ -75,7 +75,7 @@ function writePersonal() {
   try {
     localStorage.setItem(PERSONAL_KEY, JSON.stringify(personal));
   } catch (err) {
-    console.warn("[spell] dictionnaire personnel non enregistré", err);
+    console.warn("[spell] personal dictionary not saved", err);
   }
 }
 
@@ -90,7 +90,7 @@ function ensureWorker(): Worker | null {
         const state = stateOf(msg.lang);
         state.ready = msg.type === "loaded";
         state.failed = msg.type === "failed";
-        if (msg.type === "failed") console.warn(`[spell] dictionnaire ${msg.lang} illisible`, msg.error);
+        if (msg.type === "failed") console.warn(`[spell] dictionary ${msg.lang} unreadable`, msg.error);
         loadWaiters.get(msg.lang)?.(state.ready);
         loadWaiters.delete(msg.lang);
         notify();
@@ -101,7 +101,7 @@ function ensureWorker(): Worker | null {
     };
     worker.onerror = (event) => {
       workerBroken = true;
-      console.warn("[spell] worker arrêté, correcteur désactivé", event.message);
+      console.warn("[spell] worker stopped, spellchecker disabled", event.message);
       for (const resolve of pending.values()) resolve({ type: "check", id: -1, bad: [] });
       pending.clear();
       for (const resolve of loadWaiters.values()) resolve(false);
@@ -110,7 +110,7 @@ function ensureWorker(): Worker | null {
     };
   } catch (err) {
     workerBroken = true;
-    console.warn("[spell] worker indisponible, correcteur désactivé", err);
+    console.warn("[spell] worker unavailable, spellchecker disabled", err);
   }
   return worker;
 }
@@ -147,7 +147,7 @@ function ensureLang(lang: SpellLang): Promise<boolean> {
       });
     } catch (err) {
       state.failed = true;
-      console.warn(`[spell] chargement du dictionnaire ${lang} impossible`, err);
+      console.warn(`[spell] cannot load dictionary ${lang}`, err);
       return false;
     } finally {
       state.loading = null;

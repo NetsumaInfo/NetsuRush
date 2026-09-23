@@ -398,7 +398,8 @@
     "logsAttached_one": "已附上 {{count}} 行日志",
     "logsAttached_other": "已附上 {{count}} 行日志",
     "logErrors_one": "{{count}} 个错误",
-    "logErrors_other": "{{count}} 个错误"
+    "logErrors_other": "{{count}} 个错误",
+    "moduleSetup": "配置"
   },
   "outbox": {
     "opening": "正在打开缓存…",

@@ -85,7 +85,7 @@ function AudioFolderSection({ kind, embedded = false, query = "" }: AudioFolderS
       const key = file.folder || "";
       map.set(key, [...(map.get(key) || []), file]);
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b, uiLocale()));
   }, [files, query]);
 
   function chooseDestination(value: "mediapool" | "folder") {

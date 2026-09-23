@@ -120,7 +120,7 @@ async function sendAsset(req, res, root, abs) {
     if (req.method === 'HEAD') { res.end(); return; }
     fs.createReadStream(file).on('error', () => res.destroy()).pipe(res);
   } catch (e) {
-    logbus.emit('core', 'error', `/app: lecture impossible (${abs}) — ${e && e.message ? e.message : e}`);
+    logbus.emit('core', 'error', `/app: read failed (${abs}): ${e && e.message ? e.message : e}`);
     if (res.headersSent) res.destroy();
     else res.writeHead(500).end('read error');
   }

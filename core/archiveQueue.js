@@ -14,6 +14,7 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
+const { t } = require('./i18n');
 
 // Rythme d'observation de la machine quand une entrée attend le repos. Assez lent pour ne rien
 // coûter, assez rapide pour partir dans la minute qui suit la fin d'un rendu.
@@ -81,7 +82,7 @@ function createArchiveQueue({ dataDir, runArchive, broadcast, isIdle }) {
    * @param {{ name?: string, mode?: 'now'|'idle', opts?: any }} [req]
    */
   function enqueue(collId, req) {
-    if (!collId) return { ok: false, error: 'collection manquante' };
+    if (!collId) return { ok: false, error: t('collectionMissing') };
     const mode = (req && req.mode) === 'idle' ? 'idle' : 'now';
     const existing = state.entries.find((e) => e.collId === collId && e.status === 'pending');
     if (existing) {
@@ -107,7 +108,7 @@ function createArchiveQueue({ dataDir, runArchive, broadcast, isIdle }) {
   function cancel(entryId) {
     const before = state.entries.length;
     state.entries = state.entries.filter((e) => !(e.id === entryId && e.status === 'pending'));
-    if (state.entries.length === before) return { ok: false, error: 'entrée introuvable ou déjà lancée' };
+    if (state.entries.length === before) return { ok: false, error: t('archiveEntryGone') };
     emit();
     return { ok: true };
   }
@@ -138,7 +139,7 @@ function createArchiveQueue({ dataDir, runArchive, broadcast, isIdle }) {
     }
     next.status = result && result.ok ? 'done' : 'error';
     next.endedAt = Date.now();
-    next.error = result && result.ok ? undefined : (result && result.error) || 'échec';
+    next.error = result && result.ok ? undefined : (result && result.error) || t('failed');
     next.result = result && result.ok
       ? { skipped: result.skipped || 0, copied: result.copied || 0, rendered: result.rendered || 0, failed: result.failed || 0 }
       : undefined;

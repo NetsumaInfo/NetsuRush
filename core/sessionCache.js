@@ -38,7 +38,7 @@ function recreateSync() {
 function removeInBackground(dir) {
   setTimeout(() => {
     fs.promises.rm(dir, { recursive: true, force: true })
-      .catch((error) => console.warn('cache de session : suppression différée impossible', dir, String(error)));
+      .catch((error) => console.warn('session cache: deferred removal failed', dir, String(error)));
   }, 0);
 }
 

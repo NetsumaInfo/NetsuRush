@@ -70,7 +70,8 @@
     "folderImportUnavailable": "La importación de carpetas no está disponible fuera de la aplicación.",
     "emptyFolderName": "El nombre de la carpeta está vacío",
     "invalidFolderName": "El nombre de la carpeta no puede contener «/» ni «\\»",
-    "folder": "Carpeta"
+    "folder": "Carpeta",
+    "folderExists": "Ya hay una carpeta «{{name}}» aquí"
   },
   "spell": {
     "title": "Ortografía",

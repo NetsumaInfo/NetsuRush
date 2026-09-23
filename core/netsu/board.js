@@ -22,6 +22,7 @@ const levels = require('./levels');
 const sidecar = require('./sidecar');
 const relocate = require('./relocate');
 const { embedItem, describeSource } = require('./embed');
+const { t } = require('../i18n');
 
 const DOC_TYPE = 'board';
 // Kinds dont le `ref` désigne un média local embarquable. Les autres (youtube, embed, text, frame,
@@ -237,7 +238,7 @@ function resolveToken(ctx, token, kindHint) {
 
   if (value.startsWith('ref:')) {
     const row = ctx.handle.db.prepare('SELECT path, name, size FROM media WHERE id = ?').get(value.slice(4));
-    if (!row) return { path: '', missing: { name: 'média', size: 0, kind: kindHint, locator: value } };
+    if (!row) return { path: '', missing: { name: t('mediaFallbackName'), size: 0, kind: kindHint, locator: value } };
     // Même machine, ou fichier retrouvé au même endroit : on réutilise l'original tel quel.
     try {
       const stat = fs.statSync(String(row.path));
@@ -248,7 +249,7 @@ function resolveToken(ctx, token, kindHint) {
     return {
       path: '',
       missing: {
-        name: String(row.name || 'média'), size: Number(row.size) || 0, kind: kindHint, locator: value,
+        name: String(row.name || t('mediaFallbackName')), size: Number(row.size) || 0, kind: kindHint, locator: value,
       },
     };
   }
@@ -301,7 +302,7 @@ function detokenizeItem(ctx, raw) {
       frames,
       ref: frames.find(Boolean) || '',
       missing: missingCount > 0
-        ? { name: `Séquence — ${missingCount}/${tokens.length} image(s) manquante(s)`, size: missingSize, kind: 'sequence', frameLocators }
+        ? { name: t('sequenceFramesMissing', { missing: missingCount, total: tokens.length }), size: missingSize, kind: 'sequence', frameLocators }
         : undefined,
     };
   }
@@ -315,7 +316,7 @@ function detokenizeItem(ctx, raw) {
   return {
     ...item,
     ref: '',
-    missing: resolved.missing || item.missing || { name: 'média', size: 0, kind, locator: ref },
+    missing: resolved.missing || item.missing || { name: t('mediaFallbackName'), size: 0, kind, locator: ref },
   };
 }
 
@@ -328,7 +329,7 @@ function readBoardDoc({ handle, refStore, docId }) {
   const doc = docId
     ? handle.db.prepare('SELECT id, title, data FROM docs WHERE id = ?').get(docId)
     : handle.db.prepare("SELECT id, title, data FROM docs WHERE type = ? ORDER BY is_primary DESC LIMIT 1").get(DOC_TYPE);
-  if (!doc) return { ok: false, error: 'aucun board dans ce fichier' };
+  if (!doc) return { ok: false, error: t('netsuNoBoard') };
 
   let view = null;
   try { view = JSON.parse(String(doc.data || '{}')).view || null; } catch (_) { /* données de doc illisibles : vue par défaut */ }

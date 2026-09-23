@@ -220,7 +220,7 @@ async function tokenizeProjectItem(ctx, raw) {
     item.ref = tokens.find(Boolean) || '';
     if (unresolved) {
       item.missing = {
-        name: `Séquence — ${unresolved}/${tokens.length} image(s) manquante(s)`,
+        name: t('sequenceFramesMissing', { missing: unresolved, total: tokens.length }),
         size: Number(item.missing && item.missing.size) || 0,
         kind: 'sequence',
         frameLocators,

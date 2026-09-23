@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const { execFile } = require('child_process');
 const { ffBin, fsp, fileReady, SEQ_DIR, VOICE_DIR } = require('./config');
 const { cacheIndex } = require('./cacheIndex');
+const { t } = require('./i18n');
 
 function run(bin, args, opts = {}) {
   return new Promise((resolve, reject) => {
@@ -117,7 +118,7 @@ const audioInflight = new Map();
 // évite de décoder un rush entier). Clé de cache séparée (suffixe `|sN`) → ne bust pas le WAV complet.
 /** @param {{ input?: string, track?: number, seconds?: number }} [o] */
 async function extractAudio({ input, track = 0, seconds = 0 } = {}) {
-  if (!input) throw new Error('aucune source audio');
+  if (!input) throw new Error(t('sourceMissing'));
   let mtime = 0;
   try { mtime = (await fsp.stat(input)).mtimeMs; } catch (_) {}
   const snip = seconds > 0 ? Math.round(seconds) : 0;
@@ -147,7 +148,7 @@ async function extractAudio({ input, track = 0, seconds = 0 } = {}) {
 // précédente, la fin traîne le GOP ouvert — cf. core/export/frameCut.js). Arbitrage produit assumé,
 // signalé dans l'UI ; seul un ré-encodage coupe à la frame.
 async function exportClip({ input, start, end, output }) {
-  if (end <= start) throw new Error('fin <= début');
+  if (end <= start) throw new Error('end <= start');
   await run('ffmpeg', [
     '-y', '-ss', String(start), '-i', input, '-t', String(end - start),
     '-c', 'copy', '-avoid_negative_ts', 'make_zero', output,
@@ -160,7 +161,7 @@ async function exportClip({ input, start, end, output }) {
 // pixel du fichier exporté. Cache de session par chemin + mtime + instant, écriture atomique.
 async function compareFrame(input, time) {
   let mtime = 0;
-  try { mtime = (await fsp.stat(input)).mtimeMs; } catch (_) { throw new Error(`fichier introuvable : ${input}`); }
+  try { mtime = (await fsp.stat(input)).mtimeMs; } catch (_) { throw new Error(t('fileMissingAt', { path: input })); }
   const at = Math.max(0, Number(time) || 0);
   const key = crypto.createHash('md5').update(`${input}|${mtime}|${at.toFixed(4)}`).digest('hex');
   const output = path.join(SEQ_DIR, `compare-${key}.png`);
@@ -184,7 +185,7 @@ async function compareFrame(input, time) {
 }
 
 async function compareFrames(opts = {}) {
-  if (!opts.beforePath || !opts.afterPath) return { ok: false, error: 'sources de comparaison manquantes' };
+  if (!opts.beforePath || !opts.afterPath) return { ok: false, error: t('compareSourcesMissing') };
   try {
     const [before, after, meta] = await Promise.all([
       compareFrame(opts.beforePath, opts.beforeTime),
@@ -270,7 +271,7 @@ function splitPngs(buf) {
 
 async function sampleFrame(filePath, opts = {}) {
   const target = String(filePath || '');
-  if (!target) return { ok: false, error: 'chemin manquant' };
+  if (!target) return { ok: false, error: t('pathMissing') };
   const side = Math.max(16, Math.min(512, Number(opts.side) || 220));
   const at = Math.max(0, Number(opts.at) || 0);
   // Plusieurs cadres = on couvre la PORTÉE lue au lieu de son premier instant. Une palette de plan
@@ -306,7 +307,7 @@ async function sampleFrame(filePath, opts = {}) {
   const enough = Math.max(2, Math.ceil(frames / 2));
   let pngs = frames > 1 ? await shoot(true) : [];
   if (pngs.length < Math.min(enough, frames)) pngs = await shoot(false);
-  if (!pngs.length) return { ok: false, error: err || 'aucune image rendue' };
+  if (!pngs.length) return { ok: false, error: err || t('noFrames') };
   // `png` reste le premier cadre : les appelants qui n'en veulent qu'un n'ont rien à changer.
   return { ok: true, png: pngs[0].toString('base64'), pngs: pngs.map((p) => p.toString('base64')) };
 }

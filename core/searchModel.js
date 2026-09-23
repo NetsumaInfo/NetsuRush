@@ -70,9 +70,9 @@ function searchModelState(catalog) {
  */
 function setSearchModel(id, deps = {}) {
   const wanted = String(id || '');
-  if (!searchModelIds().includes(wanted)) return { ok: false, error: `${t('unknownModel')}: ${wanted}` };
+  if (!searchModelIds().includes(wanted)) return { ok: false, error: t('withDetail', { message: t('unknownModel'), detail: wanted }) };
   const dir = modelDirOf(wanted);
-  if (!dir) return { ok: false, error: `${t('modelNotDownloaded')}: ${wanted}`, needsDownload: true };
+  if (!dir) return { ok: false, error: t('withDetail', { message: t('modelNotDownloaded'), detail: wanted }), needsDownload: true };
   const saved = saveConfig({ siglipDir: dir, siglipModel: wanted, siglipModelId: wanted });
   if (!saved.ok) return { ok: false, error: saved.error };
   DETECT_ENV.NETSURUSH_SIGLIP_DIR = dir;

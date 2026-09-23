@@ -70,7 +70,8 @@
     "folderImportUnavailable": "Ordnerimport ist außerhalb der App nicht verfügbar.",
     "emptyFolderName": "Der Ordnername ist leer",
     "invalidFolderName": "Der Ordnername darf weder „/“ noch „\\“ enthalten",
-    "folder": "Ordner"
+    "folder": "Ordner",
+    "folderExists": "Hier gibt es schon einen Ordner „{{name}}“"
   },
   "spell": {
     "title": "Rechtschreibung",

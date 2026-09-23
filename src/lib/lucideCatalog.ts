@@ -7,7 +7,7 @@
 import type { LucideIcon } from "lucide-react";
 import { createLazyModule } from "./lazyModule";
 
-const catalog = createLazyModule("catalogue d'icônes lucide", () => import("./lucideCatalogData"));
+const catalog = createLazyModule("lucide icon catalog", () => import("./lucideCatalogData"));
 
 // Référence STABLE avant chargement : les grilles la passent en dépendance de `useMemo`, un tableau
 // neuf à chaque rendu relancerait le filtrage pour rien.

@@ -70,7 +70,8 @@
     "folderImportUnavailable": "アプリ外ではフォルダーを読み込めません。",
     "emptyFolderName": "フォルダー名が空です",
     "invalidFolderName": "フォルダー名に「/」や「\\」は使用できません",
-    "folder": "フォルダー"
+    "folder": "フォルダー",
+    "folderExists": "「{{name}}」という名前のフォルダーはすでにあります"
   },
   "spell": {
     "title": "スペルチェック",

@@ -34,28 +34,31 @@ async function status() {
   const bin = transcribeCli();
   const r = await spawnText(bin, ['--help'], 8000);
   const ok = r.code === 0 || /usage|transcribe-cli|--model|--batch/i.test(r.out + r.err);
-  return { ok, bin, backend: TRANSCRIBE_BACKEND, error: ok ? null : (r.err.trim().slice(-300) || 'binaire transcribe-cli introuvable') };
+  return { ok, bin, backend: TRANSCRIBE_BACKEND, error: ok ? null : (r.err.trim().slice(-300) || t('transcribeCliMissing')) };
 }
 
 /** Transcrit un fichier audio via un modèle GGUF géré. @returns {Promise<{ok:boolean,text?:string,words?:any[],error?:string}>} */
-async function transcribe({ input, modelId, lang = 'fr' }) {
+async function transcribe({ input, modelId, lang = 'auto' }) {
   const gguf = models.findModelFile(modelId, '.gguf');
-  if (!gguf) return { ok: false, error: `modèle GGUF introuvable pour ${modelId} — télécharge-le d'abord` };
+  if (!gguf) return { ok: false, error: t('ggufModelMissing', { model: modelId }) };
   let wav;
   try { wav = await ffmpeg.extractAudio({ input }); } // WAV 16 kHz mono (exigence transcribe-cli)
-  catch (e) { return { ok: false, error: 'conversion WAV : ' + String((e && e.stderr) || e) }; }
+  catch (e) { return { ok: false, error: `${t('audioExtractFailed')} (${String((e && e.stderr) || e)})` }; }
   const bin = transcribeCli();
   // Liste batch = un WAV par ligne → sortie JSONL structurée (pas de mode JSON mono-fichier).
   const listFile = path.join(os.tmpdir(), `nr-tcpp-${wav.length}-${gguf.length}.txt`);
   try { await fsp.writeFile(listFile, wav + '\n', 'utf8'); } catch (e) { return { ok: false, error: String(e) }; }
-  const argsFor = (backend) => ['-m', gguf, '-l', lang, '-q', '--backend', backend, '--batch', listFile, '--batch-jsonl'];
+  // transcribe-cli has no "auto" value: without `-l` the model detects the language itself
+  // (examples/cli/main.cpp only forwards a non-empty hint).
+  const langArgs = lang && lang !== 'auto' ? ['-l', lang] : [];
+  const argsFor = (backend) => ['-m', gguf, ...langArgs, '-q', '--backend', backend, '--batch', listFile, '--batch-jsonl'];
   let r = await spawnText(bin, argsFor(TRANSCRIBE_BACKEND));
   // Un prébuild peut ne pas embarquer CUDA/Vulkan, ou le pilote peut refuser l'initialisation. La
   // transcription reste disponible : on retente le même modèle en CPU avant de remonter l'erreur.
   if (TRANSCRIBE_BACKEND !== 'cpu' && r.code !== 0) r = await spawnText(bin, argsFor('cpu'));
   try { await fsp.rm(listFile, { force: true }); } catch (_) {}
   if (r.code !== 0 && !r.out.trim()) {
-    return { ok: false, error: `transcribe-cli a échoué : ${(r.err || '').trim().slice(-400) || 'code ' + r.code}` };
+    return { ok: false, error: t('transcribeCliFailed', { detail: (r.err || '').trim().slice(-400) || 'code ' + r.code }) };
   }
   // Parse JSONL : garde la ligne portant `text` (ignore l'entête `batch_header`).
   let text = '';

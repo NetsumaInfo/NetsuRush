@@ -20,14 +20,14 @@ import { errorText } from "@/lib/errorText";
 // Un daemon python qui meurt en plein clip (VRAM saturée, traceback, watchdog) ne fait échouer que
 // CE clip : le suivant relance un process neuf. On retente donc une fois avant de compter l'échec —
 // sans ça, une mort passagère laissait des trous dans l'index sans que rien ne les rattrape.
-async function withDaemonRetry<T extends { error?: string | null }>(run: () => Promise<T>, canceled: () => boolean): Promise<T> {
+async function withDaemonRetry<T extends { daemonDown?: boolean }>(run: () => Promise<T>, canceled: () => boolean): Promise<T> {
   const first = await run();
-  if (!first.error || !/interrompu/i.test(first.error) || canceled()) return first;
+  if (!first.daemonDown || canceled()) return first;
   return run();
 }
 
-/** Un job tué par le bouton « Arrêter » revient en `indexation annulée` : c'est un arrêt, pas un échec. */
-function isCanceled(error?: string | null) { return !!error && /annul/i.test(error); }
+/** A job stopped with the Stop button comes back `canceled`: a stop, not a failure. */
+function isCanceled(result: { canceled?: boolean }) { return !!result.canceled; }
 
 // Progression d'indexation coalescée sur une frame d'animation. Le sidecar python émet STAGE:prog
 // très souvent (parfois des dizaines de lignes/s) ; sans throttle, chaque ligne ferait un set() →
@@ -470,7 +470,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
             track.to(batchProgress(i, total, 0), batchCeiling(i, total));
             set({ faceBusy: { file: basename(paths[i]), pct: track.value(), done: i, total, phase: "", ts: Date.now() } });
             const r = await withDaemonRetry(() => nr.faceIndex(paths[i], force, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().faceCancel);
-            if (isCanceled(r.error)) { stopped = true; break; }
+            if (isCanceled(r)) { stopped = true; break; }
             if (r.error) { failed++; lastErr = r.error; }
           }
         } else {
@@ -494,7 +494,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
               running++; bump();
               try {
                 const r = await withDaemonRetry(() => nr.faceIndex(paths[i], force, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().faceCancel);
-                if (isCanceled(r.error)) { stopped = true; running--; return; }
+                if (isCanceled(r)) { stopped = true; running--; return; }
                 if (r.error) { failed++; lastErr = r.error; }
               } catch (e) { failed++; lastErr = errorText(e); }
               running--; done++; bump();
@@ -574,7 +574,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
             track.to(batchProgress(i, total, 0), batchCeiling(i, total));
             set({ indexBusy: { file: basename(paths[i]), pct: track.value(), done: i, total, phase: "", ts: Date.now() } });
             const r = await withDaemonRetry(() => nr.indexClip(paths[i], force, frames, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().indexCancel);   // force = seek précis + retraite tout ; frames = images par plan ; cutModel = découpe
-            if (isCanceled(r.error)) { stopped = true; break; }
+            if (isCanceled(r)) { stopped = true; break; }
             if (r.error) { failed++; lastErr = r.error; }   // on saute le clip fautif, on continue le reste
             else void warmIndexedThumbs(paths[i]);
           }
@@ -608,7 +608,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
             running++; bump();
             try {
               const r = await withDaemonRetry(() => nr.indexClip(paths[i], force, frames, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().indexCancel);
-              if (isCanceled(r.error)) { stopped = true; running--; return; }
+              if (isCanceled(r)) { stopped = true; running--; return; }
               if (r.error) { failed++; lastErr = r.error; }
               else void warmIndexedThumbs(paths[i]);
             } catch (e) { failed++; lastErr = errorText(e); }

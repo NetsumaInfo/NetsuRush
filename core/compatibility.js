@@ -24,7 +24,7 @@ function probePython() {
     };
     const timer = setTimeout(() => {
       try { cp.kill(); } catch (_) {}
-      finish({ torch: null, onnx: null, errors: ['diagnostic Python expiré'] });
+      finish({ torch: null, onnx: null, errors: ['Python diagnostic timed out'] });
     }, 30000);
     cp.stdout.on('data', (b) => { out += b.toString(); });
     cp.stderr.on('data', (b) => { err = (err + b.toString()).slice(-1000); });
@@ -32,7 +32,7 @@ function probePython() {
     cp.on('close', (code) => {
       if (code !== 0) return finish({ torch: null, onnx: null, errors: [err.trim() || `python code ${code}`] });
       try { finish(JSON.parse(out.trim())); }
-      catch (_) { finish({ torch: null, onnx: null, errors: ['réponse Python invalide'] }); }
+      catch (_) { finish({ torch: null, onnx: null, errors: ['invalid Python response'] }); }
     });
   });
 }

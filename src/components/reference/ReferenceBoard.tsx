@@ -759,7 +759,7 @@ export const ReferenceBoard = forwardRef<BoardHandle, ReferenceBoardProps>(funct
     async (file: File) => {
       const [filePath] = await nr.pathsForFiles([file]);
       if (filePath && onOpenProjectFile) { onOpenProjectFile(filePath); return; }
-      logError("board:canvas", `dépôt .netsu sans ouverture — ${file.name} (chemin: ${filePath || "non résolu"})`);
+      logError("board:canvas", `.netsu dropped but not opened: ${file.name} (path: ${filePath || "unresolved"})`);
       useBoard.getState().setNotice({ kind: "error", text: t("notice.dropProjectFailed", { name: file.name }) });
     },
     [onOpenProjectFile, t],

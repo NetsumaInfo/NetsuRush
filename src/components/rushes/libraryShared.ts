@@ -3,10 +3,19 @@
 // construit à partir de `Clip.bin` (chemin « A/B/C » splité par buildTree dans MediaTree). C'est ici
 // qu'on fait le pont entre les deux — d'où des sous-dossiers gratuits sans toucher au type Clip.
 import type { Clip, LibraryItem, LibraryFolder } from "@/lib/bridge";
+import i18n from "@/i18n";
 
 // Nom de la racine de la bibliothèque dans l'arbre. Doit rester synchro avec la clé i18n
 // `library.rootName` (l'arbre est bâti sur des chaînes de chemin, pas sur des ids).
 export const LIB_ROOT = "Importés";
+
+// A clip's bin as the user reads it: the library root is an internal path segment, shown under its
+// translated name.
+export function binLabel(bin: string | null | undefined): string {
+  const parts = (bin || "").split("/");
+  if (parts[0] === LIB_ROOT) parts[0] = i18n.t("derush:library.rootName");
+  return parts.join("/");
+}
 
 // Arbre de dossiers d'une liste de clips, bâti sur `Clip.bin` (« A/B/C »). Source UNIQUE du
 // regroupement par dossier : le navigateur du Derush (MediaTree) et la liste de NetsuTalk lisent le

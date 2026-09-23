@@ -22,7 +22,7 @@ import { ExportTimelineTarget } from "./ExportTimelineTarget";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 import {
   type ExportProfile,
   type ExportEncoderMode,
@@ -117,7 +117,7 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
       () => nr.timelineTree(),
       (r) => {
         if (!alive || !r.ok) return;
-        const uniq = [...new Set(r.timelines.map((t: { bin: string }) => t.bin).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        const uniq = [...new Set(r.timelines.map((t: { bin: string }) => t.bin).filter(Boolean))].sort((a, b) => a.localeCompare(b, uiLocale()));
         setBins(uniq);
       },
     );

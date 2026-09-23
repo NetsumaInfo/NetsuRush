@@ -18,6 +18,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { SCHEMA_VERSION, META_KEYS, FORMAT, applySchema, migrate } = require('./schema');
+const { t } = require('../i18n');
 
 // En-têtes reconnus. Le .netsu v1 était une archive ZIP : le sniff garantit qu'aucune archive déjà
 // partagée ne devient illisible après ce changement de format.
@@ -102,11 +103,11 @@ function openNetsu(filePath, opts) {
   const options = opts || {};
   const create = options.create !== false;
   const exists = fs.existsSync(filePath);
-  if (!exists && !create) throw new Error(`fichier .netsu introuvable : ${filePath}`);
+  if (!exists && !create) throw new Error(t('fileMissingAt', { path: filePath }));
   if (exists) {
     const kind = sniff(filePath);
-    if (kind === 'zip') throw new Error(`.netsu au format v1 (archive) : ${filePath}`);
-    if (kind !== 'sqlite') throw new Error(`fichier .netsu illisible : ${filePath}`);
+    if (kind === 'zip') throw new Error(`.netsu in the v1 format (archive): ${filePath}`);
+    if (kind !== 'sqlite') throw new Error(t('netsuUnreadable', { path: filePath }));
   }
 
   const { DatabaseSync } = require('node:sqlite');

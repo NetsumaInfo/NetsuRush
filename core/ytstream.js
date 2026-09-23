@@ -21,6 +21,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const { spawn } = require("node:child_process");
 const { PYTHON, DETECT_ENV, cookieBrowserCandidates, ytCookiesFile, jsRuntimeArgs } = require("./config");
+const { language, t } = require("./i18n");
 
 // Board muet → un flux VIDÉO SEUL suffit et évite le merge ffmpeg. Repli progressif (piste audio
 // incluse) pour les vidéos sans DASH mp4.
@@ -116,7 +117,7 @@ function runYtdlp(id, cookiesBrowser, cookiesFile) {
       const missing = /** @type {NodeJS.ErrnoException} */ (e)?.code === "ENOENT";
       resolve({
         ok: false,
-        error: missing ? `yt-dlp introuvable (${PY}) - relance l'installation pour poser l'outil` : String(e),
+        error: missing ? t("ytdlpMissing", { path: PY }) : String(e),
         missingTool: missing || undefined,
       });
     });
@@ -179,28 +180,22 @@ async function resolveWithFallback(id) {
 const LOCKED = /could not copy .*cookie database/i;
 
 function authAdvice(tried) {
-  const head = "YouTube réserve cette vidéo aux comptes connectés - le board bascule sur son lecteur pour celle-ci. ";
-  if (!tried.length) {
-    return `${head}Aucune source de session configurée : connecte-toi à YouTube dans Firefox, ou renseigne « cookiesFile » `
-      + "(cookies.txt exporté) dans nr.config.json.";
-  }
+  if (!tried.length) return t("ytAuthNoSession");
+  const lang = language();
+  const list = (names) => new Intl.ListFormat(lang, { style: "long", type: "conjunction" }).format(names);
   const locked = tried.filter((line) => LOCKED.test(line)).map((line) => line.split(" : ")[0]);
   const noSession = tried.filter((line) => !LOCKED.test(line)).map((line) => line.split(" : ")[0]);
   const parts = [];
-  if (locked.length) {
-    const many = locked.length > 1;
-    parts.push(`${locked.join(" et ")} ${many ? "gardent leurs" : "garde ses"} cookies verrouillés tant `
-      + `${many ? "qu'ils tournent (les fermer entièrement" : "qu'il tourne (le fermer entièrement"} les libère)`);
-  }
-  if (noSession.length) parts.push(`${noSession.join(", ")} : lisible${noSession.length > 1 ? "s" : ""} mais sans session YouTube`);
-  return `${head}${parts.join(" ; ")}. Le plus simple : se connecter à YouTube une fois dans Firefox, ou exporter un cookies.txt `
-    + "et le désigner par « cookiesFile » dans nr.config.json.";
+  if (locked.length) parts.push(t(locked.length > 1 ? "ytAuthLockedMany" : "ytAuthLockedOne", { browsers: list(locked) }));
+  if (noSession.length) parts.push(t(noSession.length > 1 ? "ytAuthSignedOutMany" : "ytAuthSignedOutOne", { browsers: list(noSession) }));
+  const separator = { fr: " ; ", ja: "。", zh: "；" }[lang] || "; ";
+  return t("ytAuthAdvice", { details: parts.join(separator) });
 }
 
 // First useful line of a yt-dlp error: it often repeats two or three identical ones, which drowned
 // the message in its own echo.
 function firstLine(error) {
-  const line = String(error || "").split(/\r?\n/).map((s) => s.trim()).find(Boolean) || "échec";
+  const line = String(error || "").split(/\r?\n/).map((s) => s.trim()).find(Boolean) || t("failed");
   return line.replace(/^ERROR:\s*/i, "").slice(0, 160);
 }
 

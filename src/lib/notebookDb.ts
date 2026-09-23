@@ -3,6 +3,7 @@
 // seules les règles (filters/sorts/group) diffèrent, appliquées ici en dérivé (jamais en mutation).
 import type { DbField, DbRow, DbView, FilterCond, SortRule } from "@/components/notebook/notebookShared";
 import i18n from "@/i18n";
+import { uiLocale } from "@/lib/utils";
 
 function cellValue(row: DbRow, fieldId: string): unknown {
   return row.cells[fieldId];
@@ -70,7 +71,7 @@ function compare(a: unknown, b: unknown, field: DbField | undefined): number {
   if (field && field.type === "checkbox") {
     return (a === true ? 1 : 0) - (b === true ? 1 : 0);
   }
-  return asText(a).localeCompare(asText(b), "fr", { numeric: true });
+  return asText(a).localeCompare(asText(b), uiLocale(), { numeric: true });
 }
 
 function applySorts(rows: DbRow[], fields: DbField[], sorts: SortRule[]): DbRow[] {

@@ -188,7 +188,7 @@ async function clipFrames(input, start, end) {
 function shaderDirError() {
   return fs.existsSync(SHADER_DIR)
     ? null
-    : `dossier des shaders absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})`;
+    : t('shaderDirMissing', { path: SHADER_DIR });
 }
 
 // Une image de test ne doit jamais bloquer l'UI : un décodage qui patine est abandonné.
@@ -268,10 +268,10 @@ function runOne(event, bin, jobArgs, fileLabel, i, total, frames) {
       }
     });
     cp.stderr.on('data', (d) => { errTail = (errTail + d.toString()).slice(-800); });
-    cp.on('error', (e) => resolve({ ok: false, error: `ffmpeg introuvable : ${e.message}` }));
+    cp.on('error', (e) => resolve({ ok: false, error: t('ffmpegMissing', { detail: e.message }) }));
     cp.on('close', (code) => {
       if (code === 0) resolve({ ok: true });
-      else resolve({ ok: false, error: errTail.trim() || `ffmpeg code ${code} (Vulkan/libplacebo indisponible ?)` });
+      else resolve({ ok: false, error: errTail.trim() || t('turboFfmpegFailed', { code }) });
     });
   });
 }
@@ -309,7 +309,7 @@ async function runShaderUpscale(event, opts) {
   const sh = SHADERS[shader] || SHADERS.artcnn_c4f32;
   // Shader custom absent (vendor/shaders pas provisionné) → message clair plutôt qu'un échec ffmpeg obscur.
   if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
-    return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
+    return { ok: false, error: t('shaderMissing', { file: sh.file, path: SHADER_DIR }) };
   }
   // ffmpeg dont libplacebo fonctionne (le build provisionné peut l'avoir cassé) — sinon erreur explicite.
   const bin = await libplaceboBin();
@@ -318,7 +318,7 @@ async function runShaderUpscale(event, opts) {
   }
 
   let dims;
-  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
+  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: t('sourceUnreadable', { detail: String(e) }) }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
   const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
 
@@ -327,7 +327,7 @@ async function runShaderUpscale(event, opts) {
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = (whole || !Array.isArray(segments) || !segments.length)
     ? [{ start: undefined, end: undefined, tag: '' }]
-    : segments.map((seg, i) => ({ start: seg.in, end: seg.out, tag: `_plan${i + 1}` }));
+    : segments.map((seg, i) => ({ start: seg.in, end: seg.out, tag: `_${t('shotFileSuffix')}${i + 1}` }));
   const total = jobs.length;
   const outputs = [];
   let lastErr = null;
@@ -343,7 +343,7 @@ async function runShaderUpscale(event, opts) {
       ? String(savePath)
       : target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
     if (path.resolve(out).toLowerCase() === path.resolve(input).toLowerCase()) {
-      return { ok: false, error: 'le nom de sortie écraserait le fichier source', out };
+      return { ok: false, error: t('outputOverwritesSource'), out };
     }
     const fileLabel = path.basename(out);
     const frames = await clipFrames(input, j.start, j.end);
@@ -358,7 +358,7 @@ async function runShaderUpscale(event, opts) {
     });
     let r = await runOne(event, bin, args, fileLabel, i, total, frames);
     if (!r.ok && resolved && resolved.hardware) {
-      console.warn(`[turbo] ${resolved.codec} indisponible pendant le job, repli ${resolved.fallbackCodec}`);
+      console.warn(`[turbo] ${resolved.codec} became unavailable during the job, falling back to ${resolved.fallbackCodec}`);
       const fallbackArgs = buildArgs({
         input, out, sh, ow, oh, codec: resolved.fallbackCodec, quality: quality | 0, preset: String(preset), bitDepth: bitDepth | 0, profile: resolved.fallbackProfile,
         audio: resolved.audioMode || String(audio), abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
@@ -412,16 +412,16 @@ async function runShaderFrame(opts) {
     deband = 'light', grain = 4, sharp = 'sharp', sigmoid = true, dither = true } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   const sh = SHADERS[shader];
-  if (!sh) return { ok: false, error: `${t('unknownModel')}: ${shader}` };
+  if (!sh) return { ok: false, error: t('withDetail', { message: t('unknownModel'), detail: shader }) };
   const dirErr = shaderDirError();
   if (dirErr) return { ok: false, error: dirErr };
   if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
-    return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
+    return { ok: false, error: t('shaderMissing', { file: sh.file, path: SHADER_DIR }) };
   }
   const bin = await libplaceboBin();
   if (!bin) return { ok: false, error: t('turboUnavailable') };
   let dims;
-  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
+  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: t('sourceUnreadable', { detail: String(e) }) }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
 
   const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
@@ -461,16 +461,16 @@ async function runShaderImage(opts) {
   if (!out) return { ok: false, error: t('sourceMissing') };
   if (/\.gif$/i.test(String(input))) return { ok: false, error: t('turboGifUnsupported') };
   const sh = SHADERS[shader];
-  if (!sh) return { ok: false, error: `${t('unknownModel')}: ${shader}` };
+  if (!sh) return { ok: false, error: t('withDetail', { message: t('unknownModel'), detail: shader }) };
   const dirErr = shaderDirError();
   if (dirErr) return { ok: false, error: dirErr };
   if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
-    return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
+    return { ok: false, error: t('shaderMissing', { file: sh.file, path: SHADER_DIR }) };
   }
   const bin = await libplaceboBin();
   if (!bin) return { ok: false, error: t('turboUnavailable') };
   let dims;
-  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
+  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: t('sourceUnreadable', { detail: String(e) }) }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
 
   const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);
@@ -498,16 +498,16 @@ async function runShaderGif(opts) {
   if (!input) return { ok: false, error: t('sourceMissing') };
   if (!out) return { ok: false, error: t('sourceMissing') };
   const sh = SHADERS[shader];
-  if (!sh) return { ok: false, error: `${t('unknownModel')}: ${shader}` };
+  if (!sh) return { ok: false, error: t('withDetail', { message: t('unknownModel'), detail: shader }) };
   const dirErr = shaderDirError();
   if (dirErr) return { ok: false, error: dirErr };
   if (sh.file && !fs.existsSync(path.join(SHADER_DIR, sh.file))) {
-    return { ok: false, error: `shader « ${sh.file} » absent — lance scripts/fetch-shaders.ps1 (dossier ${SHADER_DIR})` };
+    return { ok: false, error: t('shaderMissing', { file: sh.file, path: SHADER_DIR }) };
   }
   const bin = await libplaceboBin();
   if (!bin) return { ok: false, error: t('turboUnavailable') };
   let dims;
-  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: `source illisible : ${String(e)}` }; }
+  try { dims = await probeMedia(input); } catch (e) { return { ok: false, error: t('sourceUnreadable', { detail: String(e) }) }; }
   if (!dims.width || !dims.height) return { ok: false, error: t('videoDimensionsMissing') };
 
   const { width: ow, height: oh } = outputSize(dims, scale, targetHeight);

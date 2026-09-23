@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const sidecar = require('./sidecar');
 const { headSha } = require('./embed');
+const { t } = require('../i18n');
 
 const MAX_ENTRIES = 10000;
 
@@ -98,7 +99,7 @@ function findReferencedFile(netsuPath, row) {
  */
 function matchIn(dirPath, wanted) {
   const root = path.resolve(String(dirPath || ''));
-  if (!root || !fs.existsSync(root)) return { ok: false, found: [], scanned: 0, error: 'dossier introuvable' };
+  if (!root || !fs.existsSync(root)) return { ok: false, found: [], scanned: 0, error: t('folderMissing') };
   const files = walkBounded(root);
   /** @type {Map<string, string[]>} */
   const byName = new Map();

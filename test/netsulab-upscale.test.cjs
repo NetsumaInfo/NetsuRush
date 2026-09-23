@@ -9,7 +9,7 @@ test('upscale frame comparison has a bounded worker request', () => {
   const source = read('core/sidecars.js');
   const frame = source.slice(source.indexOf('async function runUpscaleFrame'), source.indexOf('async function runUpscaleImage'));
   assert.match(frame, /dUpscale\.req\([\s\S]*?,\s*null,\s*\d[\d_]*\s*\)/);
-  assert.match(source, /test d.upscale interrompu après/);
+  assert.match(source, /t\('upscaleTestTimeout'/);
 });
 
 test('the model picker waits for the authoritative installed-model list', () => {

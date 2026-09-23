@@ -127,7 +127,7 @@ function gpuVideoArgs(codec, enc, speed = 'balanced') {
   const vendor = hwVendor(enc);
   const entry = GPU_MAP[codec];
   const m = gpuCodecSpec(codec, enc);
-  if (!vendor || !entry || !m) throw new Error(`encodeur ${enc} incompatible avec ${codec}`);
+  if (!vendor || !entry || !m) throw new Error(`encoder ${enc} is incompatible with ${codec}`);
   const args = ['-c:v', enc];
   const normalizedSpeed = ['fast', 'quality', 'max'].includes(speed) ? speed : 'balanced';
   if (vendor === 'nvenc') {

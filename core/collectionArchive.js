@@ -227,7 +227,7 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, sidec
         outs[item.index] = item.file;
         reg.record(item.key, item.file, processRun.upscaleStep(item.process));
         copied++;
-        tick(item.file, 'Copie');
+        tick(item.file, 'Copy');
         continue;
       }
       renders.push(item); // jamais produit, ou recopie impossible → il faut vraiment l'encoder
@@ -246,15 +246,15 @@ function createCollectionArchive({ collectionStore, exportMod, detectLang, sidec
       const produced = (r && r.outs) || [];
       toExport.forEach((it, k) => {
         if (produced[k]) { outs[it.index] = produced[k]; reg.record(it.key, produced[k], null); }
-        else errors.push(`plan ${it.index + 1}: ${(r && r.error) || t('failed')}`);
+        else errors.push(t('shotError', { n: it.index + 1, detail: (r && r.error) || t('failed') }));
         tick(it.file, 'Archive');
       });
     }
 
     await runProcesses(event, toProcess, { profile, process: proc, dir, base }, (item, file, error) => {
       if (file) { outs[item.index] = file; reg.record(item.key, file, processRun.upscaleStep(proc)); }
-      else errors.push(`plan ${item.index + 1}: ${error}`);
-      tick(item.file, 'Traitement');
+      else errors.push(t('shotError', { n: item.index + 1, detail: String(error) }));
+      tick(item.file, 'Processing');
     });
 
     const files = outs.filter((f) => f != null);

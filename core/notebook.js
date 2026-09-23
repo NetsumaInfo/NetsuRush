@@ -10,7 +10,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const http = require('http');
 const https = require('https');
-const { t } = require('./i18n');
+const { t, language: uiLanguage } = require('./i18n');
 
 function uid() {
   return crypto.randomBytes(6).toString('hex');
@@ -26,7 +26,7 @@ const EXT_OK = new Set([
 // certains sites renvoient 403 sur un User-Agent nu. Sert au preview de lien (signet).
 function fetchHtml(url, redirects) {
   return new Promise((resolve, reject) => {
-    if ((redirects || 0) > 5) return reject(new Error('trop de redirections'));
+    if ((redirects || 0) > 5) return reject(new Error(t('downloadTooManyRedirects')));
     let u;
     try { u = new URL(url); } catch (e) { return reject(e); }
     const mod = u.protocol === 'http:' ? http : https;
@@ -51,7 +51,7 @@ function fetchHtml(url, redirects) {
       res.on('end', () => resolve(html));
     });
     req.on('error', reject);
-    req.setTimeout(15000, () => req.destroy(new Error('délai dépassé')));
+    req.setTimeout(15000, () => req.destroy(new Error(t('downloadTimedOut'))));
   });
 }
 
@@ -152,7 +152,7 @@ function sqliteBackend(db) {
     listNotebooks: () => db.prepare('SELECT id, title, icon, script_id, kind, language, updated_at FROM notebook ORDER BY updated_at DESC').all(),
     getNotebook: (id) => db.prepare('SELECT id, title, icon, script_id, kind, language, updated_at FROM notebook WHERE id = ?').get(id) || null,
     notebookByScript: (sid) => db.prepare('SELECT id, title, icon, script_id, kind, language, updated_at FROM notebook WHERE script_id = ? ORDER BY updated_at DESC').get(sid) || null,
-    putNotebook: (id, title, icon, sid, kind, language, ts) => db.prepare(NB_UPSERT).run(id, title, icon ?? null, sid ?? null, kind || 'notes', language || 'fr', ts),
+    putNotebook: (id, title, icon, sid, kind, language, ts) => db.prepare(NB_UPSERT).run(id, title, icon ?? null, sid ?? null, kind || 'notes', language || uiLanguage(), ts),
     delNotebook: (id) => {
       db.prepare('DELETE FROM nb_database WHERE page_id IN (SELECT id FROM page WHERE notebook_id = ?)').run(id);
       db.prepare('DELETE FROM page WHERE notebook_id = ?').run(id);
@@ -201,7 +201,7 @@ function jsonBackend(filePath) {
     notebookByScript: (sid) => Object.values(read().notebooks).filter((n) => n.script_id === sid).sort((a, b) => b.updated_at - a.updated_at)[0] || null,
     putNotebook: (id, title, icon, sid, kind, language, ts) => {
       const o = read();
-      o.notebooks[id] = { id, title, icon: icon ?? null, script_id: sid ?? null, kind: kind || 'notes', language: language || 'fr', updated_at: ts };
+      o.notebooks[id] = { id, title, icon: icon ?? null, script_id: sid ?? null, kind: kind || 'notes', language: language || uiLanguage(), updated_at: ts };
       write(o);
     },
     delNotebook: (id) => {
@@ -276,7 +276,7 @@ function makeNotebookStore({ backend, assetsDir, kind }) {
     try {
       const id = nb.id || uid();
       const ts = Date.now();
-      backend.putNotebook(id, nb.title || 'Nouveau carnet', nb.icon ?? null, nb.scriptId ?? null, nb.kind || 'notes', nb.language || 'fr', ts);
+      backend.putNotebook(id, nb.title || t('notebookNewTitle'), nb.icon ?? null, nb.scriptId ?? null, nb.kind || 'notes', nb.language || uiLanguage(), ts);
       return { ok: true, id, updatedAt: ts };
     } catch (e) {
       return { ok: false, error: String(e) };
@@ -294,8 +294,8 @@ function makeNotebookStore({ backend, assetsDir, kind }) {
       if (existing) return { ok: true, notebook: nbMeta(existing), created: false };
       const id = uid();
       const ts = Date.now();
-      backend.putNotebook(id, title || t('projectFolderDefault'), null, scriptId, 'script', 'fr', ts);
-      return { ok: true, notebook: nbMeta({ id, title: title || t('projectFolderDefault'), icon: null, script_id: scriptId, kind: 'script', language: 'fr', updated_at: ts }), created: true };
+      backend.putNotebook(id, title || t('projectFolderDefault'), null, scriptId, 'script', uiLanguage(), ts);
+      return { ok: true, notebook: nbMeta({ id, title: title || t('projectFolderDefault'), icon: null, script_id: scriptId, kind: 'script', language: uiLanguage(), updated_at: ts }), created: true };
     } catch (e) {
       return { ok: false, error: String(e) };
     }
@@ -628,7 +628,7 @@ function makeNotebookStore({ backend, assetsDir, kind }) {
     const nb = dump.notebook;
     const notebookId = options.notebookId || nb.id;
     const ts = Date.now();
-    backend.putNotebook(notebookId, nb.title, nb.icon ?? null, nb.script_id ?? null, nb.kind || 'notes', nb.language || 'fr', ts);
+    backend.putNotebook(notebookId, nb.title, nb.icon ?? null, nb.script_id ?? null, nb.kind || 'notes', nb.language || uiLanguage(), ts);
     for (const page of dump.pages) {
       backend.putPage({ ...page, notebook_id: notebookId, data: mapData(page.data) });
     }
@@ -743,7 +743,7 @@ function createNotebookStore(dataDir) {
       const board = session.handle.db.prepare("SELECT id FROM docs WHERE type = 'board' LIMIT 1").get();
       if (board && !doc.hasNotebookDoc(session)) {
         sessions.closeSession(filePath);
-        return { ok: false, error: t('unsupportedType') + ': board' };
+        return { ok: false, error: t('withDetail', { message: t('unsupportedType'), detail: 'board' }) };
       }
       const opened = doc.openNotebookDoc({ session, url });
       const store = makeNotebookStore({ backend: opened.backend, assetsDir: opened.assetsDir, kind: 'netsu' });

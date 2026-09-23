@@ -30,7 +30,7 @@ async function runPipeline(event, opts) {
   if (!input) return { ok: false, error: t('sourceMissing') };
   if (!outDir) return { ok: false, error: t('outputFolderMissing') };
   if (!Array.isArray(ops) || !ops.length) return { ok: false, error: t('emptyPipeline') };
-  for (const op of ops) if (!CHAINABLE.has(op && op.kind)) return { ok: false, error: `${t('unsupportedSource')}: ${op && op.kind}` };
+  for (const op of ops) if (!CHAINABLE.has(op && op.kind)) return { ok: false, error: t('withDetail', { message: t('unsupportedSource'), detail: String(op && op.kind) }) };
 
   const tmpDir = path.join(os.tmpdir(), 'netsurush-pipeline', String(Date.now()));
   try { await fsp.mkdir(tmpDir, { recursive: true }); } catch (_) {}
@@ -73,7 +73,7 @@ async function runPipeline(event, opts) {
       }
 
       if (!r || !r.ok || !Array.isArray(r.outputs) || !r.outputs.length) {
-        return { ok: false, error: (r && r.error) || `échec de l'op ${op.kind}`, total, failed: 1 };
+        return { ok: false, error: (r && r.error) || t('pipelineStepFailed', { step: op.kind }), total, failed: 1 };
       }
       cur = r.outputs[0]; // chaîne sur la 1re sortie (source unique, clip entier)
       if (last) finalOut = cur; else intermediates.push(cur);

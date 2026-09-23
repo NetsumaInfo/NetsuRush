@@ -200,7 +200,7 @@ function writeProfile(profile) {
     fs.mkdirSync(NR_HOME, { recursive: true });
     fs.writeFileSync(PROFILE_PATH, JSON.stringify({ version: PROFILE_VERSION, profile }));
   } catch (error) {
-    console.warn('matériel : profil non enregistré, il sera re-mesuré au prochain démarrage', String(error));
+    console.warn('hardware: profile not saved, it will be measured again on next start', String(error));
   }
 }
 

@@ -60,7 +60,7 @@ function baseTitle(path: string): string {
 // persistance l'écrit « manquant » (cf. useScenePersistence). Tu le sais MAINTENANT, pas au
 // prochain lancement devant une case vide.
 function assetCopyFailed(name: string, error?: string) {
-  logError("board:ingest", `copie en asset échouée — ${name}: ${error || "?"}`);
+  logError("board:ingest", `asset copy failed: ${name}: ${error || "?"}`);
   useBoard.getState().setNotice({ kind: "error", text: i18n.t("reference:ingest.copyFailed", { name }) });
 }
 
@@ -521,11 +521,11 @@ export function useBoardIngest(centerPoint: () => { x: number; y: number }) {
               useBoard.getState().patchItem(c.id, { ref: res.path, src: durable }, false);
               URL.revokeObjectURL(c.src);
             } else {
-              logError("board:ingest", `copie en asset échouée — ${name}: ${res.error || "?"}`);
+              logError("board:ingest", `asset copy failed: ${name}: ${res.error || "?"}`);
               copyFailures.push(name);
             }
           } catch (e) {
-            logError("board:ingest", `copie en asset échouée — ${name}: ${String(e)}`);
+            logError("board:ingest", `asset copy failed: ${name}: ${String(e)}`);
             copyFailures.push(name);
           }
         }

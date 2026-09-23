@@ -8,6 +8,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { downloadModel, modelDir, statusOf, MANIFEST } = require('./models');
 const { saveConfig, NR_HOME, CONFIG, PYTHON } = require('./config');
+const { t } = require('./i18n');
 
 // OmniShotCut ne passe pas par le téléchargement HF générique : son code et son checkpoint sont
 // déjà dans les resources de l'installeur. Cette seconde installation côté core est volontaire :
@@ -62,11 +63,11 @@ function runPython(args) {
 async function ensureOmniShotCut(index, count) {
   const checkpoint = CONFIG.omnishotCkpt || OMNI_DEFAULT_CHECKPOINT;
   if (!fs.existsSync(OMNI_PACKAGE)) {
-    throw new Error(`Paquet OmniShotCut introuvable dans les resources : ${OMNI_PACKAGE}`);
+    throw new Error(t('setupOmniPackageMissing', { path: OMNI_PACKAGE }));
   }
   if (!fs.existsSync(checkpoint)) {
     if (!fs.existsSync(OMNI_BUNDLED_CHECKPOINT)) {
-      throw new Error(`Poids OmniShotCut introuvables dans les resources : ${OMNI_BUNDLED_CHECKPOINT}`);
+      throw new Error(t('setupOmniWeightsMissing', { path: OMNI_BUNDLED_CHECKPOINT }));
     }
     await fs.promises.mkdir(path.dirname(checkpoint), { recursive: true });
     await fs.promises.copyFile(OMNI_BUNDLED_CHECKPOINT, checkpoint);

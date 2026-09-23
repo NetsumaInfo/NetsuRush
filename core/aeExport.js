@@ -75,7 +75,7 @@ function createAeExport(deps) {
   async function panelReachable() {
     if (typeof deps.runAeScript !== 'function' || typeof deps.aePanelConnected !== 'function') return false;
     try { return !!(await deps.aePanelConnected()); } catch (e) {
-      console.warn('[ae] statut du panneau illisible :', e && e.message);
+      console.warn('[ae] panel status unreadable:', e && e.message);
       return false;
     }
   }
@@ -269,7 +269,7 @@ function createAeExport(deps) {
         }
         const reason = (sent && (sent.error || sent.errorCode)) || t('panelTimeout');
         if (deliver === 'panel') return { ok: false, error: reason, ...done, delivered: 'panel' };
-        console.warn('[ae] livraison par le panneau impossible, repli sur le lancement :', reason);
+        console.warn('[ae] delivery through the panel failed, falling back to launching AE:', reason);
       }
 
       const afterFx = findAfterFx(CONFIG);

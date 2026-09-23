@@ -22,6 +22,7 @@ const { getCapabilities } = require('../export/capabilities');
 const { selectProxyEncoder, proxyVideoArgs, proxyContainerArgs } = require('../proxyEncoder');
 const blobs = require('./blobs');
 const levels = require('./levels');
+const { t } = require('../i18n');
 
 // Empreinte de relocalisation : les premiers octets suffisent à reconnaître un rush chez le
 // destinataire sans relire 4 Go. Deux fichiers qui partagent tête ET taille sont le même média.
@@ -124,7 +125,7 @@ async function encodeClip(input, clip, workDir) {
   args.push('-f', encoder.container, out);
   await run('ffmpeg', args);
   if (!fs.existsSync(out) || fs.statSync(out).size === 0) {
-    throw new Error(`clip vide (${path.basename(input)} ${clip.start}→${clip.end})`);
+    throw new Error(t('embedClipEmpty', { name: path.basename(input), start: clip.start, end: clip.end }));
   }
   return { file: out, ext: encoder.extension };
 }

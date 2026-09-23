@@ -36,10 +36,10 @@ function fmt(args: unknown[]): string {
 // qui distingue « le fichier n'est pas arrivé » de « le codec n'est pas décodable ». Les deux se
 // voient pareil à l'écran (cadre noir) et se corrigent à des endroits opposés.
 const MEDIA_ERROR: Record<number, string> = {
-  1: "chargement interrompu (MEDIA_ERR_ABORTED)",
-  2: "réseau interrompu pendant le chargement (MEDIA_ERR_NETWORK)",
-  3: "décodage impossible — codec ou fichier corrompu (MEDIA_ERR_DECODE)",
-  4: "source non lisible ou introuvable (MEDIA_ERR_SRC_NOT_SUPPORTED)",
+  1: "loading aborted (MEDIA_ERR_ABORTED)",
+  2: "network interrupted while loading (MEDIA_ERR_NETWORK)",
+  3: "cannot decode: codec or corrupt file (MEDIA_ERR_DECODE)",
+  4: "source unreadable or not found (MEDIA_ERR_SRC_NOT_SUPPORTED)",
 };
 
 // Ressources qui, en échouant, cassent VISIBLEMENT l'interface (vignette absente, aperçu noir,
@@ -50,7 +50,7 @@ function resourceUrl(el: Element): string {
   const direct = (el as HTMLImageElement | HTMLScriptElement).src || (el as HTMLLinkElement).href || "";
   if (direct) return direct;
   // Un <video> avec des <source> enfants n'a pas de `src` : c'est `currentSrc` qui porte l'URL.
-  return (el as HTMLMediaElement).currentSrc || "(source inconnue)";
+  return (el as HTMLMediaElement).currentSrc || "(unknown source)";
 }
 
 // Un échec de chargement (chunk JS, vignette, proxy HEVC, police) NE passe par aucun `console.error`
@@ -65,11 +65,11 @@ function captureResourceErrors(): void {
       if (!el || el === (window as unknown as Element) || !el.tagName) return; // erreur JS, déjà traitée
       const tag = el.tagName.toUpperCase();
       const media = (el as HTMLMediaElement).error;
-      const detail = media ? MEDIA_ERROR[media.code] ?? `code ${media.code}` : "chargement échoué";
+      const detail = media ? MEDIA_ERROR[media.code] ?? `code ${media.code}` : "load failed";
       pushLog({
         id: nextLocalId("r"),
         t: Date.now(),
-        source: "ressource",
+        source: "resource",
         level: BLOCKING_TAGS.has(tag) ? "error" : "warn",
         message: `<${tag.toLowerCase()}> ${detail} — ${resourceUrl(el)}`,
       });
@@ -112,12 +112,12 @@ export function initConsoleCapture(): void {
       // Bruit connu-bénin (pas une vraie erreur) → warn, jamais rouge. « ResizeObserver loop… » est
       // une notification Chromium inoffensive émise en event `error` global (sans objet Error).
       const level: LogLevel = isBenignFrontend(msg) ? "warn" : "error";
-      pushLog({ id: nextLocalId("e"), t: Date.now(), source: "frontend", level, message: `Erreur non gérée${where} — ${msg}` });
+      pushLog({ id: nextLocalId("e"), t: Date.now(), source: "frontend", level, message: `Unhandled error${where}: ${msg}` });
     });
     window.addEventListener("unhandledrejection", (ev) => {
       const r = ev.reason;
       const msg = r instanceof Error ? `${r.name}: ${r.message}\n${r.stack ?? ""}` : (() => { try { return JSON.stringify(r); } catch { return String(r); } })();
-      pushLog({ id: nextLocalId("p"), t: Date.now(), source: "frontend", level: "error", message: `Promesse rejetée — ${msg}` });
+      pushLog({ id: nextLocalId("p"), t: Date.now(), source: "frontend", level: "error", message: `Unhandled promise rejection: ${msg}` });
     });
     captureResourceErrors();
   }
@@ -142,5 +142,5 @@ export function initConsoleCapture(): void {
     })
     .catch(() => {});
 
-  logAt("log", "system", "Console NetsuRush prête.");
+  logAt("log", "system", "NetsuRush console ready.");
 }

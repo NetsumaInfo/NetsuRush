@@ -14,6 +14,8 @@
 // `docs` est pluriel dès maintenant : un .netsu à un document est un board qu'on partage, un .netsu
 // à N documents est un projet. Même format, même code — c'est le nombre de lignes qui diffère.
 
+const { t } = require('../i18n');
+
 const SCHEMA_VERSION = 1;
 
 const META_KEYS = {
@@ -140,7 +142,7 @@ function applySchema(db) {
  */
 function migrate(db, from) {
   if (from > SCHEMA_VERSION) {
-    throw new Error(`.netsu écrit par une version plus récente (schéma ${from} > ${SCHEMA_VERSION})`);
+    throw new Error(t('netsuTooNew', { from, current: SCHEMA_VERSION }));
   }
   let version = from;
   while (version < SCHEMA_VERSION) {

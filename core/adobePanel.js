@@ -123,7 +123,7 @@ function writePanelState(patch) {
   } catch (e) {
     // Préférence best-effort : l'installation reste valide même si l'état n'a pas pu être écrit
     // (la comparaison d'empreintes source/installée sert alors de repli).
-    console.warn('[adobe] état du panneau non écrit :', e && e.message);
+    console.warn('[adobe] panel state not written:', e && e.message);
     try { fs.unlinkSync(tmp); } catch (_) {}
   }
   return next;
@@ -176,7 +176,7 @@ function playerDebugState() {
   for (const v of CSXS_VERSIONS) {
     try {
       const r = execFileSync('reg', ['query', `HKCU\\Software\\Adobe\\CSXS.${v}`, '/v', 'PlayerDebugMode'], { encoding: 'utf8' });
-      out['CSXS.' + v] = /PlayerDebugMode\s+REG_SZ\s+1/i.test(r) ? '1' : 'défini≠1';
+      out['CSXS.' + v] = /PlayerDebugMode\s+REG_SZ\s+1/i.test(r) ? '1' : '≠1';
     } catch (_) { out['CSXS.' + v] = 'absent'; }
   }
   return out;

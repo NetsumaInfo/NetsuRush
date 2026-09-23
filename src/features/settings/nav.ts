@@ -103,7 +103,7 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
 
 export function settingsPageDef(page: SettingsPage): SettingsPageDef {
   const def = SETTINGS_PAGES.find((p) => p.id === page);
-  if (!def) throw new Error(`page de paramètres inconnue : ${page}`);
+  if (!def) throw new Error(`unknown settings page: ${page}`);
   return def;
 }
 

@@ -780,7 +780,7 @@ async function killProcess(pid) {
     const { stdout } = await pExecFile("tasklist", ["/fi", `PID eq ${id}`, "/fo", "csv", "/nh"], { timeout: 4000 });
     const line = String(stdout).trim().split(/\r?\n/)[0] || "";
     const name = (line.split('","')[0] || "").replace(/^"/, "");
-    if (name && isCriticalProc(name)) return { ok: false, error: `${t("criticalProcess")}: ${name}` };
+    if (name && isCriticalProc(name)) return { ok: false, error: t("withDetail", { message: t("criticalProcess"), detail: name }) };
   } catch {}
   try {
     process.kill(id);
@@ -983,7 +983,7 @@ function writeWatchdogPrefs(prefs) {
     fs.writeFileSync(tmp, JSON.stringify(prefs, null, 2));
     fs.renameSync(tmp, WATCHDOG_PREFS_FILE); // écriture atomique : jamais de fichier à moitié écrit
   } catch (e) {
-    console.warn("[optimize] préférences de surveillance non enregistrées :", String(e));
+    console.warn("[optimize] watchdog preferences not saved:", String(e));
   }
 }
 

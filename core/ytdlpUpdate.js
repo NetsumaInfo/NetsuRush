@@ -27,6 +27,7 @@ const path = require('node:path');
 const https = require('node:https');
 const { execFile } = require('node:child_process');
 const { CONFIG, DETECT_ENV, saveConfig } = require('./config');
+const { t } = require('./i18n');
 
 // A wheel download on a metered connection must never hold the boot, and a machine behind a proxy
 // that swallows the request must not hang a process either.
@@ -156,26 +157,26 @@ function publishedVersion() {
  */
 async function refreshYtDlpForAppVersion() {
   const version = appVersion();
-  if (!version) return { updated: false, reason: 'version inconnue' };
-  if (CONFIG.ytDlpCheckedFor === version) return { updated: false, reason: 'déjà vérifié' };
+  if (!version) return { updated: false, reason: 'unknown version' };
+  if (CONFIG.ytDlpCheckedFor === version) return { updated: false, reason: 'already checked' };
 
   // A bare `python` from PATH is never used here: `venvPython()` falls back to `CONFIG.python`,
   // written by the setup, and to nothing else. An interpreter the user happens to have on their
   // PATH is not this product's environment to upgrade.
   const python = venvPython();
-  if (!python) return { updated: false, reason: 'venv absent' };
+  if (!python) return { updated: false, reason: 'venv missing' };
 
   const result = await upgrade(python);
   if (result.error) {
-    console.warn(`yt-dlp: mise à jour impossible (${String(result.error.message || result.error)})`);
-    return { updated: false, reason: 'échec' };
+    console.warn(`yt-dlp: update failed (${String(result.error.message || result.error)})`);
+    return { updated: false, reason: 'failed' };
   }
   // The boot path deliberately spawns nothing else: reading the version back would double the cost
   // of a refresh that runs while the application is starting. The panel reads it on demand instead.
   saveConfig({ ytDlpCheckedFor: version, ytDlpCheckedAt: Date.now() });
   // pip prints either "Requirement already satisfied" or the version it installed; both mean the
   // venv is now current for this application version, so the marker is written in either case.
-  const line = (result.out.split(/\r?\n/).filter((l) => /yt-dlp/i.test(l)).pop() || 'à jour').trim();
+  const line = (result.out.split(/\r?\n/).filter((l) => /yt-dlp/i.test(l)).pop() || 'up to date').trim();
   console.log(`yt-dlp: ${line}`);
   return { updated: true, version };
 }
@@ -198,14 +199,14 @@ async function ytDlpStatus(options = {}) {
     checkedAt: CONFIG.ytDlpCheckedAt || null,
     appVersion: appVersion(),
   };
-  if (!python) return { ...base, available: false, version: null, latest: null, outdated: false, reason: 'venv absent' };
+  if (!python) return { ...base, available: false, version: null, latest: null, outdated: false, reason: 'venv missing' };
 
   const [version, latest] = await Promise.all([
     installedVersion(python),
     options.remote === false ? Promise.resolve(null) : publishedVersion(),
   ]);
   const outdated = Boolean(version && latest && isOlder(version, latest));
-  return { ...base, available: version != null, version, latest, outdated, ...(version ? {} : { reason: 'yt-dlp absent' }) };
+  return { ...base, available: version != null, version, latest, outdated, ...(version ? {} : { reason: 'yt-dlp missing' }) };
 }
 
 /**
@@ -216,20 +217,20 @@ async function ytDlpStatus(options = {}) {
  */
 async function updateYtDlpNow() {
   const python = venvPython();
-  if (!python) return { ok: false, version: null, previous: null, changed: false, error: 'venv absent' };
+  if (!python) return { ok: false, version: null, previous: null, changed: false, error: t('pythonEnvMissing') };
 
   const previous = await installedVersion(python);
   const result = await upgrade(python);
   if (result.error) {
     const detail = result.out.split(/\r?\n/).filter(Boolean).pop() || String(result.error.message || result.error);
-    console.warn(`yt-dlp: mise à jour impossible (${detail})`);
+    console.warn(`yt-dlp: update failed (${detail})`);
     return { ok: false, version: previous, previous, changed: false, error: detail };
   }
   const version = await installedVersion(python);
   // The manual update also satisfies this release: an upgrade that just ran must not be repeated by
   // the boot path on the next restart.
   saveConfig({ ytDlpCheckedFor: appVersion() || CONFIG.ytDlpCheckedFor, ytDlpCheckedAt: Date.now() });
-  console.log(`yt-dlp: ${version ? `version ${version}` : 'mise à jour terminée'}`);
+  console.log(`yt-dlp: ${version ? `version ${version}` : 'update finished'}`);
   return { ok: true, version, previous, changed: Boolean(version && previous && version !== previous) };
 }
 

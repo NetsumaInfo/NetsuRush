@@ -70,7 +70,8 @@
     "folderImportUnavailable": "无法在应用外导入文件夹。",
     "emptyFolderName": "文件夹名为空",
     "invalidFolderName": "文件夹名不能包含“/”或“\\”",
-    "folder": "文件夹"
+    "folder": "文件夹",
+    "folderExists": "这里已有名为“{{name}}”的文件夹"
   },
   "spell": {
     "title": "拼写检查",

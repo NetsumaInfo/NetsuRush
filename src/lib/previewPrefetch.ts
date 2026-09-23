@@ -36,7 +36,7 @@ function pump(): void {
     } catch (err) {
       job.cancelled = true;
       active = Math.max(0, active - 1);
-      console.warn("[preview] préchauffe abandonnée :", err);
+      console.warn("[preview] prewarm abandoned:", err);
     }
   }
 }

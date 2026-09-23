@@ -151,7 +151,7 @@ async function readPrefs() {
   if (!sysPath || !usrPath) return { ok: false, error: t("prefsFolderMissing"), prefs: [] };
   const [sys, usr] = await Promise.all([readFileSafe(sysPath), readFileSafe(usrPath)]);
   if (sys == null && usr == null) {
-    return { ok: false, error: `${t("unreadableFile")}: ${prefsDir()}`, prefs: [] };
+    return { ok: false, error: t("withDetail", { message: t("unreadableFile"), detail: prefsDir() }), prefs: [] };
   }
   const prefs = [];
   for (const def of PREF_DEFS) {
@@ -251,7 +251,7 @@ async function restoreBackup(dataDir, name) {
       await fsp.copyFile(path.join(src, f), dest);
       restored.push(f);
     } catch (e) {
-      return { ok: false, error: `${t("restoreFailed")}: ${f}: ${String(e)}` };
+      return { ok: false, error: t("withDetail", { message: `${t("restoreFailed")} (${f})`, detail: String(e) }) };
     }
   }
   return restored.length ? { ok: true, restored } : { ok: false, error: t("nothingToRestore") };
@@ -266,17 +266,17 @@ async function patchFile(which, entries) {
   const p = prefsFile(which);
   if (!p) return { ok: false, error: t("prefsFolderMissing") };
   let text = await readFileSafe(p);
-  if (text == null) return { ok: false, error: `${t("unreadableFile")}: ${path.basename(p)}` };
+  if (text == null) return { ok: false, error: t("withDetail", { message: t("unreadableFile"), detail: path.basename(p) }) };
   let changed = 0;
   for (const { def, value } of entries) {
     const out = formatValue(def, value);
     if (which === "system") {
       const re = new RegExp(`^(\\s*${escapeRe(def.key)}\\s*=\\s*).*$`, "m");
-      if (!re.test(text)) return { ok: false, error: `${t("notFound")}: ${def.key} (${path.basename(p)})` };
+      if (!re.test(text)) return { ok: false, error: t("withDetail", { message: t("notFound"), detail: `${def.key} (${path.basename(p)})` }) };
       text = text.replace(re, `$1${out}`);
     } else {
       const re = new RegExp(`(<${escapeRe(def.key)}>)[^<]*(</${escapeRe(def.key)}>)`);
-      if (!re.test(text)) return { ok: false, error: `${t("notFound")}: ${def.key} (${path.basename(p)})` };
+      if (!re.test(text)) return { ok: false, error: t("withDetail", { message: t("notFound"), detail: `${def.key} (${path.basename(p)})` }) };
       text = text.replace(re, `$1${out}$2`);
     }
     changed++;
@@ -293,17 +293,17 @@ function validate(changes) {
   const entries = [];
   for (const [id, value] of Object.entries(changes || {})) {
     const def = DEF_BY_ID.get(id);
-    if (!def) return { error: `${t("unknownSetting")}: ${id}` };
-    if (def.kind === "bool" && typeof value !== "boolean") return { error: `${t("invalidValue")}: ${id}` };
+    if (!def) return { error: t("withDetail", { message: t("unknownSetting"), detail: id }) };
+    if (def.kind === "bool" && typeof value !== "boolean") return { error: t("withDetail", { message: t("invalidValue"), detail: id }) };
     if (def.kind === "percent") {
       const n = Number(value);
-      if (!Number.isFinite(n)) return { error: `${t("invalidValue")}: ${id}` };
+      if (!Number.isFinite(n)) return { error: t("withDetail", { message: t("invalidValue"), detail: id }) };
       if ((def.min != null && n < def.min) || (def.max != null && n > def.max)) {
-        return { error: `${t("invalidValue")}: ${id} (${def.min}-${def.max}; ${n})` };
+        return { error: t("withDetail", { message: t("invalidValue"), detail: `${id} (${def.min}-${def.max}; ${n})` }) };
       }
     }
     if (def.kind === "enum" && def.options && !new Set(def.options).has(String(value))) {
-      return { error: `${t("invalidValue")}: ${id} (${def.options.join(", ")})` };
+      return { error: t("withDetail", { message: t("invalidValue"), detail: `${id} (${def.options.join(", ")})` }) };
     }
     entries.push({ def, value });
   }
@@ -327,7 +327,7 @@ async function applyPrefs({ hostPower, dataDir, progress }, changes) {
   if (!entries || !entries.length) return { ok: false, error: t("noChanges") };
 
   // Le filet AVANT tout le reste : si la suite tourne mal, la config d'origine est déjà à l'abri.
-  say("Sauvegarde de la configuration…", 5);
+  say(t("resolvePrefsBackingUp"), 5);
   const backup = await backupPrefs(dataDir);
   if (!backup.ok) return { ok: false, error: backup.error };
 
@@ -339,26 +339,26 @@ async function applyPrefs({ hostPower, dataDir, progress }, changes) {
 
   // Resolve fermé : rien à sauvegarder ni à redémarrer, on patche directement.
   if (!wasRunning) {
-    say("Écriture des préférences…", 50);
+    say(t("resolvePrefsWriting"), 50);
     for (const which of /** @type {("system"|"user")[]} */ (["system", "user"])) {
       const r = await patchFile(which, byFile[which]);
       if (!r.ok) return { ok: false, error: r.error, backup: backup.path };
     }
-    say("Préférences écrites.", 100);
+    say(t("resolvePrefsWritten"), 100);
     return { ok: true, applied: entries.length, backup: backup.path, restarted: false };
   }
 
   // close() sauvegarde le projet avant de tuer le process (cf. core/hostPower.js) → zéro perte.
-  say("Sauvegarde du projet et fermeture de Resolve…", 15);
+  say(t("resolvePrefsClosing"), 15);
   const c = await hostPower.close("resolve");
-  if (!c.ok) return { ok: false, error: c.error || "Fermeture de Resolve impossible.", backup: backup.path };
+  if (!c.ok) return { ok: false, error: c.error || t("hostPowerResolveCloseFailed"), backup: backup.path };
 
-  say("Attente de la sortie complète de Resolve…", 35);
+  say(t("resolvePrefsWaitingExit"), 35);
   if (!(await waitForExit())) {
     return { ok: false, error: t("resolveCloseTimeout"), backup: backup.path };
   }
 
-  say("Écriture des préférences…", 50);
+  say(t("resolvePrefsWriting"), 50);
   for (const which of /** @type {("system"|"user")[]} */ (["system", "user"])) {
     const r = await patchFile(which, byFile[which]);
     // Échec à mi-parcours : Resolve est fermé et l'état « fermé » persiste → la bannière « Rouvrir »
@@ -366,7 +366,7 @@ async function applyPrefs({ hostPower, dataDir, progress }, changes) {
     if (!r.ok) return { ok: false, error: r.error, backup: backup.path };
   }
 
-  say("Relance de Resolve…", 60);
+  say(t("resolvePrefsRelaunching"), 60);
   const re = await hostPower.reopen();
   if (!re.ok) {
     return { ok: true, applied: entries.length, backup: backup.path, restarted: false, reopenError: re.error };

@@ -24,13 +24,17 @@ import type { OptimizeDiagnosis, OptimizeSessionHealth } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { fmtBytes } from "./optimizeShared";
 import { errorText } from "@/lib/errorText";
+import { uiLocale } from "@/lib/utils";
 
 type Action = "reload" | "restart";
 
+// Session length in the interface language's own units ("1 h 5 min", "1 時間 5 分").
 const fmtDur = (ms: number) => {
   const m = Math.round(ms / 60000);
-  if (m < 60) return `${m} min`;
-  return `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}`;
+  const unit = (u: "hour" | "minute", v: number) =>
+    new Intl.NumberFormat(uiLocale(), { style: "unit", unit: u, unitDisplay: "short" }).format(v);
+  if (m < 60) return unit("minute", m);
+  return m % 60 ? `${unit("hour", Math.floor(m / 60))} ${unit("minute", m % 60)}` : unit("hour", m / 60);
 };
 
 export function MemorySection({ diag, onChanged }: { diag: OptimizeDiagnosis | null; onChanged: () => void }) {

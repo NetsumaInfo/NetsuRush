@@ -25,7 +25,7 @@ import { SystemSpecsCard } from "./SystemSpecsCard";
 import { useBugContext } from "./useBugContext";
 
 // La navigation, plus les deux écrans qui n'y figurent pas.
-const MODULES = [...NAV.map((n) => ({ id: n.id as string, label: n.label })), { id: "settings", label: "Paramètres" }, { id: "setup", label: "Installation" }];
+const MODULE_IDS = [...NAV.map((n) => ({ id: n.id as string, label: n.label as string | null })), { id: "settings", label: null }, { id: "setup", label: null }];
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -93,7 +93,11 @@ export function BugReportForm() {
   const [category, setCategory] = useState<string>(DEFAULT_CATEGORY);
   const [severity, setSeverity] = useState<BugSeverity>(DEFAULT_SEVERITY);
   const [frequency, setFrequency] = useState<BugFrequency>(DEFAULT_FREQUENCY);
-  const [moduleId, setModuleId] = useState<string>(() => (MODULES.some((m) => m.id === tab) ? tab : "settings"));
+  const MODULES = useMemo(() => MODULE_IDS.map((m) => ({
+    id: m.id,
+    label: m.label ?? (m.id === "settings" ? t("shell:sidebar.settings") : t("bugReport.moduleSetup")),
+  })), [t]);
+  const [moduleId, setModuleId] = useState<string>(() => (MODULE_IDS.some((m) => m.id === tab) ? tab : "settings"));
   const [categoryDetail, setCategoryDetail] = useState("");
   const [manualSpecs, setManualSpecs] = useState("");
   const [issue, setIssue] = useState("");

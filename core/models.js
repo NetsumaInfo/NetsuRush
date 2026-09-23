@@ -18,7 +18,7 @@ const crypto = require('node:crypto');
 const { spawn } = require('child_process');
 const { NR_HOME, CONFIG, PYTHON, DETECT_ENV, RTX_DIR, RTX_EXE, RTX_DLLS, fsp, saveConfig } = require('./config');
 const logbus = require('./logbus');
-const { t } = require('./i18n');
+const { language, t } = require('./i18n');
 const { resolveInstall } = require('./venvs'); // familles d'environnement + arbitrage des exclusifs
 
 // Dossier des poids upscale : celui que upscale.py lit (env prioritaire, sinon config, sinon défaut).
@@ -1100,7 +1100,7 @@ function cancelDownload(id) {
 // resume Range; it must survive the redirects, otherwise every resume starts over from zero.
 function httpsStream(url, headers, depth = 0) {
   return new Promise((resolve, reject) => {
-    if (depth > 6) return reject(new Error('trop de redirections'));
+    if (depth > 6) return reject(new Error(t('downloadTooManyRedirects')));
     const req = https.get(url, { headers }, (res) => {
       const code = res.statusCode || 0;
       if (code >= 300 && code < 400 && res.headers.location) {
@@ -1128,7 +1128,7 @@ function downloadAttempt(url, tmp, from, onProg, ctrl) {
         // poids, il ne se règle pas dans l'app. Le code HTTP seul ne disait pas ça.
         const gated = (code === 401 || code === 403) && isHfUrl(url);
         const err = /** @type {Error & { fatal?: boolean }} */ (
-          new Error(gated ? `${t('hfGated')} — ${url}` : `HTTP ${code} sur ${url}`));
+          new Error(gated ? `${t('hfGated')} — ${url}` : t('httpErrorAt', { code, url })));
         // A client error does not heal by retrying: dead URL, private repo, quota. 408/429 do —
         // the server is explicitly asking to wait. So does 416: the partial overshoots the
         // resource, and the next attempt starts from zero since this one gained nothing.
@@ -1157,7 +1157,7 @@ function downloadAttempt(url, tmp, from, onProg, ctrl) {
         if (ctrl && ctrl.canceled) return reject(new Error('CANCELED'));
         // Silent drop: the stream closes before the announced length. Without this check the
         // truncated .tmp would be renamed into a "valid" file and the model would fail at load.
-        if (total && done < total) return reject(new Error(`flux tronqué (${done}/${total} octets)`));
+        if (total && done < total) return reject(new Error(t('downloadTruncated', { done, total })));
         resolve();
       }));
     }, reject);
@@ -1198,11 +1198,11 @@ async function downloadUrl(url, dest, onProg, depth = 0, ctrl) {
 // GET JSON (suit les redirections). Sert à lire l'arbre de fichiers d'un dépôt HF (tailles).
 function httpsJson(url, depth = 0) {
   return new Promise((resolve, reject) => {
-    if (depth > 6) return reject(new Error('trop de redirections'));
+    if (depth > 6) return reject(new Error(t('downloadTooManyRedirects')));
     https.get(url, { headers: { 'User-Agent': 'NetsuRush' } }, (res) => {
       const code = res.statusCode || 0;
       if (code >= 300 && code < 400 && res.headers.location) { res.resume(); return resolve(httpsJson(new URL(res.headers.location, url).toString(), depth + 1)); }
-      if (code !== 200) { res.resume(); return reject(new Error(`HTTP ${code} sur ${url}`)); }
+      if (code !== 200) { res.resume(); return reject(new Error(t('httpErrorAt', { code, url }))); }
       let buf = '';
       res.setEncoding('utf8');
       res.on('data', (c) => { buf += c; });
@@ -1262,9 +1262,9 @@ async function downloadHf(id, m, emit, ctrl) {
       .map((f) => ({ ...f, repo: src.repo, out: src.into ? `${src.into}/${f.path}` : f.path }))));
     files = groups.flat();
   } catch (e) {
-    return { ok: false, id, error: `${t('unreadableFile')} (${m.repo}) : ${e}` };
+    return { ok: false, id, error: t('withDetail', { message: `${t('unreadableFile')} (${m.repo})`, detail: String(e) }) };
   }
-  if (!files.length) return { ok: false, id, error: `${t('notFound')}: ${m.repo}` };
+  if (!files.length) return { ok: false, id, error: t('withDetail', { message: t('notFound'), detail: m.repo }) };
   // pickOne : dépôt GGUF multi-quantisations (transcribe.cpp) → ne prendre QU'UN fichier (préférence de
   // quant, sinon le plus petit .gguf) au lieu de télécharger toutes les variantes (plusieurs Go).
   if (m.pickOne) {
@@ -1328,7 +1328,7 @@ async function downloadHf(id, m, emit, ctrl) {
         if (ctrl && ctrl.canceled) return;
         // First failure wins: the other workers stop on their next turn instead of going on pulling
         // bytes for a model that is already lost.
-        if (!failure) failure = `${t('downloadFailed')} (${f.path}) : ${e}`;
+        if (!failure) failure = t('withDetail', { message: `${t('downloadFailed')} (${f.path})`, detail: String(e) });
         return;
       }
     }
@@ -1350,7 +1350,7 @@ async function ensureVendor(m, id, emit) {
   emit({ id, pct: null, stage: 'install' });
   for (const v of missing) {
     try { await downloadUrl(v.url, path.join(dir, v.file)); }
-    catch (e) { return { ok: false, error: `${t('notFound')}: ${v.file} : ${e}` }; }
+    catch (e) { return { ok: false, error: t('withDetail', { message: `${t('notFound')} (${v.file})`, detail: String(e) }) }; }
   }
   return { ok: true };
 }
@@ -1488,7 +1488,7 @@ function pipInstall(id, args, env, ctrl) {
         ? { ok: true }
         : { ok: false, error: (tail.trim().split('\n').pop() || 'code ' + code) });
     });
-    p.on('error', (e) => { unbind(); resolve({ ok: false, error: `pip: ${t('unavailable')} : ${e}` }); });
+    p.on('error', (e) => { unbind(); resolve({ ok: false, error: t('withDetail', { message: `pip — ${t('unavailable')}`, detail: String(e) }) }); });
   });
 }
 
@@ -1547,13 +1547,13 @@ function extractZipArchive(archive, outDir, ctrl) {
 
 // Remplacement de `sam3/model/edt.py` (cf. PIP_PATCHES `sam3-edt-without-triton`). Gardé ici
 // en clair : c'est le fichier RÉEL que verra le paquet installé.
-const SAM3_EDT_WITHOUT_TRITON = `"""EDT sans Triton — fichier remplacé par NetsuRush (PIP_PATCHES: sam3-edt-without-triton).
+const SAM3_EDT_WITHOUT_TRITON = `"""EDT without Triton — file replaced by NetsuRush (PIP_PATCHES: sam3-edt-without-triton).
 
-Triton n'a pas de version officielle sous Windows, et ce module l'importait au CHARGEMENT : tout
-« import sam3 » échouait donc avant la moindre inférence. Le noyau d'origine ne sert qu'à la
-simulation de clics correctifs (sample_one_point_from_error_center, entraînement et évaluation),
-jamais au suivi vidéo, et son propre docstring dit qu'il reproduit
-cv2.distanceTransform(input, cv2.DIST_L2, 0) — c'est exactement ce qu'on appelle ici.
+Triton has no official Windows release, and this module imported it at LOAD time: every
+"import sam3" therefore failed before any inference. The original kernel only serves the
+simulation of corrective clicks (sample_one_point_from_error_center, training and evaluation),
+never video tracking, and its own docstring says it reproduces
+cv2.distanceTransform(input, cv2.DIST_L2, 0) — which is exactly what is called here.
 """
 
 import numpy as np
@@ -1561,14 +1561,14 @@ import torch
 
 
 def edt_triton(data: torch.Tensor) -> torch.Tensor:
-    """Transformée de distance euclidienne d'un lot d'images binaires (B, H, W).
+    """Euclidean distance transform of a batch of binary images (B, H, W).
 
-    Même contrat que la version Triton : distance L2 au zéro le plus proche, un plan par image du
-    lot. Le calcul passe par OpenCV sur processeur, donc sans exigence de tenseur CUDA.
+    Same contract as the Triton version: L2 distance to the nearest zero, one plane per image of
+    the batch. The computation runs through OpenCV on the CPU, so it needs no CUDA tensor.
     """
     import cv2
 
-    assert data.dim() == 3, "edt_triton attend un lot (B, H, W)"
+    assert data.dim() == 3, "edt_triton expects a batch (B, H, W)"
     arr = data.detach().to(torch.uint8).cpu().numpy()
     out = np.stack([cv2.distanceTransform(plane, cv2.DIST_L2, 0) for plane in arr])
     return torch.from_numpy(out).to(device=data.device, dtype=torch.float32)
@@ -1636,14 +1636,14 @@ async function preparePatchedPip(url, patchName, id, subdir) {
     p.on('close', (c) => resolve(c === 0));
     p.on('error', () => resolve(false));
   });
-  if (!untar) throw new Error('extraction du tarball impossible (tar)');
+  if (!untar) throw new Error(t('tarExtractFailed'));
   const roots = (await fsp.readdir(work, { withFileTypes: true })).filter((e) => e.isDirectory());
-  if (!roots.length) throw new Error('tarball vide');
+  if (!roots.length) throw new Error(t('tarEmpty'));
   // Le paquet n'est pas toujours à la racine du dépôt : SAMURAI publie le sien dans `sam2/`, et une
   // URL de tarball ne sait pas désigner un sous-dossier (le `#subdirectory=` de pip exige git).
   const root = subdir ? path.join(work, roots[0].name, subdir) : path.join(work, roots[0].name);
   if (!fs.existsSync(path.join(root, 'setup.py')) && !fs.existsSync(path.join(root, 'pyproject.toml'))) {
-    throw new Error(`aucun paquet python dans ${subdir || '.'} (ni setup.py ni pyproject.toml)`);
+    throw new Error(t('pipPackageMissing', { dir: subdir || '.' }));
   }
   for (const name of Array.isArray(patchName) ? patchName : [patchName]) {
     const patch = PIP_PATCHES[name];
@@ -1664,7 +1664,7 @@ async function ensurePipPackage(m, id, emit, ctrl) {
   // et fait perdre la roue correcte. On s'arrête en NOMMANT l'erreur python.
   if (checks.length && !m.pipProbe) {
     const probe = await pyImportState(checks);
-    if (probe.state === 'broken') return { ok: false, error: `${t('pyRuntimeBroken')} : ${probe.detail}` };
+    if (probe.state === 'broken') return { ok: false, error: t('withDetail', { message: t('pyRuntimeBroken'), detail: probe.detail }) };
   }
   emit({ id, pct: null, stage: 'install' });
   const busy = releaseSidecarLocks();
@@ -1684,14 +1684,14 @@ async function ensurePipPackage(m, id, emit, ctrl) {
       pipTarget = prepared.dir;
       preparedWork = prepared.work;
     }
-    catch (e) { return { ok: false, error: `${t('preparationFailed')} (${checks.join(', ') || id}): ${e}` }; }
+    catch (e) { return { ok: false, error: t('withDetail', { message: `${t('preparationFailed')} (${checks.join(', ') || id})`, detail: String(e) }) }; }
   }
   try {
     const steps = m.installSteps || [[pipTarget]];
     for (const step of steps) {
       const args = step.map((arg) => (arg === PIP_TARGET ? pipTarget : arg));
       const r = await pipInstall(id, args, env, ctrl);
-      if (!r.ok) return { ok: false, error: `${t('installationFailed')} (${checks.join(', ')}): ${installError(r.error, busy)}` };
+      if (!r.ok) return { ok: false, error: t('withDetail', { message: `${t('installationFailed')} (${checks.join(', ')})`, detail: installError(r.error, busy) }) };
     }
     if (!(await pyRuntimeReady(m, checks))) return { ok: false, error: `${t('installationFailed')} (${checks.join(', ')})` };
     return { ok: true };
@@ -1734,7 +1734,7 @@ function prefetchModels(code, emit, id) {
     const cap = (b) => { const s = b.toString(); logbus.py('models', s); tail = (tail + s).slice(-600); };
     p.stdout.on('data', cap); p.stderr.on('data', cap);
     p.on('close', (c) => resolve(c === 0 ? { ok: true } : { ok: false, error: `${t('downloadFailed')} (${tail.trim().split('\n').pop() || 'code ' + c})` }));
-    p.on('error', (e) => resolve({ ok: false, error: `Python: ${t('unavailable')} : ${e}` }));
+    p.on('error', (e) => resolve({ ok: false, error: t('withDetail', { message: `Python — ${t('unavailable')}`, detail: String(e) }) }));
   });
 }
 
@@ -1764,9 +1764,9 @@ async function installPipFork(id, m, report, ctrl) {
     if (ctrl.canceled || w.canceled) return { ok: false, id, canceled: true };
     const r = await pipInstall(id, ['--no-deps', '--no-build-isolation', prepared.dir], env, ctrl);
     if (ctrl.canceled || r.canceled) return { ok: false, id, canceled: true };
-    if (!r.ok) return fail(`${t('installationFailed')} (${id}): ${installError(r.error, busy)}`);
+    if (!r.ok) return fail(t('withDetail', { message: `${t('installationFailed')} (${id})`, detail: installError(r.error, busy) }));
   } catch (e) {
-    return fail(`${t('preparationFailed')} (${id}): ${e}`);
+    return fail(t('withDetail', { message: `${t('preparationFailed')} (${id})`, detail: String(e) }));
   } finally {
     if (prepared) { try { await fsp.rm(prepared.work, { recursive: true, force: true }); } catch (_) {} }
   }
@@ -1778,13 +1778,13 @@ async function installPipFork(id, m, report, ctrl) {
 // Télécharge un modèle par id. `emit(progress)` = SSE models:progress.
 async function downloadModel(id, emit, replace = false) {
   let m = MANIFEST[id];
-  if (!m) return { ok: false, id, error: `${t('unknownModel')}: ${id}` };
+  if (!m) return { ok: false, id, error: t('withDetail', { message: t('unknownModel'), detail: id }) };
   if (m.kind === 'alias') {
     id = m.target;
     m = MANIFEST[id];
   }
-  if (m.available === false) return { ok: false, id, error: `${t('unavailable')}: ${id}` };
-  if (m.kind === 'manual') return { ok: false, id, error: 'Importez ckpt_0_200_0.pth depuis le lien officiel AutoShot.' };
+  if (m.available === false) return { ok: false, id, error: t('withDetail', { message: t('unavailable'), detail: id }) };
+  if (m.kind === 'manual') return { ok: false, id, error: t('autoshotManualImport') };
   // Deux modèles exclusifs occupent la MÊME distribution pip : installer le second efface le
   // premier. `installPipFork` le faisait sans rien demander — on perdait une installation qui
   // marchait pour une autre qu'on n'avait pas encore essayée. On refuse donc, en nommant le
@@ -1955,7 +1955,7 @@ async function downloadModel(id, emit, replace = false) {
       if (!pf.ok) { report({ id, pct: null, stage: 'error', error: pf.error }); return { ok: false, id, error: pf.error }; }
       return done();
     }
-    return { ok: false, id, error: `${t('unsupportedSource')}: ${m.kind}` };
+    return { ok: false, id, error: t('withDetail', { message: t('unsupportedSource'), detail: m.kind }) };
   } catch (e) {
     if (ctrl.canceled) return canceled();
     report({ id, pct: null, stage: 'error', error: String(e) });
@@ -1967,16 +1967,16 @@ async function downloadModel(id, emit, replace = false) {
 
 async function importModel(id, source) {
   const m = MANIFEST[id];
-  if (!m || m.kind !== 'manual') return { ok: false, id, error: `${t('unsupportedSource')}: ${id}` };
+  if (!m || m.kind !== 'manual') return { ok: false, id, error: t('withDetail', { message: t('unsupportedSource'), detail: id }) };
   try {
     const stat = await fsp.stat(source);
-    if (!stat.isFile() || stat.size <= 0) return { ok: false, id, error: 'Checkpoint vide ou introuvable' };
+    if (!stat.isFile() || stat.size <= 0) return { ok: false, id, error: t('checkpointEmpty') };
     // Le fichier déposé décide de sa destination : sur une entrée multi-fichiers (DLL du SDK) on ne
     // peut pas deviner lequel des deux l'utilisateur vient de choisir autrement que par son nom.
     const expected = manualFiles(m);
     const picked = expected.find((name) => name.toLowerCase() === path.basename(source).toLowerCase())
       || (expected.length === 1 && path.extname(source).toLowerCase() === path.extname(expected[0]).toLowerCase() ? expected[0] : null);
-    if (!picked) return { ok: false, id, error: `Fichier attendu : ${expected.join(' ou ')}` };
+    if (!picked) return { ok: false, id, error: t('expectedFile', { files: new Intl.ListFormat(language(), { type: 'disjunction' }).format(expected) }) };
     await fsp.mkdir(m.dir, { recursive: true });
     const dest = path.join(m.dir, picked);
     const tmp = `${dest}.tmp`;
@@ -1991,7 +1991,7 @@ async function importModel(id, source) {
 
 async function deleteModel(id) {
   let m = MANIFEST[id];
-  if (!m) return { ok: false, id, error: `${t('unknownModel')}: ${id}` };
+  if (!m) return { ok: false, id, error: t('withDetail', { message: t('unknownModel'), detail: id }) };
   if (m.kind === 'alias') {
     id = m.target;
     m = MANIFEST[id];
@@ -2009,7 +2009,7 @@ async function deleteModel(id) {
     if (!removed.ok) return { ok: false, id, error: removed.error };
     const env = { ...DETECT_ENV, SAM2_BUILD_CUDA: '0', SAM2_BUILD_ALLOW_ERRORS: '1' };
     const restored = await pipInstall(id, ['--no-deps', SAM2_PIP], env, null);
-    if (!restored.ok) return { ok: false, id, error: `${t('installationFailed')} (${SAM2_DISTRIBUTION}): ${restored.error}` };
+    if (!restored.ok) return { ok: false, id, error: t('withDetail', { message: `${t('installationFailed')} (${SAM2_DISTRIBUTION})`, detail: restored.error }) };
     return { ok: true, id };
   }
   if (m.kind === 'manual') {

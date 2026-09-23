@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 /**
  * Mise à jour en UN bouton. L'updater passe par le plugin Tauri : il fonctionne même quand le core
- * Node est mort (« core indisponible : Failed to fetch »), c'est-à-dire exactement quand l'écran
+ * Node est mort (“core unreachable: Failed to fetch”), c'est-à-dire exactement quand l'écran
  * d'installation est le seul atteignable. Sans lui, un utilisateur bloqué devrait DÉSINSTALLER
  * l'application pour repartir sur une version corrigée.
  *

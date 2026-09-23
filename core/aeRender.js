@@ -1,6 +1,7 @@
 // @ts-check
 const fs = require('fs');
 const path = require('path');
+const { t } = require('./i18n');
 
 // Codec NetsuRush → (format, codec) du moteur de rendu Resolve.
 const RESOLVE_CODECS = {
@@ -69,7 +70,7 @@ async function renderRange(proj, opts) {
   await proj.SetRenderSettings(settings);
 
   const jobId = await proj.AddRenderJob();
-  if (!jobId) throw new Error('Resolve render : AddRenderJob a échoué (réglages invalides).');
+  if (!jobId) throw new Error(t('resolveRenderJobRefused'));
   await proj.StartRendering(jobId);
 
   for (let i = 0; i < 200000; i++) {
@@ -83,13 +84,13 @@ async function renderRange(proj, opts) {
   let err = null;
   try {
     const st = await proj.GetRenderJobStatus(jobId);
-    if (st && st.JobStatus === 'Failed') err = st.Error || 'rendu échoué';
+    if (st && st.JobStatus === 'Failed') err = st.Error ? `${t('resolveRenderFailed')} (${st.Error})` : t('resolveRenderFailed');
   } catch (_) {}
   try { await proj.DeleteAllRenderJobs(); } catch (_) {}
-  if (err) throw new Error('Resolve render : ' + err);
+  if (err) throw new Error(err);
 
   const file = findRendered(outDir, customName, ext);
-  if (!file) throw new Error('Resolve render : fichier de sortie introuvable (' + customName + ').');
+  if (!file) throw new Error(t('resolveRenderOutputMissing', { name: customName }));
   return file;
 }
 

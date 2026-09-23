@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { nr, type SearchHit } from "@/lib/bridge";
-import { basename, thumbTime } from "@/lib/utils";
+import { basename, thumbTime, uiLocale } from "@/lib/utils";
 import { errorText } from "@/lib/errorText";
 export { basename };
 
@@ -39,7 +39,7 @@ export function useShotBrowser() {
   const clips = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = indexedPaths.map((p) => ({ path: p, name: basename(p) }));
-    list.sort((a, b) => a.name.localeCompare(b.name));
+    list.sort((a, b) => a.name.localeCompare(b.name, uiLocale()));
     return q ? list.filter((c) => c.name.toLowerCase().includes(q) || c.path.toLowerCase().includes(q)) : list;
   }, [indexedPaths, query]);
 

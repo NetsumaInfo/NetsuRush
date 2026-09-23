@@ -70,7 +70,8 @@
     "folderImportUnavailable": "Folder import is unavailable outside the app.",
     "emptyFolderName": "Folder name is empty",
     "invalidFolderName": "Folder names cannot contain “/” or “\\”",
-    "folder": "Folder"
+    "folder": "Folder",
+    "folderExists": "A folder named “{{name}}” already exists here"
   },
   "spell": {
     "title": "Spelling",

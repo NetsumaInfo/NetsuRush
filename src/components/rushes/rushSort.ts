@@ -1,6 +1,7 @@
 // Tri de la grille de rush (Derush). Champ + sens combinés en une clé : la grille MediaTree
 // préserve l'ordre du tableau dans chaque dossier → trier la liste suffit.
 import type { Clip } from "@/lib/bridge";
+import { uiLocale } from "@/lib/utils";
 
 export type SortKey =
   | "name-asc" | "name-desc"
@@ -43,7 +44,7 @@ export function sortClips(list: Clip[], key: SortKey): Clip[] {
     // Durée = timecode zéro-paddé (HH:MM:SS:FF) → compare lexical fiable ; null en fin.
     if (field === "duration") return sign * (a.duration ?? "~").localeCompare(b.duration ?? "~");
     if (field === "resolution") return sign * (pixels(a.resolution) - pixels(b.resolution));
-    return sign * a.name.localeCompare(b.name, undefined, { numeric: true });
+    return sign * a.name.localeCompare(b.name, uiLocale(), { numeric: true });
   };
   return [...list].sort(cmp);
 }

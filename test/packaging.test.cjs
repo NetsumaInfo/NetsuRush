@@ -446,7 +446,7 @@ test('first-run setup never bypasses the gate when the core is temporarily unava
   assert.match(client, /BOOT_GRACE_MS = 45_000/);
   assert.match(client, /const deadline = Date\.now\(\) \+ \(coreReached \? RETRY_GRACE_MS : BOOT_GRACE_MS\)/);
   assert.match(client, /if \(Date\.now\(\) >= deadline\) break/);
-  assert.match(client, /core indisponible/);
+  assert.match(client, /core unreachable/);
 });
 
 // Le panneau CEP est une dépendance runtime du .exe au même titre que core/ ou python/ : sans le

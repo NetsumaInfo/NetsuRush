@@ -19,7 +19,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[NetsuRush] crash de rendu :", error, info.componentStack);
+    console.error("[NetsuRush] render crash:", error, info.componentStack);
     this.setState({ stack: info.componentStack ?? "" });
   }
 

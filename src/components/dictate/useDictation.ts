@@ -100,7 +100,7 @@ export function useDictation(
       const { stream, fellBack } = await openMic(cfg.current?.deviceId);
       if (fellBack) {
         setErr(i18n.t("dictate:mic.fallback"));
-        logWarn("dictée", `micro « ${cfg.current?.deviceId} » introuvable — bascule sur le micro par défaut`);
+        logWarn("dictation", `microphone "${cfg.current?.deviceId}" not found, falling back to the default microphone`);
       }
       const ctx = new AudioContext();
       const src = ctx.createMediaStreamSource(stream);
@@ -135,7 +135,7 @@ export function useDictation(
     } catch (e) {
       // La pastille dit ce qui se passe à l'utilisateur ; la console garde le nom exact de l'exception
       // (c'est elle qu'on relit dans un rapport de bug, pas la phrase traduite).
-      logCaught("dictée", "ouverture du micro", e);
+      logCaught("dictation", "opening the microphone", e);
       setErr(micErrorText(e));
       teardown();
       setState("idle");
@@ -152,9 +152,9 @@ export function useDictation(
     try {
       const r = await nr.dictateTranscribe({ audioB64: b64, mime: "audio/wav", lang: cfg.current?.lang, model: cfg.current?.model, idleMs: cfg.current?.idleMs });
       if (r.ok && r.text) onTextRef.current(r.text);
-      else if (r.error) { logCaught("dictée", "transcription", r.error); setErr(r.error); }
+      else if (r.error) { logCaught("dictation", "transcription", r.error); setErr(r.error); }
     } catch (e) {
-      logCaught("dictée", "transcription", e);
+      logCaught("dictation", "transcription", e);
       setErr(describeError(e));
     } finally { setState("idle"); }
   }, []);

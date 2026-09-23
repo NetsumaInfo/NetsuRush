@@ -104,7 +104,7 @@ async function ytdlpAvailable() {
   return {
     ok: code === 0,
     missing,
-    error: missing ? `yt-dlp introuvable (${cmd.bin}) — relance l'installation pour poser l'outil` : stderr.trim(),
+    error: missing ? t('ytdlpMissing', { path: cmd.bin }) : stderr.trim(),
   };
 }
 
@@ -176,7 +176,7 @@ async function dumpSlides(url, cookies) {
   const { code, stdout, stderr, missing } = await run(cmd.bin, [...cmd.args, ...args], 120000);
   let info = null;
   try { info = JSON.parse(stdout); } catch (_) { info = null; }
-  if (!info) return { slides: [], error: missing ? `yt-dlp introuvable (${cmd.bin})` : (stderr.trim() || `yt-dlp a échoué (${code})`), missing };
+  if (!info) return { slides: [], error: missing ? t('ytdlpMissing', { path: cmd.bin }) : (stderr.trim() || t('ytdlpFailed', { code })), missing };
   const entries = info._type === 'playlist' && Array.isArray(info.entries) ? info.entries : [info];
   const slides = [];
   entries.slice(0, MAX_SLIDES).forEach((entry, i) => {
@@ -354,7 +354,7 @@ function pickSlide(slides, index) {
 // Extrait le média derrière `url`. Passe sans cookies d'abord (public), puis avec (contenu connecté).
 /** @param {string} url @param {{ projectPath?: string, title?: string, index?: number }} [options] */
 async function extractMedia(url, options = {}) {
-  if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: 'URL invalide' };
+  if (!/^https?:\/\//i.test(String(url || ''))) return { ok: false, error: t('invalidUrl') };
   const projectPath = String(options.projectPath || '');
   const videoDir = projectPath ? downloadTarget.bucketDir(projectPath, 'video') : ASSETS_DIR;
   const imageDir = projectPath ? downloadTarget.bucketDir(projectPath, 'image') : ASSETS_DIR;
@@ -403,7 +403,7 @@ async function extractMedia(url, options = {}) {
     }
   }
   const tail = errors.find(Boolean);
-  return { ok: false, error: tail || 'aucun média extractible (compte privé, lien non supporté, ou outil à jour requis)' };
+  return { ok: false, error: tail || t('extractNothing') };
 }
 
 function organizeProjectItems(projectPath, items, title) {
@@ -420,7 +420,7 @@ function organizeProjectItems(projectPath, items, title) {
     }
     organized.push({ path: adopted.path, kind: item.kind });
   }
-  return organized.length ? { ok: true, items: organized } : { ok: false, error: 'échec du rangement du média' };
+  return organized.length ? { ok: true, items: organized } : { ok: false, error: t('extractOrganizeFailed') };
 }
 
 module.exports = { extractMedia };

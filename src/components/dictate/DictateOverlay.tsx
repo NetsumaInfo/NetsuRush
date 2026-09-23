@@ -26,7 +26,9 @@ export function DictateOverlay() {
     else insertIntoFocused(t);
   };
   const { state, err, start, stop } = useDictation(onText, {
-    lang: "fr", model, deviceId: mic || undefined, idleMs: unloadMs,
+    // No speech-language setting exists, and the language people speak is not always the one the
+    // interface is in: the engine detects it.
+    lang: "auto", model, deviceId: mic || undefined, idleMs: unloadMs,
     onPartial: live ? setPartial : undefined,
   });
 

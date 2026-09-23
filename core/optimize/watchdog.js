@@ -213,7 +213,7 @@ function createWatchdog(deps) {
       emit();
     } catch (e) {
       // Un tick raté ne doit jamais arrêter la surveillance : on trace et on retentera au suivant.
-      console.warn("[watchdog] tick échoué :", String(e));
+      console.warn("[watchdog] tick failed:", String(e));
     } finally {
       running = false;
     }

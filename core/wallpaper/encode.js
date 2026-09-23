@@ -18,6 +18,7 @@
 const path = require('path');
 const { fsp } = require('../config');
 const { run } = require('../ffmpeg');
+const { t } = require('../i18n');
 const { getCapabilities } = require('../export/capabilities');
 const { selectProxyEncoder, proxyVideoArgs } = require('../proxyEncoder');
 
@@ -87,8 +88,8 @@ async function writeAtomic(dest, format, args, timeout) {
     await fsp.rm(tmp, { force: true }).catch(() => {});
     // `killed` = la borne a expiré : le dire explicitement, sinon le message ffmpeg tronqué ne
     // renseigne sur rien et l'utilisateur ne sait pas s'il doit réessayer ou changer de fichier.
-    const reason = err.killed ? `dépassé ${Math.round(timeout / 1000)} s` : err.message;
-    throw new Error(`encodage du fond échoué (${path.basename(dest)}) : ${reason}`);
+    const reason = err.killed ? t('wallpaperEncodeTimeout', { seconds: Math.round(timeout / 1000) }) : err.message;
+    throw new Error(t('wallpaperEncodeFailed', { name: path.basename(dest), detail: reason }));
   }
   return dest;
 }
@@ -121,7 +122,7 @@ async function probeSource(file) {
   ]);
   const meta = JSON.parse(raw.toString());
   const stream = meta?.streams?.[0];
-  if (!stream || !stream.width) throw new Error(`aucun flux image dans ${path.basename(file)}`);
+  if (!stream || !stream.width) throw new Error(t('wallpaperNoImage', { name: path.basename(file) }));
   const duration = firstNumber(meta?.format?.duration);
   const fps = parseFps(stream.avg_frame_rate);
   const frames = firstNumber(stream.nb_frames) || Math.round(duration * fps);

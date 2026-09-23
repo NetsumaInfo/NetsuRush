@@ -25,7 +25,7 @@ async function captureResolveProjectLocation(pm) {
     }
     return { ok: true, folder, database };
   } catch (e) {
-    return { ok: false, error: `${t('projectFolderRestoreFailed')} : ${String(e && e.message || e)}` };
+    return { ok: false, error: t('withReason', { message: t('projectFolderRestoreFailed'), detail: String(e && e.message || e) }) };
   }
 }
 
@@ -42,12 +42,12 @@ async function openResolveProjectLocation(pm, folder, database) {
     }
     for (const name of folder || []) {
       if (!pm.OpenFolder || !(await pm.OpenFolder(name))) {
-        return { ok: false, error: `${t('projectFolderOpenFailed')} : ${name}` };
+        return { ok: false, error: t('withReason', { message: t('projectFolderOpenFailed'), detail: name }) };
       }
     }
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: `${t('projectFolderOpenFailed')} : ${String(e && e.message || e)}` };
+    return { ok: false, error: t('withReason', { message: t('projectFolderOpenFailed'), detail: String(e && e.message || e) }) };
   }
 }
 

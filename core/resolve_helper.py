@@ -4,7 +4,10 @@
 # Remplace WorkflowIntegration.node (in-process) pour l'app standalone.
 #
 # Protocole : entrée  {"id", "method", "params":{...}}
-#             sortie  {"id", "ok":true, "result":...} | {"id", "ok":false, "error":"..."}
+#             sortie  {"id", "ok":true, "result":...} | {"id", "ok":false, "error":"...", "code":"..."}
+#
+# Errors are English, for logs. The ones a user can meet also carry a stable `code` that
+# core/resolve-bridge.js turns into a message in the interface language.
 #
 # Registre de handles : les objets Resolve (Project, MediaPool, MediaPoolItem, Timeline, Folder...)
 # ne sont pas sérialisables → on renvoie {"__handle__": N, "__type__": "..."} et on les re-résout
@@ -18,6 +21,14 @@ import traceback
 RESOLVE = None
 REGISTRY = {}
 _next = [1]
+
+
+class HelperError(RuntimeError):
+    """An error with a `code` the core translates for the user."""
+
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
 
 
 def connect():
@@ -47,14 +58,14 @@ def connect():
     try:
         import DaVinciResolveScript as dvr
     except Exception as e:
-        return {"connected": False, "error": "DaVinciResolveScript introuvable: %s" % e}
+        return {"connected": False, "code": "scriptModuleMissing", "error": "DaVinciResolveScript not found: %s" % e}
     try:
         RESOLVE = dvr.scriptapp("Resolve")
     except Exception as e:
         RESOLVE = None
         return {"connected": False, "error": str(e)}
     if RESOLVE is None:
-        return {"connected": False, "error": "Resolve non lancé ou scripting externe désactivé (Prefs > System > General > External Scripting Using = Local)"}
+        return {"connected": False, "code": "notRunning", "error": "Resolve is not running or external scripting is off (Preferences > System > General > External scripting using = Local)"}
     try:
         ver = RESOLVE.GetVersionString()
     except Exception:
@@ -101,21 +112,21 @@ def resolve_target(handle):
     as a connection failure, which sent debugging the wrong way."""
     if handle is None:
         if RESOLVE is None:
-            raise RuntimeError("Resolve non connecté")
+            raise HelperError("notConnected", "Resolve is not connected")
         return RESOLVE
     target = REGISTRY.get(handle)
     if target is None:
         raise RuntimeError(
-            "handle %s périmé : registre purgé pendant l'opération (op Resolve non bracketée) "
-            "ou helper relancé" % handle
+            "stale handle %s: the registry was purged during the operation (Resolve op not bracketed) "
+            "or the helper restarted" % handle
         )
     return target
 
 
 def do_attr(handle, name):
-    """Lecture d'un ATTRIBUT (non appelable) : les constantes d'export de Resolve
-    (EXPORT_FCP_7_XML, EXPORT_AAF...) ne sont pas des méthodes, et le proxy JS ne sait forwarder
-    que des appels. Les coder en dur côté JS les figerait sur une version de Resolve."""
+    """Reads an ATTRIBUTE (not callable): Resolve's export constants (EXPORT_FCP_7_XML,
+    EXPORT_AAF...) are not methods, and the JS proxy only forwards calls. Hard-coding them on the
+    JS side would freeze them to one Resolve version."""
     return wrap(getattr(resolve_target(handle), name))
 
 
@@ -132,11 +143,11 @@ PROPS = ["File Path", "FPS", "Frames", "Duration", "Resolution", "Format"]
 
 def list_media_pool():
     if RESOLVE is None:
-        raise RuntimeError("Resolve non connecté")
+        raise HelperError("notConnected", "Resolve is not connected")
     pm = RESOLVE.GetProjectManager()
     proj = pm.GetCurrentProject() if pm else None
     if not proj:
-        raise RuntimeError("aucun projet ouvert")
+        raise HelperError("noProject", "no project is open")
     mp = proj.GetMediaPool()
     out = []
 
@@ -165,11 +176,11 @@ def list_media_pool():
 # frame-math (inclusif/exclusif, clamp, remap) reste côté JS (timeline.js).
 def read_timeline(name=None):
     if RESOLVE is None:
-        raise RuntimeError("Resolve non connecté")
+        raise HelperError("notConnected", "Resolve is not connected")
     pm = RESOLVE.GetProjectManager()
     proj = pm.GetCurrentProject() if pm else None
     if not proj:
-        raise RuntimeError("aucun projet ouvert")
+        raise HelperError("noProject", "no project is open")
     tl = None
     if name:
         count = int(proj.GetTimelineCount() or 0)
@@ -238,7 +249,7 @@ def read_timeline(name=None):
 
 
 def timeline_fingerprint(tl):
-    """Empreinte de la timeline courante, sans décoder ni lire les médias."""
+    """Fingerprint of the current timeline, without decoding or reading the media."""
     rows = []
     if tl:
         try:
@@ -348,11 +359,14 @@ def main():
         try:
             h = HANDLERS.get(msg.get("method"))
             if not h:
-                raise RuntimeError("méthode inconnue: %s" % msg.get("method"))
+                raise RuntimeError("unknown method: %s" % msg.get("method"))
             result = h(msg.get("params") or {})
             out = {"id": rid, "ok": True, "result": result}
         except Exception as e:
             out = {"id": rid, "ok": False, "error": "%s\n%s" % (e, traceback.format_exc())}
+            code = getattr(e, "code", None)
+            if code:
+                out["code"] = code
         sys.stdout.write(json.dumps(out) + "\n")
         sys.stdout.flush()
 

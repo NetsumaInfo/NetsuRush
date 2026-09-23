@@ -81,7 +81,7 @@ async function serveFile(req, res, filePath) {
   try {
     await respondWithFile(req, res, filePath);
   } catch (e) {
-    logbus.emit("core", "error", `media: échec de service de ${filePath} — ${e && e.message ? e.message : e}`);
+    logbus.emit("core", "error", `media: failed to serve ${filePath}: ${e && e.message ? e.message : e}`);
     if (res.headersSent) res.destroy();
     else res.writeHead(500).end("read error");
   }
@@ -204,7 +204,7 @@ function pocPage(mediaUrl) {
   return `<!doctype html><html><head><meta charset="utf-8"><title>POC HEVC</title>
 <style>html,body{margin:0;background:#0a0a0b;color:#eee;font:14px system-ui}
 #log{padding:12px;white-space:pre-wrap}video{max-width:100%;display:block}</style></head>
-<body><div id="log">POC HEVC WebView2 — chargement…</div>
+<body><div id="log">POC HEVC WebView2 — loading…</div>
 <video id="v" autoplay muted playsinline src="${mediaUrl}"></video>
 <script>
 const log=document.getElementById("log"), v=document.getElementById("v");
@@ -215,7 +215,7 @@ function report(o){if(done)return;done=true;o.canPlayType=can;
   fetch("/poc-report",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(o)}).catch(()=>{});}
 v.addEventListener("loadeddata",()=>report({ok:v.videoWidth>0,w:v.videoWidth,h:v.videoHeight}));
 v.addEventListener("error",()=>report({ok:false,code:v.error&&v.error.code,message:v.error&&v.error.message}));
-setTimeout(()=>report({ok:false,reason:"timeout 8s — aucun loadeddata/error"}),8000);
+setTimeout(()=>report({ok:false,reason:"timeout 8s: no loadeddata/error"}),8000);
 </script></body></html>`;
 }
 

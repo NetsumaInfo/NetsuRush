@@ -30,13 +30,6 @@ import {
 } from "./RotoPanels";
 import { useTranslation } from "react-i18next";
 
-const BUSY_KEYS: Record<string, string> = {
-  "Ouverture…": "open", "Segmentation…": "segment", "Annulation…": "undo", "Recalcul…": "recalc",
-  "Suivi": "track", "Réinitialisation du suivi": "resetTrack", "Dédoublonnage": "dedupe",
-  "Restauration des mattes": "restoreMattes", "Export": "export", "Matte fin": "matteFine",
-  "Suppression": "remove", "Test matte (1 image)": "testMatte", "Test suppression (1 image)": "testRemove",
-};
-
 // Roto Studio : pose des points sur l'objet actif (clic gauche = inclure,
 // droit = exclure, Maj+survol = preview) → masque teinté immédiat ; « Suivre » propage sur le plan
 // (complet ou partiel directionnel, annulable, le playhead suit) ; puis affinage non destructif,
@@ -313,11 +306,11 @@ export function RotoStudio() {
               <div className="flex items-center justify-between gap-2">
                 <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
                   <Spinner className="h-3.5 w-3.5" />
-                  {t(`busy.${BUSY_KEYS[s.busy || ""]}`, { defaultValue: s.busy || "" })}{s.prog?.stage ? ` — ${t(`stage.${s.prog.stage}`, { defaultValue: s.prog.stage })}` : ""}
+                  {t(`busy.${s.busy || ""}`)}{s.prog?.stage ? ` — ${t(`stage.${s.prog.stage}`, { defaultValue: s.prog.stage })}` : ""}
                 </p>
                 {/* Le matte fin dure autant qu'un suivi : l'abandonner ne doit pas demander de
                     tuer le service. Même drapeau d'annulation, testé image par image. */}
-                {(s.busy === "Suivi" || s.busy === "Matte fin") && (
+                {(s.busy === "track" || s.busy === "matteFine") && (
                   <Button variant="ghost" size="sm" className="h-6 shrink-0 text-xs" onClick={s.cancel}>
                     <X className="h-3 w-3" /> {t("cancel")}
                   </Button>

@@ -39,7 +39,7 @@ function stripHallucination(text) {
 
 /** @param {{ audioB64?: string, mime?: string, model?: string, lang?: string, idleMs?: number }} opts */
 async function transcribeClip(opts) {
-  const { audioB64, mime = 'audio/webm', model = 'whisper-turbo', lang = 'fr', idleMs } = opts || {};
+  const { audioB64, mime = 'audio/webm', model = 'whisper-turbo', lang = 'auto', idleMs } = opts || {};
   if (!audioB64) return { ok: false, error: t('audioMissing') };
   const ext = mime.includes('wav') ? 'wav' : mime.includes('ogg') ? 'ogg' : mime.includes('mp4') ? 'm4a' : 'webm';
   const dir = path.join(os.tmpdir(), 'netsurush-dictate');
@@ -52,7 +52,7 @@ async function transcribeClip(opts) {
     const r = engine === 'transcribe-cpp'
       ? await asrCpp.transcribe({ input: tmp, modelId: model, lang })
       : await voice.transcribe(NOOP_EVENT, { input: tmp, model, lang, idleMs });
-    if (!r || !r.ok) return { ok: false, error: (r && r.error) || 'transcription vide' };
+    if (!r || !r.ok) return { ok: false, error: (r && r.error) || t('transcriptEmpty') };
     // r.text = transcript propre (espaces + ponctuation). Repli sur les mots joints par ESPACE (jamais
     // '' → sinon « motscollés »). Les tokens portant déjà une espace de tête sont normalisés ensuite.
     const fromWords = (r.words || []).map((/** @type {any} */ w) => w.word).join(' ');

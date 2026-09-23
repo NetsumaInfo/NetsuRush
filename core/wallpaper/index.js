@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { fsp, WALLPAPER_DIR } = require('../config');
+const { t } = require('../i18n');
 const { BLUR_STEPS, BASE_WIDTH, blurRadius, probeSource, encodeStill, encodeLoop } = require('./encode');
 
 const META_NAME = 'meta.json';
@@ -50,7 +51,7 @@ function variantName(kind, step, animated) {
 async function readMeta(id) {
   const raw = await fsp.readFile(path.join(entryDir(id), META_NAME), 'utf8');
   const meta = JSON.parse(raw);
-  if (!meta || meta.id !== id) throw new Error(`métadonnées de fond illisibles (${id})`);
+  if (!meta || meta.id !== id) throw new Error(t('wallpaperMetaUnreadable', { id }));
   return meta;
 }
 
@@ -81,7 +82,7 @@ async function encodeVariant(meta, dest, step, animated) {
 async function importWallpaper(srcPath, opts = {}) {
   try {
     const file = String(srcPath || '');
-    if (!file) return fail('aucun fichier');
+    if (!file) return fail(t('pathMissing'));
     const probe = await probeSource(file);
     const id = await hashFile(file);
     const dir = entryDir(id);

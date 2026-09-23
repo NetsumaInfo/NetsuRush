@@ -398,7 +398,8 @@
     "logsAttached_one": "ログ {{count}} 行を添付",
     "logsAttached_other": "ログ {{count}} 行を添付",
     "logErrors_one": "エラー {{count}} 件",
-    "logErrors_other": "エラー {{count}} 件"
+    "logErrors_other": "エラー {{count}} 件",
+    "moduleSetup": "セットアップ"
   },
   "outbox": {
     "opening": "キャッシュを開いています…",

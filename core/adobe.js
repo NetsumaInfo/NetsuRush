@@ -115,7 +115,7 @@ function writeSnapshotFile(app, snap) {
     fs.renameSync(tmp, target);
   } catch (e) {
     // Cache best-effort : l'échec d'écriture ne doit pas faire échouer l'ingestion du snapshot.
-    console.warn(`[adobe] cache snapshot ${app} non écrit :`, e && e.message);
+    console.warn(`[adobe] snapshot cache for ${app} not written:`, e && e.message);
     try { fs.unlinkSync(tmp); } catch (_) {}
   }
 }
@@ -370,14 +370,14 @@ function createAdobeBridge({ CONFIG, broadcast }) {
     const updating = decision.action === 'update';
     const result = await installPanel(updating ? { update: true } : {});
     if (!result.ok) {
-      console.warn(`[adobe] ${updating ? 'mise à jour' : 'installation automatique'} du panneau impossible :`, result.error);
+      console.warn(`[adobe] panel ${updating ? 'update' : 'automatic installation'} failed:`, result.error);
       return { ok: false, updated: false, installed: update.installed, error: result.error };
     }
     const payload = { version: result.version || null, restart: result.restart || [], installed: true };
     if (broadcast) broadcast('adobe:panelUpdated', payload);
     console.log(updating
-      ? `[adobe] panneau CEP mis à jour (${payload.version || 'version inconnue'})`
-      : `[adobe] panneau CEP installé automatiquement pour ${hosts.join(', ')} (${payload.version || 'version inconnue'})`);
+      ? `[adobe] CEP panel updated (${payload.version || 'unknown version'})`
+      : `[adobe] CEP panel installed automatically for ${hosts.join(', ')} (${payload.version || 'unknown version'})`);
     return { ok: true, updated: updating, ...payload };
   }
 

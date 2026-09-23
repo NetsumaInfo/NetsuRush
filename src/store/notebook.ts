@@ -267,7 +267,7 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
         icon: patch.icon ?? cur?.icon ?? null,
         scriptId: cur?.scriptId ?? null,
         kind: patch.kind ?? cur?.kind ?? "notes",
-        language: patch.language ?? cur?.language ?? "fr",
+        language: patch.language ?? cur?.language ?? currentNotebookLanguage(),
       });
       await get().nbLoadList();
     },

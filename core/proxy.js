@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { ffBin, getProxyDir, fsp, fileReady } = require('./config');
 const { cacheIndex } = require('./cacheIndex');
+const { t } = require('./i18n');
 const { getCapabilities } = require('./export/capabilities');
 const { selectProxyEncoder, proxyVideoArgs, proxyContainerArgs, isHardwareBusy } = require('./proxyEncoder');
 
@@ -331,7 +332,7 @@ async function encodeProxy(input, start, end, out, height, token, resolved, pres
       ...acodec,
       ...faststart, '-f', container, tmp,
     ], token, 30000);
-    if (!(await fileReady(tmp))) throw new Error('proxy vide');
+    if (!(await fileReady(tmp))) throw new Error(t('proxyEmpty'));
     await fsp.rename(tmp, out);
     // Après le rename atomique seulement : `out` n'existe qu'une fois complet, l'index ne référence
     // donc jamais un proxy partiel.

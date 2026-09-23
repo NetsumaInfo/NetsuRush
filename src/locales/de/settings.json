@@ -398,7 +398,8 @@
     "logsAttached_one": "{{count}} Protokollzeile angehängt",
     "logsAttached_other": "{{count}} Protokollzeilen angehängt",
     "logErrors_one": "{{count}} Fehler",
-    "logErrors_other": "{{count}} Fehler"
+    "logErrors_other": "{{count}} Fehler",
+    "moduleSetup": "Einrichtung"
   },
   "outbox": {
     "opening": "Cache wird geöffnet…",

@@ -246,7 +246,7 @@ async function applyExistingTimelineInsertion({ tl, mp, resolve, insertion, fps,
     return result.items;
   }
 
-  throw new Error(`${t("timelineInsertionUnsupported")} : ${insertion}`);
+  throw new Error(t("withDetail", { message: t("timelineInsertionUnsupported"), detail: insertion }));
 }
 
 /** @param {import('./types').BuildTimelineOpts} opts */
@@ -272,7 +272,7 @@ async function buildTimeline(opts) {
         if (added && added.length) item = added[0];
       } catch (_) {}
     }
-  if (!item) return { ok: false, error: t("mediaImportFailed") + " : " + input };
+  if (!item) return { ok: false, error: t("withDetail", { message: t("mediaImportFailed"), detail: input }) };
 
     const fpsStr = await item.GetClipProperty("FPS");
     let fps = parseFloat(fpsStr);
@@ -290,7 +290,7 @@ async function buildTimeline(opts) {
       if (targetName) {
         tl = await getTimelineByName(proj, targetName);
         // Une cible explicite est un contrat : ne jamais ajouter ailleurs ni créer silencieusement.
-        if (!tl) return { ok: false, error: `${t("timelineMissing")}: ${targetName}` };
+        if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineMissing"), detail: targetName }) };
       } else tl = await proj.GetCurrentTimeline();
       if (tl) {
         const tlFpsStr = await tl.GetSetting("timelineFrameRate");
@@ -322,7 +322,7 @@ async function buildTimeline(opts) {
         tl = await mp.CreateEmptyTimeline(tryName);
       }
       if (restoreFolder) { try { await mp.SetCurrentFolder(restoreFolder); } catch (_) { /* best-effort */ } }
-  if (!tl) return { ok: false, error: `${t("timelineCreateFailed")}: ${requestedName}` };
+  if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineCreateFailed"), detail: requestedName }) };
       renamed = tryName !== requestedName;
       name = tryName;
       created = true;
@@ -367,12 +367,14 @@ async function buildTimeline(opts) {
       });
     }
     if (!clipInfos.length) {
-    return { ok: false, error: `${t("noValidSegments")} (fps=${fps} frames=${resFrames})`, timeline: name, mode, created };
+    console.warn(`[timeline] no valid segments (fps=${fps} frames=${resFrames})`);
+    return { ok: false, error: t("noValidSegments"), timeline: name, mode, created };
     }
 
     try { await proj.SetCurrentTimeline(tl); } catch (_) {}
     if (!created && whole && opts.insertion !== "end" && resFrames <= 0) {
-      return { ok: false, error: `${t("noValidSegments")} (Frames=0)`, timeline: await tl.GetName(), mode, created };
+      console.warn("[timeline] no valid segments (Frames=0)");
+      return { ok: false, error: t("noValidSegments"), timeline: await tl.GetName(), mode, created };
     }
     const appended = !created
       ? await applyExistingTimelineInsertion({ tl, mp, resolve, insertion: opts.insertion, fps, clipInfos, sourcePaths: [input], sourceFps: [fps], videoOnly })
@@ -387,7 +389,8 @@ async function buildTimeline(opts) {
       // Diagnostic concret : fps + Frames lus par Resolve + nb de clips + 3 plages → repère VFR
       // (Frames=0/incohérent), fps faux, ou liste vide à l'origine du refus.
       const sample = clipInfos.slice(0, 3).map((c) => `${c.startFrame}-${c.endFrame}`).join(", ");
-    return { ok: false, error: `${t("timelineAppendFailed")}: ${tlName} (fps=${fps} frames=${resFrames} clips=${clipInfos.length} [${sample}])`, timeline: tlName, mode, created };
+    console.warn(`[timeline] append refused: ${tlName} (fps=${fps} frames=${resFrames} clips=${clipInfos.length} [${sample}])`);
+    return { ok: false, error: t("withDetail", { message: t("timelineAppendFailed"), detail: tlName }), timeline: tlName, mode, created };
     }
 
     // Code-couleur des découpes : revue VOIX → on colore les clips de la piste AUDIO (A1), pas la
@@ -506,7 +509,7 @@ async function buildTimelineFromBlocks(opts) {
       await yieldLoop();
     }
     if (!clipInfos.length) {
-    return { ok: false, error: t("mediaPoolSourcesMissing") + " : " + missing.join(", "), missing };
+    return { ok: false, error: t("withDetail", { message: t("mediaPoolSourcesMissing"), detail: missing.join(", ") }), missing };
     }
 
     let tl = null;
@@ -516,7 +519,7 @@ async function buildTimelineFromBlocks(opts) {
       // Cible explicite (timeline choisie) → on la rend courante ; sinon la timeline ouverte.
       if (targetName) {
         tl = await getTimelineByName(proj, targetName);
-        if (!tl) return { ok: false, error: `${t("timelineMissing")}: ${targetName}` };
+        if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineMissing"), detail: targetName }) };
       } else tl = await proj.GetCurrentTimeline();
       if (tl) {
         const tlFpsStr = await tl.GetSetting("timelineFrameRate");
@@ -541,7 +544,7 @@ async function buildTimelineFromBlocks(opts) {
         tl = await mp.CreateEmptyTimeline(tryName);
       }
       if (restoreFolder) { try { await mp.SetCurrentFolder(restoreFolder); } catch (_) { /* best-effort */ } }
-  if (!tl) return { ok: false, error: `${t("timelineCreateFailed")}: ${requestedName}` };
+  if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineCreateFailed"), detail: requestedName }) };
       name = tryName;
       created = true;
     }
@@ -569,7 +572,7 @@ async function buildTimelineFromBlocks(opts) {
     let tlName = name;
     if (!created) { try { tlName = await tl.GetName(); } catch (_) {} }
     if (!okAppend) {
-    return { ok: false, error: `${t("timelineAppendFailed")}: ${tlName}`, timeline: tlName, mode, created };
+    return { ok: false, error: t("withDetail", { message: t("timelineAppendFailed"), detail: tlName }), timeline: tlName, mode, created };
     }
 
     // Marqueurs (commentaires exportés) : offset cumulé des clips précédents, frame relative au
@@ -824,7 +827,7 @@ async function readTimelineCuts(opts = {}) {
     const r = await bridge.readTimeline(timelineName || null);
     if (r && r.found === false) {
       return timelineName
-      ? { ok: false, error: `${t("timelineMissing")}: ${timelineName}`, cuts: [] }
+      ? { ok: false, error: t("withDetail", { message: t("timelineMissing"), detail: timelineName }), cuts: [] }
       : { ok: false, error: t("noTimeline"), cuts: [] };
     }
     if (r && r.found) {
@@ -891,7 +894,7 @@ async function readTimelineCutsViaProxy(opts = {}) {
     let tl;
     if (timelineName) {
       tl = await getTimelineByName(proj, timelineName);
-  if (!tl) return { ok: false, error: `${t("timelineMissing")}: ${timelineName}`, cuts: [] };
+  if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineMissing"), detail: timelineName }), cuts: [] };
     } else {
       tl = await proj.GetCurrentTimeline();
   if (!tl) return { ok: false, error: t("noTimeline"), cuts: [] };
@@ -1043,7 +1046,7 @@ async function analyzeTimelineCut(event, opts = {}) {
     let tl;
     if (timelineName) {
       tl = await getTimelineByName(proj, timelineName);
-  if (!tl) return { ok: false, error: `${t("timelineMissing")}: ${timelineName}` };
+  if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineMissing"), detail: timelineName }) };
     } else {
       tl = await proj.GetCurrentTimeline();
   if (!tl) return { ok: false, error: t("noTimeline") };
@@ -1099,7 +1102,7 @@ async function analyzeTimelineCut(event, opts = {}) {
       src: c.src, path: c.path, name: c.name, fps: c.fps, fpsNum: c.fpsNum,
       totalFrames: c.totalFrames, w: c.w, h: c.h, shots: c.shots,
     }));
-    return { ok: true, source: srcName, base: `${srcName} — découpé`, clips: outClips, shots: shotsTotal };
+    return { ok: true, source: srcName, base: t("cutTimelineName", { name: srcName }), clips: outClips, shots: shotsTotal };
   } catch (e) {
     return { ok: false, error: String(e) };
   }
@@ -1132,8 +1135,8 @@ async function buildCutTimeline(event, opts = {}) {
     // Nom unique PRÉ-calculé → l'import FCPXML reçoit un nom libre (sinon Resolve suffixe au hasard).
     // En mode 'replace', on utilise un nom TEMPORAIRE (l'originale porte encore son nom) puis on renomme.
     const rawBase = mode === "replace" && source
-      ? `${source} — découpé (tmp)`
-      : ((name && String(name).trim()) || (source ? `${source} — découpé` : "NetsuRush — découpé"));
+      ? `${t("cutTimelineName", { name: source })} (tmp)`
+      : ((name && String(name).trim()) || t("cutTimelineName", { name: source || "NetsuRush" }));
     const baseName = await uniqueTimelineName(proj, rawBase);
 
     // Normalise : fps re-rationalisé si l'éditeur a renvoyé un nombre, plans vides écartés.
@@ -1157,7 +1160,7 @@ async function buildCutTimeline(event, opts = {}) {
     try {
       newTl = await mp.ImportTimelineFromFile(xmlPath, { timelineName: baseName });
     } catch (e) {
-      return { ok: false, error: "Import FCPXML refusé par Resolve : " + String(e) };
+      return { ok: false, error: `${t("timelineImportFailed")} (${String(e)})` };
     }
     buildProg(100);
   if (!newTl) return { ok: false, error: t("timelineImportFailed") };

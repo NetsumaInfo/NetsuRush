@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
 import { isMedia } from "@/components/search/searchHelpers";
+import { binLabel } from "@/components/rushes/libraryShared";
 
 type FaceInfo = { faces: number; mtime: number };
 type Props = {
@@ -95,7 +96,7 @@ export function FaceIndexPicker({ open, onClose, onIndex }: Props) {
                 </Tooltip>
                 <span className="min-w-0 flex-1 truncate">{c.name}</span>
                 {info && <span className="shrink-0 text-[11px] font-medium text-[var(--color-ok)]">{t("faceIndexPicker.facesShort", { count: info.faces })}</span>}
-                {c.bin && <span className="shrink-0 text-[11px] text-muted-foreground">{c.bin}</span>}
+                {c.bin && <span className="shrink-0 text-[11px] text-muted-foreground">{binLabel(c.bin)}</span>}
               </button>
             );
           })}

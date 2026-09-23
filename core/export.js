@@ -292,7 +292,7 @@ async function exportClips(event, opts) {
   // A processing pass only means something on a re-encode: it replaces the pixels, which neither a
   // stream copy nor a timeline import can do. The engine then owns the cut AND the encode.
   const proc = profile.workflow === 'video_encode' ? processRun.normalizeProcessSettings(profile.process) : null;
-  const phase = proc ? 'Traitement' : profile.workflow === 'video_encode' ? 'Encode' : 'Découpe';
+  const phase = proc ? 'Processing' : profile.workflow === 'video_encode' ? 'Encode' : 'Cut';
 
   // Horloge UNIQUE du lot : les jetons {date}/{time} doivent donner la même valeur pour tous les
   // plans, sinon un export à cheval sur une seconde sort des noms qui ne se rangent plus ensemble.
@@ -420,7 +420,7 @@ async function buildSpacer(work, firstPart, ext, profile, gpuEncoder) {
     return out;
   } catch (e) {
     // La console du core est branchée sur le journal (logbus) → le repli est TRACÉ, jamais muet.
-    console.warn('export: séparateur de fusion non produit, montage sans noir intercalé —',
+    console.warn('export: merge spacer not produced, joining without black in between:',
       String((e && e.stderr) || e).split('\n').pop());
     return null;
   }
@@ -438,7 +438,7 @@ async function mergeExport(event, opts, ctx) {
   const { ext, base, gpuEncoder, profile } = ctx;
   const total = clips.length;
   const out = opts.savePath || mergeOutputPath(clips, opts.dir || '', ext, base, profile, ctx.now);
-  const send = (pct) => { if (event && event.sender) event.sender.send('export:progress', { jobId: opts.jobId, file: path.basename(out), done: 0, total, pct, phase: 'Fusion' }); };
+  const send = (pct) => { if (event && event.sender) event.sender.send('export:progress', { jobId: opts.jobId, file: path.basename(out), done: 0, total, pct, phase: 'Merge' }); };
 
   const work = await fsp.mkdtemp(path.join(os.tmpdir(), 'netsurush-export-'));
   try {

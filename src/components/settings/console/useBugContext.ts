@@ -14,7 +14,7 @@ export function useBugContext(): { context: BugContext | null; loading: boolean;
       .bugContext()
       .then((r) => setContext(r && r.ok ? (r as BugContext) : null))
       .catch((e) => {
-        logCaught("rapport", "lecture des specs machine", e);
+        logCaught("report", "reading machine specs", e);
         setContext(null);
       })
       .finally(() => setLoading(false));

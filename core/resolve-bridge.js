@@ -10,6 +10,21 @@
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 const { CONFIG, RESOLVE_PYTHON } = require("./config");
+const { t } = require("./i18n");
+
+// Codes resolve_helper.py attaches to the errors a user can meet → message in the interface language.
+/** @type {Record<string, string>} */
+const HELPER_CODES = {
+  notConnected: "resolveOffline",
+  noProject: "noProject",
+  notRunning: "resolveScriptingOff",
+  scriptModuleMissing: "resolveScriptModuleMissing",
+};
+/** @param {{ code?: string, error?: string } | null | undefined} msg */
+function helperMessage(msg) {
+  const key = msg && msg.code ? HELPER_CODES[msg.code] : null;
+  return key ? t(key) : (msg && msg.error) || "resolve helper error";
+}
 
 // Env scripting Resolve. Defaults Windows ; surchargeables via nr.config.json (install).
 function bridgeEnv() {
@@ -63,12 +78,12 @@ function createResolveBridge() {
         pending.delete(msg.id);
         if (p.timer) clearTimeout(p.timer);
         if (msg.ok) p.resolve(msg.result);
-        else p.reject(new Error(msg.error || "resolve helper error"));
+        else p.reject(new Error(helperMessage(msg)));
       }
     });
     child.stderr.on("data", () => {}); // le helper logge sur stdout uniquement
     child.on("exit", () => {
-      for (const p of pending.values()) { if (p.timer) clearTimeout(p.timer); p.reject(new Error("resolve helper terminé")); }
+      for (const p of pending.values()) { if (p.timer) clearTimeout(p.timer); p.reject(new Error(t("resolveHelperStopped"))); }
       pending.clear();
       child = null;
     });
@@ -90,7 +105,7 @@ function createResolveBridge() {
       entry.timer = setTimeout(() => {
         if (!pending.has(id)) return;
         pending.delete(id);
-        reject(new Error("resolve helper sans réponse (timeout)"));
+        reject(new Error(t("resolveTimeout")));
         try { if (child) child.kill(); } catch (_) {}
       }, RPC_TIMEOUT_MS);
       if (entry.timer.unref) entry.timer.unref();
@@ -123,7 +138,11 @@ function createResolveBridge() {
     try {
       const r = await rpc("connect");
       if (r && r.connected) { lastFailAt = 0; lastFailErr = null; }
-      else { lastFailAt = Date.now(); lastFailErr = (r && r.error) || "Resolve injoignable"; }
+      else {
+        if (r && r.code) r.error = helperMessage(r);
+        lastFailAt = Date.now();
+        lastFailErr = (r && r.error) || t("resolveUnavailable");
+      }
       return r;
     } catch (e) {
       lastFailAt = Date.now();

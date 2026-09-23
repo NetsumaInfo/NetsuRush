@@ -16,17 +16,17 @@ const { fsp } = require('./config');
 const { t } = require('./i18n');
 
 // Transcription d'un clip (Media Pool ou fichier local). `input` = chemin vidéo source.
-// model = whisper-turbo (défaut, précis) | parakeet-v3 (rapide). lang = langue ASR (défaut fr).
+// model = whisper-turbo (défaut, précis) | parakeet-v3 (rapide). lang = spoken language (ISO 639-1), 'auto' by default: the engine detects it.
 // verbatim = amorce Whisper pour ÉMETTRE les hésitations (euh/hum) au lieu de les gommer.
 /** @param {any} event @param {{ input?: string, model?: string, lang?: string, track?: number, idleMs?: number, verbatim?: boolean }} [opts] */
 async function transcribe(event, opts = {}) {
-  const { input, model = 'whisper-turbo', lang = 'fr', track = 0, idleMs, verbatim = false } = opts || {};
+  const { input, model = 'whisper-turbo', lang = 'auto', track = 0, idleMs, verbatim = false } = opts || {};
   if (!input) return { ok: false, words: [], error: t('sourceMissing') };
   let audio;
   try {
     audio = await ffmpeg.extractAudio({ input, track });
   } catch (e) {
-    return { ok: false, words: [], error: t('audioExtractFailed') + ' : ' + String((e && e.stderr) || e) };
+    return { ok: false, words: [], error: t('withDetail', { message: t('audioExtractFailed'), detail: String((e && e.stderr) || e) }) };
   }
   const res = await sidecars.transcribeAudio(event, { source: input, audio, model, lang, idleMs, verbatim });
   return res || { ok: false, words: [], error: t('transcriptEmpty') };
@@ -42,7 +42,7 @@ async function detectSilences(event, opts = {}) {
   try {
     audio = await ffmpeg.extractAudio({ input, track });
   } catch (e) {
-    return { ok: false, speech: [], silence: [], error: t('audioExtractFailed') + ' : ' + String((e && e.stderr) || e) };
+    return { ok: false, speech: [], silence: [], error: t('withDetail', { message: t('audioExtractFailed'), detail: String((e && e.stderr) || e) }) };
   }
   const res = await sidecars.runSilence(event, input, audio, params);
   return res || { ok: false, speech: [], silence: [], error: t('silenceEmpty') };
@@ -58,7 +58,7 @@ async function detectFillers(event, opts = {}) {
   try {
     audio = await ffmpeg.extractAudio({ input, track });
   } catch (e) {
-    return { ok: false, fillers: [], error: t('audioExtractFailed') + ' : ' + String((e && e.stderr) || e) };
+    return { ok: false, fillers: [], error: t('withDetail', { message: t('audioExtractFailed'), detail: String((e && e.stderr) || e) }) };
   }
   const res = await sidecars.runFiller(event, input, audio, { words, silences, params });
   return res || { ok: false, fillers: [], error: t('fillerEmpty') };
@@ -77,7 +77,7 @@ async function waveform(opts = {}) {
   try {
     audio = await ffmpeg.extractAudio({ input, track });
   } catch (e) {
-    return { ok: false, error: t('audioExtractFailed') + ' : ' + String((e && e.stderr) || e) };
+    return { ok: false, error: t('withDetail', { message: t('audioExtractFailed'), detail: String((e && e.stderr) || e) }) };
   }
   try {
     const buf = await fsp.readFile(audio);
@@ -113,7 +113,7 @@ async function exportCut(opts = {}) {
   const { input, segments = [], format = 'mp4', destPath } = opts || {};
   if (!input) return { ok: false, error: t('sourceMissing') };
   if (!segments.length) return { ok: false, error: t('noSegments') };
-  const out = destPath || input.replace(/\.[^.]+$/, ` — sans silences.${format}`);
+  const out = destPath || input.replace(/\.[^.]+$/, ` — ${t('silenceCutSuffix')}.${format}`);
 
   if (format === 'fcpxml') {
     try {
@@ -139,7 +139,7 @@ async function exportCut(opts = {}) {
       await fsp.writeFile(out, xml, 'utf8');
       return { ok: true, path: out, clips: shots.length };
     } catch (e) {
-      return { ok: false, error: 'FCPXML : ' + String((e && e.message) || e) };
+      return { ok: false, error: 'FCPXML: ' + String((e && e.message) || e) };
     }
   }
 
@@ -161,7 +161,7 @@ async function exportCut(opts = {}) {
     ]);
     return { ok: true, path: out, clips: segments.length };
   } catch (e) {
-    return { ok: false, error: 'MP4 : ' + String((e && e.stderr) || e) };
+    return { ok: false, error: 'MP4: ' + String((e && e.stderr) || e) };
   }
 }
 

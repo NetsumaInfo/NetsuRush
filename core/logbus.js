@@ -186,15 +186,15 @@ function attach(b) {
   // avec un trou exactement là où était la cause. On la journalise et on laisse le service tourner :
   // l'utilisateur récupère la cause, l'action en cours a de toute façon déjà échoué.
   process.on('unhandledRejection', (reason) => {
-    try { emit('core', 'error', `Promesse rejetée sans gestion — ${fmt(reason)}`); } catch (_) {}
+    try { emit('core', 'error', `Unhandled promise rejection: ${fmt(reason)}`); } catch (_) {}
   });
   // Exception non attrapée : le processus DOIT mourir (état imprévisible), mais pas avant que la
   // cause soit dans l'anneau et poussée aux abonnés SSE — d'où la sortie différée.
   process.on('uncaughtException', (err) => {
-    try { emit('core', 'error', `Exception non attrapée — ${fmt(err)}`); } catch (_) {}
+    try { emit('core', 'error', `Uncaught exception: ${fmt(err)}`); } catch (_) {}
     setTimeout(() => process.exit(1), 150);
   });
-  emit('system', 'log', 'Console NetsuRush démarrée.');
+  emit('system', 'log', 'NetsuRush console started.');
 }
 
 function snapshot() { return logs.slice(); }

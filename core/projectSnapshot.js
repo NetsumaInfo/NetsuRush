@@ -170,7 +170,7 @@ function createProjectSnapshot({ dataDir, broadcast }) {
     // Un seul sweep à la fois : les auto-déclencheurs (connexion + timelinesEpoch) peuvent en lancer
     // plusieurs → sans ce garde ils s'empileraient sur le pont séquentiel = extrêmement lent.
     if (capturing && opts.waitIfBusy) {
-      note('Attente de la mise en cache en cours…', null);
+      note(t('snapshotWaitingCapture'), null);
       const deadline = Date.now() + 180_000;
       while (capturing && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 200));
     }
@@ -245,13 +245,13 @@ function createProjectSnapshot({ dataDir, broadcast }) {
           // Le build incrémental ne relit pas les timelines déjà cachées. Seule la timeline courante,
           // signalée modifiée par Resolve, est vérifiée ; les nouvelles timelines restent lues.
           if (opts.skipExistingCuts && !opts.requireComplete && previous && !needsRefresh) {
-            note(`Déjà en cache… ${done}/${total}`, pct);
+            note(t('snapshotAlreadyCached', { done, total }), pct);
             continue;
           }
           // Basse priorité : cède au live (Media Pool/vignettes/ouverture de timeline) AVANT de reprendre
           // → les médias se chargent d'abord, le cache se remplit dans les creux.
           if (opts.beforeEach) await opts.beforeEach();
-          note(`Mise en cache des plans… ${done}/${total}`, pct);
+          note(t('snapshotCachingShots', { done, total }), pct);
           if (!readers.readTimelineCutsByName) continue;
           const r = await readers.readTimelineCutsByName(name).catch(() => null);
           if (r && r.ok) {
@@ -260,7 +260,7 @@ function createProjectSnapshot({ dataDir, broadcast }) {
             const unchanged = opts.skipExistingCuts && previousCuts
               && cutsFingerprint(previousCuts) === cutsFingerprint(r.cuts);
             if (unchanged) {
-              note(`Vérification… ${done}/${total}`, pct);
+              note(t('snapshotVerifying', { done, total }), pct);
               continue;
             }
             if (snap && snap.cuts && timelineName !== name) delete snap.cuts[name];

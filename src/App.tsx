@@ -151,7 +151,7 @@ function Shell() {
   useEffect(() => {
     nr.gpuStatus?.().then((s) => {
       console.info("[NetsuRush] GPU", s.features ?? s.error, "· navigator.gpu:", "gpu" in navigator);
-    }) ?? console.info("[NetsuRush] gpuStatus indisponible (core) · navigator.gpu:", "gpu" in navigator);
+    }) ?? console.info("[NetsuRush] gpuStatus unavailable (core) · navigator.gpu:", "gpu" in navigator);
   }, []);
 
   // « Cache projet » : s'abonne à la file d'attente des envois différés (charge + SSE outbox:changed).

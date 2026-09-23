@@ -155,7 +155,7 @@ test("Resolve insertion never deletes and rebuilds existing timeline clips", () 
 test("an explicit Resolve timeline target never falls back or creates a replacement", () => {
   const root = path.join(__dirname, "..");
   const timelineSource = fs.readFileSync(path.join(root, "core", "timeline.js"), "utf8");
-  const guardedTargets = timelineSource.match(/if \(!tl\) return \{ ok: false, error: `\$\{t\("timelineMissing"\)\}: \$\{targetName\}` \};/g) || [];
+  const guardedTargets = timelineSource.match(/if \(!tl\) return \{ ok: false, error: t\("withDetail", \{ message: t\("timelineMissing"\), detail: targetName \}\) \};/g) || [];
   assert.equal(guardedTargets.length, 2, "mono-source and multi-source sends must reject a missing explicit target");
   assert.doesNotMatch(timelineSource, /if \(targetName\) tl = await getTimelineByName\(proj, targetName\);\s*if \(!tl\) tl = await proj\.GetCurrentTimeline\(\);/);
 });

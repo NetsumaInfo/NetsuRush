@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Search, ScanFace } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { detectMentionQuery, insertMention, type MentionChar } from "@/components/search/mentions";
 
@@ -30,7 +30,7 @@ export function MentionInput({ value, onChange, onSubmit, roster, placeholder, b
       .sort((a, b) => {
         const ap = a.name.toLowerCase().startsWith(q) ? 0 : 1;
         const bp = b.name.toLowerCase().startsWith(q) ? 0 : 1;
-        return ap - bp || a.name.localeCompare(b.name);
+        return ap - bp || a.name.localeCompare(b.name, uiLocale());
       })
       .slice(0, 8);
   }, [mention, roster]);

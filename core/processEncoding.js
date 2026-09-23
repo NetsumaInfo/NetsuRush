@@ -43,7 +43,7 @@ async function audioModeForContainer(container, audioMode, opts) {
   if (audioMode === 'none') return audioMode;
   const written = writtenAudioCodec(audioMode, await sourceAudioCodec(opts));
   if (!written || containerAcceptsAudio(container, written)) return audioMode;
-  console.warn(`[encode] ${written} n'entre pas dans un ${container} → repli AAC`);
+  console.warn(`[encode] ${written} does not fit in ${container}, falling back to AAC`);
   return 'aac';
 }
 

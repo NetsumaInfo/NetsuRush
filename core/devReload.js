@@ -58,16 +58,16 @@ function watchModules(dir, rebuild, opts = {}) {
         for (const other of opts.also || []) count += purge(other);
         try {
           rebuild();
-          console.log(`[dev] ${label} rechargé (${count} module(s)) — pas besoin de redémarrer.`);
+          console.log(`[dev] ${label} reloaded (${count} module(s)), no restart needed.`);
         } catch (error) {
           // Un module à moitié écrit casse le require : on le dit et on garde l'ancien objet,
           // qui vient d'être remplacé par… rien. La prochaine sauvegarde réparera.
-          console.warn(`[dev] ${label} : rechargement refusé (${(error && error.message) || error})`);
+          console.warn(`[dev] ${label}: reload refused (${(error && error.message) || error})`);
         }
       }, SETTLE_MS);
     });
   } catch (error) {
-    console.warn(`[dev] surveillance de ${label} indisponible :`, (error && error.message) || error);
+    console.warn(`[dev] watching ${label} unavailable:`, (error && error.message) || error);
     return () => {};
   }
   return () => {

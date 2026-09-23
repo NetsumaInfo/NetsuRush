@@ -55,7 +55,7 @@ export function useRotoSession(active: UpSource | null) {
   // Point sélectionné (table OU glisser sur le viewer) : {frame, obj, index parmi l'objet}. Lueur + drag.
   const [selectedPoint, setSelectedPoint] = useState<{ f: number; obj: number; index: number } | null>(null);
   const [removeParams, setRemoveParams] = useState<RotoRemoveParams>(DEFAULT_REMOVE_PARAMS);
-  const [busy, setBusy] = useState<string | null>(null);   // libellé de l'action en cours
+  const [busy, setBusy] = useState<string | null>(null);   // `roto:busy.<key>` of the running action
   const [prog, setProg] = useState<RotoProgress | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -121,7 +121,7 @@ export function useRotoSession(active: UpSource | null) {
     setObjects([{ id: 1, name: i18n.t("roto:object.name", { n: 1 }) }]); setActiveObj(1);
     orderRef.current = [];
     if (!active) return;
-    setBusy("Ouverture…");
+    setBusy("open");
     nr.rotoOpen({ video: active.path, in: active.in, out: active.out, model: samModel })
       .then((r) => {
         if (seqRef.current !== seq) return;
@@ -157,7 +157,7 @@ export function useRotoSession(active: UpSource | null) {
   useEffect(() => nr.onRotoProgress((p) => {
     setProg(p);
     if (p.extracted) setDims((d) => (d ? { ...d, frames: p.extracted! } : d));
-    const live = busyRef.current === "Suivi" || busyRef.current === "Matte fin";
+    const live = busyRef.current === "track" || busyRef.current === "matteFine";
     if (p.frame !== undefined && live && workRef.current) {
       const f = p.frame;
       setFrame(f);
@@ -202,7 +202,7 @@ export function useRotoSession(active: UpSource | null) {
     const pt: RotoPoint = { x: nx, y: ny, label, obj: activeObj };
     setPointsByFrame((m) => ({ ...m, [frame]: [...(m[frame] || []), pt] }));
     orderRef.current.push(frame);
-    setErr(null); setNote(null); setPreviewSrc(null); setBusy("Segmentation…");
+    setErr(null); setNote(null); setPreviewSrc(null); setBusy("segment");
     try {
       const r = await nr.rotoAddPoint({ frame, x: nx * dims.w, y: ny * dims.h, label, obj: activeObj });
       if (r.ok) { setOverlaySrc(r.mask || null); setTracked(false); }
@@ -227,11 +227,12 @@ export function useRotoSession(active: UpSource | null) {
   // renvoie la frame du point retiré → on retire localement le dernier point de CETTE frame (aligné sur
   // le replay python). Plus de désync avec un orderRef local (effacements/retraits le corrompaient).
   const undoPoint = useCallback(async () => {
-    if (busy) return;
-    setBusy("Annulation…"); setErr(null);
+    // Nothing placed: Ctrl+Z has nothing to undo, and the backend would only answer with an error.
+    if (busy || !Object.values(pointsByFrame).some((p) => p.length)) return;
+    setBusy("undo"); setErr(null);
     try {
       const r = await nr.rotoUndoPoint();
-      if (!r.ok) { if (r.error && r.error !== "aucun point à annuler") setErr(r.error); return; }
+      if (!r.ok) { if (r.error) setErr(r.error); return; }
       const f = r.frame;
       if (f !== undefined) {
         setPointsByFrame((m) => {
@@ -246,7 +247,7 @@ export function useRotoSession(active: UpSource | null) {
       }
       setSelectedPoint(null); setTracked(false);
     } catch (e) { fail(e); } finally { setBusy(null); }
-  }, [busy, frame]);
+  }, [busy, frame, pointsByFrame]);
 
   // Sélectionne un point (table/viewer) — lueur + cible du glisser. Efface via null.
   const selectPoint = useCallback((sel: { f: number; obj: number; index: number } | null) => setSelectedPoint(sel), []);
@@ -260,7 +261,7 @@ export function useRotoSession(active: UpSource | null) {
       const upd = all.map((p) => (p.obj === obj && ++seen === index ? { ...p, x: nx, y: ny } : p));
       return { ...m, [f]: upd };
     });
-    setErr(null); setBusy("Segmentation…");
+    setErr(null); setBusy("segment");
     try {
       const r = await nr.rotoMovePoint({ frame: f, obj, index, x: nx * dims.w, y: ny * dims.h });
       if (r.ok) { if (f === frame) setOverlaySrc(r.mask || null); setTracked(false); }
@@ -270,7 +271,7 @@ export function useRotoSession(active: UpSource | null) {
 
   // Efface les points (frame courante / objet / tout) — le backend rejoue le reste.
   const clearPoints = useCallback(async (scope: { frame?: number; obj?: number }) => {
-    setErr(null); setBusy("Recalcul…"); setSelectedPoint(null);
+    setErr(null); setBusy("recalc"); setSelectedPoint(null);
     setPointsByFrame((m) => {
       const next: Record<number, RotoPoint[]> = {};
       for (const [f, pts] of Object.entries(m)) {
@@ -368,7 +369,7 @@ export function useRotoSession(active: UpSource | null) {
   // Retire UN point précis (table des points) — le backend rejoue le reste.
   const removePoint = useCallback(async (f: number, obj: number, index: number) => {
     if (busy) return;
-    setBusy("Recalcul…"); setErr(null);
+    setBusy("recalc"); setErr(null);
     setPointsByFrame((m) => {
       const all = m[f] || [];
       // index = position parmi les points de CET objet sur la frame.
@@ -391,9 +392,10 @@ export function useRotoSession(active: UpSource | null) {
   // Actions longues (propagation, export, matte, suppression) — même gestion busy/erreur/note.
   const action = useCallback(async (
     fn: () => Promise<{ ok: boolean; error?: string; output?: string; frames?: number; canceled?: boolean; preview?: string }>,
-    label: string, onOk?: (r: { output?: string; frames?: number; canceled?: boolean; preview?: string }) => void,
+    busyKey: string, onOk?: (r: { output?: string; frames?: number; canceled?: boolean; preview?: string }) => void,
   ) => {
-    setErr(null); setNote(null); setBusy(label); setProg(null);
+    setErr(null); setNote(null); setBusy(busyKey); setProg(null);
+    const label = i18n.t(`roto:busy.${busyKey}`);
     try {
       const r = await fn();
       if (r.ok) {
@@ -411,7 +413,7 @@ export function useRotoSession(active: UpSource | null) {
     useApp.getState().offerCloseForRam();
     return action(() => nr.rotoPropagate({
       mode, frame, inF: inF ?? undefined, outF: outF ?? undefined, count,
-    }), "Suivi", () => { setTracked(true); setDeduped(false); setRefined(false); });
+    }), "track", () => { setTracked(true); setDeduped(false); setRefined(false); });
   }, [action, frame, inF, outF]);
 
   // Suivi pas-à-pas : propage UNE image dans la direction demandée puis avance le playhead dessus
@@ -421,7 +423,7 @@ export function useRotoSession(active: UpSource | null) {
     return action(() => nr.rotoPropagate({
       mode: dir > 0 ? "forward" : "backward", frame,
       inF: inF ?? undefined, outF: outF ?? undefined, count: 1,
-    }), "Suivi", () => { setTracked(true); setDeduped(false); setRefined(false); setFrame(target); });
+    }), "track", () => { setTracked(true); setDeduped(false); setRefined(false); setFrame(target); });
   }, [action, frame, inF, outF]);
 
   // Efface le suivi (mattes) en gardant TOUS les points — repartir propre sans re-annoter.
@@ -429,7 +431,7 @@ export function useRotoSession(active: UpSource | null) {
     action(async () => {
       const r = await nr.rotoClearTracking();
       return { ...r, output: undefined };
-    }, "Réinitialisation du suivi", () => { setTracked(false); setDeduped(false); setRefined(false); setOverlaySrc(null); setOverlayFull(false); }),
+    }, "resetTrack", () => { setTracked(false); setDeduped(false); setRefined(false); setOverlaySrc(null); setOverlayFull(false); }),
   [action]);
 
   // Dédup animation : les frames quasi identiques (tenues) reçoivent la MÊME matte → contour stable.
@@ -438,24 +440,24 @@ export function useRotoSession(active: UpSource | null) {
     return action(async () => {
       const r = await nr.rotoDedupe({ threshold });
       return { ok: r.ok, error: r.error, output: r.ok ? i18n.t("roto:note.dedupeOutput", { groups: r.groups || 0, changed: r.changed || 0 }) : undefined };
-    }, "Dédoublonnage", () => setDeduped(true));
+    }, "dedupe", () => setDeduped(true));
   }, [action]);
   const dedupeRestore = useCallback(() =>
-    action(() => nr.rotoDedupe({ restore: true }), "Restauration des mattes", () => setDeduped(false)), [action]);
+    action(() => nr.rotoDedupe({ restore: true }), "restoreMattes", () => setDeduped(false)), [action]);
 
   const cancel = useCallback(() => { void nr.rotoCancel().catch(() => {}); }, []);
 
   // Export : portée = union (obj undefined) ou UN objet ; bg = couleur du mode d'affichage.
   const exportAs = useCallback((format: string, obj?: number) => {
     useApp.getState().offerCloseForRam();
-    return action(() => nr.rotoExport({ format, obj, bg: view.bg }), "Export");
+    return action(() => nr.rotoExport({ format, obj, bg: view.bg }), "export");
   }, [action, view.bg]);
   // Matte fin : l'aperçu live vient de `mattes_refined/`, pas des mattes du suivi — le résultat est
   // visible image par image au lieu d'attendre la fin.
   const refine = useCallback((engine: string) => {
     useApp.getState().offerCloseForRam();
     liveDirRef.current = "mattes_refined/union";
-    return action(() => nr.rotoRefine({ engine, ...matteParams }), "Matte fin", (r) => {
+    return action(() => nr.rotoRefine({ engine, ...matteParams }), "matteFine", (r) => {
       if (r.canceled) return;
       setRefined(true);
       setUseRefined(true);
@@ -474,7 +476,7 @@ export function useRotoSession(active: UpSource | null) {
   }, [frame]);
   const removeSelected = useCallback((engine: string) => {
     useApp.getState().offerCloseForRam();
-    return action(() => nr.rotoObjectRemove({ engine, ...removeParams }), "Suppression");
+    return action(() => nr.rotoObjectRemove({ engine, ...removeParams }), "remove");
   }, [action, removeParams]);
 
   // TEST sur l'image courante : le moteur tourne sur cette seule image (fenêtre courte pour la
@@ -494,11 +496,11 @@ export function useRotoSession(active: UpSource | null) {
     }, []);
   const testRefine = useCallback((engine: string) =>
     action(() => nr.rotoRefine({ engine, warmup: matteParams.warmup, maxSize: matteParams.maxSize, frame }),
-      "Test matte (1 image)",
+      "testMatte",
       onPreview("refine", i18n.t("roto:test.matteImage", { n: frame + 1 }), frame)),
     [action, frame, matteParams.maxSize, matteParams.warmup, onPreview]);
   const testRemove = useCallback((engine: string) =>
-    action(() => nr.rotoObjectRemove({ engine, ...removeParams, frame }), "Test suppression (1 image)",
+    action(() => nr.rotoObjectRemove({ engine, ...removeParams, frame }), "testRemove",
       onPreview("remove", i18n.t("roto:test.removeImage", { n: frame + 1 }), frame)), [action, frame, removeParams, onPreview]);
   // Fermeture du comparateur : le viewer reprend la place, avec un overlay qui peut dater d'avant
   // les retouches faites pendant que le test l'occupait.

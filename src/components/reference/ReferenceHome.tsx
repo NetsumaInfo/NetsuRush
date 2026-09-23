@@ -448,7 +448,7 @@ export function ReferenceHome({
       if (projectPath && openDroppedProject([projectPath])) return;
       // Un projet lâché ne doit JAMAIS retomber en silence : sans chemin (pont indisponible) ou sans
       // action d'ouverture, on le dit, plutôt que de laisser l'accueil immobile.
-      logError("board:home", `dépôt .netsu sans ouverture — ${projectFile.name} (chemin: ${projectPath || "non résolu"})`);
+      logError("board:home", `.netsu dropped but not opened: ${projectFile.name} (path: ${projectPath || "unresolved"})`);
       useBoard.getState().setNotice({ kind: "error", text: t("notice.dropProjectFailed", { name: projectFile.name }) });
       return;
     }

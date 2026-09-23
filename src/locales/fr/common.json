@@ -70,7 +70,8 @@
     "folderImportUnavailable": "Import de dossier indisponible hors application.",
     "emptyFolderName": "Le nom du dossier est vide",
     "invalidFolderName": "Le nom du dossier ne peut pas contenir « / » ni « \\ »",
-    "folder": "Dossier"
+    "folder": "Dossier",
+    "folderExists": "Un dossier « {{name}} » existe déjà ici"
   },
   "spell": {
     "title": "Correction orthographique",

@@ -11,7 +11,7 @@ async function completeAuth(url: string): Promise<void> {
   try {
     const ott = new URL(url).searchParams.get("ott");
     if (!ott) {
-      console.warn("[auth] deep-link sans ott:", url);
+      console.warn("[auth] deep link without ott:", url);
       return;
     }
     const res = (await authClient.$fetch("/cross-domain/one-time-token/verify", {
@@ -19,14 +19,14 @@ async function completeAuth(url: string): Promise<void> {
       body: { token: ott },
     })) as { error?: unknown };
     if (res?.error) {
-      console.error("[auth] échec de vérification du jeton", res.error);
+      console.error("[auth] token verification failed", res.error);
       return;
     }
     await authClient.getSession(); // hydrate la session (signal useConvexAuth)
     stampAuth();
-    console.info("[auth] session établie via deep-link");
+    console.info("[auth] session established via deep link");
   } catch (e) {
-    console.error("[auth] complétion deep-link", e);
+    console.error("[auth] deep link completion", e);
   }
 }
 

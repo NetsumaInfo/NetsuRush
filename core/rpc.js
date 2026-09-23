@@ -138,9 +138,9 @@ function createRpc() {
   // laissait l'ancien code tourner, redémarrage compris dans la facture.
   const aeDir = path.join(__dirname, "ae");
   watchModules(path.join(__dirname, "transfer"), reloadTransfer,
-    { label: "transfert de timeline", also: [aeDir] });
+    { label: "timeline transfer", also: [aeDir] });
   watchModules(aeDir, reloadTransfer,
-    { label: "lecture de timeline", also: [path.join(__dirname, "transfer")] });
+    { label: "timeline reading", also: [path.join(__dirname, "transfer")] });
   // Réglages du renderer PARTAGÉS entre origines (app Tauri / panneau CEP / fenêtres détachées).
   const prefs = createPrefs({ broadcast });
   // Miroir durable du localStorage : le profil WebView2 n'est pas un stockage sûr (recréé, nettoyé,
@@ -1166,7 +1166,7 @@ function createRpc() {
         input: src, shader, scale, codec: "hevc_nvenc", outDir: refStore.assetsDir,
         whole: !segs, segments: segs, importBack: false, baseName: base,
       });
-      if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || "échec upscale turbo" };
+      if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || t("upscaleFailed") };
       return { ok: true, path: remember(r.outputs[0]) };
     }
 
@@ -1182,7 +1182,7 @@ function createRpc() {
         : isGif
           ? await sidecars.runUpscaleGif({ input: src, out, model, scale, denoise })
           : await sidecars.runUpscaleImage({ input: src, out, model, scale, denoise });
-      if (!r || !r.ok || !r.output) return { ok: false, error: (r && r.error) || "échec upscale image" };
+      if (!r || !r.ok || !r.output) return { ok: false, error: (r && r.error) || t("upscaleFailed") };
       return { ok: true, path: remember(r.output), width: r.width, height: r.height };
     }
 
@@ -1191,7 +1191,7 @@ function createRpc() {
       input: src, model, scale, codec: "x265", denoise, audio: "aac",
       outDir: refStore.assetsDir, whole: !segments, segments, importBack: false, baseName: base,
     });
-    if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || "échec upscale vidéo" };
+    if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || t("upscaleFailed") };
     return { ok: true, path: remember(r.outputs[0]) };
   }
 
@@ -1219,7 +1219,7 @@ function createRpc() {
   const assetSweepTimer = setTimeout(() => {
     void boardStorage.free({}).then((swept) => {
       if (swept.ok && swept.files) {
-        logbus.emit("core", "info", `[board] ${swept.files} double(s) d'asset retirés (${Math.round(swept.bytes / 1048576)} Mo)`);
+        logbus.emit("core", "info", `[board] ${swept.files} duplicate asset(s) removed (${Math.round(swept.bytes / 1048576)} MB)`);
       }
     }).catch(() => { /* le magasin n'est pas critique : le prochain démarrage réessaiera */ });
   }, ASSET_SWEEP_DELAY_MS);

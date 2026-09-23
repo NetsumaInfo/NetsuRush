@@ -153,33 +153,33 @@ function createHostPower({
         if (!location.ok) return location;
         folder = location.folder;
         database = location.database;
-        progress('Sauvegarde du projet Resolve…', 5);
+        progress(t('hostPowerSavingProject'), 5);
         const saved = await pm.SaveProject();
         if (!saved) return { ok: false, error: t('projectSaveFailed') };
         // Photo des lectures (Media Pool + timelines) TANT QUE Resolve répond → servie offline pendant
         // la fermeture (l'UI garde ses rushes/timelines). La fermeture est refusée si le cache ne peut
         // pas être vérifié : Resolve n'est jamais tué sur une sauvegarde ou un snapshot incertain.
         if (!projectSnapshot || !captureReaders) return { ok: false, error: t('projectCacheUnavailable') };
-        progress('Vérification du cache projet…', 10);
+        progress(t('hostPowerCheckingCache'), 10);
         const cap = await projectSnapshot.capture(
           captureReaders,
           (msg, pct) => progress(msg, pct),
           { skipExistingCuts: true, waitIfBusy: true, requireComplete: true },
         );
         if (!cap || !cap.ok) {
-          console.log(`[snapshot] fermeture annulée : ${cap && cap.error ? cap.error : 'capture incomplète'}`);
+          console.log(`[snapshot] close cancelled: ${cap && cap.error ? cap.error : 'incomplete capture'}`);
           return { ok: false, error: (cap && cap.error) || t('projectCacheIncomplete') };
         }
-        console.log(`[snapshot] capture vérifiée avant fermeture : ${cap.clips} rush(s), ${cap.timelines} timeline(s) (${cap.fresh} neuves)`);
+        console.log(`[snapshot] capture verified before close: ${cap.clips} clip(s), ${cap.timelines} timeline(s) (${cap.fresh} new)`);
       }
     } catch (e) {
-      return { ok: false, error: `${t('projectSaveFailed')} : ${String(e && /** @type {Error} */ (e).message || e)}` };
+      return { ok: false, error: t('withReason', { message: t('projectSaveFailed'), detail: String(e && /** @type {Error} */ (e).message || e) }) };
     }
     // Arrête le helper Python (il tient un handle vers un Resolve qu'on s'apprête à tuer) → respawn propre.
     try { bridge.stop(); } catch (_) {}
     const r = await taskkillFn(RESOLVE_IMAGE, true);
-    if (!r.ok) return { ok: false, error: r.error || 'échec de la fermeture de Resolve' };
-    progress('Confirmation de la fermeture de Resolve…', 99);
+    if (!r.ok) return { ok: false, error: r.error || t('hostPowerResolveCloseFailed') };
+    progress(t('hostPowerConfirmingClose'), 99);
     if (!(await waitForHostStopped('resolve'))) {
       return { ok: false, error: t('applicationCloseTimeout') };
     }
@@ -192,7 +192,7 @@ function createHostPower({
     const { project, page, folder = [], database = null } = target;
     const exe = resolveExe();
     if (!exe) return { ok: false, error: t('resolveExeMissing') };
-    progress('Lancement de DaVinci Resolve…', 5);
+    progress(t('hostPowerLaunchingResolve'), 5);
     if (!(await isImageRunningFn(RESOLVE_IMAGE))) {
       try { spawnFn(exe, [], { detached: true, stdio: 'ignore' }).unref(); }
       catch (e) { return { ok: false, error: String(e) }; }
@@ -210,12 +210,12 @@ function createHostPower({
         if (c && c.connected) { connected = true; break; }
       } catch (_) {}
       const left = Math.max(0, deadline - Date.now());
-      progress('Attente de Resolve…', 5 + Math.round(90 * (1 - left / REOPEN_TIMEOUT_MS)));
+      progress(t('hostPowerWaitingResolve'), 5 + Math.round(90 * (1 - left / REOPEN_TIMEOUT_MS)));
     }
     if (!connected) return { ok: false, error: t('resolveTimeout') };
     // Recharge le projet s'il n'est pas déjà ouvert (Resolve rouvre souvent le dernier projet seul).
     if (project) {
-      progress(`Ouverture du projet « ${project} »…`, 96);
+      progress(t('hostPowerOpeningProject', { project }), 96);
       try {
         const resolve = await resolveMod.getResolve();
         const pm = resolve ? await resolve.GetProjectManager() : null;
@@ -226,18 +226,18 @@ function createHostPower({
           const located = await openResolveProjectLocation(pm, folder, database);
           if (!located.ok) return located;
           const loaded = await pm.LoadProject(project);
-          if (!loaded) return { ok: false, error: `${t('resolveProjectOpenFailed')} : ${project}` };
+          if (!loaded) return { ok: false, error: t('withReason', { message: t('resolveProjectOpenFailed'), detail: project }) };
           current = await pm.GetCurrentProject();
           currentName = current ? await current.GetName() : null;
-          if (currentName !== project) return { ok: false, error: `${t('resolveProjectOpenFailed')} : ${project}` };
+          if (currentName !== project) return { ok: false, error: t('withReason', { message: t('resolveProjectOpenFailed'), detail: project }) };
         }
         // Retour sur la page d'où on est parti (Montage par défaut : la fermeture a pu se faire hors ligne).
         if (resolve) { try { await resolve.OpenPage(String(page || 'edit')); } catch (_) {} }
       } catch (e) {
-        return { ok: false, error: `${t('resolveProjectOpenFailed')} : ${String(e && e.message || e)}` };
+        return { ok: false, error: t('withReason', { message: t('resolveProjectOpenFailed'), detail: String(e && e.message || e) }) };
       }
     }
-    progress('Resolve prêt.', 100);
+    progress(t('hostPowerResolveReady'), 100);
     return { ok: true, project, page };
   }
 
@@ -252,7 +252,7 @@ function createHostPower({
       projectPath = (snap && snap.projectPath) || null;
     } catch (_) {}
     const r = await adobeBridge.close(app);
-    if (!r.ok) return { ok: false, error: r.error || "échec de la fermeture" };
+    if (!r.ok) return { ok: false, error: r.error || t('adobeCloseFailed') };
     if (!r.already && !(await waitForHostStopped(app))) {
       return { ok: false, error: t('applicationCloseTimeout') };
     }
@@ -262,9 +262,9 @@ function createHostPower({
   }
 
   async function reopenAdobe(app, projectPath) {
-    progress('Relancement de l’application…', 20);
+    progress(t('boostReopening'), 20);
     const r = await adobeBridge.launch(app, projectPath || null);
-    if (!r.ok) return { ok: false, error: r.error || 'échec du lancement' };
+    if (!r.ok) return { ok: false, error: r.error || t('adobeReopenFailed') };
     const deadline = Date.now() + REOPEN_TIMEOUT_MS;
     let running = false;
     while (Date.now() < deadline) {
@@ -275,7 +275,7 @@ function createHostPower({
       await sleepFn(POLL_MS);
     }
     if (!running) return { ok: false, error: t('applicationStartTimeout') };
-    progress('Application relancée.', 100);
+    progress(t('hostPowerAppReopened'), 100);
     return { ok: true };
   }
 

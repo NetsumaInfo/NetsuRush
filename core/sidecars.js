@@ -16,6 +16,7 @@ const { codecExt: upscaleExt, hasFiles, sanitizeName } = require('./utils');
 const { resolveProcessEncoding } = require('./processEncoding');
 const { outputKind, imageSpec, imageTarget, imagePayload } = require('./imageOutput');
 const { MANIFEST, modelDir, RIFE_TORCH_DIR, RIFE_ARCH_DIR, GMFSS_DIR, DRBA_DIR, DRBA_ARCH_DIR } = require('./models');   // dossiers de poids gérés (BEN2/MatAnyone…) → env sidecar
+const { t } = require('./i18n');
 const logbus = require('./logbus'); // journal Console : forward du stderr des sidecars python
 const mediaIdent = require('./mediaIdent'); // identité de contenu : le même rush sous un autre nom
 
@@ -94,7 +95,7 @@ function runDetect(event, args, tagPath) {
     const wd = setInterval(() => {
       if (Date.now() - last > DETECT_IDLE_MS) {
         try { py.kill('SIGKILL'); } catch (_) {}
-        finish({ scenes: [], error: 'python: délai dépassé (aucune progression)' });
+        finish({ scenes: [], error: t('engineStalled') });
       }
     }, 5000);
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
@@ -108,7 +109,7 @@ function runDetect(event, args, tagPath) {
     py.on('close', () => {
       const line = out.trim().split('\n').pop() || '';
       try { finish(JSON.parse(line)); }
-      catch (_) { finish({ scenes: [], error: 'python: ' + (errTail || 'sortie illisible') }); }
+      catch (_) { finish({ scenes: [], error: errTail ? 'python: ' + errTail : t('engineOutputUnreadable') }); }
     });
     py.on('error', (e) => finish({ scenes: [], error: String(e) }));
   });
@@ -150,7 +151,7 @@ function makeDetectDaemon() {
     const onDead = () => {
       proc = null; buf = '';
       if (wd) { clearInterval(wd); wd = null; }
-      for (const resolve of pending.values()) resolve({ scenes: [], error: 'sidecar détection interrompu' });
+      for (const resolve of pending.values()) resolve({ scenes: [], error: t('detectEngineStopped'), daemonDown: true });
       pending.clear();
     };
     proc.on('exit', onDead);
@@ -159,7 +160,7 @@ function makeDetectDaemon() {
   return {
     req(payload, onProg) {
       start();
-      if (!proc) return Promise.resolve({ scenes: [], error: 'sidecar détection injoignable' });
+      if (!proc) return Promise.resolve({ scenes: [], error: t('detectEngineUnavailable'), daemonDown: true });
       const id = ++seq;
       curProg = onProg || null;
       touch();
@@ -221,7 +222,8 @@ async function detectScenes(event, filePath, threshold = 0.5, model = 'transnetv
   const concurrency = detectPool.pool.filter((slot) => slot.busy).length || 1;
   try {
     let r = await e.d.req({ cmd: 'detect', path: filePath, threshold: Number(threshold), model, options, concurrency }, onProg);
-    if (r && r.error && /interrompu|injoignable/.test(String(r.error))) {
+    // `daemonDown`, never the message: the text follows the interface language.
+    if (r && r.daemonDown) {
       r = await runDetect(event, ['detect', filePath, String(threshold), model, JSON.stringify(options || {}), String(concurrency)], filePath);
     }
     return r;
@@ -345,7 +347,7 @@ function runSilence(event, source, audio, params = {}) {
     const wd = setInterval(() => {
       if (Date.now() - last > DETECT_IDLE_MS) {
         try { py.kill('SIGKILL'); } catch (_) {}
-        finish({ ok: false, speech: [], silence: [], error: 'silero: délai dépassé (aucune progression)' });
+        finish({ ok: false, speech: [], silence: [], error: t('engineStalled') });
       }
     }, 5000);
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
@@ -362,7 +364,7 @@ function runSilence(event, source, audio, params = {}) {
     py.on('close', () => {
       const line = out.trim().split('\n').pop() || '';
       try { finish(JSON.parse(line)); }
-      catch (_) { finish({ ok: false, speech: [], silence: [], error: 'silero: ' + (errTail || 'sortie illisible') }); }
+      catch (_) { finish({ ok: false, speech: [], silence: [], error: errTail ? 'silero: ' + errTail : t('engineOutputUnreadable') }); }
     });
     py.on('error', (e) => finish({ ok: false, speech: [], silence: [], error: String(e) }));
   });
@@ -380,7 +382,7 @@ function runFiller(event, source, audio, payload = {}) {
     const wd = setInterval(() => {
       if (Date.now() - last > DETECT_IDLE_MS) {
         try { py.kill('SIGKILL'); } catch (_) {}
-        finish({ ok: false, fillers: [], error: 'filler: délai dépassé (aucune progression)' });
+        finish({ ok: false, fillers: [], error: t('engineStalled') });
       }
     }, 5000);
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
@@ -397,7 +399,7 @@ function runFiller(event, source, audio, payload = {}) {
     py.on('close', () => {
       const line = out.trim().split('\n').pop() || '';
       try { finish(JSON.parse(line)); }
-      catch (_) { finish({ ok: false, fillers: [], error: 'filler: ' + (errTail || 'sortie illisible') }); }
+      catch (_) { finish({ ok: false, fillers: [], error: errTail ? 'filler: ' + errTail : t('engineOutputUnreadable') }); }
     });
     py.on('error', (e) => finish({ ok: false, fillers: [], error: String(e) }));
   });
@@ -460,17 +462,20 @@ function makeSearchDaemon(extraEnv, onStderr, idleKillMs) {
     const onDead = (info) => {
       proc = null; buf = '';
       if (wd) { clearInterval(wd); wd = null; }
-      const cause = killedByWatchdog
-        ? `aucune sortie pendant ${Math.round((killMs() || 0) / 1000)} s`
-        : typeof info === 'string' ? info
-          : typeof info === 'number' ? `code ${info}`
-            : (info && info.message) || 'arrêt inattendu';
+      const silentFor = Math.round((killMs() || 0) / 1000);
+      const raw = typeof info === 'string' ? info
+        : typeof info === 'number' ? `code ${info}`
+          : (info && info.message) || null;
+      const cause = killedByWatchdog ? t('engineSilentFor', { seconds: silentFor }) : raw || t('engineUnexpectedExit');
       const tail = errTail.trim().split('\n').slice(-4).join(' | ');
-      const error = indexAborting
-        ? 'indexation annulée'
-        : `sidecar recherche interrompu (${cause})${tail ? ' — ' + tail : ''}`;
-      if (pending.size) logbus.py('search', error + '\n');   // visible dans Paramètres › Console
-      for (const resolve of pending.values()) resolve({ hits: [], error });
+      // The Python trace stays in the console: the user reads one sentence in their language.
+      const error = indexAborting ? t('searchIndexCancelled') : t('searchEngineStopped', { cause });
+      // Console line in English (bug reports); the result carries the translated message and a flag
+      // the renderer can branch on whatever the language.
+      const logCause = killedByWatchdog ? `no output for ${silentFor} s` : raw || 'unexpected exit';
+      if (pending.size) logbus.py('search', (indexAborting ? 'indexing cancelled' : `search sidecar stopped (${logCause})${tail ? ' — ' + tail : ''}`) + '\n');
+      const flag = indexAborting ? { canceled: true } : { daemonDown: true };
+      for (const resolve of pending.values()) resolve({ hits: [], error, ...flag });
       pending.clear();
       errTail = '';
       killedByWatchdog = false;
@@ -481,7 +486,7 @@ function makeSearchDaemon(extraEnv, onStderr, idleKillMs) {
   return {
     req(cmd, payload) {
       start();
-      if (!proc) return Promise.resolve({ hits: [], error: 'sidecar recherche injoignable' });
+      if (!proc) return Promise.resolve({ hits: [], error: t('searchEngineUnavailable') });
       const id = ++seq;
       touch();
       startWatch();
@@ -683,7 +688,7 @@ function makeUpscaleDaemon() {
     const onDead = () => {
       if (proc !== child) return;
       proc = null; buf = '';
-      for (const resolve of pending.values()) resolve({ ok: false, error: 'worker upscale interrompu' });
+      for (const resolve of pending.values()) resolve({ ok: false, error: t('upscaleEngineStopped') });
       pending.clear();
     };
     proc.on('exit', onDead);
@@ -691,7 +696,7 @@ function makeUpscaleDaemon() {
   }
   function send(payload, onProg, timeoutMs = 0) {
     start();
-    if (!proc) return Promise.resolve({ ok: false, error: 'worker upscale injoignable' });
+    if (!proc) return Promise.resolve({ ok: false, error: t('upscaleEngineUnavailable') });
     const id = ++seq;
     curProg = onProg || null;
     return new Promise((resolve) => {
@@ -700,7 +705,7 @@ function makeUpscaleDaemon() {
         const stuck = proc;
         proc = null;
         try { stuck?.kill(); } catch (_) {}
-        resolve({ ok: false, error: `test d'upscale interrompu après ${Math.round(timeoutMs / 1000)} s` });
+        resolve({ ok: false, error: t('upscaleTestTimeout', { seconds: Math.round(timeoutMs / 1000) }) });
       }, timeoutMs) : null;
       pending.set(id, (value) => {
         if (timer) clearTimeout(timer);
@@ -765,7 +770,7 @@ function makeProcessDaemon() {
       if (proc !== child) return;
       proc = null; buf = '';
       if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
-      for (const resolve of pending.values()) resolve({ ok: false, error: 'worker traitements interrompu' });
+      for (const resolve of pending.values()) resolve({ ok: false, error: t('processEngineStopped') });
       pending.clear();
     };
     proc.on('exit', onDead);
@@ -774,7 +779,7 @@ function makeProcessDaemon() {
   function send(payload, onProg, timeoutMs = 0) {
     if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
     start();
-    if (!proc) return Promise.resolve({ ok: false, error: 'worker traitements injoignable' });
+    if (!proc) return Promise.resolve({ ok: false, error: t('processEngineUnavailable') });
     const id = ++seq;
     curProg = onProg || null;
     return new Promise((resolve) => {
@@ -783,7 +788,7 @@ function makeProcessDaemon() {
         const stuck = proc;
         proc = null;
         try { stuck?.kill(); } catch (_) {}
-        resolve({ ok: false, error: `test du modèle interrompu après ${Math.round(timeoutMs / 1000)} s` });
+        resolve({ ok: false, error: t('modelTestTimeout', { seconds: Math.round(timeoutMs / 1000) }) });
       }, timeoutMs) : null;
       pending.set(id, (value) => {
         if (timer) clearTimeout(timer);
@@ -846,7 +851,7 @@ function makeTranscribeDaemon() {
     const onDead = () => {
       proc = null; buf = '';
       if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
-      for (const resolve of pending.values()) resolve({ ok: false, words: [], error: 'sidecar transcription interrompu' });
+      for (const resolve of pending.values()) resolve({ ok: false, words: [], error: t('transcribeEngineStopped') });
       pending.clear();
     };
     proc.on('exit', onDead);
@@ -855,7 +860,7 @@ function makeTranscribeDaemon() {
   function send(payload, onProg) {
     if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; } // job en cours → pas de déchargement
     start();
-    if (!proc) return Promise.resolve({ ok: false, words: [], error: 'sidecar transcription injoignable' });
+    if (!proc) return Promise.resolve({ ok: false, words: [], error: t('transcribeEngineUnavailable') });
     const id = ++seq;
     curProg = onProg || null;
     return new Promise((resolve) => {
@@ -906,7 +911,7 @@ function asrModelDir(model) {
 
 // Transcription d'un audio déjà extrait (WAV 16 kHz mono). `source` = vidéo d'origine (clé de cache).
 // `verbatim` : Whisper amorcé pour transcrire les hésitations (clé de cache séparée côté python).
-function transcribeAudio(event, { source, audio, model = 'whisper-turbo', lang = 'fr', idleMs, verbatim = false }) {
+function transcribeAudio(event, { source, audio, model = 'whisper-turbo', lang = 'auto', idleMs, verbatim = false }) {
   return dTranscribe.req(
     { source, audio, model, lang, idleMs, verbatim, model_dir: asrModelDir(model) },
     voiceProgress(event, 'transcribe'),
@@ -925,7 +930,7 @@ function detectTrackLang({ source = '', audio, model = 'whisper-turbo' }) {
 async function adaptiveRequest(daemon, payload, onProgress, resolved) {
   let r = await daemon.req(payload, onProgress);
   if ((!r || !r.ok) && resolved.hardware) {
-    console.warn(`[encode] ${resolved.codec} indisponible pendant le job, repli ${resolved.fallbackCodec}`);
+    console.warn(`[encode] ${resolved.codec} became unavailable during the job, falling back to ${resolved.fallbackCodec}`);
     try { if (payload.out) await fsp.unlink(payload.out); } catch (_) {}
     r = await daemon.req({
       ...payload,
@@ -946,8 +951,8 @@ async function runUpscale(event, opts) {
     cleanupNoise = 0, cleanupEdges = 0,
     fp32 = false, quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, segments, whole, importBack, baseName, outputName, savePath } = opts || {};
-  if (!input) return { ok: false, error: 'aucune source' };
-  if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
+  if (!input) return { ok: false, error: t('sourceMissing') };
+  if (!outDir) return { ok: false, error: t('outputFolderMissing') };
   // Sortie IMAGE (source fixe) ou SÉQUENCE : aucun codec vidéo à résoudre, l'écriture passe par
   // les arguments image. Le reste du job (découpe, progression, import) ne change pas.
   const kind = outputKind(opts);
@@ -958,7 +963,7 @@ async function runUpscale(event, opts) {
   const base = sanitizeName(customName || baseName || path.basename(input).replace(/\.[^.]+$/, ''));
   const jobs = (whole || !Array.isArray(segments) || !segments.length)
     ? [{ start: undefined, end: undefined, tag: '' }]
-    : segments.map((s, i) => ({ start: s.in, end: s.out, tag: `_plan${i + 1}` }));
+    : segments.map((s, i) => ({ start: s.in, end: s.out, tag: `_${t('shotFileSuffix')}${i + 1}` }));
   const total = jobs.length;
   const outputs = [];
   let lastErr = null;
@@ -973,7 +978,7 @@ async function runUpscale(event, opts) {
     const out = (total === 1 && savePath && kind === 'video')
       ? String(savePath)
       : target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
-    if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
+    if (samePath(out, input)) { lastErr = t('outputOverwritesSource'); continue; }
     const fileLabel = path.basename(out);
     const payload = {
       cmd: kind === 'image' ? 'image' : 'upscale',
@@ -1012,7 +1017,7 @@ async function runUpscale(event, opts) {
       : await dUpscale.req(payload, onProgress);
     // Une séquence s'importe par son DOSSIER (Resolve ne prend pas un motif de fichiers).
     if (r && r.ok && r.output) outputs.push(target ? target.imported : r.output);
-    else lastErr = (r && r.error) || 'échec upscale';
+    else lastErr = (r && r.error) || t('upscaleFailed');
   }
   let imported = 0;
   if (importBack && outputs.length) {
@@ -1040,7 +1045,7 @@ function processJobs(opts) {
   const { segments, whole } = opts || {};
   return (whole || !Array.isArray(segments) || !segments.length)
     ? [{ start: undefined, end: undefined, tag: '' }]
-    : segments.map((s, i) => ({ start: s.in, end: s.out, tag: `_plan${i + 1}` }));
+    : segments.map((s, i) => ({ start: s.in, end: s.out, tag: `_${t('shotFileSuffix')}${i + 1}` }));
 }
 
 // Interpolation de frames (RIFE) : 1 job (rush/plage) ou N jobs (plans). 1 fichier de sortie par job.
@@ -1048,8 +1053,8 @@ async function runInterpolate(event, opts) {
   const { input, model = 'rife-v4.6', factor = 2, targetFps, slowmo = false, dedup = false,
     quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, importBack, baseName, outputName } = opts || {};
-  if (!input) return { ok: false, error: 'aucune source' };
-  if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
+  if (!input) return { ok: false, error: t('sourceMissing') };
+  if (!outDir) return { ok: false, error: t('outputFolderMissing') };
   const kind = outputKind(opts);
   const spec = imageSpec(opts);
   const resolved = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
@@ -1066,7 +1071,7 @@ async function runInterpolate(event, opts) {
     const target = kind === 'video' ? null
       : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
     const out = target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
-    if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
+    if (samePath(out, input)) { lastErr = t('outputOverwritesSource'); continue; }
     const fileLabel = path.basename(out);
     const payload = {
       cmd: 'interpolate', input, out, model: String(model), factor: factor | 0,
@@ -1091,7 +1096,7 @@ async function runInterpolate(event, opts) {
       ? await adaptiveRequest(dProcess, payload, processProg(send, 'interpolate'), resolved)
       : await dProcess.req(payload, processProg(send, 'interpolate'));
     if (r && r.ok && r.output) outputs.push(target ? target.imported : r.output);
-    else lastErr = (r && r.error) || 'échec interpolation';
+    else lastErr = (r && r.error) || t('interpolationFailed');
   }
   let imported = 0;
   if (importBack && outputs.length) {
@@ -1106,8 +1111,8 @@ async function runDepth(event, opts) {
   const { input, model = 'depth-anything-v2-small', bits = 8, colormap = 'gray', dedup = false,
     quality = 20, preset = 'medium', bitDepth = 8, audio = 'copy', abr = 192, audioTrack = 0,
     outDir, importBack, baseName, outputName } = opts || {};
-  if (!input) return { ok: false, error: 'aucune source' };
-  if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
+  if (!input) return { ok: false, error: t('sourceMissing') };
+  if (!outDir) return { ok: false, error: t('outputFolderMissing') };
   const kind = outputKind(opts);
   const spec = imageSpec(opts);
   const resolved = kind === 'video' ? await resolveProcessEncoding(opts || {}) : null;
@@ -1124,7 +1129,7 @@ async function runDepth(event, opts) {
     const target = kind === 'video' ? null
       : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
     const out = target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext}`);
-    if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
+    if (samePath(out, input)) { lastErr = t('outputOverwritesSource'); continue; }
     const fileLabel = path.basename(out);
     const payload = {
       cmd: 'depth', input, out, model: String(model), bits: bits | 0, colormap: String(colormap), dedup: !!dedup,
@@ -1148,7 +1153,7 @@ async function runDepth(event, opts) {
       ? await adaptiveRequest(dProcess, payload, processProg(send, 'depth'), resolved)
       : await dProcess.req(payload, processProg(send, 'depth'));
     if (r && r.ok && r.output) outputs.push(target ? target.imported : r.output);
-    else lastErr = (r && r.error) || 'échec depth';
+    else lastErr = (r && r.error) || t('depthFailed');
   }
   let imported = 0;
   if (importBack && outputs.length) {
@@ -1164,8 +1169,8 @@ async function runDepth(event, opts) {
 async function runRemoveBg(event, opts) {
   const { input, model = 'isnet-anime', format = 'prores_4444', dedup = false,
     despeckle = 0, edgeSmoothing = 0, edgeOffset = 0, outDir, importBack, baseName, outputName } = opts || {};
-  if (!input) return { ok: false, error: 'aucune source' };
-  if (!outDir) return { ok: false, error: 'aucun dossier de sortie' };
+  if (!input) return { ok: false, error: t('sourceMissing') };
+  if (!outDir) return { ok: false, error: t('outputFolderMissing') };
   // La sortie détourée porte toujours un alpha : une image ou une séquence sort en PNG RGBA, une
   // vidéo reste arbitrée entre ProRes 4444 et WebM VP9 selon le codec demandé.
   const kind = format === 'png_seq' && outputKind(opts) === 'video' ? 'sequence' : outputKind(opts);
@@ -1189,7 +1194,7 @@ async function runRemoveBg(event, opts) {
       : await imageTarget({ outDir, base: `${base}${suffix}`, tag: j.tag, kind, spec });
     const out = target ? target.out : path.join(outDir, `${base}${suffix}${j.tag}.${ext2}`);
     const imported = target ? target.imported : out;
-    if (samePath(out, input)) { lastErr = 'le nom de sortie écraserait le fichier source'; continue; }
+    if (samePath(out, input)) { lastErr = t('outputOverwritesSource'); continue; }
     const fileLabel = path.basename(out);
     const payload = {
       cmd: 'removebg', input, out, model: String(model), format: String(alphaFormat), dedup: !!dedup,
@@ -1210,7 +1215,7 @@ async function runRemoveBg(event, opts) {
     send(0, 'model');
     const r = await dProcess.req(payload, processProg(send, 'removebg'));
     if (r && r.ok && r.output) outputs.push(imported);
-    else lastErr = (r && r.error) || 'échec détourage';
+    else lastErr = (r && r.error) || t('backgroundRemovalFailed');
   }
   let imported = 0;
   if (importBack && outputs.length) {
@@ -1236,7 +1241,7 @@ function recordTestFrames(res, source, files) {
 async function runProcessFrame(opts) {
   const { input, time = 0, mode = 'depth', model = '',
     despeckle = 0, edgeSmoothing = 0, edgeOffset = 0 } = opts || {};
-  if (!input) return { ok: false, error: 'aucune source' };
+  if (!input) return { ok: false, error: t('sourceMissing') };
   try { await fsp.mkdir(UPSCALE_TEST_DIR, { recursive: true }); } catch (_) {}
   const id = `${Date.now()}_${Math.round(time * 1000)}`;
   const orig = path.join(UPSCALE_TEST_DIR, `orig_${id}.png`);
@@ -1254,7 +1259,7 @@ async function runProcessFrame(opts) {
 async function runUpscaleFrame(opts) {
   const { input, time = 0, model = 'light', scale = 2, targetHeight = 0, denoise, tile = 0, tilePad = 10, prePad = 0,
     fp32 = false, cleanupNoise = 0, cleanupEdges = 0 } = opts || {};
-  if (!input) return { ok: false, error: 'aucune source' };
+  if (!input) return { ok: false, error: t('sourceMissing') };
   try { await fsp.mkdir(UPSCALE_TEST_DIR, { recursive: true }); } catch (_) {}
   const id = `${Date.now()}_${Math.round(time * 1000)}`;
   const orig = path.join(UPSCALE_TEST_DIR, `orig_${id}.png`);
@@ -1272,7 +1277,7 @@ async function runUpscaleFrame(opts) {
 // Upscale d'un FICHIER image vers `out` (board de référence). Retour { ok, output, width, height }.
 async function runUpscaleImage(opts) {
   const { input, out, model = 'light', scale = 2, denoise, tile = 0, tilePad = 10, prePad = 0, fp32 = false } = opts || {};
-  if (!input || !out) return { ok: false, error: 'paramètres image incomplets' };
+  if (!input || !out) return { ok: false, error: t('invalidImageParams') };
   return dUpscale.req({
     cmd: 'image', input, out, model: String(model), outscale: scale | 0,
     tile: tile | 0, tile_pad: tilePad | 0, pre_pad: prePad | 0,
@@ -1283,7 +1288,7 @@ async function runUpscaleImage(opts) {
 // Upscale d'un GIF ANIMÉ vers `out` (.gif) — préserve l'animation (toutes les frames + fps).
 async function runUpscaleGif(opts) {
   const { input, out, model = 'light', scale = 2, denoise, tile = 0, tilePad = 10, prePad = 0, fp32 = false } = opts || {};
-  if (!input || !out) return { ok: false, error: 'paramètres gif incomplets' };
+  if (!input || !out) return { ok: false, error: t('invalidGifParams') };
   return dUpscale.req({
     cmd: 'gif', input, out, model: String(model), outscale: scale | 0,
     tile: tile | 0, tile_pad: tilePad | 0, pre_pad: prePad | 0,

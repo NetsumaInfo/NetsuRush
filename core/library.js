@@ -324,7 +324,7 @@ function createLibraryStore(dataDir, deps = {}) {
       if (!name) return { ok: false, error: t('emptyFolderName') };
       if (/[\\/]/.test(name)) return { ok: false, error: t('invalidFolderName') };
       if (all.some((x) => x.id !== id && (x.parentId || null) === parentId && x.name.toLowerCase() === name.toLowerCase())) {
-        return { ok: false, error: `${t('duplicateFolder')}: ${name}` };
+        return { ok: false, error: t('withDetail', { message: t('duplicateFolder'), detail: name }) };
       }
       const rec = { id, name, parentId };
       const i = all.findIndex((x) => x.id === id);

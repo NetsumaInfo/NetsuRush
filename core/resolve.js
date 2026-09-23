@@ -204,7 +204,7 @@ async function importMediaTree(inputPaths) {
           if ((await sub.GetName()) === name) { next = sub; break; }
         }
         if (!next) next = await mp.AddSubFolder(parent, name);
-        if (!next) throw new Error(`${t("folderMissing")}: ${name}`);
+        if (!next) throw new Error(t("withDetail", { message: t("folderMissing"), detail: name }));
         folderCache.set(acc, next);
         parent = next;
       }
@@ -253,7 +253,7 @@ async function importToBin(filePaths, binName) {
       if ((await sub.GetName()) === binName) { bin = sub; break; }
     }
     if (!bin) bin = await mp.AddSubFolder(root, binName);
-    if (!bin) return { ok: false, error: `${t("folderMissing")}: ${binName}` };
+    if (!bin) return { ok: false, error: t("withDetail", { message: t("folderMissing"), detail: binName }) };
 
     // Déjà importés → sautés (l'import Resolve dupliquerait l'item dans le bin).
     const fresh = [];

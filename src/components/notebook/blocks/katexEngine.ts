@@ -7,7 +7,7 @@
 import type Katex from "katex";
 import { createLazyModule } from "@/lib/lazyModule";
 
-const engine = createLazyModule("moteur KaTeX", async (): Promise<typeof Katex> => {
+const engine = createLazyModule("KaTeX engine", async (): Promise<typeof Katex> => {
   const [katex] = await Promise.all([
     import("katex").then((m) => m.default),
     import("katex/dist/katex.min.css"),

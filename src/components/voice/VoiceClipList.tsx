@@ -12,7 +12,7 @@ import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem,
   ContextMenuCheckboxItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { buildClipTree, countTreeClips, treeClips, type ClipTreeNode } from "@/components/rushes/libraryShared";
+import { binLabel, buildClipTree, countTreeClips, treeClips, type ClipTreeNode } from "@/components/rushes/libraryShared";
 import type { VoiceBatchEntry, VoiceRenderEntry } from "@/store/voice";
 
 export interface VoiceListProps {
@@ -78,7 +78,7 @@ function FolderBlock({ node, path, depth, collapsed, toggleFolder, ...rest }: Vo
           className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ChevronRight className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform", open && "rotate-90")} />
           <Folder className="size-3.5 shrink-0 text-muted-foreground" />
-          <span className="truncate font-medium">{node.name}</span>
+          <span className="truncate font-medium">{depth === 0 ? binLabel(node.name) : node.name}</span>
           <span className="text-[11px] tabular-nums text-muted-foreground">{countTreeClips(node)}</span>
         </button>
       </div>

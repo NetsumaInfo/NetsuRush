@@ -398,7 +398,8 @@
     "logsAttached_one": "{{count}} ligne de journal jointe",
     "logsAttached_other": "{{count}} lignes de journal jointes",
     "logErrors_one": "{{count}} erreur",
-    "logErrors_other": "{{count}} erreurs"
+    "logErrors_other": "{{count}} erreurs",
+    "moduleSetup": "Installation"
   },
   "outbox": {
     "opening": "Ouverture du cache…",

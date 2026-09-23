@@ -12,6 +12,10 @@ import { hostBuildTimeline } from "@/lib/host";
 import { basename } from "@/lib/utils";
 import type { AppState } from "./index";
 
+// The spoken language of a clip is not the interface language (a French editor cuts Japanese
+// voice tracks), and there is no speech-language setting: the engine detects it.
+const ASR_LANG = "auto";
+
 interface VoiceClipRef {
   path: string;
   name: string;
@@ -111,6 +115,7 @@ export interface VoiceSlice {
   speech: VoiceSpan[];
   silence: VoiceSpan[];
   voiceDuration: number;
+  // Spoken language the engine detected for the transcript ("" before any transcription).
   voiceLang: string;
 
   silenceParams: SilenceParams;
@@ -192,7 +197,7 @@ async function analyzeClipData(
   opts: { asrModel: AsrModel; verbatim: boolean; silenceParams: SilenceParams; hesitationParams: HesitationParams },
 ): Promise<Omit<VoiceBatchEntry, "clip" | "status">> {
   const [tr, sil] = await Promise.all([
-    nr.transcribe({ input: clip.path, model: opts.asrModel, lang: "fr", verbatim: opts.verbatim }),
+    nr.transcribe({ input: clip.path, model: opts.asrModel, lang: ASR_LANG, verbatim: opts.verbatim }),
     nr.detectSilences({ input: clip.path, params: opts.silenceParams }),
   ]);
   if (!tr.ok) throw new Error(tr.error || i18n.t("voice:store.errTranscribe"));
@@ -403,7 +408,7 @@ export const createVoiceSlice: StateCreator<AppState, [], [], VoiceSlice> = (set
   speech: [],
   silence: [],
   voiceDuration: 0,
-  voiceLang: "fr",
+  voiceLang: "",
 
   // snap_ms / noise_gate = affinage énergétique par défaut (cf. python/nrvoice/vad_silero.py) : la
   // coupe tombe dans le vrai creux et les blips (clavier, clic de bouche) ne comptent plus pour de la
@@ -536,13 +541,13 @@ export const createVoiceSlice: StateCreator<AppState, [], [], VoiceSlice> = (set
     if (!voiceClip) return;
     get().offerCloseForRam();
     set({ voiceBusy: i18n.t("voice:store.busyTranscribe"), voiceError: null, voiceNotice: null, voiceProgress: 0 });
-    const r = await nr.transcribe({ input: voiceClip.path, model: asrModel, lang: "fr", verbatim });
+    const r = await nr.transcribe({ input: voiceClip.path, model: asrModel, lang: ASR_LANG, verbatim });
     if (r.ok) {
       set({
-        words: r.words, voiceDuration: r.duration ?? 0, voiceLang: r.lang ?? "fr",
+        words: r.words, voiceDuration: r.duration ?? 0, voiceLang: r.lang ?? "",
         removedWords: new Set<number>(), removedPast: [], removedFuture: [], voiceFillerSpans: [],
         offFillers: new Set<number>(), offRepeats: new Set<number>(), voiceBusy: null, voiceProgress: 100,
-        voiceNotice: r.cached ? i18n.t("voice:store.transcriptCached") : i18n.t("voice:store.transcriptDone", { count: r.words.length }),
+        voiceNotice: r.note || (r.cached ? i18n.t("voice:store.transcriptCached") : i18n.t("voice:store.transcriptDone", { count: r.words.length })),
       });
     } else {
       set({ voiceBusy: null, voiceError: r.error || i18n.t("voice:store.errTranscribe") });
@@ -561,14 +566,14 @@ export const createVoiceSlice: StateCreator<AppState, [], [], VoiceSlice> = (set
     // Étape 1 — transcription (daemon GPU) et silences (Silero CPU) en PARALLÈLE : indépendants,
     // même WAV (extraction dédupliquée côté core). Un seul set d'état à la fin (pas de courses busy).
     const [tr, sil] = await Promise.all([
-      needWords ? nr.transcribe({ input: voiceClip.path, model: asrModel, lang: "fr", verbatim }) : Promise.resolve(null),
+      needWords ? nr.transcribe({ input: voiceClip.path, model: asrModel, lang: ASR_LANG, verbatim }) : Promise.resolve(null),
       nr.detectSilences({ input: voiceClip.path, params: silenceParams }),
     ]);
     if (tr && !tr.ok) { set({ voiceBusy: null, voiceError: tr.error || i18n.t("voice:store.errTranscribe") }); return; }
     if (!sil.ok) { set({ voiceBusy: null, voiceError: sil.error || i18n.t("voice:store.errDetectSilences") }); return; }
     set({
       ...(tr ? {
-        words: tr.words, voiceLang: tr.lang ?? "fr",
+        words: tr.words, voiceLang: tr.lang ?? "",
         removedWords: new Set<number>(), removedPast: [], removedFuture: [],
       } : {}),
       speech: sil.speech, silence: sil.silence, offIntervals: new Set<number>(),
@@ -584,7 +589,7 @@ export const createVoiceSlice: StateCreator<AppState, [], [], VoiceSlice> = (set
     if (!r.ok) { set({ voiceBusy: null, voiceError: r.error || i18n.t("voice:store.errDetectFillers") }); return; }
     set({
       voiceFillerSpans: r.fillers, voiceBusy: null, voiceProgress: 100,
-      voiceNotice: i18n.t("voice:store.analyzeAllDone", { words: get().words.length, silences: sil.silence.length, fillers: r.fillers.length }),
+      voiceNotice: tr?.note || i18n.t("voice:store.analyzeAllDone", { words: get().words.length, silences: sil.silence.length, fillers: r.fillers.length }),
     });
     get().setPreviewMode("all"); // la lecture EST le montage final
   },

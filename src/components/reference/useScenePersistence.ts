@@ -27,7 +27,7 @@ const durable = (item: BoardItem): BoardItem => {
     ...item,
     ref: "",
     src: "",
-    missing: item.missing ?? { name: item.title || "média", size: 0, kind: item.kind },
+    missing: item.missing ?? { name: item.title || "", size: 0, kind: item.kind },
   };
 };
 

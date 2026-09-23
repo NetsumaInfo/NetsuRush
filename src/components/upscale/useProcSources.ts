@@ -335,7 +335,7 @@ export const ProcSourcesContext = createContext<ProcSources | null>(null);
 
 export function useSharedProcSources(): ProcSources {
   const ctx = useContext(ProcSourcesContext);
-  if (!ctx) throw new Error("useSharedProcSources doit être utilisé dans ProcSourcesContext.Provider");
+  if (!ctx) throw new Error("useSharedProcSources must be used inside ProcSourcesContext.Provider");
   return ctx;
 }
 

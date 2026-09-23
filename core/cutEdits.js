@@ -120,7 +120,7 @@ function createCutEditsStore(dataDir) {
       } catch (e) {
         // Les édits vivent toujours en mémoire : la session continue, mais l'utilisateur doit
         // pouvoir voir pourquoi ils ne survivront pas au redémarrage.
-        logbus.emit('core', 'error', `cut-edits: écriture impossible — ${(e && e.message) || e}`);
+        logbus.emit('core', 'error', `cut-edits: write failed: ${(e && e.message) || e}`);
       }
     }, FLUSH_MS);
     if (typeof timer.unref === 'function') timer.unref();

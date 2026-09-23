@@ -398,7 +398,8 @@
     "logsAttached_one": "{{count}} log line attached",
     "logsAttached_other": "{{count}} log lines attached",
     "logErrors_one": "{{count}} error",
-    "logErrors_other": "{{count}} errors"
+    "logErrors_other": "{{count}} errors",
+    "moduleSetup": "Setup"
   },
   "outbox": {
     "opening": "Opening cache…",

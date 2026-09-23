@@ -398,7 +398,8 @@
     "logsAttached_one": "{{count}} línea de registro adjunta",
     "logsAttached_other": "{{count}} líneas de registro adjuntas",
     "logErrors_one": "{{count}} error",
-    "logErrors_other": "{{count}} errores"
+    "logErrors_other": "{{count}} errores",
+    "moduleSetup": "Configuración"
   },
   "outbox": {
     "opening": "Abriendo la caché…",

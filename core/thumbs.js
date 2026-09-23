@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const { getThumbDir, fsp, fileReady } = require('./config');
 const { run, probeMedia } = require('./ffmpeg');
 const { cacheIndex } = require('./cacheIndex');
+const { t } = require('./i18n');
 const { proxyFrameSource } = require('./proxy');
 const { resolveThumbSettings, thumbKeySuffix, thumbExt } = require('./thumbPresets');
 
@@ -148,7 +149,7 @@ async function thumbnail(filePath, time = 1, priority = 'high', settings) {
   const job = thumbGate(async () => {
     if (thumbRam.has(key)) return thumbRam.get(key);   // généré entre-temps (course)
     if (await fileReady(cacheFile)) { thumbRamSet(key, cacheFile); cacheIndex().touch(cacheFile); return cacheFile; }
-    let lastErr = 'thumb échec';
+    let lastErr = t('thumbnailFailed');
     for (let attempt = 0; attempt < 2; attempt++) {  // retry : ffmpeg échoue parfois sous charge
       try {
         const source = attempt === 0 ? await fastestThumbInput(filePath, time) : { input: filePath, time };
