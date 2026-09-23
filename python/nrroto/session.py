@@ -245,7 +245,7 @@ class RotoSession:
             args += ["-vf", "scale=%d:-2" % MAX_W]
         args += ["-start_number", "0", os.path.join(frames_dir, "%05d.jpg"), "-progress", "pipe:2"]
         try:
-            p = subprocess.Popen(args, stderr=subprocess.PIPE, text=True)
+            p = subprocess.Popen(args, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
         except OSError as exc:
             self._extract_error = t("ffmpeg_missing", error=exc)
             return

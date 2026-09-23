@@ -94,6 +94,12 @@ def serve():
 
 
 def main():
+    # UTF-8 on the JSON pipes whatever the console code page (same as detect/search/transcribe).
+    try:
+        sys.stdin.reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:  # noqa: BLE001
+        pass
     if len(sys.argv) > 1 and sys.argv[1] == "serve":
         serve()
     else:

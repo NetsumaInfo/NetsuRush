@@ -10,6 +10,7 @@ backend Whisper (asr_whisper) reste le défaut éprouvé ; Parakeet est l'option
 import os
 import sys
 from nrdevice import onnx_providers, onnx_session_options
+from nri18n import t
 
 _MODELS = {}
 _REPO = "nemo-parakeet-tdt-0.6b-v3"
@@ -132,8 +133,20 @@ def _result_text(res, words):
     return " ".join(w["word"] for w in words).strip()
 
 
+# The 25 European languages Parakeet TDT 0.6b v3 is trained on. Any other language comes out as
+# plausible-looking but wrong text, so it is refused rather than transcribed.
+PARAKEET_LANGS = frozenset((
+    "bg", "hr", "cs", "da", "nl", "en", "et", "fi", "fr", "de", "el", "hu", "it", "lv", "lt", "mt",
+    "pl", "pt", "ro", "sk", "sl", "es", "sv", "ru", "uk",
+))
+
+
 def transcribe_parakeet(audio_path, lang=None, model_dir=None):
-    """Parakeet v3 detects the spoken language itself: `lang` is only echoed back."""
+    """Parakeet v3 detects the spoken language itself: `lang` is only echoed back, and checked
+    against the languages the model knows."""
+    if lang and lang not in PARAKEET_LANGS:
+        return {"words": [], "text": "", "lang": lang, "duration": 0.0,
+                "error": t("asr_lang_unsupported", engine="Parakeet")}
     m = _load(model_dir)
     _emit("STAGE:infer")
     res = m.recognize(audio_path)

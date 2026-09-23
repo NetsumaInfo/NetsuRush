@@ -155,9 +155,14 @@ class RealEngine:
     def _load(self):
         import cv2
         if self._det is None:
+            from nrpaths import read_u8
             yunet, sface = self._paths()
-            self._det = cv2.FaceDetectorYN.create(yunet, "", (320, 320), 0.8, 0.3, 5000)
-            self._rec = cv2.FaceRecognizerSF.create(sface, "")
+            # Buffer overloads: the path overloads open the file in the ANSI code page and fail
+            # under a non-ASCII profile folder (the weights live under %LOCALAPPDATA%).
+            no_config = np.empty(0, np.uint8)
+            self._det = cv2.FaceDetectorYN.create("onnx", read_u8(yunet), no_config,
+                                                  (320, 320), 0.8, 0.3, 5000)
+            self._rec = cv2.FaceRecognizerSF.create("onnx", read_u8(sface), no_config)
         return self._det, self._rec
 
     @staticmethod

@@ -48,7 +48,7 @@ def _tags(s):
 def cmd_char_list(file_paths=None):
     con = db_emb()
     try:
-        chars = con.execute("SELECT id, name, notes, tags, color, avatar FROM characters_v1 ORDER BY name").fetchall()
+        chars = con.execute("SELECT id, name, notes, tags, color, avatar FROM characters_v1 ORDER BY name COLLATE NOCASE").fetchall()
         # Plans étiquetés DANS la portée : le renderer masque les persos absents du projet courant.
         scope_shots = {}
         if file_paths is not None:

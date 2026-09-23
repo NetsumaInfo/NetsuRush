@@ -24,7 +24,7 @@ FORMATS = {
 
 def _run(args):
     p = subprocess.run([FFMPEG, "-y", "-hide_banner", "-loglevel", "error"] + args,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
     if p.returncode != 0:
         raise RuntimeError((p.stderr or t("ffmpeg_failed")).strip()[-400:])
 

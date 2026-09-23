@@ -899,6 +899,14 @@ _MESSAGES = {
         "{engine} は言語を自動検出できません。話されている言語を選んでください。",
         "{engine} 无法自动检测语言：请选择音频所用的语言。",
     ),
+    "asr_lang_unsupported": (
+        "{engine} ne transcrit que les langues européennes : choisis Whisper pour cette langue.",
+        "{engine} only transcribes European languages: choose Whisper for this language.",
+        "{engine} solo transcribe idiomas europeos: elige Whisper para este idioma.",
+        "{engine} transkribiert nur europäische Sprachen: Wähle Whisper für diese Sprache.",
+        "{engine} はヨーロッパの言語しか文字起こしできません。この言語には Whisper を選んでください。",
+        "{engine} 只能转写欧洲语言：请为该语言选择 Whisper。",
+    ),
     "parakeet_missing": (
         "Parakeet absent : pip install onnx-asr[gpu,hub] ({error})",
         "Parakeet is missing: pip install onnx-asr[gpu,hub] ({error})",
@@ -927,9 +935,9 @@ _MESSAGES = {
 
 
 def language():
-    """Interface language from `NR_LANG`; French when unset (the core's default), English for a
-    language the table does not carry."""
-    code = (os.environ.get("NR_LANG") or "fr").lower().replace("_", "-").split("-", 1)[0]
+    """Interface language from `NR_LANG`; English when it is unset or names a language the table
+    does not carry."""
+    code = (os.environ.get("NR_LANG") or "en").lower().replace("_", "-").split("-", 1)[0]
     return code if code in LANGS else "en"
 
 

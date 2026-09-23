@@ -172,13 +172,15 @@ class FaissIndex:
 
     def save(self, path):
         tmp = path + ".tmp"
-        self._faiss.write_index(self._index, tmp)
+        from nrpaths import faiss_write
+        faiss_write(self._faiss, self._index, tmp)  # Python I/O: faiss opens paths in the ANSI code page
         os.replace(tmp, path)  # rename atomique
 
     @classmethod
     def load(cls, dim, path):
         import faiss
-        return cls(dim, index=faiss.read_index(path))
+        from nrpaths import faiss_read
+        return cls(dim, index=faiss_read(faiss, path))
 
 
 class SearchStore:

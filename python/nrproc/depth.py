@@ -93,7 +93,10 @@ def cmd_depth(args):
         enc = open_image_writer(args.out, w, h, fps_str, spec)
 
     if gray16:
-        import cv2
+        from nrpaths import cv_imwrite
+
+    class _WriteFailed(Exception):
+        pass
 
     # Modèle sur une frame bgr → gris 8-bit ; écriture d'une frame de sortie (image ou vidéo).
     def process_fn(frame):
@@ -104,7 +107,8 @@ def cmd_depth(args):
             # Gris 8-bit ré-étiré sur 16 bits (×257 = réplication d'octet), une image par frame.
             g16 = (gray8.astype("uint16") * 257)  # 0..255 → 0..65535
             out = args.out if spec["kind"] == "image" else args.out % (spec["start"] + idx)
-            cv2.imwrite(out, g16)
+            if not cv_imwrite(out, g16):
+                raise _WriteFailed()
         else:
             bgr = _depth_to_bgr(gray8, colormap)
             enc.stdin.write(np.ascontiguousarray(bgr).tobytes())
@@ -133,6 +137,8 @@ def cmd_depth(args):
                         log("STAGE:prog:%d/%d" % (done, nb))
     except BrokenPipeError:
         err = t("encoder_stopped")
+    except _WriteFailed:
+        err = t("write_depth_png")
     finally:
         try:
             dec.stdout.close()

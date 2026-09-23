@@ -273,6 +273,12 @@ def cmd_get(path, model, threshold=None, options=None, link=True):
 
 def _frame_count_estimate(path):
     """Nombre de frames estimé (durée × fps) — sans lire tout le fichier."""
+    return _probe_fps_frames(path)[1]
+
+
+def _probe_fps_frames(path):
+    """(fps, estimated frame count) from ffprobe; (0.0, 0) when it can't tell. ffprobe takes any
+    path, unlike cv2.VideoCapture, which opens it in the ANSI code page on Windows."""
     import subprocess
     try:
         meta = subprocess.run(
@@ -284,9 +290,9 @@ def _frame_count_estimate(path):
         fr = ((j.get("streams") or [{}])[0]).get("avg_frame_rate", "0/1") or "0/1"
         num, den = (fr.split("/") + ["1"])[:2]
         fps_est = (float(num) / float(den)) if float(den or 0) else 0.0
-        return int(dur * fps_est) if dur and fps_est else 0
+        return fps_est, (int(dur * fps_est) if dur and fps_est else 0)
     except Exception:  # noqa: BLE001
-        return 0
+        return 0.0, 0
 
 
 def _iter_frame_chunks(path, on_frames=None):
@@ -584,6 +590,13 @@ def _detect_omnishot(path, options, concurrency=1):
     fps = cap.get(cv2.CAP_PROP_FPS) or 0.0
     nframes = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
     cap.release()
+    if not fps or fps != fps or nframes <= 0:
+        # VideoCapture refuses non-ASCII paths on Windows: fall back on ffprobe rather than on 24 fps.
+        probed_fps, probed_frames = _probe_fps_frames(path)
+        if not fps or fps != fps:
+            fps = probed_fps
+        if nframes <= 0:
+            nframes = probed_frames
     if not fps or fps != fps:
         fps = 24.0
     duration = (nframes / fps) if fps else 0.0

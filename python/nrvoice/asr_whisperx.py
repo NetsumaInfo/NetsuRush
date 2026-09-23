@@ -6,6 +6,16 @@ import os
 
 from nri18n import t
 
+# Scripts written without spaces between words: the aligner splits them into characters, and a
+# space join would print "こ ん に ち は".
+UNSPACED_LANGS = frozenset(("ja", "zh", "th", "lo", "my", "km"))
+
+
+def join_words(words, lang):
+    """Transcript text from aligned word tokens, spaced only for languages that use spaces."""
+    sep = "" if (lang or "").lower() in UNSPACED_LANGS else " "
+    return sep.join(words).strip()
+
 
 def transcribe_whisperx(audio_path, lang=None):
     try:
@@ -32,7 +42,7 @@ def transcribe_whisperx(audio_path, lang=None):
                     "word": w.get("word", ""),
                     "conf": float(w.get("score", 0.0) or 0.0),
                 })
-        text = " ".join(x["word"] for x in words).strip()
+        text = join_words((x["word"] for x in words), spoken)
         return {"words": words, "text": text, "lang": spoken, "duration": float(len(audio)) / 16000.0}
     except Exception as exc:  # noqa: BLE001
         return {"words": [], "text": "", "lang": lang, "duration": 0.0,

@@ -26,6 +26,9 @@ DEFAULT_LANG = "en"
 _MENTION_RE = re.compile(r"(?:^|(?<=\s))@\S+")
 _SPACE_RE = re.compile(r"\s+")
 _TRIM_CHARS = " \t\r\n.,;:!?\"'«»()[]{}<>/\\-–—_+*#"
+# Spanish inverted marks, curly quotes, and the full-width / CJK punctuation typed with a Japanese or
+# Chinese input method (ideographic space included).
+_TRIM_CHARS += "¿¡“”‘’„…　。、，．！？：；「」『』（）【】〈〉《》〔〕・～＂＇"
 # Jeton = suite de lettres/chiffres. L'apostrophe SÉPARE (« qu'elle » → « qu », « elle ») pour que le
 # retrait du sujet voie le pronom collé à son élision.
 _TOKEN_RE = re.compile(r"[^\W_]+", re.UNICODE)

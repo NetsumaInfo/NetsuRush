@@ -140,7 +140,8 @@ def cmd_image(args):
     import numpy as np
     from PIL import Image
 
-    img = cv2.imread(args.input, cv2.IMREAD_UNCHANGED)
+    from nrpaths import cv_imread, cv_imwrite
+    img = cv_imread(args.input, cv2.IMREAD_UNCHANGED)
     if img is None:
         return {"ok": False, "error": t("image_unreadable_path", path=args.input)}
 
@@ -184,7 +185,7 @@ def cmd_image(args):
         # 8 bits étirés sur 16 (×257 = réplication d'octet) : le modèle ne rend que du 8-bit, le
         # fichier respecte la profondeur demandée sans inventer de précision.
         output = (output.astype("uint16") * 257)
-    if not cv2.imwrite(args.out, output, cv_write_params(spec)) or not os.path.exists(args.out):
+    if not cv_imwrite(args.out, output, cv_write_params(spec)) or not os.path.exists(args.out):
         return {"ok": False, "error": t("write_upscaled_image")}
     return {"ok": True, "output": args.out, "width": ow, "height": oh, "error": None}
 
