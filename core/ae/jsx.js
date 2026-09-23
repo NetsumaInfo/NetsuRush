@@ -3,11 +3,28 @@
 // applique transforms/time-remap, crée les précompos. JAMAIS d'alert() (un modal bloque AE en
 // arrière-plan) → toutes les erreurs partent dans un log fichier.
 
+const { t } = require('../i18n');
+
+/// Names written into the user's After Effects project, in the interface language. Non-ASCII is
+/// escaped so the script reads the same whatever encoding After Effects assumes for the file.
+function projectNames() {
+  const names = {
+    precomp: t('aePrecompName'),
+    precompFolder: t('aePrecompFolder'),
+    timelinesFolder: t('aeTimelinesFolder'),
+    footageFolder: t('aeFootageFolder'),
+    audioFolder: t('aeAudioFolder'),
+    imagesFolder: t('aeImagesFolder'),
+  };
+  return JSON.stringify(names).replace(/[\u0080-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+}
+
 function genAeScript(payload, logPath) {
   const json = JSON.stringify(payload);
   const logJson = JSON.stringify(logPath);
   return `var DATA = ${json};
 var NR_LOG = ${logJson};
+var NR_NAMES = ${projectNames()};
 function nrLog(s) { try { var f = new File(NR_LOG); f.open("a"); f.write(s + "\\n"); f.close(); } catch (e) {} }
 app.beginUndoGroup("NetsuRush -> After Effects");
 try {
@@ -124,7 +141,7 @@ try {
     var still = !!L.image;
     try { still = still || !!(f.mainSource && f.mainSource.isStill); } catch (e) {}
     if (DATA.folders) {
-      var dest = still ? "Images" : (L.kind === "audio" ? "Audio" : "Rushes");
+      var dest = still ? NR_NAMES.imagesFolder : (L.kind === "audio" ? NR_NAMES.audioFolder : NR_NAMES.footageFolder);
       try { f.parentFolder = bin(dest); } catch (e) {}
     }
     var lyr = tc.layers.add(f);
@@ -173,7 +190,7 @@ try {
     var G = DATA.groups[gi];
     try {
       groupComps[G.id] = app.project.items.addComp(G.name, G.w, G.h, 1.0, G.dur, G.fps);
-      if (DATA.folders) { try { groupComps[G.id].parentFolder = bin("Timelines"); } catch (e) {} }
+      if (DATA.folders) { try { groupComps[G.id].parentFolder = bin(NR_NAMES.timelinesFolder); } catch (e) {} }
     } catch (e) { nrLog("nested comp KO: " + e.toString()); }
   }
   for (var i = 0; i < DATA.layers.length; i++) {
@@ -213,7 +230,7 @@ try {
       var want = DATA.precompTarget === "both" || (isImg ? DATA.precompTarget === "image" : DATA.precompTarget === "video");
       if (!want) continue;
       cnt++;
-      var pn = DATA.precompNaming === "number" ? pad(cnt) : videoLayers[v].lyr.name + " — Précomp";
+      var pn = DATA.precompNaming === "number" ? pad(cnt) : NR_NAMES.precomp.split("{name}").join(videoLayers[v].lyr.name);
       var li = videoLayers[v].lyr.index;
       var wasIn = videoLayers[v].lyr.inPoint;
       var wasOut = videoLayers[v].lyr.outPoint;
@@ -228,7 +245,7 @@ try {
           outer.inPoint = wasIn;
           outer.outPoint = wasOut;
         } catch (e4) { nrLog("precomp trim KO: " + e4.toString()); }
-        if (DATA.folders && pc) { try { pc.parentFolder = bin("Précomps"); } catch (e) {} }
+        if (DATA.folders && pc) { try { pc.parentFolder = bin(NR_NAMES.precompFolder); } catch (e) {} }
       } catch (e3) { nrLog("precompose KO: " + e3.toString()); }
     }
   }
@@ -240,9 +257,9 @@ try {
     try { audioLayers[a].moveToEnd(); } catch (e) { nrLog("audio order KO: " + e.toString()); }
   }
   try { comp.openInViewer(); } catch (e) {}
-  nrLog("OK comp=\\"" + comp.name + "\\" calques=" + added + " echecs=" + failed + " precomp=" + (DATA.precomp ? 1 : 0));
+  nrLog("OK comp=\\"" + comp.name + "\\" layers=" + added + " failures=" + failed + " precomp=" + (DATA.precomp ? 1 : 0));
 } catch (err) {
-  nrLog("ERREUR: " + err.toString() + " (ligne " + err.line + ")");
+  nrLog("ERROR: " + err.toString() + " (line " + err.line + ")");
 }
 app.endUndoGroup();
 `;

@@ -33,7 +33,7 @@ test("le document d'ORIGINE est toujours essayé en premier", () => {
 
 test('la version et le DOCTYPE sont les deux seules retouches', () => {
   const labels = importVariants(PREMIERE_HEADER).map((v) => v.label);
-  assert.deepEqual(labels, ['source', `version ${TARGET_VERSION}`, 'sans DOCTYPE', `version ${TARGET_VERSION} sans DOCTYPE`]);
+  assert.deepEqual(labels, ['source', `version ${TARGET_VERSION}`, 'without DOCTYPE', `version ${TARGET_VERSION} without DOCTYPE`]);
 });
 
 test('les retouches ne touchent QUE l’en-tête', () => {
@@ -49,7 +49,7 @@ test('la variante de version porte bien la version visée', () => {
 });
 
 test('la variante sans DOCTYPE le retire sans toucher à la version', () => {
-  const stripped = importVariants(PREMIERE_HEADER).find((v) => v.label === 'sans DOCTYPE');
+  const stripped = importVariants(PREMIERE_HEADER).find((v) => v.label === 'without DOCTYPE');
   assert.doesNotMatch(stripped.text, /<!DOCTYPE/);
   assert.equal(declaredVersion(stripped.text), '4');
 });

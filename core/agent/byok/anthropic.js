@@ -49,7 +49,7 @@ async function runAnthropic(opts) {
       ],
     }
     : { role: m.role, content: m.content }));
-  if (!apiKey) { onEvent({ type: 'error', message: `Anthropic: ${t('apiKeyMissing')}` }); onEvent({ type: 'done', stopReason: 'error' }); return; }
+  if (!apiKey) { onEvent({ type: 'error', message: t('agentApiKeyMissingFor', { provider: 'Anthropic' }) }); onEvent({ type: 'done', stopReason: 'error' }); return; }
 
   let guard = 0;
   for (;;) {
@@ -80,12 +80,12 @@ async function runAnthropic(opts) {
         }),
       });
     } catch (e) {
-      onEvent({ type: 'error', message: `réseau Anthropic : ${String((e && /** @type {any} */(e).message) || e)}` });
+      onEvent({ type: 'error', message: t('agentNetworkError', { provider: 'Anthropic', detail: String((e && /** @type {any} */(e).message) || e) }) });
       break;
     }
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
-      onEvent({ type: 'error', message: `Anthropic ${res.status} : ${detail.slice(0, 500)}` });
+      onEvent({ type: 'error', message: `Anthropic ${res.status}: ${detail.slice(0, 500)}` });
       break;
     }
 
@@ -97,7 +97,7 @@ async function runAnthropic(opts) {
       if (type === 'content_block_start') {
         const cb = m.content_block || {};
         blocks.set(m.index, { type: cb.type, id: cb.id, name: cb.name, jsonBuf: '', text: '' });
-        if (cb.type === 'tool_use') onEvent({ type: 'status', label: `outil ${cb.name}` });
+        if (cb.type === 'tool_use') onEvent({ type: 'status', label: t('agentToolStatus', { name: cb.name }) });
       } else if (type === 'content_block_delta') {
         const b = blocks.get(m.index);
         const d = m.delta || {};
@@ -108,7 +108,7 @@ async function runAnthropic(opts) {
         if (m.delta && m.delta.stop_reason) stopReason = m.delta.stop_reason;
         if (m.usage) onEvent({ type: 'usage', inputTokens: 0, outputTokens: m.usage.output_tokens || 0, costUsd: 0 });
       } else if (type === 'error') {
-        onEvent({ type: 'error', message: String((m.error && m.error.message) || 'erreur stream Anthropic') });
+        onEvent({ type: 'error', message: String((m.error && m.error.message) || t('agentStreamError', { provider: 'Anthropic' })) });
       }
     });
 

@@ -326,9 +326,9 @@ function nrPproJsonColor(source, names) {
    ce constat, « le texte n'est pas transféré » n'a aucune cause observable. */
 function nrPproGraphicProbe(ti) {
   var probe = { mgt: "absent", params: [] }, component = null, count, i;
-  try { component = ti.getMGTComponent ? ti.getMGTComponent() : null; } catch (e0) { probe.mgt = "erreur"; }
+  try { component = ti.getMGTComponent ? ti.getMGTComponent() : null; } catch (e0) { probe.mgt = "error"; }
   if (!component) {
-    if (probe.mgt === "absent" && !ti.getMGTComponent) probe.mgt = "getMGTComponent indisponible";
+    if (probe.mgt === "absent" && !ti.getMGTComponent) probe.mgt = "getMGTComponent unavailable";
     probe.components = nrPproComponentNames(ti);
     return probe;
   }
@@ -372,7 +372,7 @@ function nrPproGraphic(ti) {
 function nrPproComponentNames(ti) {
   var names = [], count, i, component, label, params, p, limit;
   try { count = nrPproCollectionLength(ti.components); } catch (e0) { return ["<components inaccessible>"]; }
-  if (!count) return ["<aucun composant>"];
+  if (!count) return ["<no component>"];
   for (i = 0; i < count && i < 6; i++) {
     try {
       component = ti.components[i];
@@ -383,7 +383,7 @@ function nrPproComponentNames(ti) {
         try { params.push(String(component.properties[p].displayName)); } catch (e1) {}
       }
       names.push(label + "(" + params.join(",") + ")");
-    } catch (e2) { names.push("<lecture refusée>"); }
+    } catch (e2) { names.push("<read refused>"); }
   }
   return names;
 }
@@ -1247,12 +1247,18 @@ function nrPproPlace(seq, trackIndex, item, time, ripple) {
   return track.clips.numItems > before;
 }
 
-/* insertClip exige une piste audio et pose donc l'audio d'un ProjectItem AV. Pour une
- * insertion vidéo seule, la primitive publique sûre est un subclip takeAudio=0/takeVideo=1. */
-function nrPproVideoOnlySubclip(item, inSec, outSec, suffix) {
+/* insertClip requires an audio track and therefore places the audio of an AV ProjectItem. For a
+ * video-only insert, the safe public primitive is a subclip takeAudio=0/takeVideo=1.
+ * The subclip lands in the user's project: its name comes from `nrText`, in the interface
+ * language (the panel adds it to the payload), with an English fallback. */
+function nrPproSubclipName(p, item, part) {
+  var text = (p && p.nrText) || {};
+  var pattern = text.videoSubclip || "{name} — video {part}";
+  return pattern.split("{name}").join(String(item.name || "NetsuRush")).split("{part}").join(part);
+}
+function nrPproVideoOnlySubclip(item, inSec, outSec, label) {
   if (!(outSec > inSec) || !item.createSubClip) return null;
   try {
-    var label = String(item.name || "NetsuRush") + " — vidéo " + suffix;
     return item.createSubClip(label, nrPproTicks(inSec), nrPproTicks(outSec), 0, 1, 0) || null;
   } catch (e) { return null; }
 }
@@ -1343,23 +1349,23 @@ function nrPproResolver(proj) {
    Le XML ne monte jamais rien : il n'apporte que les images clés. */
 function NR_ppro_exportXml(p) {
   var proj = app.project, seq, ok;
-  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
-  if (!p || !p.path) return NRJSON.stringify({ ok: false, errorCode: "MISSING_PATH", error: "chemin de sortie manquant" });
+  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
+  if (!p || !p.path) return NRJSON.stringify({ ok: false, errorCode: "MISSING_PATH", error: "output path missing" });
   seq = nrPproSequenceByName(proj, p.timelineName) || proj.activeSequence;
-  if (!seq) return NRJSON.stringify({ ok: false, errorCode: "NO_SEQUENCE", error: "aucune séquence" });
+  if (!seq) return NRJSON.stringify({ ok: false, errorCode: "NO_SEQUENCE", error: "no sequence" });
   if (!seq.exportAsFinalCutProXML) {
     return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "exportAsFinalCutProXML absent" });
   }
   try {
-    // suppressUI = 1 : sans lui, un avertissement modal gèle ExtendScript et le job part en timeout.
+    // suppressUI = 1: without it, a modal warning freezes ExtendScript and the job times out.
     ok = seq.exportAsFinalCutProXML(String(p.path), 1);
   } catch (e) {
     return NRJSON.stringify({ ok: false, error: String(e) });
   }
-  // La méthode rend `true` en cas de succès sur les versions récentes et `0` sur les anciennes :
-  // seul le fichier écrit prouve quelque chose.
+  // The method returns `true` on success in recent versions and `0` in older ones: only the
+  // written file proves anything.
   if (!nrPproFileExists(p.path)) {
-    return NRJSON.stringify({ ok: false, errorCode: "EXPORT_EMPTY", error: "aucun fichier écrit", returned: String(ok) });
+    return NRJSON.stringify({ ok: false, errorCode: "EXPORT_EMPTY", error: "no file written", returned: String(ok) });
   }
   return NRJSON.stringify({ ok: true, path: String(p.path), sequence: seq.name });
 }
@@ -1505,8 +1511,8 @@ function nrPproRestore(touched) {
  * n'expose PAS le fps → la fps de séquence peut différer du clip (pas d'API pour la forcer). */
 function NR_ppro_build(p) {
   var proj = app.project;
-  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
-  if (!p || !p.input) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "chemin source manquant" });
+  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
+  if (!p || !p.input) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "source path missing" });
 
   // Retrouver le clip dans le projet ; l'importer si absent.
   var sources = nrPproResolver(proj);
@@ -1517,7 +1523,7 @@ function NR_ppro_build(p) {
       ok: false,
       errorCode: missingMedia ? "MEDIA_MISSING" : "CLIP_NOT_FOUND",
       errorDetail: p.input,
-      error: (missingMedia ? "fichier introuvable sur le disque : " : "clip introuvable ou import échoué : ") + p.input
+      error: (missingMedia ? "file not found on disk: " : "clip not found or import failed: ") + p.input
     });
   }
 
@@ -1536,7 +1542,7 @@ function NR_ppro_build(p) {
   }
   if (!seq) {
     seq = nrPproNewSequence(proj, p.name, pitem);
-    if (!seq) return NRJSON.stringify({ ok: false, errorCode: "SEQUENCE_CREATE_FAILED", error: "création de séquence échouée" });
+    if (!seq) return NRJSON.stringify({ ok: false, errorCode: "SEQUENCE_CREATE_FAILED", error: "sequence creation failed" });
   }
 
   var insertion = p.insertion || "end";
@@ -1577,17 +1583,17 @@ function NR_ppro_build(p) {
 
   if (insertion === "above") {
     trackIndex = nrPproAboveTrack(seq, tlPos, tlPos + incomingDuration);
-    if (trackIndex < 0) return NRJSON.stringify({ ok: false, errorCode: "TRACK_CREATE_FAILED", error: "impossible de créer une piste vidéo supérieure" });
+    if (trackIndex < 0) return NRJSON.stringify({ ok: false, errorCode: "TRACK_CREATE_FAILED", error: "could not create a video track above" });
   }
   var vt = seq.videoTracks[trackIndex];
 
   if (insertion === "replace" || insertion === "ripple_overwrite") {
     var replaced = nrPproClipAt(vt, tlPos);
-    if (!replaced) return NRJSON.stringify({ ok: false, errorCode: "NO_CLIP_AT_PLAYHEAD", error: "aucun plan à remplacer sous la tête de lecture" });
+    if (!replaced) return NRJSON.stringify({ ok: false, errorCode: "NO_CLIP_AT_PLAYHEAD", error: "no clip to replace under the playhead" });
     var replaceStart = nrPproTimeSec(replaced.start);
     if (replaceStart !== null) tlPos = replaceStart;
     try { replaced.remove(insertion === "ripple_overwrite", true); } catch (e6) {
-      return NRJSON.stringify({ ok: false, errorCode: "REMOVE_FAILED", error: "suppression du plan remplacé échouée" });
+      return NRJSON.stringify({ ok: false, errorCode: "REMOVE_FAILED", error: "removing the replaced clip failed" });
     }
   }
 
@@ -1607,18 +1613,19 @@ function NR_ppro_build(p) {
       var wholeIn = 0, wholeOut = 0;
       try { wholeIn = nrPproTimeSec(pitem.getInPoint(1)) || 0; } catch (e11) {}
       try { wholeOut = nrPproTimeSec(pitem.getOutPoint(1)) || 0; } catch (e12) {}
-      wholeItem = nrPproVideoOnlySubclip(pitem, wholeIn, wholeOut, "entière");
+      wholeItem = nrPproVideoOnlySubclip(pitem, wholeIn, wholeOut,
+        nrPproSubclipName(p, pitem, (p.nrText && p.nrText.wholeClip) || "whole"));
       if (!wholeItem) {
         try { if (originalIn !== null) pitem.setInPoint(originalIn, mediaType); } catch (e13) {}
         try { if (originalOut !== null) pitem.setOutPoint(originalOut, mediaType); } catch (e14) {}
-        return NRJSON.stringify({ ok: false, errorCode: "VIDEO_ONLY_SUBCLIP_FAILED", error: "impossible de préparer une insertion vidéo seule" });
+        return NRJSON.stringify({ ok: false, errorCode: "VIDEO_ONLY_SUBCLIP_FAILED", error: "could not prepare a video-only insert" });
       }
     }
     var okw = nrPproPlace(seq, trackIndex, wholeItem, tlPos, wholeRipple);
     try { if (originalIn !== null) pitem.setInPoint(originalIn, mediaType); } catch (e15) {}
     try { if (originalOut !== null) pitem.setOutPoint(originalOut, mediaType); } catch (e16) {}
     return NRJSON.stringify({ ok: okw, timeline: seq.name, count: okw ? 1 : 0, created: created,
-      errorCode: okw ? undefined : "INSERT_FAILED", error: okw ? undefined : "insertion échouée" });
+      errorCode: okw ? undefined : "INSERT_FAILED", error: okw ? undefined : "insert failed" });
   }
 
   var count = 0;
@@ -1632,7 +1639,7 @@ function NR_ppro_build(p) {
     var ripple = insertion === "insert" || insertion === "ripple_overwrite";
     var placedItem = sourceItem;
     if (p.videoOnly && ripple) {
-      placedItem = nrPproVideoOnlySubclip(sourceItem, inSec, outSec, String(i + 1));
+      placedItem = nrPproVideoOnlySubclip(sourceItem, inSec, outSec, nrPproSubclipName(p, sourceItem, String(i + 1)));
       if (!placedItem) continue;
     } else {
       nrPproRemember(touched, sourceItem, rangeMediaType);
@@ -1647,15 +1654,15 @@ function NR_ppro_build(p) {
   }
   nrPproRestore(touched);
 
-  // Sources hors ligne : le dire, sinon un montage multi-sources dont les fichiers ont bougé
-  // ressortait « aucun plan inséré » sans indiquer lequel manquait.
+  // Offline sources: say so, otherwise a multi-source edit whose files moved came out as
+  // "no shots inserted" without saying which one was missing.
   if (!count && sources.missing.length) {
     return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: sources.missing[0],
-      error: "fichier introuvable sur le disque : " + sources.missing[0] });
+      error: "file not found on disk: " + sources.missing[0] });
   }
   return NRJSON.stringify({ ok: count > 0, timeline: seq.name, count: count, created: created,
     skipped: sources.missing.length || undefined,
-    errorCode: count > 0 ? undefined : "NO_SHOTS_INSERTED", error: count > 0 ? undefined : "aucun plan inséré" });
+    errorCode: count > 0 ? undefined : "NO_SHOTS_INSERTED", error: count > 0 ? undefined : "no shots inserted" });
 }
 
 /* Bornes source d'un plan du document d'échange, en secondes. Les frames sont prioritaires (elles
@@ -1677,9 +1684,9 @@ function nrPproClipRange(c, fallbackFps) {
  *             inFrame, outFrame, in, out, tlStart (secondes depuis le début du document) }] }. */
 function NR_ppro_place(p) {
   var proj = app.project;
-  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
+  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
   var clips = (p && p.clips) || [];
-  if (!clips.length) return NRJSON.stringify({ ok: false, errorCode: "NO_VALID_SHOTS", error: "aucun plan à poser" });
+  if (!clips.length) return NRJSON.stringify({ ok: false, errorCode: "NO_VALID_SHOTS", error: "no shots to place" });
 
   var sources = nrPproResolver(proj);
   var seq = null;
@@ -1700,7 +1707,7 @@ function NR_ppro_place(p) {
     }
     for (var sj = 0; sj < clips.length && !seed; sj++) seed = sources.get(clips[sj].path);
     seq = nrPproNewSequence(proj, p.name, seed);
-    if (!seq) return NRJSON.stringify({ ok: false, errorCode: "SEQUENCE_CREATE_FAILED", error: "création de séquence échouée" });
+    if (!seq) return NRJSON.stringify({ ok: false, errorCode: "SEQUENCE_CREATE_FAILED", error: "sequence creation failed" });
     fpsApplied = nrPproApplySequenceSettings(seq, p.fps, p.width, p.height);
     seq = nrPproFreshSequence(proj, seq); // les réglages réécrits périment l'objet
   }
@@ -1798,7 +1805,7 @@ function NR_ppro_place(p) {
 
   if (!placed && sources.missing.length) {
     return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: sources.missing[0],
-      error: "fichier introuvable sur le disque : " + sources.missing[0] });
+      error: "file not found on disk: " + sources.missing[0] });
   }
   // Cadence RÉELLE de la séquence : les positions sont arrondies à SA grille. Un écart avec celle du
   // document veut dire des plans décalés — le taire ferait passer un montage faux pour un succès.
@@ -1810,7 +1817,7 @@ function NR_ppro_place(p) {
     sequenceFpsMismatch: fpsMismatch || undefined,
     tracksClamped: clamped || undefined, report: { items: reportItems },
     errorCode: placed > 0 ? undefined : "NO_SHOTS_INSERTED",
-    error: placed > 0 ? undefined : "aucun plan posé" });
+    error: placed > 0 ? undefined : "no shots placed" });
 }
 
 /* Paramètres TEXTE d'un graphique essentiel. `getMGTComponent()` ne rend rien sur un titre hérité :
@@ -1909,10 +1916,10 @@ function nrPproPlaceTitles(seq, graphics, mogrt, report) {
  * plans, puis on la renomme et on l'ouvre. */
 function NR_ppro_importTimeline(p) {
   var proj = app.project;
-  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
-  if (!p || !p.path) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "fichier d'échange manquant" });
+  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
+  if (!p || !p.path) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "interchange file missing" });
   if (!nrPproFileExists(p.path)) {
-    return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: p.path, error: "fichier d'échange introuvable : " + p.path });
+    return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: p.path, error: "interchange file not found: " + p.path });
   }
 
   var before = {};
@@ -1927,7 +1934,7 @@ function NR_ppro_importTimeline(p) {
     try { if (proj.getInsertionBin) bin = proj.getInsertionBin() || proj.rootItem; } catch (e1) {}
     imported = proj.importFiles([p.path], true, bin, false) !== false;
   } catch (e2) {
-    return NRJSON.stringify({ ok: false, errorCode: "IMPORT_REFUSED", error: String(e2) });
+    return NRJSON.stringify({ ok: false, errorCode: "IMPORT_REFUSED", errorDetail: String(e2), error: String(e2) });
   }
 
   var created = null;
@@ -1943,7 +1950,7 @@ function NR_ppro_importTimeline(p) {
   } catch (e3) {}
   if (!created) {
     return NRJSON.stringify({ ok: false, errorCode: "IMPORT_NO_SEQUENCE",
-      error: imported ? "aucune séquence créée par l'import" : "import refusé par Premiere" });
+      error: imported ? "the import created no sequence" : "import refused by Premiere" });
   }
 
   if (p.name) { try { created.name = String(p.name); } catch (e4) {} }
@@ -1962,13 +1969,13 @@ function NR_ppro_importTimeline(p) {
   return NRJSON.stringify({ ok: bestCount > 0, timeline: created.name, count: bestCount, created: true,
     titles: titles || undefined,
     errorCode: bestCount > 0 ? undefined : "IMPORT_EMPTY_SEQUENCE",
-    error: bestCount > 0 ? undefined : "séquence importée vide" });
+    error: bestCount > 0 ? undefined : "imported sequence is empty" });
 }
 
 /* Importe des fichiers dans le projet Premiere (bin d'insertion courant). */
 function NR_ppro_import(p) {
   var proj = app.project;
-  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
+  if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
   var paths = (p && p.paths) || [];
   if (!paths.length) return NRJSON.stringify({ ok: true, count: 0 });
   var count = 0;
@@ -1985,7 +1992,7 @@ function NR_ppro_import(p) {
   }
   return NRJSON.stringify({ ok: count > 0, count: count, skipped: missing || undefined,
     errorCode: count > 0 ? undefined : (missing ? "MEDIA_MISSING" : "IMPORT_FAILED"),
-    error: count > 0 ? undefined : (missing ? "fichier introuvable sur le disque" : "import échoué") });
+    error: count > 0 ? undefined : (missing ? "file not found on disk" : "import failed") });
 }
 
 function NR_ppro_snapshot() {
@@ -2095,7 +2102,7 @@ function nrPproProxyCounts(proj) {
 
 function nrPproStats() {
   var proj = app.project;
-  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" };
+  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
   var items = 0;
   nrPproWalkClips(proj, function () { items++; });
   var enableProxies = null;
@@ -2123,10 +2130,10 @@ function nrPproStats() {
 function nrPproDeletePreviews() {
   try { app.enableQE(); } catch (e0) {}
   if (typeof qe === "undefined" || !qe || !qe.project) {
-    return { ok: false, code: "QE_UNAVAILABLE", error: "QE DOM indisponible dans cette version" };
+    return { ok: false, code: "QE_UNAVAILABLE", error: "QE DOM unavailable in this version" };
   }
   if (!qe.project.deletePreviewFiles) {
-    return { ok: false, code: "QE_UNAVAILABLE", error: "deletePreviewFiles absent de ce build" };
+    return { ok: false, code: "QE_UNAVAILABLE", error: "deletePreviewFiles missing from this build" };
   }
   var attempts = [];
   try {
@@ -2141,14 +2148,14 @@ function nrPproDeletePreviews() {
       return { ok: true, experimental: true };
     } catch (e2) { lastError = String(e2); }
   }
-  return { ok: false, code: "QE_CALL_FAILED", error: lastError || "appel QE refusé" };
+  return { ok: false, code: "QE_CALL_FAILED", errorDetail: lastError || undefined, error: lastError || "QE call refused" };
 }
 
 function nrPproHygiene(mode) {
   var proj = app.project;
-  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" };
-  if (mode !== "consolidateDuplicates") return { ok: false, error: "opération inconnue : " + String(mode) };
-  if (!proj.consolidateDuplicates) return { ok: false, code: "UNSUPPORTED", error: "consolidateDuplicates absent de ce build" };
+  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
+  if (mode !== "consolidateDuplicates") return { ok: false, errorCode: "UNSUPPORTED_OP", error: "unknown operation: " + String(mode) };
+  if (!proj.consolidateDuplicates) return { ok: false, code: "UNSUPPORTED", error: "consolidateDuplicates missing from this build" };
   try {
     proj.consolidateDuplicates();
     return { ok: true, mode: mode };
@@ -2211,7 +2218,7 @@ function nrPproPrefsApply(entries) {
 
 function nrPproProxyAudit() {
   var proj = app.project;
-  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" };
+  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
   var items = [];
   nrPproWalkClips(proj, function (it) {
     var media = null;
@@ -2232,9 +2239,9 @@ function nrPproProxyAudit() {
    nrPproResolver). Les proxies sont activés une seule fois pour tout le lot. */
 function nrPproAttachProxy(pairs) {
   var proj = app.project;
-  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" };
+  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
   var list = pairs || [];
-  if (!list.length) return { ok: false, error: "aucune paire à attacher" };
+  if (!list.length) return { ok: false, errorCode: "NO_PROXY_PAIRS", error: "no pairs to attach" };
   var index = nrPproIndexProject(proj);
   try { app.setEnableProxies(1); } catch (e0) {}
   var attached = 0;
@@ -2273,5 +2280,5 @@ function NR_ppro_boost(p) {
     }
   }
   // purge : After Effects seul expose une API de purge de cache ; Premiere n'a rien d'équivalent.
-  return NRJSON.stringify({ ok: false, code: "UNSUPPORTED_OP", error: "opération inconnue : " + String(op) });
+  return NRJSON.stringify({ ok: false, code: "UNSUPPORTED_OP", error: "unknown operation: " + String(op) });
 }

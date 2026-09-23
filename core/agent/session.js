@@ -15,6 +15,7 @@ const { probeProvider } = require('./probe');
 const { startCliRun } = require('./runtimes/runs');
 const { getDef } = require('./runtimes/defs');
 const { detectAgents } = require('./runtimes/detection');
+const { t } = require('../i18n');
 
 /**
  * @param {{ registry:any, permissions:any, broadcast:(ch:string,p:any)=>void,
@@ -159,30 +160,30 @@ function createSession(deps) {
         duplicated = true; // une seule doublure par tour, même si la duplication échoue
         try {
           const r = await registry.execute('resolve_timeline', { action: 'duplicate' }, { runId });
-          if (r && r.ok && r.name) emit(runId, { type: 'status', label: `doublure créée : ${r.name}` });
+          if (r && r.ok && r.name) emit(runId, { type: 'status', label: t('agentDuplicateCreated', { name: r.name }) });
         } catch { /* pas de timeline ouverte → rien à dupliquer, on continue */ }
       }
 
       const perm = await permissions.check(runId, { name, input, risk });
-      if (!perm.approved) return { ok: false, error: perm.reason || 'action refusée' };
+      if (!perm.approved) return { ok: false, error: perm.reason || t('agentActionRefused') };
       return registry.execute(name, input, { runId });
     };
   }
 
-  // Compose un prompt unique pour les CLI one-shot (system + historique + dernier message).
+  // Builds a single prompt for one-shot CLIs (system + history + last message).
   /** @param {string|undefined} system @param {Array<{role:string,content:string,images?:Array<{mediaType:string,data:string}>}>} messages */
   function composePrompt(system, messages) {
     const parts = [];
     if (system) parts.push(system);
     for (const m of messages) {
-      // Un agent CLI recoit un prompt TEXTE : il n'a pas de canal pour une
-      // image. On le DIT plutot que de la laisser disparaitre en silence, sinon
-      // le modele repond a une demande dont il lui manque la moitie.
+      // A CLI agent receives a TEXT prompt: it has no channel for an image.
+      // Say so rather than let it vanish silently, otherwise the model answers
+      // a request with half of it missing.
       const note = Array.isArray(m.images) && m.images.length
-        ? ` [${m.images.length} image(s) jointe(s) — non lisibles par un agent en ligne de commande ;`
-          + ' demande a l\'utilisateur de decrire ce qu\'elles montrent]'
+        ? ` [${m.images.length} image(s) attached — not readable by a command-line agent;`
+          + ' ask the user to describe what they show]'
         : '';
-      parts.push(`${m.role === 'assistant' ? 'Assistant' : 'Utilisateur'}: ${m.content}${note}`);
+      parts.push(`${m.role === 'assistant' ? 'Assistant' : 'User'}: ${m.content}${note}`);
     }
     parts.push('Assistant:');
     return parts.join('\n\n');
@@ -233,7 +234,7 @@ function createSession(deps) {
         });
       } else if (provider === 'cli') {
         const def = getDef(agent || 'claude');
-        if (!def) { onEvent({ type: 'error', message: `agent inconnu : ${agent}` }); onEvent({ type: 'done', stopReason: 'error' }); return { ok: true }; }
+        if (!def) { onEvent({ type: 'error', message: t('agentUnknownAgent', { id: String(agent) }) }); onEvent({ type: 'done', stopReason: 'error' }); return { ok: true }; }
         const prompt = composePrompt(system, messages);
         const mcpConfigPath = deps.mcpConfigPath ? deps.mcpConfigPath(surface) : undefined;
         activeCliRun = runId;
@@ -256,7 +257,7 @@ function createSession(deps) {
           activeCliRun = null;
         }
       } else {
-        onEvent({ type: 'error', message: `fournisseur inconnu : ${provider}` });
+        onEvent({ type: 'error', message: t('agentUnknownProvider', { provider: String(provider) }) });
         onEvent({ type: 'done', stopReason: 'error' });
       }
     } catch (e) {

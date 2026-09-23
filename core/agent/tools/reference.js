@@ -1,9 +1,11 @@
 // @ts-check
-// Outil « board de référence » exposé à l'agent IA : lire/écrire les scènes du mood-board et y
-// envoyer des médias (images / vidéos locales, ou un média distant résolu depuis une URL). Réutilise
-// le MÊME store que les canaux reference:* (core/reference.js) et le MÊME canal de push que
-// « Envoyer vers le board » (broadcast 'reference:push' {type:'path',path,title}) → le board vivant
-// (onglet Référence ou fenêtre détachée) pose l'item. Dispatcher compound : 1 outil + param `action`.
+// "Reference board" tool exposed to the AI agent: read/write the mood-board scenes and send media to
+// it (local images / videos, or remote media resolved from a URL). Reuses the SAME store as the
+// reference:* channels (core/reference.js) and the SAME push channel as "Send to board" (broadcast
+// 'reference:push' {type:'path',path,title}) → the live board (Reference tab or detached window)
+// places the item. Compound dispatcher: 1 tool + an `action` param.
+
+const { t } = require('../../i18n');
 
 /**
  * @param {{ refStore:any, broadcast:(ch:string,p:any)=>void }} deps
@@ -20,11 +22,11 @@ function createReferenceTools(deps) {
   return [
     {
       name: 'board',
-      description: 'Board de référence (mood-board). action: list_scenes | load_scene(id) | '
+      description: 'Reference board (mood-board). action: list_scenes | load_scene(id) | '
         + 'save_scene(scene) | delete_scene(id) | add_media(paths[],titles?) | add_url(url,title?). '
-        + 'add_media envoie des fichiers image/vidéo locaux au board ouvert. add_url télécharge un '
-        + 'média distant (page web, CDN, GIF) puis l’ajoute. add_media/add_url ne marchent que si le '
-        + 'board est ouvert (onglet Référence ou fenêtre détachée).',
+        + 'add_media sends local image/video files to the open board. add_url downloads a '
+        + 'remote medium (web page, CDN, GIF) and then adds it. add_media/add_url only work when the '
+        + 'board is open (Reference tab or detached window).',
       risk: 'write',
       riskFor: (/** @type {any} */ a) => (a.action === 'list_scenes' || a.action === 'load_scene' ? 'read' : a.action === 'delete_scene' ? 'destructive' : 'write'),
       inputSchema: {
@@ -33,7 +35,7 @@ function createReferenceTools(deps) {
           action: { type: 'string', enum: ['list_scenes', 'load_scene', 'save_scene', 'delete_scene', 'add_media', 'add_url'] },
           id: { type: 'string' },
           scene: { type: 'object', description: '{ id?, name, items[], view? }' },
-          paths: { type: 'array', items: { type: 'string' }, description: 'Chemins absolus image/vidéo' },
+          paths: { type: 'array', items: { type: 'string' }, description: 'Absolute image/video paths' },
           titles: { type: 'array', items: { type: 'string' } },
           url: { type: 'string' },
           title: { type: 'string' },
@@ -53,11 +55,11 @@ function createReferenceTools(deps) {
           }
           case 'add_url': {
             const r = await refStore.resolveMedia(String(a.url || ''));
-            if (!r || !r.ok || !r.path) return { ok: false, error: (r && r.error) || 'média introuvable' };
+            if (!r || !r.ok || !r.path) return { ok: false, error: (r && r.error) || t('mediaMissing') };
             pushPath(r.path, a.title);
             return ok({ added: 1, path: r.path, kind: r.kind });
           }
-          default: throw new Error(`action board inconnue : ${a.action}`);
+          default: throw new Error(t('agentUnknownAction', { action: String(a.action) }));
         }
       },
     },

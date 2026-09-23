@@ -10,6 +10,7 @@
 
 const { spawn } = require('child_process');
 const { getDef } = require('./runtimes/defs');
+const { t } = require('../i18n');
 
 /// Quoted for `cmd /k`, which splits on spaces and would otherwise break any
 /// path containing one — the normal case under Program Files.
@@ -18,14 +19,14 @@ function quote(part) {
 }
 
 /**
- * Lance la connexion d'un agent dans un terminal visible.
+ * Starts an agent's login in a visible terminal.
  * @param {{ id:string, bin?:string }} request
  */
 function openAgentLogin(request) {
   const def = getDef(String(request.id || ''));
-  if (!def) return { ok: false, error: `agent inconnu : ${request.id}` };
+  if (!def) return { ok: false, error: t('agentUnknownAgent', { id: String(request.id) }) };
   if (!Array.isArray(def.loginArgs)) {
-    return { ok: false, error: `${def.name} ne documente pas de commande de connexion` };
+    return { ok: false, error: t('agentNoLoginCommand', { name: def.name }) };
   }
 
   // Le binaire résolu par la détection l'emporte : il peut être un chemin
@@ -94,7 +95,7 @@ function installCommandAllowed(command) {
 function openAgentInstall(request) {
   const command = String(request.command || '').trim();
   if (!installCommandAllowed(command)) {
-    return { ok: false, reason: 'refused', error: `commande d'installation refusée : ${command}` };
+    return { ok: false, reason: 'refused', error: t('agentInstallRefused', { command }) };
   }
   try {
     if (process.platform === 'win32') {

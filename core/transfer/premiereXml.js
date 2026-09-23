@@ -102,8 +102,8 @@ async function graftPremiereAnimation(host, doc, timelineName) {
     // Aucun plan apparié alors que les deux lectures portent du contenu : les pistes ne se
     // correspondent pas. On montre les deux découpages plutôt que de conclure « pas d'animation ».
     if (!merged.animatedClips && merged.skippedClips.length) {
-      console.warn("[transfer] appariement XML impossible — panneau :", trackShape(doc),
-        "· export :", trackShape(read.doc));
+      console.warn("[transfer] XML pairing impossible — panel:", trackShape(doc),
+        "· export:", trackShape(read.doc));
     }
     return {
       doc: merged.doc,

@@ -1,15 +1,18 @@
 /*
- * host.jsx — point d'entrée ExtendScript (chargé par ScriptPath du manifest).
- * Dispatch par application : Premiere Pro (host-ppro.jsx) / After Effects (host-aeft.jsx).
- * Contrat de sortie : NR_getSnapshot() -> chaîne JSON AdobeSnapshot
+ * host.jsx — ExtendScript entry point (loaded through the manifest's ScriptPath).
+ * Dispatches per application: Premiere Pro (host-ppro.jsx) / After Effects (host-aeft.jsx).
+ * Output contract: NR_getSnapshot(text) -> AdobeSnapshot JSON string
  *   { app, appVersion, project, at, rushes:[…], sequences:[{ name,fps,w,h,tracks:[{kind,index,clips:[…]}] }] }
- * Temps TOUJOURS en secondes (les ticks Premiere sont convertis ici).
- * Jamais de dialogue modal : toute erreur revient en {ok:false,error}.
+ * Times ALWAYS in seconds (Premiere ticks are converted here).
+ * Never a modal dialog: every error comes back as {ok:false,errorCode?,error}. `error` is English
+ * developer text; the panel shows the user the text of `errorCode` in the interface language.
+ * `text` / `payload.nrText` carry the few names these scripts write into the project, already in
+ * the interface language (the panel knows it, the host scripts do not).
  */
 /* global $, File, BridgeTalk, NRJSON, NR_ppro_snapshot, NR_aeft_snapshot, NR_ppro_place, NR_aeft_place, NR_aeft_runScript, NR_ppro_exportXml */
 
-// Tentative de chargement des voisins via $.fileName (souvent vide sous CEP → try/catch).
-// Le vrai chargement fiable est fait par le panneau (bootHost, chemin d'extension connu).
+// Attempt to load the neighbours through $.fileName (often empty under CEP → try/catch).
+// The reliable loading is done by the panel (bootHost, known extension path).
 (function () {
   try {
     var dir = File($.fileName).parent.fsName.replace(/\\/g, "/");
@@ -19,10 +22,10 @@
   } catch (e) {}
 })();
 
-function NR_getSnapshot() {
+function NR_getSnapshot(text) {
   try {
-    if (BridgeTalk.appName === "premierepro") return NR_ppro_snapshot();
-    return NR_aeft_snapshot();
+    if (BridgeTalk.appName === "premierepro") return NR_ppro_snapshot(text);
+    return NR_aeft_snapshot(text);
   } catch (e) {
     try {
       return NRJSON.stringify({ ok: false, error: String(e) });
@@ -32,8 +35,8 @@ function NR_getSnapshot() {
   }
 }
 
-/* Construit une séquence/comp depuis les plans découpés. `payload` = objet JS déjà littéral
- * (le panneau embarque le JSON dans le code eval → pas de JSON.parse en ES3).
+/* Builds a sequence/comp from the cut shots. `payload` = a JS object already written as a literal
+ * (the panel embeds the JSON in the eval'd code → no JSON.parse in ES3).
  * payload = { name, input, segments:[{in,out,inFrame,outFrame}], fps?, mode?, whole? }. */
 function NR_buildTimeline(payload) {
   try {
@@ -48,8 +51,8 @@ function NR_buildTimeline(payload) {
   }
 }
 
-/* Recopie une timeline ENTIÈRE (positions absolues, pistes conservées) depuis le document
- * d'échange de NetsuRush. payload = { name, mode, timelineName, fps, width, height, duration,
+/* Copies a WHOLE timeline (absolute positions, tracks kept) from the NetsuRush interchange
+ * document. payload = { name, mode, timelineName, fps, width, height, duration,
  * clips:[{ path, kind, track, fps, inFrame, outFrame, tlStart, tlEnd }] }. */
 function NR_placeTimeline(payload) {
   try {
@@ -64,12 +67,12 @@ function NR_placeTimeline(payload) {
   }
 }
 
-/* Exécute un script écrit par NetsuRush dans l'hôte OUVERT. payload = { path }. After Effects
- * seulement : Premiere n'exécute pas de .jsx arbitraire depuis un panneau. */
+/* Runs a script written by NetsuRush in the OPEN host. payload = { path }. After Effects only:
+ * Premiere does not run an arbitrary .jsx from a panel. */
 function NR_runScript(payload) {
   try {
     if (BridgeTalk.appName === "premierepro") {
-      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "script hôte non supporté par Premiere Pro" });
+      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "host scripts are not supported by Premiere Pro" });
     }
     return NR_aeft_runScript(payload);
   } catch (e) {
@@ -81,18 +84,18 @@ function NR_runScript(payload) {
   }
 }
 
-/* Exporte la séquence visée en FCP7 XML vers le chemin demandé. payload = { path, timelineName }.
- * Le fichier ne sert QU'À lire les images clés : la structure du transfert vient de l'API. */
+/* Exports the target sequence as FCP7 XML to the requested path. payload = { path, timelineName }.
+ * The file is ONLY used to read the keyframes: the structure of the transfer comes from the API. */
 function NR_exportXml(payload) {
   try {
     if (BridgeTalk.appName !== "premierepro") {
-      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "export XML non supporté par After Effects" });
+      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "XML export is not supported by After Effects" });
     }
-    // Ce dispatcher est le `ScriptPath` du manifeste : Adobe ne le charge qu'au démarrage de
-    // l'application, alors que ses voisins sont rechargés par le panneau. Les deux peuvent donc
-    // diverger — on le NOMME, au lieu de laisser filer une ReferenceError que rien n'explique.
+    // This dispatcher is the manifest's `ScriptPath`: Adobe only loads it when the application
+    // starts, while its neighbours are reloaded by the panel. The two can therefore diverge — it
+    // is NAMED here, instead of letting through a ReferenceError that nothing explains.
     if (typeof NR_ppro_exportXml !== "function") {
-      return NRJSON.stringify({ ok: false, errorCode: "HOST_STALE", error: "NR_ppro_exportXml absent : scripts hôtes périmés" });
+      return NRJSON.stringify({ ok: false, errorCode: "HOST_STALE", error: "NR_ppro_exportXml missing: stale host scripts" });
     }
     return NR_ppro_exportXml(payload);
   } catch (e) {
@@ -104,17 +107,17 @@ function NR_exportXml(payload) {
   }
 }
 
-/* Importe une timeline d'échange (FCP7 XML) comme séquence. payload = { path, name }. Premiere
- * seulement : c'est son importeur qui pose les titres, qu'aucune API ne sait créer. */
+/* Imports an interchange timeline (FCP7 XML) as a sequence. payload = { path, name }. Premiere
+ * only: its importer places the titles, which no API can create. */
 function NR_importTimeline(payload) {
   try {
     if (BridgeTalk.appName !== "premierepro") {
-      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "import de timeline non supporté par After Effects" });
+      return NRJSON.stringify({ ok: false, errorCode: "UNSUPPORTED_OP", error: "timeline import is not supported by After Effects" });
     }
-    // Ce dispatcher est le `ScriptPath` du manifeste : il peut diverger de ses voisins rechargés par
-    // le panneau. On NOMME la fonction absente plutôt que de laisser filer une ReferenceError.
+    // This dispatcher is the manifest's `ScriptPath`: it can diverge from its neighbours reloaded
+    // by the panel. The missing function is NAMED rather than letting a ReferenceError through.
     if (typeof NR_ppro_importTimeline !== "function") {
-      return NRJSON.stringify({ ok: false, errorCode: "HOST_STALE", error: "NR_ppro_importTimeline absent : scripts hôtes périmés" });
+      return NRJSON.stringify({ ok: false, errorCode: "HOST_STALE", error: "NR_ppro_importTimeline missing: stale host scripts" });
     }
     return NR_ppro_importTimeline(payload);
   } catch (e) {
@@ -126,7 +129,7 @@ function NR_importTimeline(payload) {
   }
 }
 
-/* Importe des fichiers dans le projet de l'hôte. payload = { paths:[...] }. */
+/* Imports files into the host project. payload = { paths:[...] }. */
 function NR_import(payload) {
   try {
     if (BridgeTalk.appName === "premierepro") return NR_ppro_import(payload);
@@ -140,8 +143,8 @@ function NR_import(payload) {
   }
 }
 
-/* NetsuBoost : purge de cache, hygiène projet, réglages, proxies. payload = { op, … } — chaque hôte
- * n'implémente que les opérations qui ont un sens chez lui et renvoie UNSUPPORTED_OP pour les autres. */
+/* NetsuBoost: cache purge, project hygiene, settings, proxies. payload = { op, … } — each host only
+ * implements the operations that make sense for it and returns UNSUPPORTED_OP for the others. */
 function NR_boost(payload) {
   try {
     if (BridgeTalk.appName === "premierepro") return NR_ppro_boost(payload);

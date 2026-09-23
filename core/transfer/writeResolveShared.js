@@ -79,7 +79,7 @@ function createSourceResolver(resolve, root) {
           const added = await storage.AddItemListToMediaPool([filePath]);
           if (added && added.length) item = added[0];
         } catch (error) {
-          console.warn("[transfer] import Media Pool impossible :", filePath, error && error.message);
+          console.warn("[transfer] Media Pool import failed:", filePath, error && error.message);
         }
       }
       if (!item) missing.push(filePath);

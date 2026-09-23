@@ -60,6 +60,7 @@
   "phases": {
     "read": "Lecture de la timeline",
     "sources": "Résolution des sources",
+    "import": "Import de la timeline",
     "build": "Montage",
     "done": "Terminé"
   },

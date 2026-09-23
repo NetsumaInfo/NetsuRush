@@ -19,6 +19,7 @@
 
 const { createMcpClient } = require('../mcp/client');
 const { findResolveMcp } = require('../mcp/resolveBin');
+const { t } = require('../../i18n');
 
 const PREFIX = 'bmd_';
 
@@ -64,37 +65,36 @@ function reprefix(text, names) {
   return out;
 }
 
-/// Un script qui ne fait que LIRE est une lecture, et doit passer comme telle.
+/// A script that only READS is a read, and must pass as one.
 ///
-/// `run_script` déclaré destructif en bloc rendait le mode « demander »
-/// inutilisable — chaque « qu'y a-t-il dans ma timeline ? » ouvrait une
-/// confirmation — et le mode « lecture seule » refusait jusqu'à l'inspection,
-/// alors que c'est précisément ce qu'on y veut.
+/// `run_script` declared destructive wholesale made "ask" mode unusable —
+/// every "what is in my timeline?" opened a confirmation — and "read-only"
+/// mode refused even inspection, which is exactly what it is for.
 ///
-/// La reconnaissance marche par LISTE BLANCHE de verbes, jamais par liste
-/// noire : un appel dont le verbe n'est pas connu pour lire compte comme une
-/// écriture. Une méthode ajoutée par une version future de Resolve tombe donc
-/// du côté prudent, sans que ce fichier ait à la connaître.
+/// Recognition works by an ALLOW LIST of verbs, never a deny list: a call
+/// whose verb is not known to read counts as a write. A method added by a
+/// future Resolve version therefore falls on the safe side without this file
+/// having to know it.
 const READ_VERBS = /^(Get|Is|Has|Are|Can|Count|Find|Search|Exists|List|To|Print|Format|Join|Split|Strip|Lower|Upper|Replace|Append|Sort|Keys|Values|Items|Copy)$/;
 
-/// Sorties du bac à sable, ou évaluation dynamique : le script pourrait alors
-/// écrire sans qu'aucun appel visible ne le dise.
+/// Sandbox escapes, or dynamic evaluation: the script could then write
+/// without any visible call saying so.
 const ESCAPES = /\b(exec|eval|compile|__import__|open|globals|locals|getattr|setattr)\s*\(/;
 
-/// Le risque réel d'un `run_script`, lu dans le script lui-même.
+/// The real risk of a `run_script`, read from the script itself.
 /** @param {any} input @returns {'read'|'destructive'} */
 function scriptRisk(input) {
   const code = String((input && (input.script || input.code)) || '');
   if (!code.trim() || ESCAPES.test(code)) return 'destructive';
-  // Tout appel de méthode du script : `objet.Methode(`. `Append`/`Copy` sont
-  // dans la liste blanche pour les listes Python, pas pour l'API Resolve —
-  // d'où le refus explicite des deux méthodes de l'API qui portent ces noms.
+  // Every method call in the script: `object.Method(`. `Append`/`Copy` are on
+  // the allow list for Python lists, not for the Resolve API — hence the
+  // explicit refusal of the API methods that carry those names.
   if (/\.\s*(AppendToTimeline|CopyGrades|CopyTimeline)\s*\(/.test(code)) return 'destructive';
   const calls = code.match(/\.\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(/g) || [];
   for (const call of calls) {
     const name = String(call).replace(/^\.\s*/, '').replace(/\s*\($/, '');
-    // Le verbe = le premier mot CamelCase (`GetClipProperty` → `Get`), ou le
-    // nom entier pour une méthode Python en minuscules (`keys`, `sort`).
+    // The verb = the first CamelCase word (`GetClipProperty` → `Get`), or the
+    // whole name for a lowercase Python method (`keys`, `sort`).
     const verb = /^[A-Z]/.test(name) ? (name.match(/^[A-Z][a-z]*/) || [name])[0] : name;
     if (!READ_VERBS.test(verb) && !READ_VERBS.test(name.replace(/^./, (c) => c.toUpperCase()))) {
       return 'destructive';
@@ -103,39 +103,40 @@ function scriptRisk(input) {
   return 'read';
 }
 
-/// Garde-fou anti-emballement, en caractères (~50 000 tokens).
+/// Runaway guard, in characters (~50,000 tokens).
 ///
-/// Mesuré sur Resolve 21.1 : `get_scripting_api` renvoie le stub `.pyi`
-/// complet, 146 000 caractères — 36 500 tokens dans UN résultat, repayés à
-/// chaque tour suivant d'une boucle BYOK. Les autres n'en approchent pas
-/// (`search_scripting_api` : 6 700 ; la doc : 1 300).
+/// Measured on Resolve 21.1: `get_scripting_api` returns the complete `.pyi`
+/// stub, 146,000 characters — 36,500 tokens in ONE result, paid again on every
+/// following turn of a BYOK loop. The others come nowhere near
+/// (`search_scripting_api`: 6,700; the docs: 1,300).
 ///
-/// Le plafond passe donc AU-DESSUS du stub plutôt qu'en dessous : le couper
-/// ferait un outil qui échoue toujours, ce qui est pire que cher. C'est le
-/// prompt pilote qui envoie chercher avant de tout tirer. Ce qui reste barré
-/// ici, c'est le résultat qui part en vrille — un `run_script` qui déverse un
-/// fichier entier dans la conversation.
+/// The cap therefore sits ABOVE the stub rather than below: cutting it would
+/// make a tool that always fails, which is worse than expensive. The pilot
+/// prompt is what sends the model searching before pulling everything. What
+/// stays blocked here is the result that runs away — a `run_script` pouring a
+/// whole file into the conversation.
 const MAX_CHARS = 200_000;
 
-/// Trop gros = REFUSÉ, jamais tronqué. Un stub d'API coupé en deux est pire
-/// qu'absent : le modèle y lit l'absence d'une classe qui existe, et affirme
-/// derrière qu'elle n'est pas dans l'API. Le refus, lui, nomme le chemin étroit.
+/// Too big = REFUSED, never truncated. An API stub cut in half is worse than
+/// none: the model reads in it the absence of a class that exists, and then
+/// claims it is not in the API. The refusal names the narrow path instead.
 /** @param {string} name @param {number} size */
 function tooBig(name, size) {
-  const advice = name === 'get_scripting_api'
-    ? 'Utilise `bmd_search_scripting_api {pattern}` : il renvoie les types et fonctions qui correspondent, pas le stub entier.'
-    : 'Restreins la demande (moins de champs dans `result`, une plage plus courte) et rappelle l’outil.';
-  return { ok: false, error: `résultat de ${name} trop volumineux (${size} caractères, plafond ${MAX_CHARS}). ${advice}` };
+  const vars = { name, size, max: MAX_CHARS };
+  return {
+    ok: false,
+    error: name === 'get_scripting_api' ? t('agentMcpResultTooLargeApi', vars) : t('agentMcpResultTooLarge', vars),
+  };
 }
 
 /// MCP results are content blocks; the registry speaks plain objects. Text
 /// parts are joined, structured output is passed through under `data`, and
 /// `isError` becomes our own failure shape so the panel marks the line red.
 /** @param {any} result @param {string} [name] */
-function normalize(result, name = 'l’outil') {
+function normalize(result, name = 'tool') {
   const blocks = Array.isArray(result && result.content) ? result.content : [];
   const text = blocks.filter((b) => b && b.type === 'text').map((b) => String(b.text || '')).join('\n');
-  if (result && result.isError) return { ok: false, error: text || 'erreur du serveur MCP Resolve' };
+  if (result && result.isError) return { ok: false, error: text || t('agentResolveMcpError') };
   const data = result && result.structuredContent;
   const size = text.length + (data === undefined ? 0 : JSON.stringify(data).length);
   if (size > MAX_CHARS) return tooBig(name, size);
@@ -143,10 +144,9 @@ function normalize(result, name = 'l’outil') {
 }
 
 /**
- * `client` et `bin` sont injectables : c'est ce qui permet de vérifier le
- * câblage (risques, préfixe, interrupteur hors bac à sable) contre un serveur
- * factice, sans exiger une installation de Resolve Studio sur la machine de
- * test.
+ * `client` and `bin` are injectable: that is what lets the wiring (risks,
+ * prefix, out-of-sandbox switch) be checked against a fake server, without
+ * requiring a Resolve Studio install on the test machine.
  * @param {{ registry:any, bin?:string|null, client?:any }} deps
  */
 function createResolveMcp({ registry, bin: forcedBin, client: forcedClient }) {
@@ -172,7 +172,7 @@ function createResolveMcp({ registry, bin: forcedBin, client: forcedClient }) {
   /// Idempotent: called again (after the unsafe switch moves) it replaces what
   /// it registered last time rather than colliding with it.
   async function hydrate() {
-    if (!client) { error = 'serveur MCP Resolve introuvable'; return; }
+    if (!client) { error = t('agentResolveMcpMissing'); return; }
     try {
       const info = await client.start();
       serverInfo = info.serverInfo || {};
@@ -188,9 +188,9 @@ function createResolveMcp({ registry, bin: forcedBin, client: forcedClient }) {
           description: reprefix(tool.description, names),
           inputSchema: tool.inputSchema || { type: 'object', properties: {} },
           risk,
-          // `run_script` seul est jugé sur pièce. `run_script_unsafe` reste
-          // destructif quoi qu'il lise : hors du bac à sable, un script « en
-          // lecture » atteint quand même le disque et le réseau.
+          // Only `run_script` is judged on its content. `run_script_unsafe`
+          // stays destructive whatever it reads: outside the sandbox, a
+          // "read-only" script still reaches the disk and the network.
           ...(name === 'run_script' ? { riskFor: scriptRisk } : {}),
           surfaces: ['pilot'],
           handler: async (/** @type {any} */ args) => {
@@ -215,12 +215,12 @@ function createResolveMcp({ registry, bin: forcedBin, client: forcedClient }) {
     return hydration;
   }
 
-  /// Nouvelle tentative quand la précédente n'a rien donné. Resolve lancé APRÈS
-  /// NetsuRush est le cas courant : sans ce chemin, le bouton « relancer la
-  /// détection » aurait rejoué la promesse déjà résolue et l'utilisateur serait
-  /// resté devant « sans réponse » jusqu'au redémarrage de l'application.
+  /// A new attempt when the previous one gave nothing. Resolve started AFTER
+  /// NetsuRush is the common case: without this path, the "detect again"
+  /// button would have replayed the already-resolved promise and the user
+  /// would have stayed on "no answer" until the application restarted.
   async function refresh() {
-    if (registered.length) return; // déjà en place : rien à retenter
+    if (registered.length) return; // already in place: nothing to retry
     hydration = hydrate();
     await hydration;
   }

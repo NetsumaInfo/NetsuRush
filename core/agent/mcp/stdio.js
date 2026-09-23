@@ -33,7 +33,7 @@ async function handle(req) {
     });
     return;
   }
-  if (method === 'notifications/initialized') return; // notification, pas de réponse
+  if (method === 'notifications/initialized') return; // notification, no reply
   if (method === 'ping') { reply(id, {}); return; }
   if (method === 'tools/list') {
     // The surface is what the bridge put in this process's environment when it
@@ -52,7 +52,7 @@ async function handle(req) {
     } catch (e) { fail(id, String((e && e.message) || e)); }
     return;
   }
-  if (id != null) fail(id, `méthode inconnue : ${method}`);
+  if (id != null) fail(id, `unknown method: ${method}`);
 }
 
 let buf = '';

@@ -27,7 +27,7 @@ async function appendSingle(mediaPool, info, name) {
     if (Array.isArray(raw)) return { ok: raw.length > 0, item: raw.length === 1 ? raw[0] : null };
     return { ok: !!raw, item: null };
   } catch (error) {
-    console.warn("[transfer] plan refusé par Resolve :", name, error && error.message);
+    console.warn("[transfer] clip refused by Resolve:", name, error && error.message);
     return { ok: false, item: null };
   }
 }
@@ -86,8 +86,8 @@ function clampToSource(placement, frames) {
  * la seule chose qui distingue une borne fausse d'un média que Resolve n'accepte pas.
  */
 function logRefusal(clip, placement, sourceFrames) {
-  console.warn("[transfer] pose refusée par Resolve :", clip.name || clip.path, JSON.stringify({
-    requete: placement,
+  console.warn("[transfer] placement refused by Resolve:", clip.name || clip.path, JSON.stringify({
+    request: placement,
     resolveFrames: sourceFrames === undefined ? null : sourceFrames,
     document: {
       kind: clip.kind, track: clip.track, fps: clip.fps,
@@ -120,7 +120,7 @@ function logClipInventory(clips) {
       audio: named(audio, ["gainDb", "volume", "pan", "mute"]),
     };
   });
-  console.log("[transfer] propriétés LUES chez la source (`nom*N` = N images clés) :", JSON.stringify(inventory));
+  console.log("[transfer] properties READ from the source (`name*N` = N keyframes):", JSON.stringify(inventory));
 }
 
 /** Origine des images clés du document : sans elle, « rien d'animé » et « rien lu » se confondent. */
@@ -128,11 +128,11 @@ function logAnimationSource(doc) {
   const animation = doc.animation;
   if (!animation) return;
   if (animation.available) {
-    console.log(`[transfer] animations lues dans l'export de l'hôte : ${animation.clips || 0} plan(s)`
-      + `${animation.unpaired ? `, ${animation.unpaired} non apparié(s)` : ""}`);
+    console.log(`[transfer] animations read from the host export: ${animation.clips || 0} clip(s)`
+      + `${animation.unpaired ? `, ${animation.unpaired} unpaired` : ""}`);
     return;
   }
-  console.warn("[transfer] aucune animation lue :", animation.reason || "raison inconnue");
+  console.warn("[transfer] no animation read:", animation.reason || "unknown reason");
 }
 
 async function createTarget(project, mediaPool, doc, opts) {
@@ -141,15 +141,15 @@ async function createTarget(project, mediaPool, doc, opts) {
   let name = sanitizeTimelineName(opts.name || doc.timeline || "NetsuRush");
   if (opts.mode === "append") {
     timeline = opts.timelineName ? await getTimelineByName(project, opts.timelineName) : await project.GetCurrentTimeline();
-    if (opts.timelineName && !timeline) return { ok: false, error: `${t("timelineMissing")}: ${opts.timelineName}` };
+    if (opts.timelineName && !timeline) return { ok: false, error: t("agentTimelineNotFound", { name: opts.timelineName }) };
   }
   if (!timeline) {
     try { await project.SetSetting("timelineFrameRate", formatFrameRate(doc.fps)); } catch (error) {
-      console.warn("[transfer] cadence de timeline non appliquée :", error && error.message);
+      console.warn("[transfer] timeline frame rate not applied:", error && error.message);
     }
     name = await uniqueTimelineName(project, name);
     timeline = await mediaPool.CreateEmptyTimeline(name);
-    if (!timeline) return { ok: false, error: `${t("timelineCreateFailed")}: ${name}` };
+    if (!timeline) return { ok: false, error: t("transferTimelineCreateFailedNamed", { name }) };
     created = true;
   } else {
     try { name = await timeline.GetName(); } catch (_) { /* nom illisible : on garde celui demandé */ }
@@ -256,20 +256,20 @@ async function appendResolveDoc(doc, opts = {}) {
         // Sans ce constat, un plan sans animation se lit exactement comme un plan animé dans le
         // rapport — c'est le cas « ça a marché sur un seul rush » qu'on ne pouvait pas expliquer.
         if (animation.ok === true && animation.verified === false) {
-          console.warn("[transfer] comp Fusion posée mais NON confirmée à la relecture :", record.clip.name);
+          console.warn("[transfer] Fusion comp placed but NOT confirmed on readback:", record.clip.name);
         }
       } else if (clipIsAnimated(record.clip)) {
         // Fusion est la SEULE écriture d'image clé côté Resolve : son refus explique à lui seul tout
         // `resolveKeyframeWriteUnavailable` du rapport, et sans sa raison on ne peut rien en faire.
-        console.warn("[transfer] comp Fusion non posée :", record.clip.name,
-          animation.ok === false ? animation.reason : "raison inconnue");
+        console.warn("[transfer] Fusion comp not placed:", record.clip.name,
+          animation.ok === false ? animation.reason : "unknown reason");
       }
       const applied = await applyResolveClip(located.item, record.clip, record.clipIndex, {
         mode: "write", animationCarried: animation.ok === true,
       });
       const refused = applied.filter((item) => item.status !== "applied");
       if (refused.length) {
-        console.warn("[transfer] propriétés refusées par Resolve :", record.clip.name,
+        console.warn("[transfer] properties refused by Resolve:", record.clip.name,
           JSON.stringify(refused.map((item) => `${item.property}=${item.status}${item.reason ? `(${item.reason})` : ""}`
             // La valeur demandée dit si Resolve bute sur la propriété ou sur son contenu.
             + (item.expected === undefined ? "" : ` [${JSON.stringify(item.expected)}]`))));
@@ -286,7 +286,7 @@ async function appendResolveDoc(doc, opts = {}) {
     startFrame: origin, fps: doc.fps, timeline: { width: doc.width, height: doc.height },
   });
   if (titleReport.failed.length) {
-    console.warn("[transfer] titres non posés :", JSON.stringify(titleReport.failed));
+    console.warn("[transfer] titles not placed:", JSON.stringify(titleReport.failed));
   }
 
   const placed = placedRecords.length;
@@ -307,7 +307,7 @@ async function appendResolveDoc(doc, opts = {}) {
     failed: failed.length ? failed : undefined,
     missing: sources.missing.length ? sources.missing : undefined,
     report: { items: reportItems },
-    error: placed > 0 ? undefined : `${t("timelineAppendFailed")}: ${target.name}`,
+    error: placed > 0 ? undefined : t("transferTimelineAppendFailedNamed", { name: target.name }),
   };
 }
 

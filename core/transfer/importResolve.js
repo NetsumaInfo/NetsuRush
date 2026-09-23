@@ -81,10 +81,10 @@ function prepareSource(filePath) {
 function reportTitleStyle(graphics) {
   const styled = graphics.filter((graphic) => graphic.font || graphic.size);
   if (!styled.length) return;
-  console.log("[transfer] titres posés — style à reprendre à la main (Resolve n'accepte pas la police "
-    + "ni le corps par import) : "
+  console.log("[transfer] titles placed — style to redo by hand (Resolve accepts neither the font "
+    + "nor the size through import): "
     + JSON.stringify(styled.map((graphic) => ({
-      texte: graphic.text, police: graphic.font, corps: graphic.size, piste: `V${graphic.track}`,
+      text: graphic.text, font: graphic.font, size: graphic.size, track: `V${graphic.track}`,
     }))));
 }
 
@@ -104,12 +104,12 @@ function fileVariants(filePath, prepared) {
       variants.push({ label: "source", path: filePath });
       continue;
     }
-    const target = siblingPath(filePath, variant.label === "source" ? "titres-traduits" : variant.label);
+    const target = siblingPath(filePath, variant.label === "source" ? "titles-translated" : variant.label);
     try {
       fs.writeFileSync(target, variant.text, "utf8");
       variants.push({ label: variant.label, path: target });
     } catch (error) {
-      console.warn("[transfer] variante d'import non écrite :", variant.label, (error && error.message) || error);
+      console.warn("[transfer] import variant not written:", variant.label, (error && error.message) || error);
     }
   }
   return variants;
@@ -126,7 +126,7 @@ async function openEditPage(resolve) {
     if (page === "edit" || page === "cut" || page === "media") return;
     await resolve.OpenPage("edit");
   } catch (error) {
-    console.warn("[transfer] page Montage non atteinte avant l'import :", (error && error.message) || error);
+    console.warn("[transfer] Edit page not reached before the import:", (error && error.message) || error);
   }
 }
 
@@ -196,11 +196,11 @@ async function importResolveTimeline(filePath, doc, opts = {}) {
   // Resolve nomme parfois la timeline d'après le fichier plutôt que d'après `timelineName`, et la
   // chercher sous le nom DEMANDÉ concluait alors à l'échec d'un import parfaitement réussi.
   const before = await timelineNames(project);
-  console.log(`[transfer] import — fichier ${fileSize(filePath)} o, nom demandé « ${name} », `
-    + `${before.size} timeline(s) déjà présente(s) : ${JSON.stringify(Array.from(before))}`
-    + (prepared.titles ? ` · ${prepared.titles} titre(s) traduit(s) en générateur` : "")
-    + (prepared.dropped ? ` · ${prepared.dropped} élément(s) sans média écarté(s)` : "")
-    + (prepared.channels ? ` · ${prepared.channels} canal/canaux audio éclaté(s) recollé(s)` : ""));
+  console.log(`[transfer] import — file ${fileSize(filePath)} B, requested name "${name}", `
+    + `${before.size} timeline(s) already present: ${JSON.stringify(Array.from(before))}`
+    + (prepared.titles ? ` · ${prepared.titles} title(s) translated into a generator` : "")
+    + (prepared.dropped ? ` · ${prepared.dropped} item(s) without media dropped` : "")
+    + (prepared.channels ? ` · ${prepared.channels} split audio channel(s) joined back` : ""));
   // L'import de timeline agit sur le Media Pool : certaines versions le refusent depuis une page
   // qui n'y donne pas accès (Fusion, Fairlight, Livraison).
   await openEditPage(opened.resolve);
@@ -227,9 +227,9 @@ async function importResolveTimeline(filePath, doc, opts = {}) {
       // l'échec — et chacune ajoutait sa timeline au projet.
       const created = await newTimeline(project, before);
       console.log(`[transfer] ImportTimelineFromFile [${variant.label}]`,
-        options === null ? "(sans options)" : JSON.stringify(options),
+        options === null ? "(no options)" : JSON.stringify(options),
         "→", imported && typeof imported === "object" ? "timeline" : JSON.stringify(imported),
-        created ? "· une timeline est APPARUE" : "");
+        created ? "· a timeline APPEARED" : "");
       if (imported || created) { imported = imported || created; break; }
       // Un jeu d'options refusé ne dit pas lequel gêne : on relâche du plus spécifique au plus nu.
     }
@@ -245,7 +245,7 @@ async function importResolveTimeline(filePath, doc, opts = {}) {
     || (await getTimelineByName(project, name));
   if (!timeline) {
     const detail = lastError ? `${name} (${lastError})` : name;
-    return { ok: false, error: `${t("timelineImportFailed")}: ${detail}` };
+    return { ok: false, error: t("transferTimelineImportFailedDetail", { detail }) };
   }
 
   const count = await countItems(timeline);
@@ -262,7 +262,7 @@ async function importResolveTimeline(filePath, doc, opts = {}) {
     titles: prepared.titles || undefined,
     // Texte, piste, image et durée sont exacts ; la police et le corps restent ceux de Resolve.
     titlesApproximated: prepared.titles || undefined,
-    error: count > 0 ? undefined : `${t("timelineImportEmpty")}: ${created}`,
+    error: count > 0 ? undefined : t("transferTimelineImportEmptyDetail", { name: created }),
   };
 }
 

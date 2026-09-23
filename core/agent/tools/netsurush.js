@@ -1,8 +1,8 @@
 // @ts-check
-// Outils « NetsuRush » : exposent les modules core EXISTANTS (Resolve, détection, recherche, timeline,
-// proxy, vignettes, export AE) à l'agent IA. Réutilise les mêmes fonctions que core/rpc.js — zéro
-// logique métier dupliquée. Les ops Resolve passent par les brackets `guarded`/`rOp` (mêmes invariants
-// que rpc.js : reset sûr du registre de handles, pause du poll).
+// "NetsuRush" tools: expose the EXISTING core modules (Resolve, detection, search, timeline, proxy,
+// thumbnails, AE export) to the AI agent. Reuses the same functions as core/rpc.js — no duplicated
+// business logic. Resolve ops go through the `guarded`/`rOp` brackets (same invariants as rpc.js:
+// safe reset of the handle registry, poll paused).
 
 const os = require('os');
 const path = require('path');
@@ -20,41 +20,41 @@ function createNetsuRushTools(deps) {
   const tools = [
     {
       name: 'resolve_status',
-      description: 'État de DaVinci Resolve : connexion au pont, projet et timeline ouverts, version. '
-        + 'Appeler en premier pour savoir si les actions projet sont possibles.',
+      description: 'DaVinci Resolve status: bridge connection, open project and timeline, version. '
+        + 'Call it first to know whether project actions are possible.',
       risk: 'read',
       inputSchema: { type: 'object', properties: {} },
       handler: rOp(() => resolveMod.resolveStatus()),
     },
     {
       name: 'list_media_pool',
-      description: 'Liste les clips du Media Pool du projet Resolve courant (nom, chemin, durée, fps, résolution).',
+      description: 'Lists the Media Pool clips of the current Resolve project (name, path, duration, fps, resolution).',
       risk: 'read',
       inputSchema: { type: 'object', properties: {} },
       handler: rOp(() => resolveMod.listMediaPool()),
     },
     {
       name: 'import_media',
-      description: 'Importe des fichiers dans le Media Pool du projet Resolve courant.',
+      description: 'Imports files into the Media Pool of the current Resolve project.',
       risk: 'write',
       inputSchema: {
         type: 'object',
-        properties: { paths: { type: 'array', items: { type: 'string' }, description: 'Chemins absolus des fichiers à importer' } },
+        properties: { paths: { type: 'array', items: { type: 'string' }, description: 'Absolute paths of the files to import' } },
         required: ['paths'],
       },
       handler: guarded((/** @type {{paths:string[]}} */ a) => resolveMod.importToMediaPool(a.paths || [])),
     },
     {
       name: 'detect_scenes',
-      description: 'Détecte les plans d’une vidéo et met en cache. Modèles: transnetv2, omnishotcut, autoshot.',
+      description: 'Detects the shots of a video and caches them. Models: transnetv2, omnishotcut, autoshot.',
       risk: 'read',
       inputSchema: {
         type: 'object',
         properties: {
-          path: { type: 'string', description: 'Chemin de la vidéo' },
+          path: { type: 'string', description: 'Path of the video' },
           threshold: { type: 'number' },
           model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot'] },
-          options: { type: 'object', description: 'Paramètres avancés propres au modèle.' },
+          options: { type: 'object', description: 'Advanced settings specific to the model.' },
         },
         required: ['path'],
       },
@@ -62,7 +62,7 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'cached_scenes',
-      description: 'Lit les plans déjà détectés en cache pour une vidéo (instantané, sans recalcul).',
+      description: 'Reads the shots already detected and cached for a video (instant, no recomputation).',
       risk: 'read',
       inputSchema: {
         type: 'object',
@@ -73,15 +73,15 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'search_clips',
-      description: 'Recherche SÉMANTIQUE (SigLIP 2) du CONTENU VISUEL des plans (ex. "mer", "voiture de '
-        + 'nuit", "gros plan visage") — PAS le nom de fichier. C’est l’outil à utiliser pour "trouve les '
-        + 'rushs/plans de <sujet>". Renvoie les plans les plus proches {file_path, frames in/out, score 0..1}. '
-        + 'Cherche dans les plans DÉJÀ INDEXÉS : si 0 résultat, indexer d’abord les rushs avec index_clip.',
+      description: 'SEMANTIC search (SigLIP 2) of the VISUAL CONTENT of shots (e.g. "sea", "car at '
+        + 'night", "face close-up") — NOT the file name. This is the tool to use for "find the '
+        + 'footage/shots of <subject>". Returns the closest shots {file_path, frames in/out, score 0..1}. '
+        + 'Searches shots ALREADY INDEXED: if 0 results, index the footage first with index_clip.',
       risk: 'read',
       inputSchema: {
         type: 'object',
         properties: {
-          text: { type: 'string', description: 'Requête en langage naturel' },
+          text: { type: 'string', description: 'Natural-language query' },
           topK: { type: 'number' },
           minScore: { type: 'number' },
         },
@@ -89,7 +89,7 @@ function createNetsuRushTools(deps) {
       },
       handler: async (/** @type {any} */ a) => {
         const raw = await sidecars.queryReq('search', { text: String(a.text || ''), neg_text: '', refs: [], top_k: a.topK || 30, min_score: a.minScore || 0, beta: 0.4, aesthetic: false });
-        // Normalise en tableau propre, trié, champs explicites (prêts pour build_timeline).
+        // Normalized into a clean, sorted array with explicit fields (ready for build_timeline).
         const arr = Array.isArray(raw) ? raw : (raw && (raw.hits || raw.results)) || [];
         const hits = arr.map((/** @type {any} */ h) => ({
           file: h.file_path || h.file || h.path,
@@ -98,18 +98,18 @@ function createNetsuRushTools(deps) {
           score: Number(h.score ?? h.similarity ?? 0),
         })).filter((/** @type {any} */ h) => h.file).sort((/** @type {any} */ x, /** @type {any} */ y) => y.score - x.score);
         const top = hits[0] ? hits[0].score : 0;
-        // SigLIP : un vrai match dépasse ~0.05. En dessous = aucun plan ne correspond OU index vide/pauvre.
+        // SigLIP: a real match exceeds ~0.05. Below that = no shot matches OR the index is empty/poor.
         const note = hits.length === 0
-          ? 'Aucun résultat : les rushs ne sont probablement pas indexés. Lance index_clip sur chaque rush puis relance.'
+          ? 'No results: the footage is probably not indexed. Run index_clip on each clip, then search again.'
           : top < 0.05
-            ? 'Scores très faibles : aucun plan ne correspond vraiment au sujet (ou l’index est pauvre). Ne monte PAS une timeline avec ça ; dis-le à l’utilisateur.'
+            ? 'Very low scores: no shot really matches the subject (or the index is poor). Do NOT build a timeline from this; tell the user.'
             : undefined;
         return { ok: true, query: String(a.text || ''), count: hits.length, topScore: top, hits, ...(note ? { note } : {}) };
       },
     },
     {
       name: 'index_clip',
-      description: 'Indexe une vidéo pour la recherche sémantique (détecte les plans puis calcule les embeddings).',
+      description: 'Indexes a video for semantic search (detects the shots, then computes the embeddings).',
       risk: 'write',
       inputSchema: {
         type: 'object',
@@ -120,29 +120,29 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'list_timelines',
-      description: 'Liste les timelines du projet Resolve (et laquelle est courante).',
+      description: 'Lists the timelines of the Resolve project (and which one is current).',
       risk: 'read',
       inputSchema: { type: 'object', properties: {} },
       handler: rOp(() => timeline.listTimelines()),
     },
     {
       name: 'read_timeline',
-      description: 'Lit les plans montés d’une timeline Resolve existante (source + in/out frames). '
-        + 'timelineName omis = timeline ouverte.',
+      description: 'Reads the edited shots of an existing Resolve timeline (source + in/out frames). '
+        + 'timelineName omitted = open timeline.',
       risk: 'read',
       inputSchema: { type: 'object', properties: { timelineName: { type: 'string' } } },
       handler: guarded((/** @type {any} */ a) => timeline.readTimelineCuts({ timelineName: a.timelineName })),
     },
     {
       name: 'build_timeline',
-      description: 'Crée une timeline frame-accurate à partir de segments d’une vidéo (référence le '
-        + 'MediaPoolItem d’origine, out INCLUSIF). mode "new" (défaut) crée, "append" ajoute à la courante.',
+      description: 'Creates a frame-accurate timeline from segments of a video (references the '
+        + 'original MediaPoolItem, out is INCLUSIVE). mode "new" (default) creates, "append" adds to the current one.',
       risk: 'write',
       inputSchema: {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          input: { type: 'string', description: 'Chemin de la vidéo source' },
+          input: { type: 'string', description: 'Path of the source video' },
           mode: { type: 'string', enum: ['new', 'append'] },
           whole: { type: 'boolean' },
           srcFrames: { type: 'number' },
@@ -160,8 +160,8 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'cut_timeline',
-      description: 'Détecte les plans des rushs d’une timeline puis crée une nouvelle timeline découpée '
-        + '(lossless, frame-accurate). timelineName omis = timeline ouverte.',
+      description: 'Detects the shots of the footage in a timeline, then creates a new cut timeline '
+        + '(lossless, frame-accurate). timelineName omitted = open timeline.',
       risk: 'write',
       inputSchema: {
         type: 'object',
@@ -177,14 +177,14 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'probe_media',
-      description: 'Métadonnées d’un fichier vidéo : durée et dimensions.',
+      description: 'Metadata of a video file: duration and dimensions.',
       risk: 'read',
       inputSchema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] },
       handler: (/** @type {any} */ a) => ffmpeg.probeMedia(a.path),
     },
     {
       name: 'make_thumbnail',
-      description: 'Génère (ou lit en cache) une vignette d’une vidéo à un temps donné. Renvoie le chemin du JPEG.',
+      description: 'Generates (or reads from cache) a thumbnail of a video at a given time. Returns the JPEG path.',
       risk: 'read',
       inputSchema: {
         type: 'object',
@@ -195,8 +195,8 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'export_to_after_effects',
-      description: 'Exporte une timeline Resolve vers After Effects (.jsx + médias). Voir les options de '
-        + 'mode vidéo/audio. timelineName omis = timeline ouverte.',
+      description: 'Exports a Resolve timeline to After Effects (.jsx + media). See the video/audio '
+        + 'mode options. timelineName omitted = open timeline.',
       risk: 'write',
       inputSchema: {
         type: 'object',
@@ -211,14 +211,14 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'upscale_media',
-      description: 'Upscale une vidéo (ou un segment) avec Real-ESRGAN. model: anime | general | light. '
-        + 'scale 2 ou 4. whole=true pour tout le fichier, sinon segments [{in,out}] (secondes). '
-        + 'outDir omis = dossier temporaire. importBack=true réimporte le résultat dans le Media Pool.',
+      description: 'Upscales a video (or a segment) with Real-ESRGAN. model: anime | general | light. '
+        + 'scale 2 or 4. whole=true for the whole file, otherwise segments [{in,out}] (seconds). '
+        + 'outDir omitted = temporary folder. importBack=true re-imports the result into the Media Pool.',
       risk: 'write',
       inputSchema: {
         type: 'object',
         properties: {
-          input: { type: 'string', description: 'Chemin de la vidéo source' },
+          input: { type: 'string', description: 'Path of the source video' },
           model: { type: 'string', enum: ['anime', 'general', 'light'] },
           scale: { type: 'number', enum: [2, 4] },
           whole: { type: 'boolean' },

@@ -14,6 +14,7 @@ const { createReferenceTools } = require('./tools/reference'); // board de réf�
 const { createFlowTools } = require('./tools/flow'); // NetsuFlow : lecture + PROPOSITION, jamais d'écriture
 const { createResolveMcp } = require('./tools/resolveMcp'); // serveur MCP officiel Blackmagic, replié dans le registre
 const { createMcpBridge } = require('./mcp/server'); // serveur MCP stdio exposant le registry aux CLI
+const { t } = require('../i18n');
 
 /**
  * @param {{
@@ -90,8 +91,8 @@ function createAgent(deps) {
     /// repond « proposition prete » sans qu'aucune carte n'apparaisse et sans
     /// bouton pour l'appliquer — la fonction entiere hors service.
     toolCall: async (/** @type {string} */ name, /** @type {any} */ input) => {
-      const t = registry.get(name);
-      const risk = (t && (t.riskFor ? t.riskFor(input) : t.risk)) || 'read';
+      const tool = registry.get(name);
+      const risk = (tool && (tool.riskFor ? tool.riskFor(input) : tool.risk)) || 'read';
       const runId = session.currentCliRun();
       // Un identifiant d'appel stable, pour que le resultat retrouve sa ligne.
       const callId = `mcp-${Date.now().toString(36)}-${(mcpCallSeq += 1)}`;
@@ -100,7 +101,7 @@ function createAgent(deps) {
       emit({ type: 'tool_use', id: callId, name, input });
       const perm = await permissions.check('cli', { name, input, risk });
       if (!perm.approved) {
-        const refused = { ok: false, error: perm.reason || 'action refusée' };
+        const refused = { ok: false, error: perm.reason || t('agentActionRefused') };
         emit({ type: 'tool_result', id: callId, ok: false, content: refused });
         return refused;
       }

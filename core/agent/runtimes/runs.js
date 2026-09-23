@@ -5,6 +5,7 @@
 
 const { spawn } = require('child_process');
 const { parserFor } = require('./parsers');
+const { t } = require('../../i18n');
 
 /**
  * @param {{
@@ -22,7 +23,7 @@ function startCliRun(opts) {
   // dossier ferait donc SILENCIEUSEMENT revenir l'agent dans le depot. On refuse
   // au lieu de lancer, parce que la panne serait invisible jusqu'a ce qu'un
   // fichier bouge.
-  if (!cwd) throw new Error("startCliRun: dossier de travail requis (jamais le depot)");
+  if (!cwd) throw new Error('startCliRun: a working directory is required (never the repository)');
   const args = [...(opts.extraArgs || []), ...def.buildArgs({
     prompt, model, mcpConfigPath, cwd, allowedTools: opts.allowedTools,
   })];
@@ -70,13 +71,16 @@ function startCliRun(opts) {
     child.on('close', (code) => {
       if (buf.trim() && mode === 'lines') { for (const e of fn(buf)) emit(e); }
       if (!emittedDone) {
-        if (code && code !== 0) onEvent({ type: 'error', message: `agent ${def.id} sorti en ${code} : ${errTail || 'pas de détail'}` });
+        if (code && code !== 0) {
+          const exited = t('agentCliExited', { agent: def.name || def.id, code });
+          onEvent({ type: 'error', message: errTail.trim() ? `${exited}\n${errTail.trim()}` : exited });
+        }
         onEvent({ type: 'done', stopReason: code ? 'error' : 'end' });
       }
       resolve();
     });
     child.on('error', (e) => {
-      onEvent({ type: 'error', message: `lancement ${def.id} impossible : ${String((e && e.message) || e)}` });
+      onEvent({ type: 'error', message: t('agentCliLaunchFailed', { agent: def.name || def.id, detail: String((e && e.message) || e) }) });
       onEvent({ type: 'done', stopReason: 'error' });
       resolve();
     });

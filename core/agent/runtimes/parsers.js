@@ -12,6 +12,8 @@
 //
 // Chaque ligne de sortie stream-json est un objet JSON COMPLET (pas de JSON partiel à recoller).
 
+const { t: tr } = require('../../i18n');
+
 /** @param {string} line @returns {any[]} */
 function parseClaudeStreamLine(line) {
   const t = line.trim();
@@ -59,7 +61,7 @@ function parseClaudeStreamLine(line) {
     const u = msg.usage || {};
     out.push({ type: 'usage', inputTokens: u.input_tokens || 0, outputTokens: u.output_tokens || 0, costUsd: msg.total_cost_usd || 0 });
     if (msg.is_error || msg.subtype === 'error_max_turns' || msg.subtype === 'error_during_execution') {
-      out.push({ type: 'error', message: String(msg.result || msg.subtype || 'erreur agent') });
+      out.push({ type: 'error', message: String(msg.result || msg.subtype || tr('agentRunFailed')) });
     }
     out.push({ type: 'done', stopReason: msg.subtype || 'end' });
     return out;
@@ -91,7 +93,7 @@ function parseCodexJsonLine(line) {
   } else if (kind === 'task_complete' || kind.includes('turn.completed') || kind === 'shutdown') {
     out.push({ type: 'done', stopReason: 'end' });
   } else if (kind.includes('error')) {
-    out.push({ type: 'error', message: String(node.message || node.error || 'erreur codex') });
+    out.push({ type: 'error', message: String(node.message || node.error || tr('agentRunFailed')) });
   }
   return out;
 }

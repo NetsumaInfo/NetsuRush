@@ -163,7 +163,7 @@ function nrAeftSnapDuration(comp, duration) {
 /* Montage After Effects : les modes sont exprimés avec les primitives natives de calques
  * (startTime/inPoint/outPoint/stretch), pas avec des noms de commandes NLE inexistantes dans AE. */
 function NR_aeft_build(p) {
-  if (!p || !p.input) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "chemin source manquant" });
+  if (!p || !p.input) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "source path missing" });
   app.beginUndoGroup("NetsuRush -> After Effects");
   try {
     var missing = [];
@@ -172,7 +172,7 @@ function NR_aeft_build(p) {
       app.endUndoGroup();
       var absent = missing.length > 0;
       return NRJSON.stringify({ ok: false, errorCode: absent ? "MEDIA_MISSING" : "IMPORT_FAILED", errorDetail: p.input,
-        error: (absent ? "fichier introuvable sur le disque : " : "import échoué : ") + p.input });
+        error: (absent ? "file not found on disk: " : "import failed: ") + p.input });
     }
     var fps = f.frameRate || p.fps || 25;
 
@@ -204,7 +204,7 @@ function NR_aeft_build(p) {
     }
     var total = 0;
     for (var t = 0; t < ranges.length; t++) total += (ranges[t].outSec - ranges[t].inSec);
-    if (total <= 0) { app.endUndoGroup(); return NRJSON.stringify({ ok: false, errorCode: "NO_VALID_SHOTS", error: "aucun plan valide" }); }
+    if (total <= 0) { app.endUndoGroup(); return NRJSON.stringify({ ok: false, errorCode: "NO_VALID_SHOTS", error: "no valid shots" }); }
 
     var insertion = p.insertion || "end";
     var comp = null, created = true;
@@ -220,7 +220,7 @@ function NR_aeft_build(p) {
     var scale = 1;
     if (!created && (insertion === "replace" || insertion === "fit")) {
       var target = nrAeftLayerAt(comp, tlPos);
-      if (!target) { app.endUndoGroup(); return NRJSON.stringify({ ok: false, errorCode: "NO_LAYER_AT_PLAYHEAD", error: "aucun calque à remplacer sous la tête de lecture" }); }
+      if (!target) { app.endUndoGroup(); return NRJSON.stringify({ ok: false, errorCode: "NO_LAYER_AT_PLAYHEAD", error: "no layer to replace under the playhead" }); }
       tlPos = nrAeftSnapTime(comp, target.inPoint);
       if (insertion === "fit") scale = (target.outPoint - target.inPoint) / total;
       try { target.remove(); } catch (e3) {}
@@ -260,11 +260,11 @@ function NR_aeft_build(p) {
     try { comp.openInViewer(); } catch (e6) {}
     if (!count && missing.length) {
       return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: missing[0],
-        error: "fichier introuvable sur le disque : " + missing[0] });
+        error: "file not found on disk: " + missing[0] });
     }
     return NRJSON.stringify({ ok: count > 0, timeline: comp.name, count: count, created: created,
       skipped: missing.length || undefined,
-      errorCode: count > 0 ? undefined : "NO_LAYERS_ADDED", error: count > 0 ? undefined : "aucun calque posé" });
+      errorCode: count > 0 ? undefined : "NO_LAYERS_ADDED", error: count > 0 ? undefined : "no layers added" });
   } catch (e) {
     app.endUndoGroup();
     return NRJSON.stringify({ ok: false, error: String(e) });
@@ -540,9 +540,9 @@ function nrAeftSortClips(clips) {
  *             clips:[{ path, kind, track, name, fps, inFrame, outFrame, in, out, tlStart, tlEnd }] }
  * (tlStart/tlEnd en secondes depuis le début du document). */
 function NR_aeft_place(p) {
-  if (!app.project) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
+  if (!app.project) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
   var clips = (p && p.clips) || [];
-  if (!clips.length) return NRJSON.stringify({ ok: false, errorCode: "NO_VALID_SHOTS", error: "aucun plan à poser" });
+  if (!clips.length) return NRJSON.stringify({ ok: false, errorCode: "NO_VALID_SHOTS", error: "no shots to place" });
 
   app.beginUndoGroup("NetsuRush -> After Effects");
   try {
@@ -615,13 +615,13 @@ function NR_aeft_place(p) {
 
     if (!placed && missing.length) {
       return NRJSON.stringify({ ok: false, errorCode: "MEDIA_MISSING", errorDetail: missing[0],
-        error: "fichier introuvable sur le disque : " + missing[0] });
+        error: "file not found on disk: " + missing[0] });
     }
     return NRJSON.stringify({ ok: placed > 0, timeline: comp.name, count: placed, created: created,
       failed: failed || undefined, skipped: missing.length || undefined,
       report: { items: reportItems },
       errorCode: placed > 0 ? undefined : "NO_LAYERS_ADDED",
-      error: placed > 0 ? undefined : "aucun calque posé" });
+      error: placed > 0 ? undefined : "no layers added" });
   } catch (e) {
     app.endUndoGroup();
     return NRJSON.stringify({ ok: false, error: String(e) });
@@ -634,11 +634,11 @@ function NR_aeft_place(p) {
  * le panneau supprime cette condition. Le script journalise lui-même ses erreurs dans son .log. */
 function NR_aeft_runScript(p) {
   var scriptPath = p && p.path;
-  if (!scriptPath) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "chemin de script manquant" });
+  if (!scriptPath) return NRJSON.stringify({ ok: false, errorCode: "MISSING_SOURCE", error: "script path missing" });
   var file = null;
   try { file = new File(scriptPath); } catch (e0) { file = null; }
   if (!file || !file.exists) {
-    return NRJSON.stringify({ ok: false, errorCode: "SCRIPT_MISSING", error: "script introuvable : " + scriptPath });
+    return NRJSON.stringify({ ok: false, errorCode: "SCRIPT_MISSING", errorDetail: scriptPath, error: "script not found: " + scriptPath });
   }
   try { $.evalFile(file); } catch (e1) {
     return NRJSON.stringify({ ok: false, errorCode: "SCRIPT_FAILED", error: String(e1) });
@@ -648,7 +648,7 @@ function NR_aeft_runScript(p) {
 
 /* Importe des fichiers dans le projet After Effects (footages, dédup par chemin via NR_ae_import). */
 function NR_aeft_import(p) {
-  if (!app.project) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" });
+  if (!app.project) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
   var paths = (p && p.paths) || [];
   if (!paths.length) return NRJSON.stringify({ ok: true, count: 0 });
   var count = 0;
@@ -658,10 +658,10 @@ function NR_aeft_import(p) {
   }
   return NRJSON.stringify({ ok: count > 0, count: count, skipped: missing.length || undefined,
     errorCode: count > 0 ? undefined : (missing.length ? "MEDIA_MISSING" : "IMPORT_FAILED"),
-    error: count > 0 ? undefined : (missing.length ? "fichier introuvable sur le disque" : "import échoué") });
+    error: count > 0 ? undefined : (missing.length ? "file not found on disk" : "import failed") });
 }
 
-function NR_aeft_snapshot() {
+function NR_aeft_snapshot(text) {
   var proj = app.project;
   if (!proj) return NRJSON.stringify({ ok: false, errorCode: "NO_PROJECT", error: "no project open" });
 
@@ -709,7 +709,7 @@ function NR_aeft_snapshot() {
     ok: true,
     app: "aeft",
     appVersion: String(app.version),
-    project: proj.file ? proj.file.name : "Sans titre",
+    project: proj.file ? proj.file.name : ((text && text.untitledProject) || "Untitled"),
     projectPath: proj.file ? proj.file.fsName : null,
     activeSequence: activeSequence,
     at: new Date().getTime(),
@@ -804,7 +804,7 @@ function nrAeftPurgeTargets(target) {
 function nrAeftPurge(target) {
   var plan = nrAeftPurgeTargets(target || "memory");
   if (plan.missing || !plan.targets.length) {
-    return { ok: false, code: "UNSUPPORTED", error: "PurgeTarget indisponible dans cette version" };
+    return { ok: false, code: "UNSUPPORTED", error: "PurgeTarget unavailable in this version" };
   }
   var before = nrAeftMemoryInUse();
   // Le dialogue de purge disque bloquerait le job jusqu'au timeout du pont : on le neutralise.
@@ -824,19 +824,22 @@ function nrAeftPurge(target) {
     memoryBefore: before,
     memoryAfter: after,
     freed: before !== null && after !== null ? before - after : null,
-    error: done > 0 ? undefined : (lastError || "purge refusée")
+    code: done > 0 ? undefined : "PURGE_FAILED",
+    errorDetail: done > 0 ? undefined : (lastError || undefined),
+    error: done > 0 ? undefined : (lastError || "purge refused")
   };
 }
 
 /* Hygiène projet : un projet qui traîne des métrages inutilisés ou dupliqués coûte en RAM et en
    temps d'ouverture. Les deux opérations sont annulables (undo group), jamais silencieuses. */
-function nrAeftHygiene(mode) {
+function nrAeftHygiene(mode, text) {
   var proj = app.project;
-  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "aucun projet ouvert" };
+  if (!proj) return { ok: false, errorCode: "NO_PROJECT", error: "no project open" };
   if (mode !== "removeUnused" && mode !== "consolidate") {
-    return { ok: false, error: "opération inconnue : " + String(mode) };
+    return { ok: false, errorCode: "UNSUPPORTED_OP", error: "unknown operation: " + String(mode) };
   }
-  app.beginUndoGroup("NetsuRush — hygiène du projet");
+  // The undo group name shows in Edit ▸ Undo: it comes in the interface language.
+  app.beginUndoGroup((text && text.hygieneUndo) || "NetsuRush — project cleanup");
   try {
     var removed = mode === "removeUnused" ? proj.removeUnusedFootage() : proj.consolidateFootage();
     app.endUndoGroup();
@@ -930,9 +933,9 @@ function NR_aeft_boost(p) {
   var op = (p && p.op) || "";
   if (op === "stats") return NRJSON.stringify(nrAeftStats());
   if (op === "purge") return NRJSON.stringify(nrAeftPurge(p.target));
-  if (op === "hygiene") return NRJSON.stringify(nrAeftHygiene(p.mode));
+  if (op === "hygiene") return NRJSON.stringify(nrAeftHygiene(p.mode, p.nrText));
   if (op === "prefsRead") return NRJSON.stringify(nrAeftPrefsRead());
   if (op === "prefsApply") return NRJSON.stringify(nrAeftPrefsApply(p.entries));
   // Les proxies et les fichiers de rendu sont des notions Premiere : AE n'a pas d'équivalent.
-  return NRJSON.stringify({ ok: false, code: "UNSUPPORTED_OP", error: "opération inconnue : " + String(op) });
+  return NRJSON.stringify({ ok: false, code: "UNSUPPORTED_OP", error: "unknown operation: " + String(op) });
 }

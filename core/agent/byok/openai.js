@@ -26,7 +26,7 @@ async function runOpenAI(opts) {
   const { apiKey, system, tools, runTool, onEvent, signal } = opts;
   const model = opts.model || DEFAULT_MODEL;
   const base = opts.baseUrl || DEFAULT_BASE;
-  if (!apiKey) { onEvent({ type: 'error', message: `OpenAI: ${t('apiKeyMissing')}` }); onEvent({ type: 'done', stopReason: 'error' }); return; }
+  if (!apiKey) { onEvent({ type: 'error', message: t('agentApiKeyMissingFor', { provider: 'OpenAI' }) }); onEvent({ type: 'done', stopReason: 'error' }); return; }
 
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
@@ -68,12 +68,12 @@ async function runOpenAI(opts) {
         }),
       });
     } catch (e) {
-      onEvent({ type: 'error', message: `réseau OpenAI : ${String((e && /** @type {any} */(e).message) || e)}` });
+      onEvent({ type: 'error', message: t('agentNetworkError', { provider: 'OpenAI', detail: String((e && /** @type {any} */(e).message) || e) }) });
       break;
     }
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
-      onEvent({ type: 'error', message: `OpenAI ${res.status} : ${detail.slice(0, 500)}` });
+      onEvent({ type: 'error', message: `OpenAI ${res.status}: ${detail.slice(0, 500)}` });
       break;
     }
 
@@ -126,13 +126,13 @@ async function runOpenAI(opts) {
       const ok = !(r && r.ok === false);
       onEvent({ type: 'tool_result', id: c.id, name: c.name, ok, content: r });
       messages.push({ role: 'tool', tool_call_id: c.id, content: toToolContent(r) });
-      // Le rôle 'tool' n'accepte que du texte → l'image (grab_still…) part dans un message user suivant.
+      // The 'tool' role only accepts text → the image (grab_still…) goes in a following user message.
       const img = imageAttachment(r);
       if (img) {
         messages.push({
           role: 'user',
           content: [
-            { type: 'text', text: `Image renvoyée par l'outil ${c.name} :` },
+            { type: 'text', text: `Image returned by the ${c.name} tool:` },
             { type: 'image_url', image_url: { url: `data:${img.mediaType};base64,${img.data}` } },
           ],
         });

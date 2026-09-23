@@ -7,6 +7,8 @@
 // risk : 'read' (lecture seule, jamais destructif) · 'write' (crée/modifie, réversible) ·
 //        'destructive' (supprime/rend/écrase, difficilement réversible). Pilote la porte de permission.
 
+const { t: tr } = require('../../i18n');
+
 /**
  * @typedef {'read'|'write'|'destructive'} ToolRisk
  * @typedef {Object} ToolDef
@@ -36,8 +38,8 @@ function createToolRegistry() {
 
   /** @param {ToolDef} tool */
   function register(tool) {
-    if (!tool || !tool.name) throw new Error('outil sans nom');
-    if (tools.has(tool.name)) throw new Error(`outil déjà enregistré : ${tool.name}`);
+    if (!tool || !tool.name) throw new Error('tool without a name');
+    if (tools.has(tool.name)) throw new Error(`tool already registered: ${tool.name}`);
     tools.set(tool.name, {
       risk: 'read',
       inputSchema: { type: 'object', properties: {} },
@@ -110,7 +112,7 @@ function createToolRegistry() {
   /** @param {string} name @param {any} args @param {any} ctx */
   async function execute(name, args, ctx) {
     const t = tools.get(name);
-    if (!t) return { ok: false, error: `outil inconnu : ${name}` };
+    if (!t) return { ok: false, error: tr('agentUnknownToolName', { name }) };
     try {
       const result = await t.handler(args || {}, ctx || {});
       return result;

@@ -38,10 +38,10 @@ function importVariants(source) {
   // Un `<!DOCTYPE>` sans DTD accessible fait échouer certains analyseurs stricts.
   if (/<!DOCTYPE[^>]*>/i.test(text)) {
     const stripped = text.replace(/<!DOCTYPE[^>]*>\s*/i, "");
-    variants.push({ label: "sans DOCTYPE", text: stripped });
+    variants.push({ label: "without DOCTYPE", text: stripped });
     if (version && version !== TARGET_VERSION) {
       variants.push({
-        label: `version ${TARGET_VERSION} sans DOCTYPE`,
+        label: `version ${TARGET_VERSION} without DOCTYPE`,
         text: stripped.replace(/(<xmeml\s+version\s*=\s*")[^"]*(")/i, `$1${TARGET_VERSION}$2`),
       });
     }

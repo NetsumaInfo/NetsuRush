@@ -2,6 +2,8 @@
 // Document d'échange NEUTRE entre hôtes de montage. Uniquement des fonctions PURES : les mappeurs
 // et la frame-math du transfert restent vérifiables sans Resolve ni Adobe ouverts.
 
+const { t } = require("../i18n");
+
 /** Resolve : `mediaType` de AppendToTimeline — poser un plan vidéo SANS son audio lié. */
 const MEDIA_TYPE_VIDEO = 1;
 const MEDIA_TYPE_AUDIO = 2;
@@ -351,8 +353,8 @@ function docFromAdobeSequence(snap, name) {
         // Le relevé de l'hôte accompagne le nom : « Image » ne dit pas si c'est un titre dont on
         // n'a pas su lire le texte ou un cache de couleur, qui n'a rien à transporter.
         else mediaLess.push(clip.graphicProbe
-          ? `${clip.name || "plan"} ${JSON.stringify(clip.graphicProbe)}`
-          : (clip.name || "plan"));
+          ? `${clip.name || t("transferUnnamedShot")} ${JSON.stringify(clip.graphicProbe)}`
+          : (clip.name || t("transferUnnamedShot")));
         continue;
       }
       const fps = plausibleFps(clip.srcFps, sequenceFps);

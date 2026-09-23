@@ -149,7 +149,7 @@ function logSilentComponents(snap, name) {
   const clips = (sequence && sequence.tracks || []).flatMap((track) => (track && track.clips) || []);
   const silent = clips.filter((clip) => clip && clip.components);
   if (!silent.length || silent.length !== clips.length) return;
-  console.warn("[transfer] aucun composant lu chez Premiere ; l'animation vient de l'export XML. Vu :",
+  console.warn("[transfer] no component read from Premiere; the animation comes from the XML export. Seen:",
     JSON.stringify(silent[0].components));
 }
 
@@ -162,9 +162,9 @@ function logMediaLess(doc) {
   const items = doc.mediaLess || [];
   const graphics = doc.graphics || [];
   if (!items.length && !graphics.length) return;
-  console.log(`[transfer] titres lus : ${graphics.length}`
+  console.log(`[transfer] titles read: ${graphics.length}`
     + (graphics.length ? ` (${graphics.map((g) => JSON.stringify(g.text)).join(", ")})` : "")
-    + ` · sans média : ${items.length}${items.length ? ` → ${items.join(" | ")}` : ""}`);
+    + ` · without media: ${items.length}${items.length ? ` → ${items.join(" | ")}` : ""}`);
 }
 
 /** Le document porte-t-il déjà des images clés ? Alors la source les a rendues, l'export est inutile. */
@@ -190,11 +190,11 @@ function logFidelityLosses(fidelity) {
   const items = (fidelity && fidelity.items) || [];
   const lost = items.filter((item) => item && item.status !== "applied");
   if (!lost.length) return;
-  console.warn("[transfer] fidélité :", JSON.stringify(fidelity.actual));
+  console.warn("[transfer] fidelity:", JSON.stringify(fidelity.actual));
   for (const item of lost.slice(0, 60)) {
-    console.warn(`[transfer]   plan ${item.clip} ${item.property} ${item.status}${item.reason ? " (" + item.reason + ")" : ""}`);
+    console.warn(`[transfer]   clip ${item.clip} ${item.property} ${item.status}${item.reason ? " (" + item.reason + ")" : ""}`);
   }
-  if (lost.length > 60) console.warn(`[transfer]   … ${lost.length - 60} autres`);
+  if (lost.length > 60) console.warn(`[transfer]   … ${lost.length - 60} more`);
 }
 
 /**
@@ -316,7 +316,7 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, runUps
     emit(ev, "import", 0, 1);
     const exported = await exportSequenceXml(premiereHost(), opts.timelineName || null);
     if (exported.ok !== true) {
-      console.warn("[transfer] export d'échange indisponible, pose par l'API :", exported.reason);
+      console.warn("[transfer] interchange export unavailable, placing through the API:", exported.reason);
       return byApi();
     }
     let result;
@@ -334,8 +334,8 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, runUps
     // Le fichier SURVIT à un refus, et son chemin remonte jusqu'à l'interface : l'import manuel
     // donne un résultat que la pose par script ne peut pas atteindre — l'API n'écrit aucun niveau
     // audio ni la moindre image clé. Un refus reste donc rattrapable à la main.
-    console.warn("[transfer] import refusé par Resolve, pose par l'API :", result.error);
-    console.warn("[transfer] fichier d'échange conservé (Fichier ▸ Importer ▸ Timeline) :", exported.path);
+    console.warn("[transfer] import refused by Resolve, placing through the API:", result.error);
+    console.warn("[transfer] interchange file kept (File ▸ Import ▸ Timeline):", exported.path);
     const fallback = await byApi();
     return { ...fallback, exchangeFile: exported.path };
   }
@@ -356,7 +356,7 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, runUps
     emit(ev, "import", 0, 1);
     const exported = await exportResolveTimelineXml(resolve, opts.timelineName || null);
     if (exported.ok !== true) {
-      console.warn("[transfer] export d'échange indisponible, pose par l'API :", exported.reason);
+      console.warn("[transfer] interchange export unavailable, placing through the API:", exported.reason);
       return byApi();
     }
     // Retouche du fichier AVANT l'import : Resolve écrit les retours à la ligne d'un titre en
@@ -366,10 +366,10 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, runUps
       const prepared = prepareForPremiere(source);
       if (prepared.newlines) {
         await fsp.writeFile(exported.path, prepared.text, "utf8");
-        console.log(`[transfer] ${prepared.newlines} retour(s) à la ligne de titre décodé(s) pour Premiere`);
+        console.log(`[transfer] ${prepared.newlines} title line break(s) decoded for Premiere`);
       }
     } catch (error) {
-      console.warn("[transfer] fichier d'échange non retouché :", (error && error.message) || error);
+      console.warn("[transfer] interchange file not adjusted:", (error && error.message) || error);
     }
     let result;
     try {
@@ -388,8 +388,8 @@ function createTransfer({ getResolve, adobeBridge, aeExporter, runFfmpeg, runUps
     }
     // Le fichier SURVIT au refus : l'import à la main (Fichier ▸ Importer) reste possible, et lui
     // seul apporte le titre.
-    console.warn("[transfer] import refusé par Premiere, pose par l'API :", result && result.error);
-    console.warn("[transfer] fichier d'échange conservé (Fichier ▸ Importer) :", exported.path);
+    console.warn("[transfer] import refused by Premiere, placing through the API:", result && result.error);
+    console.warn("[transfer] interchange file kept (File ▸ Import):", exported.path);
     const fallback = await byApi();
     return { ...fallback, exchangeFile: exported.path, vehicle: "api" };
   }

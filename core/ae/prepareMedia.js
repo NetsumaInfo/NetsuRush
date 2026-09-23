@@ -10,6 +10,7 @@ const {
   streamCodecName,
 } = require('./codecs');
 const { bakeGraph, carriesAlpha } = require('./bakeTransform');
+const { t } = require('../i18n');
 
 /**
  * @param {{ run: (bin: string, args: string[]) => Promise<any> }} deps
@@ -64,7 +65,7 @@ async function prepareMedia(deps, event, edit, opts) {
   function noteContainer(clip, wanted, used) {
     if (wanted === used) return;
     notes.push({ clip: clip.name || path.basename(clip.path), wanted, used });
-    console.warn(`[ae] conteneur ${String(wanted).toUpperCase()} impossible pour ${clip.name || clip.path} → ${used.toUpperCase()}`);
+    console.warn(`[ae] ${String(wanted).toUpperCase()} container impossible for ${clip.name || clip.path} → ${used.toUpperCase()}`);
   }
 
   // Un ffmpeg qui échoue laisse un fichier TRONQUÉ, qu'un `uniquePath` suivant compte comme pris
@@ -140,7 +141,7 @@ async function prepareMedia(deps, event, edit, opts) {
     } catch (e) { discard(file); throw e; }
     if (!result || !result.ok) {
       discard(file);
-      throw new Error(`upscale : ${(result && result.error) || 'échec'}`);
+      throw new Error(t('aeUpscaleFailed', { detail: (result && result.error) || t('failed') }));
     }
     const out = (Array.isArray(result.outputs) && result.outputs[0]) || file;
     // Le fichier produit est le plan entier, à sa propre longueur : les bornes repartent de zéro.
@@ -198,9 +199,9 @@ async function prepareMedia(deps, event, edit, opts) {
         xf: c.xf, alpha: carriesAlpha(opts.codec), setpts,
       });
       if (c.xf && !graph) {
-        // Un cadrage non cuit se retrouve posé dans AE : indiscernable d'un mode ignoré.
-        console.warn(`[ae] cadrage non cuit pour ${c.name || c.path} :`,
-          c.anim ? 'propriétés animées' : (srcW && srcH ? 'transform identité' : 'dimensions source inconnues'));
+        // An unbaked framing ends up placed in AE: indistinguishable from an ignored mode.
+        console.warn(`[ae] framing not baked for ${c.name || c.path}:`,
+          c.anim ? 'animated properties' : (srcW && srcH ? 'identity transform' : 'unknown source dimensions'));
       }
       const vf = graph ? [] : (setpts ? ['-vf', `setpts=${setpts}`] : []);
       const aArgs = audio === 'none' ? ['-an']
@@ -262,7 +263,7 @@ async function prepareMedia(deps, event, edit, opts) {
 
   for (const c of items) {
     out.push(c.kind === 'audio' ? await prepAudio(c) : await prepVideo(c));
-    done++; emit(videoMode === 'reencode' ? 'Réencode' : videoMode === 'remux' ? 'Remux' : 'Préparation');
+    done++; emit(videoMode === 'reencode' ? t('aePhaseReencode') : videoMode === 'remux' ? t('aePhaseRemux') : t('aePhasePrepare'));
   }
   return out;
 }

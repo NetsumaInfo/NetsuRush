@@ -15,6 +15,8 @@
 // Quand une confirmation est requise : diffuse `chat:approval` en SSE {runId,callId,name,input,risk}
 // → le renderer affiche allow/deny → `respond(callId, approved)` résout la promesse en attente.
 
+const { t } = require('../i18n');
+
 /** @typedef {'read-only'|'ask'|'auto'} PermMode */
 
 const MODES = ['read-only', 'ask', 'auto'];
@@ -57,13 +59,14 @@ function createPermissions({ broadcast }) {
     const verdict = decide(call.risk);
     if (verdict === 'allow') return Promise.resolve({ approved: true });
     if (verdict === 'deny') {
-      return Promise.resolve({ approved: false, reason: `mode ${mode} : action ${call.risk} refusée` });
+      // Only read-only mode denies outright: 'auto' allows and 'ask' prompts.
+      return Promise.resolve({ approved: false, reason: t('agentReadOnlyRefused') });
     }
     // prompt → attend la réponse du renderer
     const callId = seq++;
     return new Promise((resolve) => {
       pending.set(callId, (approved) =>
-        resolve(approved ? { approved: true } : { approved: false, reason: 'refusé par l’utilisateur' }));
+        resolve(approved ? { approved: true } : { approved: false, reason: t('agentUserRefused') }));
       broadcast('chat:approval', { runId, callId, name: call.name, input: call.input, risk: call.risk });
     });
   }

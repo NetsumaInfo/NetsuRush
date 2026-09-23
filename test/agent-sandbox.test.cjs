@@ -79,7 +79,7 @@ test("launching without a working directory fails instead of using the repo", ()
     () => startCliRun({
       def: getDef("claude"), prompt: "x", onEvent: () => {},
     }),
-    /dossier de travail requis/,
+    /a working directory is required/,
   );
 });
 

@@ -7,6 +7,8 @@ const { readTimelineXml } = require('../transfer/resolveXml');
 const { graftAnimation } = require('./animation');
 const { sanitizeName: sanitize } = require('../utils');
 const { t } = require('../i18n');
+// `collect` below names its track index `t`.
+const tr = t;
 
 // "HH:MM:SS:FF" (ou ";FF" drop) → frames. Le TC tourne au fps NOMINAL (round : 24 pour 23.976).
 function tcToFrames(tc, fps) {
@@ -171,7 +173,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
     if (!outDir) throw new Error(t('chooseOutputFolder'));
     const cn = (sanitize(name).replace(/[^\x20-\x7E]+/g, '_').replace(/\s+/g, '_') || 'render') + `_${markIn}_${markOut}`;
     const onStatus = event && event.sender
-      ? (st) => event.sender.send('ae:progress', { phase: 'Rendu Resolve', done: 0, total: 0, pct: (st && st.CompletionPercentage) || 0 })
+      ? (st) => event.sender.send('ae:progress', { phase: t('aePhaseResolveRender'), done: 0, total: 0, pct: (st && st.CompletionPercentage) || 0 })
       : null;
     return renderRange(proj, { timeline: timelineObj, markIn, markOut, outDir,
       customName: cn, codec, exportAudio: audio !== 'none', audioOnly, audioFmt: audioRenderFmt || 'wav', onStatus });
@@ -195,16 +197,16 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
       for (let i = 1; i <= count; i++) {
         if (i !== clip.track) { try { await tl.SetTrackEnable('video', i, false); } catch (_) {} }
       }
-      const name = `${sanitize(clip.name || 'plan')}_bake`;
+      const name = `${sanitize(clip.name || t('transferUnnamedShot'))}_bake`;
       const cn = (name.replace(/[^\x20-\x7E]+/g, '_').replace(/\s+/g, '_') || 'bake') + `_${clip.tlStart}`;
       const onStatus = event && event.sender
-        ? (st) => event.sender.send('ae:progress', { phase: 'Cuisson Resolve', done: 0, total: 0, pct: (st && st.CompletionPercentage) || 0 })
+        ? (st) => event.sender.send('ae:progress', { phase: t('aePhaseResolveBake'), done: 0, total: 0, pct: (st && st.CompletionPercentage) || 0 })
         : null;
       return await renderRange(proj, { timeline: tl, markIn: clip.tlStart, markOut: clip.tlEnd - 1,
         outDir, customName: cn, codec, exportAudio: false, onStatus });
     } catch (e) {
-      // Un rendu refusé ne coûte que la cuisson : le cadrage repart sur le calque AE, et on le dit.
-      console.warn(`[ae] cuisson Resolve impossible pour ${clip.name || clip.path} :`, e && e.message);
+      // A refused render only costs the bake: the framing goes back onto the AE layer, and the log says so.
+      console.warn(`[ae] Resolve bake failed for ${clip.name || clip.path}:`, e && e.message);
       return null;
     } finally {
       for (let i = 1; i <= count; i++) {
@@ -286,7 +288,8 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
                     fpsClip: hasVid ? subFps : fps, srcFrames: 0, srcIn: 0, srcOut: len - 1,
                     tlStart: tlS, tlEnd: tlE, xf: null, rendered: true });
                 } else if (hasVid) {
-                  renderErr = renderErr || 'Rendu Resolve échoué'; missing.push(nm + ' (rendu KO)');
+                  renderErr = renderErr || tr('aeResolveRenderFailed');
+                  missing.push(tr('aeRenderFailedItem', { name: nm }));
                 } else {
                   // Rendu audio Resolve KO → fallback : aplatir les plans audio (conversion ffmpeg fiable).
                   const place2 = { winStart, winEnd: winStart + len, parentStart: tlS };
@@ -318,7 +321,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
                   await collect(sub, 'audio', subVideoPaths, depth + 1, place2, group);
                 }
               }
-            } else missing.push(nm || 'plan');
+            } else missing.push(nm || tr('transferUnnamedShot'));
             continue;
           }
           if (!mpi || !fp) {
@@ -327,7 +330,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
             // c'est son chemin qui manque). Les confondre faisait lire « 1 source introuvable :
             // Texte » sur une timeline saine. `GetFusionCompCount()` ne sert à rien ici : mesuré à
             // 0 sur un Text+ posé, comme sur un plan ordinaire.
-            const label = (await safeName(it)) || 'plan';
+            const label = (await safeName(it)) || tr('transferUnnamedShot');
             if (!mpi) generators.push(label);
             else missing.push(label);
             continue;
@@ -367,9 +370,9 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
     try {
       const read = await readTimelineXml(resolve, tl);
       if (read.ok === true) animated = graftAnimation(read.doc, items).animated;
-      else console.warn('[ae] images clés indisponibles :', read.reason);
+      else console.warn('[ae] keyframes unavailable:', read.reason);
     } catch (e) {
-      console.warn('[ae] lecture des images clés impossible :', e && e.message);
+      console.warn('[ae] could not read the keyframes:', e && e.message);
     }
   }
 

@@ -5,6 +5,7 @@
 
 const { parseXml, childNamed, childrenNamed, childText, childNumber } = require("./xmlText");
 const { readClipFilters } = require("./filters");
+const { t } = require("../../i18n");
 
 const DEFAULT_FPS = 24;
 
@@ -155,7 +156,7 @@ function readGeneratorItem(node, track) {
   const size = Number(params.fontsize);
   return {
     track,
-    name: childText(node, "name") || "Texte",
+    name: childText(node, "name") || t("transferTitleDefaultName"),
     tlStart: start,
     tlEnd: end,
     text,

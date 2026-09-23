@@ -12,6 +12,7 @@
 // every user who never opens the chat.
 
 const { spawn } = require('child_process');
+const { t } = require('../../i18n');
 
 const PROTOCOL_VERSION = '2025-06-18';
 
@@ -47,7 +48,7 @@ function createMcpClient(opts) {
   }
 
   function send(/** @type {any} */ msg) {
-    if (!child || !child.stdin || !child.stdin.writable) throw new Error(`${label}: serveur arrêté`);
+    if (!child || !child.stdin || !child.stdin.writable) throw new Error(t('agentMcpServerStopped', { label }));
     child.stdin.write(`${JSON.stringify(msg)}\n`);
   }
 
@@ -57,7 +58,7 @@ function createMcpClient(opts) {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         pending.delete(id);
-        reject(new Error(`${label}: ${method} sans réponse après ${Math.round(timeoutMs / 1000)} s`));
+        reject(new Error(t('agentMcpNoAnswer', { label, method, seconds: Math.round(timeoutMs / 1000) })));
       }, timeoutMs);
       pending.set(id, { resolve, reject, timer });
       try { send({ jsonrpc: '2.0', id, method, params: params || {} }); }
@@ -74,7 +75,7 @@ function createMcpClient(opts) {
     if (!p) return;
     pending.delete(msg.id);
     clearTimeout(p.timer);
-    if (msg.error) p.reject(new Error(String(msg.error.message || msg.error.code || 'erreur MCP')));
+    if (msg.error) p.reject(new Error(String(msg.error.message || msg.error.code || t('agentMcpError', { label }))));
     else p.resolve(msg.result);
   }
 
@@ -100,8 +101,11 @@ function createMcpClient(opts) {
         }
       });
       c.stderr.on('data', (d) => { errTail = (errTail + d.toString()).slice(-2000); });
-      c.on('error', (e) => reset(new Error(`${label}: lancement impossible — ${String(e.message || e)}`)));
-      c.on('close', (code) => reset(new Error(`${label}: serveur sorti en ${code}${errTail ? ` — ${errTail.trim().slice(-300)}` : ''}`)));
+      c.on('error', (e) => reset(new Error(t('agentMcpLaunchFailed', { label, detail: String(e.message || e) }))));
+      c.on('close', (code) => {
+        const exited = t('agentMcpServerExited', { label, code: String(code) });
+        reset(new Error(errTail.trim() ? `${exited}\n${errTail.trim().slice(-300)}` : exited));
+      });
 
       const result = await request('initialize', {
         protocolVersion: PROTOCOL_VERSION,
@@ -136,7 +140,7 @@ function createMcpClient(opts) {
     const c = child;
     child = null;
     ready = null;
-    fail(new Error(`${label}: fermé`));
+    fail(new Error(t('agentMcpClosed', { label })));
     try { c && c.kill(); } catch { /* already gone */ }
   }
 

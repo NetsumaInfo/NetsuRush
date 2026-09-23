@@ -98,7 +98,7 @@ async function applyFusionAnimation(item, clip, timeline) {
     // Le squelette vient de Resolve : s'il n'est pas lisible, c'est sa FORME qui a changé, et
     // aucune supposition ne remplace le fait de regarder ce qu'il contient vraiment.
     if (built.reason === "fusionSkeletonUnreadable") {
-      console.warn("[transfer] squelette Fusion illisible — début du fichier :",
+      console.warn("[transfer] unreadable Fusion skeleton — start of the file:",
         JSON.stringify(skeleton.text.slice(0, 400)));
     }
     await deleteScratch(item, skeleton.scratch);

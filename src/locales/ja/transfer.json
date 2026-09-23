@@ -58,8 +58,9 @@
     "graphicsUnsupported_other": "タイトル {{count}} 件：転送先で作り直せないため、転送されません。"
   },
   "phases": {
-    "read": "タイムラインを読み込み中",
+    "read": "タイムラインを読み取り中",
     "sources": "ソースを解決中",
+    "import": "タイムラインを読み込み中",
     "build": "編集中",
     "done": "完了"
   },
