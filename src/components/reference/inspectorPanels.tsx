@@ -15,7 +15,7 @@ import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 import { Popover } from "@base-ui/react/popover";
 import NumberFlow from "@number-flow/react";
 import { nr, type NetsuLevel } from "@/lib/bridge";
-import { cn } from "@/lib/utils";
+import { cn, fmtInputNumber, parseDecimal, uiLocale } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup,
@@ -42,15 +42,15 @@ function TrimNum({ value, empty, placeholder, ariaLabel, onCommit }: {
   value: number; empty?: boolean; placeholder?: string; ariaLabel: string; onCommit: (v: number) => void;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
-  const shown = draft ?? (empty ? "" : String(Number(value.toFixed(1))));
+  const shown = draft ?? (empty ? "" : fmtInputNumber(value, 1));
   return (
     <input
-      type="number" inputMode="decimal" step={0.1} min={0}
+      type="text" inputMode="decimal" autoComplete="off"
       aria-label={ariaLabel} placeholder={placeholder} value={shown}
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => { if (draft != null) { const v = parseFloat(draft); onCommit(isNaN(v) ? 0 : Math.max(0, v)); setDraft(null); } }}
+      onBlur={() => { if (draft != null) { const v = parseDecimal(draft); onCommit(isNaN(v) ? 0 : Math.max(0, v)); setDraft(null); } }}
       onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-      className="h-7 w-12 rounded-md border border-border bg-foreground/10 px-1.5 text-center text-xs font-semibold tabular-nums text-foreground outline-none transition-colors focus:border-primary focus:bg-foreground/[0.16] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      className="h-7 w-12 rounded-md border border-border bg-foreground/10 px-1.5 text-center text-xs font-semibold tabular-nums text-foreground outline-none transition-colors focus:border-primary focus:bg-foreground/[0.16]"
     />
   );
 }
@@ -170,7 +170,8 @@ export function TrimControls({ item }: { item: BoardItem }) {
                 className="group/th relative block size-4 shrink-0 rounded-full border-2 border-primary bg-white shadow ring-primary/40 transition-[box-shadow] select-none hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden"
               >
                 <NumberFlow
-                  value={Number(val.toFixed(1))} suffix="s"
+                  value={Number(val.toFixed(1))} locales={uiLocale()}
+                  format={{ style: "unit", unit: "second", unitDisplay: "narrow", maximumFractionDigits: 1 }}
                   className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 rounded-md bg-popover px-1.5 py-0.5 text-[10px] font-semibold text-popover-foreground opacity-0 shadow ring-1 ring-foreground/10 transition-opacity group-hover/th:opacity-100 group-focus-visible/th:opacity-100"
                 />
               </SliderPrimitive.Thumb>
@@ -182,7 +183,7 @@ export function TrimControls({ item }: { item: BoardItem }) {
       )}
 
       <TrimNum
-        value={hi} empty={item.trimOut == null} placeholder={dur ? dur.toFixed(1) : undefined}
+        value={hi} empty={item.trimOut == null} placeholder={dur ? fmtInputNumber(dur, 1) : undefined}
         ariaLabel={t("trim.end")} onCommit={(v) => set(tin, v)}
       />
     </div>

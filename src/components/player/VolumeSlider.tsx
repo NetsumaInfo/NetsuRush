@@ -3,7 +3,7 @@ import { Volume, Volume1, Volume2, VolumeX } from "lucide-react";
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import { cn, fmtPercent } from "@/lib/utils";
 
 // Amplitude (px) de l'étirement de la piste quand on tire au-delà d'un bord. Discrète : l'effet
 // caoutchouc doit se sentir, pas se voir.
@@ -202,7 +202,7 @@ export function VolumeSlider({
 
       {showValue && (
         <span className="w-10 shrink-0 text-right text-[11px] tabular-nums opacity-70">
-          {silent ? t("player.muted") : `${Math.round(value * 100)} %`}
+          {silent ? t("player.muted") : fmtPercent(value)}
         </span>
       )}
     </motion.div>

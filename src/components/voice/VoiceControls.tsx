@@ -22,6 +22,7 @@ import { ThresholdHelpDialog } from "./ThresholdHelpDialog";
 import { SliderRow, Disclosure, MiniToggle } from "./VoiceSlider";
 import { ModelsCta, useInstalledModels, useRequireModel } from "@/components/upscale/ModelPicker";
 import { ExportButton } from "@/components/export/ExportButton";
+import { fmtFixed, fmtMillis, fmtPercent, fmtSeconds } from "@/lib/utils";
 
 const PARAM_DEFAULTS = { threshold: 0.5, min_silence_ms: 500, min_speech_ms: 100, pad_ms: 100, pad_end_ms: 100, snap_ms: 40, noise_gate: 0.25 };
 
@@ -234,20 +235,20 @@ export function VoiceControls() {
           </Tooltip>
           {p.nova_confirm && (
             <SliderRow label={t("params.novaConfidence")} hint={t("controls.hints.novaConfidence")} value={p.nova_min_conf ?? 0.6} min={0.3} max={0.95} step={0.05}
-              fmt={(v) => `${Math.round(v * 100)}%`} disabled={busy} onChange={(v) => setSilenceParams({ nova_min_conf: v })} />
+              fmt={(v) => fmtPercent(v)} disabled={busy} onChange={(v) => setSilenceParams({ nova_min_conf: v })} />
           )}
           <SliderRow label={t("params.threshold")} hint={t("controls.hints.threshold")} value={p.threshold ?? 0.5} min={0} max={1} step={0.05}
-            fmt={(v) => v.toFixed(2)} disabled={busy} onChange={(v) => setSilenceParams({ threshold: v })} />
+            fmt={(v) => fmtFixed(v, 2)} disabled={busy} onChange={(v) => setSilenceParams({ threshold: v })} />
           <SliderRow label={t("params.minSilence")} hint={t("controls.hints.minSilence")} value={p.min_silence_ms ?? 500} min={100} max={2000} step={50}
-            fmt={(v) => `${v} ms`} disabled={busy} onChange={(v) => setSilenceParams({ min_silence_ms: v })} />
+            fmt={(v) => fmtMillis(v)} disabled={busy} onChange={(v) => setSilenceParams({ min_silence_ms: v })} />
           <SliderRow label={t("params.minSpeech")} hint={t("controls.hints.minSpeech")} value={p.min_speech_ms ?? 100} min={0} max={1000} step={25}
-            fmt={(v) => `${v} ms`} disabled={busy} onChange={(v) => setSilenceParams({ min_speech_ms: v })} />
+            fmt={(v) => fmtMillis(v)} disabled={busy} onChange={(v) => setSilenceParams({ min_speech_ms: v })} />
           <SliderRow label={t("params.pad")} hint={t("controls.hints.pad")} value={p.pad_ms ?? 100} min={0} max={500} step={10}
-            fmt={(v) => `${v} ms`} disabled={busy} onChange={(v) => setSilenceParams({ pad_ms: v })} />
+            fmt={(v) => fmtMillis(v)} disabled={busy} onChange={(v) => setSilenceParams({ pad_ms: v })} />
           <SliderRow label={t("params.padEnd")} hint={t("controls.hints.padEnd")} value={p.pad_end_ms ?? p.pad_ms ?? 100} min={0} max={800} step={10}
-            fmt={(v) => `${v} ms`} disabled={busy} onChange={(v) => setSilenceParams({ pad_end_ms: v })} />
+            fmt={(v) => fmtMillis(v)} disabled={busy} onChange={(v) => setSilenceParams({ pad_end_ms: v })} />
           <SliderRow label={t("params.noiseGate")} hint={t("controls.hints.noiseGate")} value={p.noise_gate ?? 0.25} min={0} max={0.8} step={0.05}
-            fmt={(v) => (v <= 0 ? t("controls.off") : `${Math.round(v * 100)}%`)} disabled={busy} onChange={(v) => setSilenceParams({ noise_gate: v })} />
+            fmt={(v) => (v <= 0 ? t("controls.off") : fmtPercent(v))} disabled={busy} onChange={(v) => setSilenceParams({ noise_gate: v })} />
           <div className="flex items-center justify-between pt-0.5 text-[11px] text-muted-foreground">
             <span>{t("controls.previewLabel")} <span className="opacity-60">{voicePeaks.length ? t("controls.previewOwnClip") : t("controls.previewExample")}</span></span>
             <button type="button" onClick={() => setSilenceParams(PARAM_DEFAULTS)} disabled={busy} className="flex items-center gap-1 hover:text-foreground disabled:opacity-50">
@@ -275,13 +276,13 @@ export function VoiceControls() {
         </div>
         <Disclosure title={t("controls.settings")} storageKey="nr.voice.open.hes">
           <SliderRow label={t("params.sensitivity")} hint={t("controls.hints.sensitivity")} value={hp.sensitivity ?? 0.5} min={0} max={1} step={0.05}
-            fmt={(v) => `${Math.round(v * 100)}%`} disabled={busy} onChange={(v) => setHesitationParams({ sensitivity: v })} />
+            fmt={(v) => fmtPercent(v)} disabled={busy} onChange={(v) => setHesitationParams({ sensitivity: v })} />
           <SliderRow label={t("params.minDuration")} hint={t("controls.hints.minDuration")} value={hp.min_ms ?? 400} min={200} max={800} step={25}
-            fmt={(v) => `${v} ms`} disabled={busy} onChange={(v) => setHesitationParams({ min_ms: v })} />
+            fmt={(v) => fmtMillis(v)} disabled={busy} onChange={(v) => setHesitationParams({ min_ms: v })} />
           <SliderRow label={t("params.maxDuration")} hint={t("controls.hints.maxDuration")} value={hp.max_ms ?? 1500} min={800} max={3000} step={50}
-            fmt={(v) => `${(v / 1000).toFixed(1)} s`} disabled={busy} onChange={(v) => setHesitationParams({ max_ms: v })} />
+            fmt={(v) => fmtSeconds(v / 1000, { fixed: true })} disabled={busy} onChange={(v) => setHesitationParams({ max_ms: v })} />
           <SliderRow label={t("params.monotoneTolerance")} hint={t("controls.hints.monotoneTolerance")} value={hp.monotone ?? 0.5} min={0} max={1} step={0.05}
-            fmt={(v) => `${Math.round(v * 100)}%`} disabled={busy} onChange={(v) => setHesitationParams({ monotone: v })} />
+            fmt={(v) => fmtPercent(v)} disabled={busy} onChange={(v) => setHesitationParams({ monotone: v })} />
           <div>
             <div className="mb-1 text-[11px] text-muted-foreground">{t("controls.wordTypes")}</div>
             <div className="flex flex-wrap gap-1.5">

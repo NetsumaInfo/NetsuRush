@@ -11,7 +11,7 @@ import { ChevronRight, ChevronsLeft, Search, Loader2, House, FilePlus2, FolderPl
 import { useShallow } from "zustand/react/shallow";
 import { nextProxyToken, nr, type Clip, type ScriptBlockMedia } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { basename, THUMB_AUTO, uiLocale } from "@/lib/utils";
+import { basename, THUMB_AUTO, uiLocale, fmtFps, parseDecimal } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { claimHoverPreview } from "@/lib/hoverPreview";
@@ -75,7 +75,7 @@ function Thumb({ clip }: { clip: Clip }) {
 interface MediaEntry { clip: Clip; source: ScriptBlockMedia["source"] }
 
 function FootageRow({ clip, source }: MediaEntry) {
-  const meta = [clip.resolution, clip.fps ? `${clip.fps}fps` : "", clip.duration].filter(Boolean).join(" · ");
+  const meta = [clip.resolution, clip.fps ? (Number.isFinite(parseDecimal(String(clip.fps))) ? fmtFps(parseDecimal(String(clip.fps))) : `${clip.fps} fps`) : "", clip.duration].filter(Boolean).join(" · ");
   return (
     <Tooltip>
       <TooltipTrigger render={

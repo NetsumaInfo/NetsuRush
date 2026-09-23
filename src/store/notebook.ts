@@ -110,7 +110,7 @@ const favKey = (nbId: string) => `nr-nb-fav-${nbId}`;
 const recKey = (nbId: string) => `nr-nb-rec-${nbId}`;
 const currentNotebookLanguage = (): NotebookLanguage => {
   const code = i18n.language.split("-")[0];
-  return (["fr", "en", "es", "de", "ja", "zh"] as string[]).includes(code) ? code as NotebookLanguage : "fr";
+  return (["fr", "en", "es", "de", "ja", "zh"] as string[]).includes(code) ? code as NotebookLanguage : "en";
 };
 
 export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> = (set, get) => {

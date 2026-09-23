@@ -2,6 +2,7 @@
 // contrôle selon le type de champ, pleine largeur. Réutilise les sélecteurs de cellControls (option,
 // checklist) + inputs natifs pour texte/nombre/lien/date. Aucune anim JS.
 import { useTranslation } from "react-i18next";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { CellDisplay, OptionPicker, ChecklistPicker, NbCheck } from "./cellControls";
 import { formatTimestamp, type ChecklistItem, type DbField } from "../notebookShared";
 import type { DatabaseOps } from "./useDatabaseOps";
@@ -27,7 +28,7 @@ export function FieldEditor({ field, value, onChange, ops }: {
         </button>
       );
     case "number":
-      return <input aria-label={field.name} type="number" value={value == null ? "" : String(value)} onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))} placeholder="0" className={inputCls} />;
+      return <DecimalInput bare aria-label={field.name} digits={6} value={typeof value === "number" ? value : null} onValueChange={(v) => onChange(v ?? "")} placeholder="0" className={inputCls} />;
     case "date":
       return <input aria-label={field.name} type={field.includeTime ? "datetime-local" : "date"} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className={inputCls} />;
     case "url":

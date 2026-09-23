@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/shallow";
 import { X, RotateCcw, Scissors, Play } from "lucide-react";
 import { useApp } from "@/store";
-import { cn } from "@/lib/utils";
+import { cn, fmtSeconds } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -131,7 +131,7 @@ function Row({ idx, accent, start, end, text, conf, active, excluded, kind, onSe
           <TooltipContent>{t("cuts.lowConfidence")}</TooltipContent>
         </Tooltip>
       )}
-      <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">{(end - start).toFixed(2)}s</span>
+      <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">{fmtSeconds(end - start, { digits: 2, fixed: true, unitDisplay: "narrow" })}</span>
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggle(); }}

@@ -31,7 +31,7 @@ import { ErrorReportButton } from "@/components/common/ErrorReportButton";
 import { useModelManager, type ModelManager } from "./useModelManager";
 import { useSearchModel, type SearchModelPicker } from "./useSearchModel";
 import { isModelCompatible, useCompatibility } from "@/hooks/useCompatibility";
-import { uiLocale } from "@/lib/utils";
+import { uiLocale, fmtPercent } from "@/lib/utils";
 
 // Tri APPLIQUÉ DANS chaque section (les sections gardent l'ordre métier de TASK_ORDER).
 // `default` = ordre du catalogue (recommandé en tête).
@@ -268,7 +268,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
                 installation prennent des dizaines de secondes sur une barre indéterminée, et sans
                 libellé elles passaient pour un téléchargement qui recommence. */}
             <span className="min-w-8 text-right text-[10px] tabular-nums text-muted-foreground">
-              {dl != null ? `${dl}%` : t(`stage.${stage || "install"}`, { defaultValue: "…" })}
+              {dl != null ? fmtPercent(dl / 100) : t(`stage.${stage || "install"}`, { defaultValue: "…" })}
             </span>
             <Progress value={dl} className="h-1 w-12" />
             <Tooltip>

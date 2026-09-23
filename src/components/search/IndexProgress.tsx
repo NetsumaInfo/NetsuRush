@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 
 type Busy = { file: string; pct: number; done: number; total: number; phase: string; ts: number };
 
@@ -51,7 +51,7 @@ export function IndexProgress({ busy, onCancel, canceling, kindLabel }: { busy: 
           <span className="truncate text-muted-foreground">{busy.file}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="tabular-nums text-muted-foreground"><NumberFlow value={busy.done + 1} />/<NumberFlow value={busy.total} /></span>
+          <span className="tabular-nums text-muted-foreground"><NumberFlow locales={uiLocale()} value={busy.done + 1} />/<NumberFlow locales={uiLocale()} value={busy.total} /></span>
           {onCancel && (
             <Button
               size="sm" variant="ghost"

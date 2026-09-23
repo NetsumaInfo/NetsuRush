@@ -24,7 +24,7 @@ import type { OptimizeDiagnosis, OptimizeSessionHealth } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { fmtBytes } from "./optimizeShared";
 import { errorText } from "@/lib/errorText";
-import { uiLocale } from "@/lib/utils";
+import { uiLocale, fmtFixed } from "@/lib/utils";
 
 type Action = "reload" | "restart";
 
@@ -93,7 +93,7 @@ export function MemorySection({ diag, onChanged }: { diag: OptimizeDiagnosis | n
   const verdict = health?.verdict ?? "ok";
   const measuring = !health?.running || !health.measured || health.measured < 60_000;
   const drift = health?.driftRam ?? 0;
-  const vramGo = (mb: number) => (mb / 1024).toFixed(1);
+  const vramGo = (mb: number) => fmtFixed(mb / 1024, 1);
   const resolveReady = !!diag?.connected && !!diag.project;
 
   return (

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AlertTriangle, CheckCircle2, Type } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { basename } from "@/lib/utils";
+import { basename, fmtNumber } from "@/lib/utils";
 import type { TransferPreview } from "@/lib/bridge";
 import { previewDuration } from "./transferShared";
 
@@ -51,7 +51,7 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
         <Stat label={t("preview.clips")} value={String(preview.clips ?? 0)} />
         <Stat label={t("preview.tracks")} value={`${preview.videoTracks ?? 0} V · ${preview.audioTracks ?? 0} A`} />
         <Stat label={t("preview.duration")} value={duration ?? "—"} />
-        <Stat label={t("preview.fps")} value={preview.fps ? preview.fps.toFixed(3).replace(/\.?0+$/, "") : "—"} />
+        <Stat label={t("preview.fps")} value={preview.fps ? fmtNumber(preview.fps, { maximumFractionDigits: 3 }) : "—"} />
       </div>
       {preview.fidelity && (
         <div className="flex items-start gap-2 border-t border-border pt-3 text-xs">

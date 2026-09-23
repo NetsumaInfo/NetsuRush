@@ -6,6 +6,7 @@ import type { MediaColor, MediaTrack, ScriptBlock, ScriptBlockMedia, ScriptBlock
 import { MEDIA_COLORS } from "./editor/mediaColors";
 import { useScriptPrefs } from "./scriptPrefs";
 import i18n from "@/i18n";
+import { fmtNumber, fmtSeconds } from "@/lib/utils";
 
 export type { MediaColor, ScriptBlock, ScriptBlockMedia, ScriptBlockType, ScriptDoc, ScriptDocMeta };
 export { MEDIA_COLORS };
@@ -194,12 +195,13 @@ export function fmtDuration(sec: number): string {
   const total = Math.max(0, Math.round(sec));
   const m = Math.floor(total / 60);
   const s = total % 60;
-  return m > 0 ? `${m}min ${String(s).padStart(2, "0")}s` : `${s}s`;
+  const sPart = fmtNumber(s, { style: "unit", unit: "second", unitDisplay: "narrow" });
+  return m > 0 ? `${fmtNumber(m, { style: "unit", unit: "minute", unitDisplay: "narrow" })} ${sPart}` : sPart;
 }
 
-// Durée courte d'un plan « 8.30s » (pilule média) ; bascule en mm:ss au-delà de la minute.
+// Durée courte d'un plan « 8,30s » / « 8.30s » (pilule média) ; bascule en mm:ss au-delà de la minute.
 export function fmtSecs(sec: number): string {
-  return sec >= 60 ? fmtClock(sec) : `${sec.toFixed(2)}s`;
+  return sec >= 60 ? fmtClock(sec) : fmtSeconds(sec, { digits: 2, fixed: true, unitDisplay: "narrow" });
 }
 
 // Payload de glisser-déposer d'un footage (panneau gauche → zone vidéo d'un bloc).

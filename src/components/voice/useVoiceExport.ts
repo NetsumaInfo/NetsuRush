@@ -10,6 +10,7 @@ import { useApp } from "@/store";
 import { hostBuildTimeline } from "@/lib/host";
 import { enabledSpeechSegments, keptWordSegments, subtractSpans, totalKept, guardWords, buildColorPartition, CUT_RESOLVE_COLOR, type CutSegment } from "./voiceCut";
 import { repetitionSpans, combineFillerSpans } from "./voiceFillers";
+import { fmtFixed } from "@/lib/utils";
 
 export function useVoiceExport() {
   const { t } = useTranslation("voice");
@@ -61,7 +62,7 @@ export function useVoiceExport() {
       const removed = Math.max(0, voiceDuration - totalKept(segments));
       setVoiceNotice(
         t("export.timelineBase", { name: r.timeline, count: r.count ?? segments.length }) +
-        (removed > 0.05 ? t("export.removedSuffix", { sec: removed.toFixed(1) }) : "") +
+        (removed > 0.05 ? t("export.removedSuffix", { sec: fmtFixed(removed, 1) }) : "") +
         (r.created ? t("export.createdSuffix") : "") +
         (r.fpsMismatch ? t("export.fpsMismatchSuffix") : ""),
       );

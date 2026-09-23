@@ -218,7 +218,7 @@ export function SearchResults() {
         )}
         <Tooltip>
           <TooltipTrigger render={<div className="flex items-center gap-2" />}>
-            <NumberSlider min={0} max={100} suffix="%" value={[Math.round(scoreThreshold * 100)]}
+            <NumberSlider min={0} max={100} percent value={[Math.round(scoreThreshold * 100)]}
               onValueChange={(v) => setScoreThreshold((Array.isArray(v) ? v[0] : v) / 100)} className="w-24" />
           </TooltipTrigger>
           <TooltipContent>{t("searchResults.relevanceThresholdTooltip")}</TooltipContent>

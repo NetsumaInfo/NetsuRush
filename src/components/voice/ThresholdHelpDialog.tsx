@@ -11,6 +11,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Slider } from "@/components/ui/slider";
 import { ThresholdPreview, silencePreviewStats } from "./ThresholdPreview";
 import { fmtTime } from "./voiceShared";
+import { fmtFixed, fmtMillis, fmtSeconds } from "@/lib/utils";
 
 const DEFAULTS = { threshold: 0.5, min_silence_ms: 500, min_speech_ms: 100, pad_ms: 100 };
 
@@ -21,13 +22,13 @@ const PARAMS: {
   min: number; max: number; step: number; fmt: (v: number) => string;
 }[] = [
   { key: "threshold", icon: Gauge, labelKey: "params.threshold", explainKey: "thresholdHelp.explains.threshold",
-    min: 0, max: 1, step: 0.05, fmt: (v) => v.toFixed(2) },
+    min: 0, max: 1, step: 0.05, fmt: (v) => fmtFixed(v, 2) },
   { key: "min_silence_ms", icon: Timer, labelKey: "params.minSilence", explainKey: "thresholdHelp.explains.minSilence",
-    min: 100, max: 2000, step: 50, fmt: (v) => `${v} ms` },
+    min: 100, max: 2000, step: 50, fmt: (v) => fmtMillis(v) },
   { key: "min_speech_ms", icon: Mic, labelKey: "params.minSpeech", explainKey: "thresholdHelp.explains.minSpeech",
-    min: 0, max: 1000, step: 25, fmt: (v) => `${v} ms` },
+    min: 0, max: 1000, step: 25, fmt: (v) => fmtMillis(v) },
   { key: "pad_ms", icon: MoveHorizontal, labelKey: "params.pad", explainKey: "thresholdHelp.explains.pad",
-    min: 0, max: 500, step: 10, fmt: (v) => `${v} ms` },
+    min: 0, max: 500, step: 10, fmt: (v) => fmtMillis(v) },
 ];
 
 function LegendDot({ className, label }: { className: string; label: string }) {
@@ -77,7 +78,7 @@ export function ThresholdHelpDialog() {
               <LegendDot className="bg-destructive/60" label={t("thresholdHelp.legendCut")} />
               <span className="ml-auto text-[11px] tabular-nums">
                 <span className="text-[color:var(--color-ok)]">{t("thresholdHelp.statsKeptPct", { pct: stats.keptPct })}</span>
-                <span className="text-muted-foreground"> · {t("thresholdHelp.statsCuts", { count: stats.cuts })} · −{stats.cutSec >= 60 ? fmtTime(stats.cutSec) : `${stats.cutSec.toFixed(1).replace(".", ",")} s`}</span>
+                <span className="text-muted-foreground"> · {t("thresholdHelp.statsCuts", { count: stats.cuts })} · −{stats.cutSec >= 60 ? fmtTime(stats.cutSec) : fmtSeconds(stats.cutSec)}</span>
               </span>
             </div>
 

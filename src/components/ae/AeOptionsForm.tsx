@@ -6,6 +6,7 @@ import { FolderOpen, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -13,7 +14,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { UP_ABR } from "@/components/upscale/upscaleShared";
 import { UpscalePane } from "@/components/upscale/UpscalePane";
 import type { AeVideoMode, AeVideoContainer, AeAudioContainer, AePrecompNaming, AePrecompTarget, AeTransformMode, AeNestedMode, AeAudioRenderFmt } from "@/lib/bridge";
-import { basename } from "@/lib/utils";
+import { basename, fmtNumber } from "@/lib/utils";
 import type { AeCtl } from "./useAeExport";
 import {
   VIDEO_MODES, AUDIO_MODES, AE_LOSSY, AUDIO_PRODUCES, AUDIO_RENDER_FORMATS, TRANSFORM_MODES,
@@ -128,8 +129,8 @@ export function AeOptionsForm({ ae, hideTimeline = false, hideCompName = false }
         </Row>
 
         <Row label={t("form.handleSeconds")} disabled={!handlesUsed}>
-          <Input type="number" min={0} step={0.5} value={handleSec} disabled={busy || !handlesUsed}
-            onChange={(e) => setHandleSec(Math.max(0, Number(e.target.value) || 0))}
+          <DecimalInput min={0} digits={2} value={handleSec} disabled={busy || !handlesUsed}
+            onValueChange={(v) => setHandleSec(Math.max(0, v ?? 0))}
             className="w-24 text-right tabular-nums" />
         </Row>
       </Section>
@@ -208,10 +209,10 @@ export function AeOptionsForm({ ae, hideTimeline = false, hideCompName = false }
         </Row>
         <Row label={t("form.bitrate")} disabled={!lossy}>
           <Select value={String(abr)} onValueChange={(v) => setAbr(Number(v))}
-            items={UP_ABR.map((b) => ({ value: String(b), label: `${b} kbps` }))} disabled={busy || !lossy}>
+            items={UP_ABR.map((b) => ({ value: String(b), label: `${fmtNumber(b)} kbps` }))} disabled={busy || !lossy}>
             <SelectTrigger className="w-[58%]"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {UP_ABR.map((b) => <SelectItem key={b} value={String(b)}>{b} kbps</SelectItem>)}
+              {UP_ABR.map((b) => <SelectItem key={b} value={String(b)}>{fmtNumber(b)} kbps</SelectItem>)}
             </SelectContent>
           </Select>
         </Row>

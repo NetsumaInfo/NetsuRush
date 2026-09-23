@@ -13,6 +13,7 @@ import type { OptimizeResources } from "@/lib/bridge";
 import { fmtBytes } from "./optimizeShared";
 import { useTranslation } from "react-i18next";
 import { errorText } from "@/lib/errorText";
+import { fmtPercent } from "@/lib/utils";
 
 const mib = (mb: number) => fmtBytes(mb * 1024 * 1024);
 
@@ -133,7 +134,7 @@ export function GpuSection() {
         ) : (
           <div className="text-xs text-muted-foreground">{t("gpu.vramUnreadable")}</div>
         )}
-        <Gauge label="CPU" pct={cpu ?? 0} detail={cpu !== null ? `${cpu}%` : "—"} danger={cpuDanger} />
+        <Gauge label="CPU" pct={cpu ?? 0} detail={cpu !== null ? fmtPercent(cpu / 100) : "—"} danger={cpuDanger} />
         {ram && ram.total > 0 && (
           <Gauge
             label={t("gpu.ramSystem")}

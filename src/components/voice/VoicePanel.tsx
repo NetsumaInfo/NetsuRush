@@ -24,6 +24,7 @@ import { VoiceControls } from "./VoiceControls";
 import { VoiceHome } from "./VoiceHome";
 import { CutsPanel } from "./CutsPanel";
 import { Waveform } from "./Waveform";
+import { fmtFps } from "@/lib/utils";
 
 function wordAt(words: { start: number; end: number }[], t: number): number {
   let lo = 0, hi = words.length - 1, res = -1;
@@ -171,7 +172,7 @@ export function VoicePanel() {
 
   const meta = [
     clipMeta?.width && clipMeta?.height ? `${clipMeta.width}×${clipMeta.height}` : null,
-    clipMeta?.fps ? `${clipMeta.fps.toFixed(3)} fps` : null,
+    clipMeta?.fps ? fmtFps(clipMeta.fps) : null,
     dur ? fmtTime(dur) : null,
     words.length ? t("panel.wordsCount", { count: words.length }) : null,
   ].filter(Boolean).join(" · ");

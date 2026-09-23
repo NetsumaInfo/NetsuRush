@@ -3,7 +3,7 @@
 // d'où le réglage séparé plutôt qu'un seuil global qui arbitrerait à la place de l'utilisateur.
 import { useTranslation } from "react-i18next";
 import { Toggle } from "@/components/ui/toggle";
-import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Images } from "lucide-react";
@@ -26,19 +26,12 @@ function NumField({ value, onCommit, suffix, disabled }: {
 }) {
   return (
     <div className="flex items-center gap-1">
-      <Input
-        type="number"
-        min={1}
-        inputMode="numeric"
+      <DecimalInput
+        digits={2}
         disabled={disabled}
-        value={value ?? ""}
+        value={value}
         placeholder="—"
-        onChange={(e) => {
-          const raw = e.target.value.trim();
-          if (!raw) return onCommit(null);
-          const n = Number(raw);
-          onCommit(Number.isFinite(n) && n > 0 ? n : null);
-        }}
+        onValueChange={(n) => onCommit(n != null && n > 0 ? n : null)}
         className="h-7 w-16 text-xs tabular-nums"
       />
       <span className="text-[11px] text-muted-foreground">{suffix}</span>

@@ -39,6 +39,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
+import { fmtBytes } from "@/lib/utils";
 
 type Profile = { userId: string; handle: string; name: string; image: string | null };
 type Social = { friends: Array<Profile & { since: number }> } | undefined;
@@ -94,8 +95,7 @@ function Avatar({ url }: { url: string | null }) {
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
+  return fmtBytes(bytes);
 }
 
 export function CollaborationDialog({

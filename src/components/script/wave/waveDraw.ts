@@ -1,3 +1,4 @@
+import { fmtSeconds } from "@/lib/utils";
 // Dessin et mesure de la waveform — fonctions PURES (aucun React, aucun DOM hors ctx canvas).
 // Séparé du composant pour que la géométrie et l'échelle soient relisibles sans runtime.
 
@@ -42,7 +43,7 @@ function tickLabel(sec: number): string {
   const total = Math.max(0, sec);
   const m = Math.floor(total / 60);
   const s = total % 60;
-  if (total < 10) return `${s.toFixed(1)}s`;
+  if (total < 10) return fmtSeconds(s, { digits: 1, fixed: true, unitDisplay: "narrow" });
   return `${m}:${String(Math.floor(s)).padStart(2, "0")}`;
 }
 

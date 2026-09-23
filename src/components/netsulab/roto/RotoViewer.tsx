@@ -3,6 +3,7 @@ import { nr } from "@/lib/bridge";
 import { colorOf } from "./rotoShared";
 import type { RotoSession } from "./useRotoSession";
 import { useTranslation } from "react-i18next";
+import { fmtFixed } from "@/lib/utils";
 
 // Zone image du Roto Studio : frame + overlay de masque + points, avec ZOOM (molette, 1×→8×,
 // centré sur le curseur) et PAN (glisser clic milieu, ou clic gauche zoomé + Alt) pour poser des
@@ -213,7 +214,7 @@ export function RotoViewer({ s, shown, stopPlayback }: {
       </div>
       {z.k > 1 && (
         <span className="pointer-events-none absolute right-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tabular-nums text-white">
-          {z.k.toFixed(1)}{t("viewer.zoomSuffix")}
+          {fmtFixed(z.k, 1)}{t("viewer.zoomSuffix")}
         </span>
       )}
     </div>

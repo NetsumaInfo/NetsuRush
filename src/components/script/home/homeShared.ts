@@ -20,7 +20,7 @@ const MONTH = 30 * DAY;
 // cinq autres langues livrées), et l'objet est réutilisé entre les cartes.
 const formatters = new Map<string, Intl.RelativeTimeFormat>();
 function relativeFormatter(): Intl.RelativeTimeFormat {
-  const lang = i18n.language || "fr";
+  const lang = i18n.language || "en";
   let f = formatters.get(lang);
   if (!f) {
     f = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });

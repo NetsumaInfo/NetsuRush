@@ -15,7 +15,7 @@ export type AgentSurface = "pilot" | "flow";
  * English these prompts are written in. A message written in another language still wins.
  */
 function replyLanguage(): string {
-  const code = i18n.language || "fr";
+  const code = i18n.language || "en";
   let name = code;
   try { name = new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? code; } catch { /* keep the code */ }
   return `Reply in ${name} (the interface language), or in the language the user writes in if it differs.`;

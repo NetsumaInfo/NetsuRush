@@ -7,6 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTranslation } from "react-i18next";
 import { Row, Field } from "./procSettingsParts";
 import { ModelPicker, useModelOptions } from "./ModelPicker";
+import { fmtFps } from "@/lib/utils";
 import {
   INTERP_MODELS, INTERP_FACTORS, INTERP_TARGET_FPS, DEPTH_MODELS, DEPTH_COLORS,
   type InterpSettings, type DepthSettings,
@@ -46,7 +47,7 @@ export function InterpModelSettings({ settings, patch, disabled }: {
         <Row label={t("settings.rowFps")}>
           <Field value={String(settings.targetFps)} disabled={disabled}
             onChange={(v) => patch({ targetFps: Number(v) })}
-            items={INTERP_TARGET_FPS.map((f) => ({ value: String(f), label: `${f} fps` }))} />
+            items={INTERP_TARGET_FPS.map((f) => ({ value: String(f), label: fmtFps(f) }))} />
         </Row>
       )}
 

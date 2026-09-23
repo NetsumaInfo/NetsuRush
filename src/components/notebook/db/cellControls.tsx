@@ -12,6 +12,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { colorOf, formatNumber, formatDate, formatTimestamp, DB_COLORS, type ChecklistItem, type DbField, type SelectOption } from "../notebookShared";
 import { MiniCalendar } from "../blocks/MiniCalendar";
 import i18n from "@/i18n";
+import { fmtInputNumber, parseDecimal } from "@/lib/utils";
 
 // ---- Case à cocher harmonisée (remplace le <input type="checkbox"> natif partout dans la db) ------
 // Bouton stylé sur les tokens : coché = aplat primary + ✓ ; décoché = contour discret. Pas de natif.
@@ -322,15 +323,24 @@ export function InputEditCell({
   const initial = (() => {
     const s = value == null ? "" : String(value);
     if (type === "date") return /^\d{4}-\d{2}-\d{2}/.test(s) ? s : "";
-    if (type === "number") return s !== "" && !isNaN(Number(s)) ? s : "";
+    if (type === "number") {
+      const n = typeof value === "number" ? value : parseDecimal(s);
+      return Number.isFinite(n) ? fmtInputNumber(n, 6) : "";
+    }
     return s;
   })();
   const [v, setV] = useState(initial);
-  const commit = () => { onCommit(type === "number" ? (v === "" ? "" : Number(v)) : v); onClose(); };
+  const commit = () => {
+    if (type !== "number") onCommit(v);
+    else if (v.trim() === "") onCommit("");
+    else { const n = parseDecimal(v); if (Number.isFinite(n)) onCommit(n); }
+    onClose();
+  };
   return (
     <input
       aria-label={type}
-      type={type === "number" ? "number" : type === "date" ? "date" : "text"}
+      type={type === "date" ? "date" : "text"}
+      inputMode={type === "number" ? "decimal" : undefined}
       value={v}
       onChange={(e) => setV(e.target.value)}
       onBlur={commit}

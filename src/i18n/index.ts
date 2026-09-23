@@ -1,5 +1,5 @@
 // Cœur i18n de l'application (react-i18next). Objectifs :
-//  - 6 langues : fr (source + repli) · en · es · de · ja · zh.
+//  - 6 langues : fr (source, fills missing keys) · en (default when no system language is supported) · es · de · ja · zh.
 //  - Chargement PARESSEUX : seule la langue active est fetchée (chunks Vite par langue×namespace).
 //    Le fr est embarqué en dur (repli immédiat, jamais de clé manquante).
 //  - Init unique par renderer (importé au plus tôt dans main.tsx) → couvre Shell, la fenêtre
@@ -29,7 +29,10 @@ export const LANGUAGES: LangDef[] = [
 ];
 
 const SUPPORTED: LangCode[] = LANGUAGES.map((l) => l.code);
-const FALLBACK_LANG: LangCode = "fr";
+// French is the source catalogue, complete by construction: it fills a key another language lacks.
+const SOURCE_LANG: LangCode = "fr";
+// The interface language of someone whose preferences name no supported language.
+const DEFAULT_LANG: LangCode = "en";
 export const LANG_STORAGE_KEY = "nr-lang";
 
 // Namespaces = un fichier JSON par feature et par langue (src/locales/<lang>/<ns>.json).
@@ -91,7 +94,7 @@ const loadedLangs = new Set<LangCode>(["fr"]);
  * fr est déjà en mémoire. Idempotent : une langue déjà chargée ne re-fetch pas.
  */
 export async function activateLanguage(lng: LangCode): Promise<void> {
-  const target: LangCode = SUPPORTED.includes(lng) ? lng : FALLBACK_LANG;
+  const target: LangCode = SUPPORTED.includes(lng) ? lng : DEFAULT_LANG;
   if (!loadedLangs.has(target)) {
     const jobs: Promise<void>[] = [];
     for (const [path, loader] of Object.entries(lazy)) {
@@ -110,17 +113,27 @@ export async function activateLanguage(lng: LangCode): Promise<void> {
   if (typeof document !== "undefined") document.documentElement.setAttribute("lang", target);
 }
 
-/** Langue de démarrage : préférence sauvegardée, sinon locale système mappée, sinon fr. */
+/**
+ * The first supported language in a preference list ("it-IT", "de-CH", "en-US" → "de"), matched on
+ * the primary subtag so every regional variant counts; English when none is supported.
+ */
+export function pickSupportedLang(preferences: readonly (string | null | undefined)[]): LangCode {
+  for (const tag of preferences) {
+    const code = (tag || "").split(/[-_]/)[0].toLowerCase() as LangCode;
+    if (SUPPORTED.includes(code)) return code;
+  }
+  return DEFAULT_LANG;
+}
+
+/** Startup language: the saved choice, else the best match in the OS/browser preference list. */
 export function detectDefaultLang(): LangCode {
-  if (typeof localStorage !== "undefined") {
+  try {
     const saved = localStorage.getItem(LANG_STORAGE_KEY) as LangCode | null;
     if (saved && SUPPORTED.includes(saved)) return saved;
-  }
-  if (typeof navigator !== "undefined") {
-    const nav = (navigator.language || "").slice(0, 2).toLowerCase() as LangCode;
-    if (SUPPORTED.includes(nav)) return nav;
-  }
-  return FALLBACK_LANG;
+  } catch { /* storage unavailable: fall through to the system preferences */ }
+  if (typeof navigator === "undefined") return DEFAULT_LANG;
+  const prefs = navigator.languages?.length ? navigator.languages : [navigator.language];
+  return pickSupportedLang(prefs);
 }
 
 /** true si l'utilisateur n'a jamais choisi de langue (→ afficher l'écran de premier lancement). */
@@ -133,8 +146,8 @@ export function hasChosenLang(): boolean {
 // Init synchrone en fr (repli garanti). La vraie langue active est ensuite appliquée par
 // initI18n() qui attend le chargement paresseux AVANT le premier rendu (pas de flash de repli).
 i18n.use(initReactI18next).init({
-  lng: FALLBACK_LANG,
-  fallbackLng: FALLBACK_LANG,
+  lng: SOURCE_LANG,
+  fallbackLng: SOURCE_LANG,
   supportedLngs: SUPPORTED,
   ns: NAMESPACES as unknown as string[],
   defaultNS: "common",

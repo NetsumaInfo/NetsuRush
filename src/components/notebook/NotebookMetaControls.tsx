@@ -84,7 +84,7 @@ export function CreateNotebookDialog({ open, onOpenChange }: { open: boolean; on
   const [kind, setKind] = useState<NotebookKind>("notes");
   const initialLanguage = NOTEBOOK_LANGUAGES.includes(i18n.language.split("-")[0] as NotebookLanguage)
     ? i18n.language.split("-")[0] as NotebookLanguage
-    : "fr";
+    : "en";
   const [language, setLanguage] = useState<NotebookLanguage>(initialLanguage);
 
   useEffect(() => {

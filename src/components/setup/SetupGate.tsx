@@ -324,9 +324,9 @@ export function SetupGate({ children }: { children: ReactNode }) {
           <section className="flex flex-col gap-4">
             <div>
               <h2 className="text-sm font-medium">{t("language:gate.title")}</h2>
-              {/* Sous-titre bilingue : l'écran s'affiche AVANT tout choix, donc dans une langue que
-                  l'utilisateur ne parle peut-être pas. */}
-              <p className="mt-1 text-xs text-muted-foreground">Choisis la langue de l'interface · Choose your language</p>
+              {/* Shown before any choice, in the best match of the system languages; each option below
+                  is written in its own language, so a reader of none of them still finds theirs. */}
+              <p className="mt-1 text-xs text-muted-foreground">{t("language:gate.subtitle")}</p>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {LANGUAGES.map((entry) => (

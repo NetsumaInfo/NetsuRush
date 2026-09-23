@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { FrameCompare } from "./useUpscale";
 import { useTranslation } from "react-i18next";
+import { fmtFixed } from "@/lib/utils";
 
 // Hauteur maximale du cadre en mode compact (popup d'upscale du board) : assez pour juger un rendu,
 // assez basse pour que les boutons du dialogue restent visibles sans défilement.
@@ -196,7 +197,7 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
           <span className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
             <span className="flex items-center gap-1"><MoveHorizontal className="h-3.5 w-3.5" /> {hasModelComparison ? t("compare.modelResults") : t("compare.beforeAfter")}</span>
             <span>· {data.width}×{data.height}</span>
-            <span className="flex items-center gap-1"><ZoomIn className="h-3.5 w-3.5" /> {scale.toFixed(1)}×</span>
+            <span className="flex items-center gap-1"><ZoomIn className="h-3.5 w-3.5" /> {fmtFixed(scale, 1)}×</span>
           </span>
           {variants.length > 1 && (
             <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5">
@@ -266,7 +267,7 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
             n'existe pas : sans ça, un zoom accidentel n'a aucune sortie visible. */}
         {compact && scale > 1 && (
           <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1">
-            <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">{scale.toFixed(1)}×</span>
+            <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white">{fmtFixed(scale, 1)}×</span>
             <Tooltip>
               <TooltipTrigger
                 render={

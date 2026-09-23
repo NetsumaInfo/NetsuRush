@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -105,14 +106,12 @@ function VariableControl({ variable, value, onChange, disabled }: {
           onChange={(event) => commit(event.target.value)}
           disabled={disabled}
         />
-        <Input
-          type="number"
+        <DecimalInput
           className="h-8 w-20 text-right tabular-nums"
           min={variable.min ?? undefined}
           max={variable.max ?? undefined}
-          step={variable.step ?? undefined}
           value={Number.isFinite(numeric) ? numeric : 0}
-          onChange={(event) => commit(event.target.value)}
+          onValueChange={(v) => { if (v != null) commit(String(v)); }}
           disabled={disabled}
         />
         {variable.unit ? (

@@ -7,7 +7,7 @@ import { useResultPreview } from "@/components/search/useResultPreview";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { AddToCollection } from "@/components/collections/AddToCollection";
 import { CollectionSubmenu } from "@/components/collections/CollectionSubmenu";
-import { cn, basename, thumbTime } from "@/lib/utils";
+import { cn, basename, thumbTime, fmtPercent } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem,
@@ -108,7 +108,7 @@ function ResultCardImpl({
           {tc(hit.start_sec)}
         </span>
         <span className="nr-chip absolute right-2 top-2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white">
-          {Math.round(hit.score * 100)}%
+          {fmtPercent(hit.score)}
         </span>
         {hit.char && (
           <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white"

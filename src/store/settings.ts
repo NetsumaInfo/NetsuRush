@@ -189,8 +189,8 @@ function readDictateUnloadMs(): number {
   return Number.isFinite(v) && v >= 0 ? v : 300000;
 }
 
-// Langue de l'interface (i18n). detectDefaultLang() lit la préférence sauvegardée, sinon la locale
-// système mappée, sinon fr. La bascule effective des ressources i18next se fait dans setLang.
+// Interface language: the saved choice, else the best supported system language, else English
+// (detectDefaultLang). setLang swaps the i18next resources.
 function readLang(): LangCode {
   return detectDefaultLang();
 }

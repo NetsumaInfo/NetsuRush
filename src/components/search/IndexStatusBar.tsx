@@ -5,7 +5,7 @@ import NumberFlow from "@number-flow/react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 
 type Props = {
   loading?: boolean;
@@ -37,13 +37,13 @@ export function IndexStatusBar({
         <span className="inline-flex items-center gap-2"><Spinner className="size-3.5" /> {t("indexStatusBar.loadingData")}</span>
       ) : (
         <span className="tabular-nums">
-          <NumberFlow value={indexed} /> {t("indexStatusBar.clips", { count: indexed })}
+          <NumberFlow locales={uiLocale()} value={indexed} /> {t("indexStatusBar.clips", { count: indexed })}
           <span className="px-1 opacity-40">·</span>
-          <NumberFlow value={frames} /> {t("indexStatusBar.plansIndexed", { count: frames })}
+          <NumberFlow locales={uiLocale()} value={frames} /> {t("indexStatusBar.plansIndexed", { count: frames })}
           {faces > 0 && (
             <>
               <span className="px-1 opacity-40">·</span>
-              <NumberFlow value={faces} /> {t("indexStatusBar.facesCount", { count: faces })}
+              <NumberFlow locales={uiLocale()} value={faces} /> {t("indexStatusBar.facesCount", { count: faces })}
             </>
           )}
         </span>

@@ -7,7 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { basename, uiLocale } from "@/lib/utils";
+import { basename, uiLocale, fmtFps } from "@/lib/utils";
 import { useApp } from "@/store";
 import type { AdobeClip, AdobeSequence, AdobeSnapshot } from "@/lib/bridge";
 
@@ -62,7 +62,7 @@ function RushRow({ r }: { r: AdobeSnapshot["rushes"][number] }) {
           <TooltipContent>{r.path}</TooltipContent>
         </Tooltip>
         <span className="ml-auto shrink-0 tabular-nums text-muted-foreground">
-          {r.fps ? `${Math.round(r.fps * 1000) / 1000} i/s` : ""}
+          {r.fps ? fmtFps(r.fps) : ""}
           {r.w && r.h ? ` · ${r.w}×${r.h}` : ""}
           {r.dur ? ` · ${fmtSec(r.dur)}` : ""}
         </span>
@@ -89,7 +89,7 @@ function SequenceBlock({ seq }: { seq: AdobeSequence }) {
       <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-3 py-2">
         <span className="text-xs font-semibold">{seq.name}</span>
         <span className="text-[11px] text-muted-foreground">
-          {seq.fps ? `${Math.round(seq.fps * 1000) / 1000} i/s` : ""}
+          {seq.fps ? fmtFps(seq.fps) : ""}
           {seq.w && seq.h ? ` · ${seq.w}×${seq.h}` : ""}
         </span>
         <Badge variant="outline" className="ml-auto text-[10px]">{t("snapshot.shotsCount", { n: nClips })}</Badge>

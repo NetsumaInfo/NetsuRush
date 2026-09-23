@@ -35,6 +35,7 @@ import { DetectionAdvancedSettings } from "./DetectionAdvancedSettings";
 import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls";
 import { flowOffsets } from "./cutFlow";
 import { CutFlowNav } from "./CutFlowNav";
+import { fmtPercent } from "@/lib/utils";
 
 // Seuils de mise en page (px) : sous NARROW_W la vue passe en colonne, et la grille garde toujours
 // au moins MIN_GRID_W — sinon la barre d'outils n'a plus de place et ses boutons s'empilent.
@@ -321,7 +322,7 @@ export function CutStudio() {
               {detecting ? <Spinner className="size-4" /> : <Scissors className="size-4" />}
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {detecting && progress ? `${t("shared.analyzing")} ${progress}%` : t("shared.detectShots")}
+              {detecting && progress ? `${t("shared.analyzing")} ${fmtPercent(progress / 100)}` : t("shared.detectShots")}
             </TooltipContent>
           </Tooltip>
         </div>

@@ -33,7 +33,7 @@ function FrameField({ frame, onCommit }: { frame: number; onCommit: (f: number) 
       type="text"
       value={v}
       inputMode="numeric"
-      onChange={(e) => setV(e.target.value.replace(/[^\d]/g, ""))}
+      onChange={(e) => setV(e.target.value.normalize("NFKC").replace(/[^\d]/g, ""))}
       onBlur={commit}
       onKeyDown={(e) => { if (e.key === "Enter") { commit(); (e.target as HTMLInputElement).blur(); } }}
       className="h-7 min-w-[5rem] max-w-full text-center text-xs tabular-nums"

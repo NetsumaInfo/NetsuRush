@@ -8,6 +8,7 @@ import { nr, type Character, type CharRef, type SearchHit, type DuplicatePair } 
 import type { AppState } from "./index";
 import { SEARCH_TOP_K, searchScopePaths } from "./search";
 import { errorText } from "@/lib/errorText";
+import { uiLocale } from "@/lib/utils";
 
 export interface CharacterSlice {
   characters: Character[];
@@ -56,7 +57,7 @@ export const createCharacterSlice: StateCreator<AppState, [], [], CharacterSlice
     set({ charsLoading: true });
     try {
       const r = await nr.charList({ filePaths: searchScopePaths(get()) });
-      set({ characters: r.characters ?? [], charsLoading: false });
+      set({ characters: [...(r.characters ?? [])].sort((a, b) => a.name.localeCompare(b.name, uiLocale(), { sensitivity: "base", numeric: true })), charsLoading: false });
     } catch {
       set({ charsLoading: false });
     }

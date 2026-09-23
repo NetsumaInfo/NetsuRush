@@ -28,7 +28,7 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { cn, basename, thumbTime } from "@/lib/utils";
+import { cn, basename, thumbTime, fmtPercent } from "@/lib/utils";
 import { hoverLiftLayer } from "@/components/common/hoverLift";
 import { previewSettingsFingerprint } from "@/lib/previewSettings";
 import { NR_MEDIA_DND, type NrMediaDrag, kindFromPath } from "./referenceShared";
@@ -330,7 +330,7 @@ function SearchView({ proxies, board }: { proxies: Map<string, string>; board: R
                   clipPath={h.file_path} inSec={h.start_sec} outSec={h.end_sec} index={i} proxies={proxies}
                   drag={{ file: h.file_path, in: h.start_sec, out: h.end_sec, title: `${basename(h.file_path)} · ${fmt(h.start_sec)}` }}
                   selectable selected={sel.has(i)} onActivate={() => toggle(i)}
-                  badge={`${Math.round(h.score * 100)}%`} footer={fmt(h.end_sec - h.start_sec)}
+                  badge={fmtPercent(h.score)} footer={fmt(h.end_sec - h.start_sec)}
                 />
               ))}
             </div>

@@ -18,7 +18,7 @@ import type { TFunction } from "i18next";
 import { AlertCircle, Brain, Check, CheckCheck, ChevronDown, Copy, Braces, Dot, ChevronsUpDown, Terminal } from "lucide-react";
 import type { UiMessage, UiStep, UiToolCall } from "@/store/chat";
 import { useApp } from "@/store";
-import { cn } from "@/lib/utils";
+import { cn, fmtMillis, fmtSeconds } from "@/lib/utils";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
@@ -131,7 +131,7 @@ function TerminalBlock({ command, output, done, ok, t }: {
 
 /** Durée lisible : sous la seconde on parle en millisecondes, au-delà en secondes à une décimale. */
 function humanDuration(ms: number): string {
-  return ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+  return ms < 1000 ? fmtMillis(ms) : fmtSeconds(ms / 1000, { fixed: true });
 }
 
 /** Grille 3×3 qui pulse pendant le tour — un « ça travaille », pas un « ça charge ». */

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -53,23 +53,20 @@ function FieldHint({ label, hint }: { label: string; hint?: string }) {
 function NumberSetting({ label, hint, value, min, max, step = 1, onChange }: {
   label: string; hint?: string; value: number; min: number; max: number; step?: number; onChange: (value: number) => void;
 }) {
-  const setClampedValue = (raw: string) => {
-    const parsed = Number(raw);
-    if (!Number.isFinite(parsed)) return;
+  const setClampedValue = (parsed: number | null) => {
+    if (parsed == null) return;
     const clamped = Math.min(max, Math.max(min, parsed));
     onChange(step >= 1 ? Math.round(clamped) : clamped);
   };
   return (
     <label className="grid grid-cols-[minmax(0,1fr)_6.5rem] items-center gap-3">
       <FieldHint label={label} hint={hint} />
-      <Input
-        type="number"
+      <DecimalInput
         value={value}
         min={min}
         max={max}
-        step={step}
-        onChange={(event) => setClampedValue(event.currentTarget.value)}
-        className="h-8 text-right text-xs [&::-webkit-inner-spin-button]:ml-2"
+        onValueChange={setClampedValue}
+        className="h-8 text-right text-xs"
       />
     </label>
   );

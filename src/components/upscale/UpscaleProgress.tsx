@@ -1,7 +1,7 @@
 import NumberFlow from "@number-flow/react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { cn, uiLocale } from "@/lib/utils";
 import type { UpscaleProgress as UpProg } from "@/lib/bridge";
 import { useTranslation } from "react-i18next";
 
@@ -21,7 +21,7 @@ export function UpscaleProgress({ busy, label }: { busy: UpProg; label?: string 
           </span>
           <span className="truncate text-muted-foreground">{busy.file}</span>
         </div>
-        <span className="shrink-0 tabular-nums text-muted-foreground"><NumberFlow value={busy.done + 1} />/<NumberFlow value={busy.total} /></span>
+        <span className="shrink-0 tabular-nums text-muted-foreground"><NumberFlow locales={uiLocale()} value={busy.done + 1} />/<NumberFlow locales={uiLocale()} value={busy.total} /></span>
       </div>
       <Progress value={busy.pct ?? 0} />
     </Card>

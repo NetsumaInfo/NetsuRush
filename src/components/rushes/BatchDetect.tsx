@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, fmtPercent } from "@/lib/utils";
 import { SELECTION_BAR_CLASS } from "./cutStudioShared";
 import { DetectionAdvancedSettings } from "./DetectionAdvancedSettings";
 import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls";
@@ -115,7 +115,7 @@ export function BatchDetectProgress() {
               <span className="shrink-0 text-muted-foreground">
                 {it.status === "done" ? t("batch.shots", { count: it.scenes ?? 0 })
                   : it.status === "error" ? t("shared.failedShort")
-                  : it.status === "running" ? `${it.pct}%`
+                  : it.status === "running" ? fmtPercent(it.pct / 100)
                   : t("batch.pending")}
               </span>
             </div>

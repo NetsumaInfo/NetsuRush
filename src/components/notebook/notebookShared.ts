@@ -2,7 +2,7 @@
 // à la fois par le store, les composants et le bridge. Un carnet = un espace ; il contient un ARBRE de
 // pages ; chaque page = un document par blocs (BlockNote) + d'éventuelles databases (bloc /database).
 import i18n from "@/i18n";
-import { uiLocale } from "@/lib/utils";
+import { uiLocale, fmtNumber, fmtPercent, parseDecimal } from "@/lib/utils";
 
 // Bloc BlockNote sérialisé — on ne type pas l'intérieur (dépend de la lib) : c'est du JSON opaque.
 export type NoteBlock = Record<string, unknown>;
@@ -67,14 +67,14 @@ export const NUMBER_FORMAT_LABELS: Record<NumberFormat, string> = {
   get dollar() { return i18n.t("notebook:numberLabels.dollar"); },
 };
 export function formatNumber(value: unknown, fmt: NumberFormat | undefined): string {
-  const n = typeof value === "number" ? value : value === "" || value == null ? NaN : Number(value);
+  const n = typeof value === "number" ? value : value === "" || value == null ? NaN : parseDecimal(String(value));
   if (isNaN(n)) return "";
   switch (fmt) {
-    case "integer": return String(Math.round(n));
-    case "percent": return `${+n.toFixed(2)} %`;
+    case "integer": return fmtNumber(Math.round(n), { maximumFractionDigits: 0 });
+    case "percent": return fmtPercent(n / 100, 2);
     case "euro": return new Intl.NumberFormat(i18n.language, { style: "currency", currency: "EUR" }).format(n);
     case "dollar": return new Intl.NumberFormat(i18n.language, { style: "currency", currency: "USD" }).format(n);
-    default: return Number.isInteger(n) ? String(n) : String(+n.toFixed(4));
+    default: return fmtNumber(n, { maximumFractionDigits: 4 });
   }
 }
 

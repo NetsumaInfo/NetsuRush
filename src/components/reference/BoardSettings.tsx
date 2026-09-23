@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Grid2x2, Square, X, Star, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, fmtFps, fmtPercent } from "@/lib/utils";
 import { nr } from "@/lib/bridge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -181,7 +181,7 @@ function PenProbe() {
   // Une pression FIGÉE sur la valeur de la spec veut dire « pas de capteur », pas « pression nulle ».
   const pressure = !live ? "—"
     : Math.abs(live.pressure - FLAT_PRESSURE) < 0.01 ? t("settings.penNoSensor")
-      : `${Math.round(live.pressure * 100)} %`;
+      : fmtPercent(live.pressure);
   const rows: [string, string][] = [
     [t("settings.penProbePen"), seen ? yes : no],
     [t("settings.penProbePressure"), pressure],
@@ -373,7 +373,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
               onValueChange={(v) => setBackground({ opacity: clampBgOpacity((Array.isArray(v) ? v[0] : v) / 100) })}
             />
             <span className="w-10 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-              {Math.round(background.opacity * 100)} %
+              {fmtPercent(background.opacity)}
             </span>
           </div>
           {/* CONTENT opacity: media, notes, frames, strokes. Alt+wheel sets it too — over the
@@ -389,7 +389,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
               onValueChange={(v) => setPrefs({ contentOpacity: clampMediaOpacity((Array.isArray(v) ? v[0] : v) / 100) })}
             />
             <span className="w-10 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-              {Math.round(prefs.contentOpacity * 100)} %
+              {fmtPercent(prefs.contentOpacity)}
             </span>
           </div>
           {/* Scope of the translucency: what it reaches beyond the background itself. */}
@@ -715,7 +715,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
             <span className="text-xs text-muted-foreground">{t("settings.penMinWidth")}</span>
             <div className="flex flex-wrap items-center gap-1.5">
               {PEN_MIN_WIDTHS.map((v) => (
-                <Seg key={v} active={prefs.penMinWidth === v} onClick={() => setPrefs({ penMinWidth: v })}>{`${Math.round(v * 100)} %`}</Seg>
+                <Seg key={v} active={prefs.penMinWidth === v} onClick={() => setPrefs({ penMinWidth: v })}>{fmtPercent(v)}</Seg>
               ))}
             </div>
           </div>
@@ -841,7 +841,7 @@ export function BoardSettings({ open, onOpenChange }: { open: boolean; onOpenCha
             <span className="mr-1 w-16 shrink-0 text-xs text-muted-foreground">{t("settings.imagesPerSec")}</span>
             {SEQ_FPS.map((f) => (
               <Seg key={f} active={prefs.seqFps === f} onClick={() => setPrefs({ seqFps: f })}>
-                {f === SOURCE_FPS ? t("settings.sourceFps") : `${f} i/s`}
+                {f === SOURCE_FPS ? t("settings.sourceFps") : fmtFps(f)}
               </Seg>
             ))}
             {/* Cadence libre : la saisie prime sur les paliers (aucun palier actif tant qu'elle diffère). */}

@@ -29,6 +29,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { nr } from "@/lib/bridge";
 import type { AdobeApp, BoostDiagnosis, BoostPref } from "@/lib/bridge";
 import { errorText } from "@/lib/errorText";
+import { fmtPercent } from "@/lib/utils";
 
 type Val = boolean | number | string;
 
@@ -83,7 +84,7 @@ function PrefRow({
                 onValueChange={(v) => stage(Array.isArray(v) ? v[0] : Number(v))}
               />
               <span className="w-9 text-right text-xs tabular-nums text-muted-foreground">
-                {current == null ? "—" : `${Number(current)}%`}
+                {current == null ? "—" : fmtPercent(Number(current) / 100)}
               </span>
             </div>
           )}

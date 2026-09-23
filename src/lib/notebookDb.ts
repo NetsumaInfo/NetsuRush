@@ -3,7 +3,7 @@
 // seules les règles (filters/sorts/group) diffèrent, appliquées ici en dérivé (jamais en mutation).
 import type { DbField, DbRow, DbView, FilterCond, SortRule } from "@/components/notebook/notebookShared";
 import i18n from "@/i18n";
-import { uiLocale } from "@/lib/utils";
+import { uiLocale, fmtNumber, parseDecimal } from "@/lib/utils";
 
 function cellValue(row: DbRow, fieldId: string): unknown {
   return row.cells[fieldId];
@@ -17,7 +17,7 @@ function asText(v: unknown): string {
 
 function asNumber(v: unknown): number | null {
   if (v == null || v === "") return null;
-  const n = typeof v === "number" ? v : parseFloat(String(v));
+  const n = typeof v === "number" ? v : parseDecimal(String(v));
   return Number.isFinite(n) ? n : null;
 }
 
@@ -124,7 +124,7 @@ export function groupForKanban(rows: DbRow[], field: DbField | undefined): Kanba
 import type { CalcType } from "@/components/notebook/notebookShared";
 
 function fmtNum(n: number): string {
-  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
+  return fmtNumber(n, { maximumFractionDigits: 2 });
 }
 
 export function computeCalc(rows: DbRow[], field: DbField, type: CalcType | undefined): string {
