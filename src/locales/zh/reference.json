@@ -423,7 +423,7 @@
     "fill": "填充",
     "fillLabel": "填充",
     "rounded": "圆角",
-    "duplicate": "创建副本（Ctrl+D）",
+    "duplicate": "创建副本",
     "unlink": "解除与媒体的关联",
     "relink": "关联到媒体",
     "linkedTo_one": "已关联 {{count}} 个元素",

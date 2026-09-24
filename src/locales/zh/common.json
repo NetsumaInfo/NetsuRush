@@ -124,5 +124,20 @@
     "busy": "另一个应用正在使用该文件。请关闭它后重试。",
     "timeout": "未能及时响应。请重试。",
     "internal": "NetsuRush 内部错误。详情见 设置 › 系统 › 控制台。"
+  },
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Shift": "Shift",
+    "Alt": "Alt",
+    "Space": "空格",
+    "Delete": "Delete",
+    "Backspace": "Backspace",
+    "Escape": "Esc",
+    "Enter": "Enter",
+    "Tab": "Tab",
+    "Home": "Home",
+    "End": "End",
+    "PageUp": "Page Up",
+    "PageDown": "Page Down"
   }
 }

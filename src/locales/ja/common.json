@@ -124,5 +124,20 @@
     "busy": "別のアプリがファイルを使用しています。そのアプリを閉じてから、もう一度試してください。",
     "timeout": "時間内に応答がありませんでした。もう一度試してください。",
     "internal": "NetsuRush の内部エラーです。詳細は 設定 › システム › コンソール にあります。"
+  },
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Shift": "Shift",
+    "Alt": "Alt",
+    "Space": "Space",
+    "Delete": "Delete",
+    "Backspace": "Backspace",
+    "Escape": "Esc",
+    "Enter": "Enter",
+    "Tab": "Tab",
+    "Home": "Home",
+    "End": "End",
+    "PageUp": "Page Up",
+    "PageDown": "Page Down"
   }
 }

@@ -423,7 +423,7 @@
     "fill": "Rellenar",
     "fillLabel": "Relleno",
     "rounded": "Esquinas redondeadas",
-    "duplicate": "Duplicar (Ctrl+D)",
+    "duplicate": "Duplicar",
     "unlink": "Desvincular del medio",
     "relink": "Vincular al medio",
     "linkedTo_one": "Vinculado a {{count}} elemento",

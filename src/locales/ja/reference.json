@@ -423,7 +423,7 @@
     "fill": "塗りつぶす",
     "fillLabel": "塗り",
     "rounded": "角を丸く",
-    "duplicate": "複製（Ctrl+D）",
+    "duplicate": "複製",
     "unlink": "メディアとの連結を解除",
     "relink": "メディアに連結",
     "linkedTo_one": "{{count}} 件に連結中",

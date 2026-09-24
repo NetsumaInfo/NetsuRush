@@ -423,7 +423,7 @@
     "fill": "Fill",
     "fillLabel": "Fill",
     "rounded": "Rounded corners",
-    "duplicate": "Duplicate (Ctrl+D)",
+    "duplicate": "Duplicate",
     "unlink": "Unlink from media",
     "relink": "Link to media",
     "linkedTo_one": "Linked to {{count}} item",

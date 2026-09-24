@@ -423,7 +423,7 @@
     "fill": "Füllen",
     "fillLabel": "Füllung",
     "rounded": "Abgerundete Ecken",
-    "duplicate": "Duplizieren (Strg+D)",
+    "duplicate": "Duplizieren",
     "unlink": "Vom Medium lösen",
     "relink": "Mit Medium verbinden",
     "linkedTo_one": "Mit {{count}} Element verbunden",

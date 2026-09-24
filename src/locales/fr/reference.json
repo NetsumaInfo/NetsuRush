@@ -423,7 +423,7 @@
     "fill": "Remplir",
     "fillLabel": "Remplissage",
     "rounded": "Coins arrondis",
-    "duplicate": "Dupliquer (Ctrl+D)",
+    "duplicate": "Dupliquer",
     "unlink": "Délier du média",
     "relink": "Lier au média",
     "linkedTo_one": "Lié à {{count}} élément",

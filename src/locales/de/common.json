@@ -124,5 +124,20 @@
     "busy": "Eine andere App verwendet die Datei. Schließe sie und versuch es dann noch einmal.",
     "timeout": "Keine Antwort in der vorgesehenen Zeit. Versuch es noch einmal.",
     "internal": "Interner Fehler in NetsuRush. Details findest du unter Einstellungen › System › Konsole."
+  },
+  "keys": {
+    "Ctrl": "Strg",
+    "Shift": "Umschalt",
+    "Alt": "Alt",
+    "Space": "Leertaste",
+    "Delete": "Entf",
+    "Backspace": "Rücktaste",
+    "Escape": "Esc",
+    "Enter": "Eingabe",
+    "Tab": "Tab",
+    "Home": "Pos1",
+    "End": "Ende",
+    "PageUp": "Bild auf",
+    "PageDown": "Bild ab"
   }
 }

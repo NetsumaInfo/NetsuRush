@@ -74,6 +74,8 @@ export function DrawToolbar() {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || isTyping(document.activeElement)) return;
       if (e.key === "Escape") { setDrawMode(false); return; }
+      // Shift+letter belongs to the board's own shortcuts: a tool key must not fire with it too.
+      if (e.shiftKey) return;
       const k = e.key.toLowerCase();
       const tool = Object.keys(drawKeys).find((t) => drawKeys[t] === k) as DrawTool | undefined;
       if (tool) { e.preventDefault(); setPen({ tool }); }

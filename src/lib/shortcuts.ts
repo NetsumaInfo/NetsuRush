@@ -20,8 +20,16 @@ export function comboFromEvent(e: KeyboardEvent): string {
   if (e.altKey) parts.push("Alt");
   if (MOD_KEYS.includes(e.key)) return parts.join("+"); // combo incomplet (modificateur seul)
   let key = e.key;
-  if (key === " ") key = "Space";
+  // Digits come from the physical key: on AZERTY the unshifted 0 key types "à", so Ctrl+0 would
+  // never match otherwise.
+  const digit = /^(Digit|Numpad)([0-9])$/.exec(e.code || "");
+  if (digit) key = digit[2];
+  else if (key === " ") key = "Space";
+  else if (key === "+") key = "="; // "+" shares the "=" key on most layouts, and "+" would break the "+"-joined combo
   else if (key.length === 1) key = key.toUpperCase();
+  // A symbol already says which character was typed: Shift is how AZERTY or QWERTZ reach "." or
+  // "=", so it must not change the combo.
+  if (key.length === 1 && !/[A-Z0-9]/.test(key) && parts.includes("Shift")) parts.splice(parts.indexOf("Shift"), 1);
   parts.push(key);
   return parts.join("+");
 }
@@ -46,13 +54,23 @@ export function matchAction(keys: ShortcutMap, e: KeyboardEvent): string | undef
   return Object.keys(keys).find((a) => keys[a] === combo);
 }
 
+// Brings a combo saved by an older version to the current canonical form ("Ctrl++" and
+// "Shift+." were recorded before symbols dropped Shift).
+export function normalizeCombo(combo: string): string {
+  let c = combo.endsWith("++") ? `${combo.slice(0, -2)}+=` : combo === "+" ? "=" : combo;
+  const parts = c.split("+");
+  const key = parts[parts.length - 1];
+  if (key.length === 1 && !/[A-Za-z0-9]/.test(key)) c = parts.filter((p) => p !== "Shift").join("+");
+  return c;
+}
+
 // Fusionne les raccourcis enregistrés par-dessus les défauts : une action ajoutée après une
 // sauvegarde n'est jamais laissée sans touche, et une clé périmée est simplement ignorée.
 export function mergeKeys(defaults: ShortcutMap, saved: unknown): ShortcutMap {
   if (!saved || typeof saved !== "object") return { ...defaults };
   const out = { ...defaults };
   for (const [action, combo] of Object.entries(saved as Record<string, unknown>)) {
-    if (action in defaults && typeof combo === "string" && combo) out[action] = combo;
+    if (action in defaults && typeof combo === "string" && combo) out[action] = normalizeCombo(combo);
   }
   return out;
 }

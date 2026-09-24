@@ -124,5 +124,20 @@
     "busy": "Otra app está usando el archivo. Ciérrala y vuelve a intentarlo.",
     "timeout": "No hubo respuesta a tiempo. Vuelve a intentarlo.",
     "internal": "Error interno de NetsuRush. El detalle está en Ajustes › Sistema › Consola."
+  },
+  "keys": {
+    "Ctrl": "Ctrl",
+    "Shift": "Mayús",
+    "Alt": "Alt",
+    "Space": "Espacio",
+    "Delete": "Supr",
+    "Backspace": "Retroceso",
+    "Escape": "Esc",
+    "Enter": "Intro",
+    "Tab": "Tab",
+    "Home": "Inicio",
+    "End": "Fin",
+    "PageUp": "Re Pág",
+    "PageDown": "Av Pág"
   }
 }
