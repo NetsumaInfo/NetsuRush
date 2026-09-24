@@ -44,3 +44,12 @@ test('a message someone wrote is shown as is, without the "Error:" prefix or the
   assert.equal(errorText('Error: Disk quota reached\n    at foo (bar.js:1:1)'), 'Disk quota reached');
   assert.equal(logged.length, 1, 'only the case that hid something is logged');
 });
+
+test('a Windows error written in the OS language is still recognised by its code', () => {
+  const { errorText } = load();
+  assert.equal(errorText(new Error('Le fichier spécifié est introuvable. (os error 2)')), '<common:error.notFound>');
+  assert.equal(errorText('指定されたパスが見つかりません。 (os error 3)'), '<common:error.notFound>');
+  assert.equal(errorText('アクセスが拒否されました。 (os error 5)'), '<common:error.permission>');
+  assert.equal(errorText('另一个程序正在使用此文件，进程无法访问。 (os error 32)'), '<common:error.busy>');
+  assert.equal(errorText('Espace insuffisant sur le disque. (os error 112)'), '<common:error.diskFull>');
+});

@@ -109,6 +109,17 @@ export function fmtSeconds(sec: number, opts: UnitOpts = {}): string {
   return fmtUnit(sec, "second", opts);
 }
 
+/** A frame rate as a host wrote it ("23.976", or "23,976" from a localized host); never grouped. */
+export function parseFps(text: string | number | null | undefined): number {
+  return parseFloat(String(text ?? "").trim().replace(",", "."));
+}
+
+/** The short seconds symbol alone, for a label next to a number field: "s", "sec", "Sek.", "秒". */
+export function secondsUnit(): string {
+  const parts = new Intl.NumberFormat(uiLocale(), { style: "unit", unit: "second", unitDisplay: "short" }).formatToParts(1);
+  return parts.find((part) => part.type === "unit")?.value ?? "s";
+}
+
 /** Milliseconds with their unit: 1500 → "1 500 ms" (fr), "1,500 ms" (en). */
 export function fmtMillis(ms: number, opts: UnitOpts = {}): string {
   return fmtUnit(ms, "millisecond", { digits: 0, ...opts });

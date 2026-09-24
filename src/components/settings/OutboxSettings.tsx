@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { hostShort } from "@/lib/host";
 import { useTranslation } from "react-i18next";
 import { InfoTip } from "./rows";
+import { secondsUnit } from "@/lib/utils";
 
 // Cache HORS-LIGNE (lecture) : construit/rafraîchit en arrière-plan pendant que Resolve est ouvert →
 // à la fermeture tout est déjà là, et on peut ouvrir n'importe quelle timeline offline. Incrémental
@@ -128,7 +129,7 @@ export function OutboxSettings() {
             <Input type="number" min={0} max={120} value={settings.delaySec}
               onChange={(e) => void setSettings({ delaySec: Math.max(0, Math.min(120, Number(e.target.value) || 0)) })}
               className="h-8 w-20 text-right" />
-            <span className="text-xs text-muted-foreground">s</span>
+            <span className="text-xs text-muted-foreground">{secondsUnit()}</span>
           </div>
         </div>
 

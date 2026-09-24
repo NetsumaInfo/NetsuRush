@@ -11,7 +11,7 @@ import { ChevronRight, ChevronsLeft, Search, Loader2, House, FilePlus2, FolderPl
 import { useShallow } from "zustand/react/shallow";
 import { nextProxyToken, nr, type Clip, type ScriptBlockMedia } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { basename, THUMB_AUTO, uiLocale, fmtFps, parseDecimal } from "@/lib/utils";
+import { basename, THUMB_AUTO, uiLocale, fmtFps, parseDecimal, parseFps } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { claimHoverPreview } from "@/lib/hoverPreview";
@@ -86,7 +86,7 @@ function FootageRow({ clip, source }: MediaEntry) {
             const payload: FootageDrag = {
               filePath: clip.path,
               label: clip.name || basename(clip.path),
-              fps: parseFloat(clip.fps || "") || 24,
+              fps: parseFps(clip.fps) || 24,
               kind: isAudio(clip) ? "audio" : "video",
               source,
             };

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { nr, type Clip } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { hostShort } from "@/lib/host";
-import { basename } from "@/lib/utils";
+import { basename, parseFps } from "@/lib/utils";
 
 export function useVoiceAnalysis() {
   const { t } = useTranslation("voice");
@@ -66,7 +66,7 @@ export function useVoiceAnalysis() {
       path: c.path,
       name: c.name,
       source: c.source === "local" ? "local" : "mediapool",
-      fps: c.fps ? parseFloat(c.fps) || undefined : undefined,
+      fps: c.fps ? parseFps(c.fps) || undefined : undefined,
     });
   }, [openVoiceClip]);
 

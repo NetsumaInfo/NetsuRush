@@ -66,7 +66,10 @@ def main():
     source = sys.argv[2] if len(sys.argv) > 2 else ""
     audio = sys.argv[3] if len(sys.argv) > 3 else source
     try:
-        payload = json.loads(sys.argv[4]) if len(sys.argv) > 4 else {}
+        # "-" = the payload comes on stdin: a long transcript's word list exceeds Windows' 32K
+        # command-line limit.
+        raw = sys.stdin.buffer.read().decode("utf-8") if len(sys.argv) > 4 and sys.argv[4] == "-" else (sys.argv[4] if len(sys.argv) > 4 else "{}")
+        payload = json.loads(raw or "{}")
     except Exception:  # noqa: BLE001
         payload = {}
     with contextlib.redirect_stdout(sys.stderr):  # aucun print parasite dans le JSON

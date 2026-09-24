@@ -777,7 +777,7 @@ async function killProcess(pid) {
   if (!Number.isFinite(id)) return { ok: false, error: t("invalidPid") };
   if (id === process.pid) return { ok: false, error: t("ownProcess") };
   try {
-    const { stdout } = await pExecFile("tasklist", ["/fi", `PID eq ${id}`, "/fo", "csv", "/nh"], { timeout: 4000 });
+    const stdout = await tasklistCsv(`PID eq ${id}`, 4000);
     const line = String(stdout).trim().split(/\r?\n/)[0] || "";
     const name = (line.split('","')[0] || "").replace(/^"/, "");
     if (name && isCriticalProc(name)) return { ok: false, error: t("withDetail", { message: t("criticalProcess"), detail: name }) };
@@ -795,16 +795,23 @@ async function killProcess(pid) {
   }
 }
 
+// tasklist writes in the console code page (cp850, cp932…), which garbles accented or CJK process
+// names; switching the console to UTF-8 first makes the output decodable on every Windows.
+/** @param {string} filter @param {number} timeout @returns {Promise<string>} */
+async function tasklistCsv(filter, timeout) {
+  const { stdout } = await pExecFile("cmd.exe", ["/d", "/c", `chcp 65001 >nul && tasklist /fi "${filter}" /fo csv /nh`], {
+    timeout,
+    windowsVerbatimArguments: true,
+  });
+  return String(stdout);
+}
+
 // Processus FIGÉS (« Ne répond pas ») = applis plantées/résidus qui retiennent RAM/VRAM pour rien.
 // Détectés via le statut Windows (tasklist STATUS eq NOT RESPONDING). Exclut les critiques.
 async function deadProcesses() {
   if (process.platform !== "win32") return { ok: false, error: t("windowsOnly"), procs: [] };
   try {
-    const { stdout } = await pExecFile(
-      "tasklist",
-      ["/fi", "STATUS eq NOT RESPONDING", "/fo", "csv", "/nh"],
-      { timeout: 6000 },
-    );
+    const stdout = await tasklistCsv("STATUS eq NOT RESPONDING", 6000);
     const out = [];
     const seen = new Set();
     for (const line of String(stdout).trim().split(/\r?\n/)) {

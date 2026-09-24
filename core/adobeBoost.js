@@ -86,7 +86,8 @@ function createAdobeBoost({ adobeBridge, hostPower, broadcast, ev }) {
 
   /** @param {string} app */
   function roots(app) {
-    return adobeCache.adobeCacheRoots(/** @type {'ppro'|'aeft'} */ (app), { projectPath: projectPathOf(app) });
+    const snap = adobeBridge.snapshot(app);
+    return adobeCache.adobeCacheRoots(/** @type {'ppro'|'aeft'} */ (app), { projectPath: projectPathOf(app), scratch: (snap && snap.scratch) || null });
   }
 
   // --- Processus --------------------------------------------------------------

@@ -7,7 +7,7 @@ import { useShallow } from "zustand/shallow";
 import { FileVideo, FolderOpen, FolderTree, List, RefreshCw, Search } from "lucide-react";
 import type { Clip } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { cn } from "@/lib/utils";
+import { cn, parseFps } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,7 +24,7 @@ const GROUP_KEY = "nr.voice.grouped";
 const toRef = (c: Clip) => ({
   path: c.path, name: c.name,
   source: (c.source === "local" ? "local" : "mediapool") as "local" | "mediapool",
-  fps: c.fps ? parseFloat(c.fps) || undefined : undefined,
+  fps: c.fps ? parseFps(c.fps) || undefined : undefined,
 });
 
 export function VoiceHome({

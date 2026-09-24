@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Editor } from "@tiptap/react";
 import { nr, type Clip, type ScriptBlockMedia } from "@/lib/bridge";
 import { useApp } from "@/store";
-import { basename } from "@/lib/utils";
+import { basename, parseFps } from "@/lib/utils";
 import { isAudioPath } from "../scriptShared";
 import { readScriptAudioDirs } from "../RecordingsSection";
 import { scriptEditorApi } from "./editorApi";
@@ -28,7 +28,7 @@ function mediaHit(clip: Clip, source: MentionMedia["source"]): MentionMedia {
     title: clip.name || basename(clip.path),
     path: clip.path,
     mediaKind: isAudioPath(clip.path) ? "audio" : "video",
-    fps: parseFloat(clip.fps || "") || (isAudioPath(clip.path) ? 0 : 24),
+    fps: parseFps(clip.fps) || (isAudioPath(clip.path) ? 0 : 24),
     source,
   };
 }

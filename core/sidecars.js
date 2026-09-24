@@ -379,7 +379,10 @@ function runSilence(event, source, audio, params = {}) {
 // Détection ACOUSTIQUE des hésitations (filler.py, librosa) one-shot. payload = {words, silences, params}.
 function runFiller(event, source, audio, payload = {}) {
   return new Promise((resolve) => {
-    const py = spawn(PYTHON, [FILLER_SCRIPT, 'process', source, audio, JSON.stringify(payload || {})], { env: langEnv() });
+    // The payload goes through stdin: a long transcript's word list exceeds Windows' 32K command line.
+    const py = spawn(PYTHON, [FILLER_SCRIPT, 'process', source, audio, '-'], { env: langEnv() });
+    py.stdin.on('error', () => {});
+    py.stdin.end(JSON.stringify(payload || {}), 'utf8');
     let out = '';
     let errTail = '';
     let done = false;

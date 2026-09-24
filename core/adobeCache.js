@@ -167,7 +167,10 @@ async function aeDiskCacheRoots(env) {
 async function autoSaveRoots(app, env) {
   const home = userProfile(env);
   if (!home || app !== "ppro") return [];
-  const versions = await versionDirs(path.join(home, "Documents", "Adobe", "Premiere Pro"));
+  // Documents is often redirected to OneDrive: look in both places.
+  const e = env || process.env;
+  const docs = [path.join(home, "Documents"), ...[e.OneDrive, e.OneDriveConsumer, e.OneDriveCommercial].filter(Boolean).map((d) => path.join(String(d), "Documents"))];
+  const versions = (await Promise.all(docs.map((d) => versionDirs(path.join(d, "Adobe", "Premiere Pro"))))).flat();
   /** @type {ReturnType<typeof root>[]} */
   const out = [];
   for (const v of versions) {
@@ -192,9 +195,21 @@ function previewRoots(app, projectPath) {
   );
 }
 
+/** Folders Premiere itself reports (Scratch Disks): the truth when the user moved them, whatever
+ *  their names in the installed language.
+ *  @param {{ videoPreviews?: string|null, audioPreviews?: string|null, autoSave?: string|null }|null|undefined} scratch */
+function scratchRoots(scratch) {
+  if (!scratch) return [];
+  /** @type {[string|null|undefined, string, string][]} */
+  const entries = [[scratch.videoPreviews, "videoPreviews", "previews"], [scratch.audioPreviews, "audioPreviews", "previews"], [scratch.autoSave, "autoSave", "autoSave"]];
+  return entries
+    .filter(([dir]) => typeof dir === "string" && path.isAbsolute(dir))
+    .map(([dir, id, kind]) => root(String(dir), `scratch-${id}`, kind, { regenerable: kind !== "autoSave" }));
+}
+
 /** Toutes les racines candidates pour une application, dédupliquées, filtrées sur l'existence réelle.
  *  @param {'ppro'|'aeft'} app
- *  @param {{ projectPath?: string|null, env?: NodeJS.ProcessEnv }} [ctx]
+ *  @param {{ projectPath?: string|null, env?: NodeJS.ProcessEnv, scratch?: { videoPreviews?: string|null, audioPreviews?: string|null, autoSave?: string|null }|null }} [ctx]
  *  @returns {Promise<AdobeCacheRoot[]>} */
 async function adobeCacheRoots(app, ctx) {
   const c = ctx || {};
@@ -204,6 +219,7 @@ async function adobeCacheRoots(app, ctx) {
     ...(app === "aeft" ? await aeDiskCacheRoots(env) : []),
     ...(await autoSaveRoots(app, env)),
     ...previewRoots(app, c.projectPath || null),
+    ...scratchRoots(c.scratch),
   ];
   /** @type {AdobeCacheRoot[]} */
   const out = [];

@@ -5,12 +5,14 @@
 import i18n from "@/i18n";
 import { describeError, logError } from "@/lib/appLog";
 
+// Rust and Windows write the reason in the OS language ("Le fichier spécifié est introuvable.
+// (os error 2)"), so the stable part to match is the Win32 code, not the words.
 const CAUSES: [RegExp, string][] = [
   [/ECONNREFUSED|ECONNRESET|Failed to fetch|fetch failed|NetworkError|Load failed/i, "common:error.coreUnreachable"],
-  [/ENOSPC|no space left/i, "common:error.diskFull"],
-  [/ENOENT|no such file|cannot find the (file|path)/i, "common:error.notFound"],
-  [/EACCES|EPERM|permission denied|operation not permitted|access is denied/i, "common:error.permission"],
-  [/EBUSY|resource busy|being used by another process/i, "common:error.busy"],
+  [/ENOSPC|no space left|\(os error (112|39)\)/i, "common:error.diskFull"],
+  [/ENOENT|no such file|cannot find the (file|path)|\(os error [23]\)/i, "common:error.notFound"],
+  [/EACCES|EPERM|permission denied|operation not permitted|access is denied|\(os error 5\)/i, "common:error.permission"],
+  [/EBUSY|resource busy|being used by another process|\(os error 3[23]\)/i, "common:error.busy"],
   [/ETIMEDOUT|timed out|timeout/i, "common:error.timeout"],
 ];
 
