@@ -3,7 +3,7 @@
 // 4 formes : Mention (puce inline), URL (lien inline), Signet (carte), Intégration (iframe / YouTube).
 import type { BlockNoteEditor } from "@blocknote/core";
 import i18n from "@/i18n";
-import { youtubeId } from "@/components/reference/embeds";
+import { youtubeId } from "@/lib/embeds";
 import { insertOrUpdate } from "./notebookSchema";
 
 export type LinkAs = "mention" | "url" | "bookmark" | "embed";

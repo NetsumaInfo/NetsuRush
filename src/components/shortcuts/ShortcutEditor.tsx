@@ -79,7 +79,7 @@ export function ShortcutEditor({
               <span className="text-muted-foreground">{t(d.labelKey)}</span>
               <button
                 type="button"
-                aria-label={t("reference:settings.editShortcut", { label: t(d.labelKey) })}
+                aria-label={t("common:shortcutEditor.editShortcut", { label: t(d.labelKey) })}
                 onClick={() => setCaptureState(capturing === d.action ? null : d.action)}
                 className={cn(
                   "inline-flex h-6 min-w-[2rem] items-center gap-1 rounded border px-2 transition-colors",
@@ -92,7 +92,7 @@ export function ShortcutEditor({
           );
         })}
       </ul>
-      {capturing && <p className="text-[11px] text-muted-foreground">{t("reference:settings.pressCombo")}</p>}
+      {capturing && <p className="text-[11px] text-muted-foreground">{t("common:shortcutEditor.pressCombo")}</p>}
     </section>
   );
 }

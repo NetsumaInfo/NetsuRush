@@ -416,7 +416,6 @@
     "dropHere": "文件夹为空——把素材拖到这里。",
     "moveTo": "移动到",
     "addToPool": "添加到 Media Pool",
-    "sendToBoard": "发送到画板",
     "removeFromLibrary": "从素材库中移除",
     "removeManyFromLibrary": "从素材库中移除 {{count}} 个素材",
     "undo": "撤销",

@@ -4,7 +4,7 @@
 import { createReactBlockSpec } from "@blocknote/react";
 import { Youtube } from "lucide-react";
 import i18n from "@/i18n";
-import { youtubeId } from "@/components/reference/embeds";
+import { youtubeId } from "@/lib/embeds";
 import { BlockConvertMenu } from "./BlockConvertMenu";
 import { EmptyLinkInput } from "./EmptyLinkInput";
 import { ResizableMediaFrame } from "./ResizableMediaFrame";

@@ -6,7 +6,7 @@ import { createReactBlockSpec } from "@blocknote/react";
 import { Globe } from "lucide-react";
 import i18n from "@/i18n";
 import { nr } from "@/lib/bridge";
-import { parseVideoEmbed, embedSrc, isImageUrl, isVideoUrl } from "@/components/reference/embeds";
+import { parseVideoEmbed, embedSrc, isImageUrl, isVideoUrl } from "@/lib/embeds";
 import { BlockConvertMenu } from "./BlockConvertMenu";
 import { EmptyLinkInput } from "./EmptyLinkInput";
 import { LinkPreviewCard, type CardMeta } from "./LinkPreviewCard";

@@ -1537,111 +1537,6 @@ export type BoardLoopEntry =
       flipH?: boolean; flipV?: boolean; rotation?: number; opacity?: number;
     };
 
-export interface RefApi {
-  listScenes(): Promise<RefSceneMeta[]>;
-  storagePath(): Promise<string>;
-  loadScene(id: string): Promise<RefSceneOut | null>;
-  saveScene(scene: RefSceneIn): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
-  deleteScene(id: string): Promise<{ ok: boolean; error?: string }>;
-  saveAsset(bytes: ArrayBuffer, ext: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; path?: string; error?: string }>;
-  // Aperçu JPEG d'un média local, écrit en asset de l'app — la collaboration l'envoie aux pairs
-  // avant l'original, pour qu'une image de 40 Mo montre quelque chose en quelques Ko.
-  collabPreview(srcPath: string): Promise<{ ok: boolean; path?: string; error?: string }>;
-  /** Durée d'une vidéo YouTube en secondes, ou null. Borne le sélecteur de portée sans attendre
-      que le lecteur ait lu l'index du conteneur. */
-  ytDuration(id: string): Promise<number | null>;
-  /** Chemins morts → chemins vivants des mêmes octets (empreinte portée par le nom). Aucune
-      écriture, aucun octet lu. `dead` : ceux qu'aucune source n'a rendus. */
-  locateMedia(refs: string[], projectPath?: string): Promise<{ ok: boolean; moves: Record<string, string>; dead: string[] }>;
-  // Magasin d'assets du board. `liveRefs` = localisateurs du board AFFICHÉ : un média posé mais pas
-  // encore enregistré n'est référencé par aucune scène et passerait pour un orphelin.
-  storageAudit(opts?: { liveRefs?: string[] }): Promise<StorageAudit>;
-  // Portée, jamais des chemins : le core recalcule ce qui est libérable au moment de l'écriture.
-  storageFree(opts?: { liveRefs?: string[] }): Promise<{ ok: boolean; bytes: number; files: number; error?: string }>;
-  // Déplace les orphelins hors du magasin : copie, vérification de taille, puis retrait.
-  storageMoveOrphans(opts: { destDir: string; liveRefs?: string[] }): Promise<{ ok: boolean; bytes: number; files: number; failed?: string[]; error?: string }>;
-  // Écrit une scène de la bibliothèque en projet .netsu : ses médias rejoignent le dossier compagnon.
-  storageArchiveScene(opts: { sceneId: string; destPath: string }): Promise<NetsuProjectSave>;
-  fetchAsset(url: string, options?: { projectPath?: string; title?: string }): Promise<{ ok: boolean; path?: string; kind?: "image" | "video"; error?: string }>;
-  // Résout le vrai média de N'IMPORTE quel lien (fichier direct, ou page web via OpenGraph) → asset
-  // disque. Catch-all générique : GIF (giphy/tenor), imgur, articles, CDN sans extension propre.
-  resolveMedia(url: string, options?: { download?: boolean; projectPath?: string; title?: string }): Promise<ResolvedOnlineMedia>;
-  // Upscale un item média (image/vidéo locale) → nouveau fichier asset. NON destructif : ne supprime
-  // jamais l'ancien fichier (le board garde de quoi revenir en arrière).
-  upscaleItem(opts: { path: string; kind: "image" | "video"; in?: number; out?: number; engine?: "ia" | "turbo"; model: UpscaleModel; shader?: ShaderModel; scale: 1 | 2 | 4; denoise?: number }): Promise<{ ok: boolean; path?: string; width?: number; height?: number; error?: string }>;
-  // Supprime un fichier UNIQUEMENT s'il est un asset de l'app (cleanup d'un upscale annulé). Sûr.
-  dropAsset(path: string): Promise<{ ok: boolean; removed?: boolean; error?: string }>;
-  // Ménage du magasin d'assets : ce que plus aucune scène ne réclame et qui a passé le délai de
-  // grâce s'en va. `graceMs` n'est là que pour les tests — l'app utilise le défaut du core.
-  sweepAssets(opts?: { graceMs?: number }): Promise<{ ok: boolean; removed: number; bytes: number; kept: number; error?: string }>;
-  // Dossier déposé sur le board : médias trouvés récursivement, avec leur sous-dossier RELATIF pour
-  // que l'import reconstruise un cadre par dossier. `truncated` quand le plafond a coupé la liste.
-  scanFolder(dir: string, opts?: { cap?: number }): Promise<{ ok: boolean; root: string; name: string; files: { path: string; rel: string; name: string; kind: "image" | "video" }[]; truncated: boolean; count: number }>;
-  // Écrit un export du board (PNG/JPG en base64, SVG en texte) vers un chemin choisi par l'utilisateur.
-  writeFile(path: string, data: string, encoding: "base64" | "utf8"): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
-  // Un cadre d'un média (image, GIF, vidéo) rendu par le core en PNG base64, lu SUR LE DISQUE.
-  // Seule source de pixels relisible par le renderer : le protocole d'asset teinte le canvas.
-  // `count` > 1 étale les cadres sur [`at`, `to`] (fin omise = durée du fichier) et les rend tous
-  // dans `pngs` — de quoi décrire une PORTÉE de vidéo et pas seulement son premier instant.
-  sampleFrame(path: string, opts?: { at?: number; to?: number; count?: number; side?: number }): Promise<{ ok: boolean; png?: string; pngs?: string[]; error?: string }>;
-  playInfo(filePath: string): Promise<{ duration: number; fps: number; codec: string; native: boolean; error?: string }>;
-  extractMedia(url: string, options?: { projectPath?: string; title?: string; index?: number }): Promise<{ ok: boolean; items?: { path: string; kind: "image" | "video" }[]; error?: string }>;
-  // Décompose une vidéo locale en frames image (assets disque) pour bâtir une séquence d'images.
-  // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
-  // `fps` omis ou ≤ 0 = cadence de la source ; la réponse renvoie celle réellement employée.
-  extractFrames(opts: { path: string; fps?: number; max?: number; height?: number; in?: number; out?: number; projectPath?: string; title?: string }): Promise<{ ok: boolean; frames?: string[]; fps?: number; error?: string }>;
-  // A local clip written as a looping animated image at `out`. `in/end` = range in seconds (whole
-  // file when omitted), `fps`/`width` omitted or 0 = those of the source, `quality` (1–100) and
-  // `lossless` are WebP only. One export at a time; `cancelExportLoop` stops it and the call resolves `cancelled`.
-  exportLoop(opts: LoopExportOpts): Promise<{ ok: boolean; path?: string; bytes?: number; cancelled?: boolean; error?: string }>;
-  cancelExportLoop(): Promise<{ ok: boolean; cancelled?: boolean }>;
-  onLoopProgress(cb: (p: { pct: number }) => void): () => void;
-  // Weight the export would have, from a real encode of a short sample. A newer call replaces the
-  // one in flight, which resolves `stale`.
-  estimateLoop(opts: Omit<LoopExportOpts, "out">): Promise<{ ok: boolean; bytes?: number; stale?: boolean; error?: string }>;
-  // The whole board as a looping animated image. `stack` is the board bottom first: still layers
-  // (PNG, base64, each the size of the output) and the videos that play between them. Progress and
-  // cancellation are those of `exportLoop`.
-  // `duration` omitted = the longest loop of the stack. `seamless` bends each clip's speed a little
-  // so that it plays a whole number of times and the file wraps without a jump.
-  exportBoardLoop(opts: { out: string; format: LoopFormat; fps: number; duration?: number; seamless?: boolean; quality?: number; lossless?: boolean; gifPalette?: GifPalette; stack: BoardLoopEntry[] }): Promise<{ ok: boolean; path?: string; bytes?: number; duration?: number; cancelled?: boolean; error?: string }>;
-  // Partage « .netsu » : exporte la scène (items + vue) dans une archive à `destPath` selon `opts`
-  // (mode complet / léger / liens, seuil d'embarquement, gel des liens distants). Importe une archive
-  // → scène reconstruite (tokens d'assets → chemins locaux ; gros médias non retrouvés = placeholders).
-  exportBoard(scene: NetsuScene, destPath: string, opts: NetsuExportOpts): Promise<NetsuExportResult>;
-  importBoard(srcPath: string): Promise<NetsuImportResult>;
-  // Avancement d'un partage, item par item : un board fourni encode ses clips pendant des minutes.
-  onShareProgress(cb: (p: { done: number; total: number; title: string }) => void): () => void;
-  // Relocalisation EN LOT : un dossier, et tous les médias manquants qu'on y reconnaît sans
-  // ambiguïté (même nom, même taille). Les homonymes de même taille ne sont jamais devinés.
-  relocateFrom(dirPath: string, wanted: { id: string; name: string; size?: number }[]): Promise<{ ok: boolean; found: { id: string; path: string }[]; scanned: number; error?: string }>;
-  // Poids estimé du board à chaque niveau, sans rien encoder → l'utilisateur voit ce qu'il fabrique
-  // avant de lancer l'export.
-  weigh(scene: NetsuScene, opts: NetsuExportOpts): Promise<NetsuWeight>;
-  // Dialogues fichier dédiés au format .netsu (filtre d'extension) : choisir une archive à importer,
-  // choisir une destination d'export. null = annulé / hors application.
-  chooseNetsu(): Promise<string | null>;
-  saveNetsuPath(defaultName: string): Promise<string | null>;
-  // Projet .netsu : le fichier EST le document. `openProject` le tient ouvert côté core et rend la
-  // scène ; `saveProject` réécrit CE fichier de façon incrémentale (aucun réencodage) ; `saveProjectAs`
-  // le fait déménager. `readonly` = archive v1, lisible mais pas modifiable en place.
-  openProject(srcPath: string): Promise<NetsuProjectRead>;
-  previewProject(srcPath: string): Promise<NetsuImportResult>;
-  saveProject(filePath: string, scene: NetsuScene): Promise<NetsuProjectSave>;
-  saveProjectAs(opts: { scene: NetsuScene; destPath: string; fromPath?: string | null; sourceSceneId?: string | null }): Promise<NetsuProjectSave>;
-  closeProject(filePath: string): Promise<{ ok: boolean; closed?: boolean }>;
-  recentProjects(type?: string): Promise<NetsuRecent[]>;
-  forgetProject(filePath: string): Promise<NetsuRecent[]>;
-  /** Lie un `.netsu` à la scène qui l'a remplacé (partage d'un board ouvert depuis un fichier). */
-  linkSource(filePath: string, sourceSceneId: string): Promise<NetsuRecent[]>;
-  deleteProject(filePath: string): Promise<{ ok: boolean; projectRemoved?: boolean; mediaRemoved?: boolean; recents: NetsuRecent[]; error?: string }>;
-  setDirty(unsaved: boolean): void;
-  detach(): void;
-  attach(): void;
-  setAlwaysOnTop(on: boolean): void;
-  push(payload: unknown): void;
-  onPush(cb: (payload: unknown) => void): () => void;
-}
 
 // ---- Module Script -----------------------------------
 // Document = 1+ par projet Resolve. Bloc = paragraphe = futur segment de timeline. Média = référence
@@ -1737,6 +1632,8 @@ export interface ScriptRecording {
 // ---- Carnet (Notebook) : carnets multi → pages imbriquées → databases -----
 export type NotebookCollabBinding = { projectId: string; surface: "notebook" | "notebook-page"; subjectId: string; notebookId: string; name: string; remoteSubjectId?: string; pending?: boolean; sourcePath?: string };
 export interface NotebookApi {
+  chooseNetsu(): Promise<string | null>;
+  saveNetsuPath(defaultName: string): Promise<string | null>;
   prepareCollaborationMedia(surface: "notebook" | "notebook-page", subjectId: string): Promise<{ ok: boolean }>;
   collaborationBindings(): Promise<NotebookCollabBinding[]>;
   setCollaborationBinding(binding: NotebookCollabBinding | null, projectId: string): Promise<{ ok: boolean }>;
@@ -2721,8 +2618,6 @@ export interface NrApi {
   onSetupProgress(cb: (p: SetupProgress) => void): () => void;
   // yt-dlp seul, sans passer par une mise à jour de l'application. `remote: false` coupe la sonde
   // réseau et ne rend que ce qui est lisible sur la machine.
-  ytDlpStatus(opts?: { remote?: boolean }): Promise<YtDlpStatus>;
-  ytDlpUpdate(): Promise<YtDlpUpdateResult>;
   // Console / journal (Paramètres › Console) : historique des logs core+python, vidage, flux temps réel.
   consoleLogs(): Promise<{ ok: boolean; logs: ConsoleLogEntry[] }>;
   consoleClear(): Promise<{ ok: boolean }>;
@@ -2998,7 +2893,6 @@ export interface NrApi {
   // Redimensionne la fenêtre principale (taille logique). Sert à passer en petit format « coin »
   // quand on épingle, et à réagrandir au dépinglage (le responsif est inconfortable en très étroit).
   setWindowSize(w: number, h: number): void;
-  reference?: RefApi;
   wallpaper?: WallpaperApi;
   notebook?: NotebookApi;
   collections?: CollectionsApi;
@@ -3380,11 +3274,6 @@ const mock: NrApi = {
   }),
   onSetupProgress: () => () => {},
   // Hors app : aucun venv à interroger, donc rien à mettre à jour non plus.
-  ytDlpStatus: async () => ({
-    ok: true, available: false, manager: "pip", owned: false, version: null, latest: null,
-    outdated: false, checkedFor: null, checkedAt: null, appVersion: "",
-  }),
-  ytDlpUpdate: async () => ({ ok: false, version: null, previous: null, changed: false, error: i18n.t("common:mock.resolveUnavailable") }),
   status: async () => ({ connected: false, error: i18n.t("common:mock.resolveUnavailable") }),
   listMediaPool: async () => ({ connected: false, clips: [], error: i18n.t("common:mock.resolveUnavailable") }),
   importToMediaPool: async () => ({ ok: false, error: "mock" }),
@@ -3559,84 +3448,6 @@ const mock: NrApi = {
     variant: async () => ({ ok: false, error: "mock" }),
     remove: async () => ({ ok: true, removed: false }),
   },
-  // Mock navigateur : persistance en mémoire (localStorage) pour tester l'UI hors Resolve.
-  reference: (() => {
-    const KEY = "nr-ref-scenes:v1";
-    const read = (): Record<string, RefSceneOut> => {
-      try { return JSON.parse(readMockStorage(KEY, "nr-ref-scenes") || "{}"); } catch { return {}; }
-    };
-    const write = (o: Record<string, RefSceneOut>) => localStorage.setItem(KEY, JSON.stringify(o));
-    return {
-      listScenes: async () =>
-        Object.values(read()).map((s) => ({ id: s.id, name: s.name, updatedAt: s.updatedAt }))
-          .sort((a, b) => b.updatedAt - a.updatedAt),
-      storagePath: async () => "",
-      loadScene: async (id: string) => read()[id] ?? null,
-      saveScene: async (scene: RefSceneIn) => {
-        const o = read();
-        const id = scene.id || Math.random().toString(36).slice(2, 10);
-        const updatedAt = Date.now();
-        o[id] = {
-          id, name: scene.name, items: scene.items, view: scene.view ?? null,
-          collaboration: scene.collaboration ?? null, media: scene.media ?? [],
-          preview: scene.preview ?? [], updatedAt,
-        };
-        write(o);
-        return { ok: true, id, updatedAt };
-      },
-      deleteScene: async (id: string) => { const o = read(); delete o[id]; write(o); return { ok: true }; },
-      saveAsset: async () => ({ ok: false, error: "mock" }),
-      collabPreview: async () => ({ ok: false, error: "mock" }),
-      ytDuration: async () => null,
-      locateMedia: async () => ({ ok: true, moves: {}, dead: [] }),
-      storageAudit: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      storageFree: async () => ({ ok: false, bytes: 0, files: 0, error: i18n.t("common:mock.appUnavailable") }),
-      storageMoveOrphans: async () => ({ ok: false, bytes: 0, files: 0, error: i18n.t("common:mock.appUnavailable") }),
-      storageArchiveScene: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      fetchAsset: async () => ({ ok: false, error: "mock" }),
-      resolveMedia: async (_url, _options) => ({ ok: false, error: "mock" }),
-      upscaleItem: async () => ({ ok: false, error: "mock" }),
-      dropAsset: async () => ({ ok: true, removed: false }),
-      sweepAssets: async () => ({ ok: true, removed: 0, bytes: 0, kept: 0 }),
-      scanFolder: async (dir: string) => ({ ok: false, root: dir, name: "", files: [], truncated: false, count: 0 }),
-      writeFile: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      sampleFrame: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      playInfo: async () => ({ duration: 0, fps: 0, codec: "", native: false }),
-      extractMedia: async () => ({ ok: false, error: "mock" }),
-      extractFrames: async () => ({ ok: false, error: "mock" }),
-      exportLoop: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      cancelExportLoop: async () => ({ ok: true, cancelled: false }),
-      onLoopProgress: () => () => {},
-      estimateLoop: async () => ({ ok: false, stale: true }),
-      exportBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      importBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      exportBoardLoop: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      onShareProgress: () => () => {},
-      relocateFrom: async () => ({ ok: false, found: [], scanned: 0, error: i18n.t("common:mock.appUnavailable") }),
-      // Forme COMPLÈTE mais vide : le dialogue d'export rend ses quatre niveaux à 0 o au lieu de
-      // tomber sur des `undefined` dans le navigateur.
-      weigh: async () => ({ ok: true, level: "preview" as const, total: 0, perLevel: { link: 0, preview: 0, margin: 0, full: 0 }, items: [] }),
-      chooseNetsu: async () => null,
-      saveNetsuPath: async () => null,
-      // Un projet est un FICHIER : dans le navigateur il n'y en a pas. On répond « indisponible »
-      // plutôt que de simuler un enregistrement qui ne laisserait rien sur le disque.
-      openProject: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      previewProject: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      saveProject: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      saveProjectAs: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      closeProject: async () => ({ ok: true, closed: false }),
-      recentProjects: async () => [],
-      forgetProject: async () => [],
-      linkSource: async () => [],
-      deleteProject: async () => ({ ok: false, recents: [], error: i18n.t("common:mock.appUnavailable") }),
-      setDirty: () => {},
-      detach: () => {},
-      attach: () => {},
-      setAlwaysOnTop: () => {},
-      push: () => {},
-      onPush: () => () => {},
-    } satisfies RefApi;
-  })(),
   // Mock navigateur : Carnet en localStorage (carnets / pages / databases) — teste l'UI hors application.
   notebook: (() => {
     const K_NB = "nr-notebooks", K_PG = "nr-notebook-pages", K_DB = "nr-notebook-databases";
@@ -3648,6 +3459,8 @@ const mock: NrApi = {
     const rid = () => Math.random().toString(36).slice(2, 10);
     const normalizeNotebook = (notebook: NbRow): NbRow => ({ ...notebook, kind: notebook.kind || "notes", language: notebook.language || "fr" });
     return {
+      chooseNetsu: async () => null,
+      saveNetsuPath: async () => null,
       collaborationBindings: async () => Object.values(rd<NotebookCollabBinding>("nr-notebook-collab")),
       prepareCollaborationMedia: async () => ({ ok: true }),
       setCollaborationBinding: async (binding, projectId) => { const data = rd<NotebookCollabBinding>("nr-notebook-collab"); if (binding) data[projectId] = binding; else delete data[projectId]; wr("nr-notebook-collab", data); return { ok: true }; },
@@ -4162,7 +3975,6 @@ const mock: NrApi = {
   } satisfies ChatApi,
 };
 
-// coreClient (Tauri) et mock (navigateur) exposent tous deux `reference` → sélection directe.
 export const nr: NrApi =
   typeof window !== "undefined" && window.nr
     ? window.nr

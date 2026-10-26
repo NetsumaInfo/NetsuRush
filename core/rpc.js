@@ -25,10 +25,7 @@ const scheduler = require("./scheduler"); // mesure VRAM (nvidia-smi) — sert l
 const pipeline = require("./pipeline"); // pipeline ordonné : chaîne de transforms fichier→fichier
 const roto = require("./roto"); // Roto Studio : daemon SAM interactif (scaffold)
 const exportMod = require("./export"); // export fichier piloté par profil (remux/encode, GPU/CPU, merge)
-const loopExport = require("./loopExport"); // board clip → looping animated image (animated WebP, GIF)
 const audioLang = require("./audioLang"); // normalisation des étiquettes de langue des pistes audio
-const { createReferenceStore, scanFolder, writeExportFile } = require("./reference");
-const { createBoardStorage } = require("./boardStorage");
 const wallpaper = require("./wallpaper");
 const { sanitizeName } = require("./utils");
 const { createCollectionStore } = require("./collections"); // dossiers de plans gardés (bibliothèque)
@@ -41,9 +38,6 @@ const { createLibraryStore } = require("./library"); // rushs importés (entrée
 const { createCutEditsStore } = require("./cutEdits"); // édits de découpe persistés par modèle (Découpage)
 const { createNotebookStore } = require("./notebook"); // module Carnet : carnets → pages → databases
 const { createNbFile } = require("./nbfile"); // partage commun .netsu du Carnet (ZIP type-routé)
-const netsu = require("./netsu"); // format de partage « .netsu » (board → conteneur SQLite type-routé)
-const extract = require("./extract"); // yt-dlp / gallery-dl : extraction du vrai média d'un lien
-const netsuSidecar = require("./netsu/sidecar");
 const { createAeExport } = require("./aeExport");
 
 const { createTransfer } = require("./transfer");
@@ -59,7 +53,6 @@ const { createProjectSnapshot } = require("./projectSnapshot"); // photo des lec
 const { createProjectRegistry } = require("./projectRegistry"); // registre projet → rushs (portée de recherche)
 const { createProjectScan } = require("./projectScan"); // recensement des projets existants (portée)
 const setup = require("./setup"); // provisionnement 1er lancement (venv/ffmpeg/poids)
-const ytdlp = require("./ytdlpUpdate"); // yt-dlp : état + mise à jour à la demande (la lib rote vite)
 const compatibility = require('./compatibility'); // matériel + runtimes IA/encodage réellement actifs
 const optimize = require("./optimize"); // onglet Optimisation : diagnostic + arrêt de tâches + nettoyage cache
 const resolvePrefs = require("./resolvePrefs"); // prefs Resolve sur disque (l'API de scripting ne les expose pas)
@@ -93,8 +86,6 @@ function createRpc() {
   // Branche le journal sur la diffusion SSE et capte les console.* du core (démarrage, erreurs RPC).
   logbus.attach(broadcast);
 
-  const refStore = createReferenceStore(DATA_DIR);
-  const boardStorage = createBoardStorage({ refStore, netsu });
   const collectionStore = createCollectionStore(DATA_DIR);
   // Sondes injectées : la bibliothèque met les métas au format Resolve (timecode/résolution/codec) pour
   // que les rushs importés se lisent comme ceux du Media Pool dans la même grille.
@@ -278,7 +269,7 @@ function createRpc() {
   // brackets guarded/rOp (mêmes invariants de registre de handles que les canaux resolve:*).
   const agent = createAgent({
     broadcast, ev, dataDir: DATA_DIR,
-    modules: { resolveMod, timeline, sidecars, thumbs, proxy, ffmpeg, aeExporter, refStore, guarded, rOp },
+    modules: { resolveMod, timeline, sidecars, thumbs, proxy, ffmpeg, aeExporter, guarded, rOp },
   });
 
   // Archivage d'une collection : exporte TOUS ses plans (remux/encode via profil d'export) vers un
@@ -507,13 +498,6 @@ function createRpc() {
     },
     "compat:status": ([opts]) => compatibility.status(opts || {}),
 
-    // --- yt-dlp (Paramètres › Mises à jour) ---
-    // The only runtime dependency that rots on its own: the boot path refreshes it once per
-    // application release, and these two channels let it be refreshed WITHOUT one, for an install
-    // left alone for months (cf. core/ytdlpUpdate.js).
-    "ytdlp:status": ([opts]) => ytdlp.ytDlpStatus(opts || {}),
-    "ytdlp:update": () => ytdlp.updateYtDlpNow(),
-
     // --- Console / journal (debug + bêta-test) : historique des logs, vidage, rapport de bug ---
     // Le flux temps réel arrive en SSE `console:log` (core + sidecars python).
     "console:logs": () => logbus.snapshot(),
@@ -578,9 +562,6 @@ function createRpc() {
     // --- ffmpeg / probe / proxy / thumbs ---
     "ffmpeg:probe": ([p]) => ffmpeg.probeMedia(p),
     "player:info": ([p]) => ffmpeg.playInfo(p),
-    // Same probe, reached from the reference board: a one-frame step needs the real rate
-    // (23.976, not 24), and HTML5 does not expose it.
-    "reference:playInfo": ([filePath]) => ffmpeg.playInfo(filePath),
     "ffmpeg:audioTracks": ([p]) => probeAudioTracksTagged(p),
     "ffmpeg:detectScenes": ([p, threshold, model, options]) => sidecars.detectScenes(ev, p, threshold, model, options),
     "ffmpeg:cachedScenes": ([p, model, threshold, options]) => sidecars.getCachedScenes(p, model, threshold, options),
@@ -841,65 +822,6 @@ function createRpc() {
     "char:merge": ([o]) => sidecars.cpuReq("char-merge", { source_id: o?.sourceId, target_id: o?.targetId }),
     "char:duplicates": ([o]) => sidecars.queryReq("char-duplicates", { min_score: o?.minScore ?? 0.55 }),
 
-    // --- Board de référence (saveAsset binaire : transport base64 à finaliser en P4) ---
-    "reference:listScenes": () => refStore.listScenes(),
-    "reference:storagePath": () => refStore.storagePath(),
-    "reference:loadScene": ([id]) => refStore.loadScene(id),
-    "reference:saveScene": ([scene]) => refStore.saveScene(scene),
-    "reference:deleteScene": ([id]) => refStore.deleteScene(id),
-    // bytes arrive en base64 (transport JSON) → Buffer pour refStore.
-    "reference:saveAsset": ([bytes, ext, options]) => {
-      const buf = bytes && bytes.__b64 ? Buffer.from(bytes.__b64, "base64") : bytes;
-      return refStore.saveAsset(buf, ext, options || {});
-    },
-    // Télécharge un média distant côté core (sans CORS) puis le persiste en asset disque.
-    // Aperçu léger envoyé aux pairs avant l'original d'un board partagé (docs/collab.md).
-    "reference:collabPreview": ([srcPath]) => refStore.collabPreview(srcPath),
-    "reference:ytDuration": ([id]) => require("./ytstream").videoDuration(id),
-    // Chemin mort d'un média de board : le nom porte son empreinte, on le retrouve sans lire
-    // un octet (compagnon du projet, magasin d'assets, compagnons des projets connus).
-    "reference:locateMedia": ([refs, projectPath]) =>
-      boardStorage.locateMedia({ refs, projectPath }),
-    // Magasin d'assets du board : ce que l'app peut refabriquer contre ce qu'elle seule détient.
-    // Le renderer demande une PORTÉE, jamais des chemins — le core recalcule ce qui y entre.
-    "reference:storageAudit": ([opts]) => boardStorage.audit(opts || {}),
-    "reference:storageFree": ([opts]) => boardStorage.free(opts || {}),
-    "reference:storageMoveOrphans": ([opts]) => boardStorage.moveOrphans(opts || {}),
-    "reference:archiveScene": ([opts]) => boardStorage.archiveScene(opts || {}),
-    "reference:fetchAsset": ([url, options]) => refStore.fetchAsset(url, options || {}),
-    // Résout le vrai média de N'IMPORTE quel lien (fichier direct ou page via OpenGraph) → asset.
-    "reference:resolveMedia": ([url, options]) => refStore.resolveMedia(url, options || {}),
-    // Extrait le VRAI média d'un lien (réseaux sociaux & co) via yt-dlp / gallery-dl.
-    "reference:extractMedia": ([url, options]) => extract.extractMedia(url, options || {}),
-    // Décompose une vidéo locale en frames image → assets disque → liste de chemins.
-    "reference:extractFrames": ([opts]) => extractBoardFrames(opts),
-    // A board clip written as a looping animated image (WebP or GIF) at a path the user chose.
-    "reference:exportLoop": ([opts]) => loopExport.exportLoop(ev, opts || {}),
-    "reference:exportLoopCancel": () => loopExport.cancelLoopExport(),
-    "reference:estimateLoop": ([opts]) => loopExport.estimateLoop(opts || {}),
-    // The whole board as a looping animated image: still layers and playing clips, stacked.
-    "reference:exportBoardLoop": ([opts]) => loopExport.exportBoardLoop(ev, opts || {}),
-    "reference:push": ([payload]) => {
-      broadcast("reference:push", payload);
-      return null;
-    },
-    // Upscale d'un item média du board → nouveau fichier dans assets/ (possédé par l'app).
-    // NON destructif : l'ancien fichier reste sur disque (le board garde de quoi revenir en arrière).
-    "reference:upscaleItem": ([opts]) => upscaleBoardItem(ev, opts),
-    // Supprime un fichier UNIQUEMENT s'il est un asset de l'app (cleanup d'un upscale annulé).
-    "reference:dropAsset": ([p]) => refStore.removeAsset(p),
-    // Ménage du magasin d'assets (Paramètres du board) : ce que plus aucune scène ne réclame part.
-    "reference:sweepAssets": ([opts]) => refStore.sweepAssets(opts || {}),
-    // Dossier déposé sur le board : médias trouvés récursivement, avec leur sous-dossier relatif
-    // (l'import en fait un cadre par dossier). Plafonné, et le dit quand il tronque.
-    "reference:scanFolder": ([dir, opts]) => scanFolder(dir, opts || {}),
-    // Export du board (PNG/JPG en base64, SVG en texte) vers un chemin choisi par l'utilisateur.
-    "reference:writeFile": ([filePath, data, encoding]) => writeExportFile(filePath, data, encoding),
-    // Un cadre d'un média rendu en PNG base64, lu SUR LE DISQUE : c'est la seule source de pixels
-    // relisible par le renderer (le protocole d'asset de la coquille teinte le canvas). Sert
-    // l'extraction de palette, qui sans ça ne trouvait « aucune couleur exploitable ».
-    "reference:sampleFrame": ([filePath, opts]) => ffmpeg.sampleFrame(filePath, opts || {}),
-
     // --- Fond d'écran de l'interface (Paramètres › Interface › Thème) ---
     // L'import copie la source dans la bibliothèque et cuit la variante de base ; les marches de flou
     // suivantes sont encodées à la demande. Le renderer ne reçoit que des CHEMINS, servis via /media.
@@ -1003,32 +925,6 @@ function createRpc() {
     "library:relinkPath": ([oldPath, newPath]) => libraryStore.relinkPath(oldPath, newPath),
     "library:relinkDir": ([dir]) => libraryStore.relinkDir(dir),
 
-    // --- Partage « .netsu » : export (board courant → archive) / import (archive → scène) ---
-    // L'export encode ses clips un par un : il rend compte item par item, sinon un board fourni
-    // laisse l'utilisateur devant un bouton figé pendant plusieurs minutes.
-    "netsu:export": ([scene, destPath, opts]) =>
-      netsu.exportBoard(refStore, scene, destPath, {
-        ...(opts || {}),
-        onProgress: (p) => broadcast("netsu:progress", p),
-      }),
-    "netsu:import": ([srcPath]) => netsu.importBoard(refStore, srcPath),
-    "netsu:weigh": ([scene, opts]) => netsu.weigh(scene, opts || {}),
-    // Relocalisation EN LOT : un dossier, tous les médias manquants qu'on y reconnaît.
-    "netsu:relocateFrom": ([dirPath, wanted]) => netsu.relocateFrom(dirPath, wanted || []),
-
-    // --- Projet « .netsu » : le fichier EST le document (ouvert en continu, Ctrl+S incrémental) ---
-    "netsu:openProject": ([srcPath]) => netsu.openProject(refStore, srcPath),
-    "netsu:previewProject": ([srcPath]) => netsu.previewProject(refStore, srcPath),
-    "netsu:saveProject": ([filePath, scene]) => netsu.saveProject(refStore, filePath, scene),
-    "netsu:saveProjectAs": ([opts]) => netsu.saveProjectAs(refStore, opts || {}),
-    "netsu:closeProject": ([filePath]) => netsu.closeProject(filePath),
-    "netsu:recents": ([type]) => netsu.recentProjects(refStore, type),
-    "netsu:forget": ([filePath]) => netsu.forgetProject(filePath),
-    // Lie un .netsu à la scène qui l'a remplacé : partager un board ouvert depuis un fichier
-    // le convertit en scène de la bibliothèque, et sans ce lien l'accueil montre les deux.
-    "netsu:linkSource": ([filePath, sourceSceneId]) => netsu.linkSourceScene(filePath, sourceSceneId),
-    "netsu:deleteProject": ([filePath]) => netsu.deleteProject(filePath),
-
     // --- Chat IA : moteur hybride (CLI + BYOK) + outils + permissions ---
     "chat:agents": () => agent.listAgents(),
     "chat:models": ([request]) => agent.listModels(request || {}),
@@ -1050,96 +946,6 @@ function createRpc() {
     "agent:toolCall": ([name, input]) => agent.toolCall(name, input),
   };
 
-  // Décompose une vidéo locale en frames d'APERÇU (ffmpeg, basse qualité) écrites dans le cache temp
-  // SEQ_DIR (purgé au boot) → liste de chemins pour bâtir un item séquence. `in/out` (s) = plage de
-  // boucle. Pas de persistance durable : un aperçu ne doit pas remplir le disque (cf. SEQ_DIR).
-  async function extractBoardFrames(opts) {
-    const { path: src, fps, max, height, in: inSec, out: outSec, projectPath, title } = opts || {};
-    if (!src) return { ok: false, error: t("sourceMissing") };
-    if (/^(https?:|data:|blob:)/i.test(String(src))) return { ok: false, error: t("localMediaRequired") };
-    try {
-      const { frames, fps: usedFps } = await ffmpeg.extractFrames(src, { fps, max, height, start: inSec, end: outSec });
-      if (!frames.length) return { ok: false, error: t("noFrames") };
-      if (!projectPath) return { ok: true, frames, fps: usedFps };
-      const index = netsuSidecar.indexSidecar(projectPath);
-      const group = netsuSidecar.slugify(title || "sequence");
-      const organized = [];
-      for (let frameIndex = 0; frameIndex < frames.length; frameIndex += 1) {
-        const adopted = netsuSidecar.adopt(projectPath, frames[frameIndex], {
-          place: { kind: "image", group, index: frameIndex },
-          index,
-        });
-        if (adopted.ok && adopted.path) organized.push(adopted.path);
-      }
-      if (!organized.length) return { ok: false, error: t("noFrames") };
-      return { ok: true, frames: organized, fps: usedFps };
-    } catch (e) {
-      return { ok: false, error: String(e.stderr || e) };
-    }
-  }
-
-  // Image → sidecar `image` (sortie PNG) ; vidéo → sidecar `upscale` HEVC mp4 (lisible direct sur le
-  // board). `in/out` (secondes) = cut local ; sinon média entier. Renvoie { ok, path }.
-  async function upscaleBoardItem(event, opts) {
-    const { path: src, kind, in: inSec, out: outSec, engine = "ia", model = "fallin", shader = "artcnn_c4f32", scale = 2, denoise } = opts || {};
-    if (!src) return { ok: false, error: t("sourceMissing") };
-    if (/^(https?:|data:|blob:)/i.test(String(src))) return { ok: false, error: t("localMediaRequired") };
-
-    // Un upscale coûte des minutes de GPU. Le registre répond d'abord : même source, mêmes bornes,
-    // mêmes réglages ⇒ le fichier existe déjà (l'archivage des collections s'en sert depuis
-    // toujours ; refaire le calcul pour le board était la même dépense pour rien).
-    const ledgerKey = upLedger.fingerprint({
-      ...upLedger.statSource(String(src)),
-      src: String(src),
-      in: inSec, out: outSec,
-      encode: { workflow: `board_${kind === "image" ? "image" : "video"}` },
-      upscale: { enabled: true, engine, model, shader, scale, denoise },
-    });
-    const known = upLedger.lookup(ledgerKey);
-    if (known) return { ok: true, path: known.file, cached: true };
-    const remember = (out) => {
-      if (out) upLedger.record(ledgerKey, out, { engine, model: engine === "turbo" ? shader : model, scale });
-      return out;
-    };
-    const base = `up_${Date.now().toString(36)}`;
-
-    // Moteur Turbo (shader GPU libplacebo) sur une VIDÉO : sortie HEVC mp4 (encode GPU) directement
-    // lisible sur le board. L'image fixe a son propre aiguillage plus bas.
-    if (engine === "turbo" && kind !== "image") {
-      const segs = inSec != null && outSec != null ? [{ in: inSec, out: outSec }] : undefined;
-      const r = await turbo.runTurbo(sidecars, event, {
-        input: src, shader, scale, codec: "hevc_nvenc", outDir: refStore.assetsDir,
-        whole: !segs, segments: segs, importBack: false, baseName: base,
-      });
-      if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || t("upscaleFailed") };
-      return { ok: true, path: remember(r.outputs[0]) };
-    }
-
-    if (kind === "image") {
-      // GIF animé → chemin dédié (toutes les frames → GIF), sinon image fixe (1 frame → PNG).
-      const isGif = /\.gif$/i.test(String(src));
-      const out = refStore.assetPath(`${base}.${isGif ? "gif" : "png"}`);
-      // Moteur Turbo sur une image : même shader GPU que la vidéo (une frame), et un GIF animé garde
-      // ses frames et sa cadence par le chemin dédié. Une image partait jusqu'ici TOUJOURS sur le
-      // moteur IA, y compris quand un shader était choisi : le choix était ignoré en silence.
-      const r = engine === "turbo"
-        ? await turbo.runTurboImage(sidecars, { input: src, out, shader, scale, denoise })
-        : isGif
-          ? await sidecars.runUpscaleGif({ input: src, out, model, scale, denoise })
-          : await sidecars.runUpscaleImage({ input: src, out, model, scale, denoise });
-      if (!r || !r.ok || !r.output) return { ok: false, error: (r && r.error) || t("upscaleFailed") };
-      return { ok: true, path: remember(r.output), width: r.width, height: r.height };
-    }
-
-    const segments = inSec != null && outSec != null ? [{ in: inSec, out: outSec }] : undefined;
-    const r = await sidecars.runUpscale(event, {
-      input: src, model, scale, codec: "x265", denoise, audio: "aac",
-      outDir: refStore.assetsDir, whole: !segments, segments, importBack: false, baseName: base,
-    });
-    if (!r || !r.ok || !r.outputs || !r.outputs.length) return { ok: false, error: (r && r.error) || t("upscaleFailed") };
-    return { ok: true, path: remember(r.outputs[0]) };
-  }
-
   // Préchauffe SigLIP dès le démarrage du core, en fond : le chargement du modèle (plusieurs
   // secondes) était payé par le PREMIER usage de la recherche, pile quand l'utilisateur attend.
   // Conditions : un index non vide (sinon rien à préparer) et un délai qui laisse passer le boot.
@@ -1150,25 +956,6 @@ function createRpc() {
     sidecars.queryReq("warm", {}).catch(() => { /* recherche indisponible : chargement paresseux */ });
   }, PREWARM_DELAY_MS);
   prewarmTimer.unref?.();
-
-  // Ménage du magasin d'assets du board, AU DÉMARRAGE et à ce moment-là seulement : aucun board
-  // n'est encore ouvert, donc aucun fichier affiché ne peut disparaître sous les yeux de personne.
-  //
-  // Il ne retire QUE les doubles — les fichiers dont le core a retrouvé les mêmes octets dans le
-  // dossier compagnon d'un projet (boardStorage#free). L'ancien balayage par ÂGE emportait aussi
-  // les copies uniques : une sortie d'upscale que plus aucune scène ne réclamait disparaissait au
-  // bout de deux semaines, alors qu'elle n'existait nulle part ailleurs. Ces fichiers-là sont
-  // désormais listés dans Paramètres › Stockage › NetsuBoard, qui propose de les SORTIR vers un
-  // dossier plutôt que de les supprimer.
-  const ASSET_SWEEP_DELAY_MS = 20000;
-  const assetSweepTimer = setTimeout(() => {
-    void boardStorage.free({}).then((swept) => {
-      if (swept.ok && swept.files) {
-        logbus.emit("core", "info", `[board] ${swept.files} duplicate asset(s) removed (${Math.round(swept.bytes / 1048576)} MB)`);
-      }
-    }).catch(() => { /* le magasin n'est pas critique : le prochain démarrage réessaiera */ });
-  }, ASSET_SWEEP_DELAY_MS);
-  assetSweepTimer.unref?.();
 
   function handle(req, res, u) {
     // SSE : flux d'événements de progression
@@ -1220,7 +1007,7 @@ function createRpc() {
     stopDiscord: discordRpc.stop, stopCache: cachePolicy.stop, stopWatchdog: optimize.stopWatchdog,
     stopArchiveQueue: archiveQueue.stop,
     stopPrewarm: () => clearTimeout(prewarmTimer),
-    closeProjects: () => { netsu.closeAllProjects(); notebookStore.closeAllProjects(); },
+    closeProjects: () => { notebookStore.closeAllProjects(); },
     // Les édits de découpe sont écrits par lots : sans ce vidage, ceux des 300 dernières ms seraient
     // perdus à la fermeture de l'app.
     flushCutEdits: cutEditsStore.flush,

@@ -1,5 +1,5 @@
 // Types partagés du store (onglets, vue derush).
-export type TabId = "derush" | "search" | "reference" | "notebook" | "upscale" | "chat" | "optimisation" | "transfer" | "adobe" | "settings";
+export type TabId = "derush" | "search" | "notebook" | "upscale" | "chat" | "optimisation" | "transfer" | "adobe" | "settings";
 // Hôte cible actif : NLE piloté par NetsuRush. Sélecteur en pied de sidebar. Resolve = flux natif
 // (pont Python) ; ppro/aeft = via le panneau CEP. Persisté (localStorage nr.activeHost).
 export type HostId = "resolve" | "ppro" | "aeft";

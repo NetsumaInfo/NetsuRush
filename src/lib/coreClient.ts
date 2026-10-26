@@ -4,7 +4,7 @@
 // Dialogs / openExternal passent par les plugins Tauri (chargés à la demande, seulement sous Tauri).
 
 import { convertFileSrc } from "@tauri-apps/api/core";
-import type { NrApi, RefApi, WallpaperApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, SnapshotApi, CacheApi } from "./bridge";
+import type { NrApi, WallpaperApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, SnapshotApi, CacheApi } from "./bridge";
 import i18n from "@/i18n";
 import { logError } from "@/lib/appLog";
 import { readPreviewSettings } from "@/lib/previewSettings";
@@ -475,13 +475,6 @@ function abToB64(ab: ArrayBuffer): string {
   return btoa(bin);
 }
 
-// ---- Fenêtre détachée du board (Tauri v2) ----
-// Le board sync déjà entre fenêtres via le core (push/onPush en SSE). Ici : créer/fermer la 2e
-// fenêtre (label "reference", même renderer au hash #reference) + épingler always-on-top.
-// Pas de confirmation de fermeture : l'autosave (scène __autosave__ restaurée au démarrage) garantit
-// qu'aucun travail n'est perdu en quittant → un dialogue « enregistrer ? » serait une fausse alerte.
-const REF_LABEL = "reference";
-
 const wallpaper: WallpaperApi = {
   import: (srcPath, opts) => call("wallpaper:import", [srcPath, opts || {}]),
   list: () => call("wallpaper:list"),
@@ -489,115 +482,6 @@ const wallpaper: WallpaperApi = {
   remove: (id) => call("wallpaper:remove", [id]),
 };
 
-const reference: RefApi = {
-  listScenes: () => call("reference:listScenes"),
-  storagePath: () => call("reference:storagePath"),
-  loadScene: (id) => call("reference:loadScene", [id]),
-  saveScene: (scene) => call("reference:saveScene", [scene]),
-  deleteScene: (id) => call("reference:deleteScene", [id]),
-  saveAsset: (bytes, ext, options) => call("reference:saveAsset", [{ __b64: abToB64(bytes) }, ext, options]),
-  collabPreview: (srcPath) => call("reference:collabPreview", [srcPath]),
-  ytDuration: (id) => call("reference:ytDuration", [id]),
-  locateMedia: (refs, projectPath) => call("reference:locateMedia", [refs, projectPath]),
-  storageAudit: (opts) => call("reference:storageAudit", [opts || {}]),
-  storageFree: (opts) => call("reference:storageFree", [opts || {}]),
-  storageMoveOrphans: (opts) => call("reference:storageMoveOrphans", [opts]),
-  storageArchiveScene: (opts) => call("reference:archiveScene", [opts]),
-  fetchAsset: (url, options) => call("reference:fetchAsset", [url, options || {}]),
-  resolveMedia: (url, options) => call("reference:resolveMedia", [url, options || {}]),
-  upscaleItem: (opts) => call("reference:upscaleItem", [opts]),
-  dropAsset: (p) => call("reference:dropAsset", [p]),
-  sweepAssets: (opts) => call("reference:sweepAssets", [opts || {}]),
-  scanFolder: (dir, opts) => call("reference:scanFolder", [dir, opts || {}]),
-  writeFile: (p, data, encoding) => call("reference:writeFile", [p, data, encoding]),
-  sampleFrame: (p, opts) => call("reference:sampleFrame", [p, opts || {}]),
-  playInfo: (p) => call("reference:playInfo", [p]),
-  extractMedia: (url, options) => call("reference:extractMedia", [url, options || {}]),
-  extractFrames: (opts) => call("reference:extractFrames", [opts]),
-  exportLoop: (opts) => call("reference:exportLoop", [opts]),
-  cancelExportLoop: () => call("reference:exportLoopCancel", []),
-  onLoopProgress: (cb) => on("reference:loopProgress", cb as (p: unknown) => void),
-  estimateLoop: (opts) => call("reference:estimateLoop", [opts]),
-  exportBoardLoop: (opts) => call("reference:exportBoardLoop", [opts]),
-  exportBoard: (scene, destPath, opts) => call("netsu:export", [scene, destPath, opts]),
-  importBoard: (srcPath) => call("netsu:import", [srcPath]),
-  onShareProgress: (cb) => on("netsu:progress", cb as (p: unknown) => void),
-  relocateFrom: (dirPath, wanted) => call("netsu:relocateFrom", [dirPath, wanted]),
-  weigh: (scene, opts) => call("netsu:weigh", [scene, opts]),
-  chooseNetsu: () =>
-    dlgOpen({ multiple: false, filters: [{ name: "Board NetsuRush", extensions: ["netsu"] }] }) as Promise<string | null>,
-  saveNetsuPath: async (defaultName) => {
-    if (!isTauri) return null;
-    const { save } = await import("@tauri-apps/plugin-dialog");
-    return await save({ defaultPath: defaultName, filters: [{ name: "Board NetsuRush", extensions: ["netsu"] }] });
-  },
-  openProject: (srcPath) => call("netsu:openProject", [srcPath]),
-  previewProject: (srcPath) => call("netsu:previewProject", [srcPath]),
-  saveProject: (filePath, scene) => call("netsu:saveProject", [filePath, scene]),
-  saveProjectAs: (opts) => call("netsu:saveProjectAs", [opts]),
-  closeProject: (filePath) => call("netsu:closeProject", [filePath]),
-  recentProjects: (type) => call("netsu:recents", [type]),
-  forgetProject: (filePath) => call("netsu:forget", [filePath]),
-  linkSource: (filePath, sourceSceneId) => call("netsu:linkSource", [filePath, sourceSceneId]),
-  deleteProject: (filePath) => call("netsu:deleteProject", [filePath]),
-  // No-op : aucune garde de fermeture (l'autosave protège déjà le board). Conservé pour l'API.
-  setDirty: () => {},
-  // Depuis la fenêtre principale : ouvre (ou refocus) la fenêtre détachée flottante.
-  detach: () => {
-    void (async () => {
-      if (!isTauri) return;
-      const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
-      const existing = await WebviewWindow.getByLabel(REF_LABEL);
-      if (existing) {
-        await existing.setFocus().catch(() => {});
-        return;
-      }
-      const win = new WebviewWindow(REF_LABEL, {
-        url: "index.html#reference",
-        title: i18n.t("common:window.reference"),
-        decorations: false,
-        alwaysOnTop: true,
-        // Set HERE and not in tauri.conf.json: the main window embeds mpv as a native Win32 child
-        // (src-tauri/src/player/mpv_window.rs), and a layered parent puts that child's rendering at
-        // risk. This floating window carries no mpv surface, and it is the one that sits over
-        // another application — so it is the one that can see through.
-        transparent: true,
-        width: 720,
-        height: 560,
-        minWidth: 360,
-        minHeight: 320,
-        // false → la WebView gère le DnD HTML5 (glisser une carte vers le board + déposer des
-        // fichiers OS arrivent via dataTransfer). true (défaut) le confie à l'OS et BLOQUE le DnD HTML5.
-        dragDropEnabled: false,
-      });
-      win.once("tauri://error", (e) => console.error("[reference] failed to open the detached window", e));
-    })();
-  },
-  // Depuis la fenêtre détachée : la ferme et redonne le focus à la principale. Le focus est
-  // best-effort (try/catch) pour ne JAMAIS empêcher la fermeture si setFocus échoue.
-  attach: () => {
-    void (async () => {
-      if (!isTauri) return;
-      const { getCurrentWindow, Window } = await import("@tauri-apps/api/window");
-      try {
-        const main = await Window.getByLabel("main");
-        await main?.setFocus();
-      } catch {
-        /* focus best-effort */
-      }
-      await getCurrentWindow().close();
-    })();
-  },
-  setAlwaysOnTop: (on) => {
-    void (async () => {
-      if (!isTauri) return;
-      const { getCurrentWindow } = await import("@tauri-apps/api/window");
-      await getCurrentWindow().setAlwaysOnTop(on).catch(() => {});
-    })();
-  },
-  push: (payload) => { void call("reference:push", [payload]); },
-  onPush: (cb) => on("reference:push", cb),
-};
 
 const collections: CollectionsApi = {
   prepareShare: (id, opts) => call("collections:prepareShare", [id, opts]),
@@ -691,6 +575,13 @@ const cache: CacheApi = {
 };
 
 const notebook: NotebookApi = {
+  chooseNetsu: () =>
+    dlgOpen({ multiple: false, filters: [{ name: "NetsuRush", extensions: ["netsu"] }] }) as Promise<string | null>,
+  saveNetsuPath: async (defaultName) => {
+    if (!isTauri) return null;
+    const { save } = await import("@tauri-apps/plugin-dialog");
+    return await save({ defaultPath: defaultName, filters: [{ name: "NetsuRush", extensions: ["netsu"] }] });
+  },
   collaborationBindings: () => call("notebook:collaborationBindings"),
   prepareCollaborationMedia: (surface, subjectId) => call("notebook:prepareCollaborationMedia", [surface, subjectId]),
   setCollaborationBinding: (binding, projectId) => call("notebook:setCollaborationBinding", [binding, projectId]),
@@ -854,8 +745,6 @@ export function makeCoreClient(): NrApi {
     setupRun: (options) => call("setup:run", [options]),
     compatibilityStatus: (opts) => call("compat:status", [opts ?? {}]),
     onSetupProgress: (cb) => on("setup:progress", cb as (p: unknown) => void),
-    ytDlpStatus: (opts) => call("ytdlp:status", [opts ?? {}]),
-    ytDlpUpdate: () => call("ytdlp:update"),
     consoleLogs: () => call("console:logs").then((logs) => ({ ok: true, logs: logs || [] })),
     consoleClear: () => call("console:clear"),
     onConsoleLog: (cb) => on("console:log", cb as (p: unknown) => void),
@@ -1077,7 +966,6 @@ export function makeCoreClient(): NrApi {
         try { await win.center(); } catch { /* noop */ }
       })();
     },
-    reference,
     wallpaper,
     notebook,
     collections,

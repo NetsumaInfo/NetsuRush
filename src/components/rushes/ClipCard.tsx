@@ -3,8 +3,8 @@
 // carte aurait fait diverger les deux au premier ajustement.
 import { memo, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Film, HardDriveDownload, Clapperboard, Scissors, CheckSquare, Folder, FolderInput, Images, Trash2, Unlink } from "lucide-react";
-import { cn, basename } from "@/lib/utils";
+import { Film, HardDriveDownload, Clapperboard, Scissors, CheckSquare, Folder, FolderInput, Trash2, Unlink } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { hoverLiftFlow } from "@/components/common/hoverLift";
 import { selectionRing, SelectCheck } from "@/components/common/selectable";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -14,7 +14,6 @@ import { useApp } from "@/store";
 import { nr, type Clip } from "@/lib/bridge";
 import { getThumb, setThumb } from "@/lib/thumbCache";
 import { hostImport } from "@/lib/host";
-import { sendPathToBoard } from "@/components/reference/boardActions";
 import { folderTrail } from "./libraryShared";
 import { TimelineSendDialog } from "./TimelineSendDialog";
 
@@ -180,9 +179,6 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
                   <HardDriveDownload /> {t("library.addToPool")}
                 </ContextMenuItem>
               )}
-              <ContextMenuItem onClick={() => void sendPathToBoard(clip.path, basename(clip.path))}>
-                <Images /> {t("library.sendToBoard")}
-              </ContextMenuItem>
               <ContextMenuSub>
                 <ContextMenuSubTrigger><FolderInput /> {t("library.moveTo")}</ContextMenuSubTrigger>
                 <ContextMenuSubContent>

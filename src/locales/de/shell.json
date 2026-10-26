@@ -7,7 +7,6 @@
     "notebook": "NetsuBook",
     "search": "NetsuSearch",
     "upscale": "NetsuLab",
-    "reference": "NetsuBoard",
     "transfer": "NetsuBridge",
     "chat": "NetsuPilot",
     "optimisation": "NetsuBoost"
@@ -70,7 +69,7 @@
     "restore": "Wiederherstellen",
     "maximize": "Maximieren",
     "github": "Quellcode auf GitHub",
-    "support": "NetsuBoard unterstützen"
+    "support": "NetsuRush unterstützen"
   },
   "errorBadge": {
     "open": "Konsole öffnen",

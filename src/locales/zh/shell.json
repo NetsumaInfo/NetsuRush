@@ -7,7 +7,6 @@
     "notebook": "NetsuBook",
     "search": "NetsuSearch",
     "upscale": "NetsuLab",
-    "reference": "NetsuBoard",
     "transfer": "NetsuBridge",
     "chat": "NetsuPilot",
     "optimisation": "NetsuBoost"
@@ -70,7 +69,7 @@
     "restore": "还原",
     "maximize": "最大化",
     "github": "GitHub 源代码",
-    "support": "支持 NetsuBoard"
+    "support": "支持 NetsuRush"
   },
   "errorBadge": {
     "open": "打开控制台",

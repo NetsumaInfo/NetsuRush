@@ -416,7 +416,6 @@
     "dropHere": "空のフォルダーです。素材をここにドロップしてください。",
     "moveTo": "移動先",
     "addToPool": "Media Pool に追加",
-    "sendToBoard": "ボードへ送信",
     "removeFromLibrary": "ライブラリーから外す",
     "removeManyFromLibrary": "素材 {{count}} 件をライブラリーから外す",
     "undo": "元に戻す",

@@ -384,12 +384,9 @@ test('aucun sélecteur de store ne fabrique son repli', () => {
 test('chaque réglage se vise au chiffre près', () => {
   const controls = read('src', 'components', 'settings', 'appearance', 'WallpaperControls.tsx');
   const lib = read('src', 'lib', 'wallpaper.ts');
-  const inspector = read('src', 'components', 'reference', 'inspectorControls.tsx');
 
   // Un curseur seul ne permet pas de viser une valeur : chaque rangée porte un champ saisissable.
   assert.match(controls, /<NumberSpin/);
-  // Saisie promue dans la couche UI partagée plutôt que dupliquée : le board la ré-exporte.
-  assert.match(inspector, /export \{ NumberSpin \} from "@\/components\/ui\/number-spin"/);
   // Le pas est de 1 sur TOUS les réglages : à 4 ou 5, viser une valeur au clavier ou à la molette
   // devient impossible et le champ ne sert plus à rien.
   assert.ok(!/step=\{[2-9]/.test(controls), 'un réglage avance par paliers trop gros');

@@ -146,21 +146,3 @@ test('déplacer le carnet avec son dossier compagnon ne casse aucune image', () 
     fresh.closeAllProjects();
   }
 });
-
-test('un .netsu de board n’est pas un carnet : refusé, pas ouvert vide', async () => {
-  const { store, projectsDir } = workspace();
-  const boardFile = path.join(projectsDir, 'board.netsu');
-  const { saveBoardProject } = require('../core/netsu/project');
-  const session = sessions.openSession(boardFile, { create: true });
-  await saveBoardProject({
-    session,
-    refStore: { assetsDir: projectsDir, isAppAsset: () => false },
-    scene: { name: 'B', items: [] },
-  });
-  sessions.closeSession(boardFile);
-
-  const res = store.openProject(boardFile, MEDIA);
-  assert.equal(res.ok, false);
-  assert.match(String(res.error), /board/);
-  store.closeAllProjects();
-});

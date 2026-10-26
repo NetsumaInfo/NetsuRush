@@ -131,5 +131,9 @@
     "End": "Ende",
     "PageUp": "Bild auf",
     "PageDown": "Bild ab"
+  },
+  "shortcutEditor": {
+    "editShortcut": "Kürzel {{label}} ändern",
+    "pressCombo": "Drücke die Tastenkombination · Esc bricht ab"
   }
 }

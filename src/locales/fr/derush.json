@@ -416,7 +416,6 @@
     "dropHere": "Dossier vide — glisse des rushs ici.",
     "moveTo": "Déplacer vers",
     "addToPool": "Ajouter au Media Pool",
-    "sendToBoard": "Envoyer au board",
     "removeFromLibrary": "Retirer de la bibliothèque",
     "removeManyFromLibrary": "Retirer {{count}} rushs de la bibliothèque",
     "undo": "Annuler",

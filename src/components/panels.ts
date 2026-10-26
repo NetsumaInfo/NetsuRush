@@ -12,7 +12,6 @@ import type { TabId } from "@/store";
 const load = {
   derush: () => import("@/components/rushes/DerushTab").then((m) => ({ default: m.DerushTab })),
   search: () => import("@/components/search/SearchPanel").then((m) => ({ default: m.SearchPanel })),
-  reference: () => import("@/components/reference/ReferencePanel").then((m) => ({ default: m.ReferencePanel })),
   notebook: () => import("@/components/notebook/NotebookPanel").then((m) => ({ default: m.NotebookPanel })),
   upscale: () => import("@/components/netsulab/NetsuLabPanel").then((m) => ({ default: m.NetsuLabPanel })),
   chat: () => import("@/components/chat/ChatPanel").then((m) => ({ default: m.ChatPanel })),

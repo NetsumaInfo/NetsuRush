@@ -44,7 +44,3 @@ test('the file runs the range forwards, then backwards without repeating the tur
 
 // An older core ignores `pingpong` and answers with a forward proxy: the board must not loop that as
 // if it were the reversal.
-test('the board only plays a file the core marked as a ping-pong', () => {
-  assert.match(read('core/rpc.js'), /opts\?\.pingpong \? proxy\.pingpongSegment\(opts\)/);
-  assert.match(read('src/components/reference/BoardItem.tsx'), /r\.ok && r\.pingpong && r\.path/);
-});

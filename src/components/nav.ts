@@ -1,11 +1,10 @@
-import { Scissors, Search, Wand2, Images, ArrowLeftRight, MessageSquare, Gauge, NotebookPen } from "lucide-react";
+import { Scissors, Search, Wand2, ArrowLeftRight, MessageSquare, Gauge, NotebookPen } from "lucide-react";
 import type { ModuleId } from "@/lib/modules";
 
 // Navigation latérale — partagée avec App (lookup du libellé de l'onglet actif).
 export const NAV: { id: ModuleId; label: string; labelKey: string; icon: typeof Scissors }[] = [
   { id: "derush", label: "NetsuCut", labelKey: "nav.derush", icon: Scissors },
   { id: "search", label: "NetsuSearch", labelKey: "nav.search", icon: Search },
-  { id: "reference", label: "NetsuBoard", labelKey: "nav.reference", icon: Images },
   { id: "notebook", label: "NetsuBook", labelKey: "nav.notebook", icon: NotebookPen },
   { id: "upscale", label: "NetsuLab", labelKey: "nav.upscale", icon: Wand2 },
   { id: "chat", label: "NetsuPilot", labelKey: "nav.chat", icon: MessageSquare },

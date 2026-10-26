@@ -14,7 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { spell } from "@/lib/spell/spellClient";
 import type { SpellLang } from "@/lib/spell/spellShared";
-import { comboFromEvent, isCompleteCombo } from "@/components/reference/referenceShared";
+import { comboFromEvent, isCompleteCombo } from "@/lib/shortcuts";
 import { NOTEBOOK_SHORTCUT_DEFS, DEFAULT_NOTEBOOK_SHORTCUT_KEYS } from "./notebookShortcuts";
 import type { NbPageWidth } from "./notebookPrefs";
 

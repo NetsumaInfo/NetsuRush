@@ -416,7 +416,6 @@
     "dropHere": "Carpeta vacía — arrastra clips aquí.",
     "moveTo": "Mover a",
     "addToPool": "Añadir al Media Pool",
-    "sendToBoard": "Enviar al tablero",
     "removeFromLibrary": "Quitar de la biblioteca",
     "removeManyFromLibrary": "Quitar clips de la biblioteca ({{count}})",
     "undo": "Deshacer",

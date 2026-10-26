@@ -46,7 +46,6 @@ export const NAMESPACES = [
   "derush",
   "collections",
   "search",
-  "reference",
   "upscale",
   "roto",
   "notebook",

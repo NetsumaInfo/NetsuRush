@@ -416,7 +416,6 @@
     "dropHere": "Empty folder — drop footage here.",
     "moveTo": "Move to",
     "addToPool": "Add to the Media Pool",
-    "sendToBoard": "Send to the board",
     "removeFromLibrary": "Remove from the library",
     "removeManyFromLibrary": "Remove clips from the library ({{count}})",
     "undo": "Undo",

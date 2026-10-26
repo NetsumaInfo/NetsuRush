@@ -131,5 +131,9 @@
     "End": "Fin",
     "PageUp": "Page préc.",
     "PageDown": "Page suiv."
+  },
+  "shortcutEditor": {
+    "editShortcut": "Modifier le raccourci {{label}}",
+    "pressCombo": "Appuie sur la combinaison · Échap annule"
   }
 }

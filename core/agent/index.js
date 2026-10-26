@@ -10,7 +10,6 @@ const { createSession } = require('./session');
 const { createChatStore } = require('./store');
 const { openAgentLogin, openAgentInstall } = require('./login'); // terminal interactif
 const { createResolveTools } = require('./tools/resolve'); // catalogue Resolve (compound dispatchers)
-const { createReferenceTools } = require('./tools/reference'); // board de référence (mood-board)
 const { createResolveMcp } = require('./tools/resolveMcp'); // serveur MCP officiel Blackmagic, replié dans le registre
 const { createMcpBridge } = require('./mcp/server'); // serveur MCP stdio exposant le registry aux CLI
 const { t } = require('../i18n');
@@ -19,7 +18,7 @@ const { t } = require('../i18n');
  * @param {{
  *   broadcast:(ch:string,p:any)=>void, ev:any, dataDir:string,
  *   modules:{ resolveMod:any, timeline:any, sidecars:any, thumbs:any, proxy:any, ffmpeg:any,
- *             aeExporter:any, refStore:any,
+ *             aeExporter:any,
  *             guarded:(fn:Function)=>Function, rOp:(fn:Function)=>Function }
  * }} deps
  */
@@ -29,7 +28,6 @@ function createAgent(deps) {
   const registry = createToolRegistry();
   registry.registerAll(createNetsuRushTools({ ...modules, ev }));
   registry.registerAll(createResolveTools({ ...modules, ev }));
-  registry.registerAll(createReferenceTools({ refStore: modules.refStore, broadcast }));
   // Serveur MCP officiel de Blackmagic (livré avec Resolve Studio 21.1+). Ses
   // outils sont DÉCOUVERTS, pas déclarés ici : ils arrivent donc dans le
   // registre après coup, et `send` attend `ready()` avant de composer sa liste.

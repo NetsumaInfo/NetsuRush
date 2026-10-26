@@ -207,7 +207,6 @@
     "addToCollection": "In Sammlung ablegen",
     "addToTimeline": "Zur Timeline hinzufügen",
     "select": "Auswählen",
-    "sendToBoard": "An Board senden",
     "copyPath": "Pfad kopieren",
     "fileAndShot": "{{path}} · Shot #{{n}}"
   },
@@ -230,8 +229,6 @@
     "selSuffix_one": " · {{count}} ausgew.",
     "selSuffix_other": " · {{count}} ausgew.",
     "selectAllTooltip": "Alle auswählen",
-    "sendToBoardAria": "An Board senden",
-    "sendToBoardTooltip": "Auswahl an das Referenz-Board senden",
     "shotCount_one": "{{count}} Treffer",
     "shotCount_other": "{{count}} Treffer",
     "shotsCount_one": "{{count}} Shot",

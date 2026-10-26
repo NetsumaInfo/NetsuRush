@@ -10,7 +10,7 @@
 // A surface with another shape (a collection, a notebook) adds its own operations here and in
 // `ops.rs`; it does not reinterpret these.
 
-import type { ItemKind } from "@/components/reference/referenceShared";
+type ItemKind = "image" | "video" | "youtube" | "embed" | "text" | "frame" | "draw" | "sequence" | "palette";
 
 export const COLLAB_PROTOCOL_VERSION = 1 as const;
 

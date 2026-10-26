@@ -16,7 +16,7 @@ import { nr } from "@/lib/bridge";
 import { spell } from "@/lib/spell/spellClient";
 import { SpellcheckExtension, type SpellTarget } from "@/lib/spell/spellPlugin";
 import { SpellPopover } from "@/components/common/SpellPopover";
-import { isImageUrl, isVideoUrl } from "@/components/reference/embeds";
+import { isImageUrl, isVideoUrl } from "@/lib/embeds";
 import { nbId, makeEmptyDatabase, parseNbLink, NBPAGE_LINK_PREFIX, type NotebookPage, type NoteBlock } from "./notebookShared";
 import { notebookSchema, noteSlashItems, insertOrUpdate, todayIso } from "./notebookSchema";
 import { applyPasteAs, type LinkAs } from "./notebookPaste";

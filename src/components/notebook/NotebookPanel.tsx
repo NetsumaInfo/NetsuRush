@@ -120,13 +120,12 @@ export function NotebookPanel() {
   }, [t]);
   // --- Carnet-DOCUMENT (.netsu) -----------------------------------------------------------------
   // « Enregistrer sous » fait DÉMÉNAGER le carnet : il quitte la bibliothèque interne pour le
-  // fichier choisi, et la frappe y va ensuite directement. Le sélecteur de fichier .netsu vit sur
-  // `nr.reference` — c'est le même format, dupliquer le dialogue le ferait diverger du filtre.
+  // fichier choisi, et la frappe y va ensuite directement.
   const saveAsProject = useCallback(async () => {
     const s = useApp.getState();
     if (!s.nbActiveId) return;
     const title = s.nbList.find((n) => n.id === s.nbActiveId)?.title || t("notebook:panel.notebookFallback");
-    const dest = await nr.reference?.saveNetsuPath(`${safeFileName(title)}.netsu`);
+    const dest = await nr.notebook?.saveNetsuPath(`${safeFileName(title)}.netsu`);
     if (!dest) return; // annulé
     const res = await nr.notebook?.saveProjectAs({ notebookId: s.nbActiveId, destPath: dest });
     if (!res?.ok) return;
@@ -135,7 +134,7 @@ export function NotebookPanel() {
   }, [t]);
 
   const openProject = useCallback(async () => {
-    const src = await nr.reference?.chooseNetsu();
+    const src = await nr.notebook?.chooseNetsu();
     if (!src) return;
     const res = await nr.notebook?.openProject(src);
     if (!res?.ok || !res.notebookId) return;

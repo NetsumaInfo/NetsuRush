@@ -23,7 +23,6 @@ import { IndexingSettings } from "./IndexingSettings";
 import { ModelsSettings } from "./models/ModelsSettings";
 import { ExportProfileSettings } from "./ExportProfileSettings";
 import { MediaCacheSection } from "./storage/MediaCacheSection";
-import { BoardAssetsSection } from "./storage/BoardAssetsSection";
 import { CleanupSettings } from "./storage/CleanupSettings";
 import { OutboxSettings } from "./OutboxSettings";
 import { ProjectsSection } from "./storage/ProjectsSection";
@@ -39,7 +38,7 @@ const PANELS: Record<SettingsPage, Record<string, ComponentType>> = {
   ai: { models: ModelsSettings, indexing: IndexingSettings },
   export: { export: ExportProfileSettings },
   adobe: { adobe: AdobeBridgePanel },
-  storage: { media: MediaCacheSection, cleanup: CleanupSettings, board: BoardAssetsSection, project: OutboxSettings, projects: ProjectsSection },
+  storage: { media: MediaCacheSection, cleanup: CleanupSettings, project: OutboxSettings, projects: ProjectsSection },
   system: { updates: UpdateSettings, compatibility: CompatibilitySettings, collaboration: CollaborationSettings, console: ConsoleSettings },
   about: { about: AboutSettings },
 };

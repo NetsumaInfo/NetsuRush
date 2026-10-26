@@ -4,7 +4,7 @@
 // les touches nues sont ignorées quand un champ/éditeur a le focus.
 import { useEffect } from "react";
 import { useApp } from "@/store";
-import { comboFromEvent } from "@/components/reference/referenceShared";
+import { comboFromEvent } from "@/lib/shortcuts";
 import i18n from "@/i18n";
 
 export type NbShortcutAction =

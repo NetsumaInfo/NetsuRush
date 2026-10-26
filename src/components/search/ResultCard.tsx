@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Film, Play, ScanSearch, Plus, Aperture, Clapperboard, UserCheck, Images, CheckSquare, Copy } from "lucide-react";
+import { Film, Play, ScanSearch, Plus, Aperture, Clapperboard, UserCheck, CheckSquare, Copy } from "lucide-react";
 import { type SearchHit } from "@/lib/bridge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResultPreview } from "@/components/search/useResultPreview";
@@ -29,7 +29,7 @@ function tc(sec: number): string {
 // proxy HEVC au survol ou « Tout lire ». Sélection + ajout à la timeline ouverte (append).
 function ResultCardImpl({
   hit, index, selected, play, onToggle, onDownload, getProxy, bustProxy, peekProxy,
-  onFindSimilar, onAddRef, refActive, confirmChar, onConfirmChar, onSendBoard,
+  onFindSimilar, onAddRef, refActive, confirmChar, onConfirmChar,
 }: {
   hit: SearchHit;
   index: number;
@@ -48,7 +48,6 @@ function ResultCardImpl({
   refActive?: boolean;          // ce plan est déjà dans le bac de références
   confirmChar?: string;         // recherche par personnage : nom pour « c'est bien lui »
   onConfirmChar?: () => void;   // confirme → le visage devient un échantillon du perso
-  onSendBoard?: () => void;     // envoie le rush au board de référence
 }) {
   const { t } = useTranslation("search");
   // MÊME instant que la grille de plans → même entrée de cache, donc la même image sur le disque.
@@ -234,7 +233,6 @@ function ResultCardImpl({
         )}
         <ContextMenuSeparator />
         <CollectionSubmenu shots={shots} />
-        {onSendBoard && <ContextMenuItem onClick={onSendBoard}><Images /> {t("resultCard.sendToBoard")}</ContextMenuItem>}
         <ContextMenuItem onClick={onDownload}><Clapperboard /> {t("resultCard.addToTimeline")}</ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => void navigator.clipboard.writeText(hit.file_path)}>

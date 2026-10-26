@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { zipStore, unzip } = require('./netsu');
+const { zipStore, unzip } = require('./netsu/legacyZip');
 const { t } = require('./i18n');
 
 const FORMAT = 'netsu';

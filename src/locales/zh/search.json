@@ -207,7 +207,6 @@
     "addToCollection": "归入合集",
     "addToTimeline": "添加到时间线",
     "select": "选择",
-    "sendToBoard": "发送到画板",
     "copyPath": "复制路径",
     "fileAndShot": "{{path}} · 镜头 #{{n}}"
   },
@@ -230,8 +229,6 @@
     "selSuffix_one": " · 已选 {{count}}",
     "selSuffix_other": " · 已选 {{count}}",
     "selectAllTooltip": "全选",
-    "sendToBoardAria": "发送到画板",
-    "sendToBoardTooltip": "将所选发送到参考画板",
     "shotCount_one": "{{count}} 个结果",
     "shotCount_other": "{{count}} 个结果",
     "shotsCount_one": "{{count}} 个镜头",

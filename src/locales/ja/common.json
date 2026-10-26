@@ -131,5 +131,9 @@
     "End": "End",
     "PageUp": "Page Up",
     "PageDown": "Page Down"
+  },
+  "shortcutEditor": {
+    "editShortcut": "{{label}} のショートカットを変更",
+    "pressCombo": "キーの組み合わせを押してください · Esc でキャンセル"
   }
 }

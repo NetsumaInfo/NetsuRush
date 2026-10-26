@@ -27,13 +27,11 @@ const path = require("node:path");
 const { serveFile, streamMedia, mediaGuard } = require("./media-server");
 const logbus = require("./logbus");
 const { serveApp } = require("./appstatic");
-const { serveYoutube } = require("./ytstream");
 const { createRpc } = require("./rpc");
 const { killSidecars } = require("./sidecars");
 const { killRoto } = require("./roto");
 const { ffBin, NR_HOME } = require("./config");
 const { getCapabilities } = require("./export/capabilities");
-const { refreshYtDlpForAppVersion } = require("./ytdlpUpdate");
 const { controlRequestAllowed } = require("./httpSecurity");
 const { listenIpv6Loopback } = require("./ipv6Loopback");
 
@@ -54,7 +52,7 @@ const server = http.createServer((req, res) => {
   // RPC/SSE/health accept only the Tauri renderer, a served or dev loopback renderer, or a holder of
   // the shared token (Adobe panel, MCP bridge). CORS `*` was a browser-to-loopback confused-deputy
   // primitive here: a public web page could invoke ffmpeg, open paths, or mutate local state. /media,
-  // /stream and /ytstream still carry NO CORS header: they serve arbitrary disk files, and without
+  // /stream still carry NO CORS header: they serve arbitrary disk files, and without
   // `Access-Control-Allow-Origin` a third-party site cannot read their content through fetch (the
   // webview's own <img>/<video> tags need no CORS to display them).
   const controlRoute = u.pathname === "/rpc" || u.pathname === "/events";
@@ -121,13 +119,6 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  // Flux YouTube relayé (lecture sans iframe, cf. core/ytstream.js). Même garde que /media : hôte
-  // local + jeton, et pas d'en-tête CORS (une page tierce ne doit pas pouvoir lire la réponse).
-  if (u.pathname === "/ytstream") {
-    if (mediaGuard(req, res, u)) return;
-    void serveYoutube(req, res, u.searchParams.get("id"));
-    return;
-  }
   if (rpc.handle(req, res, u)) return;
 
   res.writeHead(404).end("not found");
@@ -166,10 +157,6 @@ function onListening() {
   void getCapabilities()
     .then((caps) => console.log(`Video encoders: ${caps.hwEncoders.join(', ') || 'CPU'}`))
     .catch((error) => console.warn('Encoder probe unavailable, falling back to CPU:', String(error)));
-  // Refreshes yt-dlp on the first boot of a new application version, and on that boot only. In the
-  // background: a version gap downloads a wheel, and no link on a board should wait for that.
-  void refreshYtDlpForAppVersion()
-    .catch((error) => console.warn('yt-dlp: update skipped:', String(error)));
 }
 
 server.on("listening", onListening);

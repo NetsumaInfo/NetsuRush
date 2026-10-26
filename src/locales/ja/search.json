@@ -207,7 +207,6 @@
     "addToCollection": "コレクションに入れる",
     "addToTimeline": "タイムラインに追加",
     "select": "選択",
-    "sendToBoard": "ボードへ送信",
     "copyPath": "パスをコピー",
     "fileAndShot": "{{path}} · ショット #{{n}}"
   },
@@ -230,8 +229,6 @@
     "selSuffix_one": " · {{count}} 選択",
     "selSuffix_other": " · {{count}} 選択",
     "selectAllTooltip": "すべて選択",
-    "sendToBoardAria": "ボードへ送信",
-    "sendToBoardTooltip": "選択をリファレンスボードへ送信",
     "shotCount_one": "{{count}} 件",
     "shotCount_other": "{{count}} 件",
     "shotsCount_one": "{{count}} ショット",

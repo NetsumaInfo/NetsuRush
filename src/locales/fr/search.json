@@ -207,7 +207,6 @@
     "addToCollection": "Ranger dans une collection",
     "addToTimeline": "Ajouter à la timeline",
     "select": "Sélectionner",
-    "sendToBoard": "Envoyer au board",
     "copyPath": "Copier le chemin",
     "fileAndShot": "{{path}} · plan #{{n}}"
   },
@@ -230,8 +229,6 @@
     "selSuffix_one": " · {{count}} sél.",
     "selSuffix_other": " · {{count}} sél.",
     "selectAllTooltip": "Tout sélectionner",
-    "sendToBoardAria": "Envoyer au board",
-    "sendToBoardTooltip": "Envoyer la sélection au board de référence",
     "shotCount_one": "{{count}} résultat",
     "shotCount_other": "{{count}} résultats",
     "shotsCount_one": "{{count}} plan",

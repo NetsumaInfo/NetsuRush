@@ -1,10 +1,8 @@
-// Moteur d'embeds en ligne du board (parsing + reconstruction d'URL). Séparé du MODÈLE
-// (referenceShared.ts) : ici vit tout ce qui RECONNAÎT un lien (YouTube, plateformes vidéo,
-// réseaux sociaux, GIF host) et reconstruit l'URL d'iframe à afficher. referenceShared réexporte
-// ces symboles pour ne casser aucun import existant (tous les consommateurs importent depuis
-// "./referenceShared").
+// Online embed engine (link parsing + iframe URL rebuild): recognizes a link (YouTube, video
+// platforms, social networks, GIF hosts) and rebuilds the iframe URL to display.
 
-import { IMAGE_RE, VIDEO_RE } from "./referenceShared";
+const IMAGE_RE = /\.(jpg|jpeg|png|gif|webp|bmp|tif|tiff|avif|svg)$/i;
+const VIDEO_RE = /\.(mp4|mov|mkv|m4v|avi|webm|wmv|flv|mts|m2ts|ts|mpg|mpeg|3gp)$/i;
 
 // Extrait l'id d'une vidéo YouTube depuis n'importe quelle forme d'URL (watch, youtu.be, embed, shorts).
 export function youtubeId(input: string): string | null {

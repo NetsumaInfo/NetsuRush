@@ -2,7 +2,6 @@ import { Download, Loader2, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUpdater } from "@/store/updater";
 import { UpdateStatusLine } from "@/components/updates/UpdateStatusLine";
-import { YtDlpRow } from "@/components/settings/YtDlpRow";
 import { ErrorReportButton } from "@/components/common/ErrorReportButton";
 import { releases, releaseText } from "@/data/releases";
 import { ReleaseNotes } from "@/components/updates/ReleaseNotes";
@@ -95,7 +94,6 @@ export function UpdateSettings() {
 
         {/* yt-dlp suit son propre rythme : ses extracteurs cassent bien plus vite que
             l'application ne sort une version, donc la bibliothèque se met à jour sans en attendre une. */}
-        <YtDlpRow />
       </Card>
 
       <div>

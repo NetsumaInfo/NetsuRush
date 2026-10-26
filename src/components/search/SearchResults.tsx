@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, Play, Group, Copy, Images, ScanFace, CheckSquare, Square } from "lucide-react";
+import { Search, Play, Group, Copy, ScanFace, CheckSquare, Square } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { type SearchHit } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -15,15 +15,10 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { ResultCard } from "@/components/search/ResultCard";
 import { hitKey, hitShot, grid } from "@/components/search/searchHelpers";
 import { RangeSelectionProvider } from "@/components/collections/rangeSelection";
-import { sendPathToBoard } from "@/components/reference/boardActions";
 import { ExportButton } from "@/components/export/ExportButton";
 import { usePreviewCache } from "@/components/rushes/previewCache";
 import { warmResolveThumbs } from "@/lib/thumbCache";
 import { thumbTime } from "@/lib/utils";
-
-function fileName(p: string): string {
-  return p.replace(/^.*[\\/]/, "");
-}
 
 // Plage d'aperçu d'un résultat : le plan, borné à 10 s. Cette borne fait partie de l'identité du
 // proxy (elle entre dans la clé du cache partagé) → calculée ICI et nulle part ailleurs.
@@ -134,7 +129,6 @@ export function SearchResults() {
         refActive={refKeys.has(`${h.file_path}#${h.scene_index}`)}
         confirmChar={faceChar?.name}
         onConfirmChar={faceChar ? () => confirmHitAsCharacter(h) : undefined}
-        onSendBoard={() => void sendPathToBoard(h.file_path, fileName(h.file_path))}
       />
     );
   }
@@ -178,15 +172,6 @@ export function SearchResults() {
 
         {resultView === "flat" && (
           <>
-            <Tooltip>
-              <TooltipTrigger render={<Button size="sm" variant="outline" disabled={picked === 0}
-                className="h-8 gap-1 px-2 text-xs text-muted-foreground"
-                aria-label={t("searchResults.sendToBoardAria")}
-                onClick={() => selectedHits.forEach((h) => void sendPathToBoard(h.file_path, fileName(h.file_path)))} />}>
-                <Images className="size-3.5" />
-              </TooltipTrigger>
-              <TooltipContent>{t("searchResults.sendToBoardTooltip")}</TooltipContent>
-            </Tooltip>
             {/* Même duo d'export que le Découpage : icône du profil + mode d'insertion + réglages.
                 Le bouton large « nom du profil » est réservé aux panneaux latéraux. */}
             <ExportButton

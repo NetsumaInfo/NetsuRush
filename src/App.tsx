@@ -31,13 +31,10 @@ import { Toaster } from "@/components/ui/toast";
 import { ExportStatusToast } from "@/components/export/ExportStatusToast";
 import { loadExportCapabilities } from "@/features/export/capabilities";
 import { GateFrame } from "@/components/auth/GateFrame";
-// Enregistre le board de référence comme surface collaborative. Importé pour son EFFET DE
-// BORD : les Paramètres doivent pouvoir nommer un board partagé même si l'onglet Référence
-// n'a jamais été ouvert (docs/collab.md).
-import "@/components/reference/collabSurface";
+// Enregistre les collections comme surface collaborative. Importé pour son EFFET DE BORD : les
+// Paramètres doivent pouvoir nommer une collection partagée même si l'onglet n'a jamais été ouvert.
 import "@/components/collections/collabSurface";
 
-const ReferenceWindow = lazy(() => import("@/components/reference/ReferenceWindow").then((m) => ({ default: m.ReferenceWindow })));
 const NotebookWindow = lazy(() => import("@/components/notebook/NotebookWindow").then((m) => ({ default: m.NotebookWindow })));
 // Chargé PARESSEUSEMENT : le gate tire convex/react. Sans déploiement Convex il n'est jamais monté,
 // et son chunk ne part donc jamais sur le réseau (cf. AuthGate ci-dessous).
@@ -56,11 +53,7 @@ function AuthGate({ children }: { children: ReactNode }) {
   return <Suspense fallback={<WindowLoading />}><LoginGate>{children}</LoginGate></Suspense>;
 }
 
-// Fenêtre détachée du board de référence : même renderer, hash #reference (créée via une 2e
-// WebviewWindow Tauri — P3). On rend alors UNIQUEMENT la board nue, sans shell.
-const IS_REFERENCE_WINDOW =
-  typeof window !== "undefined" && window.location.hash.replace(/^#\/?/, "").startsWith("reference");
-// Fenêtre détachée du Carnet : même mécano, hash #notebook — le panneau Carnet nu, sans shell.
+// Fenêtre détachée du Carnet : 2e WebviewWindow Tauri au hash #notebook — le panneau Carnet nu, sans shell.
 const IS_NOTEBOOK_WINDOW =
   typeof window !== "undefined" && window.location.hash.replace(/^#\/?/, "").startsWith("notebook");
 
@@ -79,17 +72,15 @@ export default function App() {
   // Le core sonde et persiste les encodeurs dès son démarrage. Le renderer amorce ici sa lecture
   // unique avant l'ouverture des Paramètres ; tous les éditeurs de profils partagent cette promesse.
   useEffect(() => {
-    if (!IS_REFERENCE_WINDOW && !IS_NOTEBOOK_WINDOW && !IS_REMOTE) void loadExportCapabilities();
+    if (!IS_NOTEBOOK_WINDOW && !IS_REMOTE) void loadExportCapabilities();
   }, []);
 
   return (
     <ErrorBoundary>
-      {/* Fond d'écran : couche fixe derrière TOUT le contenu, y compris la fenêtre de référence
+      {/* Fond d'écran : couche fixe derrière TOUT le contenu, y compris la fenêtre du carnet
           détachée. Se retire d'elle-même dans le panneau Adobe (moteur sans color-mix). */}
       <WallpaperLayer />
-      {IS_REFERENCE_WINDOW ? (
-        <Suspense fallback={<WindowLoading />}><ReferenceWindow /></Suspense>
-      ) : IS_NOTEBOOK_WINDOW ? (
+      {IS_NOTEBOOK_WINDOW ? (
         <Suspense fallback={<WindowLoading />}><NotebookWindow /></Suspense>
       ) : IS_REMOTE ? (
         // Intégré en remote dans le panneau Adobe : coquille dégraissée (sélecteur de vue au lieu du

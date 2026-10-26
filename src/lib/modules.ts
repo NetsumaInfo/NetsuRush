@@ -4,7 +4,6 @@ import { modelById, type ModelTask } from "@/lib/modelRegistry";
 export const MODULE_IDS = [
   "derush",
   "search",
-  "reference",
   "notebook",
   "upscale",
   "chat",

@@ -131,5 +131,9 @@
     "End": "Fin",
     "PageUp": "Re Pág",
     "PageDown": "Av Pág"
+  },
+  "shortcutEditor": {
+    "editShortcut": "Modificar el atajo {{label}}",
+    "pressCombo": "Pulsa la combinación · Esc cancela"
   }
 }
