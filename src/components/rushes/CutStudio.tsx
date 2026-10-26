@@ -36,6 +36,8 @@ import { DetectionModelSelect, DetectionPresetSelect } from "./DetectionControls
 import { flowOffsets } from "./cutFlow";
 import { CutFlowNav } from "./CutFlowNav";
 import { fmtPercent } from "@/lib/utils";
+import { type CollectionShot } from "@/lib/bridge";
+import { RangeSelectionProvider } from "@/components/collections/rangeSelection";
 
 // Seuils de mise en page (px) : sous NARROW_W la vue passe en colonne, et la grille garde toujours
 // au moins MIN_GRID_W — sinon la barre d'outils n'a plus de place et ses boutons s'empilent.
@@ -204,6 +206,11 @@ export function CutStudio() {
   // d'état local qui divergerait de ce que montrent les Réglages d'export.
   const activeProfile = getActiveExportProfile(exportProfiles, activeExportProfileId);
   const exportInputs = () => selectedList().map((s) => ({ input: pathOf(s), start: s.in, end: s.out }));
+  // Built like SceneCard's own shot, so the "Ranger" picker recognizes the clicked card in the selection.
+  const selectedShots = (): CollectionShot[] => selectedList().map((s) => {
+    const path = pathOf(s);
+    return { path, name: nameOf(path), in: s.in, out: s.out, inFrame: s.inFrame, outFrame: s.outFrame, srcFrames: srcFramesOf(path) };
+  });
 
   // Petit bouton de chaque vignette : applique le profil configuré (import timeline OU fichier).
   const cardProfile = getActiveExportProfile(exportProfiles, cardActionProfileId);
@@ -460,6 +467,7 @@ export function CutStudio() {
               the 20px gutter (px-4 + pr-1) and its scrollbar sits against the window like a real one. */}
           <div ref={attachGrid} style={{ contain: "layout paint" }} className={"min-h-0 flex-1 overflow-x-hidden overflow-y-auto pl-1 pr-2 pb-4 pt-1.5" + (compact ? " -mr-5" : "")}>
             {segments.length > 0 ? (
+              <RangeSelectionProvider shots={selectedShots}>
               <div className="grid gap-3" style={gridContainerStyle(actualCols, cell)}>
                 {segments.map((s, i) => {
                   // Chaque carte porte SON rush : dans un flux, deux vignettes voisines peuvent venir
@@ -478,6 +486,7 @@ export function CutStudio() {
                   );
                 })}
               </div>
+              </RangeSelectionProvider>
             ) : detecting || cacheLoading ? (
               // Chargement du cache (réouverture d'un rush déjà découpé) OU détection en cours : on
               // montre un loader, JAMAIS l'invite « Détecter » — sinon ça clignote « non découpé »

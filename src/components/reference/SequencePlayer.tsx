@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useBoard } from "./useReferenceBoard";
 import { displaySrc, youtubeId, type ShortcutAction } from "./referenceShared";
-import { ComboKeys } from "@/components/ui/kbd";
+import { ShortcutTip } from "@/components/ui/kbd";
 import { revertSequence } from "./boardMediaActions";
 import { IconAction, IconToggle } from "./inspectorControls";
 import { iconForLink } from "./brandIcons";
@@ -48,10 +48,7 @@ function CtrlBtn({ icon: Icon, label, onClick, active, action }: {
         <Icon />
       </TooltipTrigger>
       <TooltipContent>
-        <span className="flex items-center gap-1.5">
-          {label}
-          {combo && <ComboKeys combo={combo} />}
-        </span>
+        <ShortcutTip label={label} combo={combo} />
       </TooltipContent>
     </Tooltip>
   );

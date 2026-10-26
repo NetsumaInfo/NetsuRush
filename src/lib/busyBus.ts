@@ -37,7 +37,7 @@ const HEAVY_CHANNELS = new Set([
   // Téléchargements de modèles (disque + réseau saturés).
   "models:download", "models:import",
   // Board : upscale d'un item, décomposition en frames.
-  "reference:upscaleItem", "reference:extractFrames",
+  "reference:upscaleItem", "reference:extractFrames", "reference:exportLoop", "reference:exportBoardLoop",
   // Le fond lui-même : son import encode, il n'a aucune raison de s'exempter. `wallpaper:variant`
   // en est EXCLU volontairement — la couche demande une variante PARCE QUE l'état d'occupation a
   // changé ; l'y inclure ferait osciller le fond entre figé et animé toutes les 2,5 s.

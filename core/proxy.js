@@ -425,6 +425,134 @@ async function proxySegment({ input, start, end, priority, height, token, codec,
   }, priority, token);
 }
 
+// --- Ping-pong proxy ---------------------------------------------------------------------------
+// A `<video>` cannot play backwards: the only way to reverse one is to write `currentTime`, and each
+// write decodes from the previous keyframe. On a web source (YouTube, Instagram: one keyframe every
+// few seconds, read over the network for a relayed stream) that is a handful of uneven frames per
+// second. The reversal is therefore encoded ONCE: the range forwards, then the same range backwards,
+// in one file the board plays as an ordinary native loop.
+//
+// The `reverse` filter holds every frame of the range decoded in memory. The plan below bounds that:
+// frame rate capped, height lowered until the range fits the budget, and a range too long for the
+// lowest tier is refused — the board then keeps its seek-driven playback.
+const PINGPONG_FPS = 30;
+const PINGPONG_BUDGET_BYTES = 512 * 1024 * 1024;
+const PINGPONG_TIMEOUT_MS = 180000;
+
+/**
+ * Height the ping-pong file is encoded at, or null when the range cannot be reversed in memory.
+ * @param {number} seconds @param {number} height
+ * @returns {{ height: number, frames: number } | null}
+ */
+function pingpongPlan(seconds, height) {
+  const span = Number(seconds);
+  if (!Number.isFinite(span) || span <= 0) return null;
+  const frames = Math.ceil(span * PINGPONG_FPS) + 1;
+  const wanted = snapProxyHeight(height);
+  // yuv420p, 16:9 assumed: 1.5 bytes per pixel.
+  const fits = (h) => frames * Math.ceil((h * 16) / 9) * h * 1.5 <= PINGPONG_BUDGET_BYTES;
+  const tier = [...PROXY_TIERS].reverse().find((h) => h <= wanted && fits(h));
+  return tier ? { height: tier, frames } : null;
+}
+
+/**
+ * What ffmpeg reads for a ping-pong: a local file, or this core's own YouTube relay — never an
+ * arbitrary URL. The cache key of a relayed stream is its video id: the port and the token carried
+ * by the URL change between sessions.
+ * @param {unknown} input
+ * @returns {{ input: string, key: string, source: string | null } | null}
+ */
+function pingpongInput(input) {
+  const raw = String(input || '');
+  if (!raw) return null;
+  if (!/^[a-z][a-z0-9+.-]+:\/\//i.test(raw)) return { input: raw, key: raw, source: raw };
+  try {
+    const u = new URL(raw);
+    const id = u.searchParams.get('id');
+    if (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.pathname === '/ytstream' && id) {
+      return { input: raw, key: `ytstream:${id}`, source: null };
+    }
+  } catch (_) {}
+  return null;
+}
+
+/** @param {number} height @returns {string} */
+function pingpongGraph(height) {
+  return [
+    `[0:v:0]fps=fps='min(source_fps,${PINGPONG_FPS})',scale=-2:${height}:flags=fast_bilinear,split[fwd][src]`,
+    // The turn-around frame is already the last one played forwards: showing it twice reads as a stall.
+    '[src]reverse,trim=start_frame=1,setpts=PTS-STARTPTS[rev]',
+    '[fwd][rev]concat=n=2:v=1:a=0[v]',
+  ].join(';');
+}
+
+async function encodePingpong(src, start, span, out, height, token, resolved, preset) {
+  try { await fsp.mkdir(getProxyDir(), { recursive: true }); } catch (_) {}
+  const tmp = `${out}.${proxyTmpSeq++}.tmp`;
+  const faststart = resolved.container === 'mp4' ? ['-movflags', '+faststart'] : [];
+  try {
+    await ffSpawnCancellable([
+      '-hide_banner', '-loglevel', 'error',
+      '-y', '-ss', String(start), '-t', String(span), '-i', src.input,
+      '-filter_complex', pingpongGraph(height), '-map', '[v]', '-an',
+      ...proxyVideoArgs(resolved, preset), ...proxyContainerArgs(resolved),
+      ...faststart, '-f', resolved.container, tmp,
+    ], token, PINGPONG_TIMEOUT_MS);
+    if (!(await fileReady(tmp))) throw new Error(t('proxyEmpty'));
+    await fsp.rename(tmp, out);
+    cacheIndex().record({ kind: 'proxy', file: out, source: src.source || undefined });
+  } catch (e) {
+    try { await fsp.rm(tmp, { force: true }); } catch (_) {}
+    throw e;
+  }
+}
+
+// One at a time: each encode may hold the whole memory budget.
+let pingpongQueue = Promise.resolve();
+
+async function pingpongSegment({ input, start, end, height, token, codec, settings }) {
+  const src = pingpongInput(input);
+  const from = Math.max(0, Number(start) || 0);
+  const span = Number(end) - from;
+  // The board asks for the height it displays; the shared preview height only covers a caller without one.
+  const plan = src ? pingpongPlan(span, height ?? settings?.height) : null;
+  if (!src || !plan) return { ok: false, error: 'range not reversible' };
+  const configured = settings?.format === 'webm' ? 'vp8' : settings?.format === 'h264' ? 'h264' : 'hevc';
+  const vc = codec === 'h264' || codec === 'hevc' ? codec : configured;
+  const engine = settings?.engine === 'nvenc' || settings?.engine === 'amf' || settings?.engine === 'qsv' || settings?.engine === 'cpu' ? settings.engine : 'auto';
+  const preset = settings?.preset === 'level2' || settings?.preset === 'level3' ? settings.preset : 'level1';
+  let caps;
+  try { caps = await getCapabilities(); } catch (_) { caps = { h264Encoder: null, h265Encoder: null, codecEncoderOptions: {} }; }
+  const makeOut = (enc) => {
+    const key = crypto.createHash('md5').update(`pingpong|${src.key}|${from}|${end}|${vc}-${enc.encoder}-${preset}-v1-${plan.height}`).digest('hex');
+    return path.join(getProxyDir(), `${key}.${enc.extension}`);
+  };
+  const hardware = selectProxyEncoder(vc, caps, engine);
+  const software = selectProxyEncoder(vc, { h264Encoder: null, h265Encoder: null }, engine === 'cpu' ? 'cpu' : 'auto');
+  const encoders = hardware.vendor === 'cpu' ? [hardware] : [hardware, software];
+  for (const enc of encoders) {
+    const out = makeOut(enc);
+    if (await fileReady(out)) { cacheIndex().touch(out); return { ok: true, path: out, pingpong: true }; }
+  }
+  const job = pingpongQueue.then(async () => {
+    let failure = null;
+    for (const enc of encoders) {
+      const out = makeOut(enc);
+      try {
+        if (!(await fileReady(out))) await encodePingpong(src, from, span, out, plan.height, token, enc, preset);
+        return { ok: true, path: out, pingpong: true };
+      } catch (e) {
+        if (e && e.cancelled) return { ok: false, cancelled: true };
+        failure = e;
+      }
+    }
+    const msg = String((failure && failure.stderr) || failure).trim().split('\n').slice(-3).join(' ').slice(-300);
+    return { ok: false, error: msg };
+  });
+  pingpongQueue = job.then(() => undefined, () => undefined);
+  return job;
+}
+
 // Vide TOUT le cache de proxies. Purge en bloc, sans distinction de rush : appelée par cacheAdmin
 // quand l'utilisateur demande le type « proxies » en entier (une purge ciblée passe par l'index).
 // Saute les fichiers verrouillés (en cours de lecture). NE TOUCHE PAS aux vignettes : elles sont
@@ -465,4 +593,4 @@ function proxyForget(files) {
   proxyMetaReady = null;
 }
 
-module.exports = { proxySegment, proxyResolve, proxyCancel, proxyCancelMany, proxyCancelAll, proxyActiveCount, proxyFrameSource, cleanProxies, proxyForget };
+module.exports = { proxySegment, pingpongSegment, pingpongPlan, pingpongInput, pingpongGraph, proxyResolve, proxyCancel, proxyCancelMany, proxyCancelAll, proxyActiveCount, proxyFrameSource, cleanProxies, proxyForget };

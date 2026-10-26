@@ -29,7 +29,9 @@
   },
   "submenu": {
     "rangeIn": "Añadir a una colección",
-    "none": "Ninguna colección"
+    "none": "Ninguna colección",
+    "rangeOne": "Añadir este plano",
+    "rangeSelection": "Añadir la selección ({{count}})"
   },
   "sidePanel": {
     "export": "Exportación"
@@ -37,7 +39,10 @@
   "range": {
     "trigger": "Añadir a una colección",
     "rangeTitle_one": "Añadir el plano",
-    "rangeTitle_other": "Añadir {{count}} planos"
+    "rangeTitle_other": "Añadir {{count}} planos",
+    "scope": "Planos que añadir",
+    "scopeOne": "Solo este plano",
+    "scopeSelection": "Toda la selección ({{count}})"
   },
   "fav": {
     "remove": "Quitar de favoritos",

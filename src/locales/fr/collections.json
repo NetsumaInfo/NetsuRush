@@ -29,7 +29,9 @@
   },
   "submenu": {
     "rangeIn": "Ranger dans une collection",
-    "none": "Aucune collection"
+    "none": "Aucune collection",
+    "rangeOne": "Ranger ce plan",
+    "rangeSelection": "Ranger la sélection ({{count}})"
   },
   "sidePanel": {
     "export": "Export"
@@ -37,7 +39,10 @@
   "range": {
     "trigger": "Ranger dans une collection",
     "rangeTitle_one": "Ranger le plan",
-    "rangeTitle_other": "Ranger {{count}} plans"
+    "rangeTitle_other": "Ranger {{count}} plans",
+    "scope": "Plans à ranger",
+    "scopeOne": "Ce plan seulement",
+    "scopeSelection": "Toute la sélection ({{count}})"
   },
   "fav": {
     "remove": "Retirer des favoris",

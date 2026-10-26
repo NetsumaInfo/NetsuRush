@@ -3,15 +3,17 @@
 // en un clic) + toutes les collections + création inline. Favoris persistés (localStorage). Partagé partout.
 import { useEffect, useMemo, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
-import { FolderPlus, Check, Plus, Search, Star, Lock } from "lucide-react";
+import { FolderPlus, Check, Plus, Search, Star, Lock, Square, SquareStack } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type CollectionShot, type CollectionMeta } from "@/lib/bridge";
 import { CollectionGlyph, DEFAULT_COLLECTION_COLOR } from "./collectionGlyph";
 import { loadCollFavs, saveCollFavs } from "./collectionShared";
+import { useRangeSelection } from "./rangeSelection";
 import { cn } from "@/lib/utils";
 
 // Ce bouton est posé sur CHAQUE carte de plan : une grille de derush en monte plusieurs centaines.
@@ -20,16 +22,19 @@ import { cn } from "@/lib/utils";
 // vivait ici et re-tournait à chaque rendu de carte (le défilement en provoque beaucoup), et la
 // moindre écriture dans le store des collections re-rendait toutes les cartes de la grille.
 export function AddToCollection({
-  shots, className, stopPropagation = true,
+  shots, className, stopPropagation = true, onOpenChange,
 }: {
   shots: CollectionShot[];          // plan(s) à ranger (id généré côté core)
   className?: string;               // style du déclencheur (bouton-icône)
   stopPropagation?: boolean;        // évite de déclencher le clic de la carte sous le bouton
+  // The popover overflows its card: a card that mounts this button on hover must keep it while open.
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { t } = useTranslation("collections");
   const [open, setOpen] = useState(false);
+  const change = (o: boolean) => { setOpen(o); onOpenChange?.(o); };
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={change}>
       <Popover.Trigger
         aria-label={t("range.trigger")}
         onClick={(e) => { if (stopPropagation) e.stopPropagation(); }}
@@ -37,10 +42,13 @@ export function AddToCollection({
       >
         <FolderPlus className="h-3.5 w-3.5" />
       </Popover.Trigger>
-      {open && <CollectionPicker shots={shots} close={() => setOpen(false)} />}
+      {open && <CollectionPicker shots={shots} close={() => change(false)} />}
     </Popover.Root>
   );
 }
+
+// Mini icon switch of the title row ("this shot" / "the selection").
+const SCOPE_ITEM = "h-5 min-w-5 gap-0.5 rounded px-1 text-muted-foreground aria-pressed:bg-primary/15 aria-pressed:text-primary aria-pressed:hover:bg-primary/15";
 
 // Contenu du popover : monté seulement à l'ouverture.
 function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: () => void }) {
@@ -58,6 +66,11 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
   const [name, setName] = useState("");
   const [q, setQ] = useState("");
   const [favs, setFavs] = useState<string[]>(loadCollFavs);
+  // A selection is often built for something else (timeline, export): ranging it is a choice made
+  // here, never implied. Offered (and preselected) only from a card that belongs to it.
+  const { selection, offer } = useRangeSelection(shots);
+  const [scope, setScope] = useState<"one" | "selection">("selection");
+  const targets = offer && scope === "selection" ? selection : shots;
 
   useEffect(() => { void loadCollections(); setFavs(loadCollFavs()); }, [loadCollections]);
 
@@ -75,7 +88,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
 
   async function range(id: string) {
     setBusy(id);
-    const r = await rangeShots(id, shots);
+    const r = await rangeShots(id, targets);
     setBusy(null);
     if (r.ok) { setDone(id); setTimeout(() => { setDone(null); close(); }, 700); }
   }
@@ -84,7 +97,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
     if (!n) return;
     setBusy("__new__");
     const id = await createCollection({ name: n, color: DEFAULT_COLLECTION_COLOR });
-    if (id) await rangeShots(id, shots);
+    if (id) await rangeShots(id, targets);
     setBusy(null);
     setName(""); setCreating(false); close();
   }
@@ -121,19 +134,36 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
       <Popover.Portal>
         <Popover.Positioner side="top" sideOffset={6} className="z-50 outline-none">
           <Popover.Popup
+            aria-label={t("range.rangeTitle", { count: targets.length })}
             onClick={(e) => e.stopPropagation()}
             // Les touches du popover ne redescendent JAMAIS à la carte porteuse : par un portail,
             // React les fait remonter dans son arbre, où une grille de plans écoute Espace/Entrée.
             onKeyDown={(e) => e.stopPropagation()}
             className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-64 origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]"
           >
-            <div className="px-1 pb-1.5 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {t("range.rangeTitle", { count: shots.length })}
-            </div>
-            {/* Recherche rapide */}
-            <div className="mb-1 flex items-center gap-1.5 rounded-md border border-border bg-background px-2">
-              <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <input aria-label={t("search.short")} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search.short")} className="w-full bg-transparent py-1.5 text-sm outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+            {/* Search field and scope switch share ONE compact row: no title line, no extra row in a
+                popover already short on room. The switch shows up only when a selection exists. */}
+            <div className="mb-1 flex h-7 items-center gap-1.5 rounded-md border border-border bg-background pl-2 pr-0.5 has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-ring">
+              <Search className="size-3.5 shrink-0 text-muted-foreground" />
+              <input aria-label={t("search.short")} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search.short")} className="h-full w-full min-w-0 bg-transparent text-xs outline-none" />
+              {offer && (
+                <ToggleGroup aria-label={t("range.scope")} value={[scope]} spacing={0} className="shrink-0 border-l border-border pl-0.5"
+                  onValueChange={(v) => { const n = v[0]; if (n === "one" || n === "selection") setScope(n); }}>
+                  <Tooltip>
+                    <TooltipTrigger render={<ToggleGroupItem value="one" aria-label={t("range.scopeOne")} className={SCOPE_ITEM} />}>
+                      <Square className="size-3" />
+                    </TooltipTrigger>
+                    <TooltipContent>{t("range.scopeOne")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger render={<ToggleGroupItem value="selection" aria-label={t("range.scopeSelection", { count: selection.length })} className={SCOPE_ITEM} />}>
+                      <SquareStack className="size-3" />
+                      <span className="text-[10px] tabular-nums">{selection.length}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("range.scopeSelection", { count: selection.length })}</TooltipContent>
+                  </Tooltip>
+                </ToggleGroup>
+              )}
             </div>
 
             <div className="max-h-64 overflow-y-auto">

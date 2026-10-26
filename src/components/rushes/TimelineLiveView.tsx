@@ -34,6 +34,7 @@ import { getActiveExportProfile } from "@/features/export/profiles";
 import { timelineBuildOptsFromProfile, newTimelineName } from "@/features/export/timelineTarget";
 import { canFewerCols, canMoreCols, fmt, gridContainerStyle, nextSegId, stepCols } from "./cutStudioShared";
 import { errorText } from "@/lib/errorText";
+import { RangeSelectionProvider } from "@/components/collections/rangeSelection";
 
 // L'identité d'un plan ne suffit pas : sa fin, sa position timeline, son FPS ou même sa source peuvent
 // changer sans modifier `track:index:inFrame`. Cette empreinte pilote la réutilisation exacte du cache.
@@ -658,6 +659,7 @@ export function TimelineLiveView() {
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
           </div>
         ) : items.length ? (
+          <RangeSelectionProvider shots={() => selectedCuts.map(toShot)}>
           <div className="grid gap-3" style={gridContainerStyle(grid.actualCols || grid.cols, grid.cell)}>
             {items.map(({ cut, seg }, i) => (
               <ShotCard
@@ -678,6 +680,7 @@ export function TimelineLiveView() {
               />
             ))}
           </div>
+          </RangeSelectionProvider>
         ) : (
           <Card className="mx-3 mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
             <Film className="h-8 w-8" />

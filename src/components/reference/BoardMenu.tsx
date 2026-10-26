@@ -10,11 +10,11 @@ import {
   Copy, FlipHorizontal, FlipVertical, Crop, BringToFront, SendToBack, Trash2,
   PictureInPicture2, Minimize2, Home, Pin, Layers, Download, AppWindow, Undo2, Redo2, Settings2,
   FolderSearch, ClipboardCopy, Scissors, RotateCcw, Wand2, Ruler, Palette, ImageDown,
-  Link2, Unlink2, RefreshCw,
+  Link2, Unlink2, RefreshCw, Repeat,
 } from "lucide-react";
 import { enclosingFrame } from "./boardFrames";
 import { shifted } from "./drawGeometry";
-import { uid } from "./referenceShared";
+import { uid, type BoardItem } from "./referenceShared";
 import { convertToEmbed, downloadMediaFromEmbed, reloadMedia, reloadableMedia, relocateMissingMedia } from "./boardMediaActions";
 import { iconForLink } from "./brandIcons";
 import { nr } from "@/lib/bridge";
@@ -25,6 +25,8 @@ import {
 import { useBoard } from "./useReferenceBoard";
 import { AddLinkDialog } from "./AddLinkDialog";
 import { ExportImageDialog } from "./ExportImageDialog";
+import { ExportLoopDialog } from "./ExportLoopDialog";
+import { loopExportable } from "./boardLoopExport";
 import { extractPaletteToBoard } from "./boardPaletteActions";
 import type { BoardHandle } from "./ReferenceBoard";
 
@@ -89,6 +91,8 @@ export function BoardContextMenu({
   const missingCount = useBoard((s) => s.items.filter((i) => !!i.missing && i.kind !== "sequence").length);
   const [ytOpen, setYtOpen] = useState(false);
   const [imgExport, setImgExport] = useState(false);
+  // Held apart from the selection: the dialog outlives a click that deselects the item.
+  const [loopItem, setLoopItem] = useState<BoardItem | null>(null);
 
   const store = useBoard.getState;
 
@@ -211,6 +215,11 @@ export function BoardContextMenu({
               {item.kind === "embed" && (
                 <ContextMenuItem onClick={() => void downloadMediaFromEmbed(item.id)}>
                   <Download /> {item.localMedia ? t("actions.restoreDownload") : t("boardMenu.downloadMedia")}
+                </ContextMenuItem>
+              )}
+              {loopExportable(item) && (
+                <ContextMenuItem onClick={() => setLoopItem(item)}>
+                  <Repeat /> {t("exportLoop.menu")}
                 </ContextMenuItem>
               )}
               {(item.kind === "image" || item.kind === "video") && item.sourceUrl && (
@@ -385,6 +394,7 @@ export function BoardContextMenu({
 
       <AddLinkDialog board={board} open={ytOpen} onOpenChange={setYtOpen} />
       <ExportImageDialog open={imgExport} onOpenChange={setImgExport} />
+      {loopItem && <ExportLoopDialog item={loopItem} open onOpenChange={(v) => { if (!v) setLoopItem(null); }} />}
     </>
   );
 }

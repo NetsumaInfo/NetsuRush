@@ -111,6 +111,9 @@ function useLocalMediaRetry(item: Item) {
 const PRELOAD_BLOCK = 24;
 // Pas minimal entre deux reculs d'une vidéo en aller-retour (cf. la boucle ping-pong).
 const BACKSTEP_MS = 66;
+// A range being dragged changes on every pointer event: the ping-pong file is only asked for once it
+// has stopped moving.
+const PINGPONG_SETTLE_MS = 350;
 
 const HANDLES: ResizeHandle[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
 const HANDLE_POS: Record<ResizeHandle, string> = {
@@ -171,20 +174,52 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
     return () => { alive = false; nr.proxyCancel(token); };
   }, [useProxy, item.ref, proxH, trimIn, trimOut]);
 
-  // Lecture / gel global — ne joue QUE si l'item n'est pas figé. Le ping-pong est piloté par l'effet
-  // rAF dédié ci-dessous (lecture native seulement en mode boucle).
+  // Ping-pong plays a file the core encodes once — the range forwards, then backwards — as a plain
+  // native loop: reversing by seeks decodes from the previous keyframe at every step, which a web
+  // source (YouTube, Instagram: sparse keyframes, read over the network) cannot follow. Until that
+  // file is ready, and for a range the core refuses as too long, the seek-driven loop below drives.
+  const pingpongEnd = trimOut ?? (item.dur && item.dur > trimIn ? item.dur : null);
+  const pingpongInput = streamSrc ?? (localRef ? item.ref : null);
+  const pingpongKey = playMode === "pingpong" && pingpongInput && pingpongEnd != null
+    ? `${pingpongInput}|${trimIn}|${pingpongEnd}|${proxH}`
+    : null;
+  const [pingpongFile, setPingpongFile] = useState<{ key: string; url: string | null } | null>(null);
+  useEffect(() => {
+    if (!pingpongKey || !pingpongInput || pingpongEnd == null) return;
+    let alive = true;
+    let token: number | null = null;
+    const timer = setTimeout(() => {
+      token = nextProxyToken();
+      nr.proxy({ input: pingpongInput, start: trimIn, end: pingpongEnd, height: proxH, token, pingpong: true })
+        .then((r) => {
+          if (!alive || r.cancelled) return;
+          setPingpongFile({ key: pingpongKey, url: r.ok && r.pingpong && r.path ? nr.assetUrl(r.path) : null });
+        })
+        .catch(() => undefined);
+    }, PINGPONG_SETTLE_MS);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      if (token != null) nr.proxyCancel(token);
+    };
+  }, [pingpongKey, pingpongInput, pingpongEnd, trimIn, proxH]);
+  const pingpongUrl = pingpongFile && pingpongFile.key === pingpongKey ? pingpongFile.url : null;
+  const native = pingpongUrl != null;
+
+  // Lecture / gel global — ne joue QUE si l'item n'est pas figé. Sans fichier aller-retour, le
+  // ping-pong est piloté par l'effet rAF dédié ci-dessous.
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
     if (!playing) v.pause();
-    else if (playMode !== "pingpong") v.play().catch(() => {});
-  }, [playing, playMode, proxUrl]);
+    else if (native || playMode !== "pingpong") v.play().catch(() => {});
+  }, [playing, playMode, proxUrl, pingpongUrl, native]);
 
   // Ping-pong : aller-retour sur [lo, hi]. <video> ne lit pas en arrière → avant = lecture native
   // (fluide), arrière = pas manuel de currentTime en rAF. Proxy = segment exact ([0, durée]).
   useEffect(() => {
     const v = ref.current;
-    if (!v || !playing || playMode !== "pingpong") return;
+    if (!v || !playing || playMode !== "pingpong" || native) return;
     const lo = useProxy ? 0 : trimIn;
     let raf = 0, prev = 0, back = 0, dir: 1 | -1 = 1;
     const tick = (ts: number) => {
@@ -211,20 +246,31 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [playing, playMode, useProxy, trimIn, trimOut, proxUrl]);
+  }, [playing, playMode, useProxy, trimIn, trimOut, proxUrl, native]);
 
   // Publishes the playback position to the inspector (loop playhead) and takes its scrub seeks. The
   // proxy plays the cut segment alone, so its clock is offset by trimIn — the offset is read from a
   // ref, not captured, so a bound dragged live never seeks against a stale base.
+  // A ping-pong file runs the range forwards then backwards: its second half folds back onto the range.
   const baseRef = useRef(0);
-  baseRef.current = useProxy ? trimIn : 0;
+  baseRef.current = useProxy || native ? trimIn : 0;
+  const foldRef = useRef<number | null>(null);
+  foldRef.current = native && pingpongEnd != null ? pingpongEnd - trimIn : null;
   useEffect(
     () =>
       registerPlayer(item.id, {
-        time: () => (ref.current ? baseRef.current + ref.current.currentTime : null),
+        time: () => {
+          const v = ref.current;
+          if (!v) return null;
+          const span = foldRef.current;
+          const at = span != null && v.currentTime > span ? Math.max(0, 2 * span - v.currentTime) : v.currentTime;
+          return baseRef.current + at;
+        },
         seek: (t) => {
           const v = ref.current;
-          if (v) v.currentTime = Math.max(0, t - baseRef.current);
+          if (!v) return;
+          const at = Math.max(0, t - baseRef.current);
+          v.currentTime = foldRef.current != null ? Math.min(at, foldRef.current) : at;
         },
       }),
     [item.id],
@@ -233,11 +279,11 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
   // Proxy = segment déjà découpé → boucle entière, aucun seek. Sinon (fichier natif lisible) on garde
   // le seek [trimIn, trimOut] sur la source brute (/media supporte le Range).
   const seekIn = () => {
-    if (useProxy) return;
+    if (useProxy || native) return;
     const v = ref.current;
     if (v && trimIn && Math.abs(v.currentTime - trimIn) > 0.05) v.currentTime = trimIn;
   };
-  useEffect(seekIn, [trimIn, useProxy]);
+  useEffect(seekIn, [trimIn, useProxy, native]);
 
   // `onLoadedMetadata` n'est PAS un état : c'est un événement, et il est perdu s'il se produit avant
   // que React n'ait attaché le handler — ce qui arrive dès que la source répond vite ou qu'elle est
@@ -253,7 +299,7 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
       // le champ « fin » restait vide et aucun point de sortie ne pouvait être posé — le symptôme
       // se lisait comme « le in/out ne marche pas » alors que rien n'avait jamais pu être réglé.
       const duration = v.duration;
-      if (!useProxy && duration && isFinite(duration) && Math.abs(duration - (item.dur ?? 0)) > 0.5) {
+      if (!useProxy && !native && duration && isFinite(duration) && Math.abs(duration - (item.dur ?? 0)) > 0.5) {
         patchItem(item.id, { dur: duration }, false);
       }
     };
@@ -265,7 +311,7 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
     return () => {
       for (const event of events) v.removeEventListener(event, announce);
     };
-  }, [streamSrc, proxUrl, item.src, item.id, item.dur, useProxy, onReady, patchItem]);
+  }, [streamSrc, proxUrl, pingpongUrl, native, item.src, item.id, item.dur, useProxy, onReady, patchItem]);
 
   // Rebouclage sur la borne de sortie, surveillé À CHAQUE FRAME DÉCODÉE. `timeupdate` n'est émis
   // que ~4 fois par seconde : la lecture dépassait la borne de jusqu'à 250 ms avant le retour en
@@ -297,7 +343,7 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
     };
   }, [useProxy, playMode, trimIn, trimOut, playing, proxUrl]);
 
-  const src = streamSrc ?? (useProxy ? proxUrl : item.src);
+  const src = pingpongUrl ?? streamSrc ?? (useProxy ? proxUrl : item.src);
 
   // Sous-titres JAMAIS imposés : ni une piste incrustée dans le conteneur, ni celle que la WebView
   // allume d'elle-même d'après la langue du système. Une planche de références montre des images,
@@ -322,8 +368,8 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
       src={src ?? undefined}
       poster={poster}
       muted
-      loop={playMode === "loop" && (useProxy || trimOut == null)}
-      autoPlay={playing && playMode !== "pingpong"}
+      loop={native || (playMode === "loop" && (useProxy || trimOut == null))}
+      autoPlay={playing && (native || playMode !== "pingpong")}
       // Suspendu (gel, navigation, mode « off ») : métadonnées seules. Sans ça, chaque vidéo montée
       // bufferise en entier même à l'arrêt — jusqu'à MEDIA_BUDGET flux ouverts en plein geste.
       preload={playing ? "auto" : "metadata"}
@@ -331,26 +377,29 @@ function VideoContent({ item, streamSrc, onStreamError, onReady }: {
       className={item.crop ? "block select-none" : "block h-full w-full select-none object-cover"}
       style={item.crop ? cropStyle(item.crop) : undefined}
       onError={() => {
+        // A ping-pong file that will not play (purged from the cache) is dropped, not treated as a
+        // dead source: the item falls back to its own media.
+        if (native && pingpongKey) { setPingpongFile({ key: pingpongKey, url: null }); return; }
         if (onStreamError) onStreamError();
         else if (!retry.onFailure()) triggerRecover(item);
       }}
       onLoadedMetadata={(e) => {
         const d = e.currentTarget.duration;
         // chargé mais noir → récupère (ou, pour un flux relayé, repli sur le lecteur intégré)
-        if (!useProxy && !e.currentTarget.videoWidth) {
+        if (!useProxy && !native && !e.currentTarget.videoWidth) {
           if (onStreamError) onStreamError();
           else if (!retry.onFailure(false)) triggerRecover(item);
         }
         // Decoded dimensions = the true ratio of the source, whatever the ingestion probe managed to
         // measure: the item is reshaped around them so a video never plays cropped inside a box that
         // does not match it. A proxy is a re-encoded excerpt — its dimensions are the proxy's.
-        if (!useProxy && e.currentTarget.videoWidth && e.currentTarget.videoHeight) {
+        if (!useProxy && !native && e.currentTarget.videoWidth && e.currentTarget.videoHeight) {
           fitNatSize(item.id, e.currentTarget.videoWidth, e.currentTarget.videoHeight);
         }
         // Prêt = la source rend une IMAGE. Des métadonnées sans dimension partent en repli juste
         // au-dessus : les annoncer prêtes retirerait le voile de chargement sur un carré noir.
         if (e.currentTarget.videoWidth) onReady?.();
-        if (!useProxy && d && isFinite(d) && Math.abs(d - (item.dur ?? 0)) > 0.5) patchItem(item.id, { dur: d }, false);
+        if (!useProxy && !native && d && isFinite(d) && Math.abs(d - (item.dur ?? 0)) > 0.5) patchItem(item.id, { dur: d }, false);
         seekIn();
       }}
       onTimeUpdate={(e) => {

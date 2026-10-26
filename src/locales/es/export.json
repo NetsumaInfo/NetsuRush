@@ -67,7 +67,7 @@
       "time": "Hora"
     },
     "mergeGap": "Pausa en negro",
-    "mergeGapHint": "Duración del negro añadido entre cada plano fusionado",
+    "mergeGapHint": "Duración del negro entre planos fusionados",
     "seconds": "s"
   },
   "encoder": {

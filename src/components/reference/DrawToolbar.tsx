@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { ComboKeys } from "@/components/ui/kbd";
+import { ShortcutTip } from "@/components/ui/kbd";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { useBoard } from "./useReferenceBoard";
 import { DrawHeadPicker } from "./DrawHeadPicker";
@@ -43,10 +43,7 @@ function IconBtn({ label, combo, active, disabled, onClick, children }: {
         {children}
       </TooltipTrigger>
       <TooltipContent>
-        <span className="flex items-center gap-1.5">
-          {label}
-          {combo && <ComboKeys combo={combo} />}
-        </span>
+        <ShortcutTip label={label} combo={combo} />
       </TooltipContent>
     </Tooltip>
   );

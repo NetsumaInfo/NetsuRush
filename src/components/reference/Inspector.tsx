@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2, Link2, Unlink2, SwatchBook } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Trash2, BringToFront, SendToBack, Crop, Download, AppWindow, Wand2, Undo2, Film, Palette, Hash, RefreshCw, Columns3, Rows3, Grid2x2, Link2, Unlink2, SwatchBook, Repeat } from "lucide-react";
 import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,6 +21,8 @@ import { quickUpscale } from "./boardUpscale";
 import { extractPaletteToBoard, regeneratePalette } from "./boardPaletteActions";
 import { COLOR_FORMATS, COLOR_FORMAT_LABEL } from "./colorFormat";
 import { UpscaleItemDialog } from "./UpscaleItemDialog";
+import { ExportLoopDialog } from "./ExportLoopDialog";
+import { loopExportable } from "./boardLoopExport";
 import { iconForLink } from "./brandIcons";
 import { enclosingFrame } from "./boardFrames";
 
@@ -51,6 +53,7 @@ export function Inspector() {
   const addSequenceFrom = useBoard((s) => s.addSequenceFrom);
   const prefs = useBoard((s) => s.prefs);
   const [upOpen, setUpOpen] = useState(false);
+  const [loopOpen, setLoopOpen] = useState(false);
   const setStudio = useBoard((s) => s.setStudio);
   // Réglage « barre quand l'app perd le focus » : la sélection reste, seule la barre s'efface.
   const hidden = useHideOnBlur();
@@ -289,6 +292,11 @@ export function Inspector() {
             <Film />
           </IconAction>
         )}
+        {loopExportable(item) && (
+          <IconAction label={t("exportLoop.menu")} onClick={() => setLoopOpen(true)}>
+            <Repeat />
+          </IconAction>
+        )}
         {item.prevMedia && (
           <IconAction
             label={t("inspector.undoUpscale")}
@@ -323,6 +331,7 @@ export function Inspector() {
         </IconAction>
       </div>
       {upscalable && <UpscaleItemDialog item={item} open={upOpen} onOpenChange={setUpOpen} />}
+      {loopOpen && loopExportable(item) && <ExportLoopDialog item={item} open onOpenChange={setLoopOpen} />}
     </div>
   );
 }

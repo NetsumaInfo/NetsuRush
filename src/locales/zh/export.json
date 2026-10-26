@@ -67,7 +67,7 @@
       "time": "时间"
     },
     "mergeGap": "黑场间隔",
-    "mergeGapHint": "合并后每个镜头之间插入黑场的时长",
+    "mergeGapHint": "合并镜头之间的黑场时长",
     "seconds": "秒"
   },
   "encoder": {

@@ -79,7 +79,9 @@ function TooltipContent({
           className={cn(
             // `break-words` : sans lui, un mot sans espace (nom de fichier, URL, identifiant) déborde
             // de la bulle — `max-w-*` borne la largeur mais ne crée aucune occasion de césure.
-            "z-50 w-fit max-w-52 break-words hyphens-auto rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md",
+            // Wide enough for a label and its shortcut, or a short hint, to stay on one line; a
+            // text that still wraps is balanced so no line ends on a single word.
+            "z-50 w-fit max-w-80 break-words text-balance hyphens-auto rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md",
             "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-98",
             "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-98",
             "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",

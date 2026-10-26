@@ -27,6 +27,7 @@ const roto = require("./roto"); // Roto Studio : daemon SAM interactif (scaffold
 const dictate = require("./dictate"); // dictée vocale push-to-talk (réutilise le daemon whisper)
 const voice = require("./voice"); // module voix : transcription + silences (sous-titres, montage texte)
 const exportMod = require("./export"); // export fichier piloté par profil (remux/encode, GPU/CPU, merge)
+const loopExport = require("./loopExport"); // board clip → looping animated image (animated WebP, GIF)
 const audioLang = require("./audioLang"); // normalisation des étiquettes de langue des pistes audio
 const { createReferenceStore, scanFolder, writeExportFile } = require("./reference");
 const { createBoardStorage } = require("./boardStorage");
@@ -590,7 +591,7 @@ function createRpc() {
     "cut:getEdits": ([p, model, optionsKey]) => cutEditsStore.getEdits(p, model, optionsKey),
     "cut:saveEdits": ([p, model, edits, optionsKey]) => cutEditsStore.saveEdits(p, model, edits, optionsKey),
     "cut:clearEdits": ([p, model, optionsKey]) => cutEditsStore.clearEdits(p, model, optionsKey),
-    "ffmpeg:proxy": ([opts]) => proxy.proxySegment(opts),
+    "ffmpeg:proxy": ([opts]) => (opts?.pingpong ? proxy.pingpongSegment(opts) : proxy.proxySegment(opts)),
     // Lot de plans → chemins des proxies DÉJÀ en cache (aucun encode). Amorce le cache d'URL du
     // renderer à l'ouverture d'une grille : les cartes n'émettent plus un RPC chacune au défilement.
     "ffmpeg:proxyResolve": ([items, opts]) => proxy.proxyResolve(items, opts || {}),
@@ -908,6 +909,12 @@ function createRpc() {
     "reference:extractMedia": ([url, options]) => extract.extractMedia(url, options || {}),
     // Décompose une vidéo locale en frames image → assets disque → liste de chemins.
     "reference:extractFrames": ([opts]) => extractBoardFrames(opts),
+    // A board clip written as a looping animated image (WebP or GIF) at a path the user chose.
+    "reference:exportLoop": ([opts]) => loopExport.exportLoop(ev, opts || {}),
+    "reference:exportLoopCancel": () => loopExport.cancelLoopExport(),
+    "reference:estimateLoop": ([opts]) => loopExport.estimateLoop(opts || {}),
+    // The whole board as a looping animated image: still layers and playing clips, stacked.
+    "reference:exportBoardLoop": ([opts]) => loopExport.exportBoardLoop(ev, opts || {}),
     "reference:push": ([payload]) => {
       broadcast("reference:push", payload);
       return null;

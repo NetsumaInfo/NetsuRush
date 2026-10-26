@@ -23,6 +23,11 @@ export interface RenderOptions {
   background?: string | null;
   // Rendre uniquement ces items (export de la sélection).
   only?: Set<string>;
+  // Paint this subset of the scope while keeping the scope's framing: one layer of a board that
+  // is composed from several (cf. boardLoopRender). Default = the whole scope.
+  paint?: Set<string>;
+  // Draw layer on top; default = only when the whole board is rendered.
+  shapes?: boolean;
 }
 
 const DEFAULT_MARGIN = 0.03;
@@ -33,7 +38,7 @@ const UI_FONT = "Inter, system-ui, sans-serif";
 // Kinds sans pixels propres (iframe) : rendus en cartouche titré.
 const CARD_KINDS = new Set(["youtube", "embed"]);
 
-function visibleItems(items: BoardItem[], only?: Set<string>): BoardItem[] {
+export function visibleItems(items: BoardItem[], only?: Set<string>): BoardItem[] {
   return items
     .filter((it) => it.kind !== "draw" && (!only || only.has(it.id)))
     .sort((a, b) => a.z - b.z);
@@ -470,8 +475,9 @@ function paintShape(ctx: CanvasRenderingContext2D, s: DrawShape): void {
   ctx.restore();
 }
 
-// Peint tout le board dans un canvas. `width` fixe la largeur de sortie (la hauteur suit le ratio).
-export async function renderBoardCanvas(items: BoardItem[], opts: RenderOptions = {}): Promise<HTMLCanvasElement> {
+// Where the content lands in the output: `scale` from board units to pixels, `dx/dy` the offset
+// applied before it. Shared by the canvas render and by whatever composes over it.
+export function exportLayout(items: BoardItem[], opts: RenderOptions = {}): { outW: number; outH: number; scale: number; dx: number; dy: number } {
   const marginRatio = opts.marginRatio ?? DEFAULT_MARGIN;
   const bounds = contentBounds(items, opts.only);
   const margin = Math.max(bounds.w, bounds.h) * marginRatio;
@@ -479,7 +485,12 @@ export async function renderBoardCanvas(items: BoardItem[], opts: RenderOptions 
   const natH = Math.max(1, bounds.h + 2 * margin);
   const outW = Math.max(1, Math.round(opts.width ?? natW));
   const scale = outW / natW;
-  const outH = Math.max(1, Math.round(natH * scale));
+  return { outW, outH: Math.max(1, Math.round(natH * scale)), scale, dx: margin - bounds.x, dy: margin - bounds.y };
+}
+
+// Peint tout le board dans un canvas. `width` fixe la largeur de sortie (la hauteur suit le ratio).
+export async function renderBoardCanvas(items: BoardItem[], opts: RenderOptions = {}): Promise<HTMLCanvasElement> {
+  const { outW, outH, scale, dx, dy } = exportLayout(items, opts);
 
   const canvas = document.createElement("canvas");
   canvas.width = outW;
@@ -492,12 +503,14 @@ export async function renderBoardCanvas(items: BoardItem[], opts: RenderOptions 
     ctx.fillRect(0, 0, outW, outH);
   }
   ctx.scale(scale, scale);
-  ctx.translate(margin - bounds.x, margin - bounds.y);
+  ctx.translate(dx, dy);
 
-  for (const item of visibleItems(items, opts.only)) await paintItem(ctx, item);
+  for (const item of visibleItems(items, opts.only)) {
+    if (!opts.paint || opts.paint.has(item.id)) await paintItem(ctx, item);
+  }
   // Le calque de dessin passe au-dessus des items (son plan à l'écran dépend d'un réglage de vue,
   // pas du document) ; un export de la sélection seule ne l'emporte pas.
-  if (!opts.only) shapesOf(items).forEach((s) => paintShape(ctx, s));
+  if (opts.shapes ?? !opts.only) shapesOf(items).forEach((s) => paintShape(ctx, s));
 
   return canvas;
 }

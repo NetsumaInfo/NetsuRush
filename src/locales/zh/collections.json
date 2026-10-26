@@ -29,7 +29,9 @@
   },
   "submenu": {
     "rangeIn": "归入合集",
-    "none": "暂无合集"
+    "none": "暂无合集",
+    "rangeOne": "将此镜头归入合集",
+    "rangeSelection": "将所选镜头归入合集 ({{count}})"
   },
   "sidePanel": {
     "export": "导出"
@@ -37,7 +39,10 @@
   "range": {
     "trigger": "归入合集",
     "rangeTitle_one": "将镜头归入合集",
-    "rangeTitle_other": "将 {{count}} 个镜头归入合集"
+    "rangeTitle_other": "将 {{count}} 个镜头归入合集",
+    "scope": "要归入的镜头",
+    "scopeOne": "仅此镜头",
+    "scopeSelection": "全部所选 ({{count}})"
   },
   "fav": {
     "remove": "取消收藏",

@@ -1,5 +1,7 @@
 // Sous-menu « Ranger dans une collection » pour les clics droits (recherche, etc.).
 // Réutilise le store collections (loadCollections/rangeShots) — chargement paresseux à l'ouverture.
+// With a selection in the grid, a second submenu ranges the whole selection: a menu has no room for
+// the popover's toggle, and two entries keep the choice explicit.
 import { useState } from "react";
 import { FolderPlus, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -11,8 +13,21 @@ import {
 } from "@/components/ui/context-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { CollectionGlyph } from "./collectionGlyph";
+import { useRangeSelection } from "./rangeSelection";
 
 export function CollectionSubmenu({ shots }: { shots: CollectionShot[] }) {
+  const { t } = useTranslation("collections");
+  const { selection, offer } = useRangeSelection(shots);
+  if (!offer) return <RangeSub shots={shots} label={t("submenu.rangeIn")} />;
+  return (
+    <>
+      <RangeSub shots={shots} label={t("submenu.rangeOne")} />
+      <RangeSub shots={selection} label={t("submenu.rangeSelection", { count: selection.length })} />
+    </>
+  );
+}
+
+function RangeSub({ shots, label }: { shots: CollectionShot[]; label: string }) {
   const { t } = useTranslation("collections");
   const { collections, loadCollections, rangeShots } = useApp(useShallow((s) => ({
     collections: s.collections, loadCollections: s.loadCollections, rangeShots: s.rangeShots,
@@ -29,7 +44,7 @@ export function CollectionSubmenu({ shots }: { shots: CollectionShot[] }) {
 
   return (
     <ContextMenuSub onOpenChange={(o) => { if (o) void loadCollections(); }}>
-      <ContextMenuSubTrigger><FolderPlus /> {t("submenu.rangeIn")}</ContextMenuSubTrigger>
+      <ContextMenuSubTrigger><FolderPlus /> {label}</ContextMenuSubTrigger>
       <ContextMenuSubContent className="max-h-64 overflow-y-auto">
         {collections.length === 0 ? (
           <ContextMenuItem disabled>{t("submenu.none")}</ContextMenuItem>

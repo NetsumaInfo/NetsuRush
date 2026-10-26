@@ -38,7 +38,10 @@ function SceneCardImpl({
   const playing = showVideo && !videoPaused;
   // Habillage de survol : monté seulement quand la carte est SOUS le pointeur (ou au clavier). En
   // remote, les icônes restent visibles au repos (cf. ACT_VIS) → il faut les monter dès la bande.
-  const chrome = IS_REMOTE || alwaysChrome ? near : interactive;
+  // The "Ranger" popover overflows the card: with the pointer on it the card is no longer hovered,
+  // and a focus move inside it would unmount the chrome, popover included. Held while it is open.
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const chrome = (IS_REMOTE || alwaysChrome ? near : interactive) || rangeOpen;
   const actVis = alwaysChrome ? ACT_ALWAYS : ACT_VIS;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
@@ -87,7 +90,9 @@ function SceneCardImpl({
         />
       }>
       <div className={hoverLiftLayer(
-        "overflow-hidden rounded-xl border bg-muted group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-1",
+        // Keyboard focus = light border, never a ring: the ring colour is the primary blue, so a focused
+        // card read as selected (it stays focused after a click, and any shortcut makes it focus-visible).
+        "overflow-hidden rounded-xl border bg-muted group-focus-visible:border-foreground/50",
         active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true),
       )}>
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
@@ -125,10 +130,12 @@ function SceneCardImpl({
 
       {chrome && (<>
         {/* ranger ce plan dans une collection (bibliothèque) — directement sur la vignette */}
-        <Tooltip>
-          <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${actVis}`} />}>
+        {/* Off while the popover is open: focus inside it bubbles (React tree) up to this trigger. */}
+        <Tooltip disabled={rangeOpen}>
+          <TooltipTrigger render={<span className={`absolute bottom-1.5 left-1.5 inline-flex transition-opacity ${rangeOpen ? ACT_ALWAYS : actVis}`} />}>
             <AddToCollection
               shots={[{ path: clipPath, name: clipName, in: seg.in, out: seg.out, inFrame: seg.inFrame, outFrame: seg.outFrame, srcFrames }]}
+              onOpenChange={setRangeOpen}
               className="nr-chip shadow-md p-1 text-white/80 hover:text-primary"
             />
           </TooltipTrigger>

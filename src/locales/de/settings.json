@@ -353,7 +353,7 @@
     "description": "Erzähl, was passiert ist",
     "descriptionPlaceholder": "Was du gemacht hast und was schiefging…",
     "descriptionIdea": "Erzähl deine Idee",
-    "descriptionIdeaPlaceholder": "Was du gern tun würdest und warum",
+    "descriptionIdeaPlaceholder": "Was du tun willst und warum",
     "steps": "Wie kann man es nachstellen?",
     "stepsPlaceholder": "1. Ich öffne… 2. Ich klicke auf… 3. …",
     "expected": "Was hätte passieren sollen?",
@@ -379,7 +379,7 @@
     "sending": "Wird gesendet…",
     "send": "Senden",
     "download": "Nachricht speichern",
-    "sendFailed": "Das Senden hat nicht geklappt. Versuch es noch einmal.",
+    "sendFailed": "Senden fehlgeschlagen. Versuch es noch einmal.",
     "validation": {
       "description": "Erzähl vor dem Senden, was passiert ist.",
       "detail": "Sag in wenigen Worten, worum es geht.",

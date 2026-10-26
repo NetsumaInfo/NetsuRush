@@ -63,7 +63,7 @@
   "mock": {
     "resolveUnavailable": "浏览器中无法使用 Resolve。",
     "appUnavailable": "浏览器中无法使用此功能。",
-    "outsideApp": "此功能仅可在应用中使用。",
+    "outsideApp": "仅可在应用中使用。",
     "pageNotFound": "找不到页面",
     "collectionNotFound": "找不到合集",
     "archiveUnavailable": "无法在应用外归档。",
@@ -119,8 +119,8 @@
   "error": {
     "coreUnreachable": "NetsuRush 服务没有响应。请重试；如果一直这样，请重启应用。",
     "diskFull": "磁盘已满。请释放空间后重试。",
-    "notFound": "找不到文件。它可能已被移动或删除。",
-    "permission": "访问被拒绝。文件可能是只读的，或已在其他应用中打开。",
+    "notFound": "找不到文件：已移动或删除？",
+    "permission": "拒绝访问：只读或已在其他应用中打开？",
     "busy": "另一个应用正在使用该文件。请关闭它后重试。",
     "timeout": "未能及时响应。请重试。",
     "internal": "NetsuRush 内部错误。详情见 设置 › 系统 › 控制台。"

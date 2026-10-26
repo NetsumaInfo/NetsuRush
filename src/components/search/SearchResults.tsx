@@ -13,7 +13,8 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ResultCard } from "@/components/search/ResultCard";
-import { hitKey, grid } from "@/components/search/searchHelpers";
+import { hitKey, hitShot, grid } from "@/components/search/searchHelpers";
+import { RangeSelectionProvider } from "@/components/collections/rangeSelection";
 import { sendPathToBoard } from "@/components/reference/boardActions";
 import { ExportButton } from "@/components/export/ExportButton";
 import { usePreviewCache } from "@/components/rushes/previewCache";
@@ -139,7 +140,7 @@ export function SearchResults() {
   }
 
   return (
-    <>
+    <RangeSelectionProvider shots={() => selectedHits.map(hitShot)}>
       {/* Barre d'outils COLLANTE, accrochee sous la barre de requete (hauteur fixe h-14). Meme
           grammaire que NetsuCut : un bouton-compteur qui selectionne tout, « Deselectionner » quand
           il y a une selection, puis les actions — TOUJOURS visibles, eteintes tant que rien n'est
@@ -332,6 +333,6 @@ export function SearchResults() {
           )}
         </>
       )}
-    </>
+    </RangeSelectionProvider>
   );
 }

@@ -353,7 +353,7 @@
     "description": "说说发生了什么",
     "descriptionPlaceholder": "你做了什么，哪里不对劲…",
     "descriptionIdea": "说说你的想法",
-    "descriptionIdeaPlaceholder": "你希望能做什么，为什么",
+    "descriptionIdeaPlaceholder": "你想做什么，为什么",
     "steps": "怎么复现？",
     "stepsPlaceholder": "1. 打开… 2. 点击… 3. …",
     "expected": "本来应该怎样？",

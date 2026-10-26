@@ -17,6 +17,22 @@ function keyLabel(part: string): string {
   return i18n.t(`common:keys.${part}`, { defaultValue: part });
 }
 
+// Tooltip of a button that has a shortcut: its label, then its keys, on ONE line. Every such
+// tooltip goes through here so they are all laid out the same — a label wrapped on two lines
+// beside keys that stay on one reads as two unrelated blocks.
+export function ShortcutTip({ label, combo }: { label: string; combo?: string }) {
+  return (
+    <span className="flex items-center gap-2.5 whitespace-nowrap">
+      {label}
+      {combo && (
+        <span className="flex items-center gap-1">
+          <ComboKeys combo={combo} />
+        </span>
+      )}
+    </span>
+  );
+}
+
 // Un combo canonique (« Ctrl+Shift+Z ») rendu en badges séparés par des « + ».
 export function ComboKeys({ combo }: { combo: string }) {
   return (

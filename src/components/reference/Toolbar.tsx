@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { ComboKeys } from "@/components/ui/kbd";
+import { ShortcutTip } from "@/components/ui/kbd";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -69,10 +69,7 @@ function IconBtn({ icon: Icon, label, onClick, disabled, active, action, setting
         <Icon />
       </TooltipTrigger>
       <TooltipContent>
-        <span className="flex items-center gap-1.5">
-          {label}
-          {combo && <ComboKeys combo={combo} />}
-        </span>
+        <ShortcutTip label={label} combo={combo} />
       </TooltipContent>
     </Tooltip>
   );

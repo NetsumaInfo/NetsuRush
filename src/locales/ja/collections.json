@@ -29,7 +29,9 @@
   },
   "submenu": {
     "rangeIn": "コレクションに追加",
-    "none": "コレクションなし"
+    "none": "コレクションなし",
+    "rangeOne": "このショットを追加",
+    "rangeSelection": "選択中のショットを追加 ({{count}})"
   },
   "sidePanel": {
     "export": "書き出し"
@@ -37,7 +39,10 @@
   "range": {
     "trigger": "コレクションに追加",
     "rangeTitle_one": "ショットを追加",
-    "rangeTitle_other": "{{count}} 件のショットを追加"
+    "rangeTitle_other": "{{count}} 件のショットを追加",
+    "scope": "追加するショット",
+    "scopeOne": "このショットのみ",
+    "scopeSelection": "選択中のすべて ({{count}})"
   },
   "fav": {
     "remove": "お気に入りから外す",

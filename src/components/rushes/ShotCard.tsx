@@ -44,7 +44,10 @@ function ShotCardImpl({
   const { rootRef, thumb, url, showVideo, videoPaused, near, interactive, hovered, onVideoError, enter, leave, focusEnter, focusLeave } =
     useSceneCardMedia({ seg, index, clipPath, play, getProxy, bustProxy, peekProxy });
   const playing = showVideo && !videoPaused;
-  const chrome = alwaysChrome ? near : interactive;
+  // The "Ranger" popover overflows the card: with the pointer on it the card is no longer hovered,
+  // and a focus move inside it would unmount the chrome, popover included. Held while it is open.
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const chrome = (alwaysChrome ? near : interactive) || rangeOpen;
 
   const [adding, setAdding] = useState<"idle" | "busy" | "done" | "err">("idle");
   async function doAdd(e: { stopPropagation: () => void }) {
@@ -82,7 +85,9 @@ function ShotCardImpl({
         />
       }>
       <div className={hoverLiftLayer(
-        "overflow-hidden rounded-xl border bg-muted group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-1",
+        // Keyboard focus = light border, never a ring: the ring colour is the primary blue, so a focused
+        // card read as selected (it stays focused after a click, and any shortcut makes it focus-visible).
+        "overflow-hidden rounded-xl border bg-muted group-focus-visible:border-foreground/50",
         active ? "border-primary ring-2 ring-inset ring-primary" : selectionRing(selected, true),
       )}>
       {!thumb && <Skeleton className="absolute inset-0 rounded-none" />}
@@ -109,7 +114,7 @@ function ShotCardImpl({
 
       {/* barre d'actions (bas-gauche) : ajouter timeline · ranger · retirer */}
       {chrome && (
-      <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" || alwaysChrome ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
+      <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" || alwaysChrome || rangeOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
         {onAddToTimeline && (
           <Tooltip>
             <TooltipTrigger render={<button type="button" aria-label={t("shared.addToTimeline")} onClick={doAdd}
@@ -121,9 +126,10 @@ function ShotCardImpl({
             <TooltipContent>{t("shared.addToTimeline")}</TooltipContent>
           </Tooltip>
         )}
-        <Tooltip>
+        {/* Off while the popover is open: focus inside it bubbles (React tree) up to this trigger. */}
+        <Tooltip disabled={rangeOpen}>
           <TooltipTrigger render={<span className="inline-flex" />}>
-            <AddToCollection shots={rangerShots} className="nr-chip p-1 text-white/80 hover:text-primary" />
+            <AddToCollection shots={rangerShots} onOpenChange={setRangeOpen} className="nr-chip p-1 text-white/80 hover:text-primary" />
           </TooltipTrigger>
           <TooltipContent>{t("shared.rangeInCollection")}</TooltipContent>
         </Tooltip>

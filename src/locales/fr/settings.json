@@ -187,7 +187,7 @@
       "namePlaceholder": "Nom du thème",
       "confirm": "Valider",
       "rename": "Renommer",
-      "unsaved": "« {{name}} » a des modifications non enregistrées."
+      "unsaved": "« {{name}} » a des modifications non enregistrées."
     }
   },
   "updates": {
@@ -305,10 +305,10 @@
   },
   "bugReport": {
     "title": "Signaler un souci",
-    "type": "Il se passe quoi ?",
+    "type": "Il se passe quoi ?",
     "module": "Où ça ?",
     "detail": "Dis-le en quelques mots",
-    "detailPlaceholder": "ex : le bouton Envoyer ne fait rien",
+    "detailPlaceholder": "ex : le bouton Envoyer ne fait rien",
     "severity": "C'est grave ?",
     "frequency": "Ça arrive…",
     "groups": {
@@ -353,11 +353,11 @@
     "description": "Raconte ce qui s'est passé",
     "descriptionPlaceholder": "Ce que tu as fait, et ce qui a cloché…",
     "descriptionIdea": "Raconte ton idée",
-    "descriptionIdeaPlaceholder": "Ce que tu aimerais faire, et pourquoi",
+    "descriptionIdeaPlaceholder": "Ce que tu veux faire, et pourquoi",
     "steps": "Comment le refaire ?",
     "stepsPlaceholder": "1. J'ouvre… 2. Je clique sur… 3. …",
-    "expected": "Ça aurait dû faire quoi ?",
-    "expectedPlaceholder": "Le résultat que tu attendais",
+    "expected": "Ça aurait dû faire quoi ?",
+    "expectedPlaceholder": "Le résultat attendu",
     "videoSource": "Lien de la vidéo",
     "videoPlaceholder": "un lien pour la télécharger",
     "discord": "Ton Discord",
@@ -371,7 +371,7 @@
       "more": "Tout voir",
       "less": "Réduire",
       "manual": "Écris-le toi-même",
-      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11",
+      "manualPlaceholder": "RTX 3060, Ryzen 5600X, 32 Go, Windows 11",
       "unknownGpu": "GPU inconnu",
       "ffmpegOk": "ffmpeg présent",
       "ffmpegMissing": "ffmpeg absent"
@@ -379,13 +379,13 @@
     "sending": "Envoi…",
     "send": "Envoyer",
     "download": "Enregistrer le message",
-    "sendFailed": "L'envoi n'a pas marché. Réessaie.",
+    "sendFailed": "Envoi échoué. Réessaie.",
     "validation": {
-      "description": "Raconte ce qui s'est passé avant d'envoyer.",
+      "description": "Décris ce qui s'est passé avant l'envoi.",
       "detail": "Dis en quelques mots de quoi il s'agit.",
       "tooLarge": "Un fichier dépasse {{size}} Mo."
     },
-    "noWebhook": "Envoi désactivé : aucun canal. Renseigne <c1>bugWebhook</c1> dans nr.config.json, ou déploie le relais Convex (<c2>VITE_CONVEX_SITE_URL</c2>).",
+    "noWebhook": "Envoi désactivé : aucun canal. Renseigne <c1>bugWebhook</c1> dans nr.config.json, ou déploie le relais Convex (<c2>VITE_CONVEX_SITE_URL</c2>).",
     "descriptionOther": "Explique ta demande",
     "descriptionOtherPlaceholder": "Ta question, ou ce que tu veux nous dire…",
     "files": {
@@ -446,7 +446,7 @@
     "off": "Désactivée",
     "status": {
       "connected": "Visible sur le profil de {{user}}.",
-      "searching": "Discord introuvable — la présence apparaîtra à son ouverture.",
+      "searching": "Discord introuvable. La présence apparaîtra à son ouverture.",
       "disabled": "Ton profil n'affiche rien.",
       "noAppId": "Application Discord non renseignée."
     },

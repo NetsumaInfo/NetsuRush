@@ -63,7 +63,7 @@
   "mock": {
     "resolveUnavailable": "Resolve est indisponible dans le navigateur.",
     "appUnavailable": "Fonction indisponible dans le navigateur.",
-    "outsideApp": "Fonction disponible uniquement dans l'application.",
+    "outsideApp": "Disponible uniquement dans l'application.",
     "pageNotFound": "Page introuvable",
     "collectionNotFound": "Collection introuvable",
     "archiveUnavailable": "Archivage indisponible hors application.",
@@ -119,8 +119,8 @@
   "error": {
     "coreUnreachable": "Le service de NetsuRush ne répond pas. Réessaie ; si ça dure, redémarre l'app.",
     "diskFull": "Disque plein. Libère de l'espace, puis réessaie.",
-    "notFound": "Fichier introuvable. Il a peut-être été déplacé ou supprimé.",
-    "permission": "Accès refusé. Le fichier est peut-être en lecture seule ou ouvert dans une autre app.",
+    "notFound": "Fichier introuvable : déplacé ou supprimé ?",
+    "permission": "Accès refusé : lecture seule ou ouvert ailleurs ?",
     "busy": "Une autre app utilise le fichier. Ferme-la, puis réessaie.",
     "timeout": "Pas de réponse à temps. Réessaie.",
     "internal": "Problème interne de NetsuRush. Le détail est dans Paramètres › Système › Console."

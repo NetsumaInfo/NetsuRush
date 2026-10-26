@@ -42,7 +42,7 @@
       "replace": "Remplacer le calque",
       "fit": "Adapter à la durée du calque",
       "above": "Ajouter au-dessus des calques",
-      "end": "Ajouter à la fin de la composition"
+      "end": "Ajouter en fin de composition"
     },
     "container": "Conteneur",
     "processStep": "Traitement {{n}}",
@@ -67,7 +67,7 @@
       "time": "Heure"
     },
     "mergeGap": "Pause noire",
-    "mergeGapHint": "Durée du noir ajouté entre chaque plan fusionné",
+    "mergeGapHint": "Durée du noir entre les plans fusionnés",
     "seconds": "s"
   },
   "encoder": {

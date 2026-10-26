@@ -353,7 +353,7 @@
     "description": "何があったか教えてください",
     "descriptionPlaceholder": "やったこと、うまくいかなかったこと…",
     "descriptionIdea": "アイデアを教えてください",
-    "descriptionIdeaPlaceholder": "できるようになってほしいこと、その理由",
+    "descriptionIdeaPlaceholder": "やりたいこと、その理由",
     "steps": "もう一度やるには？",
     "stepsPlaceholder": "1. 開く… 2. 押す… 3. …",
     "expected": "本来はどうなるはずでしたか？",

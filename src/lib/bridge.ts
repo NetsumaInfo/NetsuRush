@@ -1608,6 +1608,38 @@ export interface WallpaperApi {
   remove(id: string): Promise<{ ok: boolean; removed?: boolean; error?: string }>;
 }
 
+export type LoopFormat = "webp" | "gif";
+// How a GIF spends its 256 colours: "frame" = a palette per frame (best colours, heavier, the
+// default), "global" = one palette for the whole clip (light). Cf. core/loopExport.js.
+export type GifPalette = "frame" | "global";
+export interface LoopExportOpts {
+  path: string;
+  out: string;
+  format: LoopFormat;
+  in?: number;
+  end?: number;
+  fps?: number;
+  width?: number;
+  quality?: number;
+  lossless?: boolean;
+  gifPalette?: GifPalette;
+  crop?: { x: number; y: number; w: number; h: number };
+  flipH?: boolean;
+  flipV?: boolean;
+}
+// One entry of a whole-board export: a still layer, or a video placed by its centre (output pixels).
+export type BoardLoopEntry =
+  | { png: string }
+  | {
+      // `path`: a file, or the core's YouTube relay URL. `frames` + `fps`: an image sequence.
+      path?: string; frames?: string[]; fps?: number; in?: number; end?: number;
+      // Fit inside the rectangle instead of filling it (a card is not the shape of its video).
+      contain?: boolean;
+      x: number; y: number; w: number; h: number;
+      crop?: { x: number; y: number; w: number; h: number };
+      flipH?: boolean; flipV?: boolean; rotation?: number; opacity?: number;
+    };
+
 export interface RefApi {
   listScenes(): Promise<RefSceneMeta[]>;
   storagePath(): Promise<string>;
@@ -1661,6 +1693,21 @@ export interface RefApi {
   // `in/out` = plage de boucle (s), `fps` = cadence d'échantillonnage, `max` = plafond de frames.
   // `fps` omis ou ≤ 0 = cadence de la source ; la réponse renvoie celle réellement employée.
   extractFrames(opts: { path: string; fps?: number; max?: number; height?: number; in?: number; out?: number; projectPath?: string; title?: string }): Promise<{ ok: boolean; frames?: string[]; fps?: number; error?: string }>;
+  // A local clip written as a looping animated image at `out`. `in/end` = range in seconds (whole
+  // file when omitted), `fps`/`width` omitted or 0 = those of the source, `quality` (1–100) and
+  // `lossless` are WebP only. One export at a time; `cancelExportLoop` stops it and the call resolves `cancelled`.
+  exportLoop(opts: LoopExportOpts): Promise<{ ok: boolean; path?: string; bytes?: number; cancelled?: boolean; error?: string }>;
+  cancelExportLoop(): Promise<{ ok: boolean; cancelled?: boolean }>;
+  onLoopProgress(cb: (p: { pct: number }) => void): () => void;
+  // Weight the export would have, from a real encode of a short sample. A newer call replaces the
+  // one in flight, which resolves `stale`.
+  estimateLoop(opts: Omit<LoopExportOpts, "out">): Promise<{ ok: boolean; bytes?: number; stale?: boolean; error?: string }>;
+  // The whole board as a looping animated image. `stack` is the board bottom first: still layers
+  // (PNG, base64, each the size of the output) and the videos that play between them. Progress and
+  // cancellation are those of `exportLoop`.
+  // `duration` omitted = the longest loop of the stack. `seamless` bends each clip's speed a little
+  // so that it plays a whole number of times and the file wraps without a jump.
+  exportBoardLoop(opts: { out: string; format: LoopFormat; fps: number; duration?: number; seamless?: boolean; quality?: number; lossless?: boolean; gifPalette?: GifPalette; stack: BoardLoopEntry[] }): Promise<{ ok: boolean; path?: string; bytes?: number; duration?: number; cancelled?: boolean; error?: string }>;
   // Partage « .netsu » : exporte la scène (items + vue) dans une archive à `destPath` selon `opts`
   // (mode complet / léger / liens, seuil d'embarquement, gel des liens distants). Importe une archive
   // → scène reconstruite (tokens d'assets → chemins locaux ; gros médias non retrouvés = placeholders).
@@ -2865,7 +2912,9 @@ export interface NrApi {
   clearCutEdits(filePath: string, model: DetectModel, optionsKey?: string): Promise<{ ok: boolean; error?: string }>;
   // `path` = rush concerné (découpe en lot N en parallèle → route le pct vers le bon item) ; null en simple.
   onScenesProgress(cb: (p: { path: string | null; pct: number }) => void): () => void;
-  proxy(opts: { input: string; start: number; end: number; priority?: "high" | "low"; height?: number; token?: number; codec?: "h264" | "hevc"; requireVideo?: boolean; requireAudio?: boolean; settings?: PreviewGenerationSettings["proxy"] }): Promise<{ ok: boolean; path?: string; error?: string; cancelled?: boolean }>;
+  // `pingpong`: the range encoded forwards then backwards in one file, played as a plain loop. Refused
+  // (`ok: false`) when the range is too long to reverse in memory — cf. core/proxy.js.
+  proxy(opts: { input: string; start: number; end: number; priority?: "high" | "low"; height?: number; token?: number; codec?: "h264" | "hevc"; requireVideo?: boolean; requireAudio?: boolean; pingpong?: boolean; settings?: PreviewGenerationSettings["proxy"] }): Promise<{ ok: boolean; path?: string; error?: string; cancelled?: boolean; pingpong?: boolean }>;
   // Résout en UN appel les proxies DÉJÀ encodés d'un lot de plans (aucun ffmpeg, aucune file) :
   // `file` vaut null quand la plage n'est pas en cache. Une grille amorce ainsi son cache d'URL à
   // l'ouverture au lieu de laisser chaque carte réclamer le sien au défilement — cf. core/proxy.js.
@@ -3740,8 +3789,13 @@ const mock: NrApi = {
       playInfo: async () => ({ duration: 0, fps: 0, codec: "", native: false }),
       extractMedia: async () => ({ ok: false, error: "mock" }),
       extractFrames: async () => ({ ok: false, error: "mock" }),
+      exportLoop: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      cancelExportLoop: async () => ({ ok: true, cancelled: false }),
+      onLoopProgress: () => () => {},
+      estimateLoop: async () => ({ ok: false, stale: true }),
       exportBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       importBoard: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+      exportBoardLoop: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
       onShareProgress: () => () => {},
       relocateFrom: async () => ({ ok: false, found: [], scanned: 0, error: i18n.t("common:mock.appUnavailable") }),
       // Forme COMPLÈTE mais vide : le dialogue d'export rend ses quatre niveaux à 0 o au lieu de

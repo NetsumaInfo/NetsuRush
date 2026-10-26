@@ -353,11 +353,11 @@
     "description": "Tell us what happened",
     "descriptionPlaceholder": "What you did, and what went wrong…",
     "descriptionIdea": "Tell us your idea",
-    "descriptionIdeaPlaceholder": "What you'd like to do, and why",
+    "descriptionIdeaPlaceholder": "What you want to do, and why",
     "steps": "How can we make it happen again?",
     "stepsPlaceholder": "1. I open… 2. I click… 3. …",
     "expected": "What should it have done?",
-    "expectedPlaceholder": "The result you expected",
+    "expectedPlaceholder": "Expected result",
     "videoSource": "Link to the video",
     "videoPlaceholder": "a link we can download it from",
     "discord": "Your Discord",
@@ -379,9 +379,9 @@
     "sending": "Sending…",
     "send": "Send",
     "download": "Save the message",
-    "sendFailed": "Sending didn't work. Try again.",
+    "sendFailed": "Sending failed. Try again.",
     "validation": {
-      "description": "Tell us what happened before sending.",
+      "description": "Describe what happened before sending.",
       "detail": "Say in a few words what it is about.",
       "tooLarge": "A file is over {{size}} MB."
     },
@@ -446,7 +446,7 @@
     "off": "Off",
     "status": {
       "connected": "Visible on {{user}}'s profile.",
-      "searching": "Can't find Discord — presence shows up once it's open.",
+      "searching": "Discord not found. Presence shows once it's open.",
       "disabled": "Your profile shows nothing.",
       "noAppId": "No Discord application set."
     },

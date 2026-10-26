@@ -32,6 +32,7 @@ import { useSharedCollection } from "@/lib/collab/collection/useSharedCollection
 import { patchSharedShot } from "@/lib/collab/collection/session";
 import { ShotInspector } from "./ShotInspector";
 import { CollectionSidePanel } from "./CollectionSidePanel";
+import { RangeSelectionProvider } from "./rangeSelection";
 import {
   collectTags, sortShots, filterShots, labelColor, labelNameKey, loadShotSort, saveShotSort,
   EMPTY_FILTER, SORT_KEYS, SORT_LABELS, type CollSortKey, type ShotFilter,
@@ -476,6 +477,7 @@ export function CollectionDetail({ id }: { id: string }) {
             <span>{(coll?.shots.length ?? 0) ? tr("detail.noMatch") : tr("detail.emptyFolder")}</span>
           </Card>
         ) : (
+          <RangeSelectionProvider shots={selectedShots}>
           <div className="grid gap-3" style={gridStyle}>
             {items.map(({ shot, seg }, i) => {
               const nameKey = labelNameKey(shot.label);
@@ -519,6 +521,7 @@ export function CollectionDetail({ id }: { id: string }) {
               );
             })}
           </div>
+          </RangeSelectionProvider>
         )}
       </div>
       </div>

@@ -67,7 +67,7 @@
       "time": "Time"
     },
     "mergeGap": "Black gap",
-    "mergeGapHint": "Duration of black inserted between merged shots",
+    "mergeGapHint": "Duration of black between merged shots",
     "seconds": "s"
   },
   "encoder": {

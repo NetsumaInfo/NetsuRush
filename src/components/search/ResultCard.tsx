@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Film, Play, ScanSearch, Plus, Aperture, Clapperboard, UserCheck, Images, CheckSquare, Copy } from "lucide-react";
 import { type SearchHit } from "@/lib/bridge";
@@ -7,6 +7,7 @@ import { useResultPreview } from "@/components/search/useResultPreview";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { AddToCollection } from "@/components/collections/AddToCollection";
 import { CollectionSubmenu } from "@/components/collections/CollectionSubmenu";
+import { hitShot } from "@/components/search/searchHelpers";
 import { cn, basename, thumbTime, fmtPercent } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -53,7 +54,9 @@ function ResultCardImpl({
   // MÊME instant que la grille de plans → même entrée de cache, donc la même image sur le disque.
   const thumbAt = thumbTime(hit.start_sec, hit.end_sec);
   // Plan sérialisé pour « Ranger dans une collection » (identique au bouton du pied).
-  const shots = [{ path: hit.file_path, name: basename(hit.file_path), in: hit.start_sec, out: hit.end_sec, inFrame: hit.start_frame, outFrame: hit.end_frame, srcFrames: hit.src_frames, fps: hit.fps }];
+  const shots = [hitShot(hit)];
+  // Keeps the hover action bar visible while the "Ranger" popover is open over it.
+  const [rangeOpen, setRangeOpen] = useState(false);
 
   const { rootRef, thumb, thumbErr, hovered, enter, leave, url, showVideo, videoPaused, near, resetUrl } =
     useResultPreview({ filePath: hit.file_path, thumbAt, index, play, getProxy, bustProxy, peekProxy });
@@ -145,7 +148,7 @@ function ResultCardImpl({
           </TooltipTrigger>
           <TooltipContent>{t("resultCard.fileAndShot", { path: hit.file_path, n: hit.scene_index + 1 })}</TooltipContent>
         </Tooltip>
-        <div className="absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-br-xl bg-gradient-to-l from-card from-75% via-card to-transparent pl-8 pr-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        <div className={cn("absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-br-xl bg-gradient-to-l from-card from-75% via-card to-transparent pl-8 pr-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100", rangeOpen && "opacity-100")}>
         {onAddRef && (
           <Tooltip>
             <TooltipTrigger render={<button
@@ -183,11 +186,13 @@ function ResultCardImpl({
             <TooltipContent>{hit.char ? t("resultCard.confirmedChar", { name: hit.char.name }) : t("resultCard.confirmChar", { name: confirmChar })}</TooltipContent>
           </Tooltip>
         )}
-        <Tooltip>
+        {/* Off while the popover is open: focus inside it bubbles (React tree) up to this trigger. */}
+        <Tooltip disabled={rangeOpen}>
           <TooltipTrigger render={<span className="inline-flex shrink-0" />}>
             <AddToCollection
-              shots={[{ path: hit.file_path, name: basename(hit.file_path), in: hit.start_sec, out: hit.end_sec, inFrame: hit.start_frame, outFrame: hit.end_frame, srcFrames: hit.src_frames, fps: hit.fps }]}
+              shots={shots}
               stopPropagation={false}
+              onOpenChange={setRangeOpen}
               className="h-7 w-7 text-muted-foreground hover:bg-accent hover:text-foreground"
             />
           </TooltipTrigger>

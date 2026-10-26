@@ -29,7 +29,9 @@
   },
   "submenu": {
     "rangeIn": "In Sammlung ablegen",
-    "none": "Keine Sammlung"
+    "none": "Keine Sammlung",
+    "rangeOne": "Diesen Shot ablegen",
+    "rangeSelection": "Auswahl ablegen ({{count}})"
   },
   "sidePanel": {
     "export": "Export"
@@ -37,7 +39,10 @@
   "range": {
     "trigger": "In Sammlung ablegen",
     "rangeTitle_one": "Shot ablegen",
-    "rangeTitle_other": "{{count}} Shots ablegen"
+    "rangeTitle_other": "{{count}} Shots ablegen",
+    "scope": "Abzulegende Shots",
+    "scopeOne": "Nur dieser Shot",
+    "scopeSelection": "Gesamte Auswahl ({{count}})"
   },
   "fav": {
     "remove": "Aus Favoriten entfernen",

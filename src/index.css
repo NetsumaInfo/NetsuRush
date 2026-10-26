@@ -59,6 +59,9 @@
 .nr-grid-card {
   content-visibility: auto;
   contain-intrinsic-size: var(--nr-cell-h, 200px);
+  /* `content-visibility` brings paint containment, which clips at the shell's box: the hover lift
+     (2 px, cf. common/hoverLift) and the focus ring lost their top edge. Room to paint past it. */
+  overflow-clip-margin: 6px;
 }
 
 html,

@@ -29,7 +29,9 @@
   },
   "submenu": {
     "rangeIn": "Add to a collection",
-    "none": "No collection"
+    "none": "No collection",
+    "rangeOne": "Add this shot",
+    "rangeSelection": "Add selection ({{count}})"
   },
   "sidePanel": {
     "export": "Export"
@@ -37,7 +39,10 @@
   "range": {
     "trigger": "Add to a collection",
     "rangeTitle_one": "Add shot",
-    "rangeTitle_other": "Add {{count}} shots"
+    "rangeTitle_other": "Add {{count}} shots",
+    "scope": "Shots to add",
+    "scopeOne": "This shot only",
+    "scopeSelection": "Whole selection ({{count}})"
   },
   "fav": {
     "remove": "Remove from favorites",
