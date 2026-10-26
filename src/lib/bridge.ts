@@ -2846,24 +2846,6 @@ export interface NrApi {
   onAdobePanelUpdated(cb: (p: { version: string | null; restart: AdobeApp[] }) => void): () => void;
   adobeDiagnose(): Promise<AdobeDiagnostic>;
   onAdobeUpdate(cb: (p: { app: AdobeApp; at: number }) => void): () => void;
-  // Module voix : transcription (sous-titres + montage par texte). input = vidéo source (Media Pool
-  // ou locale) ; model = whisper-turbo (précis) | parakeet-v3 (rapide) ; lang = langue ASR.
-  // verbatim = Whisper amorcé pour transcrire les hésitations (euh/hum) au lieu de les gommer.
-  transcribe(opts: { input: string; model?: AsrModel; lang?: string; track?: number; verbatim?: boolean }): Promise<TranscriptResult>;
-  // Détection de silences (Silero VAD). params = curseurs (seuil, durées mini, marge ms).
-  detectSilences(opts: { input: string; params?: SilenceParams; track?: number }): Promise<SilenceResult>;
-  // Détection ACOUSTIQUE des hésitations (librosa) dans les trous inter-mots + mots low-conf.
-  detectFillers(opts: { input: string; words: VoiceWord[]; silences: VoiceSpan[]; params?: Record<string, number>; track?: number }): Promise<{ ok: boolean; fillers: FillerSpan[]; duration?: number; error?: string }>;
-  // Sous-titres SRT/VTT depuis les mots ; segments = cut list conservée → recalage sur le montage final.
-  exportSubtitles(opts: { words: VoiceWord[]; segments?: { in: number; out: number }[]; format?: SubtitleFormat; destPath?: string; maxChars?: number; maxDur?: number; dropFillers?: boolean; baseName?: string }): Promise<SubtitleResult>;
-  // Export fichier monté (silences coupés) : MP4 réencodé ou FCPXML (timecode source préservé).
-  exportCut(opts: { input: string; segments: { in: number; out: number }[]; format?: "mp4" | "fcpxml"; destPath?: string; fps?: number }): Promise<{ ok: boolean; path?: string; clips?: number; error?: string }>;
-  // Enveloppe d'amplitude pour la waveform (peaks 0..1 + durée). startSec/endSec = fenêtre
-  // optionnelle (zoom : pics haute résolution sur la plage visible ; start/end = plage servie).
-  waveform(opts: { input: string; track?: number; buckets?: number; startSec?: number; endSec?: number }): Promise<{ ok: boolean; peaks?: number[]; duration?: number; start?: number; end?: number; error?: string }>;
-  // Recherche par PAROLES dans les transcriptions en cache : hit au mot exact.
-  searchTranscripts(opts: { query: string; limit?: number; perFile?: number }): Promise<{ ok: boolean; hits: TranscriptHit[]; files: number; error?: string }>;
-  onVoiceProgress(cb: (p: VoiceProgress) => void): () => void;
   upscaleRun(opts: UpscaleOpts): Promise<UpscaleResult>;
   upscaleShaderRun(opts: UpscaleShaderOpts): Promise<UpscaleResult>;
   upscaleTestFrame(opts: UpscaleFrameOpts): Promise<UpscaleFrameResult>;
@@ -2914,10 +2896,6 @@ export interface NrApi {
   rotoExport(opts: { format: string; mode?: string; out?: string; obj?: number; bg?: string }): Promise<RotoResult>;
   rotoObjectRemove(opts: RotoRemoveOpts): Promise<RotoResult>;
   onRotoProgress(cb: (p: RotoProgress) => void): () => void;
-  // Dictée vocale (push-to-talk) : extrait micro (base64) → texte transcrit.
-  dictateTranscribe(opts: { audioB64: string; mime?: string; model?: string; lang?: string; idleMs?: number }): Promise<{ ok: boolean; text?: string; error?: string }>;
-  // Statut du moteur natif transcribe.cpp (binaire GGUF fourni par l'utilisateur).
-  dictateCppStatus(): Promise<{ ok: boolean; bin: string; backend: string; error: string | null }>;
   indexClip(filePath: string, force?: boolean, frames?: SamplingFrames, model?: DetectModel, options?: DetectOptions): Promise<IndexResult>;
   // Nb d'indexations à lancer en parallèle selon la VRAM libre (1 = séquentiel). Pour le mode parallèle.
   indexConcurrency(): Promise<number>;
@@ -3475,14 +3453,6 @@ const mock: NrApi = {
   onAdobePanelUpdated: () => () => {},
   adobeDiagnose: async () => ({ ok: false, panelDir: null, manifestExists: false, files: [], manifestHead: null, playerDebug: {}, cepLogs: [] }),
   onAdobeUpdate: () => () => {},
-  transcribe: async () => ({ ok: false, words: [], error: i18n.t("common:mock.appUnavailable") }),
-  detectSilences: async () => ({ ok: false, speech: [], silence: [], error: i18n.t("common:mock.appUnavailable") }),
-  detectFillers: async () => ({ ok: false, fillers: [], error: i18n.t("common:mock.appUnavailable") }),
-  exportSubtitles: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-  exportCut: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-  waveform: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-  searchTranscripts: async () => ({ ok: false, hits: [], files: 0, error: i18n.t("common:mock.appUnavailable") }),
-  onVoiceProgress: () => () => {},
   upscaleRun: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
   upscaleShaderRun: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
   upscaleTestFrame: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
@@ -3523,8 +3493,6 @@ const mock: NrApi = {
   rotoExport: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   rotoObjectRemove: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   onRotoProgress: () => () => {},
-  dictateTranscribe: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-  dictateCppStatus: async () => ({ ok: false, bin: "", backend: "cpu", error: i18n.t("common:mock.appUnavailable") }),
   indexClip: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
   indexConcurrency: async () => 1,
   warmSearchIndex: async () => ({ ok: true, count: 0 }),

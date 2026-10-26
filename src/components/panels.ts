@@ -15,7 +15,6 @@ const load = {
   reference: () => import("@/components/reference/ReferencePanel").then((m) => ({ default: m.ReferencePanel })),
   notebook: () => import("@/components/notebook/NotebookPanel").then((m) => ({ default: m.NotebookPanel })),
   upscale: () => import("@/components/netsulab/NetsuLabPanel").then((m) => ({ default: m.NetsuLabPanel })),
-  voice: () => import("@/components/voice/VoicePanel").then((m) => ({ default: m.VoicePanel })),
   chat: () => import("@/components/chat/ChatPanel").then((m) => ({ default: m.ChatPanel })),
   optimisation: () => import("@/components/optimize/OptimizePanel").then((m) => ({ default: m.OptimizePanel })),
   transfer: () => import("@/components/transfer/TransferPanel").then((m) => ({ default: m.TransferPanel })),

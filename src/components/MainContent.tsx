@@ -4,7 +4,6 @@ import { Suspense, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { NAV } from "@/components/nav";
 import { useApp } from "@/store";
-import { DictateOverlay } from "@/components/dictate/DictateOverlay";
 import { PANELS, hasPanel, prefetchPanelsWhenIdle } from "@/components/panels";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -40,7 +39,6 @@ export function MainContent() {
       </Suspense>
       {/* Dictée globale : MAINTIENS le raccourci → parle → RELÂCHE → le texte s'insère dans
           le champ/éditeur focalisé. Pas de bouton visible ; pastille discrète pendant l'écoute. */}
-      <DictateOverlay />
     </>
   );
 }

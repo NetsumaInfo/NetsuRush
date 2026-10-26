@@ -29,8 +29,6 @@ const HEAVY_CHANNELS = new Set([
   "export:clips", "ffmpeg:export", "ae:export", "transfer:run", "netsu:export", "netsu:import",
   // Détection de plans et découpe de timeline.
   "ffmpeg:detectScenes", "resolve:analyzeTimelineCut", "resolve:buildCutTimeline", "resolve:cutTimeline",
-  // Voix (ASR + VAD) et dictée.
-  "voice:transcribe", "voice:detectSilences", "voice:exportCut", "dictate:transcribe",
   // Recherche : indexation et regroupements (les requêtes servies par l'index restent légères).
   "search:index", "search:run", "search:cluster", "search:dedup",
   "face:detect", "face:index", "char:labelIndex",

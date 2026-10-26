@@ -663,7 +663,6 @@
     },
     "ai": {
       "models": "動画",
-      "dictation": "音声入力",
       "indexing": "インデックス作成"
     },
     "storage": {

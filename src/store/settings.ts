@@ -7,7 +7,6 @@ import { nr } from "@/lib/bridge";
 import { DEFAULT_DETECT_OPTIONS, normalizeDetectOptions, type NormalizedDetectOptions } from "@/lib/detection";
 import type { AppState } from "./index";
 import { THEMES, type ThemeId } from "./types";
-import { type DictateHotkey, DEFAULT_DICTATE_HOTKEY, parseHotkey } from "@/components/dictate/dictateHotkey";
 import type { ShortcutMap } from "@/lib/shortcuts";
 import { readCutKeys, DEFAULT_CUT_KEYS, CUT_KEYS_STORAGE } from "@/components/rushes/cutShortcuts";
 import { activateLanguage, detectDefaultLang, LANG_STORAGE_KEY, type LangCode } from "@/i18n";
@@ -50,13 +49,6 @@ const DETECT_OPTIONS_KEY = "nr.cut.detection-options.v1";
 const CUT_GRIDPLAY_KEY = "nr.cut.gridplay";
 const CUT_COLS_KEY = "nr.cols";
 const CUT_PLAYEROPEN_KEY = "nr.playerOpen";
-const DICTATE_HOTKEY_KEY = "nr-dictate-hotkey:v1";
-const DICTATE_HOTKEY_LEGACY_KEY = "nr-dictate-hotkey";
-const DICTATE_ENABLED_KEY = "nr-dictate-enabled";
-const DICTATE_MODEL_KEY = "nr-dictate-model";
-const DICTATE_LIVE_KEY = "nr-dictate-live";
-const DICTATE_MIC_KEY = "nr-dictate-mic";
-const DICTATE_UNLOAD_KEY = "nr-dictate-unload";
 const TIMELINE_INSERTIONS_KEY = "nr.timeline.insertions.v1";
 const CUSTOM_THEME_KEY = "nr-theme-custom";
 
@@ -155,40 +147,6 @@ function readDetectionOptions(): NormalizedDetectOptions {
 }
 
 // Dictée globale : raccourci push-to-talk maintenu + activation. Persistés en localStorage.
-function readDictateHotkey(): DictateHotkey {
-  if (typeof localStorage === "undefined") return DEFAULT_DICTATE_HOTKEY;
-  const stored = localStorage.getItem(DICTATE_HOTKEY_KEY);
-  if (stored) return parseHotkey(stored) ?? DEFAULT_DICTATE_HOTKEY;
-  const legacy = localStorage.getItem(DICTATE_HOTKEY_LEGACY_KEY);
-  if (legacy) localStorage.setItem(DICTATE_HOTKEY_KEY, legacy);
-  return parseHotkey(legacy) ?? DEFAULT_DICTATE_HOTKEY;
-}
-function readDictateEnabled(): boolean {
-  if (typeof localStorage === "undefined") return true;
-  return localStorage.getItem(DICTATE_ENABLED_KEY) !== "0";
-}
-// Modèle ASR dédié à la dictée (indépendant du moteur de l'onglet Voix). Défaut whisper-turbo.
-function readDictateModel(): string {
-  if (typeof localStorage === "undefined") return "whisper-turbo";
-  return localStorage.getItem(DICTATE_MODEL_KEY) || "whisper-turbo";
-}
-// Aperçu en direct : re-transcription périodique pendant l'écoute (texte live dans la pastille).
-function readDictateLive(): boolean {
-  if (typeof localStorage === "undefined") return true;
-  return localStorage.getItem(DICTATE_LIVE_KEY) !== "0";
-}
-// Micro choisi (deviceId MediaDevices ; "" = micro par défaut du système).
-function readDictateMic(): string {
-  if (typeof localStorage === "undefined") return "";
-  return localStorage.getItem(DICTATE_MIC_KEY) || "";
-}
-// Déchargement du modèle après inactivité (ms ; 0 = garder chaud en VRAM). Défaut 5 min.
-function readDictateUnloadMs(): number {
-  if (typeof localStorage === "undefined") return 300000;
-  const v = parseInt(localStorage.getItem(DICTATE_UNLOAD_KEY) ?? "", 10);
-  return Number.isFinite(v) && v >= 0 ? v : 300000;
-}
-
 // Interface language: the saved choice, else the best supported system language, else English
 // (detectDefaultLang). setLang swaps the i18next resources.
 function readLang(): LangCode {
@@ -294,18 +252,6 @@ export interface SettingsSlice {
   timelineInsertions: TimelineInsertions;
   setTimelineInsertion: (host: TimelineHost, mode: TimelineInsertionMode) => void;
   // Dictée globale push-to-talk : raccourci maintenu + activation.
-  dictateHotkey: DictateHotkey;
-  setDictateHotkey: (h: DictateHotkey) => void;
-  dictateEnabled: boolean;
-  setDictateEnabled: (on: boolean) => void;
-  dictateModel: string;
-  setDictateModel: (id: string) => void;
-  dictateLive: boolean;
-  setDictateLive: (on: boolean) => void;
-  dictateMic: string;
-  setDictateMic: (id: string) => void;
-  dictateUnloadMs: number;
-  setDictateUnloadMs: (ms: number) => void;
 }
 
 export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> = (set, get) => {
@@ -547,35 +493,5 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
       if (typeof localStorage !== "undefined") localStorage.setItem(TIMELINE_INSERTIONS_KEY, JSON.stringify(timelineInsertions));
       return { timelineInsertions };
     }),
-    dictateHotkey: readDictateHotkey(),
-    setDictateHotkey: (dictateHotkey) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem(DICTATE_HOTKEY_KEY, JSON.stringify(dictateHotkey));
-      set({ dictateHotkey });
-    },
-    dictateEnabled: readDictateEnabled(),
-    setDictateEnabled: (dictateEnabled) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem(DICTATE_ENABLED_KEY, dictateEnabled ? "1" : "0");
-      set({ dictateEnabled });
-    },
-    dictateModel: readDictateModel(),
-    setDictateModel: (dictateModel) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem(DICTATE_MODEL_KEY, dictateModel);
-      set({ dictateModel });
-    },
-    dictateLive: readDictateLive(),
-    setDictateLive: (dictateLive) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem(DICTATE_LIVE_KEY, dictateLive ? "1" : "0");
-      set({ dictateLive });
-    },
-    dictateMic: readDictateMic(),
-    setDictateMic: (dictateMic) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem(DICTATE_MIC_KEY, dictateMic);
-      set({ dictateMic });
-    },
-    dictateUnloadMs: readDictateUnloadMs(),
-    setDictateUnloadMs: (dictateUnloadMs) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem(DICTATE_UNLOAD_KEY, String(dictateUnloadMs));
-      set({ dictateUnloadMs });
-    },
   };
 };

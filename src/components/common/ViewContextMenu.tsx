@@ -6,8 +6,8 @@
 import { useRef, useState, type ReactNode } from "react";
 import {
   Home, RotateCw, Scissors, LayoutGrid, Eraser, Sparkles, Layers3,
-  AudioLines, Settings, Terminal, Pin, PanelLeft, Compass, Copy, ClipboardPaste,
-  TextCursorInput, SquareStack, RefreshCw, Trash2,
+  Settings, Terminal, Pin, PanelLeft, Compass, Copy, ClipboardPaste,
+  TextCursorInput, SquareStack, RefreshCw,
 } from "lucide-react";
 import { NAV } from "@/components/nav";
 import { useApp, type TabId } from "@/store";
@@ -110,23 +110,6 @@ function ViewItems({ tab }: { tab: TabId }) {
           <ContextMenuItem onClick={() => s.nlClearSources()}><Eraser /> {t("menu.clearSources")}</ContextMenuItem>
         </ContextMenuGroup>
       );
-    case "voice":
-      return (
-        <ContextMenuGroup>
-          <ContextMenuLabel>{t("menu.voice")}</ContextMenuLabel>
-          <ContextMenuSub>
-            <ContextMenuSubTrigger><AudioLines /> {t("menu.listen")}</ContextMenuSubTrigger>
-            <ContextMenuSubContent>
-              <ContextMenuCheckboxItem checked={s.previewMode === "none"} onClick={() => s.setPreviewMode("none")}>{t("menu.listenNone")}</ContextMenuCheckboxItem>
-              <ContextMenuCheckboxItem checked={s.previewMode === "all"} onClick={() => s.setPreviewMode("all")}>{t("menu.listenAll")}</ContextMenuCheckboxItem>
-              <ContextMenuCheckboxItem checked={s.previewMode === "silences"} onClick={() => s.setPreviewMode("silences")}>{t("menu.listenSilences")}</ContextMenuCheckboxItem>
-              <ContextMenuCheckboxItem checked={s.previewMode === "fillers"} onClick={() => s.setPreviewMode("fillers")}>{t("menu.listenFillers")}</ContextMenuCheckboxItem>
-              <ContextMenuCheckboxItem checked={s.previewMode === "repeats"} onClick={() => s.setPreviewMode("repeats")}>{t("menu.listenRepeats")}</ContextMenuCheckboxItem>
-            </ContextMenuSubContent>
-          </ContextMenuSub>
-          <ContextMenuItem variant="destructive" onClick={() => s.resetVoice()}><Trash2 /> {t("menu.reset")}</ContextMenuItem>
-        </ContextMenuGroup>
-      );
     case "chat":
       return (
         <ContextMenuGroup>
@@ -184,7 +167,7 @@ export function ViewContextMenu({ children, remote = false }: { children: ReactN
   const tab = useApp((s) => s.tab);
   const [edit, setEdit] = useState(false);
   const elRef = useRef<HTMLElement | null>(null);
-  const hasView = ["derush", "search", "upscale", "voice", "chat"].includes(tab);
+  const hasView = ["derush", "search", "upscale", "chat"].includes(tab);
   return (
     <ContextMenu>
       <ContextMenuTrigger

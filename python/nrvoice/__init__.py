@@ -5,8 +5,6 @@ Découpé par responsabilité (comme nrsearch/) :
   asr           dispatch ASR (Whisper turbo / Parakeet v3) → mots horodatés
   asr_whisper   backend faster-whisper large-v3-turbo (CTranslate2, GPU, word timestamps)
   asr_parakeet  backend NVIDIA Parakeet TDT 0.6b v3 via onnx-asr (ONNX, GPU, multilingue)
-  vad_silero    Silero VAD v5 (ONNX) → segments parole + complément silence
-  vad_nova      NOVA-VAD (sklearn RF+GBT) → confirmation anti-bruit PAR-DESSUS Silero (pas un segmenteur)
   fillers       mots de remplissage FR (liste + répétitions) → tag par index de mot
 
 Contrat de sortie commun (sidecar → core, secondes) :

@@ -12,7 +12,6 @@ import { createCharacterSlice, type CharacterSlice } from "./characters";
 import { createSettingsSlice, type SettingsSlice } from "./settings";
 import { createChatSlice, type ChatSlice } from "./chat";
 import { createOptimizeSlice, type OptimizeSlice } from "./optimize";
-import { createVoiceSlice, type VoiceSlice } from "./voice";
 import { createProcessSlice, type ProcessSlice } from "./process";
 import { createNetsulabSlice, type NetsulabSlice } from "./netsulab";
 import { createExportSlice, type ExportSlice } from "./export";
@@ -24,7 +23,7 @@ import { createStorageSlice, type StorageSlice } from "./storage";
 
 export type { TabId, DerushSection } from "./types";
 
-export type AppState = ShellSlice & DerushSlice & CollectionsSlice & LibrarySlice & SearchSlice & CharacterSlice & SettingsSlice & ChatSlice & OptimizeSlice & VoiceSlice & ProcessSlice & NetsulabSlice & ExportSlice & AdobeSlice & NotebookSlice & OutboxSlice & PowerSlice & StorageSlice;
+export type AppState = ShellSlice & DerushSlice & CollectionsSlice & LibrarySlice & SearchSlice & CharacterSlice & SettingsSlice & ChatSlice & OptimizeSlice & ProcessSlice & NetsulabSlice & ExportSlice & AdobeSlice & NotebookSlice & OutboxSlice & PowerSlice & StorageSlice;
 
 export const useApp = create<AppState>()((...a) => ({
   ...createShellSlice(...a),
@@ -36,7 +35,6 @@ export const useApp = create<AppState>()((...a) => ({
   ...createSettingsSlice(...a),
   ...createChatSlice(...a),
   ...createOptimizeSlice(...a),
-  ...createVoiceSlice(...a),
   ...createProcessSlice(...a),
   ...createNetsulabSlice(...a),
   ...createExportSlice(...a),

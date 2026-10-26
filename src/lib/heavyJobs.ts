@@ -17,7 +17,6 @@ function subscribeProgress(): Unsubscribe[] {
     nr.onExportProgress(hit),
     nr.onAeProgress(hit),
     nr.onTransferProgress(hit),
-    nr.onVoiceProgress(hit),
     nr.onSearchProgress(hit),
     nr.onModelsProgress(hit),
     nr.onPipelineProgress(hit),

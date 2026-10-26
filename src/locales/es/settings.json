@@ -663,7 +663,6 @@
     },
     "ai": {
       "models": "Vídeo",
-      "dictation": "Dictado",
       "indexing": "Indexación"
     },
     "storage": {

@@ -90,10 +90,6 @@
         "title": "Pas encore fonctionnel",
         "body": "NetsuPilot est en cours de développement : il ne fait rien d'utile pour l'instant. Suis son avancée sur le Discord."
       },
-      "voice": {
-        "title": "Pas encore assez testé",
-        "body": "NetsuTalk fonctionne, mais il a très peu servi en conditions réelles. Préviens-moi si quelque chose ne se passe pas comme prévu."
-      },
       "transfer": {
         "title": "Pas testé sur toutes les versions",
         "body": "NetsuBridge n'a été testé que sur quelques versions de Resolve, Premiere Pro et After Effects : selon la tienne, la copie peut fonctionner, ne fonctionner qu'en partie, ou pas du tout. Dis-moi ta version et ce qui ne marche pas."

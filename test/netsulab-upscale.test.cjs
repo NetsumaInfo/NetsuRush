@@ -69,7 +69,6 @@ test('missing selected models redirect to downloads and successful installs requ
   const manager = read('src/components/settings/models/useModelManager.ts');
   const settings = read('src/components/settings/models/ModelsSettings.tsx');
   const roto = read('src/components/netsulab/roto/RotoPanels.tsx');
-  const voice = read('src/components/voice/VoiceControls.tsx');
   const core = read('core/models.js');
   assert.match(picker, /useRequireModel/);
   assert.match(picker, /openModelsPage\(\)/);
@@ -80,7 +79,6 @@ test('missing selected models redirect to downloads and successful installs requ
   assert.match(settings, /mgr\.restart/);
   assert.match(roto, /useRequireModel\(model\)/);
   assert.match(roto, /useRequireModel\(eng,/);
-  assert.match(voice, /useRequireModel\(asrModel\)/);
   assert.match(core, /return done\(\)/);
   assert.match(core, /await pyRuntimeReady\(m, checks\)/);
 });

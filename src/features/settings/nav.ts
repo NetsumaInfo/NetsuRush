@@ -4,7 +4,7 @@
 // page ici, sinon la barre de titre tirerait tout le code des Paramètres au démarrage.
 import {
   Bell, Boxes, Brush, Cpu, DatabaseBackup, Download, FolderKanban, HardDrive, Info,
-  Languages, Mic, MonitorPlay, Palette, PanelLeft, RefreshCw, Scissors, Sparkles, Terminal,
+  Languages, MonitorPlay, Palette, PanelLeft, RefreshCw, Scissors, Sparkles, Terminal,
   UserRound, Users, Wrench, Archive,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -65,7 +65,6 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
     icon: Sparkles,
     tabs: [
       { id: "models", icon: Boxes },
-      { id: "dictation", icon: Mic },
       { id: "indexing", icon: Scissors },
     ],
   },

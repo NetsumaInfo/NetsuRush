@@ -24,8 +24,6 @@ const models = require("./models"); // gestionnaire de modèles app-wide (downlo
 const scheduler = require("./scheduler"); // mesure VRAM (nvidia-smi) — sert l'avertissement de la page Modèles
 const pipeline = require("./pipeline"); // pipeline ordonné : chaîne de transforms fichier→fichier
 const roto = require("./roto"); // Roto Studio : daemon SAM interactif (scaffold)
-const dictate = require("./dictate"); // dictée vocale push-to-talk (réutilise le daemon whisper)
-const voice = require("./voice"); // module voix : transcription + silences (sous-titres, montage texte)
 const exportMod = require("./export"); // export fichier piloté par profil (remux/encode, GPU/CPU, merge)
 const loopExport = require("./loopExport"); // board clip → looping animated image (animated WebP, GIF)
 const audioLang = require("./audioLang"); // normalisation des étiquettes de langue des pistes audio
@@ -696,19 +694,6 @@ function createRpc() {
   "roto:setRefined": ([opts]) => roto.rotoSetRefined(opts),
   "roto:export": ([opts]) => roto.rotoExport(ev, opts),
   "roto:objectRemove": ([opts]) => roto.rotoObjectRemove(ev, opts),
-
-  // --- Dictée vocale (push-to-talk) : audio b64 → texte (daemon whisper chaud) ---
-  "dictate:transcribe": ([opts]) => dictate.transcribeClip(opts),
-  "dictate:cppStatus": () => dictate.cppStatus(),
-
-    // --- Module voix : transcription (sous-titres + montage par texte) + silences ---
-    "voice:transcribe": ([opts]) => voice.transcribe(ev, opts || {}),
-    "voice:detectSilences": ([opts]) => voice.detectSilences(ev, opts || {}),
-    "voice:detectFillers": ([opts]) => voice.detectFillers(ev, opts || {}),
-    "voice:exportSubtitles": ([opts]) => voice.exportSubtitles(opts || {}),
-    "voice:exportCut": ([opts]) => voice.exportCut(opts || {}),
-    "voice:waveform": ([opts]) => voice.waveform(opts || {}),
-    "voice:searchTranscripts": ([opts]) => voice.searchTranscripts(opts || {}),
 
     // --- Export After Effects ---
     "ae:export": guarded(([opts]) => aeExporter.aeExport(ev, opts)),

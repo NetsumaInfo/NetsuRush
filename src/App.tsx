@@ -66,7 +66,7 @@ const IS_NOTEBOOK_WINDOW =
 
 // Pages dont l'usage nominal charge durablement des modèles IA ou prépare de nombreux plans.
 // Les opérations ponctuelles gardent aussi leurs déclencheurs au moment du job.
-const RESOURCE_HEAVY_TABS = new Set<TabId>(["derush", "search", "upscale", "voice"]);
+const RESOURCE_HEAVY_TABS = new Set<TabId>(["derush", "search", "upscale"]);
 
 export default function App() {
   // Écoute les retours OAuth deep-link (netsurush://auth) dès le boot — actif avant même le login,

@@ -663,7 +663,6 @@
     },
     "ai": {
       "models": "视频",
-      "dictation": "语音输入",
       "indexing": "索引"
     },
     "storage": {

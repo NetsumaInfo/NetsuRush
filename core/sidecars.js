@@ -66,8 +66,6 @@ const SEARCH_SCRIPT = path.join(PY_DIR, 'search.py');
 const UPSCALE_SCRIPT = path.join(PY_DIR, 'upscale.py');
 const PROCESS_SCRIPT = path.join(PY_DIR, 'process.py');
 const TRANSCRIBE_SCRIPT = path.join(PY_DIR, 'transcribe.py');
-const SILENCE_SCRIPT = path.join(PY_DIR, 'silence.py');
-const FILLER_SCRIPT = path.join(PY_DIR, 'filler.py');
 
 // Anti-hang : detect.py émet PROGRESS/STAGE en continu pendant l'extraction et l'inférence. Un
 // silence prolongé = process figé (hang CUDA, deadlock decode) → on tue et on résout proprement,
@@ -336,84 +334,6 @@ function getCachedScenes(filePath, model = 'transnetv2', threshold, options) {
   if (threshold != null) args.push(String(threshold));
   if (threshold != null && options != null) args.push(JSON.stringify(options));
   return runDetect(null, args);
-}
-
-// Détection de silences (Silero VAD) one-shot : silence.py léger → pas de daemon. Même squelette
-// que runDetect (watchdog d'inactivité, dernière ligne JSON) mais progression en SSE `voice:progress`.
-function runSilence(event, source, audio, params = {}) {
-  return new Promise((resolve) => {
-    const py = spawn(PYTHON, [SILENCE_SCRIPT, 'process', source, audio, JSON.stringify(params || {})], { env: langEnv() });
-    let out = '';
-    let errTail = '';
-    let done = false;
-    let last = Date.now();
-    const finish = (r) => { if (done) return; done = true; clearInterval(wd); resolve(r); };
-    const wd = setInterval(() => {
-      if (Date.now() - last > DETECT_IDLE_MS) {
-        try { py.kill('SIGKILL'); } catch (_) {}
-        finish({ ok: false, speech: [], silence: [], error: t('engineStalled') });
-      }
-    }, 5000);
-    py.stdout.setEncoding('utf8');
-    py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
-    py.stderr.setEncoding('utf8');
-    py.stderr.on('data', (d) => {
-      last = Date.now();
-      const s = d.toString();
-      errTail = (errTail + s).slice(-600);
-      logbus.py('silence', s);
-      if (event?.sender) {
-        if (s.includes('STAGE:load')) event.sender.send('voice:progress', { phase: 'silence', pct: 20 });
-        if (s.includes('STAGE:infer')) event.sender.send('voice:progress', { phase: 'silence', pct: 55 });
-      }
-    });
-    py.on('close', () => {
-      const line = out.trim().split('\n').pop() || '';
-      try { finish(JSON.parse(line)); }
-      catch (_) { finish({ ok: false, speech: [], silence: [], error: errTail ? 'silero: ' + errTail : t('engineOutputUnreadable') }); }
-    });
-    py.on('error', (e) => finish({ ok: false, speech: [], silence: [], error: String(e) }));
-  });
-}
-
-// Détection ACOUSTIQUE des hésitations (filler.py, librosa) one-shot. payload = {words, silences, params}.
-function runFiller(event, source, audio, payload = {}) {
-  return new Promise((resolve) => {
-    // The payload goes through stdin: a long transcript's word list exceeds Windows' 32K command line.
-    const py = spawn(PYTHON, [FILLER_SCRIPT, 'process', source, audio, '-'], { env: langEnv() });
-    py.stdin.on('error', () => {});
-    py.stdin.end(JSON.stringify(payload || {}), 'utf8');
-    let out = '';
-    let errTail = '';
-    let done = false;
-    let last = Date.now();
-    const finish = (r) => { if (done) return; done = true; clearInterval(wd); resolve(r); };
-    const wd = setInterval(() => {
-      if (Date.now() - last > DETECT_IDLE_MS) {
-        try { py.kill('SIGKILL'); } catch (_) {}
-        finish({ ok: false, fillers: [], error: t('engineStalled') });
-      }
-    }, 5000);
-    py.stdout.setEncoding('utf8');
-    py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
-    py.stderr.setEncoding('utf8');
-    py.stderr.on('data', (d) => {
-      last = Date.now();
-      const s = d.toString();
-      errTail = (errTail + s).slice(-600);
-      logbus.py('filler', s);
-      if (event?.sender) {
-        if (s.includes('STAGE:load')) event.sender.send('voice:progress', { phase: 'filler', pct: 20 });
-        if (s.includes('STAGE:infer')) event.sender.send('voice:progress', { phase: 'filler', pct: 55 });
-      }
-    });
-    py.on('close', () => {
-      const line = out.trim().split('\n').pop() || '';
-      try { finish(JSON.parse(line)); }
-      catch (_) { finish({ ok: false, fillers: [], error: errTail ? 'filler: ' + errTail : t('engineOutputUnreadable') }); }
-    });
-    py.on('error', (e) => finish({ ok: false, fillers: [], error: String(e) }));
-  });
 }
 
 // Daemons python persistants (modèle chargé 1 fois chacun). Choix GPU/CPU DYNAMIQUE selon ce qui
@@ -902,18 +822,6 @@ function makeTranscribeDaemon() {
 }
 const dTranscribe = makeTranscribeDaemon();
 
-// Mappe les marqueurs stderr du sidecar (STAGE:load/infer/prog:i/n) en pourcentage 6..95 → SSE.
-function voiceProgress(event, phase) {
-  return (s) => {
-    if (!event?.sender) return;
-    const send = (pct) => event.sender.send('voice:progress', { phase, pct: Math.min(95, pct) });
-    if (s.includes('STAGE:load')) send(6);
-    if (s.includes('STAGE:infer')) send(18);
-    const mp = s.match(/STAGE:prog:(\d+)\/(\d+)/);
-    if (mp) send(18 + Math.round((parseInt(mp[1], 10) / Math.max(1, parseInt(mp[2], 10))) * 77));
-  };
-}
-
 // Clé de nr.config.json portant le dossier provisionné à l'installation, par modèle ASR.
 const ASR_SETUP_DIR = { 'whisper-turbo': 'whisperDir', 'parakeet-v3': 'parakeetDir' };
 
@@ -926,15 +834,6 @@ function asrModelDir(model) {
   if (managed && hasFiles(managed)) return managed;
   const provisioned = ASR_SETUP_DIR[model] ? CONFIG[ASR_SETUP_DIR[model]] : null;
   return provisioned && hasFiles(provisioned) ? provisioned : null;
-}
-
-// Transcription d'un audio déjà extrait (WAV 16 kHz mono). `source` = vidéo d'origine (clé de cache).
-// `verbatim` : Whisper amorcé pour transcrire les hésitations (clé de cache séparée côté python).
-function transcribeAudio(event, { source, audio, model = 'whisper-turbo', lang = 'auto', idleMs, verbatim = false }) {
-  return dTranscribe.req(
-    { source, audio, model, lang, idleMs, verbatim, model_dir: asrModelDir(model) },
-    voiceProgress(event, 'transcribe'),
-  );
 }
 
 // Identification de langue d'un extrait audio (repli ML du sélecteur de piste — cf. core/audioLang.js).
@@ -1321,5 +1220,5 @@ module.exports = {
   releaseVenvLocks,
   runUpscale, runUpscaleFrame, runUpscaleImage, runUpscaleGif, recordTestFrames,
   runInterpolate, runDepth, runRemoveBg, runProcessFrame,
-  transcribeAudio, detectTrackLang, runSilence, runFiller,
+  detectTrackLang,
 };

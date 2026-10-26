@@ -147,7 +147,6 @@ test('core shutdown command removes its live session workspace', { timeout: 20_0
 test('NetsuLab wires operation and page cleanup triggers without touching user exports', () => {
   const rpc = fs.readFileSync(path.join(ROOT, 'core', 'rpc.js'), 'utf8');
   const panel = fs.readFileSync(path.join(ROOT, 'src', 'components', 'netsulab', 'NetsuLabPanel.tsx'), 'utf8');
-  const voice = fs.readFileSync(path.join(ROOT, 'src', 'components', 'voice', 'VoicePanel.tsx'), 'utf8');
   assert.match(rpc, /const \{ model: _model, \.\.\.shared \} = opts \|\| \{\}/);
   assert.match(rpc, /lastTestFrameKey !== key/);
   assert.match(rpc, /await prepareTestFrame\(opts\)/);
@@ -155,5 +154,4 @@ test('NetsuLab wires operation and page cleanup triggers without touching user e
   assert.match(rpc, /sessionCleanup\('operation', \['roto'\]\)/);
   assert.match(panel, /sessionEvent\(\{ trigger: "page", kinds: \["roto"\] \}\)/);
   assert.match(panel, /sessionEvent\(\{ trigger: "page", kinds: \["upscaleTest"\] \}\)/);
-  assert.match(voice, /sessionEvent\(\{ trigger: "page", kinds: \["voice"\] \}\)/);
 });
