@@ -32,12 +32,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
       "http://localhost:5181", // NetsuMerge/apps/web
       ...(process.env.WEB_ORIGIN ? [process.env.WEB_ORIGIN] : []),
     ],
-    // Discord et Google. Secrets côté déploiement Convex, jamais dans un bundle.
-    // Google est requis par le site : le public des ressources n'est pas celui
-    // du salon Discord, et imposer Discord pour télécharger un LUT ferme la
-    // porte à la moitié des visiteurs (02-community-access-and-moderation.md).
-    // Un fournisseur dont les identifiants ne sont pas définis n'est pas monté :
-    // mieux vaut un bouton absent qu'un bouton qui échoue au retour d'OAuth.
+    // Discord, next to the e-mail code below. Secrets live on the Convex deployment, never in a
+    // bundle. A provider whose credentials are not set is not mounted: a missing button beats one
+    // that fails on the OAuth return.
     socialProviders: {
       ...(process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET
         ? {
@@ -49,20 +46,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
             },
           }
         : {}),
-      ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-        ? {
-            google: {
-              clientId: process.env.GOOGLE_CLIENT_ID,
-              clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-              // `select_account` : sur un poste partagé, le compte précédent ne
-              // doit pas être repris en silence.
-              prompt: "select_account" as const,
-            },
-          }
-        : {}),
     },
-    // A login by any of these providers and an e-mail login with the same verified address are one account.
-    account: { accountLinking: { enabled: true, trustedProviders: ["discord", "google", "email-otp"] } },
+    // A Discord login and an e-mail login with the same verified address are one account.
+    account: { accountLinking: { enabled: true, trustedProviders: ["discord", "email-otp"] } },
     // Session kept 30 days, refreshed on each day of online use (see the renderer's offline grace).
     session: {
       expiresIn: 60 * 60 * 24 * 30,

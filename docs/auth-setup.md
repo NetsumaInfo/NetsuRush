@@ -56,7 +56,7 @@ npx convex env set BUG_WEBHOOK "<url du webhook Discord>"   # relais des rapport
 > (`RESEND_API_KEY`, needs a verified domain). `AUTH_EMAIL_FROM` is the sender, `Name <address>`,
 > verified on the provider. Without both a key and a sender, e-mail sign-in is refused and Discord
 > keeps working. In Brevo, turn **off** "block unauthorised IP addresses" for API keys: Convex sends
-> from changing IPs. A Discord or Google login and an e-mail login with the same verified address
+> from changing IPs. A Discord login and an e-mail login with the same verified address
 > are one account. Sessions last 30 days, and the app stays usable offline for 30 days after the
 > last login.
 
