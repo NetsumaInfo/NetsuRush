@@ -1,6 +1,6 @@
 // Which module of the app a shared project belongs to.
 //
-// Collaboration itself knows nothing about boards, collections or notebooks: Rust owns a document,
+// Collaboration itself knows nothing about collections or notebooks: Rust owns a document,
 // Convex owns the membership, and both are indifferent to what the document holds. What is NOT
 // indifferent is the local side — a project is only useful when it is bound to something on this
 // machine that can be opened, named, created when an invitation is accepted, and removed when the
@@ -17,7 +17,7 @@ import { collabAvailable } from "./client";
 /** A local document bound to a shared project. */
 export type CollabBinding = {
   projectId: string;
-  /** Id of the local document — a scene id, a collection id, a notebook id. */
+  /** Id of the local document — a collection id or a notebook id. */
   subjectId: string;
   /** What the user calls it. The only human-readable identity a project has on this machine. */
   name: string;

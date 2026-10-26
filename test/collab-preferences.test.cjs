@@ -22,9 +22,9 @@ function preferences(stored = null) {
   return { api, stored: () => value, external: (next) => { value = next; storage({ key: "netsurush.collab.preferences.v1" }); } };
 }
 test("cadence validates persisted values and excludes unknown surfaces", () => {
-  const { api } = preferences('{"profile":"bad","overrides":{"board":"economy","draft":"live","collection":50}}');
-  assert.deepEqual(api.getCollabPreferences(), { profile: "balanced", overrides: { board: "economy" } });
-  assert.deepEqual(api.getCollabCadence("board"), { batchMs: 900, mediaConcurrency: 1, autoDownload: false });
+  const { api } = preferences('{"profile":"bad","overrides":{"notebook":"economy","board":"live","draft":"live","collection":50}}');
+  assert.deepEqual(api.getCollabPreferences(), { profile: "balanced", overrides: { notebook: "economy" } });
+  assert.deepEqual(api.getCollabCadence("notebook"), { batchMs: 900, mediaConcurrency: 1, autoDownload: false });
   assert.equal(api.getCollabCadence("collection").batchMs, 200);
   assert.equal(preferences("invalid json").api.getCollabPreferences().profile, "balanced");
 });
@@ -45,7 +45,7 @@ test("preferences persist across reload and notify both local and external subsc
   assert.equal(preferences(state.stored()).api.getCollabCadence("collection").batchMs, 60);
   assert.equal(updates, 1);
   state.external('{"profile":"economy"}');
-  assert.equal(state.api.getCollabCadence("board").autoDownload, false);
+  assert.equal(state.api.getCollabCadence("collection").autoDownload, false);
   assert.equal(updates, 2);
   stop();
   state.api.setCollabPreferences({ profile: "balanced", overrides: {} });

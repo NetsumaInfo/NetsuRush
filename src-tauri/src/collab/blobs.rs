@@ -97,7 +97,7 @@ struct ImportGrant {
 
 fn canonical_regular_file(source: &Path) -> Result<PathBuf, BlobError> {
     // The path is part of the error. "file not found" without it cannot be told apart from a
-    // locator the renderer never resolved, an asset swept from under a still-open board, or a
+    // locator the renderer never resolved, an asset swept from under a still-open document, or a
     // session cache another application purged.
     let source_meta = fs::symlink_metadata(source)
         .map_err(|err| BlobError::Io(format!("{err} — {}", source.display())))?;
@@ -155,10 +155,8 @@ fn same_path(left: &Path, right: &Path) -> bool {
     }
 }
 
-fn collect_scene_refs(value: &serde_json::Value, output: &mut Vec<String>) {
-    // A collaborative scene deliberately stores no items: the Loro document is authoritative and a
-    // second writable copy would diverge. Its media locators are kept beside them so a shared board
-    // can still authorise the import of a file it already holds.
+/// Media locators a surface reader extracted from its local document.
+fn collect_media_refs(value: &serde_json::Value, output: &mut Vec<String>) {
     if let Some(media) = value.get("media").and_then(serde_json::Value::as_array) {
         output.extend(
             media
@@ -167,38 +165,12 @@ fn collect_scene_refs(value: &serde_json::Value, output: &mut Vec<String>) {
                 .map(str::to_owned),
         );
     }
-    let Some(items) = value.get("items").and_then(serde_json::Value::as_array) else {
-        return;
-    };
-    for item in items {
-        if let Some(reference) = item.get("ref").and_then(serde_json::Value::as_str) {
-            output.push(reference.to_owned());
-        }
-        if let Some(frames) = item.get("frames").and_then(serde_json::Value::as_array) {
-            output.extend(
-                frames
-                    .iter()
-                    .filter_map(serde_json::Value::as_str)
-                    .map(str::to_owned),
-            );
-        }
-        for field in ["prevMedia", "localMedia"] {
-            if let Some(reference) = item
-                .get(field)
-                .and_then(|nested| nested.get("ref"))
-                .and_then(serde_json::Value::as_str)
-            {
-                output.push(reference.to_owned());
-            }
-        }
-    }
 }
 
 /// The document a project is bound to, as the core stored it, or `None` when this surface has no
 /// reader. Adding one is what teaches `issue_known_grant` about a new module's own media.
 fn subject_data(surface: &str, subject_id: &str) -> Result<Option<serde_json::Value>, BlobError> {
     match surface {
-        "board" => scene_data(subject_id),
         "collection" => collection_data(subject_id),
         "notebook" | "notebook-page" => notebook_data(surface, subject_id),
         _ => Ok(None),
@@ -274,49 +246,7 @@ fn notebook_data(surface: &str, id: &str) -> Result<Option<serde_json::Value>, B
     Ok(Some(serde_json::json!({"media": refs})))
 }
 
-fn scene_data(scene_id: &str) -> Result<Option<serde_json::Value>, BlobError> {
-    if scene_id.is_empty() || scene_id.len() > 128 || scene_id.chars().any(char::is_control) {
-        return Err(BlobError::Io("invalid scene id".into()));
-    }
-    let reference_dir = super::identity::board_data_dir().join("reference");
-    let database = reference_dir.join("reference.db");
-    if database.exists() {
-        let connection = rusqlite::Connection::open_with_flags(
-            database,
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
-        )
-        .map_err(|err| BlobError::Io(err.to_string()))?;
-        let row: Option<String> = connection
-            .query_row("SELECT data FROM scenes WHERE id = ?1", [scene_id], |row| {
-                row.get(0)
-            })
-            .optional()
-            .map_err(|err| BlobError::Io(err.to_string()))?;
-        return row
-            .map(|data| serde_json::from_str(&data).map_err(|err| BlobError::Io(err.to_string())))
-            .transpose();
-    }
-    let json_path = reference_dir.join("scenes.json");
-    if !json_path.exists() {
-        return Ok(None);
-    }
-    let root: serde_json::Value =
-        serde_json::from_slice(&fs::read(json_path).map_err(|err| BlobError::Io(err.to_string()))?)
-            .map_err(|err| BlobError::Io(err.to_string()))?;
-    let Some(data) = root
-        .get(scene_id)
-        .and_then(|row| row.get("data"))
-        .and_then(serde_json::Value::as_str)
-    else {
-        return Ok(None);
-    };
-    serde_json::from_str(data)
-        .map(Some)
-        .map_err(|err| BlobError::Io(err.to_string()))
-}
-
-/// Re-authorises a file already named by the local document the project is bound to, or an
-/// app-owned reference asset. Renderer input alone is insufficient: the canonical path must
+/// Re-authorises a file already named by the local document the project is bound to. Renderer input alone is insufficient: the canonical path must
 /// already be present in trusted local application state.
 ///
 /// The lookup is per SURFACE, because "which files does this document legitimately point at" is a
@@ -331,11 +261,6 @@ pub fn issue_known_grant(
     source: &str,
 ) -> Result<String, BlobError> {
     let canonical = canonical_regular_file(Path::new(source))?;
-    let owned_root =
-        fs::canonicalize(super::identity::board_data_dir().join("reference").join("assets")).ok();
-    let owned = surface == "board" && owned_root
-        .as_ref()
-        .is_some_and(|root| canonical.starts_with(root) && canonical.as_path() != root.as_path());
     let mut referenced = false;
     // Counted so a refusal can say WHICH of the three failures happened: the document was not
     // found, it holds no reference at all, or it holds references and none matches this file.
@@ -344,7 +269,7 @@ pub fn issue_known_grant(
     if let Some(document) = subject_data(surface, subject_id)? {
         subject_found = true;
         let mut references = Vec::new();
-        collect_scene_refs(&document, &mut references);
+        collect_media_refs(&document, &mut references);
         reference_count = references.len();
         referenced = references.iter().any(|reference| {
             canonical_regular_file(Path::new(reference))
@@ -352,7 +277,7 @@ pub fn issue_known_grant(
                 .unwrap_or(false)
         });
     }
-    if !owned && !referenced {
+    if !referenced {
         let name = canonical
             .file_name()
             .map(|value| value.to_string_lossy().into_owned())
@@ -865,7 +790,7 @@ fn recorded_pins() -> Result<std::collections::HashSet<String>, BlobError> {
 }
 
 /// Runs at most once per day. Every project's last recorded current-state pins participate, even
-/// while that project is closed, so opening another board can never collect its media.
+/// while that project is closed, so opening another project can never collect its media.
 pub fn maybe_gc() -> Result<usize, BlobError> {
     let now = SystemTime::now();
     let mut last = LAST_GC

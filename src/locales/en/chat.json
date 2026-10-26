@@ -128,7 +128,6 @@
     "upscaleMedia": "Upscaling a video",
     "exportAe": "After Effects export",
     "importMedia": "Import into the Media Pool",
-    "board": "Reference board{{suffix}}",
     "page": "Page {{page}}",
     "resolveApp": "Resolve application",
     "grabStill": "Grabbing a still",

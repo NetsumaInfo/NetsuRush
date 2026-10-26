@@ -24,7 +24,6 @@ export function toolLabel(name: string, input: unknown, t: TFunction<"chat">): s
     case "upscale_media": return t("tool.upscaleMedia");
     case "export_to_after_effects": return t("tool.exportAe");
     case "import_media": return t("tool.importMedia");
-    case "board": return t("tool.board", { suffix: a.action ? ` · ${a.action}` : "" });
     case "resolve_app": return a.action === "switch_page" ? t("tool.page", { page: a.page || "" }).trim() : t("tool.resolveApp");
     case "resolve_viewer":
       return a.action === "grab_still" ? t("tool.grabStill")

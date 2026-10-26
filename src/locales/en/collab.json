@@ -4,7 +4,6 @@
   "signedOut": "Sign in to share a document.",
   "surface": {
     "unknown": "Shared document",
-    "board": "Reference board",
     "collection": "Collection",
     "notebook": "NetsuBook notebook",
     "notebook-page": "NetsuBook document"
@@ -135,10 +134,6 @@
     "nobodyReachable": "Nobody online. Nothing has been sent.",
     "waitingKey_one": "{{count}} waiting for the key. Stay online.",
     "waitingKey_other": "{{count}} waiting for the key. Stay online."
-  },
-  "board": {
-    "noScene": "Save this board to the scene library first.",
-    "willAdopt": "This board will be copied into the scene library. The .netsu file stays on your disk."
   },
   "error": {
     "failed": "Sync failed. Try again.",

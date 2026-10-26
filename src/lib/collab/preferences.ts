@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export const COLLAB_SURFACES = ["board", "collection", "notebook", "notebook-page"] as const;
+export const COLLAB_SURFACES = ["collection", "notebook", "notebook-page"] as const;
 export type CollabSurface = typeof COLLAB_SURFACES[number];
 export type CollabProfile = "live" | "balanced" | "economy";
 export type CollabPreferences = { profile: CollabProfile; overrides: Partial<Record<CollabSurface, CollabProfile>> };

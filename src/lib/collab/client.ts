@@ -2,7 +2,7 @@
 //
 // Everything authoritative lives in Rust: the Loro document, the iroh endpoint, the durable outbox
 // and every secret. This module only speaks to it. It knows nothing about what is being shared —
-// a board, a collection, a notebook — so a new surface adds a projection and a diff (see
+// a collection, a notebook — so a new surface adds a projection and a diff (see
 // `surfaces.ts`), never another copy of this file.
 
 import { COLLAB_PROTOCOL_VERSION, type CollabOp, type ProjectRole } from "./types";
@@ -13,7 +13,7 @@ export type ApplyResult = { revision: number; applied: number; authoredRevision?
 export type CollabChanged = { projectId: string; revision: number };
 export type ProjectSession = {
   projectId: string;
-  /** Local document this project is bound to — a scene id, a collection id, a notebook id. */
+  /** Local document this project is bound to — a collection id or a notebook id. */
   subjectId: string;
   surface: string;
   role: ProjectRole;

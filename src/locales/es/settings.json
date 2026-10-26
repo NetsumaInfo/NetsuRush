@@ -669,8 +669,7 @@
       "media": "Caché de medios",
       "cleanup": "Limpieza",
       "project": "Caché del proyecto",
-      "projects": "Proyectos",
-      "board": "NetsuBoard"
+      "projects": "Proyectos"
     },
     "system": {
       "updates": "Actualizaciones",
@@ -738,7 +737,6 @@
       "economy": "Ahorro"
     },
     "surfaces": {
-      "board": "Tableros",
       "collection": "Colecciones",
       "notebook": "Cuadernos",
       "notebook-page": "Páginas de cuaderno"

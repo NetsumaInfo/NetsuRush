@@ -4,7 +4,6 @@
   "signedOut": "ドキュメントを共有するにはサインインしてください。",
   "surface": {
     "unknown": "共有ドキュメント",
-    "board": "リファレンスボード",
     "collection": "コレクション",
     "notebook": "NetsuBook ノートブック",
     "notebook-page": "NetsuBook ドキュメント"
@@ -135,10 +134,6 @@
     "nobodyReachable": "オンラインの人がいません。まだ送信されていません。",
     "waitingKey_one": "{{count}} 人が鍵を待っています。オンラインのままにしてください。",
     "waitingKey_other": "{{count}} 人が鍵を待っています。オンラインのままにしてください。"
-  },
-  "board": {
-    "noScene": "先にこのボードをシーンライブラリに保存してください。",
-    "willAdopt": "このボードはシーンライブラリにコピーされます。.netsu ファイルはディスクに残ります。"
   },
   "error": {
     "failed": "同期できませんでした。もう一度お試しください。",

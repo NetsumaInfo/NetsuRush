@@ -669,8 +669,7 @@
       "media": "素材缓存",
       "cleanup": "清理",
       "project": "项目缓存",
-      "projects": "项目",
-      "board": "NetsuBoard"
+      "projects": "项目"
     },
     "system": {
       "updates": "更新",
@@ -738,7 +737,6 @@
       "economy": "节能"
     },
     "surfaces": {
-      "board": "画板",
       "collection": "合集",
       "notebook": "笔记本",
       "notebook-page": "笔记本页面"

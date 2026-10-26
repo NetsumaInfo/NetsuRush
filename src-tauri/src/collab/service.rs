@@ -119,7 +119,7 @@ impl ProjectRole {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct OpenProject {
     pub project_id: String,
-    /// Local document this project is bound to — a scene id, a collection id, a notebook id.
+    /// Local document this project is bound to — a collection id or a notebook id.
     pub subject_id: String,
     /// Module that owns it (`docs/collab.md`). Decides which local media the project may import.
     pub surface: String,
@@ -614,18 +614,13 @@ impl CollabService {
     }
 }
 
-/// Default surface of a project that names none — the module collaboration shipped with.
-pub const DEFAULT_SURFACE: &str = "board";
-
 /// A surface is a module label the service never interprets, only bounds. It travels to Convex in
 /// clear and decides which local media a project may import (`blobs::issue_known_grant`), so it is
 /// validated here rather than trusted from the renderer.
 fn normalize_surface(value: &str) -> Result<String, CollabError> {
     let label = value.trim().to_ascii_lowercase();
-    if label.is_empty() {
-        return Ok(DEFAULT_SURFACE.to_owned());
-    }
-    let valid = label.len() <= 32
+    let valid = !label.is_empty()
+        && label.len() <= 32
         && label.starts_with(|c: char| c.is_ascii_lowercase())
         && label
             .bytes()
@@ -637,7 +632,7 @@ fn normalize_surface(value: &str) -> Result<String, CollabError> {
 }
 
 /// Binding key. Two modules may legitimately give their documents the same local id, so the
-/// surface is part of it — without that, opening a collection would claim a scene's binding.
+/// surface is part of it — without that, opening a notebook would claim a collection's binding.
 fn subject_key(surface: &str, subject_id: &str) -> String {
     format!("{surface}\0{subject_id}")
 }
@@ -755,8 +750,8 @@ fn read_cached_roster(store: &ProjectStore) -> Result<Option<CachedRoster>, Coll
 
 // The one authorization failure that actually means the account lost the project. Every other
 // authorization failure — an expired token, a mutation refused while a key rotation is in flight —
-// is transient, and demoting the OWNER of a board to a read-only viewer on one of those made the
-// board unusable until the app was restarted.
+// is transient, and demoting the OWNER of a project to a read-only viewer on one of those would
+// leave it unusable until the app restarts.
 const NOT_A_MEMBER: &str = "this account is no longer a project member";
 
 fn lost_membership(error: &CollabError) -> bool {
@@ -1393,17 +1388,12 @@ fn enqueue_current_state(
 }
 
 /// Operations that can change which media hashes the document references. Everything else —
-/// geometry, text, strokes, appearance, ordering — leaves the retained set exactly as it was.
+/// fields and text — leaves the retained set exactly as it was.
 fn batch_touches_media(ops: &[doc::Op]) -> bool {
     ops.iter().any(|op| {
         matches!(
             op,
-            doc::Op::AddItem { .. }
-                | doc::Op::DeleteItem { .. }
-                | doc::Op::SetMediaManifest { .. }
-                | doc::Op::SetLink { .. }
-                | doc::Op::SetSequence { .. }
-                | doc::Op::SurfaceSetMedia { .. }
+            doc::Op::SurfaceSetMedia { .. }
                 | doc::Op::SurfaceDeleteEntry { .. }
                 | doc::Op::SurfaceRestoreEntry { .. }
         )
@@ -1423,7 +1413,6 @@ fn validate_surface_operations(surface: &str, ops: &[doc::Op]) -> Result<(), Col
             doc::Op::SurfaceDeleteEntry { .. } | doc::Op::SurfaceTextInsert { .. }
             | doc::Op::SurfaceTextDelete { .. } | doc::Op::SurfaceTextFormat { .. }
             | doc::Op::SurfaceSetMedia { .. } => matches!(surface, "collection" | "notebook" | "notebook-page"),
-            _ => surface == "board",
         };
         if !allowed { return Err(CollabError::validation("operation does not belong to this surface")); }
     }
@@ -1816,8 +1805,8 @@ async fn run_actor(
                     if let Ok(parsed) = ProjectId::parse(&project_id) {
                         if let Some(project) = active.get_mut(&parsed) {
                             // Rebuilding the projection to collect media hashes is O(document);
-                            // a geometry/text/stroke batch cannot change the referenced set, so a
-                            // drag no longer pays it on every 150 ms flush.
+                            // a field/text batch cannot change the referenced set, so typing does
+                            // not pay it on every 150 ms flush.
                             if batch_touches_media(&batch.ops) {
                                 if let Err(error) = refresh_media_retention(&parsed) {
                                     eprintln!("[collab] media retention update failed: {error}");
@@ -2626,23 +2615,14 @@ mod tests {
         CollabService, OpenProject, ProjectAccess, ProjectRole, RosterDevice, MAX_PUBLISH_RETRY,
     };
     use crate::collab::ids::OpaqueToken;
-    use crate::collab::ops::{CollabOp, Geometry, ItemKind, OperationBatch};
+    use crate::collab::ops::{CollabOp, OperationBatch, SurfaceEntryKind};
     use std::time::{Duration, Instant};
 
     fn add_batch() -> OperationBatch {
-        OperationBatch::v1(vec![CollabOp::AddItem {
-            item_id: "item".into(),
-            kind: ItemKind::Text,
-            geometry: Geometry {
-                x: 0.0,
-                y: 0.0,
-                width: 100.0,
-                height: 100.0,
-                rotation: 0.0,
-                natural_width: None,
-                natural_height: None,
-                detached: false,
-            },
+        OperationBatch::v1(vec![CollabOp::SurfaceSetEntry {
+            entry_id: "collection".into(),
+            kind: SurfaceEntryKind::Collection,
+            fields: Default::default(),
         }])
     }
 
@@ -2659,8 +2639,8 @@ mod tests {
         service
             .open(OpenProject {
                 project_id: "viewer-project".into(),
-                subject_id: "scene".into(),
-                surface: "board".into(),
+                subject_id: "collection".into(),
+                surface: "collection".into(),
                 role: ProjectRole::Viewer,
             })
             .await
@@ -2678,8 +2658,8 @@ mod tests {
         let session = service
             .open(OpenProject {
                 project_id: "closed-project".into(),
-                subject_id: "scene".into(),
-                surface: "board".into(),
+                subject_id: "collection".into(),
+                surface: "collection".into(),
                 role: ProjectRole::Editor,
             })
             .await

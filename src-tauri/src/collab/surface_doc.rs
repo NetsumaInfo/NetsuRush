@@ -86,7 +86,6 @@ pub fn apply(doc: &LoroDoc, op: &CollabOp) -> Result<(), DocError> {
         CollabOp::SurfaceSetMedia { entry_id, field, manifest } => {
             entry(doc, entry_id.as_str())?.ensure_mergeable_map("media")?.insert(field, json(manifest)?)?;
         }
-        _ => return Err(DocError::Rejected("not a surface operation".into())),
     }
     Ok(())
 }

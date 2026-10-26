@@ -26,7 +26,7 @@ use super::identity;
 /// Document synchronisation. The ALPN is versioned so incompatible peers are rejected by QUIC.
 const ALPN_SYNC: &[u8] = b"netsurush/sync/1";
 
-/// Ceiling on one synchronisation frame. A Loro delta for a moodboard is small; anything past this
+/// Ceiling on one synchronisation frame. A Loro delta for a surface document is small; anything past this
 /// is refused rather than buffered, so a peer cannot exhaust this machine's memory.
 const MAX_FRAME: usize = 32 * 1024 * 1024;
 const MAX_UPDATE: usize = 23 * 1024 * 1024;

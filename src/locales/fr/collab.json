@@ -4,7 +4,6 @@
   "signedOut": "Connecte-toi pour partager un document.",
   "surface": {
     "unknown": "Document partagé",
-    "board": "Board de référence",
     "collection": "Collection",
     "notebook": "Carnet NetsuBook",
     "notebook-page": "Document NetsuBook"
@@ -135,10 +134,6 @@
     "nobodyReachable": "Personne en ligne. Rien n'a été envoyé.",
     "waitingKey_one": "{{count}} attend la clé. Reste en ligne.",
     "waitingKey_other": "{{count}} attendent la clé. Reste en ligne."
-  },
-  "board": {
-    "noScene": "Enregistre d'abord ce board dans la bibliothèque de scènes.",
-    "willAdopt": "Ce board sera copié dans la bibliothèque de scènes. Le fichier .netsu reste sur ton disque."
   },
   "error": {
     "failed": "La synchronisation a échoué. Réessaie.",

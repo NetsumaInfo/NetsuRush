@@ -4,9 +4,10 @@
 //! never write into containers: they send typed operations, Rust validates and applies them.
 //!
 //! Why not a generic `set(path)` API: it would let a buggy — or compromised — renderer build states
-//! the board cannot represent, and it would step straight past the atomicity rules below. Geometry,
-//! crop, trim and every other group is ONE value, so two people dragging the same item produce one
-//! winner rather than Alice's position married to Bob's size.
+//! a surface cannot represent, and it would step straight past the atomicity rules below.
+//!
+//! Root containers this build does not know (for instance those written by the retired reference
+//! board) are left untouched and never projected.
 
 use std::collections::{HashMap, HashSet};
 use std::fs;
@@ -14,7 +15,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-use loro::{ExportMode, LoroDoc, LoroMap, LoroMovableList, LoroValue, VersionVector};
+use loro::{ExportMode, LoroDoc, LoroMap, LoroValue, VersionVector};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
@@ -24,26 +25,15 @@ mod surface;
 use super::identity;
 use super::ids::ProjectId;
 pub use super::ops::CollabOp as Op;
-use super::ops::{
-    Appearance, BoardPalette, CollabOp, Crop, EmbedMetadata, FrameStyle, Geometry, ItemKind,
-    LinkMetadata, MediaManifest, OperationBatch, Playback, SequenceMetadata, Stroke, TextStyle,
-    Trim, VectorShape, OP_PROTOCOL_VERSION,
-};
+use super::ops::{CollabOp, OperationBatch, OP_PROTOCOL_VERSION};
 
 /// Layout of the document itself. A build that does not understand it opens the project read-only
 /// rather than rewriting it into something the writer cannot read back.
 const DOC_SCHEMA_VERSION: i64 = 1;
 const ROOT_META: &str = "meta";
-const ROOT_ITEMS: &str = "items";
-const ROOT_ORDER: &str = "order";
-const ROOT_STROKES: &str = "strokes";
-const ROOT_STROKE_ORDER: &str = "strokeOrder";
-const ROOT_SHAPES: &str = "shapes";
-const ROOT_SHAPE_ORDER: &str = "shapeOrder";
 
 const KEY_SCHEMA: &str = "schemaVersion";
 const KEY_DELETED: &str = "deleted";
-const KEY_TEXT: &str = "text";
 
 #[derive(Debug)]
 pub enum DocError {
@@ -53,7 +43,7 @@ pub enum DocError {
     Schema(i64),
     /// The renderer speaks another operation protocol.
     Protocol(u32),
-    /// The operation cannot apply to this document: unknown item, tombstoned item, bad payload.
+    /// The operation cannot apply to this document: unknown entry, tombstoned entry, bad payload.
     Rejected(String),
 }
 
@@ -92,45 +82,9 @@ pub struct ApplyResult {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ItemProjection {
-    pub item_id: String,
-    pub kind: ItemKind,
-    pub geometry: Geometry,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub crop: Option<Crop>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub trim: Option<Trim>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub appearance: Option<Appearance>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub text_style: Option<TextStyle>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub frame_style: Option<FrameStyle>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub playback: Option<Playback>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub media: Option<MediaManifest>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub link: Option<LinkMetadata>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub embed: Option<EmbedMetadata>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sequence: Option<SequenceMetadata>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub palette: Option<BoardPalette>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct ProjectProjection {
     pub entries: Vec<surface::SurfaceEntryProjection>,
     pub revision: u64,
-    pub items: Vec<ItemProjection>,
-    pub order: Vec<String>,
-    pub strokes: Vec<Stroke>,
-    pub shapes: Vec<VectorShape>,
     /// Content hashes whose bytes are already in the local blob store. The document layer cannot
     /// know this — the service fills it before the projection crosses to the renderer, which uses
     /// it to paint a placeholder instead of pointing an `<img>`/`<video>` at a blob that would 404.
@@ -327,25 +281,8 @@ pub fn flush(project_id: &str) -> Result<(), DocError> {
     })
 }
 
-fn items(doc: &LoroDoc) -> LoroMap {
-    doc.get_map(ROOT_ITEMS)
-}
-
-fn order(doc: &LoroDoc) -> LoroMovableList {
-    doc.get_movable_list(ROOT_ORDER)
-}
-
-/// The item map, refusing a tombstoned or unknown id.
-///
-/// Ids are never reused, so a late operation that arrives after a deletion cannot resurrect an item:
-/// it is refused here instead of writing into a container the projection already filters out.
-/// Une entrée présente dans une map est-elle une PIERRE TOMBALE ?
-///
-/// Supprimer ne retire pas l'entrée, ça lève ce drapeau. Refuser tout id déjà présent revenait donc
-/// à refuser la RÉAPPARITION d'un objet supprimé — ce qui est exactement ce qu'une annulation
-/// demande, l'historique du board restituant les ids d'origine. Et un lot rejeté l'est en ENTIER :
-/// un seul Ctrl+Z après une suppression faisait tomber tout le lot, l'annulation était perdue et
-/// une notice d'erreur restait collée. Un id VIVANT reste refusé : celui-là est une vraie collision.
+/// Deleting never removes an entry: it raises this flag. Restoring an entry with its original id
+/// (what an undo asks for) revives a tombstone rather than colliding with a live entry.
 fn is_tombstoned(entry: &LoroMap) -> bool {
     matches!(
         entry.get(KEY_DELETED).and_then(|value| value.into_value().ok()),
@@ -353,50 +290,8 @@ fn is_tombstoned(entry: &LoroMap) -> bool {
     )
 }
 
-fn live_item(doc: &LoroDoc, id: &str) -> Result<LoroMap, DocError> {
-    let item = items(doc)
-        .get(id)
-        .and_then(|value| value.into_container().ok())
-        .and_then(|container| container.into_map().ok())
-        .ok_or_else(|| DocError::Rejected(format!("unknown item {id}")))?;
-    if matches!(
-        item.get(KEY_DELETED).and_then(|v| v.into_value().ok()),
-        Some(LoroValue::Bool(true))
-    ) {
-        return Err(DocError::Rejected(format!("item {id} is deleted")));
-    }
-    Ok(item)
-}
-
 fn json<T: Serialize>(value: &T) -> Result<String, DocError> {
     serde_json::to_string(value).map_err(|error| DocError::Rejected(error.to_string()))
-}
-
-fn set_atomic<T: Serialize>(doc: &LoroDoc, id: &str, key: &str, value: &T) -> Result<(), DocError> {
-    live_item(doc, id)?.insert(key, json(value)?)?;
-    Ok(())
-}
-
-fn index_in_order(list: &LoroMovableList, id: &str) -> Option<usize> {
-    for index in 0..list.len() {
-        if let Some(LoroValue::String(found)) = list.get(index).and_then(|v| v.into_value().ok()) {
-            if found.as_str() == id {
-                return Some(index);
-            }
-        }
-    }
-    None
-}
-
-fn ordered_ids(list: &LoroMovableList) -> Vec<String> {
-    (0..list.len())
-        .filter_map(|index| list.get(index))
-        .filter_map(|value| value.into_value().ok())
-        .filter_map(|value| match value {
-            LoroValue::String(value) => Some(value.to_string()),
-            _ => None,
-        })
-        .collect()
 }
 
 fn atomic<T: DeserializeOwned>(map: &LoroMap, key: &str) -> Result<Option<T>, DocError> {
@@ -408,300 +303,19 @@ fn atomic<T: DeserializeOwned>(map: &LoroMap, key: &str) -> Result<Option<T>, Do
         .map_err(|error| DocError::Loro(format!("invalid {key} group: {error}")))
 }
 
-fn kind(map: &LoroMap) -> Result<ItemKind, DocError> {
-    let Some(LoroValue::String(value)) = map.get("kind").and_then(|value| value.into_value().ok())
-    else {
-        return Err(DocError::Loro("item has no kind".into()));
-    };
-    serde_json::from_str(&format!("\"{}\"", value.as_str()))
-        .map_err(|error| DocError::Loro(format!("invalid item kind: {error}")))
-}
-
-fn text_value(map: &LoroMap) -> Option<String> {
-    map.get(KEY_TEXT)
-        .and_then(|value| value.into_container().ok())
-        .and_then(|container| container.into_text().ok())
-        .map(|text| text.to_string())
-}
-
-fn ordered_data<T: DeserializeOwned>(
-    map: LoroMap,
-    list: LoroMovableList,
-) -> Result<Vec<T>, DocError> {
-    let mut output = Vec::new();
-    for id in ordered_ids(&list) {
-        let Some(entry) = map
-            .get(&id)
-            .and_then(|value| value.into_container().ok())
-            .and_then(|container| container.into_map().ok())
-        else {
-            continue;
-        };
-        if matches!(
-            entry
-                .get(KEY_DELETED)
-                .and_then(|value| value.into_value().ok()),
-            Some(LoroValue::Bool(true))
-        ) {
-            continue;
-        }
-        let Some(LoroValue::String(raw)) =
-            entry.get("data").and_then(|value| value.into_value().ok())
-        else {
-            continue;
-        };
-        output.push(
-            serde_json::from_str(raw.as_str())
-                .map_err(|error| DocError::Loro(format!("invalid ordered data: {error}")))?,
-        );
-    }
-    Ok(output)
-}
-
 fn project_projection_from_doc(
     doc: &LoroDoc,
     revision: u64,
 ) -> Result<ProjectProjection, DocError> {
-    let mut projected_items = Vec::new();
-    let mut projected_order = Vec::new();
-    for id in ordered_ids(&order(doc)) {
-        let Ok(item) = live_item(doc, &id) else {
-            continue;
-        };
-        let Some(geometry) = atomic::<Geometry>(&item, "geometry")? else {
-            return Err(DocError::Loro(format!("item {id} has no geometry")));
-        };
-        projected_order.push(id.clone());
-        projected_items.push(ItemProjection {
-            item_id: id,
-            kind: kind(&item)?,
-            geometry,
-            crop: atomic(&item, "crop")?,
-            trim: atomic(&item, "trim")?,
-            appearance: atomic(&item, "appearance")?,
-            text_style: atomic(&item, "textStyle")?,
-            text: text_value(&item),
-            frame_style: atomic(&item, "frameStyle")?,
-            playback: atomic(&item, "playback")?,
-            media: atomic(&item, "media")?,
-            link: atomic(&item, "link")?,
-            embed: atomic(&item, "embed")?,
-            sequence: atomic(&item, "sequence")?,
-            palette: atomic(&item, "palette")?,
-        });
-    }
     Ok(ProjectProjection {
         entries: surface::projection(doc)?,
         revision,
-        items: projected_items,
-        order: projected_order,
-        strokes: ordered_data(
-            doc.get_map(ROOT_STROKES),
-            doc.get_movable_list(ROOT_STROKE_ORDER),
-        )?,
-        shapes: ordered_data(
-            doc.get_map(ROOT_SHAPES),
-            doc.get_movable_list(ROOT_SHAPE_ORDER),
-        )?,
         local_hashes: Vec::new(),
     })
 }
 
 fn apply_one(doc: &LoroDoc, op: &CollabOp) -> Result<(), DocError> {
-    match op {
-        CollabOp::SurfaceRestoreEntry { .. } | CollabOp::SurfaceTextFormat { .. } | CollabOp::SurfaceSetEntry { .. } | CollabOp::SurfaceDeleteEntry { .. } | CollabOp::SurfaceTextInsert { .. } | CollabOp::SurfaceTextDelete { .. } | CollabOp::SurfaceSetMedia { .. } => surface::apply(doc, op)?,
-        CollabOp::AddItem {
-            item_id,
-            kind,
-            geometry,
-        } => {
-            let id = item_id.as_str();
-            let existing = items(doc)
-                .get(id)
-                .and_then(|value| value.into_container().ok())
-                .and_then(|container| container.into_map().ok());
-            if let Some(entry) = &existing {
-                if !is_tombstoned(entry) {
-                    return Err(DocError::Rejected(format!("item {id} already exists")));
-                }
-            }
-            let item = items(doc).ensure_mergeable_map(id)?;
-            item.insert("kind", json(kind)?.trim_matches('"'))?;
-            item.insert("geometry", json(geometry)?)?;
-            item.insert(KEY_DELETED, false)?;
-            let list = order(doc);
-            // Un item ressuscité a quitté l'ordre à sa suppression ; un id qui y serait resté ne
-            // doit pas y figurer deux fois.
-            if index_in_order(&list, id).is_none() {
-                list.insert(list.len(), id)?;
-            }
-        }
-        // Delete wins over move: the tombstone stays and the id leaves the order. A concurrent move
-        // may put the id back, which is why the projection filters tombstones as well.
-        CollabOp::DeleteItem { item_id } => {
-            let id = item_id.as_str();
-            let item = live_item(doc, id)?;
-            item.insert(KEY_DELETED, true)?;
-            if let Some(index) = index_in_order(&order(doc), id) {
-                order(doc).delete(index, 1)?;
-            }
-        }
-        CollabOp::SetGeometry { item_id, geometry } => {
-            set_atomic(doc, item_id.as_str(), "geometry", geometry)?
-        }
-        CollabOp::SetCrop { item_id, crop } => set_atomic(doc, item_id.as_str(), "crop", crop)?,
-        CollabOp::SetTrim { item_id, trim } => set_atomic(doc, item_id.as_str(), "trim", trim)?,
-        CollabOp::SetAppearance {
-            item_id,
-            appearance,
-        } => set_atomic(doc, item_id.as_str(), "appearance", appearance)?,
-        CollabOp::SetTextStyle { item_id, style } => {
-            set_atomic(doc, item_id.as_str(), "textStyle", style)?
-        }
-        CollabOp::SetFrameStyle { item_id, frame } => {
-            set_atomic(doc, item_id.as_str(), "frameStyle", frame)?
-        }
-        CollabOp::SetPlayback { item_id, playback } => {
-            set_atomic(doc, item_id.as_str(), "playback", playback)?
-        }
-        CollabOp::SetMediaManifest { item_id, manifest } => {
-            set_atomic(doc, item_id.as_str(), "media", manifest)?
-        }
-        CollabOp::SetLink { item_id, link } => set_atomic(doc, item_id.as_str(), "link", link)?,
-        CollabOp::SetEmbed { item_id, embed } => set_atomic(doc, item_id.as_str(), "embed", embed)?,
-        CollabOp::SetSequence { item_id, sequence } => {
-            set_atomic(doc, item_id.as_str(), "sequence", sequence)?
-        }
-        CollabOp::SetPalette { item_id, palette } => {
-            set_atomic(doc, item_id.as_str(), "palette", palette)?
-        }
-        // Text is the ONE field that must not be a whole-value write: two people typing in the same
-        // note have to merge character by character, which is what LoroText is for.
-        CollabOp::TextInsert {
-            item_id,
-            index,
-            text,
-        } => {
-            let id = item_id.as_str();
-            let item = live_item(doc, id)?;
-            let content = item.ensure_mergeable_text(KEY_TEXT)?;
-            let index = *index as usize;
-            if index > content.len_unicode() {
-                return Err(DocError::Rejected("text index out of range".into()));
-            }
-            content.insert(index, text)?;
-        }
-        CollabOp::TextDelete {
-            item_id,
-            index,
-            len,
-        } => {
-            let id = item_id.as_str();
-            let item = live_item(doc, id)?;
-            let content = item.ensure_mergeable_text(KEY_TEXT)?;
-            let index = *index as usize;
-            let len = *len as usize;
-            if index.saturating_add(len) > content.len_unicode() {
-                return Err(DocError::Rejected("text range out of bounds".into()));
-            }
-            content.delete(index, len)?;
-        }
-        CollabOp::MoveItem { item_id, before } => {
-            let id = item_id.as_str();
-            live_item(doc, id)?;
-            let list = order(doc);
-            let from = index_in_order(&list, id)
-                .ok_or_else(|| DocError::Rejected(format!("item {id} is not in the order")))?;
-            let target = if let Some(before) = before {
-                let before_id = before.as_str();
-                live_item(doc, before_id)?;
-                let before_index = index_in_order(&list, before_id).ok_or_else(|| {
-                    DocError::Rejected(format!("item {before_id} is not in the order"))
-                })?;
-                if from < before_index {
-                    before_index.saturating_sub(1)
-                } else {
-                    before_index
-                }
-            } else {
-                list.len().saturating_sub(1)
-            };
-            list.mov(from, target)?;
-        }
-        // A finished stroke is one immutable value, not a list of points: one operation instead of
-        // thousands. Erasing part of a stroke deletes it and adds the remaining segments as new ones.
-        // A stroke holds no editable field of its own, so CHANGING one (its colour, width, opacity,
-        // or the item it belongs to) is expressed as a delete followed by an add on the same id,
-        // usually inside a single batch. Deleting only raises the tombstone — the entry stays — so
-        // refusing every id already present rejected the whole batch, and with it any edit made to
-        // an existing pen stroke on a shared board. A LIVE id is still refused: that one is a
-        // genuine collision. Re-adding over a tombstone revives the entry with the new value.
-        CollabOp::AddStroke(stroke_value) => {
-            let id = stroke_value.stroke_id.as_str();
-            let strokes = doc.get_map(ROOT_STROKES);
-            let existing = strokes
-                .get(id)
-                .and_then(|value| value.into_container().ok())
-                .and_then(|container| container.into_map().ok());
-            if let Some(entry) = &existing {
-                if !is_tombstoned(entry) {
-                    return Err(DocError::Rejected(format!("stroke {id} already exists")));
-                }
-            }
-            let stroke = strokes.ensure_mergeable_map(id)?;
-            stroke.insert("data", json(stroke_value)?)?;
-            stroke.insert(KEY_DELETED, false)?;
-            let list = doc.get_movable_list(ROOT_STROKE_ORDER);
-            // A revived stroke was taken out of the order when it was deleted; a stroke that
-            // somehow kept its slot must not be listed twice.
-            if index_in_order(&list, id).is_none() {
-                list.insert(list.len(), id)?;
-            }
-        }
-        CollabOp::DeleteStroke { stroke_id } => {
-            let id = stroke_id.as_str();
-            let strokes = doc.get_map(ROOT_STROKES);
-            let stroke = strokes
-                .get(id)
-                .and_then(|value| value.into_container().ok())
-                .and_then(|container| container.into_map().ok())
-                .ok_or_else(|| DocError::Rejected(format!("unknown stroke {id}")))?;
-            stroke.insert(KEY_DELETED, true)?;
-            let list = doc.get_movable_list(ROOT_STROKE_ORDER);
-            if let Some(index) = index_in_order(&list, id) {
-                list.delete(index, 1)?;
-            }
-        }
-        CollabOp::UpsertShape(shape_value) => {
-            let id = shape_value.shape_id.as_str();
-            let shapes = doc.get_map(ROOT_SHAPES);
-            let shape = shapes.ensure_mergeable_map(id)?;
-            let revived = is_tombstoned(&shape);
-            shape.insert("data", json(shape_value)?)?;
-            shape.insert(KEY_DELETED, false)?;
-            let list = doc.get_movable_list(ROOT_SHAPE_ORDER);
-            // Une forme supprimée a quitté l'ordre : la ré-poser la remet dans la pile. Sinon
-            // (simple mise à jour), l'ordre est déjà juste et la toucher la ferait remonter.
-            if revived || index_in_order(&list, id).is_none() {
-                list.insert(list.len(), id)?;
-            }
-        }
-        CollabOp::DeleteShape { shape_id } => {
-            let id = shape_id.as_str();
-            let shapes = doc.get_map(ROOT_SHAPES);
-            let shape = shapes
-                .get(id)
-                .and_then(|value| value.into_container().ok())
-                .and_then(|container| container.into_map().ok())
-                .ok_or_else(|| DocError::Rejected(format!("unknown shape {id}")))?;
-            shape.insert(KEY_DELETED, true)?;
-            let list = doc.get_movable_list(ROOT_SHAPE_ORDER);
-            if let Some(index) = index_in_order(&list, id) {
-                list.delete(index, 1)?;
-            }
-        }
-    }
-    Ok(())
+    surface::apply(doc, op)
 }
 
 #[cfg(test)]
@@ -737,8 +351,7 @@ fn apply_batch_to_doc(doc: &LoroDoc, ops: &[Op]) -> Result<Vec<u8>, DocError> {
 ///
 /// The service persists both in one SQLite transaction before calling `commit_update`, so a crash
 /// cannot leave visible work without a recoverable head. The shadow keeps the cost O(batch) rather
-/// than O(document): no full snapshot is exported or re-imported per 150 ms batch, which is what a
-/// drag on a large board is made of.
+/// than O(document): no full snapshot is exported or re-imported per 150 ms batch.
 ///
 /// `base_revision` pins the batch to a past revision of a surface; `None` applies it to the live
 /// head.
@@ -947,27 +560,6 @@ pub(crate) fn projection_media_hashes(
     }
 
     let mut hashes = std::collections::HashSet::new();
-    for item in &projection.items {
-        if let Some(manifest) = &item.media {
-            add_asset(&mut hashes, &manifest.primary);
-            if let Some(previous) = &manifest.previous {
-                add_asset(&mut hashes, &previous.asset);
-            }
-            if let Some(local) = &manifest.local {
-                add_asset(&mut hashes, &local.asset);
-            }
-        }
-        if let Some(sequence) = &item.sequence {
-            for frame in &sequence.frames {
-                add_asset(&mut hashes, frame);
-            }
-        }
-        if let Some(link) = &item.link {
-            if matches!(link.kind, crate::collab::ops::LinkKind::File) {
-                hashes.insert(link.target.clone());
-            }
-        }
-    }
     for entry in &projection.entries {
         for manifest in entry.media.values() {
             add_asset(&mut hashes, &manifest.primary);
@@ -1048,62 +640,27 @@ pub fn close(project_id: &str) -> Result<bool, DocError> {
 #[cfg(test)]
 mod path_tests {
     use super::{
-        activate, apply_batch_to_doc, close, import_if_new, items, live_item, open_media_hashes,
-        project_path, project_projection_from_doc, projection, Op, KEY_TEXT,
+        activate, apply_batch_to_doc, close, import_if_new, open_media_hashes, project_path,
+        project_projection_from_doc, projection, Op,
     };
-    use crate::collab::ops::{Geometry, ItemKind};
-    use loro::{ExportMode, LoroDoc, LoroValue};
-
-    /// Annuler une suppression restitue les ids d'ORIGINE : l'historique du board n'est pas celui du
-    /// document. Refuser tout id déjà présent revenait à refuser cette réapparition — et un lot
-    /// rejeté l'est en entier, donc le premier Ctrl+Z après une suppression perdait tout le lot.
-    #[test]
-    fn deleting_then_re_adding_the_same_id_is_accepted() {
-        let doc = LoroDoc::new();
-        let add = || Op::AddItem {
-            item_id: "item-a".into(),
-            kind: ItemKind::Image,
-            geometry: geometry(1.0),
-        };
-        apply_batch_to_doc(&doc, &[add()]).expect("premier ajout");
-        apply_batch_to_doc(
-            &doc,
-            &[Op::DeleteItem { item_id: "item-a".into() }],
-        )
-        .expect("suppression");
-
-        // Ctrl+Z : le même id revient.
-        apply_batch_to_doc(&doc, &[add()]).expect("the undo must be accepted");
-        let projection = project_projection_from_doc(&doc, 0).expect("projection");
-        assert_eq!(projection.items.len(), 1);
-        // Une seule occurrence dans l'ordre : ressusciter ne doit pas empiler l'id deux fois.
-        assert_eq!(projection.order, vec!["item-a".to_string()]);
-
-        // Un id VIVANT reste une vraie collision.
-        assert!(apply_batch_to_doc(&doc, &[add()]).is_err());
-    }
-
-    fn geometry(x: f64) -> Geometry {
-        Geometry {
-            x,
-            y: 0.0,
-            width: 100.0,
-            height: 100.0,
-            rotation: 0.0,
-            natural_width: None,
-            natural_height: None,
-            detached: false,
-        }
-    }
+    use loro::{ExportMode, LoroDoc};
 
     #[test]
     fn empty_document_has_a_total_empty_projection() {
         let projection = project_projection_from_doc(&LoroDoc::new(), 4).expect("projection");
         assert_eq!(projection.revision, 4);
-        assert!(projection.items.is_empty());
-        assert!(projection.order.is_empty());
-        assert!(projection.strokes.is_empty());
-        assert!(projection.shapes.is_empty());
+        assert!(projection.entries.is_empty());
+    }
+
+    #[test]
+    fn unknown_root_containers_are_ignored_by_the_projection() {
+        let doc = LoroDoc::new();
+        let legacy = doc.get_map("items").ensure_mergeable_map("old").expect("legacy entry");
+        legacy.insert("kind", "image").expect("insert");
+        doc.get_movable_list("order").insert(0, "old").expect("order");
+        doc.commit();
+        let projection = project_projection_from_doc(&doc, 0).expect("projection");
+        assert!(projection.entries.is_empty());
     }
 
     #[test]
@@ -1138,20 +695,15 @@ mod path_tests {
     #[test]
     fn invalid_second_operation_rolls_back_the_first_operation() {
         let doc = LoroDoc::new();
-        let operations = vec![
-            Op::AddItem {
-                item_id: "one".into(),
-                kind: ItemKind::Text,
-                geometry: geometry(0.0),
-            },
-            Op::SetGeometry {
-                item_id: "missing".into(),
-                geometry: geometry(1.0),
-            },
-        ];
+        let operations: Vec<Op> = serde_json::from_value(serde_json::json!([
+            { "type": "surfaceSetEntry", "entryId": "page-one", "kind": "page", "fields": {} },
+            { "type": "surfaceTextInsert", "entryId": "missing", "field": "title", "index": 0, "text": "x" }
+        ]))
+        .expect("operations");
 
         assert!(apply_batch_to_doc(&doc, &operations).is_err());
-        assert!(items(&doc).get("one").is_none());
+        let projection = project_projection_from_doc(&doc, 0).expect("projection");
+        assert!(projection.entries.is_empty());
     }
 
     #[test]
@@ -1166,200 +718,5 @@ mod path_tests {
         let target = LoroDoc::new();
         assert!(import_if_new(&target, &update).expect("first import"));
         assert!(!import_if_new(&target, &update).expect("duplicate import"));
-    }
-
-    #[test]
-    fn text_indices_are_unicode_scalar_indices() {
-        let doc = LoroDoc::new();
-        let operations = vec![
-            Op::AddItem {
-                item_id: "note".into(),
-                kind: ItemKind::Text,
-                geometry: geometry(0.0),
-            },
-            Op::TextInsert {
-                item_id: "note".into(),
-                index: 0,
-                text: "a👩🏽‍🎨z".into(),
-            },
-            Op::TextInsert {
-                item_id: "note".into(),
-                index: 1,
-                text: "é".into(),
-            },
-        ];
-
-        apply_batch_to_doc(&doc, &operations).expect("apply Unicode text");
-        let text = live_item(&doc, "note")
-            .expect("note")
-            .get(KEY_TEXT)
-            .and_then(|value| value.into_container().ok())
-            .and_then(|container| container.into_text().ok())
-            .expect("text");
-        assert_eq!(text.to_string(), "aé👩🏽‍🎨z");
-        assert!(matches!(
-            items(&doc)
-                .get("note")
-                .and_then(|value| value.into_container().ok())
-                .and_then(|container| container.into_map().ok())
-                .and_then(|map| map.get("kind"))
-                .and_then(|value| value.into_value().ok()),
-            Some(LoroValue::String(kind)) if kind.as_str() == "text"
-        ));
-    }
-
-    #[test]
-    fn two_through_ten_replicas_converge_across_the_complete_board_contract() {
-        use serde_json::json;
-
-        let geometry = |x: f64| {
-            json!({
-                "x": x, "y": 0.0, "width": 100.0, "height": 80.0,
-                "rotation": 0.0, "detached": false,
-            })
-        };
-        let base_ops: Vec<Op> = serde_json::from_value(json!([
-            { "type": "addItem", "itemId": "shared", "kind": "video", "geometry": geometry(0.0) },
-            { "type": "addItem", "itemId": "temporary", "kind": "image", "geometry": geometry(1.0) },
-            { "type": "addItem", "itemId": "note", "kind": "text", "geometry": geometry(2.0) },
-            { "type": "addItem", "itemId": "frame", "kind": "frame", "geometry": geometry(3.0) },
-            { "type": "addItem", "itemId": "sequence", "kind": "sequence", "geometry": geometry(4.0) },
-            { "type": "addItem", "itemId": "palette", "kind": "palette", "geometry": geometry(5.0) }
-        ]))
-        .expect("base operations");
-        let base = LoroDoc::new();
-        base.set_peer_id(100).expect("peer id");
-        apply_batch_to_doc(&base, &base_ops).expect("base");
-        let base_version = base.oplog_vv();
-        let snapshot = base.export(ExportMode::Snapshot).expect("snapshot");
-
-        let batches = vec![
-            json!([
-                { "type": "setGeometry", "itemId": "shared", "geometry": {
-                    "x": 50.0, "y": 20.0, "width": 320.0, "height": 180.0,
-                    "rotation": 12.0, "naturalWidth": 1920.0, "naturalHeight": 1080.0,
-                    "detached": false
-                }},
-                { "type": "deleteItem", "itemId": "temporary" }
-            ]),
-            json!([
-                { "type": "setCrop", "itemId": "shared", "crop": { "x": 0.1, "y": 0.1, "width": 0.8, "height": 0.8 } },
-                { "type": "setTrim", "itemId": "shared", "trim": { "start": 1.0, "end": 3.0, "duration": 5.0 } }
-            ]),
-            json!([{ "type": "setAppearance", "itemId": "shared", "appearance": {
-                "title": "Clip", "opacity": 0.8, "flipHorizontal": true, "flipVertical": false
-            }}]),
-            json!([
-                { "type": "setTextStyle", "itemId": "note", "style": {
-                    "fontSize": 24.0, "fontFamily": "Inter", "color": "#ffffff",
-                    "background": "#000000", "highlight": "#ff0000", "lineHeight": 1.4,
-                    "indent": 1, "bullet": true, "numbered": false, "strike": false,
-                    "align": "center", "bold": true, "italic": true, "underline": false
-                }},
-                { "type": "textInsert", "itemId": "note", "index": 0, "text": "Bonjour 👋" }
-            ]),
-            json!([{ "type": "setFrameStyle", "itemId": "frame", "frame": {
-                "fillMode": "tint", "fillColor": "#112233", "titleBackground": "#445566"
-            }}]),
-            json!([{ "type": "setPlayback", "itemId": "sequence", "playback": {
-                "playMode": "pingpong", "frame": 2, "fps": 12.0, "speed": 1.5,
-                "sequencePlaying": false, "sequenceIn": 1, "sequenceOut": 3
-            }}]),
-            json!([{ "type": "setMediaManifest", "itemId": "shared", "manifest": {
-                "primary": {
-                    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                    "displayName": "clip.mp4", "mime": "video/mp4", "size": 42
-                }
-            }}]),
-            json!([
-                { "type": "setLink", "itemId": "note", "link": {
-                    "kind": "url", "target": "https://example.com/reference", "label": "Source"
-                }},
-                { "type": "setEmbed", "itemId": "shared", "embed": {
-                    "level": "full", "quality": "high", "marginSeconds": 2.0
-                }}
-            ]),
-            json!([
-                { "type": "setSequence", "itemId": "sequence", "sequence": { "frames": [{
-                    "remoteUrl": "https://example.com/frame.png", "displayName": "frame.png",
-                    "mime": "image/png", "size": 10
-                }]}},
-                { "type": "setPalette", "itemId": "palette", "palette": {
-                    "colors": ["#112233", "#abcdef"], "sourceItemIds": ["shared"],
-                    "showValues": true, "colorFormat": "hex", "layout": "grid"
-                }},
-                { "type": "moveItem", "itemId": "palette", "before": "shared" }
-            ]),
-            json!([
-                { "type": "addStroke", "strokeId": "stroke-one", "color": "#fff",
-                  "width": 3.0, "opacity": 1.0, "encodedPoints": "AQID", "detached": false },
-                { "type": "upsertShape", "shapeId": "shape-one", "kind": "arrow",
-                  "color": "#fff", "width": 2.0, "points": [0.0, 0.0, 10.0, 10.0],
-                  "startHead": "none", "endHead": "arrow", "dash": "solid",
-                  "route": "straight", "opacity": 1.0, "rounded": false,
-                  "ownerPoints": [], "detached": true }
-            ]),
-        ];
-
-        for replica_count in 2..=10 {
-            let mut updates = Vec::new();
-            for (index, batch) in batches.iter().take(replica_count).enumerate() {
-                let replica = LoroDoc::new();
-                replica.import(&snapshot).expect("replica snapshot");
-                replica.set_peer_id((index + 1) as u64).expect("peer id");
-                let operations: Vec<Op> =
-                    serde_json::from_value(batch.clone()).expect("operations");
-                apply_batch_to_doc(&replica, &operations).expect("replica operation");
-                updates.push(
-                    replica
-                        .export(ExportMode::updates(&base_version))
-                        .expect("replica update"),
-                );
-            }
-
-            let left = LoroDoc::new();
-            left.import(&snapshot).expect("left snapshot");
-            for update in &updates {
-                left.import(update).expect("left update");
-            }
-            let right = LoroDoc::new();
-            right.import(&snapshot).expect("right snapshot");
-            for update in updates.iter().rev() {
-                right.import(update).expect("right update");
-            }
-            assert_eq!(
-                serde_json::to_value(
-                    project_projection_from_doc(&left, 0).expect("left projection")
-                )
-                .expect("left JSON"),
-                serde_json::to_value(
-                    project_projection_from_doc(&right, 0).expect("right projection")
-                )
-                .expect("right JSON"),
-                "{replica_count} replicas must converge regardless of import order",
-            );
-        }
-
-        let final_doc = LoroDoc::new();
-        final_doc.import(&snapshot).expect("final snapshot");
-        for (index, batch) in batches.into_iter().enumerate() {
-            let replica = LoroDoc::new();
-            replica.import(&snapshot).expect("replica snapshot");
-            replica.set_peer_id((index + 1) as u64).expect("peer id");
-            let operations: Vec<Op> = serde_json::from_value(batch).expect("operations");
-            let update = apply_batch_to_doc(&replica, &operations).expect("operation");
-            final_doc.import(&update).expect("final update");
-        }
-        let projection = project_projection_from_doc(&final_doc, 0).expect("projection");
-        assert!(!projection.order.contains(&"temporary".to_owned()));
-        assert_eq!(projection.strokes.len(), 1);
-        assert_eq!(projection.shapes.len(), 1);
-        let shared = projection
-            .items
-            .iter()
-            .find(|item| item.item_id == "shared")
-            .expect("shared item");
-        assert!(shared.crop.is_some() && shared.trim.is_some() && shared.media.is_some());
-        assert!(shared.appearance.is_some() && shared.embed.is_some());
     }
 }

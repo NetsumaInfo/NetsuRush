@@ -4,7 +4,6 @@
   "signedOut": "登录后即可共享文档。",
   "surface": {
     "unknown": "共享文档",
-    "board": "参考画板",
     "collection": "合集",
     "notebook": "NetsuBook 笔记本",
     "notebook-page": "NetsuBook 文档"
@@ -135,10 +134,6 @@
     "nobodyReachable": "无人在线，尚未发送。",
     "waitingKey_one": "{{count}} 人在等待密钥。请保持在线。",
     "waitingKey_other": "{{count}} 人在等待密钥。请保持在线。"
-  },
-  "board": {
-    "noScene": "请先将此画板保存到场景库。",
-    "willAdopt": "此画板将复制到场景库。.netsu 文件仍保留在你的磁盘上。"
   },
   "error": {
     "failed": "无法同步。请重试。",

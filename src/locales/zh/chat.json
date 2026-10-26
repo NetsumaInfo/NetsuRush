@@ -128,7 +128,6 @@
     "upscaleMedia": "视频超分辨率",
     "exportAe": "导出到 After Effects",
     "importMedia": "导入 Media Pool",
-    "board": "参考画板{{suffix}}",
     "page": "页面 {{page}}",
     "resolveApp": "Resolve 应用",
     "grabStill": "抓取静帧",

@@ -669,8 +669,7 @@
       "media": "Media cache",
       "cleanup": "Cleanup",
       "project": "Project cache",
-      "projects": "Projects",
-      "board": "NetsuBoard"
+      "projects": "Projects"
     },
     "system": {
       "updates": "Updates",
@@ -738,7 +737,6 @@
       "economy": "Economy"
     },
     "surfaces": {
-      "board": "Boards",
       "collection": "Collections",
       "notebook": "Notebooks",
       "notebook-page": "Notebook pages"

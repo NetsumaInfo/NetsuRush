@@ -669,8 +669,7 @@
       "media": "Cache médias",
       "cleanup": "Nettoyage",
       "project": "Cache projet",
-      "projects": "Projets",
-      "board": "NetsuBoard"
+      "projects": "Projets"
     },
     "system": {
       "updates": "Mises à jour",
@@ -738,7 +737,6 @@
       "economy": "Économie"
     },
     "surfaces": {
-      "board": "Boards",
       "collection": "Collections",
       "notebook": "Carnets",
       "notebook-page": "Pages de carnet"

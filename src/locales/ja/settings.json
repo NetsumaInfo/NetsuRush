@@ -669,8 +669,7 @@
       "media": "メディアキャッシュ",
       "cleanup": "クリーンアップ",
       "project": "プロジェクトキャッシュ",
-      "projects": "プロジェクト",
-      "board": "NetsuBoard"
+      "projects": "プロジェクト"
     },
     "system": {
       "updates": "アップデート",
@@ -738,7 +737,6 @@
       "economy": "省エネ"
     },
     "surfaces": {
-      "board": "ボード",
       "collection": "コレクション",
       "notebook": "ノートブック",
       "notebook-page": "ノートブックのページ"

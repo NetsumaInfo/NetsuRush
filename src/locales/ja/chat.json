@@ -128,7 +128,6 @@
     "upscaleMedia": "動画のアップスケール",
     "exportAe": "After Effects 書き出し",
     "importMedia": "Media Pool へ読み込み",
-    "board": "リファレンスボード{{suffix}}",
     "page": "ページ {{page}}",
     "resolveApp": "Resolve アプリケーション",
     "grabStill": "スチル取得",

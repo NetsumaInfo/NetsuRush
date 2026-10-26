@@ -1,7 +1,7 @@
 //! Collaborative projects (`docs/collab.md`).
 //!
 //! The Rust side is the single authority for collaborative state: it owns the Loro document, the
-//! iroh endpoint, durable outbox, blob store and every secret. Renderers receive total board
+//! iroh endpoint, durable outbox, blob store and every secret. Renderers receive total
 //! projections and submit typed operations; they never receive key material or mutable CRDT access.
 
 pub mod blobs;
