@@ -68,7 +68,6 @@ export interface NotebookSlice {
   nbRenameNotebook: (id: string, patch: { title?: string; icon?: string | null; kind?: NotebookKind; language?: NotebookLanguage }) => Promise<void>;
   nbDeleteNotebook: (id: string) => Promise<void>;
   // Ouvre (ou crée) le carnet lié à un script et bascule sur l'onglet Carnet.
-  nbForScript: (scriptId: string, title?: string) => Promise<void>;
 
   nbCreatePage: (parentId?: string | null, opts?: NbCreateOpts) => Promise<string | null>;
   nbOpenPage: (id: string, opts?: NbOpenOpts) => Promise<void>;
@@ -278,14 +277,6 @@ export const createNotebookSlice: StateCreator<AppState, [], [], NotebookSlice> 
       await a.deleteNotebook(id);
       if (get().nbActiveId === id) set({ nbActiveId: null, nbPages: [], nbActivePageId: null, nbPage: null, nbDatabases: {}, nbTabs: [], nbActiveTabId: null, nbFavorites: [], nbRecents: [], nbTrash: [] });
       await get().nbLoadList();
-    },
-
-    nbForScript: async (scriptId, title) => {
-      const a = api(); if (!a) return;
-      const r = await a.forScript(scriptId, title);
-      set({ tab: "notebook" });
-      await get().nbLoadList();
-      if (r.ok && r.notebook) await get().nbOpenNotebook(r.notebook.id);
     },
 
     nbCreatePage: async (parentId = null, opts) => {

@@ -51,7 +51,6 @@ export const NAMESPACES = [
   "upscale",
   "roto",
   "notebook",
-  "script",
   "adobe",
   "chat",
   "export",

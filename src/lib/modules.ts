@@ -6,7 +6,6 @@ export const MODULE_IDS = [
   "search",
   "reference",
   "notebook",
-  "script",
   "upscale",
   "voice",
   "chat",

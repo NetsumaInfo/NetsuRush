@@ -423,7 +423,7 @@ export function TimelineLiveView() {
       });
       return { ok: r.ok, timeline: r.timeline, count: r.count, error: r.error };
     }
-    const r = await nr.script?.buildTimeline({
+    const r = await nr.buildTimelineFromBlocks({
       name,
       blocks: list.map(block),
       ...opts,

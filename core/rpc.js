@@ -41,10 +41,8 @@ const { createUpscaleLedger } = require("./upscaleLedger"); // registre des sort
 const encodeGate = require("./export/gate"); // portail global du nombre d'encodages en vol
 const { createLibraryStore } = require("./library"); // rushs importés (entrée du derush, sans Media Pool)
 const { createCutEditsStore } = require("./cutEdits"); // édits de découpe persistés par modèle (Découpage)
-const { createScriptStore } = require("./script"); // documents script : docs/blocs/médias
 const { createNotebookStore } = require("./notebook"); // module Carnet : carnets → pages → databases
 const { createNbFile } = require("./nbfile"); // partage commun .netsu du Carnet (ZIP type-routé)
-const recordings = require("./recordings"); // dossier d'enregistrements voix off (module Script)
 const netsu = require("./netsu"); // format de partage « .netsu » (board → conteneur SQLite type-routé)
 const extract = require("./extract"); // yt-dlp / gallery-dl : extraction du vrai média d'un lien
 const netsuSidecar = require("./netsu/sidecar");
@@ -104,7 +102,6 @@ function createRpc() {
   // que les rushs importés se lisent comme ceux du Media Pool dans la même grille.
   const libraryStore = createLibraryStore(DATA_DIR, { probeMedia: ffmpeg.probeMedia, playInfo: ffmpeg.playInfo });
   const cutEditsStore = createCutEditsStore(DATA_DIR);
-  const scriptStore = createScriptStore(DATA_DIR);
   const notebookStore = createNotebookStore(DATA_DIR);
   const nbFile = createNbFile({ notebookStore, dataDir: DATA_DIR });
   const adobeBridge = createAdobeBridge({ CONFIG, broadcast });
@@ -344,6 +341,8 @@ function createRpc() {
     }),
     "resolve:import": guarded(([paths]) => resolveMod.importToMediaPool(paths)),
     "resolve:importToBin": guarded(([paths, bin]) => resolveMod.importToBin(paths, bin)),
+    // Build natif AppendToTimeline depuis des blocs ordonnés (multi-sources).
+    "resolve:buildTimelineFromBlocks": guarded(([opts]) => timeline.buildTimelineFromBlocks(opts)),
     "resolve:buildTimeline": guarded(([opts]) => timeline.buildTimeline(opts)),
     "resolve:listTimelines": rOp(async () => {
       const r = await timeline.listTimelines();
@@ -931,7 +930,6 @@ function createRpc() {
     "notebook:list": () => notebookStore.listNotebooks(),
     "notebook:saveNotebook": ([nb]) => notebookStore.saveNotebook(nb),
     "notebook:deleteNotebook": ([id]) => notebookStore.deleteNotebook(id),
-    "notebook:forScript": ([scriptId, title]) => notebookStore.notebookForScript(scriptId, title),
     "notebook:load": ([id]) => notebookStore.loadNotebook(id),
     "notebook:loadPage": ([id]) => notebookStore.loadPage(id),
     "notebook:savePage": ([page]) => notebookStore.savePage(page),
@@ -1045,30 +1043,6 @@ function createRpc() {
     // le convertit en scène de la bibliothèque, et sans ce lien l'accueil montre les deux.
     "netsu:linkSource": ([filePath, sourceSceneId]) => netsu.linkSourceScene(filePath, sourceSceneId),
     "netsu:deleteProject": ([filePath]) => netsu.deleteProject(filePath),
-
-    // --- Module Script : documents/blocs/médias (SQLite ou JSON) + build natif ---
-    "script:recordings": ([dir]) => recordings.listRecordings(dir),
-    "script:mediaPool": rOp(async () => {
-      const r = await resolveMod.listMediaPool({ includeAudio: true });
-      if (r.connected) { projectSnapshot.warm("mediaPoolAll", r); return r; }
-      const snap = projectSnapshot.get();
-      const cached = snap && (snap.mediaPoolAll || snap.mediaPool);
-      if (cached) return { connected: false, cached: true, project: snap.project, clips: cached.clips || [], error: null };
-      return r;
-    }),
-    // Écrit dans le Media Pool → même bracket que resolve:import (registre de handles + poller).
-    "script:importMedia": guarded(([paths]) => resolveMod.importMediaTree(paths)),
-    "script:listDocs": ([proj]) => scriptStore.listDocs(proj),
-    "script:loadDoc": ([id]) => scriptStore.loadDoc(id),
-    "script:saveDoc": ([doc]) => scriptStore.saveDoc(doc),
-    "script:deleteDoc": ([id]) => scriptStore.deleteDoc(id),
-    // Historique de versions : points de contrôle manuels.
-    "script:listVersions": ([docId]) => scriptStore.listVersions(docId),
-    "script:saveVersion": ([docId, label, doc]) => scriptStore.saveVersion(docId, label, doc),
-    "script:getVersion": ([id]) => scriptStore.getVersion(id),
-    "script:deleteVersion": ([id]) => scriptStore.deleteVersion(id),
-    // Build natif AppendToTimeline depuis les blocs ordonnés (multi-sources). Pont Resolve → guarded.
-    "script:buildTimeline": guarded(([opts]) => timeline.buildTimelineFromBlocks(opts)),
 
     // --- Chat IA : moteur hybride (CLI + BYOK) + outils + permissions ---
     "chat:agents": () => agent.listAgents(),

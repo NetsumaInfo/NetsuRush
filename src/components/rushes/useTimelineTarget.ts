@@ -94,7 +94,7 @@ export function useTimelineTarget(enabled = true): TimelineTarget {
       return { ok: r.ok, timeline: r.timeline, count: r.count, error: r.error };
     }
 
-    const r = await nr.script?.buildTimeline({ name, mode, timelineName, insertion, blocks });
+    const r = await nr.buildTimelineFromBlocks({ name, mode, timelineName, insertion, blocks });
     return { ok: !!r?.ok, timeline: r?.timeline, count: r?.count, error: r?.error };
   }
 

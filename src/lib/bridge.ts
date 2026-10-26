@@ -1733,37 +1733,6 @@ export interface ScriptRecording {
   mtime: number;
   size: number;
 }
-export interface ScriptApi {
-  // Dossier d'enregistrements voix off (configuré côté renderer) : fichiers audio, récents d'abord.
-  recordings(dir: string): Promise<{ ok: boolean; error?: string; files: ScriptRecording[] }>;
-  // Media Pool complet pour NetsuDraft : vidéos + audios (la vue NetsuCut garde son flux vidéo seul).
-  mediaPool(): Promise<MediaList>;
-  // Importe des fichiers ou dossiers en conservant l'arborescence dans les bins du Media Pool.
-  importMedia(paths: string[]): Promise<{ ok: boolean; count?: number; skipped?: number; error?: string }>;
-  listDocs(resolveProject?: string | null): Promise<ScriptDocMeta[]>;
-  loadDoc(id: string): Promise<ScriptDoc | null>;
-  saveDoc(doc: ScriptDoc): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
-  deleteDoc(id: string): Promise<{ ok: boolean; error?: string }>;
-  // Historique de versions : points de contrôle manuels (snapshot complet du doc) + restauration.
-  listVersions(docId: string): Promise<ScriptVersionMeta[]>;
-  saveVersion(docId: string, label: string, doc: ScriptDoc): Promise<{ ok: boolean; id?: string; createdAt?: number; error?: string }>;
-  getVersion(id: string): Promise<{ id: string; docId: string; label: string; createdAt: number; doc: ScriptDoc | null } | null>;
-  deleteVersion(id: string): Promise<{ ok: boolean; error?: string }>;
-  // Build natif : blocs ordonnés (sources multiples) → AppendToTimeline frame-accurate. out INCLUSIF,
-  // outFrame null = clip entier. mode "new" (défaut) crée une timeline, "append" ajoute à la courante.
-  // markers = commentaires exportés : marqueur Resolve posé au début du clip issu de blocks[index].
-  buildTimeline(opts: {
-    name?: string;
-    mode?: "new" | "append";
-    timelineName?: string;   // mode append : timeline existante ciblée (sinon la timeline ouverte)
-    insertion?: "insert" | "overwrite" | "replace" | "fit" | "above" | "end" | "ripple_overwrite";
-    dest?: "timeline" | "bin";
-    binName?: string;
-    videoOnly?: boolean;
-    blocks: { filePath: string; inFrame?: number; outFrame?: number | null; fps?: number }[];
-    markers?: { index: number; name?: string; note?: string; color?: string }[];
-  }): Promise<ScriptBuildResult>;
-}
 
 // ---- Carnet (Notebook) : carnets multi → pages imbriquées → databases -----
 export type NotebookCollabBinding = { projectId: string; surface: "notebook" | "notebook-page"; subjectId: string; notebookId: string; name: string; remoteSubjectId?: string; pending?: boolean; sourcePath?: string };
@@ -1776,7 +1745,6 @@ export interface NotebookApi {
   saveNotebook(nb: { id?: string; title: string; icon?: string | null; scriptId?: string | null; kind?: NotebookKind; language?: NotebookLanguage }): Promise<{ ok: boolean; id?: string; updatedAt?: number; error?: string }>;
   deleteNotebook(id: string): Promise<{ ok: boolean; error?: string }>;
   // Carnet lié à un script (bouton « Carnet » du module Script) : renvoie l'existant ou en crée un.
-  forScript(scriptId: string, title?: string): Promise<{ ok: boolean; notebook?: NotebookMeta; created?: boolean; error?: string }>;
   // Carnet + arbre de pages (métas seules, sans les docs de blocs).
   load(id: string): Promise<{ notebook: NotebookMeta; pages: PageMeta[] } | null>;
   // Page complète (document de blocs) + databases de la page (map dbId → Database).
@@ -2770,6 +2738,20 @@ export interface NrApi {
   // Import dans un bin dédié du Media Pool (créé s'il manque, fichiers déjà présents sautés) —
   // ex. « Audios » pour les enregistrements voix off du module Script.
   importToBin(paths: string[], bin: string): Promise<{ ok: boolean; count?: number; skipped?: number; error?: string }>;
+  // Build natif : blocs ordonnés (sources multiples) → AppendToTimeline frame-accurate. out INCLUSIF,
+  // outFrame null = clip entier. mode "new" (défaut) crée une timeline, "append" ajoute à la courante.
+  // markers = commentaires exportés : marqueur Resolve posé au début du clip issu de blocks[index].
+  buildTimelineFromBlocks(opts: {
+    name?: string;
+    mode?: "new" | "append";
+    timelineName?: string;   // mode append : timeline existante ciblée (sinon la timeline ouverte)
+    insertion?: "insert" | "overwrite" | "replace" | "fit" | "above" | "end" | "ripple_overwrite";
+    dest?: "timeline" | "bin";
+    binName?: string;
+    videoOnly?: boolean;
+    blocks: { filePath: string; inFrame?: number; outFrame?: number | null; fps?: number }[];
+    markers?: { index: number; name?: string; note?: string; color?: string }[];
+  }): Promise<ScriptBuildResult>;
   buildTimeline(opts: { name: string; input: string; srcFrames?: number; mode?: "append" | "new"; timelineName?: string; whole?: boolean; dest?: "timeline" | "bin"; binName?: string; videoOnly?: boolean; insertion?: "insert" | "overwrite" | "replace" | "fit" | "above" | "end" | "ripple_overwrite"; segments?: { in: number; out: number; inFrame?: number; outFrame?: number }[]; colors?: string[] }): Promise<{ ok: boolean; timeline?: string; count?: number; dir?: string; error?: string; mapped?: boolean; mode?: string; created?: boolean; fpsMismatch?: boolean; timelineFps?: number; clipFps?: number; whole?: boolean; renamed?: boolean; requestedName?: string; colored?: number }>;
   // Découpe en lot : liste des timelines du projet, et découpe de tous les rushs d'une timeline.
   listTimelines(): Promise<{ ok: boolean; current?: string | null; timelines: { name: string; current: boolean }[]; cached?: boolean; error?: string }>;
@@ -3040,7 +3022,6 @@ export interface NrApi {
   setWindowSize(w: number, h: number): void;
   reference?: RefApi;
   wallpaper?: WallpaperApi;
-  script?: ScriptApi;
   notebook?: NotebookApi;
   collections?: CollectionsApi;
   library?: LibraryApi;
@@ -3430,6 +3411,7 @@ const mock: NrApi = {
   listMediaPool: async () => ({ connected: false, clips: [], error: i18n.t("common:mock.resolveUnavailable") }),
   importToMediaPool: async () => ({ ok: false, error: "mock" }),
   importToBin: async () => ({ ok: false, error: "mock" }),
+  buildTimelineFromBlocks: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
   buildTimeline: async () => ({ ok: false, error: "mock" }),
   listTimelines: async () => ({ ok: false, timelines: [], error: i18n.t("common:mock.resolveUnavailable") }),
   timelineTree: async () => ({ ok: false, timelines: [], error: i18n.t("common:mock.resolveUnavailable") }),
@@ -3687,96 +3669,6 @@ const mock: NrApi = {
       onPush: () => () => {},
     } satisfies RefApi;
   })(),
-  // Mock navigateur : persistance des documents script en localStorage (teste l'UI hors Resolve).
-  script: (() => {
-    // Stats des cartes d'accueil. Le core les calcule en SQL ; ici les documents entiers sont déjà
-    // en mémoire, on compte à la volée (mêmes types non narrés, même estimation de lecture).
-    const NON_NARRATED = new Set(["heading", "storyboard", "divider", "callout"]);
-    const mockScriptStats = (d: ScriptDoc): ScriptDocStats => {
-      const blocks = Array.isArray(d.blocks) ? d.blocks : [];
-      let words = 0, seconds = 0, media = 0, sections = 0;
-      for (const b of blocks) {
-        const list = Array.isArray(b.media) ? b.media : [];
-        media += list.length;
-        if (b.type === "heading") sections += 1;
-        if (NON_NARRATED.has(b.type)) continue;
-        const text = (b.text || "").replace(/<[^>]+>/g, " ").trim();
-        const w = text ? text.split(/\s+/).filter(Boolean).length : 0;
-        words += w;
-        const cuts = list.flatMap((m) =>
-          m.kind === "video" && m.outFrame != null && m.fps ? [(m.outFrame - m.inFrame + 1) / m.fps] : [],
-        );
-        seconds += cuts.length ? Math.max(...cuts) : (w / 200) * 60;
-      }
-      return { blocks: blocks.length, words, seconds: Math.round(seconds), media, sections };
-    };
-    const KEY = "nr-script-docs:v1";
-    const KEY_V = "nr-script-versions:v1";
-    const read = (): Record<string, ScriptDoc> => {
-      try { return JSON.parse(readMockStorage(KEY, "nr-script-docs") || "{}"); } catch { return {}; }
-    };
-    const write = (o: Record<string, ScriptDoc>) => localStorage.setItem(KEY, JSON.stringify(o));
-    return {
-      recordings: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable"), files: [] }),
-      mediaPool: async () => ({ connected: false, clips: [], error: i18n.t("common:mock.resolveUnavailable") }),
-      importMedia: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
-      listDocs: async (resolveProject?: string | null) =>
-        Object.values(read())
-          .filter((d) => !resolveProject || d.resolveProject === resolveProject)
-          .map((d) => ({
-            id: d.id,
-            title: d.title,
-            resolveProject: d.resolveProject ?? null,
-            updatedAt: d.updatedAt ?? 0,
-            stats: mockScriptStats(d),
-          }))
-          .sort((a, b) => b.updatedAt - a.updatedAt),
-      loadDoc: async (id: string) => read()[id] ?? null,
-      saveDoc: async (doc: ScriptDoc) => {
-        const o = read();
-        const id = doc.id || Math.random().toString(36).slice(2, 10);
-        const updatedAt = Date.now();
-        o[id] = { ...doc, id, updatedAt };
-        write(o);
-        return { ok: true, id, updatedAt };
-      },
-      deleteDoc: async (id: string) => { const o = read(); delete o[id]; write(o); return { ok: true }; },
-      listVersions: (() => {
-        const readV = (): Record<string, { id: string; docId: string; label: string; createdAt: number; doc: ScriptDoc | null }> => {
-          try { return JSON.parse(readMockStorage(KEY_V, "nr-script-versions") || "{}"); } catch { return {}; }
-        };
-        return async (docId: string) =>
-          Object.values(readV())
-            .filter((v) => v.docId === docId)
-            .map(({ id, docId: d, label, createdAt }) => ({ id, docId: d, label, createdAt }))
-            .sort((a, b) => b.createdAt - a.createdAt);
-      })(),
-      saveVersion: async (docId: string, label: string, doc: ScriptDoc) => {
-        let o: Record<string, unknown> = {};
-        try { o = JSON.parse(readMockStorage(KEY_V, "nr-script-versions") || "{}"); } catch { /* vide */ }
-        const id = Math.random().toString(36).slice(2, 10);
-        const createdAt = Date.now();
-        o[id] = { id, docId, label, createdAt, doc };
-        localStorage.setItem(KEY_V, JSON.stringify(o));
-        return { ok: true, id, createdAt };
-      },
-      getVersion: async (id: string) => {
-        try {
-          const o = JSON.parse(readMockStorage(KEY_V, "nr-script-versions") || "{}");
-          return o[id] ?? null;
-        } catch { return null; }
-      },
-      deleteVersion: async (id: string) => {
-        try {
-          const o = JSON.parse(readMockStorage(KEY_V, "nr-script-versions") || "{}");
-          delete o[id];
-          localStorage.setItem(KEY_V, JSON.stringify(o));
-        } catch { /* vide */ }
-        return { ok: true };
-      },
-      buildTimeline: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
-    } satisfies ScriptApi;
-  })(),
   // Mock navigateur : Carnet en localStorage (carnets / pages / databases) — teste l'UI hors application.
   notebook: (() => {
     const K_NB = "nr-notebooks", K_PG = "nr-notebook-pages", K_DB = "nr-notebook-databases";
@@ -3785,10 +3677,6 @@ const mock: NrApi = {
     type DbRow = Database & { pageId: string };
     const rd = <T,>(k: string): Record<string, T> => { try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch { return {}; } };
     const wr = (k: string, o: unknown) => localStorage.setItem(k, JSON.stringify(o));
-    const mockNotebookLanguage = (): NbRow["language"] => {
-      const code = i18n.language.split("-")[0];
-      return (["fr", "en", "es", "de", "ja", "zh"] as string[]).includes(code) ? code as NbRow["language"] : "fr";
-    };
     const rid = () => Math.random().toString(36).slice(2, 10);
     const normalizeNotebook = (notebook: NbRow): NbRow => ({ ...notebook, kind: notebook.kind || "notes", language: notebook.language || "fr" });
     return {
@@ -3816,16 +3704,6 @@ const mock: NrApi = {
         const o = rd<NbRow>(K_NB); delete o[id]; wr(K_NB, o);
         const pg = rd<PgRow>(K_PG); for (const p of Object.values(pg)) if (p.notebookId === id) delete pg[p.id]; wr(K_PG, pg);
         return { ok: true };
-      },
-      forScript: async (scriptId: string, title?: string) => {
-        const o = rd<NbRow>(K_NB);
-        const found = Object.values(o).filter((n) => n.scriptId === scriptId).sort((a, b) => b.updatedAt - a.updatedAt)[0];
-        if (found) return { ok: true, notebook: found, created: false };
-        const id = rid();
-        const updatedAt = Date.now();
-        o[id] = { id, title: title || i18n.t("notebook:panel.scriptNotebook"), icon: null, scriptId, kind: "script", language: mockNotebookLanguage(), updatedAt };
-        wr(K_NB, o);
-        return { ok: true, notebook: o[id], created: true };
       },
       load: async (id: string) => {
         const nb = rd<NbRow>(K_NB)[id];

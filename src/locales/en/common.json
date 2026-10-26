@@ -86,10 +86,6 @@
     "title": "Module in beta",
     "body": "Features are still missing, others will change. I'm looking for testers: tell me what doesn't work and what you need.",
     "modules": {
-      "script": {
-        "title": "Still a prototype",
-        "body": "NetsuDraft is very incomplete and barely tested: a lot is missing or doesn't work yet. Tell me what you would need first."
-      },
       "chat": {
         "title": "Not working yet",
         "body": "NetsuPilot is still in development: it does nothing useful yet. Follow its progress on Discord."

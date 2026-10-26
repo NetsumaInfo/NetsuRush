@@ -14,7 +14,6 @@ const load = {
   search: () => import("@/components/search/SearchPanel").then((m) => ({ default: m.SearchPanel })),
   reference: () => import("@/components/reference/ReferencePanel").then((m) => ({ default: m.ReferencePanel })),
   notebook: () => import("@/components/notebook/NotebookPanel").then((m) => ({ default: m.NotebookPanel })),
-  script: () => import("@/components/script/ScriptPanel").then((m) => ({ default: m.ScriptPanel })),
   upscale: () => import("@/components/netsulab/NetsuLabPanel").then((m) => ({ default: m.NetsuLabPanel })),
   voice: () => import("@/components/voice/VoicePanel").then((m) => ({ default: m.VoicePanel })),
   chat: () => import("@/components/chat/ChatPanel").then((m) => ({ default: m.ChatPanel })),

@@ -4,7 +4,7 @@
 // Dialogs / openExternal passent par les plugins Tauri (chargés à la demande, seulement sous Tauri).
 
 import { convertFileSrc } from "@tauri-apps/api/core";
-import type { NrApi, RefApi, WallpaperApi, ScriptApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, SnapshotApi, CacheApi } from "./bridge";
+import type { NrApi, RefApi, WallpaperApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, SnapshotApi, CacheApi } from "./bridge";
 import i18n from "@/i18n";
 import { logError } from "@/lib/appLog";
 import { readPreviewSettings } from "@/lib/previewSettings";
@@ -599,21 +599,6 @@ const reference: RefApi = {
   onPush: (cb) => on("reference:push", cb),
 };
 
-const script: ScriptApi = {
-  recordings: (dir) => call("script:recordings", [dir]),
-  mediaPool: () => call("script:mediaPool"),
-  importMedia: (paths) => call("script:importMedia", [paths]),
-  listDocs: (resolveProject) => call("script:listDocs", [resolveProject ?? null]),
-  loadDoc: (id) => call("script:loadDoc", [id]),
-  saveDoc: (doc) => call("script:saveDoc", [doc]),
-  deleteDoc: (id) => call("script:deleteDoc", [id]),
-  listVersions: (docId) => call("script:listVersions", [docId]),
-  saveVersion: (docId, label, doc) => call("script:saveVersion", [docId, label, doc]),
-  getVersion: (id) => call("script:getVersion", [id]),
-  deleteVersion: (id) => call("script:deleteVersion", [id]),
-  buildTimeline: (opts) => call("script:buildTimeline", [opts]),
-};
-
 const collections: CollectionsApi = {
   prepareShare: (id, opts) => call("collections:prepareShare", [id, opts]),
   defaultArchiveDir: (name) => call("collections:defaultArchiveDir", [name]),
@@ -712,7 +697,6 @@ const notebook: NotebookApi = {
   list: () => call("notebook:list"),
   saveNotebook: (nb) => call("notebook:saveNotebook", [nb]),
   deleteNotebook: (id) => call("notebook:deleteNotebook", [id]),
-  forScript: (scriptId, title) => call("notebook:forScript", [scriptId, title ?? null]),
   load: (id) => call("notebook:load", [id]),
   loadPage: (id) => call("notebook:loadPage", [id]),
   savePage: (page) => call("notebook:savePage", [page]),
@@ -882,6 +866,7 @@ export function makeCoreClient(): NrApi {
     listMediaPool: () => call("resolve:listMediaPool"),
     importToMediaPool: (paths) => call("resolve:import", [paths]),
     importToBin: (paths, bin) => call("resolve:importToBin", [paths, bin]),
+    buildTimelineFromBlocks: (opts) => call("resolve:buildTimelineFromBlocks", [opts]),
     buildTimeline: (opts) => call("resolve:buildTimeline", [opts]),
     listTimelines: () => call("resolve:listTimelines"),
     timelineTree: () => call("resolve:timelineTree"),
@@ -1104,7 +1089,6 @@ export function makeCoreClient(): NrApi {
     },
     reference,
     wallpaper,
-    script,
     notebook,
     collections,
     library,
