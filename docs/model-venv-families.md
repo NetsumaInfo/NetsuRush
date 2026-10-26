@@ -36,7 +36,7 @@ A conflict is therefore resolved by **choosing a model**, not by multiplying env
 | `diffusion` | torch + diffusers | `diffusers>=0.33.0` | video object removal, batched matting, generative inpainting |
 | `voice` | ONNX Runtime + ctranslate2 | `onnxruntime` | Whisper variants, Parakeet, Canary |
 | `anime-face` | pure ONNX | `numpy<2`, `opencv-contrib-python` | the anime face engine (YOLO anime detection + CCIP identity) |
-| `bundled` | none | — | shot detection models, Silero VAD, RVM, WhisperX |
+| `bundled` | none | — | shot detection models, RVM, WhisperX |
 
 The family is **derived from the model's task** (`FAMILY_BY_TASK`): one task, one stack. Writing it on every manifest entry would be that many chances to get it wrong for information that can be computed. Two declared exceptions (`FAMILY_OVERRIDES`): the anime face engine, the only face model going through `dghs-imgutils` rather than the opencv_zoo ONNX graphs; and the real-face weights, a direct download **with no task**, which the fallback rule ("a `url` entry without a task is an upscaler") would otherwise file with the upscalers.
 
@@ -74,7 +74,7 @@ scikit-image 0.26.0 has requirement imageio!=2.35.0,>=2.33, but you have imageio
 1. **Any `==` pin on a shared dependency must be removed by `pipPatch`**, never merely bypassed with `--no-deps`: the pin survives in the installed package's metadata and pip honours it on every later resolution.
 2. Any new bound on a shared package goes into its family's `constrains` in `core/venvs.js`. Otherwise the diagnostic stays silent exactly when it is needed.
 3. A model that replaces a shared package declares `exclusiveWith` — that is what triggers the refusal and the confirmation prompt.
-4. Never let a model install decide the torch version. `torch`, `torchvision` and `torchaudio` are one ABI: a wheel pulled from PyPI by a transitive dependency (`silero-vad` asks for `torchaudio>=0.12`) overwrites the one built for the installed torch, and the import then raises `[WinError 127]` in a module the user was not installing. `ensurePipPackage` therefore runs every step under a `PIP_CONSTRAINT` file pinning whichever of the three are already present, and `scripts/setup.ps1` installs all three together from the torch index.
+4. Never let a model install decide the torch version. `torch`, `torchvision` and `torchaudio` are one ABI: a wheel pulled from PyPI by a transitive dependency (one asking for `torchaudio` without a bound) overwrites the one built for the installed torch, and the import then raises `[WinError 127]` in a module the user was not installing. `ensurePipPackage` therefore runs every step under a `PIP_CONSTRAINT` file pinning whichever of the three are already present, and `scripts/setup.ps1` installs all three together from the torch index.
 
 ## Installed, missing, or broken
 

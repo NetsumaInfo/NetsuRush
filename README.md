@@ -20,11 +20,8 @@ Because the app drives Resolve **from the outside**, nothing is installed inside
 |---|---|
 | **NetsuCut** | Footage review: preview, AI shot detection, lossless cutting, frame-accurate timeline building, shot collections |
 | **NetsuSearch** | Find a shot by describing it (SigLIP 2), plus duplicates, groups and face search |
-| **NetsuBoard** | Infinite reference board — images, videos, YouTube, notes, drawing |
 | **NetsuBook** | Notebook with linked pages, databases and exports |
-| **NetsuDraft** | Script-first writing where one paragraph is one shot |
 | **NetsuLab** | Upscaling, frame interpolation, depth, background removal, matting, interactive roto |
-| **NetsuTalk** | Transcription, silence removal, subtitles, text-based editing |
 | **NetsuBoost** | Frees host resources (cache, stray processes, memory) during heavy work |
 | **NetsuBridge** | Moves a timeline between editing applications |
 | **NetsuPilot** | AI copilot driving the app and Resolve through tools |
@@ -32,7 +29,7 @@ Because the app drives Resolve **from the outside**, nothing is installed inside
 Everything above is implemented and type-checked, and the invariants are covered by tests. Two areas have **never been exercised end to end at runtime**: the AI copilot (it needs an API key or a local CLI agent) and the Premiere Pro / After Effects side of the bridges (they need those applications installed). Bug reports on those two are especially welcome.
 
 > [!NOTE]
-> Everything that touches a **project** (status, Media Pool, timelines, import) needs DaVinci Resolve **Studio** — the free edition does not expose the scripting API. The rest of the app (ffmpeg work, thumbnails, search, board, notebook, processing) runs perfectly with Resolve closed.
+> Everything that touches a **project** (status, Media Pool, timelines, import) needs DaVinci Resolve **Studio** — the free edition does not expose the scripting API. The rest of the app (ffmpeg work, thumbnails, search, notebook, processing) runs perfectly with Resolve closed.
 
 ## Getting started
 
@@ -134,8 +131,6 @@ NetsuRush would not look the way it does without these projects. Each one shaped
 | [Ultimate-AMV](https://github.com/ElishaPervez/Ultimate-AMV) | Editing-workflow ideas for anime and music-video work |
 | [scene-scout](https://github.com/Mark-Shun/scene-scout) | The natural-language shot search, whose core approach it follows |
 | [Sammie-Roto-2](https://github.com/Zarxrax/Sammie-Roto-2) | Roto Studio: point prompting, partial re-propagation, non-destructive mask post-processing, matte refinement stepped frame by frame |
-| [AnimRef](https://github.com/lettucegoblin/AnimRef) | The infinite reference board, rebuilt in React |
-| [BeeRef](https://github.com/rbreu/beeref) | Reference-board interaction ideas |
 | [AppFlowy](https://github.com/AppFlowy-IO/AppFlowy) | The notebook: block gutter, breadcrumb, page mentions, icon picker, document tabs |
 
 > [!NOTE]

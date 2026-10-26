@@ -33,7 +33,7 @@ The "GPU" choice stored in upscale preferences is an **automatic intent**: it re
 ## Models
 
 - Shot detection, search, upscaling, interpolation, depth and the roto models all go through the central PyTorch selection (`cuda`, `rocm`, `xpu`, `cpu`).
-- Parakeet, Silero and the ONNX graphs use CUDA, DirectML or CPU depending on the providers actually present in the venv.
+- Parakeet and the ONNX graphs use CUDA, DirectML or CPU depending on the providers actually present in the venv.
 - faster-whisper / WhisperX use CUDA **only** on NVIDIA, because CTranslate2 has no equivalent Windows ROCm/XPU path; AMD and Intel keep the CPU fallback.
 - A model requiring an official CUDA-only pipeline is **hidden** on AMD, Intel and CPU installs rather than offered and failing.
 - Turbo (shader) upscaling depends on Vulkan/libplacebo; if that is unavailable the AI engine still works.

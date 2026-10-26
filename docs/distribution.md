@@ -31,7 +31,7 @@
 
 ## Authentication (`convex/` + `src/components/auth/`)
 
-A login gate over the shell (after the setup gate, main window only; the detached board and the remote panel are not gated). **Not verified at runtime** — needs a Convex deployment and an OAuth application. Setup steps: `auth-setup.md`.
+A login gate over the shell (after the setup gate, main window only; the detached notebook and the remote panel are not gated). **Not verified at runtime** — needs a Convex deployment and an OAuth application. Setup steps: `auth-setup.md`.
 
 - **Auth lives entirely in Convex** through `@convex-dev/better-auth`, so the **OAuth secret never enters the Tauri bundle**. The backend declares the component, the auth config, a Discord social provider, session/refresh lifetimes, rate limiting and trusted origins including the custom scheme. `convex/` has **its own tsconfig**, outside the renderer build.
 - **OAuth is a deep link** (`netsurush://`) plus `single-instance`, which is required on Windows to route the link to the live instance. Deterministic desktop flow: `signIn.social({ provider, callbackURL: 'netsurush://auth', disableRedirect: true })` opens the **system browser** → the callback redirects to `netsurush://auth?ott=<token>` (one-time, 3 min) → the deep-link handler verifies the token → the client fetch plugin stores the session cookie → the app is authenticated. Rust registers `single-instance` **first** (focusing the window), then the deep-link plugin.
@@ -83,5 +83,5 @@ Shows the active module on the user's Discord profile. **Not verified in CI** (n
 - **Connection**: a `probing` guard (the socket stays null during the probe, otherwise toggling twice opens two sockets), a teardown that **checks identity** (an orphan socket must not kill the live connection), a re-read of the enabled flag inside the connect callback (the probe is async), a 10 s handshake timeout, and a 1 s→30 s backoff **only while enabled**. Discord being absent is the nominal case: total silence.
 - **The preview is the real render**: the core exposes the activity it would send, plus the application name and icon resolved from public endpoints **without a token**, fetched **core-side** (no CORS, once per session). The renderer only formats it. Do not reimplement the render in the renderer — the clamps and omissions would diverge.
 - `setPrefs` must **never** force a send: typing in a text field fires it per character, so forcing would drown Discord in dropped frames and the **final** text would be the one lost. The bypass is reserved for a fresh connection.
-- The presence hook is mounted **once**, in the shell: the detached board, the notebook window and the Adobe panel share the same renderer and would push a competing context.
+- The presence hook is mounted **once**, in the shell: the notebook window and the Adobe panel share the same renderer and would push a competing context.
 - Content is opt-in per field: active module (label from `NAV`, not the id), project name (**off by default**, privacy), elapsed time, custom templates. The core is stopped on `SIGINT`/`SIGTERM`.

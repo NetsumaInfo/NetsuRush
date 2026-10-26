@@ -123,8 +123,7 @@ submit videos, respond to tutorial requests, publish channel updates and opt out
 
 Playback is user-initiated in the official YouTube player. NetsuRush does not obscure player controls,
 manufacture autoplay views or promise that every play will count. `Open in YouTube` and `View channel`
-remain one click away. Non-embeddable videos fall back to YouTube. The local `/ytstream` NetsuBoard
-convenience is never used for the public tutorial feed.
+remain one click away. Non-embeddable videos fall back to YouTube.
 
 ### 4.4 Ingestion and quota
 

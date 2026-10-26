@@ -55,7 +55,7 @@ Every UI primitive (button, dialog, dropdown, tabs, tooltip, select, popover, sl
 - Init: `npx shadcn@latest init --base base --preset vega`. Add: `npx shadcn@latest add <name>`.
 - Base UI specifics: `ToggleGroup`/`Slider` are driven by `value={[…]}` + `onValueChange` (arrays); `Dialog` is controlled through `open`/`onOpenChange` and always needs a `DialogTitle` (`sr-only` if visually hidden).
 - `cn` lives in `@/lib/utils` (`clsx` + `tailwind-merge`).
-- `ui/color-picker.tsx` is the single source of every colour choice in the app (text, note background, frame stroke/fill, pen, board background).
+- `ui/color-picker.tsx` is the single source of every colour choice in the app (text, note background, theme colours).
 - **Gotcha**: shadcn `<Card>` forces `flex flex-col gap-6 py-6 ring-1`. For a plain container add `block`/`p-0`; for a centred row add `flex-row`; replace `space-y-*` with `gap-*`.
 
 ### Theming
@@ -99,7 +99,7 @@ Further wallpaper rules:
 
 `src/features/settings/nav.ts` is the **single source** of the settings map (page ids, tabs, icons): the side nav, the title-bar sub-nav and the router all read the same list, otherwise the three diverge. It holds pure data only — no page component — so the title bar does not pull the settings code at startup.
 
-Pages: **Account** (Profile · Discord · Sharing — the collaboration panel, `docs/collab.md`) · **Interface** (Theme · Language · Navigation · Notifications) · **Media** (Previews) · **AI** (Video · Dictation · Indexing — the models tab has id `models`, label "Video") · **Export** · **Adobe** · **Storage** (Media cache · Cleanup · NetsuBoard · Project cache · Projects) · **System** (Updates · Compatibility · Collaboration · Console) · **About**.
+Pages: **Account** (Profile · Discord · Sharing — the collaboration panel, `docs/collab.md`) · **Interface** (Theme · Language · Navigation · Notifications) · **Media** (Previews) · **AI** (Video · Indexing — the models tab has id `models`, label "Video") · **Export** · **Adobe** · **Storage** (Media cache · Cleanup · Project cache · Projects) · **System** (Updates · Compatibility · Collaboration · Console) · **About**.
 
 - The active tab is remembered **per page** (`settingsTab: Record<SettingsPage,string>` in `store/shell`).
 - `openSettings(page, tab)` is the only external entry point.

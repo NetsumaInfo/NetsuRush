@@ -36,7 +36,7 @@ npm run tauri dev
 
 Vite must be up before Tauri. The Rust shell spawns the Node core itself, so there is nothing else to start.
 
-DaVinci Resolve Studio is only needed to test project, Media Pool and timeline features; enable external scripting (`Local`) in its preferences first. Everything else — ffmpeg, thumbnails, search, board — works without it.
+DaVinci Resolve Studio is only needed to test project, Media Pool and timeline features; enable external scripting (`Local`) in its preferences first. Everything else — ffmpeg, thumbnails, search, notebook — works without it.
 
 ### Blackmagic's MCP server, for your own agent
 

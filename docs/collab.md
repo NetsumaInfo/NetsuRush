@@ -1,15 +1,12 @@
 # Sharing and collaboration
 
-**Implementation status:** source integration covers the reference board, Collections, and NetsuBook
+**Implementation status:** source integration covers Collections and NetsuBook
 (one page or an entire notebook). Static checks do not establish live-session correctness or latency.
 Native/core changes require a Tauri window restart; the running app still uses its previous native
 and core code until then. Two-machine acceptance and backend deployment remain unverified.
 
 NetsuRush supports local-first shared documents for **up to 15 members**, including the owner and
-reserved invitation seats. On the reference board,
-members can edit the complete persisted contract: item creation and deletion, geometry, ordering,
-text, drawing, crop and trim, appearance, playback, palettes, sequences, links, embeds, and media
-manifests.
+reserved invitation seats.
 
 The design has three deliberately separate jobs:
 
@@ -24,7 +21,7 @@ document convergence; Convex determines current membership; iroh moves already-a
 
 ## Surfaces
 
-Collaboration knows nothing about boards, collections or notebooks. What it knows is a **surface**:
+Collaboration knows nothing about collections or notebooks. What it knows is a **surface**:
 a lowercase module label that travels with the project.
 
 - On Convex it is one clear field on the project row (`projects.surface`). It has to be readable
@@ -37,37 +34,10 @@ a lowercase module label that travels with the project.
   bound, how to create one when an invitation is accepted, how to remove it when the project goes
   away.
 
-A project with no surface is read as `board`, the label collaboration shipped with. Surfaces are
-registered from their module (`src/components/reference/collabSurface.ts`,
-`src/components/collections/collabSurface.ts`, `src/components/notebook/collabSurface.ts`), imported for their side effect from `App.tsx` so the
-account panel can name a shared document even when its tab was never opened.
-
-### The board surface
-
-Sharing a file-backed board converts it into a library scene; the `.netsu` stays on disk as a frozen
-export. The file's recents entry is linked to that scene (`sourceSceneId`), and the home screen
-hides the file card while the linked scene is collaborative — otherwise the board shows twice with
-nothing relating the two cards, and the file card is the wrong one to edit. Leaving or deleting the
-project removes the scene and the file card returns.
-
-`Save As` is blocked on a shared board: duplicating a scene id without defining a new collaboration
-project would create two local names for one remote truth. Explicit export remains available, and
-resolves every `collab:` locator to the path of its bytes on this disk
-(`lib/collab/board/media.ts#withLocalMediaPaths`) — without that, the core wrote a `.netsu` made
-entirely of "relocate" placeholders while reporting success.
-
-A collaborative scene stores **no items** — the document is authoritative — so it stores instead the
-durable locators of the board's local media beside them, and the grant check reads that list too.
-Without it a shared board can never accept another local file: the stored scene mentions nothing.
-The list is rewritten before every batch leaves (`useScenePersistence#syncCollabMedia`), so a file
-dropped on the board is authorised by the time its bytes are asked for. The scene also stores a
-read-only layout of at most 40 items, purely so its home-screen card has something to draw.
-
-Before sharing, dead paths are healed (`boardMediaActions#prepareShareMedia`): the core relocates by
-name alone — the open project's companion folder first, then the asset store, then every known
-project's companion — reading zero bytes, since the file name carries the content fingerprint. What
-stays dead but keeps an online origin is re-downloaded; whatever remains dead is marked missing on
-the board so the recovery gestures take over.
+A project must name its surface; an empty one is rejected. Surfaces are registered from their
+module (`src/components/collections/collabSurface.ts`, `src/components/notebook/collabSurface.ts`),
+imported for their side effect from `App.tsx` so the account panel can name a shared document even
+when its tab was never opened.
 
 ### The collection surface
 
@@ -119,7 +89,7 @@ shot entered the local copy, publication was refused, and it stayed there invisi
 
 `notebook` shares the notebook tree; `notebook-page` shares only the selected document. The header
 opens the existing people/invitation dialog for either scope. Whole-notebook and individual-page
-bindings cannot overlap. NetsuDraft and local `scriptId` associations are excluded.
+bindings cannot overlap. Local `scriptId` associations are excluded.
 
 Each page, block and database has a stable surface entry. Rich text uses independent LoroText
 containers and Unicode scalar offsets; marks are separate operations. An accepted edit carries its
@@ -141,7 +111,7 @@ URLs must not be treated as portable asset addresses.
 
 ### Device-local cadence
 
-General settings expose a default profile and overrides for Reference, Collections, NetsuBook and
+General settings expose a default profile and overrides for Collections, NetsuBook and
 individual documents. A new device defaults to Live for writing and Balanced for other surfaces.
 Existing explicit preferences remain authoritative. No profile is stored in the shared document.
 
@@ -161,10 +131,10 @@ retains the existing durable outbox and its independent schedule.
 1. **Register it** from the module, once, with `registerCollabSurface({ id, labelKey, listBindings,
    adopt, forget, onRemoved?, open? })`. The account panel, the invitations and the notifications
    pick it up with no change of their own. Add `surface.<id>` to `src/locales/*/collab.json`.
-2. **Store the binding.** The local document must remember its `projectId`, the way a scene stores
-   `collaboration.projectId`, so `listBindings` can answer after a restart.
+2. **Store the binding.** The local document must remember its `projectId`, the way a collection stores its
+   `projectId`, so `listBindings` can answer after a restart.
 3. **Bridge the document.** Diff the module's model into `CollabOp`s, project the native projection
-   back into it, and import its local media. The board operation contract lives in
+   back into it, and import its local media. The operation contract lives in
    `src/lib/collab/types.ts` and `src-tauri/src/collab/ops.rs`; a module whose shape it cannot
    express adds its own operations to both, and its own reader to `blobs.rs#subject_data` so its
    media can be authorised by name.
@@ -505,8 +475,7 @@ delete. The current running device cannot revoke itself.
 ## Verification and operations
 
 `test/collaboration-contract.test.cjs` checks the shape of the stack: no prototype escape hatch in
-the native command surface, the documentation and security pointers, the surface registry contract,
-the board's ownership of its own publication, the `isCollabRef`/`isCoreFileRef` guards on every path
+the native command surface, the documentation and security pointers, the surface registry contract, the `isCollabRef`/`isCoreFileRef` guards on every path
 that would otherwise hand a shared media to the core, and collaboration copy present in all six
 locales. The rest is `npm run build`, `npm run check:core`,
 `npm run check:i18n` and `cargo check --locked`.

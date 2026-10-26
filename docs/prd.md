@@ -68,11 +68,8 @@ dépendants d'un serveur. Conception, coûts, sécurité, monétisation et ordre
 |--------|-------------|------|------|
 | Derush | **NetsuCut** | Preview des rush, détection de plans IA, découpe lossless, timeline frame-accurate, collections, timeline live | livré (cœur) |
 | Recherche | **NetsuSearch** | Recherche de plans en langage naturel (SigLIP 2), doublons, visages, personnages nommés | livré |
-| Référence | **NetsuBoard** | Board infini images / vidéos / YouTube, notes, cadres, dessin, fenêtre détachable, format `.netsu` | livré |
 | Carnet | **NetsuBook** | Notes structurées, pages liées, bases de données, exports | livré |
-| Script | **NetsuDraft** | Écriture script-first, paragraphe = plan, montage depuis le texte | livré |
 | Traitements | **NetsuLab** | Upscale, interpolation, profondeur, détourage, matte, suppression d'objet, Roto Studio (SAM) | livré |
-| Voix | **NetsuTalk** | Transcription word-level, suppression des silences, sous-titres, montage par texte | livré, runtime partiellement non testé |
 | Chat IA | **NetsuPilot** | Copilote agentique sur les outils de l'app | livré, runtime non testé |
 | Optimisation | **NetsuBoost** | Diagnostic et libération des ressources de l'hôte | livré |
 | Transfert | **NetsuBridge** | Recopie d'une timeline d'un logiciel vers un autre | livré, runtime Adobe non testé |
