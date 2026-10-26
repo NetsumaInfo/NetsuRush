@@ -179,12 +179,8 @@ const SEARCH_RUNTIME = {
 // déclare nous-mêmes ce que l'inférence importe vraiment, le provider ONNX restant choisi par le
 // setup selon le matériel. Même patron que MATANYONE_DEPS ci-dessus, même cause racine.
 const WHISPER_DEPS = ['ctranslate2>=4,<5', 'tokenizers>=0.13,<1', 'av>=11', 'tqdm', HF_HUB_FLOOR];
-// Lecture et rééchantillonnage du WAV de travail : `soundfile` pour la découpe des silences,
-// `librosa` en plus pour les hésitations acoustiques. Ils n'appartiennent à AUCUN modèle — ils
-// arrivaient donc uniquement avec le pack `voice` du premier lancement, et sur une installation qui
-// n'avait pas coché ce module, « Couper les silences » échouait à l'import SANS que rien, dans
-// l'application, ne sache les poser. Rattachés ici aux entrées qui les font tourner.
-const AUDIO_IO_DEPS = ['soundfile', 'librosa>=0.10'];
+// Lecture du WAV de travail des moteurs ASR.
+const AUDIO_IO_DEPS = ['soundfile'];
 const WHISPER_RUNTIME = {
   pip: 'faster-whisper>=1.1',
   pipCheck: ['faster_whisper', 'soundfile'],
@@ -560,7 +556,6 @@ const MANIFEST = /** @type {Record<string, any>} */ ({
 
   // -- fournis par un wheel / cache de lib → toujours installé --
   transnetv2:   { kind: 'bundled' },
-  'silero-vad': { kind: 'bundled' },
   // RVM : téléchargé via torch.hub au 1er usage → bundlé MAIS supprimable (cache torch.hub).
   rvm:           { kind: 'bundled', cache: { kind: 'torchhub', match: 'rvm' } },
 });
@@ -599,13 +594,6 @@ for (const id of ['birefnet', 'lucida']) {
 }
 Object.assign(MANIFEST.transnetv2, {
   pip: 'transnetv2-pytorch', pipCheck: 'transnetv2_pytorch', installSteps: [['transnetv2-pytorch']],
-});
-Object.assign(MANIFEST['silero-vad'], {
-  // `soundfile` voyage avec : `vad_silero` lit le WAV de travail par lui, donc un Silero seul
-  // n'aurait pas suffi à faire marcher « Couper les silences ». `librosa` sert aux hésitations
-  // acoustiques, servies par le même sidecar.
-  pip: 'silero-vad', pipCheck: ['silero_vad', 'soundfile', 'librosa'],
-  installSteps: [['silero-vad', ...AUDIO_IO_DEPS]],
 });
 // Depth Anything 3 : package PyPI officiel (Apache-2.0). Ce n'est PAS un modèle transformers — les
 // dépôts DA3 déclarent `library_name: depth-anything-3` et `pipeline('depth-estimation')` échoue
@@ -1420,8 +1408,8 @@ function bindCancelable(ctrl, p) {
 
 // Deux familles de paquets ne se choisissent PAS au coup par coup, parce qu'une roue mal assortie ne
 // casse pas le modèle qu'on installe mais un AUTRE, plus tard :
-//   · torch / torchvision / torchaudio = une seule ABI. `silero-vad` demande `torchaudio>=0.12`, pip
-//     prend la dernière de PyPI, et l'import lève [WinError 127].
+//   · torch / torchvision / torchaudio = une seule ABI. Une dépendance qui réclame `torchaudio` sans
+//     borne fait poser la dernière roue de PyPI, et l'import lève [WinError 127].
 //   · onnxruntime, onnxruntime-gpu, onnxruntime-directml écrivent dans le MÊME dossier `onnxruntime/`.
 //     `rembg[gpu]` et `onnx-asr[gpu,hub]` réclament `onnxruntime-gpu` sans borne : la roue posée est
 //     la branche CUDA 13, son provider réclame une DLL absente d'un venv cu124, et TOUTE l'inférence

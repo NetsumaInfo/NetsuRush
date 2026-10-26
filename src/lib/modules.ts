@@ -21,7 +21,7 @@ const MODULE_MODEL_TASKS: Record<string, readonly ModelTask[]> = {
   derush: ["detect"],
   search: ["search", "face"],
   upscale: ["upscale", "restore", "interpolate", "depth", "matte-video", "matte-image", "segment", "object-removal"],
-  voice: ["voice-asr", "voice-vad"],
+  voice: ["voice-asr"],
 };
 
 const MODULE_BY_TASK = new Map<ModelTask, string>(

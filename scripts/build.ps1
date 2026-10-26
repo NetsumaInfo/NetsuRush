@@ -76,7 +76,6 @@ $required = @(
   'scripts\uninstall-cleanup.ps1',
   'adobe-cep\CSXS\manifest.xml',
   'vendor\OmniShotCut\pyproject.toml',
-  'vendor\nova-vad\src',
   'vendor\weights\OmniShotCut_ckpt.pth',
   'vendor\weights\realesrgan',
   # vendor\shaders n'est PAS exige : l'etape 4 telecharge les shaders (fetch-shaders.ps1) quand la
@@ -117,13 +116,13 @@ $uninstallText = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'uninsta
 # vendor/ SELECTIF -> resources/vendor : seules les ressources runtime utiles. setup.ps1 y puise
 # OmniShotCut (package + poids ckpt : AUCUN download, source unique) et prefere les poids Real-ESRGAN /
 # cascade bundles au telechargement (install offline-first). On EXCLUT mpv/_mpvsrc (lecteur natif
-# abandonne, ~335 Mo). NOVA-VAD est petit et utilise par le module voix : il est inclus.
+# abandonne, ~335 Mo).
 if (Test-Path $stageVendor) { Remove-Item -Recurse -Force $stageVendor }
 New-Item -ItemType Directory -Force -Path $stageVendor | Out-Null
 # `sam2` est OPTIONNEL : setup.ps1 prefere un paquet LOCAL (installation hors ligne du Roto Studio) et
 # retombe sinon sur le tarball GitHub officiel. Le stager quand il existe rend ce chemin atteignable ;
 # les trois autres sont deja valides par $required ci-dessus.
-foreach ($v in @('OmniShotCut', 'weights', 'nova-vad', 'sam2')) {
+foreach ($v in @('OmniShotCut', 'weights', 'sam2')) {
   $srcV = Join-Path $root "vendor\$v"
   if (-not (Test-Path $srcV)) { continue }
   Copy-Item -Recurse -Force $srcV (Join-Path $stageVendor $v)

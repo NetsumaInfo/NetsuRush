@@ -156,15 +156,11 @@ if (CONFIG.ramFraction) DETECT_ENV.NETSURUSH_RAM_FRACTION = String(CONFIG.ramFra
 // NR_HOME/realesrgan pendant que le sidecar lisait ~/.netsurush/realesrgan — deux dossiers distincts,
 // donc un modèle annoncé installé et pourtant retéléchargé au premier usage.
 DETECT_ENV.NETSURUSH_REALESRGAN_DIR = CONFIG.realesganDir || path.join(NR_HOME, 'realesrgan');
-// Module voix : modèles offline (packaging) du sidecar transcribe.py / silence.py.
-// Whisper = dossier CTranslate2 ; Parakeet = dossier ONNX (onnx-asr) ; Silero = poids ONNX.
+// ASR : modèles offline (packaging) du sidecar transcribe.py.
+// Whisper = dossier CTranslate2 ; Parakeet = dossier ONNX (onnx-asr).
 if (CONFIG.whisperDir) DETECT_ENV.NETSURUSH_WHISPER_DIR = CONFIG.whisperDir;
 if (CONFIG.whisperCompute) DETECT_ENV.NETSURUSH_WHISPER_COMPUTE = CONFIG.whisperCompute;
 if (CONFIG.parakeetDir) DETECT_ENV.NETSURUSH_PARAKEET_DIR = CONFIG.parakeetDir;
-if (CONFIG.sileroDir) DETECT_ENV.NETSURUSH_SILERO_DIR = CONFIG.sileroDir;
-// NOVA-VAD (confirmation anti-bruit par-dessus Silero) : dépôt vendoré (models/ + src/classifier.py).
-// Absent → silence.py garde Silero seul (dégradation gracieuse). En dev, vad_nova retombe sur <repo>/vendor/nova-vad.
-if (CONFIG.novaDir) DETECT_ENV.NETSURUSH_NOVA_DIR = CONFIG.novaDir;
 // Hub de traitements (process.py) : caches de modèles offline si fournis par la config.
 if (CONFIG.rembgDir) DETECT_ENV.U2NET_HOME = CONFIG.rembgDir;          // cache modèles rembg
 if (CONFIG.procHfHome) DETECT_ENV.HF_HOME = CONFIG.procHfHome;          // cache HF depth (si fourni)

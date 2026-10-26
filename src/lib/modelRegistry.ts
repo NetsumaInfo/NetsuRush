@@ -14,7 +14,7 @@ import { fmtBytes } from "@/lib/utils";
 
 // Tâche = regroupement dans le gestionnaire. Aligné sur les sous-systèmes réels.
 export type ModelTask =
-  | "detect" | "search" | "face" | "voice-asr" | "voice-vad"
+  | "detect" | "search" | "face" | "voice-asr"
   | "upscale" | "restore" | "interpolate" | "depth"
   | "matte-video" | "matte-image" | "segment" | "object-removal";
 
@@ -109,8 +109,6 @@ export const MODEL_REGISTRY: ModelEntry[] = [
   // Moteur natif transcribe.cpp (GGUF) — nécessite le binaire transcribe-cli (fourni, voir carte moteur).
   { id: "nemotron-3.5-asr", label: "Nemotron 3.5 ASR Streaming 0.6B", task: "voice-asr", engine: "transcribe-cpp", license: "OpenMDW", commercialUse: true, sizeBytes: 700 * MB, tier: "balanced", vramGB: 2, hint: "40 langues, ponctuation et majuscules automatiques. Demande transcribe-cli, à installer à la main.", advanced: true },
 
-  // ---- Voix : VAD ----
-  { id: "silero-vad", label: "Silero VAD v5", task: "voice-vad", engine: "silero", license: "MIT", commercialUse: true, sizeBytes: 2 * MB, tier: "light", vramGB: 0, hint: "Repère les passages parlés pour lancer et couper la dictée. Rapide, sur le processeur.", default: true, bundled: true },
 
   // ---- Upscale — sélection courante : un modèle par situation (anime rapide, anime vidéo, réel,
   //      débruitage intégré, qualité maximale). Le reste du catalogue est en avancé. ----
@@ -285,8 +283,7 @@ export const TASK_LABELS: Record<ModelTask, string> = {
   detect: "Détection de plans",
   search: "Recherche visuelle",
   face: "Recherche par visage",
-  "voice-asr": "Voix — transcription",
-  "voice-vad": "Voix — silences",
+  "voice-asr": "Voix — langue des pistes",
   upscale: "Upscale",
   restore: "Restauration",
   interpolate: "Interpolation",
@@ -300,7 +297,7 @@ export const TASK_LABELS: Record<ModelTask, string> = {
 // Ordre d'affichage des groupes.
 export const TASK_ORDER: ModelTask[] = [
   "upscale", "restore", "interpolate", "depth", "matte-video", "matte-image", "segment", "object-removal",
-  "detect", "search", "face", "voice-asr", "voice-vad",
+  "detect", "search", "face", "voice-asr",
 ];
 
 export const modelById = (id: string): ModelEntry | undefined => MODEL_REGISTRY.find((m) => m.id === id);

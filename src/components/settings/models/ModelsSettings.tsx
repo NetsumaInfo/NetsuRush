@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  AudioLines, Download, Eraser, FileUp, Film, Gauge,
+  Download, Eraser, FileUp, Film, Gauge,
   HardDrive, Image, Layers3, Mic, Package, RefreshCw, RotateCw, ScanFace, ScanSearch,
   Scissors, Search, Sparkles, Trash2, WandSparkles, Check, AlertTriangle, X,
   ArrowUpNarrowWide, ArrowDownWideNarrow, type LucideIcon,
@@ -53,7 +53,6 @@ const TASK_ICONS: Record<ModelTask, LucideIcon> = {
   search: Search,
   face: ScanFace,
   "voice-asr": Mic,
-  "voice-vad": AudioLines,
   upscale: WandSparkles,
   restore: Sparkles,
   interpolate: Gauge,

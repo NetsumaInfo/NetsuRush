@@ -125,44 +125,12 @@ test('first-run setup imports each selected module pack before declaring success
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
   const probes = setup.slice(setup.indexOf('$packProbes'), setup.indexOf('Progress 72'));
   assert.match(probes, /search\s*=\s*'import transformers, sentencepiece, accelerate, faiss'/);
-  assert.match(probes, /voice\s*=\s*'import faster_whisper, onnx_asr, silero_vad, soundfile, librosa'/);
-  assert.doesNotMatch(probes, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
+  assert.match(probes, /voice\s*=\s*'import faster_whisper, onnx_asr, soundfile'/);
+  assert.doesNotMatch(probes, /yt_dlp|silero_vad/);
   assert.match(probes, /_patch_basicsr\(\); import realesrgan, basicsr, spandrel, rembg/);
   assert.match(probes, /Fail \(\(T 'moduleBroken'\) -f \$moduleId\)/);
   // Sondé APRÈS la normalisation ONNX : rembg tirerait sinon le runtime qu'on s'apprête à remplacer.
   assert.ok(setup.indexOf('ONNX Runtime $OnnxBackend') < setup.indexOf('$packProbes'));
-});
-
-test('NetsuBoard link tools are mandatory and verified outside optional module packs', () => {
-  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
-  const mandatory = setup.slice(setup.indexOf('$boardReq'), setup.indexOf('$moduleRequirements'));
-  assert.match(mandatory, /requirements-reference\.txt/);
-  assert.match(mandatory, /Invoke-Pip @\('install', '-r', \$boardReq/);
-  assert.match(mandatory, /import yt_dlp, gallery_dl/);
-  const optional = setup.slice(setup.indexOf('$moduleRequirements'), setup.indexOf('Progress 72'));
-  assert.doesNotMatch(optional, /reference\s*=\s*'requirements-reference\.txt'/);
-  assert.doesNotMatch(optional, /reference\s*=\s*'import yt_dlp, gallery_dl'/);
-  // Le marqueur écrit par le script doit être CELUI que le core attend : une version en retard fait
-  // repasser toutes les installations saines par l'écran de réparation, une version en avance laisse
-  // un venv incomplet sur le chemin rapide. Comparaison des deux sources plutôt qu'un littéral.
-  const { SETUP_RUNTIME_VERSION } = require(path.join(root, 'core', 'setup.js'));
-  assert.match(setup, new RegExp(`setupRuntimeVersion\\s*=\\s*${SETUP_RUNTIME_VERSION}\\b`));
-  const coreSetup = fs.readFileSync(path.join(root, 'core', 'setup.js'), 'utf8');
-  assert.match(coreSetup, /import yt_dlp, gallery_dl/);
-  assert.match(coreSetup, /runtime\.online/);
-});
-
-test('the packaged NetsuBoard runtime includes the current Instagram extractor and impersonation stack', () => {
-  const req = fs.readFileSync(path.join(root, 'python', 'requirements-reference.txt'), 'utf8');
-  const fullReq = fs.readFileSync(path.join(root, 'python', 'requirements.txt'), 'utf8');
-  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
-  const build = fs.readFileSync(path.join(root, 'scripts', 'build.ps1'), 'utf8');
-  const ytDlpPin = /yt-dlp\[default,curl-cffi\]==2026\.8\.4\.234419\.dev0/;
-  assert.match(req, ytDlpPin);
-  assert.match(fullReq, ytDlpPin);
-  assert.match(setup, /import yt_dlp, gallery_dl, curl_cffi/);
-  assert.match(build, /Copy-Item -Recurse -Force \(Join-Path \$root 'python\\\*'\) \$stagePy/);
-  assert.match(build, /ReadAllText\(\(Join-Path \$PSScriptRoot 'setup\.ps1'\)/);
 });
 
 // Le paquet ONNX installé ne prouve pas que son provider existe (CUDA/cuDNN absents, roue CPU
@@ -679,21 +647,6 @@ test('the search model stays switchable after the install, wired end to end', ()
   assert.match(catalog, /function indexedByModel\(\)/);
 });
 
-// NOVA-VAD n'est pas un modèle sélectionnable (aucun poids public) : son CODE est livré dans
-// l'installeur et posé avec le module voix. Le chemin doit être écrit dès que le code est là, sinon
-// déposer les poids plus tard n'activerait rien sans relancer l'installation.
-test('the NOVA-VAD confirmation layer installs with the voice module, weights optional', () => {
-  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
-  assert.doesNotMatch(setup, /HasModel 'nova-vad'/);
-  const novaBlock = setup.slice(setup.indexOf('$novaDir = Join-Path'), setup.indexOf('── 4b.'));
-  assert.match(novaBlock, /if \(HasModule 'voice'\) \{/);
-  assert.match(novaBlock, /scikit-learn joblib/);
-  assert.doesNotMatch(novaBlock, /git clone|snapshot_download/);
-  assert.match(setup, /if \(Test-Path \(Join-Path \$novaDir 'src\\classifier\.py'\)\) \{ \$cfg\.novaDir = \$novaDir \}/);
-  const { MANIFEST } = require('../core/models.js');
-  assert.equal(MANIFEST['nova-vad'], undefined, 'nova-vad ne doit pas être un modèle du catalogue');
-});
-
 test('uninstall cleanup preserves personal data unless explicitly selected', () => {
   const script = fs.readFileSync(path.join(root, 'scripts', 'uninstall-cleanup.ps1'), 'utf8');
   const runtimeBlock = script.slice(script.indexOf('if ($Runtime) {'), script.indexOf('if ($UserData) {'));
@@ -797,4 +750,12 @@ test('RTX VSR only converts to HDR when TrueHDR is explicitly enabled', () => {
   // Le réglage n'est pas activé par défaut côté UI non plus.
   const shared = fs.readFileSync(path.join(root, 'src', 'components', 'upscale', 'upscaleShared.ts'), 'utf8');
   assert.match(shared, /rtxHdr: false/);
+});
+
+// The marker written by setup.ps1 must be the one the core expects: a lagging version sends every
+// healthy install through the repair screen, a leading one leaves an incomplete venv on the fast path.
+test('setup.ps1 writes the runtime version the core expects', () => {
+  const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
+  const { SETUP_RUNTIME_VERSION } = require(path.join(root, 'core', 'setup.js'));
+  assert.match(setup, new RegExp(`setupRuntimeVersion\\s*=\\s*${SETUP_RUNTIME_VERSION}\\b`));
 });

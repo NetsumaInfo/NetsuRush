@@ -23,19 +23,14 @@ realesrgan
 basicsr
 # Loader générique (modèle "fallin" = CUGAN, et tout .pth/.safetensors OpenModelDB) : Spandrel (MIT).
 spandrel
-# Board de référence : extraction du vrai média derrière liens sociaux / sites vidéo.
-yt-dlp[default,curl-cffi]==2026.8.4.234419.dev0
-gallery-dl
-# Module voix (transcribe.py / silence.py) — silences + sous-titres + montage par texte.
+# ASR (transcribe.py) — identifie la langue d'une piste audio sans étiquette.
 # ⚠️ `faster-whisper` déclare `onnxruntime` SANS extra : pip pose alors la variante CPU PAR-DESSUS
 # `onnxruntime-gpu` (les deux distributions écrivent dans le MÊME dossier `onnxruntime/`), et le CPU
 # gagne l'import. Résultat mesuré : visages/Parakeet/rembg 7,9× plus lents, sans aucun message.
 # `setup.ps1` réinstalle donc la variante voulue APRÈS ce fichier — ne pas y ajouter `onnxruntime`.
 faster-whisper>=1.1        # ASR « Précis » : Whisper large-v3-turbo (CTranslate2, GPU, word timestamps)
 onnx-asr[gpu,hub]>=0.6     # ASR « Rapide » : Parakeet TDT 0.6b v3 (ONNX, onnxruntime-gpu)
-silero-vad>=5.1            # VAD : Silero v5 (ONNX) → détection de silences
-soundfile                  # lecture WAV (silero read_audio / fallback)
-librosa>=0.10              # détection ACOUSTIQUE des hésitations (F0/flux/RMS/ZCR) — pur signal, sans modèle
+soundfile                  # lecture WAV
 # Traitements vidéo (process.py) — hub interpolation / depth / removeBG.
 rembg[gpu]                 # removeBG : isnet-anime / birefnet-general / u2net (onnxruntime, alpha)
 # depth = transformers (déjà présent) : Depth-Anything-V2-Small / Intel DPT

@@ -15,12 +15,6 @@ kornia
 # Suppression d'objet video (Roto Studio → MiniMax-Remover) : pipeline diffusion Wan. Le CODE vit dans
 # python/nrroto/vendor/ (2 .py du depot zibojia, hors pip) ; diffusers>=0.33 fournit AutoencoderKLWan.
 diffusers>=0.33
-# Dictee streaming faible latence (future) : runtime ONNX multi-modeles (sherpa-onnx, MIT).
-sherpa-onnx
-# Confirmation anti-bruit NOVA-VAD (couche par-dessus Silero) : classifieur sklearn RF+GBT (MIT).
-# librosa/soundfile deja dans requirements.txt ; le depot nova-vad est clone par setup.ps1.
-scikit-learn
-joblib
 # Recherche visage ANIME (faces.py) : detection YOLO anime (MIT) + identite personnage CCIP
 # (OpenRAIL), ONNX. ATTENTION : tire opencv-contrib-python (GUI) → setup.ps1 re-normalise le
 # venv sur opencv-contrib-python-headless juste apres (2 dists cv2 = imports casses).

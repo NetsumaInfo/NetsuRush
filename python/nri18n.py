@@ -915,22 +915,6 @@ _MESSAGES = {
         "Parakeet がありません：pip install onnx-asr[gpu,hub]（{error}）",
         "缺少 Parakeet：pip install onnx-asr[gpu,hub]（{error}）",
     ),
-    "silero_missing": (
-        "Silero VAD absent : pip install silero-vad ({error})",
-        "Silero VAD is missing: pip install silero-vad ({error})",
-        "Falta Silero VAD: pip install silero-vad ({error})",
-        "Silero VAD fehlt: pip install silero-vad ({error})",
-        "Silero VAD がありません：pip install silero-vad（{error}）",
-        "缺少 Silero VAD：pip install silero-vad（{error}）",
-    ),
-    "librosa_missing": (
-        "librosa absent : pip install librosa ({error})",
-        "librosa is missing: pip install librosa ({error})",
-        "Falta librosa: pip install librosa ({error})",
-        "librosa fehlt: pip install librosa ({error})",
-        "librosa がありません：pip install librosa（{error}）",
-        "缺少 librosa：pip install librosa（{error}）",
-    ),
 }
 
 
