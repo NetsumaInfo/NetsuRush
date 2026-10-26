@@ -20,9 +20,8 @@
   },
   "friends": {
     "title": "Personen",
-    "subtitle": "Füge Personen über ihren Discord-Namen oder ihre NetsuRush-Kennung hinzu. Geteilt wird nur mit jemandem aus dieser Liste.",
-    "yourHandle": "Du: @{{handle}}",
-    "placeholder": "Discord-Name oder NetsuRush-Kennung",
+    "subtitle": "Freund per Name hinzufügen. Geteilt wird nur mit jemandem aus dieser Liste.",
+    "placeholder": "Name",
     "add": "Hinzufügen",
     "accept": "Annehmen",
     "remove": "Entfernen",
@@ -40,6 +39,22 @@
       "error": "Die Suche hat nicht geklappt. Versuch es noch einmal.",
       "invited": "Einladung gesendet."
     }
+  },
+  "username": {
+    "label": "Name",
+    "placeholder": "z. B. Netsuma_f",
+    "save": "Speichern",
+    "hint": "3 bis 20 Zeichen: Kleinbuchstaben, Ziffern, _ und . Einmal im Monat änderbar.",
+    "saved": "Name gespeichert.",
+    "format": "Ungültiger Name: 3 bis 20 Zeichen, Kleinbuchstaben, Ziffern, _ und .",
+    "reserved": "Dieser Name ist reserviert.",
+    "taken": "Name bereits vergeben.",
+    "cooldown": "Nächste Änderung möglich am {{date}}.",
+    "noProfile": "Profil noch nicht bereit. Gleich erneut versuchen.",
+    "error": "Speichern fehlgeschlagen. Erneut versuchen.",
+    "edit": "Ändern",
+    "cancel": "Abbrechen",
+    "none": "Noch kein Name."
   },
   "invites": {
     "title": "Einladungen",

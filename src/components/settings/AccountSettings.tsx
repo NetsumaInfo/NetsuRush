@@ -11,6 +11,8 @@ import { AvatarDecoration } from "./AvatarDecoration";
 import { useDiscordProfile } from "./useDiscordProfile";
 import { useTranslation } from "react-i18next";
 import { useDiscordLogin } from "@/components/auth/useDiscordLogin";
+import { EmailLogin } from "@/components/auth/EmailLogin";
+import { UsernameField } from "./UsernameField";
 
 // Doc user Better Auth (champs Discord : name = pseudo, image = avatar, email).
 type AuthUser = { name?: string | null; email?: string | null; image?: string | null } | null | undefined;
@@ -63,8 +65,10 @@ function AccountInner() {
               </svg>
               {busy ? t("auth:login.waitingDiscord") : t("auth:login.signInDiscord")}
             </Button>
+            {!busy && <EmailLogin size="sm" />}
           </div>
         ) : (
+          <>
           <div className="flex items-center gap-4">
             <div className="relative size-12 shrink-0">
               {user.image ? (
@@ -90,6 +94,8 @@ function AccountInner() {
               <LogOut className="size-3.5" /> {t("account.signOut")}
             </Button>
           </div>
+          <UsernameField />
+          </>
         )}
       </div>
     </section>

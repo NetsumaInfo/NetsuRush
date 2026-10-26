@@ -20,9 +20,8 @@
   },
   "friends": {
     "title": "共有相手",
-    "subtitle": "Discord ユーザー名または NetsuRush ID で追加します。共有できるのはこの一覧の相手だけです。",
-    "yourHandle": "自分：@{{handle}}",
-    "placeholder": "Discord ユーザー名または NetsuRush ID",
+    "subtitle": "ユーザー名で友達を追加。共有できるのはこの一覧の相手だけです。",
+    "placeholder": "ユーザー名",
     "add": "追加",
     "accept": "承認",
     "remove": "削除",
@@ -40,6 +39,22 @@
       "error": "検索できませんでした。もう一度お試しください。",
       "invited": "招待を送信しました。"
     }
+  },
+  "username": {
+    "label": "ユーザー名",
+    "placeholder": "例: Netsuma_f",
+    "save": "保存",
+    "hint": "3〜20 文字：小文字、数字、_ と . 。変更は月 1 回まで。",
+    "saved": "ユーザー名を保存しました。",
+    "format": "無効なユーザー名：3〜20 文字、小文字、数字、_ と . のみ。",
+    "reserved": "このユーザー名は予約されています。",
+    "taken": "このユーザー名は使用中です。",
+    "cooldown": "次の変更は {{date}} から可能です。",
+    "noProfile": "プロフィールの準備中です。少し後で再試行してください。",
+    "error": "保存できません。再試行してください。",
+    "edit": "変更",
+    "cancel": "キャンセル",
+    "none": "ユーザー名はまだありません。"
   },
   "invites": {
     "title": "招待",

@@ -20,9 +20,8 @@
   },
   "friends": {
     "title": "Personas",
-    "subtitle": "Añade por usuario de Discord o identificador NetsuRush. Solo puedes compartir con alguien de esta lista.",
-    "yourHandle": "Tú: @{{handle}}",
-    "placeholder": "Usuario de Discord o identificador NetsuRush",
+    "subtitle": "Añade un amigo por su usuario. Solo puedes compartir con alguien de esta lista.",
+    "placeholder": "Usuario",
     "add": "Añadir",
     "accept": "Aceptar",
     "remove": "Quitar",
@@ -40,6 +39,22 @@
       "error": "La búsqueda ha fallado. Inténtalo otra vez.",
       "invited": "Invitación enviada."
     }
+  },
+  "username": {
+    "label": "Usuario",
+    "placeholder": "p. ej. Netsuma_f",
+    "save": "Guardar",
+    "hint": "3 a 20 caracteres: minúsculas, cifras, _ y . Se cambia una vez al mes.",
+    "saved": "Usuario guardado.",
+    "format": "Usuario no válido: 3 a 20 caracteres, minúsculas, cifras, _ y .",
+    "reserved": "Este usuario está reservado.",
+    "taken": "Usuario ya en uso.",
+    "cooldown": "Próximo cambio posible el {{date}}.",
+    "noProfile": "Perfil aún no listo. Reintenta en un momento.",
+    "error": "No se pudo guardar. Reintenta.",
+    "edit": "Editar",
+    "cancel": "Cancelar",
+    "none": "Aún sin usuario."
   },
   "invites": {
     "title": "Invitaciones",

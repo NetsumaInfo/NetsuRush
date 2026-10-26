@@ -20,9 +20,8 @@
   },
   "friends": {
     "title": "Personnes",
-    "subtitle": "Ajoute par pseudo Discord ou identifiant NetsuRush. On ne partage qu'avec quelqu'un de cette liste.",
-    "yourHandle": "Toi : @{{handle}}",
-    "placeholder": "Pseudo Discord ou identifiant NetsuRush",
+    "subtitle": "Ajoute un ami par son pseudo. On ne partage qu'avec quelqu'un de cette liste.",
+    "placeholder": "Pseudo",
     "add": "Ajouter",
     "accept": "Accepter",
     "remove": "Retirer",
@@ -40,6 +39,22 @@
       "error": "Recherche impossible. Réessaie.",
       "invited": "Invitation envoyée."
     }
+  },
+  "username": {
+    "label": "Pseudo",
+    "placeholder": "ex. Netsuma_f",
+    "save": "Enregistrer",
+    "hint": "3 à 20 caractères : minuscules, chiffres, _ et . Modifiable une fois par mois.",
+    "saved": "Pseudo enregistré.",
+    "format": "Pseudo invalide : 3 à 20 caractères, minuscules, chiffres, _ et .",
+    "reserved": "Ce pseudo est réservé.",
+    "taken": "Pseudo déjà pris.",
+    "cooldown": "Prochain changement possible le {{date}}.",
+    "noProfile": "Profil pas encore prêt. Réessaie dans un instant.",
+    "error": "Enregistrement impossible. Réessaie.",
+    "edit": "Modifier",
+    "cancel": "Annuler",
+    "none": "Pas encore de pseudo."
   },
   "invites": {
     "title": "Invitations",

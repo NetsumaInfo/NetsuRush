@@ -20,9 +20,8 @@
   },
   "friends": {
     "title": "People",
-    "subtitle": "Add by Discord username or NetsuRush handle. You can only share with someone on this list.",
-    "yourHandle": "You: @{{handle}}",
-    "placeholder": "Discord username or NetsuRush handle",
+    "subtitle": "Add a friend by username. You can only share with someone on this list.",
+    "placeholder": "Username",
     "add": "Add",
     "accept": "Accept",
     "remove": "Remove",
@@ -40,6 +39,22 @@
       "error": "The lookup failed. Try again.",
       "invited": "Invitation sent."
     }
+  },
+  "username": {
+    "label": "Username",
+    "placeholder": "e.g. Netsuma_f",
+    "save": "Save",
+    "hint": "3 to 20 characters: lowercase, digits, _ and . Can change once a month.",
+    "saved": "Username saved.",
+    "format": "Invalid username: 3 to 20 characters, lowercase, digits, _ and .",
+    "reserved": "This username is reserved.",
+    "taken": "Username already taken.",
+    "cooldown": "Next change possible on {{date}}.",
+    "noProfile": "Profile not ready yet. Try again in a moment.",
+    "error": "Could not save. Try again.",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "none": "No username yet."
   },
   "invites": {
     "title": "Invitations",

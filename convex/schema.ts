@@ -81,6 +81,8 @@ export default defineSchema({
     handle: v.string(), // lowercased unique NetsuRush handle, the lookup key
     discordId: v.optional(v.string()), // stable Discord snowflake, never renderer-supplied
     discordUsername: v.optional(v.string()), // current normalized Discord username
+    username: v.optional(v.string()), // NetsuRush pseudonym the user chose, unique, distinct from Discord's
+    usernameChangedAt: v.optional(v.number()),
     name: v.string(), // as displayed
     image: v.optional(v.string()),
     updatedAt: v.number(),
@@ -88,7 +90,8 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_handle", ["handle"])
     .index("by_discord_id", ["discordId"])
-    .index("by_discord_username", ["discordUsername"]),
+    .index("by_discord_username", ["discordUsername"])
+    .index("by_username", ["username"]),
 
   // Accepted friendship, written as TWO rows, one per direction: every list query then reads a
   // single index instead of merging two.

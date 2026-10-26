@@ -20,9 +20,8 @@
   },
   "friends": {
     "title": "成员",
-    "subtitle": "通过 Discord 用户名或 NetsuRush 标识添加。只能与此列表中的人共享。",
-    "yourHandle": "你：@{{handle}}",
-    "placeholder": "Discord 用户名或 NetsuRush 标识",
+    "subtitle": "按用户名添加好友。只能与此列表中的人共享。",
+    "placeholder": "用户名",
     "add": "添加",
     "accept": "接受",
     "remove": "移除",
@@ -40,6 +39,22 @@
       "error": "没能查到。再试一次。",
       "invited": "邀请已发送。"
     }
+  },
+  "username": {
+    "label": "用户名",
+    "placeholder": "例如 Netsuma_f",
+    "save": "保存",
+    "hint": "3 到 20 个字符：小写字母、数字、_ 和 . 。每月可改一次。",
+    "saved": "用户名已保存。",
+    "format": "用户名无效：3 到 20 个字符，小写字母、数字、_ 和 . 。",
+    "reserved": "该用户名已被保留。",
+    "taken": "用户名已被占用。",
+    "cooldown": "下次可修改日期：{{date}}。",
+    "noProfile": "资料尚未就绪，请稍后重试。",
+    "error": "无法保存，请重试。",
+    "edit": "修改",
+    "cancel": "取消",
+    "none": "还没有用户名。"
   },
   "invites": {
     "title": "邀请",

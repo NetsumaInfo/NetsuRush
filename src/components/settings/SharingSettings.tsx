@@ -30,11 +30,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { SectionTitle } from "./rows";
 import { uiLocale } from "@/lib/utils";
 
-type AuthUser = { name?: string | null; image?: string | null } | null | undefined;
+type AuthUser = { name?: string | null; email?: string | null; image?: string | null } | null | undefined;
 type Profile = {
   userId: string;
   handle: string;
   discordUsername?: string | null;
+  username?: string | null;
   name: string;
   image: string | null;
 };
@@ -71,20 +72,15 @@ function Avatar({ url }: { url: string | null }) {
 }
 
 function Row({ profile, children }: { profile: Profile; children?: React.ReactNode }) {
-  const secondary =
-    profile.discordUsername && profile.discordUsername !== profile.name
-      ? profile.discordUsername
-      : profile.handle && profile.handle !== profile.name
-        ? profile.handle
-        : null;
+  // One pseudonym per person: the chosen one, else the Discord username it started from, else the
+  // internal handle when it says something the name does not.
+  const pseudo = profile.username ?? profile.discordUsername ?? (profile.handle !== profile.name ? profile.handle : null);
   return (
     <div className="flex items-center gap-3 py-2">
       <Avatar url={profile.image} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm">{profile.name || profile.handle}</p>
-        {/* Discord pseudonym and NetsuRush handle are usually derived from the same name, so
-            printing both showed it twice. Only the second is kept when it says something new. */}
-        {secondary && <p className="truncate text-xs text-muted-foreground">@{secondary}</p>}
+        <p className="truncate text-sm">{profile.name || pseudo}</p>
+        {pseudo && pseudo !== profile.name && <p className="truncate text-xs text-muted-foreground">@{pseudo}</p>}
       </div>
       {children}
     </div>
@@ -163,9 +159,12 @@ function SharingInner() {
   useEffect(() => reloadBindings(), [reloadBindings]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.name) return;
-    void upsertProfile({ handle: user.name }).catch(() => undefined);
-  }, [isAuthenticated, user?.name, user?.image, upsertProfile]);
+    // An account made by e-mail code has no name: its handle starts from the address instead, or
+    // nobody could add it.
+    const base = user?.name || user?.email?.split("@")[0];
+    if (!isAuthenticated || !base) return;
+    void upsertProfile({ handle: base }).catch(() => undefined);
+  }, [isAuthenticated, user?.name, user?.email, user?.image, upsertProfile]);
 
   if (!isAuthenticated) {
     return (
@@ -380,17 +379,6 @@ function SharingInner() {
 
       <section className="mt-6">
         <SectionTitle title={t("friends.title")} info={t("friends.subtitle")} />
-        {/* The Discord username, not the internal handle. The stored handle carries a suffix
-            derived from the account id so two people with the same name cannot collide or
-            pre-claim each other's — useful as a key, meaningless to read, and nobody would ever
-            type it: a Discord username is already unique and is what people actually exchange. */}
-        {(social?.self?.discordUsername || social?.self?.handle) && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("friends.yourHandle", {
-              handle: social.self.discordUsername || social.self.handle,
-            })}
-          </p>
-        )}
         <div className="mt-3 flex gap-2">
           <Input
             value={identifier}
