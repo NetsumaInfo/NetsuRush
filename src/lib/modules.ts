@@ -10,7 +10,6 @@ export const MODULE_IDS = [
   "upscale",
   "voice",
   "chat",
-  "flow",
   "optimisation",
   "transfer",
 ] as const satisfies readonly TabId[];

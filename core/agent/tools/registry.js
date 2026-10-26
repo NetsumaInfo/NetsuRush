@@ -21,15 +21,11 @@ const { t: tr } = require('../../i18n');
  * @property {(args:any, ctx:any)=>Promise<any>|any} handler
  */
 
-/// Les surfaces de l'agent. Un même moteur, deux métiers : NetsuPilot pilote
-/// Resolve et le derush, NetsuFlow édite une composition web. Exposer les 300+
-/// outils Resolve à l'éditeur de composition (ou l'inverse) noierait le modèle
-/// sous des capacités hors sujet et rendrait les deux prompts impossibles à
-/// écrire — d'où un registre unique, filtré par fenêtre.
+/// Les surfaces de l'agent : un registre unique, filtré par fenêtre.
 /**
- * @typedef {'pilot'|'flow'} Surface
+ * @typedef {'pilot'} Surface
  */
-const SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot', 'flow']));
+const SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot']));
 const DEFAULT_SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot']));
 
 function createToolRegistry() {

@@ -12,8 +12,7 @@
     "transfer": "NetsuBridge",
     "voice": "NetsuTalk",
     "chat": "NetsuPilot",
-    "optimisation": "NetsuBoost",
-    "flow": "NetsuFlow"
+    "optimisation": "NetsuBoost"
   },
   "sidebar": {
     "settings": "Paramètres",

@@ -1,8 +1,6 @@
 // A CLI agent runs its tools through the MCP bridge, not through the BYOK
 // tool-calling loop. That path broadcast nothing at all, so the interface never
-// saw a tool being called or returning — and in NetsuFlow, where the edit
-// PROPOSAL travels inside `flow_propose`'s result, that meant an agent
-// answering "proposal ready" with no card and no Apply button.
+// saw a tool being called or returning.
 //
 // What is pinned here is what the bridge does around the call. Driving a whole
 // CLI turn would need a real agent binary, so the broadcast under a live run is
@@ -79,13 +77,4 @@ test("the session reports which CLI turn is running", () => {
   });
   assert.equal(typeof session.currentCliRun, "function");
   assert.equal(session.currentCliRun(), null);
-});
-
-test("a proposal survives the bridge unchanged", () => {
-  // The renderer reads `content.proposal` off the tool result. Any reshaping
-  // here — wrapping, stringifying, renaming — breaks the card silently, since
-  // the agent's prose still arrives and reads as if it worked.
-  const { agent } = harness();
-  const registry = agent.describeTools().map((tool) => tool.name);
-  assert.ok(registry.includes("flow_propose"), `flow_propose missing from ${registry}`);
 });

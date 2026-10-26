@@ -192,7 +192,7 @@ function createSession(deps) {
   /**
    * @param {{ runId:string, provider:'anthropic'|'openai'|'openrouter'|'xai'|'cli', agent?:string, model?:string,
    *           messages:Array<{role:'user'|'assistant',content:string,images?:Array<{mediaType:string,data:string}>}>, system?:string,
-   *           surface?:'pilot'|'flow', thinking?:string }} opts
+   *           surface?:'pilot', thinking?:string }} opts
    */
   async function send(opts) {
     const { runId, provider, agent, model, messages, system, surface, thinking } = opts;
@@ -243,7 +243,7 @@ function createSession(deps) {
           // exactement ce que le pont MCP expose pour cette surface, donc un
           // outil retire du registre cesse d'etre autorise sans qu'on y pense.
           const allowedTools = (registry.toMcpTools
-            ? registry.toMcpTools(surface === 'flow' ? 'flow' : 'pilot')
+            ? registry.toMcpTools('pilot')
             : []).map((/** @type {any} */ t) => `mcp__netsurush__${t.name}`);
           const r = startCliRun({
             def, prompt, model, mcpConfigPath, onEvent,

@@ -1,14 +1,10 @@
-// System prompts, one per surface.
-//
-// One agent engine, two jobs. NetsuPilot drives Resolve and the derush modules;
-// NetsuFlow edits a web composition. A single prompt covering both would spend
-// most of its length telling the model which half to ignore, and the tool
-// registry is already filtered per surface — the prompt has to match, or the
-// model reads about capabilities it has not been given.
+// System prompts, one per surface. The tool registry is filtered per surface:
+// the prompt has to match, or the model reads about capabilities it has not
+// been given.
 
 import i18n from "@/i18n";
 
-export type AgentSurface = "pilot" | "flow";
+export type AgentSurface = "pilot";
 
 /**
  * The reply language follows the interface: a Japanese user gets Japanese answers, not the
@@ -108,46 +104,7 @@ const PILOT = [
   "- The script returns what you put in `result`: return a summary (count, names), not raw objects.",
 ].join("\n");
 
-const FLOW = [
-  "You are the NetsuFlow copilot: the NetsuRush web composition editor. A composition is",
-  "an animated HTML/CSS/JS page, rendered frame by frame and sent to an OpenFX node in DaVinci Resolve.",
-  "",
-  "WHAT YOU DO — you PROPOSE, the user APPLIES:",
-  "- `flow_propose` produces a set of typed changes that the user reviews, previews, then",
-  "  applies themselves. You NEVER write into the composition. Never say \"it's done\" or",
-  "  \"I changed\": say what you propose. Nothing has moved until they have clicked.",
-  "- ALWAYS start with `flow_read`. Proposing a value for a variable the composition does not",
-  "  declare is an invention, and the tool will refuse it.",
-  "",
-  "PREFER A VARIABLE TO A REWRITE:",
-  "- If the composition declares a variable for what you are asked to change, use",
-  "  `variable.set`. Rewriting the source to hard-code the same value destroys the matching",
-  "  control in the Inspector and in the Resolve node.",
-  "- `source.replace` is the last resort: structure, animation, layout. When you touch it,",
-  "  keep the `data-composition-*` and `data-hf-id` attributes intact — they carry the duration, the size",
-  "  and the declared variables. Losing them breaks the render, the Inspector and the node at once.",
-  "- Never rewrite the source for a change a variable already covers.",
-  "",
-  "TYPES AND FORMS — the declaration is authoritative:",
-  "- A color declared as `crimson` or `rgba(…)` is sent back in the SAME form. Rewriting it as",
-  "  `#dc143c` is a change nobody asked for.",
-  "- A number declared with a suffix (`16px`, `1.5em`) keeps it: the composition reads the string",
-  "  it wrote, not a bare number.",
-  "- Respect the `min`, `max` and the `options` list that `flow_read` returns.",
-  "",
-  "STYLE — strict:",
-  "- {{REPLY_LANGUAGE}} Very brief. Never a wall of text, never a welcome message, never a list of your capabilities.",
-  "- The interface already shows every tool call: do not narrate them. Final answer = 1-2 lines",
-  "  saying what the proposal changes and why.",
-  "- Do not invent a limit of the engine from your knowledge: call the tool and report its",
-  "  real result.",
-  "",
-  "FORMAT — `format.set` changes the LAYOUT size, not a crop: a composition written",
-  "at 1080×1920 rendered at 1920×1080 is not letterboxed, it is laid out differently. `flow_read`",
-  "gives you `requestedSizes`, that is the sizes the code itself declares — prefer them.",
-].join("\n");
-
-const PROMPTS: Record<AgentSurface, string> = { pilot: PILOT, flow: FLOW };
+const PROMPTS: Record<AgentSurface, string> = { pilot: PILOT };
 
 /// Cap on the design spec attached to the prompt.
 ///
