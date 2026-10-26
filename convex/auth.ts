@@ -1,6 +1,7 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
+import { emailOTP } from "better-auth/plugins";
 import { components } from "./_generated/api";
 import { query } from "./_generated/server";
 import type { DataModel } from "./_generated/dataModel";
@@ -60,9 +61,11 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
           }
         : {}),
     },
-    // Session gardée 7 jours, rafraîchie chaque jour d'usage en ligne (cf. grâce offline renderer).
+    // A login by any of these providers and an e-mail login with the same verified address are one account.
+    account: { accountLinking: { enabled: true, trustedProviders: ["discord", "google", "email-otp"] } },
+    // Session kept 30 days, refreshed on each day of online use (see the renderer's offline grace).
     session: {
-      expiresIn: 60 * 60 * 24 * 7,
+      expiresIn: 60 * 60 * 24 * 30,
       updateAge: 60 * 60 * 24,
     },
     // Anti-bruteforce intégré (durcissement beta).
@@ -72,8 +75,54 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
       crossDomain({ siteUrl }),
       // convex : émet le JWT que Convex valide (issuer = auth.config.ts).
       convex({ authConfig }),
+      // Sign-in by a code sent to the address: no password to store or reset. The first code creates
+      // the account.
+      emailOTP({
+        otpLength: 6,
+        expiresIn: 10 * 60,
+        allowedAttempts: 5,
+        sendVerificationOTP: async ({ email, otp, type }) => {
+          if (type !== "sign-in") return;
+          await sendSignInCode(email, otp);
+        },
+      }),
     ],
   });
+
+// Sent through the provider's HTTP API, no SDK in the bundle. Brevo (BREVO_API_KEY) takes a single
+// verified sender address, so it works without a domain; Resend (RESEND_API_KEY) needs a verified
+// domain. AUTH_EMAIL_FROM is the sender, `Name <address>`. Keys live on the deployment.
+async function sendSignInCode(email: string, otp: string) {
+  const from = process.env.AUTH_EMAIL_FROM;
+  if (!from) throw new Error("e-mail sign-in is not configured");
+  const subject = "Your NetsuRush sign-in code";
+  const text = `Your NetsuRush sign-in code: ${otp}
+
+It expires in 10 minutes. If you did not ask for it, ignore this e-mail.`;
+
+  const brevo = process.env.BREVO_API_KEY;
+  if (brevo) {
+    const match = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(from);
+    const sender = match ? { name: match[1] || "NetsuRush", email: match[2] } : { email: from.trim() };
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": brevo, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ sender, to: [{ email }], subject, textContent: text }),
+    });
+    if (!res.ok) throw new Error(`Brevo refused the e-mail (${res.status}): ${(await res.text()).slice(0, 300)}`);
+    console.log(`sign-in code accepted by Brevo: ${(await res.text()).slice(0, 120)}`);
+    return;
+  }
+
+  const resend = process.env.RESEND_API_KEY;
+  if (!resend) throw new Error("e-mail sign-in is not configured");
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${resend}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to: [email], subject, text }),
+  });
+  if (!res.ok) throw new Error(`Resend refused the e-mail (${res.status})`);
+}
 
 // Utilisateur courant (safe = undefined si non connecté) — pour l'identité UI (avatar/pseudo Discord).
 export const getCurrentUser = query({

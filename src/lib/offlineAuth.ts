@@ -1,8 +1,8 @@
-// Grâce OFFLINE : après un login Discord réussi (en ligne), on tamponne l'instant. Aux lancements
-// suivants SANS réseau, l'app reste utilisable tant que ce tampon a moins de 7 jours. Au-delà,
-// re-login exigé (donc reconnexion Internet). Honore « gardé, re-login si offline ~1 semaine ».
+// OFFLINE grace: after a successful (online) login the instant is stamped. On later launches with NO
+// network the app stays usable as long as that stamp is under 30 days old. Past that, a new login is
+// required — which means going back online.
 const KEY = "nr.auth.lastAuthAt";
-const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+const OFFLINE_GRACE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function stampAuth(now: number = Date.now()): void {
   try {
@@ -30,7 +30,7 @@ function lastAuthAt(): number | null {
   }
 }
 
-// true = un login récent (< 7 j) autorise l'usage hors ligne.
+// true = un login récent (< 30 j) autorise l'usage hors ligne.
 export function offlineGraceValid(now: number = Date.now()): boolean {
   const t = lastAuthAt();
   return t !== null && now - t >= 0 && now - t < OFFLINE_GRACE_MS;

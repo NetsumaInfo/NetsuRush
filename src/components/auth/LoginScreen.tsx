@@ -7,8 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GateFrame } from "./GateFrame";
 import { useDiscordLogin } from "./useDiscordLogin";
+import { EmailLogin } from "./EmailLogin";
 
-// Écran de connexion facultative : Discord ou poursuite locale sans compte.
+// Optional sign-in screen: Discord, an e-mail code, or keep going locally without an account.
 export function LoginScreen({ offline = false, onSkip }: { offline?: boolean; onSkip: () => void }) {
   const { t } = useTranslation(["auth", "common"]);
   const { login, busy, error, reset } = useDiscordLogin();
@@ -45,6 +46,8 @@ export function LoginScreen({ offline = false, onSkip }: { offline?: boolean; on
           </svg>
           {busy ? t("login.waitingDiscord") : t("login.signInDiscord")}
         </Button>
+
+        {!busy && <EmailLogin />}
 
         {!busy && (
           <div className="w-full space-y-1.5">

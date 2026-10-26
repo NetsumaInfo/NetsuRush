@@ -39,6 +39,8 @@ npx convex env set SITE_URL "https://<ton-deploiement>.convex.site"
 npx convex env set BETTER_AUTH_SECRET "$(openssl rand -base64 32)"
 npx convex env set DISCORD_CLIENT_ID "<client id>"
 npx convex env set DISCORD_CLIENT_SECRET "<client secret>"
+npx convex env set BREVO_API_KEY "<Brevo API key>"   # or RESEND_API_KEY with a verified domain
+npx convex env set AUTH_EMAIL_FROM "NetsuRush <login@your-domain>"
 npx convex env set OPEN_BETA "true"   # beta ouverte : tout compte connecté a l'accès
 npx convex env set BUG_WEBHOOK "<url du webhook Discord>"   # relais des rapports de bug
 ```
@@ -48,6 +50,15 @@ npx convex env set BUG_WEBHOOK "<url du webhook Discord>"   # relais des rapport
 > Le relais n'exige aucune connexion : un testeur déconnecté peut envoyer un rapport. `npx convex env
 > set BUG_QUOTA_SALT "<chaîne aléatoire>"` sale l'empreinte d'IP qui sert de clé de plafond aux
 > envois anonymes (facultatif).
+
+> E-mail sign-in: a 6-digit code (10 min, 5 attempts) sent through Brevo's HTTP API when
+> `BREVO_API_KEY` is set (one verified sender address, no domain needed), else through Resend
+> (`RESEND_API_KEY`, needs a verified domain). `AUTH_EMAIL_FROM` is the sender, `Name <address>`,
+> verified on the provider. Without both a key and a sender, e-mail sign-in is refused and Discord
+> keeps working. In Brevo, turn **off** "block unauthorised IP addresses" for API keys: Convex sends
+> from changing IPs. A Discord or Google login and an e-mail login with the same verified address
+> are one account. Sessions last 30 days, and the app stays usable offline for 30 days after the
+> last login.
 
 > Bascule en **allowlist** plus tard : `npx convex env set OPEN_BETA false`, puis accorde l'accès
 > par utilisateur : `npx convex run access:grantAccess '{"userId":"<id>","role":"member"}'`.

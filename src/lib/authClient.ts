@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react";
+import { emailOTPClient } from "better-auth/client/plugins";
 import {
   convexClient as convexAuthPlugin,
   crossDomainClient,
@@ -9,8 +10,8 @@ const siteUrl = import.meta.env.VITE_CONVEX_SITE_URL as string | undefined;
 
 // crossDomainClient : la webview desktop n'est pas sur le domaine Convex → le jeton de session
 // transite hors cookie (stocké via localStorage, préfixe "netsurush"). convexAuthPlugin : lie la
-// session Better Auth au JWT que Convex valide.
+// session Better Auth au JWT que Convex valide. emailOTPClient : connexion par code envoyé à une adresse.
 export const authClient = createAuthClient({
   baseURL: siteUrl ?? "http://localhost",
-  plugins: [convexAuthPlugin(), crossDomainClient({ storagePrefix: "netsurush" })],
+  plugins: [convexAuthPlugin(), crossDomainClient({ storagePrefix: "netsurush" }), emailOTPClient()],
 });

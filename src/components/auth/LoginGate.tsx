@@ -32,7 +32,7 @@ function Checking() {
 
 /**
  * Gate de connexion Discord facultative. Le choix « Passer » est persisté localement ; une session
- * valide garde en plus sa grâce offline de 7 j. Si Convex n'est pas configuré
+ * valide garde en plus sa grâce offline de 30 j. Si Convex n'est pas configuré
  * (dev/navigateur/mock, env absent) → rend les enfants directement.
  */
 export function LoginGate({ children }: { children: ReactNode }) {
@@ -79,7 +79,7 @@ function LoginGateInner({ children, onSkip }: { children: ReactNode; onSkip: () 
 
   const unreachable = !online || timedOut;
 
-  // 1) Hors ligne + login récent (< 7 j) → app utilisable (mode dégradé).
+  // 1) Hors ligne + login récent (< 30 j) → app utilisable (mode dégradé).
   if (unreachable && !isAuthenticated && offlineGraceValid()) return <>{children}</>;
 
   // 2) En ligne, résolution en cours → vérification.
