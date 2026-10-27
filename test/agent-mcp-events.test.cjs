@@ -58,7 +58,7 @@ test("an unknown tool still answers, rather than throwing into the bridge", () =
   const { agent } = harness();
   return agent.toolCall("not_a_real_tool", {}).then((result) => {
     assert.equal(result.ok, false);
-    assert.match(String(result.error), /inconnu/);
+    assert.match(String(result.error), /inconnu|unknown/i);
   });
 });
 

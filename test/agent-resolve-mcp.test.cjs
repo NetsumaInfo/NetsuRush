@@ -227,7 +227,7 @@ test('un résultat qui part en vrille est refusé, jamais tronqué', () => {
   // Tronquer un stub d'API ferait lire au modèle l'absence d'une classe qui
   // existe : le refus doit donc être total, et dire quoi faire à la place.
   assert.ok(!('text' in r), 'aucun fragment ne doit passer');
-  assert.match(r.error, /trop volumineux/);
+  assert.match(r.error, /trop volumineux|too large/);
 
   // Le stub complet de l'API, lui, passe : un outil qui échoue toujours serait
   // pire que cher (146 000 caractères mesurés sur Resolve 21.1).
