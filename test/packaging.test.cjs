@@ -358,17 +358,17 @@ test('NetsuCut reveals detected scenes without the removed fake thumbnail loadin
 test('OmniShotCut is installed and verified from the bundled local package', () => {
   const setup = fs.readFileSync(path.join(root, 'scripts', 'setup.ps1'), 'utf8');
   assert.match(setup, /vendor\\OmniShotCut/);
-  assert.match(setup, /import omnishotcut; import decord/);
+  assert.match(setup, /import omnishotcut; import ffmpeg/);
   assert.match(setup, /Fail \(T 'omniImport'\)/);
   const models = fs.readFileSync(path.join(root, 'core', 'models.js'), 'utf8');
   assert.match(models, /OMNISHOTCUT_PIP/);
-  assert.match(models, /pipCheck: \['omnishotcut', 'decord'\]/);
+  assert.match(models, /pipCheck: \['omnishotcut', 'ffmpeg'\]/);
   assert.match(models, /--no-deps.*OMNISHOTCUT_PIP/);
   const setupModels = fs.readFileSync(path.join(root, 'core', 'setup-models.js'), 'utf8');
   assert.match(setupModels, /async function ensureOmniShotCut/);
   assert.match(setupModels, /OMNI_PACKAGE/);
-  assert.match(setupModels, /'--no-deps', OMNI_PACKAGE/);
-  assert.match(setupModels, /await runPython\(\['-c', 'import omnishotcut; import decord'\]\)/);
+  assert.match(setupModels, /'--no-deps', '--force-reinstall', OMNI_PACKAGE/);
+  assert.match(setupModels, /await runPython\(\['-c', 'import omnishotcut; import ffmpeg'\]\)/);
 });
 
 test('NetsuCut exposes only the three wired detection engines and option-aware caches', () => {

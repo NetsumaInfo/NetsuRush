@@ -139,7 +139,7 @@
     "remux": "Remux",
     "encode": "Neu kodieren",
     "remuxWarning": "Bildgenau nur in MP4/MOV",
-    "remuxWarningDetail": "Remux kopiert den Stream ohne Neukodierung. In MP4 oder MOV bleibt der Schnitt bildgenau: Die Bilder rund um die Keyframes bleiben in der Datei, werden aber bei Wiedergabe und Import ausgeblendet. In MKV oder beim Zusammenführen von Shots richtet sich der Schnitt nach den Keyframes, daher erscheinen am Anfang und am Ende einige Bilder zu viel. Für einen überall bildgenauen Schnitt „Neu kodieren“ verwenden."
+    "remuxWarningDetail": "Schnell, ohne Qualitätsverlust.\n• MP4/MOV: bildgenauer Schnitt.\n• MKV oder zusammengeführte Shots: ein paar Bilder zu viel am Anfang und Ende.\nÜberall bildgenau: „Neu kodieren“."
   },
   "audioMode": {
     "copy": "Kopie",

@@ -139,7 +139,7 @@
     "remux": "Remux",
     "encode": "Réencodage",
     "remuxWarning": "Exact en MP4/MOV seulement",
-    "remuxWarningDetail": "Le Remux copie le flux sans le ré-encoder. En MP4 ou MOV, la coupe reste exacte à l'image : les images autour des images clés restent dans le fichier mais sont masquées à la lecture et à l'import. En MKV, ou quand les plans sont fusionnés, la coupe se cale sur les images clés : quelques images en trop au début et à la fin. Pour une coupe exacte partout, prends Réencodage."
+    "remuxWarningDetail": "Rapide, sans perte de qualité.\n• MP4/MOV : coupe exacte.\n• MKV ou plans fusionnés : quelques images en trop au début et à la fin.\nCoupe exacte partout : Réencodage."
   },
   "audioMode": {
     "copy": "Copie",

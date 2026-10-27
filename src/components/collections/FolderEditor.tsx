@@ -559,7 +559,7 @@ export function FolderEditor({
                       </Tooltip>
                       {!reencode && <Tooltip>
                         <TooltipTrigger render={<p className="text-[10px] text-amber-500">{te("workflow.remuxWarning")}</p>} />
-                        <TooltipContent className="max-w-72">{te("workflow.remuxWarningDetail")}</TooltipContent>
+                        <TooltipContent className="max-w-72 whitespace-pre-line">{te("workflow.remuxWarningDetail")}</TooltipContent>
                       </Tooltip>}
                       {reencode && (
                         <>

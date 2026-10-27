@@ -185,7 +185,7 @@ function probeRuntime(config = CONFIG) {
     'r={"transnet":False,"torch":False,"gpu":False,"omnishotcut":False}',
     'import torch; r["torch"]=True',
     'from transnetv2_pytorch import TransNetV2; r["transnet"]=True',
-    needsOmni ? 'import omnishotcut, decord; r["omnishotcut"]=True' : 'r["omnishotcut"]=True',
+    needsOmni ? 'import omnishotcut, ffmpeg; r["omnishotcut"]=True' : 'r["omnishotcut"]=True',
     'b=os.environ.get("NETSURUSH_ML_BACKEND", "cpu")',
     'r["actual"]=("rocm" if torch.cuda.is_available() and getattr(torch.version,"hip",None) else ("cuda" if torch.cuda.is_available() else ("xpu" if hasattr(torch,"xpu") and torch.xpu.is_available() else "cpu")))',
     'r["gpu"]=(b=="cpu" or r["actual"]==b)',

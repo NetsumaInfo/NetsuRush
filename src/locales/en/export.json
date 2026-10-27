@@ -139,7 +139,7 @@
     "remux": "Remux",
     "encode": "Re-encode",
     "remuxWarning": "Frame-exact in MP4/MOV only",
-    "remuxWarningDetail": "Remux copies the stream without re-encoding it. In MP4 or MOV the cut stays frame-exact: the frames around the keyframes stay in the file but are hidden on playback and import. In MKV, or when shots are merged, the cut snaps to the keyframes, so a few extra frames show up at the start and the end. For a frame-exact cut everywhere, use Re-encode."
+    "remuxWarningDetail": "Fast, no quality loss.\n• MP4/MOV: frame-exact cut.\n• MKV or merged shots: a few extra frames at the start and end.\nExact cut everywhere: Re-encode."
   },
   "audioMode": {
     "copy": "Copy",

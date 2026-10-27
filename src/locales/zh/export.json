@@ -139,7 +139,7 @@
     "remux": "Remux",
     "encode": "重新编码",
     "remuxWarning": "仅 MP4/MOV 精确到帧",
-    "remuxWarningDetail": "Remux 直接复制流而不重新编码。在 MP4 或 MOV 中，剪切精确到帧：关键帧附近的帧仍保留在文件中，但在播放和导入时会被隐藏。在 MKV 中或合并镜头时，剪切点会对齐到关键帧，因此开头和结尾会多出几帧。需要在任何情况下都精确到帧，请使用“重新编码”。"
+    "remuxWarningDetail": "快速，无画质损失。\n• MP4/MOV：精确到帧。\n• MKV 或合并镜头：开头和结尾会多出几帧。\n任何情况都精确：“重新编码”。"
   },
   "audioMode": {
     "copy": "直接复制",

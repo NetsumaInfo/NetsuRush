@@ -235,7 +235,7 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
                 <TooltipTrigger render={<span className="inline-flex shrink-0 text-amber-500" aria-hidden="true" />}>
                   <TriangleAlert className="size-3" />
                 </TooltipTrigger>
-                <TooltipContent side="bottom" align="center" className="max-w-72">{t("workflow.remuxWarningDetail")}</TooltipContent>
+                <TooltipContent side="bottom" align="center" className="max-w-72 whitespace-pre-line">{t("workflow.remuxWarningDetail")}</TooltipContent>
               </Tooltip>
             )}
           </ToggleGroupItem>

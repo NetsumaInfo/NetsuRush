@@ -139,7 +139,7 @@
     "remux": "Remux",
     "encode": "Recodificación",
     "remuxWarning": "Exacto solo en MP4/MOV",
-    "remuxWarningDetail": "Remux copia el flujo sin recodificarlo. En MP4 o MOV el corte es exacto al fotograma: los fotogramas alrededor de los fotogramas clave se quedan en el archivo, pero se ocultan al reproducir e importar. En MKV, o al fusionar planos, el corte se ajusta a los fotogramas clave y aparecen algunos fotogramas de más al principio y al final. Para un corte exacto en todos los casos, usa Recodificación."
+    "remuxWarningDetail": "Rápido, sin pérdida de calidad.\n• MP4/MOV: corte exacto.\n• MKV o planos fusionados: algunos fotogramas de más al principio y al final.\nCorte exacto siempre: Recodificación."
   },
   "audioMode": {
     "copy": "Copia",

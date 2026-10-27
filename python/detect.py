@@ -31,7 +31,7 @@ import threading
 import time
 
 import nrident
-from ffbin import ffmpeg_bin, ffprobe_bin
+from ffbin import expose_on_path, ffmpeg_bin, ffprobe_bin
 from nri18n import t
 
 
@@ -76,7 +76,7 @@ def _estimate_ratio(elapsed, expected):
 
 @contextlib.contextmanager
 def _heartbeat(interval=20.0, estimate=None):
-    """Bat sur stderr toutes les `interval` s. OmniShotCut lit TOUTE la vidéo en RAM (decord) AVANT
+    """Bat sur stderr toutes les `interval` s. OmniShotCut lit TOUTE la vidéo en RAM (ffmpeg) AVANT
     d'émettre sa 1re progression → ~70 s muets sur 24 min, plus sous contention. Le core a un watchdog
     d'INACTIVITÉ (tue un process sans sortie) → sans ce battement, plusieurs détections EN PARALLÈLE
     (dont les lectures se chevauchent et s'allongent) déclenchaient « délai dépassé ». Le battement
@@ -164,7 +164,7 @@ def _canonical_options(model, threshold, options=None):
         selected_inter = sorted({str(x) for x in (omni.get("interLabels") or all_inter) if str(x) in all_inter})
         out["omnishotcut"] = {
             "mode": "default" if omni.get("mode") == "default" else "clean_shot",
-            "overlapWindowLength": max(0, min(239, int(omni.get("overlapWindowLength", 20) or 0))),
+            "overlapWindowLength": max(0, min(239, int(omni.get("overlapWindowLength", 10) or 0))),
             "intraLabels": selected_intra or all_intra,
             "interLabels": selected_inter or all_inter,
         }
@@ -382,13 +382,14 @@ def _get_transnet():
 
 def _get_omnishot():
     if "omnishotcut" not in _MODELS:
+        expose_on_path()  # ffmpeg-python (OmniShotCut decoding) spawns bare `ffmpeg`/`ffprobe`
         import omnishotcut
         ckpt = os.environ.get("NETSURUSH_OMNISHOT_CKPT", "")
         with contextlib.redirect_stdout(sys.stderr), _heartbeat():
             if ckpt and os.path.exists(ckpt):
                 _MODELS["omnishotcut"] = omnishotcut.load(ckpt)  # poids locaux (offline)
             else:
-                _MODELS["omnishotcut"] = omnishotcut.load("uva-cv-lab/OmniShotCut", filename="OmniShotCut_ckpt.pth")
+                _MODELS["omnishotcut"] = omnishotcut.load("uva-cv-lab/OmniShotCut_v1.5", filename="OmniShotCut_ckpt.pth")
     return _MODELS["omnishotcut"]
 
 
@@ -615,7 +616,7 @@ def _detect_omnishot(path, options, concurrency=1):
     # tient le pool). Une découpe en lot en lance plusieurs : chacune dure alors à peu près autant de
     # fois plus longtemps, et une estimation calée sur un job seul se ferait dépasser à tous les coups.
     expected = max(30.0, duration * 0.12) * max(1, int(concurrency or 1))
-    overlap = int(options.get("overlapWindowLength", 20))
+    overlap = int(options.get("overlapWindowLength", 10))
     with contextlib.redirect_stdout(sys.stderr), _heartbeat(interval=2.0, estimate=(5, 85, expected)):
         ranges, intra_labels, inter_labels = model.inference(path, mode="default", overlap=overlap)
     # L'inférence est finie pour de bon : on quitte l'estimation et on le dit. Ce qui suit (filtrage

@@ -67,8 +67,10 @@ async function ensureOmniShotCut(index, count) {
   if (!fs.existsSync(OMNI_PACKAGE)) {
     throw new Error(t('setupOmniPackageMissing', { path: OMNI_PACKAGE }));
   }
-  if (!fs.existsSync(checkpoint)) {
-    if (!fs.existsSync(OMNI_BUNDLED_CHECKPOINT)) {
+  // A checkpoint left by an older release is replaced: the bundled one is the version this build expects.
+  const bundledSize = fs.existsSync(OMNI_BUNDLED_CHECKPOINT) ? fs.statSync(OMNI_BUNDLED_CHECKPOINT).size : -1;
+  if (!fs.existsSync(checkpoint) || (bundledSize >= 0 && fs.statSync(checkpoint).size !== bundledSize)) {
+    if (bundledSize < 0) {
       throw new Error(t('setupOmniWeightsMissing', { path: OMNI_BUNDLED_CHECKPOINT }));
     }
     await fs.promises.mkdir(path.dirname(checkpoint), { recursive: true });
@@ -77,14 +79,14 @@ async function ensureOmniShotCut(index, count) {
 
   emit({ id: 'omnishotcut', index, count, pct: 0, stage: 'verify' });
   try {
-    await runPython(['-c', 'import omnishotcut; import decord']);
+    await runPython(['-c', 'import omnishotcut; import ffmpeg']);
   } catch (_) {
     // Le dépôt local est la source de vérité : jamais de `git+https` sur le PC d'un utilisateur.
     emit({ id: 'omnishotcut', index, count, pct: 35, stage: 'install' });
-    await runPython(['-m', 'pip', 'install', '--no-input', 'decord']);
-    await runPython(['-m', 'pip', 'install', '--no-input', '--no-deps', OMNI_PACKAGE]);
+    await runPython(['-m', 'pip', 'install', '--no-input', 'ffmpeg-python']);
+    await runPython(['-m', 'pip', 'install', '--no-input', '--no-deps', '--force-reinstall', OMNI_PACKAGE]);
     emit({ id: 'omnishotcut', index, count, pct: 80, stage: 'verify' });
-    await runPython(['-c', 'import omnishotcut; import decord']);
+    await runPython(['-c', 'import omnishotcut; import ffmpeg']);
   }
   saveConfig({ omnishotCkpt: checkpoint });
   emit({ id: 'omnishotcut', index, count, pct: 100, stage: 'done' });

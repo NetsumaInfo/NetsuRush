@@ -28,7 +28,7 @@ export const DEFAULT_DETECT_OPTIONS: NormalizedDetectOptions = {
   minSceneFrames: 6,
   omnishotcut: {
     mode: "clean_shot",
-    overlapWindowLength: 20,
+    overlapWindowLength: 10,
     intraLabels: [...OMNI_INTRA_LABELS],
     interLabels: [...OMNI_INTER_LABELS],
   },
@@ -55,7 +55,7 @@ export function normalizeDetectOptions(value?: DetectOptions | null): Normalized
     minSceneFrames: Math.round(finite(value?.minSceneFrames, 6, 1, 300)),
     omnishotcut: {
       mode: omni?.mode === "default" ? "default" : "clean_shot",
-      overlapWindowLength: Math.round(finite(omni?.overlapWindowLength, 20, 0, 239)),
+      overlapWindowLength: Math.round(finite(omni?.overlapWindowLength, 10, 0, 239)),
       intraLabels: subset(omni?.intraLabels, OMNI_INTRA_LABELS, OMNI_INTRA_LABELS),
       interLabels: subset(omni?.interLabels, OMNI_INTER_LABELS, OMNI_INTER_LABELS),
     },

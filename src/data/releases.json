@@ -1,5 +1,50 @@
 [
   {
+    "id": "netsurush-0.4.1",
+    "version": "0.4.1",
+    "date": "2026-10-27",
+    "title": {
+      "fr": "OmniShotCut v1.5",
+      "en": "OmniShotCut v1.5",
+      "es": "OmniShotCut v1.5",
+      "de": "OmniShotCut v1.5",
+      "ja": "OmniShotCut v1.5",
+      "zh": "OmniShotCut v1.5"
+    },
+    "highlights": {
+      "fr": [
+        "Détection de plans OmniShotCut mise à jour en v1.5 : nouveaux poids, coupes et transitions mieux reconnues.",
+        "Les coupes situées entre deux fenêtres d’analyse ne sont plus étiquetées à tort comme début de vidéo.",
+        "Décodage vidéo plus fiable : la résolution d’entrée n’importe plus, et OmniShotCut lit les vidéos via ffmpeg."
+      ],
+      "en": [
+        "OmniShotCut shot detection updated to v1.5: new weights, better recognition of cuts and transitions.",
+        "Cuts that fall between two analysis windows are no longer mislabeled as the start of the video.",
+        "More reliable video decoding: input resolution no longer matters, and OmniShotCut now reads videos through ffmpeg."
+      ],
+      "es": [
+        "Detección de planos OmniShotCut actualizada a la v1.5: nuevos pesos y mejor reconocimiento de cortes y transiciones.",
+        "Los cortes situados entre dos ventanas de análisis ya no se etiquetan por error como inicio del vídeo.",
+        "Decodificación de vídeo más fiable: la resolución de entrada ya no importa y OmniShotCut lee los vídeos con ffmpeg."
+      ],
+      "de": [
+        "OmniShotCut-Szenenerkennung auf v1.5 aktualisiert: neue Gewichte, Schnitte und Übergänge werden besser erkannt.",
+        "Schnitte zwischen zwei Analysefenstern werden nicht mehr fälschlich als Videoanfang markiert.",
+        "Zuverlässigere Videodekodierung: Die Eingangsauflösung spielt keine Rolle mehr, OmniShotCut liest Videos jetzt über ffmpeg."
+      ],
+      "ja": [
+        "OmniShotCut のショット検出を v1.5 に更新：新しい重みで、カットとトランジションをより正確に認識します。",
+        "2 つの解析ウィンドウの境界にあるカットが、動画の開始として誤ってラベル付けされなくなりました。",
+        "動画のデコードがより安定：入力解像度に依存せず、OmniShotCut は ffmpeg で動画を読み込みます。"
+      ],
+      "zh": [
+        "OmniShotCut 镜头检测更新至 v1.5：新权重，剪切与转场识别更准确。",
+        "位于两个分析窗口之间的剪切点不再被误标为视频开头。",
+        "视频解码更可靠：不再受输入分辨率影响，OmniShotCut 现通过 ffmpeg 读取视频。"
+      ]
+    }
+  },
+  {
     "id": "netsurush-0.4.0",
     "version": "0.4.0",
     "date": "2026-10-27",

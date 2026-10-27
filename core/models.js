@@ -424,8 +424,8 @@ const MANIFEST = /** @type {Record<string, any>} */ ({
   'da3-mono-large':          { kind: 'hf', task: 'depth', repo: 'depth-anything/DA3MONO-LARGE' },
   'da3-giant':               { kind: 'hf', task: 'depth', repo: 'depth-anything/DA3NESTED-GIANT-LARGE-1.1' },
   omnishotcut:               { kind: 'hf', task: 'detect', repo: 'uva-cv-lab/OmniShotCut', cfg: 'omnishotCkpt',
-                               pip: OMNISHOTCUT_PIP, pipCheck: ['omnishotcut', 'decord'],
-                               installSteps: [['decord'], ['--no-deps', OMNISHOTCUT_PIP]] },
+                               pip: OMNISHOTCUT_PIP, pipCheck: ['omnishotcut', 'ffmpeg'],
+                               installSteps: [['ffmpeg-python'], ['--no-deps', '--force-reinstall', OMNISHOTCUT_PIP]] },
   // Le README officiel renvoie vers un dossier Google Drive contenant ce fichier (57 243 097 octets).
   // URL directe HTTPS : le bouton Télécharger peut donc terminer l'installation sans import manuel.
   // `nrautoshot` (architecture officielle, code livré avec l'app) charge le checkpoint avec torch et
