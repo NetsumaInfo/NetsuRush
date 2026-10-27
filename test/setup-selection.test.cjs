@@ -121,3 +121,32 @@ test('quick setup check rejects missing runtime files and optional assets', () =
   };
   assert.equal(quickSetupReady(config, { ignorePackageGate: true }), false);
 });
+
+test('quick setup rejects an OmniShotCut checkpoint older than the bundled one', () => {
+  const fs = require('fs');
+  const os = require('os');
+  const path = require('path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nr-omni-'));
+  const installed = path.join(dir, 'installed.pth');
+  const bundled = path.join(dir, 'bundled.pth');
+  fs.writeFileSync(installed, 'v1');
+  fs.writeFileSync(bundled, 'v1.5');
+  const executable = process.execPath;
+  const config = {
+    setupCompletedAt: new Date().toISOString(),
+    python: executable,
+    ffmpeg: executable,
+    ffprobe: executable,
+    ffmpegVersion: '9.0',
+    setupRuntimeVersion: SETUP_RUNTIME_VERSION,
+    setupModels: ['omnishotcut'],
+    omnishotCkpt: installed,
+  };
+  try {
+    assert.equal(quickSetupReady(config, { ignorePackageGate: true, omniBundled: bundled }), false);
+    fs.writeFileSync(installed, 'v1.5');
+    assert.equal(quickSetupReady(config, { ignorePackageGate: true, omniBundled: bundled }), true);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

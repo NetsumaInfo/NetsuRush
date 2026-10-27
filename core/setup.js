@@ -158,6 +158,51 @@ function readInstalledConfig() {
 // page de téléchargement). Ce contrôle volontairement superficiel ne sonde que les chemins écrits
 // par setup.ps1/setup-models.js ; si l'un d'eux a disparu, on retombe sur la vérification complète
 // et l'écran de réparation.
+// The checkpoint the installed app ships with. An app update replaces the bundle but not the copy in
+// NR_HOME, so an installed checkpoint that differs from the bundled one is stale: the setup must run
+// again to refresh it (and the package that goes with it). No bundled checkpoint = nothing to compare.
+function omniCheckpointCurrent(checkpoint, bundled = path.join(RESOURCE_DIR, 'vendor', 'weights', 'OmniShotCut_ckpt.pth')) {
+  try {
+    if (!fs.existsSync(bundled)) return true;
+    return fs.statSync(checkpoint).size === fs.statSync(bundled).size;
+  } catch (_) { return false; }
+}
+
+function runQuiet(cmd, args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { windowsHide: true });
+    let output = '';
+    child.stdout.on('data', (d) => { output += d; });
+    child.stderr.on('data', (d) => { output += d; });
+    child.on('error', reject);
+    child.on('close', (code) => (code === 0 ? resolve() : reject(new Error(output.trim() || `exit ${code}`))));
+  });
+}
+
+// An app update ships a new OmniShotCut (package + checkpoint) in the bundle. Refresh the installed
+// copy in place, without sending the user through the setup screen. On failure nothing is lost: the
+// stale checkpoint keeps `quickSetupReady` false and the repair screen takes over.
+let omniRefresh = null;
+function refreshStaleOmniShotCut(config) {
+  const selected = Array.isArray(config.setupModels) ? config.setupModels : [];
+  if (!PACKAGED || !selected.includes('omnishotcut') || !exists(config.python) || !exists(config.omnishotCkpt)) return Promise.resolve();
+  if (omniCheckpointCurrent(config.omnishotCkpt)) return Promise.resolve();
+  const pkg = path.join(RESOURCE_DIR, 'vendor', 'OmniShotCut');
+  const bundled = path.join(RESOURCE_DIR, 'vendor', 'weights', 'OmniShotCut_ckpt.pth');
+  if (!exists(path.join(pkg, 'pyproject.toml'))) return Promise.resolve();
+  if (!omniRefresh) {
+    omniRefresh = (async () => {
+      await runQuiet(config.python, ['-m', 'pip', 'install', '--no-input', 'ffmpeg-python']);
+      await runQuiet(config.python, ['-m', 'pip', 'install', '--no-input', '--no-deps', '--force-reinstall', pkg]);
+      // Checkpoint last: it is the marker the quick check reads, so it only changes once the package matches.
+      await fs.promises.copyFile(bundled, config.omnishotCkpt);
+    })()
+      .catch((err) => { console.error('[setup] OmniShotCut refresh failed:', err.message); })
+      .finally(() => { omniRefresh = null; });
+  }
+  return omniRefresh;
+}
+
 function quickSetupReady(config = CONFIG, options = {}) {
   if ((!PACKAGED && !options.ignorePackageGate) || !config || !config.setupCompletedAt) return false;
   if (Number(config.setupRuntimeVersion) !== SETUP_RUNTIME_VERSION) return false;
@@ -170,6 +215,7 @@ function quickSetupReady(config = CONFIG, options = {}) {
   if (!ffmpegVersionOk(config)) return false;
   const selected = Array.isArray(config.setupModels) ? config.setupModels : [];
   if (selected.includes('omnishotcut') && !exists(config.omnishotCkpt)) return false;
+  if (selected.includes('omnishotcut') && !omniCheckpointCurrent(config.omnishotCkpt, options.omniBundled)) return false;
   if (selected.some((id) => String(id).startsWith('siglip2-')) && !exists(config.siglipDir)) return false;
   return true;
 }
@@ -199,7 +245,7 @@ function probeRuntime(config = CONFIG) {
     );
     const parsed = result.status === 0 ? JSON.parse(String(result.stdout || '').trim()) : {};
     const siglip = !needsSiglip || exists(config.siglipDir);
-    const omniWeight = !needsOmni || exists(config.omnishotCkpt);
+    const omniWeight = !needsOmni || (exists(config.omnishotCkpt) && omniCheckpointCurrent(config.omnishotCkpt));
     return { ...parsed, siglip, omnishotcut: !!parsed.omnishotcut && omniWeight, ok: !!parsed.transnet && !!parsed.torch && !!parsed.gpu && !!parsed.omnishotcut && siglip, error: result.status === 0 ? null : String(result.stderr || '').trim() };
   } catch (_) {
     return { ok: false, transnet: false, torch: false, gpu: false, omnishotcut: false, siglip: false, error: String(_) };
@@ -209,6 +255,7 @@ function probeRuntime(config = CONFIG) {
 // État du provisionnement (aucune installation déclenchée).
 async function setupStatus() {
   const installed = readInstalledConfig();
+  await refreshStaleOmniShotCut(installed);
   const quickReady = quickSetupReady(installed);
   const venv = PACKAGED ? exists(installed.python) : venvReady();
   // Le chemin nominal est uniquement une vérification de fichiers. probeRuntime lance Python et
