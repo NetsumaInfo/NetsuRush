@@ -24,6 +24,8 @@ export interface BuildTimelineOpts {
   input: string;
   segments?: Segment[];
   srcFrames?: number | string;
+  /** Detector frame rate (else read back from a segment carrying inFrame and in). */
+  srcFps?: number;
   mode?: "new" | "append";
   /** Timeline visée en mode "append" : nom exact. Absent/introuvable → la timeline ouverte. */
   timelineName?: string;

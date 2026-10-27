@@ -57,7 +57,7 @@ def cmd_removebg(args):
     # est déjà en rgba (le détourage produit l'alpha), d'où `pix_in`.
     spec = image_spec(args, alpha=True)
     images = spec["kind"] != "video"
-    dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None))
+    dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None), fps=_fps)
     enc = (open_image_writer(args.out, w, h, fps_str, spec, pix_in="rgba") if images
            else open_encoder_alpha(args.out, w, h, fps_str, fmt, args))
 

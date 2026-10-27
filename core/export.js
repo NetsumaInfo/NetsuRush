@@ -21,6 +21,7 @@ const spacer = require('./export/spacer');
 const { videoEncodeArgs, audioEncodeArgs, audioMapArgs, mergeMapArgs, containerTagArgs } = require('./export/encodeArgs');
 const { pickGpuEncoder } = require('./export/encoder');
 const frameCut = require('./export/frameCut');
+const editList = require('./export/editList');
 const encodeGate = require('./export/gate');
 const capabilities = require('./export/capabilities');
 const processRun = require('./processRun');
@@ -187,16 +188,25 @@ function isEncoderOpenError(err) {
  * Args ffmpeg pour produire UN fichier de sortie depuis un plan.
  * Avec `fps` connu, les bornes viennent de frameCut.encodeCutBounds (seek −¼ frame + `-frames:v`),
  * seules bornes frame-exactes d'un ré-encodage ; sans fps (sonde muette), ancien `-ss/-t`.
+ * `exactCopy` : copie MP4/MOV, même seek −¼ frame, edit list conservée (pas de `make_zero`), timestamps sur la grille.
  * @param {ExportClipInput} clip @param {string} out @param {ExportProfileLike} profile
- * @param {string|null} gpuEncoder @param {boolean} encode @param {number} [fps] @returns {string[]}
+ * @param {string|null} gpuEncoder @param {boolean} encode @param {number} [fps] @param {boolean} [exactCopy]
+ * @returns {string[]}
  */
-function clipArgs(clip, out, profile, gpuEncoder, encode, fps) {
-  const bounds = encode ? frameCut.encodeCutBounds(clip.start, clip.end, fps || 0) : null;
+function clipArgs(clip, out, profile, gpuEncoder, encode, fps, exactCopy = false) {
+  const bounds = encode || exactCopy ? frameCut.encodeCutBounds(clip.start, clip.end, fps || 0) : null;
   const base = bounds
-    ? ['-y', '-ss', String(bounds.ss), '-i', clip.input, '-t', String(bounds.duration), '-frames:v', String(bounds.vframes)]
+    ? ['-y', '-ss', String(bounds.ss), '-i', clip.input, '-t', String(bounds.duration), ...(encode ? ['-frames:v', String(bounds.vframes)] : [])]
     : ['-y', '-ss', String(clip.start), '-i', clip.input, '-t', String(clip.end - clip.start)];
   const map = audioMapArgs(clip.audioTrack, profile.audioMode);
-  if (!encode) return [...base, ...map, '-c', 'copy', '-avoid_negative_ts', 'make_zero', out];
+  // MP4/MOV copy: keep the edit list ffmpeg writes (no `make_zero`), it hides the keyframe head;
+  // `runClip` then trims its tail with `editList.trimEditList`.
+  const grid = !encode && bounds ? editList.frameGrid(fps || 0) : null;
+  if (!encode) {
+    return [...base, ...map, '-c', 'copy',
+      ...(bounds ? [] : ['-avoid_negative_ts', 'make_zero']),
+      ...(grid ? ['-video_track_timescale', String(grid.timescale)] : []), out];
+  }
   const ext = profile.container;
   const args = [
     ...base,
@@ -212,18 +222,27 @@ function clipArgs(clip, out, profile, gpuEncoder, encode, fps) {
 
 /**
  * Encode/copie UN plan vers `out`, avec replis : remux→ré-encode, GPU→CPU.
- * Le remux reste une COPIE DE FLUX pure, donc pas frame-exact (cf. `frameCut.js` : la copie démarre
- * à la keyframe précédente et la fin traîne le GOP ouvert). Arbitrage produit assumé, signalé dans
- * l'UI par l'avertissement du flux « Remux » ; seul le ré-encodage coupe à la frame.
+ * The remux stays a pure STREAM COPY. Into MP4/MOV it still presents the exact frames: the edit
+ * list hides the keyframe head and its tail is trimmed to the frame count (`export/editList.js`).
+ * Into MKV, or as a merge part, it starts on the previous keyframe and drags the open GOP — the UI
+ * warns about it; only a re-encode cuts those to the frame.
  * @param {ExportClipInput} clip @param {string} out @param {ExportProfileLike} profile
- * @param {string|null} gpuEncoder @returns {Promise<void>}
+ * @param {string|null} gpuEncoder @param {{ merge?: boolean }} [opts] @returns {Promise<void>}
  */
-async function runClip(clip, out, profile, gpuEncoder) {
+async function runClip(clip, out, profile, gpuEncoder, { merge = false } = {}) {
   const encode = profile.workflow === 'video_encode';
+  // A merged copy goes through the concat demuxer, which does not carry per-part edit lists over.
+  const exactCopy = !encode && !merge && editList.hasEditList(path.extname(out));
   let fps = 0;
-  if (encode) { try { fps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { fps = 0; } }
+  if (encode || exactCopy) { try { fps = (await ffmpeg.playInfo(clip.input)).fps || 0; } catch (_) { fps = 0; } }
+  const trimmed = exactCopy && fps > 0;
   try {
-    await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, encode, fps));
+    await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, gpuEncoder, encode, fps, trimmed));
+    if (trimmed) {
+      const bounds = frameCut.encodeCutBounds(clip.start, clip.end, fps);
+      const grid = editList.frameGrid(fps);
+      if (bounds) await editList.trimEditList(out, bounds.vframes, { step: grid ? grid.step : 0 }).catch(() => false);
+    }
   } catch (e) {
     if (encode && gpuEncoder && isEncoderOpenError(e) && (!profile.encoderMode || profile.encoderMode === 'auto')) {
       await ffmpeg.run('ffmpeg', clipArgs(clip, out, profile, null, true, fps)); // anciens profils : repli CPU
@@ -247,14 +266,14 @@ async function runClip(clip, out, profile, gpuEncoder) {
  * Returns the file that was REALLY written: an engine may impose its own container (the RTX CLI
  * only writes MP4), so the planned name is a request, not a promise.
  * @param {ExportClipInput} clip @param {string} out
- * @param {{ profile: ExportProfileLike, gpuEncoder: string|null, process?: any, base?: string }} ctx
+ * @param {{ profile: ExportProfileLike, gpuEncoder: string|null, process?: any, base?: string, merge?: boolean }} ctx
  * @param {(fraction: number) => void} onFraction
  * @returns {Promise<string>}
  */
 async function produceClip(clip, out, ctx, onFraction) {
   const { profile, gpuEncoder } = ctx;
   const proc = ctx.process;
-  if (!proc) { await runClip(clip, out, profile, gpuEncoder); return out; }
+  if (!proc) { await runClip(clip, out, profile, gpuEncoder, { merge: !!ctx.merge }); return out; }
   // The engine speaks its own SSE channel: relay it as a fraction of THIS file, the batch counter
   // stays the caller's business.
   const relay = { sender: { send: (_ch, p) => onFraction(Math.min(1, Math.max(0, (Number(p && p.pct) || 0) / 100))) } };
@@ -455,7 +474,7 @@ async function mergeExport(event, opts, ctx) {
     try {
       await runPool(total, conc, async (i) => {
         const part = path.join(work, `part_${String(i + 1).padStart(3, '0')}.${ext}`);
-        parts[i] = await encodeGate.withSlot(() => produceClip(clips[i], part, ctx, (f) => { partials[i] = f; sendParts(); }));
+        parts[i] = await encodeGate.withSlot(() => produceClip(clips[i], part, { ...ctx, merge: true }, (f) => { partials[i] = f; sendParts(); }));
         partials[i] = 0;
         done++;
         sendParts();

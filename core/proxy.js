@@ -322,10 +322,15 @@ async function encodeProxy(input, start, end, out, height, token, resolved, pres
       : ['-c:a', 'aac', '-b:a', '96k'];
   const container = resolved.container;
   const faststart = container === 'mp4' ? ['-movflags', '+faststart'] : [];
+  // Source decoding is the bottleneck of a grid proxy (CPU-bound, measured on 1080p HEVC 10-bit:
+  // the GPU encode is a fraction of it). Skipping the in-loop deblocking/SAO filters cuts ~15-20 %
+  // of that decode; the artefacts it leaves are invisible once scaled down to a grid tier. The
+  // 720 tier (side player, sharper) keeps the full decode.
+  const fastDecode = height <= 520 ? ['-skip_loop_filter', 'all'] : [];
   try {
     await ffSpawnCancellable([
       '-hide_banner', '-loglevel', 'error',
-      '-y', '-ss', String(start), '-i', input, '-t', String(dur),
+      '-y', ...fastDecode, '-ss', String(start), '-i', input, '-t', String(dur),
       '-vf', `scale=-2:${height}:flags=fast_bilinear`,
       // Encode le PLUS rapide possible (cold-start = priorité). Réglages propres à NVENC/AMF/QSV ;
       // -bf 0 : redémarrage de boucle net.

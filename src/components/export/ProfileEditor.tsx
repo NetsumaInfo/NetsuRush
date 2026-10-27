@@ -223,9 +223,9 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
             key={o.value}
             className="flex-1 gap-1 text-xs"
             value={o.value}
-            // Le Remux copie le flux : la coupe se cale sur les images clés de la source, donc
-            // quelques images en trop en tête et en queue. Signalé SUR l'option elle-même — le
-            // compromis se lit au moment où l'on choisit le flux, sans bloc qui pousse la suite.
+            // Remux copies the stream: frame-exact in MP4/MOV through the edit list, keyframe snap in
+            // MKV or a merge. Flagged ON the option itself — the trade-off reads at the moment the
+            // workflow is picked, without a block pushing the rest down.
             aria-label={o.value === "video_remux" ? `${o.label} — ${t("workflow.remuxWarning")}` : undefined}
           >
             {o.label}

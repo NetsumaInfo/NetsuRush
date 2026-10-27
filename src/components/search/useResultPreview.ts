@@ -12,6 +12,10 @@ const THUMB_MARGIN_PX = 1600;
 // Une carte doit rester dans la bande ce temps-là avant qu'on encode son proxy : un défilement
 // rapide la traverse en bien moins, donc n'émet aucune demande (cf. useSceneCardMedia).
 const PREFETCH_SETTLE_MS = 220;
+// Encode-ahead band while autoplay is on: about three screens. Wider than the band that MOUNTS
+// paused <video> elements (usePreviewActivity), because encoding is the slow part (~0.5 s per shot)
+// while mounting a ready file is not. Slots are capped and served nearest-first (previewPrefetch).
+const PREFETCH_MARGIN_PX = 2400;
 
 // Search thumbnail/proxy loading. The same usePreviewActivity hook as shot cards
 // owns visibility, playback starts and decoder retention.
@@ -137,7 +141,13 @@ export function useResultPreview(opts: {
   // ANTICIPATION : en lecture auto, une carte de la bande jouera à coup sûr en arrivant à l'écran →
   // on encode son proxy MAINTENANT, en priorité basse. Bandé + retardé + plafonné, exactement comme
   // la grille de derush (cf. useSceneCardMedia pour le détail des trois garde-fous).
-  const prefetchReady = useGranted(play && nearVideo, (settled) => {
+  const [nearPrefetch, setNearPrefetch] = useState(false);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || !play) { setNearPrefetch(false); return; }
+    return observeViewport(el, PREFETCH_MARGIN_PX, setNearPrefetch);
+  }, [play]);
+  const prefetchReady = useGranted(play && (nearPrefetch || nearVideo), (settled) => {
     const timer = setTimeout(settled, PREFETCH_SETTLE_MS);
     return () => clearTimeout(timer);
   });
@@ -145,7 +155,7 @@ export function useResultPreview(opts: {
   // La préchauffe qui s'arrête parce que la carte passe en LECTURE ne doit PAS annuler sa demande en
   // vol : c'est exactement celle qu'on attend. Seule une vraie sortie de bande tue l'encode.
   const nearVideoRef = useRef(nearVideo);
-  nearVideoRef.current = nearVideo;
+  nearVideoRef.current = nearVideo || nearPrefetch;
 
   useEffect(() => {
     if (!prefetchReady || wantVideo || url) return;
@@ -160,7 +170,7 @@ export function useResultPreview(opts: {
       void getProxyRef.current(measured || proxyHRef.current || 360, token, "low")
         .then((u) => { if (alive && u) setFetchedUrl(u); })
         .finally(releaseSlot);
-    });
+    }, rootRef.current);
     return () => {
       alive = false;
       if (token != null && !nearVideoRef.current) nr.proxyCancel(token);

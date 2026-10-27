@@ -1,5 +1,68 @@
 [
   {
+    "id": "netsurush-0.4.0",
+    "version": "0.4.0",
+    "date": "2026-10-27",
+    "title": {
+      "fr": "Partage, comptes et coupes exactes",
+      "en": "Sharing, accounts and exact cuts",
+      "es": "Compartir, cuentas y cortes exactos",
+      "de": "Teilen, Konten und exakte Schnitte",
+      "ja": "共有、アカウント、フレーム精度のカット",
+      "zh": "共享、账户与精确剪切"
+    },
+    "highlights": {
+      "fr": [
+        "Partage et collaboration : partage une collection en pair-à-pair, avec des droits par personne.",
+        "Connexion par code envoyé par e-mail, session conservée 30 jours, et un nom d’utilisateur unique par compte.",
+        "Le Remux reste exact à l’image en MP4 et MOV, et les timelines gardent la bonne cadence à l’envoi vers Resolve.",
+        "NetsuRush parle ta langue partout : dates, nombres, erreurs du cœur, pont Adobe (toute langue de Premiere) et raccourcis AZERTY/QWERTY/QWERTZ.",
+        "Aperçus plus fluides au défilement, agrandissement des plans à l’export, et export d’une image fixe avec son canal alpha depuis Roto.",
+        "Les modules Flow, Talk, Draft et Board sont retirés pour recentrer l’application sur le montage."
+      ],
+      "en": [
+        "Sharing and collaboration: share a collection peer-to-peer, with per-person permissions.",
+        "Sign in with an e-mail code, sessions last 30 days, and each account gets a unique username.",
+        "Remux stays frame-exact in MP4 and MOV, and timelines keep the right frame rate when sent to Resolve.",
+        "NetsuRush speaks your language everywhere: dates, numbers, core errors, the Adobe bridge (any Premiere language) and AZERTY/QWERTY/QWERTZ shortcuts.",
+        "Smoother preview scrolling, shot enlargement on export, and still-image export with its alpha channel from Roto.",
+        "The Flow, Talk, Draft and Board modules are removed to refocus the app on editing."
+      ],
+      "es": [
+        "Compartir y colaborar: comparte una colección de par a par, con permisos por persona.",
+        "Inicio de sesión con un código por correo, sesiones de 30 días y un nombre de usuario único por cuenta.",
+        "El Remux sigue siendo exacto al fotograma en MP4 y MOV, y las líneas de tiempo conservan la cadencia correcta al enviarlas a Resolve.",
+        "NetsuRush habla tu idioma en todas partes: fechas, números, errores del núcleo, puente de Adobe (cualquier idioma de Premiere) y atajos AZERTY/QWERTY/QWERTZ.",
+        "Previsualizaciones más fluidas al desplazarse, ampliación de planos al exportar y exportación de una imagen fija con su canal alfa desde Roto.",
+        "Los módulos Flow, Talk, Draft y Board se eliminan para centrar la aplicación en el montaje."
+      ],
+      "de": [
+        "Teilen und Zusammenarbeit: Teile eine Sammlung Peer-to-Peer, mit Rechten pro Person.",
+        "Anmeldung per E-Mail-Code, Sitzungen bleiben 30 Tage gültig, und jedes Konto erhält einen eindeutigen Benutzernamen.",
+        "Remux bleibt in MP4 und MOV bildgenau, und Timelines behalten beim Senden an Resolve die richtige Bildrate.",
+        "NetsuRush spricht überall deine Sprache: Datumsangaben, Zahlen, Kernfehler, die Adobe-Brücke (jede Premiere-Sprache) und AZERTY/QWERTY/QWERTZ-Kürzel.",
+        "Flüssigere Vorschauen beim Scrollen, Vergrößerung von Shots beim Export und Export eines Standbilds mit Alphakanal aus Roto.",
+        "Die Module Flow, Talk, Draft und Board entfallen, damit sich die App wieder auf den Schnitt konzentriert."
+      ],
+      "ja": [
+        "共有とコラボレーション：コレクションをピアツーピアで共有し、ユーザーごとに権限を設定できます。",
+        "メールで届くコードでサインインし、セッションは30日間保持されます。アカウントごとに固有のユーザー名を設定できます。",
+        "Remux は MP4 と MOV でフレーム精度を保ち、Resolve に送るタイムラインも正しいフレームレートを維持します。",
+        "日付、数値、コアのエラー、Adobe ブリッジ（Premiere の言語を問わず）、AZERTY/QWERTY/QWERTZ のショートカットまで、すべてお使いの言語に対応しました。",
+        "スクロール時のプレビューがより滑らかになり、書き出し時のショット拡大と、Roto からのアルファ付き静止画の書き出しに対応しました。",
+        "Flow、Talk、Draft、Board の各モジュールを削除し、編集に集中できるアプリに戻しました。"
+      ],
+      "zh": [
+        "共享与协作：以点对点方式共享合集，并可按人设置权限。",
+        "通过邮件验证码登录，会话保持 30 天，每个账户拥有唯一用户名。",
+        "Remux 在 MP4 和 MOV 中保持逐帧精确，发送到 Resolve 的时间线也保持正确的帧率。",
+        "NetsuRush 处处使用你的语言：日期、数字、核心错误、Adobe 桥接（任何 Premiere 语言）以及 AZERTY/QWERTY/QWERTZ 快捷键。",
+        "预览滚动更流畅，导出时可放大镜头，并可从 Roto 导出带 Alpha 通道的静态图像。",
+        "移除 Flow、Talk、Draft 和 Board 模块，让应用重新专注于剪辑。"
+      ]
+    }
+  },
+  {
     "id": "netsurush-0.3.95",
     "version": "0.3.95",
     "date": "2026-08-30",

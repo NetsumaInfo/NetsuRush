@@ -77,7 +77,7 @@ def cmd_upscale(args):
     # Les images sortent en RGB plein : pas de conversion colorimétrique de sortie, donc pas de
     # matrice à imposer au décodeur non plus (l'invariant bt709 ne concerne que la sortie YUV).
     dec = open_decoder(args.input, args.start, args.end, None if images else color,
-                       _decode_size((fw, fh), w, h))
+                       _decode_size((fw, fh), w, h), fps=_fps)
     enc = (open_image_writer(args.out, ow, oh, fps_str, spec) if images
            else open_encoder(args.out, ow, oh, fps_str, args, color))
     done, err = run_stream(dec, enc, up, fw, fh, (ow, oh), nb, t("encoder_stopped"),

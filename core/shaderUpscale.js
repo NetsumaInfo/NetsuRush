@@ -11,6 +11,7 @@ const { ffBin, SHADER_DIR, UPSCALE_TEST_DIR, fsp } = require('./config');
 const { importToMediaPool } = require('./resolve');
 const { codecExt, sanitizeName } = require('./utils');
 const { playInfo, probeMedia } = require('./ffmpeg');
+const { encodeCutBounds } = require('./export/frameCut');
 const { t } = require('./i18n');
 const { resolveProcessEncoding } = require('./processEncoding');
 const { outputKind, imageSpec, imageTarget, imageEncodeArgs } = require('./imageOutput');
@@ -217,7 +218,7 @@ function placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix 
   return `${placebo}:format=${pix}`;
 }
 
-function buildArgs({ input, out, sh, ow, oh, codec, quality, preset, bitDepth, profile, audio, abr, audioTrack, start, end, deband, grain, sharp, sigmoid, dither, videoArgs, audioArgs, container, imageArgs, single, seqStart }) {
+function buildArgs({ input, out, sh, ow, oh, codec, quality, preset, bitDepth, profile, audio, abr, audioTrack, start, end, fps, deband, grain, sharp, sigmoid, dither, videoArgs, audioArgs, container, imageArgs, single, seqStart }) {
   // Sortie image : libplacebo travaille nativement en RGB, donc le filtre rend directement le
   // format de l'image écrite — aucun aller-retour par du YUV, et pas d'audio à muxer.
   const pixArg = Array.isArray(imageArgs || videoArgs) ? (imageArgs || videoArgs).indexOf('-pix_fmt') : -1;
@@ -227,9 +228,16 @@ function buildArgs({ input, out, sh, ow, oh, codec, quality, preset, bitDepth, p
   const placebo = placeboFilter({ sh, ow, oh, sharp, sigmoid, deband, grain, dither, pix });
   const args = ['-y', '-hide_banner', '-loglevel', 'error', '-progress', 'pipe:1', '-nostats',
     '-init_hw_device', 'vulkan'];
-  if (start != null) args.push('-ss', String(start));
-  if (end != null && start != null) args.push('-t', String(Math.max(0, end - start)));
+  // A shot is cut with the bounds of a frame-exact re-encode (core/export/frameCut.js): a quarter-frame
+  // early seek and a frame count; a plain `-ss/-t` lands a frame off on an mkv 1/1000 timebase.
+  const bounds = start != null && end != null && !single ? encodeCutBounds(start, end, fps || 0) : null;
+  if (bounds) args.push('-ss', String(bounds.ss), '-t', String(bounds.duration));
+  else {
+    if (start != null) args.push('-ss', String(start));
+    if (end != null && start != null) args.push('-t', String(Math.max(0, end - start)));
+  }
   args.push('-i', input, '-vf', placebo, '-map', '0:v:0');
+  if (bounds) args.push('-frames:v', String(bounds.vframes));
   if (Array.isArray(imageArgs)) {
     args.push(...imageArgs, '-an');
     if (single) args.push('-frames:v', '1', '-update', '1');
@@ -349,10 +357,11 @@ async function runShaderUpscale(event, opts) {
     }
     const fileLabel = path.basename(out);
     const frames = await clipFrames(input, j.start, j.end);
+    const fps = (await playInfo(input).catch(() => ({ fps: 0 }))).fps || 0;
     const imageArgs = target ? imageEncodeArgs(spec) : null;
     const args = buildArgs({
       input, out, sh, ow, oh, codec: resolved ? resolved.codec : null, quality: quality | 0, preset: String(preset), bitDepth: bitDepth | 0, profile: resolved ? resolved.profile : null,
-      audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
+      audio: resolved ? (resolved.audioMode || String(audio)) : 'none', abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null, fps,
       deband: String(deband), grain, sharp: String(sharp), sigmoid: sigmoid !== false, dither: dither !== false,
       videoArgs: resolved ? resolved.videoArgs : null, audioArgs: resolved ? resolved.audioArgs : null,
       container: resolved ? resolved.container : null,
@@ -363,7 +372,7 @@ async function runShaderUpscale(event, opts) {
       console.warn(`[turbo] ${resolved.codec} became unavailable during the job, falling back to ${resolved.fallbackCodec}`);
       const fallbackArgs = buildArgs({
         input, out, sh, ow, oh, codec: resolved.fallbackCodec, quality: quality | 0, preset: String(preset), bitDepth: bitDepth | 0, profile: resolved.fallbackProfile,
-        audio: resolved.audioMode || String(audio), abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null,
+        audio: resolved.audioMode || String(audio), abr, audioTrack, start: j.start != null ? j.start : null, end: j.end != null ? j.end : null, fps,
         deband: String(deband), grain, sharp: String(sharp), sigmoid: sigmoid !== false, dither: dither !== false,
         videoArgs: resolved.fallbackVideoArgs, audioArgs: resolved.audioArgs, container: resolved.container,
         imageArgs: null, single: false, seqStart: null,

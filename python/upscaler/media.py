@@ -86,16 +86,33 @@ def _color_tags(color):
             "-color_trc", color["transfer"], "-color_range", color["range"]]
 
 
-def open_decoder(input_path, start, end, color=None, size=None):
+def cut_bounds(start, end, fps):
+    """Frame-exact decode bounds, same rule as core/export/frameCut.js `encodeCutBounds`: seek a
+    quarter frame early (an mkv 1/1000 timebase stores the in point's pts just below it, and a seek
+    on the exact time drops that frame) and stop on a frame COUNT (`-t` lands on packet rounding).
+    Returns (ss, duration, frames), or None when a bound or the rate is unknown."""
+    if start is None or end is None or not fps or fps <= 0 or end <= start:
+        return None
+    ss = max(0.0, start - 0.25 / fps)
+    return ss, end - ss, max(1, int(round((end - start) * fps)))
+
+
+def open_decoder(input_path, start, end, color=None, size=None, fps=None):
     # -hwaccel auto = décode GPU si dispo (NVDEC), repli CPU automatique sinon. Les frames sont
     # ramenées en mémoire pour le modèle (rawvideo bgr24) → transparent.
     args = [ffmpeg_bin(), "-nostdin", "-hide_banner", "-loglevel", "error", "-hwaccel", "auto"]
-    if start is not None:
-        args += ["-ss", str(start)]
-    if end is not None and start is not None:
-        args += ["-t", str(max(0.0, end - start))]
+    bounds = cut_bounds(start, end, fps)
+    if bounds:
+        args += ["-ss", str(bounds[0]), "-t", str(bounds[1])]
+    else:
+        if start is not None:
+            args += ["-ss", str(start)]
+        if end is not None and start is not None:
+            args += ["-t", str(max(0.0, end - start))]
     args += ["-i", input_path]
     args += _decode_vf(color, size)
+    if bounds:
+        args += ["-frames:v", str(bounds[2])]
     args += ["-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:"]
     return subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 

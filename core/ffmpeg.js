@@ -144,15 +144,25 @@ async function extractAudio({ input, track = 0, seconds = 0 } = {}) {
   try { return await job; } finally { audioInflight.delete(key); }
 }
 
-// Extraction d'un plan : COPIE DE FLUX pure, donc pas frame-exacte (la copie démarre à la keyframe
-// précédente, la fin traîne le GOP ouvert — cf. core/export/frameCut.js). Arbitrage produit assumé,
-// signalé dans l'UI ; seul un ré-encodage coupe à la frame.
+// Shot extraction: a pure STREAM COPY. Into MP4/MOV it still presents the exact frames — the edit
+// list hides the keyframe head and its tail is trimmed to the frame count (core/export/editList.js).
+// Into another container the copy starts on the previous keyframe and drags the open GOP.
 async function exportClip({ input, start, end, output }) {
   if (end <= start) throw new Error('end <= start');
-  await run('ffmpeg', [
-    '-y', '-ss', String(start), '-i', input, '-t', String(end - start),
-    '-c', 'copy', '-avoid_negative_ts', 'make_zero', output,
-  ]);
+  const { encodeCutBounds } = require('./export/frameCut');
+  const editList = require('./export/editList');
+  let fps = 0;
+  if (editList.hasEditList(path.extname(output))) {
+    try { fps = (await playInfo(input)).fps || 0; } catch (_) { fps = 0; }
+  }
+  const bounds = fps > 0 ? encodeCutBounds(start, end, fps) : null;
+  const grid = bounds ? editList.frameGrid(fps) : null;
+  await run('ffmpeg', bounds
+    ? ['-y', '-ss', String(bounds.ss), '-i', input, '-t', String(bounds.duration), '-c', 'copy',
+      ...(grid ? ['-video_track_timescale', String(grid.timescale)] : []), output]
+    : ['-y', '-ss', String(start), '-i', input, '-t', String(end - start),
+      '-c', 'copy', '-avoid_negative_ts', 'make_zero', output]);
+  if (bounds) await editList.trimEditList(output, bounds.vframes, { step: grid ? grid.step : 0 }).catch(() => false);
   return output;
 }
 

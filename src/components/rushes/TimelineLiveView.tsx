@@ -590,7 +590,7 @@ export function TimelineLiveView() {
               }>
                 {grid.thumbsGen
                   ? <><Square className="size-3.5 fill-current" /> {grid.thumbsGen.done}/{grid.thumbsGen.total} (+{grid.thumbsGen.started - grid.thumbsGen.done})</>
-                  : <ImageIcon className="size-3.5" />}
+                  : <><ImageIcon className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
               </TooltipTrigger>
               <TooltipContent>{grid.thumbsGen ? t("shared.stop") : t("shared.genThumbs", { verb: selCount ? `(${selCount})` : t("shared.all") })}</TooltipContent>
             </Tooltip>
@@ -602,7 +602,7 @@ export function TimelineLiveView() {
               }>
                 {grid.proxyGen
                   ? <><Square className="size-3.5 fill-current" /> {grid.proxyGen.done}/{grid.proxyGen.total} (+{grid.proxyGen.started - grid.proxyGen.done})</>
-                  : <Zap className="size-3.5" />}
+                  : <><Zap className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
               </TooltipTrigger>
               <TooltipContent>{grid.proxyGen ? t("shared.stop") : t("shared.genProxies", { verb: selCount ? `(${selCount})` : t("shared.all") })}</TooltipContent>
             </Tooltip>

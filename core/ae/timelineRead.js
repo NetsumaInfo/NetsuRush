@@ -7,6 +7,7 @@ const { readTimelineXml } = require('../transfer/resolveXml');
 const { graftAnimation } = require('./animation');
 const { sanitizeName: sanitize } = require('../utils');
 const { t } = require('../i18n');
+const { sourceOutFrame } = require('../timeline-insertion');
 // `collect` below names its track index `t`.
 const tr = t;
 
@@ -33,10 +34,10 @@ async function mediaStartTcFrames(mpi, fps) {
 // PRIMAIRE = GetSourceStartFrame/GetSourceEndFrame (officiels Resolve 19.0.2+) : 0-based fiables, et ils
 // encodent le retime — `ssf == sef` = FREEZE (1 frame tenue), `ssf > sef` = REVERSE.
 //
-// `sef` est INCLUSIF. Mesuré sur Resolve Studio 21.0.3, sur des plans posés ENTIERS et non rognés :
-// un fichier de 96 images occupant 96 images de timeline rend `ssf=0, sef=95`. Le lire comme exclusif
-// coûtait la DERNIÈRE IMAGE de chaque plan et inventait une vitesse de 95/96 sur un plan qui n'est pas
-// retimé — assez pour noyer les vraies accélérations dans un bruit de fond de faux retimes.
+// `sef` is an EXCLUSIVE end clamped to the file's last frame (`sourceOutFrame`, measured on Resolve
+// Studio 21.1.2): a range laid 0→95 reads sef=95 for 95 frames, a whole 96-frame file sef=95 for 96.
+// Reading every sef as inclusive added a frame to each trimmed shot; reading it as exclusive cost the
+// last frame of whole clips. Either way it faked a retime on a shot that was never retimed.
 // GetLeftOffset est en fallback seulement (il dérive — décalé de plusieurs frames — et renvoie un
 // timecode garbage, ex 86400, sur les freeze).
 // Renvoie { srcIn, srcOut (inclusifs), freeze, reverse, srcSpan, retimed }.
@@ -51,7 +52,7 @@ async function sourceRange(it, tlStart, tlEnd, tcFrames = 0, maxFrame = Infinity
     let srcIn, srcOut, reverse = false, freeze = false;
     if (ssf === sef) { srcIn = srcOut = ssf; freeze = true; }             // freeze : 1 frame tenue
     else if (ssf > sef) { srcIn = sef; srcOut = ssf; reverse = true; }    // reverse : plage [sef, ssf]
-    else { srcIn = ssf; srcOut = sef; }                                   // forward : plage [ssf, sef]
+    else { srcIn = ssf; srcOut = sourceOutFrame(ssf, sef, span, maxFrame); } // forward : plage [ssf, sef[
     if (Number.isFinite(maxFrame)) {
       srcIn = Math.max(0, Math.min(srcIn, maxFrame));
       srcOut = Math.max(srcIn, Math.min(srcOut, maxFrame));

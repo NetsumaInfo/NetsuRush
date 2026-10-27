@@ -232,10 +232,15 @@ def read_timeline(name=None):
                 except Exception:
                     row["ssf"] = None
                     row["sef"] = None
+                # The timeline span tells an exclusive GetSourceEndFrame from one clamped to the
+                # file's last frame (core/timeline-insertion.js sourceOutFrame).
+                try:
+                    row["dur"] = it.GetDuration()
+                except Exception:
+                    pass
                 if row["ssf"] is None or row["sef"] is None:
                     try:
                         row["lo"] = it.GetLeftOffset()
-                        row["dur"] = it.GetDuration()
                     except Exception:
                         pass
                 try:

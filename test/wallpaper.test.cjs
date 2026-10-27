@@ -400,7 +400,7 @@ test('chaque réglage se vise au chiffre près', () => {
 test('une bulle d\'aide ne déborde pas sur un mot sans espace', () => {
   // Un nom de fichier ou une URL n'offre aucune occasion de césure : `max-w-*` borne la largeur mais
   // le mot sort quand même de la bulle (vu sur un nom de GIF exporté).
-  assert.match(read('src', 'components', 'ui', 'tooltip.tsx'), /max-w-52 break-words/);
+  assert.match(read('src', 'components', 'ui', 'tooltip.tsx'), /max-w-80 break-words/);
 });
 
 test('le curseur d\'opacité des panneaux ne ment pas sur son sens', () => {

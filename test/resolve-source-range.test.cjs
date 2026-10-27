@@ -1,13 +1,12 @@
-// Bornes SOURCE d'un plan Resolve : `GetSourceEndFrame` est INCLUSIF.
-//
-// Mesuré sur Resolve Studio 21.0.3, sur des plans posés ENTIERS et non rognés : un fichier de
-// 96 images occupant 96 images de timeline rend `ssf=0, sef=95`. Le lire comme exclusif retirait la
-// dernière image de CHAQUE plan et inventait une vitesse de 95/96 sur un plan qui n'est pas retimé —
-// de faux retimes partout, et les vrais noyés dedans.
+// Bornes SOURCE d'un plan Resolve : `GetSourceEndFrame` est une fin EXCLUSIVE plafonnée à la dernière
+// image du fichier. Mesuré sur Resolve Studio 21.1.2 (MKV de 34072 images) : une plage posée 0→95
+// rend sef=95 pour 95 images, un clip entier rend sef=34071 pour 34072 images — et un fichier entier
+// de 96 images sef=95, la mesure qui l'avait fait croire inclusif. La durée timeline tranche.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { sourceRange } = require('../core/ae/timelineRead');
+const { sourceOutFrame } = require('../core/timeline-insertion');
 
 const item = (values) => ({
   GetSourceStartFrame: async () => values.ssf,
@@ -54,4 +53,20 @@ test('sans les frames source, le repli GetLeftOffset garde la durée timeline', 
   assert.equal(out.srcIn, 12);
   assert.equal(out.srcOut, 51, 'bornes inclusives : 40 images à partir de 12');
   assert.equal(out.srcSpan, 40);
+});
+
+test('un plan posé avec des bornes lit sef comme une fin exclusive', async () => {
+  // AppendToTimeline 494→548 : 54 images, la dernière montrée est la 547.
+  const out = await sourceRange(item({ ssf: 494, sef: 548 }), 0, 54, 0, 34071);
+  assert.equal(out.srcIn, 494);
+  assert.equal(out.srcOut, 547);
+  assert.equal(out.srcSpan, 54);
+  assert.equal(out.retimed, false);
+});
+
+test('un plan qui s’arrête juste avant la dernière image ne la récupère pas', () => {
+  // 34000→34071 posé : 71 images, sef=34071 = dernière image du fichier, mais exclusive ici.
+  assert.equal(sourceOutFrame(34000, 34071, 71, 34071), 34070);
+  // Le même sef, plafonné, pour un plan qui va jusqu'au bout : 72 images.
+  assert.equal(sourceOutFrame(34000, 34071, 72, 34071), 34071);
 });

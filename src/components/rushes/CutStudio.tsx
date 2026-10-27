@@ -398,7 +398,7 @@ export function CutStudio() {
                 }>
                   {thumbsGen
                     ? <><Square className="size-3.5 fill-current" /> {thumbsGen.done}/{thumbsGen.total}</>
-                    : <ImageIcon className="size-3.5" />}
+                    : <><ImageIcon className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
                 </TooltipTrigger>
                 <TooltipContent>{thumbsGen ? t("shared.stop") : t("shared.genThumbs", { verb })}</TooltipContent>
               </Tooltip>
@@ -409,7 +409,7 @@ export function CutStudio() {
                 }>
                   {proxyGen
                     ? <><Square className="size-3.5 fill-current" /> {proxyGen.done}/{proxyGen.total}</>
-                    : <Zap className="size-3.5" />}
+                    : <><Zap className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
                 </TooltipTrigger>
                 <TooltipContent>{proxyGen ? t("shared.stop") : t("shared.genProxies", { verb })}</TooltipContent>
               </Tooltip>

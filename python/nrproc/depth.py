@@ -79,7 +79,7 @@ def cmd_depth(args):
 
     import numpy as np
 
-    dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None))
+    dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None), fps=_fps)
 
     spec = image_spec(args)
     images = spec["kind"] != "video"

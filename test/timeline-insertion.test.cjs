@@ -8,6 +8,8 @@ const {
   timelineClipDuration,
   timelineClipLayout,
   appendContiguousTimelineClips,
+  frameRemap,
+  resolveRange,
   firstFreeVideoTrack,
 } = require("../core/timeline-insertion");
 const { atempoChain } = require("../core/timeline-fit");
@@ -174,4 +176,49 @@ test("video-only timeline policy reaches every sender and host", () => {
   assert.match(bridgeSource, /interface AdobeBuildOpts[\s\S]*videoOnly\?: boolean/);
   assert.match(pproSource, /p\.videoOnly/);
   assert.match(aeftSource, /if \(p\.videoOnly\) lyr\.audioEnabled = false/);
+});
+
+// Resolve takes an EXCLUSIVE source end (measured on 21.1.2: 494→548 lays 54 frames, last shown 547).
+// Our inclusive end went through as is and every shot lost its last frame.
+test("hands Resolve an exclusive end so the last frame of each shot is laid", async () => {
+  const sent = [];
+  const mp = {
+    async AppendToTimeline(infos) {
+      sent.push({ startFrame: infos[0].startFrame, endFrame: infos[0].endFrame });
+      return [{}];
+    },
+  };
+  const infos = [
+    { mediaPoolItem: "a", startFrame: 494, endFrame: 547 },
+    { mediaPoolItem: "a", startFrame: 34000, endFrame: 34071 }, // ends on the file's last frame
+  ];
+  await appendContiguousTimelineClips(mp, infos, { recordFrame: 0, sourceFps: [24], timelineFps: 24 });
+  assert.deepEqual(sent, [{ startFrame: 494, endFrame: 548 }, { startFrame: 34000, endFrame: 34072 }]);
+  assert.equal(infos[0].endFrame, 547, "the caller's inclusive range is left untouched");
+});
+
+test("a whole clip without bounds is passed through", () => {
+  const info = { mediaPoolItem: "a" };
+  assert.equal(resolveRange(info), info);
+});
+
+// Resolve counts a frame or two more than were decoded (container duration): 1501 for 1500, with
+// frame N showing ffmpeg's frame N everywhere. A linear stretch over that tail moved cuts by +1 past
+// frame 1000. Only a different rate (a MOV read at 24 instead of 23.976) is a real grid change.
+test("a tail difference in frame counts does not remap", () => {
+  const { map, mapped } = frameRemap({ resFrames: 1501, detFrames: 1500, resFps: 25, detFps: 25 });
+  assert.equal(mapped, false);
+  assert.equal(map(1000), 1000);
+  assert.equal(frameRemap({ resFrames: 2399, detFrames: 2397, resFps: 59.94, detFps: 60000 / 1001 }).map(1800), 1800);
+});
+
+test("a file read at another rate is remapped linearly", () => {
+  const { map, mapped } = frameRemap({ resFrames: 187291, detFrames: 187104, resFps: 24, detFps: 24000 / 1001 });
+  assert.equal(mapped, true);
+  assert.equal(map(2000), 2002);
+});
+
+test("without a detector rate, a few frames of difference is a tail", () => {
+  assert.equal(frameRemap({ resFrames: 1501, detFrames: 1500 }).mapped, false);
+  assert.equal(frameRemap({ resFrames: 187291, detFrames: 187104 }).mapped, true);
 });

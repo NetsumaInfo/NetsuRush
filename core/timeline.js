@@ -8,16 +8,17 @@
 const path = require("path");
 const os = require("os");
 const { pathToFileURL } = require("url");
-const { fsp, yieldLoop } = require("./config");
+const { fsp, yieldLoop } = require("./config");
+
 const { parseHostFloat, parseHostInt } = require("./hostNumber"); // FPS / Frames text from Resolve, either decimal mark
 const { getResolve, findItemByPath } = require("./resolve");
 const { bridge } = require("./resolve-proxy");
 const { detectScenes, getCachedScenes } = require("./sidecars");
-const { buildFcpxml, fpsRational } = require("./fcpxml");
+const { buildFcpxml, buildEmptyFcpxml, fpsRational } = require("./fcpxml");
 const { t } = require("./i18n");
 const {
   timelineRecordFrame, timelineClipLayout, firstFreeVideoTrack,
-  appendContiguousTimelineClips,
+  appendContiguousTimelineClips, sourceOutFrame, frameRemap, timecodeToFrames,
 } = require("./timeline-insertion");
 const { createFitToFillMedia } = require("./timeline-fit");
 
@@ -66,6 +67,44 @@ async function ensureVideoTrack(tl, index) {
     count = parseInt(await tl.GetTrackCount("video"), 10) || count + 1;
   }
   return count >= index ? index : null;
+}
+
+// Resolve only applies `proj.SetSetting('timelineFrameRate')` while the project has NO timeline: in
+// any real project it fails silently and the new timeline keeps the project rate, so a 30 fps rush
+// laid on a 23.976 timeline is conformed (measured on 21.1.2: a 30-frame shot became 23 frames). A
+// timeline's own setting (`useCustomSettings`) takes integer rates and 23.976, but refuses 29.97,
+// 59.94 and 47.952 in every spelling; for those the fresh timeline is swapped for an empty FCPXML
+// sequence at the exact rate, which Resolve imports at that rate (same name, resolution and start
+// timecode). Call it while the destination bin is still the current folder.
+async function matchTimelineRate(proj, mp, tl, fps) {
+  const rateOf = async (x) => parseHostFloat(await x.GetSetting("timelineFrameRate")) || 0;
+  const close = (r) => Math.abs(r - fps) < 0.01;
+  let rate = await rateOf(tl);
+  if (!(fps > 0) || close(rate)) return { tl, rate };
+  try {
+    await tl.SetSetting("useCustomSettings", "1");
+    await tl.SetSetting("timelineFrameRate", Number(fps).toFixed(3).replace(/\.?0+$/, ""));
+  } catch (_) { /* refused: FCPXML below */ }
+  rate = await rateOf(tl);
+  if (close(rate)) return { tl, rate };
+
+  const name = await tl.GetName();
+  const exact = fpsRational(fps);
+  let tcStartFrames = 0;
+  try { tcStartFrames = timecodeToFrames(await tl.GetStartTimecode(), exact.num / exact.den) || 0; } catch (_) {}
+  const w = parseHostInt(await proj.GetSetting("timelineResolutionWidth")) || 1920;
+  const h = parseHostInt(await proj.GetSetting("timelineResolutionHeight")) || 1080;
+  const xmlPath = path.join(os.tmpdir(), `netsurush-rate-${Date.now()}.fcpxml`);
+  await fsp.writeFile(xmlPath, buildEmptyFcpxml({ name, fps: exact, w, h, tcStartFrames }), "utf8");
+  try {
+    if (!(await mp.DeleteTimelines([tl]))) return { tl, rate };
+    let fresh = null;
+    try { fresh = await mp.ImportTimelineFromFile(xmlPath, { timelineName: name }); } catch (_) { fresh = null; }
+    if (!fresh) fresh = await mp.CreateEmptyTimeline(name); // keep a timeline, even at the wrong rate
+    return { tl: fresh, rate: fresh ? await rateOf(fresh) : 0 };
+  } finally {
+    fsp.rm(xmlPath, { force: true }).catch(() => {});
+  }
 }
 
 async function videoTrackRanges(tl) {
@@ -168,8 +207,9 @@ async function currentVideoTarget(tl, recordFrame, timelineFps) {
   return null;
 }
 
+// `endFrame` is inclusive here; AddTake takes an exclusive end like AppendToTimeline (resolveRange).
 async function finalizeTake(target, mediaPoolItem, startFrame, endFrame) {
-  if (!(await target.AddTake(mediaPoolItem, startFrame, endFrame))) return false;
+  if (!(await target.AddTake(mediaPoolItem, startFrame, endFrame + 1))) return false;
   const count = parseInt(await target.GetTakesCount(), 10) || 0;
   if (count > 0 && !(await target.SelectTakeByIndex(count))) return false;
   return !!(await target.FinalizeTake());
@@ -322,24 +362,21 @@ async function buildTimeline(opts) {
         tryName = `${requestedName} (${i})`;
         tl = await mp.CreateEmptyTimeline(tryName);
       }
+      if (tl) ({ tl, rate: timelineFps } = await matchTimelineRate(proj, mp, tl, fps));
       if (restoreFolder) { try { await mp.SetCurrentFolder(restoreFolder); } catch (_) { /* best-effort */ } }
   if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineCreateFailed"), detail: requestedName }) };
       renamed = tryName !== requestedName;
       name = tryName;
       created = true;
-      timelineFps = fps;
+      if (Math.abs(timelineFps - fps) > 0.01) fpsMismatch = true;
     }
 
     const resFrames = parseHostInt(await item.GetClipProperty("Frames")) || 0;
     const detFrames = parseInt(String(srcFrames), 10) || 0;
-    let mapped = false;
-    const toRes = (f) => {
-      if (resFrames > 1 && detFrames > 1 && resFrames !== detFrames) {
-        mapped = true;
-        return Math.round((f * (resFrames - 1)) / (detFrames - 1));
-      }
-      return f;
-    };
+    // Detector rate: given, or read back from a segment that carries both its frame and its time.
+    const timed = segments.find((s) => s && s.inFrame > 0 && s.in > 0);
+    const detFps = Number(opts.srcFps) || (timed ? timed.inFrame / timed.in : 0);
+    const { map: toRes, mapped } = frameRemap({ resFrames, detFrames, resFps: fps, detFps });
 
     const maxFrame = resFrames > 0 ? resFrames - 1 : Number.MAX_SAFE_INTEGER;
     // Couleurs (revue colorée) filtrées EN PARALLÈLE des clips : une clipInfo invalide (frames
@@ -543,6 +580,11 @@ async function buildTimelineFromBlocks(opts) {
       for (let i = 2; !tl && i < 50; i++) {
         tryName = `${requestedName} (${i})`;
         tl = await mp.CreateEmptyTimeline(tryName);
+      }
+      if (tl) {
+        const matched = await matchTimelineRate(proj, mp, tl, timelineFps);
+        tl = matched.tl;
+        if (Math.abs(matched.rate - timelineFps) > 0.01) fpsMismatch = true;
       }
       if (restoreFolder) { try { await mp.SetCurrentFolder(restoreFolder); } catch (_) { /* best-effort */ } }
   if (!tl) return { ok: false, error: t("withDetail", { message: t("timelineCreateFailed"), detail: requestedName }) };
@@ -850,14 +892,13 @@ async function readTimelineCuts(opts = {}) {
         const maxFrame = srcFrames > 0 ? srcFrames - 1 : Number.MAX_SAFE_INTEGER;
         let ssf = parseInt(row.ssf, 10);
         let sef = parseInt(row.sef, 10);
+        const span = parseInt(row.dur, 10) || 0;
         if (Number.isNaN(ssf) || Number.isNaN(sef)) {
-          const lo = parseInt(row.lo, 10) || 0;
-          const span = parseInt(row.dur, 10) || 0;
-          ssf = lo;
-          sef = lo + span; // exclusif
+          ssf = parseInt(row.lo, 10) || 0;
+          sef = ssf + span; // exclusif
         }
         const inFrame = Math.max(0, Math.min(maxFrame, ssf));
-        const outFrame = Math.max(inFrame, Math.min(maxFrame, sef - 1)); // inclusif
+        const outFrame = Math.max(inFrame, Math.min(maxFrame, sourceOutFrame(ssf, sef, span, maxFrame))); // inclusif
         cuts.push({
           id: `${row.track}:${cuts.length}:${inFrame}`,
           path: fp,
@@ -934,20 +975,18 @@ async function readTimelineCutsViaProxy(opts = {}) {
           const { fps, srcFrames, name } = meta;
           const maxFrame = srcFrames > 0 ? srcFrames - 1 : Number.MAX_SAFE_INTEGER;
 
-          // in/out SOURCE en frames. GetSourceEndFrame est INCLUSIF (mesuré sur Resolve 21.0.3 :
-          // un fichier de 96 images posé entier rend ssf=0, sef=95) → outFrame = sef, l'invariant
-          // « bornes inclusives » de la timeline est déjà le sien. Le lire comme exclusif retirait
-          // la dernière image de chaque plan découpé. Repli GetLeftOffset + span si l'API manque.
+          // Source in/out in frames. GetSourceEndFrame is an exclusive end clamped to the file's
+          // last frame (sourceOutFrame); the timeline span settles which one it is. GetLeftOffset +
+          // span when the API is missing.
           let ssf = parseInt(await it.GetSourceStartFrame(), 10);
           let sef = parseInt(await it.GetSourceEndFrame(), 10);
+          const span = (parseInt(await it.GetDuration(), 10) || 0);
           if (Number.isNaN(ssf) || Number.isNaN(sef)) {
-            const lo = parseInt(await it.GetLeftOffset(), 10) || 0;
-            const span = (parseInt(await it.GetDuration(), 10) || 0);
-            ssf = lo;
-            sef = lo + Math.max(0, span - 1); // inclusif, comme l'API
+            ssf = parseInt(await it.GetLeftOffset(), 10) || 0;
+            sef = ssf + span; // exclusif, comme l'API
           }
           const inFrame = Math.max(0, Math.min(maxFrame, ssf));
-          const outFrame = Math.max(inFrame, Math.min(maxFrame, sef)); // inclusif
+          const outFrame = Math.max(inFrame, Math.min(maxFrame, sourceOutFrame(ssf, sef, span, maxFrame))); // inclusif
           cuts.push({
             id: `${t}:${cuts.length}:${inFrame}`,
             path: fp,
@@ -984,8 +1023,8 @@ async function computeCutClips(withScenes, fps0, onProg) {
     const detFrames = p.detFrames;
     const maxFrame = resFrames > 0 ? resFrames - 1 : Number.MAX_SAFE_INTEGER;
     const maxExcl = resFrames > 0 ? resFrames : Number.MAX_SAFE_INTEGER;
-    const toRes = (f) => (resFrames > 1 && detFrames > 1 && resFrames !== detFrames)
-      ? Math.round((f * (resFrames - 1)) / (detFrames - 1)) : f;
+    const fpsRes = parseHostFloat(await p.item.GetClipProperty("FPS")) || 0;
+    const { map: toRes } = frameRemap({ resFrames, detFrames, resFps: fpsRes, detFps: p.fps });
     const fpsNum = parseHostFloat(await p.item.GetClipProperty("FPS")) || p.fps || fps0;
     const rm = /(\d+)\s*x\s*(\d+)/.exec((await p.item.GetClipProperty("Resolution")) || "");
     const w = rm ? parseInt(rm[1], 10) : 0;
@@ -1223,4 +1262,4 @@ async function cutTimeline(event, opts = {}) {
   return buildCutTimeline(event, { name: opts.name, source: a.source, clips: a.clips, mode: opts.mode });
 }
 
-module.exports = { buildTimeline, buildTimelineFromBlocks, listTimelines, timelineTree, timelineThumbs, readTimelineCuts, analyzeTimelineCut, buildCutTimeline, cutTimeline, uniqueTimelineName, sanitizeTimelineName, getTimelineByName };
+module.exports = { matchTimelineRate, buildTimeline, buildTimelineFromBlocks, listTimelines, timelineTree, timelineThumbs, readTimelineCuts, analyzeTimelineCut, buildCutTimeline, cutTimeline, uniqueTimelineName, sanitizeTimelineName, getTimelineByName };

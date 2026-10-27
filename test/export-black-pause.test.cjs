@@ -66,7 +66,7 @@ test("les six langues nomment la pause noire, son aide et les secondes", () => {
 
   const fr = JSON.parse(fs.readFileSync(path.join(root, "src/locales/fr/export.json"), "utf8"));
   assert.equal(fr.editor.mergeGap, "Pause noire");
-  assert.equal(fr.editor.mergeGapHint, "Durée du noir ajouté entre chaque plan fusionné");
+  assert.equal(fr.editor.mergeGapHint, "Durée du noir entre les plans fusionnés");
   assert.equal(fr.editor.seconds, "s");
 });
 

@@ -3,7 +3,7 @@
 // l'import de fichier (et seule voie possible pour ajouter à une timeline existante) : elle ne sait
 // poser aucune image clé, l'API n'en exposant pas l'écriture.
 
-const { uniqueTimelineName, sanitizeTimelineName, getTimelineByName } = require("../timeline");
+const { uniqueTimelineName, sanitizeTimelineName, getTimelineByName, matchTimelineRate } = require("../timeline");
 const { yieldLoop } = require("../config");
 const { resolvePlacement } = require("./doc");
 const { applyResolveClip } = require("./resolveApply");
@@ -15,6 +15,7 @@ const {
   clipHasProperties, placementReports, trackCounts, timelineSnapshots, locateResolveClip, uniqueIdOf,
 } = require("./writeResolveShared");
 const { t } = require("../i18n");
+const { resolveRange } = require("../timeline-insertion");
 
 /**
  * `AppendToTimeline` rend la LISTE des items créés. Un tableau VIDE est un échec — et un tableau
@@ -23,7 +24,7 @@ const { t } = require("../i18n");
  */
 async function appendSingle(mediaPool, info, name) {
   try {
-    const raw = await mediaPool.AppendToTimeline([info]);
+    const raw = await mediaPool.AppendToTimeline([resolveRange(info)]);
     if (Array.isArray(raw)) return { ok: raw.length > 0, item: raw.length === 1 ? raw[0] : null };
     return { ok: !!raw, item: null };
   } catch (error) {
@@ -149,6 +150,9 @@ async function createTarget(project, mediaPool, doc, opts) {
     }
     name = await uniqueTimelineName(project, name);
     timeline = await mediaPool.CreateEmptyTimeline(name);
+    if (!timeline) return { ok: false, error: t("transferTimelineCreateFailedNamed", { name }) };
+    // The project-level setting above is ignored once the project holds a timeline.
+    timeline = (await matchTimelineRate(project, mediaPool, timeline, Number(doc.fps))).tl;
     if (!timeline) return { ok: false, error: t("transferTimelineCreateFailedNamed", { name }) };
     created = true;
   } else {

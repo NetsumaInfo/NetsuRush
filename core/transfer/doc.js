@@ -531,7 +531,7 @@ function docSummary(doc) {
   };
 }
 
-/** Pose d'un plan dans Resolve. `endFrame` reste INCLUSIF. */
+/** Pose d'un plan dans Resolve. `endFrame` reste INCLUSIF ; `resolveRange` le convertit à l'appel. */
 function resolvePlacement(clip, timelineStart) {
   return {
     startFrame: clip.srcIn,

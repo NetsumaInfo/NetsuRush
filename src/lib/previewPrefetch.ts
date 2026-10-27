@@ -7,13 +7,16 @@
 // émettrait autant d'appels /rpc que de cartes traversées : le pont HTTP local n'ouvre que quelques
 // sockets, et la file ainsi remplie retarderait AUSSI les vignettes — donc l'inverse du but.
 //
-// La file est LIFO : la dernière carte inscrite est la plus proche du viewport courant, une
-// inscription plus ancienne a de bonnes chances d'être déjà repartie hors bande.
+// Order: the pending card CLOSEST to the viewport goes first, measured when a slot frees up. The
+// band spans several screens, so a whole band registers at once on open and on every long scroll;
+// registration order (LIFO) then started the farthest cards first. A job without an element falls
+// back on LIFO.
 
 const MAX_PREFETCH = 6;
 
 interface PrefetchJob {
   start: () => void;
+  el: Element | null;
   cancelled: boolean;
   started: boolean;
 }
@@ -21,9 +24,30 @@ interface PrefetchJob {
 let active = 0;
 const pending: PrefetchJob[] = [];
 
+function distanceToViewport(el: Element | null): number {
+  if (!el) return Number.POSITIVE_INFINITY;
+  const r = el.getBoundingClientRect();
+  if (!r.width && !r.height) return Number.POSITIVE_INFINITY;
+  const vh = window.innerHeight || 0;
+  if (r.bottom < 0) return -r.bottom;
+  if (r.top > vh) return r.top - vh;
+  return 0;
+}
+
+function takeNearest(): PrefetchJob | undefined {
+  if (pending.length < 2) return pending.pop();
+  let best = pending.length - 1;
+  let bestDistance = distanceToViewport(pending[best].el);
+  for (let i = pending.length - 2; i >= 0 && bestDistance > 0; i--) {
+    const d = distanceToViewport(pending[i].el);
+    if (d < bestDistance) { best = i; bestDistance = d; }
+  }
+  return pending.splice(best, 1)[0];
+}
+
 function pump(): void {
   while (active < MAX_PREFETCH) {
-    const job = pending.pop();
+    const job = takeNearest();
     if (!job) return;
     if (job.cancelled) continue;
     active++;
@@ -44,8 +68,9 @@ function pump(): void {
 // Réserve un créneau de préchauffe. `start` est appelé dès qu'un créneau se libère. La fonction
 // rendue libère le créneau : elle doit être appelée à la FIN du travail comme à l'abandon, et elle
 // est idempotente (les deux cas se produisent quand une carte quitte la bande pendant son encode).
-export function acquirePrefetchSlot(start: () => void): () => void {
-  const job: PrefetchJob = { start, cancelled: false, started: false };
+// `el` is the card: it ranks the job by distance to the viewport.
+export function acquirePrefetchSlot(start: () => void, el: Element | null = null): () => void {
+  const job: PrefetchJob = { start, el, cancelled: false, started: false };
   pending.push(job);
   pump();
   return () => {

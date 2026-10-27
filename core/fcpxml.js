@@ -48,18 +48,22 @@ function buildFcpxml({ projectName, eventName = 'NetsuRush', clips }) {
     );
   }
 
-  // Spine : un asset-clip par plan, offsets cumulés en frames de séquence.
+  // Spine : un asset-clip par plan, offsets cumulés en frames de séquence. At a different rate, each
+  // shot ends on the ROUNDED CUMULATIVE boundary, not on its own rounded length: rounding every shot
+  // on its own drifted a frame every few shots over a long timeline.
   const spine = [];
   let offFrames = 0;
+  let exactEnd = 0;
   let n = 1;
   for (const c of clips) {
     const { num: clipNum, den: clipDen } = c.fps;
     const sameFps = clipNum === seq.num && clipDen === seq.den;
     for (const sh of c.shots) {
       const startNum = sh.startFrame * clipDen;       // entrée source (base du clip)
+      exactEnd += sameFps ? sh.frames : (sh.frames * clipDen * seq.num) / (clipNum * seq.den);
       const tlFrames = sameFps
         ? sh.frames
-        : Math.max(1, Math.round((sh.frames * clipDen / clipNum) * (seq.num / seq.den)));
+        : Math.max(1, Math.round(exactEnd) - offFrames);
       spine.push(
         `<asset-clip ref="${c.assetId}" offset="${offFrames * seq.den}/${seq.num}s" `
         + `name="${esc(c.name)} · plan ${n}" start="${startNum}/${c.fps.num}s" `
@@ -90,4 +94,24 @@ function buildFcpxml({ projectName, eventName = 'NetsuRush', clips }) {
 </fcpxml>`;
 }
 
-module.exports = { buildFcpxml, fpsRational };
+// An EMPTY sequence at an exact rate. Resolve's API cannot give a timeline a 29.97, 59.94 or 47.952
+// rate (see core/timeline.js matchTimelineRate); importing this file creates one.
+// tcStartFrames: the start timecode in frames, so the timeline keeps the project's start.
+function buildEmptyFcpxml({ name, fps, w, h, tcStartFrames = 0 }) {
+  const fd = `${fps.den}/${fps.num}s`;
+  const tcStart = `${tcStartFrames * fps.den}/${fps.num}s`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fcpxml>
+<fcpxml version="1.9">
+  <resources><format id="r1" frameDuration="${fd}" width="${w || 1920}" height="${h || 1080}"/></resources>
+  <library>
+    <event name="NetsuRush">
+      <project name="${esc(name)}">
+        <sequence format="r1" duration="0s" tcStart="${tcStart}" tcFormat="NDF" audioLayout="stereo" audioRate="48k"><spine/></sequence>
+      </project>
+    </event>
+  </library>
+</fcpxml>`;
+}
+
+module.exports = { buildFcpxml, buildEmptyFcpxml, fpsRational };

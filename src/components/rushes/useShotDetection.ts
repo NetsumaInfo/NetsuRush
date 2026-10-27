@@ -12,6 +12,23 @@ import {
 import { usePreviewCache, type GenerationState, type PreviewSource } from "./previewCache";
 import { errorText } from "@/lib/errorText";
 
+// A shot keeps its id when a new list brings back the same range. The id is the grid's React key:
+// a re-detection, an undo or a cache reload used to issue fresh ids for identical shots, so every
+// card remounted and every playing preview was torn down and reloaded at once.
+function keepSegmentIds(next: Segment[], prev: Segment[]): Segment[] {
+  if (!prev.length) return next;
+  const byRange = new Map<string, number[]>();
+  const rangeKey = (s: Segment) => `${s.path ?? ""}|${s.in.toFixed(3)}|${s.out.toFixed(3)}`;
+  for (const s of prev) {
+    const ids = byRange.get(rangeKey(s));
+    if (ids) ids.push(s.id); else byRange.set(rangeKey(s), [s.id]);
+  }
+  return next.map((s) => {
+    const id = byRange.get(rangeKey(s))?.shift();
+    return id == null ? s : { ...s, id };
+  });
+}
+
 // Réapplique les fusions persistées à une liste de plans FRAÎCHEMENT détectés/rechargés. Recalage
 // par CHEVAUCHEMENT de frames (les bornes du détecteur peuvent bouger d'une passe à l'autre) : tout
 // plan qui chevauche l'étendue d'une fusion est absorbé, l'union s'aligne sur les vraies bornes des
@@ -168,6 +185,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   // qu'elle ne touche pas, or elle démarre bien avant de savoir ce qu'elle va remplacer.
   const segmentsRef = useRef<Segment[]>([]);
   segmentsRef.current = segments;
+  const loadedFlowRef = useRef<string | null>(null);
   const [detecting, setDetecting] = useState(false);
   // Vrai pendant le chargement async du cache SQLite à l'ouverture du flux/modèle : évite d'afficher
   // « Détecter pour découper » alors que les rushs sont déjà découpés (le cache n'a juste pas fini de
@@ -332,7 +350,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
         if (group) group.push(s); else kept.set(p, [s]);
       }
       const all = paths.flatMap((p) => fresh.get(p) ?? kept.get(p) ?? []);
-      setSegments(all);
+      setSegments(keepSegmentIds(all, segmentsRef.current));
       toast.ok(t("detection.shotsWithModel", { count: all.length, model: modelLabel(model) }));
       warmThumbs(all, fpsHint);
     } catch (e) { setErr(errorText(e)); }
@@ -404,8 +422,13 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   // route, donc rien n'apparaît sous le curseur ni ne déplace ce qu'on est en train de regarder.
   useEffect(() => {
     let alive = true;
-    // Vide l'état du flux précédent avant le rechargement async du cache (flux/modèle changé).
-    setSegments([]); setActive(null); setActiveUrl(null);
+    // A new flow starts blank. The SAME flow (model, threshold or edits changed) keeps its grid on
+    // screen until the reload lands: blanking it unmounted every card, and the shots that come back
+    // identical keep their id (keepSegmentIds), so their previews keep playing.
+    const sameFlow = loadedFlowRef.current === flowKey;
+    loadedFlowRef.current = flowKey;
+    if (!sameFlow) setSegments([]);
+    setActive(null); setActiveUrl(null);
     setErr(null);
     setCacheLoading(true);
     if (!paths.length) { setCacheLoading(false); return; }
@@ -428,7 +451,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
       editsRef.current = table;
       setHasEdits(countEdits(table) > 0);
 
-      const all: Segment[] = [];
+      const built: Segment[] = [];
       const probed: FlowSource[] = [];
       const fpsHint = new Map<string, number>();
       for (const { path, r, edits } of loaded) {
@@ -441,7 +464,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
           s.end > s.start
             ? [{ id: nextSegId(), in: s.start, out: s.end, inFrame: s.startFrame, outFrame: s.endFrame, path }]
             : []);
-        all.push(...applyEdits(segs, edits));   // rejoue les fusions/retraits gardés
+        built.push(...applyEdits(segs, edits));   // rejoue les fusions/retraits gardés
       }
       if (probed.length) {
         setSources((prev) => prev.map((s) => {
@@ -450,11 +473,12 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
           return p ? { ...p, info: s.info ?? p.info, duration: s.duration || p.duration } : s;
         }));
       }
-      if (!all.length) return;
       // Réouverture = plans connus instantanément (cache SQLite) → on RÉVÈLE TOUT DE SUITE, sans
       // attendre les vignettes (elles sont sur disque → chargées en lazy/cache renderer, rapides).
       // Ne jamais bloquer ici sur des vignettes : un seek ffmpeg lent retarderait toute la page.
+      const all = keepSegmentIds(built, segmentsRef.current);
       setSegments(all);
+      if (!all.length) return;
       helpersRef.current.warmThumbs(all, fpsHint);
       // À la réouverture d'un flux déjà détecté, la grille reste visible mais le lecteur latéral
       // reste sans source : il ne doit charger/lire qu'après une action explicite sur une carte

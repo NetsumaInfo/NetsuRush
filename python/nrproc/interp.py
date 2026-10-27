@@ -162,7 +162,7 @@ def cmd_interpolate(args):
     # ne sert qu'à horodater le flux brut — une séquence n'a pas de cadence propre).
     spec = image_spec(args)
     images = spec["kind"] != "video"
-    dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None))
+    dec = open_decoder(args.input, getattr(args, "start", None), getattr(args, "end", None), fps=fps_in)
     enc = (open_image_writer(args.out, w, h, out_fps_str, spec) if images
            else open_encoder_video(args.out, w, h, fps_str, args, out_fps=out_fps_str))
 

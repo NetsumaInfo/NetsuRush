@@ -1,15 +1,14 @@
 // @ts-check
-// Bornes de découpe d'un RÉ-ENCODAGE. Seul le ré-encodage coupe à la frame : une copie de flux
-// (`-c copy`, flux « remux ») démarre à la keyframe précédente du conteneur — mesuré 24 à 70 frames
-// en trop en tête sur des rips BluRay — et sa fin traîne les paquets du GOP ouvert (1-2 frames).
-// C'est une limite de format, pas de ffmpeg : les frames entre la keyframe et le point de coupe ne
-// se décodent pas sans elle. Arbitrage produit : le remux reste une copie pure et l'UI avertit
-// (`export:workflow.remuxWarning`) ; qui veut la frame exacte prend un profil de ré-encodage.
+// Frame-exact cut bounds. A re-encode cuts to the frame with them directly. A stream copy into
+// MP4/MOV uses the same seek and then hides its keyframe head and open-GOP tail behind the edit list
+// (`editList.js`). A copy into MKV, which has no edit list, still starts on the previous keyframe
+// (measured 24-70 extra frames on BluRay rips) and drags 1-2 frames of open GOP; the UI warns about
+// it (`export:workflow.remuxWarning`).
 //
-// Le ré-encodage, lui, doit être exact — deux pièges d'un `-ss start -t durée` naïf :
-//  - timebase mkv 1/1000 : le pts stocké s'arrondit parfois SOUS `start`, la première frame est
-//    alors jetée par le seek (mesuré : plan de 2 frames sorti à 1) ;
-//  - la borne de fin en durée retombe sur l'arrondi du paquet limite → une frame en trop.
+// Two traps of a naive `-ss start -t duration`:
+//  - mkv 1/1000 timebase: the stored pts sometimes rounds BELOW `start`, and the seek then drops the
+//    first frame (measured: a 2-frame shot came out with 1);
+//  - an end bound in duration lands on the rounding of the last packet → one extra frame.
 
 /**
  * Bornes frame-exactes d'un ré-encodage : seek à −¼ de frame (la frame visée reste au-dessus, la

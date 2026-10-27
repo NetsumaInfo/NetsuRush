@@ -20,6 +20,10 @@ const THUMB_MIN_MARGIN_PX = 1200;
 // traverse la bande en bien moins : aucune demande n'est émise pendant un flick, donc le pont /rpc
 // reste libre pour les vignettes, qui sont ce qu'on regarde en défilant.
 const PREFETCH_SETTLE_MS = 220;
+// Encode-ahead band while autoplay is on: about three screens. Wider than the band that MOUNTS
+// paused <video> elements (usePreviewActivity), because encoding is the slow part (~0.5 s per shot)
+// while mounting a ready file is not. Slots are capped and served nearest-first (previewPrefetch).
+const PREFETCH_MARGIN_PX = 2400;
 
 interface SceneCardMediaOpts {
   seg: Segment;
@@ -188,7 +192,13 @@ export function useSceneCardMedia({
   // 1. la BANDE de usePreviewActivity — pré-encoder toute la grille noyait NVENC et laissait une grille noire ;
   // 2. le DÉLAI DE STABILISATION — un flick traverse la bande en moins que ça, donc n'émet rien ;
   // 3. le PLAFOND de créneaux (`previewPrefetch`) — le pont /rpc reste libre pour les vignettes.
-  const prefetchReady = useGranted(play && nearVideo, (settled) => {
+  const [nearPrefetch, setNearPrefetch] = useState(false);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || !play) { setNearPrefetch(false); return; }
+    return observeViewport(el, PREFETCH_MARGIN_PX, setNearPrefetch);
+  }, [play]);
+  const prefetchReady = useGranted(play && (nearPrefetch || nearVideo), (settled) => {
     const timer = setTimeout(settled, PREFETCH_SETTLE_MS);
     return () => clearTimeout(timer);
   });
@@ -197,7 +207,7 @@ export function useSceneCardMedia({
   // parce que la carte vient de passer en LECTURE, la demande en vol est exactement celle qu'on
   // attend : l'annuler relancerait un ffmpeg de zéro au pire moment. D'où la lecture par ref.
   const nearVideoRef = useRef(nearVideo);
-  nearVideoRef.current = nearVideo;
+  nearVideoRef.current = nearVideo || nearPrefetch;
 
   useEffect(() => {
     if (!prefetchReady || wantVideo || url) return;
@@ -210,7 +220,7 @@ export function useSceneCardMedia({
       void getProxyRef.current(proxyHeight(), token, "low")
         .then((u) => { if (alive && u) setFetchedUrl(u); })
         .finally(releaseSlot);
-    });
+    }, rootRef.current);
     return () => {
       alive = false;
       if (token != null && !nearVideoRef.current) nr.proxyCancel(token);
@@ -246,7 +256,15 @@ export function useSceneCardMedia({
   function enter() {
     setPointerOn(true);
     dropClaim.current = claimHoverPreview(rootRef.current, hoverOff);
-    timer.current = setTimeout(() => setHovered(true), 180);
+    // A second `enter` without a `leave` (React re-enters a card through its own portals) must not
+    // orphan the first timer: `leave` only clears the current one, and the orphan would switch the
+    // hover back on after the pointer left — the preview then played on, with sound, behind it.
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      timer.current = null;
+      // The 180 ms delay outlives the pointer if the global arbiter dropped this card meanwhile.
+      if (dropClaim.current) setHovered(true);
+    }, 180);
   }
   function leave() {
     dropClaim.current?.();

@@ -1,5 +1,44 @@
 // @ts-check
 
+// Resolve's scripting API takes source ranges with an EXCLUSIVE end, whatever its README says.
+// Measured on Resolve Studio 21.1.2 with a 34072-frame BluRay MKV: AppendToTimeline 494→548 lays 54
+// frames, the last one shown is 547; 0→95 lays 95 frames; AddTake 1654→1708 fills 54 frames; an end
+// one past the last frame (34072) is accepted. Passing our INCLUSIVE end dropped the last frame of
+// every shot — a frame lost per shot, so a long insertion drifted by several frames. NetsuRush keeps
+// inclusive ends everywhere; this is the only place they are converted.
+function resolveRange(info) {
+  if (!info || info.endFrame == null) return info;
+  return { ...info, endFrame: Number(info.endFrame) + 1 };
+}
+
+// GetSourceEndFrame reports that same exclusive end, CLAMPED to the last frame of the file: a laid
+// range 0→95 reads sef=95 for 95 frames, while a whole 34072-frame clip reads sef=34071 for 34072
+// frames (and a whole 96-frame file sef=95 — the measurement that once made it look inclusive). The
+// timeline span settles the ambiguous case; a retimed clip falls back on the exclusive reading.
+// Returns the INCLUSIVE source out frame.
+function sourceOutFrame(ssf, sef, span, maxFrame = Infinity) {
+  if (Number.isFinite(span) && span > 0) {
+    if (sef - ssf === span - 1) return sef;
+    if (sef - ssf === span) return sef - 1;
+  }
+  return Number.isFinite(maxFrame) && sef >= maxFrame ? maxFrame : sef - 1;
+}
+
+// Detector frame → Resolve frame. Resolve often counts one or two frames more than were decoded
+// (it takes the container duration, audio included): measured 1501 for 1500, 1799 for 1798, 2399 for
+// 2397, with frame N showing the same picture as ffmpeg's frame N everywhere in the file. Stretching
+// linearly over that tail moved every cut — +1 past frame 1000, +2 past 1800. The grids only really
+// differ when Resolve reads the file at ANOTHER rate (a MOV read at 24 fps instead of 23.976: 187291
+// frames for 187104); only then is the linear remap right. Unknown detector rate: a gap of a few
+// frames is a tail, anything larger is a grid.
+function frameRemap({ resFrames, detFrames, resFps, detFps }) {
+  const identity = (f) => f;
+  if (!(resFrames > 1 && detFrames > 1) || resFrames === detFrames) return { map: identity, mapped: false };
+  const sameRate = resFps > 0 && detFps > 0 ? Math.abs(resFps - detFps) < 0.01 : Math.abs(resFrames - detFrames) <= 3;
+  if (sameRate) return { map: identity, mapped: false };
+  return { map: (f) => Math.round((f * (resFrames - 1)) / (detFrames - 1)), mapped: true };
+}
+
 function timecodeToFrames(tc, fps) {
   const m = String(tc || "").match(/^(\d+):(\d{2}):(\d{2})[:;](\d{2})$/);
   if (!m) return null;
@@ -93,7 +132,7 @@ async function appendContiguousTimelineClips(mp, clipInfos, opts) {
   for (let index = 0; index < clipInfos.length; index++) {
     const info = { ...clipInfos[index], recordFrame: cursor };
     if (opts.trackIndex != null) info.trackIndex = opts.trackIndex;
-    const raw = await mp.AppendToTimeline([info]);
+    const raw = await mp.AppendToTimeline([resolveRange(info)]);
     const items = Array.isArray(raw) ? raw : raw ? [raw] : [];
     if (!items.length) return { ok: false, items: appended, endFrame: cursor };
     appended.push(...items);
@@ -120,6 +159,6 @@ function firstFreeVideoTrack(trackRanges, startFrame, endFrame) {
 }
 
 module.exports = {
-  timecodeToFrames, timelineRecordFrame, timelineClipDuration, timelineClipLayout, firstFreeVideoTrack,
+  resolveRange, sourceOutFrame, frameRemap, timecodeToFrames, timelineRecordFrame, timelineClipDuration, timelineClipLayout, firstFreeVideoTrack,
   appendContiguousTimelineClips,
 };
