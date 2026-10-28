@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/context-menu";
 import { ArchiveBadge, useArchiveQueue } from "./archiveRows";
 import { CollectionGlyph } from "./collectionGlyph";
+import { SharedBadge, isSharedCollection } from "./SharedBadge";
+import { Toggle } from "@/components/ui/toggle";
 import { FolderEditor } from "./FolderEditor";
 import { CollectionDetail } from "./CollectionDetail";
 import { FolderNameDialog } from "./FolderNameDialog";
@@ -110,6 +112,9 @@ export function CollectionsView() {
   );
 
   const [editing, setEditing] = useState<CollectionMeta | null>(null);
+  const [editingShare, setEditingShare] = useState(false);
+  const [sharedOnly, setSharedOnly] = useState(false);
+  const edit = (c: CollectionMeta, share = false) => { setEditingShare(share); setEditing(c); };
   const [creating, setCreating] = useState(false);
   const [folderDialog, setFolderDialog] = useState<{ id?: string; name: string } | null>(null);
   // Confirmation in-app (window.confirm interdit sous Tauri).
@@ -136,11 +141,12 @@ export function CollectionsView() {
     const needle = q.trim().toLowerCase();
     const inFolder = s.collections.filter((c) => (c.folderId ?? null) === s.currentFolderId);
     const filtered = inFolder.filter((c) => {
+      if (sharedOnly && !isSharedCollection(c.collaboration)) return false;
       if (needle && !c.name.toLowerCase().includes(needle) && !(c.description ?? "").toLowerCase().includes(needle) && !(c.collTags ?? []).some((t) => t.toLowerCase().includes(needle))) return false;
       return true;
     });
     return sortCollections(filtered, sort);
-  }, [s.collections, s.currentFolderId, q, sort]);
+  }, [s.collections, s.currentFolderId, q, sort, sharedOnly]);
 
   if (s.collectionsView === "detail" && s.currentCollectionId) {
     return <CollectionDetail id={s.currentCollectionId} />;
@@ -160,7 +166,8 @@ export function CollectionsView() {
         <MoreVertical className="h-3.5 w-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem onClick={() => setEditing(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => edit(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => edit(c, true)}><NetsuIcon name="collab" className="size-3.5" /> {tr("share.action")}</DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggleFav(c.id)}>
           <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="size-3.5" /> {favs.includes(c.id) ? tr("fav.remove") : tr("fav.add")}
         </DropdownMenuItem>
@@ -187,7 +194,8 @@ export function CollectionsView() {
     <ContextMenuContent className="min-w-48">
       <ContextMenuItem onClick={() => s.openCollection(c.id)}><NetsuIcon name="eye" className="size-3.5" /> {tr("common:action.open")}</ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem onClick={() => setEditing(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => edit(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => edit(c, true)}><NetsuIcon name="collab" className="size-3.5" /> {tr("share.action")}</ContextMenuItem>
       <ContextMenuItem onClick={() => toggleFav(c.id)}>
         <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="size-3.5" /> {favs.includes(c.id) ? tr("fav.remove") : tr("fav.add")}
       </ContextMenuItem>
@@ -227,6 +235,13 @@ export function CollectionsView() {
             <NetsuIcon name="cut-folder-new" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{tr("list.newFolderHint")}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger render={<Toggle size="sm" variant="outline" pressed={sharedOnly} onPressedChange={setSharedOnly} aria-label={tr("list.sharedOnly")}
+            className="gap-1.5 text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary" />}>
+            <NetsuIcon name="collab" className="size-3.5" /> {tr("list.sharedOnly")}
+          </TooltipTrigger>
+          <TooltipContent>{tr("list.sharedOnlyHint")}</TooltipContent>
         </Tooltip>
         <Select value={sort} onValueChange={(v) => setSort(v as CollListSort)}>
           <SelectTrigger size="sm" className="w-auto gap-1.5" aria-label={tr("list.sortColls")}>
@@ -356,7 +371,7 @@ export function CollectionsView() {
                       <CollectionGlyph icon={c.icon} color={c.color} size={GLYPH_BADGE} />
                     </div>
                     <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-md bg-background/70 px-1.5 py-0.5 text-[10px] text-muted-foreground backdrop-blur-sm tabular-nums">
-                      <ArchiveBadge archived={c.archived} status={queued.get(c.id)} />{tr("list.plansCount", { count: c.count })}
+                      <SharedBadge collaboration={c.collaboration} /><ArchiveBadge archived={c.archived} status={queued.get(c.id)} />{tr("list.plansCount", { count: c.count })}
                     </span>
                     {cardMenu(c)}
                   </div>
@@ -395,7 +410,7 @@ export function CollectionsView() {
                     {view !== "compact" && (
                       <>
                         <div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-                          <ArchiveBadge archived={c.archived} status={queued.get(c.id)} />{tr("list.plansCount", { count: c.count })}
+                          <SharedBadge collaboration={c.collaboration} /><ArchiveBadge archived={c.archived} status={queued.get(c.id)} />{tr("list.plansCount", { count: c.count })}
                         </div>
                         {display.description && c.description && <div className="truncate text-[11px] text-muted-foreground">{c.description}</div>}
                       </>
@@ -429,7 +444,7 @@ export function CollectionsView() {
         )}
 
         <FolderEditor open={creating} onOpenChange={setCreating} />
-        <FolderEditor open={!!editing} onOpenChange={(v) => { if (!v) setEditing(null); }} editing={editing} />
+        <FolderEditor open={!!editing} onOpenChange={(v) => { if (!v) { setEditing(null); setEditingShare(false); } }} editing={editing} expandShare={editingShare} />
         <FolderNameDialog
           open={!!folderDialog}
           initial={folderDialog?.name ?? ""}

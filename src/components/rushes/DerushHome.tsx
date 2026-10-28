@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
@@ -7,6 +7,10 @@ import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { CutSettings } from "./CutSettings";
+import { convexConfigured } from "@/lib/convexEnv";
+
+// Lazy: the invitation cards pull convex/react, which must stay out of the startup bundle.
+const HomeCollabInvites = lazy(() => import("@/components/collab/HomeCollabInvites").then((m) => ({ default: m.HomeCollabInvites })));
 
 export function DerushHome() {
   const { t } = useTranslation("derush");
@@ -94,6 +98,7 @@ export function DerushHome() {
             </div>
           </button>
         </div>
+      {convexConfigured && <Suspense fallback={null}><HomeCollabInvites /></Suspense>}
     </div>
   );
 }

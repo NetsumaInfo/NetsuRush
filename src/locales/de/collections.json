@@ -161,7 +161,9 @@
     "folderEmpty": "Dieser Ordner ist leer.",
     "plansCount_one": "{{count}} Shot",
     "plansCount_other": "{{count}} Shots",
-    "folderEmptyFiltered": "Nichts in diesem Ordner passt zum Filter."
+    "folderEmptyFiltered": "Nichts in diesem Ordner passt zum Filter.",
+    "sharedOnly": "Geteilt",
+    "sharedOnlyHint": "Nur geteilte Sammlungen anzeigen"
   },
   "editor": {
     "iconSearch": "Symbol suchen…",
@@ -242,6 +244,12 @@
     "permAll": "Bearbeiten – alle Shots",
     "stop": "Freigabe beenden",
     "leave": "Freigabe verlassen",
-    "stopHint": "Andere verlieren den Zugriff auf die geteilten Shots."
+    "stopHint": "Andere verlieren den Zugriff auf die geteilten Shots.",
+    "badge": "Geteilt",
+    "badgeReadOnly": "Mit dir geteilt · nur Lesen",
+    "roleEditor": "Bearbeiter",
+    "action": "Teilen…",
+    "actionHint": "Diese Sammlung teilen",
+    "readOnlyTip": "Nur Lesen: Du kannst diese geteilte Sammlung nicht ändern."
   }
 }

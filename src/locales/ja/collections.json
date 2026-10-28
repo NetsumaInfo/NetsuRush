@@ -161,7 +161,9 @@
     "folderEmpty": "このフォルダーは空です。",
     "plansCount_one": "{{count}} 件のショット",
     "plansCount_other": "{{count}} 件のショット",
-    "folderEmptyFiltered": "このフォルダーにはフィルターに一致するものがありません。"
+    "folderEmptyFiltered": "このフォルダーにはフィルターに一致するものがありません。",
+    "sharedOnly": "共有",
+    "sharedOnlyHint": "共有コレクションのみ表示"
   },
   "editor": {
     "iconSearch": "アイコンを検索…",
@@ -242,6 +244,12 @@
     "permAll": "編集 — すべてのショット",
     "stop": "共有を停止",
     "leave": "共有から抜ける",
-    "stopHint": "ほかの人は共有されたショットにアクセスできなくなります。"
+    "stopHint": "ほかの人は共有されたショットにアクセスできなくなります。",
+    "badge": "共有中",
+    "badgeReadOnly": "あなたと共有 · 読み取り専用",
+    "roleEditor": "編集者",
+    "action": "共有…",
+    "actionHint": "このコレクションを共有",
+    "readOnlyTip": "読み取り専用：この共有コレクションは変更できません。"
   }
 }

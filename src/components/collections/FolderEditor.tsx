@@ -116,11 +116,13 @@ function SettingRow({ icon, label, hint, open, onClick }: { icon: React.ReactNod
 }
 
 export function FolderEditor({
-  open, onOpenChange, editing,
+  open, onOpenChange, editing, expandShare,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing?: CollectionMeta | null;   // null/undefined = création
+  /** Ouvre l'éditeur avec la carte « Partage » déjà dépliée (entrée « Partager… »). */
+  expandShare?: boolean;
 }) {
   const { t: tr } = useTranslation(["collections", "common"]);
   // Libellés partagés avec l'éditeur de profil d'export (mêmes réglages, mêmes mots).
@@ -222,7 +224,7 @@ export function FolderEditor({
     if (!open) return;
     savedId.current = editing?.id ?? null;
     setShareProjectId(editing?.collaboration?.projectId ?? null);
-    setSub(""); setExpanded(""); setPane("");
+    setSub(""); setExpanded(expandShare ? "share" : ""); setPane("");
     void loadCollectionTags();
     void loadCollectionFolders();
     setName(editing?.name ?? "");

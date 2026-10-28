@@ -59,7 +59,12 @@
   "invites": {
     "title": "Invitations",
     "join": "Rejoindre",
-    "shared": "Document partagé"
+    "shared": "Document partagé",
+    "adoptFailed": "Impossible d'ajouter la collection partagée",
+    "body": "t'invite sur un document partagé",
+    "later": "Plus tard",
+    "decline": "Refuser",
+    "failed": "Impossible de répondre à l'invitation."
   },
   "projects": {
     "title": "Documents partagés",

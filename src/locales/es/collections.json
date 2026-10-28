@@ -161,7 +161,9 @@
     "folderEmpty": "Esta carpeta está vacía.",
     "plansCount_one": "{{count}} plano",
     "plansCount_other": "{{count}} planos",
-    "folderEmptyFiltered": "Nada en esta carpeta coincide con el filtro."
+    "folderEmptyFiltered": "Nada en esta carpeta coincide con el filtro.",
+    "sharedOnly": "Compartidas",
+    "sharedOnlyHint": "Mostrar solo las colecciones compartidas"
   },
   "editor": {
     "iconSearch": "Buscar un icono…",
@@ -242,6 +244,12 @@
     "permAll": "Edición — todos los planos",
     "stop": "Dejar de compartir",
     "leave": "Salir del uso compartido",
-    "stopHint": "Las demás personas perderán el acceso a los planos compartidos."
+    "stopHint": "Las demás personas perderán el acceso a los planos compartidos.",
+    "badge": "Compartida",
+    "badgeReadOnly": "Compartida contigo · solo lectura",
+    "roleEditor": "Editor",
+    "action": "Compartir…",
+    "actionHint": "Compartir esta colección",
+    "readOnlyTip": "Solo lectura: no puedes modificar esta colección compartida."
   }
 }

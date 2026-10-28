@@ -59,7 +59,12 @@
   "invites": {
     "title": "Invitations",
     "join": "Join",
-    "shared": "Shared document"
+    "shared": "Shared document",
+    "adoptFailed": "Could not add the shared collection",
+    "body": "invited you to a shared document",
+    "later": "Later",
+    "decline": "Decline",
+    "failed": "Could not answer the invitation."
   },
   "projects": {
     "title": "Shared documents",

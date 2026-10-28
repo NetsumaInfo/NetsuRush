@@ -25,7 +25,7 @@ registerCollabSurface({
     if (existing) return { projectId, subjectId: existing.id, name: existing.name };
     const name = suggestedName || i18n.t("collab:invites.shared");
     const result = await collectionApi().save({ name, collaboration: { projectId, role: await grantedRole(projectId) } });
-    if (!result.ok || !result.id) throw new Error(result.error || "Could not adopt shared collection");
+    if (!result.ok || !result.id) throw new Error(result.error || i18n.t("collab:invites.adoptFailed"));
     return { projectId, subjectId: result.id, name };
   },
   async forget(binding) { await collectionApi().delete(binding.subjectId); },

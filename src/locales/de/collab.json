@@ -59,7 +59,12 @@
   "invites": {
     "title": "Einladungen",
     "join": "Beitreten",
-    "shared": "Geteiltes Dokument"
+    "shared": "Geteiltes Dokument",
+    "adoptFailed": "Die geteilte Sammlung konnte nicht hinzugefügt werden",
+    "body": "lädt dich zu einem geteilten Dokument ein",
+    "later": "Später",
+    "decline": "Ablehnen",
+    "failed": "Die Einladung konnte nicht beantwortet werden."
   },
   "projects": {
     "title": "Geteilte Dokumente",

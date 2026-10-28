@@ -59,7 +59,12 @@
   "invites": {
     "title": "邀请",
     "join": "加入",
-    "shared": "共享文档"
+    "shared": "共享文档",
+    "adoptFailed": "无法添加共享合集",
+    "body": "邀请你加入共享文档",
+    "later": "稍后",
+    "decline": "拒绝",
+    "failed": "无法回复邀请。"
   },
   "projects": {
     "title": "共享文档",

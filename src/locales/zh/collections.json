@@ -161,7 +161,9 @@
     "folderEmpty": "此文件夹为空。",
     "plansCount_one": "{{count}} 个镜头",
     "plansCount_other": "{{count}} 个镜头",
-    "folderEmptyFiltered": "此文件夹中没有符合筛选条件的内容。"
+    "folderEmptyFiltered": "此文件夹中没有符合筛选条件的内容。",
+    "sharedOnly": "已共享",
+    "sharedOnlyHint": "仅显示已共享的合集"
   },
   "editor": {
     "iconSearch": "搜索图标…",
@@ -242,6 +244,12 @@
     "permAll": "编辑 — 所有镜头",
     "stop": "停止共享",
     "leave": "退出共享",
-    "stopHint": "其他人将失去对已共享镜头的访问权限。"
+    "stopHint": "其他人将失去对已共享镜头的访问权限。",
+    "badge": "已共享",
+    "badgeReadOnly": "与你共享 · 只读",
+    "roleEditor": "编辑者",
+    "action": "共享…",
+    "actionHint": "共享此合集",
+    "readOnlyTip": "只读：你无法修改此共享合集。"
   }
 }

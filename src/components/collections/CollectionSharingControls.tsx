@@ -68,27 +68,23 @@ function Card({ open, onToggleOpen, control, children }: {
   const { t } = useTranslation("collections");
   const hint = t("share.viaArchive");
   return <div className="overflow-hidden rounded-lg border border-border bg-card">
-    <div className="flex items-center pr-3">
+    <div className="flex items-center gap-1.5 pr-3">
+      {/* One tab stop for the whole header: icon, title and chevron are the same button. The help
+          bubble and the switch are siblings, never nested inside it. */}
       <button type="button" aria-expanded={open} onClick={onToggleOpen}
-        className="flex flex-1 items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50">
+        className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50">
         <span className="text-muted-foreground"><NetsuIcon name="collab" className="size-4" /></span>
-        <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
-          {t("share.title")}
-          {/* Le « pourquoi » tient dans une bulle : la phrase en clair mangeait un quart de la fenêtre. */}
-          <Tooltip>
-            <TooltipTrigger render={<span tabIndex={0} aria-label={hint} className="inline-flex shrink-0 text-muted-foreground"
-              onClick={(event) => event.stopPropagation()} />}>
-              <NetsuIcon name="help" className="size-3.5" />
-            </TooltipTrigger>
-            <TooltipContent className="max-w-64">{hint}</TooltipContent>
-          </Tooltip>
-        </span>
+        <span className="min-w-0 truncate">{t("share.title")}</span>
+        <NetsuIcon name="chevron-toggle" on={open} className="ml-auto size-4 shrink-0 text-muted-foreground" />
       </button>
+      {/* The "why" lives in a bubble: the sentence in plain text ate a quarter of the window. */}
+      <Tooltip>
+        <TooltipTrigger render={<span tabIndex={0} aria-label={hint} className="inline-flex shrink-0 text-muted-foreground" />}>
+          <NetsuIcon name="help" className="size-3.5" />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-64">{hint}</TooltipContent>
+      </Tooltip>
       {control}
-      <button type="button" aria-label={t("share.title")} aria-expanded={open} onClick={onToggleOpen}
-        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
-        <NetsuIcon name="chevron-toggle" on={open} className="size-4" />
-      </button>
     </div>
     {open && children && <div className="space-y-2.5 border-t border-border px-3 py-3">{children}</div>}
   </div>;
@@ -98,7 +94,7 @@ export function CollectionSharingControls(props: Props) {
   const { t } = useTranslation("collections");
   if (!convexConfigured) {
     return <Card open={false} onToggleOpen={() => {}}
-      control={<span className="mr-2.5 shrink-0 text-[11px] text-muted-foreground">{t("share.unavailable")}</span>} />;
+      control={<span className="mr-3 shrink-0 text-[11px] text-muted-foreground">{t("share.unavailable")}</span>} />;
   }
   return <SharingInner {...props} />;
 }
@@ -149,7 +145,7 @@ function SharingInner({ projectId, collectionId, disabled, open, onToggleOpen, s
   const control = <Toggle size="sm" variant="outline" pressed={shared}
     disabled={busy || (!shared && (disabled || !isAuthenticated))}
     onPressedChange={(next) => { if (next) void publish(); else { setStopping(true); if (!open) onToggleOpen(); } }}
-    className="mr-2.5 shrink-0 text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
+    className="shrink-0 text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
     {busy ? <Spinner className="size-3.5" /> : shared ? t("editor.on") : t("editor.off")}
   </Toggle>;
 
@@ -165,7 +161,7 @@ function SharingInner({ projectId, collectionId, disabled, open, onToggleOpen, s
       </div>
     </div>}
     {shared && !stopping && <>
-      <div className="space-y-1.5">
+      <div className="max-h-48 space-y-1.5 overflow-y-auto">
         {project?.members.map((member) => <div key={member.userId} className="flex items-center gap-2">
           <Avatar url={member.image} />
           <span className="min-w-0 flex-1 truncate text-xs">{member.name || member.handle}</span>
@@ -223,7 +219,7 @@ function PermissionSelect({ projectId, member, onError }: {
     } catch (cause) { onError(collabErrorText(cause, t("share.failed"))); }
     finally { setBusy(false); }
   }}>
-    <SelectTrigger size="sm" className="w-44 shrink-0">
+    <SelectTrigger size="sm" className="w-40 max-w-[50%] shrink-0">
       <SelectValue>{t(permissionKey(current))}</SelectValue>
     </SelectTrigger>
     <SelectContent>

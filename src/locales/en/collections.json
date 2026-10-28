@@ -161,7 +161,9 @@
     "folderEmpty": "This folder is empty.",
     "plansCount_one": "{{count}} shot",
     "plansCount_other": "{{count}} shots",
-    "folderEmptyFiltered": "Nothing in this folder matches the filter."
+    "folderEmptyFiltered": "Nothing in this folder matches the filter.",
+    "sharedOnly": "Shared",
+    "sharedOnlyHint": "Show only shared collections"
   },
   "editor": {
     "iconSearch": "Search icons…",
@@ -242,6 +244,12 @@
     "permAll": "Editing — every shot",
     "stop": "Stop sharing",
     "leave": "Leave the share",
-    "stopHint": "Others will lose access to the shared shots."
+    "stopHint": "Others will lose access to the shared shots.",
+    "badge": "Shared",
+    "badgeReadOnly": "Shared with you · read-only",
+    "roleEditor": "Editor",
+    "action": "Share…",
+    "actionHint": "Share this collection",
+    "readOnlyTip": "Read-only: you can't change this shared collection."
   }
 }

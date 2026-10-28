@@ -59,7 +59,12 @@
   "invites": {
     "title": "招待",
     "join": "参加",
-    "shared": "共有ドキュメント"
+    "shared": "共有ドキュメント",
+    "adoptFailed": "共有コレクションを追加できませんでした",
+    "body": "共有ドキュメントに招待されました",
+    "later": "後で",
+    "decline": "辞退",
+    "failed": "招待に返信できませんでした。"
   },
   "projects": {
     "title": "共有ドキュメント",

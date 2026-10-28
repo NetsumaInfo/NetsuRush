@@ -17,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExportButton } from "@/components/export/ExportButton";
 import { ShotCard } from "@/components/rushes/ShotCard";
@@ -73,6 +74,12 @@ export function CollectionDetail({ id }: { id: string }) {
   const [loading, setLoading] = useState(() => !collectionCache.has(id));
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
+  const [editShare, setEditShare] = useState(false);
+  const openEditor = (share: boolean) => { setEditShare(share); setEditing(true); };
+  const role = localColl?.collaboration?.role ?? shared.access?.role;
+  const roleKey = role === "owner" ? "share.owner" : role === "editor" ? "share.roleEditor" : "share.permView";
+  // A viewer, or a share whose role is not known yet, must not look editable.
+  const readOnly = !!sharedProjectId && role === "viewer";
   // Libellé publié AUSSI dans le store : la pastille d'export l'affiche (cf. ExportStatusToast).
   // L'état local reste pour éteindre les boutons pendant l'opération.
   const setExportBusy = useApp((s) => s.setExportBusy);
@@ -318,10 +325,14 @@ export function CollectionDetail({ id }: { id: string }) {
   // Plans ciblés par l'export du panneau (sélection ou tout).
   const panelExportClips = (): ExportClipInput[] => selectedShots().map((s) => ({ input: s.path, start: s.in, end: s.out }));
 
+  // The inspector edits shot metadata: for a shot this account cannot edit, say so instead of hiding it.
+  const readOnlyInspect = !!(inspected?.id && sharedProjectId && !shared.canEdit(inspected.id));
+
   const meta: CollectionMeta | null = coll ? {
     id: coll.id, name: coll.name, color: coll.color, icon: coll.icon, count: coll.shots.length, updatedAt: coll.updatedAt,
     description: coll.description, collTags: coll.tags, folderId: coll.folderId, archive: coll.archive,
     archived: !!coll.archive?.lastAt, autoSync: !!coll.archive?.autoSync,
+    collaboration: localColl?.collaboration ?? null,
   } : null;
 
   return (
@@ -340,10 +351,26 @@ export function CollectionDetail({ id }: { id: string }) {
         {/* Le crayon modifie CE dossier : il se tient contre son nom, pas à l'autre bout de la barre
             au milieu d'outils qui parlent de la grille. */}
         <Tooltip>
-          <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => setEditing(true)} aria-label={tr("common:action.edit")} className="shrink-0 text-muted-foreground" />}>
+          <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => openEditor(false)} aria-label={tr("common:action.edit")} className="shrink-0 text-muted-foreground" />}>
             <NetsuIcon name="edit" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{tr("detail.editFolder")}</TooltipContent>
+        </Tooltip>
+        {sharedProjectId && (
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Badge variant={readOnly ? "outline" : "secondary"} className="gap-1">
+                <NetsuIcon name="collab" className="size-3" /> {tr(roleKey)}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>{tr(readOnly ? "share.readOnlyTip" : "share.badge")}</TooltipContent>
+          </Tooltip>
+        )}
+        <Tooltip>
+          <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => openEditor(true)} aria-label={tr("share.action")} className="shrink-0 text-muted-foreground" />}>
+            <NetsuIcon name="collab" className="size-3.5" />
+          </TooltipTrigger>
+          <TooltipContent>{tr("share.actionHint")}</TooltipContent>
         </Tooltip>
         <div className="flex-1" />
         <Tooltip>
@@ -529,8 +556,15 @@ export function CollectionDetail({ id }: { id: string }) {
                 />
                 {sharedProjectId && <div className="flex flex-wrap gap-1 pt-1">
                   <Button size="sm" variant="ghost" onClick={() => shared.hide(shot.id!)}>{tr("share.hideLocal")}</Button>
-                  {shared.canRemove(shot.id!) && <Button size="sm" variant="ghost" className="text-destructive"
-                    onClick={() => void shared.remove(shot.id!).catch((cause) => setError(collabErrorText(cause, tr("share.failed"))))}>{tr("share.removeGlobal")}</Button>}
+                  {shared.canRemove(shot.id!)
+                    ? <Button size="sm" variant="ghost" className="text-destructive"
+                      onClick={() => void shared.remove(shot.id!).catch((cause) => setError(collabErrorText(cause, tr("share.failed"))))}>{tr("share.removeGlobal")}</Button>
+                    : <Tooltip>
+                      <TooltipTrigger render={<span className="inline-flex" />}>
+                        <Button size="sm" variant="ghost" disabled className="text-destructive">{tr("share.removeGlobal")}</Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{tr("share.readOnlyTip")}</TooltipContent>
+                    </Tooltip>}
                 </div>}
                 </div>
               );
@@ -593,8 +627,9 @@ export function CollectionDetail({ id }: { id: string }) {
 
       {/* Bandeau d'état en PIED de vue, comme au Découpage : au-dessus de la grille il repoussait
           les vignettes vers le bas à chaque message. */}
-      {(error || shared.error || shared.hiddenCount > 0 || undoStack.length > 0) && (
+      {(error || shared.error || shared.hiddenCount > 0 || undoStack.length > 0 || readOnlyInspect) && (
         <div className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-1.5 text-xs">
+          {readOnlyInspect && <span className="inline-flex items-center gap-1 text-muted-foreground"><NetsuIcon name="collab" className="size-3" /> {tr("share.readOnlyTip")}</span>}
           {error && <span className="text-destructive">{error}</span>}
           {shared.error && <span className="text-destructive">{shared.error}</span>}
           {shared.hiddenCount > 0 && <Button size="sm" variant="ghost" onClick={shared.restoreHidden}>{tr("share.restoreHidden", { count: shared.hiddenCount })}</Button>}
@@ -606,7 +641,7 @@ export function CollectionDetail({ id }: { id: string }) {
         </div>
       )}
 
-      {meta && <FolderEditor open={editing} onOpenChange={(v) => { setEditing(v); if (!v) void reload(); }} editing={meta} />}
+      {meta && <FolderEditor open={editing} onOpenChange={(v) => { setEditing(v); if (!v) void reload(); }} editing={meta} expandShare={editShare} />}
     </div>
   );
 }
