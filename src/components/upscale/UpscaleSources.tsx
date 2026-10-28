@@ -53,11 +53,11 @@ const ClipRow = memo(function ClipRow({ clip, selected, onToggle, depth }: { cli
   return (
     <ContextMenu onOpenChange={noteCtx}>
       <ContextMenuTrigger
-        render={<button
+        render={<Button variant="ghost"
           type="button"
           onClick={ctxGuard(() => onToggle(clip))}
           style={{ paddingLeft: depth * 14 + 8 }}
-          className={cn(
+          className={cn("h-auto font-normal whitespace-normal justify-start", 
             "flex w-full items-center gap-2 rounded-lg py-1.5 pr-2 text-left transition-colors",
             selected ? "bg-primary/15" : "hover:bg-accent/60",
           )}
@@ -124,9 +124,9 @@ function FolderView({ node, path, depth, collapsed, toggle, selectedPaths, onTog
   return (
     <div>
       <ContextMenu onOpenChange={noteCtx}>
-        <ContextMenuTrigger render={<button type="button" onClick={ctxGuard(() => toggle(path))}
+        <ContextMenuTrigger render={<Button variant="ghost" type="button" onClick={ctxGuard(() => toggle(path))}
           style={{ paddingLeft: depth * 14 + 4 }}
-          className="flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm hover:bg-accent/60" />}>
+          className="h-auto font-normal whitespace-normal justify-start flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm hover:bg-accent/60" />}>
           <NetsuIcon name="chevron-toggle" on={open} className="size-4 shrink-0 text-muted-foreground" />
           <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />
           <span className="truncate font-medium">{node.name}</span>
@@ -170,8 +170,8 @@ const PlanRow = memo(function PlanRow({ cut, index, selected, onToggle }: { cut:
   const { t } = useTranslation("upscale");
   return (
     <ContextMenu onOpenChange={noteCtx}>
-      <ContextMenuTrigger render={<button type="button" onClick={ctxGuard(onToggle)}
-        className={cn("flex w-full items-center gap-2 rounded-lg py-1.5 pl-2 pr-2 text-left transition-colors",
+      <ContextMenuTrigger render={<Button variant="ghost" type="button" onClick={ctxGuard(onToggle)}
+        className={cn("h-auto font-normal whitespace-normal justify-start", "flex w-full items-center gap-2 rounded-lg py-1.5 pl-2 pr-2 text-left transition-colors",
           selected ? "bg-primary/15" : "hover:bg-accent/60")} />}>
         <div className="relative shrink-0">
           <LazyThumb path={cut.path} at={cut.in} out={cut.out} className={THUMB_CLS} />
@@ -351,13 +351,13 @@ export function UpscaleSources({ up }: { up: ProcController }) {
                 <p className="py-8 text-center text-sm text-muted-foreground">{t("sources.noTimelineFor", { q: query.trim() })}</p>
               )}
               {timelinesF.map((timeline) => (
-                <button key={timeline.name} type="button" onClick={() => openTimeline(timeline.name)}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-accent/60">
+                <Button variant="ghost" key={timeline.name} type="button" onClick={() => openTimeline(timeline.name)}
+                  className="h-auto font-normal whitespace-normal justify-start flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-accent/60">
                   <NetsuIcon name="film" className="size-4 shrink-0 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate font-medium">{timeline.name}</span>
                   {timeline.current && <span className="shrink-0 text-[11px] text-[var(--color-ok)]">{t("sources.opened")}</span>}
                   <NetsuIcon name="next" className="size-4 shrink-0 text-muted-foreground" />
-                </button>
+                </Button>
               ))}
             </div>
           ) : (
@@ -367,10 +367,10 @@ export function UpscaleSources({ up }: { up: ProcController }) {
           // Plans de la timeline ouverte (en vignettes) — chaque plan sélectionnable indépendamment
           <div className="space-y-0.5">
             <div className="flex items-center gap-1 px-1 pb-1">
-              <button type="button" onClick={() => { setQuery(""); setOpened(null); setCuts([]); }}
-                className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Button variant="ghost" type="button" onClick={() => { setQuery(""); setOpened(null); setCuts([]); }}
+                className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <NetsuIcon name="prev" className="size-3.5" /> {t("sources.timelines")}
-              </button>
+              </Button>
               <span className="min-w-0 flex-1 truncate text-xs font-medium">{opened}</span>
               {cuts.length > 0 && (
                 <>

@@ -131,13 +131,15 @@ export function SelectionTray() {
                     <TooltipContent>{t("tray.previewCenter")}</TooltipContent>
                   </Tooltip>
                 )}
-                <button type="button"
+                <Tooltip>
+                  <TooltipTrigger render={<Button variant="ghost" type="button"
                   onClick={(e) => { e.stopPropagation(); remove(key); }}
-                  className="shrink-0 rounded p-0.5 opacity-50 hover:bg-destructive/20 hover:text-destructive hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label={t("tray.removeNamed", { name: s.name })}
-                >
-                  <NetsuIcon name="close" className="size-3.5" />
-                </button>
+                  className="h-auto font-normal whitespace-normal justify-start shrink-0 rounded p-0.5 opacity-50 hover:bg-destructive/20 hover:text-destructive hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={t("tray.removeNamed", { name: s.name })} />}>
+                    <NetsuIcon name="close" className="size-3.5" />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("tray.removeNamed", { name: s.name })}</TooltipContent>
+                </Tooltip>
               </ContextMenuTrigger>
               <ContextMenuContent>
                 <ContextMenuItem onClick={() => setActive(i)} disabled={active}><NetsuIcon name="eye" /> {t("tray.previewCenterMenu")}</ContextMenuItem>

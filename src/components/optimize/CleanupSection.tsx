@@ -148,10 +148,10 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
               const on = sel.has(e.path);
               return (
                 <li key={e.path}>
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     onClick={() => toggle(e.path)}
-                    className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-muted/50"
+                    className="h-auto font-normal whitespace-normal justify-start flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-muted/50"
                   >
                     <NetsuIcon name="checkbox-off" on={on} className={`size-4 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
                     <span className="min-w-0 flex-1">
@@ -166,7 +166,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
                       </Tooltip>
                     </span>
                     <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{fmtBytes(e.size)}</span>
-                  </button>
+                  </Button>
                 </li>
               );
             })}

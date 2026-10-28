@@ -1,4 +1,5 @@
 import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { THEMES, type ThemeId, type ThemeMode } from "@/store/types";
@@ -34,11 +35,11 @@ function ThemeCard({ id, label }: { id: ThemeId; label: string }) {
   const active = useApp((s) => s.theme === id && !s.customThemeId);
   const setTheme = useApp((s) => s.setTheme);
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       aria-pressed={active}
       onClick={() => setTheme(id)}
-      className={cn(
+      className={cn("h-auto font-normal whitespace-normal justify-start", 
         "flex min-w-0 flex-col gap-2 rounded-lg border p-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
         active ? "border-primary bg-accent" : "border-border hover:bg-accent/60",
       )}
@@ -48,7 +49,7 @@ function ThemeCard({ id, label }: { id: ThemeId; label: string }) {
         {active && <NetsuIcon name="check" className="size-4 shrink-0 text-primary" />}
       </div>
       <Swatch theme={id} />
-    </button>
+    </Button>
   );
 }
 

@@ -3,6 +3,7 @@
 // plutôt que dans le store : le core est déjà la seule source de vérité, le dupliquer en localStorage
 // ouvrirait la porte à deux copies divergentes.
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { nr, type DiscordActivity, type DiscordPrefs, type DiscordState } from "@/lib/bridge";
 import { BrandIcon } from "@/components/BrandIcon";
@@ -36,9 +37,9 @@ function Linked({ url, className, children }: {
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button variant="ghost"
             type="button"
-            className={cn(className, "cursor-pointer text-left hover:text-foreground hover:underline")}
+            className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", className, "cursor-pointer text-left hover:text-foreground hover:underline")}
             onClick={() => void nr.openExternal(url)}
           />
         }

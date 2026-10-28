@@ -128,11 +128,11 @@ export function CustomThemesCard() {
             const selected = entry.id === customThemeId;
             return (
               <div key={entry.id} className="group relative">
-                <button
+                <Button variant="ghost"
                   type="button"
                   aria-pressed={selected}
                   onClick={() => selectTheme(entry.id)}
-                  className={cn(
+                  className={cn("h-auto font-normal whitespace-normal justify-start", 
                     "flex w-full min-w-0 flex-col gap-2 rounded-lg border p-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     selected ? "border-primary bg-accent" : "border-border hover:bg-accent/60",
                   )}
@@ -142,7 +142,7 @@ export function CustomThemesCard() {
                     {selected && <NetsuIcon name="check" className="size-4 shrink-0 text-primary" />}
                   </div>
                   <ThemePreview theme={entry} poster={entry.wallpaper.id ? posters[entry.wallpaper.id] ?? null : null} />
-                </button>
+                </Button>
                 {/* Actions au survol : renommer et supprimer. Elles vivent HORS du bouton de
                     sélection — un bouton dans un bouton n'est pas un contrôle valide. */}
                 <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
@@ -193,14 +193,14 @@ function CardAction({ label, onClick, children }: { label: string; onClick: () =
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button variant="ghost"
             type="button"
             aria-label={label}
             onClick={onClick}
-            className="rounded bg-black/70 p-1 text-white outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent rounded bg-black/70 p-1 text-white outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {children}
-          </button>
+          </Button>
         }
       />
       <TooltipContent>{label}</TooltipContent>

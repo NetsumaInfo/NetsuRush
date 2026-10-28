@@ -1,5 +1,7 @@
 // Sélecteur d'icône d'un profil d'export, façon Carnet — 3 onglets : Emojis (emoji-mart), Icônes
 // (grille lucide cherchable, jeu complet), Images (bibliothèque persistée + import GIF/PNG). Popover
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 // Base UI. Renvoie un ExportIcon ({ emoji } | { lucide } | { image }).
 import { createElement, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,11 +47,11 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: E
         <>
           <div ref={gridRef} className="grid max-h-64 grid-cols-8 gap-1 overflow-y-auto">
             {list.map((n) => (
-              <button key={n} type="button" aria-label={n} data-hover-label={n} onClick={() => onPick({ type: "lucide", name: n })}
-                className={cn("flex aspect-square items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              <Button variant="ghost" key={n} type="button" aria-label={n} data-hover-label={n} onClick={() => onPick({ type: "lucide", name: n })}
+                className={cn("h-auto font-normal whitespace-normal", "flex aspect-square items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   current === n ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
                 {createElement(lucideIcon(n) as LucideIcon, { className: "size-4" })}
-              </button>
+              </Button>
             ))}
           </div>
           <HoverLabel containerRef={gridRef} />
@@ -79,23 +81,26 @@ function ImageTab({ current, onPick }: { current: string | null; onPick: (icon: 
         <div className="mb-2 grid grid-cols-5 gap-1.5">
           {library.map((src) => (
             <div key={src} className="group/icn relative">
-              <button type="button" aria-label={t("iconPicker.importedImage")} onClick={() => onPick({ type: "image", src })}
-                className={cn("flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 p-1 transition-colors",
+              <Button variant="ghost" type="button" aria-label={t("iconPicker.importedImage")} onClick={() => onPick({ type: "image", src })}
+                className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", "flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 p-1 transition-colors",
                   current === src ? "border-primary ring-1 ring-primary" : "border-border hover:border-foreground/40")}>
                 <img src={src} alt="" className="max-h-full max-w-full object-contain" draggable={false} />
-              </button>
-              <button type="button" aria-label={t("iconPicker.removeFromLibrary")} onClick={() => removeIcon(src)}
-                className="absolute -right-1 -top-1 hidden size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover/icn:flex">
-                <X className="size-2.5" />
-              </button>
+              </Button>
+              <Tooltip>
+                <TooltipTrigger render={<Button variant="ghost" type="button" aria-label={t("iconPicker.removeFromLibrary")} onClick={() => removeIcon(src)}
+                className="h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent absolute -right-1 -top-1 hidden size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover/icn:flex focus-visible:flex" />}>
+                  <X className="size-2.5" />
+                </TooltipTrigger>
+                <TooltipContent>{t("iconPicker.removeFromLibrary")}</TooltipContent>
+              </Tooltip>
             </div>
           ))}
         </div>
       )}
-      <button type="button" onClick={() => fileRef.current?.click()}
-        className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-border px-2 py-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+      <Button variant="ghost" type="button" onClick={() => fileRef.current?.click()}
+        className="h-auto font-normal whitespace-normal flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-border px-2 py-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
         <ImagePlus className="size-4" /> {t("iconPicker.importImage")}
-      </button>
+      </Button>
       <input ref={fileRef} type="file" accept="image/*,image/gif" className="hidden"
         onChange={(e) => void pickFile(e.target.files?.[0])
           .catch(() => {})
@@ -130,10 +135,10 @@ export function IconPicker({ profile, onChange }: { profile: ExportProfile; onCh
           <Popover.Popup className="max-h-(--available-height) overflow-x-hidden overflow-y-auto scrollbar-inset w-[22rem] origin-[var(--transform-origin)] rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-xl outline-none data-[starting-style]:scale-98 data-[starting-style]:opacity-0 transition-[transform,opacity]">
             <div className="mb-2 flex items-center gap-1 border-b border-border pb-2">
               {tabs.map((t) => (
-                <button key={t.id} type="button" onClick={() => setTab(t.id)}
-                  className={cn("flex items-center gap-1 rounded-md px-2 py-1 text-sm", tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                <Button variant="ghost" key={t.id} type="button" onClick={() => setTab(t.id)}
+                  className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", "flex items-center gap-1 rounded-md px-2 py-1 text-sm", tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}>
                   {createElement(t.icon, { className: "size-3.5" })} {t.label}
-                </button>
+                </Button>
               ))}
             </div>
             {tab === "emoji" && <EmojiPicker onPick={(ch) => onChange({ type: "emoji", ch })} />}

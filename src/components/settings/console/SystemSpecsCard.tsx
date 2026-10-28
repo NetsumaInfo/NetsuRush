@@ -87,14 +87,14 @@ export function SystemSpecsCard({ context, loading, onRefresh, manual, onManualC
           <ul className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
             {summaryLines(context, t).map((line) => <li key={line} className="truncate">{line}</li>)}
           </ul>
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent mt-2 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
           >
             <NetsuIcon name="chevron-toggle" on={open} className="size-3" />
             {open ? t("bugReport.specs.less") : t("bugReport.specs.more")}
-          </button>
+          </Button>
           {open && (
             <pre className="mt-2 overflow-x-auto rounded-md bg-input/40 p-2 font-mono text-[10px] leading-relaxed text-muted-foreground">
               {formatContext(context)}

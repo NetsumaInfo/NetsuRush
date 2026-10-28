@@ -3,6 +3,7 @@
 // kept for state that changes at run time (a version, a count, an error), never for an
 // explanation — an explanation sits behind the info icon, where it costs no height.
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -12,7 +13,7 @@ export function InfoTip({ text }: { text: string }) {
     <Tooltip>
       <TooltipTrigger
         closeOnClick={false}
-        render={<button type="button" className="shrink-0 text-muted-foreground transition-colors hover:text-foreground" aria-label={text} />}
+        render={<Button variant="ghost" type="button" className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent shrink-0 text-muted-foreground transition-colors hover:text-foreground" aria-label={text} />}
       >
         <NetsuIcon name="info" className="size-3.5" />
       </TooltipTrigger>

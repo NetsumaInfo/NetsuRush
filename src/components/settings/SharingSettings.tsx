@@ -468,14 +468,14 @@ function SharingInner() {
               line says the count; expanding gives each its adopt button and its bin. */}
           {!!absent.length && (
             <div className="mt-2 overflow-hidden rounded-lg border border-border">
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setShowAbsent((current) => !current)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                className="h-auto font-normal whitespace-normal justify-start flex w-full items-center gap-2 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
               >
                 <NetsuIcon name="chevron-toggle" on={showAbsent} className="size-3.5" />
                 {t("projects.absent", { count: absent.length })}
-              </button>
+              </Button>
               {showAbsent && (
                 <div className="divide-y divide-border border-t border-border px-3">
                   {absent.map((project) => projectRow(

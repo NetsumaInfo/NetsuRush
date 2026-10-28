@@ -33,11 +33,11 @@ export function ExportProfileSettings() {
             {profiles.map((profile) => {
               const on = profile.id === activeId;
               return (
-                <button
+                <Button variant="ghost"
                   key={profile.id}
                   type="button"
                   onClick={() => setActive(profile.id)}
-                  className={cn(
+                  className={cn("h-auto font-normal whitespace-normal justify-start", 
                     "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[0.8125rem] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                     on ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/60",
                   )}
@@ -45,7 +45,7 @@ export function ExportProfileSettings() {
                   <ExportProfileIcon profile={profile} className="size-3.5 shrink-0" />
                   <span className="min-w-0 flex-1 truncate">{profile.name}</span>
                   {on && <NetsuIcon name="check" className="size-3.5 shrink-0 text-primary" />}
-                </button>
+                </Button>
               );
             })}
           </div>

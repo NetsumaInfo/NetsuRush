@@ -170,11 +170,11 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
             const on = sel.has(i.path);
             return (
               <li key={i.path}>
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => i.canProxy && toggle(i.path)}
                   disabled={!i.canProxy}
-                  className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs hover:bg-muted/50 disabled:opacity-50"
+                  className="h-auto font-normal whitespace-normal justify-start flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs hover:bg-muted/50 disabled:opacity-50"
                 >
                   <NetsuIcon name="checkbox-off" on={on} className={`size-3.5 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
                   <Tooltip>
@@ -188,7 +188,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
                   ) : (
                     <Badge variant="secondary">{t("boost.proxy.cannot")}</Badge>
                   )}
-                </button>
+                </Button>
               </li>
             );
           })}

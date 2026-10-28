@@ -3,6 +3,7 @@
 import { useState, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CacheFolder, CacheRush, CacheTree as CacheTreeData } from "@/lib/bridge";
@@ -34,12 +35,7 @@ function RushRow({ rush, on, onToggle }: { rush: CacheRush; on: boolean; onToggl
   const kinds = Object.entries(rush.byKind).filter(([, v]) => (v || 0) > 0) as [CacheKind, number][];
   return (
     <label className="flex cursor-pointer items-center gap-2 rounded-md py-1 pl-7 pr-2 text-xs hover:bg-accent/50">
-      <input
-        type="checkbox"
-        checked={on}
-        onChange={(e) => onToggle([rush.source], e.target.checked)}
-        className="size-3.5 shrink-0 accent-[var(--color-primary)]"
-      />
+      <Checkbox checked={on} onCheckedChange={(v) => onToggle([rush.source], v)} className="size-3.5" />
       <Tooltip>
         <TooltipTrigger render={<span className="min-w-0 flex-1 truncate text-foreground" />}>{rush.name}</TooltipTrigger>
         <TooltipContent>{rush.source}</TooltipContent>
@@ -73,17 +69,14 @@ function FolderRow({ folder, selected, onToggle }: { folder: CacheFolder; select
   return (
     <div className="border-b border-border last:border-0">
       <div className="flex items-center gap-2 py-1.5 pr-2 text-xs">
-        <input
-          type="checkbox"
+        <Checkbox
           aria-label={t("storage.tree.selectFolder", { name: folder.folder.split(/[\\/]/).filter(Boolean).pop() || folder.folder })}
           checked={all}
-          // Un dossier partiellement sélectionné : ni coché ni vide, sinon on ne distingue pas
-          // « rien » de « quelques rushs » en repliant.
-          ref={(el) => { if (el) el.indeterminate = nSel > 0 && !all; }}
-          onChange={(e) => onToggle(sources, e.target.checked)}
-          className="ml-2 size-3.5 shrink-0 accent-[var(--color-primary)]"
+          indeterminate={nSel > 0 && !all}
+          onCheckedChange={(v) => onToggle(sources, v)}
+          className="ml-2 size-3.5"
         />
-        <button type="button" onClick={() => setOpen((v) => !v)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+        <Button variant="ghost" type="button" onClick={() => setOpen((v) => !v)} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent flex min-w-0 flex-1 items-center gap-1.5 text-left">
           <NetsuIcon name="chevron-toggle" on={open} className="size-3.5 shrink-0 text-muted-foreground" />
           <Tooltip>
             <TooltipTrigger render={<span className="min-w-0 flex-1 truncate font-medium text-foreground" />}>
@@ -92,7 +85,7 @@ function FolderRow({ folder, selected, onToggle }: { folder: CacheFolder; select
             <TooltipContent>{folder.folder}</TooltipContent>
           </Tooltip>
           <span className="shrink-0 text-muted-foreground">{t("storage.tree.rushCount", { count: folder.rushes.length })}</span>
-        </button>
+        </Button>
         <span className="w-14 shrink-0 text-right tabular-nums font-medium text-foreground">{fmtBytes(folder.bytes)}</span>
       </div>
       {open && (

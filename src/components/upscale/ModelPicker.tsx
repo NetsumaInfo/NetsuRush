@@ -157,11 +157,11 @@ export function ModelPicker({ items, value, onChange, disabled, className, empty
         </SelectContent>
       </Select>
       {missing && (
-        <button type="button" onClick={openModelsPage} className="flex w-full items-center gap-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" type="button" onClick={openModelsPage} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
           <NetsuIcon name="warning" className="size-3 shrink-0 text-[var(--color-warn)]" />
           <span>{t("modelPicker.required")}</span>
           <span className="ml-auto shrink-0 underline underline-offset-2">{t("modelPicker.settings")}</span>
-        </button>
+        </Button>
       )}
     </div>
   );

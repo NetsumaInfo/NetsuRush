@@ -120,11 +120,11 @@ export function AttachmentPicker({ files, onChange, maxFiles = DEFAULT_MAX_FILES
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <button
+                        <Button variant="ghost"
                           type="button"
                           onClick={() => remove(file)}
                           aria-label={t("bugReport.files.remove")}
-                          className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                          className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
                         />
                       }
                     >

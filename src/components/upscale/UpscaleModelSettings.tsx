@@ -4,6 +4,7 @@
 // au premier réglage ajouté. Ce qui reste propre à Traitements (encodage de sortie, dossier, import)
 // n'est pas ici : l'archivage a déjà les siens.
 import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -130,10 +131,10 @@ export function UpscaleModelSettings({ settings, patch, disabled }: {
 
       {/* Réglages experts repliés par défaut → panneau épuré. IA = VRAM/précision ; temps réel =
           filtres libplacebo, ou paramètres du RTX Video SDK (les deux n'ont rien en commun). */}
-      <button type="button" onClick={() => setAdvanced((a) => !a)}
-        className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
+      <Button variant="ghost" type="button" onClick={() => setAdvanced((a) => !a)}
+        className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
         <NetsuIcon name="chevron-toggle" on={advanced} className="size-3.5" /> {t("settings.advanced")}
-      </button>
+      </Button>
 
       {isTurbo && advanced && (
         isRtx ? <RtxAdvanced settings={settings} patch={patch} disabled={disabled} />

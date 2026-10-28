@@ -39,10 +39,10 @@ function RootRow({ root, checked, onToggle }: RootRowProps) {
   const Icon = cacheIcon(root.kind);
   return (
     <li>
-      <button
+      <Button variant="ghost"
         type="button"
         onClick={() => onToggle(root.dir)}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-muted/50"
+        className="h-auto font-normal whitespace-normal justify-start flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-muted/50"
       >
         <NetsuIcon name="checkbox-off" on={checked} className={`size-4 shrink-0 ${checked ? "text-primary" : "text-muted-foreground"}`} />
         <Icon className="size-4 shrink-0 text-muted-foreground" />
@@ -63,7 +63,7 @@ function RootRow({ root, checked, onToggle }: RootRowProps) {
           </Tooltip>
         </span>
         <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{fmtBytes(root.size ?? 0)}</span>
-      </button>
+      </Button>
     </li>
   );
 }

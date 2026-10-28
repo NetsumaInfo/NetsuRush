@@ -2,6 +2,7 @@
 // titre, cf. SettingsSubnav). Ce module ne fait que router — la carte des pages vit dans
 // features/settings/nav, chaque panneau dans son propre fichier.
 import type { ComponentType } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
@@ -57,12 +58,12 @@ function SettingsNav() {
           const on = item.id === page;
           const Icon = item.icon;
           return (
-            <button
+            <Button variant="ghost"
               key={item.id}
               type="button"
               aria-current={on ? "page" : undefined}
               onClick={() => setPage(item.id)}
-              className={cn(
+              className={cn("h-auto font-normal whitespace-normal justify-start", 
                 "flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                 on ? "bg-accent font-medium text-foreground" : "text-muted-foreground hover:bg-accent/60",
               )}
@@ -71,7 +72,7 @@ function SettingsNav() {
               {item.id === "storage" && storageAlert && (
                 <span className="ml-auto size-1.5 shrink-0 rounded-full bg-destructive" />
               )}
-            </button>
+            </Button>
           );
         })}
       </nav>

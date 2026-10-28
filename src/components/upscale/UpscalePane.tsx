@@ -3,6 +3,7 @@
 // MÊME `UpscaleModelSettings`. Ce fichier n'ajoute que l'emballage — interrupteur, résumé du volet
 // fermé, pliage — parce que la dizaine de réglages dépliés noierait le reste du panneau.
 import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Toggle } from "@/components/ui/toggle";
 import { UpscaleModelSettings } from "./UpscaleModelSettings";
@@ -28,15 +29,15 @@ export function SettingsPane({
   return (
     <div className="overflow-hidden rounded-md border border-border/70 bg-muted/20">
       <div className="flex items-center gap-2 pr-2">
-        <button type="button" aria-expanded={open} onClick={onToggle}
-          className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-accent/40">
+        <Button variant="ghost" type="button" aria-expanded={open} onClick={onToggle}
+          className="h-auto font-normal whitespace-normal justify-start flex min-w-0 flex-1 items-center gap-2 px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-accent/40">
           <span className="shrink-0">{label}</span>
           {summary && <span className="min-w-0 flex-1 truncate text-right text-[11px] font-normal text-muted-foreground">{summary}</span>}
-        </button>
+        </Button>
         {control}
-        <button type="button" aria-hidden tabIndex={-1} onClick={onToggle} className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
+        <Button variant="ghost" type="button" aria-hidden tabIndex={-1} onClick={onToggle} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent shrink-0 text-muted-foreground transition-colors hover:text-foreground">
           <NetsuIcon name="chevron-toggle" on={open} className="size-3.5" />
-        </button>
+        </Button>
       </div>
       {open && <div className="space-y-2.5 border-t border-border/70 px-2.5 py-2.5">{children}</div>}
     </div>

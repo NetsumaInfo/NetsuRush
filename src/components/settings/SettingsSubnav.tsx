@@ -3,6 +3,7 @@
 // une page d'un seul sujet (Export, Adobe). En mode épinglé la barre est trop étroite : SettingsPanel
 // rend le repli.
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import { useApp } from "@/store";
 import { settingsPageDef } from "@/features/settings/nav";
 import { cn } from "@/lib/utils";
@@ -23,18 +24,18 @@ export function SettingsSubnav() {
         const on = tab.id === active;
         const Icon = tab.icon;
         return (
-          <button
+          <Button variant="ghost"
             key={tab.id}
             type="button"
             aria-current={on ? "page" : undefined}
             onClick={() => setTab(page, tab.id)}
-            className={cn(
+            className={cn("h-auto font-normal whitespace-normal justify-start", 
               "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-colors",
               on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
           >
             <Icon className="size-3.5" /> {t(`tab.${page}.${tab.id}`)}
-          </button>
+          </Button>
         );
       })}
     </div>

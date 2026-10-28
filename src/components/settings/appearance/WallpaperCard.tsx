@@ -106,11 +106,11 @@ export function WallpaperCard() {
         <Tooltip>
           <TooltipTrigger
             render={
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => void pick()}
                 disabled={busy}
-                className={cn(
+                className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", 
                   THUMB_CLASS,
                   "grid place-items-center border-dashed border-border text-muted-foreground",
                   "hover:border-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
@@ -118,7 +118,7 @@ export function WallpaperCard() {
                 )}
               >
                 {busy ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="image-add" className="size-4" />}
-              </button>
+              </Button>
             }
           />
           <TooltipContent>{t("appearance.wallpaper.choose")}</TooltipContent>
@@ -128,17 +128,17 @@ export function WallpaperCard() {
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => setWallpaper({ id: null })}
-                  className={cn(
+                  className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", 
                     THUMB_CLASS,
                     "grid place-items-center border-border bg-card text-muted-foreground",
                     "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                   )}
                 >
                   <NetsuIcon name="close" className="size-4" />
-                </button>
+                </Button>
               }
             />
             <TooltipContent>{t("appearance.wallpaper.none")}</TooltipContent>
@@ -150,30 +150,32 @@ export function WallpaperCard() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     aria-pressed={entry.id === config.id}
                     onClick={() => setWallpaper({ id: entry.id })}
-                    className={cn(
+                    className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", 
                       THUMB_CLASS,
                       "block focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                       entry.id === config.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-muted-foreground",
                     )}
                   >
                     <img src={nr.mediaUrl(entry.poster)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                  </button>
+                  </Button>
                 }
               />
               <TooltipContent>{entry.name}</TooltipContent>
             </Tooltip>
-            <button
+            <Tooltip>
+              <TooltipTrigger render={<Button variant="ghost"
               type="button"
               aria-label={t("appearance.wallpaper.remove")}
               onClick={() => void remove(entry.id)}
-              className="absolute top-1 right-1 rounded bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-            >
-              <NetsuIcon name="trash" className="size-3" />
-            </button>
+              className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent absolute top-1 right-1 rounded bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" />}>
+                <NetsuIcon name="trash" className="size-3" />
+              </TooltipTrigger>
+              <TooltipContent>{t("appearance.wallpaper.remove")}</TooltipContent>
+            </Tooltip>
           </div>
         ))}
 

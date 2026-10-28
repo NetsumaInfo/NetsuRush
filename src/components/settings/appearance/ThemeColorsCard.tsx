@@ -106,11 +106,11 @@ export function ThemeColorsCard() {
                   toute la grille sous le curseur. */}
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-[0.8125rem]">{t(`appearance.colors.${color}`)}</span>
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => restore(color)}
                   disabled={!overridden}
-                  className={cn(
+                  className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", 
                     "block h-4 truncate text-[11px] outline-none",
                     overridden
                       ? "text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:underline"
@@ -118,7 +118,7 @@ export function ThemeColorsCard() {
                   )}
                 >
                   {overridden ? t("appearance.colors.restore") : t("appearance.colors.fromTheme")}
-                </button>
+                </Button>
               </div>
             </div>
           );
