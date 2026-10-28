@@ -74,6 +74,9 @@ function sqliteBackend(dbPath) {
       db
         .prepare('SELECT id, name, data, updated_at FROM collections ORDER BY updated_at DESC')
         .all(),
+    // Sans la colonne `data` (tous les plans en JSON) : suffit pour valider un cache de méta.
+    heads: () =>
+      db.prepare('SELECT id, name, updated_at FROM collections ORDER BY updated_at DESC').all(),
     get: (id) => db.prepare('SELECT id, name, data, updated_at FROM collections WHERE id = ?').get(id) || null,
     put: (id, name, data, ts) => db.prepare(UPSERT).run(id, name, data, ts),
     del: (id) => db.prepare('DELETE FROM collections WHERE id = ?').run(id),
@@ -92,6 +95,9 @@ function jsonBackend(filePath) {
   };
   return {
     list: () => Object.values(read()).sort((a, b) => b.updated_at - a.updated_at),
+    heads: () => Object.values(read())
+      .sort((a, b) => b.updated_at - a.updated_at)
+      .map((r) => ({ id: r.id, name: r.name, updated_at: r.updated_at })),
     get: (id) => read()[id] || null,
     put: (id, name, data, ts) => {
       const o = read();
@@ -119,6 +125,26 @@ function createCollectionStore(dataDir) {
   } catch (e) {
     backend = jsonBackend(path.join(dir, 'collections.json'));
     kind = 'json';
+  }
+
+  // Cache de méta par collection : { updatedAt, meta, tags }. Rempli paresseusement, invalidé par
+  // CHAQUE écriture (put/del du backend passent par ici) ; validé aussi par updated_at.
+  const metaCache = new Map();
+  const rawPut = backend.put;
+  const rawDel = backend.del;
+  backend.put = (id, ...rest) => { metaCache.delete(id); return rawPut(id, ...rest); };
+  backend.del = (id) => { metaCache.delete(id); return rawDel(id); };
+
+  function cachedEntry(head) {
+    const hit = metaCache.get(head.id);
+    if (hit && hit.updatedAt === head.updated_at && hit.name === head.name) return hit;
+    const c = decode(backend.get(head.id));
+    if (!c) return null;
+    const tagSet = new Set(c.tags || []);
+    for (const s of c.shots) for (const x of (s.tags || [])) tagSet.add(x);
+    const entry = { updatedAt: c.updatedAt, name: c.name, meta: meta(c), tags: [...tagSet] };
+    metaCache.set(head.id, entry);
+    return entry;
   }
 
   // Décode une ligne → collection complète. data JSON = {color, icon, shots, description, tags,
@@ -187,7 +213,13 @@ function createCollectionStore(dataDir) {
   function listCollections() {
     try {
       const out = [];
-      for (const item of backend.list()) out.push(meta(decode(item)));
+      const live = new Set();
+      for (const head of backend.heads()) {
+        live.add(head.id);
+        const e = cachedEntry(head);
+        if (e) out.push(e.meta);
+      }
+      for (const id of metaCache.keys()) if (!live.has(id)) metaCache.delete(id);
       return out;
     } catch (_) { return []; }
   }
@@ -369,9 +401,9 @@ function createCollectionStore(dataDir) {
   function allTags() {
     try {
       const set = new Set();
-      for (const c of backend.list().map(decode)) {
-        for (const t of (c.tags || [])) set.add(t);
-        for (const s of (c.shots || [])) for (const t of (s.tags || [])) set.add(t);
+      for (const head of backend.heads()) {
+        const e = cachedEntry(head);
+        if (e) for (const x of e.tags) set.add(x);
       }
       return [...set].sort((a, b) => String(a).localeCompare(String(b), 'fr'));
     } catch (_) { return []; }
@@ -381,27 +413,39 @@ function createCollectionStore(dataDir) {
   // Une collection ne stocke QUE des chemins de fichiers : elle s'ouvre même logiciels fermés, mais un
   // média déplacé devient « hors-ligne ». On liste les chemins manquants (dédupliqués : une source =
   // souvent plusieurs plans) pour les relier depuis les réglages.
-  function scanOffline(c) {
+  async function scanOffline(c) {
     const seen = new Set();
-    const missing = [];
+    const paths = [];
     for (const s of c.shots) {
       if (!s.path || seen.has(s.path)) continue;
       seen.add(s.path);
-      let ok = false;
-      try { ok = fs.existsSync(s.path); } catch (_) {}
-      if (!ok) missing.push({ path: s.path, name: s.name || path.basename(s.path), count: 0 });
+      paths.push(s);
     }
+    // Existence vérifiée en asynchrone, par lots bornés : ne bloque jamais la boucle du core.
+    const present = new Array(paths.length).fill(false);
+    let next = 0;
+    const worker = async () => {
+      while (next < paths.length) {
+        const i = next++;
+        try { await fs.promises.access(paths[i].path); present[i] = true; } catch (_) {}
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(16, paths.length) }, worker));
+    const missing = [];
+    paths.forEach((s, i) => {
+      if (!present[i]) missing.push({ path: s.path, name: s.name || path.basename(s.path), count: 0 });
+    });
     // Nombre de plans par source manquante (info UI).
     const missingByPath = new Map(missing.map((x) => [x.path, x]));
     for (const s of c.shots) { const m = missingByPath.get(s.path); if (m) m.count++; }
     return { missing, sources: seen.size };
   }
 
-  function offlineShots(id) {
+  async function offlineShots(id) {
     try {
       const c = loadCollection(id);
       if (!c) return { ok: false, error: t('collectionMissing') };
-      let { missing, sources } = scanOffline(c);
+      let { missing, sources } = await scanOffline(c);
       // Relocalisation SILENCIEUSE par contenu (cf. core/mediaIdent.js) : une source manquante dont
       // les octets EXACTS sont connus ailleurs et toujours présents se repointe toute seule.
       let relinked = 0;
@@ -413,7 +457,7 @@ function createCollectionStore(dataDir) {
       }
       if (relinked) {
         const again = loadCollection(id);
-        if (again) ({ missing, sources } = scanOffline(again));
+        if (again) ({ missing, sources } = await scanOffline(again));
       }
       return { ok: true, missing, offline: missing.length, total: sources, relinked };
     } catch (e) { return { ok: false, error: String(e) }; }
