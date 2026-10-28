@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
@@ -59,20 +60,20 @@ export function CharacterChips() {
           <ContextMenu key={c.id}>
             <ContextMenuTrigger>
               <Tooltip>
-                <TooltipTrigger render={<button
+                <TooltipTrigger render={<Button variant="ghost"
                   type="button"
                   onClick={() => onChipClick(c)}
                   onDoubleClick={() => setRenamingId(c.id)}
-                  className={cn(
+                  className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
                     "inline-flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-2 text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     active
                       ? "border-primary bg-primary/15 text-primary hover:bg-primary/20"
                       : "border-border bg-card hover:border-primary/50 hover:bg-accent",
                   )} />}>
-                  <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-muted" style={c.color ? { boxShadow: `inset 0 0 0 1.5px ${c.color}` } : undefined}>
+                  <span className="size-5 shrink-0 overflow-hidden rounded-full bg-muted" style={c.color ? { boxShadow: `inset 0 0 0 1.5px ${c.color}` } : undefined}>
                     {c.avatar
                       ? <img src={c.avatar} alt="" className="h-full w-full object-cover" />
-                      : <NetsuIcon name="face" className="m-1 h-3 w-3 text-muted-foreground" />}
+                      : <NetsuIcon name="face" className="m-1 size-3 text-muted-foreground" />}
                   </span>
                   {renamingId === c.id ? (
                     <InlineRename
@@ -84,7 +85,7 @@ export function CharacterChips() {
                   ) : (
                     <span className="max-w-28 truncate">{c.name}</span>
                   )}
-                  {active && <NetsuIcon name="close" className="h-3 w-3 shrink-0" />}
+                  {active && <NetsuIcon name="close" className="size-3 shrink-0" />}
                 </TooltipTrigger>
                 <TooltipContent>
                   {active

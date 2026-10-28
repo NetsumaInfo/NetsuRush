@@ -2,6 +2,7 @@
 // dossiers (bins) repliables imbriqués + grille de vignettes compactes, comme le Media Pool de Resolve.
 // Deux modes : `onOpen` (clic ouvre) OU `selected`+`onToggle` (multi-sélection à cases).
 import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Badge } from "@/components/ui/badge";
@@ -64,11 +65,11 @@ export function TimelineFolders({
     return (
       <ContextMenu key={t.name}>
         <ContextMenuTrigger render={
-          <button
+          <Button variant="ghost"
             type="button"
             disabled={busy}
             onClick={() => (onToggle ? onToggle(t.name) : onOpen?.(t.name))}
-            className={cn(
+            className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
               "group relative flex flex-col overflow-hidden rounded-lg border text-left transition-all disabled:opacity-60",
               on ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50 hover:-translate-y-0.5",
             )} />
@@ -115,12 +116,12 @@ export function TimelineFolders({
         {!isRoot && (
           <ContextMenu>
             <ContextMenuTrigger render={
-              <button type="button" onClick={() => toggleFolder(node.path)}
+              <Button variant="ghost" type="button" onClick={() => toggleFolder(node.path)}
                 style={{ paddingLeft: (depth - 1) * 16 }}
-                className="flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 text-sm text-foreground transition-colors hover:bg-accent/60" />
+                className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 text-sm text-foreground transition-colors hover:bg-accent/60" />
             }>
-              <NetsuIcon name="chevron-toggle" on={!isCol} className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <NetsuIcon name="chevron-toggle" on={!isCol} className="size-4 shrink-0 text-muted-foreground" />
+              <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />
               <span className="truncate font-medium">{node.name}</span>
               <span className="text-xs text-muted-foreground">{countAll(node)}</span>
             </ContextMenuTrigger>

@@ -147,7 +147,7 @@ export function RushGrid() {
         <h1 className="text-[13px] font-medium">{t("home.title")}</h1>
         <span className="text-[11px] text-muted-foreground">{all.length || "—"}</span>
         <div className="relative ml-2 max-w-xs flex-1">
-          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("rushGrid.searchPlaceholder")} className="h-8 pl-8" />
         </div>
         {all.length > 0 && <FoldersToggle pressed={folders} onPressedChange={setFolders} />}
@@ -158,33 +158,33 @@ export function RushGrid() {
         {all.length > 0 && (
           <Tooltip>
             <TooltipTrigger render={<Button variant={selectMode ? "default" : "outline"} size="icon-sm" onClick={() => (selectMode ? exitSelect() : setSelectMode(true))} aria-label={t("rushGrid.select")} />}>
-              <NetsuIcon name="task-list" className="h-4 w-4" />
+              <NetsuIcon name="task-list" className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{selectMode ? t("rushGrid.exitSelect") : t("rushGrid.selectBatch")}</TooltipContent>
           </Tooltip>
         )}
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => setNewFolder(true)} aria-label={t("library.newFolder")} />}>
-            <NetsuIcon name="cut-folder-new" className="h-4 w-4" />
+            <NetsuIcon name="cut-folder-new" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("library.newFolder")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={pickFiles} aria-label={t("rushGrid.import")} />}>
-            <NetsuIcon name="file-video" className="h-4 w-4" />
+            <NetsuIcon name="file-video" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("home.import")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={pickDir} aria-label={t("library.importFolder")} />}>
-            <NetsuIcon name="cut-import" className="h-4 w-4" />
+            <NetsuIcon name="cut-import" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("library.importFolder")}</TooltipContent>
         </Tooltip>
         {connected && (
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={openCutTimeline} aria-label={t("home.cutTimeline")} />}>
-              <NetsuIcon name="scissors" className="h-4 w-4" />
+              <NetsuIcon name="scissors" className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{t("home.cutTimeline")}</TooltipContent>
           </Tooltip>

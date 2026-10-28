@@ -239,7 +239,7 @@ export function CutTimelineView() {
       <header className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
         <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common:action.back")} onClick={close}><NetsuIcon name="back" className="size-4" /></Button>
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <NetsuIcon name="scissors" className="h-4 w-4 shrink-0 text-primary" />
+          <NetsuIcon name="scissors" className="size-4 shrink-0 text-primary" />
           <span className="text-[13px] font-medium">{t("cutTimeline.title")}</span>
         </div>
       </header>
@@ -247,7 +247,7 @@ export function CutTimelineView() {
       {/* Barre de navigation (fixe) : recherche + dossiers + tri */}
       <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
         <div className="relative max-w-md flex-1">
-          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} disabled={busy} placeholder={t("shared.searchTimeline")} className="h-8 pl-8" />
         </div>
         <div className="flex-1" />
@@ -348,10 +348,10 @@ export function CutTimelineView() {
           <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-border p-2 text-xs">
             {batch.items.map((it) => (
               <div key={it.name} className="flex items-center gap-2">
-                {it.status === "done" ? <NetsuIcon name="check" className="h-3.5 w-3.5 shrink-0 text-[var(--color-ok)]" />
-                  : it.status === "error" ? <NetsuIcon name="error-badge" className="h-3.5 w-3.5 shrink-0 text-destructive" />
+                {it.status === "done" ? <NetsuIcon name="check" className="size-3.5 shrink-0 text-[var(--color-ok)]" />
+                  : it.status === "error" ? <NetsuIcon name="error-badge" className="size-3.5 shrink-0 text-destructive" />
                   : it.status === "running" ? <Spinner className="size-3.5 text-primary" />
-                  : <NetsuIcon name="film" className="h-3.5 w-3.5 shrink-0 opacity-40" />}
+                  : <NetsuIcon name="film" className="size-3.5 shrink-0 opacity-40" />}
                 <span className="min-w-0 flex-1 truncate">{it.name}</span>
                 <span className="shrink-0 text-muted-foreground">{it.text || ""}</span>
               </div>

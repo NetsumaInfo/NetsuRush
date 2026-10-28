@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { Check, Play } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -105,7 +106,7 @@ function SceneCardImpl({
         <PreviewVideo url={url!} label={t("shared.shotPreview", { n: index + 1 })} onError={onVideoError} audible={hovered} paused={videoPaused} />
       )}
       <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20">
-        {!playing && <Play className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />}
+        {!playing && <Play className="absolute left-1/2 top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />}
       </div>
 
       {/* Tout ce qui est VISIBLE AU REPOS est rendu sans condition : le numéro et la durée sont
@@ -146,10 +147,10 @@ function SceneCardImpl({
         {/* ajouter ce plan à la timeline ouverte (reste visible tant qu'un ajout est en cours/terminé) */}
         {onAddToTimeline && (
           <Tooltip>
-            <TooltipTrigger render={<button type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs" type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
               className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : actVis} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
-              {adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                : <SendToTimelineIcon busy={adding === "busy"} className="h-3.5 w-3.5" />}
+              {adding === "done" ? <Check className="size-3.5" strokeWidth={3} />
+                : <SendToTimelineIcon busy={adding === "busy"} className="size-3.5" />}
             </TooltipTrigger>
             <TooltipContent>{addLabel ?? t("shared.sendToTimeline")}</TooltipContent>
           </Tooltip>

@@ -361,10 +361,10 @@ export function CutStudio() {
         >
           {segments.length > 0 && (
             <div className="flex shrink-0 flex-wrap items-center gap-2 py-1">
-              <button type="button" onClick={selectAll} className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
-                <NetsuIcon name="cut-select" on={selCount === segments.length} className="h-4 w-4" />
+              <Button variant="outline" size="sm" type="button" onClick={selectAll} className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                <NetsuIcon name="cut-select" on={selCount === segments.length} className="size-4" />
                 <span className="tabular-nums">{narrow ? `${segments.length}${selCount ? `/${selCount}` : ""}` : `${t("cutStudio.shotCount", { count: segments.length })}${selCount ? t("cutStudio.selSuffix", { count: selCount }) : ""}`}</span>
-              </button>
+              </Button>
               {selCount > 0 && (
                 <Button type="button" variant="ghost" size="sm" onClick={() => setSel(new Set())} className="text-xs text-muted-foreground">{t("shared.deselect")}</Button>
               )}
@@ -428,7 +428,7 @@ export function CutStudio() {
               <div className="flex-1" />
               <Tooltip>
                 <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
-                  <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <NetsuIcon name="grid-columns" className="mr-0.5 size-3.5 text-muted-foreground" />
                    <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.decrease")} onClick={() => setCols(stepCols(actualCols, -1, maxCols))} disabled={!canFewerCols(actualCols)}><NetsuIcon name="remove" className="size-3.5" /></Button>
                   <span className="w-4 text-center tabular-nums">{actualCols}</span>
                    <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.increase")} onClick={() => setCols(stepCols(actualCols, 1, maxCols))} disabled={!canMoreCols(actualCols, maxCols)}><NetsuIcon name="add" className="size-3.5" /></Button>
@@ -491,7 +491,7 @@ export function CutStudio() {
               </Card>
             ) : (
               <Card className="mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-                <NetsuIcon name="film" className="h-8 w-8" />
+                <NetsuIcon name="film" className="size-8" />
                 <span>{t("cutStudio.detectPrompt")}</span>
               </Card>
             )}
@@ -511,7 +511,7 @@ export function CutStudio() {
             // à border, il se colle donc au bord de la fenêtre et rend ces pixels à la grille.
             className="group relative -mr-3.5 w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
         )}
 
@@ -529,7 +529,7 @@ export function CutStudio() {
           {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
               restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
           <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-          <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
         )}
 
@@ -573,7 +573,7 @@ export function CutStudio() {
               {isLocal && (
                 <p className="text-[11px] text-muted-foreground">{t("cutStudio.addToPoolHint")}</p>
               )}
-              {connected && exported.length > 0 && <Button className="w-full" variant="ghost" onClick={importBack} disabled={!!busy}><NetsuIcon name="cut-import" className="h-4 w-4" /> {t("cutStudio.importExtracts")}</Button>}
+              {connected && exported.length > 0 && <Button className="w-full" variant="ghost" onClick={importBack} disabled={!!busy}><NetsuIcon name="cut-import" className="size-4" /> {t("cutStudio.importExtracts")}</Button>}
             </div>
           )}
 

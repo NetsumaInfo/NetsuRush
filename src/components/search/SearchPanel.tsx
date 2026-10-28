@@ -216,8 +216,8 @@ export function SearchPanel() {
       {dragOver && (
         <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-bg/70 backdrop-blur-sm animate-in fade-in-0 duration-150">
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-primary/60 bg-card/80 px-10 py-8 shadow-xl ring-1 ring-primary/20 animate-in zoom-in-98 duration-150">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
-              <NetsuIcon name="image-add" className="h-7 w-7" />
+            <div className="flex size-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <NetsuIcon name="image-add" className="size-7" />
             </div>
             <div className="text-center">
               <div className="text-sm font-medium text-foreground">{t("searchPanel.dropImage")}</div>
@@ -322,7 +322,7 @@ export function SearchPanel() {
         </Card>
       ) : !pickerOpen ? (
         <Card className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-          <NetsuIcon name="search-empty" className="h-8 w-8 text-muted-foreground" />
+          <NetsuIcon name="search-empty" className="size-8 text-muted-foreground" />
           <div className="text-sm font-medium">{indexed > 0 ? t("searchPanel.readyToSearch") : t("searchPanel.indexNotBuilt")}</div>
           <p className="max-w-md text-xs text-muted-foreground">
             {indexed > 0

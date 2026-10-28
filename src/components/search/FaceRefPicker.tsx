@@ -37,10 +37,10 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
   return (
     <div className="relative w-20">
       <Tooltip>
-        <TooltipTrigger render={<button
+        <TooltipTrigger render={<Button variant="ghost"
           type="button"
           onClick={onToggle}
-          className={cn(
+          className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
             "relative block aspect-square w-full overflow-hidden rounded-lg border bg-muted transition-colors",
             active ? "border-primary ring-2 ring-primary" : "border-border hover:border-foreground/40",
           )}
@@ -48,7 +48,7 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
           {thumb ? (
             <img src={thumb} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="h-5 w-5 opacity-40" /></div>
+            <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="size-5 opacity-40" /></div>
           )}
           {domain && (
             <span className="absolute bottom-0.5 left-0.5 rounded bg-black/60 px-1 text-[9px] text-white">
@@ -56,21 +56,21 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
             </span>
           )}
           {active && <SelectCheck />}
-        </button>} />
+        </Button>} />
         <TooltipContent>{active ? t("faceRefPicker.removeThisFace") : t("faceRefPicker.searchThisFace")}</TooltipContent>
       </Tooltip>
       {refPayload && (
         <NameFaceMenu refPayload={refPayload} trigger={
-          <button type="button" aria-label={t("faceRefPicker.nameFaceAria")}
-            className="absolute right-0.5 top-0.5 inline-flex h-5 w-5 items-center justify-center rounded bg-black/60 text-white opacity-80 hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-primary">
-            <NetsuIcon name="tag" className="h-3 w-3" />
-          </button>
+          <Button variant="ghost" size="icon-xs" type="button" aria-label={t("faceRefPicker.nameFaceAria")}
+            className="absolute right-0.5 top-0.5 inline-flex size-5 items-center justify-center rounded bg-black/60 text-white opacity-80 hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <NetsuIcon name="tag" className="size-3" />
+          </Button>
         } />
       )}
       {suggestion && (
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={onSearchChar}
-            className="mt-1 block w-full truncate rounded bg-primary/15 px-1 py-0.5 text-[10px] text-primary hover:bg-primary/25 outline-none focus-visible:ring-2 focus-visible:ring-primary" />}>
+          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={onSearchChar}
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent mt-1 block w-full truncate rounded bg-primary/15 px-1 py-0.5 text-[10px] text-primary hover:bg-primary/25 outline-none focus-visible:ring-2 focus-visible:ring-primary" />}>
             ≈ {suggestion.name}
           </TooltipTrigger>
           <TooltipContent>{t("faceRefPicker.suggestionTooltip", { name: suggestion.name, pct: Math.round(suggestion.score * 100) })}</TooltipContent>
@@ -177,12 +177,12 @@ export function FaceRefPicker() {
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={onAddImages} disabled={busy}>
-            {busy ? <Spinner className="h-4 w-4" /> : <NetsuIcon name="search-add-ref" className="h-4 w-4" />}
+            {busy ? <Spinner className="size-4" /> : <NetsuIcon name="search-add-ref" className="size-4" />}
             {t("faceRefPicker.addImage")}
           </Button>
           {images.length > 0 && (
             <Button variant="ghost" size="sm" onClick={reset} disabled={busy}>
-              <NetsuIcon name="trash" className="h-4 w-4" />
+              <NetsuIcon name="trash" className="size-4" />
               {t("faceRefPicker.clearImages")}
             </Button>
           )}
@@ -225,7 +225,7 @@ export function FaceRefPicker() {
           ))}
           {images.length === 0 && !busy && (
             <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
-              <NetsuIcon name="face" className="h-7 w-7 text-muted-foreground" />
+              <NetsuIcon name="face" className="size-7 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">{t("faceRefPicker.noImages")}</span>
             </div>
           )}
@@ -234,7 +234,7 @@ export function FaceRefPicker() {
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={() => { closeFacePicker(); reset(); }}>{t("common:action.cancel")}</Button>
           <Button size="sm" onClick={onSearch} disabled={sel.length === 0 || busy}>
-            <NetsuIcon name="face" className="h-4 w-4" />
+            <NetsuIcon name="face" className="size-4" />
             {t("faceRefPicker.search")}
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { Film, Play, ScanSearch, Plus, Aperture, UserCheck } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -92,7 +93,7 @@ function ResultCardImpl({
         {thumb && <img src={thumb} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
         {thumbFailed && !thumb && (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-            <Film className="h-7 w-7 opacity-40" />
+            <Film className="size-7 opacity-40" />
           </div>
         )}
         {showVideo && (
@@ -106,7 +107,7 @@ function ResultCardImpl({
           />
         )}
         {!playing && (
-          <Play className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />
+          <Play className="absolute left-1/2 top-1/2 size-7 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 drop-shadow transition-opacity group-hover:opacity-90" />
         )}
 
         {/* case de sélection (toujours visible si cochée, sinon au survol) — coin haut-gauche
@@ -133,13 +134,13 @@ function ResultCardImpl({
           chrome ? (
             <Tooltip>
               <TooltipTrigger render={<span className="nr-chip absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-warn)]" />}>
-                <Aperture className="h-3 w-3" /> {t("resultCard.blurry")}
+                <Aperture className="size-3" /> {t("resultCard.blurry")}
               </TooltipTrigger>
               <TooltipContent>{t("resultCard.blurryTooltip")}</TooltipContent>
             </Tooltip>
           ) : (
             <span className="nr-chip absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-warn)]">
-              <Aperture className="h-3 w-3" /> {t("resultCard.blurry")}
+              <Aperture className="size-3" /> {t("resultCard.blurry")}
             </span>
           )
         )}
@@ -161,37 +162,37 @@ function ResultCardImpl({
         <div className={cn("absolute inset-y-0 right-0 flex items-center gap-0.5 rounded-br-xl bg-gradient-to-l from-card from-75% via-card to-transparent pl-8 pr-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100", rangeOpen && "opacity-100")}>
         {onAddRef && (
           <Tooltip>
-            <TooltipTrigger render={<button
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
               type="button"
               onClick={() => onAddRef(thumb)}
-              className={cn("inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              className={cn("inline-flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 refActive ? "bg-primary/15 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:opacity-100")} />}>
-              <Plus className="h-4 w-4" />
+              <Plus className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{refActive ? t("resultCard.alreadyRef") : t("resultCard.addAsRef")}</TooltipContent>
           </Tooltip>
         )}
         {onFindSimilar && (
           <Tooltip>
-            <TooltipTrigger render={<button
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
               type="button"
               onClick={() => onFindSimilar(thumb)}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:opacity-100" />}>
-              <ScanSearch className="h-4 w-4" />
+              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:opacity-100" />}>
+              <ScanSearch className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{t("resultCard.similarShots")}</TooltipContent>
           </Tooltip>
         )}
         {confirmChar && onConfirmChar && (
           <Tooltip>
-            <TooltipTrigger render={<button
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
               type="button"
               onClick={onConfirmChar}
               disabled={!!hit.char}
-              className={cn("inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              className={cn("inline-flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 hit.char ? "text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground")} />}>
-              <UserCheck className="h-4 w-4" />
+              <UserCheck className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{hit.char ? t("resultCard.confirmedChar", { name: hit.char.name }) : t("resultCard.confirmChar", { name: confirmChar })}</TooltipContent>
           </Tooltip>
@@ -203,17 +204,17 @@ function ResultCardImpl({
               shots={shots}
               stopPropagation={false}
               onOpenChange={setRangeOpen}
-              className="h-7 w-7 text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="size-7 text-muted-foreground hover:bg-accent hover:text-foreground"
             />
           </TooltipTrigger>
           <TooltipContent>{t("resultCard.addToCollection")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<button
+          <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
             type="button"
             onClick={onDownload}
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:opacity-100" />}>
-            <SendToTimelineIcon className="h-4 w-4" />
+            className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:opacity-100" />}>
+            <SendToTimelineIcon className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("resultCard.addToTimeline")}</TooltipContent>
         </Tooltip>

@@ -3,6 +3,7 @@
 // Collections et Timeline Live. Actions par carte : sélection, ajouter à la timeline, Ranger
 // (collection), supprimer.
 import { memo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { Play, X, Check } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -97,10 +98,10 @@ function ShotCardImpl({
       <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20">
         {/* L'aperçu dans la carte reste réservé au survol/à la lecture auto. Ce bouton ouvre le lecteur. */}
         {onPlay && !playing && (
-          <button type="button" aria-label={t("shotCard.playShot", { n: index + 1 })} onClick={(e) => { e.stopPropagation(); onPlay(); }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-90">
-            <Play className="h-7 w-7 drop-shadow" />
-          </button>
+          <Button variant="ghost" type="button" aria-label={t("shotCard.playShot", { n: index + 1 })} onClick={(e) => { e.stopPropagation(); onPlay(); }}
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-90 focus-visible:opacity-100">
+            <Play className="size-7 drop-shadow" />
+          </Button>
         )}
       </div>
       {/* Tout ce qui est VISIBLE AU REPOS (pastille, méta) est rendu sans condition : ça apparaissait
@@ -118,10 +119,10 @@ function ShotCardImpl({
       <div className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 transition-opacity ${adding !== "idle" || alwaysChrome || rangeOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"}`}>
         {onAddToTimeline && (
           <Tooltip>
-            <TooltipTrigger render={<button type="button" aria-label={t("shared.addToTimeline")} onClick={doAdd}
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs" type="button" aria-label={t("shared.addToTimeline")} onClick={doAdd}
               className={`rounded nr-chip p-1 transition-colors ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
-              {adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                : <SendToTimelineIcon busy={adding === "busy"} className="h-3.5 w-3.5" />}
+              {adding === "done" ? <Check className="size-3.5" strokeWidth={3} />
+                : <SendToTimelineIcon busy={adding === "busy"} className="size-3.5" />}
             </TooltipTrigger>
             <TooltipContent>{t("shared.addToTimeline")}</TooltipContent>
           </Tooltip>
@@ -135,9 +136,9 @@ function ShotCardImpl({
         </Tooltip>
         {onRemove && (
           <Tooltip>
-            <TooltipTrigger render={<button type="button" aria-label={t("shotCard.remove")} onClick={(e) => { e.stopPropagation(); onRemove(); }}
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs" type="button" aria-label={t("shotCard.remove")} onClick={(e) => { e.stopPropagation(); onRemove(); }}
               className="rounded nr-chip p-1 text-white/80 transition-colors hover:text-destructive" />}>
-              <X className="h-3.5 w-3.5" />
+              <X className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{t("shared.removeFromCollection")}</TooltipContent>
           </Tooltip>

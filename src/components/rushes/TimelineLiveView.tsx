@@ -497,7 +497,7 @@ export function TimelineLiveView() {
     return (
       <div className="flex h-full flex-col">
         <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
-          <NetsuIcon name="film" className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="film" className="size-4 shrink-0 text-muted-foreground" />
           <h1 className="text-[13px] font-medium">{t("subnav.timeline")}</h1>
           <span className="text-[11px] text-muted-foreground">{timelineList.length || "—"}</span>
           {adobe.active && !adobe.live && (
@@ -507,7 +507,7 @@ export function TimelineLiveView() {
             <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{t("timelineLive.offlineCache")}</span>
           )}
           <div className="relative ml-2 max-w-xs flex-1">
-            <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("shared.searchTimeline")} className="h-8 pl-8" />
           </div>
           <div className="flex-1" />
@@ -520,7 +520,7 @@ export function TimelineLiveView() {
               if (adobe.active) { void adobe.refresh(); return; }
               target.refresh(); nr.timelineThumbs({ refresh: true }).catch(() => {}); nr.timelineTree().then((r) => { if (r.ok) setBins(new Map(r.timelines.map((tl) => [tl.name, tl.bin]))); }).catch(() => {});
             }} aria-label={t("shared.reload")} />}>
-              <NetsuIcon name="restart" className="h-4 w-4" />
+              <NetsuIcon name="restart" className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{t("timelineLive.reloadTimelines")}</TooltipContent>
           </Tooltip>
@@ -553,10 +553,10 @@ export function TimelineLiveView() {
       <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
         <Tooltip>
           <TooltipTrigger render={
-            <button type="button" aria-label={t("timelineLive.backToTimelines")} onClick={() => { openRequestRef.current++; setOpened(null); setCuts([]); cutsRef.current = []; cutsSigRef.current = null; loadedTimelineRef.current = null; }}
+            <Button variant="ghost" size="icon-sm" type="button" aria-label={t("timelineLive.backToTimelines")} onClick={() => { openRequestRef.current++; setOpened(null); setCuts([]); cutsRef.current = []; cutsSigRef.current = null; loadedTimelineRef.current = null; }}
               className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" />
           }>
-            <NetsuIcon name="film" className="h-4 w-4" />
+            <NetsuIcon name="film" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("timelineLive.backToTimelines")}</TooltipContent>
         </Tooltip>
@@ -620,7 +620,7 @@ export function TimelineLiveView() {
             <TimelineTrackSelect options={tracks} value={tlTrack} onChange={setTlTrack} total={cuts.length} />
             <Tooltip>
               <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
-                <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
+                <NetsuIcon name="grid-columns" className="mr-0.5 size-3.5 text-muted-foreground" />
                 <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)}><NetsuIcon name="remove" className="size-3.5" /></Button>
                 <span className="w-4 text-center tabular-nums">{grid.actualCols}</span>
                 <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)}><NetsuIcon name="add" className="size-3.5" /></Button>
@@ -682,7 +682,7 @@ export function TimelineLiveView() {
           </RangeSelectionProvider>
         ) : (
           <Card className="mx-3 mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-            <NetsuIcon name="film" className="h-8 w-8" />
+            <NetsuIcon name="film" className="size-8" />
             <span>{t("timelineLive.noShots")}</span>
           </Card>
         )}
@@ -699,7 +699,7 @@ export function TimelineLiveView() {
           onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); setPlayerOpen(true); } }}
           className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
           <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-          <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
       )}
 
@@ -714,7 +714,7 @@ export function TimelineLiveView() {
             {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
                 restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
 
           <aside ref={panelRef} style={{ width: panelW }} className="flex h-full min-h-0 shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden py-3 pl-5">

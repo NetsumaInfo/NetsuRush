@@ -43,7 +43,7 @@ export function CutFlowNav({ flow, offsets, cell, cols, scrollEl, sourceOf, tota
           className="h-6 w-auto max-w-full gap-1.5 border-0 bg-transparent px-1 shadow-none hover:bg-accent"
           aria-label={t("cutStudio.flowJump")}
         >
-          <NetsuIcon name="layers" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="layers" className="size-3.5 shrink-0 text-muted-foreground" />
           {/* Base UI rend la VALEUR quand on ne lui donne rien : sans cet enfant explicite, l'entête
               affichait le rang brut (« 0 ») au lieu du nom du rush. */}
           <SelectValue>

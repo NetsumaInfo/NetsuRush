@@ -37,18 +37,18 @@ function Seg({ active, onClick, disabled, children }: {
   active: boolean; onClick: () => void; disabled?: boolean; children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active}
-      className={cn(
+      className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
         "inline-flex items-center gap-1.5 rounded border px-2 py-1 text-xs font-medium transition-colors disabled:opacity-40",
         active ? "border-transparent bg-primary text-primary-foreground" : "border-border bg-transparent text-muted-foreground hover:text-foreground",
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -120,14 +120,14 @@ export function CutSettings({ open, onOpenChange }: { open: boolean; onOpenChang
     >
       <div className="flex shrink-0 items-center justify-between px-3 pb-1 pt-2">
         <h2 className="text-sm font-semibold text-foreground">{t("settings.title")}</h2>
-        <button
+        <Button variant="ghost" size="icon-xs"
           type="button"
           aria-label={t("common:action.close")}
           onClick={() => onOpenChange(false)}
           className="inline-flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <NetsuIcon name="close" className="size-4" />
-        </button>
+        </Button>
       </div>
 
       <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-border px-3 pb-2">

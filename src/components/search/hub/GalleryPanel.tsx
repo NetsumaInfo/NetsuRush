@@ -37,15 +37,15 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <button type="button"
+        <Button variant="ghost" type="button"
           onClick={anySel ? onToggle : onSearch}
-          className={cn(
+          className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
             "group relative block aspect-square w-full overflow-hidden rounded-lg border bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
             selected ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary",
           )}>
           {f.thumb
             ? <img src={f.thumb} alt="" className="h-full w-full object-cover" />
-            : <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="h-8 w-8 opacity-40" /></div>}
+            : <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="size-8 opacity-40" /></div>}
           <span className="absolute right-1 top-1 rounded bg-black/70 px-1 text-[10px] tabular-nums text-white/90">{f.count}</span>
           {f.char ? (
             <span className="absolute inset-x-0 bottom-0 truncate px-1.5 py-1 text-center text-xs font-semibold text-white"
@@ -60,7 +60,7 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
             onToggle={onToggle}
             className={cn("left-1 top-1 right-auto", anySel && !selected && "opacity-100")}
           />
-        </button>
+        </Button>
       </ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem onClick={onSearch}><NetsuIcon name="search" /> {t("galleryPanel.card.search")}</ContextMenuItem>
@@ -73,8 +73,8 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
             <ContextMenuSubContent className="max-h-64 overflow-y-auto">
               {characters.map((c) => (
                 <ContextMenuItem key={c.id} onClick={() => onAddTo(c.id)} className="gap-2">
-                  <span className="h-5 w-5 shrink-0 overflow-hidden rounded bg-muted">
-                    {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 h-4 w-4 text-muted-foreground" />}
+                  <span className="size-5 shrink-0 overflow-hidden rounded bg-muted">
+                    {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 size-4 text-muted-foreground" />}
                   </span>
                   <span className="truncate">{c.name}</span>
                 </ContextMenuItem>
@@ -139,14 +139,14 @@ export function GalleryPanel() {
             <span className="text-sm font-medium tabular-nums">{sel.size}</span>
             <div className="flex-1" />
             <Button size="sm" disabled={busy} onClick={() => askName(selectedFaces.map(toRef))}>
-              <NetsuIcon name="user-plus" className="h-3.5 w-3.5" /> {t("galleryPanel.create")}
+              <NetsuIcon name="user-plus" className="size-3.5" /> {t("galleryPanel.create")}
             </Button>
             {characters.length > 0 && (
               <AddToExistingMenu characters={characters} onPick={addSelectedTo} disabled={busy} />
             )}
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("galleryPanel.cancelSelectionAria")} onClick={clearSel} />}>
-                <NetsuIcon name="close" className="h-4 w-4" />
+                <NetsuIcon name="close" className="size-4" />
               </TooltipTrigger>
               <TooltipContent>{t("galleryPanel.cancelTooltip")}</TooltipContent>
             </Tooltip>
@@ -156,13 +156,13 @@ export function GalleryPanel() {
             <div className="flex-1" />
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("galleryPanel.reloadAria")} onClick={refreshFaceGallery} disabled={faceGalleryLoading} />}>
-                <NetsuIcon name="refresh" busy={faceGalleryLoading} className="h-4 w-4" />
+                <NetsuIcon name="refresh" busy={faceGalleryLoading} className="size-4" />
               </TooltipTrigger>
               <TooltipContent>{t("galleryPanel.reloadTooltip")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label={t("galleryPanel.searchByPhotoAria")} onClick={() => { closeFaceHub(); openFacePicker(); }} />}>
-                <NetsuIcon name="image-add" className="h-4 w-4" />
+                <NetsuIcon name="image-add" className="size-4" />
               </TooltipTrigger>
               <TooltipContent>{t("galleryPanel.searchByPhotoTooltip")}</TooltipContent>
             </Tooltip>
@@ -174,10 +174,10 @@ export function GalleryPanel() {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {faceGalleryLoading ? (
-          <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground"><Spinner className="h-4 w-4" /> {t("galleryPanel.grouping")}</div>
+          <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground"><Spinner className="size-4" /> {t("galleryPanel.grouping")}</div>
         ) : gallery.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <NetsuIcon name="face" className="h-9 w-9 text-muted-foreground" />
+            <NetsuIcon name="face" className="size-9 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">{t("galleryPanel.empty")}</span>
           </div>
         ) : (
@@ -201,7 +201,7 @@ export function GalleryPanel() {
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setNaming(null)}>{t("common:action.cancel")}</Button>
             <Button size="sm" disabled={!name.trim() || busy} onClick={confirmCreate}>
-              {busy ? <Spinner className="h-3.5 w-3.5" /> : <NetsuIcon name="check" className="h-3.5 w-3.5" />} {t("galleryPanel.create")}
+              {busy ? <Spinner className="size-3.5" /> : <NetsuIcon name="check" className="size-3.5" />} {t("galleryPanel.create")}
             </Button>
           </div>
         </DialogContent>
@@ -218,13 +218,13 @@ function AddToExistingMenu({ characters, onPick, disabled }: {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" size="sm" disabled={disabled} />}>
-        <NetsuIcon name="collab" className="h-3.5 w-3.5" /> {t("galleryPanel.card.addTo")}
+        <NetsuIcon name="collab" className="size-3.5" /> {t("galleryPanel.card.addTo")}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
         {characters.map((c) => (
           <DropdownMenuItem key={c.id} onClick={() => onPick(c.id)} className="gap-2">
-            <span className="h-5 w-5 shrink-0 overflow-hidden rounded bg-muted">
-              {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 h-4 w-4 text-muted-foreground" />}
+            <span className="size-5 shrink-0 overflow-hidden rounded bg-muted">
+              {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 size-4 text-muted-foreground" />}
             </span>
             <span className="truncate">{c.name}</span>
           </DropdownMenuItem>

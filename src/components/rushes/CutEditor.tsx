@@ -130,7 +130,7 @@ export function CutEditor({ analysis, onBack, onClose, mode, onBuild }: {
       {/* En-tête : retour + source + compte de plans + actions d'édition. */}
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border px-1 pb-3">
         <Button variant="ghost" size="sm" onClick={onBack} disabled={busy} className="gap-1.5">
-          <NetsuIcon name="prev" className="h-4 w-4" /> {t("cutEditor.timelines")}
+          <NetsuIcon name="prev" className="size-4" /> {t("cutEditor.timelines")}
         </Button>
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium">{analysis.source}</div>
@@ -138,19 +138,19 @@ export function CutEditor({ analysis, onBack, onClose, mode, onBuild }: {
         </div>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="sm" onClick={mergeSel} disabled={!canMerge || busy} className="gap-1.5" />}>
-            <NetsuIcon name="cut-merge" className="h-4 w-4" /> {t("shared.merge")}
+            <NetsuIcon name="cut-merge" className="size-4" /> {t("shared.merge")}
           </TooltipTrigger>
           <TooltipContent>{t("cutEditor.mergeTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="sm" onClick={deleteSel} disabled={!selCount || busy} className="gap-1.5 text-destructive hover:text-destructive" />}>
-            <NetsuIcon name="cut-delete" className="h-4 w-4" /> {t("common:action.delete")}
+            <NetsuIcon name="cut-delete" className="size-4" /> {t("common:action.delete")}
           </TooltipTrigger>
           <TooltipContent>{t("cutEditor.deleteTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={reset} disabled={busy} aria-label={t("common:action.reset")} />}>
-            <NetsuIcon name="reset-default" className="h-4 w-4" />
+            <NetsuIcon name="reset-default" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("cutEditor.resetTip")}</TooltipContent>
         </Tooltip>
@@ -161,7 +161,7 @@ export function CutEditor({ analysis, onBack, onClose, mode, onBuild }: {
         {clips.map((c, ci) => (
           <div key={`${c.path}-${ci}`} className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <NetsuIcon name="film" className="h-3 w-3 shrink-0" />
+              <NetsuIcon name="film" className="size-3 shrink-0" />
               <span className="truncate">{c.name}</span>
               <span className="shrink-0 opacity-60">· {t("shared.shotsCount", { count: c.shots.length })}</span>
             </div>
@@ -203,7 +203,7 @@ export function CutEditor({ analysis, onBack, onClose, mode, onBuild }: {
 
         {res && (
           <div className={`flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm ${res.ok ? "border-[var(--color-ok)]/40" : "border-destructive/50"}`}>
-            {res.ok ? <NetsuIcon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-ok)]" /> : <NetsuIcon name="error-badge" className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
+            {res.ok ? <NetsuIcon name="check" className="mt-0.5 size-4 shrink-0 text-[var(--color-ok)]" /> : <NetsuIcon name="error-badge" className="mt-0.5 size-4 shrink-0 text-destructive" />}
             <span className="min-w-0 flex-1">{res.ok ? t("cutEditor.created", { name: res.timeline, count: res.shots }) : (res.error || t("shared.failed"))}</span>
           </div>
         )}
@@ -216,7 +216,7 @@ export function CutEditor({ analysis, onBack, onClose, mode, onBuild }: {
               <Button variant="ghost" onClick={onBack} disabled={busy}>{t("common:action.back")}</Button>
               <Button onClick={build} disabled={busy || total === 0}>
                 {busy && <Spinner className="size-4" />}
-                <NetsuIcon name="scissors" className="h-4 w-4" /> {t("cutEditor.build", { count: total })}
+                <NetsuIcon name="scissors" className="size-4" /> {t("cutEditor.build", { count: total })}
               </Button>
             </>
           )}

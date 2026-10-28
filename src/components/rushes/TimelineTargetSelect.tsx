@@ -3,6 +3,8 @@
 // déclencheur compact → Popover avec barre de recherche + liste scrollable de lignes (icône Film,
 // nom, badge « ouverte », sélection = bg-primary). Pas de <select> natif ni de dropdown shadcn.
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { Popover } from "@base-ui/react/popover";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -46,10 +48,10 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
         disabled={disabled}
         className={`inline-flex h-8 max-w-[240px] items-center gap-1.5 rounded-md border border-border bg-card pl-2 pr-2 text-xs text-muted-foreground outline-none transition-colors hover:bg-accent data-[popup-open]:border-ring disabled:pointer-events-none ${className || ""}`}
       >
-        <SendToTimelineIcon className="h-3.5 w-3.5 shrink-0" />
+        <SendToTimelineIcon className="size-3.5 shrink-0" />
         <span className="shrink-0">{t("target.to")}</span>
         <span className="min-w-0 flex-1 truncate text-foreground">{label}</span>
-        <NetsuIcon name="chevron-down" className="h-3.5 w-3.5 shrink-0 opacity-60" />
+        <NetsuIcon name="chevron-down" className="size-3.5 shrink-0 opacity-60" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-50 outline-none">
@@ -57,18 +59,18 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
             {/* destinations fixes */}
             <div className="space-y-1">
               {current && (
-                <button type="button" onClick={() => pick("open")} className={rowCls(value === "open")}>
-                  <NetsuIcon name="folder-open" className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                <Button variant="ghost" type="button" onClick={() => pick("open")} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", rowCls(value === "open"))}>
+                  <NetsuIcon name="folder-open" className="size-3.5 shrink-0 opacity-70" />
                   <span className="min-w-0 flex-1 truncate">{t("target.openedTimeline")}</span>
                   <Badge variant={value === "open" ? "secondary" : "outline"} className="shrink-0 text-[10px]">{current}</Badge>
-                </button>
+                </Button>
               )}
               {/* « Nouvelle timeline » ne ferme PAS le popover : le champ de nom s'ouvre juste dessous
                   (nom vide = nom déduit du contexte, affiché en placeholder par l'appelant). */}
-              <button type="button" onClick={() => { setValue(value.startsWith("new:") ? value : "new"); }} className={rowCls(isNew)}>
-                <NetsuIcon name="add" className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              <Button variant="ghost" type="button" onClick={() => { setValue(value.startsWith("new:") ? value : "new"); }} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", rowCls(isNew))}>
+                <NetsuIcon name="add" className="size-3.5 shrink-0 opacity-70" />
                 <span className="min-w-0 flex-1 truncate">{t("target.newTimeline")}</span>
-              </button>
+              </Button>
               {isNew && (
                 <Input
                   autoFocus
@@ -86,7 +88,7 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
               <>
                 <div className="mt-2 mb-1.5 px-1 text-[10px] font-semibold text-muted-foreground">{t("target.existing")}</div>
                 <div className="relative mb-1.5">
-                  <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                   <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("shared.searchTimeline")} className="h-8 pl-8 text-xs" />
                 </div>
                 <div className="max-h-52 space-y-1 overflow-y-auto">
@@ -95,10 +97,10 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
                   ) : visible.map((tl) => {
                     const v = `tl:${tl.name}`;
                     return (
-                      <button key={tl.name} type="button" onClick={() => pick(v)} className={rowCls(value === v)}>
-                        <NetsuIcon name="film" className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                      <Button variant="ghost" key={tl.name} type="button" onClick={() => pick(v)} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", rowCls(value === v))}>
+                        <NetsuIcon name="film" className="size-3.5 shrink-0 opacity-70" />
                         <span className="min-w-0 flex-1 truncate">{tl.name}</span>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>

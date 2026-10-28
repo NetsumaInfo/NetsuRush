@@ -120,29 +120,29 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
               : st === "stale" ? { t: t("indexPicker.status.stale"), cls: "text-[var(--color-warn)]", dot: "bg-[var(--color-warn)]" }
               : { t: "", cls: "", dot: "bg-muted-foreground/40" };
             return (
-              <button
+              <Button variant="ghost"
                 key={c.path}
                 type="button"
                 onClick={() => setPick((s) => { const n = new Set(s); n.has(c.path) ? n.delete(c.path) : n.add(c.path); return n; })}
-                className={cn("flex w-full items-center gap-2 rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", "flex w-full items-center gap-2 rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   on ? "bg-accent" : "hover:bg-accent/50",
                   st === "done" && !on && "opacity-50")}
               >
-                <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                <span className={cn("flex size-4 shrink-0 items-center justify-center rounded border",
                   on ? "border-primary bg-primary text-white" : "border-border")}>
-                  {on && <NetsuIcon name="check" className="h-3 w-3" />}
+                  {on && <NetsuIcon name="check" className="size-3" />}
                 </span>
                 {/* Un rush jamais indexé n'a que sa pastille : elle porte alors seule l'état. */}
-                {tag.t ? <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", tag.dot)} /> : (
+                {tag.t ? <span className={cn("size-1.5 shrink-0 rounded-full", tag.dot)} /> : (
                   <Tooltip>
-                    <TooltipTrigger render={<span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", tag.dot)} />} />
+                    <TooltipTrigger render={<span className={cn("size-1.5 shrink-0 rounded-full", tag.dot)} />} />
                     <TooltipContent>{t("indexPicker.status.none")}</TooltipContent>
                   </Tooltip>
                 )}
                 <span className="min-w-0 flex-1 truncate">{c.name}</span>
                 {c.bin && <span className="shrink-0 text-[11px] text-muted-foreground">{binLabel(c.bin)}</span>}
                 {tag.t && <span className={cn("shrink-0 text-[11px] font-medium", tag.cls)}>{tag.t}</span>}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -170,22 +170,22 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
               <Toggle size="sm" variant="outline" pressed={indexParallel} onPressedChange={setIndexParallel}
                 className="px-2.5 text-xs text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary" />
             }>
-              <NetsuIcon name="layers" className="h-3.5 w-3.5" /> {t("indexPicker.parallel")}
+              <NetsuIcon name="layers" className="size-3.5" /> {t("indexPicker.parallel")}
             </TooltipTrigger>
             <TooltipContent>{t("indexPicker.parallelHint")}</TooltipContent>
           </Tooltip>
           <SearchPerfMenu />
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="h-3.5 w-3.5" /> {t("common:action.cancel")}</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="size-3.5" /> {t("common:action.cancel")}</Button>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="sm" disabled={pick.size === 0} onClick={() => confirmIndex(true)} />}>
-              <NetsuIcon name="zap" className="h-3.5 w-3.5" /> {t("indexPicker.reindex")} ({pick.size})
+              <NetsuIcon name="zap" className="size-3.5" /> {t("indexPicker.reindex")} ({pick.size})
             </TooltipTrigger>
             <TooltipContent>{t("indexPicker.reindexHint")}</TooltipContent>
           </Tooltip>
           <Button size="sm" disabled={pick.size === 0} onClick={() => confirmIndex(false)}>
-            <NetsuIcon name="search-index" className="h-3.5 w-3.5" /> {t("indexPicker.index")} ({pick.size})
+            <NetsuIcon name="search-index" className="size-3.5" /> {t("indexPicker.index")} ({pick.size})
           </Button>
         </div>
       </div>

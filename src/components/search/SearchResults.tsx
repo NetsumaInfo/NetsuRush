@@ -166,7 +166,7 @@ export function SearchResults() {
         )}
 
         <Tooltip>
-          <TooltipTrigger render={<button
+          <TooltipTrigger render={<Button variant="outline" size="sm"
             type="button"
             onClick={() => setSel(allPicked ? new Set() : new Set(viewHits.map(hitKey)))}
             disabled={viewHits.length === 0}
@@ -181,10 +181,10 @@ export function SearchResults() {
           <TooltipContent>{allPicked ? t("searchResults.deselectAllTooltip") : t("searchResults.selectAllTooltip")}</TooltipContent>
         </Tooltip>
         {picked > 0 && (
-          <button type="button" onClick={() => setSel(new Set())}
-            className="flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+          <Button variant="ghost" type="button" onClick={() => setSel(new Set())}
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
             {t("searchResults.deselect")}
-          </button>
+          </Button>
         )}
 
         {/* Même duo d'export que le Découpage : icône du profil + mode d'insertion + réglages.
@@ -280,7 +280,7 @@ export function SearchResults() {
             {dedupGroups.map((g, gi) => (
               <Card key={gi} className="block p-3">
                 <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  <NetsuIcon name="copy" className="h-3.5 w-3.5" /> {t("searchResults.duplicatesCount", { count: g.size })}
+                  <NetsuIcon name="copy" className="size-3.5" /> {t("searchResults.duplicatesCount", { count: g.size })}
                   <span className="text-primary">· {t("searchResults.mostRepresentative")}</span>
                 </div>
                 <div className={grid}>{g.members.map((h, i) => card(h, groupOffsets[gi] + i))}</div>
@@ -296,7 +296,7 @@ export function SearchResults() {
             {clusters.map((cl, ci) => (
               <Card key={ci} className="block p-3">
                 <div className="mb-2 flex items-center gap-2 text-xs">
-                  <NetsuIcon name="group" className="h-3.5 w-3.5 text-primary" />
+                  <NetsuIcon name="group" className="size-3.5 text-primary" />
                   <span className="font-medium">{cl.label}</span>
                   <span className="text-muted-foreground">· {t("searchResults.shotsCount", { count: cl.size })}</span>
                 </div>

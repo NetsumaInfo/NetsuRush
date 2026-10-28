@@ -44,7 +44,7 @@ export function IndexProgress({ busy, onCancel, canceling, kindLabel }: { busy: 
         <div className="flex min-w-0 items-center gap-2">
           {kindLabel && <span className="shrink-0 rounded-full bg-foreground/10 px-1.5 py-0.5 text-[10px] font-semibold">{kindLabel}</span>}
           <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium", ph.cls)}>
-            <span className={cn("h-1.5 w-1.5 rounded-full", ph.dot)} />
+            <span className={cn("size-1.5 rounded-full", ph.dot)} />
             {ph.t}
           </span>
           <span className="truncate text-muted-foreground">{busy.file}</span>
@@ -57,7 +57,7 @@ export function IndexProgress({ busy, onCancel, canceling, kindLabel }: { busy: 
               onClick={onCancel} disabled={canceling}
               className="h-6 gap-1 px-2 text-[11px] text-muted-foreground hover:text-destructive"
             >
-              <NetsuIcon name="search-stop-index" busy={canceling} className="h-3 w-3" />
+              <NetsuIcon name="search-stop-index" busy={canceling} className="size-3" />
               {canceling ? t("indexProgress.stopping") : t("indexProgress.stop")}
             </Button>
           )}

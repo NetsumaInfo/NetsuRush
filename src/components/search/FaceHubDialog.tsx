@@ -20,7 +20,7 @@ export function FaceHubDialog() {
       {/* sm:max-w-[95vw] surcharge le sm:max-w-md du composant Dialog (même variante = tailwind-merge garde la nôtre) */}
       <DialogContent className="flex h-[90vh] w-[95vw] max-w-[95vw] flex-col gap-4 sm:max-w-[95vw]">
         <div className="flex items-center gap-3 pr-8">
-          <NetsuIcon name="face" className="h-5 w-5 text-primary" />
+          <NetsuIcon name="face" className="size-5 text-primary" />
           <DialogTitle className="text-base">{t("faceHubDialog.title")}</DialogTitle>
           <Tabs value={faceHubTab} onValueChange={(v) => setFaceHubTab(v as "gallery" | "roster")}>
             <TabsList className="h-8">

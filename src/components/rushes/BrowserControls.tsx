@@ -15,7 +15,7 @@ export function SortSelect({ value, onChange, options }: { value: string; onChan
   return (
     <Select value={value} onValueChange={(v) => onChange(v as string)}>
       <SelectTrigger size="sm" className="w-auto min-w-[9.5rem] gap-1.5 whitespace-nowrap" aria-label={t("browser.sort")}>
-        <NetsuIcon name="sort" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="sort" className="size-3.5 shrink-0 text-muted-foreground" />
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

@@ -33,7 +33,7 @@ function OfflineBanner({ count }: { count: number }) {
   };
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
-      <NetsuIcon name="unlink" className="h-4 w-4 shrink-0 text-destructive" />
+      <NetsuIcon name="unlink" className="size-4 shrink-0 text-destructive" />
       <span className="flex-1 text-muted-foreground">{t("library.offlineBanner", { count })}</span>
       <Button variant="outline" size="sm" onClick={relocate} disabled={busy}>{t("library.relocate")}</Button>
     </div>
@@ -102,12 +102,12 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
               drop.over && "bg-primary/10 ring-1 ring-primary",
             )} />
         }>
-          <NetsuIcon name="chevron-toggle" on={isOpen} className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="chevron-toggle" on={isOpen} className="size-4 shrink-0 text-muted-foreground" />
           {/* Accent réservé à l'état : marque « c'est à moi, ça persiste », même vocabulaire que le
               badge des clips locaux. Les bins du projet gardent l'icône neutre. */}
           {isRoot
-            ? <NetsuIcon name="disk-download" className="h-4 w-4 shrink-0 text-primary" />
-            : <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />}
+            ? <NetsuIcon name="disk-download" className="size-4 shrink-0 text-primary" />
+            : <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />}
           <span className="truncate font-medium">{isRoot ? t("library.rootName") : node.name}</span>
           <span className="text-xs text-muted-foreground">{countTreeClips(node)}</span>
           <span className="flex-1" />
@@ -202,12 +202,12 @@ function FolderView({ node, path, depth, collapsed, toggle, lib, folderByPath, o
       ) : (
         <ContextMenu>
           <ContextMenuTrigger render={
-            <button type="button" onClick={() => toggle(path)}
+            <Button variant="ghost" type="button" onClick={() => toggle(path)}
               style={{ paddingLeft: pad }}
-              className="flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm text-foreground hover:bg-accent/60" />
+              className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm text-foreground hover:bg-accent/60" />
           }>
-            <NetsuIcon name="chevron-toggle" on={isOpen} className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="chevron-toggle" on={isOpen} className="size-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />
             <span className="truncate font-medium">{node.name}</span>
             <span className="text-xs text-muted-foreground">{countTreeClips(node)}</span>
           </ContextMenuTrigger>

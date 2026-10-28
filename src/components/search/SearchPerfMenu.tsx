@@ -25,7 +25,7 @@ export function SearchPerfMenu() {
       <Tooltip>
         <TooltipTrigger render={<span className="inline-flex" />}>
           <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="px-2 text-muted-foreground" />}>
-            <NetsuIcon name="sliders" className="h-3.5 w-3.5" />
+            <NetsuIcon name="sliders" className="size-3.5" />
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent>{t("performance.quick")}</TooltipContent>

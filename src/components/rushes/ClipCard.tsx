@@ -2,6 +2,7 @@
 // privés au module : la bande « récents » de l'accueil en a besoin aussi, et dupliquer une seconde
 // carte aurait fait diverger les deux au premier ajustement.
 import { memo, useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { Film, HardDriveDownload, Unlink } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -42,7 +43,7 @@ function Thumb({ path, dim }: { path: string; dim?: boolean }) {
   return (
     <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-muted">
       {src ? <img src={src} alt="" draggable={false} className={cn("h-full w-full select-none object-cover", dim && "opacity-40")} />
-        : failed ? <Film className="h-7 w-7 text-muted-foreground" />
+        : failed ? <Film className="size-7 text-muted-foreground" />
         : <Skeleton className="absolute inset-0 rounded-none" />}
     </div>
   );
@@ -122,19 +123,19 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
               de l'arbre qui prend le relais (200 badges = bruit). */}
           {offline && (
             <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-md bg-card/90 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
-              <Unlink className="h-3 w-3" /> {t("library.offlineBadge")}
+              <Unlink className="size-3" /> {t("library.offlineBadge")}
             </span>
           )}
           {/* Ouvre le choix : découpe en cache (modèle au choix) ou rush entier, vers une nouvelle
               timeline ou celle ouverte, avec un nom. Tout via l'API (sans rien écraser). */}
           {canSend && (
             <Tooltip>
-              <TooltipTrigger render={<button
+              <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
                 type="button"
                 aria-label={t("mediaTree.sendToTimeline")}
                 onClick={(e) => { e.stopPropagation(); setPicker(true); }}
-                className="absolute right-1.5 top-1.5 flex items-center rounded-md bg-black/75 p-1.5 text-white opacity-0 transition-all hover:bg-primary group-hover:opacity-100" />}>
-                <SendToTimelineIcon className="h-3.5 w-3.5" />
+                className="absolute right-1.5 top-1.5 flex items-center rounded-md bg-black/75 p-1.5 text-white opacity-0 transition-all hover:bg-primary group-hover:opacity-100 focus-visible:opacity-100" />}>
+                <SendToTimelineIcon className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent>{t("mediaTree.sendToTimeline")}</TooltipContent>
             </Tooltip>
@@ -142,7 +143,7 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
         </div>
         <div className="space-y-0.5 p-2">
           <div className="flex items-center gap-1.5">
-            {clip.source === "local" && <HardDriveDownload className="h-3 w-3 shrink-0 text-primary" />}
+            {clip.source === "local" && <HardDriveDownload className="size-3 shrink-0 text-primary" />}
             <Tooltip>
               <TooltipTrigger render={<div className="truncate text-sm font-medium" />}>
                 {clip.name}

@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { cn, uiLocale } from "@/lib/utils";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -143,27 +144,27 @@ function MentionList({ matches, active, setActive, pick }: {
     >
       {matches.map((c, i) => (
         <li key={c.id}>
-          <button
+          <Button variant="ghost"
             type="button"
             role="option"
             aria-selected={i === active}
             onMouseEnter={() => setActive(i)}
             onMouseDown={(e) => { e.preventDefault(); pick(c); }}
-            className={cn(
+            className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
               "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none",
               i === active ? "bg-accent text-accent-foreground" : "hover:bg-accent/50",
             )}
           >
             <span
-              className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-muted"
+              className="size-6 shrink-0 overflow-hidden rounded-full bg-muted"
               style={c.color ? { boxShadow: `inset 0 0 0 1.5px ${c.color}` } : undefined}
             >
               {c.avatar
                 ? <img src={c.avatar} alt="" className="h-full w-full object-cover" />
-                : <NetsuIcon name="face" className="m-1 h-4 w-4 text-muted-foreground" />}
+                : <NetsuIcon name="face" className="m-1 size-4 text-muted-foreground" />}
             </span>
             <span className="truncate">{c.name}</span>
-          </button>
+          </Button>
         </li>
       ))}
     </ul>

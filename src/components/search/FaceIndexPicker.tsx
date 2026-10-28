@@ -60,7 +60,7 @@ export function FaceIndexPicker({ open, onClose, onIndex }: Props) {
   return (
     <Card className="block overflow-hidden p-0">
       <div className="flex items-center gap-2 border-b border-border px-3 py-2 text-xs">
-        <NetsuIcon name="face" className="h-3.5 w-3.5 text-primary" />
+        <NetsuIcon name="face" className="size-3.5 text-primary" />
         <span className="font-medium">{t("faceIndexPicker.title")}</span>
         <div className="flex-1" />
         <div className="flex items-center gap-1">
@@ -77,25 +77,25 @@ export function FaceIndexPicker({ open, onClose, onIndex }: Props) {
             const on = pick.has(c.path);
             const info = faceMap[c.path];
             return (
-              <button
+              <Button variant="ghost"
                 key={c.path}
                 type="button"
                 onClick={() => setPick((s) => { const n = new Set(s); n.has(c.path) ? n.delete(c.path) : n.add(c.path); return n; })}
-                className={cn("flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   on ? "bg-accent" : "hover:bg-accent/50", info && !on && "opacity-50")}
               >
-                <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded border",
+                <span className={cn("flex size-4 shrink-0 items-center justify-center rounded border",
                   on ? "border-primary bg-primary text-white" : "border-border")}>
-                  {on && <NetsuIcon name="check" className="h-3 w-3" />}
+                  {on && <NetsuIcon name="check" className="size-3" />}
                 </span>
                 <Tooltip>
-                  <TooltipTrigger render={<span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", info ? "bg-[var(--color-ok)]" : "bg-muted-foreground/40")} />} />
+                  <TooltipTrigger render={<span className={cn("size-1.5 shrink-0 rounded-full", info ? "bg-[var(--color-ok)]" : "bg-muted-foreground/40")} />} />
                   <TooltipContent>{info ? t("faceIndexPicker.facesIndexed", { count: info.faces }) : t("faceIndexPicker.notIndexed")}</TooltipContent>
                 </Tooltip>
                 <span className="min-w-0 flex-1 truncate">{c.name}</span>
                 {info && <span className="shrink-0 text-[11px] font-medium text-[var(--color-ok)]">{t("faceIndexPicker.facesShort", { count: info.faces })}</span>}
                 {c.bin && <span className="shrink-0 text-[11px] text-muted-foreground">{binLabel(c.bin)}</span>}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -106,20 +106,20 @@ export function FaceIndexPicker({ open, onClose, onIndex }: Props) {
             <Toggle size="sm" variant="outline" pressed={indexParallel} onPressedChange={setIndexParallel}
               className="px-2.5 text-xs text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary" />
           }>
-            <NetsuIcon name="layers" className="h-3.5 w-3.5" /> {t("faceIndexPicker.parallel")}
+            <NetsuIcon name="layers" className="size-3.5" /> {t("faceIndexPicker.parallel")}
           </TooltipTrigger>
           <TooltipContent>{t("faceIndexPicker.parallelHint")}</TooltipContent>
         </Tooltip>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="h-3.5 w-3.5" /> {t("common:action.cancel")}</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="size-3.5" /> {t("common:action.cancel")}</Button>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="sm" disabled={pick.size === 0} onClick={() => confirm(true)} />}>
-              <NetsuIcon name="zap" className="h-3.5 w-3.5" /> {t("faceIndexPicker.reindex")} ({pick.size})
+              <NetsuIcon name="zap" className="size-3.5" /> {t("faceIndexPicker.reindex")} ({pick.size})
             </TooltipTrigger>
             <TooltipContent>{t("faceIndexPicker.reindexHint")}</TooltipContent>
           </Tooltip>
           <Button size="sm" disabled={pick.size === 0} onClick={() => confirm(false)}>
-            <NetsuIcon name="search-face" className="h-3.5 w-3.5" /> {t("faceIndexPicker.indexFaces")} ({pick.size})
+            <NetsuIcon name="search-face" className="size-3.5" /> {t("faceIndexPicker.indexFaces")} ({pick.size})
           </Button>
         </div>
       </div>

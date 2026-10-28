@@ -26,14 +26,14 @@ export function FaceModelsBanner() {
   return (
     <div className="space-y-2 rounded-lg border border-[var(--color-warn)]/40 bg-[var(--color-warn)]/10 p-3">
       <div className="flex items-center gap-2 text-xs">
-        <NetsuIcon name="warning" className="h-4 w-4 text-[var(--color-warn)]" />
+        <NetsuIcon name="warning" className="size-4 text-[var(--color-warn)]" />
         <span className="font-medium">{t("faceModelsBanner.missing")}</span>
         <span className="text-muted-foreground">
           {faceEngines.real ? "" : t("faceModelsBanner.realLower")}{!faceEngines.real && !faceEngines.anime ? " + " : ""}{faceEngines.anime ? "" : t("faceModelsBanner.animeLower")}
         </span>
         <div className="flex-1" />
         <Button size="sm" disabled={!!dl} onClick={() => downloadFaceModels()}>
-          {dl ? <Spinner className="h-3.5 w-3.5" /> : <NetsuIcon name="download" className="h-3.5 w-3.5" />} {t("faceModelsBanner.download")}
+          {dl ? <Spinner className="size-3.5" /> : <NetsuIcon name="download" className="size-3.5" />} {t("faceModelsBanner.download")}
         </Button>
       </div>
       {dl && (
