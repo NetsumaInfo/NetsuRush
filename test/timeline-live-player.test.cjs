@@ -19,7 +19,7 @@ test('shared Timeline Live proxy requests coalesce while generation is in flight
     path.join(__dirname, '..', 'src', 'components', 'rushes', 'previewCache.ts'),
     'utf8',
   );
-  assert.match(grid, /pendingRef = useRef<Map<string, Promise<string \| null>>>/);
+  assert.match(grid, /sharedPending = new Map<string, Promise<string \| null>>/);
   assert.match(grid, /const inFlight = pendingRef\.current\.get\(key\);\s*if \(inFlight\) return inFlight;/);
   assert.match(grid, /pendingRef\.current\.set\(key, request\)/);
 });

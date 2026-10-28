@@ -105,14 +105,30 @@ export interface PreviewCache {
   generateThumbs: (source: PreviewSource<PreviewThumbRange>) => Promise<void>;
 }
 
+// Module scope on purpose: leaving a tab unmounts its grid, and a cache owned by the component died
+// with it, so coming back redid every resolve. Bounded (oldest entry out) so a long session over many
+// rushes cannot grow it without limit.
+const URL_CACHE_MAX = 5000;
+class BoundedUrlCache extends Map<string, string> {
+  override set(key: string, value: string): this {
+    if (this.has(key)) this.delete(key);   // re-insert = most recent
+    super.set(key, value);
+    if (this.size > URL_CACHE_MAX) {
+      const oldest = this.keys().next().value;
+      if (oldest !== undefined) this.delete(oldest);
+    }
+    return this;
+  }
+}
+const sharedCache = new BoundedUrlCache();
+// A card and the side player can ask for the same shot in the same render: one promise owns the
+// encode and every consumer gets exactly the same result.
+const sharedPending = new Map<string, Promise<string | null>>();
+
 export function usePreviewCache(): PreviewCache {
   const { t } = useTranslation("derush");
-  const cacheRef = useRef<Map<string, string> | null>(null);
-  if (cacheRef.current === null) cacheRef.current = new Map();
-  const cache = cacheRef.current;
-  // A card and the side player can ask for the same shot in the same render: one promise owns the
-  // encode and every consumer gets exactly the same result.
-  const pendingRef = useRef<Map<string, Promise<string | null>>>(new Map());
+  const cache = sharedCache;
+  const pendingRef = useRef(sharedPending);
   const warmProxyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Each entry cancels one warm poll. Functions rather than timer ids: the poll re-arms itself with a
   // growing delay, so the id it would be cancelled by is not the id it was started with.
@@ -185,7 +201,20 @@ export function usePreviewCache(): PreviewCache {
   const warmThumbs = useCallback((list: PreviewThumbRange[]) => {
     if (!list.length) return;
     const version = ++warmVersionRef.current;
+    // After first paint, never in the load path: the grid shows what the renderer cache already holds
+    // and the warm pass fills the rest in the background.
+    const start = () => {
+      if (warmVersionRef.current !== version) return;   // superseded or unmounted meanwhile
+      runWarmThumbs(list, version);
+    };
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    if (idle) idle.call(window, start, { timeout: 500 }); else setTimeout(start, 50);
+  }, []);
+
+  const runWarmThumbs = useCallback((list: PreviewThumbRange[], version: number) => {
     const items = list.map((s) => ({ path: s.path, time: thumbTime(s.in, s.out) }));
+    // Everything already in the renderer cache (a revisit): nothing to resolve nor to batch.
+    if (items.every((it) => getThumb(it.path, it.time))) return;
     // Resolves in ONE RPC the thumbnails already on disk → primes the renderer cache, so cards
     // render their <img> without one RPC each.
     void warmResolveThumbs(items);

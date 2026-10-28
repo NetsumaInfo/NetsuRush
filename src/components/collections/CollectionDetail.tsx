@@ -46,17 +46,31 @@ import { uiLocale } from "@/lib/utils";
 const NARROW_W = 640;
 const MIN_GRID_W = 260;
 
+// Per-collection cache (module scope): reopening a collection paints its last known content at once
+// and revalidates in the background. Kept in step with every local edit by the effect below.
+const COLLECTION_CACHE_MAX = 12;
+const collectionCache = new Map<string, Collection>();
+function cacheCollection(c: Collection) {
+  collectionCache.delete(c.id);
+  collectionCache.set(c.id, c);
+  if (collectionCache.size > COLLECTION_CACHE_MAX) {
+    const oldest = collectionCache.keys().next().value;
+    if (oldest !== undefined) collectionCache.delete(oldest);
+  }
+}
+
 export function CollectionDetail({ id }: { id: string }) {
   const { t: tr } = useTranslation(["collections", "common"]);
   const { closeCollection, connected, loadCollections, collectionTags, loadCollectionTags, archiveCollection } = useApp(
     useShallow((s) => ({ closeCollection: s.closeCollection, connected: hostConnected(s), loadCollections: s.loadCollections, collectionTags: s.collectionTags, loadCollectionTags: s.loadCollectionTags, archiveCollection: s.archiveCollection })),
   );
   const pinned = useApp((s) => s.pinned);
-  const [localColl, setColl] = useState<Collection | null>(null);
+  const [localColl, setColl] = useState<Collection | null>(() => collectionCache.get(id) ?? null);
+  useEffect(() => { if (localColl && localColl.id === id) cacheCollection(localColl); }, [localColl, id]);
   const shared = useSharedCollection(localColl);
   const coll = shared.collection ?? (localColl?.collaboration?.projectId ? { ...localColl, shots: [] } : localColl);
   const sharedProjectId = localColl?.collaboration?.projectId;
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !collectionCache.has(id));
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
   // Libellé publié AUSSI dans le store : la pastille d'export l'affiche (cf. ExportStatusToast).
@@ -128,9 +142,10 @@ export function CollectionDetail({ id }: { id: string }) {
   }
 
   async function reload() {
-    setLoading(true);
+    if (!collectionCache.has(id)) setLoading(true);   // cached: keep showing it, refresh silently
     try {
       const c = await nr.collections?.load(id);
+      if (c) cacheCollection(c); else collectionCache.delete(id);
       setColl(c ?? null);
       // `out` FAIT PARTIE de l'instant de vignette (thumbTime borne l'avance à 40 % du plan) : sans
       // lui la préchauffe générait une image que la carte ne demanderait jamais, et chaque plan de
@@ -138,7 +153,7 @@ export function CollectionDetail({ id }: { id: string }) {
       if (c?.shots?.length && !c.collaboration?.projectId) grid.warmThumbs(c.shots.map((s) => ({ path: s.path, in: s.in, out: s.out, inFrame: s.inFrame, fps: s.fps })));
     } finally { setLoading(false); }
   }
-  useEffect(() => { void reload(); void loadCollectionTags(); setSel(new Set()); setFilter(EMPTY_FILTER); /* eslint-disable-next-line */ }, [id]);
+  useEffect(() => { void reload(); void loadCollectionTags(); setColl(collectionCache.get(id) ?? null); setLoading(!collectionCache.has(id)); setSel(new Set()); setFilter(EMPTY_FILTER); /* eslint-disable-next-line */ }, [id]);
   useEffect(() => {
     const changed = (event: Event) => { if ((event as CustomEvent<{ id: string }>).detail.id === id) void reload(); };
     window.addEventListener("nr-collection-shared", changed);

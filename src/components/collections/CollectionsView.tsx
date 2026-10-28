@@ -220,7 +220,7 @@ export function CollectionsView() {
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("list.searchPlaceholder")} className="h-8 pl-8" />
         </div>
         <div className="flex-1" />
-        {s.collectionsLoading && <Spinner className="size-4" />}
+        {s.collectionsLoading && !s.collections.length && <Spinner className="size-4" />}
         <Tooltip>
           <TooltipTrigger render={<button type="button" aria-label={tr("folder.new")} onClick={() => setFolderDialog({ name: "" })}
             className="inline-flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground" />}>

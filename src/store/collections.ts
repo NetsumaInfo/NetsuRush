@@ -67,6 +67,9 @@ export interface CollectionsSlice {
 // Un upscale REMPLACE les pixels : la copie de flux ne peut pas le faire. Activer l'agrandissement
 // impose donc le ré-encodage, quel que soit le réglage enregistré (le core applique la même règle —
 // l'UI et le core doivent conclure pareil, sinon le fichier produit ne correspond pas à l'aperçu).
+let collectionsInFlight: Promise<void> | null = null;
+let foldersInFlight: Promise<void> | null = null;
+
 export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsSlice> = (set, get) => ({
   collections: [],
   collectionsLoading: false,
@@ -76,14 +79,33 @@ export const createCollectionsSlice: StateCreator<AppState, [], [], CollectionsS
   currentFolderId: null,
   collectionTags: [],
 
-  loadCollections: async () => {
-    set({ collectionsLoading: true });
-    const list = (await nr.collections?.list()) ?? [];
-    set({ collections: list, collectionsLoading: false });
+  // Stale-while-revalidate: what the store already holds stays on screen while the refresh runs, and
+  // concurrent callers share the one request in flight.
+  loadCollections: () => {
+    if (collectionsInFlight) return collectionsInFlight;
+    if (!get().collections.length) set({ collectionsLoading: true });
+    const run = (async () => {
+      try {
+        const list = (await nr.collections?.list()) ?? [];
+        set({ collections: list, collectionsLoading: false });
+      } finally {
+        collectionsInFlight = null;
+        if (get().collectionsLoading) set({ collectionsLoading: false });
+      }
+    })();
+    collectionsInFlight = run;
+    return run;
   },
-  loadCollectionFolders: async () => {
-    const f = (await nr.collections?.listFolders?.()) ?? [];
-    set({ collectionFolders: f });
+  loadCollectionFolders: () => {
+    if (foldersInFlight) return foldersInFlight;
+    const run = (async () => {
+      try {
+        const f = (await nr.collections?.listFolders?.()) ?? [];
+        set({ collectionFolders: f });
+      } finally { foldersInFlight = null; }
+    })();
+    foldersInFlight = run;
+    return run;
   },
   loadCollectionTags: async () => {
     const t = (await nr.collections?.allTags?.()) ?? [];
