@@ -621,9 +621,9 @@ export function TimelineLiveView() {
             <Tooltip>
               <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
                 <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-                <button type="button" aria-label={t("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="remove" className="h-3.5 w-3.5" /></button>
+                <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)}><NetsuIcon name="remove" className="size-3.5" /></Button>
                 <span className="w-4 text-center tabular-nums">{grid.actualCols}</span>
-                <button type="button" aria-label={t("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
+                <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)}><NetsuIcon name="add" className="size-3.5" /></Button>
               </TooltipTrigger>
               <TooltipContent>{t("shared.thumbSize")}</TooltipContent>
             </Tooltip>

@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { Button } from "@/components/ui/button";
 import { useApp } from "@/store";
 import { useOutsideDismiss } from "@/hooks/useOutsideDismiss";
 import { cn } from "@/lib/utils";
@@ -186,9 +187,9 @@ export function CutSettings({ open, onOpenChange }: { open: boolean; onOpenChang
         {tab === "grid" && (<>
           <Row label={t("settings.density")} hint={t("settings.densityHint")}>
             <div className="flex h-7 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs">
-              <button type="button" onClick={() => setCutCols(cutCols - 1)} disabled={cutCols <= 2} aria-label={t("settings.smaller")} className="flex size-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="remove" className="size-3.5" /></button>
+              <Button type="button" variant="ghost" size="icon-xs" onClick={() => setCutCols(cutCols - 1)} disabled={cutCols <= 2} aria-label={t("settings.smaller")}><NetsuIcon name="remove" className="size-3.5" /></Button>
               <span className="w-4 text-center tabular-nums">{cutCols}</span>
-              <button type="button" onClick={() => setCutCols(cutCols + 1)} disabled={cutCols >= 8} aria-label={t("settings.bigger")} className="flex size-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="add" className="size-3.5" /></button>
+              <Button type="button" variant="ghost" size="icon-xs" onClick={() => setCutCols(cutCols + 1)} disabled={cutCols >= 8} aria-label={t("settings.bigger")}><NetsuIcon name="add" className="size-3.5" /></Button>
             </div>
           </Row>
           <Separator />

@@ -89,9 +89,7 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
     const paths = [...pick];
     onClose();
     if (paths.length) onIndex(paths, force, frames);
-  };
-
-  const pill = "rounded-md border border-border px-2 py-0.5 text-muted-foreground hover:border-foreground/40 hover:text-foreground";
+  };
   const nTodo = clips.filter(todo).length;
 
   return (
@@ -100,9 +98,9 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
         <span className="font-medium">{t("indexPicker.title")}</span>
         <div className="flex-1" />
         <div className="flex items-center gap-1">
-          <button type="button" className={pill} disabled={!nTodo} onClick={() => setPick(new Set(clips.flatMap((c) => todo(c) ? [c.path] : [])))}>{t("indexPicker.todo")}{nTodo ? ` (${nTodo})` : ""}</button>
-          <button type="button" className={pill} onClick={() => setPick(new Set(clips.map((c) => c.path)))}>{t("indexPicker.all")}</button>
-          <button type="button" className={pill} onClick={() => setPick(new Set())}>{t("indexPicker.deselect")}</button>
+          <Button type="button" variant="outline" size="xs" disabled={!nTodo} onClick={() => setPick(new Set(clips.flatMap((c) => todo(c) ? [c.path] : [])))}>{t("indexPicker.todo")}{nTodo ? ` (${nTodo})` : ""}</Button>
+          <Button type="button" variant="outline" size="xs" onClick={() => setPick(new Set(clips.map((c) => c.path)))}>{t("indexPicker.all")}</Button>
+          <Button type="button" variant="outline" size="xs" onClick={() => setPick(new Set())}>{t("indexPicker.deselect")}</Button>
         </div>
       </div>
       {clips.length === 0 ? (

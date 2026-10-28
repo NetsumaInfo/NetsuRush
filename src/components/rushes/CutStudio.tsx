@@ -299,7 +299,7 @@ export function CutStudio() {
       {!compact && (
       <div className="relative shrink-0 border-b border-border px-4 py-2">
         <div className="flex flex-wrap items-center gap-2.5">
-           <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex items-center justify-center rounded-md transition-colors hover:bg-accent h-8 px-2 text-sm"><NetsuIcon name="back" className="h-4 w-4" /></button>
+           <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common:action.back")} onClick={close}><NetsuIcon name="back" className="size-4" /></Button>
           <div className="min-w-0 flex-1">
             {/* Flux : le nom affiché est celui du rush qu'on a SOUS LES YEUX, et il change en défilant.
                 L'entête garde exactement sa forme — seul son contenu suit le défilement, donc rien ne
@@ -366,7 +366,7 @@ export function CutStudio() {
                 <span className="tabular-nums">{narrow ? `${segments.length}${selCount ? `/${selCount}` : ""}` : `${t("cutStudio.shotCount", { count: segments.length })}${selCount ? t("cutStudio.selSuffix", { count: selCount }) : ""}`}</span>
               </button>
               {selCount > 0 && (
-                <button type="button" onClick={() => setSel(new Set())} className="flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">{t("shared.deselect")}</button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setSel(new Set())} className="text-xs text-muted-foreground">{t("shared.deselect")}</Button>
               )}
               {selCount >= 2 && (
                 <Tooltip>
@@ -429,9 +429,9 @@ export function CutStudio() {
               <Tooltip>
                 <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
                   <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-                   <button type="button" aria-label={t("common:action.decrease")} onClick={() => setCols(stepCols(actualCols, -1, maxCols))} disabled={!canFewerCols(actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="remove" className="h-3.5 w-3.5" /></button>
+                   <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.decrease")} onClick={() => setCols(stepCols(actualCols, -1, maxCols))} disabled={!canFewerCols(actualCols)}><NetsuIcon name="remove" className="size-3.5" /></Button>
                   <span className="w-4 text-center tabular-nums">{actualCols}</span>
-                   <button type="button" aria-label={t("common:action.increase")} onClick={() => setCols(stepCols(actualCols, 1, maxCols))} disabled={!canMoreCols(actualCols, maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
+                   <Button type="button" variant="ghost" size="icon-xs" aria-label={t("common:action.increase")} onClick={() => setCols(stepCols(actualCols, 1, maxCols))} disabled={!canMoreCols(actualCols, maxCols)}><NetsuIcon name="add" className="size-3.5" /></Button>
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.thumbSize")}</TooltipContent>
               </Tooltip>

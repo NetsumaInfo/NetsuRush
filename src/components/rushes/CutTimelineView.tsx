@@ -215,7 +215,7 @@ export function CutTimelineView() {
     return (
       <div className="flex h-full flex-col">
         <header className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
-           <button type="button" aria-label={t("common:action.back")} onClick={() => setEditing(null)} className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm transition-colors hover:bg-accent"><NetsuIcon name="back" className="h-4 w-4" /></button>
+           <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common:action.back")} onClick={() => setEditing(null)}><NetsuIcon name="back" className="size-4" /></Button>
           <div className="min-w-0 flex-1 truncate text-[13px] font-medium">{t("cutTimeline.editHeader", { name: single })}</div>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
@@ -237,7 +237,7 @@ export function CutTimelineView() {
     <div className="flex h-full flex-col">
       {/* En-tête de page */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
-        <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm transition-colors hover:bg-accent"><NetsuIcon name="back" className="h-4 w-4" /></button>
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={t("common:action.back")} onClick={close}><NetsuIcon name="back" className="size-4" /></Button>
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <NetsuIcon name="scissors" className="h-4 w-4 shrink-0 text-primary" />
           <span className="text-[13px] font-medium">{t("cutTimeline.title")}</span>
