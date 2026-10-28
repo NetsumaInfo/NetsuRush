@@ -79,7 +79,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={scan} disabled={scanning}>
-          <NetsuIcon name="boost-rescan" busy={scanning} className="h-4 w-4" />
+          <NetsuIcon name="boost-rescan" busy={scanning} className="size-4" />
           {t("boost.procs.scan")}
         </Button>
       </div>
@@ -115,7 +115,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
                     <TooltipTrigger
                       render={<Button variant="ghost" size="icon-sm" disabled={p.critical} onClick={() => setTarget(p)} />}
                     >
-                      <NetsuIcon name="boost-kill" className="h-4 w-4" />
+                      <NetsuIcon name="boost-kill" className="size-4" />
                     </TooltipTrigger>
                     {/* L'hôte VIVANT n'est pas un résidu : le tuer perdrait le montage en cours. */}
                     <TooltipContent>{p.critical ? t("boost.procs.protectedTip") : t("boost.procs.kill")}</TooltipContent>
@@ -145,7 +145,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={kill} disabled={killing}>
-              <NetsuIcon name="boost-kill" busy={killing} className="h-4 w-4" />
+              <NetsuIcon name="boost-kill" busy={killing} className="size-4" />
               {t("boost.procs.kill")}
             </Button>
           </DialogFooter>

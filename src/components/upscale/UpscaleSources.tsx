@@ -38,10 +38,10 @@ const ctxGuard = (fn: () => void) => () => { if (performance.now() - lastCtxClos
 function Tick({ on }: { on: boolean }) {
   return (
     <span className={cn(
-      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+      "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
       on ? "border-primary bg-primary text-primary-foreground" : "border-border",
     )}>
-      {on && <NetsuIcon name="check" className="h-3 w-3" />}
+      {on && <NetsuIcon name="check" className="size-3" />}
     </span>
   );
 }
@@ -66,7 +66,7 @@ const ClipRow = memo(function ClipRow({ clip, selected, onToggle, depth }: { cli
         <LazyThumb path={clip.path} at={THUMB_AUTO} className={THUMB_CLS} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
-            {clip.source === "local" && <NetsuIcon name="disk-download" className="h-3 w-3 shrink-0 text-primary" />}
+            {clip.source === "local" && <NetsuIcon name="disk-download" className="size-3 shrink-0 text-primary" />}
             <Tooltip>
               <TooltipTrigger render={<span className="truncate text-sm font-medium">{clip.name}</span>} />
               <TooltipContent>{clip.name}</TooltipContent>
@@ -127,8 +127,8 @@ function FolderView({ node, path, depth, collapsed, toggle, selectedPaths, onTog
         <ContextMenuTrigger render={<button type="button" onClick={ctxGuard(() => toggle(path))}
           style={{ paddingLeft: depth * 14 + 4 }}
           className="flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm hover:bg-accent/60" />}>
-          <NetsuIcon name="chevron-toggle" on={open} className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="chevron-toggle" on={open} className="size-4 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />
           <span className="truncate font-medium">{node.name}</span>
           <span className="text-xs text-muted-foreground">{countClips(node)}</span>
         </ContextMenuTrigger>
@@ -287,19 +287,19 @@ export function UpscaleSources({ up }: { up: ProcController }) {
       <div className="space-y-1 border-b border-border px-2 py-1">
         <div className="flex items-center gap-1.5">
           <ToggleGroup className="flex-1" value={[mode]} onValueChange={(v) => v[0] && setMode(v[0] as "pool" | "timeline")}>
-            <ToggleGroupItem value="pool" className="flex-1 gap-1.5 text-xs"><NetsuIcon name="folder-open" className="h-3.5 w-3.5" /> {t("sources.mediaPool")}</ToggleGroupItem>
-            <ToggleGroupItem value="timeline" className="flex-1 gap-1.5 text-xs"><NetsuIcon name="film-slate" className="h-3.5 w-3.5" /> {t("sources.timeline")}</ToggleGroupItem>
+            <ToggleGroupItem value="pool" className="flex-1 gap-1.5 text-xs"><NetsuIcon name="folder-open" className="size-3.5" /> {t("sources.mediaPool")}</ToggleGroupItem>
+            <ToggleGroupItem value="timeline" className="flex-1 gap-1.5 text-xs"><NetsuIcon name="film-slate" className="size-3.5" /> {t("sources.timeline")}</ToggleGroupItem>
           </ToggleGroup>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" disabled={mode === "pool" ? clipsLoading : tlLoading}
               onClick={() => (mode === "pool" ? loadClips() : (opened ? openTimeline(opened) : loadTimelines()))} aria-label={t("sources.reload")}>
-              <NetsuIcon name="refresh" busy={mode === "pool" ? clipsLoading : tlLoading} className="h-4 w-4" />
+              <NetsuIcon name="refresh" busy={mode === "pool" ? clipsLoading : tlLoading} className="size-4" />
             </Button>} />
             <TooltipContent>{mode === "pool" ? t("sources.reloadMediaPool") : t("sources.reload")}</TooltipContent>
           </Tooltip>
         </div>
         <div className="relative">
-          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)}
             placeholder={mode === "pool" ? t("sources.searchRush") : opened ? t("sources.searchShot") : t("sources.searchTimeline")} className="h-7 pl-8" />
         </div>
@@ -339,7 +339,7 @@ export function UpscaleSources({ up }: { up: ProcController }) {
           </div>
         ) : !opened ? (
           tlLoading ? (
-            <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"><Spinner className="h-4 w-4" /> {t("sources.loading")}</div>
+            <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"><Spinner className="size-4" /> {t("sources.loading")}</div>
           ) : tlErr ? (
             <div className="rounded-lg border border-dashed border-border p-4 text-xs text-destructive">{tlErr}</div>
           ) : timelines.length ? (
@@ -353,10 +353,10 @@ export function UpscaleSources({ up }: { up: ProcController }) {
               {timelinesF.map((timeline) => (
                 <button key={timeline.name} type="button" onClick={() => openTimeline(timeline.name)}
                   className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-accent/60">
-                  <NetsuIcon name="film" className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <NetsuIcon name="film" className="size-4 shrink-0 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate font-medium">{timeline.name}</span>
                   {timeline.current && <span className="shrink-0 text-[11px] text-[var(--color-ok)]">{t("sources.opened")}</span>}
-                  <NetsuIcon name="next" className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <NetsuIcon name="next" className="size-4 shrink-0 text-muted-foreground" />
                 </button>
               ))}
             </div>
@@ -369,21 +369,21 @@ export function UpscaleSources({ up }: { up: ProcController }) {
             <div className="flex items-center gap-1 px-1 pb-1">
               <button type="button" onClick={() => { setQuery(""); setOpened(null); setCuts([]); }}
                 className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
-                <NetsuIcon name="prev" className="h-3.5 w-3.5" /> {t("sources.timelines")}
+                <NetsuIcon name="prev" className="size-3.5" /> {t("sources.timelines")}
               </button>
               <span className="min-w-0 flex-1 truncate text-xs font-medium">{opened}</span>
               {cuts.length > 0 && (
                 <>
                   <Tooltip>
                     <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={addAllPlans} aria-label={t("sources.selectAll")}>
-                      <NetsuIcon name="list-plus" className="h-4 w-4" />
+                      <NetsuIcon name="list-plus" className="size-4" />
                     </Button>} />
                     <TooltipContent>{q ? t("sources.selectAllShown") : t("sources.selectAll")}</TooltipContent>
                   </Tooltip>
                   {selectedPlanCount > 0 && (
                     <Tooltip>
                       <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={deselectAllPlans} aria-label={t("sources.deselectAll")}>
-                        <NetsuIcon name="list-x" className="h-4 w-4" />
+                        <NetsuIcon name="list-x" className="size-4" />
                       </Button>} />
                       <TooltipContent>{t("sources.deselectTimeline", { count: selectedPlanCount })}</TooltipContent>
                     </Tooltip>
@@ -392,7 +392,7 @@ export function UpscaleSources({ up }: { up: ProcController }) {
               )}
             </div>
             {cutsLoading ? (
-              <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"><Spinner className="h-4 w-4" /> {t("sources.readingShots")}</div>
+              <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground"><Spinner className="size-4" /> {t("sources.readingShots")}</div>
             ) : tlErr ? (
               <div className="rounded-lg border border-dashed border-border p-4 text-xs text-destructive">{tlErr}</div>
             ) : cuts.length ? (
@@ -410,7 +410,7 @@ export function UpscaleSources({ up }: { up: ProcController }) {
 
       <div className="border-t border-border p-2">
         <Button variant="outline" size="sm" className="w-full" onClick={pickFiles}>
-          <NetsuIcon name="file-video" className="h-4 w-4" /> {t("sources.diskFiles")}
+          <NetsuIcon name="file-video" className="size-4" /> {t("sources.diskFiles")}
         </Button>
       </div>
     </div>

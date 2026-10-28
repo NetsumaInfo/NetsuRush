@@ -98,7 +98,7 @@ function OpLayout({
                   return (
                     <Tooltip key={m.id}>
                       <TooltipTrigger render={<ToggleGroupItem value={m.id} className="flex-1" disabled={off} aria-label={t(`ops.${m.id}`)}>
-                        <m.icon className="h-4 w-4" />
+                        <m.icon className="size-4" />
                       </ToggleGroupItem>} />
                       <TooltipContent>{m.id === "interpolate" && up.allStills ? t("panel.interpolateNeedsVideo") : t(`ops.${m.id}`)}</TooltipContent>
                     </Tooltip>
@@ -106,7 +106,7 @@ function OpLayout({
                 })}
               </ToggleGroup>
               <h2 className="flex items-center gap-1.5 px-1 text-sm font-semibold">
-                <NetsuIcon name="sparkles" className="h-4 w-4 shrink-0 text-primary" />
+                <NetsuIcon name="sparkles" className="size-4 shrink-0 text-primary" />
                 <span>{title}</span>
                 <span className="text-xs font-medium text-muted-foreground">{titleMeta}</span>
               </h2>
@@ -138,13 +138,13 @@ function OpLayout({
 
               {err && (
                 <Card className="block border-destructive/40 p-2.5 text-xs text-destructive">
-                  <NetsuIcon name="warning" className="mr-1.5 inline h-3.5 w-3.5" /> {err}
+                  <NetsuIcon name="warning" className="mr-1.5 inline size-3.5" /> {err}
                 </Card>
               )}
               {result?.ok && !running && (
                 <Card className="block p-3 text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-[var(--color-ok)]">
-                    <NetsuIcon name="status-ok" className="h-3.5 w-3.5" />
+                    <NetsuIcon name="status-ok" className="size-3.5" />
                     {t("result.files", { count: result.outputs?.length ?? 0 })}{result.imported ? t("result.imported", { count: result.imported }) : ""}.
                   </div>
                   {result.failed ? <p className="mt-1 text-muted-foreground">{t("result.failed", { count: result.failed })}</p> : null}
@@ -152,7 +152,7 @@ function OpLayout({
               )}
 
               <Button className="w-full" size="lg" onClick={up.run} disabled={!has || running || !!unavailable}>
-                {running ? <Spinner className="h-4 w-4" /> : <RunIcon className="h-4 w-4" />}
+                {running ? <Spinner className="size-4" /> : <RunIcon className="size-4" />}
                 {running ? busyLabel
                   : sources.length > 1 ? t("run.idleMulti", { label: runLabel.idle, count: sources.length })
                   : runLabel.idle}

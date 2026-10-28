@@ -100,16 +100,16 @@ export function ProcessSection() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-            <NetsuIcon name="list-tree" className="h-4 w-4 text-primary" /> {t("process.title")}
+            <NetsuIcon name="list-tree" className="size-4 text-primary" /> {t("process.title")}
           </h3>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={scanDead} disabled={deadBusy}>
-            <NetsuIcon name="boost-purge" busy={deadBusy} className="h-4 w-4" />
+            <NetsuIcon name="boost-purge" busy={deadBusy} className="size-4" />
             {t("process.cleanBlocked")}
           </Button>
           <Button variant="outline" size="sm" onClick={scan} disabled={scanning}>
-            <NetsuIcon name="boost-rescan" busy={scanning} className="h-4 w-4" />
+            <NetsuIcon name="boost-rescan" busy={scanning} className="size-4" />
             {t("process.scan")}
           </Button>
         </div>
@@ -154,7 +154,7 @@ export function ProcessSection() {
                         onClick={() => setTarget(p)}
                       />
                     }>
-                      <NetsuIcon name="boost-kill" className="h-4 w-4" />
+                      <NetsuIcon name="boost-kill" className="size-4" />
                     </TooltipTrigger>
                     <TooltipContent>{p.critical ? t("process.protectedTip") : t("process.kill")}</TooltipContent>
                   </Tooltip>
@@ -185,7 +185,7 @@ export function ProcessSection() {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={kill} disabled={killing}>
-              <NetsuIcon name="boost-kill" busy={killing} className="h-4 w-4" />
+              <NetsuIcon name="boost-kill" busy={killing} className="size-4" />
               {t("process.kill")}
             </Button>
           </DialogFooter>
@@ -212,7 +212,7 @@ export function ProcessSection() {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={cleanDead} disabled={deadBusy}>
-              <NetsuIcon name="boost-purge" busy={deadBusy} className="h-4 w-4" />
+              <NetsuIcon name="boost-purge" busy={deadBusy} className="size-4" />
               {t("process.clean")}
             </Button>
           </DialogFooter>

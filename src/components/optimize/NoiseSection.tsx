@@ -76,12 +76,12 @@ export function NoiseSection() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-            <NetsuIcon name="wind" className="h-4 w-4 text-primary" /> {t("noise.title")}
+            <NetsuIcon name="wind" className="size-4 text-primary" /> {t("noise.title")}
           </h3>
           <p className="mt-0.5 text-xs text-muted-foreground">{t("noise.subtitle")}</p>
         </div>
         <Button variant="outline" size="sm" onClick={scan} disabled={scanning}>
-          <NetsuIcon name="boost-rescan" busy={scanning} className="h-4 w-4" />
+          <NetsuIcon name="boost-rescan" busy={scanning} className="size-4" />
           {t("noise.scan")}
         </Button>
       </div>
@@ -108,7 +108,7 @@ export function NoiseSection() {
           </ul>
           <div className="mt-3 flex items-center gap-2">
             <Button variant="destructive" size="sm" onClick={stop} disabled={killing || !picked.size}>
-              <NetsuIcon name="boost-kill" busy={killing} className="h-4 w-4" />
+              <NetsuIcon name="boost-kill" busy={killing} className="size-4" />
               {t("noise.stop", { count: picked.size })}
             </Button>
             {picked.size > 0 && (

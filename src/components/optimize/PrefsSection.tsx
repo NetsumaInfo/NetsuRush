@@ -202,7 +202,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-            <NetsuIcon name="sliders" className="h-4 w-4 text-primary" /> {t("prefs.title")}
+            <NetsuIcon name="sliders" className="size-4 text-primary" /> {t("prefs.title")}
           </h3>
           <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">{t("prefs.subtitle")}</p>
         </div>
@@ -213,7 +213,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
               {t("prefs.reset")}
             </Button>
             <Button variant="default" size="sm" disabled={busy} onClick={() => setConfirm(true)}>
-              {busy ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : null}
+              {busy ? <NetsuIcon name="loading" busy className="size-4" /> : null}
               {t("prefs.apply")}
             </Button>
           </div>
@@ -222,7 +222,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
 
       {error && (
         <p className="mt-3 flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-500">
-          <NetsuIcon name="warning" className="h-3.5 w-3.5 shrink-0" /> {t("prefs.unavailable", { error })}
+          <NetsuIcon name="warning" className="size-3.5 shrink-0" /> {t("prefs.unavailable", { error })}
         </p>
       )}
 
@@ -252,7 +252,7 @@ export function PrefsSection({ diag, onChanged }: { diag: OptimizeDiagnosis | nu
               <Tooltip key={b.name}>
                 <TooltipTrigger render={
                   <Button variant="outline" size="sm" disabled={busy} onClick={() => restore(b.name)}>
-                    <NetsuIcon name="reset-default" className="h-3.5 w-3.5" />
+                    <NetsuIcon name="reset-default" className="size-3.5" />
                     {new Date(b.at).toLocaleString(uiLocale())}
                   </Button>
                 } />

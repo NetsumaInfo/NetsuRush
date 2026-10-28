@@ -97,7 +97,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={pick} disabled={scanning}>
-            <NetsuIcon name="folder-open" className="h-4 w-4" /> {t("cleanup.browse")}
+            <NetsuIcon name="folder-open" className="size-4" /> {t("cleanup.browse")}
           </Button>
           <Button
             variant="ghost"
@@ -105,7 +105,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
             onClick={() => root && doScan(root)}
             disabled={scanning || !root}
           >
-            <NetsuIcon name="boost-rescan" busy={scanning} className="h-4 w-4" />
+            <NetsuIcon name="boost-rescan" busy={scanning} className="size-4" />
             {t("cleanup.rescan")}
           </Button>
         </div>
@@ -125,7 +125,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
       {disk && diskPct !== null && (
         <div className="mt-3">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <NetsuIcon name="disk" className="h-3.5 w-3.5" />
+            <NetsuIcon name="disk" className="size-3.5" />
             {t("cleanup.disk", { free: fmtBytes(disk.free), total: fmtBytes(disk.total) })}
           </div>
           <div className="mt-1">
@@ -153,7 +153,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
                     onClick={() => toggle(e.path)}
                     className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-muted/50"
                   >
-                    <NetsuIcon name="checkbox-off" on={on} className={`h-4 w-4 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
+                    <NetsuIcon name="checkbox-off" on={on} className={`size-4 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{e.label}</span>
                       <Tooltip>
@@ -178,7 +178,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
             disabled={!selEntries.length}
             onClick={() => setConfirmOpen(true)}
           >
-            <NetsuIcon name="trash" className="h-4 w-4" /> {t("cleanup.cleanSelection", { size: fmtBytes(selBytes) })}
+            <NetsuIcon name="trash" className="size-4" /> {t("cleanup.cleanSelection", { size: fmtBytes(selBytes) })}
           </Button>
         </>
       )}
@@ -212,7 +212,7 @@ export function CleanupSection({ cacheRoots }: { cacheRoots: string[] }) {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={confirmClean} disabled={cleaning}>
-              {cleaning ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="trash" className="h-4 w-4" />}
+              {cleaning ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="trash" className="size-4" />}
               {t("common:action.delete")}
             </Button>
           </DialogFooter>

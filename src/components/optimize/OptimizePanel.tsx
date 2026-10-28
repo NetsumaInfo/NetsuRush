@@ -43,12 +43,12 @@ function PanelHeader({
           serrée dans la carte Projet où elle se faisait tronquer. */}
       <div className="flex items-baseline gap-2">
         <h1 className="flex items-center gap-2 text-lg font-semibold">
-          <NetsuIcon name="gauge" className="h-5 w-5 text-primary" /> {t("panel.title")}
+          <NetsuIcon name="gauge" className="size-5 text-primary" /> {t("panel.title")}
         </h1>
         {version && <span className="text-xs text-muted-foreground">{t("diagnostic.version", { version })}</span>}
       </div>
       <Button variant="outline" size="sm" onClick={onDiagnose} disabled={loading}>
-        <NetsuIcon name="boost-rescan" busy={loading} className="h-4 w-4" />
+        <NetsuIcon name="boost-rescan" busy={loading} className="size-4" />
         {t("panel.diagnose")}
       </Button>
     </header>

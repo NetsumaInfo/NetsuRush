@@ -8,6 +8,7 @@ import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { nr, type SnapshotState, type SnapshotProgress } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -172,7 +173,12 @@ export function OutboxSettings() {
                 <span className="shrink-0 text-[10px] text-muted-foreground">
                   {e.status === "done" ? (e.result ? `« ${e.result} »` : t("outbox.applied")) : e.status === "error" ? (e.error || t("outbox.failed")) : t("outbox.pending")}
                 </span>
-                <button type="button" aria-label={t("common:action.remove")} onClick={() => void remove(e.id)} className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="size-3.5" /></button>
+                <Tooltip>
+                  <TooltipTrigger render={<Button variant="ghost" size="icon-xs" aria-label={t("common:action.remove")} onClick={() => void remove(e.id)} className="shrink-0 text-muted-foreground hover:text-destructive" />}>
+                    <NetsuIcon name="close" className="size-3.5" />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("common:action.remove")}</TooltipContent>
+                </Tooltip>
               </div>
             ))}
           </div>

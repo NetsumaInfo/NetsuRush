@@ -21,7 +21,7 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
       <div className="flex items-center justify-between">
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={addObject} disabled={!!s.busy} aria-label={t("objects.add")}>
-            <NetsuIcon name="add" className="h-3.5 w-3.5" />
+            <NetsuIcon name="add" className="size-3.5" />
           </Button>} />
           <TooltipContent>{t("objects.addTip")}</TooltipContent>
         </Tooltip>
@@ -33,13 +33,13 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
         onValueChange={(v) => v[0] && s.setPointLabel(v[0] === "exclude" ? 0 : 1)}>
         <Tooltip>
           <TooltipTrigger render={<ToggleGroupItem value="include" className="flex-1 gap-1 text-[11px]">
-            <NetsuIcon name="circle-plus" className="h-3 w-3 text-[var(--color-ok)]" /> {t("objects.include")}
+            <NetsuIcon name="circle-plus" className="size-3 text-[var(--color-ok)]" /> {t("objects.include")}
           </ToggleGroupItem>} />
           <TooltipContent>{t("objects.includeTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<ToggleGroupItem value="exclude" className="flex-1 gap-1 text-[11px]">
-            <NetsuIcon name="circle-minus" className="h-3 w-3 text-destructive" /> {t("objects.exclude")}
+            <NetsuIcon name="circle-minus" className="size-3 text-destructive" /> {t("objects.exclude")}
           </ToggleGroupItem>} />
           <TooltipContent>{t("objects.excludeTip")}</TooltipContent>
         </Tooltip>
@@ -59,7 +59,7 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
               )}
             />}
           >
-            <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: colorOf(o.id) }} />
+            <span className="size-3 shrink-0 rounded-full" style={{ background: colorOf(o.id) }} />
             <Input
               value={o.name}
               onChange={(e) => renameObject(o.id, e.target.value)}
@@ -68,13 +68,15 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
               aria-label={t("objects.nameAria")}
             />
             {objects.length > 1 && (
-              <button type="button"
-                onClick={(e) => { e.stopPropagation(); removeObject(o.id); }}
-                className="shrink-0 rounded p-0.5 opacity-50 hover:bg-destructive/20 hover:text-destructive hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={t("objects.removeAria", { name: o.name })}
-              >
-                <NetsuIcon name="close" className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip>
+                <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
+                  onClick={(e) => { e.stopPropagation(); removeObject(o.id); }}
+                  className="shrink-0 opacity-50 hover:bg-destructive/20 hover:text-destructive hover:opacity-100 focus-visible:opacity-100"
+                  aria-label={t("objects.removeAria", { name: o.name })} />}>
+                  <NetsuIcon name="close" className="size-3.5" />
+                </TooltipTrigger>
+                <TooltipContent>{t("objects.removeAria", { name: o.name })}</TooltipContent>
+              </Tooltip>
             )}
           </ContextMenuTrigger>
           <ContextMenuContent>

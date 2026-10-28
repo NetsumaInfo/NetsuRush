@@ -45,7 +45,7 @@ export function StopTasksSection({
             disabled={!diag.render.inProgress || !!busy}
             onClick={() => run("stop", () => nr.optimizeStopRender())}
           >
-            {busy === "stop" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="chat-stop" className="h-4 w-4" />}
+            {busy === "stop" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="chat-stop" className="size-4" />}
             {t("stop.stopRender")}
           </Button>
           <Button
@@ -54,7 +54,7 @@ export function StopTasksSection({
             disabled={!jobs.length || !!busy}
             onClick={() => run("finished", () => nr.optimizeClearFinishedJobs())}
           >
-            {busy === "finished" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="check" className="h-4 w-4" />}
+            {busy === "finished" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="check" className="size-4" />}
             {t("stop.clearFinished")}
           </Button>
           <Button
@@ -63,7 +63,7 @@ export function StopTasksSection({
             disabled={!jobs.length || !!busy}
             onClick={() => run("clear", () => nr.optimizeClearRenderQueue())}
           >
-            {busy === "clear" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="trash" className="h-4 w-4" />}
+            {busy === "clear" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="trash" className="size-4" />}
             {t("stop.clearQueue")}
           </Button>
         </div>
@@ -90,7 +90,7 @@ export function StopTasksSection({
                     onClick={() => run(j.id, () => nr.optimizeDeleteRenderJob(j.id))}
                   />
                 }>
-                  {busy === j.id ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="close" className="h-4 w-4" />}
+                  {busy === j.id ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="close" className="size-4" />}
                 </TooltipTrigger>
                 <TooltipContent>{t("stop.deleteJob")}</TooltipContent>
               </Tooltip>

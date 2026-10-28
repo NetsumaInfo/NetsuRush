@@ -132,7 +132,7 @@ export function UpscaleModelSettings({ settings, patch, disabled }: {
           filtres libplacebo, ou paramètres du RTX Video SDK (les deux n'ont rien en commun). */}
       <button type="button" onClick={() => setAdvanced((a) => !a)}
         className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
-        <NetsuIcon name="chevron-toggle" on={advanced} className="h-3.5 w-3.5" /> {t("settings.advanced")}
+        <NetsuIcon name="chevron-toggle" on={advanced} className="size-3.5" /> {t("settings.advanced")}
       </button>
 
       {isTurbo && advanced && (

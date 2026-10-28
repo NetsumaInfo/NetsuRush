@@ -56,22 +56,22 @@ export function TrackButtons({ s, running }: { s: RotoSession; running: boolean 
     <div className="space-y-1.5">
       {s.points.length > 0 && (
         <Button variant="ghost" size="sm" className="w-full" onClick={() => s.clearPoints({ frame: s.frame })} disabled={running}>
-          <NetsuIcon name="erase" className="h-3.5 w-3.5" /> {t("track.clearFramePoints")}
+          <NetsuIcon name="erase" className="size-3.5" /> {t("track.clearFramePoints")}
         </Button>
       )}
       <Button className="w-full" disabled={!canTrack} onClick={() => s.track("all")}>
-        <NetsuIcon name="route" className="h-4 w-4" /> {t("track.trackAll")}
+        <NetsuIcon name="route" className="size-4" /> {t("track.trackAll")}
       </Button>
       <div className="flex gap-1.5">
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="sm" className="flex-1" disabled={!canTrack} onClick={() => s.trackStep(-1)}>
-            <NetsuIcon name="step-back" className="h-3.5 w-3.5" /> {t("track.stepBack")}
+            <NetsuIcon name="step-back" className="size-3.5" /> {t("track.stepBack")}
           </Button>} />
           <TooltipContent>{t("track.stepBackTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="sm" className="flex-1" disabled={!canTrack} onClick={() => s.trackStep(1)}>
-            {t("track.stepFwd")} <NetsuIcon name="step-forward" className="h-3.5 w-3.5" />
+            {t("track.stepFwd")} <NetsuIcon name="step-forward" className="size-3.5" />
           </Button>} />
           <TooltipContent>{t("track.stepFwdTip")}</TooltipContent>
         </Tooltip>
@@ -80,13 +80,13 @@ export function TrackButtons({ s, running }: { s: RotoSession; running: boolean 
         <div className="flex gap-1.5">
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="sm" className="flex-1" disabled={!canTrack} onClick={() => s.track("backward")}>
-              <NetsuIcon name="prev" className="h-3.5 w-3.5" /> {t("track.retrackBack")}
+              <NetsuIcon name="prev" className="size-3.5" /> {t("track.retrackBack")}
             </Button>} />
             <TooltipContent>{t("track.retrackBackTip")}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="sm" className="flex-1" disabled={!canTrack} onClick={() => s.track("forward")}>
-              {t("track.retrackFwd")} <NetsuIcon name="next" className="h-3.5 w-3.5" />
+              {t("track.retrackFwd")} <NetsuIcon name="next" className="size-3.5" />
             </Button>} />
             <TooltipContent>{t("track.retrackFwdTip")}</TooltipContent>
           </Tooltip>
@@ -96,21 +96,21 @@ export function TrackButtons({ s, running }: { s: RotoSession; running: boolean 
         <div className="flex gap-1.5">
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="sm" className="flex-1" disabled={running} onClick={() => s.dedupe()}>
-              <NetsuIcon name="copy" className="h-3.5 w-3.5" /> {t("track.dedupe")}
+              <NetsuIcon name="copy" className="size-3.5" /> {t("track.dedupe")}
             </Button>} />
             <TooltipContent>{t("track.dedupeTip")}</TooltipContent>
           </Tooltip>
           {s.deduped && (
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" disabled={running} onClick={() => s.dedupeRestore()} aria-label={t("track.restoreMattesAria")}>
-                <NetsuIcon name="undo" className="h-3.5 w-3.5" />
+                <NetsuIcon name="undo" className="size-3.5" />
               </Button>} />
               <TooltipContent>{t("track.restoreMattesTip")}</TooltipContent>
             </Tooltip>
           )}
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" disabled={running} onClick={() => s.clearTracking()} aria-label={t("track.resetAria")}>
-              <NetsuIcon name="trash" className="h-3.5 w-3.5" />
+              <NetsuIcon name="trash" className="size-3.5" />
             </Button>} />
             <TooltipContent>{t("track.resetTip")}</TooltipContent>
           </Tooltip>
@@ -262,14 +262,14 @@ export function EngineRow({ label, icon: Icon, engines, installed, disabled, onR
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon" disabled={testDisabled ?? disabled}
             onClick={() => onTest(cur.id)} aria-label={t("engineRow.testAria", { label })}>
-            <NetsuIcon name="flask" className="h-4 w-4" />
+            <NetsuIcon name="flask" className="size-4" />
           </Button>} />
           <TooltipContent>{t("engineRow.testTip")}</TooltipContent>
         </Tooltip>
       )}
       <Tooltip>
         <TooltipTrigger render={<Button variant="outline" size="icon" disabled={disabled} onClick={() => onRun(cur.id)} aria-label={label}>
-          <Icon className="h-4 w-4" />
+          <Icon className="size-4" />
         </Button>} />
         <TooltipContent>{label} — {cur.hint}</TooltipContent>
       </Tooltip>
@@ -285,9 +285,9 @@ function ResetParams({ onReset, disabled }: { onReset: () => void; disabled: boo
   return (
     <div className="flex justify-end">
       <Tooltip>
-        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="h-6 w-6 text-muted-foreground"
+        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="size-6 text-muted-foreground"
           disabled={disabled} onClick={onReset} aria-label={t("resetParams")}>
-          <NetsuIcon name="reset-default" className="h-3.5 w-3.5" />
+          <NetsuIcon name="reset-default" className="size-3.5" />
         </Button>} />
         <TooltipContent>{t("resetParams")}</TooltipContent>
       </Tooltip>
@@ -318,7 +318,7 @@ function AdvancedRows({ label, children }: { label: string; children: ReactNode 
     <div className="space-y-1.5">
       <Button variant="ghost" size="sm" className="h-6 w-full justify-start px-1 text-[11px] text-muted-foreground"
         onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        <NetsuIcon name="chevron-toggle" on={open} className="h-3 w-3" /> {label}
+        <NetsuIcon name="chevron-toggle" on={open} className="size-3" /> {label}
       </Button>
       {open && <div className="space-y-1.5 pl-1">{children}</div>}
     </div>
@@ -395,7 +395,7 @@ export function RemoveParamsRows({ value, onChange, disabled, diffusion }: {
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm" disabled={disabled}
                     onClick={() => set({ seed: Math.floor(Math.random() * 1e6) })}
                     aria-label={t("remove.reroll")}>
-                    <NetsuIcon name="dice" className="h-3.5 w-3.5" />
+                    <NetsuIcon name="dice" className="size-3.5" />
                   </Button>} />
                   <TooltipContent>{t("remove.rerollTip")}</TooltipContent>
                 </Tooltip>
@@ -460,14 +460,14 @@ export function MatteFinePanel({ s, engines, disabled }: {
           <TooltipTrigger render={<Button variant="ghost" size="icon" className="shrink-0"
             disabled={disabled || (!s.tracked && !s.points.length)} onClick={() => s.testRefine(cur.id)}
             aria-label={t("matte.test")}>
-            <NetsuIcon name="flask" className="h-4 w-4" />
+            <NetsuIcon name="flask" className="size-4" />
           </Button>} />
           <TooltipContent>{t("matte.test")} — {t("matte.testTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon" className="shrink-0"
             disabled={disabled || !s.outputReady} onClick={() => s.refine(cur.id)} aria-label={t("matte.run")}>
-            <NetsuIcon name="sparkles" className="h-4 w-4" />
+            <NetsuIcon name="sparkles" className="size-4" />
           </Button>} />
           <TooltipContent>{t("matte.run")} — {cur.hint}</TooltipContent>
         </Tooltip>
@@ -557,7 +557,7 @@ export function ExportRow({ fmt, onFmtChange, disabled, objects, onExport, forma
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon" disabled={disabled}
             onClick={() => onExport(fmt, scope || undefined)} aria-label={t("exportRow.exportAria")}>
-            <NetsuIcon name="lab-export" className="h-4 w-4" />
+            <NetsuIcon name="lab-export" className="size-4" />
           </Button>} />
           <TooltipContent>{t(`exportFmt.${fmtKey[cur.id]}Hint`, { defaultValue: cur.hint })}</TooltipContent>
         </Tooltip>

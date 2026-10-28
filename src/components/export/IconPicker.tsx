@@ -34,7 +34,7 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: E
   return (
     <div className="flex flex-col">
       <div className="mb-2 flex items-center gap-1.5">
-        <Search className="h-3.5 w-3.5 text-muted-foreground" />
+        <Search className="size-3.5 text-muted-foreground" />
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("iconPicker.search")} className="flex-1 h-7 border-0" />
       </div>
       {names.length === 0 ? (
@@ -48,7 +48,7 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: E
               <button key={n} type="button" aria-label={n} data-hover-label={n} onClick={() => onPick({ type: "lucide", name: n })}
                 className={cn("flex aspect-square items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   current === n ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
-                {createElement(lucideIcon(n) as LucideIcon, { className: "h-4 w-4" })}
+                {createElement(lucideIcon(n) as LucideIcon, { className: "size-4" })}
               </button>
             ))}
           </div>
@@ -132,7 +132,7 @@ export function IconPicker({ profile, onChange }: { profile: ExportProfile; onCh
               {tabs.map((t) => (
                 <button key={t.id} type="button" onClick={() => setTab(t.id)}
                   className={cn("flex items-center gap-1 rounded-md px-2 py-1 text-sm", tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}>
-                  {createElement(t.icon, { className: "h-3.5 w-3.5" })} {t.label}
+                  {createElement(t.icon, { className: "size-3.5" })} {t.label}
                 </button>
               ))}
             </div>

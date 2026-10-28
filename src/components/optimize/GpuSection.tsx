@@ -98,20 +98,20 @@ export function GpuSection() {
     <Card className="block p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-          <NetsuIcon name="activity" className="h-4 w-4 text-primary" /> {t("gpu.title")}
+          <NetsuIcon name="activity" className="size-4 text-primary" /> {t("gpu.title")}
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{t("gpu.free")}</span>
           <Button variant="outline" size="sm" disabled={!!busy} onClick={() => free("gpu")}>
-            {busy === "gpu" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="chip" className="h-4 w-4" />}
+            {busy === "gpu" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="chip" className="size-4" />}
             GPU
           </Button>
           <Button variant="outline" size="sm" disabled={!!busy} onClick={() => free("cpu")}>
-            {busy === "cpu" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="chip" className="h-4 w-4" />}
+            {busy === "cpu" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="chip" className="size-4" />}
             CPU
           </Button>
           <Button variant="outline" size="sm" disabled={!!busy} onClick={() => free("ram")}>
-            {busy === "ram" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="memory" className="h-4 w-4" />}
+            {busy === "ram" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="memory" className="size-4" />}
             RAM
           </Button>
         </div>

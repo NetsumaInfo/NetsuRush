@@ -115,7 +115,7 @@ function PrefRow({
                 <TooltipContent>{current ? String(current) : t("boost.prefs.noPath")}</TooltipContent>
               </Tooltip>
               <Button variant="outline" size="icon-sm" onClick={pickFolder}>
-                <NetsuIcon name="folder-open" className="h-4 w-4" />
+                <NetsuIcon name="folder-open" className="size-4" />
               </Button>
             </div>
           )}
@@ -200,7 +200,7 @@ export function BoostPrefsSection({ diag, app }: { diag: BoostDiagnosis | null; 
               {t("common:action.reset")}
             </Button>
             <Button size="sm" onClick={() => setConfirm(true)} disabled={busy}>
-              <NetsuIcon name="sliders" className="h-4 w-4" /> {t("boost.prefs.apply", { count: pending })}
+              <NetsuIcon name="sliders" className="size-4" /> {t("boost.prefs.apply", { count: pending })}
             </Button>
           </div>
         )}
@@ -231,7 +231,7 @@ export function BoostPrefsSection({ diag, app }: { diag: BoostDiagnosis | null; 
               {t("common:action.cancel")}
             </Button>
             <Button size="sm" onClick={apply} disabled={busy}>
-              {busy ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="sliders" className="h-4 w-4" />}
+              {busy ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="sliders" className="size-4" />}
               {t("common:action.apply")}
             </Button>
           </DialogFooter>

@@ -13,7 +13,7 @@ export function AdviceCards({ items = ADVICE }: { items?: Advice[] }) {
   return (
     <div>
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-        <NetsuIcon name="lightbulb" className="h-4 w-4 text-primary" /> {t("advice.heading")}
+        <NetsuIcon name="lightbulb" className="size-4 text-primary" /> {t("advice.heading")}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((a) => (

@@ -94,7 +94,7 @@ export function ModelsCta({ label, disabled }: { label?: string; disabled?: bool
     <div className="space-y-1.5 rounded-md border border-dashed border-border p-2">
       {label && <p className="text-[11px] leading-snug text-muted-foreground">{label}</p>}
       <Button variant="outline" size="sm" className="w-full" onClick={openModelsPage} disabled={disabled}>
-        <NetsuIcon name="download" className="h-3.5 w-3.5" /> {t("modelPicker.download")}
+        <NetsuIcon name="download" className="size-3.5" /> {t("modelPicker.download")}
       </Button>
     </div>
   );
@@ -152,7 +152,7 @@ export function ModelPicker({ items, value, onChange, disabled, className, empty
           ))}
           <SelectSeparator />
           <SelectItem value={MORE} className="text-muted-foreground">
-            <span className="flex items-center gap-2"><NetsuIcon name="download" className="h-3.5 w-3.5" /> {t("modelPicker.more")}</span>
+            <span className="flex items-center gap-2"><NetsuIcon name="download" className="size-3.5" /> {t("modelPicker.more")}</span>
           </SelectItem>
         </SelectContent>
       </Select>

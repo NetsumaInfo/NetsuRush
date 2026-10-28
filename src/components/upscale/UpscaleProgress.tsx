@@ -16,7 +16,7 @@ export function UpscaleProgress({ busy, label }: { busy: UpProg; label?: string 
       <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
         <div className="flex min-w-0 items-center gap-2">
           <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium", ph.cls)}>
-            <span className={cn("h-1.5 w-1.5 rounded-full", ph.dot)} />
+            <span className={cn("size-1.5 rounded-full", ph.dot)} />
             {ph.t}
           </span>
           <span className="truncate text-muted-foreground">{busy.file}</span>

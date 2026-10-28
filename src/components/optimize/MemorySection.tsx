@@ -100,11 +100,11 @@ export function MemorySection({ diag, onChanged }: { diag: OptimizeDiagnosis | n
     <Card className="block p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-          <NetsuIcon name="memory" className="h-4 w-4 text-primary" /> {t("memory.title")}
+          <NetsuIcon name="memory" className="size-4 text-primary" /> {t("memory.title")}
         </h3>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" disabled={!resolveReady || !!busy} onClick={() => setConfirm("reload")}>
-            {busy === "reload" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="memory" className="h-4 w-4" />}
+            {busy === "reload" ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="memory" className="size-4" />}
             {t("memory.reload")}
           </Button>
           <Button
@@ -113,7 +113,7 @@ export function MemorySection({ diag, onChanged }: { diag: OptimizeDiagnosis | n
             disabled={!resolveReady || !!busy}
             onClick={() => setConfirm("restart")}
           >
-            <NetsuIcon name="boost-restart" busy={busy === "restart"} className="h-4 w-4" />
+            <NetsuIcon name="boost-restart" busy={busy === "restart"} className="size-4" />
             {t("memory.restart")}
           </Button>
         </div>
@@ -179,7 +179,7 @@ export function MemorySection({ diag, onChanged }: { diag: OptimizeDiagnosis | n
               {t("common:action.cancel")}
             </Button>
             <Button variant="default" size="sm" onClick={() => confirm && run(confirm)}>
-              {confirm === "restart" ? <NetsuIcon name="power" className="h-4 w-4" /> : <NetsuIcon name="memory" className="h-4 w-4" />}
+              {confirm === "restart" ? <NetsuIcon name="power" className="size-4" /> : <NetsuIcon name="memory" className="size-4" />}
               {confirm === "restart" ? t("memory.restart") : t("memory.reload")}
             </Button>
           </DialogFooter>

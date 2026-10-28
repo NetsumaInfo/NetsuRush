@@ -54,7 +54,7 @@ export function ChainPanel() {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              <NetsuIcon name="numbered-list" className="h-4 w-4 text-primary" /> {t("chain.title")}
+              <NetsuIcon name="numbered-list" className="size-4 text-primary" /> {t("chain.title")}
             </h3>
             {chain.length > 0 && (
               <Button variant="ghost" size="sm" onClick={clearChain} disabled={running}>{t("chain.clear")}</Button>
@@ -74,18 +74,18 @@ export function ChainPanel() {
                   <ContextMenu key={step.id}>
                     <ContextMenuTrigger render={<li className="flex items-center gap-2 rounded-md border border-border bg-card/40 px-2 py-1.5 text-xs" />}>
                       <span className="tabular-nums text-muted-foreground">{i + 1}.</span>
-                      <meta.icon className="h-3.5 w-3.5 text-primary" />
+                      <meta.icon className="size-3.5 text-primary" />
                       <span className="flex-1 font-medium text-foreground">{t(`steps.${step.kind === "upscale" && step.settings.mode === "restore" ? "restore" : step.kind}`)}</span>
                       <Tooltip>
-                        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => moveStep(step.id, -1)} disabled={running || i === 0} aria-label={t("chain.moveUp")}><NetsuIcon name="move-up" className="h-3.5 w-3.5" /></Button>} />
+                        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => moveStep(step.id, -1)} disabled={running || i === 0} aria-label={t("chain.moveUp")}><NetsuIcon name="move-up" className="size-3.5" /></Button>} />
                         <TooltipContent>{t("chain.moveUp")}</TooltipContent>
                       </Tooltip>
                       <Tooltip>
-                        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => moveStep(step.id, 1)} disabled={running || i === chain.length - 1} aria-label={t("chain.moveDown")}><NetsuIcon name="move-down" className="h-3.5 w-3.5" /></Button>} />
+                        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => moveStep(step.id, 1)} disabled={running || i === chain.length - 1} aria-label={t("chain.moveDown")}><NetsuIcon name="move-down" className="size-3.5" /></Button>} />
                         <TooltipContent>{t("chain.moveDown")}</TooltipContent>
                       </Tooltip>
                       <Tooltip>
-                        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => removeStep(step.id)} disabled={running} aria-label={t("chain.remove")}><NetsuIcon name="close" className="h-3.5 w-3.5" /></Button>} />
+                        <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => removeStep(step.id)} disabled={running} aria-label={t("chain.remove")}><NetsuIcon name="close" className="size-3.5" /></Button>} />
                         <TooltipContent>{t("chain.remove")}</TooltipContent>
                       </Tooltip>
                     </ContextMenuTrigger>
@@ -107,7 +107,7 @@ export function ChainPanel() {
               const Icon = step.icon;
               return (
                 <Button key={step.key} variant="outline" size="sm" className="gap-1.5" onClick={() => addStep(step.kind, step.defaults())} disabled={running}>
-                  <Icon className="h-3.5 w-3.5" /> <NetsuIcon name="add" className="h-3 w-3" /> {t(`steps.${step.key}`)}
+                  <Icon className="size-3.5" /> <NetsuIcon name="add" className="size-3" /> {t(`steps.${step.key}`)}
                 </Button>
               );
             })}
@@ -126,20 +126,20 @@ export function ChainPanel() {
         {busy && <UpscaleProgress busy={busy} label={t("chain.stepLabel", { i: busy.opIndex + 1, n: busy.opCount })} />}
         {err && (
           <Card className="block border-destructive/40 p-2.5 text-xs text-destructive">
-            <NetsuIcon name="warning" className="mr-1.5 inline h-3.5 w-3.5" /> {err}
+            <NetsuIcon name="warning" className="mr-1.5 inline size-3.5" /> {err}
           </Card>
         )}
         {result?.ok && !running && (
           <Card className="block p-3 text-xs">
             <div className="flex items-center gap-1.5 font-medium text-[var(--color-ok)]">
-              <NetsuIcon name="status-ok" className="h-3.5 w-3.5" />
+              <NetsuIcon name="status-ok" className="size-3.5" />
               {t("result.files", { count: result.outputs?.length ?? 0 })}{result.imported ? t("result.imported", { count: result.imported }) : ""}.
             </div>
             {result.failed ? <p className="mt-1 text-muted-foreground">{t("result.failed", { count: result.failed })}</p> : null}
           </Card>
         )}
         <Button className="w-full" size="lg" onClick={run} disabled={!has || !chain.length || running}>
-          {running ? <Spinner className="h-4 w-4" /> : <NetsuIcon name="play" className="h-4 w-4" />}
+          {running ? <Spinner className="size-4" /> : <NetsuIcon name="play" className="size-4" />}
           {running ? t("chain.running") : base.sources.length > 1 ? t("chain.runMulti", { count: base.sources.length }) : t("chain.run")}
         </Button>
       </div>

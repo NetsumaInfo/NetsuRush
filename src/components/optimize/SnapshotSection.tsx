@@ -58,11 +58,11 @@ export function SnapshotSection({ diag }: { diag: OptimizeDiagnosis | null }) {
         <div className="flex gap-2">
           {dir && (
             <Button variant="ghost" size="sm" onClick={() => nr.openPath(dir)} disabled={!list.length}>
-              <NetsuIcon name="folder-open" className="h-4 w-4" /> {t("snapshot.folder")}
+              <NetsuIcon name="folder-open" className="size-4" /> {t("snapshot.folder")}
             </Button>
           )}
           <Button variant="outline" size="sm" disabled={!connected || !diag?.project || busy} onClick={snapshot}>
-            {busy ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="save" className="h-4 w-4" />}
+            {busy ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="save" className="size-4" />}
             {t("snapshot.create")}
           </Button>
         </div>
@@ -72,7 +72,7 @@ export function SnapshotSection({ diag }: { diag: OptimizeDiagnosis | null }) {
         <ul className="mt-3 divide-y divide-border rounded-md border border-border">
           {list.slice(0, 6).map((s) => (
             <li key={s.path} className="flex items-center gap-2 px-3 py-2 text-xs">
-              <NetsuIcon name="history" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <NetsuIcon name="history" className="size-3.5 shrink-0 text-muted-foreground" />
               <Tooltip>
                 <TooltipTrigger render={
                   <span className="min-w-0 flex-1 truncate">

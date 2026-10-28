@@ -40,7 +40,7 @@ export function ExportAudioSelect({ profile, sourcePath, size }: {
     <div className="flex flex-col gap-1">
       <Select value={value} onValueChange={(v) => v && update(profile.id, applyExportAudioValue(profile, v as string))}>
         <SelectTrigger size={small ? "sm" : undefined} className={small ? "h-8 text-xs" : undefined}>
-          <NetsuIcon name="volume" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="volume" className="size-3.5 shrink-0 text-muted-foreground" />
           <SelectValue className="min-w-0 flex-1">{display}</SelectValue>
         </SelectTrigger>
         <SelectContent>

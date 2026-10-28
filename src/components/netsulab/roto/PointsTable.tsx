@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
@@ -69,20 +70,22 @@ export function PointsTable({ s, goto, running }: {
                   />}
                 >
                   <span className="w-10 shrink-0 tabular-nums">{t("img")} {r.f}</span>
-                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: colorOf(r.obj) }} />
+                  <span className="size-2 shrink-0 rounded-full" style={{ background: colorOf(r.obj) }} />
                   <span className="min-w-0 flex-1 truncate">{name}</span>
                   {r.label
-                    ? <NetsuIcon name="add" className="h-3 w-3 shrink-0 text-[var(--color-ok)]" />
-                    : <NetsuIcon name="remove" className="h-3 w-3 shrink-0 text-destructive" />}
+                    ? <NetsuIcon name="add" className="size-3 shrink-0 text-[var(--color-ok)]" />
+                    : <NetsuIcon name="remove" className="size-3 shrink-0 text-destructive" />}
                   <span className="shrink-0 tabular-nums opacity-60">{Math.round(r.x * 100)},{Math.round(r.y * 100)}</span>
-                  <button type="button"
-                    onClick={(e) => { e.stopPropagation(); void s.removePoint(r.f, r.obj, r.index); }}
-                    disabled={running}
-                    className="shrink-0 rounded p-0.5 opacity-0 transition-opacity hover:bg-destructive/20 hover:text-destructive group-hover:opacity-70 disabled:opacity-0"
-                    aria-label={t("points.removeAria")}
-                  >
-                    <NetsuIcon name="close" className="h-3 w-3" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
+                      onClick={(e) => { e.stopPropagation(); void s.removePoint(r.f, r.obj, r.index); }}
+                      disabled={running}
+                      className="shrink-0 opacity-0 transition-opacity hover:bg-destructive/20 hover:text-destructive group-hover:opacity-70 focus-visible:opacity-100 disabled:opacity-0"
+                      aria-label={t("points.removeAria")} />}>
+                      <NetsuIcon name="close" className="size-3" />
+                    </TooltipTrigger>
+                    <TooltipContent>{t("points.removeAria")}</TooltipContent>
+                  </Tooltip>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                   <ContextMenuItem onClick={() => goto(r.f)}><NetsuIcon name="forward" /> {t("points.goToFrame")}</ContextMenuItem>

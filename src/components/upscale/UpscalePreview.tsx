@@ -63,7 +63,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
   if (!active) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center text-sm text-muted-foreground">
-        <NetsuIcon name="file-video" className="h-10 w-10 opacity-40" />
+        <NetsuIcon name="file-video" className="size-10 opacity-40" />
         <p>{t("preview.selectRushLeft")}</p>
       </div>
     );
@@ -84,17 +84,17 @@ export function UpscalePreview({ up }: { up: ProcController }) {
           {multi && (
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => setActiveIdx((idx - 1 + sources.length) % sources.length)} aria-label={t("preview.prevClip")}>
-                <NetsuIcon name="prev" className="h-4 w-4" />
+                <NetsuIcon name="prev" className="size-4" />
               </Button>} />
               <TooltipContent>{t("preview.prevClip")}</TooltipContent>
             </Tooltip>
           )}
           {still
             ? <Tooltip>
-                <TooltipTrigger render={<span className="inline-flex shrink-0 text-primary"><NetsuIcon name="image" className="h-4 w-4" /></span>} />
+                <TooltipTrigger render={<span className="inline-flex shrink-0 text-primary"><NetsuIcon name="image" className="size-4" /></span>} />
                 <TooltipContent>{t("preview.stillSource")}</TooltipContent>
               </Tooltip>
-            : <NetsuIcon name="file-video" className="h-4 w-4 shrink-0 text-primary" />}
+            : <NetsuIcon name="file-video" className="size-4 shrink-0 text-primary" />}
           <Tooltip>
             <TooltipTrigger render={<span className="truncate font-medium">{active.name}</span>} />
             <TooltipContent>{active.path}</TooltipContent>
@@ -104,7 +104,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
           {multi && (
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => setActiveIdx((idx + 1) % sources.length)} aria-label={t("preview.nextClip")}>
-                <NetsuIcon name="next" className="h-4 w-4" />
+                <NetsuIcon name="next" className="size-4" />
               </Button>} />
               <TooltipContent>{t("preview.nextClip")}</TooltipContent>
             </Tooltip>
@@ -169,7 +169,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
       {/* Test d'upscale sur la frame courante */}
       {!reviewActive && <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" size="sm" onClick={() => testFrame(still ? 0 : cur)} disabled={testing}>
-          <NetsuIcon name="lab-upscale" busy={testing} className="h-4 w-4" />
+          <NetsuIcon name="lab-upscale" busy={testing} className="size-4" />
           {testing ? t("preview.testing") : compare
             ? t("preview.testAnotherModel")
             : still ? t("preview.testStill")
@@ -178,7 +178,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
         {compare && <span className="text-xs text-muted-foreground">{t("preview.wheelZoom")}</span>}
         {testErr && (
           <span className="flex items-center gap-1 text-xs text-destructive">
-            <NetsuIcon name="warning" className="h-3.5 w-3.5" /> {testErr}
+            <NetsuIcon name="warning" className="size-3.5" /> {testErr}
           </span>
         )}
       </div>}
@@ -189,7 +189,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={detectScenes} disabled={detecting}>
-              {detecting ? <Spinner className="h-4 w-4" /> : <NetsuIcon name="scan-search" className="h-4 w-4" />} {t("preview.detectShots")}
+              {detecting ? <Spinner className="size-4" /> : <NetsuIcon name="scan-search" className="size-4" />} {t("preview.detectShots")}
             </Button>
             {scenes.length > 0 && (
               <>
@@ -230,11 +230,11 @@ export function UpscalePreview({ up }: { up: ProcController }) {
                         <TooltipTrigger render={<button type="button" onClick={() => toggleScene(i)}
                           aria-label={sel ? t("preview.deselect") : t("preview.select")}
                           className={cn(
-                            "absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full border transition-colors",
+                            "absolute right-1 top-1 flex size-5 items-center justify-center rounded-full border transition-colors",
                             sel ? "border-primary bg-primary text-primary-foreground"
                                 : "border-white/40 bg-black/40 text-transparent hover:border-primary hover:text-primary/70",
                           )}>
-                          <NetsuIcon name="check" className="h-3 w-3" />
+                          <NetsuIcon name="check" className="size-3" />
                         </button>} />
                         <TooltipContent>{sel ? t("preview.deselect") : t("preview.select")}</TooltipContent>
                       </Tooltip>

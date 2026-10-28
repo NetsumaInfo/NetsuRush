@@ -158,7 +158,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
             {t("boost.proxy.useProxies")}
           </Toggle>
           <Button variant="ghost" size="sm" onClick={audit} disabled={!ready || loading || running}>
-            <NetsuIcon name="boost-rescan" busy={loading} className="h-4 w-4" />
+            <NetsuIcon name="boost-rescan" busy={loading} className="size-4" />
             {t("boost.proxy.rescan")}
           </Button>
         </div>
@@ -176,7 +176,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
                   disabled={!i.canProxy}
                   className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs hover:bg-muted/50 disabled:opacity-50"
                 >
-                  <NetsuIcon name="checkbox-off" on={on} className={`h-3.5 w-3.5 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
+                  <NetsuIcon name="checkbox-off" on={on} className={`size-3.5 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
                   <Tooltip>
                     <TooltipTrigger render={<span className="min-w-0 flex-1 truncate">{i.name}</span>} />
                     <TooltipContent>{i.path}</TooltipContent>
@@ -205,7 +205,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
       )}
 
       <Button size="sm" className="mt-3" disabled={!ready || !targets.length || running} onClick={generate}>
-        {running ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="layers" className="h-4 w-4" />}
+        {running ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="layers" className="size-4" />}
         {t("boost.proxy.generate", { count: targets.length })}
       </Button>
 
