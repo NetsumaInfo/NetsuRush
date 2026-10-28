@@ -69,6 +69,12 @@ function badWordAt(state: EditorState, pos: number): { from: number; to: number;
   return { from: hit.from, to: hit.to, word: state.doc.textBetween(hit.from, hit.to) };
 }
 
+/** Mot fautif sous un point écran (clic droit), ou null. */
+export function badWordAtPoint(view: EditorView, x: number, y: number): boolean {
+  const at = view.posAtCoords({ left: x, top: y });
+  return !!at && !!badWordAt(view.state, at.pos);
+}
+
 /** Remplace le mot [from, to) en conservant les marques de l'endroit (gras, lien…). */
 export function applyCorrection(view: EditorView, from: number, to: number, replacement: string): void {
   const { tr } = view.state;

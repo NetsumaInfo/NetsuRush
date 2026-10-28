@@ -5,7 +5,7 @@
 // rien de NetsuBridge, dont la maturité est différente.
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlaskConical, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { DiscordIcon } from "@/components/DiscordIcon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -43,7 +43,7 @@ export function BetaNotice({ module, className }: { module: string; className?: 
         className,
       )}
     >
-      <FlaskConical className="mt-0.5 size-4 shrink-0 text-[var(--color-warn)]" />
+      <NetsuIcon name="flask" className="mt-0.5 size-4 shrink-0 text-[var(--color-warn)]" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-[var(--color-warn)]">
           {t([`beta.modules.${module}.title`, "beta.title"])}
@@ -64,7 +64,7 @@ export function BetaNotice({ module, className }: { module: string; className?: 
             <Button variant="ghost" size="icon" className="size-7 shrink-0" onClick={dismiss} aria-label={t("beta.dismiss")} />
           }
         >
-          <X className="size-3.5" />
+          <NetsuIcon name="close" className="size-3.5" />
         </TooltipTrigger>
         <TooltipContent>{t("beta.dismiss")}</TooltipContent>
       </Tooltip>

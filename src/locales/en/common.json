@@ -20,7 +20,11 @@
     "import": "Import",
     "decrease": "Decrease",
     "increase": "Increase",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "cut": "Cut",
+    "paste": "Paste",
+    "selectAll": "Select all",
+    "pastePlain": "Paste as plain text"
   },
   "status": {
     "loading": "Loading…",

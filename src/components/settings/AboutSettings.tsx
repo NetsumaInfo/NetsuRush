@@ -1,11 +1,11 @@
 // « À propos » : identité de l'app, liens communautaires, mentions légales. Volontairement pauvre en
 // texte — un panneau qu'on ouvre pour une version, un serveur ou une licence, jamais pour lire.
 import type { MouseEvent } from "react";
-import { ArrowUpRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { BetaBadge } from "@/components/BetaBadge";
 import { BrandIcon } from "@/components/BrandIcon";
 import { DiscordIcon } from "@/components/DiscordIcon";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/release";
@@ -50,7 +50,7 @@ function LinkRow({ link, group }: { link: ExternalLink; group: string }) {
       <Icon className={cn("size-5", link.tint)} />
       <span className="text-sm font-medium">{link.label}</span>
       <span className="ml-auto truncate text-xs text-muted-foreground">{t(`about.${group}.${link.id}`)}</span>
-      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0" />
+      <span className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0"><NetsuIcon name="open-external" className="size-full" /></span>
     </a>
   );
 }

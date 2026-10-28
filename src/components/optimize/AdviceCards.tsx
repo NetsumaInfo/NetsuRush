@@ -2,7 +2,7 @@
 // une valeur, donc hors de portée de PrefsSection (symptôme → où agir dans Resolve). Tout réglage
 // qu'on sait LIRE est affiché à sa vraie valeur là-bas, jamais conseillé à l'aveugle ici.
 import { useTranslation } from "react-i18next";
-import { Lightbulb } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { ADVICE, type Advice } from "./optimizeShared";
 
@@ -13,7 +13,7 @@ export function AdviceCards({ items = ADVICE }: { items?: Advice[] }) {
   return (
     <div>
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-        <Lightbulb className="h-4 w-4 text-primary" /> {t("advice.heading")}
+        <NetsuIcon name="lightbulb" className="h-4 w-4 text-primary" /> {t("advice.heading")}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((a) => (

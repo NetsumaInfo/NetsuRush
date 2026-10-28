@@ -2,7 +2,7 @@
 // Règle de lecture du panneau : une question posée UNE fois, et une ligne qui n'agit pas est GRISÉE,
 // jamais retirée — la mise en page ne saute pas et l'on voit toujours de quoi dépend le réglage.
 import { useTranslation } from "react-i18next";
-import { FolderOpen, RefreshCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -82,7 +82,7 @@ export function AeOptionsForm({ ae, hideTimeline = false, hideCompName = false }
               </SelectContent>
             </Select>
             <Tooltip>
-              <TooltipTrigger render={<Button variant="outline" size="icon" onClick={loadTimelines} disabled={busy}><RefreshCw className="h-4 w-4" /></Button>} />
+              <TooltipTrigger render={<Button variant="outline" size="icon" onClick={loadTimelines} disabled={busy}><NetsuIcon name="refresh" className="h-4 w-4" /></Button>} />
               <TooltipContent>{t("form.refresh")}</TooltipContent>
             </Tooltip>
           </div>
@@ -259,7 +259,7 @@ export function AeOptionsForm({ ae, hideTimeline = false, hideCompName = false }
           </p>
           <Row label={outDir ? basename(outDir) : t("form.none")}>
             <Button variant={needsDir ? "destructive" : "outline"} size="sm" onClick={chooseOut} disabled={busy}>
-              <FolderOpen className="h-4 w-4" /> {t("form.choose")}
+              <NetsuIcon name="folder-open" className="h-4 w-4" /> {t("form.choose")}
             </Button>
           </Row>
         </Section>

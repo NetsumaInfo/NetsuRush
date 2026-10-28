@@ -32,10 +32,6 @@
   "menu": {
     "derush": "Visionado",
     "chat": "Chat",
-    "edit": "Edición",
-    "cut": "Cortar",
-    "paste": "Pegar",
-    "selectAll": "Seleccionar todo",
     "derushHome": "Inicio del visionado",
     "reloadRushes": "Recargar clips",
     "cutTimeline": "Cortar una timeline",

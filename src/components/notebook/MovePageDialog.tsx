@@ -7,7 +7,7 @@ import { useApp } from "@/store";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, NotebookPen } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { buildPageTree, subtreeIds, type PageTreeNode } from "./notebookShared";
 import { renderPageIcon } from "./IconPicker";
 
@@ -48,7 +48,7 @@ export function MovePageDialog({ pageId, onClose }: { pageId: string | null; onC
             onClick={() => void move(null)}
             className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            <NotebookPen className="h-3.5 w-3.5 shrink-0 text-primary" /> {t("navigation.notebookRoot")}
+            <NetsuIcon name="notebook" className="h-3.5 w-3.5 shrink-0 text-primary" /> {t("navigation.notebookRoot")}
           </button>
           {candidates.map((n) => (
             <button
@@ -59,7 +59,7 @@ export function MovePageDialog({ pageId, onClose }: { pageId: string | null; onC
               className="flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                {n.icon ? renderPageIcon(n.icon, "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5" />}
+                {n.icon ? renderPageIcon(n.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
               </span>
               <span className="min-w-0 flex-1 truncate">{n.title || t("panel.untitled")}</span>
             </button>

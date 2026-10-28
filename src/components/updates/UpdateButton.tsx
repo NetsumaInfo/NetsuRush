@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Download, Loader2, RefreshCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { scheduleUpdateBootstrapCheck, updaterAvailable, useUpdater } from "@/store/updater";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -86,11 +86,11 @@ export function UpdateButton({ className, variant = "action" }: { className?: st
                   <span className="size-2 rounded-full bg-card" />
                 </span>
               ) : phase === "installing" ? (
-                <Loader2 className="animate-spin" />
+                <NetsuIcon name="loading" busy />
               ) : ready ? (
-                <RefreshCw />
+                <NetsuIcon name="refresh" />
               ) : (
-                <Download />
+                <NetsuIcon name="update-download" />
               )}
               {(ready || busy) && <span className="tabular-nums">{label}</span>}
             </button>
@@ -106,7 +106,7 @@ export function UpdateButton({ className, variant = "action" }: { className?: st
       <TooltipTrigger
         render={<Button size="sm" className={className} disabled={busy} onClick={onClick} />}
       >
-        {phase === "installing" ? <Loader2 className="size-3.5 animate-spin" /> : ready ? <RefreshCw className="size-3.5" /> : <Download className="size-3.5" />}
+        {phase === "installing" ? <NetsuIcon name="loading" busy className="size-3.5" /> : ready ? <NetsuIcon name="refresh" className="size-3.5" /> : <NetsuIcon name="update-download" busy={phase === "downloading"} className="size-3.5" />}
         <span className="tabular-nums">{phase === "downloading" ? (percent ?? t("settings:updates.downloading")) : ready ? action : t("setup:update.download")}</span>
       </TooltipTrigger>
       <TooltipContent>{tip}</TooltipContent>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Trash2, Download, Check } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -67,18 +67,18 @@ export function ConsolePanel() {
         <SectionTitle title={t("console.title")} info={t("console.subtitle")} />
         <div className="flex shrink-0 flex-wrap items-center gap-1.5">
           <Button variant="outline" size="sm" onClick={() => write(text, "view")}>
-            {copied === "view" ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {t("console.copy")}
+            {copied === "view" ? <NetsuIcon name="check" className="size-3.5" /> : <NetsuIcon name="copy" className="size-3.5" />} {t("console.copy")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => write(serializeConsole(errors), "errors")} disabled={!errors.length}>
-            {copied === "errors" ? <Check className="size-3.5" /> : <Copy className="size-3.5" />} {t("console.errors")}
+            {copied === "errors" ? <NetsuIcon name="check" className="size-3.5" /> : <NetsuIcon name="copy" className="size-3.5" />} {t("console.errors")}
             {errors.length > 0 && <span className="text-destructive">({errors.length})</span>}
           </Button>
           <Button variant="outline" size="sm" onClick={exportTxt}>
-            <Download className="size-3.5" /> {t("console.export")}
+            <NetsuIcon name="download" className="size-3.5" /> {t("console.export")}
           </Button>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={clearConsole} aria-label={t("console.clearAria")} />}>
-              <Trash2 className="size-3.5" />
+              <NetsuIcon name="trash" className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{t("console.clearAria")}</TooltipContent>
           </Tooltip>

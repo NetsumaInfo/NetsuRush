@@ -2,7 +2,7 @@
 // Rendu même quand rien n'est joignable — l'utilisateur doit voir POURQUOI, pas une page vide.
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AppWindow, Plug, HardDrive, Boxes, Loader2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ export function BoostStatusCards({ diag, app }: { diag: BoostDiagnosis | null; a
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <AppWindow className="h-3.5 w-3.5" /> {hostLabel(app)}
+          <NetsuIcon name="app-window" className="h-3.5 w-3.5" /> {hostLabel(app)}
         </div>
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <StateBadge on={diag.installed} onLabel={t("boost.status.installed")} offLabel={t("boost.status.notInstalled")} />
@@ -64,7 +64,7 @@ export function BoostStatusCards({ diag, app }: { diag: BoostDiagnosis | null; a
 
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Plug className="h-3.5 w-3.5" /> {t("boost.status.panel")}
+          <NetsuIcon name="plug" className="h-3.5 w-3.5" /> {t("boost.status.panel")}
         </div>
         <div className="mt-1.5">
           <StateBadge
@@ -77,7 +77,7 @@ export function BoostStatusCards({ diag, app }: { diag: BoostDiagnosis | null; a
             mais muet = l'application est fermée ou le panneau n'est pas ouvert, rien à faire ici. */}
         {!diag.panelInstalled ? (
           <Button variant="outline" size="sm" className="mt-2" onClick={installPanel} disabled={installing}>
-            {installing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {installing && <NetsuIcon name="loading" busy className="h-3.5 w-3.5" />}
             {t("boost.status.installPanel")}
           </Button>
         ) : (
@@ -92,7 +92,7 @@ export function BoostStatusCards({ diag, app }: { diag: BoostDiagnosis | null; a
 
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Boxes className="h-3.5 w-3.5" /> {t("boost.status.caches")}
+          <NetsuIcon name="boxes" className="h-3.5 w-3.5" /> {t("boost.status.caches")}
         </div>
         <div className="mt-1 text-sm font-medium">{fmtBytes(diag.cacheTotal)}</div>
         <div className="mt-0.5 text-xs text-muted-foreground">
@@ -104,7 +104,7 @@ export function BoostStatusCards({ diag, app }: { diag: BoostDiagnosis | null; a
 
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <HardDrive className="h-3.5 w-3.5" /> {t("boost.status.disk")}
+          <NetsuIcon name="disk" className="h-3.5 w-3.5" /> {t("boost.status.disk")}
         </div>
         <div className={`mt-1 text-sm font-medium ${diskLow ? "text-amber-500" : ""}`}>
           {diag.disk ? fmtBytes(diag.disk.free) : "—"}

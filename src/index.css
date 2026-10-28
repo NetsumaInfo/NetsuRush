@@ -714,21 +714,6 @@ html.nr-wallpaper-on body {
 .nb-doc .katex { color: var(--color-fg); }
 .nb-doc .katex-display { margin: 0.25em 0; }
 
-/* <select> natifs des filtres db : appearance retirée + caret maison + fond/texte/options thémés
-   (l'OS ne styule plus la boîte fermée ; harmonisé avec les inputs du carnet). */
-.nb-sel {
-  appearance: none; -webkit-appearance: none;
-  background-color: var(--color-surface-2);
-  color: var(--color-fg);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 2px 20px 2px 6px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 5px center;
-}
-.nb-sel:focus { outline: none; border-color: var(--color-primary); }
-.nb-sel option { background: var(--color-surface-2); color: var(--color-fg); }
 
 /* Bande d'onglets (barre de titre) : défilement sans barre visible (sinon un rail gris s'affiche entre
    le dernier onglet et le bouton +, qui casse l'intégration). */
@@ -1157,4 +1142,20 @@ html.nr-see-through:not(.nr-see-through-shell) .nr-chrome {
 }
 html.nr-see-through:not(.nr-see-through-shell) .nr-chrome-page {
   background-color: var(--color-bg);
+}
+
+/* Brand logos stay as their owners draw them; they only answer the control that holds them, with one small move. */
+.brand-motion {
+  transition: transform 200ms ease-out;
+}
+:is(button, a, [role="button"], [role="menuitem"], [role="tab"]):hover .brand-motion {
+  transform: translateY(-1px) rotate(-6deg) scale(1.06);
+}
+:is(button, a, [role="button"], [role="menuitem"], [role="tab"]):active .brand-motion {
+  transform: scale(0.92);
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-motion {
+    transition: none;
+  }
 }

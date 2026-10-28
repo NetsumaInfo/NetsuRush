@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { ChevronRight, MoreHorizontal, NotebookPen, FileText } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { pageAncestors, type PageMeta } from "./notebookShared";
 import { renderPageIcon } from "./IconPicker";
 
@@ -25,7 +25,7 @@ function Crumb({ page, current, siblings, onOpen }: {
         className={`flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm transition-colors ${current ? "font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
       >
         <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-          {page.icon ? renderPageIcon(page.icon, "h-4 w-4", "text-sm") : <FileText className="h-3.5 w-3.5" />}
+          {page.icon ? renderPageIcon(page.icon, "h-4 w-4", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
         </span>
         <span className="max-w-44 truncate">{page.title || t("panel.untitled")}</span>
       </button>
@@ -35,7 +35,7 @@ function Crumb({ page, current, siblings, onOpen }: {
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
                 <button type="button" className="rounded p-0.5 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground">
-                  <ChevronRight className="h-3 w-3 rotate-90" />
+                  <NetsuIcon name="chevron-down" className="h-3 w-3" />
                 </button>
               } />
             } />
@@ -45,7 +45,7 @@ function Crumb({ page, current, siblings, onOpen }: {
             {siblings.map((s) => (
               <DropdownMenuItem key={s.id} onClick={() => onOpen(s.id)} className={s.id === page.id ? "font-medium" : ""}>
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                  {s.icon ? renderPageIcon(s.icon, "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5" />}
+                  {s.icon ? renderPageIcon(s.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
                 </span>
                 <span className="truncate">{s.title || t("panel.untitled")}</span>
               </DropdownMenuItem>
@@ -80,14 +80,14 @@ export function NotebookBreadcrumb() {
   const tail = deep ? [ancestors[ancestors.length - 1]] : [];
   const siblingsOf = (p: PageMeta) => nbPages.filter((x) => (x.parentId ?? null) === (p.parentId ?? null));
   const open = (id: string) => void nbOpenPage(id);
-  const sep = <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />;
+  const sep = <NetsuIcon name="chevron-toggle" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />;
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden">
         {nb && (
           <>
             <span className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-muted-foreground">
-              <NotebookPen className="h-4 w-4 shrink-0 text-primary" />
+              <NetsuIcon name="notebook" className="h-4 w-4 shrink-0 text-primary" />
               <span className="max-w-32 truncate">{nb.title}</span>
             </span>
             {sep}
@@ -106,7 +106,7 @@ export function NotebookBreadcrumb() {
                 <TooltipTrigger render={
                   <DropdownMenuTrigger render={
                     <button type="button" className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                      <MoreHorizontal className="h-4 w-4" />
+                      <NetsuIcon name="more" className="h-4 w-4" />
                     </button>
                   } />
                 } />

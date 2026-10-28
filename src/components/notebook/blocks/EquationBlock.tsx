@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import i18n from "@/i18n";
 import { createReactBlockSpec } from "@blocknote/react";
-import { Sigma, SquareFunction, ChevronDown } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { renderTex, useKatex } from "./katexEngine";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
@@ -97,7 +97,7 @@ function Equation({ tex, onCommit }: { tex: string; onCommit: (tex: string) => v
     if (!tex.trim()) {
       return (
         <button type="button" onClick={() => setEditing(true)} className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-foreground">
-          <Sigma className="h-4 w-4" /> {i18n.t("notebook:equation.empty")}
+          <NetsuIcon name="equation" className="h-4 w-4" /> {i18n.t("notebook:equation.empty")}
         </button>
       );
     }
@@ -122,7 +122,7 @@ function Equation({ tex, onCommit }: { tex: string; onCommit: (tex: string) => v
         <DropdownMenu>
           <DropdownMenuTrigger render={
             <button type="button" onMouseDown={(e) => e.preventDefault()} className="flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-xs text-foreground hover:bg-accent">
-              <SquareFunction className="h-3.5 w-3.5" /> {i18n.t("notebook:equation.templates")} <ChevronDown className="h-3 w-3 text-muted-foreground" />
+              <NetsuIcon name="equation" className="h-3.5 w-3.5" /> {i18n.t("notebook:equation.templates")} <NetsuIcon name="chevron-down" className="h-3 w-3 text-muted-foreground" />
             </button>
           } />
           <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
@@ -160,7 +160,7 @@ function Equation({ tex, onCommit }: { tex: string; onCommit: (tex: string) => v
           ))}
         </div>
       </div>
-      <textarea
+      <textarea autoComplete="off"
         aria-label={i18n.t("notebook:equation.input")}
         ref={box}
         value={draft}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 
@@ -28,7 +28,7 @@ export function TagInput({ value, onChange, suggestions = [], placeholder }: {
       {value.map((t) => (
         <span key={t} className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[11px]">
           {t}
-          <button type="button" aria-label={tr("tags.remove", { tag: t })} onClick={() => remove(t)} className="text-muted-foreground hover:text-destructive"><X className="h-2.5 w-2.5" /></button>
+          <button type="button" aria-label={tr("tags.remove", { tag: t })} onClick={() => remove(t)} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="h-2.5 w-2.5" /></button>
         </span>
       ))}
       <div className="relative">

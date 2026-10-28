@@ -9,16 +9,20 @@ const { execFile } = require('child_process');
 const { ffBin, fsp, fileReady, SEQ_DIR, VOICE_DIR } = require('./config');
 const { cacheIndex } = require('./cacheIndex');
 const { t } = require('./i18n');
+const { lowerPriority } = require('./backgroundPriority');
 
+// `background: true` runs the process below the interface (cf. backgroundPriority).
 function run(bin, args, opts = {}) {
+  const { background, ...execOpts } = /** @type {{ background?: boolean } & Record<string, any>} */ (opts);
   return new Promise((resolve, reject) => {
-    execFile(ffBin(bin), args, { maxBuffer: 64 * 1024 * 1024, ...opts }, (err, stdout, stderr) => {
+    const child = execFile(ffBin(bin), args, { maxBuffer: 64 * 1024 * 1024, ...execOpts }, (err, stdout, stderr) => {
       if (err) {
         err.stderr = stderr;
         return reject(err);
       }
       resolve(stdout);
     });
+    if (background) lowerPriority(child);
   });
 }
 

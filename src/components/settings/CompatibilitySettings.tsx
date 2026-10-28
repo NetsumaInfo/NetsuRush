@@ -1,4 +1,4 @@
-import { CheckCircle2, Cpu, Monitor, RefreshCw, TriangleAlert, XCircle } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useCompatibility } from "@/hooks/useCompatibility";
 import { Badge } from "@/components/ui/badge";
@@ -28,13 +28,13 @@ function runtimeKind(accelerated: boolean, configured: string | undefined, insta
 }
 
 function StateBadge({ kind, t }: { kind: RuntimeKind; t: (key: string) => string }) {
-  const Icon = kind === "gpu" ? CheckCircle2 : kind === "fallback" ? TriangleAlert : kind === "missing" ? XCircle : Cpu;
+  const icon = kind === "gpu" ? "status-ok" : kind === "fallback" ? "warning" : kind === "missing" ? "error-badge" : "chip";
   return (
     <Badge
       variant={kind === "missing" ? "destructive" : kind === "fallback" ? "outline" : kind === "gpu" ? "default" : "secondary"}
       className={kind === "gpu" ? "bg-[var(--color-ok)] text-black" : undefined}
     >
-      <Icon className="size-3" /> {t(`compatibility.state.${kind}`)}
+      <NetsuIcon name={icon} className="size-3" /> {t(`compatibility.state.${kind}`)}
     </Badge>
   );
 }
@@ -93,7 +93,7 @@ export function CompatibilitySettings() {
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-medium">{t("compatibility.title")}</h2>
         <Button variant="outline" size="sm" disabled={loading} onClick={() => void refresh()}>
-          {loading ? <Spinner /> : <RefreshCw className="size-3.5" />}
+          {loading ? <Spinner /> : <NetsuIcon name="refresh" className="size-3.5" />}
           {t("compatibility.refresh")}
         </Button>
       </div>
@@ -110,7 +110,7 @@ export function CompatibilitySettings() {
             <div className="mt-2 divide-y divide-border rounded-lg border border-border">
               {status.hardware.gpus.map((gpu) => (
                 <div key={`${gpu.name}-${gpu.pnpDeviceId || ""}`} className="flex items-center gap-3 px-3 py-2.5">
-                  <Monitor className="size-4 shrink-0 text-primary" />
+                  <NetsuIcon name="monitor" className="size-4 shrink-0 text-primary" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium">{gpu.name}</p>
                     <p className="mt-0.5 text-[11px] text-muted-foreground">{roleLabel(gpu.role, t)} · {gpu.vendor.toUpperCase()}</p>
@@ -120,7 +120,7 @@ export function CompatibilitySettings() {
               ))}
               {status.hardware.cpus.map((cpu) => (
                 <div key={cpu} className="flex items-center gap-3 px-3 py-2.5">
-                  <Cpu className="size-4 shrink-0 text-muted-foreground" />
+                  <NetsuIcon name="chip" className="size-4 shrink-0 text-muted-foreground" />
                   <div><p className="text-xs font-medium">{cpu}</p><p className="text-[11px] text-muted-foreground">{t("compatibility.cpu")}</p></div>
                 </div>
               ))}

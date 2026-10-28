@@ -1,14 +1,10 @@
 // Menu clic droit GLOBAL de la coquille — coiffe le contenu du module actif (`<main>`).
 // But : le menu natif du navigateur ne sort JAMAIS ; à la place un menu custom, PERTINENT selon la
-// vue (onglet) ou selon la cible (champ de texte → couper/copier/coller). Les menus imbriqués des
-// cartes/board/éditeurs GAGNENT (Base UI `stopPropagation` sur le trigger interne → ce menu parent
+// vue (onglet). Les champs de texte ont leur menu d'édition (TextContextMenu, monté dans App, qui passe
+// avant celui-ci). Les menus imbriqués des cartes/board/éditeurs GAGNENT (Base UI `stopPropagation` sur le trigger interne → ce menu parent
 // ne s'ouvre pas dessus). Voir CLAUDE.md « UI ».
-import { useRef, useState, type ReactNode } from "react";
-import {
-  Home, RotateCw, Scissors, LayoutGrid, Eraser, Sparkles, Layers3,
-  Settings, Terminal, Pin, PanelLeft, Compass, Copy, ClipboardPaste,
-  TextCursorInput, SquareStack, RefreshCw,
-} from "lucide-react";
+import type { ReactNode } from "react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { NAV } from "@/components/nav";
 import { useApp, type TabId } from "@/store";
 import {
@@ -17,52 +13,6 @@ import {
   ContextMenuSubContent, ContextMenuGroup,
 } from "@/components/ui/context-menu";
 import { useTranslation } from "react-i18next";
-
-// Repère le champ éditable sous le curseur (input texte / textarea / contenteditable).
-// Exporté : les fenêtres détachées (Carnet) rendent le même menu d'édition — le menu natif est
-// supprimé partout, chaque surface doit donc offrir couper/copier/coller.
-export function editableFrom(target: EventTarget | null): HTMLElement | null {
-  const node = target as HTMLElement | null;
-  const ed = node?.closest?.("input, textarea, [contenteditable='true'], [contenteditable='']") as HTMLElement | null;
-  if (!ed) return null;
-  if (ed instanceof HTMLInputElement) {
-    const t = ed.type;
-    // Seuls les inputs qui portent réellement du texte éditable méritent un menu couper/copier/coller.
-    return ["text", "search", "url", "email", "tel", "password", "number", ""].includes(t) ? ed : null;
-  }
-  return ed;
-}
-
-// ── Menu d'édition (champ de texte) ───────────────────────────────────────────
-export function EditItems({ el }: { el: HTMLElement | null }) {
-  const { t } = useTranslation("shell");
-  // Refocalise avant d'agir : ouvrir le menu (portail) a pu retirer le focus du champ.
-  const focus = () => el?.focus();
-  const hasSel = () => {
-    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el.selectionStart !== el.selectionEnd;
-    const s = window.getSelection(); return !!s && !s.isCollapsed;
-  };
-  const cut = () => { focus(); document.execCommand("cut"); };
-  const copy = () => { focus(); document.execCommand("copy"); };
-  const paste = async () => {
-    focus();
-    try { const t = await navigator.clipboard.readText(); document.execCommand("insertText", false, t); } catch { /* clipboard refusé */ }
-  };
-  const selectAll = () => {
-    focus();
-    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.select();
-    else document.execCommand("selectAll");
-  };
-  return (
-    <ContextMenuGroup>
-      <ContextMenuLabel>{t("menu.edit")}</ContextMenuLabel>
-      <ContextMenuItem onClick={cut} disabled={!hasSel()}><Scissors /> {t("menu.cut")}</ContextMenuItem>
-      <ContextMenuItem onClick={copy} disabled={!hasSel()}><Copy /> {t("common:action.copy")}</ContextMenuItem>
-      <ContextMenuItem onClick={() => void paste()}><ClipboardPaste /> {t("menu.paste")}</ContextMenuItem>
-      <ContextMenuItem onClick={selectAll}><TextCursorInput /> {t("menu.selectAll")}</ContextMenuItem>
-    </ContextMenuGroup>
-  );
-}
 
 // ── Actions propres à la vue (fond du panneau du module) ──────────────────────
 function ViewItems({ tab }: { tab: TabId }) {
@@ -73,11 +23,11 @@ function ViewItems({ tab }: { tab: TabId }) {
       return (
         <ContextMenuGroup>
           <ContextMenuLabel>{t("menu.derush")}</ContextMenuLabel>
-          <ContextMenuItem onClick={() => s.backHome()}><Home /> {t("menu.derushHome")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => void s.loadClips()}><RotateCw /> {t("menu.reloadRushes")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => s.openCutTimeline()}><Scissors /> {t("menu.cutTimeline")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => s.backHome()}><NetsuIcon name="home" /> {t("menu.derushHome")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => void s.loadClips()}><NetsuIcon name="restart" /> {t("menu.reloadRushes")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => s.openCutTimeline()}><NetsuIcon name="scissors" /> {t("menu.cutTimeline")}</ContextMenuItem>
           <ContextMenuSub>
-            <ContextMenuSubTrigger><LayoutGrid /> {t("menu.section")}</ContextMenuSubTrigger>
+            <ContextMenuSubTrigger><NetsuIcon name="layout-grid" /> {t("menu.section")}</ContextMenuSubTrigger>
             <ContextMenuSubContent>
               <ContextMenuCheckboxItem checked={s.derushSection === "decoupage"} onClick={() => s.setDerushSection("decoupage")}>{t("menu.sectionDecoupage")}</ContextMenuCheckboxItem>
               <ContextMenuCheckboxItem checked={s.derushSection === "collections"} onClick={() => s.setDerushSection("collections")}>{t("menu.sectionCollections")}</ContextMenuCheckboxItem>
@@ -91,30 +41,30 @@ function ViewItems({ tab }: { tab: TabId }) {
         <ContextMenuGroup>
           <ContextMenuLabel>{t("menu.search")}</ContextMenuLabel>
           <ContextMenuSub>
-            <ContextMenuSubTrigger><LayoutGrid /> {t("menu.resultView")}</ContextMenuSubTrigger>
+            <ContextMenuSubTrigger><NetsuIcon name="layout-grid" /> {t("menu.resultView")}</ContextMenuSubTrigger>
             <ContextMenuSubContent>
               <ContextMenuCheckboxItem checked={s.resultView === "flat"} onClick={() => s.setResultView("flat")}>{t("menu.resultFlat")}</ContextMenuCheckboxItem>
               <ContextMenuCheckboxItem checked={s.resultView === "clusters"} onClick={() => s.setResultView("clusters")}>{t("menu.resultClusters")}</ContextMenuCheckboxItem>
               <ContextMenuCheckboxItem checked={s.resultView === "dedup"} onClick={() => s.setResultView("dedup")}>{t("menu.resultDedup")}</ContextMenuCheckboxItem>
             </ContextMenuSubContent>
           </ContextMenuSub>
-          <ContextMenuItem onClick={() => s.clearRefs()}><Eraser /> {t("menu.clearRefs")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => s.clearRefs()}><NetsuIcon name="erase" /> {t("menu.clearRefs")}</ContextMenuItem>
         </ContextMenuGroup>
       );
     case "upscale":
       return (
         <ContextMenuGroup>
           <ContextMenuLabel>NetsuLab</ContextMenuLabel>
-          <ContextMenuCheckboxItem checked={s.nlRoto} onClick={() => s.nlSetRoto(!s.nlRoto)}><Sparkles /> Roto Studio</ContextMenuCheckboxItem>
-          <ContextMenuItem onClick={() => s.nlClearChain()}><Layers3 /> {t("menu.clearChain")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => s.nlClearSources()}><Eraser /> {t("menu.clearSources")}</ContextMenuItem>
+          <ContextMenuCheckboxItem checked={s.nlRoto} onClick={() => s.nlSetRoto(!s.nlRoto)}><NetsuIcon name="sparkles" /> Roto Studio</ContextMenuCheckboxItem>
+          <ContextMenuItem onClick={() => s.nlClearChain()}><NetsuIcon name="layers" /> {t("menu.clearChain")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => s.nlClearSources()}><NetsuIcon name="erase" /> {t("menu.clearSources")}</ContextMenuItem>
         </ContextMenuGroup>
       );
     case "chat":
       return (
         <ContextMenuGroup>
           <ContextMenuLabel>{t("menu.chat")}</ContextMenuLabel>
-          <ContextMenuItem variant="destructive" onClick={() => s.chatClear()}><Eraser /> {t("menu.clearChat")}</ContextMenuItem>
+          <ContextMenuItem variant="destructive" onClick={() => s.chatClear()}><NetsuIcon name="erase" /> {t("menu.clearChat")}</ContextMenuItem>
         </ContextMenuGroup>
       );
     default:
@@ -133,7 +83,7 @@ function SharedAppItems({ tab, remote = false }: { tab: TabId; remote?: boolean 
   return (
     <>
       <ContextMenuSub>
-        <ContextMenuSubTrigger><Compass /> {t("menu.gotoModule")}</ContextMenuSubTrigger>
+        <ContextMenuSubTrigger><NetsuIcon name="compass" /> {t("menu.gotoModule")}</ContextMenuSubTrigger>
         <ContextMenuSubContent className="min-w-44">
           {NAV.map((n) => {
             const Icon = n.icon;
@@ -145,16 +95,16 @@ function SharedAppItems({ tab, remote = false }: { tab: TabId; remote?: boolean 
           })}
         </ContextMenuSubContent>
       </ContextMenuSub>
-      <ContextMenuItem onClick={() => s.setTab("settings")}><Settings /> {t("sidebar.settings")}</ContextMenuItem>
-      <ContextMenuItem onClick={() => s.openConsole()}><Terminal /> {t("menu.console")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => s.setTab("settings")}><NetsuIcon name="sidebar-settings" /> {t("sidebar.settings")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => s.openConsole()}><NetsuIcon name="console" /> {t("menu.console")}</ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem onClick={() => void s.refreshStatus(false)}><RefreshCw /> {t("menu.refreshStatus")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => void s.refreshStatus(false)}><NetsuIcon name="sidebar-refresh" /> {t("menu.refreshStatus")}</ContextMenuItem>
       {remote ? (
-        <ContextMenuItem onClick={() => window.location.reload()}><RotateCw /> {t("menu.reloadApp")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => window.location.reload()}><NetsuIcon name="restart" /> {t("menu.reloadApp")}</ContextMenuItem>
       ) : (
         <>
-          <ContextMenuCheckboxItem checked={s.pinned} onClick={() => s.togglePinned()}><Pin /> {t("menu.pinned")}</ContextMenuCheckboxItem>
-          <ContextMenuCheckboxItem checked={s.sidebarHidden} onClick={() => s.toggleSidebar()}><PanelLeft /> {t("menu.hideSidebar")}</ContextMenuCheckboxItem>
+          <ContextMenuCheckboxItem checked={s.pinned} onClick={() => s.togglePinned()}><NetsuIcon name="window-pin" on={s.pinned} /> {t("menu.pinned")}</ContextMenuCheckboxItem>
+          <ContextMenuCheckboxItem checked={s.sidebarHidden} onClick={() => s.toggleSidebar()}><NetsuIcon name="panel-left-toggle" on={s.sidebarHidden} /> {t("menu.hideSidebar")}</ContextMenuCheckboxItem>
         </>
       )}
     </>
@@ -165,35 +115,20 @@ function SharedAppItems({ tab, remote = false }: { tab: TabId; remote?: boolean 
 // `remote` : rendu dans le panneau CEP Adobe → items fenêtre remplacés (cf. SharedAppItems).
 export function ViewContextMenu({ children, remote = false }: { children: ReactNode; remote?: boolean }) {
   const tab = useApp((s) => s.tab);
-  const [edit, setEdit] = useState(false);
-  const elRef = useRef<HTMLElement | null>(null);
   const hasView = ["derush", "search", "upscale", "chat"].includes(tab);
   return (
     <ContextMenu>
-      <ContextMenuTrigger
-        render={<main className="min-h-0 min-w-0 flex-1 overflow-auto" />}
-        onContextMenuCapture={(e: React.MouseEvent) => {
-          const ed = editableFrom(e.target);
-          elRef.current = ed;
-          setEdit(!!ed);
-        }}
-      >
+      <ContextMenuTrigger render={<main className="min-h-0 min-w-0 flex-1 overflow-auto" />}>
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-52">
-        {edit ? (
-          <EditItems el={elRef.current} />
-        ) : (
+        {hasView && (
           <>
-            {hasView && (
-              <>
-                <ViewItems tab={tab} />
-                <ContextMenuSeparator />
-              </>
-            )}
-            <SharedAppItems tab={tab} remote={remote} />
+            <ViewItems tab={tab} />
+            <ContextMenuSeparator />
           </>
         )}
+        <SharedAppItems tab={tab} remote={remote} />
       </ContextMenuContent>
     </ContextMenu>
   );
@@ -220,12 +155,12 @@ export function TitleBarMenu({
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        <ContextMenuCheckboxItem checked={useApp.getState().pinned} onClick={() => s.togglePinned()}><Pin /> {t("menu.pinAbove")}</ContextMenuCheckboxItem>
-        <ContextMenuCheckboxItem checked={useApp.getState().sidebarHidden} onClick={() => s.toggleSidebar()}><PanelLeft /> {t("menu.hideSidebar")}</ContextMenuCheckboxItem>
+        <ContextMenuCheckboxItem checked={useApp.getState().pinned} onClick={() => s.togglePinned()}><NetsuIcon name="window-pin" on={useApp.getState().pinned} /> {t("menu.pinAbove")}</ContextMenuCheckboxItem>
+        <ContextMenuCheckboxItem checked={useApp.getState().sidebarHidden} onClick={() => s.toggleSidebar()}><NetsuIcon name="panel-left-toggle" on={useApp.getState().sidebarHidden} /> {t("menu.hideSidebar")}</ContextMenuCheckboxItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => s.setTab("settings")}><Settings /> {t("sidebar.settings")}</ContextMenuItem>
-        <ContextMenuItem onClick={() => s.openConsole()}><Terminal /> {t("menu.console")}</ContextMenuItem>
-        <ContextMenuItem onClick={() => void s.refreshStatus(false)}><SquareStack /> {t("menu.refreshStatus")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => s.setTab("settings")}><NetsuIcon name="sidebar-settings" /> {t("sidebar.settings")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => s.openConsole()}><NetsuIcon name="console" /> {t("menu.console")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => void s.refreshStatus(false)}><NetsuIcon name="stack" /> {t("menu.refreshStatus")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

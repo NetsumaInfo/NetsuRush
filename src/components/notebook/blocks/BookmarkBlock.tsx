@@ -4,7 +4,7 @@
 import { useEffect, useRef } from "react";
 import { createReactBlockSpec } from "@blocknote/react";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { Link2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import i18n from "@/i18n";
 import { nr } from "@/lib/bridge";
 import { BlockConvertMenu } from "./BlockConvertMenu";
@@ -50,7 +50,7 @@ export const bookmarkSpec = createReactBlockSpec(
       if (!p.url) {
         return (
           <EmptyLinkInput
-            icon={<Link2 className="h-4 w-4 text-primary" />}
+            icon={<NetsuIcon name="link" className="h-4 w-4 text-primary" />}
             placeholder={i18n.t("notebook:blocks.bookmark.pastePlaceholder")}
             onSubmit={(url) => editor.updateBlock(block, { type: "bookmark", props: { url } })}
           />

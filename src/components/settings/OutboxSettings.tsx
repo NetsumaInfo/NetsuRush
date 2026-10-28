@@ -4,7 +4,7 @@
 // les envois. Réglages : activation, délai, cible (nouvelle timeline vs timeline collectrice unique).
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Check, CircleAlert, Clock, Play, Trash2, X, Film, RefreshCw, Loader2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { nr, type SnapshotState, type SnapshotProgress } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
@@ -51,11 +51,11 @@ function OfflineCacheBlock() {
     <div className="space-y-2.5 rounded-lg border border-border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Film className="size-4 text-muted-foreground" />
+          <NetsuIcon name="film" className="size-4 text-muted-foreground" />
           <div>
             <span className="flex items-center gap-1.5 text-[0.8125rem]">
               {t("outbox.offline.title")}
-              {upToDate && !building && <span className="inline-flex items-center gap-0.5 text-[10px] text-[var(--color-ok)]"><Check className="size-3" /> {t("outbox.offline.upToDate")}</span>}
+              {upToDate && !building && <span className="inline-flex items-center gap-0.5 text-[10px] text-[var(--color-ok)]"><NetsuIcon name="check" className="size-3" /> {t("outbox.offline.upToDate")}</span>}
             </span>
             <span className="block text-[11px] text-muted-foreground">
               {snap
@@ -65,7 +65,7 @@ function OfflineCacheBlock() {
           </div>
         </div>
         <Button size="sm" variant="outline" disabled={!connected || building} onClick={() => build(false)}>
-          {building ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />} {t("outbox.offline.update")}
+          <NetsuIcon name="refresh" busy={building} className="size-3.5" /> {t("outbox.offline.update")}
         </Button>
       </div>
 
@@ -154,8 +154,8 @@ export function OutboxSettings() {
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-[0.8125rem] font-medium">{t("outbox.queue")} {pending.length ? <span className="text-muted-foreground">· {t("outbox.pendingCount", { count: pending.length })}</span> : null}</h3>
           <div className="flex gap-1.5">
-            {!!pending.length && <Button size="sm" variant="outline" onClick={() => void flush("resolve")}><Play className="size-3.5" /> {t("outbox.applyNow")}</Button>}
-            {entries.length > 0 && <Button size="sm" variant="ghost" onClick={() => void clear("done")}><Trash2 className="size-3.5" /> {t("outbox.clearHistory")}</Button>}
+            {!!pending.length && <Button size="sm" variant="outline" onClick={() => void flush("resolve")}><NetsuIcon name="play" className="size-3.5" /> {t("outbox.applyNow")}</Button>}
+            {entries.length > 0 && <Button size="sm" variant="ghost" onClick={() => void clear("done")}><NetsuIcon name="trash" className="size-3.5" /> {t("outbox.clearHistory")}</Button>}
           </div>
         </div>
         {entries.length === 0 ? (
@@ -164,15 +164,15 @@ export function OutboxSettings() {
           <div className="space-y-1">
             {entries.map((e) => (
               <div key={e.id} className="flex items-center gap-2 rounded-lg border border-border px-2.5 py-1.5 text-xs">
-                {e.status === "done" ? <Check className="size-3.5 shrink-0 text-[var(--color-ok)]" />
-                  : e.status === "error" ? <CircleAlert className="size-3.5 shrink-0 text-destructive" />
-                  : <Clock className="size-3.5 shrink-0 text-[var(--color-warn)]" />}
+                {e.status === "done" ? <NetsuIcon name="check" className="size-3.5 shrink-0 text-[var(--color-ok)]" />
+                  : e.status === "error" ? <NetsuIcon name="error-badge" className="size-3.5 shrink-0 text-destructive" />
+                  : <NetsuIcon name="clock" className="size-3.5 shrink-0 text-[var(--color-warn)]" />}
                 <span className="min-w-0 flex-1 truncate">{e.label}</span>
                 <span className="shrink-0 text-[10px] text-muted-foreground">{hostShort(e.host)}</span>
                 <span className="shrink-0 text-[10px] text-muted-foreground">
                   {e.status === "done" ? (e.result ? `« ${e.result} »` : t("outbox.applied")) : e.status === "error" ? (e.error || t("outbox.failed")) : t("outbox.pending")}
                 </span>
-                <button type="button" aria-label={t("common:action.remove")} onClick={() => void remove(e.id)} className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"><X className="size-3.5" /></button>
+                <button type="button" aria-label={t("common:action.remove")} onClick={() => void remove(e.id)} className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="size-3.5" /></button>
               </div>
             ))}
           </div>

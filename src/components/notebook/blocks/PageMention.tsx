@@ -6,7 +6,7 @@
 // lien) → l'index de rétroliens (core) scanne ce type. content:"none" (pas de texte éditable).
 import { useEffect, useRef, useState } from "react";
 import { createReactInlineContentSpec, useBlockNoteEditor } from "@blocknote/react";
-import { CornerDownRight, ExternalLink, Link2, RefreshCw, CreditCard, Tag } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
@@ -127,21 +127,21 @@ function MentionView({ pageId, blockId, label, display }: { pageId: string; bloc
       <ContextMenuTrigger render={<span contentEditable={false} />}>{body}</ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem disabled={gone} onClick={open}>
-          <ExternalLink /> {blockId ? i18n.t("notebook:mention.openBlock") : i18n.t("notebook:blocksUi.open")}
+          <NetsuIcon name="open-external" /> {blockId ? i18n.t("notebook:mention.openBlock") : i18n.t("notebook:blocksUi.open")}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem disabled={display !== "card"} onClick={() => setMentionAttrs(editor, root.current, { display: "chip" })}>
-          <Tag /> {i18n.t("notebook:mention.showChip")}
+          <NetsuIcon name="tag" /> {i18n.t("notebook:mention.showChip")}
         </ContextMenuItem>
         <ContextMenuItem disabled={display === "card"} onClick={() => setMentionAttrs(editor, root.current, { display: "card" })}>
-          <CreditCard /> {i18n.t("notebook:mention.showCard")}
+          <NetsuIcon name="card" /> {i18n.t("notebook:mention.showCard")}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem disabled={gone} onClick={() => setMentionAttrs(editor, root.current, { label: title })}>
-          <RefreshCw /> {i18n.t("notebook:mention.refreshLabel")}
+          <NetsuIcon name="refresh" /> {i18n.t("notebook:mention.refreshLabel")}
         </ContextMenuItem>
         <ContextMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${pageId}${blockId ? `#${blockId}` : ""}`)}>
-          <Link2 /> {i18n.t("notebook:finalPass.copyLink")}
+          <NetsuIcon name="link" /> {i18n.t("notebook:finalPass.copyLink")}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
@@ -186,7 +186,7 @@ function ChipPreview({ pageId, blockId, title, icon }: { pageId: string; blockId
       {blockId && ex && !ex.found && <span className="text-muted-foreground">{i18n.t("notebook:mention.blockMissing")}</span>}
       {ex?.text ? (
         <span className="line-clamp-3 whitespace-normal text-muted-foreground">
-          {blockId && <CornerDownRight className="mr-1 inline h-3 w-3" />}
+          {blockId && <NetsuIcon name="subpage" className="mr-1 inline h-3 w-3" />}
           {ex.text}
         </span>
       ) : null}
@@ -216,7 +216,7 @@ function CardView({ pageId, blockId, title, icon, gone, onOpen, rootRef }: {
       </span>
       {ex?.text ? (
         <span className="line-clamp-2 text-xs text-muted-foreground">
-          {blockId && <CornerDownRight className="mr-1 inline h-3 w-3" />}
+          {blockId && <NetsuIcon name="subpage" className="mr-1 inline h-3 w-3" />}
           {ex.text}
         </span>
       ) : ex && blockId && !ex.found ? (

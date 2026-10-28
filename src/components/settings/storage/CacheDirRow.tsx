@@ -2,7 +2,7 @@
 // déplacer évite de tout régénérer, laisser garde l'ancien dossier listé et purgeable.
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderOpen, RotateCcw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -72,12 +72,12 @@ export function CacheDirRow({ overview, onDone }: Props) {
           </TooltipContent>
         </Tooltip>
         <Button variant="outline" size="sm" onClick={choose} disabled={busy}>
-          <FolderOpen className="size-3.5" /> {t("settings:storage.dir.choose")}
+          <NetsuIcon name="folder-open" className="size-3.5" /> {t("settings:storage.dir.choose")}
         </Button>
         {current && (
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => apply(null, "move")} disabled={busy} />}>
-              <RotateCcw className="size-3.5" />
+              <NetsuIcon name="reset-default" className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{t("settings:storage.dir.reset")}</TooltipContent>
           </Tooltip>

@@ -3,17 +3,18 @@ import { createElement } from "react";
 import i18n from "@/i18n";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuCheckboxItem, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
-import { Plus, Trash2, ChevronDown, Type, Hash, CircleDot, Tags, CalendarDays, CheckSquare, Link2, ListChecks, Clock, History, ArrowLeftToLine, ArrowRightToLine, Copy, EyeOff, Eraser, type LucideIcon } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { FIELD_TYPE_LABELS, NUMBER_FORMAT_LABELS, DATE_FORMAT_LABELS, type DbField, type FieldType, type NumberFormat, type DateFormat } from "../notebookShared";
 import type { DatabaseOps } from "./useDatabaseOps";
 
 const TYPES = Object.keys(FIELD_TYPE_LABELS) as FieldType[];
 
 // Icône par type de champ (repère visuel dans l'en-tête + les menus).
-export const FIELD_ICON: Record<FieldType, LucideIcon> = {
-  text: Type, number: Hash, select: CircleDot, multiSelect: Tags,
-  date: CalendarDays, checkbox: CheckSquare, url: Link2, checklist: ListChecks,
-  createdTime: Clock, lastEditedTime: History,
+export const FIELD_ICON: Record<FieldType, IconComponent> = {
+  text: netsuIconOf("type"), number: netsuIconOf("hash"), select: netsuIconOf("circle-dot"), multiSelect: netsuIconOf("tags"),
+  date: netsuIconOf("calendar"), checkbox: netsuIconOf("checkbox-on"), url: netsuIconOf("link"), checklist: netsuIconOf("task-list"),
+  createdTime: netsuIconOf("clock"), lastEditedTime: netsuIconOf("history"),
 };
 
 // `primary` = champ titre (1re colonne). Son TYPE est verrouillé (toujours texte, c'est le titre de la ligne) et il ne peut être ni supprimé ni dupliqué
@@ -26,12 +27,12 @@ export function FieldHeader({ field, ops, primary = false }: { field: DbField; o
           <button type="button" className="flex h-full w-full items-center gap-1.5 px-1.5 text-left text-xs font-medium">
             {createElement(FIELD_ICON[field.type], { className: "h-3.5 w-3.5 shrink-0 text-muted-foreground" })}
             <span className="truncate">{field.name}</span>
-            <ChevronDown className="ml-auto h-3 w-3 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="chevron-down" className="ml-auto h-3 w-3 shrink-0 text-muted-foreground" />
           </button>
         }
       />
       <DropdownMenuContent className="w-56">
-        <input
+        <input autoComplete="off"
           aria-label={field.name}
           defaultValue={field.name}
           onBlur={(e) => { if (e.target.value.trim() && e.target.value !== field.name) ops.updateField(field.id, { name: e.target.value.trim() }); }}
@@ -73,17 +74,17 @@ export function FieldHeader({ field, ops, primary = false }: { field: DbField; o
           </>
         )}
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "left")}><ArrowLeftToLine className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.insertLeft")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "right")}><ArrowRightToLine className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.insertRight")}</DropdownMenuItem>
-          {!primary && <DropdownMenuItem onClick={() => ops.duplicateField(field.id)}><Copy className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>}
-          {!primary && <DropdownMenuItem onClick={() => ops.toggleFieldHidden(field.id)}><EyeOff className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.hide")}</DropdownMenuItem>}
-          <DropdownMenuItem onClick={() => ops.clearFieldData(field.id)}><Eraser className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.clearValues")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "left")}><NetsuIcon name="in-point" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.insertLeft")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "right")}><NetsuIcon name="out-point" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.insertRight")}</DropdownMenuItem>
+          {!primary && <DropdownMenuItem onClick={() => ops.duplicateField(field.id)}><NetsuIcon name="copy" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>}
+          {!primary && <DropdownMenuItem onClick={() => ops.toggleFieldHidden(field.id)}><NetsuIcon name="eye-off" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.hide")}</DropdownMenuItem>}
+          <DropdownMenuItem onClick={() => ops.clearFieldData(field.id)}><NetsuIcon name="erase" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.clearValues")}</DropdownMenuItem>
         </DropdownMenuGroup>
         {!primary && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => ops.removeField(field.id)} className="text-destructive">
-              <Trash2 className="mr-1 h-3.5 w-3.5" /> {i18n.t("notebook:finalPass.deleteColumn")}
+              <NetsuIcon name="trash" className="mr-1 h-3.5 w-3.5" /> {i18n.t("notebook:finalPass.deleteColumn")}
             </DropdownMenuItem>
           </>
         )}
@@ -96,7 +97,7 @@ export function AddFieldButton({ ops }: { ops: DatabaseOps }) {
   return (
     <DropdownMenu>
       <Tooltip>
-        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex h-full w-full items-center justify-center text-muted-foreground hover:text-foreground"><Plus className="h-4 w-4" /></button>} />} />
+        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex h-full w-full items-center justify-center text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-4 w-4" /></button>} />} />
         <TooltipContent>{i18n.t("notebook:dbFields.addColumn")}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent>

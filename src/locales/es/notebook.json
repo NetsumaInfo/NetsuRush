@@ -625,7 +625,9 @@
     "bulletList": "Lista con viñetas",
     "numberedList": "Lista numerada",
     "checkList": "Lista de tareas",
-    "quote": "Cita"
+    "quote": "Cita",
+    "callout": "Destacado",
+    "codeBlock": "Bloque de código"
   },
   "dbDefaults": {
     "titleField": "Nombre",
@@ -660,6 +662,22 @@
     "removeFilter": "Quitar filtro",
     "editOption": "Editar opción",
     "removeTask": "Quitar tarea",
-    "addTask": "Añadir tarea"
+    "addTask": "Añadir tarea",
+    "hour": "Horas",
+    "minute": "Minutos"
+  },
+  "menu": {
+    "format": "Formato",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "underline": "Subrayado",
+    "strike": "Tachado",
+    "code": "Código",
+    "link": "Enlace",
+    "linkNeedsUrl": "Copia antes una dirección",
+    "block": "Bloque",
+    "duplicate": "Duplicar",
+    "moveUp": "Subir",
+    "moveDown": "Bajar"
   }
 }

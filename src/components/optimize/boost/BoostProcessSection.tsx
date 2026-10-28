@@ -5,9 +5,9 @@
 // Le core interroge Windows PAR NOM plutôt que de lire le top 30 de `optimize:listProcesses` :
 // justement parce que ces auxiliaires sont trop petits pour y figurer. La MISE À MORT, elle, repasse
 // par `optimize:killProcess` — un seul chemin destructif dans l'application, avec ses garde-fous.
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Loader2, Skull } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,7 +79,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={scan} disabled={scanning}>
-          {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          <NetsuIcon name="boost-rescan" busy={scanning} className="h-4 w-4" />
           {t("boost.procs.scan")}
         </Button>
       </div>
@@ -115,7 +115,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
                     <TooltipTrigger
                       render={<Button variant="ghost" size="icon-sm" disabled={p.critical} onClick={() => setTarget(p)} />}
                     >
-                      <Skull className="h-4 w-4" />
+                      <NetsuIcon name="boost-kill" className="h-4 w-4" />
                     </TooltipTrigger>
                     {/* L'hôte VIVANT n'est pas un résidu : le tuer perdrait le montage en cours. */}
                     <TooltipContent>{p.critical ? t("boost.procs.protectedTip") : t("boost.procs.kill")}</TooltipContent>
@@ -145,7 +145,7 @@ export function BoostProcessSection({ onChanged }: { onChanged: () => void }) {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={kill} disabled={killing}>
-              {killing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Skull className="h-4 w-4" />}
+              <NetsuIcon name="boost-kill" busy={killing} className="h-4 w-4" />
               {t("boost.procs.kill")}
             </Button>
           </DialogFooter>

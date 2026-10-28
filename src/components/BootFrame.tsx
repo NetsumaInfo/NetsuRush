@@ -1,5 +1,5 @@
+import { CloseGlyph, MinimizeGlyph } from "@/components/ui/window-glyphs";
 import { useTranslation } from "react-i18next";
-import { Minus, X } from "lucide-react";
 import { BrandIcon } from "@/components/BrandIcon";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -17,7 +17,7 @@ async function win() {
 
 export function BootFrame() {
   const { t } = useTranslation(["shell", "common"]);
-  const btn = "inline-flex h-9 w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&_svg]:size-3.5";
+  const btn = "group inline-flex h-9 w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&_svg]:size-3.5";
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <header
@@ -29,10 +29,10 @@ export function BootFrame() {
         {isTauri && (
           <div className="ml-auto flex items-center" data-no-drag>
             <button type="button" aria-label={t("shell:windowControls.minimize")} className={btn} onClick={() => void win().then((w) => w.minimize()).catch(() => undefined)}>
-              <Minus />
+              <MinimizeGlyph />
             </button>
             <button type="button" aria-label={t("common:action.close")} className={`${btn} hover:bg-destructive hover:text-primary-foreground`} onClick={() => void win().then((w) => w.close()).catch(() => undefined)}>
-              <X />
+              <CloseGlyph />
             </button>
           </div>
         )}

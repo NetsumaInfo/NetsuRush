@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import i18n from "@/i18n";
 import { DataGrid, type Column, type RenderCellProps, type RenderEditCellProps } from "react-data-grid";
-import { Trash2, Copy, MoreHorizontal, Sigma, Maximize2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
 import { visibleRows, computeCalc } from "@/lib/notebookDb";
@@ -32,7 +32,7 @@ function CalcCell({ field, calc, rows, onPick }: { field: DbField; calc: CalcTyp
       <Tooltip>
         <TooltipTrigger render={<DropdownMenuTrigger render={
           <button type="button" className="flex h-full w-full items-center justify-end gap-1 px-1.5 text-xs text-muted-foreground hover:text-foreground">
-            {active ? <><span className="opacity-70">{CALC_LABELS[eff!]}</span> <span className="font-medium tabular-nums text-foreground">{value}</span></> : <Sigma className="h-3.5 w-3.5 opacity-40" />}
+            {active ? <><span className="opacity-70">{CALC_LABELS[eff!]}</span> <span className="font-medium tabular-nums text-foreground">{value}</span></> : <NetsuIcon name="equation" className="h-3.5 w-3.5 opacity-40" />}
           </button>
         } />} />
         <TooltipContent>{i18n.t("notebook:dbBasics.calculation")}</TooltipContent>
@@ -102,13 +102,13 @@ export function TableView({ db, view, ops, onOpenRow, tall }: { db: Database; vi
         <div className="nb-row-actions flex h-full items-center justify-center">
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>} />} />
+              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="h-3.5 w-3.5" /></button>} />} />
               <TooltipContent>{i18n.t("notebook:dbBasics.rowActions")}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => onOpenRow(p.row.__id)}><Maximize2 className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:blocksUi.open")}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => ops.duplicateRow(p.row.__id)}><Copy className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => ops.removeRow(p.row.__id)} className="text-destructive"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onOpenRow(p.row.__id)}><NetsuIcon name="fullscreen" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:blocksUi.open")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => ops.duplicateRow(p.row.__id)}><NetsuIcon name="copy" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => ops.removeRow(p.row.__id)} className="text-destructive"><NetsuIcon name="trash" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -13,7 +13,7 @@ export function EmptyLinkInput({
       className="my-1.5 flex items-center gap-2.5 rounded-xl border border-dashed border-border bg-muted/30 px-3.5 py-3 transition-colors focus-within:border-primary/50 hover:bg-muted/50"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm">{icon}</span>
-      <input
+      <input autoComplete="off"
         aria-label={placeholder}
         value={val}
         onChange={(e) => setVal(e.target.value)}

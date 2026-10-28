@@ -3,7 +3,7 @@
 // sélection → nbpage:<pageId>#<blockId>, collable dans n'importe quelle page). Retour visuel bref
 // (icône ✓) via état local. S'insèrent dans la FormattingToolbar de NoteEditor.
 import { useState } from "react";
-import { Copy, Check, Link2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useComponentsContext, useBlockNoteEditor } from "@blocknote/react";
 import { useApp } from "@/store";
 import { NBPAGE_LINK_PREFIX } from "./notebookShared";
@@ -27,7 +27,7 @@ export function CopyTextButton() {
       className="bn-button"
       label={i18n.t("notebook:finalPass.copy")}
       mainTooltip={i18n.t("notebook:finalPass.copyText")}
-      icon={done ? <Check size={18} /> : <Copy size={18} />}
+      icon={<NetsuIcon name={done ? "check" : "copy"} className="h-[18px] w-[18px]" />}
       onClick={() => {
         const text = editor.getSelectedText();
         if (!text) return;
@@ -50,7 +50,7 @@ export function CopyAnchorButton() {
       className="bn-button"
       label={i18n.t("notebook:finalPass.copyLink")}
       mainTooltip={i18n.t("notebook:finalPass.copyPassageLink")}
-      icon={done ? <Check size={18} /> : <Link2 size={18} />}
+      icon={<NetsuIcon name={done ? "check" : "link"} className="h-[18px] w-[18px]" />}
       onClick={() => {
         const blockId = selectionBlockId(editor);
         if (!blockId) return;

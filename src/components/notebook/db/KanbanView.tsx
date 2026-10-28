@@ -9,7 +9,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Plus, MoreHorizontal, EyeOff, Eye, ArrowLeft, ArrowRight, Pencil } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { visibleRows, groupForKanban, type KanbanColumn } from "@/lib/notebookDb";
 import { CellDisplay } from "./cellControls";
 import { cellValueFor, colorOf, type Database, type DbField, type DbRow, type DbView } from "../notebookShared";
@@ -56,7 +56,7 @@ function Column({ col, fields, groupField, primaryId, tall, ops, onAdd, onOpen, 
     <div ref={setNodeRef} className={`flex ${tall ? "max-h-full" : "max-h-[540px]"} w-64 shrink-0 flex-col rounded-lg border border-border bg-muted/40 ${isOver ? "ring-1 ring-primary" : ""}`}>
       <div className="group/col flex items-center justify-between gap-1 px-3 py-2">
         {renaming && isOption ? (
-          <input
+          <input autoComplete="off"
             aria-label={col.label}
             defaultValue={col.label}
             onBlur={(e) => { const v = e.target.value.trim(); if (v) ops.updateOption(groupField.id, col.key, { label: v }); setRenaming(false); }}
@@ -71,19 +71,19 @@ function Column({ col, fields, groupField, primaryId, tall, ops, onAdd, onOpen, 
         <span className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover/col:opacity-100">
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>} />} />
+              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="h-3.5 w-3.5" /></button>} />} />
               <TooltipContent>{i18n.t("notebook:dbFields.columnOptions")}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent>
-              {isOption && <DropdownMenuItem onClick={() => setRenaming(true)}><Pencil className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:tree.rename")}</DropdownMenuItem>}
-              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, -1)}><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveLeft")}</DropdownMenuItem>}
-              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, 1)}><ArrowRight className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveRight")}</DropdownMenuItem>}
+              {isOption && <DropdownMenuItem onClick={() => setRenaming(true)}><NetsuIcon name="edit" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:tree.rename")}</DropdownMenuItem>}
+              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, -1)}><NetsuIcon name="back" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveLeft")}</DropdownMenuItem>}
+              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, 1)}><NetsuIcon name="forward" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveRight")}</DropdownMenuItem>}
               {isOption && <DropdownMenuSeparator />}
-              <DropdownMenuItem onClick={onHide}><EyeOff className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.hideColumn")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={onHide}><NetsuIcon name="eye-off" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.hideColumn")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={onAdd} className="text-muted-foreground hover:text-foreground"><Plus className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={onAdd} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-4 w-4" /></button>} />
             <TooltipContent>{i18n.t("notebook:dbFields.addCard")}</TooltipContent>
           </Tooltip>
         </span>
@@ -165,14 +165,14 @@ export function KanbanView({ db, view, ops, onOpenRow, tall }: { db: Database; v
         {/* Ajouter une colonne (nouvelle option du champ groupé) + colonnes masquées */}
         <div className="flex w-48 shrink-0 flex-col gap-1.5">
           <button type="button" onClick={addColumn} className="flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary">
-            <Plus className="h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.addColumn")}
+            <NetsuIcon name="add" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.addColumn")}
           </button>
           {hiddenCols.map((c) => (
             <Tooltip key={c.key}>
               <TooltipTrigger
                 render={
                   <button type="button" onClick={() => toggleHideColumn(c.key)} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
-                    <Eye className="h-3.5 w-3.5" /> <span className="truncate">{c.label}</span> <span className="opacity-60">{c.rows.length}</span>
+                    <NetsuIcon name="eye" className="h-3.5 w-3.5" /> <span className="truncate">{c.label}</span> <span className="opacity-60">{c.rows.length}</span>
                   </button>
                 }
               />

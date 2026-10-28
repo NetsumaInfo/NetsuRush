@@ -1,4 +1,4 @@
-import { CheckCircle2, Download, TriangleAlert } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import type { UpdateInfo, UpdatePhase } from "@/store/updater";
 import { cn } from "@/lib/utils";
@@ -20,11 +20,11 @@ function updateStatusKey(phase: UpdatePhase) {
 export function UpdateStatusLine({ phase, info, className }: { phase: UpdatePhase; info: UpdateInfo | null; className?: string }) {
   const { t } = useTranslation("settings");
   const pending = phase === "available" || phase === "downloading" || phase === "downloaded" || phase === "installing";
-  const Icon = pending ? Download : phase === "error" ? TriangleAlert : CheckCircle2;
+  const icon = pending ? "download" : phase === "error" ? "warning" : "status-ok";
   const tone = pending ? "text-primary" : phase === "error" ? "text-destructive" : "text-[var(--color-ok)]";
   return (
     <div className={cn("flex min-w-0 items-center gap-2 text-sm", className)}>
-      <Icon className={cn("size-4 shrink-0", tone)} />
+      <NetsuIcon name={icon} className={cn("size-4 shrink-0", tone)} />
       <span className="truncate">{t(updateStatusKey(phase), { version: info?.version })}</span>
     </div>
   );

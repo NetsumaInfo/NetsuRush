@@ -4,10 +4,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import {
-  Plus, Pencil, Trash2, Library, Search, ArrowDownUp, Images, LayoutGrid, Grid3x3,
-  FolderPlus, Folder, ChevronRight, FolderInput, MoreVertical, Eye, Star,
-} from "lucide-react";
+import { Plus, Folder, ChevronRight, MoreVertical, Star } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { useApp } from "@/store";
 import { nr, type CollectionMeta, type CollectionPreviewShot } from "@/lib/bridge";
 import { getThumb, setThumb } from "@/lib/thumbCache";
@@ -47,7 +46,7 @@ const GLYPH_BADGE = 22;
 const GLYPH_SIZE: Record<CollListView, number> = { gallery: 76, grid: 80, compact: 52 };
 // Côté de la vignette d'un dossier dans la bande des sous-dossiers.
 const FOLDER_GLYPH = 26;
-const VIEW_ICON: Record<CollListView, typeof LayoutGrid> = { gallery: Images, grid: LayoutGrid, compact: Grid3x3 };
+const VIEW_ICON: Record<CollListView, IconComponent> = { gallery: netsuIconOf("gallery"), grid: netsuIconOf("layout-grid"), compact: netsuIconOf("grid-3x3") };
 // Valeurs = clés i18n (ns « collections ») résolues au rendu.
 const VIEW_LABEL: Record<CollListView, string> = { gallery: "view.gallery", grid: "view.grid", compact: "view.compact" };
 
@@ -161,9 +160,9 @@ export function CollectionsView() {
         <MoreVertical className="h-3.5 w-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem onClick={() => setEditing(c)}><Pencil className="size-3.5" /> {tr("common:action.edit")}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setEditing(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</DropdownMenuItem>
         <DropdownMenuItem onClick={() => toggleFav(c.id)}>
-          <Star className={cn("size-3.5", favs.includes(c.id) && "fill-amber-400 text-amber-400")} /> {favs.includes(c.id) ? tr("fav.remove") : tr("fav.add")}
+          <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="size-3.5" /> {favs.includes(c.id) ? tr("fav.remove") : tr("fav.add")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
@@ -171,13 +170,13 @@ export function CollectionsView() {
           <DropdownMenuItem onClick={() => void s.moveCollection(c.id, null)} disabled={(c.folderId ?? null) === null}>{tr("folder.root")}</DropdownMenuItem>
           {s.folders.map((f) => (
             <DropdownMenuItem key={f.id} onClick={() => void s.moveCollection(c.id, f.id)} disabled={c.folderId === f.id}>
-              <Folder className="size-3.5" /> {folderTrail(s.folders, f.id).map((x) => x.name).join(" / ")}
+              <NetsuIcon name="folder-open" className="size-3.5" /> {folderTrail(s.folders, f.id).map((x) => x.name).join(" / ")}
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={() => setConfirmState({ title: tr("list.deleteCollTitle", { name: c.name }), description: tr("list.deleteCollDesc"), onConfirm: () => void s.deleteCollection(c.id) })}>
-          <Trash2 className="size-3.5" /> {tr("common:action.delete")}
+          <NetsuIcon name="cut-delete" className="size-3.5" /> {tr("common:action.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -186,26 +185,26 @@ export function CollectionsView() {
   // Clic droit sur la carte : mêmes actions que le menu ⋮ (Ouvrir en tête).
   const cardCtxMenu = (c: CollectionMeta) => (
     <ContextMenuContent className="min-w-48">
-      <ContextMenuItem onClick={() => s.openCollection(c.id)}><Eye className="size-3.5" /> {tr("common:action.open")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => s.openCollection(c.id)}><NetsuIcon name="eye" className="size-3.5" /> {tr("common:action.open")}</ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem onClick={() => setEditing(c)}><Pencil className="size-3.5" /> {tr("common:action.edit")}</ContextMenuItem>
+      <ContextMenuItem onClick={() => setEditing(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</ContextMenuItem>
       <ContextMenuItem onClick={() => toggleFav(c.id)}>
-        <Star className={cn("size-3.5", favs.includes(c.id) && "fill-amber-400 text-amber-400")} /> {favs.includes(c.id) ? tr("fav.remove") : tr("fav.add")}
+        <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="size-3.5" /> {favs.includes(c.id) ? tr("fav.remove") : tr("fav.add")}
       </ContextMenuItem>
       <ContextMenuSub>
-        <ContextMenuSubTrigger><FolderInput className="size-3.5" /> {tr("list.moveTo")}</ContextMenuSubTrigger>
+        <ContextMenuSubTrigger><NetsuIcon name="cut-move-to-folder" className="size-3.5" /> {tr("list.moveTo")}</ContextMenuSubTrigger>
         <ContextMenuSubContent>
           <ContextMenuItem onClick={() => void s.moveCollection(c.id, null)} disabled={(c.folderId ?? null) === null}>{tr("folder.root")}</ContextMenuItem>
           {s.folders.map((f) => (
             <ContextMenuItem key={f.id} onClick={() => void s.moveCollection(c.id, f.id)} disabled={c.folderId === f.id}>
-              <Folder className="size-3.5" /> {folderTrail(s.folders, f.id).map((x) => x.name).join(" / ")}
+              <NetsuIcon name="folder-open" className="size-3.5" /> {folderTrail(s.folders, f.id).map((x) => x.name).join(" / ")}
             </ContextMenuItem>
           ))}
         </ContextMenuSubContent>
       </ContextMenuSub>
       <ContextMenuSeparator />
       <ContextMenuItem variant="destructive" onClick={() => setConfirmState({ title: tr("list.deleteCollTitle", { name: c.name }), description: tr("list.deleteCollDesc"), onConfirm: () => void s.deleteCollection(c.id) })}>
-        <Trash2 className="size-3.5" /> {tr("common:action.delete")}
+        <NetsuIcon name="cut-delete" className="size-3.5" /> {tr("common:action.delete")}
       </ContextMenuItem>
     </ContextMenuContent>
   );
@@ -213,11 +212,11 @@ export function CollectionsView() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
-        <Library className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="library" className="h-4 w-4 shrink-0 text-muted-foreground" />
         <h1 className="text-[13px] font-medium">{tr("list.title")}</h1>
         <span className="text-[11px] text-muted-foreground">{s.collections.length || "—"}</span>
         <div className="relative ml-2 max-w-xs flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("list.searchPlaceholder")} className="h-8 pl-8" />
         </div>
         <div className="flex-1" />
@@ -225,13 +224,13 @@ export function CollectionsView() {
         <Tooltip>
           <TooltipTrigger render={<button type="button" aria-label={tr("folder.new")} onClick={() => setFolderDialog({ name: "" })}
             className="inline-flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground" />}>
-            <FolderPlus className="size-3.5" />
+            <NetsuIcon name="cut-folder-new" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{tr("list.newFolderHint")}</TooltipContent>
         </Tooltip>
         <Select value={sort} onValueChange={(v) => setSort(v as CollListSort)}>
           <SelectTrigger size="sm" className="w-auto gap-1.5" aria-label={tr("list.sortColls")}>
-            <ArrowDownUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="sort" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -241,7 +240,7 @@ export function CollectionsView() {
         <DropdownMenu>
           <DropdownMenuTrigger render={<button type="button" aria-label={tr("list.cardInfo")}
             className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground" />}>
-            <Eye className="size-3.5" /> {tr("list.display")}
+            <NetsuIcon name="eye" className="size-3.5" /> {tr("list.display")}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
@@ -306,19 +305,19 @@ export function CollectionsView() {
                       <MoreVertical className="size-3.5" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenuItem onClick={() => setFolderDialog({ id: f.id, name: f.name })}><Pencil className="size-3.5" /> {tr("common:action.rename")}</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setFolderDialog({ id: f.id, name: f.name })}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.rename")}</DropdownMenuItem>
                       <DropdownMenuItem variant="destructive" onClick={() => setConfirmState({ title: tr("list.deleteFolderTitle", { name: f.name }), description: tr("list.deleteFolderDesc"), onConfirm: () => void s.deleteCollectionFolder(f.id) })}>
-                        <Trash2 className="size-3.5" /> {tr("common:action.delete")}
+                        <NetsuIcon name="cut-delete" className="size-3.5" /> {tr("common:action.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="min-w-44">
-                  <ContextMenuItem onClick={() => s.setCollectionFolder(f.id)}><Folder className="size-3.5" /> {tr("common:action.open")}</ContextMenuItem>
-                  <ContextMenuItem onClick={() => setFolderDialog({ id: f.id, name: f.name })}><Pencil className="size-3.5" /> {tr("common:action.rename")}</ContextMenuItem>
+                  <ContextMenuItem onClick={() => s.setCollectionFolder(f.id)}><NetsuIcon name="folder-open" className="size-3.5" /> {tr("common:action.open")}</ContextMenuItem>
+                  <ContextMenuItem onClick={() => setFolderDialog({ id: f.id, name: f.name })}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.rename")}</ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem variant="destructive" onClick={() => setConfirmState({ title: tr("list.deleteFolderTitle", { name: f.name }), description: tr("list.deleteFolderDesc"), onConfirm: () => void s.deleteCollectionFolder(f.id) })}>
-                    <Trash2 className="size-3.5" /> {tr("common:action.delete")}
+                    <NetsuIcon name="cut-delete" className="size-3.5" /> {tr("common:action.delete")}
                   </ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>
@@ -425,7 +424,7 @@ export function CollectionsView() {
         )}
         {!s.collectionsLoading && s.collections.length > 0 && shown.length === 0 && subfolders.length === 0 && (
           <Card className="mt-4 flex items-center gap-2 p-6 text-sm text-muted-foreground">
-            <FolderInput className="size-4" /> {q ? tr("list.folderEmptyFiltered") : tr("list.folderEmpty")}
+            <NetsuIcon name="folder-move" className="size-4" /> {q ? tr("list.folderEmptyFiltered") : tr("list.folderEmpty")}
           </Card>
         )}
 

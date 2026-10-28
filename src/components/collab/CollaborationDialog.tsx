@@ -11,7 +11,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useConvexAuth, useQuery } from "convex/react";
-import { AlertTriangle, LogOut, Trash2, UserRound, Users } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { api } from "@/lib/convexApi";
 import {
   cancelInvite,
@@ -88,7 +88,7 @@ function Avatar({ url }: { url: string | null }) {
     <img src={url} alt="" className="size-7 rounded-full object-cover" referrerPolicy="no-referrer" />
   ) : (
     <div className="flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground">
-      <UserRound className="size-4" />
+      <NetsuIcon name="account" className="size-4" />
     </div>
   );
 }
@@ -243,7 +243,7 @@ export function CollaborationDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Users className="size-4" /> {t("dialog.title")}
+            <NetsuIcon name="collab" className="size-4" /> {t("dialog.title")}
           </DialogTitle>
           <DialogDescription>{t("dialog.subtitle")}</DialogDescription>
         </DialogHeader>
@@ -266,7 +266,7 @@ export function CollaborationDialog({
         ) : confirmStaleHead ? (
           <div className="space-y-3 rounded-lg border border-destructive/40 p-3">
             <p className="flex items-center gap-2 text-sm font-medium">
-              <AlertTriangle className="size-4" /> {t("staleHead.confirmTitle")}
+              <NetsuIcon name="warning" className="size-4" /> {t("staleHead.confirmTitle")}
             </p>
             <p className="text-xs text-muted-foreground">{t("staleHead.confirmWarning")}</p>
             <div className="flex justify-end gap-2">
@@ -306,7 +306,7 @@ export function CollaborationDialog({
             {effectiveRole === "owner" && (staleHeads?.length ?? 0) > 0 && (
               <div className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
                 <p className="flex items-center gap-2 font-medium">
-                  <AlertTriangle className="size-3.5" /> {t("staleHead.title")}
+                  <NetsuIcon name="warning" className="size-3.5" /> {t("staleHead.title")}
                 </p>
                 <p className="text-muted-foreground">{t("staleHead.warning")}</p>
                 {staleHeads!.map((head) => (
@@ -367,7 +367,7 @@ export function CollaborationDialog({
                         aria-label={t("members.remove")}
                         onClick={() => void memberAction(() => removeMember(projectId!, member.userId))}
                       >
-                        <Trash2 />
+                        <NetsuIcon name="trash" />
                       </Button>
                     </>
                   ) : (
@@ -387,7 +387,7 @@ export function CollaborationDialog({
                       aria-label={t("members.cancelInvite")}
                       onClick={() => void memberAction(() => cancelInvite(member.inviteId))}
                     >
-                      <Trash2 />
+                      <NetsuIcon name="trash" />
                     </Button>
                   )}
                 </div>
@@ -410,11 +410,11 @@ export function CollaborationDialog({
             <div className="flex justify-end">
               {effectiveRole === "owner" ? (
                 <Button variant="destructive" size="sm" onClick={() => setConfirmLifecycle("delete")}>
-                  <Trash2 className="size-3.5" /> {t("lifecycle.delete")}
+                  <NetsuIcon name="trash" className="size-3.5" /> {t("lifecycle.delete")}
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" onClick={() => setConfirmLifecycle("leave")}>
-                  <LogOut className="size-3.5" /> {t("lifecycle.leave")}
+                  <NetsuIcon name="auth-logout" className="size-3.5" /> {t("lifecycle.leave")}
                 </Button>
               )}
             </div>
@@ -484,7 +484,7 @@ export function CollaborationDialog({
             }
             onClick={() => void submit()}
           >
-            {busy ? <Spinner className="size-3.5" /> : <Users className="size-3.5" />}{" "}
+            {busy ? <Spinner className="size-3.5" /> : <NetsuIcon name="collab" className="size-3.5" />}{" "}
             {t(projectId ? "dialog.invite" : "dialog.create")}
           </Button>
         </DialogFooter>

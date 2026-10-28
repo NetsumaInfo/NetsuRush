@@ -6,7 +6,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { DecimalInput } from "@/components/ui/decimal-input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Images } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import type { CacheSettings, CacheKindPolicy, SessionCleanupTrigger } from "@/lib/bridge";
 import { CACHE_KIND_LIST, KIND_ICON, isDbKind, isSessionKind, type CacheKind } from "./storageShared";
 import { InfoTip } from "../rows";
@@ -120,7 +120,7 @@ function SessionPolicies({ settings, onChange }: Props) {
         <SessionPolicyRow kind="upscaleTest" value={settings.session.upscaleTest} onChange={(v) => setSession("upscaleTest", v)} />
         <SessionPolicyRow kind="voice" value={settings.session.voice} onChange={(v) => setSession("voice", v)} />
         <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
-          <Images className="size-4 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="gallery" className="size-4 shrink-0 text-muted-foreground" />
           <p className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-foreground">
             {t("storage.policy.sequenceTitle")}
             <InfoTip text={t("storage.policy.sequenceHint")} />

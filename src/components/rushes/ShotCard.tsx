@@ -4,11 +4,12 @@
 // (collection), supprimer.
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, X, Download, Check, Star, CheckSquare, Clapperboard, Crop } from "lucide-react";
+import { Play, X, Check, Star } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { hoverLiftLayer } from "@/components/common/hoverLift";
 import { selectionRing, SelectToggle } from "@/components/common/selectable";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
@@ -119,9 +120,8 @@ function ShotCardImpl({
           <Tooltip>
             <TooltipTrigger render={<button type="button" aria-label={t("shared.addToTimeline")} onClick={doAdd}
               className={`rounded nr-chip p-1 transition-colors ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
-              {adding === "busy" ? <Spinner className="size-3.5" />
-                : adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                : <Download className="h-3.5 w-3.5" />}
+              {adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                : <SendToTimelineIcon busy={adding === "busy"} className="h-3.5 w-3.5" />}
             </TooltipTrigger>
             <TooltipContent>{t("shared.addToTimeline")}</TooltipContent>
           </Tooltip>
@@ -163,27 +163,27 @@ function ShotCardImpl({
       {/* Clic droit : lire / (dé)sélectionner / timeline / retirer. */}
       {chrome && (
       <ContextMenuContent className="min-w-48">
-        {onPlay && <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>}
+        {onPlay && <ContextMenuItem onClick={onPlay}><NetsuIcon name="play" /> {t("shared.playShotMenu")}</ContextMenuItem>}
         <ContextMenuItem onClick={onToggle}>
-          <CheckSquare /> {selected ? t("shared.deselect") : t("shared.select")}
+          <NetsuIcon name="cut-select" on={selected} /> {selected ? t("shared.deselect") : t("shared.select")}
         </ContextMenuItem>
         {onAddToTimeline && (
           <ContextMenuItem onClick={(e) => doAdd(e)}>
-            <Clapperboard /> {t("shared.addToTimeline")}
+            <SendToTimelineIcon /> {t("shared.addToTimeline")}
           </ContextMenuItem>
         )}
         {/* Rognage atteignable depuis la GRILLE : il ne vivait que dans le lecteur de droite, donc
             invisible panneau fermé — alors que corriger des bornes est une action de tri. */}
         {onTrim && (
           <ContextMenuItem onClick={onTrim}>
-            <Crop /> {t("shared.trimShot")}
+            <NetsuIcon name="crop" /> {t("shared.trimShot")}
           </ContextMenuItem>
         )}
         {onRemove && (
           <>
             <ContextMenuSeparator />
             <ContextMenuItem variant="destructive" onClick={onRemove}>
-              <X /> {t("shared.removeFromCollection")}
+              <NetsuIcon name="close" /> {t("shared.removeFromCollection")}
             </ContextMenuItem>
           </>
         )}

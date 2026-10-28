@@ -3,7 +3,7 @@
 // le fichier illisible.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { HardDrive, Hourglass } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr, type CollectionArchiveProcess } from "@/lib/bridge";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -41,13 +41,13 @@ export function useArchiveQueue(): Map<string, "pending" | "running"> {
  */
 export function ArchiveBadge({ archived, status }: { archived?: boolean; status?: "pending" | "running" }) {
   const { t } = useTranslation("collections");
-  if (!status) return archived ? <HardDrive className="size-3 text-primary" /> : null;
+  if (!status) return archived ? <NetsuIcon name="disk" className="size-3 text-primary" /> : null;
   return (
     <Tooltip>
       <TooltipTrigger render={<span className="inline-flex" />}>
         {status === "running"
           ? <Spinner className="size-3 text-primary" />
-          : <Hourglass className="size-3 text-amber-500" />}
+          : <NetsuIcon name="hourglass" className="size-3 text-amber-500" />}
       </TooltipTrigger>
       <TooltipContent>{t(status === "running" ? "archive.queueRunning" : "archive.queuePending")}</TooltipContent>
     </Tooltip>

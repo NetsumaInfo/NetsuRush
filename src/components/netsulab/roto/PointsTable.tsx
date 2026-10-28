@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { X, Plus, Minus, ArrowRight } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
@@ -72,8 +72,8 @@ export function PointsTable({ s, goto, running }: {
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: colorOf(r.obj) }} />
                   <span className="min-w-0 flex-1 truncate">{name}</span>
                   {r.label
-                    ? <Plus className="h-3 w-3 shrink-0 text-[var(--color-ok)]" />
-                    : <Minus className="h-3 w-3 shrink-0 text-destructive" />}
+                    ? <NetsuIcon name="add" className="h-3 w-3 shrink-0 text-[var(--color-ok)]" />
+                    : <NetsuIcon name="remove" className="h-3 w-3 shrink-0 text-destructive" />}
                   <span className="shrink-0 tabular-nums opacity-60">{Math.round(r.x * 100)},{Math.round(r.y * 100)}</span>
                   <button type="button"
                     onClick={(e) => { e.stopPropagation(); void s.removePoint(r.f, r.obj, r.index); }}
@@ -81,13 +81,13 @@ export function PointsTable({ s, goto, running }: {
                     className="shrink-0 rounded p-0.5 opacity-0 transition-opacity hover:bg-destructive/20 hover:text-destructive group-hover:opacity-70 disabled:opacity-0"
                     aria-label={t("points.removeAria")}
                   >
-                    <X className="h-3 w-3" />
+                    <NetsuIcon name="close" className="h-3 w-3" />
                   </button>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
-                  <ContextMenuItem onClick={() => goto(r.f)}><ArrowRight /> {t("points.goToFrame")}</ContextMenuItem>
+                  <ContextMenuItem onClick={() => goto(r.f)}><NetsuIcon name="forward" /> {t("points.goToFrame")}</ContextMenuItem>
                   <ContextMenuSeparator />
-                  <ContextMenuItem variant="destructive" onClick={() => void s.removePoint(r.f, r.obj, r.index)} disabled={running}><X /> {t("points.removePoint")}</ContextMenuItem>
+                  <ContextMenuItem variant="destructive" onClick={() => void s.removePoint(r.f, r.obj, r.index)} disabled={running}><NetsuIcon name="close" /> {t("points.removePoint")}</ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>
             );

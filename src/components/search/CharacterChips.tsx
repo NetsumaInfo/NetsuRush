@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScanFace, Search, Film, AtSign, X, Pencil, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { cn } from "@/lib/utils";
@@ -72,7 +72,7 @@ export function CharacterChips() {
                   <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-muted" style={c.color ? { boxShadow: `inset 0 0 0 1.5px ${c.color}` } : undefined}>
                     {c.avatar
                       ? <img src={c.avatar} alt="" className="h-full w-full object-cover" />
-                      : <ScanFace className="m-1 h-3 w-3 text-muted-foreground" />}
+                      : <NetsuIcon name="face" className="m-1 h-3 w-3 text-muted-foreground" />}
                   </span>
                   {renamingId === c.id ? (
                     <InlineRename
@@ -84,7 +84,7 @@ export function CharacterChips() {
                   ) : (
                     <span className="max-w-28 truncate">{c.name}</span>
                   )}
-                  {active && <X className="h-3 w-3 shrink-0" />}
+                  {active && <NetsuIcon name="close" className="h-3 w-3 shrink-0" />}
                 </TooltipTrigger>
                 <TooltipContent>
                   {active
@@ -95,20 +95,20 @@ export function CharacterChips() {
             </ContextMenuTrigger>
             <ContextMenuContent>
               <ContextMenuItem onClick={() => toggleMention(c)}>
-                <AtSign /> {active ? t("characterChips.remove", { name: c.name }) : t("characterChips.cite", { name: c.name })}
+                <NetsuIcon name="mention" /> {active ? t("characterChips.remove", { name: c.name }) : t("characterChips.cite", { name: c.name })}
               </ContextMenuItem>
               <ContextMenuItem onClick={() => searchByCharacter(c.id, c.name)}>
-                <Search /> {t("characterChips.searchInRushes")}
+                <NetsuIcon name="search" /> {t("characterChips.searchInRushes")}
               </ContextMenuItem>
               <ContextMenuItem onClick={() => filterByCharacter(c.id, c.name)}>
-                <Film /> {t("characterChips.recognizedShots")}
+                <NetsuIcon name="film" /> {t("characterChips.recognizedShots")}
               </ContextMenuItem>
               <ContextMenuItem onClick={() => setRenamingId(c.id)}>
-                <Pencil /> {t("characterChips.rename")}
+                <NetsuIcon name="edit" /> {t("characterChips.rename")}
               </ContextMenuItem>
               <ContextMenuSeparator />
               <ContextMenuItem variant="destructive" onClick={() => deleteCharacter(c.id)}>
-                <Trash2 /> {t("common:action.delete")}
+                <NetsuIcon name="trash" /> {t("common:action.delete")}
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>

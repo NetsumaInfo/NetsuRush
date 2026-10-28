@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "convex/react";
-import { Pencil } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { api } from "@/lib/convexApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,7 +86,7 @@ export function UsernameField() {
             {current ? `@${current}` : <span className="text-muted-foreground">{t("username.none")}</span>}
           </p>
           <Button size="sm" variant="outline" onClick={startEdit}>
-            <Pencil className="size-3.5" /> {t("username.edit")}
+            <NetsuIcon name="edit" className="size-3.5" /> {t("username.edit")}
           </Button>
         </div>
       )}

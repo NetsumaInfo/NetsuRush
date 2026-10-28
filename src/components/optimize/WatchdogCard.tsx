@@ -6,7 +6,7 @@
 // est PROPOSÉ, jamais exécuté par la boucle.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ShieldCheck, Loader2, Skull, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -46,7 +46,7 @@ export function WatchdogCard() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-            <ShieldCheck className="h-4 w-4 text-primary" /> {t("watchdog.title")}
+            <NetsuIcon name="boost-watchdog" on={state.armed} className="h-4 w-4 text-primary" /> {t("watchdog.title")}
           </h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {state.armed
@@ -92,7 +92,7 @@ export function WatchdogCard() {
           </ul>
           <div className="mt-3 flex gap-2">
             <Button variant="destructive" size="sm" onClick={stopSuggested} disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Skull className="h-4 w-4" />}
+              <NetsuIcon name="boost-kill" busy={busy} className="h-4 w-4" />
               {t("watchdog.stopThem", { count: suggestion.procs.length })}
             </Button>
             <Button
@@ -101,7 +101,7 @@ export function WatchdogCard() {
               onClick={() => void nr.optimizeDismissWatchdog().then(setState)}
               disabled={busy}
             >
-              <X className="h-4 w-4" />
+              <NetsuIcon name="close" className="h-4 w-4" />
               {t("watchdog.ignore")}
             </Button>
           </div>

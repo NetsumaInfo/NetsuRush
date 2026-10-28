@@ -14,7 +14,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { ChevronRight, CircleHelp, UserRound, Users } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { api } from "@/lib/convexApi";
 import { convexConfigured } from "@/lib/convexEnv";
 import { shareCollection, unbindCollection } from "@/lib/collab/collection/session";
@@ -27,7 +27,6 @@ import { Toggle } from "@/components/ui/toggle";
 import { Spinner } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 type Props = {
   projectId: string | null;
@@ -59,7 +58,7 @@ const permissionKey = (permission: Permission) =>
 function Avatar({ url }: { url: string | null }) {
   return url
     ? <img src={url} alt="" referrerPolicy="no-referrer" className="size-6 shrink-0 rounded-full object-cover" />
-    : <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"><UserRound className="size-3.5" /></span>;
+    : <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"><NetsuIcon name="account" className="size-3.5" /></span>;
 }
 
 /** En-tête de carte, calqué sur celui de l'archivage (mêmes espacements, même chevron). */
@@ -72,14 +71,14 @@ function Card({ open, onToggleOpen, control, children }: {
     <div className="flex items-center pr-3">
       <button type="button" aria-expanded={open} onClick={onToggleOpen}
         className="flex flex-1 items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50">
-        <span className="text-muted-foreground"><Users className="size-4" /></span>
+        <span className="text-muted-foreground"><NetsuIcon name="collab" className="size-4" /></span>
         <span className="inline-flex min-w-0 flex-1 items-center gap-1.5">
           {t("share.title")}
           {/* Le « pourquoi » tient dans une bulle : la phrase en clair mangeait un quart de la fenêtre. */}
           <Tooltip>
             <TooltipTrigger render={<span tabIndex={0} aria-label={hint} className="inline-flex shrink-0 text-muted-foreground"
               onClick={(event) => event.stopPropagation()} />}>
-              <CircleHelp className="size-3.5" />
+              <NetsuIcon name="help" className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent className="max-w-64">{hint}</TooltipContent>
           </Tooltip>
@@ -88,7 +87,7 @@ function Card({ open, onToggleOpen, control, children }: {
       {control}
       <button type="button" aria-label={t("share.title")} aria-expanded={open} onClick={onToggleOpen}
         className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
-        <ChevronRight className={cn("size-4 transition-transform", open && "rotate-90")} />
+        <NetsuIcon name="chevron-toggle" on={open} className="size-4" />
       </button>
     </div>
     {open && children && <div className="space-y-2.5 border-t border-border px-3 py-3">{children}</div>}

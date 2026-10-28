@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Eraser, AlertTriangle, ChevronLeft, ChevronRight,
-  Eye, EyeOff, Sparkles, Play, Pause, X, ArrowLeftToLine, ArrowRightToLine,
-} from "lucide-react";
+import { netsuIconOf } from "@/components/NetsuIconOf";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useSharedProcSources } from "@/components/upscale/useProcSources";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,6 +27,8 @@ import {
   MatteFinePanel,
 } from "./RotoPanels";
 import { useTranslation } from "react-i18next";
+
+const ERASE_ICON = netsuIconOf("erase");
 
 // Roto Studio : pose des points sur l'objet actif (clic gauche = inclure,
 // droit = exclure, Maj+survol = preview) → masque teinté immédiat ; « Suivre » propage sur le plan
@@ -177,31 +177,31 @@ export function RotoStudio() {
               <div className="flex w-full min-w-0 max-w-full flex-wrap items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={view.togglePlay} aria-label={view.playing ? t("studio.pause") : t("studio.play")}>
-                    {view.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    <NetsuIcon name="play-pause" on={view.playing} className="h-4 w-4" />
                   </Button>} />
                   <TooltipContent>{view.playing ? t("studio.pauseTip") : t("studio.playTip")}</TooltipContent>
                 </Tooltip>
-                <Button variant="ghost" size="icon-sm" onClick={() => step(-1)} disabled={s.frame <= 0} aria-label={t("studio.prevFrame")}><ChevronLeft className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon-sm" onClick={() => step(1)} disabled={s.frame >= nbFrames - 1} aria-label={t("studio.nextFrame")}><ChevronRight className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon-sm" onClick={() => step(-1)} disabled={s.frame <= 0} aria-label={t("studio.prevFrame")}><NetsuIcon name="prev" className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon-sm" onClick={() => step(1)} disabled={s.frame >= nbFrames - 1} aria-label={t("studio.nextFrame")}><NetsuIcon name="next" className="h-4 w-4" /></Button>
                 {view.speed !== 0 && Math.abs(view.speed) > 1 && (
                   <span className="text-[11px] tabular-nums text-muted-foreground">{view.speed > 0 ? "▶" : "◀"} ×{Math.abs(view.speed)}</span>
                 )}
                 <span className="flex-1" />
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => s.setInF(s.frame)} aria-label={t("studio.inHere")}>
-                    <ArrowLeftToLine className="h-3.5 w-3.5" />
+                    <NetsuIcon name="in-point" className="h-3.5 w-3.5" />
                   </Button>} />
                   <TooltipContent>{t("studio.inTip")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => s.setOutF(s.frame)} aria-label={t("studio.outHere")}>
-                    <ArrowRightToLine className="h-3.5 w-3.5" />
+                    <NetsuIcon name="out-point" className="h-3.5 w-3.5" />
                   </Button>} />
                   <TooltipContent>{t("studio.outTip")}</TooltipContent>
                 </Tooltip>
                 {(s.inF !== null || s.outF !== null) && (
                   <Button variant="ghost" size="sm" className="text-xs" onClick={() => { s.setInF(null); s.setOutF(null); }}>
-                    {t("studio.range", { from: (s.inF ?? 0) + 1, to: (s.outF ?? nbFrames - 1) + 1 })} <X className="h-3 w-3" />
+                    {t("studio.range", { from: (s.inF ?? 0) + 1, to: (s.outF ?? nbFrames - 1) + 1 })} <NetsuIcon name="close" className="h-3 w-3" />
                   </Button>
                 )}
                 <span className="ml-auto min-w-fit break-keep text-right text-xs tabular-nums text-muted-foreground">
@@ -216,10 +216,10 @@ export function RotoStudio() {
       {/* Droite : modèle + objets + suivi + affinage + sortie */}
       <aside className="flex w-80 shrink-0 flex-col border-l border-border">
         <div className="flex items-center justify-between border-b border-border px-3 py-2">
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold"><Sparkles className="h-4 w-4 text-primary" /> {t("studio.title")}</h2>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold"><NetsuIcon name="sparkles" className="h-4 w-4 text-primary" /> {t("studio.title")}</h2>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => s.setShowOverlay(!s.showOverlay)} aria-label={t("studio.showMask")}>
-              {s.showOverlay ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              <NetsuIcon name="eye" on={!s.showOverlay} className="h-4 w-4" />
             </Button>} />
             <TooltipContent>{s.showOverlay ? t("studio.hideOverlay") : t("studio.showOverlay")}</TooltipContent>
           </Tooltip>
@@ -280,7 +280,7 @@ export function RotoStudio() {
                    part — rangée sous « Sortie », l'opération passait pour une variante de l'export. */}
             <RotoSection id="remove" title={t("panels.removeObject")} summary={removeSummary}>
               <div className="space-y-1.5">
-                <EngineRow label={t("panels.removeObject")} icon={Eraser} engines={REMOVE_ENGINES}
+                <EngineRow label={t("panels.removeObject")} icon={ERASE_ICON} engines={REMOVE_ENGINES}
                   installed={s.installedModels} disabled={!s.outputReady || running} onRun={s.removeSelected}
                   onTest={s.testRemove} testDisabled={!s.outputReady || running} onEngineChange={setRemoveEngine} />
                 <RemoveParamsRows value={s.removeParams} onChange={s.setRemoveParams} disabled={running}
@@ -312,13 +312,13 @@ export function RotoStudio() {
                     tuer le service. Même drapeau d'annulation, testé image par image. */}
                 {(s.busy === "track" || s.busy === "matteFine") && (
                   <Button variant="ghost" size="sm" className="h-6 shrink-0 text-xs" onClick={s.cancel}>
-                    <X className="h-3 w-3" /> {t("cancel")}
+                    <NetsuIcon name="close" className="h-3 w-3" /> {t("cancel")}
                   </Button>
                 )}
               </div>
             </div>
           )}
-          {s.err && <Card className="block border-destructive/40 p-2.5 text-xs text-destructive"><AlertTriangle className="mr-1.5 inline h-3.5 w-3.5" /> {s.err}</Card>}
+          {s.err && <Card className="block border-destructive/40 p-2.5 text-xs text-destructive"><NetsuIcon name="warning" className="mr-1.5 inline h-3.5 w-3.5" /> {s.err}</Card>}
           {s.note && !s.err && <p className="break-all text-xs text-muted-foreground">{s.note}</p>}
         </div>
       </aside>

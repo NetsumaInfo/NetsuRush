@@ -1,4 +1,4 @@
-import { LogOut, UserRound } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { siDiscord } from "simple-icons";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/lib/convexApi";
@@ -39,7 +39,8 @@ function AccountInner() {
   const { t } = useTranslation(["settings", "auth"]);
   const { isLoading, isAuthenticated } = useConvexAuth();
   const user = useQuery(api.auth.getCurrentUser) as AuthUser;
-  const profile = useDiscordProfile(); // avatar + décoration Nitro (via token OAuth)
+  // Gated on the session: a fetch made before sign-in would cache `null` for the whole session.
+  const profile = useDiscordProfile(isAuthenticated && !!user);
   const { login, busy, error, reset } = useDiscordLogin();
 
   return (
@@ -80,7 +81,7 @@ function AccountInner() {
                 />
               ) : (
                 <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                  <UserRound className="size-6" />
+                  <NetsuIcon name="account" className="size-6" />
                 </div>
               )}
               {/* Décoration d'avatar Discord (cadre Nitro) posée par-dessus, comme dans le client. */}
@@ -91,7 +92,7 @@ function AccountInner() {
               {user.email && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
             </div>
             <Button variant="outline" size="sm" onClick={() => void signOut()}>
-              <LogOut className="size-3.5" /> {t("account.signOut")}
+              <NetsuIcon name="auth-logout" className="size-3.5" /> {t("account.signOut")}
             </Button>
           </div>
           <UsernameField />

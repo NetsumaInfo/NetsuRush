@@ -1,20 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ArrowLeft,
-  Check,
-  CheckCircle2,
-  Cpu,
-  Download,
-  HardDrive,
-  Layers3,
-  LockKeyhole,
-  PackageCheck,
-  RotateCw,
-  Search,
-  Terminal,
-  TriangleAlert,
-} from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import type { AdobeApp, ModelStatus, SetupDownload, SetupProgress, SetupStatus } from "@/lib/bridge";
 import { hostLabel } from "@/lib/host";
@@ -342,7 +328,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
                 >
                   <FlagIcon code={entry.code} className="h-4 w-[1.35rem] shrink-0" />
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{entry.label}</span>
-                  {entry.code === lang && <Check className="size-4 shrink-0 text-primary" />}
+                  {entry.code === lang && <NetsuIcon name="check" className="size-4 shrink-0 text-primary" />}
                 </button>
               ))}
             </div>
@@ -355,7 +341,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
               <h2 className="text-sm font-medium">{t("setup:models.title")}</h2>
               <div className="flex items-center gap-2">
                 <Toggle pressed={advanced} onPressedChange={setAdvanced} className="gap-1.5">
-                  <Layers3 className="size-3.5" />
+                  <NetsuIcon name="layers" className="size-3.5" />
                   {t("models:advanced.label")}
                   {!advanced && hiddenCount > 0 && <Badge variant="secondary" className="text-[10px] tabular-nums">{hiddenCount}</Badge>}
                 </Toggle>
@@ -365,19 +351,19 @@ export function SetupGate({ children }: { children: ReactNode }) {
 
             <div className="rounded-lg border border-primary/40 bg-primary/5 p-3">
               <div className="flex items-center gap-3">
-                <span className="grid size-8 place-items-center rounded-md bg-primary/15 text-primary"><LockKeyhole className="size-4" /></span>
+                <span className="grid size-8 place-items-center rounded-md bg-primary/15 text-primary"><NetsuIcon name="lock" className="size-4" /></span>
                 <p className="min-w-0 flex-1 text-sm font-medium">{t("setup:models.sceneDetection")}</p>
                 <Badge variant="secondary">{t("setup:models.included")}</Badge>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
-              <div className="flex items-center gap-3"><PackageCheck className="size-5 text-primary" /><div><p className="text-sm font-medium">{t("setup:packs.recommended")}</p><p className="text-xs text-muted-foreground">{t("setup:review.modelCount", { count: RECOMMENDED_MODELS.length })} · ~{fmtSize(RECOMMENDED_BYTES)}</p></div></div>
+              <div className="flex items-center gap-3"><NetsuIcon name="package" className="size-5 text-primary" /><div><p className="text-sm font-medium">{t("setup:packs.recommended")}</p><p className="text-xs text-muted-foreground">{t("setup:review.modelCount", { count: RECOMMENDED_MODELS.length })} · ~{fmtSize(RECOMMENDED_BYTES)}</p></div></div>
               <Button variant="outline" size="sm" onClick={() => setModels(RECOMMENDED_MODELS)}>{t("setup:packs.select")}</Button>
             </div>
 
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input type="search" value={modelQuery} onChange={(event) => setModelQuery(event.target.value)} placeholder={t("setup:models.search")} className="pl-8" />
             </div>
 
@@ -399,7 +385,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
                       )}
                     >
                       <span className={cn("grid size-5 place-items-center rounded border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border")}>
-                        {selected && <Check className="size-3.5" />}
+                        {selected && <NetsuIcon name="check" className="size-3.5" />}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium">{model.label}</span>
@@ -412,7 +398,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
             )}
             <div className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
               <span>{t("setup:models.selected", { count: models.length })}</span>
-              <span className="flex items-center gap-1.5"><HardDrive className="size-3.5" /> {selectedBytes ? `~${fmtSize(selectedBytes)}` : t("setup:models.noExtraSpace")}</span>
+              <span className="flex items-center gap-1.5"><NetsuIcon name="disk" className="size-3.5" /> {selectedBytes ? `~${fmtSize(selectedBytes)}` : t("setup:models.noExtraSpace")}</span>
             </div>
           </section>
         )}
@@ -422,7 +408,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
             <h2 className="text-sm font-medium">{t("setup:review.title")}</h2>
             {status?.hardware && (
               <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/20 p-3">
-                <Cpu className="mt-0.5 size-4 shrink-0 text-primary" />
+                <NetsuIcon name="chip" className="mt-0.5 size-4 shrink-0 text-primary" />
                 <div className="min-w-0 text-xs">
                   {status.hardware.gpus.map((gpu) => <p key={`${gpu.name}-${gpu.pnpDeviceId || ""}`} className="font-medium text-foreground">{gpu.name}</p>)}
                   {status.hardware.cpus.map((cpu) => <p key={cpu} className="truncate text-muted-foreground">{cpu}</p>)}
@@ -445,7 +431,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
                 )}
               >
                 <span className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded border", adobePanel ? "border-primary bg-primary text-primary-foreground" : "border-border")}>
-                  {adobePanel && <Check className="size-3.5" />}
+                  {adobePanel && <NetsuIcon name="check" className="size-3.5" />}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-medium">{t("setup:adobe.title")}</span>
@@ -458,7 +444,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
             <ul className="space-y-2 rounded-lg border border-border p-3">
               {status?.items.map((item) => (
                 <li key={item.id} className="flex items-center gap-2 text-sm">
-                  {item.done ? <CheckCircle2 className="size-4 text-[var(--color-ok)]" /> : <Download className="size-4 text-muted-foreground" />}
+                  {item.done ? <NetsuIcon name="status-ok" className="size-4 text-[var(--color-ok)]" /> : <NetsuIcon name="download" className="size-4 text-muted-foreground" />}
                   <span>{item.label}</span>
                 </li>
               ))}
@@ -470,7 +456,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
           <section className="flex flex-col gap-4">
             {phase === "restart" ? (
               <div className="flex flex-col items-center gap-3 py-5 text-center">
-                <span className="grid size-12 place-items-center rounded-full bg-[var(--color-ok)]/15 text-[var(--color-ok)]"><CheckCircle2 className="size-6" /></span>
+                <span className="grid size-12 place-items-center rounded-full bg-[var(--color-ok)]/15 text-[var(--color-ok)]"><NetsuIcon name="status-ok" className="size-6" /></span>
                 <div><h2 className="text-base font-medium">{t("setup:done")}</h2><p className="mt-1 text-sm text-muted-foreground">{t("setup:restartHint")}</p></div>
               </div>
             ) : (
@@ -482,7 +468,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
             {phase === "error" && (
               <div className="flex flex-col gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
                 <div className="flex items-start gap-2">
-                  <TriangleAlert className="size-4 shrink-0" /><span className="break-words">{error}</span>
+                  <NetsuIcon name="warning" className="size-4 shrink-0" /><span className="break-words">{error}</span>
                 </div>
                 {/* Une installation qui échoue laisse l'app inutilisable : le rapport doit partir d'ICI,
                     les Paramètres étant derrière l'écran bloqué. */}
@@ -515,7 +501,7 @@ export function SetupGate({ children }: { children: ReactNode }) {
             {(log.length > 0 || downloads.length > 0) && phase !== "restart" && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Terminal className="size-3.5" /> {t("setup:log")}</span>
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><NetsuIcon name="console" className="size-3.5" /> {t("setup:log")}</span>
                   <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => void navigator.clipboard?.writeText(logText(log))}>{t("common:action.copy")}</Button>
                 </div>
                 <div ref={logRef} className="h-44 overflow-auto rounded-md border border-border bg-black/40 p-2 font-mono text-[11px] leading-relaxed text-muted-foreground">
@@ -531,15 +517,15 @@ export function SetupGate({ children }: { children: ReactNode }) {
 
         <footer className="flex items-center justify-between gap-3 border-t border-border pt-4">
           <div>
-            {phase === "configure" && step !== steps[0] && <Button variant="ghost" onClick={goBack}><ArrowLeft className="size-4" /> {t("common:action.back")}</Button>}
-            {phase === "error" && <Button variant="ghost" onClick={() => { setPhase("configure"); setStep("review"); }}><ArrowLeft className="size-4" /> {t("common:action.back")}</Button>}
+            {phase === "configure" && step !== steps[0] && <Button variant="ghost" onClick={goBack}><NetsuIcon name="back" className="size-4" /> {t("common:action.back")}</Button>}
+            {phase === "error" && <Button variant="ghost" onClick={() => { setPhase("configure"); setStep("review"); }}><NetsuIcon name="back" className="size-4" /> {t("common:action.back")}</Button>}
           </div>
           <div className="flex gap-2">
             {phase === "configure" && step !== "review" && <Button onClick={goNext}>{t("common:action.continue")}</Button>}
-            {phase === "configure" && step === "review" && <Button onClick={() => void install()}><Download className="size-4" /> {status?.items.some((item) => item.done) ? t("setup:repair") : t("setup:install")}</Button>}
-            {phase === "running" && <Button disabled><RotateCw className="size-4 animate-spin" /> {t("setup:installing")}</Button>}
-            {phase === "error" && <Button onClick={() => void install()}><RotateCw className="size-4" /> {t("common:action.retry")}</Button>}
-            {phase === "restart" && <Button onClick={() => void relaunchApp()}><RotateCw className="size-4" /> {t("setup:restartApp")}</Button>}
+            {phase === "configure" && step === "review" && <Button onClick={() => void install()}><NetsuIcon name="download" className="size-4" /> {status?.items.some((item) => item.done) ? t("setup:repair") : t("setup:install")}</Button>}
+            {phase === "running" && <Button disabled><NetsuIcon name="refresh" busy className="size-4" /> {t("setup:installing")}</Button>}
+            {phase === "error" && <Button onClick={() => void install()}><NetsuIcon name="restart" className="size-4" /> {t("common:action.retry")}</Button>}
+            {phase === "restart" && <Button onClick={() => void relaunchApp()}><NetsuIcon name="restart" className="size-4" /> {t("setup:restartApp")}</Button>}
           </div>
         </footer>
       </Card>

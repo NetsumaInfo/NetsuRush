@@ -3,9 +3,11 @@
 // PRIORITÉ (survol/clic > préchauffe) + concurrence ADAPTATIVE (converge vers le nb de sessions
 // matérielles que le pilote accepte) + annulation (carte hors écran → kill ffmpeg).
 
+const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
+const { lowerPriority } = require('./backgroundPriority');
 const { ffBin, getProxyDir, fsp, fileReady } = require('./config');
 const { cacheIndex } = require('./cacheIndex');
 const { t } = require('./i18n');
@@ -69,8 +71,15 @@ async function proxyFrameSource(input, time) {
 // quand le GPU refuse vraiment une session — puis on REMONTE d'un cran après une série de succès
 // (HEAL_STREAK) : un refus transitoire (Resolve qui prend 2 sessions une seconde) ne fige plus le
 // plafond au plancher pour tout le batch. Le job refusé se ré-enfile (backoff). Plancher PROXY_MAX_LO.
-const PROXY_MAX_HI = 12;
+// Every encode also DECODES its source on the CPU (the costly half on 1080p HEVC 10-bit), so the
+// ceiling follows the core count: twelve decodes on an eight-thread machine froze the interface
+// long before the GPU ran out of sessions.
+const CPU_COUNT = Math.max(1, os.cpus().length);
+const PROXY_MAX_HI = Math.max(3, Math.min(12, Math.floor(CPU_COUNT / 2)));
 const PROXY_MAX_LO = 3;
+// Decoder threads per encode. ffmpeg defaults to one per core, so N parallel encodes asked for
+// N x cores threads; a 4 s segment at grid size gains little past four.
+const PROXY_DECODE_THREADS = String(Math.max(2, Math.min(4, Math.floor(CPU_COUNT / 4))));
 const HEAL_STREAK = 4;          // succès consécutifs avant de regagner +1 créneau
 let proxyMax = PROXY_MAX_HI;
 let proxyActive = 0;
@@ -276,6 +285,7 @@ function ffSpawnCancellable(args, token, timeout) {
       return reject(e);
     }
     const ch = spawn(ffBin('ffmpeg'), args);
+    lowerPriority(ch);
     if (token != null) proxyChildren.set(token, ch);
     let err = '';
     const to = setTimeout(() => { try { ch.kill('SIGKILL'); } catch (_) {} }, timeout);
@@ -330,7 +340,7 @@ async function encodeProxy(input, start, end, out, height, token, resolved, pres
   try {
     await ffSpawnCancellable([
       '-hide_banner', '-loglevel', 'error',
-      '-y', ...fastDecode, '-ss', String(start), '-i', input, '-t', String(dur),
+      '-y', '-threads', PROXY_DECODE_THREADS, ...fastDecode, '-ss', String(start), '-i', input, '-t', String(dur),
       '-vf', `scale=-2:${height}:flags=fast_bilinear`,
       // Encode le PLUS rapide possible (cold-start = priorité). Réglages propres à NVENC/AMF/QSV ;
       // -bf 0 : redémarrage de boucle net.

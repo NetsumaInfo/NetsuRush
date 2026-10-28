@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Download, Eraser, FileUp, Film, Gauge,
-  HardDrive, Image, Layers3, Mic, Package, RefreshCw, RotateCw, ScanFace, ScanSearch,
-  Scissors, Search, Sparkles, Trash2, WandSparkles, Check, AlertTriangle, X,
-  ArrowUpNarrowWide, ArrowDownWideNarrow, type LucideIcon,
-} from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import {
   MODEL_REGISTRY, TASK_ORDER, fmtSize,
   type ModelEntry, type ModelTask,
@@ -48,19 +44,19 @@ const NATURAL_DIR: Record<SortKey, SortDir> = { default: "asc", size: "desc", vr
 // Le délai vit sur le Provider (Base UI ne l'expose pas sur Root) → un provider local par bulle.
 const HOVER_TIP_DELAY_MS = 600;
 
-const TASK_ICONS: Record<ModelTask, LucideIcon> = {
-  detect: ScanSearch,
-  search: Search,
-  face: ScanFace,
-  "voice-asr": Mic,
-  upscale: WandSparkles,
-  restore: Sparkles,
-  interpolate: Gauge,
-  depth: Layers3,
-  "matte-video": Film,
-  "matte-image": Image,
-  segment: Scissors,
-  "object-removal": Eraser,
+const TASK_ICONS: Record<ModelTask, IconComponent> = {
+  detect: netsuIconOf("scan-search"),
+  search: netsuIconOf("search"),
+  face: netsuIconOf("face"),
+  "voice-asr": netsuIconOf("microphone"),
+  upscale: netsuIconOf("wand"),
+  restore: netsuIconOf("sparkles"),
+  interpolate: netsuIconOf("gauge"),
+  depth: netsuIconOf("layers"),
+  "matte-video": netsuIconOf("film"),
+  "matte-image": netsuIconOf("image"),
+  segment: netsuIconOf("scissors"),
+  "object-removal": netsuIconOf("erase"),
 };
 
 function SlowTooltip({ children }: { children: React.ReactNode }) {
@@ -101,7 +97,7 @@ function RemoveButton({ id, mgr }: { id: string; mgr: ModelManager }) {
   return (
     <SlowTooltip>
       <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => mgr.remove(id)} aria-label={t("common:action.delete")}>
-        <Trash2 className="h-3.5 w-3.5" />
+        <NetsuIcon name="trash" className="h-3.5 w-3.5" />
       </Button>} />
       <TooltipContent>{t("common:action.delete")} — {t("models:status.removeTip")}</TooltipContent>
     </SlowTooltip>
@@ -127,7 +123,7 @@ function SearchModelAction({ m, picker }: { m: ModelEntry; picker: SearchModelPi
     <>
       <Tooltip>
         <TooltipTrigger render={<Button variant="outline" size="sm" disabled={picker.busy === m.id} onClick={() => setOpen(true)}>
-          {picker.busy === m.id ? <Spinner className="size-3.5" /> : <Check className="size-3.5" />} {t("models:search.use")}
+          {picker.busy === m.id ? <Spinner className="size-3.5" /> : <NetsuIcon name="check" className="size-3.5" />} {t("models:search.use")}
         </Button>} />
         <TooltipContent>{t("models:search.useTip")}</TooltipContent>
       </Tooltip>
@@ -222,7 +218,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
         )}
         {err && (
           <div className="mt-0.5 flex flex-wrap items-center gap-2">
-            <p className="flex min-w-0 items-center gap-1 text-xs text-destructive"><AlertTriangle className="h-3 w-3 shrink-0" /> {err}</p>
+            <p className="flex min-w-0 items-center gap-1 text-xs text-destructive"><NetsuIcon name="warning" className="h-3 w-3 shrink-0" /> {err}</p>
             <ErrorReportButton
               error={err}
               subject={`Échec du téléchargement du modèle « ${m.label} » (${m.id})`}
@@ -241,7 +237,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
               <TooltipTrigger
                 render={
                   <div className="flex items-center justify-end gap-1 text-[10px] text-[var(--color-warn)]">
-                    <AlertTriangle className="h-3 w-3" /> {t("vram", { size: fmtSize(m.vramGB * 1024 ** 3) })}
+                    <NetsuIcon name="warning" className="h-3 w-3" /> {t("vram", { size: fmtSize(m.vramGB * 1024 ** 3) })}
                   </div>
                 }
               />
@@ -272,7 +268,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
             <Progress value={dl} className="h-1 w-12" />
             <Tooltip>
               <TooltipTrigger render={<button type="button" onClick={() => mgr.cancel(m.id)} aria-label={t("action.cancelDownload")} className="rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground">
-                <X className="size-3" />
+                <NetsuIcon name="close" className="size-3" />
               </button>} />
               <TooltipContent>{t("common:action.cancel")}</TooltipContent>
             </Tooltip>
@@ -281,7 +277,7 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
           <div className="flex items-center justify-end gap-1">
             <SlowTooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="text-[var(--color-warn)]" onClick={() => mgr.download(m.id)} aria-label={t("action.resume")}>
-                <RefreshCw className="h-3.5 w-3.5" />
+                <NetsuIcon name="refresh" className="h-3.5 w-3.5" />
               </Button>} />
               <TooltipContent>{t("action.resume")} — {t("action.resumeTip")}</TooltipContent>
             </SlowTooltip>
@@ -289,26 +285,26 @@ function ModelRow({ m, mgr, search }: { m: ModelEntry; mgr: ModelManager; search
           </div>
         ) : m.bundled ? (
           <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Package className="h-3.5 w-3.5" /> {t("status.bundled")}</span>} />
+            <TooltipTrigger render={<span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><NetsuIcon name="package" className="h-3.5 w-3.5" /> {t("status.bundled")}</span>} />
             <TooltipContent>{t("status.bundledTip")}</TooltipContent>
           </Tooltip>
         ) : installed ? (
           <div className="flex items-center justify-end gap-1">
-            <span className="inline-flex items-center gap-1 text-xs text-[var(--color-ok)]"><Check className="h-3.5 w-3.5" /> {t("status.installed")}</span>
+            <span className="inline-flex items-center gap-1 text-xs text-[var(--color-ok)]"><NetsuIcon name="check" className="h-3.5 w-3.5" /> {t("status.installed")}</span>
             <RemoveButton id={m.id} mgr={mgr} />
           </div>
         ) : m.manual ? (
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => mgr.importFile(m.id)}>
-            <FileUp className="h-3.5 w-3.5" /> {t("common:action.import")}
+            <NetsuIcon name="file-up" className="h-3.5 w-3.5" /> {t("common:action.import")}
           </Button>
         ) : m.autoFetch ? (
           <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><RefreshCw className="h-3.5 w-3.5" /> {fmtSize(0)} · {t("status.auto")}</span>} />
+            <TooltipTrigger render={<span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><NetsuIcon name="refresh" className="h-3.5 w-3.5" /> {fmtSize(0)} · {t("status.auto")}</span>} />
             <TooltipContent>{t("status.autoTip")}</TooltipContent>
           </Tooltip>
         ) : (
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => mgr.download(m.id)}>
-            <Download className="h-3.5 w-3.5" /> {t("action.download")}
+            <NetsuIcon name="download" className="h-3.5 w-3.5" /> {t("action.download")}
           </Button>
         )}
       </div>
@@ -343,7 +339,7 @@ export function ModelsSettings() {
         <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/10 p-3">
           <p className="text-xs text-foreground">{t("setup:restartHint")}</p>
           <Button size="sm" onClick={() => mgr.restart()}>
-            <RotateCw className="size-4" /> {t("setup:restartApp")}
+            <NetsuIcon name="restart" className="size-4" /> {t("setup:restartApp")}
           </Button>
         </div>
       )}
@@ -352,7 +348,7 @@ export function ModelsSettings() {
           <TooltipTrigger
             render={
               <Toggle pressed={advanced} onPressedChange={setAdvanced} className="mr-auto gap-1.5">
-                <Layers3 className="size-3.5" />
+                <NetsuIcon name="layers" className="size-3.5" />
                 {t("advanced.label")}
                 {!advanced && hiddenCount > 0 && (
                   <Badge variant="secondary" className="text-[10px] tabular-nums">{hiddenCount}</Badge>
@@ -366,7 +362,7 @@ export function ModelsSettings() {
           <DropdownMenuTrigger
             render={
               <Button variant="outline" size="icon" aria-label={t(`sort.${sort}Tip`)}>
-                {dir === "asc" ? <ArrowUpNarrowWide className="size-4" /> : <ArrowDownWideNarrow className="size-4" />}
+                <NetsuIcon name="sort" on={dir === "asc"} className="size-4" />
               </Button>
             }
           />
@@ -385,7 +381,7 @@ export function ModelsSettings() {
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setDir((value) => (value === "asc" ? "desc" : "asc"))}>
-              {dir === "asc" ? <ArrowDownWideNarrow /> : <ArrowUpNarrowWide />}
+              <NetsuIcon name="sort" on={dir !== "asc"} />
               {t(`sort.${dir === "asc" ? "desc" : "asc"}`)}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -394,7 +390,7 @@ export function ModelsSettings() {
           <TooltipTrigger
             render={
               <span className="inline-flex items-center gap-1.5 px-1 text-xs text-muted-foreground">
-                {mgr.loading ? <Spinner className="size-3.5" /> : <><HardDrive className="size-3.5" /><span className="tabular-nums text-foreground">{fmtSize(mgr.diskTotal)}</span></>}
+                {mgr.loading ? <Spinner className="size-3.5" /> : <><NetsuIcon name="disk" className="size-3.5" /><span className="tabular-nums text-foreground">{fmtSize(mgr.diskTotal)}</span></>}
               </span>
             }
           />
@@ -414,14 +410,14 @@ export function ModelsSettings() {
             </h3>
             {!usable && (
               <p className="mb-1 flex items-center gap-1.5 text-xs text-destructive">
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> {t("noneInstalled")}
+                <NetsuIcon name="warning" className="h-3.5 w-3.5 shrink-0" /> {t("noneInstalled")}
               </p>
             )}
             {/* Dit AVANT le clic que ces moteurs se remplacent : le découvrir en voyant le premier
                 passer à « non installé » après avoir posé le second serait pris pour une panne. */}
             {g.models.some((m) => m.exclusive) && (
               <p className="mb-1 flex items-center gap-1.5 text-xs text-[var(--color-warn)]">
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> {t("badge.exclusiveTip")}
+                <NetsuIcon name="warning" className="h-3.5 w-3.5 shrink-0" /> {t("badge.exclusiveTip")}
               </p>
             )}
             <div className="rounded-lg border border-border bg-card/40 px-3">

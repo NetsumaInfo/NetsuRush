@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FileText, FileVideo, Film, Paperclip, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn, fmtBytes } from "@/lib/utils";
@@ -19,9 +19,9 @@ type Props = {
 
 
 function iconFor(file: File) {
-  if (file.type.startsWith("video/")) return FileVideo;
-  if (file.type.startsWith("audio/")) return Film;
-  return FileText;
+  if (file.type.startsWith("video/")) return "file-video";
+  if (file.type.startsWith("audio/")) return "film";
+  return "file-text";
 }
 
 /** Même nom, même taille, même date : c'est un double ajout, pas un second fichier. */
@@ -105,14 +105,14 @@ export function AttachmentPicker({ files, onChange, maxFiles = DEFAULT_MAX_FILES
         {files.length > 0 && (
           <ul className="mb-3 grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2">
             {previews.map(({ file, url }) => {
-              const Icon = iconFor(file);
+              const icon = iconFor(file);
               return (
                 <li key={`${file.name}-${file.lastModified}`} className="group relative overflow-hidden rounded-md border border-border bg-input/30">
                   {url ? (
                     <img src={url} alt={file.name} className="aspect-video w-full object-cover" />
                   ) : (
                     <div className="flex aspect-video w-full items-center justify-center text-muted-foreground">
-                      <Icon className="size-6" />
+                      <NetsuIcon name={icon} className="size-6" />
                     </div>
                   )}
                   <p className="truncate px-1.5 pt-1 text-[10px] text-foreground/80">{file.name}</p>
@@ -128,7 +128,7 @@ export function AttachmentPicker({ files, onChange, maxFiles = DEFAULT_MAX_FILES
                         />
                       }
                     >
-                      <X className="size-3" />
+                      <NetsuIcon name="close" className="size-3" />
                     </TooltipTrigger>
                     <TooltipContent>{t("bugReport.files.remove")}</TooltipContent>
                   </Tooltip>
@@ -140,7 +140,7 @@ export function AttachmentPicker({ files, onChange, maxFiles = DEFAULT_MAX_FILES
 
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="outline" size="sm" disabled={full} onClick={() => inputRef.current?.click()}>
-            <Paperclip className="size-3.5" /> {files.length ? t("bugReport.files.add") : t("bugReport.files.choose")}
+            <NetsuIcon name="attach-file" className="size-3.5" /> {files.length ? t("bugReport.files.add") : t("bugReport.files.choose")}
           </Button>
           {/* Compteur seul : la bordure en pointillés porte déjà l'affordance de dépôt. */}
           {files.length > 0 && <span className="text-xs text-muted-foreground">{files.length}/{maxFiles}</span>}

@@ -20,7 +20,11 @@
     "import": "Importieren",
     "decrease": "Verringern",
     "increase": "Erhöhen",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "cut": "Ausschneiden",
+    "paste": "Einfügen",
+    "selectAll": "Alles auswählen",
+    "pastePlain": "Als reinen Text einfügen"
   },
   "status": {
     "loading": "Wird geladen…",

@@ -4,7 +4,7 @@
 // exigent l'application ouverte avec son panneau.
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { PlugZap } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import type { AdobeApp } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -38,7 +38,7 @@ export function BoostPanel({ app }: { app: AdobeApp }) {
       {diag && !diag.panelConnected && (
         <Card className="block border-amber-500/30 p-4 text-sm">
           <div className="flex items-center gap-2 font-medium text-amber-500">
-            <PlugZap className="h-4 w-4" /> {t("boost.degraded.title")}
+            <NetsuIcon name="plug" className="h-4 w-4" /> {t("boost.degraded.title")}
           </div>
           <p className="mt-1 text-muted-foreground">{t("boost.degraded.body")}</p>
         </Card>

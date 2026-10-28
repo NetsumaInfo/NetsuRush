@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Volume, Volume1, Volume2, VolumeX } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -40,12 +40,6 @@ export type VolumeSliderProps = {
   label?: string;
   className?: string;
 };
-
-function iconFor(level: number) {
-  if (level < 0.34) return Volume;
-  if (level < 0.67) return Volume1;
-  return Volume2;
-}
 
 // Décroissance sigmoïde : l'overflow ralentit en s'éloignant du bord (effet élastique).
 function decay(value: number, max: number) {
@@ -118,7 +112,6 @@ export function VolumeSlider({
     overflow.jump(decay(past, MAX_OVERFLOW));
   });
 
-  const Icon = silent ? VolumeX : iconFor(value);
   const thumbX = useTransform(() => (region === "left" ? -overflow.get() : region === "right" ? overflow.get() : 0));
 
   return (
@@ -142,7 +135,7 @@ export function VolumeSlider({
         style={{ x: useTransform(() => (region === "left" ? -overflow.get() : 0)) }}
         className="grid size-5 shrink-0 place-items-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none"
       >
-        <Icon className="size-3.5" />
+        <NetsuIcon name={silent ? "mute" : "volume"} className="size-3.5" />
       </motion.button>
 
       <SliderPrimitive.Root

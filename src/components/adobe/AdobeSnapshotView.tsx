@@ -1,5 +1,5 @@
 // Vue du snapshot projet poussé par le panneau CEP : rushs + séquences/comps (clips en secondes).
-import { Copy, Clock, Send } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,8 +40,8 @@ function ClipRow({ t, c }: { t: { kind: "video" | "audio"; index: number }; c: A
         <td className="px-3 py-1 tabular-nums text-muted-foreground">{fmtSec(c.srcIn)} → {fmtSec(c.srcOut)}</td>
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        {c.path && <ContextMenuItem onClick={() => copy(c.path!)}><Copy /> {tr("snapshot.copySourcePath")}</ContextMenuItem>}
-        <ContextMenuItem onClick={() => copy(timecodes)}><Clock /> {tr("snapshot.copyTimecodes")}</ContextMenuItem>
+        {c.path && <ContextMenuItem onClick={() => copy(c.path!)}><NetsuIcon name="copy" /> {tr("snapshot.copySourcePath")}</ContextMenuItem>}
+        <ContextMenuItem onClick={() => copy(timecodes)}><NetsuIcon name="clock" /> {tr("snapshot.copyTimecodes")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
@@ -68,12 +68,12 @@ function RushRow({ r }: { r: AdobeSnapshot["rushes"][number] }) {
         </span>
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        <ContextMenuItem onClick={() => copy(label)}><Copy /> {t("snapshot.copyName")}</ContextMenuItem>
-        {r.path && <ContextMenuItem onClick={() => copy(r.path)}><Copy /> {t("snapshot.copyPath")}</ContextMenuItem>}
+        <ContextMenuItem onClick={() => copy(label)}><NetsuIcon name="copy" /> {t("snapshot.copyName")}</ContextMenuItem>
+        {r.path && <ContextMenuItem onClick={() => copy(r.path)}><NetsuIcon name="copy" /> {t("snapshot.copyPath")}</ContextMenuItem>}
         {r.path && (
           <>
             <ContextMenuSeparator />
-            <ContextMenuItem onClick={toNetsulab}><Send /> {t("snapshot.sendToNetsulab")}</ContextMenuItem>
+            <ContextMenuItem onClick={toNetsulab}><NetsuIcon name="send" /> {t("snapshot.sendToNetsulab")}</ContextMenuItem>
           </>
         )}
       </ContextMenuContent>

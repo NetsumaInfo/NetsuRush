@@ -11,6 +11,7 @@ const { CONFIG, PYTHON, DETECT_ENV, UPSCALE_TEST_DIR, fsp } = require('./config'
 const { perfEnv } = require('./prefs'); // options de performance partagées entre les fenêtres
 const { cacheIndex } = require('./cacheIndex');
 const scheduler = require('./scheduler');
+const { lowerPriority } = require('./backgroundPriority');
 const { importToMediaPool } = require('./resolve'); // pont Python externe (core/resolve.js)
 const { codecExt: upscaleExt, hasFiles, sanitizeName } = require('./utils');
 const { resolveProcessEncoding } = require('./processEncoding');
@@ -81,6 +82,7 @@ const DETECT_IDLE_MS = 300000;
 function runDetect(event, args, tagPath) {
   return new Promise((resolve) => {
     const py = spawn(PYTHON, [DETECT_SCRIPT, ...args], { env: langEnv() });
+    lowerPriority(py);
     let out = '';
     let errTail = '';
     let done = false;
@@ -134,6 +136,8 @@ function makeDetectDaemon() {
   function start() {
     if (proc) return;
     proc = spawn(PYTHON, [DETECT_SCRIPT, 'serve'], { env: langEnv() });
+    // Decoding a whole episode on every core must not freeze the grid next to it.
+    lowerPriority(proc);
     touch();
     proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
@@ -288,7 +292,11 @@ function readSceneCacheDirect(filePath, model, threshold, options) {
         if (row) { linkedFrom = twin; break; }
       }
     }
-    if (!row) return options == null ? { scenes: [], cached: false, model, error: null } : null;
+    // A definitive "not cut", also when exact options were asked. Handing that case to Python cost
+    // one interpreter per rush (~0.3 s cold, seconds when a whole flow opens at once) to answer what
+    // this query already knows: every rush not yet cut, or cut under other settings, paid it on
+    // every open, and the grid waited on it before saying whether the rush was cut.
+    if (!row) return { scenes: [], cached: false, model, error: null };
     let mt = 0;
     try { mt = require('fs').statSync(filePath).mtimeMs / 1000; } catch (_) { /* fichier disparu */ }
     // Découpe reprise d'un jumeau : son horodatage décrit l'autre fichier, la comparer n'a pas de

@@ -42,7 +42,7 @@ function IconTab({ onPick }: { onPick: (v: string) => void }) {
     <div className="flex flex-col">
       <div className="mb-2 flex items-center gap-1.5 rounded-md border border-border bg-muted px-2">
         <Search className="h-3.5 w-3.5 text-muted-foreground" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={i18n.t("notebook:icons.search")} className="w-full bg-transparent py-1.5 text-sm outline-none" />
+        <input autoComplete="off" spellCheck={false} value={q} onChange={(e) => setQ(e.target.value)} placeholder={i18n.t("notebook:icons.search")} className="w-full bg-transparent py-1.5 text-sm outline-none" />
       </div>
       <div ref={gridRef} className="grid max-h-72 grid-cols-8 gap-1 overflow-y-auto">
         {list.map((n) => (

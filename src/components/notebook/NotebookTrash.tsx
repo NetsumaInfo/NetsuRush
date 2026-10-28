@@ -7,7 +7,7 @@ import { useApp } from "@/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Trash2, Undo2, FileText, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { renderPageIcon } from "./IconPicker";
 
 export function NotebookTrash({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
@@ -37,21 +37,21 @@ export function NotebookTrash({ open, onOpenChange }: { open: boolean; onOpenCha
         <div className="max-h-80 overflow-y-auto">
           {!trash.length && (
             <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
-              <Trash2 className="h-8 w-8 opacity-40" />
+              <NetsuIcon name="trash" className="h-8 w-8 opacity-40" />
               <p className="text-sm">{t("trash.empty")}</p>
             </div>
           )}
           {trash.map((p) => (
             <div key={p.id} className="group flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted">
               <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                {p.icon ? renderPageIcon(p.icon, "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+                {p.icon ? renderPageIcon(p.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5 text-muted-foreground" />}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm">{p.title || t("panel.untitled")}</span>
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button size="sm" variant="ghost" onClick={() => void restorePage(p.id)}>
-                      <Undo2 className="size-3.5" /> {t("trash.restore")}
+                      <NetsuIcon name="undo" className="size-3.5" /> {t("trash.restore")}
                     </Button>
                   }
                 />
@@ -61,7 +61,7 @@ export function NotebookTrash({ open, onOpenChange }: { open: boolean; onOpenCha
                 <TooltipTrigger
                   render={
                     <Button size="sm" variant="ghost" onClick={() => void purgePage(p.id)} className="text-destructive">
-                      <X className="size-3.5" />
+                      <NetsuIcon name="close" className="size-3.5" />
                     </Button>
                   }
                 />
@@ -77,12 +77,12 @@ export function NotebookTrash({ open, onOpenChange }: { open: boolean; onOpenCha
                 <span className="self-center text-xs text-muted-foreground">{t("trash.confirmAll")}</span>
                 <Button size="sm" variant="outline" onClick={() => setConfirmEmpty(false)}>{t("trash.cancel")}</Button>
                 <Button size="sm" variant="destructive" onClick={() => { void emptyTrash(); setConfirmEmpty(false); }}>
-                  <Trash2 className="size-3.5" /> {t("trash.deleteAll")}
+                  <NetsuIcon name="trash" className="size-3.5" /> {t("trash.deleteAll")}
                 </Button>
               </>
             ) : (
               <Button size="sm" variant="outline" onClick={() => setConfirmEmpty(true)} className="text-destructive">
-                <Trash2 className="size-3.5" /> {t("trash.emptyTrash")}
+                <NetsuIcon name="trash" className="size-3.5" /> {t("trash.emptyTrash")}
               </Button>
             )}
           </div>

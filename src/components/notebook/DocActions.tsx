@@ -12,7 +12,7 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Star, MoreHorizontal, ExternalLink, Link2, Copy, FolderInput, FileDown, FileCode, Package, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { NBPAGE_LINK_PREFIX, pageStats, formatTimestamp, type NoteBlock } from "./notebookShared";
 import { blocksToMarkdown, blocksToStandaloneHtml, safeFileName, type ExportContext } from "./notebookExport";
 import { openNotebookSharing } from "./notebookCollabState";
@@ -98,7 +98,7 @@ export function DocActions({ onMove, onAskDelete }: {
               onClick={() => toggleFav(pageId)}
               className={`rounded-md p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent ${isFav ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <Star className={`h-4 w-4 ${isFav ? "fill-current" : ""}`} />
+              <NetsuIcon name="star" on={isFav} className="h-4 w-4" />
             </button>
           }
         />
@@ -111,7 +111,7 @@ export function DocActions({ onMove, onAskDelete }: {
               <DropdownMenuTrigger
                 render={
                   <button type="button" className="rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <NetsuIcon name="more" className="h-4 w-4" />
                   </button>
                 }
               />
@@ -120,20 +120,20 @@ export function DocActions({ onMove, onAskDelete }: {
           <TooltipContent>{t("actions.documentActions")}</TooltipContent>
         </Tooltip>
         <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuItem onClick={() => void openInNewTab(pageId)}><ExternalLink className="mr-1 h-3.5 w-3.5" /> {t("actions.openNewTab")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${pageId}`)}><Link2 className="mr-1 h-3.5 w-3.5" /> {t("actions.copyPageLink")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => void openInNewTab(pageId)}><NetsuIcon name="open-external" className="mr-1 h-3.5 w-3.5" /> {t("actions.openNewTab")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${pageId}`)}><NetsuIcon name="link" className="mr-1 h-3.5 w-3.5" /> {t("actions.copyPageLink")}</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => openNotebookSharing("notebook-page", pageId)}>{t("share.document")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void duplicate(pageId)}><Copy className="mr-1 h-3.5 w-3.5" /> {t("actions.duplicate")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onMove(pageId)}><FolderInput className="mr-1 h-3.5 w-3.5" /> {t("navigation.moveTo")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => void duplicate(pageId)}><NetsuIcon name="copy" className="mr-1 h-3.5 w-3.5" /> {t("actions.duplicate")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onMove(pageId)}><NetsuIcon name="folder-move" className="mr-1 h-3.5 w-3.5" /> {t("navigation.moveTo")}</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => void exportPage("md")}><FileDown className="mr-1 h-3.5 w-3.5" /> {t("actions.exportMarkdown")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void exportPage("html")}><FileCode className="mr-1 h-3.5 w-3.5" /> {t("actions.exportHtml")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => void exportPage("md")}><NetsuIcon name="file-down" className="mr-1 h-3.5 w-3.5" /> {t("actions.exportMarkdown")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => void exportPage("html")}><NetsuIcon name="code" className="mr-1 h-3.5 w-3.5" /> {t("actions.exportHtml")}</DropdownMenuItem>
           {coreAvailable && (
-            <DropdownMenuItem onClick={() => void exportPageNetsu()}><Package className="mr-1 h-3.5 w-3.5" /> {t("actions.exportNetsu")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => void exportPageNetsu()}><NetsuIcon name="book-export-pack" className="mr-1 h-3.5 w-3.5" /> {t("actions.exportNetsu")}</DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onAskDelete(pageId, title)} className="text-destructive"><Trash2 className="mr-1 h-3.5 w-3.5" /> {t("panel.sendToTrash")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAskDelete(pageId, title)} className="text-destructive"><NetsuIcon name="trash" className="mr-1 h-3.5 w-3.5" /> {t("panel.sendToTrash")}</DropdownMenuItem>
           <DropdownMenuSeparator />
           <InfoFooter />
         </DropdownMenuContent>

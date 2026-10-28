@@ -2,7 +2,7 @@
 // que des jobs — ne lance jamais de rendu, ne crée aucun fichier. Boutons : arrêter le rendu actif,
 // vider la file, supprimer un job précis.
 import { useState } from "react";
-import { Square, Trash2, X, Loader2, CheckCheck } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -45,7 +45,7 @@ export function StopTasksSection({
             disabled={!diag.render.inProgress || !!busy}
             onClick={() => run("stop", () => nr.optimizeStopRender())}
           >
-            {busy === "stop" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-4 w-4" />}
+            {busy === "stop" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="chat-stop" className="h-4 w-4" />}
             {t("stop.stopRender")}
           </Button>
           <Button
@@ -54,7 +54,7 @@ export function StopTasksSection({
             disabled={!jobs.length || !!busy}
             onClick={() => run("finished", () => nr.optimizeClearFinishedJobs())}
           >
-            {busy === "finished" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCheck className="h-4 w-4" />}
+            {busy === "finished" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="check" className="h-4 w-4" />}
             {t("stop.clearFinished")}
           </Button>
           <Button
@@ -63,7 +63,7 @@ export function StopTasksSection({
             disabled={!jobs.length || !!busy}
             onClick={() => run("clear", () => nr.optimizeClearRenderQueue())}
           >
-            {busy === "clear" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            {busy === "clear" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="trash" className="h-4 w-4" />}
             {t("stop.clearQueue")}
           </Button>
         </div>
@@ -90,7 +90,7 @@ export function StopTasksSection({
                     onClick={() => run(j.id, () => nr.optimizeDeleteRenderJob(j.id))}
                   />
                 }>
-                  {busy === j.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                  {busy === j.id ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="close" className="h-4 w-4" />}
                 </TooltipTrigger>
                 <TooltipContent>{t("stop.deleteJob")}</TooltipContent>
               </Tooltip>

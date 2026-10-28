@@ -4,11 +4,12 @@
 import type { BlockNoteEditor } from "@blocknote/core";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Repeat, AtSign, Link2, Bookmark, Globe, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import i18n from "@/i18n";
 import { LINK_AS_OPTIONS, convertBlockTo, type LinkAs } from "../notebookPaste";
 
-const ICONS: Record<LinkAs, typeof AtSign> = { mention: AtSign, url: Link2, bookmark: Bookmark, embed: Globe };
+const ICONS: Record<LinkAs, IconComponent> = { mention: netsuIconOf("mention"), url: netsuIconOf("link"), bookmark: netsuIconOf("bookmark"), embed: netsuIconOf("web") };
 
 export function BlockConvertMenu({ editor, block, url }: { editor: BlockNoteEditor<any, any, any>; block: unknown; url: string }) {
   return (
@@ -20,7 +21,7 @@ export function BlockConvertMenu({ editor, block, url }: { editor: BlockNoteEdit
               <DropdownMenuTrigger
                 render={
                   <button type="button" className="rounded bg-background/80 p-1 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground">
-                    <Repeat className="h-3.5 w-3.5" />
+                    <NetsuIcon name="repeat" className="h-3.5 w-3.5" />
                   </button>
                 }
               />
@@ -40,7 +41,7 @@ export function BlockConvertMenu({ editor, block, url }: { editor: BlockNoteEdit
               );
             })}
             <DropdownMenuItem className="text-destructive" onClick={() => editor.removeBlocks([block as never])}>
-              <Trash2 className="mr-2 h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}
+              <NetsuIcon name="trash" className="mr-2 h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

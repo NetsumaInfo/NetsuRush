@@ -625,7 +625,9 @@
     "bulletList": "Aufzählung",
     "numberedList": "Nummerierte Liste",
     "checkList": "Aufgabenliste",
-    "quote": "Zitat"
+    "quote": "Zitat",
+    "callout": "Hinweis",
+    "codeBlock": "Codeblock"
   },
   "dbDefaults": {
     "titleField": "Name",
@@ -660,6 +662,22 @@
     "removeFilter": "Filter entfernen",
     "editOption": "Option bearbeiten",
     "removeTask": "Aufgabe entfernen",
-    "addTask": "Aufgabe hinzufügen"
+    "addTask": "Aufgabe hinzufügen",
+    "hour": "Stunden",
+    "minute": "Minuten"
+  },
+  "menu": {
+    "format": "Format",
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstrichen",
+    "strike": "Durchgestrichen",
+    "code": "Code",
+    "link": "Link",
+    "linkNeedsUrl": "Kopiere zuerst eine Adresse",
+    "block": "Block",
+    "duplicate": "Duplizieren",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten"
   }
 }

@@ -1,16 +1,17 @@
 // Affichage + édition des cellules de la database, par type de champ. Partagé entre TableView (grille)
 // et KanbanView (cartes). Les sélecteurs d'option utilisent le DropdownMenu shadcn (Base UI) ; date =
-// input natif ; case = checkbox natif stylé. Aucune anim JS (respecte l'interdit perf des grilles).
+// MiniCalendar (+ heure/minute) ; case = bouton stylé. Aucune anim JS (respecte l'interdit perf des grilles).
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Plus, X, Pencil, Check, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { colorOf, formatNumber, formatDate, formatTimestamp, DB_COLORS, type ChecklistItem, type DbField, type SelectOption } from "../notebookShared";
 import { MiniCalendar } from "../blocks/MiniCalendar";
+import { NumberSpin } from "@/components/ui/number-spin";
 import i18n from "@/i18n";
 import { fmtInputNumber, parseDecimal } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ export function NbCheck({ checked, onChange, title }: { checked: boolean; onChan
         checked ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 bg-transparent hover:border-primary/70"
       }`}
     >
-      {checked && <Check className="h-3 w-3" strokeWidth={3} />}
+      {checked && <NetsuIcon name="check" className="h-3 w-3" />}
     </button>
   );
   if (!title) return btn;
@@ -62,7 +63,7 @@ function OptionEditRow({ option, onUpdate, onRemove, onDone }: {
   const commit = () => { if (label.trim() && label !== option.label) onUpdate({ label: label.trim() }); };
   return (
     <div className="rounded-md bg-muted/60 p-1.5">
-      <input
+      <input autoComplete="off"
         aria-label={option.label}
         value={label}
         onChange={(e) => setLabel(e.target.value)}
@@ -84,7 +85,7 @@ function OptionEditRow({ option, onUpdate, onRemove, onDone }: {
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <button type="button" onClick={onRemove} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:text-destructive"><Trash2 className="h-3 w-3" /> {t("common:action.delete")}</button>
+        <button type="button" onClick={onRemove} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:text-destructive"><NetsuIcon name="trash" className="h-3 w-3" /> {t("common:action.delete")}</button>
         <button type="button" onClick={() => { commit(); onDone(); }} className="rounded px-2 py-0.5 text-xs text-primary hover:bg-primary/10">{t("common:status.ok")}</button>
       </div>
     </div>
@@ -125,7 +126,7 @@ export function OptionPicker({
     <DropdownMenu>
       <DropdownMenuTrigger render={trigger as React.ReactElement} />
       <DropdownMenuContent className="w-64">
-        <input
+        <input autoComplete="off" spellCheck={false}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t("db.option.searchOrCreate")}
@@ -143,7 +144,7 @@ export function OptionPicker({
           ) : (
             <div key={o.id} className="group flex items-center gap-1 rounded px-1 py-0.5 hover:bg-muted">
               <button type="button" aria-label={o.label} onClick={() => toggle(o.id)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
-                <span className="flex w-4 shrink-0 justify-center">{selected.includes(o.id) && <Check className="h-3.5 w-3.5 text-primary" />}</span>
+                <span className="flex w-4 shrink-0 justify-center">{selected.includes(o.id) && <NetsuIcon name="check" className="h-3.5 w-3.5 text-primary" />}</span>
                 <OptionBadge option={o} />
               </button>
               {canEdit && (
@@ -151,7 +152,7 @@ export function OptionPicker({
                   <TooltipTrigger
                     render={
                       <button type="button" aria-label={i18n.t("notebook:a11y.editOption")} onClick={() => setEditingId(o.id)} className="shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100">
-                        <Pencil className="h-3 w-3" />
+                        <NetsuIcon name="edit" className="h-3 w-3" />
                       </button>
                     }
                   />
@@ -165,7 +166,7 @@ export function OptionPicker({
           <>
             {filtered.length > 0 && <DropdownMenuSeparator />}
             <DropdownMenuItem onClick={() => { const id = onCreateOption(q.trim()); setQ(""); toggle(id); }}>
-              <Plus className="mr-1 h-3.5 w-3.5" /> {t("db.option.create", { label: q.trim() })}
+              <NetsuIcon name="add" className="mr-1 h-3.5 w-3.5" /> {t("db.option.create", { label: q.trim() })}
             </DropdownMenuItem>
           </>
         )}
@@ -200,24 +201,24 @@ export function ChecklistPicker({ value, onChange, trigger }: {
         {items.map((it) => (
           <div key={it.id} className="flex items-center gap-2 rounded px-1 py-0.5 hover:bg-muted">
             <NbCheck checked={it.done} onChange={() => set(items.map((x) => (x.id === it.id ? { ...x, done: !x.done } : x)))} />
-            <input
+            <input autoComplete="off"
               aria-label={it.label || t("db.checklist.addTask")}
               value={it.label}
               onChange={(e) => set(items.map((x) => (x.id === it.id ? { ...x, label: e.target.value } : x)))}
               className={`min-w-0 flex-1 bg-transparent text-sm outline-none ${it.done ? "text-muted-foreground line-through" : ""}`}
             />
-            <button type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="h-3.5 w-3.5" /></button>
           </div>
         ))}
         <div className="mt-1 flex items-center gap-1 border-t border-border px-1 pt-1.5">
-          <input
+          <input autoComplete="off" spellCheck={false}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter") { e.preventDefault(); add(); } }}
             placeholder={t("db.checklist.addTask")}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-          <button type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="text-muted-foreground hover:text-foreground"><Plus className="h-3.5 w-3.5" /></button>
+          <button type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -229,6 +230,15 @@ export function ChecklistPicker({ value, onChange, trigger }: {
 export function DatePickerCell({ field, value, onChange }: { field: DbField; value: unknown; onChange: (v: unknown) => void }) {
   const { t } = useTranslation("notebook");
   const [open, setOpen] = useState(false);
+  const text = String(value ?? "");
+  const day = /^\d{4}-\d{2}-\d{2}/.test(text) ? text.slice(0, 10) : "";
+  const time = /T\d{2}:\d{2}/.test(text) ? text.slice(11, 16) : "00:00";
+  const [hh, mm] = time.split(":").map(Number);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const setTime = (h: number, m: number) => {
+    const d = new Date();
+    onChange(`${day || `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`}T${pad(h)}:${pad(m)}`);
+  };
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger render={
@@ -237,17 +247,23 @@ export function DatePickerCell({ field, value, onChange }: { field: DbField; val
         </button>
       } />
       <DropdownMenuContent className="w-auto border-0 bg-transparent p-0 shadow-none ring-0">
-        {field.includeTime ? (
-          <input
-            type="datetime-local"
-            aria-label={field.name}
-            value={/^\d{4}-\d{2}-\d{2}/.test(String(value ?? "")) ? String(value) : ""}
-            onChange={(e) => onChange(e.target.value)}
-            className="m-2 rounded border border-border bg-muted px-2 py-1 text-sm outline-none"
+        <div className="flex flex-col gap-1">
+          <MiniCalendar
+            value={day}
+            onPick={(iso) => {
+              // "" = the calendar's clear button.
+              onChange(iso && field.includeTime ? `${iso}T${time}` : iso);
+              if (!field.includeTime) setOpen(false);
+            }}
           />
-        ) : (
-          <MiniCalendar value={/^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")) ? String(value) : ""} onPick={(iso) => { onChange(iso); setOpen(false); }} />
-        )}
+          {field.includeTime && (
+            <div className="flex items-center justify-center gap-1 rounded-xl border border-border bg-card p-2 shadow-xl">
+              <NumberSpin ariaLabel={t("a11y.hour")} value={hh} min={0} max={23} onCommit={(h) => setTime(h, mm)} className="w-12" />
+              <span className="text-muted-foreground">:</span>
+              <NumberSpin ariaLabel={t("a11y.minute")} value={mm} min={0} max={59} onCommit={(m) => setTime(hh, m)} className="w-12" />
+            </div>
+          )}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -337,7 +353,7 @@ export function InputEditCell({
     onClose();
   };
   return (
-    <input
+    <input autoComplete="off"
       aria-label={type}
       type={type === "date" ? "date" : "text"}
       inputMode={type === "number" ? "decimal" : undefined}

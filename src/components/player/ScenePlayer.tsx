@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
-import { Play, Maximize2, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
-import { PlayIcon, PauseIcon } from "@/components/ui/animated-icons";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { VolumeSlider } from "@/components/player/VolumeSlider";
 import { useVideoScrubber, useVolumeState } from "@/components/player/usePlayer";
 import { useApp } from "@/store";
@@ -68,7 +67,7 @@ export function ScenePlayer({
     return (
       <div className="group relative h-full w-full bg-black">
         <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-          <Play className="h-8 w-8 opacity-40" />
+          <NetsuIcon name="play" className="h-8 w-8 opacity-40" />
         </div>
       </div>
     );
@@ -362,13 +361,13 @@ function PlayerSurface({
         </div>
 
         <div className="pointer-events-auto mt-2 flex items-center gap-2 text-white">
-          <button type="button" onClick={toggle} aria-label={playing ? t("player.pause") : t("player.play")} className="shrink-0 hover:text-primary">{playing ? <PauseIcon size={20} /> : <PlayIcon size={20} />}</button>
+          <button type="button" onClick={toggle} aria-label={playing ? t("player.pause") : t("player.play")} className="shrink-0 hover:text-primary"><NetsuIcon name="play-pause" on={playing} className="size-5" /></button>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => step(-1 / 24)} className="shrink-0 hover:text-primary" aria-label={t("player.prevFrame")} />}><SkipBack className="h-4 w-4" /></TooltipTrigger>
+            <TooltipTrigger render={<button type="button" onClick={() => step(-1 / 24)} className="shrink-0 hover:text-primary" aria-label={t("player.prevFrame")} />}><NetsuIcon name="prev" className="h-4 w-4" /></TooltipTrigger>
             <TooltipContent>{t("player.prevFrameShortcut")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => step(1 / 24)} className="shrink-0 hover:text-primary" aria-label={t("player.nextFrame")} />}><SkipForward className="h-4 w-4" /></TooltipTrigger>
+            <TooltipTrigger render={<button type="button" onClick={() => step(1 / 24)} className="shrink-0 hover:text-primary" aria-label={t("player.nextFrame")} />}><NetsuIcon name="next" className="h-4 w-4" /></TooltipTrigger>
             <TooltipContent>{t("player.nextFrameShortcut")}</TooltipContent>
           </Tooltip>
           <span className="shrink-0 whitespace-nowrap tabular-nums text-xs text-white/80">{fmt(time)} / {fmt(dur)}</span>
@@ -383,22 +382,22 @@ function PlayerSurface({
           >
             <VolumeSlider value={volume} onChange={onVolumeChange} onToggleMute={toggleMute} label={t("player.volume")} />
           </div>
-          <button type="button" onClick={fullscreen} aria-label={t("player.fullscreen")} className="shrink-0 hover:text-primary"><Maximize2 className="h-4 w-4" /></button>
+          <button type="button" onClick={fullscreen} aria-label={t("player.fullscreen")} className="shrink-0 hover:text-primary"><NetsuIcon name="fullscreen" className="h-4 w-4" /></button>
         </div>
       </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
         <ContextMenuItem onClick={toggle}>
-          {playing ? <PauseIcon /> : <PlayIcon />} {playing ? t("player.pause") : t("player.play")}
+          <NetsuIcon name="play-pause" on={playing} /> {playing ? t("player.pause") : t("player.play")}
         </ContextMenuItem>
         <ContextMenuCheckboxItem checked={volume === 0} onClick={toggleMute}>
-          {volume === 0 ? <VolumeX /> : <Volume2 />} {t("player.muted")}
+          <NetsuIcon name="mute" on={volume === 0} /> {t("player.muted")}
         </ContextMenuCheckboxItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => step(-1 / 24)}><SkipBack /> {t("player.prevFrame")}</ContextMenuItem>
-        <ContextMenuItem onClick={() => step(1 / 24)}><SkipForward /> {t("player.nextFrame")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => step(-1 / 24)}><NetsuIcon name="prev" /> {t("player.prevFrame")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => step(1 / 24)}><NetsuIcon name="next" /> {t("player.nextFrame")}</ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={fullscreen}><Maximize2 /> {t("player.fullscreen")}</ContextMenuItem>
+        <ContextMenuItem onClick={fullscreen}><NetsuIcon name="fullscreen" /> {t("player.fullscreen")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

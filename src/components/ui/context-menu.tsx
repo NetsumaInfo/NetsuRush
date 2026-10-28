@@ -3,7 +3,7 @@
 // Menu contextuel (clic droit) — flavor Base UI (jamais Radix). Mêmes styles que dropdown-menu.
 
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu"
-import { ChevronRightIcon, CheckIcon } from "lucide-react"
+import { NetsuIcon } from "@/components/ui/netsu-icon"
 
 import { cn } from "@/lib/utils"
 
@@ -25,7 +25,7 @@ function ContextMenuContent({
 }: ContextMenuPrimitive.Popup.Props) {
   return (
     <ContextMenuPrimitive.Portal>
-      <ContextMenuPrimitive.Positioner className="isolate z-50 outline-none">
+      <ContextMenuPrimitive.Positioner collisionPadding={8} className="isolate z-50 outline-none">
         <ContextMenuPrimitive.Popup
           data-slot="context-menu-content"
           className={cn(
@@ -80,7 +80,7 @@ function ContextMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute right-2 flex items-center justify-center">
         <ContextMenuPrimitive.CheckboxItemIndicator>
-          <CheckIcon />
+          <NetsuIcon name="check" className="size-4" />
         </ContextMenuPrimitive.CheckboxItemIndicator>
       </span>
       {children}
@@ -109,7 +109,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto" />
+      <NetsuIcon name="next" className="ml-auto" />
     </ContextMenuPrimitive.SubmenuTrigger>
   )
 }

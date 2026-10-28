@@ -5,7 +5,8 @@ import { createElement, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import type { LucideIcon } from "lucide-react";
-import { ImagePlus, Smile, Shapes, Images as ImagesIcon, Search, X, FolderInput, HardDrive, RefreshCw, FileWarning, Link2, Tags, ChevronRight } from "lucide-react";
+import { Smile, Shapes, Images as ImagesIcon } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { lucideIcon, lucideNames, useLucideCatalog } from "@/lib/lucideCatalog";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
@@ -67,8 +68,8 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: C
   return (
     <div className="flex flex-col">
       <div className="mb-2 flex items-center gap-1.5 rounded-md border border-border bg-muted px-2">
-        <Search className="h-3.5 w-3.5 text-muted-foreground" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("editor.iconSearch")} className="w-full bg-transparent py-1.5 text-sm outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+        <NetsuIcon name="search" className="h-3.5 w-3.5 text-muted-foreground" />
+        <input autoComplete="off" spellCheck={false} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("editor.iconSearch")} className="w-full bg-transparent py-1.5 text-sm outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </div>
       <div ref={gridRef} className="grid max-h-64 grid-cols-9 gap-1 overflow-y-auto">
         {list.map((n) => (
@@ -109,7 +110,7 @@ function SettingRow({ icon, label, hint, open, onClick }: { icon: React.ReactNod
       <span className="text-muted-foreground">{icon}</span>
       <span className="flex-1">{label}</span>
       {hint}
-      <ChevronRight className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-90")} />
+      <NetsuIcon name="chevron-toggle" on={open} className="size-4 text-muted-foreground" />
     </button>
   );
 }
@@ -411,10 +412,10 @@ export function FolderEditor({
                 placeholder={tr("editor.descPlaceholder")} className="text-xs" />
               {/* Deux rangements DISTINCTS : Groupes = étiquettes multiples (filtres), Dossier =
                   emplacement unique. Icônes + légendes différentes pour lever la confusion. */}
-              <FieldRow icon={<Tags className="size-4 shrink-0" />} label={tr("editor.groups")}>
+              <FieldRow icon={<NetsuIcon name="tags" className="size-4 shrink-0" />} label={tr("editor.groups")}>
                 <TagInput value={tags} onChange={setTags} suggestions={collectionTags} placeholder={tr("editor.groupTag")} />
               </FieldRow>
-              <FieldRow icon={<FolderInput className="size-4 shrink-0" />} label={tr("editor.folder")} hint={tr("editor.folderHint")}>
+              <FieldRow icon={<NetsuIcon name="folder-move" className="size-4 shrink-0" />} label={tr("editor.folder")} hint={tr("editor.folderHint")}>
                 <div>
                   <Select value={folderId ?? ROOT} onValueChange={(v) => setFolderId(v === ROOT ? null : (v as string))}>
                     <SelectTrigger size="sm" className="w-full">
@@ -447,7 +448,7 @@ export function FolderEditor({
               onRemoved={() => onOpenChange(false)} />
             {editing?.id && (
               <div className="overflow-hidden rounded-lg border border-border bg-card">
-                <SettingRow icon={<FileWarning className="size-4" />} label={tr("editor.media")} open={expanded === "media"}
+                <SettingRow icon={<NetsuIcon name="file-warning" className="size-4" />} label={tr("editor.media")} open={expanded === "media"}
                   onClick={() => setExpanded((e) => (e === "media" ? "" : "media"))}
                   hint={offline.length > 0
                     ? <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-500">{tr("editor.offlineCount", { count: offline.length })}</span>
@@ -458,7 +459,7 @@ export function FolderEditor({
                       <HintLabel label={tr("editor.relinkMoved")} hint={tr("editor.resyncHint")}
                         className="min-w-0 truncate text-xs text-muted-foreground" />
                       <Button variant="outline" size="sm" className="shrink-0" onClick={resyncDir} disabled={resyncing}>
-                        {resyncing ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />} {tr("editor.resync")}
+                        {resyncing ? <Spinner className="size-3.5" /> : <NetsuIcon name="refresh" className="size-3.5" />} {tr("editor.resync")}
                       </Button>
                     </div>
                     {/* Rien à afficher quand tout est en ligne : l'état est déjà dans l'en-tête de la
@@ -472,7 +473,7 @@ export function FolderEditor({
                                 <TooltipTrigger render={<span className="min-w-0 flex-1 truncate text-[11px]">{m.name} <span className="text-muted-foreground">{tr("editor.dotPlans", { count: m.count })}</span></span>} />
                                 <TooltipContent>{m.path}</TooltipContent>
                               </Tooltip>
-                              <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => relinkOne(m.path)}><Link2 className="size-3" /> {tr("editor.relink")}</Button>
+                              <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => relinkOne(m.path)}><NetsuIcon name="link" className="size-3" /> {tr("editor.relink")}</Button>
                             </div>
                           ))}
                         </div>
@@ -489,7 +490,7 @@ export function FolderEditor({
                 <button type="button" aria-expanded={expanded === "archive"}
                   onClick={() => setExpanded((e) => (e === "archive" ? "" : "archive"))}
                   className="flex flex-1 items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50">
-                  <span className="text-muted-foreground"><HardDrive className="size-4" /></span>
+                  <span className="text-muted-foreground"><NetsuIcon name="disk" className="size-4" /></span>
                   <span className="flex-1">{tr("archive.onDisk")}</span>
                 </button>
                 <Tooltip>
@@ -505,7 +506,7 @@ export function FolderEditor({
                 <button type="button" aria-label={tr("archive.onDisk")} aria-expanded={expanded === "archive"}
                   onClick={() => setExpanded((e) => (e === "archive" ? "" : "archive"))}
                   className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
-                  <ChevronRight className={cn("size-4 transition-transform", expanded === "archive" && "rotate-90")} />
+                  <NetsuIcon name="chevron-toggle" on={expanded === "archive"} className="size-4" />
                 </button>
               </div>
               {expanded === "archive" && (
@@ -710,13 +711,13 @@ export function FolderEditor({
                   <CollectionGlyph icon={icon} color={color} size={40} />
                   <button type="button" onClick={() => setIcon({ kind: "lucide", name: "folder" })}
                     className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-destructive">
-                    <X className="h-3.5 w-3.5" /> {tr("common:action.remove")}
+                    <NetsuIcon name="close" className="h-3.5 w-3.5" /> {tr("common:action.remove")}
                   </button>
                 </div>
               )}
               <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                 className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-border px-2 py-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                {uploading ? <Spinner className="size-3.5" /> : <ImagePlus className="h-3.5 w-3.5" />}
+                {uploading ? <Spinner className="size-3.5" /> : <NetsuIcon name="image-add" className="h-3.5 w-3.5" />}
                 {tr("editor.importImage")}
               </button>
               <input ref={fileRef} type="file" accept="image/*" hidden

@@ -3,7 +3,7 @@
 // panneau de portée, qui doit rester un simple sélecteur.
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderKanban, RefreshCw, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -68,7 +68,7 @@ export function ProjectsSection() {
         </h4>
         <div className="mt-3 flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => void runScan()} disabled={scanning}>
-            {scanning ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}
+            {scanning ? <Spinner className="size-3.5" /> : <NetsuIcon name="refresh" className="size-3.5" />}
             {t("settings:storage.projects.scan")}
           </Button>
           {notice && <span className="text-xs text-muted-foreground">{notice}</span>}
@@ -97,7 +97,7 @@ export function ProjectsSection() {
         )}
         {projects?.map((p) => (
           <li key={p.name} className="flex items-center gap-3 p-3">
-            <FolderKanban className="size-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="folder-kanban" className="size-4 shrink-0 text-muted-foreground" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="truncate text-sm text-foreground">{p.name}</span>
@@ -111,7 +111,7 @@ export function ProjectsSection() {
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive"
                 aria-label={t("settings:storage.projects.forget")} onClick={() => void forget(p.name)} />}>
-                <Trash2 className="size-4" />
+                <NetsuIcon name="trash" className="size-4" />
               </TooltipTrigger>
               <TooltipContent>{t("settings:storage.projects.forgetTooltip")}</TooltipContent>
             </Tooltip>

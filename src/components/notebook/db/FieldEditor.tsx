@@ -1,9 +1,9 @@
 // Éditeur d'une cellule EN COLONNE (panneau détail de ligne) — rend le bon
 // contrôle selon le type de champ, pleine largeur. Réutilise les sélecteurs de cellControls (option,
-// checklist) + inputs natifs pour texte/nombre/lien/date. Aucune anim JS.
+// checklist) + inputs pour texte/nombre/lien, calendrier maison pour la date. Aucune anim JS.
 import { useTranslation } from "react-i18next";
 import { DecimalInput } from "@/components/ui/decimal-input";
-import { CellDisplay, OptionPicker, ChecklistPicker, NbCheck } from "./cellControls";
+import { CellDisplay, OptionPicker, ChecklistPicker, NbCheck, DatePickerCell } from "./cellControls";
 import { formatTimestamp, type ChecklistItem, type DbField } from "../notebookShared";
 import type { DatabaseOps } from "./useDatabaseOps";
 
@@ -30,9 +30,9 @@ export function FieldEditor({ field, value, onChange, ops }: {
     case "number":
       return <DecimalInput bare aria-label={field.name} digits={6} value={typeof value === "number" ? value : null} onValueChange={(v) => onChange(v ?? "")} placeholder="0" className={inputCls} />;
     case "date":
-      return <input aria-label={field.name} type={field.includeTime ? "datetime-local" : "date"} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className={inputCls} />;
+      return <div className={`${inputCls} h-9 p-0`}><DatePickerCell field={field} value={value} onChange={onChange} /></div>;
     case "url":
-      return <input aria-label={field.name} type="url" value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} placeholder="https://…" className={inputCls} />;
+      return <input autoComplete="off" spellCheck={false} aria-label={field.name} type="url" value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} placeholder="https://…" className={inputCls} />;
     case "select":
     case "multiSelect":
       return (
@@ -60,6 +60,6 @@ export function FieldEditor({ field, value, onChange, ops }: {
         />
       );
     default:
-      return <input aria-label={field.name} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} placeholder={t("db.field.empty")} className={inputCls} />;
+      return <input autoComplete="off" aria-label={field.name} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} placeholder={t("db.field.empty")} className={inputCls} />;
   }
 }

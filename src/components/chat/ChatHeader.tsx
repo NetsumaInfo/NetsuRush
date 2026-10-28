@@ -2,7 +2,7 @@
 // + réglages. Le choix du moteur / modèle / permissions vit désormais EN BAS, dans le composer (EngineMenu).
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Settings2, Loader2, Plus, MessageSquare, Trash2, ChevronDown } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,13 +29,13 @@ export function ChatHeader({ onSettings }: { onSettings: () => void }) {
     <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2">
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="max-w-56 gap-1.5" />}>
-          <MessageSquare className="size-3.5 shrink-0" />
+          <NetsuIcon name="message" className="size-3.5 shrink-0" />
           <span className="truncate text-xs">{curTitle || t("header.conversations")}</span>
-          <ChevronDown className="size-3.5 shrink-0 opacity-60" />
+          <NetsuIcon name="chevron-down" className="size-3.5 shrink-0 opacity-60" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
           <button type="button" onClick={newConv} className="mb-1 flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary">
-            <Plus className="size-4" /> {t("header.newConv")}
+            <NetsuIcon name="chat-new" className="size-4" /> {t("header.newConv")}
           </button>
           {convs.length > 0 && <DropdownMenuSeparator />}
           <div className="max-h-72 overflow-y-auto">
@@ -47,7 +47,7 @@ export function ChatHeader({ onSettings }: { onSettings: () => void }) {
                   {c.title}
                 </button>
                 <button type="button" onClick={() => void delConv(c.id)} aria-label={t("common:action.delete")} className="rounded p-1 text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary hover:text-destructive outline-none">
-                  <Trash2 className="size-3.5" />
+                  <NetsuIcon name="trash" className="size-3.5" />
                 </button>
               </div>
             ))}
@@ -55,11 +55,11 @@ export function ChatHeader({ onSettings }: { onSettings: () => void }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Button variant="ghost" size="icon-sm" aria-label={t("header.newConv")} onClick={newConv}><Plus className="size-4" /></Button>
+      <Button variant="ghost" size="icon-sm" aria-label={t("header.newConv")} onClick={newConv}><NetsuIcon name="chat-new" className="size-4" /></Button>
 
       <div className="ml-auto flex items-center gap-1.5">
-        {running && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="size-3.5 animate-spin" />{status || "…"}</span>}
-        <Button size="sm" variant="ghost" onClick={onSettings} aria-label={t("header.settings")}><Settings2 className="size-4" /></Button>
+        {running && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><NetsuIcon name="loading" busy className="size-3.5" />{status || "…"}</span>}
+        <Button size="sm" variant="ghost" onClick={onSettings} aria-label={t("header.settings")}><NetsuIcon name="sliders" className="size-4" /></Button>
       </div>
     </div>
   );

@@ -3,12 +3,11 @@
 // collections rendent EXACTEMENT les mêmes contrôles. Recopier ce bloc ferait diverger les deux écrans
 // au premier réglage ajouté. Ce qui reste propre à Traitements (encodage de sortie, dossier, import)
 // n'est pas ici : l'archivage a déjà les siens.
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Toggle } from "@/components/ui/toggle";
-import { cn } from "@/lib/utils";
 import { Row, Field } from "./procSettingsParts";
 import { ModelPicker, useModelOptions } from "./ModelPicker";
 import { ShaderPicker } from "./ShaderPicker";
@@ -133,7 +132,7 @@ export function UpscaleModelSettings({ settings, patch, disabled }: {
           filtres libplacebo, ou paramètres du RTX Video SDK (les deux n'ont rien en commun). */}
       <button type="button" onClick={() => setAdvanced((a) => !a)}
         className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
-        <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", advanced && "rotate-90")} /> {t("settings.advanced")}
+        <NetsuIcon name="chevron-toggle" on={advanced} className="h-3.5 w-3.5" /> {t("settings.advanced")}
       </button>
 
       {isTurbo && advanced && (

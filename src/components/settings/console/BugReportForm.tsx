@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Download } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type BugReportRequest } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -293,7 +293,7 @@ export function BugReportForm() {
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={busy || configured === false}>{busy ? t("bugReport.sending") : t("bugReport.send")}</Button>
           <Button type="button" variant="outline" onClick={download}>
-            <Download className="size-3.5" /> {t("bugReport.download")}
+            <NetsuIcon name="download" className="size-3.5" /> {t("bugReport.download")}
           </Button>
           <span className="text-xs text-muted-foreground">
             {t("bugReport.logsAttached", { count: logs.length })}

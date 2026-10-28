@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import { ChevronRight, Folder, HardDriveDownload, FolderOpen, FolderPlus, FolderInput, Pencil, Trash2, Unlink } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
@@ -33,7 +33,7 @@ function OfflineBanner({ count }: { count: number }) {
   };
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
-      <Unlink className="h-4 w-4 shrink-0 text-destructive" />
+      <NetsuIcon name="unlink" className="h-4 w-4 shrink-0 text-destructive" />
       <span className="flex-1 text-muted-foreground">{t("library.offlineBanner", { count })}</span>
       <Button variant="outline" size="sm" onClick={relocate} disabled={busy}>{t("library.relocate")}</Button>
     </div>
@@ -102,12 +102,12 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
               drop.over && "bg-primary/10 ring-1 ring-primary",
             )} />
         }>
-          <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90")} />
+          <NetsuIcon name="chevron-toggle" on={isOpen} className="h-4 w-4 shrink-0 text-muted-foreground" />
           {/* Accent réservé à l'état : marque « c'est à moi, ça persiste », même vocabulaire que le
               badge des clips locaux. Les bins du projet gardent l'icône neutre. */}
           {isRoot
-            ? <HardDriveDownload className="h-4 w-4 shrink-0 text-primary" />
-            : <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />}
+            ? <NetsuIcon name="disk-download" className="h-4 w-4 shrink-0 text-primary" />
+            : <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />}
           <span className="truncate font-medium">{isRoot ? t("library.rootName") : node.name}</span>
           <span className="text-xs text-muted-foreground">{countTreeClips(node)}</span>
           <span className="flex-1" />
@@ -117,25 +117,25 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
               aria-label={t("library.newFolder")}
               onClick={(e) => { e.stopPropagation(); setDialog("new"); }}
               className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100" />}>
-              <FolderPlus />
+              <NetsuIcon name="cut-folder-new" />
             </TooltipTrigger>
             <TooltipContent>{t("library.newFolder")}</TooltipContent>
           </Tooltip>
         </ContextMenuTrigger>
         <ContextMenuContent className="min-w-48">
           <ContextMenuItem onClick={toggle}>
-            <FolderOpen /> {isOpen ? t("shared.collapseFolder") : t("shared.expandFolder")}
+            <NetsuIcon name="folder-open" /> {isOpen ? t("shared.collapseFolder") : t("shared.expandFolder")}
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={() => setDialog("new")}><FolderPlus /> {t("library.newFolder")}</ContextMenuItem>
-          {isRoot && <ContextMenuItem onClick={() => void pickDir()}><FolderInput /> {t("library.importFolder")}</ContextMenuItem>}
+          <ContextMenuItem onClick={() => setDialog("new")}><NetsuIcon name="cut-folder-new" /> {t("library.newFolder")}</ContextMenuItem>
+          {isRoot && <ContextMenuItem onClick={() => void pickDir()}><NetsuIcon name="cut-import" /> {t("library.importFolder")}</ContextMenuItem>}
           {!isRoot && (
             <>
-              <ContextMenuItem onClick={() => setDialog("rename")}><Pencil /> {t("library.renameFolder")}</ContextMenuItem>
+              <ContextMenuItem onClick={() => setDialog("rename")}><NetsuIcon name="edit" /> {t("library.renameFolder")}</ContextMenuItem>
               <ContextMenuSeparator />
               {/* Confirmation : le sort des rushs contenus se décide là, pas ici. */}
               <ContextMenuItem variant="destructive" onClick={() => { setWithItems(false); setDialog("delete"); }}>
-                <Trash2 /> {t("library.deleteFolder")}
+                <NetsuIcon name="cut-delete" /> {t("library.deleteFolder")}
               </ContextMenuItem>
             </>
           )}
@@ -173,7 +173,7 @@ function LibFolderRow({ node, depth, isOpen, toggle, folder }: {
               variant="destructive"
               onClick={() => { if (folder) void deleteLibraryFolder(folder.id, withItems); setDialog(null); }}
             >
-              <Trash2 /> {t("library.deleteFolder")}
+              <NetsuIcon name="cut-delete" /> {t("library.deleteFolder")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -206,14 +206,14 @@ function FolderView({ node, path, depth, collapsed, toggle, lib, folderByPath, o
               style={{ paddingLeft: pad }}
               className="flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm text-foreground hover:bg-accent/60" />
           }>
-            <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90")} />
-            <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="chevron-toggle" on={isOpen} className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="truncate font-medium">{node.name}</span>
             <span className="text-xs text-muted-foreground">{countTreeClips(node)}</span>
           </ContextMenuTrigger>
           <ContextMenuContent className="min-w-44">
             <ContextMenuItem onClick={() => toggle(path)}>
-              <FolderOpen /> {isOpen ? t("shared.collapseFolder") : t("shared.expandFolder")}
+              <NetsuIcon name="folder-open" /> {isOpen ? t("shared.collapseFolder") : t("shared.expandFolder")}
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>

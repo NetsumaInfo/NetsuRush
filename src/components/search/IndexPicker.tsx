@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Database, Check, X, Zap, Layers } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type Clip, type IndexedInfo } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -132,7 +132,7 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
               >
                 <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded border",
                   on ? "border-primary bg-primary text-white" : "border-border")}>
-                  {on && <Check className="h-3 w-3" />}
+                  {on && <NetsuIcon name="check" className="h-3 w-3" />}
                 </span>
                 {/* Un rush jamais indexé n'a que sa pastille : elle porte alors seule l'état. */}
                 {tag.t ? <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", tag.dot)} /> : (
@@ -172,22 +172,22 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
               <Toggle size="sm" variant="outline" pressed={indexParallel} onPressedChange={setIndexParallel}
                 className="px-2.5 text-xs text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary" />
             }>
-              <Layers className="h-3.5 w-3.5" /> {t("indexPicker.parallel")}
+              <NetsuIcon name="layers" className="h-3.5 w-3.5" /> {t("indexPicker.parallel")}
             </TooltipTrigger>
             <TooltipContent>{t("indexPicker.parallelHint")}</TooltipContent>
           </Tooltip>
           <SearchPerfMenu />
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose}><X className="h-3.5 w-3.5" /> {t("common:action.cancel")}</Button>
+          <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="h-3.5 w-3.5" /> {t("common:action.cancel")}</Button>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="sm" disabled={pick.size === 0} onClick={() => confirmIndex(true)} />}>
-              <Zap className="h-3.5 w-3.5" /> {t("indexPicker.reindex")} ({pick.size})
+              <NetsuIcon name="zap" className="h-3.5 w-3.5" /> {t("indexPicker.reindex")} ({pick.size})
             </TooltipTrigger>
             <TooltipContent>{t("indexPicker.reindexHint")}</TooltipContent>
           </Tooltip>
           <Button size="sm" disabled={pick.size === 0} onClick={() => confirmIndex(false)}>
-            <Database className="h-3.5 w-3.5" /> {t("indexPicker.index")} ({pick.size})
+            <NetsuIcon name="search-index" className="h-3.5 w-3.5" /> {t("indexPicker.index")} ({pick.size})
           </Button>
         </div>
       </div>

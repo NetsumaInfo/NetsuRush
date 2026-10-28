@@ -19,7 +19,7 @@
 // the core never reads the vault.
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Check, Clapperboard, Download, Eye, EyeOff, ExternalLink, KeyRound, LogIn, RefreshCw, ShieldAlert, Terminal, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 
 import { useApp } from "@/store";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -84,7 +84,7 @@ function AgentRow({ agent, onRescan }: { agent: ChatAgentInfo; onRescan: () => v
             <Tooltip>
               <TooltipTrigger render={
                 <Button size="sm" variant="ghost" className="h-6 px-1.5" onClick={() => void connect()} disabled={busy}>
-                  {busy ? <Spinner className="size-3" /> : <LogIn className="size-3" />}
+                  {busy ? <Spinner className="size-3" /> : <NetsuIcon name="login" className="size-3" />}
                 </Button>
               } />
               <TooltipContent>{t("settings.connect")}</TooltipContent>
@@ -116,7 +116,7 @@ function AgentRow({ agent, onRescan }: { agent: ChatAgentInfo; onRescan: () => v
                   <Tooltip>
                     <TooltipTrigger render={
                       <Button size="sm" variant="ghost" className="h-6 px-1.5" onClick={() => void install()} disabled={busy}>
-                        {busy ? <Spinner className="size-3" /> : <Download className="size-3" />}
+                        {busy ? <Spinner className="size-3" /> : <NetsuIcon name="download" className="size-3" />}
                       </Button>
                     } />
                     <TooltipContent>{source.install}</TooltipContent>
@@ -130,7 +130,7 @@ function AgentRow({ agent, onRescan }: { agent: ChatAgentInfo; onRescan: () => v
                       onClick={() => void nr.openExternal(source.docs)}
                       aria-label={t("settings.docs")}
                     >
-                      <ExternalLink className="size-3" />
+                      <NetsuIcon name="open-external" className="size-3" />
                     </button>
                   } />
                   <TooltipContent>{install ? t("settings.docs") : t("settings.installPage")}</TooltipContent>
@@ -201,7 +201,7 @@ function ProviderRow({ provider, keySet, value, onValue, baseUrl, onBaseUrl }: {
               onClick={() => void nr.openExternal(provider.keyUrl)}
               aria-label={t("settings.getKey")}
             >
-              <ExternalLink className="size-3.5" />
+              <NetsuIcon name="open-external" className="size-3.5" />
             </button>
           } />
           <TooltipContent>{t("settings.getKey")}</TooltipContent>
@@ -224,7 +224,7 @@ function ProviderRow({ provider, keySet, value, onValue, baseUrl, onBaseUrl }: {
             className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             aria-label={shown ? t("settings.hide") : t("settings.show")}
           >
-            {shown ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            <NetsuIcon name="eye" on={shown} className="size-3.5" />
           </button>
         </div>
         <Button
@@ -251,7 +251,7 @@ function ProviderRow({ provider, keySet, value, onValue, baseUrl, onBaseUrl }: {
 
       {probe.state === "done" ? (
         <p className={`mt-1.5 flex items-center gap-1 text-[11px] ${probe.ok ? "text-[var(--color-ok)]" : "text-destructive"}`}>
-          {probe.ok ? <Check className="size-3" /> : <X className="size-3" />}
+          {probe.ok ? <NetsuIcon name="check" className="size-3" /> : <NetsuIcon name="close" className="size-3" />}
           {probe.ok ? t("settings.reachable", { ms: probe.ms }) : probe.detail}
         </p>
       ) : null}
@@ -322,7 +322,7 @@ function ResolveMcpSection({ info }: { info: ChatResolveMcp | null | undefined }
         />
         <span className="flex min-w-0 flex-col">
           <span className="flex items-center gap-1 text-xs font-medium">
-            <ShieldAlert className="size-3 text-amber-500" />
+            <NetsuIcon name="shield-alert" className="size-3 text-amber-500" />
             {t("settings.resolveUnsafe")}
           </span>
           <span className="text-[11px] leading-snug text-muted-foreground">{t("settings.resolveUnsafeHint")}</span>
@@ -399,7 +399,7 @@ export function ChatSettings({ onClose }: { onClose: () => void }) {
       <Accordion defaultValue={["agents"]} className="w-full">
         <AccordionItem value="agents" className="border-b border-border">
           <AccordionTrigger className="h-10 gap-3 text-xs font-semibold hover:no-underline">
-            <Terminal className="size-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="console" className="size-4 shrink-0 text-muted-foreground" />
             <span className="shrink-0">{t("settings.cliAgents")}</span>
             {/* A closed drawer still reports its state, so folding it away
                 costs nothing. */}
@@ -410,7 +410,7 @@ export function ChatSettings({ onClose }: { onClose: () => void }) {
           <AccordionContent className="pb-2">
             <div className="mb-1 flex justify-end">
               <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => void rescan()} disabled={scanning}>
-                <RefreshCw className={scanning ? "size-3 animate-spin" : "size-3"} /> {t("settings.rescan")}
+                <NetsuIcon name="refresh" busy={scanning} className="size-3" /> {t("settings.rescan")}
               </Button>
             </div>
             {cli.length === 0 ? (
@@ -425,7 +425,7 @@ export function ChatSettings({ onClose }: { onClose: () => void }) {
 
         <AccordionItem value="resolve-mcp" className="border-b border-border">
           <AccordionTrigger className="h-10 gap-3 text-xs font-semibold hover:no-underline">
-            <Clapperboard className="size-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="film-slate" className="size-4 shrink-0 text-muted-foreground" />
             <span className="shrink-0">{t("settings.resolveMcp")}</span>
             <span className="ml-auto text-[11px] font-normal tabular-nums text-muted-foreground">
               {resolveMcp?.available
@@ -440,7 +440,7 @@ export function ChatSettings({ onClose }: { onClose: () => void }) {
 
         <AccordionItem value="keys" className="border-b-0">
           <AccordionTrigger className="h-10 gap-3 text-xs font-semibold hover:no-underline">
-            <KeyRound className="size-4 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="key" className="size-4 shrink-0 text-muted-foreground" />
             <span className="shrink-0">{t("settings.apiKeys")}</span>
             <span className="ml-auto text-[11px] font-normal tabular-nums text-muted-foreground">
               {t("settings.readyCount", { ready: keysReady, total: BYOK_PROVIDERS.length })}
@@ -472,7 +472,7 @@ export function ChatSettings({ onClose }: { onClose: () => void }) {
       <div className="mt-2 flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onClose}>{t("common:action.close")}</Button>
         <Button size="sm" onClick={save}>
-          {saved ? <><Check className="size-3.5" /> {t("settings.saved")}</> : t("common:action.save")}
+          {saved ? <><NetsuIcon name="check" className="size-3.5" /> {t("settings.saved")}</> : t("common:action.save")}
         </Button>
       </div>
     </div>

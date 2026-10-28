@@ -26,7 +26,7 @@ export function NumberSpin({
   const clamp = (v: number) => clampSteppedNumber(v, min, max, step);
   const shown = draft ?? String(value);
   return (
-    <input
+    <input autoComplete="off"
       type="text" inputMode="decimal" role="spinbutton"
       aria-valuemin={min} aria-valuemax={max} aria-valuenow={value}
       aria-label={ariaLabel} value={shown} disabled={disabled}

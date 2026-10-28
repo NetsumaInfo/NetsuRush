@@ -2,7 +2,7 @@
 // sous la bascule). L'état `open` se persiste dans les props ; le masquage des enfants se fait en CSS
 // (`.bn-block-outer:has([data-toggle-open="false"]) > … > .bn-block-group`, cf. index.css).
 import { createReactBlockSpec } from "@blocknote/react";
-import { ChevronRight } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import i18n from "@/i18n";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
@@ -25,10 +25,9 @@ export const toggleSpec = createReactBlockSpec(
                 type="button"
                 contentEditable={false}
                 onClick={() => editor.updateBlock(block, { type: "toggle", props: { open: !open } })}
-                className="mt-0.5 shrink-0 select-none rounded p-0.5 text-muted-foreground transition-transform hover:bg-muted"
-                style={{ transform: open ? "rotate(90deg)" : "none" }}
+                className="mt-0.5 shrink-0 select-none rounded p-0.5 text-muted-foreground hover:bg-muted"
               >
-                <ChevronRight className="h-4 w-4" />
+                <NetsuIcon name="chevron-toggle" on={open} className="h-4 w-4" />
               </button>
             } />
             <TooltipContent>{open ? i18n.t("notebook:blocks.toggle.collapse") : i18n.t("notebook:blocks.toggle.expand")}</TooltipContent>

@@ -4,7 +4,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Crop } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -113,7 +113,7 @@ export function WallpaperControls({ config, animated, onChange, onOpenFraming }:
     <div className="flex flex-col gap-3">
       <Group title={label("groupFraming")}>
         <Button variant="outline" size="sm" onClick={onOpenFraming} className="w-full sm:w-auto">
-          <Crop className="size-3.5" /> {label("openFraming")}
+          <NetsuIcon name="crop" className="size-3.5" /> {label("openFraming")}
         </Button>
       </Group>
 

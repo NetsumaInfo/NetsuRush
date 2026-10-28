@@ -9,6 +9,7 @@ export type DiscordProfile = {
   decorationUrl: string | null;
   accentColor: string | null;
   username: string | null;
+  displayName: string | null;
 };
 
 // Cache module : le profil Discord change rarement → un seul fetch par session, partagé.
@@ -17,11 +18,17 @@ let inflight: Promise<DiscordProfile | null> | null = null;
 
 // Profil Discord (avatar + décoration + accentColor) via l'action Convex. `null` tant que non chargé
 // ou indisponible (pas de token OAuth). Sert surtout la décoration d'avatar Nitro.
-export function useDiscordProfile(): DiscordProfile | null {
+export function useDiscordProfile(enabled = true): DiscordProfile | null {
   const getProfile = useAction(api.discord.getCurrentDiscordProfile);
   const [profile, setProfile] = useState<DiscordProfile | null>(cache ?? null);
 
   useEffect(() => {
+    if (!enabled) {
+      cache = undefined;
+      inflight = null;
+      setProfile(null);
+      return;
+    }
     if (cache !== undefined) {
       setProfile(cache);
       return;
@@ -35,7 +42,7 @@ export function useDiscordProfile(): DiscordProfile | null {
     return () => {
       cancelled = true;
     };
-  }, [getProfile]);
+  }, [enabled, getProfile]);
 
   return profile;
 }

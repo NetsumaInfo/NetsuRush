@@ -4,7 +4,7 @@
 // un nom que l'export n'écrit pas.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Braces } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr, type ExportNamePreview } from "@/lib/bridge";
 import { type ExportProfile } from "@/features/export/profiles";
 import { Button } from "@/components/ui/button";
@@ -79,7 +79,7 @@ export function ExportNaming({
             <Tooltip>
               <TooltipTrigger render={<span />}>
                 <DropdownMenuTrigger render={<Button variant="outline" size="icon" disabled={disabled} aria-label={t("editor.insertToken")}>
-                  <Braces className="size-4" />
+                  <NetsuIcon name="code" className="size-4" />
                 </Button>} />
               </TooltipTrigger>
               <TooltipContent>{t("editor.insertToken")}</TooltipContent>

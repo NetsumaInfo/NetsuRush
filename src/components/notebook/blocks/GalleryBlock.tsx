@@ -6,7 +6,8 @@ import { useRef, useState, type DragEvent } from "react";
 import i18n from "@/i18n";
 import { createReactBlockSpec } from "@blocknote/react";
 import type { BlockNoteEditor } from "@blocknote/core";
-import { Images, ChevronLeft, ChevronRight, Plus, Trash2, GalleryHorizontal, GalleryHorizontalEnd, LayoutGrid, Maximize2 } from "lucide-react";
+import { GalleryHorizontal } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Lightbox } from "./Lightbox";
@@ -48,13 +49,13 @@ function GalleryEmpty({ onAdd }: { onAdd: (urls: string[], files: File[]) => voi
       className={`my-1.5 flex flex-col gap-2 rounded-xl border border-dashed px-4 py-5 transition-colors ${over ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><Images className="h-4 w-4" /></span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="gallery" className="h-4 w-4" /></span>
         <Button size="sm" onClick={() => input.current?.click()}>{i18n.t("notebook:gallery.chooseImages")}</Button>
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:gallery.dropFiles")}</span>
         <input ref={input} type="file" accept="image/*" multiple hidden onChange={(e) => { const f = Array.from(e.target.files || []); if (f.length) onAdd([], f); }} />
       </div>
       <div className="flex items-center gap-2">
-        <input
+        <input autoComplete="off"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter" && /^https?:\/\//i.test(url.trim())) { e.preventDefault(); onAdd([url.trim()], []); setUrl(""); } }}
@@ -141,7 +142,7 @@ function Gallery({ editor, block, urls, captions, layout, height }: {
       <div className="flex items-center gap-1">
         <div className="flex items-center gap-0.5 rounded-md bg-muted/60 p-0.5">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => setLayout("row")} className={`rounded p-1 ${layout === "row" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><GalleryHorizontalEnd className="h-3.5 w-3.5" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => setLayout("row")} className={`rounded p-1 ${layout === "row" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><NetsuIcon name="gallery-row" className="h-3.5 w-3.5" /></button>} />
             <TooltipContent>{i18n.t("notebook:gallery.row")}</TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -149,7 +150,7 @@ function Gallery({ editor, block, urls, captions, layout, height }: {
             <TooltipContent>{i18n.t("notebook:gallery.carousel")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => setLayout("grid")} className={`rounded p-1 ${layout === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><LayoutGrid className="h-3.5 w-3.5" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => setLayout("grid")} className={`rounded p-1 ${layout === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><NetsuIcon name="layout-grid" className="h-3.5 w-3.5" /></button>} />
             <TooltipContent>{i18n.t("notebook:gallery.grid")}</TooltipContent>
           </Tooltip>
         </div>
@@ -164,7 +165,7 @@ function Gallery({ editor, block, urls, captions, layout, height }: {
           </div>
         )}
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:gallery.imageCount", { count: urls.length })}</span>
-        <button type="button" onClick={() => input.current?.click()} className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"><Plus className="h-3.5 w-3.5" /> {i18n.t("notebook:gallery.add")}</button>
+        <button type="button" onClick={() => input.current?.click()} className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="add" className="h-3.5 w-3.5" /> {i18n.t("notebook:gallery.add")}</button>
       </div>
 
       {layout === "row" ? (
@@ -173,14 +174,14 @@ function Gallery({ editor, block, urls, captions, layout, height }: {
           {urls.map((u, k) => (
             <div key={u + k} {...dragProps(k)} className="group/img relative h-48 shrink-0 overflow-hidden rounded-lg bg-muted/40">
               <img src={u} alt={i18n.t("notebook:gallery.openImage")} role="button" tabIndex={0} aria-label={i18n.t("notebook:gallery.openImage")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLb(k); } }} onMouseDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setLb(k); }} className="h-full w-auto cursor-zoom-in object-cover" draggable={false} />
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover/img:bg-black/25 group-hover/img:opacity-100"><Maximize2 className="h-5 w-5 text-white drop-shadow" /></span>
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover/img:bg-black/25 group-hover/img:opacity-100"><NetsuIcon name="fullscreen" className="h-5 w-5 text-white drop-shadow" /></span>
               <Tooltip>
-                 <TooltipTrigger render={<button type="button" aria-label={i18n.t("notebook:gallery.removeImage")} onClick={() => removeAt(k)} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 shadow backdrop-blur transition-opacity hover:text-destructive group-hover/img:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>} />
+                 <TooltipTrigger render={<button type="button" aria-label={i18n.t("notebook:gallery.removeImage")} onClick={() => removeAt(k)} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 shadow backdrop-blur transition-opacity hover:text-destructive group-hover/img:opacity-100"><NetsuIcon name="trash" className="h-3.5 w-3.5" /></button>} />
                 <TooltipContent>{i18n.t("notebook:gallery.remove")}</TooltipContent>
               </Tooltip>
             </div>
           ))}
-           <button type="button" aria-label={i18n.t("notebook:a11y.addImage")} onClick={() => input.current?.click()} className="flex h-48 w-32 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"><Plus className="h-6 w-6" /></button>
+           <button type="button" aria-label={i18n.t("notebook:a11y.addImage")} onClick={() => input.current?.click()} className="flex h-48 w-32 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"><NetsuIcon name="add" className="h-6 w-6" /></button>
         </div>
       ) : layout === "grid" ? (
         // Grille : plusieurs par ligne. Glisser = réordonner.
@@ -188,14 +189,14 @@ function Gallery({ editor, block, urls, captions, layout, height }: {
           {urls.map((u, k) => (
             <div key={u + k} {...dragProps(k)} className="group/img relative aspect-square overflow-hidden rounded-lg bg-muted/40">
               <img src={u} alt={i18n.t("notebook:gallery.openImage")} role="button" tabIndex={0} aria-label={i18n.t("notebook:gallery.openImage")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLb(k); } }} onMouseDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setLb(k); }} className="h-full w-full cursor-zoom-in object-cover" draggable={false} />
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover/img:bg-black/25 group-hover/img:opacity-100"><Maximize2 className="h-5 w-5 text-white drop-shadow" /></span>
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover/img:bg-black/25 group-hover/img:opacity-100"><NetsuIcon name="fullscreen" className="h-5 w-5 text-white drop-shadow" /></span>
               <Tooltip>
-                 <TooltipTrigger render={<button type="button" aria-label={i18n.t("notebook:gallery.removeImage")} onClick={() => removeAt(k)} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 shadow backdrop-blur transition-opacity hover:text-destructive group-hover/img:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>} />
+                 <TooltipTrigger render={<button type="button" aria-label={i18n.t("notebook:gallery.removeImage")} onClick={() => removeAt(k)} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 shadow backdrop-blur transition-opacity hover:text-destructive group-hover/img:opacity-100"><NetsuIcon name="trash" className="h-3.5 w-3.5" /></button>} />
                 <TooltipContent>{i18n.t("notebook:gallery.remove")}</TooltipContent>
               </Tooltip>
             </div>
           ))}
-           <button type="button" aria-label={i18n.t("notebook:a11y.addImage")} onClick={() => input.current?.click()} className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"><Plus className="h-6 w-6" /></button>
+           <button type="button" aria-label={i18n.t("notebook:a11y.addImage")} onClick={() => input.current?.click()} className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"><NetsuIcon name="add" className="h-6 w-6" /></button>
         </div>
       ) : (
         <>
@@ -204,18 +205,18 @@ function Gallery({ editor, block, urls, captions, layout, height }: {
             <img src={urls[i]} alt={i18n.t("notebook:gallery.openImage")} role="button" tabIndex={0} aria-label={i18n.t("notebook:gallery.openImage")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLb(i); } }} onMouseDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setLb(i); }} className="max-h-full max-w-full cursor-zoom-in object-contain" draggable={false} />
             {urls.length > 1 && (
               <>
-                 <button type="button" aria-label={i18n.t("notebook:a11y.previousImage")} onClick={() => setIdx((i - 1 + urls.length) % urls.length)} className="absolute left-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow backdrop-blur hover:bg-background"><ChevronLeft className="h-4 w-4" /></button>
-                 <button type="button" aria-label={i18n.t("notebook:a11y.nextImage")} onClick={() => setIdx((i + 1) % urls.length)} className="absolute right-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow backdrop-blur hover:bg-background"><ChevronRight className="h-4 w-4" /></button>
+                 <button type="button" aria-label={i18n.t("notebook:a11y.previousImage")} onClick={() => setIdx((i - 1 + urls.length) % urls.length)} className="absolute left-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow backdrop-blur hover:bg-background"><NetsuIcon name="prev" className="h-4 w-4" /></button>
+                 <button type="button" aria-label={i18n.t("notebook:a11y.nextImage")} onClick={() => setIdx((i + 1) % urls.length)} className="absolute right-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow backdrop-blur hover:bg-background"><NetsuIcon name="next" className="h-4 w-4" /></button>
                 <span className="absolute bottom-2 rounded-full bg-background/80 px-2 py-0.5 text-xs text-foreground shadow backdrop-blur">{i + 1} / {urls.length}</span>
               </>
             )}
             <Tooltip>
-              <TooltipTrigger render={<button type="button" aria-label={i18n.t("notebook:gallery.removeImage")} onClick={() => removeAt(i)} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 shadow backdrop-blur transition-opacity hover:text-destructive group-hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>} />
+              <TooltipTrigger render={<button type="button" aria-label={i18n.t("notebook:gallery.removeImage")} onClick={() => removeAt(i)} className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 shadow backdrop-blur transition-opacity hover:text-destructive group-hover:opacity-100"><NetsuIcon name="trash" className="h-3.5 w-3.5" /></button>} />
               <TooltipContent>{i18n.t("notebook:gallery.removeImage")}</TooltipContent>
             </Tooltip>
           </div>
           {/* Légende de l'image courante (persistée, affichée aussi en plein écran) */}
-          <input
+          <input autoComplete="off"
             value={captions[i] ?? ""}
             onChange={(e) => setCaption(i, e.target.value)}
             placeholder={i18n.t("notebook:gallery.caption")}

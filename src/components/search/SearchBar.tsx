@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { ImagePlus, Ban, FolderSearch, ScanFace, Users, FolderKanban, Library } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Spinner } from "@/components/ui/spinner";
-import { SearchIcon } from "@/components/ui/animated-icons";
 import { MentionInput } from "@/components/search/MentionInput";
 import { cn } from "@/lib/utils";
 import type { MentionChar } from "@/components/search/mentions";
@@ -53,31 +52,31 @@ export function SearchBar({
         <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("searchBar.excludeAria")}
           aria-pressed={negativeOpen} onClick={onToggleNegative}
           className={cn(ghost, negativeOpen && "bg-accent text-foreground")} />}>
-          <Ban className="size-4" />
+          <NetsuIcon name="search-exclude" on={negativeOpen} className="size-4" />
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.excludeTooltip")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className={ghost} aria-label={t("searchBar.searchByImageAria")} onClick={onImage} />}>
-          <ImagePlus className="size-4" />
+          <NetsuIcon name="search-add-ref" className="size-4" />
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.searchByImageTooltip")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className={ghost} aria-label={t("searchBar.searchInRushesAria")} onClick={onRefPicker} />}>
-          <FolderSearch className="size-4" />
+          <NetsuIcon name="scope-folder" className="size-4" />
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.searchInRushesTooltip")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className={ghost} aria-label={t("searchBar.faceSearchAria")} onClick={onFace} />}>
-          <ScanFace className="size-4" />
+          <NetsuIcon name="search-face" className="size-4" />
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.faceSearchTooltip")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className={ghost} aria-label={t("searchBar.charactersAria")} onClick={onCharacters} />}>
-          <Users className="size-4" />
+          <NetsuIcon name="scope-characters" className="size-4" />
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.charactersTooltip")}</TooltipContent>
       </Tooltip>
@@ -89,7 +88,7 @@ export function SearchBar({
         <TooltipTrigger render={<Button variant="ghost" size="sm" aria-label={t("projectScope.open")} onClick={onOpenScope}
           className={cn("max-w-48 text-muted-foreground hover:text-foreground", scopeOpen && "bg-accent text-foreground")} />}>
           {scopeLoading ? <Spinner className="size-3.5" />
-            : scope === "all" ? <Library className="size-3.5" /> : <FolderKanban className="size-3.5" />}
+            : scope === "all" ? <NetsuIcon name="scope-library" className="size-3.5" /> : <NetsuIcon name="scope-project" className="size-3.5" />}
           <span className="truncate">{scopeLabel}</span>
         </TooltipTrigger>
         <TooltipContent>{t("projectScope.openTooltip")}</TooltipContent>
@@ -97,7 +96,7 @@ export function SearchBar({
 
       <Tooltip>
         <TooltipTrigger render={<Button size="icon-sm" aria-label={t("searchBar.searchAria")} disabled={!canSearch || searching} onClick={onSearch} />}>
-          <SearchIcon loading={searching} />
+          <NetsuIcon name="search-run" busy={searching} />
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.searchTooltip")}</TooltipContent>
       </Tooltip>

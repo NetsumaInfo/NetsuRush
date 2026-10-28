@@ -32,10 +32,6 @@
   "menu": {
     "derush": "Logging",
     "chat": "Chat",
-    "edit": "Edit",
-    "cut": "Cut",
-    "paste": "Paste",
-    "selectAll": "Select all",
     "derushHome": "Logging home",
     "reloadRushes": "Reload footage",
     "cutTimeline": "Cut a timeline",

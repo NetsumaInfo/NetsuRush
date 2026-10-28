@@ -3,8 +3,7 @@
 // Toutes les listes d'opérations ci-dessous sont alignées sur les chaînes ACCEPTÉES par les jsx
 // (`adobe-cep/jsx/host-ppro.jsx`, `host-aeft.jsx`) : une valeur inventée ici produirait un
 // « opération inconnue » côté hôte, visible seulement au runtime — c'est-à-dire jamais ici.
-import { Database, FolderClock, HardDrive, Film, AudioWaveform, Save } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import type { AdobeApp, BoostCacheKind, BoostCacheRoot, BoostDiagnosis } from "@/lib/bridge";
 
 export type { AdobeApp };
@@ -34,17 +33,19 @@ export function isUxpEraHost(app: AdobeApp, diag: BoostDiagnosis | null): boolea
 }
 
 /** Icône par nature de cache. */
-const KIND_ICONS: Record<BoostCacheKind, LucideIcon> = {
-  mediaCache: Film,
-  mediaCacheDb: Database,
-  peak: AudioWaveform,
-  diskCache: HardDrive,
-  autoSave: Save,
-  previews: FolderClock,
+const FALLBACK_ICON = netsuIconOf("disk");
+
+const KIND_ICONS: Record<BoostCacheKind, IconComponent> = {
+  mediaCache: netsuIconOf("film"),
+  mediaCacheDb: netsuIconOf("database"),
+  peak: netsuIconOf("audio-wave"),
+  diskCache: netsuIconOf("disk"),
+  autoSave: netsuIconOf("save"),
+  previews: netsuIconOf("folder-clock"),
 };
 
-export function cacheIcon(kind: BoostCacheKind): LucideIcon {
-  return KIND_ICONS[kind] || HardDrive;
+export function cacheIcon(kind: BoostCacheKind): IconComponent {
+  return KIND_ICONS[kind] || FALLBACK_ICON;
 }
 
 /** Racines dont l'identifiant est FIXE côté core et mérite donc son propre libellé. */

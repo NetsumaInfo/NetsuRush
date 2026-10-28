@@ -111,7 +111,9 @@ function thumbArgs(filePath, time, settings) {
     // Pas de seek à 0 : sur une IMAGE FIXE, `-ss` cherche après la fin d'un flux d'une seule frame,
     // ffmpeg ne rend rien et la vignette échouait sans un mot (« thumb échec »).
     ...(time > 0 ? ['-noaccurate_seek', '-ss', String(time)] : []),
-    '-i', filePath, '-an',
+    // One frame: ffmpeg's one-thread-per-core default only multiplied the threads of a dozen
+    // parallel seeks, which is what starved the interface during a thumbnail run.
+    '-threads', '2', '-i', filePath, '-an',
     '-frames:v', '1', '-vf', `scale=-2:${s.height}`, '-f', 'image2pipe', ...codec, '-',
   ];
 }
@@ -153,7 +155,7 @@ async function thumbnail(filePath, time = 1, priority = 'high', settings) {
     for (let attempt = 0; attempt < 2; attempt++) {  // retry : ffmpeg échoue parfois sous charge
       try {
         const source = attempt === 0 ? await fastestThumbInput(filePath, time) : { input: filePath, time };
-        const buf = await run('ffmpeg', thumbArgs(source.input, source.time, s), { encoding: 'buffer', timeout: 20000 });
+        const buf = await run('ffmpeg', thumbArgs(source.input, source.time, s), { encoding: 'buffer', timeout: 20000, background: true });
         if (buf && buf.length) {
           await fsp.writeFile(cacheFile, buf);
           thumbRamSet(key, cacheFile);
@@ -207,8 +209,8 @@ async function thumbsBatch(filePath, items, settings) {
       try {
         const source = await fastestThumbInput(filePath, t.time);
         let buf;
-        try { buf = await run('ffmpeg', thumbArgs(source.input, source.time, s), { encoding: 'buffer', timeout: 20000 }); }
-        catch (_) { buf = await run('ffmpeg', thumbArgs(filePath, t.time, s), { encoding: 'buffer', timeout: 20000 }); }
+        try { buf = await run('ffmpeg', thumbArgs(source.input, source.time, s), { encoding: 'buffer', timeout: 20000, background: true }); }
+        catch (_) { buf = await run('ffmpeg', thumbArgs(filePath, t.time, s), { encoding: 'buffer', timeout: 20000, background: true }); }
         if (buf && buf.length) {
           await fsp.writeFile(t.cacheFile, buf);   // cache disque écrit aussitôt
           thumbRamSet(t.key, t.cacheFile);

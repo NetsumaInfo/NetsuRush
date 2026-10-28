@@ -10,7 +10,7 @@ import { useApp } from "@/store";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from "@/components/ui/context-menu";
-import { X, Plus, ChevronsRight, FileText, ArrowLeft, ArrowRight } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { renderPageIcon } from "./IconPicker";
 
 export function NotebookTabs() {
@@ -42,11 +42,11 @@ export function NotebookTabs() {
       {/* Historique de l'onglet actif (◀ ▶) */}
       <div data-no-drag className="flex shrink-0 items-center gap-0.5">
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={navBtn}><ArrowLeft className="h-4 w-4" /></button>} />
+          <TooltipTrigger render={<button type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={navBtn}><NetsuIcon name="back" className="h-4 w-4" /></button>} />
           <TooltipContent>{tr("tabs.prev")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={navBtn}><ArrowRight className="h-4 w-4" /></button>} />
+          <TooltipTrigger render={<button type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={navBtn}><NetsuIcon name="forward" className="h-4 w-4" /></button>} />
           <TooltipContent>{tr("tabs.next")}</TooltipContent>
         </Tooltip>
       </div>
@@ -76,7 +76,7 @@ export function NotebookTabs() {
                         }`}
                       >
                     <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                      {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5" />}
+                      {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
                     </span>
                     <span className="min-w-0 flex-1 truncate">{titleOf(t.pageId)}</span>
                     <Tooltip>
@@ -86,7 +86,7 @@ export function NotebookTabs() {
                           onClick={(e) => { e.stopPropagation(); nbCloseTab(t.id); }}
                           className={`-mr-1 flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`}
                         >
-                          <X className="h-3 w-3" />
+                          <NetsuIcon name="close" className="h-3 w-3" />
                         </button>
                       } />
                       <TooltipContent>{tr("tabs.closeTab")}</TooltipContent>
@@ -113,7 +113,7 @@ export function NotebookTabs() {
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
                 <button type="button" data-no-drag className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                  <ChevronsRight className="h-4 w-4" />
+                  <NetsuIcon name="chevrons-right" className="h-4 w-4" />
                 </button>
               } />
             } />
@@ -123,7 +123,7 @@ export function NotebookTabs() {
             {nbTabs.map((t) => (
               <DropdownMenuItem key={t.id} onClick={() => void nbActivateTab(t.id)} className={t.id === nbActiveTabId ? "font-medium" : ""}>
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                  {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5" />}
+                  {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
                 </span>
                 <span className="truncate">{titleOf(t.pageId)}</span>
               </DropdownMenuItem>
@@ -139,7 +139,7 @@ export function NotebookTabs() {
             onClick={() => void nbCreatePage(null, { newTab: true })}
             className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            <Plus className="h-4 w-4" />
+            <NetsuIcon name="add" className="h-4 w-4" />
           </button>
         } />
         <TooltipContent>{tr("tabs.newPage")}</TooltipContent>

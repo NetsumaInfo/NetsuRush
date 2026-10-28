@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePersistedChoice } from "@/lib/persistedChoice";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Scissors, Check, CircleAlert, Film, Search, Pencil, Repeat, CheckSquare, Square, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr, type DetectModel, type CutAnalysis } from "@/lib/bridge";
 import { swrRead } from "@/lib/swr";
 import { useApp } from "@/store";
@@ -215,7 +215,7 @@ export function CutTimelineView() {
     return (
       <div className="flex h-full flex-col">
         <header className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
-           <button type="button" aria-label={t("common:action.back")} onClick={() => setEditing(null)} className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm transition-colors hover:bg-accent"><ArrowLeft className="h-4 w-4" /></button>
+           <button type="button" aria-label={t("common:action.back")} onClick={() => setEditing(null)} className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm transition-colors hover:bg-accent"><NetsuIcon name="back" className="h-4 w-4" /></button>
           <div className="min-w-0 flex-1 truncate text-[13px] font-medium">{t("cutTimeline.editHeader", { name: single })}</div>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
@@ -237,9 +237,9 @@ export function CutTimelineView() {
     <div className="flex h-full flex-col">
       {/* En-tête de page */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
-        <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm transition-colors hover:bg-accent"><ArrowLeft className="h-4 w-4" /></button>
+        <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex h-8 items-center justify-center rounded-md px-2 text-sm transition-colors hover:bg-accent"><NetsuIcon name="back" className="h-4 w-4" /></button>
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Scissors className="h-4 w-4 shrink-0 text-primary" />
+          <NetsuIcon name="scissors" className="h-4 w-4 shrink-0 text-primary" />
           <span className="text-[13px] font-medium">{t("cutTimeline.title")}</span>
         </div>
       </header>
@@ -247,7 +247,7 @@ export function CutTimelineView() {
       {/* Barre de navigation (fixe) : recherche + dossiers + tri */}
       <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
         <div className="relative max-w-md flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} disabled={busy} placeholder={t("shared.searchTimeline")} className="h-8 pl-8" />
         </div>
         <div className="flex-1" />
@@ -263,7 +263,7 @@ export function CutTimelineView() {
           {/* Sélection : icône bascule + compteur court + vider */}
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={allSelected ? clearSel : selectAll} disabled={busy || !visible.length} className="shrink-0" />}>
-              {allSelected ? <CheckSquare className="size-4 text-primary" /> : <Square className="size-4" />}
+              <NetsuIcon name="cut-select" on={allSelected} className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{allSelected ? t("shared.deselectAll") : t("shared.selectAll")}</TooltipContent>
           </Tooltip>
@@ -276,7 +276,7 @@ export function CutTimelineView() {
           {sel.size > 0 && !allSelected && (
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={clearSel} disabled={busy} className="shrink-0" />}>
-                <X className="size-4" />
+                <NetsuIcon name="close" className="size-4" />
               </TooltipTrigger>
               <TooltipContent>{t("shared.deselectAll")}</TooltipContent>
             </Tooltip>
@@ -298,13 +298,13 @@ export function CutTimelineView() {
           <ToggleGroup value={[mode]} onValueChange={(v) => { const m = v[0] as "new" | "replace" | undefined; if (m) setMode(m); }} disabled={busy} spacing={0} variant="outline" size="sm" className="shrink-0">
             <Tooltip>
               <TooltipTrigger render={<ToggleGroupItem value="new" className="px-2 text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary" />}>
-                <Film className="size-3.5" />
+                <NetsuIcon name="film" className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent>{t("cutTimeline.modeNewTip")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger render={<ToggleGroupItem value="replace" className="px-2 text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary" />}>
-                <Repeat className="size-3.5" />
+                <NetsuIcon name="repeat" className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent>{t("cutTimeline.modeReplaceTip")}</TooltipContent>
             </Tooltip>
@@ -322,14 +322,14 @@ export function CutTimelineView() {
               {single && (
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={startEdit} disabled={busy} className="shrink-0" />}>
-                    {analyzing ? <Spinner className="size-4" /> : <Pencil className="size-4" />}
+                    {analyzing ? <Spinner className="size-4" /> : <NetsuIcon name="edit" className="size-4" />}
                   </TooltipTrigger>
                   <TooltipContent>{t("cutTimeline.editTip")}</TooltipContent>
                 </Tooltip>
               )}
               <Tooltip>
                 <TooltipTrigger render={<Button size="sm" onClick={runBatch} disabled={busy || sel.size === 0} className="shrink-0" />}>
-                  <Scissors className="size-4" /> {t("cutTimeline.cut")}{sel.size > 1 ? ` ${sel.size}` : ""}
+                  <NetsuIcon name="scissors" className="size-4" /> {t("cutTimeline.cut")}{sel.size > 1 ? ` ${sel.size}` : ""}
                 </TooltipTrigger>
                 <TooltipContent>{sel.size > 1 ? t("cutTimeline.cutTipMany", { count: sel.size }) : t("cutTimeline.cutTipOne")}</TooltipContent>
               </Tooltip>
@@ -348,10 +348,10 @@ export function CutTimelineView() {
           <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-border p-2 text-xs">
             {batch.items.map((it) => (
               <div key={it.name} className="flex items-center gap-2">
-                {it.status === "done" ? <Check className="h-3.5 w-3.5 shrink-0 text-[var(--color-ok)]" />
-                  : it.status === "error" ? <CircleAlert className="h-3.5 w-3.5 shrink-0 text-destructive" />
+                {it.status === "done" ? <NetsuIcon name="check" className="h-3.5 w-3.5 shrink-0 text-[var(--color-ok)]" />
+                  : it.status === "error" ? <NetsuIcon name="error-badge" className="h-3.5 w-3.5 shrink-0 text-destructive" />
                   : it.status === "running" ? <Spinner className="size-3.5 text-primary" />
-                  : <Film className="h-3.5 w-3.5 shrink-0 opacity-40" />}
+                  : <NetsuIcon name="film" className="h-3.5 w-3.5 shrink-0 opacity-40" />}
                 <span className="min-w-0 flex-1 truncate">{it.name}</span>
                 <span className="shrink-0 text-muted-foreground">{it.text || ""}</span>
               </div>

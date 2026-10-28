@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Trash2, Volume2, VolumeX } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { useCompatibility } from "@/hooks/useCompatibility";
@@ -107,7 +107,7 @@ export function PlaybackSettings() {
           </SettingRow>
           <SettingRow label={t("playback.generation.audio")}>
             <Toggle className="ml-auto flex" pressed={settings.proxy.audio} onPressedChange={(audio) => patchProxy({ audio })}>
-              {settings.proxy.audio ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
+              <NetsuIcon name="mute" on={!settings.proxy.audio} className="size-3.5" />
               {settings.proxy.audio ? t("playback.generation.enabled") : t("playback.generation.disabled")}
             </Toggle>
           </SettingRow>
@@ -135,7 +135,7 @@ export function PlaybackSettings() {
         <div className="flex shrink-0 gap-2">
           <Button variant="ghost" size="sm" onClick={() => { resetSettings(); setCacheChanged(true); setCleared(false); }}>{t("playback.generation.reset")}</Button>
           <Button variant="outline" size="sm" disabled={!cacheChanged || cacheBusy === "purge"} onClick={() => void removeOldCaches()}>
-            <Trash2 className="size-3.5" /> {t("playback.generation.clearOld")}
+            <NetsuIcon name="trash" className="size-3.5" /> {t("playback.generation.clearOld")}
           </Button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScanFace, ImagePlus, Check, UserPlus, Users, Search, RefreshCw, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { type GalleryFace, type CharRef } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -45,7 +45,7 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
           )}>
           {f.thumb
             ? <img src={f.thumb} alt="" className="h-full w-full object-cover" />
-            : <div className="flex h-full items-center justify-center text-muted-foreground"><ScanFace className="h-8 w-8 opacity-40" /></div>}
+            : <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="h-8 w-8 opacity-40" /></div>}
           <span className="absolute right-1 top-1 rounded bg-black/70 px-1 text-[10px] tabular-nums text-white/90">{f.count}</span>
           {f.char ? (
             <span className="absolute inset-x-0 bottom-0 truncate px-1.5 py-1 text-center text-xs font-semibold text-white"
@@ -63,18 +63,18 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
         </button>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={onSearch}><Search /> {t("galleryPanel.card.search")}</ContextMenuItem>
-        <ContextMenuItem onClick={onToggle}><Check /> {selected ? t("galleryPanel.card.deselect") : t("galleryPanel.card.select")}</ContextMenuItem>
+        <ContextMenuItem onClick={onSearch}><NetsuIcon name="search" /> {t("galleryPanel.card.search")}</ContextMenuItem>
+        <ContextMenuItem onClick={onToggle}><NetsuIcon name="check" /> {selected ? t("galleryPanel.card.deselect") : t("galleryPanel.card.select")}</ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={onCreateOne}><UserPlus /> {t("galleryPanel.card.newCharacter")}</ContextMenuItem>
+        <ContextMenuItem onClick={onCreateOne}><NetsuIcon name="user-plus" /> {t("galleryPanel.card.newCharacter")}</ContextMenuItem>
         {characters.length > 0 && (
           <ContextMenuSub>
-            <ContextMenuSubTrigger><Users /> {t("galleryPanel.card.addTo")}</ContextMenuSubTrigger>
+            <ContextMenuSubTrigger><NetsuIcon name="collab" /> {t("galleryPanel.card.addTo")}</ContextMenuSubTrigger>
             <ContextMenuSubContent className="max-h-64 overflow-y-auto">
               {characters.map((c) => (
                 <ContextMenuItem key={c.id} onClick={() => onAddTo(c.id)} className="gap-2">
                   <span className="h-5 w-5 shrink-0 overflow-hidden rounded bg-muted">
-                    {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <ScanFace className="m-0.5 h-4 w-4 text-muted-foreground" />}
+                    {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 h-4 w-4 text-muted-foreground" />}
                   </span>
                   <span className="truncate">{c.name}</span>
                 </ContextMenuItem>
@@ -139,14 +139,14 @@ export function GalleryPanel() {
             <span className="text-sm font-medium tabular-nums">{sel.size}</span>
             <div className="flex-1" />
             <Button size="sm" disabled={busy} onClick={() => askName(selectedFaces.map(toRef))}>
-              <UserPlus className="h-3.5 w-3.5" /> {t("galleryPanel.create")}
+              <NetsuIcon name="user-plus" className="h-3.5 w-3.5" /> {t("galleryPanel.create")}
             </Button>
             {characters.length > 0 && (
               <AddToExistingMenu characters={characters} onPick={addSelectedTo} disabled={busy} />
             )}
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("galleryPanel.cancelSelectionAria")} onClick={clearSel} />}>
-                <X className="h-4 w-4" />
+                <NetsuIcon name="close" className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>{t("galleryPanel.cancelTooltip")}</TooltipContent>
             </Tooltip>
@@ -156,13 +156,13 @@ export function GalleryPanel() {
             <div className="flex-1" />
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("galleryPanel.reloadAria")} onClick={refreshFaceGallery} disabled={faceGalleryLoading} />}>
-                <RefreshCw className={cn("h-4 w-4", faceGalleryLoading && "animate-spin")} />
+                <NetsuIcon name="refresh" busy={faceGalleryLoading} className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>{t("galleryPanel.reloadTooltip")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label={t("galleryPanel.searchByPhotoAria")} onClick={() => { closeFaceHub(); openFacePicker(); }} />}>
-                <ImagePlus className="h-4 w-4" />
+                <NetsuIcon name="image-add" className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>{t("galleryPanel.searchByPhotoTooltip")}</TooltipContent>
             </Tooltip>
@@ -177,7 +177,7 @@ export function GalleryPanel() {
           <div className="flex h-full items-center justify-center gap-2 text-sm text-muted-foreground"><Spinner className="h-4 w-4" /> {t("galleryPanel.grouping")}</div>
         ) : gallery.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <ScanFace className="h-9 w-9 text-muted-foreground" />
+            <NetsuIcon name="face" className="h-9 w-9 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">{t("galleryPanel.empty")}</span>
           </div>
         ) : (
@@ -201,7 +201,7 @@ export function GalleryPanel() {
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setNaming(null)}>{t("common:action.cancel")}</Button>
             <Button size="sm" disabled={!name.trim() || busy} onClick={confirmCreate}>
-              {busy ? <Spinner className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />} {t("galleryPanel.create")}
+              {busy ? <Spinner className="h-3.5 w-3.5" /> : <NetsuIcon name="check" className="h-3.5 w-3.5" />} {t("galleryPanel.create")}
             </Button>
           </div>
         </DialogContent>
@@ -218,13 +218,13 @@ function AddToExistingMenu({ characters, onPick, disabled }: {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" size="sm" disabled={disabled} />}>
-        <Users className="h-3.5 w-3.5" /> {t("galleryPanel.card.addTo")}
+        <NetsuIcon name="collab" className="h-3.5 w-3.5" /> {t("galleryPanel.card.addTo")}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
         {characters.map((c) => (
           <DropdownMenuItem key={c.id} onClick={() => onPick(c.id)} className="gap-2">
             <span className="h-5 w-5 shrink-0 overflow-hidden rounded bg-muted">
-              {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <ScanFace className="m-0.5 h-4 w-4 text-muted-foreground" />}
+              {c.avatar ? <img src={c.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 h-4 w-4 text-muted-foreground" />}
             </span>
             <span className="truncate">{c.name}</span>
           </DropdownMenuItem>

@@ -3,7 +3,7 @@
 // With a selection in the grid, a second submenu ranges the whole selection: a menu has no room for
 // the popover's toggle, and two entries keep the choice explicit.
 import { useState } from "react";
-import { FolderPlus, Check } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
@@ -44,7 +44,7 @@ function RangeSub({ shots, label }: { shots: CollectionShot[]; label: string }) 
 
   return (
     <ContextMenuSub onOpenChange={(o) => { if (o) void loadCollections(); }}>
-      <ContextMenuSubTrigger><FolderPlus /> {label}</ContextMenuSubTrigger>
+      <ContextMenuSubTrigger><NetsuIcon name="folder-plus" /> {label}</ContextMenuSubTrigger>
       <ContextMenuSubContent className="max-h-64 overflow-y-auto">
         {collections.length === 0 ? (
           <ContextMenuItem disabled>{t("submenu.none")}</ContextMenuItem>
@@ -55,7 +55,7 @@ function RangeSub({ shots, label }: { shots: CollectionShot[]; label: string }) 
               <CollectionGlyph icon={c.icon} color={c.color} size={20} />
               <span className="min-w-0 flex-1 truncate">{c.name}</span>
               {busy === c.id ? <Spinner className="size-3.5" />
-                : done === c.id ? <Check className="size-3.5 text-[var(--color-ok)]" strokeWidth={3} />
+                : done === c.id ? <NetsuIcon name="check" className="size-3.5 text-[var(--color-ok)]" />
                 : <span className="text-[11px] tabular-nums text-muted-foreground">{c.count}</span>}
             </ContextMenuItem>
           ))

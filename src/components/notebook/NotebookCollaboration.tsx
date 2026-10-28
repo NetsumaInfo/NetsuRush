@@ -7,7 +7,7 @@ import { collabAvailable } from "@/lib/collab/client";
 import { CollaborationDialog } from "@/components/collab/CollaborationDialog";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Users, FileText, RotateCw, AlertTriangle } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { notebookBindings } from "./collabSurface";
 import { shareNotebook } from "./notebookCollabSession";
 import { useNotebookCollaboration } from "./useNotebookCollaboration";
@@ -52,7 +52,7 @@ export function NotebookCollaboration() {
         <TooltipTrigger
           render={
             <button type="button" onClick={() => openScope("notebook")} aria-label={t("share.notebook")} className={ICON_BUTTON}>
-              <Users className="h-4 w-4" />
+              <NetsuIcon name="collab" className="h-4 w-4" />
             </button>
           }
         />
@@ -62,7 +62,7 @@ export function NotebookCollaboration() {
         <TooltipTrigger
           render={
             <button type="button" onClick={() => openScope("notebook-page")} disabled={!pageId} aria-label={t("share.document")} className={ICON_BUTTON}>
-              <FileText className="h-4 w-4" />
+              <NetsuIcon name="file-text" className="h-4 w-4" />
             </button>
           }
         />
@@ -73,7 +73,7 @@ export function NotebookCollaboration() {
           <TooltipTrigger
             render={
               <button type="button" onClick={() => window.dispatchEvent(new Event("nr-notebook-collab-retry"))} aria-label={t("share.retry")} className={ICON_BUTTON}>
-                <RotateCw className="h-4 w-4" />
+                <NetsuIcon name="restart" className="h-4 w-4" />
               </button>
             }
           />
@@ -85,7 +85,7 @@ export function NotebookCollaboration() {
           <TooltipTrigger
             render={
               <span role="alert" aria-label={error || t("share.failed")} className="shrink-0 p-1.5 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
+                <NetsuIcon name="warning" className="h-4 w-4" />
               </span>
             }
           />

@@ -1,6 +1,5 @@
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
-import { Database, ScanFace } from "lucide-react";
-import { RefreshIcon } from "@/components/ui/animated-icons";
 import NumberFlow from "@number-flow/react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -62,14 +61,14 @@ export function IndexStatusBar({
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="icon-xs" className="text-muted-foreground hover:text-foreground"
           onClick={onRefresh} disabled={indexing || facing} aria-label={t("indexStatusBar.refreshTooltip")} />}>
-          <RefreshIcon size={13} spinning={loading || indexing || facing} />
+          <NetsuIcon name="sidebar-refresh" busy={loading || indexing || facing} className="size-3.5" />
         </TooltipTrigger>
         <TooltipContent side="bottom">{t("indexStatusBar.refreshTooltip")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="sm" aria-label={t("indexStatusBar.indexRushAria")} onClick={onOpenPicker} disabled={indexing}
           className={cn(action, pickerOpen && "bg-accent text-foreground")} />}>
-          {indexing ? <Spinner className="size-3.5" /> : <Database className="size-3.5" />}
+          <NetsuIcon name="search-index" busy={indexing} className="size-3.5" />
           {indexing ? t("indexStatusBar.indexingPlans") : t("indexStatusBar.index")}
         </TooltipTrigger>
         <TooltipContent side="bottom">{t("indexStatusBar.indexTooltip")}</TooltipContent>
@@ -77,7 +76,7 @@ export function IndexStatusBar({
       <Tooltip>
         <TooltipTrigger render={<Button variant="ghost" size="sm" aria-label={t("indexStatusBar.indexFacesAria")} onClick={onIndexFaces} disabled={facing}
           className={cn(action, faceIdxPickerOpen && "bg-accent text-foreground")} />}>
-          {facing ? <Spinner className="size-3.5" /> : <ScanFace className="size-3.5" />}
+          <NetsuIcon name="search-face" busy={facing} className="size-3.5" />
           {facing ? t("indexStatusBar.indexingFaces") : t("indexStatusBar.faces")}
         </TooltipTrigger>
         <TooltipContent side="bottom">{t("indexStatusBar.indexFacesTooltip")}</TooltipContent>

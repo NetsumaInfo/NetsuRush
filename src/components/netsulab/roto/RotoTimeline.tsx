@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ArrowRightToLine, ArrowLeftToLine, RotateCcw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
@@ -120,12 +120,12 @@ export function RotoTimeline({ s, goto }: { s: RotoSession; goto: (f: number) =>
         )}
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={() => s.setInF(menuF)}><ArrowRightToLine /> {t("timeline.inHere", { n: menuF + 1 })}</ContextMenuItem>
-        <ContextMenuItem onClick={() => s.setOutF(menuF)}><ArrowLeftToLine /> {t("timeline.outHere", { n: menuF + 1 })}</ContextMenuItem>
+        <ContextMenuItem onClick={() => s.setInF(menuF)}><NetsuIcon name="in-point" /> {t("timeline.inHere", { n: menuF + 1 })}</ContextMenuItem>
+        <ContextMenuItem onClick={() => s.setOutF(menuF)}><NetsuIcon name="out-point" /> {t("timeline.outHere", { n: menuF + 1 })}</ContextMenuItem>
         {hasRange && (
           <>
             <ContextMenuSeparator />
-            <ContextMenuItem onClick={() => { s.setInF(null); s.setOutF(null); }}><RotateCcw /> {t("timeline.resetRange")}</ContextMenuItem>
+            <ContextMenuItem onClick={() => { s.setInF(null); s.setOutF(null); }}><NetsuIcon name="reset-default" /> {t("timeline.resetRange")}</ContextMenuItem>
           </>
         )}
       </ContextMenuContent>

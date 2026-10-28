@@ -3,7 +3,7 @@
 // quitter la vue ni recharger (contrairement à la page Paramètres). shadcn flavor Base UI.
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, Copy, Trash2, Settings2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export function ExportQuickDialog({ compact = false }: { compact?: boolean }) {
         <TooltipTrigger
           render={<Button variant="outline" size={compact ? "icon-sm" : "icon"} className={cn("rounded-l-none border-l-0", compact && "text-muted-foreground")} aria-label={t("settings.title")} onClick={() => setOpen(true)} />}
         >
-          <Settings2 className={compact ? "size-3.5" : "size-4"} />
+          <NetsuIcon name="sliders" className={compact ? "size-3.5" : "size-4"} />
         </TooltipTrigger>
         <TooltipContent>{t("settings.title")}</TooltipContent>
       </Tooltip>
@@ -64,15 +64,15 @@ export function ExportQuickDialog({ compact = false }: { compact?: boolean }) {
                   </SelectContent>
                 </Select>
                 <Tooltip>
-                  <TooltipTrigger render={<Button variant="outline" size="icon" onClick={() => addProfile()} aria-label={t("settings.newProfile")} />}><Plus className="size-4" /></TooltipTrigger>
+                  <TooltipTrigger render={<Button variant="outline" size="icon" onClick={() => addProfile()} aria-label={t("settings.newProfile")} />}><NetsuIcon name="add" className="size-4" /></TooltipTrigger>
                   <TooltipContent>{t("settings.new")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <TooltipTrigger render={<Button variant="outline" size="icon" onClick={() => duplicate(activeId)} aria-label={t("settings.duplicateProfile")} />}><Copy className="size-4" /></TooltipTrigger>
+                  <TooltipTrigger render={<Button variant="outline" size="icon" onClick={() => duplicate(activeId)} aria-label={t("settings.duplicateProfile")} />}><NetsuIcon name="copy" className="size-4" /></TooltipTrigger>
                   <TooltipContent>{t("settings.duplicate")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <TooltipTrigger render={<Button variant="ghost" size="icon" disabled={profiles.length <= 1} onClick={() => remove(activeId)} aria-label={t("settings.deleteProfile")} />}><Trash2 className="size-4" /></TooltipTrigger>
+                  <TooltipTrigger render={<Button variant="ghost" size="icon" disabled={profiles.length <= 1} onClick={() => remove(activeId)} aria-label={t("settings.deleteProfile")} />}><NetsuIcon name="trash" className="size-4" /></TooltipTrigger>
                   <TooltipContent>{t("common:action.delete")}</TooltipContent>
                 </Tooltip>
               </div>

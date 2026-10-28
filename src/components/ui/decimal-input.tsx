@@ -50,5 +50,5 @@ export function DecimalInput({
       onBlur?.(e);
     },
   };
-  return bare ? <input {...inputProps} /> : <Input {...inputProps} />;
+  return bare ? <input autoComplete="off" {...inputProps} /> : <Input {...inputProps} />;
 }

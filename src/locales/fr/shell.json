@@ -32,10 +32,6 @@
   "menu": {
     "derush": "Dérush",
     "chat": "Chat",
-    "edit": "Édition",
-    "cut": "Couper",
-    "paste": "Coller",
-    "selectAll": "Tout sélectionner",
     "derushHome": "Accueil du dérush",
     "reloadRushes": "Recharger les rushs",
     "cutTimeline": "Découper une timeline",

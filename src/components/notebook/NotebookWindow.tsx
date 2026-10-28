@@ -2,13 +2,14 @@
 // mécano de ReferenceWindow) — écrire ses notes À CÔTÉ de NetsuDraft ou de n'importe quel module.
 // Frameless (decorations:false) → on redessine TOUT : bande de déplacement + réduire / agrandir /
 // FERMER + épingler (always-on-top) + rattacher. Le menu natif étant supprimé partout, le clic
-// droit est câblé ici aussi (édition couper/copier/coller + actions fenêtre).
+// droit est câblé ici aussi (actions fenêtre ; l'édition passe par TextContextMenu, monté dans App).
 // Chaque fenêtre a son propre état (renderer séparé) ; la persistance passe par le core → dernier
 // écrit gagne sur une MÊME page ouverte des deux côtés (limite assumée).
 
 import { useEffect, useState, type CSSProperties } from "react";
 import i18n from "@/i18n";
-import { Minus, Square, Copy, X, Pin, PinOff, Minimize2, RotateCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { CloseGlyph, MaximizeGlyph, MinimizeGlyph, RestoreGlyph } from "@/components/ui/window-glyphs";
 import { nr } from "@/lib/bridge";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,6 @@ import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator,
   ContextMenuGroup, ContextMenuLabel,
 } from "@/components/ui/context-menu";
-import { EditItems, editableFrom } from "@/components/common/ViewContextMenu";
 import { NotebookPanel } from "./NotebookPanel";
 
 const DRAG: CSSProperties = { WebkitAppRegion: "drag" } as CSSProperties;
@@ -31,8 +31,6 @@ async function win() {
 export function NotebookWindow() {
   const [maxed, setMaxed] = useState(false);
   const [pinned, setPinned] = useState(false);
-  const [edit, setEdit] = useState(false);
-  const [editEl, setEditEl] = useState<HTMLElement | null>(null);
 
   // Suit l'état agrandi/restauré pour dessiner la bonne icône (fenêtre frameless : les contrôles
   // système n'existent pas, on les redessine — même patron que WindowControls de la principale).
@@ -56,7 +54,7 @@ export function NotebookWindow() {
   const toggleMax = () => void (async () => { if (isTauri) await (await win()).toggleMaximize(); })();
   const close = () => void (async () => { if (isTauri) await (await win()).close(); })();
 
-  const ctlBtn = "inline-flex h-6 w-9 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none [&_svg]:size-3.5";
+  const ctlBtn = "group inline-flex h-6 w-9 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none [&_svg]:size-3.5";
 
   return (
     <TooltipProvider delay={600}>
@@ -67,52 +65,41 @@ export function NotebookWindow() {
           <div className="ml-auto flex items-center" style={NO_DRAG}>
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={pinned ? i18n.t("notebook:window.unpin") : i18n.t("notebook:window.alwaysOnTop")} aria-pressed={pinned} onClick={togglePin} />}>
-                {pinned ? <Pin /> : <PinOff />}
+                <NetsuIcon name="window-pin" on={pinned} />
               </TooltipTrigger>
               <TooltipContent>{pinned ? i18n.t("notebook:window.stopAlwaysOnTop") : i18n.t("notebook:window.keepOnTop")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={i18n.t("notebook:window.attach")} onClick={() => nr.notebook?.attach()} />}>
-                <Minimize2 />
+                <NetsuIcon name="shrink" />
               </TooltipTrigger>
               <TooltipContent>{i18n.t("notebook:window.attach")}</TooltipContent>
             </Tooltip>
             {isTauri && (
               <>
-                <button type="button" className={ctlBtn} aria-label={i18n.t("notebook:window.minimize")} onClick={minimize}><Minus /></button>
-                <button type="button" className={ctlBtn} aria-label={maxed ? i18n.t("notebook:window.restore") : i18n.t("notebook:window.maximize")} onClick={toggleMax}>{maxed ? <Copy /> : <Square />}</button>
-                <button type="button" className={`${ctlBtn} hover:bg-destructive hover:text-destructive-foreground`} aria-label={i18n.t("notebook:window.close")} onClick={close}><X /></button>
+                <button type="button" className={ctlBtn} aria-label={i18n.t("notebook:window.minimize")} onClick={minimize}><MinimizeGlyph /></button>
+                <button type="button" className={ctlBtn} aria-label={maxed ? i18n.t("notebook:window.restore") : i18n.t("notebook:window.maximize")} onClick={toggleMax}>{maxed ? <RestoreGlyph /> : <MaximizeGlyph />}</button>
+                <button type="button" className={`${ctlBtn} hover:bg-destructive hover:text-destructive-foreground`} aria-label={i18n.t("notebook:window.close")} onClick={close}><CloseGlyph /></button>
               </>
             )}
           </div>
         </header>
 
         <ContextMenu>
-          <ContextMenuTrigger
-            render={<div className="min-h-0 flex-1" />}
-            onContextMenuCapture={(e: React.MouseEvent) => {
-              const el = editableFrom(e.target);
-              setEditEl(el);
-              setEdit(!!el);
-            }}
-          >
+          <ContextMenuTrigger render={<div className="min-h-0 flex-1" />}>
             <NotebookPanel />
           </ContextMenuTrigger>
           <ContextMenuContent className="min-w-48">
-            {edit ? (
-              <EditItems el={editEl} />
-            ) : (
-              <ContextMenuGroup>
-                <ContextMenuLabel>{i18n.t("notebook:window.title")}</ContextMenuLabel>
-                <ContextMenuItem onClick={togglePin}>
-                  {pinned ? <PinOff /> : <Pin />} {pinned ? i18n.t("notebook:window.stopAlwaysOnTop") : i18n.t("notebook:window.keepOnTop")}
-                </ContextMenuItem>
-                <ContextMenuItem onClick={() => nr.notebook?.attach()}><Minimize2 /> {i18n.t("notebook:window.attach")}</ContextMenuItem>
-                <ContextMenuSeparator />
-                <ContextMenuItem onClick={() => window.location.reload()}><RotateCw /> {i18n.t("notebook:window.reload")}</ContextMenuItem>
-                <ContextMenuItem onClick={close}><X /> {i18n.t("notebook:window.closeWindow")}</ContextMenuItem>
-              </ContextMenuGroup>
-            )}
+            <ContextMenuGroup>
+              <ContextMenuLabel>{i18n.t("notebook:window.title")}</ContextMenuLabel>
+              <ContextMenuItem onClick={togglePin}>
+                <NetsuIcon name="window-pin" on={pinned} /> {pinned ? i18n.t("notebook:window.stopAlwaysOnTop") : i18n.t("notebook:window.keepOnTop")}
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => nr.notebook?.attach()}><NetsuIcon name="shrink" /> {i18n.t("notebook:window.attach")}</ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem onClick={() => window.location.reload()}><NetsuIcon name="restart" /> {i18n.t("notebook:window.reload")}</ContextMenuItem>
+              <ContextMenuItem onClick={close}><CloseGlyph /> {i18n.t("notebook:window.closeWindow")}</ContextMenuItem>
+            </ContextMenuGroup>
           </ContextMenuContent>
         </ContextMenu>
       </div>

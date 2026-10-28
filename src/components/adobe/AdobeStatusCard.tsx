@@ -1,6 +1,6 @@
 // Carte de statut d'une app Adobe (Premiere / After Effects) : installée, lancée,
 // panneau CEP connecté + actions Lancer / Scanner.
-import { Play, RefreshCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,10 +51,10 @@ export function AdobeStatusCard({
       </div>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" disabled={!installed || running || busy} onClick={onLaunch}>
-          <Play className="size-3.5" /> {t("status.launch")}
+          <NetsuIcon name="play" className="size-3.5" /> {t("status.launch")}
         </Button>
         <Button size="sm" disabled={!connected || busy} onClick={onScan}>
-          <RefreshCw className="size-3.5" /> {t("status.scanProject")}
+          <NetsuIcon name="refresh" className="size-3.5" /> {t("status.scanProject")}
         </Button>
       </div>
       {installed && !connected && (

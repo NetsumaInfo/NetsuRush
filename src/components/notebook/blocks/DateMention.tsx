@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createReactInlineContentSpec } from "@blocknote/react";
-import { CalendarDays } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { MiniCalendar } from "./MiniCalendar";
 import { useViewportAnchor } from "@/lib/useViewportAnchor";
 import { uiLocale } from "@/lib/utils";
@@ -33,7 +33,7 @@ function DateMentionView({ date, onChange }: { date: string; onChange: (iso: str
   return (
     <span ref={root} className="nb-date-mention" contentEditable={false}>
       <button type="button" className="nb-date-mention-btn" onClick={() => setOpen((v) => !v)}>
-        <CalendarDays className="nb-link-mention-ico" />
+        <NetsuIcon name="calendar" className="nb-link-mention-ico" />
         {formatFr(date)}
       </button>
       {open && createPortal(

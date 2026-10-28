@@ -15,7 +15,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { AlertCircle, Brain, Check, CheckCheck, ChevronDown, Copy, Braces, Dot, ChevronsUpDown, Terminal } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import type { UiMessage, UiStep, UiToolCall } from "@/store/chat";
 import { useApp } from "@/store";
 import { cn, fmtMillis, fmtSeconds } from "@/lib/utils";
@@ -85,7 +85,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         setTimeout(() => setCopied(false), 1600);
       }}
       className="shrink-0 rounded-sm px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      {copied ? <CheckCheck className="size-3 text-[var(--color-ok)]" /> : <Copy className="size-3" />}
+      {copied ? <NetsuIcon name="check" className="size-3 text-[var(--color-ok)]" /> : <NetsuIcon name="copy" className="size-3" />}
     </button>
   );
 }
@@ -103,7 +103,7 @@ function TerminalBlock({ command, output, done, ok, t }: {
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-md border border-border/80 bg-card font-mono text-[11px]">
       <div className="flex items-center gap-2 border-b border-border/70 bg-muted/40 px-2 py-1">
-        <Terminal className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+        <NetsuIcon name="console" className="size-3.5 shrink-0 text-primary" />
         <span className="select-none font-bold text-muted-foreground/60">$</span>
         <span className="min-w-0 flex-1 truncate font-semibold text-foreground">{command}</span>
         {done && (
@@ -182,9 +182,8 @@ function RowIcon({ open, expandable, children }: { open: boolean; expandable: bo
         {children}
       </span>
       {expandable && (
-        <ChevronDown aria-hidden="true"
-          className={cn("absolute size-3.5 opacity-0 transition-transform duration-200 group-hover/row:opacity-100",
-            open ? "rotate-0 opacity-100" : "-rotate-90")} />
+        <NetsuIcon name="chevron-toggle" on={open}
+          className={cn("absolute size-3.5 opacity-0 transition-opacity duration-200 group-hover/row:opacity-100", open && "opacity-100")} />
       )}
     </span>
   );
@@ -198,7 +197,7 @@ function ReasoningRow({ text, active }: { text: string; active: boolean }) {
   return (
     <div className="flex flex-col">
       <button type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={ROW}>
-        <RowIcon open={open} expandable><Brain className="size-3.5 opacity-75" /></RowIcon>
+        <RowIcon open={open} expandable><NetsuIcon name="brain" className="size-3.5 opacity-75" /></RowIcon>
         {active
           ? <Shimmer>{t("message.thinking")}</Shimmer>
           : <span className="font-medium text-foreground">{t("message.reasoning")}</span>}
@@ -228,10 +227,10 @@ function ToolRow({ tool, t }: { tool: UiToolCall; t: TFunction<"chat"> }) {
             {!tool.done
               ? <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-[1.5px] border-muted-foreground/30 border-t-foreground" />
               : failed
-                ? <AlertCircle className="size-3.5 text-destructive" />
+                ? <NetsuIcon name="error-badge" className="size-3.5 text-destructive" />
                 : command
-                  ? <Terminal className="size-3.5 text-primary" />
-                  : <Check className="size-3.5 text-[var(--color-ok)]" />}
+                  ? <NetsuIcon name="console" className="size-3.5 text-primary" />
+                  : <NetsuIcon name="check" className="size-3.5 text-[var(--color-ok)]" />}
           </RowIcon>
           <span className={cn("shrink-0 font-medium tracking-tight", failed ? "text-destructive" : "text-foreground")}>{label}</span>
           {chip && (
@@ -248,7 +247,7 @@ function ToolRow({ tool, t }: { tool: UiToolCall; t: TFunction<"chat"> }) {
             <TerminalBlock command={command} output={outputOf(tool.result)} done={tool.done} ok={tool.ok} t={t} />
           ) : (
             <div className="space-y-1.5">
-              <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground"><Dot className="size-3" />{tool.name}</div>
+              <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground"><NetsuIcon name="dot" className="size-3" />{tool.name}</div>
               <div>
                 <div className="mb-0.5 text-[10px] text-muted-foreground">{t("toolcard.arguments")}</div>
                 <pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-[11px] text-foreground/80">{short(tool.input)}</pre>
@@ -264,16 +263,16 @@ function ToolRow({ tool, t }: { tool: UiToolCall; t: TFunction<"chat"> }) {
         </Collapsible>
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        <ContextMenuItem onClick={() => navigator.clipboard.writeText(tool.name)}><Dot /> {t("toolcard.copyName")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => navigator.clipboard.writeText(tool.name)}><NetsuIcon name="dot" /> {t("toolcard.copyName")}</ContextMenuItem>
         {tool.input != null && (
-          <ContextMenuItem onClick={() => navigator.clipboard.writeText(asText(tool.input))}><Braces /> {t("toolcard.copyArgs")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => navigator.clipboard.writeText(asText(tool.input))}><NetsuIcon name="code" /> {t("toolcard.copyArgs")}</ContextMenuItem>
         )}
         {tool.done && tool.result != null && (
-          <ContextMenuItem onClick={() => navigator.clipboard.writeText(asText(tool.result))}><Copy /> {t("toolcard.copyResult")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => navigator.clipboard.writeText(asText(tool.result))}><NetsuIcon name="copy" /> {t("toolcard.copyResult")}</ContextMenuItem>
         )}
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => setOpen((value) => !value)}>
-          <ChevronsUpDown /> {open ? t("toolcard.collapse") : t("toolcard.expand")}
+          <NetsuIcon name="chevrons-up-down" /> {open ? t("toolcard.collapse") : t("toolcard.expand")}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
@@ -337,8 +336,8 @@ export function AgentTrace({ msg, active, status }: {
         {running
           ? <Shimmer>{label || t("trace.working")}</Shimmer>
           : <span>{t("trace.workedFor", { count: seconds })}</span>}
-        <ChevronDown aria-hidden="true"
-          className={cn("size-3 opacity-30 transition-transform duration-300 group-hover:opacity-80", open ? "rotate-180" : "rotate-0")} />
+        <NetsuIcon name="chevron-toggle" on={open}
+          className="size-3 opacity-30 transition-opacity duration-300 group-hover:opacity-80" />
       </button>
 
       <div className={cn("grid transition-[grid-template-rows,opacity] duration-300 ease-out",

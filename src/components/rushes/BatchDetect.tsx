@@ -1,7 +1,7 @@
 // Découpe en lot : barre de sélection (choix du modèle + lancement) et panneau de progression
 // (un rush par ligne). La détection sérielle vit dans le store (runBatchDetect) ; ici, l'UI seule.
 import { useTranslation } from "react-i18next";
-import { Scissors, X, CheckCheck, Check, TriangleAlert, Trash2, Layers } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import type { DetectModel } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -52,12 +52,12 @@ export function BatchDetectBar({ total, count, model, setModel, presetIdx, setPr
         <TooltipTrigger render={
           <Button variant="outline" size="sm" disabled={count === 0 || busy} onClick={onOpenFlow} />
         }>
-          <Layers className="h-4 w-4" /> {t("batch.openFlow", { count })}
+          <NetsuIcon name="layers" className="h-4 w-4" /> {t("batch.openFlow", { count })}
         </TooltipTrigger>
         <TooltipContent>{t("batch.openFlowTip")}</TooltipContent>
       </Tooltip>
       <Button size="sm" disabled={count === 0 || busy} onClick={onRun}>
-        <Scissors className="h-4 w-4" /> {t("batch.cut", { count })}
+        <NetsuIcon name="cut-detect" busy={busy} className="h-4 w-4" /> {t("batch.cut", { count })}
       </Button>
       {removeCount > 0 && (
         <Tooltip>
@@ -65,13 +65,13 @@ export function BatchDetectBar({ total, count, model, setModel, presetIdx, setPr
             <Button variant="outline" size="sm" disabled={busy} onClick={onRemove}
               className="border-destructive/40 text-destructive hover:text-destructive" />
           }>
-            <Trash2 className="h-4 w-4" /> {removeCount}
+            <NetsuIcon name="cut-delete" className="h-4 w-4" /> {removeCount}
           </TooltipTrigger>
           <TooltipContent>{t("library.removeManyFromLibrary", { count: removeCount })}</TooltipContent>
         </Tooltip>
       )}
       <Button variant="outline" size="sm" onClick={onExit}>
-        <X className="h-4 w-4" /> {t("batch.quit")}
+        <NetsuIcon name="close" className="h-4 w-4" /> {t("batch.quit")}
       </Button>
     </Card>
   );
@@ -101,7 +101,7 @@ export function BatchDetectProgress() {
         {running ? (
           <Button variant="ghost" size="sm" onClick={cancelBatchDetect}>{t("shared.stop")}</Button>
         ) : (
-          <Button variant="ghost" size="icon-sm" aria-label={t("common:action.close")} onClick={dismissBatchDetect}><X /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label={t("common:action.close")} onClick={dismissBatchDetect}><NetsuIcon name="close" /></Button>
         )}
       </div>
       {/* Gouttière à droite : la barre de défilement se posait SUR les pourcentages et sur le bout
@@ -135,7 +135,7 @@ export function BatchDetectProgress() {
 
 function StatusIcon({ status }: { status: "pending" | "running" | "done" | "error" }) {
   if (status === "running") return <Spinner className="h-3.5 w-3.5 shrink-0 text-primary" />;
-  if (status === "done") return <Check className="h-3.5 w-3.5 shrink-0 text-[var(--color-ok)]" />;
-  if (status === "error") return <TriangleAlert className="h-3.5 w-3.5 shrink-0 text-destructive" />;
-  return <CheckCheck className="h-3.5 w-3.5 shrink-0 opacity-30" />;
+  if (status === "done") return <NetsuIcon name="check" className="h-3.5 w-3.5 shrink-0 text-[var(--color-ok)]" />;
+  if (status === "error") return <NetsuIcon name="warning" className="h-3.5 w-3.5 shrink-0 text-destructive" />;
+  return <NetsuIcon name="check" className="h-3.5 w-3.5 shrink-0 opacity-30" />;
 }

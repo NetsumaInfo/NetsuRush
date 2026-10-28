@@ -1,7 +1,7 @@
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
 
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon } from "lucide-react"
+import { NetsuIcon } from "@/components/ui/netsu-icon"
 
 // PAS d'animation de hauteur. Les keyframes `accordion-down/up` de tw-animate-css visent
 // `--radix-accordion-content-height` (avec des replis Bits/Reka/Kobalte) — aucune n'existe sous
@@ -43,13 +43,19 @@ function AccordionTrigger({
           "group/accordion-trigger relative flex flex-1 items-center justify-between gap-2 rounded-md border border-transparent py-4 text-left text-sm font-medium outline-none hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
           className
         )}
+        render={(triggerProps, state) => (
+          <button {...triggerProps}>
+            {triggerProps.children}
+            <NetsuIcon
+              name="chevron-toggle"
+              on={state.open}
+              className="pointer-events-none size-4 text-muted-foreground"
+            />
+          </button>
+        )}
         {...props}
       >
         {children}
-        <ChevronDownIcon
-          data-slot="accordion-trigger-icon"
-          className="pointer-events-none size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-aria-expanded/accordion-trigger:rotate-180"
-        />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )

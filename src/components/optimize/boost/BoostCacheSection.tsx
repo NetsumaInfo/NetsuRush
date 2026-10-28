@@ -6,7 +6,7 @@
 // rouvre le projet) et l'énonce dans la confirmation.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2, Loader2, CheckSquare, Square, AlertTriangle, Power } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,11 +44,7 @@ function RootRow({ root, checked, onToggle }: RootRowProps) {
         onClick={() => onToggle(root.dir)}
         className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-muted/50"
       >
-        {checked ? (
-          <CheckSquare className="h-4 w-4 shrink-0 text-primary" />
-        ) : (
-          <Square className="h-4 w-4 shrink-0 text-muted-foreground" />
-        )}
+        <NetsuIcon name="checkbox-off" on={checked} className={`h-4 w-4 shrink-0 ${checked ? "text-primary" : "text-muted-foreground"}`} />
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-1.5">
@@ -208,12 +204,12 @@ export function BoostCacheSection({
 
           {selRoots.some((r) => isSlowToRebuild(r.kind)) && (
             <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-500">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("boost.cache.dbWarning")}
+              <NetsuIcon name="warning" className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("boost.cache.dbWarning")}
             </p>
           )}
           {selRoots.some((r) => !r.regenerable) && (
             <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-500">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("boost.cache.autoSaveWarning")}
+              <NetsuIcon name="warning" className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("boost.cache.autoSaveWarning")}
             </p>
           )}
 
@@ -224,7 +220,7 @@ export function BoostCacheSection({
             disabled={!selRoots.length || estimating}
             onClick={() => setConfirmOpen(true)}
           >
-            {estimating ? <Loader2 className="h-4 w-4 animate-spin" /> : running ? <Power className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+            {estimating ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : running ? <NetsuIcon name="power" className="h-4 w-4" /> : <NetsuIcon name="trash" className="h-4 w-4" />}
             {running
               ? t("boost.cache.closePurgeReopen")
               : t("boost.cache.cleanSelection", { size: fmtBytes(freeable ?? 0) })}
@@ -273,7 +269,7 @@ export function BoostCacheSection({
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={confirmClean} disabled={cleaning}>
-              {cleaning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {cleaning ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="trash" className="h-4 w-4" />}
               {t("common:action.delete")}
             </Button>
           </DialogFooter>

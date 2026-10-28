@@ -1,7 +1,7 @@
 // Vue Galerie — cartes en grille. Chaque carte = champ primaire + champs
 // non vides (chips). Clic → ouvre le détail de ligne. Aucune anim JS, content-visibility pour le paint.
 import { useMemo } from "react";
-import { Plus } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { visibleRows } from "@/lib/notebookDb";
 import { CellDisplay } from "./cellControls";
 import { cellValueFor, primaryField, type Database, type DbView } from "../notebookShared";
@@ -35,7 +35,7 @@ export function GalleryView({ db, view, ops, onOpenRow }: { db: Database; view: 
         );
       })}
       <button type="button" onClick={() => ops.addRow()} className="flex min-h-20 items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-primary">
-        <Plus className="h-4 w-4" /> {i18n.t("notebook:dbFields.addCard")}
+        <NetsuIcon name="add" className="h-4 w-4" /> {i18n.t("notebook:dbFields.addCard")}
       </button>
     </div>
   );

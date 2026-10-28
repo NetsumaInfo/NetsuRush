@@ -1,4 +1,4 @@
-import { Settings2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export function SearchPerfMenu() {
       <Tooltip>
         <TooltipTrigger render={<span className="inline-flex" />}>
           <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="px-2 text-muted-foreground" />}>
-            <Settings2 className="h-3.5 w-3.5" />
+            <NetsuIcon name="sliders" className="h-3.5 w-3.5" />
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent>{t("performance.quick")}</TooltipContent>

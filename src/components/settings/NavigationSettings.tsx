@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Eye, EyeOff, LockKeyhole, RotateCcw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { NAV } from "@/components/nav";
@@ -33,7 +33,7 @@ export function NavigationSettings() {
       <header className="flex items-center justify-between gap-4">
         <h2 className="text-sm font-medium">{t("settings:navigation.title")}</h2>
         <Button variant="outline" size="sm" onClick={resetAll}>
-          <RotateCcw className="size-3.5" /> {t("settings:navigation.reset")}
+          <NetsuIcon name="reset-default" className="size-3.5" /> {t("settings:navigation.reset")}
         </Button>
       </header>
 
@@ -63,7 +63,7 @@ export function NavigationSettings() {
                   onClick={() => move(id, -1)}
                   aria-label={t("settings:navigation.moveUp", { module: t(`shell:${item.labelKey}`) })}
                 >
-                  <ArrowUp className="size-4" />
+                  <NetsuIcon name="move-up" className="size-4" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -72,7 +72,7 @@ export function NavigationSettings() {
                   onClick={() => move(id, 1)}
                   aria-label={t("settings:navigation.moveDown", { module: t(`shell:${item.labelKey}`) })}
                 >
-                  <ArrowDown className="size-4" />
+                  <NetsuIcon name="move-down" className="size-4" />
                 </Button>
                 <Toggle
                   pressed={visible}
@@ -83,7 +83,7 @@ export function NavigationSettings() {
                     : t(visible ? "settings:navigation.hideAria" : "settings:navigation.showAria", { module: t(`shell:${item.labelKey}`) })}
                   className="ml-1"
                 >
-                  {required ? <LockKeyhole className="size-4" /> : visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                  {required ? <NetsuIcon name="lock" on className="size-4" /> : <NetsuIcon name="eye" on={!visible} className="size-4" />}
                 </Toggle>
               </div>
             </Card>

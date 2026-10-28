@@ -1,4 +1,5 @@
-import { Sparkles, Wand2, Gauge, Layers, Scissors, CheckCircle2, AlertTriangle } from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { nr, type ProcMode, type ProcessProgress, type UpscaleProgress as UpscaleProgressT, type ProcessResult } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
@@ -24,12 +25,17 @@ import { RotoStudio } from "./roto/RotoStudio";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 
+const WAND_ICON = netsuIconOf("wand");
+const GAUGE_ICON = netsuIconOf("gauge");
+const LAYERS_ICON = netsuIconOf("layers");
+const SCISSORS_ICON = netsuIconOf("scissors");
+
 // Shell NetsuLab : colonne gauche = navigateur de sources + bac ; centre = lecteur/aperçu + test ;
 // droite = op + réglages + run (ou constructeur de chaîne). Le Roto Studio remplace centre + droite.
 
-const OPS: { id: ProcMode; icon: typeof Wand2 }[] = [
-  { id: "upscale", icon: Wand2 }, { id: "interpolate", icon: Gauge },
-  { id: "depth", icon: Layers }, { id: "removebg", icon: Scissors },
+const OPS: { id: ProcMode; icon: IconComponent }[] = [
+  { id: "upscale", icon: WAND_ICON }, { id: "interpolate", icon: GAUGE_ICON },
+  { id: "depth", icon: LAYERS_ICON }, { id: "removebg", icon: SCISSORS_ICON },
 ];
 
 type OpController = ProcController & {
@@ -47,7 +53,7 @@ function OpLayout({
   title: string;
   titleMeta: string;
   runLabel: { idle: string; running: string };
-  runIcon: typeof Wand2;
+  runIcon: IconComponent;
   busyLabel: string;
   progressLabel: string;
   settings: React.ReactNode;
@@ -100,7 +106,7 @@ function OpLayout({
                 })}
               </ToggleGroup>
               <h2 className="flex items-center gap-1.5 px-1 text-sm font-semibold">
-                <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                <NetsuIcon name="sparkles" className="h-4 w-4 shrink-0 text-primary" />
                 <span>{title}</span>
                 <span className="text-xs font-medium text-muted-foreground">{titleMeta}</span>
               </h2>
@@ -132,13 +138,13 @@ function OpLayout({
 
               {err && (
                 <Card className="block border-destructive/40 p-2.5 text-xs text-destructive">
-                  <AlertTriangle className="mr-1.5 inline h-3.5 w-3.5" /> {err}
+                  <NetsuIcon name="warning" className="mr-1.5 inline h-3.5 w-3.5" /> {err}
                 </Card>
               )}
               {result?.ok && !running && (
                 <Card className="block p-3 text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-[var(--color-ok)]">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <NetsuIcon name="status-ok" className="h-3.5 w-3.5" />
                     {t("result.files", { count: result.outputs?.length ?? 0 })}{result.imported ? t("result.imported", { count: result.imported }) : ""}.
                   </div>
                   {result.failed ? <p className="mt-1 text-muted-foreground">{t("result.failed", { count: result.failed })}</p> : null}
@@ -164,7 +170,7 @@ function UpscaleOp() {
   const up = useUpscale();
   return (
     <OpLayout
-      up={up} title={t(up.settings.mode === "restore" ? "titles.restore" : "titles.upscale")} titleMeta={t(up.settings.engine === "turbo" && up.settings.mode !== "restore" ? "settings.sectionShaderTurbo" : "settings.sectionModelIa")} runIcon={Wand2}
+      up={up} title={t(up.settings.mode === "restore" ? "titles.restore" : "titles.upscale")} titleMeta={t(up.settings.engine === "turbo" && up.settings.mode !== "restore" ? "settings.sectionShaderTurbo" : "settings.sectionModelIa")} runIcon={WAND_ICON}
       runLabel={{ idle: t("run.upscaleIdle"), running: t("run.upscaleBusy") }} busyLabel={t("run.upscaleBusy")} progressLabel={t("progress.upscaling")}
       settings={
         <UpscaleSettings
@@ -183,7 +189,7 @@ function InterpOp() {
   const up = useInterpolate();
   return (
     <OpLayout
-      up={up} title={t("titles.interpolate")} titleMeta={t("settings.sectionModelIa")} runIcon={Gauge}
+      up={up} title={t("titles.interpolate")} titleMeta={t("settings.sectionModelIa")} runIcon={GAUGE_ICON}
       unavailable={up.allStills ? t("panel.interpolateNeedsVideo") : undefined}
       runLabel={{ idle: t("run.interpolateIdle"), running: t("run.interpolateBusy") }} busyLabel={t("run.interpolateBusy")} progressLabel={t("progress.interpolation")}
       settings={
@@ -203,7 +209,7 @@ function DepthOp() {
   const up = useDepth();
   return (
     <OpLayout
-      up={up} title={t("titles.depth")} titleMeta={t("settings.sectionModelIa")} runIcon={Layers}
+      up={up} title={t("titles.depth")} titleMeta={t("settings.sectionModelIa")} runIcon={LAYERS_ICON}
       runLabel={{ idle: t("run.depthIdle"), running: t("run.depthBusy") }} busyLabel={t("run.depthBusy")} progressLabel={t("progress.depth")}
       settings={
         <DepthSettings
@@ -222,7 +228,7 @@ function RemoveBgOp() {
   const up = useRemoveBg();
   return (
     <OpLayout
-      up={up} title={t("titles.removebg")} titleMeta={t("settings.sectionModelIa")} runIcon={Scissors}
+      up={up} title={t("titles.removebg")} titleMeta={t("settings.sectionModelIa")} runIcon={SCISSORS_ICON}
       runLabel={{ idle: t("run.removebgIdle"), running: t("run.removebgBusy") }} busyLabel={t("run.removebgBusy")} progressLabel={t("progress.removebg")}
       settings={
         <RemoveBgSettings

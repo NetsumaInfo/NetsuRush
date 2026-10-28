@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ArrowLeft, Scissors, FolderInput, CheckSquare, Square,
-  Combine, Film, Play, Minus, Plus, LayoutGrid, GripVertical, Image as ImageIcon, Zap,
-  PanelRightClose, PanelRightOpen,
-} from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { basename } from "@/store/types";
@@ -303,7 +299,7 @@ export function CutStudio() {
       {!compact && (
       <div className="relative shrink-0 border-b border-border px-4 py-2">
         <div className="flex flex-wrap items-center gap-2.5">
-           <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex items-center justify-center rounded-md transition-colors hover:bg-accent h-8 px-2 text-sm"><ArrowLeft className="h-4 w-4" /></button>
+           <button type="button" aria-label={t("common:action.back")} onClick={close} className="inline-flex items-center justify-center rounded-md transition-colors hover:bg-accent h-8 px-2 text-sm"><NetsuIcon name="back" className="h-4 w-4" /></button>
           <div className="min-w-0 flex-1">
             {/* Flux : le nom affiché est celui du rush qu'on a SOUS LES YEUX, et il change en défilant.
                 L'entête garde exactement sa forme — seul son contenu suit le défilement, donc rien ne
@@ -326,7 +322,7 @@ export function CutStudio() {
           <DetectionAdvancedSettings model={model} disabled={detecting} compact />
           <Tooltip>
             <TooltipTrigger render={<Button type="button" variant="ghost" size="icon-sm" onClick={runDetect} disabled={detecting} aria-label={t("shared.detectShots")} />}>
-              {detecting ? <Spinner className="size-4" /> : <Scissors className="size-4" />}
+              <NetsuIcon name="cut-detect" busy={detecting} className="size-4" />
             </TooltipTrigger>
             <TooltipContent side="bottom">
               {detecting && progress ? `${t("shared.analyzing")} ${fmtPercent(progress / 100)}` : t("shared.detectShots")}
@@ -366,7 +362,7 @@ export function CutStudio() {
           {segments.length > 0 && (
             <div className="flex shrink-0 flex-wrap items-center gap-2 py-1">
               <button type="button" onClick={selectAll} className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
-                {selCount === segments.length ? <CheckSquare className="h-4 w-4 text-primary" /> : <Square className="h-4 w-4" />}
+                <NetsuIcon name="cut-select" on={selCount === segments.length} className="h-4 w-4" />
                 <span className="tabular-nums">{narrow ? `${segments.length}${selCount ? `/${selCount}` : ""}` : `${t("cutStudio.shotCount", { count: segments.length })}${selCount ? t("cutStudio.selSuffix", { count: selCount }) : ""}`}</span>
               </button>
               {selCount > 0 && (
@@ -375,7 +371,7 @@ export function CutStudio() {
               {selCount >= 2 && (
                 <Tooltip>
                   <TooltipTrigger render={<Button size="sm" variant="outline" onClick={mergeSelected} className="h-8 gap-1 px-2 text-xs text-muted-foreground" />}>
-                    <Combine className="size-3.5" /> {selCount}
+                    <NetsuIcon name="cut-merge" className="size-3.5" /> {selCount}
                   </TooltipTrigger>
                   <TooltipContent>{t("cutStudio.mergeTip", { count: selCount })}</TooltipContent>
                 </Tooltip>
@@ -386,7 +382,7 @@ export function CutStudio() {
                     <Button size="sm" variant="outline" onClick={detectUncut} disabled={detecting}
                       className="h-8 gap-1 border-primary/40 px-2 text-xs text-primary hover:text-primary" />
                   }>
-                    <Scissors className="size-3.5" /> {t("cutStudio.flowUncut", { count: uncut.length })}
+                    <NetsuIcon name="scissors" className="size-3.5" /> {t("cutStudio.flowUncut", { count: uncut.length })}
                   </TooltipTrigger>
                   <TooltipContent>{t("cutStudio.flowUncutTip")}</TooltipContent>
                 </Tooltip>
@@ -397,8 +393,8 @@ export function CutStudio() {
                     className={"h-8 text-xs " + (thumbsGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
                 }>
                   {thumbsGen
-                    ? <><Square className="size-3.5 fill-current" /> {thumbsGen.done}/{thumbsGen.total}</>
-                    : <><ImageIcon className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
+                    ? <><NetsuIcon name="chat-stop" className="size-3.5" /> {thumbsGen.done}/{thumbsGen.total}</>
+                    : <><NetsuIcon name="image" className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
                 </TooltipTrigger>
                 <TooltipContent>{thumbsGen ? t("shared.stop") : t("shared.genThumbs", { verb })}</TooltipContent>
               </Tooltip>
@@ -407,9 +403,8 @@ export function CutStudio() {
                   <Button size="sm" variant="outline" onClick={generateProxies}
                     className={"h-8 text-xs " + (proxyGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
                 }>
-                  {proxyGen
-                    ? <><Square className="size-3.5 fill-current" /> {proxyGen.done}/{proxyGen.total}</>
-                    : <><Zap className="size-3.5" />{selCount > 0 && <span className="tabular-nums">{selCount}</span>}</>}
+                  <NetsuIcon name="proxy-generate" busy={!!proxyGen} className="size-3.5" />
+                  {proxyGen ? <>{proxyGen.done}/{proxyGen.total}</> : selCount > 0 && <span className="tabular-nums">{selCount}</span>}
                 </TooltipTrigger>
                 <TooltipContent>{proxyGen ? t("shared.stop") : t("shared.genProxies", { verb })}</TooltipContent>
               </Tooltip>
@@ -423,7 +418,7 @@ export function CutStudio() {
                     className="text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary aria-pressed:hover:bg-primary/15"
                   />
                 }>
-                  <Play className="size-3.5" />
+                  <NetsuIcon name="play" className="size-3.5" />
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.autoplayPreviews")}</TooltipContent>
               </Tooltip>
@@ -433,10 +428,10 @@ export function CutStudio() {
               <div className="flex-1" />
               <Tooltip>
                 <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
-                  <LayoutGrid className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-                   <button type="button" aria-label={t("common:action.decrease")} onClick={() => setCols(stepCols(actualCols, -1, maxCols))} disabled={!canFewerCols(actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
+                  <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
+                   <button type="button" aria-label={t("common:action.decrease")} onClick={() => setCols(stepCols(actualCols, -1, maxCols))} disabled={!canFewerCols(actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="remove" className="h-3.5 w-3.5" /></button>
                   <span className="w-4 text-center tabular-nums">{actualCols}</span>
-                   <button type="button" aria-label={t("common:action.increase")} onClick={() => setCols(stepCols(actualCols, 1, maxCols))} disabled={!canMoreCols(actualCols, maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
+                   <button type="button" aria-label={t("common:action.increase")} onClick={() => setCols(stepCols(actualCols, 1, maxCols))} disabled={!canMoreCols(actualCols, maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
                 </TooltipTrigger>
                 <TooltipContent>{t("shared.thumbSize")}</TooltipContent>
               </Tooltip>
@@ -453,7 +448,7 @@ export function CutStudio() {
               {!compact && (
                 <Tooltip>
                   <TooltipTrigger render={<Button size="sm" variant="outline" onClick={() => setPlayerOpen((v) => !v)} className="h-8 text-xs text-muted-foreground" />}>
-                    {playerOpen ? <PanelRightClose className="size-3.5" /> : <PanelRightOpen className="size-3.5" />}
+                    <NetsuIcon name="panel-right-toggle" on={playerOpen} className="size-3.5" />
                   </TooltipTrigger>
                   <TooltipContent>{playerOpen ? t("cutStudio.hidePlayer") : t("cutStudio.showPlayer")}</TooltipContent>
                 </Tooltip>
@@ -496,7 +491,7 @@ export function CutStudio() {
               </Card>
             ) : (
               <Card className="mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-                <Film className="h-8 w-8" />
+                <NetsuIcon name="film" className="h-8 w-8" />
                 <span>{t("cutStudio.detectPrompt")}</span>
               </Card>
             )}
@@ -516,7 +511,7 @@ export function CutStudio() {
             // à border, il se colle donc au bord de la fenêtre et rend ces pixels à la grille.
             className="group relative -mr-3.5 w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
         )}
 
@@ -534,7 +529,7 @@ export function CutStudio() {
           {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
               restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
           <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-          <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
         )}
 
@@ -578,7 +573,7 @@ export function CutStudio() {
               {isLocal && (
                 <p className="text-[11px] text-muted-foreground">{t("cutStudio.addToPoolHint")}</p>
               )}
-              {connected && exported.length > 0 && <Button className="w-full" variant="ghost" onClick={importBack} disabled={!!busy}><FolderInput className="h-4 w-4" /> {t("cutStudio.importExtracts")}</Button>}
+              {connected && exported.length > 0 && <Button className="w-full" variant="ghost" onClick={importBack} disabled={!!busy}><NetsuIcon name="cut-import" className="h-4 w-4" /> {t("cutStudio.importExtracts")}</Button>}
             </div>
           )}
 

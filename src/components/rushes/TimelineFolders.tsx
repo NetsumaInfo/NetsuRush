@@ -3,7 +3,7 @@
 // Deux modes : `onOpen` (clic ouvre) OU `selected`+`onToggle` (multi-sélection à cases).
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, Folder, Check, Clapperboard, CheckSquare, FolderOpen } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Badge } from "@/components/ui/badge";
 import { cn, thumbTime, uiLocale } from "@/lib/utils";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from "@/components/ui/context-menu";
@@ -79,7 +79,7 @@ export function TimelineFolders({
               "absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full border transition-colors",
               on ? "border-primary bg-primary text-primary-foreground" : "border-white/40 bg-black/40 text-transparent",
             )}>
-              <Check className="size-3" />
+              <NetsuIcon name="check" className="size-3" />
             </span>
           )}
           {t.current && <Badge variant="secondary" className="absolute left-1.5 top-1.5 text-[9px]">{tr("timelineFolders.open")}</Badge>}
@@ -88,10 +88,10 @@ export function TimelineFolders({
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="min-w-44">
-          {onOpen && <ContextMenuItem onClick={() => onOpen(t.name)}><Clapperboard /> {tr("timelineFolders.openTimeline")}</ContextMenuItem>}
+          {onOpen && <ContextMenuItem onClick={() => onOpen(t.name)}><NetsuIcon name="film-slate" /> {tr("timelineFolders.openTimeline")}</ContextMenuItem>}
           {onToggle && (
             <ContextMenuItem onClick={() => onToggle(t.name)}>
-              <CheckSquare /> {on ? tr("shared.deselect") : tr("shared.select")}
+              <NetsuIcon name="cut-select" on={on} /> {on ? tr("shared.deselect") : tr("shared.select")}
             </ContextMenuItem>
           )}
         </ContextMenuContent>
@@ -119,14 +119,14 @@ export function TimelineFolders({
                 style={{ paddingLeft: (depth - 1) * 16 }}
                 className="flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 text-sm text-foreground transition-colors hover:bg-accent/60" />
             }>
-              <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", !isCol && "rotate-90")} />
-              <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <NetsuIcon name="chevron-toggle" on={!isCol} className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <NetsuIcon name="folder-open" className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span className="truncate font-medium">{node.name}</span>
               <span className="text-xs text-muted-foreground">{countAll(node)}</span>
             </ContextMenuTrigger>
             <ContextMenuContent className="min-w-44">
               <ContextMenuItem onClick={() => toggleFolder(node.path)}>
-                <FolderOpen /> {isCol ? tr("shared.expandFolder") : tr("shared.collapseFolder")}
+                <NetsuIcon name="folder-open" /> {isCol ? tr("shared.expandFolder") : tr("shared.collapseFolder")}
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>

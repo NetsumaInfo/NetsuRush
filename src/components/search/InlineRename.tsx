@@ -23,7 +23,7 @@ export function InlineRename({ value, onCommit, onCancel, className }: {
     onCancel();
   };
   return (
-    <input
+    <input autoComplete="off"
       aria-label="Renommer"
       value={draft}
       onChange={(e) => setDraft(e.target.value)}

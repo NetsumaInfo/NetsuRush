@@ -3,7 +3,7 @@
 // en un clic) + toutes les collections + création inline. Favoris persistés (localStorage). Partagé partout.
 import { useEffect, useMemo, useState } from "react";
 import { Popover } from "@base-ui/react/popover";
-import { FolderPlus, Check, Plus, Search, Star, Lock, Square, SquareStack } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
@@ -40,7 +40,7 @@ export function AddToCollection({
         onClick={(e) => { if (stopPropagation) e.stopPropagation(); }}
         className={cn("inline-flex items-center justify-center rounded transition-colors", className)}
       >
-        <FolderPlus className="h-3.5 w-3.5" />
+        <NetsuIcon name="folder-plus" className="h-3.5 w-3.5" />
       </Popover.Trigger>
       {open && <CollectionPicker shots={shots} close={() => change(false)} />}
     </Popover.Root>
@@ -113,19 +113,19 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
         <CollectionGlyph icon={c.icon} color={c.color} size={22} />
         <span className="min-w-0 flex-1 truncate">{c.name}</span>
         {busy === c.id ? <Spinner className="size-3.5 text-muted-foreground" />
-          : done === c.id ? <Check className="h-3.5 w-3.5 text-[var(--color-ok)]" strokeWidth={3} />
+          : done === c.id ? <NetsuIcon name="check" className="h-3.5 w-3.5 text-[var(--color-ok)]" />
           : !readOnly(c) && <span className="text-[11px] tabular-nums text-muted-foreground">{c.count}</span>}
       </button>
       {/* Le cadenas vit HORS du bouton désactivé : un élément désactivé n'émet aucun survol, sa bulle
           ne s'ouvrirait jamais. */}
       {readOnly(c) && <Tooltip>
-        <TooltipTrigger render={<span className="shrink-0 text-muted-foreground" />}><Lock className="h-3 w-3" /></TooltipTrigger>
+        <TooltipTrigger render={<span className="shrink-0 text-muted-foreground" />}><NetsuIcon name="lock" on className="h-3 w-3" /></TooltipTrigger>
         <TooltipContent>{t("share.readOnly")}</TooltipContent>
       </Tooltip>}
       <button type="button" aria-label={favs.includes(c.id) ? t("fav.remove") : t("fav.pin")}
         onClick={(e) => { e.stopPropagation(); toggleFav(c.id); }}
         className={cn("shrink-0 rounded p-1 transition-opacity", favs.includes(c.id) ? "text-amber-400" : "text-muted-foreground opacity-0 hover:text-foreground group-hover/row:opacity-100")}>
-        <Star className={cn("h-3.5 w-3.5", favs.includes(c.id) && "fill-current")} />
+        <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="h-3.5 w-3.5" />
       </button>
     </div>
   );
@@ -144,20 +144,20 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
             {/* Search field and scope switch share ONE compact row: no title line, no extra row in a
                 popover already short on room. The switch shows up only when a selection exists. */}
             <div className="mb-1 flex h-7 items-center gap-1.5 rounded-md border border-border bg-background pl-2 pr-0.5 has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-ring">
-              <Search className="size-3.5 shrink-0 text-muted-foreground" />
-              <input aria-label={t("search.short")} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search.short")} className="h-full w-full min-w-0 bg-transparent text-xs outline-none" />
+              <NetsuIcon name="search" className="size-3.5 shrink-0 text-muted-foreground" />
+              <input autoComplete="off" spellCheck={false} aria-label={t("search.short")} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search.short")} className="h-full w-full min-w-0 bg-transparent text-xs outline-none" />
               {offer && (
                 <ToggleGroup aria-label={t("range.scope")} value={[scope]} spacing={0} className="shrink-0 border-l border-border pl-0.5"
                   onValueChange={(v) => { const n = v[0]; if (n === "one" || n === "selection") setScope(n); }}>
                   <Tooltip>
                     <TooltipTrigger render={<ToggleGroupItem value="one" aria-label={t("range.scopeOne")} className={SCOPE_ITEM} />}>
-                      <Square className="size-3" />
+                      <NetsuIcon name="checkbox-off" className="size-3" />
                     </TooltipTrigger>
                     <TooltipContent>{t("range.scopeOne")}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger render={<ToggleGroupItem value="selection" aria-label={t("range.scopeSelection", { count: selection.length })} className={SCOPE_ITEM} />}>
-                      <SquareStack className="size-3" />
+                      <NetsuIcon name="stack" className="size-3" />
                       <span className="text-[10px] tabular-nums">{selection.length}</span>
                     </TooltipTrigger>
                     <TooltipContent>{t("range.scopeSelection", { count: selection.length })}</TooltipContent>
@@ -169,7 +169,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
             <div className="max-h-64 overflow-y-auto">
               {favList.length > 0 && (
                 <>
-                  <div className="flex items-center gap-1 px-2 pb-0.5 pt-1 text-[10px] font-medium uppercase tracking-wide text-amber-400/80"><Star className="size-2.5 fill-current" /> {t("fav.favorites")}</div>
+                  <div className="flex items-center gap-1 px-2 pb-0.5 pt-1 text-[10px] font-medium uppercase tracking-wide text-amber-400/80"><NetsuIcon name="star" on className="size-2.5" /> {t("fav.favorites")}</div>
                   {favList.map(Row)}
                   {others.length > 0 && <div className="my-1 h-px bg-border" />}
                 </>
@@ -182,7 +182,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
 
             {creating ? (
               <div className="mt-1 flex items-center gap-1.5 border-t border-border px-1.5 pt-2">
-                <input autoFocus value={name} onChange={(e) => setName(e.target.value)}
+                <input autoComplete="off" autoFocus value={name} onChange={(e) => setName(e.target.value)}
                   onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter") void createAndRange(); if (e.key === "Escape") setCreating(false); }}
                   placeholder={t("folder.namePlaceholder")} className="h-7 w-full min-w-0 rounded-md border border-border bg-background px-2 text-xs outline-none focus:ring-1 focus:ring-primary" />
                 <button type="button" onClick={createAndRange} disabled={!name.trim() || !!busy}
@@ -193,7 +193,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
             ) : (
               <button type="button" onClick={() => setCreating(true)}
                 className="mt-1 flex w-full items-center gap-2 rounded-lg border-t border-border px-2 py-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground">
-                <Plus className="h-4 w-4" /> {t("folder.new")}
+                <NetsuIcon name="add" className="h-4 w-4" /> {t("folder.new")}
               </button>
             )}
           </Popover.Popup>

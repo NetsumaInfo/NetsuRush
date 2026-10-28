@@ -2,14 +2,10 @@
 // sous-nav de la barre de titre (App), par la nav latérale et par le routeur (SettingsPanel) — sans
 // elle les trois listes divergeraient. Données pures (ids + icônes + clés i18n) : aucun composant de
 // page ici, sinon la barre de titre tirerait tout le code des Paramètres au démarrage.
-import {
-  Bell, Boxes, Brush, Cpu, DatabaseBackup, Download, FolderKanban, HardDrive, Info,
-  Languages, MonitorPlay, Palette, PanelLeft, RefreshCw, Scissors, Sparkles, Terminal,
-  UserRound, Users, Wrench,
-} from "lucide-react";
 import type { ComponentType } from "react";
 import { AdobeLogo } from "@/components/HostIcon";
 import { DiscordIcon } from "@/components/DiscordIcon";
+import { settingsIcon } from "./settingsIcons";
 
 export type SettingsPage = "account" | "interface" | "media" | "ai" | "export" | "adobe" | "storage" | "system" | "about";
 
@@ -36,65 +32,65 @@ export function hasSettingsTabs(page: SettingsPage): boolean {
 export const SETTINGS_PAGES: SettingsPageDef[] = [
   {
     id: "account",
-    icon: UserRound,
+    icon: settingsIcon("account"),
     tabs: [
-      { id: "profile", icon: UserRound },
+      { id: "profile", icon: settingsIcon("profile") },
       { id: "discord", icon: DiscordIcon },
       // Sharing belongs to the ACCOUNT, not to a module: the device identity, the people, the
       // invitations and the projects are the same whichever page opened them.
-      { id: "sharing", icon: Users },
+      { id: "sharing", icon: settingsIcon("sharing") },
     ],
   },
   {
     id: "interface",
-    icon: Palette,
+    icon: settingsIcon("interface"),
     tabs: [
-      { id: "theme", icon: Palette },
-      { id: "language", icon: Languages },
-      { id: "navigation", icon: PanelLeft },
-      { id: "notifications", icon: Bell },
+      { id: "theme", icon: settingsIcon("theme") },
+      { id: "language", icon: settingsIcon("language") },
+      { id: "navigation", icon: settingsIcon("navigation") },
+      { id: "notifications", icon: settingsIcon("notifications") },
     ],
   },
   {
     id: "media",
-    icon: MonitorPlay,
-    tabs: [{ id: "preview", icon: MonitorPlay }],
+    icon: settingsIcon("media"),
+    tabs: [{ id: "preview", icon: settingsIcon("preview") }],
   },
   {
     id: "ai",
-    icon: Sparkles,
+    icon: settingsIcon("ai"),
     tabs: [
-      { id: "models", icon: Boxes },
-      { id: "indexing", icon: Scissors },
+      { id: "models", icon: settingsIcon("models") },
+      { id: "indexing", icon: settingsIcon("indexing") },
     ],
   },
   // Export et Adobe restent DEUX entrées de la nav : le pont Adobe est une destination qu'on cherche
   // par son nom — enfoui en onglet d'une page « Montage », il devenait introuvable.
-  { id: "export", icon: Download, tabs: [{ id: "export", icon: Download }] },
+  { id: "export", icon: settingsIcon("export"), tabs: [{ id: "export", icon: settingsIcon("export") }] },
   { id: "adobe", icon: AdobeLogo, tabs: [{ id: "adobe", icon: AdobeLogo, wide: true }] },
   {
     id: "storage",
-    icon: HardDrive,
+    icon: settingsIcon("storage"),
     tabs: [
-      { id: "media", icon: HardDrive },
-      { id: "cleanup", icon: Brush },
-      { id: "project", icon: DatabaseBackup },
-      { id: "projects", icon: FolderKanban },
+      { id: "media", icon: settingsIcon("media") },
+      { id: "cleanup", icon: settingsIcon("cleanup") },
+      { id: "project", icon: settingsIcon("project") },
+      { id: "projects", icon: settingsIcon("projects") },
     ],
   },
   {
     id: "system",
-    icon: Wrench,
+    icon: settingsIcon("system"),
     tabs: [
-      { id: "updates", icon: RefreshCw },
-      { id: "compatibility", icon: Cpu },
-      { id: "collaboration", icon: Users },
-      { id: "console", icon: Terminal },
+      { id: "updates", icon: settingsIcon("updates") },
+      { id: "compatibility", icon: settingsIcon("compatibility") },
+      { id: "collaboration", icon: settingsIcon("collaboration") },
+      { id: "console", icon: settingsIcon("console") },
     ],
   },
   // « À propos » est une DESTINATION qu'on cherche par son nom (identité de l'app, liens
   // communautaires, mentions légales) : enfouie en 4e onglet de « Système », elle était introuvable.
-  { id: "about", icon: Info, tabs: [{ id: "about", icon: Info }] },
+  { id: "about", icon: settingsIcon("about"), tabs: [{ id: "about", icon: settingsIcon("about") }] },
 ];
 
 export function settingsPageDef(page: SettingsPage): SettingsPageDef {

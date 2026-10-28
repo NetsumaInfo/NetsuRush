@@ -1,6 +1,6 @@
 // Diagnostic LECTURE SEULE : état du pont Resolve, projet/timeline, rendu en cours, réglages perf.
 import { useTranslation } from "react-i18next";
-import { Activity, Film, AlertTriangle, Settings2, Database } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -15,7 +15,7 @@ export function DiagnosticCards({ diag }: { diag: OptimizeDiagnosis | null }) {
     return (
       <Card className="block border-amber-500/30 p-4 text-sm">
         <div className="flex items-center gap-2 font-medium text-amber-500">
-          <AlertTriangle className="h-4 w-4" /> {t("diagnostic.offline")}
+          <NetsuIcon name="warning" className="h-4 w-4" /> {t("diagnostic.offline")}
         </div>
         <p className="mt-1 text-muted-foreground">
           {t("diagnostic.offlineHint")}
@@ -35,7 +35,7 @@ export function DiagnosticCards({ diag }: { diag: OptimizeDiagnosis | null }) {
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Film className="h-3.5 w-3.5" /> {t("diagnostic.project")}
+          <NetsuIcon name="film" className="h-3.5 w-3.5" /> {t("diagnostic.project")}
         </div>
         <Tooltip>
           <TooltipTrigger render={
@@ -64,7 +64,7 @@ export function DiagnosticCards({ diag }: { diag: OptimizeDiagnosis | null }) {
 
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Activity className="h-3.5 w-3.5" /> {t("diagnostic.render")}
+          <NetsuIcon name="activity" className="h-3.5 w-3.5" /> {t("diagnostic.render")}
         </div>
         <div className="mt-1.5 flex items-center gap-2">
           {diag.render.inProgress ? (
@@ -80,7 +80,7 @@ export function DiagnosticCards({ diag }: { diag: OptimizeDiagnosis | null }) {
 
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Settings2 className="h-3.5 w-3.5" /> {t("diagnostic.settingsRead")}
+          <NetsuIcon name="sliders" className="h-3.5 w-3.5" /> {t("diagnostic.settingsRead")}
         </div>
         <div className="mt-1 text-sm font-medium">{t("diagnostic.cacheProxyKeys", { count: settingKeys.length })}</div>
         <div className="mt-0.5 text-xs text-muted-foreground">
@@ -92,7 +92,7 @@ export function DiagnosticCards({ diag }: { diag: OptimizeDiagnosis | null }) {
 
       <Card className="block p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Database className="h-3.5 w-3.5" /> {t("diagnostic.database")}
+          <NetsuIcon name="database" className="h-3.5 w-3.5" /> {t("diagnostic.database")}
         </div>
         <div className={`mt-1 text-sm font-medium ${dbBig ? "text-amber-500" : ""}`}>
           {dbSize != null ? fmtBytes(dbSize) : diag.db ? t("diagnostic.dbRemote") : "—"}

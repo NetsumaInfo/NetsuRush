@@ -32,10 +32,6 @@
   "menu": {
     "derush": "素材整理",
     "chat": "チャット",
-    "edit": "編集",
-    "cut": "切り取り",
-    "paste": "貼り付け",
-    "selectAll": "すべて選択",
     "derushHome": "素材整理ホーム",
     "reloadRushes": "素材を再読み込み",
     "cutTimeline": "タイムラインをカット",

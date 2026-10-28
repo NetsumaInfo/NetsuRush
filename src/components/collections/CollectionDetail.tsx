@@ -3,7 +3,7 @@
 // ; ICI on garde le TRI + le FILTRE PAR TAGS (organiser les plans du dossier). Un inspecteur édite les
 // méta du plan sélectionné (note, label, tags, annotation).
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, LayoutGrid, Minus, Plus, Play, Pencil, Library, Zap, Square, CheckSquare, Search, ArrowDownUp, Tag, PanelRight, HardDrive, GripVertical, Undo2, Image as ImageIcon } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type Collection, type CollectionMeta, type CollectionShot, type CollectionShotPatch, type ExportClipInput } from "@/lib/bridge";
@@ -312,7 +312,7 @@ export function CollectionDetail({ id }: { id: string }) {
   return (
     <div ref={rootRef} className="flex h-full flex-col">
       <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
-        <Button variant="ghost" size="icon-sm" aria-label={tr("common:action.back")} onClick={closeCollection}><ArrowLeft className="size-4" /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label={tr("common:action.back")} onClick={closeCollection}><NetsuIcon name="back" className="size-4" /></Button>
         {coll && <CollectionGlyph icon={coll.icon} color={coll.color} size={26} />}
         <div className="min-w-0 max-w-[40%]">
           {/* Le compte de plans et la sélection vivent sur le bouton de sélection (comme au
@@ -326,17 +326,17 @@ export function CollectionDetail({ id }: { id: string }) {
             au milieu d'outils qui parlent de la grille. */}
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => setEditing(true)} aria-label={tr("common:action.edit")} className="shrink-0 text-muted-foreground" />}>
-            <Pencil className="size-3.5" />
+            <NetsuIcon name="edit" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{tr("detail.editFolder")}</TooltipContent>
         </Tooltip>
         <div className="flex-1" />
         <Tooltip>
           <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
-            <LayoutGrid className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-            <button type="button" aria-label={tr("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Minus className="h-3.5 w-3.5" /></button>
+            <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
+            <button type="button" aria-label={tr("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="remove" className="h-3.5 w-3.5" /></button>
             <span className="w-4 text-center tabular-nums">{grid.actualCols}</span>
-            <button type="button" aria-label={tr("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><Plus className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label={tr("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
           </TooltipTrigger>
           <TooltipContent>{tr("detail.thumbSize")}</TooltipContent>
         </Tooltip>
@@ -351,7 +351,7 @@ export function CollectionDetail({ id }: { id: string }) {
         {coll?.archive?.dir && (
           <Tooltip>
             <TooltipTrigger render={<Button size="sm" variant="outline" onClick={archiveNow} disabled={archiving} aria-label={tr("archive.onDisk")} className="h-8 text-xs text-muted-foreground" />}>
-              {archiving ? <Spinner className="size-3.5" /> : <HardDrive className="size-3.5" />}
+              {archiving ? <Spinner className="size-3.5" /> : <NetsuIcon name="disk" className="size-3.5" />}
             </TooltipTrigger>
             <TooltipContent>{tr("detail.archiveDiskHint")}</TooltipContent>
           </Tooltip>
@@ -368,12 +368,12 @@ export function CollectionDetail({ id }: { id: string }) {
             {/* Champ de recherche COURT : il partage sa ligne avec les tags et tous les outils de
                 grille ; pleine largeur, il repoussait le reste sur une seconde rangée. */}
             <div className="relative w-40 shrink-0">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={filter.q} onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))} placeholder={tr("detail.searchPlaceholder")} className="h-8 pl-8" />
             </div>
             <Select value={sort} onValueChange={(v) => setSort(v as CollSortKey)}>
               <SelectTrigger size="sm" className="w-auto gap-1.5" aria-label={tr("detail.sortShots")}>
-                <ArrowDownUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <NetsuIcon name="sort" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <SelectValue>{tr(SORT_LABELS[sort])}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -382,7 +382,7 @@ export function CollectionDetail({ id }: { id: string }) {
             </Select>
             {allTags.length > 0 && (
               <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
-                <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <NetsuIcon name="tag" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 {allTags.map((t) => {
                   const on = filter.tags.includes(t);
                   return (
@@ -404,7 +404,7 @@ export function CollectionDetail({ id }: { id: string }) {
                 <Button size="sm" variant="outline" onClick={selectAllVisible} aria-label={selCount ? tr("detail.deselectAll") : tr("detail.selectAll")}
                   className={"h-8 gap-1.5 text-xs " + (selCount ? "border-primary/40 text-primary" : "text-muted-foreground")} />
               }>
-                {selCount ? <CheckSquare className="size-3.5" /> : <Square className="size-3.5" />}
+                <NetsuIcon name="cut-select" on={selCount > 0} className="size-3.5" />
                 <span className="tabular-nums">
                   {tr("detail.shotCount", { count: items.length })}{selCount ? tr("detail.selCount", { count: selCount }) : ""}
                 </span>
@@ -422,8 +422,8 @@ export function CollectionDetail({ id }: { id: string }) {
                   className={"h-8 text-xs " + (grid.thumbsGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
               }>
                 {grid.thumbsGen
-                  ? <><Square className="size-3.5 fill-current" /> {grid.thumbsGen.done}/{grid.thumbsGen.total}</>
-                  : <ImageIcon className="size-3.5" />}
+                  ? <><NetsuIcon name="chat-stop" className="size-3.5" /> {grid.thumbsGen.done}/{grid.thumbsGen.total}</>
+                  : <NetsuIcon name="image" className="size-3.5" />}
               </TooltipTrigger>
               <TooltipContent>{grid.thumbsGen ? tr("detail.stopGen") : tr("detail.genThumbs", { verb })}</TooltipContent>
             </Tooltip>
@@ -434,8 +434,8 @@ export function CollectionDetail({ id }: { id: string }) {
                   className={"h-8 text-xs " + (grid.proxyGen ? "border-destructive/40 text-destructive hover:text-destructive" : "text-muted-foreground")} />
               }>
                 {grid.proxyGen
-                  ? <><Square className="size-3.5 fill-current" /> {grid.proxyGen.done}/{grid.proxyGen.total}</>
-                  : <Zap className="size-3.5" />}
+                  ? <><NetsuIcon name="chat-stop" className="size-3.5" /> {grid.proxyGen.done}/{grid.proxyGen.total}</>
+                  : <NetsuIcon name="zap" className="size-3.5" />}
               </TooltipTrigger>
               <TooltipContent>{grid.proxyGen ? tr("detail.stopGen") : tr("detail.pregen", { verb })}</TooltipContent>
             </Tooltip>
@@ -444,7 +444,7 @@ export function CollectionDetail({ id }: { id: string }) {
                 <Toggle size="sm" variant="outline" pressed={grid.gridPlay} onPressedChange={setGridPlayback} aria-label={tr("detail.autoplay")}
                   className="text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary aria-pressed:hover:bg-primary/15" />
               }>
-                <Play className="size-3.5" />
+                <NetsuIcon name="play" className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent>{tr("detail.autoplayHint")}</TooltipContent>
             </Tooltip>
@@ -456,7 +456,7 @@ export function CollectionDetail({ id }: { id: string }) {
               <Toggle size="sm" variant="outline" pressed={sidePanel} onPressedChange={toggleSide} aria-label={tr("detail.player")}
                 className="text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary aria-pressed:hover:bg-primary/15" />
             }>
-              <PanelRight className="size-3.5" />
+              <NetsuIcon name="panel-right-toggle" on={sidePanel} className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{tr("detail.playerHint")}</TooltipContent>
           </Tooltip>
@@ -473,7 +473,7 @@ export function CollectionDetail({ id }: { id: string }) {
           </div>
         ) : !items.length ? (
           <Card className="mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-            <Library className="h-8 w-8" />
+            <NetsuIcon name="collections-empty" className="h-8 w-8" />
             <span>{(coll?.shots.length ?? 0) ? tr("detail.noMatch") : tr("detail.emptyFolder")}</span>
           </Card>
         ) : (
@@ -536,7 +536,7 @@ export function CollectionDetail({ id }: { id: string }) {
             onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); toggleSide(true); } }}
             className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
         )}
 
@@ -553,7 +553,7 @@ export function CollectionDetail({ id }: { id: string }) {
             {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
                 restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <GripVertical className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
           )}
           {/* Rognage ouvert → lecteur du panneau suspendu (sinon il continue de tourner derrière la modale). */}
@@ -585,7 +585,7 @@ export function CollectionDetail({ id }: { id: string }) {
           {shared.hiddenCount > 0 && <Button size="sm" variant="ghost" onClick={shared.restoreHidden}>{tr("share.restoreHidden", { count: shared.hiddenCount })}</Button>}
           {undoStack.length > 0 && (
             <button type="button" onClick={() => void undoRemove()} className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-              <Undo2 className="size-3" /> {tr("detail.undoRemove")}
+              <NetsuIcon name="cut-undo" className="size-3" /> {tr("detail.undoRemove")}
             </button>
           )}
         </div>

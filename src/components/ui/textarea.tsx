@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
+      autoComplete="off"
       data-slot="textarea"
       className={cn(
         // `resize-none` : le champ grandit déjà seul avec son contenu (`field-sizing-content`), la

@@ -1,6 +1,6 @@
 // Rétroliens : pages du carnet qui @mentionnent la page ouverte (index calculé côté core). Pied de page.
 import { useTranslation } from "react-i18next";
-import { CornerDownRight } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 
 export function Backlinks() {
@@ -19,7 +19,7 @@ export function Backlinks() {
             onClick={() => void openPage(p.id)}
             className="flex items-center gap-2 rounded px-2 py-1 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            <CornerDownRight className="h-3.5 w-3.5 shrink-0" />
+            <NetsuIcon name="subpage" className="h-3.5 w-3.5 shrink-0" />
             <span className="shrink-0">{p.icon || "📄"}</span>
             <span className="truncate">{p.title || t("panel.untitled")}</span>
           </button>

@@ -1,7 +1,8 @@
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Play, Download, CheckSquare, Clapperboard } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { Check, Play } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -147,9 +148,8 @@ function SceneCardImpl({
           <Tooltip>
             <TooltipTrigger render={<button type="button" aria-label={addLabel ?? t("shared.sendToTimeline")} onClick={doAdd}
               className={`absolute bottom-1.5 left-9 rounded nr-chip shadow-md p-1 transition-opacity ${adding !== "idle" ? "opacity-100" : actVis} ${adding === "done" ? "text-[var(--color-ok)]" : adding === "err" ? "text-destructive" : "text-white/80 hover:text-primary"}`} />}>
-              {adding === "busy" ? <Spinner className="size-3.5" />
-                : adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                : <Download className="h-3.5 w-3.5" />}
+              {adding === "done" ? <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                : <SendToTimelineIcon busy={adding === "busy"} className="h-3.5 w-3.5" />}
             </TooltipTrigger>
             <TooltipContent>{addLabel ?? t("shared.sendToTimeline")}</TooltipContent>
           </Tooltip>
@@ -160,15 +160,15 @@ function SceneCardImpl({
       {/* Clic droit : lire / (dé)sélectionner / envoyer à la timeline. */}
       {chrome && (
       <ContextMenuContent className="min-w-48">
-        <ContextMenuItem onClick={onPlay}><Play /> {t("shared.playShotMenu")}</ContextMenuItem>
+        <ContextMenuItem onClick={onPlay}><NetsuIcon name="play" /> {t("shared.playShotMenu")}</ContextMenuItem>
         <ContextMenuItem onClick={() => onToggle()}>
-          <CheckSquare /> {selected ? t("shared.deselect") : t("shared.select")}
+          <NetsuIcon name="cut-select" on={selected} /> {selected ? t("shared.deselect") : t("shared.select")}
         </ContextMenuItem>
         {onAddToTimeline && (
           <>
             <ContextMenuSeparator />
             <ContextMenuItem onClick={(e) => doAdd(e)}>
-              <Clapperboard /> {addLabel ?? t("shared.addToTimeline")}
+              <SendToTimelineIcon /> {addLabel ?? t("shared.addToTimeline")}
             </ContextMenuItem>
           </>
         )}

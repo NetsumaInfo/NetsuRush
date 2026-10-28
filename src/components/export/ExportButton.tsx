@@ -14,7 +14,7 @@ import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem,
   ContextMenuCheckboxItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuGroup,
 } from "@/components/ui/context-menu";
-import { Settings2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { ExportProfileIcon } from "./exportIcons";
@@ -91,7 +91,7 @@ export function ExportButton({ clips, baseName, onTimelineImport, verb, disabled
           ))}
         </ContextMenuGroup>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => openExportSettings()}><Settings2 /> {t("settings.title")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => openExportSettings()}><NetsuIcon name="sliders" /> {t("settings.title")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

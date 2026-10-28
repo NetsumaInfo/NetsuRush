@@ -6,7 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Search, FileText, History } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { renderPageIcon } from "./IconPicker";
 
 export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
@@ -47,7 +47,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
           <DialogDescription className="sr-only">{t("navigation.searchDescription")}</DialogDescription>
         </DialogHeader>
         <div className="relative">
-          <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -68,7 +68,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
             return (
               <>
                 <div className="flex items-center gap-1 px-2 pt-1 pb-1.5 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
-                  <History className="h-3 w-3" /> {t("navigation.recent")}
+                  <NetsuIcon name="history" className="h-3 w-3" /> {t("navigation.recent")}
                 </div>
                 {recents.map((p) => p && (
                   <button
@@ -78,7 +78,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
                     className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
                   >
                     <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                      {p.icon ? renderPageIcon(p.icon, "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+                      {p.icon ? renderPageIcon(p.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5 text-muted-foreground" />}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-sm">{p.title || t("panel.untitled")}</span>
                   </button>
@@ -94,7 +94,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
               className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
             >
               <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
-                {r.icon ? renderPageIcon(r.icon, "h-3.5 w-3.5", "text-sm") : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+                {r.icon ? renderPageIcon(r.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5 text-muted-foreground" />}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{r.title || t("panel.untitled")}</span>

@@ -11,7 +11,7 @@
 
 import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
-import { AlertTriangle, Check, RefreshCw, UserRound, Users } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { api } from "@/lib/convexApi";
 import { cn } from "@/lib/utils";
 import type { MemberPresence } from "@/lib/collab/client";
@@ -35,7 +35,7 @@ function Avatar({ url, online }: { url: string | null; online: boolean }) {
         <img src={url} alt="" className="size-6 rounded-full object-cover" referrerPolicy="no-referrer" />
       ) : (
         <span className="flex size-6 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <UserRound className="size-3.5" />
+          <NetsuIcon name="account" className="size-3.5" />
         </span>
       )}
       <span
@@ -108,7 +108,7 @@ export function CollabStatus({
             />
           }
         >
-          <Users className="size-3.5" />
+          <NetsuIcon name="collab" className="size-3.5" />
           <span className={onlineCount ? "text-[var(--color-ok)]" : undefined}>{onlineCount}</span>
           {(offlineQueued || rotationRequired) && (
             <span className="size-1.5 rounded-full bg-amber-500" />
@@ -164,29 +164,29 @@ export function CollabStatus({
               otherwise let the user believe the others already had their edits. */}
           {offlineQueued ? (
             <p className="flex items-start gap-1.5 text-muted-foreground">
-              <RefreshCw className="mt-0.5 size-3.5 shrink-0" />
+              <NetsuIcon name="refresh" className="mt-0.5 size-3.5 shrink-0" />
               {t("panel.queued")}
             </p>
           ) : seen.length > 0 && onlineCount === 0 ? (
             <p className="flex items-start gap-1.5 text-muted-foreground">
-              <RefreshCw className="mt-0.5 size-3.5 shrink-0" />
+              <NetsuIcon name="refresh" className="mt-0.5 size-3.5 shrink-0" />
               {t("panel.nobodyReachable")}
             </p>
           ) : (
             <p className="flex items-start gap-1.5 text-muted-foreground">
-              <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--color-ok)]" />
+              <NetsuIcon name="check" className="mt-0.5 size-3.5 shrink-0 text-[var(--color-ok)]" />
               {t("panel.upToDate")}
             </p>
           )}
           {rotationRequired && (
             <p className="flex items-start gap-1.5 text-amber-500">
-              <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+              <NetsuIcon name="warning" className="mt-0.5 size-3.5 shrink-0" />
               {t("panel.rotation")}
             </p>
           )}
           {waitingForKey.length > 0 && (
             <p className="flex items-start gap-1.5 text-amber-500">
-              <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+              <NetsuIcon name="warning" className="mt-0.5 size-3.5 shrink-0" />
               {t("panel.waitingKey", { count: waitingForKey.length })}
             </p>
           )}

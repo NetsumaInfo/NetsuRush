@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, CircleHelp, RotateCcw, Settings2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import type { DetectModel, DetectOptions, OmniInterLabel, OmniIntraLabel } from "@/lib/bridge";
@@ -40,7 +40,7 @@ function FieldHint({ label, hint }: { label: string; hint?: string }) {
       {hint && (
         <Tooltip>
           <TooltipTrigger render={<span className="inline-flex shrink-0 text-muted-foreground" tabIndex={0} aria-label={hint} />}>
-            <CircleHelp className="size-3.5" />
+            <NetsuIcon name="help" className="size-3.5" />
           </TooltipTrigger>
           {/* Pas de titre : le libellé du champ est juste à côté du curseur, le répéter noie la phrase utile. */}
           <TooltipContent side="right" align="center" className="max-w-64">{hint}</TooltipContent>
@@ -133,7 +133,7 @@ export function DetectionAdvancedSettings({ model, disabled = false, compact = f
           <DialogTrigger
             render={<Button variant="outline" size={compact ? "icon-sm" : "sm"} disabled={disabled} aria-label={t("advanced.open")} />}
           >
-            <Settings2 className="size-4" />
+            <NetsuIcon name="sliders" className="size-4" />
             {!compact && t("advanced.open")}
           </DialogTrigger>
         </TooltipTrigger>
@@ -146,7 +146,7 @@ export function DetectionAdvancedSettings({ model, disabled = false, compact = f
             <DialogTitle>{t("advanced.title", { model: meta.label })}</DialogTitle>
             <Tooltip>
               <TooltipTrigger render={<Button type="button" variant="ghost" size="icon-sm" className="size-6 text-muted-foreground" aria-label={t("advanced.description")} />}>
-                <CircleHelp className="size-3.5" />
+                <NetsuIcon name="help" className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent side="right" className="max-w-60">{t("advanced.description")}</TooltipContent>
             </Tooltip>
@@ -192,7 +192,7 @@ export function DetectionAdvancedSettings({ model, disabled = false, compact = f
 
           {hasMore && (
             <Button type="button" variant="ghost" size="sm" className="self-start px-2 text-muted-foreground" onClick={() => setExpanded((value) => !value)}>
-              {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+              <NetsuIcon name="chevron-toggle" on={expanded} className="size-4" />
               {t(expanded ? "advanced.showLess" : "advanced.showMore")}
             </Button>
           )}
@@ -209,7 +209,7 @@ export function DetectionAdvancedSettings({ model, disabled = false, compact = f
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={resetOptions}>
-            <RotateCcw className="size-4" /> {t("advanced.reset")}
+            <NetsuIcon name="reset-default" className="size-4" /> {t("advanced.reset")}
           </Button>
         </DialogFooter>
       </DialogContent>

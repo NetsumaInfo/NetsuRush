@@ -32,10 +32,6 @@
   "menu": {
     "derush": "素材整理",
     "chat": "聊天",
-    "edit": "编辑",
-    "cut": "剪切",
-    "paste": "粘贴",
-    "selectAll": "全选",
     "derushHome": "素材整理主页",
     "reloadRushes": "重新加载素材",
     "cutTimeline": "切分时间线",

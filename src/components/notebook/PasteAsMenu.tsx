@@ -3,12 +3,12 @@
 // Échap annule (repli = lien inline). Se ferme au clic extérieur. Positionné en fixed près du caret.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AtSign, Link2, Bookmark, Globe } from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { LINK_AS_OPTIONS, type LinkAs } from "./notebookPaste";
 import i18n from "@/i18n";
 import { useViewportAnchor } from "@/lib/useViewportAnchor";
 
-const ICONS: Record<LinkAs, typeof AtSign> = { mention: AtSign, url: Link2, bookmark: Bookmark, embed: Globe };
+const ICONS: Record<LinkAs, IconComponent> = { mention: netsuIconOf("mention"), url: netsuIconOf("link"), bookmark: netsuIconOf("bookmark"), embed: netsuIconOf("web") };
 
 export interface PasteAnchor { getRect: () => DOMRect | null; url: string; }
 

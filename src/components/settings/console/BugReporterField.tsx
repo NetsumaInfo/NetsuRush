@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { UserRound } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/lib/convexApi";
 import { convexConfigured } from "@/lib/convexEnv";
@@ -40,7 +40,7 @@ function ConnectedReporter(props: Props) {
   const { t } = useTranslation("settings");
   const { isAuthenticated } = useConvexAuth();
   const user = useQuery(api.auth.getCurrentUser) as { name?: string | null; image?: string | null } | null | undefined;
-  const profile = useDiscordProfile();
+  const profile = useDiscordProfile(isAuthenticated);
   const { onIdentity } = props;
 
   const name = profile?.username ?? user?.name ?? null;
@@ -60,7 +60,7 @@ function ConnectedReporter(props: Props) {
         {user?.image ? (
           <img src={user.image} alt="" className="size-5 rounded-full object-cover" referrerPolicy="no-referrer" />
         ) : (
-          <UserRound className="size-4 text-muted-foreground" />
+          <NetsuIcon name="account" className="size-4 text-muted-foreground" />
         )}
         <span className="min-w-0 flex-1 truncate text-[0.8125rem]">{name}</span>
         <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground">{t("bugReport.auto")}</span>

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Home, FileVideo, FolderInput, FolderPlus, Scissors, Search, ListChecks, Undo2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
-import { RefreshIcon } from "@/components/ui/animated-icons";
 import { useApp } from "@/store";
 import { nr, type Clip, type DetectModel } from "@/lib/bridge";
 import { Card } from "@/components/ui/card";
@@ -141,14 +140,14 @@ export function RushGrid() {
       <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={backHome} aria-label={t("rushGrid.home")} />}>
-            <Home />
+            <NetsuIcon name="home" />
           </TooltipTrigger>
           <TooltipContent>{t("rushGrid.home")}</TooltipContent>
         </Tooltip>
         <h1 className="text-[13px] font-medium">{t("home.title")}</h1>
         <span className="text-[11px] text-muted-foreground">{all.length || "—"}</span>
         <div className="relative ml-2 max-w-xs flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("rushGrid.searchPlaceholder")} className="h-8 pl-8" />
         </div>
         {all.length > 0 && <FoldersToggle pressed={folders} onPressedChange={setFolders} />}
@@ -159,40 +158,40 @@ export function RushGrid() {
         {all.length > 0 && (
           <Tooltip>
             <TooltipTrigger render={<Button variant={selectMode ? "default" : "outline"} size="icon-sm" onClick={() => (selectMode ? exitSelect() : setSelectMode(true))} aria-label={t("rushGrid.select")} />}>
-              <ListChecks className="h-4 w-4" />
+              <NetsuIcon name="task-list" className="h-4 w-4" />
             </TooltipTrigger>
             <TooltipContent>{selectMode ? t("rushGrid.exitSelect") : t("rushGrid.selectBatch")}</TooltipContent>
           </Tooltip>
         )}
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => setNewFolder(true)} aria-label={t("library.newFolder")} />}>
-            <FolderPlus className="h-4 w-4" />
+            <NetsuIcon name="cut-folder-new" className="h-4 w-4" />
           </TooltipTrigger>
           <TooltipContent>{t("library.newFolder")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={pickFiles} aria-label={t("rushGrid.import")} />}>
-            <FileVideo className="h-4 w-4" />
+            <NetsuIcon name="file-video" className="h-4 w-4" />
           </TooltipTrigger>
           <TooltipContent>{t("home.import")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={pickDir} aria-label={t("library.importFolder")} />}>
-            <FolderInput className="h-4 w-4" />
+            <NetsuIcon name="cut-import" className="h-4 w-4" />
           </TooltipTrigger>
           <TooltipContent>{t("library.importFolder")}</TooltipContent>
         </Tooltip>
         {connected && (
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={openCutTimeline} aria-label={t("home.cutTimeline")} />}>
-              <Scissors className="h-4 w-4" />
+              <NetsuIcon name="scissors" className="h-4 w-4" />
             </TooltipTrigger>
             <TooltipContent>{t("home.cutTimeline")}</TooltipContent>
           </Tooltip>
         )}
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={loadClips} disabled={clipsLoading} aria-label={t("shared.reload")} />}>
-            <RefreshIcon spinning={clipsLoading || clipsRevalidating} />
+            <NetsuIcon name="sidebar-refresh" busy={clipsLoading || clipsRevalidating} />
           </TooltipTrigger>
           <TooltipContent>{t("shared.reload")}</TooltipContent>
         </Tooltip>
@@ -227,7 +226,7 @@ export function RushGrid() {
           <span className="min-w-0 flex-1 truncate text-muted-foreground">{libraryNotice}</span>
           {canUndoLibrary && (
             <Button variant="outline" size="sm" onClick={() => void undoLibraryDelete()}>
-              <Undo2 className="size-3.5" /> {t("library.undo")}
+              <NetsuIcon name="cut-undo" className="size-3.5" /> {t("library.undo")}
             </Button>
           )}
         </div>

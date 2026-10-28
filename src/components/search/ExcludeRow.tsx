@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Ban, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupButton } from "@/components/ui/input-group";
 
 type Props = {
@@ -19,7 +19,7 @@ export function ExcludeRow({ value, setValue, onSubmit, onClose }: Props) {
   return (
     <div className="animate-in fade-in-0 slide-in-from-top-1 duration-150 motion-reduce:animate-none">
       <InputGroup>
-        <InputGroupAddon><Ban /></InputGroupAddon>
+        <InputGroupAddon><NetsuIcon name="search-exclude" /></InputGroupAddon>
         <InputGroupInput
           ref={ref}
           value={value}
@@ -33,7 +33,7 @@ export function ExcludeRow({ value, setValue, onSubmit, onClose }: Props) {
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton size="icon-xs" aria-label={t("searchBar.clearExclusionAria")} onClick={() => { setValue(""); onClose(); }}>
-            <X />
+            <NetsuIcon name="close" />
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>

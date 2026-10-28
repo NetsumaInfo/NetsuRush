@@ -3,7 +3,7 @@
 // le premier lancement reste exactement l'écran d'avant. Pas d'état vide inventé.
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Folder } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/store";
@@ -48,7 +48,7 @@ export function LibraryStrip() {
         <span className="text-xs text-muted-foreground">{items.length}</span>
         <span className="flex-1" />
         <Button variant="ghost" size="sm" onClick={() => goTo(null)}>
-          {t("library.seeAll")} <ArrowRight className="h-3.5 w-3.5" />
+          {t("library.seeAll")} <NetsuIcon name="forward" className="h-3.5 w-3.5" />
         </Button>
       </div>
 
@@ -58,7 +58,7 @@ export function LibraryStrip() {
         <div className="flex flex-wrap gap-2">
           {chips.map((c) => (
             <Button key={c.id} variant="outline" size="sm" onClick={() => goTo(c.path)}>
-              <Folder className="h-3.5 w-3.5 text-muted-foreground" />
+              <NetsuIcon name="folder-open" className="h-3.5 w-3.5 text-muted-foreground" />
               {c.name}
               <span className="text-xs text-muted-foreground">{c.n}</span>
             </Button>

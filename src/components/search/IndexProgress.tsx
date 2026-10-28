@@ -1,11 +1,10 @@
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import NumberFlow from "@number-flow/react";
-import { Square } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { cn, uiLocale } from "@/lib/utils";
 
 type Busy = { file: string; pct: number; done: number; total: number; phase: string; ts: number };
@@ -58,7 +57,7 @@ export function IndexProgress({ busy, onCancel, canceling, kindLabel }: { busy: 
               onClick={onCancel} disabled={canceling}
               className="h-6 gap-1 px-2 text-[11px] text-muted-foreground hover:text-destructive"
             >
-              {canceling ? <Spinner className="h-3 w-3" /> : <Square className="h-3 w-3 fill-current" />}
+              <NetsuIcon name="search-stop-index" busy={canceling} className="h-3 w-3" />
               {canceling ? t("indexProgress.stopping") : t("indexProgress.stop")}
             </Button>
           )}

@@ -4,7 +4,7 @@
 // Zéro boucle d'anim JS (transform direct + un setInterval de diaporama).
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, ChevronRight, Play, Pause, ZoomIn, ZoomOut } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import i18n from "@/i18n";
 
@@ -80,24 +80,24 @@ export function Lightbox({ urls, index, onClose, onIndex, captions }: {
         <span className="text-sm text-white/70 tabular-nums">{index + 1} / {urls.length}</span>
         <div className="flex items-center gap-1.5">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => { setZoom(clampZoom(zoom / 1.4)); if (zoom / 1.4 <= 1) setPan({ x: 0, y: 0 }); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><ZoomOut className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => { setZoom(clampZoom(zoom / 1.4)); if (zoom / 1.4 <= 1) setPan({ x: 0, y: 0 }); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><NetsuIcon name="zoom-out" className="h-4 w-4" /></button>} />
             <TooltipContent>{i18n.t("notebook:lightbox.zoomOut")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => setZoom(clampZoom(zoom * 1.4))} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><ZoomIn className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => setZoom(clampZoom(zoom * 1.4))} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><NetsuIcon name="zoom-in" className="h-4 w-4" /></button>} />
             <TooltipContent>{i18n.t("notebook:lightbox.zoomIn")}</TooltipContent>
           </Tooltip>
           {many && (
             <Tooltip>
               <TooltipTrigger render={
                 <button type="button" onClick={() => setPlaying((p) => !p)} className={`flex h-9 w-9 items-center justify-center rounded-full text-white hover:bg-white/20 ${playing ? "bg-primary" : "bg-white/10"}`}>
-                  {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  <NetsuIcon name="play-pause" on={playing} className="h-4 w-4" />
                 </button>
               } />
               <TooltipContent>{playing ? i18n.t("notebook:lightbox.pause") : i18n.t("notebook:lightbox.slideshow")}</TooltipContent>
             </Tooltip>
           )}
-          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:window.close")}><X className="h-4 w-4" /></button>
+          <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:window.close")}><NetsuIcon name="close" className="h-4 w-4" /></button>
         </div>
       </div>
 
@@ -105,8 +105,8 @@ export function Lightbox({ urls, index, onClose, onIndex, captions }: {
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
         {many && (
           <>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(-1); }} className="absolute left-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.previous")}><ChevronLeft className="h-6 w-6" /></button>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(1); }} className="absolute right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.next")}><ChevronRight className="h-6 w-6" /></button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(-1); }} className="absolute left-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.previous")}><NetsuIcon name="prev" className="h-6 w-6" /></button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(1); }} className="absolute right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.next")}><NetsuIcon name="next" className="h-6 w-6" /></button>
           </>
         )}
         <img

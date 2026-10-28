@@ -2,8 +2,8 @@
 // outils. Branche les flux SSE (événements + approbations) au store, charge les agents disponibles,
 // et assemble en-tête / réglages / fil / barre d'approbation / composer.
 import { useEffect, useRef, useState } from "react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
-import { Bot } from "lucide-react";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { BetaNotice } from "@/components/common/BetaNotice";
@@ -58,7 +58,7 @@ export function ChatPanel() {
       <div ref={scrollRef} className="flex-1 overflow-auto">
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary"><Bot className="size-5" /></div>
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary"><NetsuIcon name="chat-empty" className="size-5" /></div>
             <div className="text-sm font-semibold">{t("panel.copilot")}</div>
             {!ready && (
               <button type="button" onClick={() => setShowSettings(true)} className="text-xs text-primary underline-offset-2 hover:underline">

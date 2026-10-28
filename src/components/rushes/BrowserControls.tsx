@@ -2,7 +2,7 @@
 // cohérence garantie. `SortSelect` = tri (Select large, jamais tronqué) ; `FoldersToggle` = bascule
 // affichage par dossiers Media Pool.
 import { useTranslation } from "react-i18next";
-import { ArrowDownUp, FolderTree } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,7 +15,7 @@ export function SortSelect({ value, onChange, options }: { value: string; onChan
   return (
     <Select value={value} onValueChange={(v) => onChange(v as string)}>
       <SelectTrigger size="sm" className="w-auto min-w-[9.5rem] gap-1.5 whitespace-nowrap" aria-label={t("browser.sort")}>
-        <ArrowDownUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="sort" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -34,7 +34,7 @@ export function FoldersToggle({ pressed, onPressedChange }: { pressed: boolean; 
         <Toggle size="sm" variant="outline" pressed={pressed} onPressedChange={onPressedChange}
           className="text-xs text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary aria-pressed:hover:bg-primary/15" />
       }>
-        <FolderTree className="size-3.5" /> {t("browser.folders")}
+        <NetsuIcon name="folder-tree" className="size-3.5" /> {t("browser.folders")}
       </TooltipTrigger>
       <TooltipContent>{t("browser.foldersTip")}</TooltipContent>
     </Tooltip>

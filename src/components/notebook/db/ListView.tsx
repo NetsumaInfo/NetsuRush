@@ -1,7 +1,7 @@
 // Vue Liste — lignes compactes en une colonne. Chaque ligne = champ
 // primaire + chips des autres champs ; clic → détail de ligne. Bouton nouvelle ligne en pied.
 import { useMemo } from "react";
-import { Plus } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { visibleRows } from "@/lib/notebookDb";
 import { CellDisplay } from "./cellControls";
 import { cellValueFor, primaryField, type Database, type DbView } from "../notebookShared";
@@ -32,7 +32,7 @@ export function ListView({ db, view, ops, onOpenRow }: { db: Database; view: DbV
         );
       })}
       <button type="button" onClick={() => ops.addRow()} className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs text-muted-foreground hover:bg-muted">
-        <Plus className="h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.newRow")}
+        <NetsuIcon name="add" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.newRow")}
       </button>
     </div>
   );

@@ -6,7 +6,7 @@
 // versions l'appel tient — sur Premiere Pro 2026 il n'est plus garanti (bascule UXP).
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Eraser, Loader2, AlertTriangle, Sparkles, MemoryStick } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -125,7 +125,7 @@ export function BoostPurgeSection({
 
       {app === "aeft" && memory != null && (
         <div className="mt-3 flex items-center gap-2 text-sm">
-          <MemoryStick className="h-4 w-4 text-primary" />
+          <NetsuIcon name="memory" className="h-4 w-4 text-primary" />
           <span className="font-medium tabular-nums">{fmtBytes(memory)}</span>
           <span className="text-xs text-muted-foreground">{t("boost.purge.memoryInUse")}</span>
         </div>
@@ -141,7 +141,7 @@ export function BoostPurgeSection({
               disabled={!ready || !!busy}
               onClick={() => (target.heavy ? setPending({ kind: "purge", id: target.id }) : runPurge(target.id))}
             >
-              {busy === target.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eraser className="h-4 w-4" />}
+              <NetsuIcon name="boost-purge" busy={busy === target.id} className="h-4 w-4" />
               {t(`boost.purge.targets.${target.id}`)}
             </Button>
           ))}
@@ -151,7 +151,7 @@ export function BoostPurgeSection({
       {app === "aeft" && (
         <>
           <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-500">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("boost.purge.allCachesWarning")}
+            <NetsuIcon name="warning" className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("boost.purge.allCachesWarning")}
           </p>
           <p className="mt-1.5 text-xs text-muted-foreground">{t("boost.purge.compatAeft")}</p>
         </>
@@ -161,13 +161,13 @@ export function BoostPurgeSection({
         <div className="mt-3">
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" disabled={!ready || !!busy} onClick={runDeletePreviews}>
-              {busy === "previews" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eraser className="h-4 w-4" />}
+              <NetsuIcon name="boost-purge" busy={busy === "previews"} className="h-4 w-4" />
               {t("boost.purge.deletePreviews")}
             </Button>
             <Badge className="bg-amber-500/15 text-amber-500">{t("boost.purge.experimental")}</Badge>
           </div>
           <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-500">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <NetsuIcon name="warning" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             {uxpEra ? t("boost.purge.uxpEra", { year: hostYear(diag) }) : t("boost.purge.qeExperimental")}
           </p>
           <p className="mt-1.5 text-xs text-muted-foreground">
@@ -178,7 +178,7 @@ export function BoostPurgeSection({
 
       <div className="mt-4 border-t border-border pt-3">
         <div className="flex items-center gap-2 text-xs font-medium">
-          <Sparkles className="h-3.5 w-3.5 text-primary" /> {t("boost.purge.hygiene")}
+          <NetsuIcon name="sparkles" className="h-3.5 w-3.5 text-primary" /> {t("boost.purge.hygiene")}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{t("boost.purge.hygieneHint")}</p>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -190,7 +190,7 @@ export function BoostPurgeSection({
               disabled={!ready || !!busy}
               onClick={() => setPending({ kind: "hygiene", id: op.id })}
             >
-              {busy === op.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {busy === op.id ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="sparkles" className="h-4 w-4" />}
               {t(`boost.purge.hygieneOps.${op.id}`)}
             </Button>
           ))}
@@ -218,7 +218,7 @@ export function BoostPurgeSection({
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={confirmPending} disabled={!!busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eraser className="h-4 w-4" />}
+              <NetsuIcon name="boost-purge" busy={!!busy} className="h-4 w-4" />
               {t("common:action.confirm")}
             </Button>
           </DialogFooter>

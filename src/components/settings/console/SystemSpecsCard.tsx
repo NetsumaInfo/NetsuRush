@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Check, ChevronDown, Copy, RefreshCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn, fmtBytes } from "@/lib/utils";
+import { fmtBytes } from "@/lib/utils";
 import type { BugContext } from "@/lib/bridge";
 import { formatContext } from "./bugReportShared";
 import { useTranslation } from "react-i18next";
@@ -53,13 +53,13 @@ export function SystemSpecsCard({ context, loading, onRefresh, manual, onManualC
         <div className="flex shrink-0 items-center gap-1">
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={copy} disabled={!context} aria-label={t("bugReport.specs.copy")} />}>
-              {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              {copied ? <NetsuIcon name="check" className="size-3.5" /> : <NetsuIcon name="copy" className="size-3.5" />}
             </TooltipTrigger>
             <TooltipContent>{t("bugReport.specs.copy")}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={onRefresh} disabled={loading} aria-label={t("bugReport.specs.refresh")} />}>
-              <RefreshCw className={cn("size-3.5", loading && "animate-spin")} />
+              <NetsuIcon name="refresh" busy={loading} className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{t("bugReport.specs.refresh")}</TooltipContent>
           </Tooltip>
@@ -92,7 +92,7 @@ export function SystemSpecsCard({ context, loading, onRefresh, manual, onManualC
             onClick={() => setOpen((v) => !v)}
             className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ChevronDown className={cn("size-3 transition-transform", open && "rotate-180")} />
+            <NetsuIcon name="chevron-toggle" on={open} className="size-3" />
             {open ? t("bugReport.specs.less") : t("bugReport.specs.more")}
           </button>
           {open && (

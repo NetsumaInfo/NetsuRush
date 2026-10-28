@@ -3,10 +3,11 @@
 // Navigation aussi au CLIC DROIT (ViewContextMenu, comme dans l'app) : « Aller au module »,
 // actions de la vue, Paramètres, Recharger — variante remote (pas d'items fenêtre OS).
 import { useEffect, type ReactNode } from "react";
-import { Scissors, ChevronDown, Settings, Check, RotateCw, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { NAV } from "@/components/nav";
+import { NavCutIcon } from "@/components/navIcons";
 import { ViewContextMenu } from "@/components/common/ViewContextMenu";
 import { MainContent } from "@/components/MainContent";
 import { DerushSubnav } from "@/components/rushes/DerushSubnav";
@@ -53,7 +54,7 @@ export function RemotePanel() {
   const tab = useApp((s) => s.tab);
   const setTab = useApp((s) => s.setTab);
   const current = NAV.find((n) => n.id === tab);
-  const CurrentIcon = current?.icon ?? Scissors;
+  const CurrentIcon = current?.icon ?? NavCutIcon;
 
   // Prévient la coquille CEP que l'app est bien montée (sinon elle ne peut pas distinguer un iframe
   // resté blanc d'un chargement lent, et l'utilisateur se retrouve devant un panneau vide).
@@ -85,7 +86,7 @@ export function RemotePanel() {
                 {/* Panneau très étroit : le nom du module cède la place à la sous-nav CENTRÉE (qui
                     doit rester au milieu de la barre), l'icône et le chevron suffisent à la lire. */}
                 <span className="hidden min-[480px]:inline">{current ? t(`shell:${current.labelKey}`) : "NetsuRush"}</span>
-                <ChevronDown className="size-3 text-muted-foreground" />
+                <NetsuIcon name="chevron-down" className="size-3 text-muted-foreground" />
               </button>
             }
           />
@@ -97,16 +98,16 @@ export function RemotePanel() {
                   <DropdownMenuItem key={n.id} onClick={() => setTab(n.id)}>
                     <Icon className="size-4 text-muted-foreground" />
                     <span className="flex-1">{t(`shell:${n.labelKey}`)}</span>
-                    {tab === n.id && <Check className="size-3.5 text-primary" />}
+                    {tab === n.id && <NetsuIcon name="check" className="size-3.5 text-primary" />}
                   </DropdownMenuItem>
                 );
               })}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setTab("settings")}>
-              <Settings className="size-4 text-muted-foreground" />
+              <NetsuIcon name="sidebar-settings" className="size-4 text-muted-foreground" />
               <span className="flex-1">{t("remote.settings")}</span>
-              {tab === "settings" && <Check className="size-3.5 text-primary" />}
+              {tab === "settings" && <NetsuIcon name="check" className="size-3.5 text-primary" />}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -120,10 +121,10 @@ export function RemotePanel() {
           <div className="absolute left-1/2 flex -translate-x-1/2 items-center">{subnav}</div>
         )}
         <PanelButton label={t("remote.reload")} onClick={() => panelCommand("reload")}>
-          <RotateCw className="size-3.5" />
+          <NetsuIcon name="restart" className="size-3.5" />
         </PanelButton>
         <PanelButton label={t("remote.close")} onClick={() => panelCommand("home")}>
-          <X className="size-3.5" />
+          <NetsuIcon name="close" className="size-3.5" />
         </PanelButton>
       </header>
 

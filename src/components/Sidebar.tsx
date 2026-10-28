@@ -1,7 +1,6 @@
 import { useState, type FocusEvent } from "react";
-import { Settings, MonitorPlay, MonitorX } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
-import { RefreshIcon } from "@/components/ui/animated-icons";
 import { useApp } from "@/store";
 import { hasCacheAlert } from "@/store/storage";
 import { cn } from "@/lib/utils";
@@ -133,7 +132,7 @@ export function Sidebar() {
             {/* Pastille ANCRÉE À L'ICÔNE, pas au libellé : le rail est replié par défaut et le
                 libellé disparaît — une alerte accrochée au texte serait invisible au repos. */}
             <span className="relative shrink-0">
-              <Settings className="size-[18px]" />
+              <NetsuIcon name="sidebar-settings" className="size-[18px]" />
               {storageAlert && (
                 <span className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-destructive ring-2 ring-[var(--color-bg)]" />
               )}
@@ -240,16 +239,16 @@ export function Sidebar() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => (adobeActive ? refreshAdobeStatus() : refreshStatus())}>
-                <RefreshIcon /> {t("status.refresh")}
+                <NetsuIcon name="sidebar-refresh" busy={statusLoading} /> {t("status.refresh")}
               </DropdownMenuItem>
               {/* Fermer / rouvrir le logiciel de montage pour libérer la RAM pendant une tâche lourde. */}
               {power?.closed ? (
                 <DropdownMenuItem disabled={power.busy} onClick={() => void reopenHost()}>
-                  <MonitorPlay className="size-3.5" /> {t("power.reopenHost", { host: hostShort(power.closed.host) })}
+                  <NetsuIcon name="host-reopen" className="size-3.5" /> {t("power.reopenHost", { host: hostShort(power.closed.host) })}
                 </DropdownMenuItem>
               ) : activeConnected ? (
                 <DropdownMenuItem disabled={power?.busy} onClick={() => void closeHost(activeHost)}>
-                  <MonitorX className="size-3.5" /> {t("power.freeRam")}
+                  <NetsuIcon name="free-ram" className="size-3.5" /> {t("power.freeRam")}
                 </DropdownMenuItem>
               ) : null}
             </DropdownMenuContent>
@@ -265,7 +264,7 @@ export function Sidebar() {
               transition: collapsed ? "opacity 120ms ease-in" : "opacity 180ms ease-out 80ms",
             }}
           >
-            <RefreshIcon size={14} spinning={statusLoading} />
+            <NetsuIcon name="sidebar-refresh" busy={statusLoading} className="size-3.5" />
           </button>
         </div>
       </aside>

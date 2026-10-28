@@ -5,7 +5,7 @@ import { createElement } from "react";
 import i18n from "@/i18n";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Trash2, Copy, ChevronUp, ChevronDown } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { visibleRows } from "@/lib/notebookDb";
 import { FIELD_ICON, AddFieldButton } from "./FieldMenu";
 import { FieldEditor } from "./FieldEditor";
@@ -38,18 +38,18 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
         {/* Navigation + position */}
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" disabled={!prev} onClick={() => prev && onNavigate(prev.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" disabled={!prev} onClick={() => prev && onNavigate(prev.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="h-4 w-4 rotate-180" /></button>} />
             <TooltipContent>{i18n.t("notebook:dbBasics.previousRow")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" disabled={!next} onClick={() => next && onNavigate(next.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" disabled={!next} onClick={() => next && onNavigate(next.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="h-4 w-4" /></button>} />
             <TooltipContent>{i18n.t("notebook:dbBasics.nextRow")}</TooltipContent>
           </Tooltip>
           {pos >= 0 && <span className="tabular-nums">{pos + 1} / {ordered.length}</span>}
         </div>
         {/* Titre = champ primaire */}
         {primary && (
-          <input
+          <input autoComplete="off"
             value={String(row.cells[primary.id] ?? "")}
             onChange={(e) => setCell(primary.id, e.target.value)}
             placeholder={i18n.t("notebook:panel.untitled")}
@@ -76,10 +76,10 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
           </div>
           <div className="flex items-center gap-1">
             <button type="button" onClick={() => { ops.duplicateRow(rowId); onClose(); }} className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
-              <Copy className="h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}
+              <NetsuIcon name="copy" className="h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}
             </button>
             <button type="button" onClick={() => { ops.removeRow(rowId); onClose(); }} className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-destructive">
-              <Trash2 className="h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}
+              <NetsuIcon name="trash" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}
             </button>
           </div>
         </div>

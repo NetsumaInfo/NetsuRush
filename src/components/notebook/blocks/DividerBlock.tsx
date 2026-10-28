@@ -2,7 +2,7 @@
 // cyclés au clic (bouton discret au survol). Persisté dans la prop `style`.
 import { createReactBlockSpec } from "@blocknote/react";
 import i18n from "@/i18n";
-import { SlidersHorizontal } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const STYLES = ["line", "dashed", "dots", "stars"] as const;
@@ -26,7 +26,7 @@ function Divider({ style, onCycle }: { style: DividerStyle; onCycle: () => void 
             className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 shadow-sm transition-opacity hover:bg-muted group-hover/div:opacity-100"
             aria-label={i18n.t("notebook:blocksUi.changeDivider")}
           >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
+            <NetsuIcon name="sliders" className="h-3.5 w-3.5" />
           </button>
         } />
         <TooltipContent>{i18n.t("notebook:blocksUi.changeDivider")}</TooltipContent>

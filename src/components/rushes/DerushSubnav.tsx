@@ -1,17 +1,17 @@
 // Sous-nav du derush (Découpage / Collections / Timeline Live), posée DANS la barre de titre pour
 // ne rien coûter en hauteur (segmented control compact). Pilote `derushSection` du store.
 import { useTranslation } from "react-i18next";
-import { Scissors, Library, Film } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { type DerushSection } from "@/store";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const SECTIONS: { id: DerushSection; labelKey: string; icon: typeof Scissors }[] = [
-  { id: "decoupage", labelKey: "subnav.decoupage", icon: Scissors },
-  { id: "collections", labelKey: "subnav.collections", icon: Library },
-  { id: "timeline", labelKey: "subnav.timeline", icon: Film },
+const SECTIONS: { id: DerushSection; labelKey: string; icon: string }[] = [
+  { id: "decoupage", labelKey: "subnav.decoupage", icon: "tab-cut" },
+  { id: "collections", labelKey: "subnav.collections", icon: "tab-collections" },
+  { id: "timeline", labelKey: "subnav.timeline", icon: "tab-timeline-live" },
 ];
 
 export function DerushSubnav() {
@@ -40,7 +40,7 @@ export function DerushSubnav() {
             >
               {/* Sous ~560 px (panneau CEP étroit), les libellés sortiraient de la barre : on garde
                   les TROIS entrées visibles en icônes plutôt que d'en pousser une hors de vue. */}
-              <s.icon className="size-3.5" />
+              <NetsuIcon name={s.icon} className="size-3.5" />
               <span className="hidden min-[560px]:inline">{t(s.labelKey)}</span>
             </TooltipTrigger>
             <TooltipContent side="bottom">{t(s.labelKey)}</TooltipContent>

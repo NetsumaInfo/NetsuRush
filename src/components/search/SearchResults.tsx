@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, Play, Group, Copy, ScanFace, CheckSquare, Square } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { netsuIconOf } from "@/components/NetsuIconOf";
 import { useShallow } from "zustand/react/shallow";
 import { type SearchHit } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -27,9 +28,9 @@ function previewRange(h: SearchHit): { path: string; in: number; out: number } {
 }
 
 const VIEWS = [
-  { id: "flat", icon: Search, labelKey: "searchResults.tabFlat" },
-  { id: "dedup", icon: Copy, labelKey: "searchResults.tabDedupTooltip" },
-  { id: "clusters", icon: Group, labelKey: "searchResults.tabClustersTooltip" },
+  { id: "flat", icon: netsuIconOf("search"), labelKey: "searchResults.tabFlat" },
+  { id: "dedup", icon: netsuIconOf("copy"), labelKey: "searchResults.tabDedupTooltip" },
+  { id: "clusters", icon: netsuIconOf("group"), labelKey: "searchResults.tabClustersTooltip" },
 ] as const;
 
 // Fenêtre d'affichage de la vue plate : le backend renvoie un grand top-k (SEARCH_TOP_K),
@@ -65,6 +66,8 @@ export function SearchResults() {
 
   // The proxy cache survives result changes; each card owns its playback cleanup.
   useEffect(() => { setSel(new Set()); setPlayAll(false); setVisible(PAGE); }, [searchHits]);
+  // Play-all exists in the flat view only: leaving it must not leave every card of a group playing.
+  useEffect(() => { if (resultView !== "flat") setPlayAll(false); }, [resultView]);
 
   // Amorçage des vignettes DÉJÀ générées en UN appel (rien n'est encodé ici) : les résultats
   // portent souvent des rushs déjà découpés, dont les vignettes sont sur le disque. Sans ce
@@ -107,9 +110,25 @@ export function SearchResults() {
     [searchHits, scoreThreshold, sortMode],
   );
   const visibleHits = useMemo(() => shown.slice(0, visible), [shown, visible]);
-  const selectedHits = useMemo(() => shown.filter((h) => sel.has(hitKey(h))), [shown, sel]);   // ne télécharge que ce qui est visible (seuil)
+  // What the CURRENT view displays, in display order. Selection, the counter, "select all" and the
+  // export all read this one list: the duplicates and groups views used to keep their checkboxes
+  // while the counter and the export disappeared, and "select all" in the flat view only took the
+  // first page while the counter announced every shot above the threshold.
+  const viewHits = useMemo(() => {
+    if (resultView === "dedup") return dedupGroups.flatMap((g) => g.members);
+    if (resultView === "clusters") return clusters.flatMap((c) => c.members);
+    return shown;
+  }, [resultView, dedupGroups, clusters, shown]);
+  const selectedHits = useMemo(() => viewHits.filter((h) => sel.has(hitKey(h))), [viewHits, sel]);
   const picked = selectedHits.length;
-  const allPicked = picked > 0 && picked === visibleHits.length;
+  const allPicked = picked > 0 && picked === viewHits.length;
+  // Playback order across the grouped views: each group restarted at 0, so several cards shared the
+  // same index in the start queue.
+  const groupOffsets = useMemo(() => {
+    const groups = resultView === "dedup" ? dedupGroups : resultView === "clusters" ? clusters : [];
+    let n = 0;
+    return groups.map((g) => { const at = n; n += g.members.length; return at; });
+  }, [resultView, dedupGroups, clusters]);
   const refKeys = useMemo(
     () => new Set(refs.filter((r) => r.file_path != null).map((r) => `${r.file_path}#${r.scene_index}`)),
     [refs],
@@ -142,27 +161,25 @@ export function SearchResults() {
       <div className="sticky top-14 z-20 -mx-6 flex flex-wrap items-center gap-1.5 border-b border-border/70 bg-background px-6 py-1.5 text-xs text-muted-foreground">
         {faceMode && (
           <span className="inline-flex items-center gap-1 rounded-md bg-primary/15 px-1.5 py-0.5 text-primary">
-            <ScanFace className="size-3.5" /> {t("searchResults.faceMode")}
+            <NetsuIcon name="face" className="size-3.5" /> {t("searchResults.faceMode")}
           </span>
         )}
 
-        {resultView === "flat" && (
-          <Tooltip>
-            <TooltipTrigger render={<button
-              type="button"
-              onClick={() => setSel(allPicked ? new Set() : new Set(visibleHits.map(hitKey)))}
-              disabled={visibleHits.length === 0}
-              className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
-            />}>
-              {allPicked ? <CheckSquare className="size-4 text-primary" /> : <Square className="size-4" />}
-              <span className="tabular-nums">
-                {t("searchResults.shotCount", { count: shown.length })}
-                {picked > 0 && t("searchResults.selSuffix", { count: picked })}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{allPicked ? t("searchResults.deselectAllTooltip") : t("searchResults.selectAllTooltip")}</TooltipContent>
-          </Tooltip>
-        )}
+        <Tooltip>
+          <TooltipTrigger render={<button
+            type="button"
+            onClick={() => setSel(allPicked ? new Set() : new Set(viewHits.map(hitKey)))}
+            disabled={viewHits.length === 0}
+            className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+          />}>
+            <NetsuIcon name="cut-select" on={allPicked} className="size-4" />
+            <span className="tabular-nums">
+              {t("searchResults.shotCount", { count: viewHits.length })}
+              {picked > 0 && t("searchResults.selSuffix", { count: picked })}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{allPicked ? t("searchResults.deselectAllTooltip") : t("searchResults.selectAllTooltip")}</TooltipContent>
+        </Tooltip>
         {picked > 0 && (
           <button type="button" onClick={() => setSel(new Set())}
             className="flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
@@ -170,19 +187,15 @@ export function SearchResults() {
           </button>
         )}
 
-        {resultView === "flat" && (
-          <>
-            {/* Même duo d'export que le Découpage : icône du profil + mode d'insertion + réglages.
-                Le bouton large « nom du profil » est réservé aux panneaux latéraux. */}
-            <ExportButton
-              clips={() => selectedHits.map((h) => ({ input: h.file_path, start: h.start_sec, end: h.end_sec }))}
-              baseName="recherche"
-              onTimelineImport={() => sendHitsToTimeline(selectedHits)}
-              disabled={picked === 0}
-              compact
-            />
-          </>
-        )}
+        {/* Même duo d'export que le Découpage : icône du profil + mode d'insertion + réglages.
+            Le bouton large « nom du profil » est réservé aux panneaux latéraux. */}
+        <ExportButton
+          clips={() => selectedHits.map((h) => ({ input: h.file_path, start: h.start_sec, end: h.end_sec }))}
+          baseName="recherche"
+          onTimelineImport={() => sendHitsToTimeline(selectedHits)}
+          disabled={picked === 0}
+          compact
+        />
 
         <div className="flex-1" />
 
@@ -197,7 +210,7 @@ export function SearchResults() {
               aria-label={t("searchResults.playAllAria")}
               className="size-8 p-0 text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary aria-pressed:hover:bg-primary/15"
             />}>
-              <Play className="size-3.5" />
+              <NetsuIcon name="play" className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{playAll ? t("searchResults.stopPlayTooltip") : t("searchResults.playAllTooltip")}</TooltipContent>
           </Tooltip>
@@ -267,10 +280,10 @@ export function SearchResults() {
             {dedupGroups.map((g, gi) => (
               <Card key={gi} className="block p-3">
                 <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Copy className="h-3.5 w-3.5" /> {t("searchResults.duplicatesCount", { count: g.size })}
+                  <NetsuIcon name="copy" className="h-3.5 w-3.5" /> {t("searchResults.duplicatesCount", { count: g.size })}
                   <span className="text-primary">· {t("searchResults.mostRepresentative")}</span>
                 </div>
-                <div className={grid}>{g.members.map((h, i) => card(h, i))}</div>
+                <div className={grid}>{g.members.map((h, i) => card(h, groupOffsets[gi] + i))}</div>
               </Card>
             ))}
           </div>
@@ -283,11 +296,11 @@ export function SearchResults() {
             {clusters.map((cl, ci) => (
               <Card key={ci} className="block p-3">
                 <div className="mb-2 flex items-center gap-2 text-xs">
-                  <Group className="h-3.5 w-3.5 text-primary" />
+                  <NetsuIcon name="group" className="h-3.5 w-3.5 text-primary" />
                   <span className="font-medium">{cl.label}</span>
                   <span className="text-muted-foreground">· {t("searchResults.shotsCount", { count: cl.size })}</span>
                 </div>
-                <div className={grid}>{cl.members.map((h, i) => card(h, i))}</div>
+                <div className={grid}>{cl.members.map((h, i) => card(h, groupOffsets[ci] + i))}</div>
               </Card>
             ))}
           </div>

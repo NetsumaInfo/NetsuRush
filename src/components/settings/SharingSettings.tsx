@@ -8,9 +8,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import {
-  Check, ChevronDown, ChevronRight, Laptop, Trash2, UserPlus, UserRound, Users, X,
-} from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { api } from "@/lib/convexApi";
 import { convexConfigured } from "@/lib/convexEnv";
 import { refreshNativeCollaborationAuth } from "@/lib/collab/authBridge";
@@ -66,7 +64,7 @@ function Avatar({ url }: { url: string | null }) {
     <img src={url} alt="" className="size-7 rounded-full object-cover" referrerPolicy="no-referrer" />
   ) : (
     <div className="flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground">
-      <UserRound className="size-4" />
+      <NetsuIcon name="account" className="size-4" />
     </div>
   );
 }
@@ -281,7 +279,7 @@ function SharingInner() {
     ].filter(Boolean).join(" · ");
     return (
       <div key={project.projectId} className="flex items-center gap-3 py-2">
-        <Users className="size-4 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="collab" className="size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs">{name}</p>
           {detail && <p className="truncate text-[10px] text-muted-foreground">{detail}</p>}
@@ -300,7 +298,7 @@ function SharingInner() {
               {t(own ? "projects.delete" : "projects.leave")}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setConfirmProject(null)}>
-              <X className="size-3.5" />
+              <NetsuIcon name="close" className="size-3.5" />
             </Button>
           </>
         ) : (
@@ -317,7 +315,7 @@ function SharingInner() {
               aria-label={t(own ? "projects.delete" : "projects.leave")}
               onClick={() => setConfirmProject(project.projectId)}
             >
-              <Trash2 />
+              <NetsuIcon name="trash" />
             </Button>
           </>
         )}
@@ -335,7 +333,7 @@ function SharingInner() {
       <section className="mt-6">
         <SectionTitle title={t("device.title")} info={t("device.subtitle")} />
         <div className="mt-3 flex items-center gap-3 rounded-lg border border-border p-3">
-          <Laptop className="size-4 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="laptop" className="size-4 shrink-0 text-muted-foreground" />
           {!collabAvailable() ? (
             <p className="text-xs text-muted-foreground">{t("device.desktopOnly")}</p>
           ) : nativeError ? (
@@ -350,7 +348,7 @@ function SharingInner() {
           <div className="mt-2 divide-y divide-border rounded-lg border border-border px-3">
             {devices.map((device) => (
               <div key={device.deviceId} className="flex items-center gap-3 py-2">
-                <Laptop className="size-4 shrink-0 text-muted-foreground" />
+                <NetsuIcon name="laptop" className="size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs">
                     {device.label || t("device.unnamed")}
@@ -368,7 +366,7 @@ function SharingInner() {
                     aria-label={t("device.revoke")}
                     onClick={() => void revokeDevice(device.deviceId)}
                   >
-                    <Trash2 />
+                    <NetsuIcon name="trash" />
                   </Button>
                 )}
               </div>
@@ -388,7 +386,7 @@ function SharingInner() {
             className="h-8"
           />
           <Button size="sm" disabled={busy || !identifier.trim()} onClick={() => void add()}>
-            <UserPlus className="size-3.5" /> {t("friends.add")}
+            <NetsuIcon name="user-plus" className="size-3.5" /> {t("friends.add")}
           </Button>
         </div>
         {status && <p className="mt-2 text-xs text-muted-foreground">{t(`friends.status.${status}`)}</p>}
@@ -397,10 +395,10 @@ function SharingInner() {
             {social.incoming.map((request) => (
               <Row key={request.requestId} profile={request}>
                 <Button size="sm" variant="ghost" onClick={() => void respondRequest({ requestId: request.requestId, accept: true })}>
-                  <Check className="size-3.5" /> {t("friends.accept")}
+                  <NetsuIcon name="check" className="size-3.5" /> {t("friends.accept")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => void respondRequest({ requestId: request.requestId, accept: false })}>
-                  <X className="size-3.5" />
+                  <NetsuIcon name="close" className="size-3.5" />
                 </Button>
               </Row>
             ))}
@@ -413,7 +411,7 @@ function SharingInner() {
                   {request.pending ? t("friends.notYetJoined") : t("friends.awaiting")}
                 </span>
                 <Button size="sm" variant="ghost" onClick={() => void respondRequest({ requestId: request.requestId, accept: false })}>
-                  <X className="size-3.5" />
+                  <NetsuIcon name="close" className="size-3.5" />
                 </Button>
               </Row>
             ))}
@@ -441,10 +439,10 @@ function SharingInner() {
                   {t(collabSurface(invite.surface)?.labelKey ?? "surface.unknown")}
                 </span>
                 <Button size="sm" onClick={() => void answerInvite(invite, true)}>
-                  <Check className="size-3.5" /> {t("invites.join")}
+                  <NetsuIcon name="check" className="size-3.5" /> {t("invites.join")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => void answerInvite(invite, false)}>
-                  <X className="size-3.5" />
+                  <NetsuIcon name="close" className="size-3.5" />
                 </Button>
               </Row>
             ))}
@@ -475,7 +473,7 @@ function SharingInner() {
                 onClick={() => setShowAbsent((current) => !current)}
                 className="flex w-full items-center gap-2 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
               >
-                {showAbsent ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                <NetsuIcon name="chevron-toggle" on={showAbsent} className="size-3.5" />
                 {t("projects.absent", { count: absent.length })}
               </button>
               {showAbsent && (

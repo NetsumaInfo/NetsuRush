@@ -201,7 +201,7 @@ export function ColorPicker({
             {/* hex + préréglages */}
             <div className="mt-3 flex items-center gap-2">
               <ColorSwatch value={value} className="size-7" />
-              <input
+              <input autoComplete="off" spellCheck={false}
                 aria-label={t("color.hexValue")}
                 defaultValue={toHex(color)}
                 key={toHex(color)}

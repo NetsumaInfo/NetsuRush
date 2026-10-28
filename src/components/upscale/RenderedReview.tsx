@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Columns2, FileOutput, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr, type PlayInfo } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -101,11 +101,11 @@ export function RenderedReview({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-ok)]/30 bg-[var(--color-ok)]/5 p-2">
         <span className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-[var(--color-ok)]">
-          <CheckCircle2 className="size-4 shrink-0" /> {t("review.ready")}
+          <NetsuIcon name="status-ok" className="size-4 shrink-0" /> {t("review.ready")}
         </span>
         <Select value={review.id} onValueChange={(v) => onSelect(String(v))}>
           <SelectTrigger size="sm" className="min-w-44 flex-1" aria-label={t("review.chooseRender")}>
-            <FileOutput className="size-3.5 text-muted-foreground" />
+            <NetsuIcon name="file-output" className="size-3.5 text-muted-foreground" />
             <SelectValue>{review.outputName}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -118,12 +118,12 @@ export function RenderedReview({
         </ToggleGroup>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="sm" onClick={compare} disabled={comparing || !outputInfo}>
-            {comparing ? <Spinner className="size-4" /> : <Columns2 className="size-4" />} {t("review.compareFrame")}
+            {comparing ? <Spinner className="size-4" /> : <NetsuIcon name="grid-columns" className="size-4" />} {t("review.compareFrame")}
           </Button>} />
           <TooltipContent>{t("review.compareFrameTip")}</TooltipContent>
         </Tooltip>
         <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("review.backToSource")}>
-          <X className="size-4" />
+          <NetsuIcon name="close" className="size-4" />
         </Button>
       </div>
 

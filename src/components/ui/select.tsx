@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
-import { Check, ChevronDown } from "lucide-react"
+import { NetsuIcon } from "@/components/ui/netsu-icon"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -45,7 +45,7 @@ function SelectTrigger({
     <SelectPrimitive.Trigger data-slot="select-trigger" className={cn(triggerVariants({ size }), className)} {...props}>
       {children}
       <SelectPrimitive.Icon className="shrink-0">
-        <ChevronDown className="h-4 w-4 opacity-60" />
+        <NetsuIcon name="chevron-down" className="h-4 w-4 opacity-60" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -97,7 +97,7 @@ function SelectItem({ className, children, ...props }: React.ComponentProps<type
     >
       <SelectPrimitive.ItemText className="flex-1">{children}</SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator className="absolute right-2 flex items-center">
-        <Check className="h-3.5 w-3.5 text-primary" />
+        <NetsuIcon name="check" className="h-3.5 w-3.5 text-primary" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   )

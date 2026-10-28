@@ -1,4 +1,4 @@
-import { Plus, X, MousePointerClick, CirclePlus, CircleMinus } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -21,7 +21,7 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
       <div className="flex items-center justify-between">
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={addObject} disabled={!!s.busy} aria-label={t("objects.add")}>
-            <Plus className="h-3.5 w-3.5" />
+            <NetsuIcon name="add" className="h-3.5 w-3.5" />
           </Button>} />
           <TooltipContent>{t("objects.addTip")}</TooltipContent>
         </Tooltip>
@@ -33,13 +33,13 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
         onValueChange={(v) => v[0] && s.setPointLabel(v[0] === "exclude" ? 0 : 1)}>
         <Tooltip>
           <TooltipTrigger render={<ToggleGroupItem value="include" className="flex-1 gap-1 text-[11px]">
-            <CirclePlus className="h-3 w-3 text-[var(--color-ok)]" /> {t("objects.include")}
+            <NetsuIcon name="circle-plus" className="h-3 w-3 text-[var(--color-ok)]" /> {t("objects.include")}
           </ToggleGroupItem>} />
           <TooltipContent>{t("objects.includeTip")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<ToggleGroupItem value="exclude" className="flex-1 gap-1 text-[11px]">
-            <CircleMinus className="h-3 w-3 text-destructive" /> {t("objects.exclude")}
+            <NetsuIcon name="circle-minus" className="h-3 w-3 text-destructive" /> {t("objects.exclude")}
           </ToggleGroupItem>} />
           <TooltipContent>{t("objects.excludeTip")}</TooltipContent>
         </Tooltip>
@@ -73,17 +73,17 @@ export function ObjectsPanel({ s }: { s: RotoSession }) {
                 className="shrink-0 rounded p-0.5 opacity-50 hover:bg-destructive/20 hover:text-destructive hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={t("objects.removeAria", { name: o.name })}
               >
-                <X className="h-3.5 w-3.5" />
+                <NetsuIcon name="close" className="h-3.5 w-3.5" />
               </button>
             )}
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem onClick={() => setActiveObj(o.id)} disabled={o.id === activeObj}><MousePointerClick /> {t("objects.setActive")}</ContextMenuItem>
-            <ContextMenuItem onClick={addObject} disabled={!!s.busy}><Plus /> {t("objects.add")}</ContextMenuItem>
+            <ContextMenuItem onClick={() => setActiveObj(o.id)} disabled={o.id === activeObj}><NetsuIcon name="pointer-click" /> {t("objects.setActive")}</ContextMenuItem>
+            <ContextMenuItem onClick={addObject} disabled={!!s.busy}><NetsuIcon name="add" /> {t("objects.add")}</ContextMenuItem>
             {objects.length > 1 && (
               <>
                 <ContextMenuSeparator />
-                <ContextMenuItem variant="destructive" onClick={() => removeObject(o.id)}><X /> {t("objects.remove")}</ContextMenuItem>
+                <ContextMenuItem variant="destructive" onClick={() => removeObject(o.id)}><NetsuIcon name="close" /> {t("objects.remove")}</ContextMenuItem>
               </>
             )}
           </ContextMenuContent>

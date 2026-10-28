@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
-import { Globe } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import i18n from "@/i18n";
 import { nr } from "@/lib/bridge";
 import { parseVideoEmbed, embedSrc, isImageUrl, isVideoUrl } from "@/lib/embeds";
@@ -46,7 +46,7 @@ export const embedSpec = createReactBlockSpec(
       if (!url) {
         return (
           <EmptyLinkInput
-            icon={<Globe className="h-4 w-4 text-primary" />}
+            icon={<NetsuIcon name="web" className="h-4 w-4 text-primary" />}
             placeholder={i18n.t("notebook:blocks.embed.pastePlaceholder")}
             onSubmit={(v) => editor.updateBlock(block, { type: "embed", props: { url: v } })}
           />

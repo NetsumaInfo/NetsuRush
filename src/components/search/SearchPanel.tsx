@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ImagePlus, Database, AlertTriangle } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type FaceStatus } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -217,7 +217,7 @@ export function SearchPanel() {
         <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-bg/70 backdrop-blur-sm animate-in fade-in-0 duration-150">
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-primary/60 bg-card/80 px-10 py-8 shadow-xl ring-1 ring-primary/20 animate-in zoom-in-98 duration-150">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
-              <ImagePlus className="h-7 w-7" />
+              <NetsuIcon name="image-add" className="h-7 w-7" />
             </div>
             <div className="text-center">
               <div className="text-sm font-medium text-foreground">{t("searchPanel.dropImage")}</div>
@@ -294,7 +294,7 @@ export function SearchPanel() {
 
       {searchNotice && (
         <Card className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
-          <AlertTriangle className="size-4 shrink-0 text-primary" />
+          <NetsuIcon name="warning" className="size-4 shrink-0 text-primary" />
           {searchNotice}
         </Card>
       )}
@@ -322,7 +322,7 @@ export function SearchPanel() {
         </Card>
       ) : !pickerOpen ? (
         <Card className="flex flex-col items-center justify-center gap-3 p-10 text-center">
-          <Database className="h-8 w-8 text-muted-foreground" />
+          <NetsuIcon name="search-empty" className="h-8 w-8 text-muted-foreground" />
           <div className="text-sm font-medium">{indexed > 0 ? t("searchPanel.readyToSearch") : t("searchPanel.indexNotBuilt")}</div>
           <p className="max-w-md text-xs text-muted-foreground">
             {indexed > 0

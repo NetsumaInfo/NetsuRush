@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Clapperboard, Check, AlertTriangle, CircleAlert } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { nr, type Clip, type DetectModel } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -69,7 +70,7 @@ export function TimelineSendDialog({ clip, onClose }: { clip: Clip; onClose: () 
       <DialogContent className="w-[820px] max-w-[calc(100%-2rem)] gap-6 p-7">
         <div className="min-w-0 space-y-1">
           <DialogTitle className="flex items-center gap-2 text-base">
-            <Clapperboard className="h-4 w-4 shrink-0 text-primary" /> {t("mediaTree.sendToTimeline")}
+            <SendToTimelineIcon className="h-4 w-4 shrink-0 text-primary" /> {t("mediaTree.sendToTimeline")}
           </DialogTitle>
           <Tooltip>
             <TooltipTrigger render={<DialogDescription className="truncate" />}>
@@ -134,9 +135,9 @@ export function TimelineSendDialog({ clip, onClose }: { clip: Clip; onClose: () 
             result.kind === "ok" ? "border-[var(--color-ok)]/40 text-foreground"
               : result.kind === "warn" ? "border-amber-500/50 text-foreground"
               : "border-destructive/50 text-foreground"}`}>
-            {result.kind === "ok" ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-ok)]" />
-              : result.kind === "warn" ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-              : <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
+            {result.kind === "ok" ? <NetsuIcon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-ok)]" />
+              : result.kind === "warn" ? <NetsuIcon name="warning" className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              : <NetsuIcon name="error-badge" className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
             <span className="min-w-0 flex-1">{result.text}</span>
           </div>
         )}

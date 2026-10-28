@@ -396,6 +396,29 @@ fn disable_tracking_prevention(window: &tauri::WebviewWindow) {
     });
 }
 
+// WebView2's own autofill pops a native dropdown of previously typed values under every text field
+// (names, search, URLs). It does not match the app's UI and `autocomplete="off"` is not always
+// honoured, so general autofill and password saving are turned off. The settings belong to each
+// webview, not to the shared profile: this runs on every page load (`on_page_load`) so the detached
+// notebook window, created from JS long after `setup`, is covered like the main one.
+#[cfg(target_os = "windows")]
+fn disable_autofill(webview: &tauri::Webview) {
+    use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Settings4;
+    use windows_core::Interface;
+
+    let _ = webview.with_webview(|webview| unsafe {
+        let Ok(core) = webview.controller().CoreWebView2() else {
+            return;
+        };
+        let Ok(settings) = core.Settings() else { return };
+        let Ok(s4) = settings.cast::<ICoreWebView2Settings4>() else {
+            return;
+        };
+        let _ = s4.SetIsGeneralAutofillEnabled(false);
+        let _ = s4.SetIsPasswordAutosaveEnabled(false);
+    });
+}
+
 // ── Chemin disque des fichiers déposés depuis l'Explorateur ─────────────────────────────────────
 // `dragDropEnabled` (tauri.conf.json) est EXCLUSIF : l'activer fait révoquer par wry les cibles OLE
 // de WebView2 (SetAllowExternalDrop(false) + EnumChildWindows/RevokeDragDrop sur chaque enfant) →
@@ -642,6 +665,12 @@ pub fn run() {
         // store, never on disk where the core could open them.
         .register_uri_scheme_protocol("collab", |_context, request| {
             collab::blobs::protocol_response(request)
+        })
+        .on_page_load(|_webview, _payload| {
+            #[cfg(target_os = "windows")]
+            if matches!(_payload.event(), tauri::webview::PageLoadEvent::Started) {
+                disable_autofill(_webview);
+            }
         })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())

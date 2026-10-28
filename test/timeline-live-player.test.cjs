@@ -57,15 +57,15 @@ test('building the grid stays left of the spring, framing it stays right', () =>
   const dir = path.join(__dirname, '..', 'src', 'components', 'rushes');
   for (const file of ['CutStudio.tsx', 'TimelineLiveView.tsx']) {
     const src = fs.readFileSync(path.join(dir, file), 'utf8');
-    const density = src.indexOf('<LayoutGrid className="mr-0.5');
+    const density = src.indexOf('<NetsuIcon name="grid-columns" className="mr-0.5');
     assert.ok(density > 0, file);
     const at = (needle) => {
       const i = src.lastIndexOf(needle, density);
       assert.ok(i > 0, `${file}: ${needle}`);
       return i;
     };
-    const thumbs = at('<ImageIcon className="size-3.5" />');
-    const proxies = at('<Zap className="size-3.5" />');
+    const thumbs = at('<NetsuIcon name="image" className="size-3.5" />');
+    const proxies = at('<NetsuIcon name="proxy-generate"');
     const play = at('shared.autoplayPreviews');
     const spring = at('<div className="flex-1" />');
     assert.ok(thumbs < proxies, `${file}: vignettes avant aperçus`);

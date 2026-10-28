@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { AlertTriangle } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import type { ShaderModel } from "@/lib/bridge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -54,7 +54,7 @@ export function ShaderPicker({ value, onChange, disabled }: {
       </Select>
       {missing && (
         <button type="button" onClick={openModelsPage} className="flex w-full items-center gap-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
-          <AlertTriangle className="size-3 shrink-0 text-[var(--color-warn)]" />
+          <NetsuIcon name="warning" className="size-3 shrink-0 text-[var(--color-warn)]" />
           <span>{t("modelPicker.required")}</span>
           <span className="ml-auto shrink-0 underline underline-offset-2">{t("modelPicker.settings")}</span>
         </button>

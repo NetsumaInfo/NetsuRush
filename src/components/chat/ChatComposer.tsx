@@ -4,7 +4,7 @@
 // les lire / les voir).
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Send, Square, Paperclip, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -53,10 +53,10 @@ export function ChatComposer({ ready }: { ready: boolean }) {
           <div className="flex flex-wrap gap-1.5 border-b border-border px-2 py-1.5">
             {files.map((f) => (
               <span key={f} className="flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-xs text-foreground/80">
-                <Paperclip className="size-3 shrink-0 opacity-60" />
+                <NetsuIcon name="attach-file" className="size-3 shrink-0 opacity-60" />
                 <span className="max-w-40 truncate">{basename(f)}</span>
                 <button type="button" onClick={() => setFiles((arr) => arr.filter((x) => x !== f))} aria-label={t("common:action.remove")} className="rounded p-0.5 hover:text-destructive">
-                  <X className="size-3" />
+                  <NetsuIcon name="close" className="size-3" />
                 </button>
               </span>
             ))}
@@ -64,7 +64,7 @@ export function ChatComposer({ ready }: { ready: boolean }) {
         )}
 
         <div className="px-3 pt-2.5">
-          <textarea
+          <textarea autoComplete="off"
             ref={ref}
             value={text}
             onChange={(e) => { setText(e.target.value); if (notice) setNotice(""); }}
@@ -79,16 +79,16 @@ export function ChatComposer({ ready }: { ready: boolean }) {
           <EngineMenu />
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("composer.attachFiles")} onClick={attach} />}>
-              <Paperclip className="size-4" />
+              <NetsuIcon name="chat-attach" className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{t("composer.attachTip")}</TooltipContent>
           </Tooltip>
 
           <div className="ml-auto">
             {running ? (
-              <Button size="sm" variant="outline" onClick={cancel}><Square className="size-3.5" /> {t("composer.stop")}</Button>
+              <Button size="sm" variant="outline" onClick={cancel}><NetsuIcon name="chat-stop" className="size-3.5" /> {t("composer.stop")}</Button>
             ) : (
-              <Button size="icon-sm" onClick={submit} disabled={!text.trim() && !files.length} aria-label={t("composer.send")}><Send className="size-4" /></Button>
+              <Button size="icon-sm" onClick={submit} disabled={!text.trim() && !files.length} aria-label={t("composer.send")}><NetsuIcon name="chat-send" className="size-4" /></Button>
             )}
           </div>
         </div>

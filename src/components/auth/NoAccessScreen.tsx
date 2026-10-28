@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Hourglass } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GateFrame } from "./GateFrame";
@@ -23,7 +23,7 @@ export function NoAccessScreen({ role, onSkip }: { role: string | null; onSkip: 
     <GateFrame>
       <Card className="gate-in w-full items-center gap-6 p-8 text-center">
         <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-          <Hourglass className="size-6" />
+          <NetsuIcon name="hourglass" className="size-6" />
         </div>
         <div className="space-y-1.5">
           <h1 className="text-lg font-semibold tracking-tight">{t("noAccess.title")}</h1>

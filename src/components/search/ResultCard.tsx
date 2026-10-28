@@ -1,9 +1,12 @@
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Film, Play, ScanSearch, Plus, Aperture, Clapperboard, UserCheck, CheckSquare, Copy } from "lucide-react";
+import { Film, Play, ScanSearch, Plus, Aperture, UserCheck } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { type SearchHit } from "@/lib/bridge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useResultPreview } from "@/components/search/useResultPreview";
+import { useCardMedia } from "@/lib/useCardMedia";
+import { IS_REMOTE } from "@/lib/remote";
 import { PreviewVideo } from "@/components/player/PreviewVideo";
 import { AddToCollection } from "@/components/collections/AddToCollection";
 import { CollectionSubmenu } from "@/components/collections/CollectionSubmenu";
@@ -15,6 +18,9 @@ import {
   ContextMenuCheckboxItem, ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 import { selectionRing, SelectToggle } from "@/components/common/selectable";
+
+// The card adds a footer under its 16:9 video area: the proxy height comes from the width.
+const videoAreaHeight = (el: HTMLDivElement) => el.clientWidth * 9 / 16;
 
 function tc(sec: number): string {
   if (!isFinite(sec) || sec < 0) sec = 0;
@@ -57,11 +63,14 @@ function ResultCardImpl({
   // Keeps the hover action bar visible while the "Ranger" popover is open over it.
   const [rangeOpen, setRangeOpen] = useState(false);
 
-  const { rootRef, thumb, thumbErr, hovered, enter, leave, url, showVideo, videoPaused, near, resetUrl } =
-    useResultPreview({ filePath: hit.file_path, thumbAt, index, play, getProxy, bustProxy, peekProxy });
+  const { rootRef, thumb, thumbFailed, hovered, enter, leave, focusEnter, focusLeave, url, showVideo, videoPaused, near, interactive, onVideoError } =
+    useCardMedia({ clipPath: hit.file_path, thumbAt, index, play, getProxy, bustProxy, peekProxy, measure: videoAreaHeight });
   const playing = showVideo && !videoPaused;
-
-  function onVideoError() { bustProxy(); resetUrl(); }
+  // Hover chrome (tooltips, the "Ranger" popover, the context menu: one Base UI root each) mounts for
+  // the card under the pointer or the keyboard only, like the shot cards. It used to follow the
+  // thumbnail band, so dragging the scrollbar mounted and unmounted it for dozens of cards at once.
+  // In remote the hover is unreliable, so the band stays the trigger there.
+  const chrome = (IS_REMOTE ? near : interactive) || rangeOpen;
 
   return (
     <ContextMenu>
@@ -74,12 +83,14 @@ function ResultCardImpl({
           )}
           onMouseEnter={enter}
           onMouseLeave={leave}
+          onFocus={focusEnter}
+          onBlur={focusLeave}
         />
       }>
       <div className="relative aspect-video bg-muted">
-        {!thumb && !thumbErr && <Skeleton className="absolute inset-0 rounded-none" />}
+        {!thumb && !thumbFailed && <Skeleton className="absolute inset-0 rounded-none" />}
         {thumb && <img src={thumb} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover" />}
-        {thumbErr && !thumb && (
+        {thumbFailed && !thumb && (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <Film className="h-7 w-7 opacity-40" />
           </div>
@@ -100,7 +111,7 @@ function ResultCardImpl({
 
         {/* case de sélection (toujours visible si cochée, sinon au survol) — coin haut-gauche
             car le haut-droite porte déjà le timecode. Cochée, elle est visible : jamais différée. */}
-        {(near || selected) && <SelectToggle selected={selected} onToggle={onToggle} className="left-2 top-2 right-auto" />}
+        {(chrome || selected) && <SelectToggle selected={selected} onToggle={onToggle} className="left-2 top-2 right-auto" />}
 
         {/* Pastilles en `nr-chip` (fond opaque), JAMAIS en `backdrop-blur` : un backdrop-filter
             posé sur une <video> qui joue force le compositeur à recopier et flouter le fond à
@@ -119,7 +130,7 @@ function ResultCardImpl({
           </span>
         )}
         {hit.aesthetic != null && hit.aesthetic < 0 && (
-          near ? (
+          chrome ? (
             <Tooltip>
               <TooltipTrigger render={<span className="nr-chip absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-warn)]" />}>
                 <Aperture className="h-3 w-3" /> {t("resultCard.blurry")}
@@ -139,8 +150,8 @@ function ResultCardImpl({
           Le pied garde sa hauteur même loin de l'écran (elle entre dans la taille mémorisée par
           `content-visibility`) ; seul son contenu interactif est différé. */}
       <div className="relative flex h-8 items-center px-2.5">
-        {!near && <div className="min-w-0 flex-1 truncate text-xs font-medium">{basename(hit.file_path)}</div>}
-        {near && (<>
+        {!chrome && <div className="min-w-0 flex-1 truncate text-xs font-medium">{basename(hit.file_path)}</div>}
+        {chrome && (<>
         <Tooltip>
           <TooltipTrigger render={<div className="min-w-0 flex-1 truncate text-xs font-medium" />}>
             {basename(hit.file_path)}
@@ -202,7 +213,7 @@ function ResultCardImpl({
             type="button"
             onClick={onDownload}
             className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:opacity-100" />}>
-            <Clapperboard className="h-4 w-4" />
+            <SendToTimelineIcon className="h-4 w-4" />
           </TooltipTrigger>
           <TooltipContent>{t("resultCard.addToTimeline")}</TooltipContent>
         </Tooltip>
@@ -212,10 +223,10 @@ function ResultCardImpl({
       </ContextMenuTrigger>
 
       {/* Clic droit : mêmes actions que les boutons du survol, toutes accessibles d'un geste. */}
-      {near && (
+      {chrome && (
       <ContextMenuContent className="min-w-52">
         <ContextMenuCheckboxItem checked={selected} onClick={onToggle}>
-          <CheckSquare /> {t("resultCard.select")}
+          <NetsuIcon name="cut-select" /> {t("resultCard.select")}
         </ContextMenuCheckboxItem>
         {(onAddRef || onFindSimilar || (confirmChar && onConfirmChar)) && <ContextMenuSeparator />}
         {onAddRef && (
@@ -233,10 +244,10 @@ function ResultCardImpl({
         )}
         <ContextMenuSeparator />
         <CollectionSubmenu shots={shots} />
-        <ContextMenuItem onClick={onDownload}><Clapperboard /> {t("resultCard.addToTimeline")}</ContextMenuItem>
+        <ContextMenuItem onClick={onDownload}><SendToTimelineIcon /> {t("resultCard.addToTimeline")}</ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => void navigator.clipboard.writeText(hit.file_path)}>
-          <Copy /> {t("resultCard.copyPath")}
+          <NetsuIcon name="copy" /> {t("resultCard.copyPath")}
         </ContextMenuItem>
       </ContextMenuContent>
       )}

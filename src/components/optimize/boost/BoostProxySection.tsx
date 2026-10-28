@@ -8,7 +8,7 @@
 // ambiguïté. Le portail d'encodage global (core/export/gate.js) borne déjà les ffmpeg simultanés.
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Loader2, Layers, CheckSquare, Square } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -158,7 +158,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
             {t("boost.proxy.useProxies")}
           </Toggle>
           <Button variant="ghost" size="sm" onClick={audit} disabled={!ready || loading || running}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            <NetsuIcon name="boost-rescan" busy={loading} className="h-4 w-4" />
             {t("boost.proxy.rescan")}
           </Button>
         </div>
@@ -176,11 +176,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
                   disabled={!i.canProxy}
                   className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-xs hover:bg-muted/50 disabled:opacity-50"
                 >
-                  {on ? (
-                    <CheckSquare className="h-3.5 w-3.5 shrink-0 text-primary" />
-                  ) : (
-                    <Square className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  )}
+                  <NetsuIcon name="checkbox-off" on={on} className={`h-3.5 w-3.5 shrink-0 ${on ? "text-primary" : "text-muted-foreground"}`} />
                   <Tooltip>
                     <TooltipTrigger render={<span className="min-w-0 flex-1 truncate">{i.name}</span>} />
                     <TooltipContent>{i.path}</TooltipContent>
@@ -209,7 +205,7 @@ export function BoostProxySection({ diag, app }: { diag: BoostDiagnosis | null; 
       )}
 
       <Button size="sm" className="mt-3" disabled={!ready || !targets.length || running} onClick={generate}>
-        {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Layers className="h-4 w-4" />}
+        {running ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="layers" className="h-4 w-4" />}
         {t("boost.proxy.generate", { count: targets.length })}
       </Button>
 

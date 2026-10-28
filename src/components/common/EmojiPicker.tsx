@@ -3,7 +3,7 @@
 // thémée sur les tokens de l'app : recherche, catégories, survol cohérent. Réutilisable partout.
 import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import emojiData from "@emoji-mart/data";
 import { HoverLabel } from "@/components/common/HoverLabel";
 
@@ -57,8 +57,8 @@ export function EmojiPicker({ onPick, className, heightClass = "max-h-56" }: { o
   return (
     <div className={className}>
       <div className="mb-2 flex items-center gap-1.5 rounded-md border border-border bg-muted px-2">
-        <Search className="h-3.5 w-3.5 text-muted-foreground" />
-        <input
+        <NetsuIcon name="search" className="h-3.5 w-3.5 text-muted-foreground" />
+        <input autoComplete="off" spellCheck={false}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t("emoji.search")}

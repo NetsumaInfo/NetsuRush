@@ -2,7 +2,7 @@
 // But : même retour visuel partout — anneau bleu + pastille ronde bleue avec check. Les positions
 // de pastille restent libres par carte (un coin peut être pris par un timecode/compteur), seul le
 // STYLE est unifié.
-import { Check } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,7 @@ export function SelectCheck({ className }: { className?: string }) {
         className,
       )}
     >
-      <Check className="h-3 w-3" strokeWidth={3} />
+      <NetsuIcon name="check" className="h-3 w-3 [&_svg]:stroke-[3]" />
     </span>
   );
 }
@@ -52,7 +52,7 @@ export function SelectToggle({ selected, onToggle, label, className }: {
         className,
       )}
     >
-      <Check className="h-3 w-3" strokeWidth={3} />
+      <NetsuIcon name="check" className="h-3 w-3 [&_svg]:stroke-[3]" />
     </button>
   );
 }

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Search, ScanFace } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { cn, uiLocale } from "@/lib/utils";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { detectMentionQuery, insertMention, type MentionChar } from "@/components/search/mentions";
@@ -93,8 +93,8 @@ export function MentionInput({ value, onChange, onSubmit, roster, placeholder, b
   if (bare) {
     return (
       <div className="relative flex flex-1 items-center gap-2">
-        <Search className="size-4 shrink-0 text-muted-foreground" />
-        <input
+        <NetsuIcon name="search" className="size-4 shrink-0 text-muted-foreground" />
+        <input autoComplete="off"
           {...fieldProps}
           className="h-9 w-full min-w-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
         />
@@ -106,7 +106,7 @@ export function MentionInput({ value, onChange, onSubmit, roster, placeholder, b
   return (
     <div className="relative flex-1">
       <InputGroup>
-        <InputGroupAddon><Search /></InputGroupAddon>
+        <InputGroupAddon><NetsuIcon name="search" /></InputGroupAddon>
         <InputGroupInput
           ref={inputRef}
           value={value}
@@ -160,7 +160,7 @@ function MentionList({ matches, active, setActive, pick }: {
             >
               {c.avatar
                 ? <img src={c.avatar} alt="" className="h-full w-full object-cover" />
-                : <ScanFace className="m-1 h-4 w-4 text-muted-foreground" />}
+                : <NetsuIcon name="face" className="m-1 h-4 w-4 text-muted-foreground" />}
             </span>
             <span className="truncate">{c.name}</span>
           </button>

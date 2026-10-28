@@ -3,7 +3,7 @@
 // Resolve. Garde-fous : process critiques (Windows/Resolve/core) non tuables, confirmation avant kill
 // (équivalent « Fin de tâche » → peut perdre le travail non sauvé de l'app visée).
 import { useState } from "react";
-import { ListTree, RefreshCw, Loader2, Skull, Eraser } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -100,16 +100,16 @@ export function ProcessSection() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-            <ListTree className="h-4 w-4 text-primary" /> {t("process.title")}
+            <NetsuIcon name="list-tree" className="h-4 w-4 text-primary" /> {t("process.title")}
           </h3>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={scanDead} disabled={deadBusy}>
-            {deadBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eraser className="h-4 w-4" />}
+            <NetsuIcon name="boost-purge" busy={deadBusy} className="h-4 w-4" />
             {t("process.cleanBlocked")}
           </Button>
           <Button variant="outline" size="sm" onClick={scan} disabled={scanning}>
-            {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            <NetsuIcon name="boost-rescan" busy={scanning} className="h-4 w-4" />
             {t("process.scan")}
           </Button>
         </div>
@@ -154,7 +154,7 @@ export function ProcessSection() {
                         onClick={() => setTarget(p)}
                       />
                     }>
-                      <Skull className="h-4 w-4" />
+                      <NetsuIcon name="boost-kill" className="h-4 w-4" />
                     </TooltipTrigger>
                     <TooltipContent>{p.critical ? t("process.protectedTip") : t("process.kill")}</TooltipContent>
                   </Tooltip>
@@ -185,7 +185,7 @@ export function ProcessSection() {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={kill} disabled={killing}>
-              {killing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Skull className="h-4 w-4" />}
+              <NetsuIcon name="boost-kill" busy={killing} className="h-4 w-4" />
               {t("process.kill")}
             </Button>
           </DialogFooter>
@@ -212,7 +212,7 @@ export function ProcessSection() {
               {t("common:action.cancel")}
             </Button>
             <Button variant="destructive" size="sm" onClick={cleanDead} disabled={deadBusy}>
-              {deadBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eraser className="h-4 w-4" />}
+              <NetsuIcon name="boost-purge" busy={deadBusy} className="h-4 w-4" />
               {t("process.clean")}
             </Button>
           </DialogFooter>

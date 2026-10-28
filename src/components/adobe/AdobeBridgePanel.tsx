@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { usePersistedChoice } from "@/lib/persistedChoice";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import { Download, Check, Stethoscope, Copy, RefreshCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import type { AdobeApp, AdobeDiagnostic } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -89,7 +89,7 @@ export function AdobeBridgePanel() {
           <InfoTip text={t("subtitle")} />
         </h1>
         <Button variant="outline" disabled={adobeBusy} onClick={() => void installAdobePanel()}>
-          <Download className="size-4" /> {adobeStatus?.panelInstalled ? t("reinstallPanel") : t("installPanel")}
+          <NetsuIcon name="download" className="size-4" /> {adobeStatus?.panelInstalled ? t("reinstallPanel") : t("installPanel")}
         </Button>
       </div>
 
@@ -107,7 +107,7 @@ export function AdobeBridgePanel() {
             />
           </span>
           {adobeStatus?.panelInstalled ? (
-            <Badge className="gap-1 bg-[var(--color-ok)]/15 text-[var(--color-ok)]"><Check className="size-3" /> {t("panel.installed")}</Badge>
+            <Badge className="gap-1 bg-[var(--color-ok)]/15 text-[var(--color-ok)]"><NetsuIcon name="check" className="size-3" /> {t("panel.installed")}</Badge>
           ) : (
             <Badge variant="outline" className="text-muted-foreground">{t("panel.notInstalled")}</Badge>
           )}
@@ -137,7 +137,7 @@ export function AdobeBridgePanel() {
           <div className="flex items-center gap-2">
             {adobeStatus?.panelInstalled && adobeStatus.panelOutdated && (
               <Button size="sm" variant="outline" disabled={adobeBusy} onClick={() => void installAdobePanel()}>
-                <RefreshCw className="size-3.5" /> {t("panel.updateNow")}
+                <NetsuIcon name="refresh" className="size-3.5" /> {t("panel.updateNow")}
               </Button>
             )}
             <Toggle
@@ -162,11 +162,11 @@ export function AdobeBridgePanel() {
         )}
         <div className="mt-3 flex items-center gap-2">
           <Button size="sm" variant="outline" disabled={diagBusy} onClick={() => void runDiagnose()}>
-            <Stethoscope className="size-3.5" /> {t("panel.diagnose")}
+            <NetsuIcon name="bridge-doctor" busy={diagBusy} className="size-3.5" /> {t("panel.diagnose")}
           </Button>
           {diag && (
             <Button size="sm" variant="ghost" onClick={() => void navigator.clipboard.writeText(diagText)}>
-              <Copy className="size-3.5" /> {t("common:action.copy")}
+              <NetsuIcon name="copy" className="size-3.5" /> {t("common:action.copy")}
             </Button>
           )}
         </div>

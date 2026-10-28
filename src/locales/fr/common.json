@@ -20,7 +20,11 @@
     "import": "Importer",
     "decrease": "Diminuer",
     "increase": "Augmenter",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "cut": "Couper",
+    "paste": "Coller",
+    "selectAll": "Tout sélectionner",
+    "pastePlain": "Coller sans mise en forme"
   },
   "status": {
     "loading": "Chargement…",

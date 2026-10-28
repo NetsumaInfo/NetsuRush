@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, ArrowDownToLine, Repeat } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -415,22 +415,22 @@ export function UpscalePlayer({ path, mediaKey, duration, native, fps, rangeMode
 
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <Tooltip>
-          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => seek(cur - 5)} aria-label={t("player.back5")}><SkipBack className="h-4 w-4" /></Button>} />
+          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => seek(cur - 5)} aria-label={t("player.back5")}><NetsuIcon name="prev" className="h-4 w-4" /></Button>} />
           <TooltipContent>{t("player.back5")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={toggle} aria-label={t("player.playPause")}>
-            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            <NetsuIcon name="play-pause" on={playing} className="h-4 w-4" />
           </Button>} />
           <TooltipContent>{playing ? t("player.pause") : t("player.play")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => seek(cur + 5)} aria-label={t("player.forward5")}><SkipForward className="h-4 w-4" /></Button>} />
+          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => seek(cur + 5)} aria-label={t("player.forward5")}><NetsuIcon name="next" className="h-4 w-4" /></Button>} />
           <TooltipContent>{t("player.forward5")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant={loop ? "default" : "outline"} size="icon-sm" onClick={() => { const next = !loop; saveLoop(next); setLoop(next); }} aria-label={t("player.loop")} aria-pressed={loop}>
-            <Repeat className="h-4 w-4" />
+            <NetsuIcon name="cut-loop" on={loop} className="h-4 w-4" />
           </Button>} />
           <TooltipContent>{loop ? (rangeMode ? t("player.loopInOutActive") : t("player.loopActive")) : t("player.loopOff")}</TooltipContent>
         </Tooltip>
@@ -441,11 +441,11 @@ export function UpscalePlayer({ path, mediaKey, duration, native, fps, rangeMode
 
         {/* pas image par image (seek fps-précis) */}
         <Tooltip>
-          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => frameStep(-1)} aria-label={t("player.minus1Frame")}><ChevronLeft className="h-4 w-4" /></Button>} />
+          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => frameStep(-1)} aria-label={t("player.minus1Frame")}><NetsuIcon name="prev" className="h-4 w-4" /></Button>} />
           <TooltipContent>{t("player.prevFrame")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => frameStep(1)} aria-label={t("player.plus1Frame")}><ChevronRight className="h-4 w-4" /></Button>} />
+          <TooltipTrigger render={<Button variant="outline" size="icon-sm" onClick={() => frameStep(1)} aria-label={t("player.plus1Frame")}><NetsuIcon name="next" className="h-4 w-4" /></Button>} />
           <TooltipContent>{t("player.nextFrame")}</TooltipContent>
         </Tooltip>
         <span className="tabular-nums text-muted-foreground">{fmt(cur)} / {fmt(dur)}{fps > 0 && <> · f{frameOf(cur)}</>}</span>
@@ -474,16 +474,16 @@ export function UpscalePlayer({ path, mediaKey, duration, native, fps, rangeMode
                 <span className="w-12 shrink-0 text-muted-foreground">{h === "in" ? t("player.in") : t("player.out")}</span>
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="outline" size="sm" onClick={setHead} className="gap-1.5">
-                    <ArrowDownToLine className="h-3.5 w-3.5" /> {t("player.mark")}
+                    <NetsuIcon name="mark" className="h-3.5 w-3.5" /> {t("player.mark")}
                   </Button>} />
                   <TooltipContent>{t("player.markAtHead")}</TooltipContent>
                 </Tooltip>
                 <span className="tabular-nums text-muted-foreground">{fmt(val)}</span>
                 <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1">
-                  <Button variant="ghost" size="icon-sm" onClick={() => nudge(-1)} aria-label={t("player.minus1Frame")}><ChevronLeft className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" onClick={() => nudge(-1)} aria-label={t("player.minus1Frame")}><NetsuIcon name="prev" className="h-4 w-4" /></Button>
                   <FrameField frame={frameOf(val)} onCommit={setFrame} />
                   <span className="text-muted-foreground">{t("player.img")}</span>
-                  <Button variant="ghost" size="icon-sm" onClick={() => nudge(1)} aria-label={t("player.plus1Frame")}><ChevronRight className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" onClick={() => nudge(1)} aria-label={t("player.plus1Frame")}><NetsuIcon name="next" className="h-4 w-4" /></Button>
                 </div>
               </div>
             );

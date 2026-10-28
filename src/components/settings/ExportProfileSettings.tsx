@@ -1,4 +1,4 @@
-import { Check, Copy, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { cn } from "@/lib/utils";
@@ -44,16 +44,16 @@ export function ExportProfileSettings() {
                 >
                   <ExportProfileIcon profile={profile} className="size-3.5 shrink-0" />
                   <span className="min-w-0 flex-1 truncate">{profile.name}</span>
-                  {on && <Check className="size-3.5 shrink-0 text-primary" />}
+                  {on && <NetsuIcon name="check" className="size-3.5 shrink-0 text-primary" />}
                 </button>
               );
             })}
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <Button variant="outline" size="sm" onClick={() => addProfile()}><Plus className="size-3.5" /> {t("exportProfiles.new")}</Button>
-            <Button variant="outline" size="sm" onClick={() => duplicate(activeId)}><Copy className="size-3.5" /> {t("exportProfiles.duplicate")}</Button>
+            <Button variant="outline" size="sm" onClick={() => addProfile()}><NetsuIcon name="add" className="size-3.5" /> {t("exportProfiles.new")}</Button>
+            <Button variant="outline" size="sm" onClick={() => duplicate(activeId)}><NetsuIcon name="copy" className="size-3.5" /> {t("exportProfiles.duplicate")}</Button>
             <Button variant="ghost" size="icon-sm" disabled={profiles.length <= 1} onClick={() => remove(activeId)} aria-label={t("exportProfiles.deleteAria")}>
-              <Trash2 className="size-3.5" />
+              <NetsuIcon name="trash" className="size-3.5" />
             </Button>
             {/* Les préréglages livrés avec une mise à jour n'apparaissent pas tout seuls dans une liste
                 déjà enregistrée : les greffer d'office ferait revenir ceux supprimés exprès. */}
@@ -62,7 +62,7 @@ export function ExportProfileSettings() {
                 <TooltipTrigger
                   render={
                     <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => restore()}>
-                      <RotateCcw className="size-3.5" /> {t("exportProfiles.restore")}
+                      <NetsuIcon name="reset-default" className="size-3.5" /> {t("exportProfiles.restore")}
                     </Button>
                   }
                 />

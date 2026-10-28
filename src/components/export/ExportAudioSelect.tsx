@@ -3,7 +3,7 @@
 // Toujours rendu (même sur un fichier mono-piste) : couper le son reste utile, et le panneau ne doit
 // pas sauter d'un clip à l'autre.
 import { useMemo } from "react";
-import { Volume2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { type AudioTrack } from "@/lib/bridge";
 import { useTranslation } from "react-i18next";
@@ -40,7 +40,7 @@ export function ExportAudioSelect({ profile, sourcePath, size }: {
     <div className="flex flex-col gap-1">
       <Select value={value} onValueChange={(v) => v && update(profile.id, applyExportAudioValue(profile, v as string))}>
         <SelectTrigger size={small ? "sm" : undefined} className={small ? "h-8 text-xs" : undefined}>
-          <Volume2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="volume" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <SelectValue className="min-w-0 flex-1">{display}</SelectValue>
         </SelectTrigger>
         <SelectContent>

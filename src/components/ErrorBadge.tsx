@@ -4,7 +4,7 @@
 // flottante du coin bas-droit qui l'accueille (cf. `App`), partagée avec les pastilles d'état.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Terminal, Check } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { subscribeErrorCount, markConsoleSeen } from "@/lib/appConsole";
 import { notifyDurations, subscribeNotify } from "@/lib/notifySettings";
@@ -47,12 +47,12 @@ export function ErrorBadge() {
           />
         }
       >
-        <AlertTriangle className="size-4" />
+        <NetsuIcon name="error-badge" className="size-4" />
         <span className="tabular-nums">{count > 99 ? "99+" : count}</span>
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-44">
-        <ContextMenuItem onClick={() => { openConsole(); markConsoleSeen(); }}><Terminal /> {t("errorBadge.open")}</ContextMenuItem>
-        <ContextMenuItem onClick={() => markConsoleSeen()}><Check /> {t("errorBadge.markRead")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => { openConsole(); markConsoleSeen(); }}><NetsuIcon name="console" /> {t("errorBadge.open")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => markConsoleSeen()}><NetsuIcon name="check" /> {t("errorBadge.markRead")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

@@ -1,7 +1,7 @@
 // Choix du couple source → cible. Les noms complets ne tiennent pas sur une ligne (« Re… », « Pre… »,
 // « Aft… ») : le logo porte l'identité, l'infobulle donne le nom.
 import { useTranslation } from "react-i18next";
-import { ArrowLeftRight } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -85,7 +85,7 @@ export function TransferHostPicker({
           <TooltipTrigger
             render={
               <Button variant="outline" size="icon" onClick={swap} disabled={disabled || !swappable} className="size-10">
-                <ArrowLeftRight className="size-4" />
+                <NetsuIcon name="swap" className="size-4" />
               </Button>
             }
           />

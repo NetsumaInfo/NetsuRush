@@ -2,10 +2,9 @@
 // à un projet terminé sans toucher aux autres. Multi-sélection par cases, purge de la sélection.
 import { useState, memo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, FolderOpen, Trash2, HelpCircle } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import type { CacheFolder, CacheRush, CacheTree as CacheTreeData } from "@/lib/bridge";
 import { fmtBytes, KIND_ICON, KIND_TINT, type CacheKind } from "./storageShared";
 
@@ -85,7 +84,7 @@ function FolderRow({ folder, selected, onToggle }: { folder: CacheFolder; select
           className="ml-2 size-3.5 shrink-0 accent-[var(--color-primary)]"
         />
         <button type="button" onClick={() => setOpen((v) => !v)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
-          <ChevronRight className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform", open && "rotate-90")} />
+          <NetsuIcon name="chevron-toggle" on={open} className="size-3.5 shrink-0 text-muted-foreground" />
           <Tooltip>
             <TooltipTrigger render={<span className="min-w-0 flex-1 truncate font-medium text-foreground" />}>
               {folder.folder.split(/[\\/]/).filter(Boolean).pop() || folder.folder}
@@ -120,11 +119,11 @@ export function CacheTree({ tree, selected, onToggle, onPurgeUnattributed }: Pro
       </div>
       {un.bytes > 0 && (
         <div className="flex items-center gap-2 border-t border-border bg-muted/30 px-2 py-1.5 text-xs">
-          <FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="folder-open" className="size-3.5 shrink-0 text-muted-foreground" />
           <span className="text-foreground">{t("storage.tree.unattributed")}</span>
           <Tooltip>
             <TooltipTrigger render={<span className="text-muted-foreground" />}>
-              <HelpCircle className="size-3" />
+              <NetsuIcon name="help" className="size-3" />
             </TooltipTrigger>
             <TooltipContent className="max-w-64">{t("storage.tree.unattributedHint")}</TooltipContent>
           </Tooltip>
@@ -132,7 +131,7 @@ export function CacheTree({ tree, selected, onToggle, onPurgeUnattributed }: Pro
           <span className="tabular-nums text-muted-foreground">{fmtBytes(un.bytes)}</span>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={onPurgeUnattributed} />}>
-              <Trash2 className="size-3.5" />
+              <NetsuIcon name="trash" className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>{t("storage.tree.purgeSelection")}</TooltipContent>
           </Tooltip>

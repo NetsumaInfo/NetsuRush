@@ -5,7 +5,7 @@ import { createElement, useRef, useState, type DragEvent } from "react";
 import i18n from "@/i18n";
 import { createReactBlockSpec } from "@blocknote/react";
 import { defaultProps, type BlockNoteEditor } from "@blocknote/core";
-import { Paperclip, Download, ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { fileKind, kindMeta, extOf, type FileKind } from "./fileKinds";
@@ -43,12 +43,12 @@ function FileEmpty({ editor, block }: { editor: Ed; block: unknown }) {
       className={`my-1.5 flex flex-col gap-2 rounded-xl border border-dashed px-4 py-5 transition-colors ${over ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><Paperclip className="h-4 w-4" /></span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="attach-file" className="h-4 w-4" /></span>
         <Button size="sm" onClick={() => input.current?.click()}>{i18n.t("notebook:blocksUi.chooseFile")}</Button>
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:blocksUi.fileDrop")}</span>
         <input ref={input} type="file" hidden onChange={(e) => void pick(e.target.files?.[0] || undefined)} />
       </div>
-      <input
+      <input autoComplete="off"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter" && /^https?:\/\//i.test(url.trim())) { e.preventDefault(); set(url.trim()); } }}
@@ -79,15 +79,15 @@ function FileCard({ url, name }: { url: string; name: string }) {
         </div>
         {previewable && (
           <button type="button" onClick={() => setPreview((v) => !v)} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-            {preview ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />} {i18n.t("notebook:blocksUi.preview")}
+            <NetsuIcon name="chevron-toggle" on={preview} className="h-3.5 w-3.5" /> {i18n.t("notebook:blocksUi.preview")}
           </button>
         )}
         <Tooltip>
-          <TooltipTrigger render={<a href={url} target="_blank" rel="noreferrer" className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><ExternalLink className="h-4 w-4" /></a>} />
+          <TooltipTrigger render={<a href={url} target="_blank" rel="noreferrer" className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="h-4 w-4" /></a>} />
           <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<a href={url} download={label} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><Download className="h-4 w-4" /></a>} />
+          <TooltipTrigger render={<a href={url} download={label} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="download" className="h-4 w-4" /></a>} />
           <TooltipContent>{i18n.t("notebook:blocksUi.download")}</TooltipContent>
         </Tooltip>
       </div>

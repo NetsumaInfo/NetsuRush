@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { UserPlus, Search, Film, Pencil, Trash2, ScanFace, Users, Check, X, Merge, Spline, CheckSquare, Images } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type Character, type CharSample } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -39,8 +39,8 @@ function CharForm({ draft, setDraft, onSave, onCancel, saving }: {
       <Input value={draft.tags} onChange={(e) => setDraft({ ...draft, tags: e.target.value })} placeholder={t("rosterPanel.tagsPlaceholder")} />
       <Textarea value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} placeholder={t("rosterPanel.notesPlaceholder")} className="min-h-16" />
       <div className="flex justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={onCancel}><X className="h-3.5 w-3.5" /> {t("common:action.cancel")}</Button>
-        <Button size="sm" disabled={!draft.name.trim() || saving} onClick={onSave}><Check className="h-3.5 w-3.5" /> {t("common:action.save")}</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}><NetsuIcon name="close" className="h-3.5 w-3.5" /> {t("common:action.cancel")}</Button>
+        <Button size="sm" disabled={!draft.name.trim() || saving} onClick={onSave}><NetsuIcon name="check" className="h-3.5 w-3.5" /> {t("common:action.save")}</Button>
       </div>
     </div>
   );
@@ -71,7 +71,7 @@ function SamplesStrip({ charId }: { charId: number }) {
         <div key={s.id} className="group/s relative h-14 w-14 overflow-hidden rounded-md border border-border bg-muted">
           {s.thumb
             ? <img src={s.thumb} alt="" className="h-full w-full object-cover" />
-            : <div className="flex h-full items-center justify-center"><ScanFace className="h-5 w-5 text-muted-foreground" /></div>}
+            : <div className="flex h-full items-center justify-center"><NetsuIcon name="face" className="h-5 w-5 text-muted-foreground" /></div>}
           <span className="absolute bottom-0 left-0 rounded-tr bg-black/55 px-1 text-[8px] leading-3 text-white/80">
             {s.domain === "anime" ? t("domain.anime") : t("domain.real")}
           </span>
@@ -82,7 +82,7 @@ function SamplesStrip({ charId }: { charId: number }) {
                 void removeSample(s.id).then(load).catch(() => setErr(true));
               }}
               className="absolute right-0 top-0 hidden h-5 w-5 items-center justify-center rounded-bl bg-black/70 text-white hover:bg-destructive group-hover/s:flex" />}>
-              <X className="h-3 w-3" />
+              <NetsuIcon name="close" className="h-3 w-3" />
             </TooltipTrigger>
             <TooltipContent>{t("rosterPanel.removeSampleTooltip")}</TooltipContent>
           </Tooltip>
@@ -119,7 +119,7 @@ function CharCard({ c, others, selecting, selected, onSearch, onShots, onEdit, o
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
             {c.avatar
               ? <img src={c.avatar} alt="" className="h-full w-full object-cover" />
-              : <div className="flex h-full items-center justify-center text-muted-foreground"><ScanFace className="h-6 w-6 opacity-40" /></div>}
+              : <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="h-6 w-6 opacity-40" /></div>}
             {c.color && <span className="absolute bottom-1 right-1 h-3 w-3 rounded-full border border-white/60" style={{ background: c.color }} />}
             {selecting && (
               <SelectToggle selected={selected} onToggle={onToggle} className="left-1 top-1 right-auto opacity-100" />
@@ -153,7 +153,7 @@ function CharCard({ c, others, selecting, selected, onSearch, onShots, onEdit, o
               <div className="mt-1.5 flex items-center gap-1">
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5" disabled={c.total === 0} onClick={(e) => { e.stopPropagation(); onSearch(); }} />}>
-                    <Search className="h-3.5 w-3.5" /> {t("rosterPanel.search")}
+                    <NetsuIcon name="search" className="h-3.5 w-3.5" /> {t("rosterPanel.search")}
                   </TooltipTrigger>
                   <TooltipContent>{c.total === 0 ? t("rosterPanel.addFaceFirst") : t("rosterPanel.searchIndexed")}</TooltipContent>
                 </Tooltip>
@@ -161,20 +161,20 @@ function CharCard({ c, others, selecting, selected, onSearch, onShots, onEdit, o
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm"
                     className={cn("h-7 w-7", showSamples && "bg-accent text-accent-foreground")}
                     onClick={(e) => { e.stopPropagation(); setShowSamples((v) => !v); }} />}>
-                    <Images className="h-3.5 w-3.5" />
+                    <NetsuIcon name="gallery" className="h-3.5 w-3.5" />
                   </TooltipTrigger>
                   <TooltipContent>{t("rosterPanel.savedFacesCount", { count: c.total })}</TooltipContent>
                 </Tooltip>
                 <div className="flex-1" />
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setRenaming(true); }} />}>
-                    <Pencil className="h-3.5 w-3.5" />
+                    <NetsuIcon name="edit" className="h-3.5 w-3.5" />
                   </TooltipTrigger>
                   <TooltipContent>{t("rosterPanel.rename")}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger render={<Button variant="ghost" size="icon-sm" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }} />}>
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <NetsuIcon name="trash" className="h-3.5 w-3.5" />
                   </TooltipTrigger>
                   <TooltipContent>{t("common:action.delete")}</TooltipContent>
                 </Tooltip>
@@ -189,21 +189,21 @@ function CharCard({ c, others, selecting, selected, onSearch, onShots, onEdit, o
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem disabled={c.total === 0} onClick={onSearch}><Search /> {t("rosterPanel.searchInRushes")}</ContextMenuItem>
-        <ContextMenuItem onClick={onShots}><Film /> {t("rosterPanel.recognizedShots")}</ContextMenuItem>
+        <ContextMenuItem disabled={c.total === 0} onClick={onSearch}><NetsuIcon name="search" /> {t("rosterPanel.searchInRushes")}</ContextMenuItem>
+        <ContextMenuItem onClick={onShots}><NetsuIcon name="film" /> {t("rosterPanel.recognizedShots")}</ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => setShowSamples((v) => !v)}><Images /> {t("rosterPanel.savedFaces")}</ContextMenuItem>
-        <ContextMenuItem onClick={() => setRenaming(true)}><Pencil /> {t("rosterPanel.rename")}</ContextMenuItem>
-        <ContextMenuItem onClick={onEdit}><Pencil /> {t("rosterPanel.edit")}</ContextMenuItem>
-        <ContextMenuItem onClick={onToggle}><CheckSquare /> {selected ? t("rosterPanel.deselect") : t("rosterPanel.select")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => setShowSamples((v) => !v)}><NetsuIcon name="gallery" /> {t("rosterPanel.savedFaces")}</ContextMenuItem>
+        <ContextMenuItem onClick={() => setRenaming(true)}><NetsuIcon name="edit" /> {t("rosterPanel.rename")}</ContextMenuItem>
+        <ContextMenuItem onClick={onEdit}><NetsuIcon name="edit" /> {t("rosterPanel.edit")}</ContextMenuItem>
+        <ContextMenuItem onClick={onToggle}><NetsuIcon name="cut-select" on={selected} /> {selected ? t("rosterPanel.deselect") : t("rosterPanel.select")}</ContextMenuItem>
         {others.length > 0 && (
           <ContextMenuSub>
-            <ContextMenuSubTrigger><Merge /> {t("rosterPanel.mergeDuplicateHere")}</ContextMenuSubTrigger>
+            <ContextMenuSubTrigger><NetsuIcon name="search-merge-person" /> {t("rosterPanel.mergeDuplicateHere")}</ContextMenuSubTrigger>
             <ContextMenuSubContent className="max-h-64 overflow-y-auto">
               {others.map((o) => (
                 <ContextMenuItem key={o.id} onClick={() => onMergeInto(o.id)} className="gap-2">
                   <span className="h-5 w-5 shrink-0 overflow-hidden rounded bg-muted">
-                    {o.avatar ? <img src={o.avatar} alt="" className="h-full w-full object-cover" /> : <ScanFace className="m-0.5 h-4 w-4 text-muted-foreground" />}
+                    {o.avatar ? <img src={o.avatar} alt="" className="h-full w-full object-cover" /> : <NetsuIcon name="face" className="m-0.5 h-4 w-4 text-muted-foreground" />}
                   </span>
                   <span className="truncate">{o.name}</span>
                 </ContextMenuItem>
@@ -212,7 +212,7 @@ function CharCard({ c, others, selecting, selected, onSearch, onShots, onEdit, o
           </ContextMenuSub>
         )}
         <ContextMenuSeparator />
-        <ContextMenuItem variant="destructive" onClick={onDelete}><Trash2 /> {t("common:action.delete")}</ContextMenuItem>
+        <ContextMenuItem variant="destructive" onClick={onDelete}><NetsuIcon name="trash" /> {t("common:action.delete")}</ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
@@ -268,11 +268,11 @@ export function RosterPanel() {
             {target && sel.size >= 2 && <span className="truncate text-xs text-muted-foreground">→ « {target.name} »</span>}
             <div className="flex-1" />
             <Button size="sm" disabled={sel.size < 2} onClick={mergeSelected}>
-              <Merge className="h-3.5 w-3.5" /> {t("rosterPanel.merge")}
+              <NetsuIcon name="search-merge-person" className="h-3.5 w-3.5" /> {t("rosterPanel.merge")}
             </Button>
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("rosterPanel.cancelSelectionAria")} onClick={clearSel} />}>
-                <X className="h-4 w-4" />
+                <NetsuIcon name="close" className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>{t("common:action.cancel")}</TooltipContent>
             </Tooltip>
@@ -283,24 +283,24 @@ export function RosterPanel() {
             {characters.length >= 2 && (
               <Tooltip>
                 <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("rosterPanel.mergeDuplicatesAria")} onClick={() => setSelecting(true)} />}>
-                  <CheckSquare className="h-4 w-4" />
+                  <NetsuIcon name="checkbox-on" className="h-4 w-4" />
                 </TooltipTrigger>
                 <TooltipContent>{t("rosterPanel.mergeDuplicatesTooltip")}</TooltipContent>
               </Tooltip>
             )}
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("rosterPanel.detectDuplicatesAria")} disabled={dupLoading || characters.length < 2} onClick={() => findDuplicates()} />}>
-                {dupLoading ? <Spinner className="h-4 w-4" /> : <Spline className="h-4 w-4" />}
+                {dupLoading ? <Spinner className="h-4 w-4" /> : <NetsuIcon name="spline" className="h-4 w-4" />}
               </TooltipTrigger>
               <TooltipContent>{t("rosterPanel.detectDuplicatesTooltip")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("rosterPanel.recognizeAria")} disabled={!!charLabeling || characters.length === 0} onClick={() => labelIndex()} />}>
-                <ScanFace className={cn("h-4 w-4", charLabeling && "animate-pulse")} />
+                <NetsuIcon name="face" busy={!!charLabeling} className="h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent>{t("rosterPanel.recognizeTooltip")}</TooltipContent>
             </Tooltip>
-            <Button size="sm" onClick={startNew}><UserPlus className="h-3.5 w-3.5" /> {t("rosterPanel.new")}</Button>
+            <Button size="sm" onClick={startNew}><NetsuIcon name="user-plus" className="h-3.5 w-3.5" /> {t("rosterPanel.new")}</Button>
           </>
         )}
       </div>
@@ -310,10 +310,10 @@ export function RosterPanel() {
       {duplicates && (
         <div className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3">
           <div className="flex items-center gap-2 text-xs">
-            <Spline className="h-3.5 w-3.5 text-primary" />
+            <NetsuIcon name="spline" className="h-3.5 w-3.5 text-primary" />
             <span className="font-medium">{t("rosterPanel.possibleDuplicates")}</span>
             <div className="flex-1" />
-            <Button variant="ghost" size="icon-xs" aria-label={t("rosterPanel.closeAria")} onClick={clearDuplicates}><X className="h-3 w-3" /></Button>
+            <Button variant="ghost" size="icon-xs" aria-label={t("rosterPanel.closeAria")} onClick={clearDuplicates}><NetsuIcon name="close" className="h-3 w-3" /></Button>
           </div>
           {duplicates.length === 0 ? (
             <div className="text-[11px] text-muted-foreground">{t("rosterPanel.noDuplicates")}</div>
@@ -324,7 +324,7 @@ export function RosterPanel() {
               <div className="flex-1" />
               <Tooltip>
                 <TooltipTrigger render={<Button variant="outline" size="sm" className="h-6 px-2 text-[11px]" onClick={() => mergeCharacters(p.b.id, p.a.id)} />}>
-                  <Merge className="h-3 w-3" /> {t("rosterPanel.merge")}
+                  <NetsuIcon name="search-merge-person" className="h-3 w-3" /> {t("rosterPanel.merge")}
                 </TooltipTrigger>
                 <TooltipContent>{t("rosterPanel.mergeIntoTooltip", { source: p.b.name, target: p.a.name })}</TooltipContent>
               </Tooltip>
@@ -345,7 +345,7 @@ export function RosterPanel() {
       <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
         {characters.length === 0 && editId !== "new" ? (
           <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
-            <Users className="h-7 w-7 text-muted-foreground" />
+            <NetsuIcon name="collab" className="h-7 w-7 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{t("rosterPanel.noCharacters")}</span>
           </div>
         ) : (

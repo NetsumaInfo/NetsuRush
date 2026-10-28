@@ -7,7 +7,7 @@
 // holds the two funding links (GitHub Sponsors, Buy Me a Coffee) and lets the reader pick.
 
 import { useTranslation } from "react-i18next";
-import { HandHeart } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { GITHUB_REPO } from "@/lib/community";
@@ -42,7 +42,7 @@ export function HeaderLinks() {
             className={TITLEBAR_BTN}
             onClick={() => openSettings("about")}
           >
-            <HandHeart />
+            <NetsuIcon name="support" />
           </button>
         } />
         <TooltipContent>{t("windowControls.support")}</TooltipContent>

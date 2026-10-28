@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ImagePlus, ScanFace, Trash2, Tag } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type FaceDet, type CharMatch, type CharRef } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -48,7 +48,7 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
           {thumb ? (
             <img src={thumb} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground"><ScanFace className="h-5 w-5 opacity-40" /></div>
+            <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="face" className="h-5 w-5 opacity-40" /></div>
           )}
           {domain && (
             <span className="absolute bottom-0.5 left-0.5 rounded bg-black/60 px-1 text-[9px] text-white">
@@ -63,7 +63,7 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
         <NameFaceMenu refPayload={refPayload} trigger={
           <button type="button" aria-label={t("faceRefPicker.nameFaceAria")}
             className="absolute right-0.5 top-0.5 inline-flex h-5 w-5 items-center justify-center rounded bg-black/60 text-white opacity-80 hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-primary">
-            <Tag className="h-3 w-3" />
+            <NetsuIcon name="tag" className="h-3 w-3" />
           </button>
         } />
       )}
@@ -177,12 +177,12 @@ export function FaceRefPicker() {
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={onAddImages} disabled={busy}>
-            {busy ? <Spinner className="h-4 w-4" /> : <ImagePlus className="h-4 w-4" />}
+            {busy ? <Spinner className="h-4 w-4" /> : <NetsuIcon name="search-add-ref" className="h-4 w-4" />}
             {t("faceRefPicker.addImage")}
           </Button>
           {images.length > 0 && (
             <Button variant="ghost" size="sm" onClick={reset} disabled={busy}>
-              <Trash2 className="h-4 w-4" />
+              <NetsuIcon name="trash" className="h-4 w-4" />
               {t("faceRefPicker.clearImages")}
             </Button>
           )}
@@ -225,7 +225,7 @@ export function FaceRefPicker() {
           ))}
           {images.length === 0 && !busy && (
             <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-8 text-center">
-              <ScanFace className="h-7 w-7 text-muted-foreground" />
+              <NetsuIcon name="face" className="h-7 w-7 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">{t("faceRefPicker.noImages")}</span>
             </div>
           )}
@@ -234,7 +234,7 @@ export function FaceRefPicker() {
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={() => { closeFacePicker(); reset(); }}>{t("common:action.cancel")}</Button>
           <Button size="sm" onClick={onSearch} disabled={sel.length === 0 || busy}>
-            <ScanFace className="h-4 w-4" />
+            <NetsuIcon name="face" className="h-4 w-4" />
             {t("faceRefPicker.search")}
           </Button>
         </div>

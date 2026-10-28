@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,11 @@ export function StarRating({ value, onChange, size = 14, className }: {
     <div className={cn("flex items-center gap-0.5", className)}>
       {stars.map((n) => {
         const on = n <= value;
-        const star = <Star style={{ width: size, height: size }} className={on ? "fill-amber-400 text-amber-400" : "text-muted-foreground/50"} />;
+        const star = (
+          <span className={on ? "text-amber-400" : "text-muted-foreground/50"} style={{ width: size, height: size }}>
+            <NetsuIcon name="star" on={on} className="size-full" />
+          </span>
+        );
         if (!onChange) return <span key={n}>{star}</span>;
         return (
           <button key={n} type="button" aria-label={t("rating.stars", { count: n })} onClick={(e) => { e.stopPropagation(); onChange(value === n ? 0 : n); }}

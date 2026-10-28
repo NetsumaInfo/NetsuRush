@@ -5,7 +5,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { createReactInlineContentSpec } from "@blocknote/react";
-import { Link2, ExternalLink, Copy, Repeat, AtSign, Bookmark, Globe } from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { nr } from "@/lib/bridge";
@@ -21,7 +22,7 @@ function hostOf(url: string, fallback: string) {
   try { return new URL(url).hostname; } catch { return url; }
 }
 
-const CONVERT_ICONS: Record<LinkAs, typeof AtSign> = { mention: AtSign, url: Link2, bookmark: Bookmark, embed: Globe };
+const CONVERT_ICONS: Record<LinkAs, IconComponent> = { mention: netsuIconOf("mention"), url: netsuIconOf("link"), bookmark: netsuIconOf("bookmark"), embed: netsuIconOf("web") };
 const INLINE_CONVERT_OPTIONS = LINK_AS_OPTIONS.filter((option) => option.key === "mention" || option.key === "url");
 
 function InlineConvertMenu({ onConvert }: { onConvert: (kind: LinkAs) => void }) {
@@ -32,7 +33,7 @@ function InlineConvertMenu({ onConvert }: { onConvert: (kind: LinkAs) => void })
           <TooltipTrigger
             render={
               <DropdownMenuTrigger
-                render={<button type="button" className="rounded bg-background/80 p-1 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"><Repeat className="h-3.5 w-3.5" /></button>}
+                render={<button type="button" className="rounded bg-background/80 p-1 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"><NetsuIcon name="repeat" className="h-3.5 w-3.5" /></button>}
               />
             }
           />
@@ -70,14 +71,14 @@ function HoverCard({ meta, anchor, onEnter, onLeave, onConvert }: { meta: Meta; 
         <div className="line-clamp-1 text-sm font-semibold text-foreground">{meta.title || host}</div>
         {meta.description && <div className="line-clamp-3 text-xs leading-4 text-muted-foreground">{meta.description}</div>}
         <div className="mt-1 flex items-center gap-1.5">
-          {meta.favicon ? <img src={meta.favicon} alt="" className="h-4 w-4 rounded-sm" draggable={false} /> : <Link2 className="h-4 w-4 text-muted-foreground" />}
+          {meta.favicon ? <img src={meta.favicon} alt="" className="h-4 w-4 rounded-sm" draggable={false} /> : <NetsuIcon name="link" className="h-4 w-4 text-muted-foreground" />}
           <span className="flex-1 truncate text-xs font-semibold text-foreground">{host}</span>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => void navigator.clipboard?.writeText(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><Copy className="h-3.5 w-3.5" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => void navigator.clipboard?.writeText(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="h-3.5 w-3.5" /></button>} />
             <TooltipContent>{i18n.t("notebook:finalPass.copyLink")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => void nr.openExternal(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ExternalLink className="h-3.5 w-3.5" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => void nr.openExternal(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="h-3.5 w-3.5" /></button>} />
             <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
           </Tooltip>
         </div>
@@ -126,7 +127,7 @@ function LinkMentionView({ meta, persist, convert }: { meta: Meta; persist: (m: 
             onMouseEnter={open}
             onMouseLeave={() => { overChip.current = false; scheduleClose(); }}
           >
-            {m.favicon ? <img src={m.favicon} alt="" className="nb-link-mention-ico" draggable={false} /> : <Link2 className="nb-link-mention-ico" />}
+            {m.favicon ? <img src={m.favicon} alt="" className="nb-link-mention-ico" draggable={false} /> : <NetsuIcon name="link" className="nb-link-mention-ico" />}
             {m.siteName && m.siteName !== (m.title || host) && <span className="nb-link-mention-site">{m.siteName}</span>}
             <span className="truncate">{m.title || host}</span>
           </span>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Layers, Eraser, Eye, Pencil, RotateCcw, AlertTriangle, Image as ImageIcon } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { nlSrcKey } from "@/store/netsulab";
 import { nr } from "@/lib/bridge";
@@ -44,13 +44,13 @@ export function SelectionTray() {
     <div className="flex min-h-0 flex-col border-t border-border">
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-          <Layers className="h-3.5 w-3.5 text-primary" />
+          <NetsuIcon name="layers" className="h-3.5 w-3.5 text-primary" />
           {t("tray.title")}
           <span className="tabular-nums text-muted-foreground">({sources.length})</span>
         </div>
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={clear} aria-label={t("tray.clearAll")}>
-            <Eraser className="h-3.5 w-3.5" />
+            <NetsuIcon name="erase" className="h-3.5 w-3.5" />
           </Button>} />
           <TooltipContent>{t("tray.clearAll")}</TooltipContent>
         </Tooltip>
@@ -100,7 +100,7 @@ export function SelectionTray() {
                       <div className="flex items-center gap-1">
                         {still && (
                           <Tooltip>
-                            <TooltipTrigger render={<ImageIcon className="h-3 w-3 shrink-0 text-primary" />} />
+                            <TooltipTrigger render={<span className="inline-flex shrink-0 text-primary"><NetsuIcon name="image" className="h-3 w-3" /></span>} />
                             <TooltipContent>{t("tray.stillSource")}</TooltipContent>
                           </Tooltip>
                         )}
@@ -116,8 +116,8 @@ export function SelectionTray() {
                           "flex min-w-0 items-center gap-1 truncate font-mono text-[10px]",
                           clash ? "text-destructive" : "text-muted-foreground/80",
                         )} />}>
-                          {clash && <AlertTriangle className="h-2.5 w-2.5 shrink-0" />}
-                          {s.outName && <Pencil className="h-2.5 w-2.5 shrink-0" />}
+                          {clash && <NetsuIcon name="warning" className="h-2.5 w-2.5 shrink-0" />}
+                          {s.outName && <NetsuIcon name="edit" className="h-2.5 w-2.5 shrink-0" />}
                           {outName}
                         </TooltipTrigger>
                         <TooltipContent>{clash ? t("tray.nameClash") : t("tray.outputName", { name: outName })}</TooltipContent>
@@ -127,7 +127,7 @@ export function SelectionTray() {
                 </div>
                 {active && editing !== key && (
                   <Tooltip>
-                    <TooltipTrigger render={<Eye className="h-3.5 w-3.5 shrink-0 text-primary" />} />
+                    <TooltipTrigger render={<span className="inline-flex shrink-0 text-primary"><NetsuIcon name="eye" className="h-3.5 w-3.5" /></span>} />
                     <TooltipContent>{t("tray.previewCenter")}</TooltipContent>
                   </Tooltip>
                 )}
@@ -136,18 +136,18 @@ export function SelectionTray() {
                   className="shrink-0 rounded p-0.5 opacity-50 hover:bg-destructive/20 hover:text-destructive hover:opacity-100 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   aria-label={t("tray.removeNamed", { name: s.name })}
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <NetsuIcon name="close" className="h-3.5 w-3.5" />
                 </button>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onClick={() => setActive(i)} disabled={active}><Eye /> {t("tray.previewCenterMenu")}</ContextMenuItem>
-                <ContextMenuItem onClick={() => setEditing(key)}><Pencil /> {t("tray.rename")}</ContextMenuItem>
+                <ContextMenuItem onClick={() => setActive(i)} disabled={active}><NetsuIcon name="eye" /> {t("tray.previewCenterMenu")}</ContextMenuItem>
+                <ContextMenuItem onClick={() => setEditing(key)}><NetsuIcon name="edit" /> {t("tray.rename")}</ContextMenuItem>
                 {s.outName && (
-                  <ContextMenuItem onClick={() => setSourceName(s, null)}><RotateCcw /> {t("tray.renameReset")}</ContextMenuItem>
+                  <ContextMenuItem onClick={() => setSourceName(s, null)}><NetsuIcon name="reset-default" /> {t("tray.renameReset")}</ContextMenuItem>
                 )}
                 <ContextMenuSeparator />
-                <ContextMenuItem variant="destructive" onClick={() => remove(key)}><X /> {t("tray.remove")}</ContextMenuItem>
-                <ContextMenuItem variant="destructive" onClick={clear}><Eraser /> {t("tray.clearAll")}</ContextMenuItem>
+                <ContextMenuItem variant="destructive" onClick={() => remove(key)}><NetsuIcon name="close" /> {t("tray.remove")}</ContextMenuItem>
+                <ContextMenuItem variant="destructive" onClick={clear}><NetsuIcon name="erase" /> {t("tray.clearAll")}</ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
           );

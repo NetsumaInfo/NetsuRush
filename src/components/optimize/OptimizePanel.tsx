@@ -10,7 +10,7 @@
 // AUCUN levier ne crée de cache ni ne lance de rendu, des deux côtés : c'est une exigence produit.
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Gauge, RefreshCw, Loader2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/store";
 import { isAdobeHost } from "@/lib/host";
@@ -43,12 +43,12 @@ function PanelHeader({
           serrée dans la carte Projet où elle se faisait tronquer. */}
       <div className="flex items-baseline gap-2">
         <h1 className="flex items-center gap-2 text-lg font-semibold">
-          <Gauge className="h-5 w-5 text-primary" /> {t("panel.title")}
+          <NetsuIcon name="gauge" className="h-5 w-5 text-primary" /> {t("panel.title")}
         </h1>
         {version && <span className="text-xs text-muted-foreground">{t("diagnostic.version", { version })}</span>}
       </div>
       <Button variant="outline" size="sm" onClick={onDiagnose} disabled={loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        <NetsuIcon name="boost-rescan" busy={loading} className="h-4 w-4" />
         {t("panel.diagnose")}
       </Button>
     </header>

@@ -2,7 +2,7 @@
 // couple, montre ce qui a été lu, puis délègue lecture et montage au core (core/transfer/).
 import { Suspense, lazy, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, ArrowLeftRight, CheckCircle2, FolderOpen, RefreshCw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,7 @@ export function TransferPanel() {
     <div className="mx-auto max-w-2xl space-y-6 p-7">
       <header className="space-y-1">
         <h1 className="flex items-center gap-2 text-lg font-semibold">
-          <ArrowLeftRight className="size-5 text-primary" /> {t("header.title")}
+          <NetsuIcon name="swap" className="size-5 text-primary" /> {t("header.title")}
         </h1>
         <p className="text-xs text-muted-foreground">{t("header.subtitle")}</p>
       </header>
@@ -87,7 +87,7 @@ export function TransferPanel() {
                 <TooltipTrigger
                   render={
                     <Button variant="outline" size="icon" onClick={() => void loadSources()} disabled={busy}>
-                      <RefreshCw className="size-4" />
+                      <NetsuIcon name="refresh" className="size-4" />
                     </Button>
                   }
                 />
@@ -192,15 +192,15 @@ export function TransferPanel() {
 
         {result && !result.ok && (
           <Card className="block border-destructive/40 p-3 text-xs text-destructive">
-            <AlertTriangle className="mr-1.5 inline size-3.5" /> {result.error}
+            <NetsuIcon name="warning" className="mr-1.5 inline size-3.5" /> {result.error}
           </Card>
         )}
         {result?.ok && (
           <Card className="block p-3 text-xs">
             <div className={`flex items-center gap-1.5 font-medium ${result.fidelity?.verified ? "text-[var(--color-ok)]" : "text-foreground"}`}>
               {result.fidelity?.verified
-                ? <CheckCircle2 className="size-3.5" />
-                : <AlertTriangle className="size-3.5 text-amber-400" />}
+                ? <NetsuIcon name="status-ok" className="size-3.5" />
+                : <NetsuIcon name="warning" className="size-3.5 text-amber-400" />}
               {t("result.done", { count: result.count ?? 0, timeline: result.timeline, host: hostShort(to) })}
             </div>
             {result.fidelity && (
@@ -220,7 +220,7 @@ export function TransferPanel() {
               <div className="mt-2 space-y-1 border-t border-border pt-2">
                 <p className="text-muted-foreground">{t("result.exchangeFile")}</p>
                 <Button size="sm" variant="outline" onClick={() => nr.openPath(result.exchangeFile!)}>
-                  <FolderOpen className="size-3.5" /> {result.exchangeFile}
+                  <NetsuIcon name="folder-open" className="size-3.5" /> {result.exchangeFile}
                 </Button>
               </div>
             )}
@@ -264,7 +264,7 @@ export function TransferPanel() {
         )}
 
         <Button className="w-full" size="lg" onClick={run} disabled={!canRun}>
-          {busy ? <Spinner className="size-4" /> : <ArrowLeftRight className="size-4" />}
+          <NetsuIcon name="bridge-send" busy={busy} className="size-4" />
           {busy ? t("run.busy") : t("run.label", { from: hostShort(from), to: hostShort(to) })}
         </Button>
       </div>

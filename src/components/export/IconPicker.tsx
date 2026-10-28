@@ -5,10 +5,11 @@ import { createElement, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Popover } from "@base-ui/react/popover";
 import type { LucideIcon } from "lucide-react";
-import { Smile, Shapes, Images as ImagesIcon, Search, ImagePlus, X, Loader2 } from "lucide-react";
+import { Smile, Shapes, Images as ImagesIcon, Search, ImagePlus, X } from "lucide-react";
 import { lucideIcon, lucideNames, loadLucideCatalog, useLucideCatalog } from "@/lib/lucideCatalog";
 import { useApp } from "@/store";
 import { cn } from "@/lib/utils";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Input } from "@/components/ui/input";
 import { EmojiPicker } from "@/components/common/EmojiPicker";
 import { HoverLabel } from "@/components/common/HoverLabel";
@@ -38,7 +39,7 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: E
       </div>
       {names.length === 0 ? (
         <div className="flex h-64 items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Loader2 className="size-3.5 animate-spin" /> {t("iconPicker.loading")}
+          <NetsuIcon name="loading" busy className="size-3.5" /> {t("iconPicker.loading")}
         </div>
       ) : (
         <>

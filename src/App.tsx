@@ -8,6 +8,7 @@ import { NotebookTabs } from "@/components/notebook/NotebookTabs";
 import { SettingsSubnav } from "@/components/settings/SettingsSubnav";
 import { MainContent } from "@/components/MainContent";
 import { ViewContextMenu, TitleBarMenu } from "@/components/common/ViewContextMenu";
+import { TextContextMenu } from "@/components/common/TextContextMenu";
 import { RemotePanel } from "@/components/adobe/RemotePanel";
 import { SetupGate } from "@/components/setup/SetupGate";
 import { convexConfigured } from "@/lib/convexEnv";
@@ -94,6 +95,8 @@ export default function App() {
         // Puis gate beta (login Discord) APRÈS le provisionnement.
         <SetupGate><AuthGate><Shell /></AuthGate></SetupGate>
       )}
+      {/* Right-click edit menu of every text field, in every renderer; also keeps the native menu out. */}
+      <TextContextMenu />
     </ErrorBoundary>
   );
 }

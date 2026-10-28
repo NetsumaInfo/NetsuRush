@@ -4,7 +4,7 @@
 // boutons arrêtent les tâches lourdes de NetsuRush (encodes NVENC + daemons IA) : ces process chargent
 // GPU ET CPU/RAM → chaque bouton les tue réellement, la jauge associée chute en preuve.
 import { useEffect, useRef, useState } from "react";
-import { Cpu, Loader2, Activity, MemoryStick, Microchip } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -98,20 +98,20 @@ export function GpuSection() {
     <Card className="block p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-          <Activity className="h-4 w-4 text-primary" /> {t("gpu.title")}
+          <NetsuIcon name="activity" className="h-4 w-4 text-primary" /> {t("gpu.title")}
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{t("gpu.free")}</span>
           <Button variant="outline" size="sm" disabled={!!busy} onClick={() => free("gpu")}>
-            {busy === "gpu" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Microchip className="h-4 w-4" />}
+            {busy === "gpu" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="chip" className="h-4 w-4" />}
             GPU
           </Button>
           <Button variant="outline" size="sm" disabled={!!busy} onClick={() => free("cpu")}>
-            {busy === "cpu" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Cpu className="h-4 w-4" />}
+            {busy === "cpu" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="chip" className="h-4 w-4" />}
             CPU
           </Button>
           <Button variant="outline" size="sm" disabled={!!busy} onClick={() => free("ram")}>
-            {busy === "ram" ? <Loader2 className="h-4 w-4 animate-spin" /> : <MemoryStick className="h-4 w-4" />}
+            {busy === "ram" ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="memory" className="h-4 w-4" />}
             RAM
           </Button>
         </div>

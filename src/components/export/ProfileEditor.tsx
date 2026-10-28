@@ -3,7 +3,7 @@
 // quand on change de réglage. Moteurs GPU filtrés par sonde réelle côté core. shadcn Base UI.
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderInput, ChevronDown, CircleHelp, TriangleAlert } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { swrRead } from "@/lib/swr";
@@ -56,7 +56,7 @@ function Row({ label, hint, disabled, children }: { label: string; hint?: string
         {hint && (
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex shrink-0" tabIndex={0} aria-label={hint} />}>
-              <CircleHelp className="size-3.5" />
+              <NetsuIcon name="help" className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent side="right" align="center" className="max-w-64">{hint}</TooltipContent>
           </Tooltip>
@@ -144,7 +144,7 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
             {t("editor.folder")}
             <Tooltip>
               <TooltipTrigger render={<span className="inline-flex shrink-0" tabIndex={0} aria-label={folderHint} />}>
-                <CircleHelp className="size-3.5" />
+                <NetsuIcon name="help" className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent side="right" align="center" className="max-w-64">{folderHint}</TooltipContent>
             </Tooltip>
@@ -173,14 +173,14 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
             {isTimelineImport && bins.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label={t("editor.existingFolders")}>
-                  <ChevronDown className="size-4" />
+                  <NetsuIcon name="chevron-down" className="size-4" />
                 </Button>} />
                 <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>{t("editor.mediaPoolFolders")}</DropdownMenuLabel>
                     {bins.map((b) => (
                       <DropdownMenuItem key={b} onClick={() => set({ binTarget: b })}>
-                        <FolderInput className="size-3.5" /> {b}
+                        <NetsuIcon name="folder-move" className="size-3.5" /> {b}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuGroup>
@@ -233,7 +233,7 @@ export function ProfileEditor({ profile }: { profile: ExportProfile }) {
               <Tooltip>
                 {/* Non focusable : le bouton porteur l'est déjà et annonce l'avertissement. */}
                 <TooltipTrigger render={<span className="inline-flex shrink-0 text-amber-500" aria-hidden="true" />}>
-                  <TriangleAlert className="size-3" />
+                  <NetsuIcon name="warning" className="size-3" />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="center" className="max-w-72 whitespace-pre-line">{t("workflow.remuxWarningDetail")}</TooltipContent>
               </Tooltip>

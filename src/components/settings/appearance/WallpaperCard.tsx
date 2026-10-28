@@ -2,7 +2,7 @@
 // (adressés par hash de contenu) — réimporter le même visuel ne duplique rien.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ImagePlus, Loader2, RotateCcw, Trash2, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { nr } from "@/lib/bridge";
@@ -117,7 +117,7 @@ export function WallpaperCard() {
                   "disabled:pointer-events-none disabled:opacity-60",
                 )}
               >
-                {busy ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
+                {busy ? <NetsuIcon name="loading" busy className="size-4" /> : <NetsuIcon name="image-add" className="size-4" />}
               </button>
             }
           />
@@ -137,7 +137,7 @@ export function WallpaperCard() {
                     "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                   )}
                 >
-                  <X className="size-4" />
+                  <NetsuIcon name="close" className="size-4" />
                 </button>
               }
             />
@@ -172,7 +172,7 @@ export function WallpaperCard() {
               onClick={() => void remove(entry.id)}
               className="absolute top-1 right-1 rounded bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
-              <Trash2 className="size-3" />
+              <NetsuIcon name="trash" className="size-3" />
             </button>
           </div>
         ))}
@@ -210,7 +210,7 @@ export function WallpaperCard() {
           ) : null}
           <div className="flex justify-end">
             <Button size="sm" variant="ghost" onClick={reset}>
-              <RotateCcw className="size-3.5" /> {t("appearance.wallpaper.reset")}
+              <NetsuIcon name="reset-default" className="size-3.5" /> {t("appearance.wallpaper.reset")}
             </Button>
           </div>
         </>

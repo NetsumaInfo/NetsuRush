@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ArrowLeft, Scissors, CheckSquare, Combine, Split, Clapperboard, FolderInput,
-  Play, Image as ImageIcon, Zap, Minus, Plus, PanelRightClose,
-} from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import {
   ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem,
   ContextMenuSeparator, ContextMenuLabel, ContextMenuCheckboxItem, ContextMenuGroup,
@@ -73,15 +71,15 @@ export function CutContextMenu(p: CutMenuProps) {
         {p.children}
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-52">
-        <ContextMenuItem onClick={p.onClose}><ArrowLeft /> {t("cutMenu.backToRushes")}</ContextMenuItem>
+        <ContextMenuItem onClick={p.onClose}><NetsuIcon name="back" /> {t("cutMenu.backToRushes")}</ContextMenuItem>
         <ContextMenuSeparator />
 
         {/* Détection */}
         <ContextMenuItem onClick={p.onDetect} disabled={p.detecting}>
-          <Scissors /> {p.detecting ? t("shared.analyzing") : t("shared.detectShots")}
+          <NetsuIcon name="cut-detect" busy={p.detecting} /> {p.detecting ? t("shared.analyzing") : t("shared.detectShots")}
         </ContextMenuItem>
         <ContextMenuSub>
-          <ContextMenuSubTrigger>{t("cutMenu.model", { label: MODELS.find((m) => m.id === p.model)?.label })}</ContextMenuSubTrigger>
+          <ContextMenuSubTrigger disabled={p.detecting}>{t("cutMenu.model",{ label: MODELS.find((m) => m.id === p.model)?.label })}</ContextMenuSubTrigger>
           <ContextMenuSubContent>
             {MODELS.map((m) => (
               <ContextMenuCheckboxItem key={m.id} checked={p.model === m.id} onClick={() => p.setModel(m.id)}>
@@ -107,50 +105,50 @@ export function CutContextMenu(p: CutMenuProps) {
           <>
             <ContextMenuSeparator />
             <ContextMenuItem onClick={p.onSelectAll}>
-              <CheckSquare /> {p.allSelected ? t("shared.deselectAll") : t("shared.selectAll")}
+              <NetsuIcon name="cut-select" on={p.allSelected} /> {p.allSelected ? t("shared.deselectAll") : t("shared.selectAll")}
             </ContextMenuItem>
             {p.selCount > 0 && <ContextMenuItem onClick={p.onDeselect}>{t("cutMenu.clearSelection")}</ContextMenuItem>}
-            {p.selCount >= 2 && <ContextMenuItem onClick={p.onMerge}><Combine /> {t("cutMenu.merge", { count: p.selCount })}</ContextMenuItem>}
-            {p.hasEdits && <ContextMenuItem onClick={p.onClearEdits}><Split /> {t("cutMenu.clearEdits")}</ContextMenuItem>}
+            {p.selCount >= 2 && <ContextMenuItem onClick={p.onMerge}><NetsuIcon name="cut-merge" /> {t("cutMenu.merge", { count: p.selCount })}</ContextMenuItem>}
+            {p.hasEdits && <ContextMenuItem onClick={p.onClearEdits}><NetsuIcon name="split" /> {t("cutMenu.clearEdits")}</ContextMenuItem>}
 
             <ContextMenuSeparator />
             {/* Timeline : action principale du mode épinglé */}
             {canTimeline && (
               <ContextMenuItem onClick={p.onAppendSelection} disabled={p.busy || p.selCount === 0}>
-                <Clapperboard /> {t("cutMenu.sendToTimeline", { verb })}
+                <SendToTimelineIcon /> {t("cutMenu.sendToTimeline", { verb })}
               </ContextMenuItem>
             )}
             {canTimeline && (
               <ContextMenuItem onClick={p.onCreateTimeline} disabled={p.busy || p.selCount === 0}>
-                <Clapperboard /> {t("cutMenu.createTimeline", { verb })}
+                <SendToTimelineIcon /> {t("cutMenu.createTimeline", { verb })}
               </ContextMenuItem>
             )}
-            <ContextMenuItem onClick={p.onExtract} disabled={p.busy || p.selCount === 0}><Scissors /> {t("cutMenu.extract", { verb })}</ContextMenuItem>
+            <ContextMenuItem onClick={p.onExtract} disabled={p.busy || p.selCount === 0}><NetsuIcon name="scissors" /> {t("cutMenu.extract", { verb })}</ContextMenuItem>
             {p.connected && p.exportedCount > 0 && (
-              <ContextMenuItem onClick={p.onImportBack} disabled={p.busy}><FolderInput /> {t("cutMenu.importExtracts")}</ContextMenuItem>
+              <ContextMenuItem onClick={p.onImportBack} disabled={p.busy}><NetsuIcon name="cut-import" /> {t("cutMenu.importExtracts")}</ContextMenuItem>
             )}
 
             <ContextMenuSeparator />
             {/* Aperçus */}
             <ContextMenuCheckboxItem checked={p.gridPlay} onClick={() => p.setGridPlay(!p.gridPlay)}>
-              <Play /> {t("shared.autoplay")}
+              <NetsuIcon name="play" /> {t("shared.autoplay")}
             </ContextMenuCheckboxItem>
-            <ContextMenuItem onClick={p.onThumbs}><ImageIcon /> {p.thumbsBusy ? t("shared.stopThumbs") : t("shared.genThumbs", { verb })}</ContextMenuItem>
-            <ContextMenuItem onClick={p.onProxies}><Zap /> {p.proxyBusy ? t("shared.stopProxies") : t("shared.genProxies", { verb })}</ContextMenuItem>
+            <ContextMenuItem onClick={p.onThumbs}><NetsuIcon name="image" /> {p.thumbsBusy ? t("shared.stopThumbs") : t("shared.genThumbs", { verb })}</ContextMenuItem>
+            <ContextMenuItem onClick={p.onProxies}><NetsuIcon name="zap" /> {p.proxyBusy ? t("shared.stopProxies") : t("shared.genProxies", { verb })}</ContextMenuItem>
 
             <ContextMenuSeparator />
             <ContextMenuGroup>
               <ContextMenuLabel>{t("shared.thumbSize")}</ContextMenuLabel>
               <ContextMenuItem closeOnClick={false} onClick={() => p.setCols(stepCols(p.cols, -1, p.maxCols))} disabled={!canFewerCols(p.cols)}>
-                <Plus /> {t("cutMenu.larger")}
+                <NetsuIcon name="add" /> {t("cutMenu.larger")}
               </ContextMenuItem>
               <ContextMenuItem closeOnClick={false} onClick={() => p.setCols(stepCols(p.cols, 1, p.maxCols))} disabled={!canMoreCols(p.cols, p.maxCols)}>
-                <Minus /> {t("cutMenu.smaller")}
+                <NetsuIcon name="remove" /> {t("cutMenu.smaller")}
               </ContextMenuItem>
             </ContextMenuGroup>
             {!p.compact && (
               <ContextMenuCheckboxItem checked={p.playerOpen} onClick={() => p.setPlayerOpen((v) => !v)}>
-                <PanelRightClose /> {t("cutMenu.rightPlayer")}
+                <NetsuIcon name="panel-right-toggle" /> {t("cutMenu.rightPlayer")}
               </ContextMenuCheckboxItem>
             )}
           </>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import { AlertTriangle, Clock3, Database, Gauge, RefreshCw, Trash2, Wand2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +26,7 @@ function WarnBanner() {
   if (!warn || !warn.alerts.length) return null;
   return (
     <div className="flex items-start gap-2.5 rounded-lg border border-destructive/40 bg-destructive/10 p-3">
-      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-foreground" />
+      <NetsuIcon name="warning" className="mt-0.5 size-4 shrink-0 text-foreground" />
       <div className="min-w-0 flex-1 space-y-0.5">
         {warn.alerts.map((alert, i) => (
           <p key={i} className="text-xs text-foreground">
@@ -45,7 +45,7 @@ function KindRow({ kind, bytes, onPurge }: { kind: CacheKind; bytes: number; onP
   const Icon = KIND_ICON[kind];
   return (
     <div className="flex items-center gap-2.5 px-3 py-2.5">
-      <Icon className="size-4 shrink-0" style={{ color: KIND_TINT[kind] }} />
+      <span className="inline-flex shrink-0" style={{ color: KIND_TINT[kind] }}><Icon className="size-4" /></span>
       <div className="min-w-0 flex-1">
         <Tooltip>
           <TooltipTrigger render={<p className="truncate text-xs text-foreground" />}>{t(`storage.kind.${kind}`)}</TooltipTrigger>
@@ -56,7 +56,7 @@ function KindRow({ kind, bytes, onPurge }: { kind: CacheKind; bytes: number; onP
       {bytes > 0 && (
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={onPurge} />}>
-            <Trash2 className="size-3.5" />
+            <NetsuIcon name="trash" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{t("storage.confirm.title")}</TooltipContent>
         </Tooltip>
@@ -74,11 +74,11 @@ function CacheGroup({ id, kinds, always = false, onPurge }: {
   const { t } = useTranslation("settings");
   if (!always && kinds.length === 0) return null;
   const total = kinds.reduce((sum, kind) => sum + kind.shownBytes, 0);
-  const GroupIcon = id === "session" ? Clock3 : id === "reusable" ? Gauge : Database;
+  const groupIcon = id === "session" ? "clock" : id === "reusable" ? "gauge" : "database";
   return (
     <div className="overflow-hidden rounded-lg border border-border">
       <div className="flex items-start gap-2.5 border-b border-border bg-muted/25 px-3 py-2.5">
-        <GroupIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+        <NetsuIcon name={groupIcon} className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="flex items-center gap-1.5 text-xs font-medium text-foreground">
@@ -215,13 +215,13 @@ export function MediaCacheSection() {
         <span className="flex-1" />
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => void s.reindex()} disabled={!!s.busy} />}>
-            <Wand2 className="size-3.5" />
+            <NetsuIcon name="wand" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent className="max-w-64">{t("settings:storage.reindex.hint")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => void s.load()} disabled={!!s.busy} />}>
-            <RefreshCw className="size-3.5" />
+            <NetsuIcon name="refresh" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{t("settings:storage.refresh")}</TooltipContent>
         </Tooltip>
@@ -248,7 +248,7 @@ export function MediaCacheSection() {
             <div className="flex items-center gap-3 rounded-lg border border-dashed border-border p-3">
               <p className="min-w-0 flex-1 text-[11px] text-muted-foreground">{t("settings:storage.reindex.hint")}</p>
               <Button variant="outline" size="sm" onClick={() => void s.reindex()} disabled={!!s.busy}>
-                <Wand2 className="size-3.5" /> {t("settings:storage.reindex.action")}
+                <NetsuIcon name="wand" className="size-3.5" /> {t("settings:storage.reindex.action")}
               </Button>
             </div>
           )}
@@ -279,7 +279,7 @@ export function MediaCacheSection() {
                   <div className="flex items-center gap-1.5">
                     <Button variant="ghost" size="sm" onClick={() => setSel(new Set())}>{t("settings:storage.tree.clearSelection")}</Button>
                     <Button variant="destructive" size="sm" disabled={purging} onClick={() => setTarget({ sources: [...sel], size: selBytes })}>
-                      <Trash2 className="size-3.5" /> {t("settings:storage.tree.purgeSelection")}
+                      <NetsuIcon name="trash" className="size-3.5" /> {t("settings:storage.tree.purgeSelection")}
                     </Button>
                   </div>
                 </div>
@@ -313,7 +313,7 @@ export function MediaCacheSection() {
           <DialogFooter>
             <Button variant="ghost" size="sm" onClick={() => setTarget(null)}>{t("settings:storage.confirm.cancel")}</Button>
             <Button variant="destructive" size="sm" onClick={() => void confirm()} disabled={purging}>
-              <Trash2 className="size-3.5" /> {purging ? t("settings:storage.confirm.purging") : t("settings:storage.confirm.confirm")}
+              <NetsuIcon name="trash" className="size-3.5" /> {purging ? t("settings:storage.confirm.purging") : t("settings:storage.confirm.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

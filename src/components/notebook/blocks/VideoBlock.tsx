@@ -6,8 +6,9 @@ import { useRef, useState, type DragEvent } from "react";
 import i18n from "@/i18n";
 import { createReactBlockSpec } from "@blocknote/react";
 import { defaultProps, type BlockNoteEditor } from "@blocknote/core";
-import { Video as VideoIcon, Play, Pause, Volume2, VolumeX, Maximize2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { ResizableMediaFrame } from "./ResizableMediaFrame";
 
 type Ed = BlockNoteEditor<any, any, any>;
@@ -75,7 +76,7 @@ export function VideoPlayer({ url, caption, width, trimStart = 0, trimEnd = 0, o
       {!playing && (
         <button type="button" onClick={toggle} className="absolute inset-0 flex items-center justify-center" aria-label={i18n.t("notebook:blocksUi.play")}>
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur transition-transform group-hover:scale-105">
-            <Play className="ml-0.5 h-6 w-6" />
+            <NetsuIcon name="play" className="ml-0.5 h-6 w-6" />
           </span>
         </button>
       )}
@@ -86,43 +87,35 @@ export function VideoPlayer({ url, caption, width, trimStart = 0, trimEnd = 0, o
         </div>
         <div className="pointer-events-auto flex items-center gap-2 text-white">
           <button type="button" onClick={toggle} className="hover:text-primary" aria-label={playing ? i18n.t("common:player.pause") : i18n.t("common:player.play")}>
-            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            <NetsuIcon name="play-pause" on={playing} className="h-4 w-4" />
           </button>
           <button type="button" onClick={toggleMute} className="hover:text-primary" aria-label={muted ? i18n.t("common:player.soundOn") : i18n.t("common:player.soundOff")}>
-            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            <NetsuIcon name="mute" on={muted} className="h-4 w-4" />
           </button>
           <span className="text-xs tabular-nums text-white/85">{fmt(cur)} / {fmt(outPoint || dur)}</span>
-          <button type="button" onClick={full} className="ml-auto hover:text-primary" aria-label={i18n.t("notebook:blocksUi.fullscreen")}><Maximize2 className="h-4 w-4" /></button>
+          <button type="button" onClick={full} className="ml-auto hover:text-primary" aria-label={i18n.t("notebook:blocksUi.fullscreen")}><NetsuIcon name="fullscreen" className="h-4 w-4" /></button>
         </div>
       </div>
       {dur > 0 && onTrim && (
         <div className="flex items-center gap-2 border-t border-white/10 bg-black/80 px-3 py-2 text-[10px] text-white/75">
-          <span className="w-6 font-semibold text-primary">IN</span>
-          <input
+          <span className="font-semibold text-primary">IN</span>
+          {/* One two-thumb slider: IN and OUT can't cross, and it matches the app's own sliders. */}
+          <Slider
             aria-label={i18n.t("notebook:a11y.inPoint")}
-            type="range"
             min={0}
-            max={Math.max(0, outPoint - 0.05)}
-            step={0.01}
-            value={inPoint}
-            onChange={(e) => {
-              const next = Number(e.target.value);
-              onTrim({ trimStart: next, trimEnd: trimEnd > 0 ? Math.max(next + 0.05, trimEnd) : 0 });
-              if (vid.current && vid.current.currentTime < next) vid.current.currentTime = next;
-            }}
-            className="min-w-0 flex-1 accent-primary"
-          />
-          <span className="w-6 font-semibold text-primary">OUT</span>
-          <input
-            aria-label={i18n.t("notebook:a11y.outPoint")}
-            type="range"
-            min={Math.min(dur, inPoint + 0.05)}
             max={dur}
             step={0.01}
-            value={outPoint || dur}
-            onChange={(e) => onTrim({ trimStart: inPoint, trimEnd: Number(e.target.value) })}
-            className="min-w-0 flex-1 accent-primary"
+            minStepsBetweenValues={5}
+            value={[inPoint, outPoint || dur]}
+            onValueChange={(v) => {
+              if (!Array.isArray(v)) return;
+              const [a, b] = v as number[];
+              onTrim({ trimStart: a, trimEnd: b });
+              if (vid.current && vid.current.currentTime < a) vid.current.currentTime = a;
+            }}
+            className="min-w-0 flex-1"
           />
+          <span className="font-semibold text-primary">OUT</span>
         </div>
       )}
       {caption && <div className="bg-black/20 px-3 py-1 text-xs text-white/70">{caption}</div>}
@@ -155,12 +148,12 @@ function VideoEmpty({ editor, block }: { editor: Ed; block: unknown }) {
       className={`my-1.5 flex flex-col gap-2 rounded-xl border border-dashed px-4 py-5 transition-colors ${over ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><VideoIcon className="h-4 w-4" /></span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="video" className="h-4 w-4" /></span>
         <Button size="sm" onClick={() => input.current?.click()}>{i18n.t("notebook:blocksUi.chooseVideo")}</Button>
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:blocksUi.dropFile")}</span>
         <input ref={input} type="file" accept="video/*" hidden onChange={(e) => void pick(e.target.files?.[0] || undefined)} />
       </div>
-      <input
+      <input autoComplete="off"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter" && /^https?:\/\//i.test(url.trim())) { e.preventDefault(); set(url.trim()); } }}

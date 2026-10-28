@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { siDiscord } from "simple-icons";
-import { WifiOff } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { BrandIcon } from "@/components/BrandIcon";
 import { BetaBadge } from "@/components/BetaBadge";
 import { Card } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export function LoginScreen({ offline = false, onSkip }: { offline?: boolean; on
 
         {offline && (
           <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
-            <WifiOff className="size-4 shrink-0" />
+            <NetsuIcon name="wifi-off" className="size-4 shrink-0" />
             <span>{t("login.offlineTooLong")}</span>
           </div>
         )}

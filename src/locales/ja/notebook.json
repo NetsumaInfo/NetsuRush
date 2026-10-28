@@ -625,7 +625,9 @@
     "bulletList": "箇条書き",
     "numberedList": "番号付きリスト",
     "checkList": "タスクリスト",
-    "quote": "引用"
+    "quote": "引用",
+    "callout": "コールアウト",
+    "codeBlock": "コードブロック"
   },
   "dbDefaults": {
     "titleField": "名前",
@@ -660,6 +662,22 @@
     "removeFilter": "フィルターを削除",
     "editOption": "オプションを編集",
     "removeTask": "タスクを削除",
-    "addTask": "タスクを追加"
+    "addTask": "タスクを追加",
+    "hour": "時",
+    "minute": "分"
+  },
+  "menu": {
+    "format": "書式",
+    "bold": "太字",
+    "italic": "斜体",
+    "underline": "下線",
+    "strike": "取り消し線",
+    "code": "コード",
+    "link": "リンク",
+    "linkNeedsUrl": "先にアドレスをコピーしてください",
+    "block": "ブロック",
+    "duplicate": "複製",
+    "moveUp": "上へ",
+    "moveDown": "下へ"
   }
 }

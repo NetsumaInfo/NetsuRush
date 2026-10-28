@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { X, MoveHorizontal, ZoomIn, RotateCcw, AlertTriangle } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -195,9 +195,9 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
       {!compact && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-            <span className="flex items-center gap-1"><MoveHorizontal className="h-3.5 w-3.5" /> {hasModelComparison ? t("compare.modelResults") : t("compare.beforeAfter")}</span>
+            <span className="flex items-center gap-1"><NetsuIcon name="compare" className="h-3.5 w-3.5" /> {hasModelComparison ? t("compare.modelResults") : t("compare.beforeAfter")}</span>
             <span>· {data.width}×{data.height}</span>
-            <span className="flex items-center gap-1"><ZoomIn className="h-3.5 w-3.5" /> {fmtFixed(scale, 1)}×</span>
+            <span className="flex items-center gap-1"><NetsuIcon name="zoom-in" className="h-3.5 w-3.5" /> {fmtFixed(scale, 1)}×</span>
           </span>
           {variants.length > 1 && (
             <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5">
@@ -205,7 +205,7 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
                 <SelectTrigger size="sm" className="min-w-32 max-w-52 flex-1" aria-label={t("compare.leftModel")}><SelectValue>{left.label}</SelectValue></SelectTrigger>
                 <SelectContent>{variants.map((v) => <SelectItem key={v.id} value={v.id}>{v.label}</SelectItem>)}</SelectContent>
               </Select>
-              <MoveHorizontal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <NetsuIcon name="compare" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <Select value={right.id} onValueChange={(v) => setRightId(String(v))}>
                 <SelectTrigger size="sm" className="min-w-32 max-w-52 flex-1" aria-label={t("compare.rightModel")}><SelectValue>{right.label}</SelectValue></SelectTrigger>
                 <SelectContent>{variants.map((v) => <SelectItem key={v.id} value={v.id}>{v.label}</SelectItem>)}</SelectContent>
@@ -213,8 +213,8 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
             </div>
           )}
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={reset}><RotateCcw className="h-4 w-4" /> {t("compare.reset")}</Button>
-            <Button variant="ghost" size="sm" onClick={onClose}><X className="h-4 w-4" /> {t("compare.close")}</Button>
+            <Button variant="ghost" size="sm" onClick={reset}><NetsuIcon name="reset-default" className="h-4 w-4" /> {t("compare.reset")}</Button>
+            <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="h-4 w-4" /> {t("compare.close")}</Button>
           </div>
         </div>
       )}
@@ -256,7 +256,7 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
         )}
         {imgErr && (
           <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/70 px-4 text-center text-xs text-white">
-            <AlertTriangle className="h-4 w-4" /> {t("compare.previewMissing")}
+            <NetsuIcon name="warning" className="h-4 w-4" /> {t("compare.previewMissing")}
           </div>
         )}
 
@@ -280,7 +280,7 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
                   />
                 }
               >
-                <RotateCcw className="h-3 w-3" />
+                <NetsuIcon name="reset-default" className="h-3 w-3" />
               </TooltipTrigger>
               <TooltipContent>{t("compare.reset")}</TooltipContent>
             </Tooltip>
@@ -297,7 +297,7 @@ export function UpscaleCompare({ data, onClose, compact }: { data: FrameCompare;
             onLostPointerCapture={onUp}
             className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full bg-white text-black shadow-lg"
           >
-            <MoveHorizontal className="h-4 w-4" />
+            <NetsuIcon name="compare" className="h-4 w-4" />
           </div>
         </div>
       </div>

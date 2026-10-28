@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Tag } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { type CollectionShot, type CollectionShotPatch } from "@/lib/bridge";
 import { Input } from "@/components/ui/input";
@@ -63,12 +63,12 @@ export function ShotInspector({ shot, suggestions, onPatch, onClose }: {
 
         {/* Tags */}
         <div className="flex min-w-[200px] flex-1 items-center gap-1.5">
-          <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="tag" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <div className="flex flex-wrap items-center gap-1">
             {tags.map((t) => (
               <span key={t} className="inline-flex items-center gap-1 rounded bg-accent px-1.5 py-0.5 text-[11px]">
                 {t}
-                <button type="button" aria-label={tr("tags.remove", { tag: t })} onClick={() => removeTag(t)} className="text-muted-foreground hover:text-destructive"><X className="h-2.5 w-2.5" /></button>
+                <button type="button" aria-label={tr("tags.remove", { tag: t })} onClick={() => removeTag(t)} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="h-2.5 w-2.5" /></button>
               </span>
             ))}
             <div className="relative">
@@ -86,7 +86,7 @@ export function ShotInspector({ shot, suggestions, onPatch, onClose }: {
           </div>
         </div>
 
-        <button type="button" onClick={onClose} aria-label={tr("inspector.close")} className="grid size-7 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"><X className="size-4" /></button>
+        <button type="button" onClick={onClose} aria-label={tr("inspector.close")} className="grid size-7 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"><NetsuIcon name="close" className="size-4" /></button>
       </div>
 
       {/* Annotation (ligne dédiée, discrète) */}

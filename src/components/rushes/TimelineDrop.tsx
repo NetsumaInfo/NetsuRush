@@ -1,4 +1,4 @@
-import { X, AlertTriangle, Check, CircleAlert } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
@@ -31,12 +31,12 @@ export function TimelineDrop() {
           tlNotice.kind === "ok" ? "border-[var(--color-ok)]/40 bg-card text-foreground"
             : tlNotice.kind === "warn" ? "border-[var(--color-warn)]/50 bg-card text-foreground"
             : "border-destructive/50 bg-card text-foreground"}`}>
-          {tlNotice.kind === "ok" ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-ok)]" />
-            : tlNotice.kind === "warn" ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-warn)]" />
-            : <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
+          {tlNotice.kind === "ok" ? <NetsuIcon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-ok)]" />
+            : tlNotice.kind === "warn" ? <NetsuIcon name="warning" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-warn)]" />
+            : <NetsuIcon name="error-badge" className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
           <span className="min-w-0 flex-1">{tlNotice.text}</span>
           <button type="button" aria-label={t("common:action.close")} onClick={dismiss} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent">
-            <X className="h-4 w-4" />
+            <NetsuIcon name="close" className="h-4 w-4" />
           </button>
         </div>
       )}

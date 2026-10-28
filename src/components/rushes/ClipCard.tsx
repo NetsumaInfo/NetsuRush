@@ -3,7 +3,9 @@
 // carte aurait fait diverger les deux au premier ajustement.
 import { memo, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Film, HardDriveDownload, Clapperboard, Scissors, CheckSquare, Folder, FolderInput, Trash2, Unlink } from "lucide-react";
+import { Film, HardDriveDownload, Unlink } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { cn } from "@/lib/utils";
 import { hoverLiftFlow } from "@/components/common/hoverLift";
 import { selectionRing, SelectCheck } from "@/components/common/selectable";
@@ -132,7 +134,7 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
                 aria-label={t("mediaTree.sendToTimeline")}
                 onClick={(e) => { e.stopPropagation(); setPicker(true); }}
                 className="absolute right-1.5 top-1.5 flex items-center rounded-md bg-black/75 p-1.5 text-white opacity-0 transition-all hover:bg-primary group-hover:opacity-100" />}>
-                <Clapperboard className="h-3.5 w-3.5" />
+                <SendToTimelineIcon className="h-3.5 w-3.5" />
               </TooltipTrigger>
               <TooltipContent>{t("mediaTree.sendToTimeline")}</TooltipContent>
             </Tooltip>
@@ -156,17 +158,17 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
         </ContextMenuTrigger>
         {/* Clic droit : mêmes actions que la carte (ouvrir / choisir / (dé)sélectionner / timeline). */}
         <ContextMenuContent className="min-w-48">
-          {!picking && <ContextMenuItem onClick={() => open(clip)}><Scissors /> {t("mediaTree.openInDerush")}</ContextMenuItem>}
-          {onPick && <ContextMenuItem onClick={() => onPick(clip)}><CheckSquare /> {t("mediaTree.pickRush")}</ContextMenuItem>}
+          {!picking && <ContextMenuItem onClick={() => open(clip)}><NetsuIcon name="scissors" /> {t("mediaTree.openInDerush")}</ContextMenuItem>}
+          {onPick && <ContextMenuItem onClick={() => onPick(clip)}><NetsuIcon name="checkbox-on" /> {t("mediaTree.pickRush")}</ContextMenuItem>}
           {onToggle && (
             <ContextMenuItem onClick={() => onToggle(clip)}>
-              <CheckSquare /> {selected ? t("shared.deselect") : t("shared.select")}
+              <NetsuIcon name="cut-select" on={selected} /> {selected ? t("shared.deselect") : t("shared.select")}
             </ContextMenuItem>
           )}
           {canSend && (
             <>
               <ContextMenuSeparator />
-              <ContextMenuItem onClick={() => setPicker(true)}><Clapperboard /> {t("mediaTree.sendToTimeline")}</ContextMenuItem>
+              <ContextMenuItem onClick={() => setPicker(true)}><SendToTimelineIcon /> {t("mediaTree.sendToTimeline")}</ContextMenuItem>
             </>
           )}
           {isLib && (
@@ -176,11 +178,11 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
                   le projet à l'import, mais on garde la passerelle à la demande. */}
               {connected && (
                 <ContextMenuItem onClick={() => void hostImport(activeHost, [clip.path])}>
-                  <HardDriveDownload /> {t("library.addToPool")}
+                  <NetsuIcon name="cut-import" /> {t("library.addToPool")}
                 </ContextMenuItem>
               )}
               <ContextMenuSub>
-                <ContextMenuSubTrigger><FolderInput /> {t("library.moveTo")}</ContextMenuSubTrigger>
+                <ContextMenuSubTrigger><NetsuIcon name="cut-move-to-folder" /> {t("library.moveTo")}</ContextMenuSubTrigger>
                 <ContextMenuSubContent>
                   {/* Label DANS un Group : Base UI le rattache au contexte de groupe, sinon il jette
                       (« MenuGroupContext is missing ») et le sous-menu ne s'ouvre pas. */}
@@ -191,7 +193,7 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
                     </ContextMenuItem>
                     {folderOpts.map((f) => (
                       <ContextMenuItem key={f.id} disabled={item!.folderId === f.id} onClick={() => void moveLibraryItem(item!.id, f.id)}>
-                        <Folder className="size-3.5" /> {f.label}
+                        <NetsuIcon name="folder-open" className="size-3.5" /> {f.label}
                       </ContextMenuItem>
                     ))}
                   </ContextMenuGroup>
@@ -203,7 +205,7 @@ function ClipCardImpl({ clip, onPick, onToggle, selectedPath, selectedPaths }: C
                 variant="destructive"
                 onClick={() => void (bulk ? removeLibraryItems(bulkIds) : removeLibraryItem(item!.id))}
               >
-                <Trash2 /> {bulk ? t("library.removeManyFromLibrary", { count: bulkIds.length }) : t("library.removeFromLibrary")}
+                <NetsuIcon name="cut-delete" /> {bulk ? t("library.removeManyFromLibrary", { count: bulkIds.length }) : t("library.removeFromLibrary")}
               </ContextMenuItem>
             </>
           )}

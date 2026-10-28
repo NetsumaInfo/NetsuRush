@@ -5,7 +5,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { XIcon } from "lucide-react"
+import { NetsuIcon } from "@/components/ui/netsu-icon"
 import { useTranslation } from "react-i18next"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
@@ -78,8 +78,7 @@ function DialogContent({
               />
             }
           >
-            <XIcon
-            />
+            <NetsuIcon name="close" className="size-4" />
             <span className="sr-only">{t("action.close")}</span>
           </DialogPrimitive.Close>
         )}

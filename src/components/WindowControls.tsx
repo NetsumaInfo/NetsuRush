@@ -2,9 +2,10 @@
 // `decorations: false` : on redessine donc les contrôles. `data-no-drag` les exclut de la région
 // non-client WebView2 utilisée par la barre de titre.
 
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { CloseGlyph, MaximizeGlyph, MinimizeGlyph, RestoreGlyph } from "@/components/ui/window-glyphs";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Minus, Square, X, Copy, Pin } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { UpdateButton } from "@/components/updates/UpdateButton";
@@ -13,7 +14,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 // Mise en forme d'un bouton de la barre de titre. Exportée : `HeaderLinks` pose les siens à côté
 // des contrôles de fenêtre, et deux styles voisins qui divergent se voient tout de suite.
 export const TITLEBAR_BTN =
-  "inline-flex h-9 w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset [&_svg]:size-3.5";
+  "group inline-flex h-9 w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset [&_svg]:size-3.5";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -55,7 +56,7 @@ export function WindowControls() {
             className={`${btn} ${pinned ? "text-primary hover:text-primary" : ""}`}
             onClick={togglePinned}
           >
-            <Pin className={pinned ? "fill-current" : ""} />
+            <NetsuIcon name="window-pin" on={pinned} />
           </button>
         } />
         <TooltipContent>{pinned ? t("windowControls.unpinShort") : t("windowControls.pinAbove")}</TooltipContent>
@@ -63,7 +64,7 @@ export function WindowControls() {
       <Tooltip>
         <TooltipTrigger render={
           <button type="button" aria-label={t("windowControls.minimize")} className={btn} onClick={() => void win().then((w) => w.minimize()).catch(() => undefined)}>
-            <Minus />
+            <MinimizeGlyph />
           </button>
         } />
         <TooltipContent>{t("windowControls.minimize")}</TooltipContent>
@@ -71,7 +72,7 @@ export function WindowControls() {
       <Tooltip>
         <TooltipTrigger render={
           <button type="button" aria-label={maxed ? t("windowControls.restore") : t("windowControls.maximize")} className={btn} onClick={() => void win().then((w) => w.toggleMaximize()).catch(() => undefined)}>
-            {maxed ? <Copy className="-scale-x-100" /> : <Square />}
+            {maxed ? <RestoreGlyph /> : <MaximizeGlyph />}
           </button>
         } />
         <TooltipContent>{maxed ? t("windowControls.restore") : t("windowControls.maximize")}</TooltipContent>
@@ -79,7 +80,7 @@ export function WindowControls() {
       <Tooltip>
         <TooltipTrigger render={
           <button type="button" aria-label={t("common:action.close")} className={`${btn} hover:bg-destructive hover:text-primary-foreground`} onClick={() => void win().then((w) => w.close()).catch(() => undefined)}>
-            <X />
+            <CloseGlyph />
           </button>
         } />
         <TooltipContent>{t("common:action.close")}</TooltipContent>

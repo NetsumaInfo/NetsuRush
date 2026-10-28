@@ -2,7 +2,7 @@
 // Présentationnel : reçoit les métadonnées déjà résolues + une disposition. SOURCE UNIQUE du « beau
 // look » de carte, pour un rendu cohérent partout.
 import { useEffect, useState, type ReactNode } from "react";
-import { Link2, ExternalLink, Copy } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { nr } from "@/lib/bridge";
 import i18n from "@/i18n";
@@ -18,11 +18,11 @@ function Actions({ url }: { url: string }) {
   return (
     <>
       <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><Copy className="h-3.5 w-3.5" /></button>} />
+        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="h-3.5 w-3.5" /></button>} />
         <TooltipContent>{i18n.t("notebook:finalPass.copyLink")}</TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><ExternalLink className="h-3.5 w-3.5" /></button>} />
+        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="h-3.5 w-3.5" /></button>} />
         <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
       </Tooltip>
     </>
@@ -34,7 +34,7 @@ function Favicon({ src }: { src?: string }) {
   useEffect(() => setFailed(false), [src]);
   return src && !failed
     ? <img src={src} alt="" onError={() => setFailed(true)} className="h-4 w-4 rounded-sm" draggable={false} referrerPolicy="no-referrer" />
-    : <Link2 className="h-4 w-4 text-muted-foreground" />;
+    : <NetsuIcon name="link" className="h-4 w-4 text-muted-foreground" />;
 }
 
 export function PreviewImage({ src, className }: { src?: string; className: string }) {

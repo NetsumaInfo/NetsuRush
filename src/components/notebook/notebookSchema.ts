@@ -5,7 +5,8 @@ import { createElement } from "react";
 import i18n from "@/i18n";
 import { BlockNoteSchema, defaultBlockSpecs, defaultInlineContentSpecs, type BlockNoteEditor } from "@blocknote/core";
 import type { DefaultReactSuggestionItem } from "@blocknote/react";
-import { MessageSquareQuote, ChevronRight, Table, Youtube, Globe, Link2, CalendarDays, Images, Video, Paperclip, FilePlus2, Sigma, Minus, Music } from "lucide-react";
+import { Youtube } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { calloutSpec } from "./blocks/CalloutBlock";
 import { toggleSpec } from "./blocks/ToggleBlock";
 import { databaseSpec } from "./blocks/DatabaseBlock";
@@ -70,7 +71,7 @@ export function noteSlashItems(
   return [
     {
       title: tr("subpage.title"), subtext: tr("subpage.desc"), aliases: aliases("subpage"), group: tr("groups.blocks"),
-      icon: createElement(FilePlus2, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "file-plus", className: "h-[18px] w-[18px]" }),
       onItemClick: () => {
         void onCreateSubpage().then((id) => {
           if (id) insertOrUpdate(editor, { type: "subpage", props: { pageId: id } });
@@ -79,17 +80,17 @@ export function noteSlashItems(
     },
     {
       title: tr("callout.title"), subtext: tr("callout.desc"), aliases: aliases("callout"), group: tr("groups.blocks"),
-      icon: createElement(MessageSquareQuote, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "callout", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "callout", props: { color: "blue", emoji: "💡" } }),
     },
     {
       title: tr("toggle.title"), subtext: tr("toggle.desc"), aliases: aliases("toggle"), group: tr("groups.blocks"),
-      icon: createElement(ChevronRight, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "toggle-block", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "toggle", props: { open: true } }),
     },
     {
       title: tr("database.title"), subtext: tr("database.desc"), aliases: aliases("database"), group: tr("groups.blocks"),
-      icon: createElement(Table, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "table", className: "size-[18px]" }),
       onItemClick: () => {
         const dbId = onInsertDatabase();
         insertOrUpdate(editor, { type: "database", props: { dbId } });
@@ -97,12 +98,12 @@ export function noteSlashItems(
     },
     {
       title: tr("equation.title"), subtext: tr("equation.desc"), aliases: aliases("equation"), group: tr("groups.blocks"),
-      icon: createElement(Sigma, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "equation", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "equation", props: { tex: "" } }),
     },
     {
       title: tr("divider.title"), subtext: tr("divider.desc"), aliases: aliases("divider"), group: tr("groups.blocks"),
-      icon: createElement(Minus, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "divider", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "divider", props: { style: "line" } }),
     },
     {
@@ -112,37 +113,37 @@ export function noteSlashItems(
     },
     {
       title: tr("embed.title"), subtext: "Vimeo, X, TikTok, Twitch…", aliases: aliases("embed"), group: tr("groups.media"),
-      icon: createElement(Globe, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "web", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "embed", props: { url: "" } }),
     },
     {
       title: tr("bookmark.title"), subtext: tr("bookmark.desc"), aliases: aliases("bookmark"), group: tr("groups.media"),
-      icon: createElement(Link2, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "bookmark", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "bookmark", props: { url: "" } }),
     },
     {
       title: tr("video.title"), subtext: tr("video.desc"), aliases: aliases("video"), group: tr("groups.media"),
-      icon: createElement(Video, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "video", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "video", props: { url: "" } }),
     },
     {
       title: "Audio", subtext: tr("audio.desc"), aliases: aliases("audio"), group: tr("groups.media"),
-      icon: createElement(Music, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "music", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "audio", props: { url: "" } }),
     },
     {
       title: tr("file.title"), subtext: tr("file.desc"), aliases: aliases("file"), group: tr("groups.media"),
-      icon: createElement(Paperclip, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "attach-file", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "file", props: { url: "" } }),
     },
     {
       title: tr("gallery.title"), subtext: tr("gallery.desc"), aliases: aliases("gallery"), group: tr("groups.media"),
-      icon: createElement(Images, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "gallery", className: "size-[18px]" }),
       onItemClick: () => insertOrUpdate(editor, { type: "gallery", props: { urls: "[]" } }),
     },
     {
       title: tr("date.title"), subtext: tr("date.desc"), aliases: aliases("date"), group: tr("groups.insert"),
-      icon: createElement(CalendarDays, { size: 18 }),
+      icon: createElement(NetsuIcon, { name: "calendar", className: "size-[18px]" }),
       onItemClick: () => editor.insertInlineContent([{ type: "dateMention", props: { date: todayIso() } }, " "] as never),
     },
   ];

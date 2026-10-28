@@ -32,10 +32,6 @@
   "menu": {
     "derush": "Sichtung",
     "chat": "Chat",
-    "edit": "Bearbeiten",
-    "cut": "Ausschneiden",
-    "paste": "Einfügen",
-    "selectAll": "Alles auswählen",
     "derushHome": "Sichtung – Start",
     "reloadRushes": "Rohmaterial neu laden",
     "cutTimeline": "Timeline schneiden",

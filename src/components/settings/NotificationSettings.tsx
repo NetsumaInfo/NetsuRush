@@ -5,7 +5,7 @@
 //   • l'invite qui propose de fermer le logiciel de montage pendant une tâche lourde, puis de le
 //     rouvrir. Rien ici ne retire une capacité : fermer et rouvrir restent dans le menu du voyant de
 //     la barre latérale, quoi qu'on coupe.
-import { RotateCcw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ export function NotificationSettings() {
       <header className="flex items-center justify-between gap-4">
         <SectionTitle title={t("notifications.title")} info={t("notifications.subtitle")} />
         <Button variant="outline" size="sm" onClick={() => { resetNotify(); resetPower(); }}>
-          <RotateCcw className="size-3.5" /> {t("notifications.reset")}
+          <NetsuIcon name="reset-default" className="size-3.5" /> {t("notifications.reset")}
         </Button>
       </header>
 

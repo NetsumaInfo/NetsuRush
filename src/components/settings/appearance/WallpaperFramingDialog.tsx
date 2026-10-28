@@ -12,7 +12,7 @@
 // tout le fond de l'application derrière la fenêtre à chaque pixel de glissement.
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlipHorizontal, FlipVertical, RotateCcw, RotateCw, Undo2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NumberSpin } from "@/components/ui/number-spin";
@@ -219,13 +219,13 @@ export function WallpaperFramingDialog({ open, onOpenChange, config, media, onCh
           <div className="flex flex-col gap-2">
             <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{label("transform")}</span>
             <div className="flex flex-wrap gap-1.5">
-              <IconAction label={label("rotateLeft")} onClick={() => turn(-1)}><RotateCcw className="size-4" /></IconAction>
-              <IconAction label={label("rotateRight")} onClick={() => turn(1)}><RotateCw className="size-4" /></IconAction>
+              <IconAction label={label("rotateLeft")} onClick={() => turn(-1)}><NetsuIcon name="undo" className="size-4" /></IconAction>
+              <IconAction label={label("rotateRight")} onClick={() => turn(1)}><NetsuIcon name="restart" className="size-4" /></IconAction>
               <IconAction label={label("flipH")} pressed={draft.flipH} onClick={() => setDraft((d) => ({ ...d, flipH: !d.flipH }))}>
-                <FlipHorizontal className="size-4" />
+                <NetsuIcon name="flip-h" className="size-4" />
               </IconAction>
               <IconAction label={label("flipV")} pressed={draft.flipV} onClick={() => setDraft((d) => ({ ...d, flipV: !d.flipV }))}>
-                <FlipVertical className="size-4" />
+                <NetsuIcon name="flip-v" className="size-4" />
               </IconAction>
             </div>
           </div>
@@ -237,7 +237,7 @@ export function WallpaperFramingDialog({ open, onOpenChange, config, media, onCh
             variant="ghost"
             onClick={() => setDraft((d) => ({ ...d, crop: FULL_CROP, rotate: 0, flipH: false, flipV: false }))}
           >
-            <Undo2 className="size-3.5" /> {label("resetFraming")}
+            <NetsuIcon name="undo" className="size-3.5" /> {label("resetFraming")}
           </Button>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>{t("common:action.cancel")}</Button>

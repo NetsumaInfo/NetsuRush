@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowUp } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 // Bouton flottant « remonter en haut » : localise l'ancêtre scrollable (le <main> de l'app),
@@ -34,7 +34,7 @@ export function ScrollTopButton({ threshold = 600 }: { threshold?: number }) {
             aria-label={t("scrollTop")}
             onClick={() => scrollerRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
             className="fixed bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary animate-in fade-in-0 zoom-in-98 duration-200" />}>
-            <ArrowUp className="h-4 w-4" />
+            <NetsuIcon name="move-up" className="h-4 w-4" />
           </TooltipTrigger>
           <TooltipContent>{t("scrollTop")}</TooltipContent>
         </Tooltip>

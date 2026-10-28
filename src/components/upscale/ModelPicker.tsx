@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Download } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -94,7 +94,7 @@ export function ModelsCta({ label, disabled }: { label?: string; disabled?: bool
     <div className="space-y-1.5 rounded-md border border-dashed border-border p-2">
       {label && <p className="text-[11px] leading-snug text-muted-foreground">{label}</p>}
       <Button variant="outline" size="sm" className="w-full" onClick={openModelsPage} disabled={disabled}>
-        <Download className="h-3.5 w-3.5" /> {t("modelPicker.download")}
+        <NetsuIcon name="download" className="h-3.5 w-3.5" /> {t("modelPicker.download")}
       </Button>
     </div>
   );
@@ -152,13 +152,13 @@ export function ModelPicker({ items, value, onChange, disabled, className, empty
           ))}
           <SelectSeparator />
           <SelectItem value={MORE} className="text-muted-foreground">
-            <span className="flex items-center gap-2"><Download className="h-3.5 w-3.5" /> {t("modelPicker.more")}</span>
+            <span className="flex items-center gap-2"><NetsuIcon name="download" className="h-3.5 w-3.5" /> {t("modelPicker.more")}</span>
           </SelectItem>
         </SelectContent>
       </Select>
       {missing && (
         <button type="button" onClick={openModelsPage} className="flex w-full items-center gap-1 text-left text-[11px] text-muted-foreground hover:text-foreground">
-          <AlertTriangle className="size-3 shrink-0 text-[var(--color-warn)]" />
+          <NetsuIcon name="warning" className="size-3 shrink-0 text-[var(--color-warn)]" />
           <span>{t("modelPicker.required")}</span>
           <span className="ml-auto shrink-0 underline underline-offset-2">{t("modelPicker.settings")}</span>
         </button>

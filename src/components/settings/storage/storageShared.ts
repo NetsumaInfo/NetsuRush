@@ -1,27 +1,23 @@
 // Vocabulaire partagé de Paramètres › Stockage : icône et famille de chaque type de cache.
 // `fmtBytes` vient d'optimizeShared — même problème, même formateur (pas de second exemplaire).
-import { Image, Film, AudioLines, FlaskConical, Lasso, Scissors, Captions, Sparkles, Images, SmilePlus } from "lucide-react";
-import type { ComponentType, CSSProperties } from "react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { CACHE_KIND_LIST, type CacheKind } from "@/lib/bridge";
-
-/** Signature commune des icônes lucide employées ici : `style` sert à teinter par type (KIND_TINT). */
-type IconCmp = ComponentType<{ className?: string; style?: CSSProperties }>;
 
 export { fmtBytes } from "@/components/optimize/optimizeShared";
 export { CACHE_KIND_LIST };
 export type { CacheKind };
 
-export const KIND_ICON: Record<CacheKind, IconCmp> = {
-  thumb: Image,
-  proxy: Film,
-  voice: AudioLines,
-  upscaleTest: FlaskConical,
-  roto: Lasso,
-  scenes: Scissors,
-  transcripts: Captions,
-  embeddings: Sparkles,
-  indexThumbs: Images,
-  faces: SmilePlus,
+export const KIND_ICON: Record<CacheKind, IconComponent> = {
+  thumb: netsuIconOf("image"),
+  proxy: netsuIconOf("film"),
+  voice: netsuIconOf("audio-wave"),
+  upscaleTest: netsuIconOf("flask"),
+  roto: netsuIconOf("lasso"),
+  scenes: netsuIconOf("scissors"),
+  transcripts: netsuIconOf("captions"),
+  embeddings: netsuIconOf("sparkles"),
+  indexThumbs: netsuIconOf("gallery"),
+  faces: netsuIconOf("face"),
 };
 
 /** Types stockés en base plutôt qu'en fichiers. Ils n'ont pas de suivi d'usage par entrée → pas

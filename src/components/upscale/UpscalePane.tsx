@@ -2,9 +2,8 @@
 // collection, transfert NetsuBridge). Les réglages sont ceux de NetsuLab, sans copie : c'est le
 // MÊME `UpscaleModelSettings`. Ce fichier n'ajoute que l'emballage — interrupteur, résumé du volet
 // fermé, pliage — parce que la dizaine de réglages dépliés noierait le reste du panneau.
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Toggle } from "@/components/ui/toggle";
 import { UpscaleModelSettings } from "./UpscaleModelSettings";
 import { DEFAULT_SETTINGS, RESTORE_MODELS, SHADER_MODELS, UP_MODELS, isRtxShader, type UpSettings } from "./upscaleShared";
@@ -36,7 +35,7 @@ export function SettingsPane({
         </button>
         {control}
         <button type="button" aria-hidden tabIndex={-1} onClick={onToggle} className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
-          <ChevronRight className={cn("size-3.5 transition-transform", open && "rotate-90")} />
+          <NetsuIcon name="chevron-toggle" on={open} className="size-3.5" />
         </button>
       </div>
       {open && <div className="space-y-2.5 border-t border-border/70 px-2.5 py-2.5">{children}</div>}

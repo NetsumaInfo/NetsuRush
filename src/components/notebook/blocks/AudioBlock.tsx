@@ -7,7 +7,7 @@ import { useMemo, useRef, useState, type DragEvent, type PointerEvent as RPointe
 import i18n from "@/i18n";
 import { createReactBlockSpec } from "@blocknote/react";
 import { defaultProps, type BlockNoteEditor } from "@blocknote/core";
-import { Music, Play, Pause, Gauge } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { VolumeSlider } from "@/components/player/VolumeSlider";
@@ -94,12 +94,12 @@ function AudioPlayer({ url, name }: { url: string; name?: string }) {
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
         aria-label={playing ? i18n.t("common:player.pause") : i18n.t("common:player.play")}
       >
-        {playing ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
+        <NetsuIcon name="play-pause" on={playing} className="h-4 w-4" />
       </button>
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
-          <Music className="h-3 w-3 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="music" className="h-3 w-3 shrink-0 text-muted-foreground" />
           <span className="truncate text-xs font-medium text-foreground">{label}</span>
         </div>
         {/* Forme d'onde cliquable/scrubable : barres, portion lue teintée en primary */}
@@ -125,7 +125,7 @@ function AudioPlayer({ url, name }: { url: string; name?: string }) {
         <span className="text-xs tabular-nums text-muted-foreground">{fmt(cur)} / {fmt(dur)}</span>
         <div className="flex items-center gap-1.5">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={cycleSpeed} className="flex w-14 shrink-0 items-center justify-center gap-1 rounded px-1 py-0.5 text-[11px] whitespace-nowrap tabular-nums text-muted-foreground hover:bg-muted hover:text-foreground"><Gauge className="h-3 w-3 shrink-0" />{speed}×</button>} />
+            <TooltipTrigger render={<button type="button" onClick={cycleSpeed} className="flex w-14 shrink-0 items-center justify-center gap-1 rounded px-1 py-0.5 text-[11px] whitespace-nowrap tabular-nums text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="gauge" className="h-3 w-3 shrink-0" />{speed}×</button>} />
             <TooltipContent>{i18n.t("notebook:blocksUi.playbackSpeed")}</TooltipContent>
           </Tooltip>
           {/* Volume ANCRÉ dans la barre (toujours visible, pas de popup) : même curseur que les lecteurs. */}
@@ -167,12 +167,12 @@ function AudioEmpty({ editor, block }: { editor: Ed; block: unknown }) {
       className={`my-1.5 flex flex-col gap-2 rounded-xl border border-dashed px-4 py-5 transition-colors ${over ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><Music className="h-4 w-4" /></span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="music" className="h-4 w-4" /></span>
         <Button size="sm" onClick={() => input.current?.click()}>{i18n.t("notebook:blocksUi.chooseAudio")}</Button>
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:blocksUi.audioDrop")}</span>
         <input ref={input} type="file" accept="audio/*" hidden onChange={(e) => void pick(e.target.files?.[0] || undefined)} />
       </div>
-      <input
+      <input autoComplete="off"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter" && /^https?:\/\//i.test(url.trim())) { e.preventDefault(); set(url.trim()); } }}

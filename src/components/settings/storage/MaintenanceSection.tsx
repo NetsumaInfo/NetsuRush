@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import { Database, FileQuestion, Minimize2, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useApp } from "@/store";
@@ -27,7 +27,7 @@ function DbBlock() {
   return (
     <div className="rounded-lg border border-border p-3">
       <div className="flex items-center gap-3">
-        <Database className="size-4 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="database" className="size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <p className="text-xs text-foreground">{t("storage.db.title")}</p>
           <Tooltip>
@@ -40,7 +40,7 @@ function DbBlock() {
         </div>
         <Tooltip>
           <TooltipTrigger render={<Button variant="outline" size="sm" onClick={() => void run()} disabled={!db.available || !!busy} />}>
-            <Minimize2 className="size-3.5" /> {t("storage.db.vacuum")}
+            <NetsuIcon name="storage-compact" className="size-3.5" /> {t("storage.db.vacuum")}
           </TooltipTrigger>
           <TooltipContent className="max-w-64">{t("storage.db.vacuumHint")}</TooltipContent>
         </Tooltip>
@@ -65,7 +65,7 @@ function MissingBlock() {
   return (
     <div className="rounded-lg border border-border p-3">
       <div className="flex items-center gap-3">
-        <FileQuestion className="size-4 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="file-question" className="size-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-xs text-foreground">
             {t("storage.missing.title")}
@@ -88,7 +88,7 @@ function MissingBlock() {
             }}
             onBlur={() => setConfirm(false)}
           >
-            <Trash2 className="size-3.5" /> {confirm ? t("storage.confirm.confirm") : t("storage.missing.purge")}
+            <NetsuIcon name="trash" className="size-3.5" /> {confirm ? t("storage.confirm.confirm") : t("storage.missing.purge")}
           </Button>
         )}
       </div>

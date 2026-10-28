@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { THEMES, type ThemeId, type ThemeMode } from "@/store/types";
@@ -45,7 +45,7 @@ function ThemeCard({ id, label }: { id: ThemeId; label: string }) {
     >
       <div className="flex w-full items-center justify-between gap-2">
         <span className="truncate text-sm font-medium">{t(`appearance.theme.${id}.label`, { defaultValue: label })}</span>
-        {active && <Check className="size-4 shrink-0 text-primary" />}
+        {active && <NetsuIcon name="check" className="size-4 shrink-0 text-primary" />}
       </div>
       <Swatch theme={id} />
     </button>

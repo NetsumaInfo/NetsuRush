@@ -1,7 +1,7 @@
 "use client"
 
 import { Toast as ToastPrimitive } from "@base-ui/react/toast"
-import { CheckIcon, CircleAlertIcon, InfoIcon, XIcon } from "lucide-react"
+import { NetsuIcon } from "@/components/ui/netsu-icon"
 import { useTranslation } from "react-i18next"
 
 import { notifyDurations } from "@/lib/notifySettings"
@@ -71,7 +71,7 @@ export const toast = {
   close: (id?: string) => manager.close(id),
 }
 
-const ICON: Record<Tone, typeof CheckIcon> = { ok: CheckIcon, error: CircleAlertIcon, info: InfoIcon, task: InfoIcon }
+const ICON: Record<Tone, string> = { ok: "status-ok", error: "warning", info: "info", task: "info" }
 const TONE_CLASS: Record<Tone, string> = {
   ok: "text-[var(--color-ok)]",
   error: "text-destructive",
@@ -102,7 +102,7 @@ function ToastList() {
     >
       {toasts.map((item) => {
         const tone: Tone = item.type === "error" || item.type === "info" || item.type === "task" ? item.type : "ok"
-        const Icon = ICON[tone]
+        const iconName = ICON[tone]
         // Progression d'une tâche en cours. `null` = on ne sait pas encore mesurer (montage d'une
         // timeline, choix du dossier) : le rouet suffit, une barre à zéro ferait croire à un blocage.
         const progress = tone === "task" ? (item.data as { progress?: number | null } | undefined)?.progress ?? null : null
@@ -125,7 +125,7 @@ function ToastList() {
           >
             {tone === "task"
               ? <Spinner className="mt-0.5 size-3.5 shrink-0 text-primary" />
-              : <Icon className={cn("mt-0.5 size-3.5 shrink-0", TONE_CLASS[tone])} />}
+              : <NetsuIcon name={iconName} className={cn("mt-0.5 size-3.5", TONE_CLASS[tone])} />}
             <div className="min-w-0 flex-1">
               <ToastPrimitive.Title className="min-w-0 select-text break-words py-0.5 leading-snug text-foreground" />
               {progress != null && progress > 0 && (
@@ -139,7 +139,7 @@ function ToastList() {
               aria-label={t("action.close")}
               className="mt-px shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
-              <XIcon className="size-3" />
+              <NetsuIcon name="close" className="size-3" />
             </ToastPrimitive.Close>
           </ToastPrimitive.Root>
         )

@@ -20,7 +20,11 @@
     "import": "导入",
     "decrease": "减少",
     "increase": "增加",
-    "loading": "加载中…"
+    "loading": "加载中…",
+    "cut": "剪切",
+    "paste": "粘贴",
+    "selectAll": "全选",
+    "pastePlain": "粘贴为纯文本"
   },
   "status": {
     "loading": "加载中…",

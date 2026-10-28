@@ -11,17 +11,18 @@ import {
 import { useApp } from "@/store";
 import { NBPAGE_LINK_PREFIX } from "./notebookShared";
 import i18n from "@/i18n";
-import { CheckSquare2, Heading1, Heading2, Heading3, List, ListOrdered, Pilcrow, Quote, Replace, type LucideIcon } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 
-const BLOCK_TYPES: { key: string; type: string; props?: Record<string, boolean | number | string>; icon: LucideIcon }[] = [
-  { key: "paragraph", type: "paragraph", icon: Pilcrow },
-  { key: "heading1", type: "heading", props: { level: 1, isToggleable: false }, icon: Heading1 },
-  { key: "heading2", type: "heading", props: { level: 2, isToggleable: false }, icon: Heading2 },
-  { key: "heading3", type: "heading", props: { level: 3, isToggleable: false }, icon: Heading3 },
-  { key: "bulletList", type: "bulletListItem", icon: List },
-  { key: "numberedList", type: "numberedListItem", icon: ListOrdered },
-  { key: "checkList", type: "checkListItem", icon: CheckSquare2 },
-  { key: "quote", type: "quote", icon: Quote },
+export const BLOCK_TYPES: { key: string; type: string; props?: Record<string, boolean | number | string>; icon: IconComponent }[] = [
+  { key: "paragraph", type: "paragraph", icon: netsuIconOf("paragraph") },
+  { key: "heading1", type: "heading", props: { level: 1, isToggleable: false }, icon: netsuIconOf("heading-1") },
+  { key: "heading2", type: "heading", props: { level: 2, isToggleable: false }, icon: netsuIconOf("heading-2") },
+  { key: "heading3", type: "heading", props: { level: 3, isToggleable: false }, icon: netsuIconOf("heading-3") },
+  { key: "bulletList", type: "bulletListItem", icon: netsuIconOf("bullet-list") },
+  { key: "numberedList", type: "numberedListItem", icon: netsuIconOf("numbered-list") },
+  { key: "checkList", type: "checkListItem", icon: netsuIconOf("task-list") },
+  { key: "quote", type: "quote", icon: netsuIconOf("quote") },
 ];
 
 function ChangeBlockTypeItem() {
@@ -43,7 +44,7 @@ function ChangeBlockTypeItem() {
   return (
     <Components.Generic.Menu.Root position="right" sub>
       <Components.Generic.Menu.Trigger sub>
-        <Components.Generic.Menu.Item className="bn-menu-item" subTrigger icon={<Replace className="h-4 w-4" />}>
+        <Components.Generic.Menu.Item className="bn-menu-item" subTrigger icon={<NetsuIcon name="change-type" className="h-4 w-4" />}>
           {i18n.t("notebook:sideMenu.changeType")}
         </Components.Generic.Menu.Item>
       </Components.Generic.Menu.Trigger>

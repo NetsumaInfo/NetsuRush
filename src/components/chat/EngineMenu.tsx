@@ -16,10 +16,8 @@
 // Les modèles ne sont plus écrits ici : ils viennent du core, qui les demande
 // au fournisseur. La liste tapée à la main avait pris une génération de retard.
 import { useEffect, useMemo, useState } from "react";
-import {
-  Bot, Sparkles, Globe, Terminal, ChevronDown, ChevronLeft, Eye, Hand, ShieldAlert, Zap,
-  RefreshCw,
-} from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { buildEngines, toEngineId, type Engine } from "@/lib/agentCatalog";
@@ -40,10 +38,10 @@ import {
 // coup d'œil. Il y en avait quatre ; le quatrième dupliquait la timeline avant
 // d'écrire, ce qui est un souhait distinct de « combien l'agent demande » — il
 // est devenu la case du bas.
-const MODES: { id: ChatPermMode; icon: typeof Eye; tone?: string }[] = [
-  { id: "read-only", icon: Eye },
-  { id: "ask", icon: Hand },
-  { id: "auto", icon: ShieldAlert, tone: "text-destructive" },
+const MODES: { id: ChatPermMode; icon: IconComponent; tone?: string }[] = [
+  { id: "read-only", icon: netsuIconOf("eye") },
+  { id: "ask", icon: netsuIconOf("hand") },
+  { id: "auto", icon: netsuIconOf("shield-alert"), tone: "text-destructive" },
 ];
 
 // Modèle abrégé (claude-opus-5 → opus-5 ; anthropic/claude-opus-5 → claude-opus-5).
@@ -53,12 +51,12 @@ const shortModel = (m: string, fallback: string) => {
 };
 
 function EngineIcon({ engine, className }: { engine: Engine | undefined; className?: string }) {
-  if (!engine) return <Bot className={className} />;
-  if (engine.kind === "cli") return <Terminal className={className} />;
-  if (engine.id === "api:openai") return <Sparkles className={className} />;
-  if (engine.id === "api:openrouter") return <Globe className={className} />;
-  if (engine.id === "api:xai") return <Zap className={className} />;
-  return <Bot className={className} />;
+  if (!engine) return <NetsuIcon name="bot" className={className} />;
+  if (engine.kind === "cli") return <NetsuIcon name="console" className={className} />;
+  if (engine.id === "api:openai") return <NetsuIcon name="sparkles" className={className} />;
+  if (engine.id === "api:openrouter") return <NetsuIcon name="web" className={className} />;
+  if (engine.id === "api:xai") return <NetsuIcon name="zap" className={className} />;
+  return <NetsuIcon name="bot" className={className} />;
 }
 
 /// Déclencheur commun aux trois socles, pour qu'ils se ressemblent : même
@@ -79,7 +77,7 @@ function Socle({ className, children, ...props }: React.ComponentProps<typeof Bu
       className={cn("h-7 min-w-0 gap-1.5 px-2 text-muted-foreground hover:text-foreground", className)}
     >
       {children}
-      <ChevronDown className="size-3 shrink-0 opacity-60" />
+      <NetsuIcon name="chevron-down" className="size-3 shrink-0 opacity-60" />
     </Button>
   );
 }
@@ -234,7 +232,7 @@ export function EngineMenu({ showDuplicate = true }: { showDuplicate?: boolean }
                   <Button size="icon-sm" variant="ghost" className="size-6"
                     aria-label={t("common:action.back")}
                     onClick={(e) => { e.preventDefault(); setView("effort"); }}>
-                    <ChevronLeft className="size-3.5" />
+                    <NetsuIcon name="prev" className="size-3.5" />
                   </Button>
                 ) : null}
                 <span className="text-xs font-medium text-muted-foreground">{t("engine.model")}</span>
@@ -261,7 +259,7 @@ export function EngineMenu({ showDuplicate = true }: { showDuplicate?: boolean }
                       onClick={(e) => { e.preventDefault(); if (current) void loadModels(current.modelsFrom, true); }}
                     />
                   }>
-                    <RefreshCw className={loading ? "size-3 animate-spin" : "size-3"} />
+                    <NetsuIcon name="refresh" busy={loading} className="size-3" />
                   </TooltipTrigger>
                   <TooltipContent>{t("engine.refreshModels")}</TooltipContent>
                 </Tooltip>

@@ -47,14 +47,14 @@ test('preview cards keep content-visibility with an exact offscreen height', () 
 // la bande d'anticipation : traîner le curseur de la barre le montait/démontait pour des dizaines de
 // cartes à la fois, sur le thread qui fait justement avancer un défilement traîné à la souris.
 test('hover chrome mounts for the pointed card, not for the whole prefetch band', () => {
-  for (const file of CARDS) {
+  for (const file of [...CARDS, 'src/components/search/ResultCard.tsx']) {
     const src = read(file);
     assert.match(src, /\binteractive\b/,
       `${file} must gate its hover chrome on pointer/keyboard presence`);
     assert.doesNotMatch(src, /\{near && \(|\(near \|\| selected\)/,
       `${file} must not mount Base UI roots for every card of the thumbnail band`);
   }
-  assert.match(read('src/components/rushes/useSceneCardMedia.ts'), /interactive:\s*pointerOn \|\| focusOn/,
+  assert.match(read('src/lib/useCardMedia.ts'), /interactive:\s*pointerOn \|\| focusOn/,
     'the hook must expose pointer/keyboard presence separately from the prefetch band');
 });
 
@@ -74,17 +74,19 @@ test('all preview cards share strict visibility and paced starts', () => {
   assert.match(activity, /observeViewport\(el, 0, setVisible\)/);
   assert.match(activity, /play && visible/);
   assert.match(activity, /visible && \(hovered \|\| started\)/);
-  for (const file of ['src/components/rushes/useSceneCardMedia.ts', 'src/components/search/useResultPreview.ts']) {
-    assert.match(read(file), /usePreviewActivity\(/);
-    assert.doesNotMatch(read(file), /acquirePlaySlot|requestPreloadMount|retainPausedVideo/);
-  }
+  assert.match(read('src/lib/useCardMedia.ts'), /usePreviewActivity\(/);
+  assert.doesNotMatch(read('src/lib/useCardMedia.ts'), /acquirePlaySlot|requestPreloadMount|retainPausedVideo/);
+  // Shot cards and search results share ONE media hook: two copies had drifted apart.
+  assert.match(read('src/components/rushes/useSceneCardMedia.ts'), /useCardMedia\(/);
+  assert.match(read('src/components/search/ResultCard.tsx'), /useCardMedia\(/);
+  assert.ok(!fs.existsSync(path.join(root, 'src/components/search/useResultPreview.ts')));
   assert.doesNotMatch(read('src/components/rushes/cutStudioShared.ts'), /MAX_PLAYING_HARD|playingActive/);
 });
 
 // Une carte dont l'URL de proxy est déjà résolue ne doit RIEN attendre : la lecture du cache est
 // synchrone, dans le rendu. Repasser par la promesse coûtait un rendu de plus après le créneau.
 test('cards read the resolved proxy URL synchronously while rendering', () => {
-  assert.match(read('src/components/rushes/useSceneCardMedia.ts'),
+  assert.match(read('src/lib/useCardMedia.ts'),
     /const url = fetchedUrl \?\? peekProxy\?\.\(\) \?\? null/);
   for (const file of GRIDS) {
     assert.match(read(file), /peekProxy=\{/, `${file} must hand its cards the resolved-proxy lookup`);
@@ -127,11 +129,14 @@ test('a preloaded preview loads without starting playback', () => {
   assert.match(src, /preload="auto"/, 'the element must still load and prime its decoder while paused');
 });
 
-test('search shares activity while keeping its cached URL and settled-request handling', () => {
-  const src = read('src/components/search/useResultPreview.ts');
-  assert.match(src, /usePreviewActivity\(/);
-  assert.match(src, /const url = fetchedUrl \?\? peekProxy\?\.\(\) \?\? null/);
+test('card media retries a failed thumbnail and bounds video error retries', () => {
+  const src = read('src/lib/useCardMedia.ts');
   assert.match(src, /if \(!settled\) nr\.proxyCancel\(token\)/);
+  assert.match(src, /\.catch\(retry\)/, 'a rejected thumbnail request must retry, not leave a skeleton forever');
+  assert.match(src, /else setThumbFailed\(true\)/);
+  assert.match(src, /tries > PROXY_RETRIES\) return/, 'a <video> the decoder refuses must not loop forever');
+  assert.match(src, /setTimeout\(\(\) => \{\s*timer\.current = null;[\s\S]*?HOVER_DELAY_MS\)/,
+    'hover playback waits a beat, so a wheel scroll under the pointer does not start every card');
 });
 
 // Les deux vues résolvent leurs proxies en UN appel. Sans ça, chaque carte réclame le sien au core

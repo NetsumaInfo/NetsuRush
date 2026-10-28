@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { AlertTriangle, Braces, FolderOpen, ListOrdered, RotateCcw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -261,7 +261,7 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
     <Section title={t("settings.sectionExport")}>
       <Row label={t("settings.rowFolder")}>
         <Button variant="outline" size="sm" className="max-w-[58%]" onClick={chooseOut} disabled={disabled}>
-          <FolderOpen className="h-4 w-4" /> <span className="truncate">{outDir ? basename(outDir) : t("settings.choose")}</span>
+          <NetsuIcon name="folder-open" className="h-4 w-4" /> <span className="truncate">{outDir ? basename(outDir) : t("settings.choose")}</span>
         </Button>
       </Row>
 
@@ -293,7 +293,7 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
               <TooltipTrigger render={<span />}>
                 <DropdownMenuTrigger render={<Button variant="outline" size="icon" disabled={disabled}
                   aria-label={t("settings.insertToken")}>
-                  <Braces className="size-4" />
+                  <NetsuIcon name="code" className="size-4" />
                 </Button>} />
               </TooltipTrigger>
               <TooltipContent>{t("settings.insertToken")}</TooltipContent>
@@ -326,7 +326,7 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
       {nameReport.collisions.length > 0 && (
         <Card className="block space-y-1.5 border-destructive/40 p-2.5 text-[11px] leading-snug text-destructive">
           <p className="flex items-start gap-1.5 font-medium">
-            <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" />
+            <NetsuIcon name="warning" className="mt-px h-3.5 w-3.5 shrink-0" />
             {t("settings.namingCollision", { count: nameReport.collisions.length })}
           </p>
           <ul className="space-y-0.5 pl-5">
@@ -338,7 +338,7 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
           </ul>
           <Button variant="outline" size="sm" className="w-full" disabled={disabled}
             onClick={() => setOutputPattern(numberedPattern(outputPattern))}>
-            <ListOrdered className="h-3.5 w-3.5" /> {t("settings.namingNumber")}
+            <NetsuIcon name="numbered-list" className="h-3.5 w-3.5" /> {t("settings.namingNumber")}
           </Button>
         </Card>
       )}
@@ -351,7 +351,7 @@ export function ExportRows({ outDir, chooseOut, importBack, setImportBack, disab
           <span className="truncate">{t("settings.namingRenamed", { count: renamed.length })}</span>
           <Button variant="ghost" size="sm" disabled={disabled}
             onClick={() => renamed.forEach((source) => setSourceName(source, null))}>
-            <RotateCcw className="h-3.5 w-3.5" /> {t("settings.namingResetAll")}
+            <NetsuIcon name="reset-default" className="h-3.5 w-3.5" /> {t("settings.namingResetAll")}
           </Button>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { UserPlus, ScanFace, Check } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { type CharRef } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -55,14 +55,14 @@ export function NameFaceMenu({ refPayload, trigger, onDone }: {
               <span className="h-6 w-6 shrink-0 overflow-hidden rounded bg-muted">
                 {c.avatar
                   ? <img src={c.avatar} alt="" className="h-full w-full object-cover" />
-                  : <ScanFace className="h-4 w-4 m-1 text-muted-foreground" />}
+                  : <NetsuIcon name="face" className="h-4 w-4 m-1 text-muted-foreground" />}
               </span>
               <span className="truncate">{c.name}</span>
             </DropdownMenuItem>
           ))}
           {characters.length > 0 && <DropdownMenuSeparator />}
           <DropdownMenuItem onClick={() => { setName(""); setCreating(true); }} className="gap-2">
-            <UserPlus className="h-4 w-4" /> {t("nameFaceMenu.newCharacter")}
+            <NetsuIcon name="user-plus" className="h-4 w-4" /> {t("nameFaceMenu.newCharacter")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -75,7 +75,7 @@ export function NameFaceMenu({ refPayload, trigger, onDone }: {
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setCreating(false)}>{t("common:action.cancel")}</Button>
             <Button size="sm" disabled={!name.trim() || busy} onClick={createAndAssign}>
-              {busy ? <Spinner className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />} {t("nameFaceMenu.createAndSave")}
+              {busy ? <Spinner className="h-3.5 w-3.5" /> : <NetsuIcon name="check" className="h-3.5 w-3.5" />} {t("nameFaceMenu.createAndSave")}
             </Button>
           </div>
         </DialogContent>

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Search, ArrowLeft, Images, Film, Play } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { nr, type SearchHit } from "@/lib/bridge";
 import { useApp } from "@/store";
@@ -52,13 +52,13 @@ function ShotCell({ shot, thumb, active, onToggle }: {
       {thumb ? (
         <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
       ) : (
-        <div className="flex h-full items-center justify-center text-muted-foreground"><Film className="h-5 w-5 opacity-40" /></div>
+        <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="film" className="h-5 w-5 opacity-40" /></div>
       )}
       {hover && src && (
         <PreviewVideo url={src} label={t("referencePicker.previewAria")} onError={() => setSrc(null)} />
       )}
       {hover && !src && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30"><Play className="h-5 w-5 text-white/80" /></div>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30"><NetsuIcon name="play" className="h-5 w-5 text-white/80" /></div>
       )}
       <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-[10px] text-white">#{shot.scene_index + 1}</span>
       {active && <SelectCheck />}
@@ -103,11 +103,11 @@ export function ReferencePicker({ onClose }: { onClose: () => void }) {
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           {clip ? (
             <Button variant="ghost" size="sm" onClick={closeClip}>
-              <ArrowLeft className="h-4 w-4" /> {t("referencePicker.media")}
+              <NetsuIcon name="back" className="h-4 w-4" /> {t("referencePicker.media")}
             </Button>
           ) : (
             <span className="inline-flex items-center gap-2 text-sm font-medium">
-              <Images className="h-4 w-4 text-primary" /> {t("referencePicker.title")}
+              <NetsuIcon name="gallery" className="h-4 w-4 text-primary" /> {t("referencePicker.title")}
             </span>
           )}
           <div className="flex-1" />
@@ -117,7 +117,7 @@ export function ReferencePicker({ onClose }: { onClose: () => void }) {
               <TooltipContent>{clip}</TooltipContent>
             </Tooltip>
           )}
-          <Button variant="ghost" size="sm" onClick={onClose}><X className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="sm" onClick={onClose}><NetsuIcon name="close" className="h-4 w-4" /></Button>
         </div>
 
         {error && !clip && <div className="border-b border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">{error}</div>}
@@ -127,7 +127,7 @@ export function ReferencePicker({ onClose }: { onClose: () => void }) {
           <>
             <div className="border-b border-border px-4 py-2">
               <InputGroup>
-                <InputGroupAddon><Search /></InputGroupAddon>
+                <InputGroupAddon><NetsuIcon name="search" /></InputGroupAddon>
                 <InputGroupInput
                   autoFocus
                   value={query}
@@ -136,7 +136,7 @@ export function ReferencePicker({ onClose }: { onClose: () => void }) {
                 />
                 {query && (
                   <InputGroupAddon align="inline-end">
-                    <InputGroupButton size="icon-xs" aria-label={t("referencePicker.clearAria")} onClick={() => setQuery("")}><X /></InputGroupButton>
+                    <InputGroupButton size="icon-xs" aria-label={t("referencePicker.clearAria")} onClick={() => setQuery("")}><NetsuIcon name="close" /></InputGroupButton>
                   </InputGroupAddon>
                 )}
               </InputGroup>
@@ -157,7 +157,7 @@ export function ReferencePicker({ onClose }: { onClose: () => void }) {
                         onClick={() => openClip(c.path)}
                         className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
                       >
-                      <Film className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <NetsuIcon name="film" className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <span className="truncate">{c.name}</span>
                       </button>} />
                       <TooltipContent>{c.path}</TooltipContent>

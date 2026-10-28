@@ -2,7 +2,7 @@
 // TRACE de son tour — raisonnement et outils dans l'ordre, cf. AgentTrace — puis du corps rendu en
 // Markdown léger maison, zéro dépendance).
 import { useTranslation } from "react-i18next";
-import { Bot, User, Copy, Brain } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import type { UiMessage } from "@/store/chat";
 import { cn } from "@/lib/utils";
 import {
@@ -23,7 +23,7 @@ export function Message({ msg, active = false, status }: {
       <div className={cn("mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md transition-shadow",
         isUser ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground",
         active && !isUser && "ring-2 ring-primary/40 animate-pulse")}>
-        {isUser ? <User className="size-3.5" /> : <Bot className="size-3.5" />}
+        {isUser ? <NetsuIcon name="account" className="size-3.5" /> : <NetsuIcon name="bot" className="size-3.5" />}
       </div>
       <div className={cn("min-w-0 flex-1 space-y-2", isUser && "flex flex-col items-end")}>
         {!isUser && <AgentTrace msg={msg} active={active} status={status} />}
@@ -37,11 +37,11 @@ export function Message({ msg, active = false, status }: {
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-44">
         <ContextMenuItem onClick={() => navigator.clipboard.writeText(msg.content)} disabled={!msg.content}>
-          <Copy /> {t("message.copyText")}
+          <NetsuIcon name="copy" /> {t("message.copyText")}
         </ContextMenuItem>
         {msg.thinking && (
           <ContextMenuItem onClick={() => navigator.clipboard.writeText(msg.thinking)}>
-            <Brain /> {t("message.copyReasoning")}
+            <NetsuIcon name="brain" /> {t("message.copyReasoning")}
           </ContextMenuItem>
         )}
       </ContextMenuContent>

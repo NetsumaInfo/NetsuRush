@@ -4,7 +4,7 @@
 // le combo est déjà pris — même mécanisme que le board Référence).
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
-import { X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -68,7 +68,7 @@ function SpellSection({ language }: { language: string }) {
                   className="group flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:border-destructive/50 hover:text-foreground"
                 >
                   {word}
-                  <X className="h-3 w-3 opacity-50 transition-opacity group-hover:opacity-100" />
+                  <NetsuIcon name="close" className="h-3 w-3 opacity-50 transition-opacity group-hover:opacity-100" />
                 </button>
               ))}
             </div>

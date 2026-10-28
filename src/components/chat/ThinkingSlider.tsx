@@ -15,7 +15,7 @@
 // aucune de nos lignes de commande ; l'icône n'aurait rien désigné ici.)
 import { Slider } from "@base-ui/react/slider";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, RotateCcw } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import type { ChatThinking } from "@/lib/bridge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ export function ThinkingSlider({ value, onChange, model, onPickModel, className 
             <button type="button" onClick={onPickModel}
               className="relative inline-flex max-w-full items-center rounded px-3.5 text-[10px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <span className="truncate">{model || t("engine.default")}</span>
-              <ChevronRight className="absolute right-0 size-3 shrink-0 opacity-70" />
+              <NetsuIcon name="chevron-toggle" on={false} className="absolute right-0 size-3 shrink-0 opacity-70" />
             </button>
           ) : (
             <div className="truncate text-[10px] text-muted-foreground">{model || t("engine.default")}</div>
@@ -74,7 +74,7 @@ export function ThinkingSlider({ value, onChange, model, onPickModel, className 
               onClick={() => onChange(THINKING_DEFAULT)}
               className="grid size-6 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground" />
           }>
-            <RotateCcw className="size-3.5" />
+            <NetsuIcon name="reset-default" className="size-3.5" />
           </TooltipTrigger>
           <TooltipContent>{t("thinkingSlider.reset")}</TooltipContent>
         </Tooltip>

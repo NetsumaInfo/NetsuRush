@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Layers } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import type { Clip } from "@/lib/bridge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fmt } from "./cutStudioShared";
@@ -43,7 +43,7 @@ export function CutFlowNav({ flow, offsets, cell, cols, scrollEl, sourceOf, tota
           className="h-6 w-auto max-w-full gap-1.5 border-0 bg-transparent px-1 shadow-none hover:bg-accent"
           aria-label={t("cutStudio.flowJump")}
         >
-          <Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="layers" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           {/* Base UI rend la VALEUR quand on ne lui donne rien : sans cet enfant explicite, l'entête
               affichait le rang brut (« 0 ») au lieu du nom du rush. */}
           <SelectValue>

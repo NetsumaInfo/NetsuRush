@@ -10,7 +10,7 @@
 //   • volatile — le réglage retombe à la fin du script (Multi-Frame Rendering, documenté par Adobe).
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Loader2, SlidersHorizontal, FolderOpen } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -115,7 +115,7 @@ function PrefRow({
                 <TooltipContent>{current ? String(current) : t("boost.prefs.noPath")}</TooltipContent>
               </Tooltip>
               <Button variant="outline" size="icon-sm" onClick={pickFolder}>
-                <FolderOpen className="h-4 w-4" />
+                <NetsuIcon name="folder-open" className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -200,7 +200,7 @@ export function BoostPrefsSection({ diag, app }: { diag: BoostDiagnosis | null; 
               {t("common:action.reset")}
             </Button>
             <Button size="sm" onClick={() => setConfirm(true)} disabled={busy}>
-              <SlidersHorizontal className="h-4 w-4" /> {t("boost.prefs.apply", { count: pending })}
+              <NetsuIcon name="sliders" className="h-4 w-4" /> {t("boost.prefs.apply", { count: pending })}
             </Button>
           </div>
         )}
@@ -231,7 +231,7 @@ export function BoostPrefsSection({ diag, app }: { diag: BoostDiagnosis | null; 
               {t("common:action.cancel")}
             </Button>
             <Button size="sm" onClick={apply} disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <SlidersHorizontal className="h-4 w-4" />}
+              {busy ? <NetsuIcon name="loading" busy className="h-4 w-4" /> : <NetsuIcon name="sliders" className="h-4 w-4" />}
               {t("common:action.apply")}
             </Button>
           </DialogFooter>

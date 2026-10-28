@@ -8,13 +8,16 @@
 // n'est jamais qu'un rappel : fermer et rouvrir restent dans le menu du voyant de la barre latérale.
 import { useEffect, useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { MonitorX, MonitorPlay, Loader2, Minus, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { hostShort } from "@/lib/host";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+
+const Monitor = netsuIconOf("monitor");
 
 const COLLAPSE_KEY = "nr.power.collapsed";   // pref persistée : garder la bannière « rouvrir » réduite
 const DISMISS_KEY = "nr.power.dismissed-at"; // fermeture (`closed.at`) dont le rappel a été retiré
@@ -41,7 +44,7 @@ function readDismissedAt(): number | null {
 // trait au repos, et « retirer » naît au-dessus, sur du vide. Sans ça, un clic lancé pendant les
 // 200 ms d'ouverture atterrirait sur « retirer » alors qu'on visait l'action.
 function EdgeNub({ icon: Icon, label, dismissLabel, onClick, onDismiss, tone }: {
-  icon: typeof MonitorPlay; label: string; dismissLabel: string;
+  icon: IconComponent; label: string; dismissLabel: string;
   onClick: () => void; onDismiss: () => void; tone: Tone;
 }) {
   const shades = TONE[tone];
@@ -65,7 +68,7 @@ function EdgeNub({ icon: Icon, label, dismissLabel, onClick, onDismiss, tone }: 
                 "group-hover:h-7 group-hover:opacity-100 group-focus-within:h-7 group-focus-within:opacity-100",
                 "hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60",
               )}>
-              <X className="size-3.5 shrink-0" />
+              <NetsuIcon name="close" className="size-3.5 shrink-0" />
             </button>
           } />
           <TooltipContent side="left">{dismissLabel}</TooltipContent>
@@ -90,7 +93,7 @@ function EdgeNub({ icon: Icon, label, dismissLabel, onClick, onDismiss, tone }: 
 
 // Action de la carte : ICÔNE seule. « Fermer » et « rouvrir » se lisent sur le pictogramme ; le
 // libellé complet vit dans l'infobulle, et la carte tient en trois lignes.
-function IconAction({ icon: Icon, label, onClick }: { icon: typeof MonitorPlay; label: string; onClick: () => void }) {
+function IconAction({ icon: Icon, label, onClick }: { icon: IconComponent; label: string; onClick: () => void }) {
   return (
     <Tooltip>
       <TooltipTrigger render={
@@ -113,7 +116,7 @@ function CardControls({ onCollapse, onDismiss }: { onCollapse?: () => void; onDi
         <Tooltip>
           <TooltipTrigger render={
             <Button variant="ghost" size="icon-xs" onClick={onCollapse} aria-label={t("power.collapse")}>
-              <Minus className="size-3.5" />
+              <NetsuIcon name="remove" className="size-3.5" />
             </Button>
           } />
           <TooltipContent>{t("power.collapseCorner")}</TooltipContent>
@@ -122,7 +125,7 @@ function CardControls({ onCollapse, onDismiss }: { onCollapse?: () => void; onDi
       <Tooltip>
         <TooltipTrigger render={
           <Button variant="ghost" size="icon-xs" onClick={onDismiss} aria-label={t("power.dismiss")}>
-            <X className="size-3.5" />
+            <NetsuIcon name="close" className="size-3.5" />
           </Button>
         } />
         <TooltipContent>{t("power.dismissHint")}</TooltipContent>
@@ -182,12 +185,12 @@ export function PowerPrompt() {
 
   // Op en cours → carte pleine (on veut la barre de progression), sinon languette si réduit.
   if (closed && !busy && collapsed && prefs.nub) {
-    return <EdgeNub icon={MonitorPlay} tone="ok" onClick={reopen} onDismiss={() => dismissReopen(closed.at)}
+    return <EdgeNub icon={Monitor} tone="ok" onClick={reopen} onDismiss={() => dismissReopen(closed.at)}
       dismissLabel={t("power.dismissHint")}
       label={t("power.reopenHost", { host: hostShort(closed.host) }) + (closed.project ? ` — « ${closed.project} »` : "")} />;
   }
   if (ramPrompt && !closed && !busy && ramCollapsed && prefs.nub) {
-    return <EdgeNub icon={MonitorX} tone="warn" onClick={() => doClose(ramPrompt.host)} onDismiss={dismissRamPrompt}
+    return <EdgeNub icon={Monitor} tone="warn" onClick={() => doClose(ramPrompt.host)} onDismiss={dismissRamPrompt}
       dismissLabel={t("power.dismissHint")}
       label={t("power.closeNub", { host: hostShort(ramPrompt.host) })} />;
   }
@@ -198,7 +201,7 @@ export function PowerPrompt() {
       <Card>
         <div className="flex items-center gap-2.5 p-2.5">
           <span className="grid size-7 shrink-0 place-items-center rounded-md bg-primary/12 ring-1 ring-inset ring-primary/25">
-            <Loader2 className="size-3.5 animate-spin text-primary" />
+            <NetsuIcon name="loading" busy className="size-3.5 text-primary" />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-2">
@@ -220,19 +223,19 @@ export function PowerPrompt() {
   const view = closed
     ? {
       tone: "ok" as const,
-      icon: MonitorPlay,
+      icon: Monitor,
       title: t("power.hostClosed", { host: hostShort(closed.host) }),
       desc: closed.project ? `« ${closed.project} »` : null,
       // Un nom de projet peut être long : il se coupe. Une phrase, elle, se replie sur deux lignes.
       clipDesc: true,
       collapse: () => setCollapse(true),
       dismiss: () => dismissReopen(closed.at),
-      actions: <IconAction icon={MonitorPlay} label={t("power.reopenHost", { host: hostShort(closed.host) })} onClick={reopen} />,
+      actions: <IconAction icon={Monitor} label={t("power.reopenHost", { host: hostShort(closed.host) })} onClick={reopen} />,
     }
     : ramPrompt
       ? {
         tone: "warn" as const,
-        icon: MonitorX,
+        icon: Monitor,
         title: t("power.closeHostQ", { host: hostShort(ramPrompt.host) }),
         desc: t(ramPrompt.host === "resolve" ? "power.resolveSafeCloseDesc" : "power.freeRamDesc"),
         clipDesc: false,
@@ -241,7 +244,7 @@ export function PowerPrompt() {
         actions: (
           <>
             <Button variant="ghost" size="sm" onClick={dismissRamPrompt}>{t("power.later")}</Button>
-            <IconAction icon={MonitorX} label={t("power.closeHost", { host: hostShort(ramPrompt.host) })} onClick={() => doClose(ramPrompt.host)} />
+            <IconAction icon={Monitor} label={t("power.closeHost", { host: hostShort(ramPrompt.host) })} onClick={() => doClose(ramPrompt.host)} />
           </>
         ),
       }

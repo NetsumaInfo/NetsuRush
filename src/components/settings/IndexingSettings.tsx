@@ -1,4 +1,4 @@
-import { AlertTriangle, Cpu, Zap } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export function IndexingSettings() {
         <div className="mt-2 divide-y divide-border rounded-lg border border-border">
           <SettingRow label={t("performance.shotDecode")} hint={t("performance.shotDecodeHint")}>
             <Toggle className="ml-auto flex" pressed={perf.shotDecode} onPressedChange={(shotDecode) => setPerf({ shotDecode })}>
-              <Zap className="size-3.5" />
+              <NetsuIcon name="zap" className="size-3.5" />
               {t(perf.shotDecode ? "performance.enabled" : "performance.disabled")}
             </Toggle>
           </SettingRow>
@@ -63,7 +63,7 @@ export function IndexingSettings() {
         </div>
         {needsReindex(perf) && (
           <p className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground">
-            <AlertTriangle className="mt-px size-3.5 shrink-0 text-destructive" />
+            <NetsuIcon name="warning" className="mt-px size-3.5 shrink-0 text-destructive" />
             {t("performance.reindexWarning")}
           </p>
         )}
@@ -74,7 +74,7 @@ export function IndexingSettings() {
         <div className="mt-2 divide-y divide-border rounded-lg border border-border">
           <SettingRow label={t("performance.onnxGpu")} hint={t("performance.onnxGpuHint")}>
             <Toggle className="ml-auto flex" pressed={perf.onnxGpu} onPressedChange={(onnxGpu) => setPerf({ onnxGpu })}>
-              <Cpu className="size-3.5" />
+              <NetsuIcon name="chip" className="size-3.5" />
               {t(perf.onnxGpu ? "performance.enabled" : "performance.disabled")}
             </Toggle>
           </SettingRow>

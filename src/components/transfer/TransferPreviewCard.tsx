@@ -1,6 +1,6 @@
 // Aperçu de ce que NetsuRush a LU dans la timeline source, avant tout montage.
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, CheckCircle2, Type } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { basename, fmtNumber } from "@/lib/utils";
@@ -32,7 +32,7 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
   if (!preview.ok) {
     return (
       <Card className="block border-destructive/40 p-3 text-xs text-destructive">
-        <AlertTriangle className="mr-1.5 inline size-3.5" /> {preview.error}
+        <NetsuIcon name="warning" className="mr-1.5 inline size-3.5" /> {preview.error}
       </Card>
     );
   }
@@ -56,8 +56,8 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
       {preview.fidelity && (
         <div className="flex items-start gap-2 border-t border-border pt-3 text-xs">
           {preview.fidelity.faithful
-            ? <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-[var(--color-ok)]" />
-            : <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-400" />}
+            ? <NetsuIcon name="status-ok" className="mt-0.5 size-3.5 shrink-0 text-[var(--color-ok)]" />
+            : <NetsuIcon name="warning" className="mt-0.5 size-3.5 shrink-0 text-amber-400" />}
           <div className="min-w-0">
             <p className="font-medium text-foreground">
               {preview.fidelity.faithful ? t("preview.fidelityExact") : t("preview.fidelityLimited")}
@@ -76,7 +76,7 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
         // Sans cet avertissement, un export refusé par Resolve rendrait un document SANS image clé,
         // et l'aperçu annoncerait sereinement « équivalence native » sur une timeline animée.
         <div className="flex items-start gap-2 border-t border-border pt-3 text-xs">
-          <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-400" />
+          <NetsuIcon name="warning" className="mt-0.5 size-3.5 shrink-0 text-amber-400" />
           <p className="min-w-0 text-[11px] text-muted-foreground">{t("preview.animationUnavailable")}</p>
         </div>
       )}
@@ -92,7 +92,7 @@ export function TransferPreviewCard({ preview, busy }: { preview: TransferPrevie
         // PAS écrire de titre (Premiere : aucune API n'en crée), promettre une recréation ferait
         // chercher un titre qui n'arrivera jamais.
         <div className="flex items-start gap-2 border-t border-border pt-3 text-xs">
-          <Type className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+          <NetsuIcon name="type" className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
           <p className="min-w-0 text-[11px] text-muted-foreground">
             {t(titlesRebuildable ? "preview.graphics" : "preview.graphicsUnsupported", { count: preview.graphics })}
           </p>

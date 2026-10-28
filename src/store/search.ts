@@ -159,6 +159,37 @@ async function warmIndexedThumbs(path: string): Promise<void> {
 }
 
 export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (set, get) => {
+  // Every request that fills the result grid (text, face, duplicates, groups) takes a ticket; only
+  // the latest one may write. Without it a slow search landing after a faster one, or after the scope
+  // changed, replaced the results on screen with those of a query nobody was looking at anymore.
+  let resultSeq = 0;
+  async function analyzeResults(view: "dedup" | "clusters", scope?: { filePath?: string }) {
+    const st = get();
+    const scenes = st.searchHits
+      .filter((h) => h.score >= st.scoreThreshold)
+      .map((h) => ({ file_path: h.file_path, scene_index: h.scene_index }));
+    const ticket = takeTicket();
+    set({ analyzing: true, searchNotice: null });
+    try {
+      if (view === "dedup") {
+        const r = await nr.dedup(scope?.filePath ? { filePath: scope.filePath, threshold: 0.93 } : { scenes, threshold: 0.93 });
+        if (!isCurrent(ticket)) return;
+        if (r.error) set({ analyzing: false, resultView: "flat", searchNotice: r.error });
+        else set({ analyzing: false, dedupGroups: r.groups ?? [], resultView: "dedup" });
+      } else {
+        const r = await nr.cluster(scope?.filePath ? { filePath: scope.filePath } : { scenes });
+        if (!isCurrent(ticket)) return;
+        if (r.error) set({ analyzing: false, resultView: "flat", searchNotice: r.error });
+        else set({ analyzing: false, clusters: r.clusters ?? [], resultView: "clusters" });
+      }
+    } catch (e) {
+      if (!isCurrent(ticket)) return;
+      const key = view === "dedup" ? "search:store.dedupUnavailable" : "search:store.clustersUnavailable";
+      set({ analyzing: false, resultView: "flat", searchNotice: i18n.t(key, { error: errorText(e) }) });
+    }
+  }
+  const takeTicket = () => ++resultSeq;
+  const isCurrent = (ticket: number) => ticket === resultSeq;
   // Pousse la dernière progression accumulée, au plus une fois par frame (cf. pendingProg).
   const scheduleProg = (p: { pct: number | null; phase?: string }) => {
     pendingProg = pendingProg
@@ -206,7 +237,8 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     })(),
     setSearchScope: (searchScope) => {
       try { localStorage.setItem("nr.search.scope", searchScope); } catch { /* noop */ }
-      set({ searchScope, searchHits: [], searchQuery: "", clusters: [], dedupGroups: [], resultView: "flat", searchNotice: null });
+      takeTicket();
+      set({ searchScope, searchHits: [], searchQuery: "", clusters: [], dedupGroups: [], resultView: "flat", searchNotice: null, searching: false, analyzing: false, searchError: null });
       void get().refreshSearchStatus();
       void get().refreshCharacters();
       // La galerie est une PHOTO d'une portée : on l'invalide, sinon rouvrir le hub réafficherait
@@ -252,7 +284,10 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     setSelectedProjects: (names) => {
       const selectedProjects = [...new Set(names)];
       try { localStorage.setItem("nr.search.projects", JSON.stringify(selectedProjects)); } catch { /* noop */ }
-      set({ selectedProjects, searchHits: [], clusters: [], dedupGroups: [], resultView: "flat" });
+      // Same reset as a scope change: clearing the hits but not the query showed "no results for …"
+      // for a search that had simply not been run in the new scope.
+      takeTicket();
+      set({ selectedProjects, searchHits: [], searchQuery: "", clusters: [], dedupGroups: [], resultView: "flat", searchNotice: null, searching: false, analyzing: false, searchError: null });
       void get().loadProjectScope();
     },
     indexBusy: null,
@@ -319,8 +354,9 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
       const searchNotice = unknown.length
         ? i18n.t("search:store.unknownMention", { tokens: unknown.map((u) => `@${u}`).join(", ") })
         : null;
+      const ticket = takeTicket();
       if (!pos && refs.length === 0 && ids.length === 0) {
-        set({ searchHits: [], searchQuery: "", resultView: "flat", searchNotice }); return;
+        set({ searching: false, searchHits: [], searchQuery: "", resultView: "flat", searchNotice }); return;
       }
       const refLabel = (r: SearchRef) => basename(r.file_path || r.path || i18n.t("search:store.referenceFallback"));
       const bits: string[] = [];
@@ -355,8 +391,10 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         }
         // Avertissements cumulés : mention inconnue (renderer) + dégradation du filtre @perso (backend).
         const notices = [searchNotice, r.notice ?? null].filter((n): n is string => !!n);
+        if (!isCurrent(ticket)) return;
         set({ searching: false, searchHits: hits, searchError: r.error ?? null, searchNotice: notices.join(" · ") || null });
       } catch (e) {   // core/sidecar indispo → erreur lisible, jamais de spinner infini
+        if (!isCurrent(ticket)) return;
         set({ searching: false, searchHits: [], searchError: i18n.t("search:store.searchUnavailable", { error: errorText(e) }) });
       }
     },
@@ -390,11 +428,14 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     // Recherche directe par un visage DÉJÀ indexé (clic dans la galerie) : son embedding stocké sert
     // de référence — aucune photo à fournir. Résultats dans la grille (mode visage).
     searchByIndexedFace: async (ref) => {
+      const ticket = takeTicket();
       set({ searching: true, searchError: null, searchNotice: null, searchQuery: ref.domain === "anime" ? i18n.t("search:store.queryIndexedFaceAnime") : i18n.t("search:store.queryIndexedFaceReal"), faceMode: true, faceChar: null, resultView: "flat", clusters: [], dedupGroups: [], faceHubOpen: false });
       try {
         const r = await nr.faceSearch({ refs: [{ file_path: ref.file_path, scene_index: ref.scene_index, face_index: ref.face_index }], topK: SEARCH_TOP_K, minScore: 0, filePaths: searchScopePaths(get()) });
+        if (!isCurrent(ticket)) return;
         set({ searching: false, searchHits: r.hits ?? [], searchError: r.error ?? null });
       } catch (e) {
+        if (!isCurrent(ticket)) return;
         set({ searching: false, searchHits: [], searchError: i18n.t("search:store.faceSearchUnavailable", { error: errorText(e) }) });
       }
     },
@@ -410,12 +451,15 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         set({ searchError: i18n.t("search:store.faceSearchNeedsRef") });
         return;
       }
+      const ticket = takeTicket();
       const head = refs.length === 1 ? i18n.t("search:store.queryFaceSingle") : i18n.t("search:store.queryFaceMulti", { count: refs.length });
       set({ searching: true, searchError: null, searchNotice: null, searchQuery: head, resultView: "flat", clusters: [], dedupGroups: [], faceMode: true, faceChar: null });
       try {
         const r = await nr.faceSearch({ refs, topK: SEARCH_TOP_K, minScore: 0, filePaths: searchScopePaths(get()) });
+        if (!isCurrent(ticket)) return;
         set({ searching: false, searchHits: r.hits ?? [], searchError: r.error ?? null });
       } catch (e) {
+        if (!isCurrent(ticket)) return;
         set({ searching: false, searchHits: [], searchError: i18n.t("search:store.faceSearchUnavailableRestart", { error: errorText(e) }) });
       }
     },
@@ -511,31 +555,15 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
       if (stopped) set({ searchError: i18n.t("search:store.faceIndexingStopped") });
       else if (failed) set({ searchError: i18n.t("search:store.faceIndexingFailed", { failed, total, error: lastErr }) });
     },
+    // Duplicates and groups work on the shots the flat view SHOWS (above the relevance threshold):
+    // grouping the whole top-k brought back shots the slider had hidden. They refine the results
+    // instead of replacing them, so a failure is a notice over the flat view, never an error card
+    // in place of every result.
     runDedup: async (scope) => {
-      const st = get();
-      set({ analyzing: true, searchError: null });
-      const opts = scope?.filePath
-        ? { filePath: scope.filePath, threshold: 0.93 }
-        : { scenes: st.searchHits.map((h) => ({ file_path: h.file_path, scene_index: h.scene_index })), threshold: 0.93 };
-      try {
-        const r = await nr.dedup(opts);
-        set({ analyzing: false, dedupGroups: r.groups ?? [], resultView: "dedup", searchError: r.error ?? null });
-      } catch (e) {
-        set({ analyzing: false, searchError: i18n.t("search:store.dedupUnavailable", { error: errorText(e) }) });
-      }
+      await analyzeResults("dedup", scope);
     },
     runCluster: async (scope) => {
-      const st = get();
-      set({ analyzing: true, searchError: null });
-      const opts = scope?.filePath
-        ? { filePath: scope.filePath }
-        : { scenes: st.searchHits.map((h) => ({ file_path: h.file_path, scene_index: h.scene_index })) };
-      try {
-        const r = await nr.cluster(opts);
-        set({ analyzing: false, clusters: r.clusters ?? [], resultView: "clusters", searchError: r.error ?? null });
-      } catch (e) {
-        set({ analyzing: false, searchError: i18n.t("search:store.clustersUnavailable", { error: errorText(e) }) });
-      }
+      await analyzeResults("clusters", scope);
     },
     // Indexe une liste de clips (1 frame/plan → embedding SigLIP 2, cache SQLite, incrémental).
     // Progression réelle par clip via onSearchProgress (canal search:progress).

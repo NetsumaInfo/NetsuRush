@@ -123,7 +123,8 @@ export interface ShotDetection {
   preset: number;
   setPreset: React.Dispatch<React.SetStateAction<number>>;
   model: DetectModel;
-  setModel: React.Dispatch<React.SetStateAction<DetectModel>>;
+  /** Ignored while a detection runs: the run would land its shots under the other model. */
+  setModel: (model: DetectModel) => void;
   getProxy: (s: Segment, priority?: "high" | "low", height?: number, token?: number) => Promise<string | null>;
   /** Lecture SYNCHRONE du cache d'URL : la carte monte sa <video> sans attendre une promesse. */
   peekProxy: (s: Segment) => string | null;
@@ -195,7 +196,11 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   // Défauts du module (panneau Paramètres). Lus À L'INIT seulement : changer le défaut ne doit pas
   // re-détecter le flux ouvert sous le nez de l'utilisateur.
   const [preset, setPreset] = useState(() => useApp.getState().cutPreset);
-  const [model, setModel] = useState<DetectModel>(() => useApp.getState().cutModel);
+  const [model, setModelState] = useState<DetectModel>(() => useApp.getState().cutModel);
+  // Model the grid currently shows, read by a running detection when it lands.
+  const modelRef = useRef(model);
+  modelRef.current = model;
+  const detectingRef = useRef(false);
   const detectionOptions = useApp((state) => state.detectionOptions);
   const scopedOptions = useMemo(() => detectionOptionsFor(model, detectionOptions), [model, detectionOptions]);
   const optionsScope = useMemo(() => detectionOptionsKey(model, detectionOptions), [model, detectionOptions]);
@@ -287,12 +292,23 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   // `only` = ne (re)découper que ces rushs, et garder les plans déjà en place pour les autres.
   // Sert au flux : compléter les rushs pas encore découpés ne doit pas repasser le détecteur sur
   // ceux qui le sont — c'est des minutes de GPU pour un résultat identique.
+  // Switching model mid-detection used to let the run land its shots, toast and edits under the
+  // model selected meanwhile, while that model's own cache load raced it for the same grid. The
+  // model is locked for the length of a run (toolbar, context menu and shortcuts all come through
+  // here).
+  const setModel = useCallback((next: DetectModel) => {
+    if (detectingRef.current) return;
+    setModelState(next);
+  }, []);
+
   async function detect(only?: string[]) {
-    if (!paths.length) return;
+    if (!paths.length || detectingRef.current) return;
     const wanted = only?.length ? new Set(only) : null;
     const targets = wanted ? paths.filter((p) => wanted.has(p)) : paths;
     if (!targets.length) return;
     useApp.getState().offerCloseForRam();
+    detectingRef.current = true;
+    const runModel = model;
     setDetecting(true); setProgress(0); setErr(null);
     // Découpe partielle : les proxies des rushs qu'on ne touche pas restent valides, les jeter
     // ferait ré-encoder toute la grille au premier survol.
@@ -341,6 +357,9 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
       // ce qui a manqué. Perdre neuf découpes parce que la dixième a échoué serait absurde.
       if (failed.length) setErr(failed[0]);
       if (!fresh.size && failed.length) return;
+      // The flow-open auto-selection can still move the model under a run: its cache effect then
+      // owns the grid, and these shots belong to the other model's cache, where they already are.
+      if (modelRef.current !== runModel) return;
       // Réassemblage DANS L'ORDRE DU FLUX : les rushs re-détectés prennent leurs nouveaux plans,
       // les autres gardent exactement les leurs, et la grille ne se réordonne pas sous le curseur.
       const kept = new Map<string, Segment[]>();
@@ -354,7 +373,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
       toast.ok(t("detection.shotsWithModel", { count: all.length, model: modelLabel(model) }));
       warmThumbs(all, fpsHint);
     } catch (e) { setErr(errorText(e)); }
-    finally { off(); track.stop(); setDetecting(false); }
+    finally { off(); track.stop(); detectingRef.current = false; setDetecting(false); }
   }
 
   // Helpers recréés à chaque rendu (capturent le flux) ; on les lit via ref pour que l'effet de
@@ -395,7 +414,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
         if (m.id === model) continue;
         const r = await nr.cachedScenes(firstPath, m.id).catch(() => null);
         if (!alive) return;
-        if (r?.cached && r.scenes.length) { setModel(m.id); return; }
+        if (r?.cached && r.scenes.length) { setModelState(m.id); return; }
       }
     })();
     return () => { alive = false; };

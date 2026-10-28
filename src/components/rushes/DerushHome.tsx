@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderOpen, FileVideo, Scissors, Settings2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useApp } from "@/store";
@@ -42,7 +42,7 @@ export function DerushHome() {
           <TooltipTrigger render={
             <Button variant="ghost" size="icon-sm" data-settings-toggle aria-label={t("settings.title")} onClick={() => setSettings((v) => !v)} />
           }>
-            <Settings2 className="size-4" />
+            <NetsuIcon name="detection-settings" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{t("settings.title")}</TooltipContent>
         </Tooltip>
@@ -56,7 +56,7 @@ export function DerushHome() {
           <button type="button" onClick={enterMediaPool}
             className="group flex flex-row items-center gap-4 rounded-xl bg-card p-4 text-left shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-start sm:gap-3 sm:p-6">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <FolderOpen className="h-5 w-5" />
+              <NetsuIcon name="browse-media" className="h-5 w-5" />
             </div>
             <div className="min-w-0">
               <div className="font-medium">{poolLabel}</div>
@@ -69,7 +69,7 @@ export function DerushHome() {
           <button type="button" onClick={pickFiles}
             className="group flex flex-row items-center gap-4 rounded-xl bg-card p-4 text-left shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-start sm:gap-3 sm:p-6">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <FileVideo className="h-5 w-5" />
+              <NetsuIcon name="import-videos" className="h-5 w-5" />
             </div>
             <div className="min-w-0">
               <div className="font-medium">{t("home.import")}</div>
@@ -84,7 +84,7 @@ export function DerushHome() {
           <button type="button" onClick={openCutTimeline}
             className="group flex w-full items-center gap-4 rounded-xl bg-card p-4 text-left sm:p-5 shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <Scissors className="h-5 w-5" />
+              <NetsuIcon name="cut-timeline" className="h-5 w-5" />
             </div>
             <div className="min-w-0">
               <div className="font-medium">{t("home.cutTimeline")}</div>

@@ -1,4 +1,4 @@
-import { Layers3 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ export function TimelineInsertionButton({ className }: { className?: string }) {
             <DropdownMenuTrigger
               render={
                 <Button variant="outline" size="icon-sm" aria-label={`${label} : ${selected.label}`} className={cn("text-muted-foreground", className)}>
-                  <Layers3 className="size-3.5" />
+                  <NetsuIcon name="layers" className="size-3.5" />
                 </Button>
               }
             />
@@ -75,7 +75,7 @@ export function TimelineInsertionSelect({ className }: { className?: string }) {
       items={options}
     >
       <SelectTrigger size="sm" className={cn("min-w-0", className)} aria-label={label}>
-        <Layers3 className="size-3.5 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="layers" className="size-3.5 shrink-0 text-muted-foreground" />
         <SelectValue>{selected.label}</SelectValue>
       </SelectTrigger>
       <SelectContent>

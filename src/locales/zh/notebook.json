@@ -625,7 +625,9 @@
     "bulletList": "项目符号列表",
     "numberedList": "编号列表",
     "checkList": "任务列表",
-    "quote": "引用"
+    "quote": "引用",
+    "callout": "提示框",
+    "codeBlock": "代码块"
   },
   "dbDefaults": {
     "titleField": "名称",
@@ -660,6 +662,22 @@
     "removeFilter": "移除筛选",
     "editOption": "编辑选项",
     "removeTask": "移除任务",
-    "addTask": "添加任务"
+    "addTask": "添加任务",
+    "hour": "小时",
+    "minute": "分钟"
+  },
+  "menu": {
+    "format": "格式",
+    "bold": "粗体",
+    "italic": "斜体",
+    "underline": "下划线",
+    "strike": "删除线",
+    "code": "代码",
+    "link": "链接",
+    "linkNeedsUrl": "请先复制网址",
+    "block": "块",
+    "duplicate": "创建副本",
+    "moveUp": "上移",
+    "moveDown": "下移"
   }
 }

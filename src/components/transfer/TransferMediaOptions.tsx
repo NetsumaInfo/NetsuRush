@@ -3,7 +3,7 @@
 // on ne réécrit ni les couples valides ni les moteurs sondés. Le catalogue y est seulement réduit à
 // ce que les logiciels de montage importent (cf. transferEncoding).
 import { useTranslation } from "react-i18next";
-import { FolderOpen } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -167,7 +167,7 @@ export function TransferMediaOptions({ ctl }: { ctl: TransferCtl }) {
         <Section title={t("sections.outDir")}>
           <Row label={outDir ? basename(outDir) : t("form.none")}>
             <Button variant={needsDir ? "destructive" : "outline"} size="sm" onClick={chooseOut} disabled={busy}>
-              <FolderOpen className="size-4" /> {t("form.choose")}
+              <NetsuIcon name="folder-open" className="size-4" /> {t("form.choose")}
             </Button>
           </Row>
         </Section>

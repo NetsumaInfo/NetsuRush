@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Users, ScanFace, LayoutGrid } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -20,12 +20,12 @@ export function FaceHubDialog() {
       {/* sm:max-w-[95vw] surcharge le sm:max-w-md du composant Dialog (même variante = tailwind-merge garde la nôtre) */}
       <DialogContent className="flex h-[90vh] w-[95vw] max-w-[95vw] flex-col gap-4 sm:max-w-[95vw]">
         <div className="flex items-center gap-3 pr-8">
-          <ScanFace className="h-5 w-5 text-primary" />
+          <NetsuIcon name="face" className="h-5 w-5 text-primary" />
           <DialogTitle className="text-base">{t("faceHubDialog.title")}</DialogTitle>
           <Tabs value={faceHubTab} onValueChange={(v) => setFaceHubTab(v as "gallery" | "roster")}>
             <TabsList className="h-8">
-              <TabsTrigger value="gallery"><LayoutGrid /> {t("faceHubDialog.detected")}</TabsTrigger>
-              <TabsTrigger value="roster"><Users /> {t("faceHubDialog.characters")}</TabsTrigger>
+              <TabsTrigger value="gallery"><NetsuIcon name="tab-detected" /> {t("faceHubDialog.detected")}</TabsTrigger>
+              <TabsTrigger value="roster"><NetsuIcon name="tab-characters" /> {t("faceHubDialog.characters")}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

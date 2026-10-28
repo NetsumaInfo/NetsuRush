@@ -53,6 +53,26 @@ const WARM_THUMB_POLL_MAX_MS = 12_000;
 // one, so aborting leaves at most this many encodes to kill.
 const PROXY_WORKERS = 6;
 const THUMB_WORKERS = 8;
+// Counter updates of a run reach React at most this often. Each one re-renders the toolbar's owner;
+// published per shot, a fast thumbnail run issued dozens of renders a second right while the grid
+// was being scrolled.
+const GEN_PUBLISH_MS = 120;
+
+/** Coalesces a run's counter updates; `flush` publishes the latest one immediately. */
+function throttledPublisher(set: (state: GenerationState) => void) {
+  let latest: GenerationState | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const flush = () => {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (latest) set(latest);
+    latest = null;
+  };
+  const publish = (state: GenerationState) => {
+    latest = state;
+    if (!timer) timer = setTimeout(flush, GEN_PUBLISH_MS);
+  };
+  return { publish, flush };
+}
 
 /** Cache key of a preview. The generation settings are part of it: changing them targets other
  *  files core-side, so an URL cached under the old settings must not be served. */
@@ -274,7 +294,8 @@ export function usePreviewCache(): PreviewCache {
       // to do" from "it did nothing".
       let total = readSource(source).length;
       const claimed = new Set<string>();
-      const publish = () => setProxyGen({ started: claimed.size, done, failed, total });
+      const counters = throttledPublisher(setProxyGen);
+      const publish = () => counters.publish({ started: claimed.size, done, failed, total });
       // Next shot to handle, READ FROM THE CURRENT LIST — this is what ties the run to the count
       // shown above the grid instead of freezing it on the one that existed at click time.
       const nextShot = (): PreviewRange | null => {
@@ -319,6 +340,7 @@ export function usePreviewCache(): PreviewCache {
         }
       };
       await Promise.all(Array.from({ length: PROXY_WORKERS }, worker));
+      counters.flush();
       if (proxyAbortRef.current) toast.info(t("cutStudio.genStopped", { done, total }));
       else if (failed) toast.error(t("cutStudio.genFailed", { failed, total }));
       else if (reused === done) toast.info(t("cutStudio.proxiesUpToDate", { count: done }));
@@ -348,7 +370,8 @@ export function usePreviewCache(): PreviewCache {
       let total = readSource(source).length;
       const claimed = new Set<string>();
       const seen: PreviewThumbRange[] = [];   // what was actually handled -> final cache priming
-      const publish = () => setThumbsGen({ started: claimed.size, done, failed, total });
+      const counters = throttledPublisher(setThumbsGen);
+      const publish = () => counters.publish({ started: claimed.size, done, failed, total });
       // Same live read as the proxies: the list can still grow while the run works through it.
       const nextShot = (): PreviewThumbRange | null => {
         const current = readSource(source);
@@ -370,13 +393,16 @@ export function usePreviewCache(): PreviewCache {
           publish();
           seen.push(shot);
           try {
-            const result = await nr.thumbnail(shot.path, thumbTime(shot.in, shot.out));
+            // Low: the core keeps two workers for the cards on screen, so a run over a whole rush
+            // never makes the visible thumbnails wait behind it.
+            const result = await nr.thumbnail(shot.path, thumbTime(shot.in, shot.out), "low");
             if (typeof result !== "string") failed++;
           } catch { failed++; }
           done++; publish();
         }
       };
       await Promise.all(Array.from({ length: THUMB_WORKERS }, worker));
+      counters.flush();
       // The files are written but their paths never came back through `nr.thumbnail`: this final
       // resolve primes the renderer cache in one RPC, so mounted cards show their <img> without each
       // pulling its own request.

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import { FolderKanban, Library, RefreshCw, X } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 
 import { useApp } from "@/store";
 import { Button } from "@/components/ui/button";
@@ -79,19 +79,19 @@ export function ProjectScopeSheet() {
         aria-label={t("projectScope.title")}
       >
         <header className="flex items-center gap-1 border-b border-border py-2 pr-2 pl-3">
-          <FolderKanban className="size-4 shrink-0 text-primary" />
+          <NetsuIcon name="folder-kanban" className="size-4 shrink-0 text-primary" />
           <span className="min-w-0 flex-1 truncate pl-1 text-sm font-medium">{t("projectScope.title")}</span>
           <Tooltip>
             <TooltipTrigger render={
               <Button variant="ghost" size="icon-sm" disabled={!!scan} onClick={() => void runScan()} aria-label={t("projectScope.scan")} />
             }>
-              {scan ? <Spinner className="size-4" /> : <RefreshCw className="size-4" />}
+              {scan ? <Spinner className="size-4" /> : <NetsuIcon name="refresh" className="size-4" />}
             </TooltipTrigger>
             <TooltipContent>{t("projectScope.scan")}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-sm" onClick={() => setOpen(false)} aria-label={t("projectScope.close")} />}>
-              <X className="size-4" />
+              <NetsuIcon name="close" className="size-4" />
             </TooltipTrigger>
             <TooltipContent>{t("projectScope.close")}</TooltipContent>
           </Tooltip>
@@ -103,7 +103,7 @@ export function ProjectScopeSheet() {
             onClick={() => setSearchScope(allScope ? "project" : "all")}
             className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left transition-colors hover:bg-muted ${allScope ? "bg-primary/10 text-primary hover:bg-primary/15" : ""}`}
           >
-            <Library className="size-4 shrink-0" />
+            <NetsuIcon name="library" className="size-4 shrink-0" />
             <span className="min-w-0 flex-1 truncate text-sm">{t("projectScope.allFootage")}</span>
             {allScope && <Badge variant="secondary" className="shrink-0">{t("projectScope.activeMode")}</Badge>}
           </button>

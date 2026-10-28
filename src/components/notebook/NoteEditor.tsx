@@ -2,7 +2,7 @@
 // une `key={page.id}` par le parent → recréé à chaque page (initialContent = blocs de la page). onChange
 // pousse les blocs au store (autosave débouncé ailleurs). Menus : slash « / » (défaut + blocs custom) et
 // « @ » (mention d'une autre page → lien + rétrolien).
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BlockNoteView, type Theme } from "@blocknote/mantine";
 import { useCreateBlockNote, SuggestionMenuController, getDefaultReactSlashMenuItems, FormattingToolbarController, FormattingToolbar, getFormattingToolbarItems, type DefaultReactSuggestionItem } from "@blocknote/react";
@@ -14,7 +14,7 @@ import { notebookCanEdit, notebookCollabState } from "./notebookCollabState";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
 import { spell } from "@/lib/spell/spellClient";
-import { SpellcheckExtension, type SpellTarget } from "@/lib/spell/spellPlugin";
+import { SpellcheckExtension, badWordAtPoint, type SpellTarget } from "@/lib/spell/spellPlugin";
 import { SpellPopover } from "@/components/common/SpellPopover";
 import { isImageUrl, isVideoUrl } from "@/lib/embeds";
 import { nbId, makeEmptyDatabase, parseNbLink, NBPAGE_LINK_PREFIX, type NotebookPage, type NoteBlock } from "./notebookShared";
@@ -24,6 +24,7 @@ import { PasteAsMenu, type PasteAnchor } from "./PasteAsMenu";
 import { LinkToPageButton } from "./LinkToPageButton";
 import { CopyTextButton, CopyAnchorButton } from "./SelectionActions";
 import { NoteSideMenu } from "./NoteSideMenu";
+import { useNoteTextMenu } from "./NoteTextMenu";
 import { parseUrls } from "./blocks/GalleryBlock";
 
 // Thème BlockNote construit depuis les tokens CSS de l'app (source unique = palette d'index.css).
@@ -168,6 +169,14 @@ function NoteEditorInner({ page }: { page: NotebookPage }) {
       return true;
     },
   });
+
+  // Right-click menu (cut/copy/paste, formatting, block actions) of the app-wide text menu. A click
+  // on a misspelled word stays with the spelling panel.
+  const claimSpelling = useCallback(
+    (e: MouseEvent) => !!spellLangRef.current && !!editor.prosemirrorView && badWordAtPoint(editor.prosemirrorView, e.clientX, e.clientY),
+    [editor],
+  );
+  useNoteTextMenu(editor, editorWrap, !canEdit, claimSpelling);
 
   useEffect(() => {
     const updateRole = () => setCanEdit(notebookCanEdit(page.notebookId, page.id));

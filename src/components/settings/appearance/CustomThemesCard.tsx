@@ -9,7 +9,7 @@
 // Une vignette de palette seule ne distingue pas deux thèmes qui ne diffèrent que par leur image.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -111,11 +111,11 @@ export function CustomThemesCard() {
               n'apprend rien sur l'état du thème. */}
           {dirty ? (
             <Button size="sm" onClick={() => active && updateCustomTheme(active.id)}>
-              <Save className="size-3.5" /> {t("appearance.custom.save")}
+              <NetsuIcon name="save" className="size-3.5" /> {t("appearance.custom.save")}
             </Button>
           ) : null}
           <Button size="sm" variant="outline" onClick={() => setNaming({ id: null, name: "" })}>
-            <Plus className="size-3.5" /> {t("appearance.custom.create")}
+            <NetsuIcon name="add" className="size-3.5" /> {t("appearance.custom.create")}
           </Button>
         </div>
       </div>
@@ -139,7 +139,7 @@ export function CustomThemesCard() {
                 >
                   <div className="flex w-full items-center justify-between gap-2">
                     <span className="truncate text-sm font-medium">{entry.name}</span>
-                    {selected && <Check className="size-4 shrink-0 text-primary" />}
+                    {selected && <NetsuIcon name="check" className="size-4 shrink-0 text-primary" />}
                   </div>
                   <ThemePreview theme={entry} poster={entry.wallpaper.id ? posters[entry.wallpaper.id] ?? null : null} />
                 </button>
@@ -150,10 +150,10 @@ export function CustomThemesCard() {
                     label={t("appearance.custom.rename")}
                     onClick={() => setNaming({ id: entry.id, name: entry.name })}
                   >
-                    <Pencil className="size-3" />
+                    <NetsuIcon name="edit" className="size-3" />
                   </CardAction>
                   <CardAction label={t("appearance.custom.delete")} onClick={() => deleteCustomTheme(entry.id)}>
-                    <Trash2 className="size-3" />
+                    <NetsuIcon name="trash" className="size-3" />
                   </CardAction>
                 </div>
               </div>

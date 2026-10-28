@@ -3,7 +3,7 @@
 // Envoi raté → le message est enregistré, comme le bouton « Enregistrer le message » du formulaire.
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, LifeBuoy } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr, type BugContext, type BugReportRequest } from "@/lib/bridge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -91,7 +91,7 @@ export function ErrorReportButton({
   if (state === "sent" || state === "saved") {
     return (
       <p className={cn("flex items-center gap-1.5 text-xs", state === "sent" ? "text-[var(--color-ok)]" : "text-muted-foreground", className)}>
-        <Check className="size-3.5 shrink-0" /> {t(state === "sent" ? "common:report.sent" : "common:report.saved")}
+        <NetsuIcon name="check" className="size-3.5 shrink-0" /> {t(state === "sent" ? "common:report.sent" : "common:report.saved")}
       </p>
     );
   }
@@ -103,7 +103,7 @@ export function ErrorReportButton({
           <Button variant="outline" size="sm" className={className} disabled={state === "sending"} onClick={() => void send()} />
         }
       >
-        <LifeBuoy className={state === "sending" ? "size-3.5 animate-pulse" : "size-3.5"} />
+        <NetsuIcon name="error-report" busy={state === "sending"} className="size-3.5" />
         {state === "sending" ? t("settings:bugReport.sending") : t("common:report.action")}
       </TooltipTrigger>
       {/* Le formulaire annonce déjà le journal joint : même phrase, même clé. */}

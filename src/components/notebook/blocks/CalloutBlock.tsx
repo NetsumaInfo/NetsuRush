@@ -5,7 +5,7 @@ import { createReactBlockSpec } from "@blocknote/react";
 import i18n from "@/i18n";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Palette } from "lucide-react";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { EmojiPicker } from "@/components/common/EmojiPicker";
 import { colorOf, DB_COLORS } from "../notebookShared";
 
@@ -60,7 +60,7 @@ export const calloutSpec = createReactBlockSpec(
             <Tooltip>
               <TooltipTrigger render={
                 <DropdownMenu>
-                  <DropdownMenuTrigger render={<button type="button" className="rounded p-1 opacity-70 hover:bg-foreground/10 hover:opacity-100"><Palette className="h-3.5 w-3.5" /></button>} />
+                  <DropdownMenuTrigger render={<button type="button" className="rounded p-1 opacity-70 hover:bg-foreground/10 hover:opacity-100"><NetsuIcon name="palette" className="h-3.5 w-3.5" /></button>} />
                   <DropdownMenuContent align="end">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel>{i18n.t("notebook:callout.presets")}</DropdownMenuLabel>

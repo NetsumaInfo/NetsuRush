@@ -12,11 +12,8 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuGroup, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table, Kanban, Plus, Trash2, LayoutGrid, CalendarDays, List, Eye, EyeOff, Settings2,
-  MoreHorizontal, Maximize2, Minimize2, Pencil, Copy, ArrowLeft, ArrowRight, ChevronDown,
-  type LucideIcon,
-} from "lucide-react";
+import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
+import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { makeEmptyDatabase, ROW_HEIGHT_LABELS, VIEW_LABELS, type Database, type RowHeight, type ViewType } from "../notebookShared";
 import { useDatabaseOps, type DatabaseOps } from "./useDatabaseOps";
 import { TableView } from "./TableView";
@@ -26,9 +23,10 @@ import { CalendarView } from "./CalendarView";
 import { ListView } from "./ListView";
 import { RowDetail } from "./RowDetail";
 import { FilterMenu, SortMenu } from "./FilterSort";
+import { cn } from "@/lib/utils";
 
-const VIEW_ICON: Record<ViewType, LucideIcon> = {
-  table: Table, kanban: Kanban, gallery: LayoutGrid, calendar: CalendarDays, list: List,
+const VIEW_ICON: Record<ViewType, IconComponent> = {
+  table: netsuIconOf("table"), kanban: netsuIconOf("kanban"), gallery: netsuIconOf("layout-grid"), calendar: netsuIconOf("calendar"), list: netsuIconOf("bullet-list"),
 };
 const VIEW_ORDER: ViewType[] = ["table", "kanban", "gallery", "calendar", "list"];
 
@@ -42,7 +40,7 @@ function ViewTab({ view, active, canDelete, ops }: {
   const [renaming, setRenaming] = useState(false);
   if (renaming) {
     return (
-      <input
+      <input autoComplete="off"
         aria-label={i18n.t("notebook:a11y.renameView")}
         defaultValue={view.name}
         onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== view.name) ops.updateView(view.id, { name: v }); setRenaming(false); }}
@@ -65,18 +63,18 @@ function ViewTab({ view, active, canDelete, ops }: {
       {active && (
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="pr-1.5 text-muted-foreground hover:text-foreground"><ChevronDown className="h-3 w-3" /></button>} />} />
+            <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="pr-1.5 text-muted-foreground hover:text-foreground"><NetsuIcon name="chevron-down" className="h-3 w-3" /></button>} />} />
             <TooltipContent>{i18n.t("notebook:dbView.viewOptions")}</TooltipContent>
           </Tooltip>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setRenaming(true)}><Pencil className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:tree.rename")}</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => ops.duplicateView(view.id)}><Copy className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => ops.moveView(view.id, -1)}><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveLeft")}</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => ops.moveView(view.id, 1)}><ArrowRight className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveRight")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setRenaming(true)}><NetsuIcon name="edit" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:tree.rename")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => ops.duplicateView(view.id)}><NetsuIcon name="copy" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => ops.moveView(view.id, -1)}><NetsuIcon name="back" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveLeft")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => ops.moveView(view.id, 1)}><NetsuIcon name="forward" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveRight")}</DropdownMenuItem>
             {canDelete && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => ops.removeView(view.id)} className="text-destructive"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.deleteView")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => ops.removeView(view.id)} className="text-destructive"><NetsuIcon name="trash" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.deleteView")}</DropdownMenuItem>
               </>
             )}
           </DropdownMenuContent>
@@ -93,7 +91,7 @@ function ViewSettingsMenu({ db, view, ops }: { db: Database; view: Database["vie
   return (
     <DropdownMenu>
       <Tooltip>
-        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"><Settings2 className="h-3.5 w-3.5" /> {i18n.t("notebook:dbView.settings")}</button>} />} />
+        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="sliders" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbView.settings")}</button>} />} />
         <TooltipContent>{i18n.t("notebook:dbView.viewSettings")}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" className="max-h-96 w-56 overflow-y-auto">
@@ -106,7 +104,7 @@ function ViewSettingsMenu({ db, view, ops }: { db: Database; view: Database["vie
               onClick={() => { if (i !== 0) ops.toggleFieldHidden(f.id); }}
               className={i === 0 ? "opacity-50" : ""}
             >
-              {hidden.has(f.id) ? <EyeOff className="mr-1.5 h-3.5 w-3.5 opacity-50" /> : <Eye className="mr-1.5 h-3.5 w-3.5" />}
+              <NetsuIcon name="eye" on={hidden.has(f.id)} className={cn("mr-1.5 h-3.5 w-3.5", hidden.has(f.id) && "opacity-50")} />
               <span className="min-w-0 flex-1 truncate">{f.name}</span>
             </DropdownMenuItem>
           ))}
@@ -159,7 +157,7 @@ function DatabaseCard({ db, ops, tall, onRemove, onToggleFull, full }: {
     <div className={`flex min-h-0 flex-col rounded-lg border border-border bg-card/40 ${tall ? "h-full" : ""}`}>
       {/* Barre d'outils : nom + onglets de vue | réglages, filtres, tris, ⋯ */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-2 py-1.5">
-        <input
+        <input autoComplete="off"
           aria-label={i18n.t("notebook:a11y.databaseName")}
           defaultValue={db.name}
           key={db.name}
@@ -172,7 +170,7 @@ function DatabaseCard({ db, ops, tall, onRemove, onToggleFull, full }: {
           ))}
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="rounded px-1.5 py-1 text-muted-foreground hover:text-foreground"><Plus className="h-3.5 w-3.5" /></button>} />} />
+              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="rounded px-1.5 py-1 text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>} />} />
               <TooltipContent>{i18n.t("notebook:dbView.addView")}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent>
@@ -193,16 +191,16 @@ function DatabaseCard({ db, ops, tall, onRemove, onToggleFull, full }: {
           <SortMenu fields={db.fields} view={view} onChange={ops.setSorts} />
           <ViewSettingsMenu db={db} view={view} ops={ops} />
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={onToggleFull} className="rounded p-1 text-muted-foreground hover:text-foreground">{full ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}</button>} />
+            <TooltipTrigger render={<button type="button" onClick={onToggleFull} className="rounded p-1 text-muted-foreground hover:text-foreground"><NetsuIcon name={full ? "shrink" : "fullscreen"} className="h-3.5 w-3.5" /></button>} />
             <TooltipContent>{full ? i18n.t("notebook:finalPass.exitFullscreen") : i18n.t("notebook:finalPass.openFullscreen")}</TooltipContent>
           </Tooltip>
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="rounded p-1 text-muted-foreground hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>} />} />
+              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="rounded p-1 text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="h-3.5 w-3.5" /></button>} />} />
               <TooltipContent>{i18n.t("notebook:dbView.databaseActions")}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onRemove} className="text-destructive"><Trash2 className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.deleteDatabase")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={onRemove} className="text-destructive"><NetsuIcon name="trash" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.deleteDatabase")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
