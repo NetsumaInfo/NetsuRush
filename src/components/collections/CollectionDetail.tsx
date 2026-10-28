@@ -373,15 +373,27 @@ export function CollectionDetail({ id }: { id: string }) {
           <TooltipContent>{tr("share.actionHint")}</TooltipContent>
         </Tooltip>
         <div className="flex-1" />
-        <Tooltip>
-          <TooltipTrigger render={<div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs" />}>
-            <NetsuIcon name="grid-columns" className="mr-0.5 h-3.5 w-3.5 text-muted-foreground" />
-            <button type="button" aria-label={tr("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="remove" className="h-3.5 w-3.5" /></button>
-            <span className="w-4 text-center tabular-nums">{grid.actualCols}</span>
-            <button type="button" aria-label={tr("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
-          </TooltipTrigger>
-          <TooltipContent>{tr("detail.thumbSize")}</TooltipContent>
-        </Tooltip>
+        <div className="flex h-8 items-center gap-0.5 rounded-md border border-border bg-card px-1 text-xs">
+          <Tooltip>
+            <TooltipTrigger render={<span className="mr-0.5 inline-flex" />}>
+              <NetsuIcon name="grid-columns" className="size-3.5 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>{tr("detail.thumbSize")}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs" aria-label={tr("common:action.decrease")} onClick={() => grid.setCols(stepCols(grid.actualCols, -1, grid.maxCols))} disabled={!canFewerCols(grid.actualCols)} />}>
+              <NetsuIcon name="remove" className="size-3.5" />
+            </TooltipTrigger>
+            <TooltipContent>{tr("common:action.decrease")}</TooltipContent>
+          </Tooltip>
+          <span className="min-w-5 text-center tabular-nums">{grid.actualCols}</span>
+          <Tooltip>
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs" aria-label={tr("common:action.increase")} onClick={() => grid.setCols(stepCols(grid.actualCols, 1, grid.maxCols))} disabled={!canMoreCols(grid.actualCols, grid.maxCols)} />}>
+              <NetsuIcon name="add" className="size-3.5" />
+            </TooltipTrigger>
+            <TooltipContent>{tr("common:action.increase")}</TooltipContent>
+          </Tooltip>
+        </div>
         {connected && !!items.length && <TimelineTargetSelect target={target} />}
         {/* Export par PROFIL, accessible sans ouvrir le lecteur (le panneau de droite est fermé par
             défaut) : même bouton et mêmes profils que le Découpage et la Recherche. Il porte AUSSI
@@ -410,12 +422,12 @@ export function CollectionDetail({ id }: { id: string }) {
             {/* Champ de recherche COURT : il partage sa ligne avec les tags et tous les outils de
                 grille ; pleine largeur, il repoussait le reste sur une seconde rangée. */}
             <div className="relative w-40 shrink-0">
-              <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={filter.q} onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))} placeholder={tr("detail.searchPlaceholder")} className="h-8 pl-8" />
             </div>
             <Select value={sort} onValueChange={(v) => setSort(v as CollSortKey)}>
               <SelectTrigger size="sm" className="w-auto gap-1.5" aria-label={tr("detail.sortShots")}>
-                <NetsuIcon name="sort" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <NetsuIcon name="sort" className="size-3.5 shrink-0 text-muted-foreground" />
                 <SelectValue>{tr(SORT_LABELS[sort])}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -424,14 +436,14 @@ export function CollectionDetail({ id }: { id: string }) {
             </Select>
             {allTags.length > 0 && (
               <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
-                <NetsuIcon name="tag" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <NetsuIcon name="tag" className="size-3.5 shrink-0 text-muted-foreground" />
                 {allTags.map((t) => {
                   const on = filter.tags.includes(t);
                   return (
-                    <button key={t} type="button" onClick={() => toggleTag(t)}
-                      className={"shrink-0 rounded-full border px-2 py-0.5 text-[11px] transition-colors " + (on ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground")}>
+                    <Toggle key={t} size="sm" variant="outline" pressed={on} onPressedChange={() => toggleTag(t)}
+                      className="h-5 min-w-0 shrink-0 rounded-full px-2 text-[11px] text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary/15 aria-pressed:text-primary">
                       {t}
-                    </button>
+                    </Toggle>
                   );
                 })}
               </div>
@@ -585,7 +597,7 @@ export function CollectionDetail({ id }: { id: string }) {
             onKeyDown={(e) => { if (e.key === "ArrowLeft") { e.preventDefault(); toggleSide(true); } }}
             className="group relative w-px shrink-0 touch-none self-stretch cursor-col-resize bg-border/60 transition-colors hover:bg-primary outline-none focus-visible:bg-primary">
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
         )}
 
@@ -602,7 +614,7 @@ export function CollectionDetail({ id }: { id: string }) {
             {/* Zone de PRÉHENSION élargie mais SANS largeur de layout : la grille et le lecteur
                 restent collés au trait, seul le curseur dispose de quelques pixels de chaque côté. */}
             <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
-            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <NetsuIcon name="grip" className="pointer-events-none absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
           )}
           {/* Rognage ouvert → lecteur du panneau suspendu (sinon il continue de tourner derrière la modale). */}
@@ -634,9 +646,9 @@ export function CollectionDetail({ id }: { id: string }) {
           {shared.error && <span className="text-destructive">{shared.error}</span>}
           {shared.hiddenCount > 0 && <Button size="sm" variant="ghost" onClick={shared.restoreHidden}>{tr("share.restoreHidden", { count: shared.hiddenCount })}</Button>}
           {undoStack.length > 0 && (
-            <button type="button" onClick={() => void undoRemove()} className="ml-auto inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+            <Button variant="ghost" size="sm" onClick={() => void undoRemove()} className="ml-auto text-xs text-muted-foreground">
               <NetsuIcon name="cut-undo" className="size-3" /> {tr("detail.undoRemove")}
-            </button>
+            </Button>
           )}
         </div>
       )}

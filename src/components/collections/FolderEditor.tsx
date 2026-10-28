@@ -10,6 +10,7 @@ import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { lucideIcon, lucideNames, useLucideCatalog } from "@/lib/lucideCatalog";
 import { useApp } from "@/store";
 import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { nr, type CollectionIcon, type CollectionMeta, type CollectionArchive, type CollectionArchiveProcess, type OfflineMedia } from "@/lib/bridge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -67,17 +68,17 @@ function IconTab({ current, onPick }: { current: string | null; onPick: (icon: C
   }, [q, names]);
   return (
     <div className="flex flex-col">
-      <div className="mb-2 flex items-center gap-1.5 rounded-md border border-border bg-muted px-2">
-        <NetsuIcon name="search" className="h-3.5 w-3.5 text-muted-foreground" />
-        <input autoComplete="off" spellCheck={false} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("editor.iconSearch")} className="w-full bg-transparent py-1.5 text-sm outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+      <div className="relative mb-2">
+        <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input autoComplete="off" spellCheck={false} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("editor.iconSearch")} className="h-8 pl-8 text-sm" />
       </div>
       <div ref={gridRef} className="grid max-h-64 grid-cols-9 gap-1 overflow-y-auto">
         {list.map((n) => (
-          <button key={n} type="button" aria-label={n} data-hover-label={n} onClick={() => onPick({ kind: "lucide", name: n })}
-            className={cn("flex aspect-square items-center justify-center rounded-md transition-colors",
-              current === n ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
-            {createElement(lucideIcon(n) as LucideIcon, { className: "h-4 w-4" })}
-          </button>
+          <Button key={n} variant="ghost" aria-label={n} data-hover-label={n} onClick={() => onPick({ kind: "lucide", name: n })}
+            className={cn("aspect-square h-auto w-full p-0",
+              current === n ? "bg-primary text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground" : "text-muted-foreground")}>
+            {createElement(lucideIcon(n) as LucideIcon, { className: "size-4" })}
+          </Button>
         ))}
       </div>
       <HoverLabel containerRef={gridRef} />
@@ -105,13 +106,13 @@ function FieldRow({ icon, label, hint, children }: {
 // gauche, statut à droite, chevron qui pivote quand ouvert.
 function SettingRow({ icon, label, hint, open, onClick }: { icon: React.ReactNode; label: string; hint?: React.ReactNode; open: boolean; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} aria-expanded={open}
-      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50">
+    <Button variant="ghost" onClick={onClick} aria-expanded={open}
+      className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5 text-left text-sm font-normal hover:bg-accent/50">
       <span className="text-muted-foreground">{icon}</span>
       <span className="flex-1">{label}</span>
       {hint}
       <NetsuIcon name="chevron-toggle" on={open} className="size-4 text-muted-foreground" />
-    </button>
+    </Button>
   );
 }
 
@@ -395,11 +396,14 @@ export function FolderEditor({
             {/* Le contour est dessiné DANS la vignette (`outline` à décalage négatif) et non par une
                 boîte parente : une bordure aurait mangé 1 px de la vignette (box-sizing) et un
                 `ring` sur un parent aurait son propre rayon, jamais exactement celui de l'image. */}
-            <button type="button" onClick={() => setSub("icon")} aria-label={tr("editor.changeIcon")}
-              className="group shrink-0 outline-none">
-              <CollectionGlyph icon={icon} color={color} size={GLYPH_SIZE}
-                className="block outline outline-1 -outline-offset-1 outline-border transition-[outline-color] group-hover:outline-primary group-focus-visible:outline-primary" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger render={<Button variant="ghost" onClick={() => setSub("icon")} aria-label={tr("editor.changeIcon")}
+                className="group h-auto shrink-0 rounded-none p-0 hover:bg-transparent dark:hover:bg-transparent" />}>
+                <CollectionGlyph icon={icon} color={color} size={GLYPH_SIZE}
+                  className="block outline outline-1 -outline-offset-1 outline-border transition-[outline-color] group-hover:outline-primary group-focus-visible:outline-primary" />
+              </TooltipTrigger>
+              <TooltipContent>{tr("editor.changeIcon")}</TooltipContent>
+            </Tooltip>
             <Input autoFocus value={name} onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter") void save(); }}
               placeholder={tr("folder.namePlaceholder")} className="h-11 flex-1" />
@@ -489,12 +493,12 @@ export function FolderEditor({
               {/* En-tête archive : le toggle Activé/Désactivé vit DANS la barre (haut-droite), à côté
                   du chevron — hors du bouton d'ouverture (pas de bouton imbriqué). */}
               <div className="flex items-center pr-3">
-                <button type="button" aria-expanded={expanded === "archive"}
+                <Button variant="ghost" aria-expanded={expanded === "archive"}
                   onClick={() => setExpanded((e) => (e === "archive" ? "" : "archive"))}
-                  className="flex flex-1 items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent/50">
+                  className="h-auto flex-1 justify-start gap-2.5 rounded-none px-3 py-2.5 text-left text-sm font-normal hover:bg-accent/50">
                   <span className="text-muted-foreground"><NetsuIcon name="disk" className="size-4" /></span>
                   <span className="flex-1">{tr("archive.onDisk")}</span>
-                </button>
+                </Button>
                 <Tooltip>
                   <TooltipTrigger render={<div className="mr-2.5 shrink-0" />}>
                     <Toggle size="sm" variant="outline" pressed={archiveOn} disabled={!!shareProjectId}
@@ -505,11 +509,14 @@ export function FolderEditor({
                   </TooltipTrigger>
                   {shareProjectId && <TooltipContent>{tr("archive.requiredForShare")}</TooltipContent>}
                 </Tooltip>
-                <button type="button" aria-label={tr("archive.onDisk")} aria-expanded={expanded === "archive"}
-                  onClick={() => setExpanded((e) => (e === "archive" ? "" : "archive"))}
-                  className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
-                  <NetsuIcon name="chevron-toggle" on={expanded === "archive"} className="size-4" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger render={<Button variant="ghost" size="icon-xs" aria-label={tr("archive.onDisk")} aria-expanded={expanded === "archive"}
+                    onClick={() => setExpanded((e) => (e === "archive" ? "" : "archive"))}
+                    className="shrink-0 text-muted-foreground hover:text-foreground" />}>
+                    <NetsuIcon name="chevron-toggle" on={expanded === "archive"} className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>{tr("archive.onDisk")}</TooltipContent>
+                </Tooltip>
               </div>
               {expanded === "archive" && (
                 <div className="space-y-2.5 border-t border-border px-3 py-3">
@@ -696,14 +703,15 @@ export function FolderEditor({
       <Dialog open={sub === "icon"} onOpenChange={(v) => { if (!v) setSub(""); }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader><DialogTitle>{tr("editor.iconTitle")}</DialogTitle></DialogHeader>
-          <div className="mb-1 flex items-center gap-1 border-b border-border pb-2">
-            {tabs.map((t) => (
-              <button key={t.id} type="button" onClick={() => setTab(t.id)}
-                className={cn("flex items-center gap-1 rounded-md px-2 py-1 text-sm", tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}>
-                {createElement(t.icon, { className: "h-3.5 w-3.5" })} {t.label}
-              </button>
-            ))}
-          </div>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+            <TabsList variant="line" className="w-full justify-start border-b border-border">
+              {tabs.map((t) => (
+                <TabsTrigger key={t.id} value={t.id} className="gap-1 text-sm">
+                  {createElement(t.icon, { className: "size-3.5" })} {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
           {tab === "emoji" && <EmojiPicker onPick={(ch) => setIcon({ kind: "emoji", ch })} />}
           {tab === "icon" && <IconTab current={currentLucide} onPick={setIcon} />}
           {tab === "image" && (
@@ -711,17 +719,17 @@ export function FolderEditor({
               {icon?.kind === "image" && (
                 <div className="flex items-center gap-2">
                   <CollectionGlyph icon={icon} color={color} size={40} />
-                  <button type="button" onClick={() => setIcon({ kind: "lucide", name: "folder" })}
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-destructive">
-                    <NetsuIcon name="close" className="h-3.5 w-3.5" /> {tr("common:action.remove")}
-                  </button>
+                  <Button variant="ghost" size="sm" onClick={() => setIcon({ kind: "lucide", name: "folder" })}
+                    className="text-xs text-muted-foreground hover:text-destructive">
+                    <NetsuIcon name="close" className="size-3.5" /> {tr("common:action.remove")}
+                  </Button>
                 </div>
               )}
-              <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-                className="flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-border px-2 py-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                {uploading ? <Spinner className="size-3.5" /> : <NetsuIcon name="image-add" className="h-3.5 w-3.5" />}
+              <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}
+                className="h-auto w-full gap-1.5 border-dashed px-2 py-3 text-xs text-muted-foreground hover:text-foreground">
+                {uploading ? <Spinner className="size-3.5" /> : <NetsuIcon name="image-add" className="size-3.5" />}
                 {tr("editor.importImage")}
-              </button>
+              </Button>
               <input ref={fileRef} type="file" accept="image/*" hidden
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadIcon(f); e.target.value = ""; }} />
             </div>

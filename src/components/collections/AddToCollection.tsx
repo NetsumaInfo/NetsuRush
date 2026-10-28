@@ -7,6 +7,8 @@ import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -40,7 +42,7 @@ export function AddToCollection({
         onClick={(e) => { if (stopPropagation) e.stopPropagation(); }}
         className={cn("inline-flex items-center justify-center rounded transition-colors", className)}
       >
-        <NetsuIcon name="folder-plus" className="h-3.5 w-3.5" />
+        <NetsuIcon name="folder-plus" className="size-3.5" />
       </Popover.Trigger>
       {open && <CollectionPicker shots={shots} close={() => change(false)} />}
     </Popover.Root>
@@ -108,25 +110,28 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
 
   const Row = (c: CollectionMeta) => (
     <div key={c.id} className="group/row flex items-center gap-1 rounded-lg pr-1 transition-colors hover:bg-accent">
-      <button type="button" onClick={() => range(c.id)} disabled={!!busy || readOnly(c)}
-        className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm disabled:opacity-60">
+      <Button variant="ghost" onClick={() => range(c.id)} disabled={!!busy || readOnly(c)}
+        className="h-auto min-w-0 flex-1 justify-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-normal hover:bg-transparent dark:hover:bg-transparent">
         <CollectionGlyph icon={c.icon} color={c.color} size={22} />
         <span className="min-w-0 flex-1 truncate">{c.name}</span>
         {busy === c.id ? <Spinner className="size-3.5 text-muted-foreground" />
-          : done === c.id ? <NetsuIcon name="check" className="h-3.5 w-3.5 text-[var(--color-ok)]" />
+          : done === c.id ? <NetsuIcon name="check" className="size-3.5 text-[var(--color-ok)]" />
           : !readOnly(c) && <span className="text-[11px] tabular-nums text-muted-foreground">{c.count}</span>}
-      </button>
+      </Button>
       {/* Le cadenas vit HORS du bouton désactivé : un élément désactivé n'émet aucun survol, sa bulle
           ne s'ouvrirait jamais. */}
       {readOnly(c) && <Tooltip>
-        <TooltipTrigger render={<span className="shrink-0 text-muted-foreground" />}><NetsuIcon name="lock" on className="h-3 w-3" /></TooltipTrigger>
+        <TooltipTrigger render={<span className="shrink-0 text-muted-foreground" />}><NetsuIcon name="lock" on className="size-3" /></TooltipTrigger>
         <TooltipContent>{t("share.readOnly")}</TooltipContent>
       </Tooltip>}
-      <button type="button" aria-label={favs.includes(c.id) ? t("fav.remove") : t("fav.pin")}
-        onClick={(e) => { e.stopPropagation(); toggleFav(c.id); }}
-        className={cn("shrink-0 rounded p-1 transition-opacity", favs.includes(c.id) ? "text-amber-400" : "text-muted-foreground opacity-0 hover:text-foreground group-hover/row:opacity-100")}>
-        <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="h-3.5 w-3.5" />
-      </button>
+      <Tooltip>
+        <TooltipTrigger render={<Button variant="ghost" size="icon-xs" aria-label={favs.includes(c.id) ? t("fav.remove") : t("fav.pin")}
+          onClick={(e) => { e.stopPropagation(); toggleFav(c.id); }}
+          className={cn("shrink-0 transition-opacity focus-visible:opacity-100", favs.includes(c.id) ? "text-amber-400" : "text-muted-foreground opacity-0 hover:text-foreground group-hover/row:opacity-100")} />}>
+          <NetsuIcon name="cut-favorite" on={favs.includes(c.id)} className="size-3.5" />
+        </TooltipTrigger>
+        <TooltipContent>{favs.includes(c.id) ? t("fav.remove") : t("fav.pin")}</TooltipContent>
+      </Tooltip>
     </div>
   );
 
@@ -145,7 +150,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
                 popover already short on room. The switch shows up only when a selection exists. */}
             <div className="mb-1 flex h-7 items-center gap-1.5 rounded-md border border-border bg-background pl-2 pr-0.5 has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-ring">
               <NetsuIcon name="search" className="size-3.5 shrink-0 text-muted-foreground" />
-              <input autoComplete="off" spellCheck={false} aria-label={t("search.short")} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search.short")} className="h-full w-full min-w-0 bg-transparent text-xs outline-none" />
+              <Input autoComplete="off" spellCheck={false} aria-label={t("search.short")} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search.short")} className="h-full min-w-0 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0 dark:bg-transparent" />
               {offer && (
                 <ToggleGroup aria-label={t("range.scope")} value={[scope]} spacing={0} className="shrink-0 border-l border-border pl-0.5"
                   onValueChange={(v) => { const n = v[0]; if (n === "one" || n === "selection") setScope(n); }}>
@@ -182,19 +187,18 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
 
             {creating ? (
               <div className="mt-1 flex items-center gap-1.5 border-t border-border px-1.5 pt-2">
-                <input autoComplete="off" autoFocus value={name} onChange={(e) => setName(e.target.value)}
+                <Input autoComplete="off" autoFocus value={name} onChange={(e) => setName(e.target.value)}
                   onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter") void createAndRange(); if (e.key === "Escape") setCreating(false); }}
-                  placeholder={t("folder.namePlaceholder")} className="h-7 w-full min-w-0 rounded-md border border-border bg-background px-2 text-xs outline-none focus:ring-1 focus:ring-primary" />
-                <button type="button" onClick={createAndRange} disabled={!name.trim() || !!busy}
-                  className="inline-flex h-7 shrink-0 items-center rounded-md bg-primary px-2 text-xs text-primary-foreground disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  placeholder={t("folder.namePlaceholder")} className="h-7 min-w-0 text-xs" />
+                <Button size="sm" onClick={createAndRange} disabled={!name.trim() || !!busy} className="h-7 shrink-0 px-2 text-xs">
                   {busy === "__new__" ? <Spinner className="size-3.5" /> : t("common:status.ok")}
-                </button>
+                </Button>
               </div>
             ) : (
-              <button type="button" onClick={() => setCreating(true)}
-                className="mt-1 flex w-full items-center gap-2 rounded-lg border-t border-border px-2 py-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground">
-                <NetsuIcon name="add" className="h-4 w-4" /> {t("folder.new")}
-              </button>
+              <Button variant="ghost" onClick={() => setCreating(true)}
+                className="mt-1 h-auto w-full justify-start gap-2 rounded-lg border-t border-border px-2 py-2 text-left text-sm font-normal text-muted-foreground hover:text-foreground">
+                <NetsuIcon name="add" className="size-4" /> {t("folder.new")}
+              </Button>
             )}
           </Popover.Popup>
         </Popover.Positioner>

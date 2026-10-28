@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
 import { Plus, Folder, ChevronRight, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { useApp } from "@/store";
@@ -41,6 +42,14 @@ import {
   LIST_SORT_KEYS, LIST_SORT_LABELS, type CollListView, type CollListSort, type CollDisplay,
 } from "./collectionShared";
 
+// Revealed on hover, keyboard focus inside the card, or when the trigger itself is focused/open.
+const ACTION_REVEAL = "opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 aria-expanded:opacity-100";
+// Shared column preset: the folder strip and the collections grid use the same columns per view.
+const GRID_COLS: Record<CollListView, string> = {
+  gallery: "grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3",
+  grid: "grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+  compact: "grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8",
+};
 // Côté de la vignette posée en coin d'une carte Galerie.
 const GLYPH_BADGE = 22;
 // Côté de la vignette au centre d'une carte, par mode d'affichage : l'image est l'identité visuelle
@@ -153,18 +162,18 @@ export function CollectionsView() {
   }
 
   const glyphSize = GLYPH_SIZE[view];
-  const gridCls =
-    view === "gallery" ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
-    : view === "compact" ? "grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
-    : "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
+  const gridCls = cn("grid", GRID_COLS[view]);
 
   // Menu d'une carte : modifier / déplacer vers un dossier / supprimer.
   const cardMenu = (c: CollectionMeta) => (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<button type="button" aria-label={tr("list.actions")} onClick={(e) => e.stopPropagation()}
-        className="absolute right-1.5 top-1.5 rounded-md bg-background/80 p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100" />}>
-        <MoreVertical className="h-3.5 w-3.5" />
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="ghost" size="icon-xs" aria-label={tr("list.actions")} onClick={(e) => e.stopPropagation()}
+          className={ACTION_REVEAL + " absolute right-1.5 top-1.5 bg-background/80 text-muted-foreground hover:text-foreground"} />}>
+          <MoreVertical />
+        </DropdownMenuTrigger>} />
+        <TooltipContent>{tr("list.actions")}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
         <DropdownMenuItem onClick={() => edit(c)}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.edit")}</DropdownMenuItem>
         <DropdownMenuItem onClick={() => edit(c, true)}><NetsuIcon name="collab" className="size-3.5" /> {tr("share.action")}</DropdownMenuItem>
@@ -220,19 +229,19 @@ export function CollectionsView() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex min-h-12 shrink-0 flex-wrap items-center gap-2.5 border-b border-border px-4 py-2">
-        <NetsuIcon name="library" className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="library" className="size-4 shrink-0 text-muted-foreground" />
         <h1 className="text-[13px] font-medium">{tr("list.title")}</h1>
         <span className="text-[11px] text-muted-foreground">{s.collections.length || "—"}</span>
         <div className="relative ml-2 max-w-xs flex-1">
-          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <NetsuIcon name="search" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("list.searchPlaceholder")} className="h-8 pl-8" />
         </div>
         <div className="flex-1" />
         {s.collectionsLoading && !s.collections.length && <Spinner className="size-4" />}
         <Tooltip>
-          <TooltipTrigger render={<button type="button" aria-label={tr("folder.new")} onClick={() => setFolderDialog({ name: "" })}
-            className="inline-flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground" />}>
-            <NetsuIcon name="cut-folder-new" className="size-3.5" />
+          <TooltipTrigger render={<Button variant="outline" size="icon-sm" aria-label={tr("folder.new")} onClick={() => setFolderDialog({ name: "" })}
+            className="text-muted-foreground hover:text-foreground" />}>
+            <NetsuIcon name="cut-folder-new" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>{tr("list.newFolderHint")}</TooltipContent>
         </Tooltip>
@@ -245,7 +254,7 @@ export function CollectionsView() {
         </Tooltip>
         <Select value={sort} onValueChange={(v) => setSort(v as CollListSort)}>
           <SelectTrigger size="sm" className="w-auto gap-1.5" aria-label={tr("list.sortColls")}>
-            <NetsuIcon name="sort" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="sort" className="size-3.5 shrink-0 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -253,9 +262,9 @@ export function CollectionsView() {
           </SelectContent>
         </Select>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<button type="button" aria-label={tr("list.cardInfo")}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground" />}>
-            <NetsuIcon name="eye" className="size-3.5" /> {tr("list.display")}
+          <DropdownMenuTrigger render={<Button variant="outline" size="sm" aria-label={tr("list.cardInfo")}
+            className="gap-1.5 text-xs text-muted-foreground hover:text-foreground" />}>
+            <NetsuIcon name="eye" className="size-4" /> {tr("list.display")}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
@@ -283,11 +292,11 @@ export function CollectionsView() {
 
       {/* Fil d'Ariane des dossiers */}
       <div className="flex shrink-0 items-center gap-1 border-b border-border px-4 py-1.5 text-xs text-muted-foreground">
-        <button type="button" onClick={() => s.setCollectionFolder(null)} className={cn("rounded px-1.5 py-0.5 hover:bg-accent hover:text-foreground", !s.currentFolderId && "text-foreground")}>{tr("list.all")}</button>
+        <Button variant="link" size="xs" onClick={() => s.setCollectionFolder(null)} className={cn("text-muted-foreground", !s.currentFolderId && "text-foreground")}>{tr("list.all")}</Button>
         {trail.map((f) => (
           <span key={f.id} className="flex items-center gap-1">
             <ChevronRight className="size-3" />
-            <button type="button" onClick={() => s.setCollectionFolder(f.id)} className="rounded px-1.5 py-0.5 hover:bg-accent hover:text-foreground">{f.name}</button>
+            <Button variant="link" size="xs" onClick={() => s.setCollectionFolder(f.id)} className="text-muted-foreground">{f.name}</Button>
           </span>
         ))}
       </div>
@@ -295,7 +304,7 @@ export function CollectionsView() {
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {/* Sous-dossiers du dossier courant */}
         {subfolders.length > 0 && (
-          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          <div className={cn("mb-4", gridCls)}>
             {subfolders.map((f) => (
               <ContextMenu key={f.id}>
                 <ContextMenuTrigger render={
@@ -315,10 +324,13 @@ export function CollectionsView() {
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm">{f.name}</span>
                   <DropdownMenu>
-                    <DropdownMenuTrigger render={<button type="button" aria-label={tr("list.folderActions")} onClick={(e) => e.stopPropagation()}
-                      className="rounded p-0.5 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100" />}>
-                      <MoreVertical className="size-3.5" />
-                    </DropdownMenuTrigger>
+                    <Tooltip>
+                      <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="ghost" size="icon-xs" aria-label={tr("list.folderActions")} onClick={(e) => e.stopPropagation()}
+                        className={ACTION_REVEAL + " bg-background/80 text-muted-foreground hover:text-foreground"} />}>
+                        <MoreVertical />
+                      </DropdownMenuTrigger>} />
+                      <TooltipContent>{tr("list.folderActions")}</TooltipContent>
+                    </Tooltip>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenuItem onClick={() => setFolderDialog({ id: f.id, name: f.name })}><NetsuIcon name="edit" className="size-3.5" /> {tr("common:action.rename")}</DropdownMenuItem>
                       <DropdownMenuItem variant="destructive" onClick={() => setConfirmState({ title: tr("list.deleteFolderTitle", { name: f.name }), description: tr("list.deleteFolderDesc"), onConfirm: () => void s.deleteCollectionFolder(f.id) })}>
@@ -348,7 +360,7 @@ export function CollectionsView() {
             className={cn("flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary",
               view === "gallery" ? "aspect-video" : view === "compact" ? "aspect-square" : "aspect-[4/3]")}
           >
-            <Plus className={view === "compact" ? "h-5 w-5" : "h-7 w-7"} />
+            <Plus className={view === "compact" ? "size-5" : "size-6"} />
             {view !== "compact" && <span className="text-sm font-medium">{tr("list.newCollection")}</span>}
           </button>
 
