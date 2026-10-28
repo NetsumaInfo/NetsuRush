@@ -2,6 +2,7 @@
 // dnd-kit sortable : réordonner les cartes DANS une colonne (ordre global des lignes) et déplacer
 // entre colonnes (écrit la valeur du champ groupé). Colonnes : menu par en-tête (masquer / déplacer
 // ← → / renommer) + « Ajouter une colonne » (nouvelle option). Zéro anim JS (transforms GPU dnd-kit).
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import i18n from "@/i18n";
 import { DndContext, PointerSensor, closestCorners, useSensor, useSensors, useDroppable, type DragEndEvent } from "@dnd-kit/core";
@@ -71,7 +72,7 @@ function Column({ col, fields, groupField, primaryId, tall, ops, onAdd, onOpen, 
         <span className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover/col:opacity-100">
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="size-3.5" /></button>} />} />
+              <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="size-3.5" /></Button>} />} />
               <TooltipContent>{i18n.t("notebook:dbFields.columnOptions")}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent>
@@ -83,7 +84,7 @@ function Column({ col, fields, groupField, primaryId, tall, ops, onAdd, onOpen, 
             </DropdownMenuContent>
           </DropdownMenu>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={onAdd} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-4" /></button>} />
+            <TooltipTrigger render={<Button variant="ghost" type="button" onClick={onAdd} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-4" /></Button>} />
             <TooltipContent>{i18n.t("notebook:dbFields.addCard")}</TooltipContent>
           </Tooltip>
         </span>
@@ -164,16 +165,16 @@ export function KanbanView({ db, view, ops, onOpenRow, tall }: { db: Database; v
         ))}
         {/* Ajouter une colonne (nouvelle option du champ groupé) + colonnes masquées */}
         <div className="flex w-48 shrink-0 flex-col gap-1.5">
-          <button type="button" onClick={addColumn} className="flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary">
+          <Button variant="ghost" type="button" onClick={addColumn} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary">
             <NetsuIcon name="add" className="size-3.5" /> {i18n.t("notebook:dbFields.addColumn")}
-          </button>
+          </Button>
           {hiddenCols.map((c) => (
             <Tooltip key={c.key}>
               <TooltipTrigger
                 render={
-                  <button type="button" onClick={() => toggleHideColumn(c.key)} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
+                  <Button variant="ghost" type="button" onClick={() => toggleHideColumn(c.key)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
                     <NetsuIcon name="eye" className="size-3.5" /> <span className="truncate">{c.label}</span> <span className="opacity-60">{c.rows.length}</span>
-                  </button>
+                  </Button>
                 }
               />
               <TooltipContent>{i18n.t("notebook:dbFields.showColumn")}</TooltipContent>

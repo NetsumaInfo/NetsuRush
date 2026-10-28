@@ -1,6 +1,7 @@
 // En-tête de page : image de couverture (optionnelle) + icône (emoji / lucide / image) +
 // titre éditable. Écrit dans le store (nbSetPageMeta → autosave). L'icône se choisit via IconPicker
 // (Emojis énormes + Icônes + Upload) ; la couverture = fichier image local.
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "@/store";
 import { nr } from "@/lib/bridge";
@@ -32,8 +33,8 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         <div className="group relative h-40 w-full overflow-hidden rounded-lg">
           <img src={nr.mediaUrl(page.cover)} alt="" className="h-full w-full object-cover" draggable={false} />
           <div className="absolute right-2 top-2 hidden gap-1 group-hover:flex">
-            <button type="button" onClick={pickCover} className="nr-chip rounded px-2 py-1 text-xs text-white">{i18n.t("notebook:pageHeader.change")}</button>
-             <button type="button" aria-label={i18n.t("common:action.delete")} onClick={() => setMeta({ cover: null })} className="nr-chip rounded p-1 text-white"><NetsuIcon name="close" className="size-3.5" /></button>
+            <Button variant="ghost" type="button" onClick={pickCover} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent nr-chip rounded px-2 py-1 text-xs text-white">{i18n.t("notebook:pageHeader.change")}</Button>
+             <Button variant="ghost" type="button" aria-label={i18n.t("common:action.delete")} onClick={() => setMeta({ cover: null })} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent nr-chip rounded p-1 text-white"><NetsuIcon name="close" className="size-3.5" /></Button>
           </div>
         </div>
       ) : null}
@@ -42,9 +43,9 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         <div ref={iconWrap} className="relative">
           <Tooltip>
             <TooltipTrigger render={
-              <button type="button" onClick={() => setEmojiOpen((v) => !v)} className="flex size-14 items-center justify-center rounded-lg bg-card shadow-sm ring-1 ring-border">
+              <Button variant="ghost" type="button" onClick={() => setEmojiOpen((v) => !v)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex size-14 items-center justify-center rounded-lg bg-card shadow-sm ring-1 ring-border">
                 {renderPageIcon(page.icon, "size-8")}
-              </button>
+              </Button>
             } />
             <TooltipContent>{i18n.t("notebook:pageHeader.icon")}</TooltipContent>
           </Tooltip>
@@ -60,9 +61,9 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         </div>
 
         {!page.cover && (
-          <button type="button" onClick={pickCover} className="mb-1 flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
+          <Button variant="ghost" type="button" onClick={pickCover} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent mb-1 flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
             <NetsuIcon name="image-add" className="size-3.5" /> {i18n.t("notebook:pageHeader.cover")}
-          </button>
+          </Button>
         )}
       </div>
 

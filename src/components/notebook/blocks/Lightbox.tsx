@@ -2,6 +2,8 @@
 // (clic = sauter à l'image), zoom molette + déplacement à la souris, double-clic = zoom rapide,
 // diaporama auto (lecture/pause, 3 s), légende, flèches clavier, Échap. Portail sur <body>.
 // Zéro boucle d'anim JS (transform direct + un setInterval de diaporama).
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -80,24 +82,24 @@ export function Lightbox({ urls, index, onClose, onIndex, captions }: {
         <span className="text-sm text-white/70 tabular-nums">{index + 1} / {urls.length}</span>
         <div className="flex items-center gap-1.5">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => { setZoom(clampZoom(zoom / 1.4)); if (zoom / 1.4 <= 1) setPan({ x: 0, y: 0 }); }} className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><NetsuIcon name="zoom-out" className="size-4" /></button>} />
+            <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => { setZoom(clampZoom(zoom / 1.4)); if (zoom / 1.4 <= 1) setPan({ x: 0, y: 0 }); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><NetsuIcon name="zoom-out" className="size-4" /></Button>} />
             <TooltipContent>{i18n.t("notebook:lightbox.zoomOut")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => setZoom(clampZoom(zoom * 1.4))} className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><NetsuIcon name="zoom-in" className="size-4" /></button>} />
+            <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => setZoom(clampZoom(zoom * 1.4))} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"><NetsuIcon name="zoom-in" className="size-4" /></Button>} />
             <TooltipContent>{i18n.t("notebook:lightbox.zoomIn")}</TooltipContent>
           </Tooltip>
           {many && (
             <Tooltip>
               <TooltipTrigger render={
-                <button type="button" onClick={() => setPlaying((p) => !p)} className={`flex size-9 items-center justify-center rounded-full text-white hover:bg-white/20 ${playing ? "bg-primary" : "bg-white/10"}`}>
+                <Button variant="ghost" type="button" onClick={() => setPlaying((p) => !p)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `flex size-9 items-center justify-center rounded-full text-white hover:bg-white/20 ${playing ? "bg-primary" : "bg-white/10"}`)}>
                   <NetsuIcon name="play-pause" on={playing} className="size-4" />
-                </button>
+                </Button>
               } />
               <TooltipContent>{playing ? i18n.t("notebook:lightbox.pause") : i18n.t("notebook:lightbox.slideshow")}</TooltipContent>
             </Tooltip>
           )}
-          <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:window.close")}><NetsuIcon name="close" className="size-4" /></button>
+          <Button variant="ghost" type="button" onClick={onClose} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:window.close")}><NetsuIcon name="close" className="size-4" /></Button>
         </div>
       </div>
 
@@ -105,8 +107,8 @@ export function Lightbox({ urls, index, onClose, onIndex, captions }: {
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
         {many && (
           <>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(-1); }} className="absolute left-4 z-10 flex size-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.previous")}><NetsuIcon name="prev" className="size-6" /></button>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(1); }} className="absolute right-4 z-10 flex size-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.next")}><NetsuIcon name="next" className="size-6" /></button>
+            <Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(-1); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent absolute left-4 z-10 flex size-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.previous")}><NetsuIcon name="prev" className="size-6" /></Button>
+            <Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); setPlaying(false); go(1); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent absolute right-4 z-10 flex size-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label={i18n.t("notebook:lightbox.next")}><NetsuIcon name="next" className="size-6" /></Button>
           </>
         )}
         <img
@@ -130,15 +132,15 @@ export function Lightbox({ urls, index, onClose, onIndex, captions }: {
         {many && (
           <div className="flex max-w-full items-center gap-1.5 overflow-x-auto pb-1">
             {urls.map((u, k) => (
-              <button
+              <Button variant="ghost"
                 key={u + k}
                 type="button"
                 aria-label={`${caption || i18n.t("notebook:fileKind.image")} ${k + 1}`}
                 onClick={() => { setPlaying(false); onIndex(k); }}
-                className={`h-14 w-20 shrink-0 overflow-hidden rounded-md transition-opacity ${k === index ? "ring-2 ring-primary" : "opacity-50 hover:opacity-90"}`}
+                className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `h-14 w-20 shrink-0 overflow-hidden rounded-md transition-opacity ${k === index ? "ring-2 ring-primary" : "opacity-50 hover:opacity-90"}`)}
               >
                 <img src={u} alt="" className="h-full w-full object-cover" draggable={false} />
-              </button>
+              </Button>
             ))}
           </div>
         )}

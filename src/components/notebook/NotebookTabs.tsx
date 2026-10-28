@@ -3,6 +3,8 @@
 // (icône + titre), × au survol, clic-milieu ferme, glisser-déposer natif réordonne, clic droit =
 // fermer / fermer les autres, débordement = scroll + menu « » », bouton + = nouvelle page.
 // `data-no-drag` sur les contrôles → le clic ne déplace pas la fenêtre (l'espace vide, lui, drague).
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -42,11 +44,11 @@ export function NotebookTabs() {
       {/* Historique de l'onglet actif (◀ ▶) */}
       <div data-no-drag className="flex shrink-0 items-center gap-0.5">
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={navBtn}><NetsuIcon name="back" className="size-4" /></button>} />
+          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", navBtn)}><NetsuIcon name="back" className="size-4" /></Button>} />
           <TooltipContent>{tr("tabs.prev")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={navBtn}><NetsuIcon name="forward" className="size-4" /></button>} />
+          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", navBtn)}><NetsuIcon name="forward" className="size-4" /></Button>} />
           <TooltipContent>{tr("tabs.next")}</TooltipContent>
         </Tooltip>
       </div>
@@ -81,13 +83,13 @@ export function NotebookTabs() {
                     <span className="min-w-0 flex-1 truncate">{titleOf(t.pageId)}</span>
                     <Tooltip>
                       <TooltipTrigger render={
-                        <button
+                        <Button variant="ghost"
                           type="button"
                           onClick={(e) => { e.stopPropagation(); nbCloseTab(t.id); }}
-                          className={`-mr-1 flex size-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`}
+                          className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `-mr-1 flex size-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`)}
                         >
                           <NetsuIcon name="close" className="size-3" />
-                        </button>
+                        </Button>
                       } />
                       <TooltipContent>{tr("tabs.closeTab")}</TooltipContent>
                     </Tooltip>
@@ -112,9 +114,9 @@ export function NotebookTabs() {
           <Tooltip>
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
-                <button type="button" data-no-drag className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                <Button variant="ghost" type="button" data-no-drag className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                   <NetsuIcon name="chevrons-right" className="size-4" />
-                </button>
+                </Button>
               } />
             } />
             <TooltipContent>{tr("tabs.all")}</TooltipContent>
@@ -133,14 +135,14 @@ export function NotebookTabs() {
       )}
       <Tooltip>
         <TooltipTrigger render={
-          <button
+          <Button variant="ghost"
             type="button"
             data-no-drag
             onClick={() => void nbCreatePage(null, { newTab: true })}
-            className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <NetsuIcon name="add" className="size-4" />
-          </button>
+          </Button>
         } />
         <TooltipContent>{tr("tabs.newPage")}</TooltipContent>
       </Tooltip>

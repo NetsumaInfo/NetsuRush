@@ -6,6 +6,7 @@
 // Chaque fenêtre a son propre état (renderer séparé) ; la persistance passe par le core → dernier
 // écrit gagne sur une MÊME page ouverte des deux côtés (limite assumée).
 
+import { cn } from "@/lib/utils";
 import { useEffect, useState, type CSSProperties } from "react";
 import i18n from "@/i18n";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -77,9 +78,9 @@ export function NotebookWindow() {
             </Tooltip>
             {isTauri && (
               <>
-                <button type="button" className={ctlBtn} aria-label={i18n.t("notebook:window.minimize")} onClick={minimize}><MinimizeGlyph /></button>
-                <button type="button" className={ctlBtn} aria-label={maxed ? i18n.t("notebook:window.restore") : i18n.t("notebook:window.maximize")} onClick={toggleMax}>{maxed ? <RestoreGlyph /> : <MaximizeGlyph />}</button>
-                <button type="button" className={`${ctlBtn} hover:bg-destructive hover:text-destructive-foreground`} aria-label={i18n.t("notebook:window.close")} onClick={close}><CloseGlyph /></button>
+                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ctlBtn)} aria-label={i18n.t("notebook:window.minimize")} onClick={minimize}><MinimizeGlyph /></Button>
+                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ctlBtn)} aria-label={maxed ? i18n.t("notebook:window.restore") : i18n.t("notebook:window.maximize")} onClick={toggleMax}>{maxed ? <RestoreGlyph /> : <MaximizeGlyph />}</Button>
+                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `${ctlBtn} hover:bg-destructive hover:text-destructive-foreground`)} aria-label={i18n.t("notebook:window.close")} onClick={close}><CloseGlyph /></Button>
               </>
             )}
           </div>

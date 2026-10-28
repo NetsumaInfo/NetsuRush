@@ -1,6 +1,8 @@
 // Actions du document ouvert (droite du fil d'Ariane) : étoile favori + menu ⋯
 // (nouvel onglet, copier le lien, dupliquer, déplacer, exporter Markdown/HTML, corbeille) et infos
 // (mots / caractères / dernière modification) calculées à l'OUVERTURE du menu seulement.
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
@@ -93,13 +95,13 @@ export function DocActions({ onMove, onAskDelete }: {
       <Tooltip>
         <TooltipTrigger
           render={
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={() => toggleFav(pageId)}
-              className={`rounded-md p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent ${isFav ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `rounded-md p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent ${isFav ? "text-primary" : "text-muted-foreground hover:text-foreground"}`)}
             >
               <NetsuIcon name="star" on={isFav} className="size-4" />
-            </button>
+            </Button>
           }
         />
         <TooltipContent>{isFav ? t("actions.removeFavorite") : t("actions.addFavorite")}</TooltipContent>
@@ -110,9 +112,9 @@ export function DocActions({ onMove, onAskDelete }: {
             render={
               <DropdownMenuTrigger
                 render={
-                  <button type="button" className="rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
+                  <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
                     <NetsuIcon name="more" className="size-4" />
-                  </button>
+                  </Button>
                 }
               />
             }

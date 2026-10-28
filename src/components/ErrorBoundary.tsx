@@ -1,5 +1,6 @@
 // Garde-fou de rendu : un composant qui jette pendant le render démonte tout l'arbre React 19
 // → écran noir. Cette barrière affiche l'erreur à l'écran (au lieu du noir) pour diagnostiquer.
+import { Button } from "@/components/ui/button";
 import { Component, type ReactNode, type ErrorInfo } from "react";
 import i18n from "@/i18n";
 
@@ -35,13 +36,13 @@ export class ErrorBoundary extends Component<Props, State> {
         {stack && (
           <pre className="whitespace-pre-wrap rounded-md bg-card p-3 text-xs text-muted-foreground">{stack}</pre>
         )}
-        <button
+        <Button variant="ghost"
           type="button"
           onClick={() => location.reload()}
-          className="self-start rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent self-start rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {i18n.t("shell:errorBoundary.reload")}
-        </button>
+        </Button>
       </div>
     );
   }

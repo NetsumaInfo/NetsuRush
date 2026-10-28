@@ -124,14 +124,14 @@ function AgentRow({ agent, onRescan }: { agent: ChatAgentInfo; onRescan: () => v
                 ) : null}
                 <Tooltip>
                   <TooltipTrigger render={
-                    <button
+                    <Button variant="ghost"
                       type="button"
-                      className="text-muted-foreground hover:text-foreground"
+                      className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-muted-foreground hover:text-foreground"
                       onClick={() => void nr.openExternal(source.docs)}
                       aria-label={t("settings.docs")}
                     >
                       <NetsuIcon name="open-external" className="size-3" />
-                    </button>
+                    </Button>
                   } />
                   <TooltipContent>{install ? t("settings.docs") : t("settings.installPage")}</TooltipContent>
                 </Tooltip>
@@ -145,9 +145,9 @@ function AgentRow({ agent, onRescan }: { agent: ChatAgentInfo; onRescan: () => v
           {said}
           {/* An install only shows up here once the detector runs again, and
               the terminal finishes on its own schedule. */}
-          <button type="button" className="underline hover:text-foreground" onClick={onRescan}>
+          <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent underline hover:text-foreground" onClick={onRescan}>
             {t("settings.rescan")}
-          </button>
+          </Button>
         </p>
       ) : null}
     </div>
@@ -195,14 +195,14 @@ function ProviderRow({ provider, keySet, value, onValue, baseUrl, onBaseUrl }: {
         <span className="flex-1" />
         <Tooltip>
           <TooltipTrigger render={
-            <button
+            <Button variant="ghost"
               type="button"
-              className="text-muted-foreground hover:text-foreground"
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-muted-foreground hover:text-foreground"
               onClick={() => void nr.openExternal(provider.keyUrl)}
               aria-label={t("settings.getKey")}
             >
               <NetsuIcon name="open-external" className="size-3.5" />
-            </button>
+            </Button>
           } />
           <TooltipContent>{t("settings.getKey")}</TooltipContent>
         </Tooltip>
@@ -218,14 +218,14 @@ function ProviderRow({ provider, keySet, value, onValue, baseUrl, onBaseUrl }: {
             autoComplete="off"
             className="h-8 pr-8 text-xs"
           />
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => setShown((s) => !s)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             aria-label={shown ? t("settings.hide") : t("settings.show")}
           >
             <NetsuIcon name="eye" on={shown} className="size-3.5" />
-          </button>
+          </Button>
         </div>
         <Button
           size="sm"

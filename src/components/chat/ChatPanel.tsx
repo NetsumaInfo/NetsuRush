@@ -1,6 +1,7 @@
 // Onglet « Chat IA » : copilote agentique qui pilote DaVinci Resolve et les modules NetsuRush via des
 // outils. Branche les flux SSE (événements + approbations) au store, charge les agents disponibles,
 // et assemble en-tête / réglages / fil / barre d'approbation / composer.
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
@@ -61,9 +62,9 @@ export function ChatPanel() {
             <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary"><NetsuIcon name="chat-empty" className="size-5" /></div>
             <div className="text-sm font-semibold">{t("panel.copilot")}</div>
             {!ready && (
-              <button type="button" onClick={() => setShowSettings(true)} className="text-xs text-primary underline-offset-2 hover:underline">
+              <Button variant="ghost" type="button" onClick={() => setShowSettings(true)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-xs text-primary underline-offset-2 hover:underline">
                 {provider === "cli" ? t("panel.noCliAgent") : t("panel.configureKey")}
-              </button>
+              </Button>
             )}
           </div>
         ) : (

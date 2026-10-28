@@ -2,6 +2,7 @@
 // étroit. Pas de rail latéral (inutile ici) → un simple sélecteur de vue en haut. Max de place.
 // Navigation aussi au CLIC DROIT (ViewContextMenu, comme dans l'app) : « Aller au module »,
 // actions de la vue, Paramètres, Recharger — variante remote (pas d'items fenêtre OS).
+import { Button } from "@/components/ui/button";
 import { useEffect, type ReactNode } from "react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useTranslation } from "react-i18next";
@@ -34,11 +35,11 @@ function PanelButton({ label, onClick, children }: { label: string; onClick: () 
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
+          <Button variant="ghost"
             type="button"
             aria-label={label}
             onClick={onClick}
-            className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         }
       >
@@ -78,16 +79,16 @@ export function RemotePanel() {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button
+              <Button variant="ghost"
                 type="button"
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
               >
                 <CurrentIcon className="size-3.5 text-primary" />
                 {/* Panneau très étroit : le nom du module cède la place à la sous-nav CENTRÉE (qui
                     doit rester au milieu de la barre), l'icône et le chevron suffisent à la lire. */}
                 <span className="hidden min-[480px]:inline">{current ? t(`shell:${current.labelKey}`) : "NetsuRush"}</span>
                 <NetsuIcon name="chevron-down" className="size-3 text-muted-foreground" />
-              </button>
+              </Button>
             }
           />
           <DropdownMenuContent align="start" className="w-52">

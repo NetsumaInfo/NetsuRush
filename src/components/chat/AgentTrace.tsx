@@ -12,6 +12,7 @@
 //     qu'on ne s'en approche pas, et la colonne reste calme ;
 //   — la hauteur s'anime par `grid-template-rows: 0fr → 1fr`, la seule façon d'animer vers une
 //     hauteur inconnue sans la mesurer en JS.
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -77,16 +78,16 @@ function outputOf(result: unknown): string {
 function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <button type="button" aria-label={label}
+    <Button variant="ghost" type="button" aria-label={label}
       onClick={(event) => {
         event.stopPropagation();
         void navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
-      className="shrink-0 rounded-sm px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-sm px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       {copied ? <NetsuIcon name="check" className="size-3 text-[var(--color-ok)]" /> : <NetsuIcon name="copy" className="size-3" />}
-    </button>
+    </Button>
   );
 }
 
@@ -196,12 +197,12 @@ function ReasoningRow({ text, active }: { text: string; active: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-col">
-      <button type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={ROW}>
+      <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ROW)}>
         <RowIcon open={open} expandable><NetsuIcon name="brain" className="size-3.5 opacity-75" /></RowIcon>
         {active
           ? <Shimmer>{t("message.thinking")}</Shimmer>
           : <span className="font-medium text-foreground">{t("message.reasoning")}</span>}
-      </button>
+      </Button>
       <Collapsible open={open}>
         <p className="max-h-56 select-text overflow-y-auto whitespace-pre-wrap pr-1 text-[11.5px] leading-relaxed text-muted-foreground">
           {text}
@@ -222,7 +223,7 @@ function ToolRow({ tool, t }: { tool: UiToolCall; t: TFunction<"chat"> }) {
   return (
     <ContextMenu>
       <ContextMenuTrigger render={<div className="flex flex-col" />}>
-        <button type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={ROW}>
+        <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ROW)}>
           <RowIcon open={open} expandable>
             {!tool.done
               ? <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-[1.5px] border-muted-foreground/30 border-t-foreground" />
@@ -241,7 +242,7 @@ function ToolRow({ tool, t }: { tool: UiToolCall; t: TFunction<"chat"> }) {
           {duration !== null && (
             <span className="ml-auto shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground/70">{humanDuration(duration)}</span>
           )}
-        </button>
+        </Button>
         <Collapsible open={open}>
           {command ? (
             <TerminalBlock command={command} output={outputOf(tool.result)} done={tool.done} ok={tool.ok} t={t} />
@@ -330,15 +331,15 @@ export function AgentTrace({ msg, active, status }: {
 
   return (
     <div className="flex w-full flex-col">
-      <button type="button" aria-expanded={open} onClick={() => setManual(!open)}
-        className="group flex w-fit items-center gap-1.5 rounded-sm text-left text-[13px] text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setManual(!open)}
+        className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent group flex w-fit items-center gap-1.5 rounded-sm text-left text-[13px] text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {running && <PixelDots />}
         {running
           ? <Shimmer>{label || t("trace.working")}</Shimmer>
           : <span>{t("trace.workedFor", { count: seconds })}</span>}
         <NetsuIcon name="chevron-toggle" on={open}
           className="size-3 opacity-30 transition-opacity duration-300 group-hover:opacity-80" />
-      </button>
+      </Button>
 
       <div className={cn("grid transition-[grid-template-rows,opacity] duration-300 ease-out",
         open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>

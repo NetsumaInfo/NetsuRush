@@ -1,4 +1,5 @@
 // En-tête de colonne (renommer / changer le type / supprimer) et bouton « + colonne » de la database.
+import { Button } from "@/components/ui/button";
 import { createElement } from "react";
 import i18n from "@/i18n";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -24,11 +25,11 @@ export function FieldHeader({ field, ops, primary = false }: { field: DbField; o
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button type="button" className="flex h-full w-full items-center gap-1.5 px-1.5 text-left text-xs font-medium">
+          <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex h-full w-full items-center gap-1.5 px-1.5 text-left text-xs font-medium">
             {createElement(FIELD_ICON[field.type], { className: "size-3.5 shrink-0 text-muted-foreground" })}
             <span className="truncate">{field.name}</span>
             <NetsuIcon name="chevron-down" className="ml-auto size-3 shrink-0 text-muted-foreground" />
-          </button>
+          </Button>
         }
       />
       <DropdownMenuContent className="w-56">
@@ -97,7 +98,7 @@ export function AddFieldButton({ ops }: { ops: DatabaseOps }) {
   return (
     <DropdownMenu>
       <Tooltip>
-        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex h-full w-full items-center justify-center text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-4" /></button>} />} />
+        <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex h-full w-full items-center justify-center text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-4" /></Button>} />} />
         <TooltipContent>{i18n.t("notebook:dbFields.addColumn")}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent>

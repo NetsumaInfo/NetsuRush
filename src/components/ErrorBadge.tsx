@@ -2,6 +2,7 @@
 // erreur est journalisée (console.error, exception non gérée, rejet de promesse, ou log core/python de
 // niveau error). Clic → ouvre Paramètres › Console sur l'erreur. Le positionnement vient de la colonne
 // flottante du coin bas-droit qui l'accueille (cf. `App`), partagée avec les pastilles d'état.
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -39,11 +40,11 @@ export function ErrorBadge() {
     <ContextMenu>
       <ContextMenuTrigger
         render={
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => { openConsole(); markConsoleSeen(); }}
             aria-label={t("errorBadge.aria", { count })}
-            className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-destructive px-3 py-2 text-xs font-medium text-destructive-foreground shadow-lg ring-1 ring-black/20 transition-transform hover:scale-105 active:scale-95"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent pointer-events-auto flex items-center gap-1.5 rounded-full bg-destructive px-3 py-2 text-xs font-medium text-destructive-foreground shadow-lg ring-1 ring-black/20 transition-transform hover:scale-105 active:scale-95"
           />
         }
       >

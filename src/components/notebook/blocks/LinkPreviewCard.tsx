@@ -1,6 +1,7 @@
 // Carte d'aperçu de lien PARTAGÉE (signet + intégration de site non-iframable + survol de mention).
 // Présentationnel : reçoit les métadonnées déjà résolues + une disposition. SOURCE UNIQUE du « beau
 // look » de carte, pour un rendu cohérent partout.
+import { Button } from "@/components/ui/button";
 import { useEffect, useState, type ReactNode } from "react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -18,11 +19,11 @@ function Actions({ url }: { url: string }) {
   return (
     <>
       <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="size-3.5" /></button>} />
+        <TooltipTrigger render={<Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="size-3.5" /></Button>} />
         <TooltipContent>{i18n.t("notebook:finalPass.copyLink")}</TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-3.5" /></button>} />
+        <TooltipTrigger render={<Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-3.5" /></Button>} />
         <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
       </Tooltip>
     </>

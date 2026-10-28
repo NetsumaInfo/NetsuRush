@@ -6,6 +6,8 @@
 // Support points at Settings ▸ About rather than straight at a donation page: that section already
 // holds the two funding links (GitHub Sponsors, Buy Me a Coffee) and lets the reader pick.
 
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
@@ -23,27 +25,27 @@ export function HeaderLinks() {
     <div className="flex items-center" data-no-drag>
       <Tooltip>
         <TooltipTrigger render={
-          <button
+          <Button variant="ghost"
             type="button"
             aria-label={t("windowControls.github")}
-            className={TITLEBAR_BTN}
+            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", TITLEBAR_BTN)}
             onClick={() => void nr.openExternal(GITHUB_REPO)}
           >
             <GithubIcon />
-          </button>
+          </Button>
         } />
         <TooltipContent>{t("windowControls.github")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={
-          <button
+          <Button variant="ghost"
             type="button"
             aria-label={t("windowControls.support")}
-            className={TITLEBAR_BTN}
+            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", TITLEBAR_BTN)}
             onClick={() => openSettings("about")}
           >
             <NetsuIcon name="support" />
-          </button>
+          </Button>
         } />
         <TooltipContent>{t("windowControls.support")}</TooltipContent>
       </Tooltip>

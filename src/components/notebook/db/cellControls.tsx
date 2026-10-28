@@ -1,6 +1,8 @@
 // Affichage + édition des cellules de la database, par type de champ. Partagé entre TableView (grille)
 // et KanbanView (cartes). Les sélecteurs d'option utilisent le DropdownMenu shadcn (Base UI) ; date =
 // MiniCalendar (+ heure/minute) ; case = bouton stylé. Aucune anim JS (respecte l'interdit perf des grilles).
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,18 +21,18 @@ import { fmtInputNumber, parseDecimal } from "@/lib/utils";
 // Bouton stylé sur les tokens : coché = aplat primary + ✓ ; décoché = contour discret. Pas de natif.
 export function NbCheck({ checked, onChange, title }: { checked: boolean; onChange: (v: boolean) => void; title?: string }) {
   const btn = (
-    <button
+    <Button variant="ghost"
       type="button"
       role="checkbox"
       aria-label={title || "Checkbox"}
       aria-checked={checked}
       onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
-      className={`flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors ${
+      className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors ${
         checked ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 bg-transparent hover:border-primary/70"
-      }`}
+      }`)}
     >
       {checked && <NetsuIcon name="check" className="size-3" />}
-    </button>
+    </Button>
   );
   if (!title) return btn;
   return (
@@ -76,8 +78,8 @@ function OptionEditRow({ option, onUpdate, onRemove, onDone }: {
           <Tooltip key={c.key}>
             <TooltipTrigger
               render={
-                <button type="button" onClick={() => onUpdate({ color: c.key })} style={{ background: c.bg }}
-                  className={`size-5 rounded-full ${option.color === c.key ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}`} />
+                <Button variant="ghost" type="button" onClick={() => onUpdate({ color: c.key })} style={{ background: c.bg }}
+                  className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `size-5 rounded-full ${option.color === c.key ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}`)} />
               }
             />
             <TooltipContent>{c.label}</TooltipContent>
@@ -85,8 +87,8 @@ function OptionEditRow({ option, onUpdate, onRemove, onDone }: {
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <button type="button" onClick={onRemove} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:text-destructive"><NetsuIcon name="trash" className="size-3" /> {t("common:action.delete")}</button>
-        <button type="button" onClick={() => { commit(); onDone(); }} className="rounded px-2 py-0.5 text-xs text-primary hover:bg-primary/10">{t("common:status.ok")}</button>
+        <Button variant="ghost" type="button" onClick={onRemove} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:text-destructive"><NetsuIcon name="trash" className="size-3" /> {t("common:action.delete")}</Button>
+        <Button variant="ghost" type="button" onClick={() => { commit(); onDone(); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded px-2 py-0.5 text-xs text-primary hover:bg-primary/10">{t("common:status.ok")}</Button>
       </div>
     </div>
   );
@@ -143,17 +145,17 @@ export function OptionPicker({
             />
           ) : (
             <div key={o.id} className="group flex items-center gap-1 rounded px-1 py-0.5 hover:bg-muted">
-              <button type="button" aria-label={o.label} onClick={() => toggle(o.id)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+              <Button variant="ghost" type="button" aria-label={o.label} onClick={() => toggle(o.id)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex min-w-0 flex-1 items-center gap-1.5 text-left">
                 <span className="flex w-4 shrink-0 justify-center">{selected.includes(o.id) && <NetsuIcon name="check" className="size-3.5 text-primary" />}</span>
                 <OptionBadge option={o} />
-              </button>
+              </Button>
               {canEdit && (
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <button type="button" aria-label={i18n.t("notebook:a11y.editOption")} onClick={() => setEditingId(o.id)} className="shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100">
+                      <Button variant="ghost" type="button" aria-label={i18n.t("notebook:a11y.editOption")} onClick={() => setEditingId(o.id)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100">
                         <NetsuIcon name="edit" className="size-3" />
-                      </button>
+                      </Button>
                     }
                   />
                   <TooltipContent>{t("common:action.edit")}</TooltipContent>
@@ -207,7 +209,7 @@ export function ChecklistPicker({ value, onChange, trigger }: {
               onChange={(e) => set(items.map((x) => (x.id === it.id ? { ...x, label: e.target.value } : x)))}
               className={`min-w-0 flex-1 bg-transparent text-sm outline-none ${it.done ? "text-muted-foreground line-through" : ""}`}
             />
-            <button type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="size-3.5" /></button>
+            <Button variant="ghost" type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="size-3.5" /></Button>
           </div>
         ))}
         <div className="mt-1 flex items-center gap-1 border-t border-border px-1 pt-1.5">
@@ -218,7 +220,7 @@ export function ChecklistPicker({ value, onChange, trigger }: {
             placeholder={t("db.checklist.addTask")}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-          <button type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-3.5" /></button>
+          <Button variant="ghost" type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-3.5" /></Button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -242,9 +244,9 @@ export function DatePickerCell({ field, value, onChange }: { field: DbField; val
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger render={
-        <button type="button" className="flex h-full w-full items-center px-1.5 text-left text-sm">
+        <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex h-full w-full items-center px-1.5 text-left text-sm">
           {formatDate(value, field.dateFormat, field.includeTime) || <span className="text-muted-foreground/50">{t("db.field.empty")}</span>}
-        </button>
+        </Button>
       } />
       <DropdownMenuContent className="w-auto border-0 bg-transparent p-0 shadow-none ring-0">
         <div className="flex flex-col gap-1">

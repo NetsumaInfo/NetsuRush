@@ -2,6 +2,7 @@
 // Apparence (largeur de page, échelle de police, fil d'Ariane), Éditeur (autosave, confirmation de
 // suppression) et Raccourcis clavier REBINDABLES (clic sur le combo → capture de la frappe, échange si
 // le combo est déjà pris — même mécanisme que le board Référence).
+import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -60,16 +61,16 @@ function SpellSection({ language }: { language: string }) {
           ) : (
             <div className="mt-2 flex flex-wrap gap-1">
               {words.map((word) => (
-                <button
+                <Button variant="ghost"
                   key={word}
                   type="button"
                   onClick={() => spell.forget(lang, word)}
                   aria-label={`${t("settings.personalRemove")} — ${word}`}
-                  className="group flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:border-destructive/50 hover:text-foreground"
+                  className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent group flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:border-destructive/50 hover:text-foreground"
                 >
                   {word}
                   <NetsuIcon name="close" className="size-3 opacity-50 transition-opacity group-hover:opacity-100" />
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -191,17 +192,17 @@ export function NotebookSettings({ open, onOpenChange }: { open: boolean; onOpen
                 <span className="text-[0.8125rem]">{t(`settings.shortcut.${d.action}`)}</span>
                 <Tooltip>
                   <TooltipTrigger render={
-                    <button
+                    <Button variant="ghost"
                       type="button"
                       onClick={() => setCapturing(capturing === d.action ? null : d.action)}
-                      className={`rounded border px-2 py-0.5 font-mono text-xs ${
+                      className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `rounded border px-2 py-0.5 font-mono text-xs ${
                         capturing === d.action
                           ? "border-primary bg-primary/15 text-primary"
                           : "border-border bg-muted text-muted-foreground hover:text-foreground"
-                      }`}
+                      }`)}
                     >
                       {capturing === d.action ? t("settings.press") : prefs.shortcutKeys[d.action] || d.combo}
-                    </button>
+                    </Button>
                   } />
                   <TooltipContent>{t("settings.shortcutHint")}</TooltipContent>
                 </Tooltip>

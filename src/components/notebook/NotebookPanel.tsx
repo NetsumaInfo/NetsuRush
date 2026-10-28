@@ -2,6 +2,7 @@
 // / Nouvelle page + Favoris/Récents + arbre de pages + pied Corbeille/Paramètres) et zone d'édition
 // (fil d'Ariane — les onglets vivent dans la barre de titre — + en-tête cover/emoji/titre + éditeur
 // BlockNote + rétroliens). Autosave débouncé, raccourcis rebindables, recherche, corbeille, paramètres.
+import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -33,16 +34,16 @@ import { CreateNotebookDialog, EditNotebookDialog } from "./NotebookMetaControls
 // Rangée d'action de la sidebar (Recherche / Nouvelle page) — icône + libellé.
 function ActionRow({ icon, label, accent, onClick }: { icon: React.ReactNode; label: string; accent?: boolean; onClick: () => void }) {
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
+      className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
     >
       <span className={`flex size-5 shrink-0 items-center justify-center rounded-md ${accent ? "bg-primary text-primary-foreground" : "bg-[var(--color-surface-2)] text-muted-foreground"}`}>
         {icon}
       </span>
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -185,14 +186,14 @@ export function NotebookPanel() {
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button type="button" aria-label={t("panel.notebooks")} className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent">
+                <Button variant="ghost" type="button" aria-label={t("panel.notebooks")} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent">
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
                     <NetsuIcon name="notebook" className="size-3.5" />
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold">{activeNb ? activeNb.title : t("panel.notebookFallback")}</span>
                   {projectPath && <span aria-label={projectPath} className="flex shrink-0"><NetsuIcon name="file-check" className="size-3.5 text-muted-foreground" /></span>}
                   <NetsuIcon name="chevrons-up-down" className="size-3.5 shrink-0 text-muted-foreground" />
-                </button>
+                </Button>
               }
             />
             <DropdownMenuContent className="w-60">
@@ -231,14 +232,14 @@ export function NotebookPanel() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     onClick={() => setEditNotebookOpen(true)}
-                    className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     aria-label={t("panel.editNotebook")}
                   >
                     <NetsuIcon name="edit" className="size-4" />
-                  </button>
+                  </Button>
                 }
               />
               <TooltipContent>{t("panel.editNotebook")}</TooltipContent>
@@ -247,14 +248,14 @@ export function NotebookPanel() {
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => nr.notebook?.detach()}
                   aria-label={t("window.detach")}
-                  className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
+                  className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
                 >
                   <NetsuIcon name="book-float" className="size-4" />
-                </button>
+                </Button>
               }
             />
             <TooltipContent>{t("window.detach")}</TooltipContent>
@@ -262,14 +263,14 @@ export function NotebookPanel() {
           <Tooltip>
             <TooltipTrigger
               render={
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => nbSetPrefs({ sidebarOpen: false })}
                   aria-label={t("panel.collapseSidebar")}
-                  className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
+                  className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
                 >
                   <NetsuIcon name="panel-left-toggle" on className="size-4" />
-                </button>
+                </Button>
               }
             />
             <TooltipContent>{t("panel.collapseSidebar")}</TooltipContent>
@@ -294,13 +295,13 @@ export function NotebookPanel() {
 
             {/* Pied : Corbeille · Paramètres */}
             <div className="flex items-center gap-px border-t border-border p-1.5 text-sm">
-              <button type="button" onClick={() => setDlg("trash")} className="flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
+              <Button variant="ghost" type="button" onClick={() => setDlg("trash")} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
                 <NetsuIcon name="trash" className="size-3.5" /> {t("panel.trash")}
-              </button>
+              </Button>
               <span className="h-4 w-px bg-border" />
-              <button type="button" onClick={() => setDlg("settings")} className="flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
+              <Button variant="ghost" type="button" onClick={() => setDlg("settings")} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
                 <NetsuIcon name="sliders" className="size-3.5" /> {t("panel.settings")}
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -309,13 +310,13 @@ export function NotebookPanel() {
         {!activeNb && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
             <p className="text-xs text-muted-foreground">{t("panel.emptyNotebookHint")}</p>
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={() => setCreateOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary hover:opacity-90"
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary hover:opacity-90"
             >
               <NetsuIcon name="add" className="size-3.5" /> {t("panel.newNotebook")}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -334,14 +335,14 @@ export function NotebookPanel() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     onClick={() => nbSetPrefs({ sidebarOpen: true })}
                     aria-label={t("panel.expandSidebar")}
-                    className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
+                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
                   >
                     <NetsuIcon name="panel-left-toggle" on={false} className="size-4" />
-                  </button>
+                  </Button>
                 }
               />
               <TooltipContent>{t("panel.expandSidebar")}</TooltipContent>
@@ -365,13 +366,13 @@ export function NotebookPanel() {
                 <p className="mb-4 text-sm text-muted-foreground">
                   {activeNb ? t("panel.emptyBodyHasNb") : t("panel.emptyBodyNoNb")}
                 </p>
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => activeNb ? void nbCreatePage(null) : setCreateOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                  className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
                 >
                   <NetsuIcon name="add" className="size-4" /> {activeNb ? t("panel.newPage") : t("panel.createNotebook")}
-                </button>
+                </Button>
               </div>
             </div>
           )}

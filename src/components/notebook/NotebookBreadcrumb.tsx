@@ -1,6 +1,8 @@
 // Fil d'Ariane du Carnet : carnet > ancêtres > page courante — chaque maillon
 // cliquable, chevron ▾ = frères de ce niveau, chemin profond replié en « … ». Les flèches d'historique
 // vivent dans la barre d'onglets (barre de titre). Masquable via prefs.showBreadcrumb.
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
@@ -19,24 +21,24 @@ function Crumb({ page, current, siblings, onOpen }: {
   const { t } = useTranslation("notebook");
   return (
     <span className="flex min-w-0 items-center">
-      <button
+      <Button variant="ghost"
         type="button"
         onClick={() => { if (!current) onOpen(page.id); }}
-        className={`flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm transition-colors ${current ? "font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
+        className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm transition-colors ${current ? "font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`)}
       >
         <span className="flex size-4 shrink-0 items-center justify-center">
           {page.icon ? renderPageIcon(page.icon, "size-4", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
         </span>
         <span className="max-w-44 truncate">{page.title || t("panel.untitled")}</span>
-      </button>
+      </Button>
       {siblings.length > 1 && (
         <DropdownMenu>
           <Tooltip>
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
-                <button type="button" className="rounded p-0.5 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground">
+                <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded p-0.5 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground">
                   <NetsuIcon name="chevron-down" className="size-3" />
-                </button>
+                </Button>
               } />
             } />
             <TooltipContent>{t("navigation.siblings")}</TooltipContent>
@@ -105,9 +107,9 @@ export function NotebookBreadcrumb() {
               <Tooltip>
                 <TooltipTrigger render={
                   <DropdownMenuTrigger render={
-                    <button type="button" className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                    <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                       <NetsuIcon name="more" className="size-4" />
-                    </button>
+                    </Button>
                   } />
                 } />
                 <TooltipContent>{t("navigation.intermediate")}</TooltipContent>

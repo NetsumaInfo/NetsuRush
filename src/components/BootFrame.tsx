@@ -1,4 +1,6 @@
 import { CloseGlyph, MinimizeGlyph } from "@/components/ui/window-glyphs";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { BrandIcon } from "@/components/BrandIcon";
 import { Spinner } from "@/components/ui/spinner";
@@ -28,12 +30,12 @@ export function BootFrame() {
         <span className="text-xs font-semibold tracking-tight">NetsuRush</span>
         {isTauri && (
           <div className="ml-auto flex items-center" data-no-drag>
-            <button type="button" aria-label={t("shell:windowControls.minimize")} className={btn} onClick={() => void win().then((w) => w.minimize()).catch(() => undefined)}>
+            <Button variant="ghost" type="button" aria-label={t("shell:windowControls.minimize")} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", btn)} onClick={() => void win().then((w) => w.minimize()).catch(() => undefined)}>
               <MinimizeGlyph />
-            </button>
-            <button type="button" aria-label={t("common:action.close")} className={`${btn} hover:bg-destructive hover:text-primary-foreground`} onClick={() => void win().then((w) => w.close()).catch(() => undefined)}>
+            </Button>
+            <Button variant="ghost" type="button" aria-label={t("common:action.close")} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `${btn} hover:bg-destructive hover:text-primary-foreground`)} onClick={() => void win().then((w) => w.close()).catch(() => undefined)}>
               <CloseGlyph />
-            </button>
+            </Button>
           </div>
         )}
       </header>

@@ -1,5 +1,6 @@
 // Recherche plein-texte du carnet (Dialog, Ctrl+P) : titres + texte des blocs, résultats avec extrait,
 // clic = ouvre la page À L'ANCRE du bloc contenant le terme (scroll + surbrillance).
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -71,27 +72,27 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
                   <NetsuIcon name="history" className="size-3" /> {t("navigation.recent")}
                 </div>
                 {recents.map((p) => p && (
-                  <button
+                  <Button variant="ghost"
                     key={p.id}
                     type="button"
                     onClick={() => pick(p.id, "")}
-                    className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
                   >
                     <span className="flex size-4 shrink-0 items-center justify-center">
                       {p.icon ? renderPageIcon(p.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5 text-muted-foreground" />}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-sm">{p.title || t("panel.untitled")}</span>
-                  </button>
+                  </Button>
                 ))}
               </>
             );
           })()}
           {results.map((r) => (
-            <button
+            <Button variant="ghost"
               key={`${r.pageId}-${r.blockId}`}
               type="button"
               onClick={() => pick(r.pageId, r.blockId)}
-              className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-start gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
             >
               <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
                 {r.icon ? renderPageIcon(r.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5 text-muted-foreground" />}
@@ -100,7 +101,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
                 <span className="block truncate text-sm">{r.title || t("panel.untitled")}</span>
                 {r.snippet && <span className="block truncate text-xs text-muted-foreground">{r.snippet}</span>}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
       </DialogContent>

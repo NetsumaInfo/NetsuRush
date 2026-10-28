@@ -1,6 +1,7 @@
 // « Déplacer vers… » (menu ⋯ du document + clic droit de l'arbre) : choisit la destination d'une page
 // — la racine du carnet ou n'importe quelle autre page (hors elle-même et sa descendance, anti-cycle).
 // Liste aplatie de l'arbre (indentée), filtrable par titre.
+import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
@@ -43,26 +44,26 @@ export function MovePageDialog({ pageId, onClose }: { pageId: string | null; onC
         <DialogTitle>{t("navigation.moveTo")}</DialogTitle>
         <Input autoFocus placeholder={t("navigation.filterPages")} value={q} onChange={(e) => setQ(e.target.value)} />
         <ScrollArea className="max-h-72">
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => void move(null)}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <NetsuIcon name="notebook" className="size-3.5 shrink-0 text-primary" /> {t("navigation.notebookRoot")}
-          </button>
+          </Button>
           {candidates.map((n) => (
-            <button
+            <Button variant="ghost"
               key={n.id}
               type="button"
               onClick={() => void move(n.id)}
               style={{ paddingLeft: 8 + (q.trim() ? 0 : n.depth) * 14 }}
-              className="flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <span className="flex size-4 shrink-0 items-center justify-center">
                 {n.icon ? renderPageIcon(n.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
               </span>
               <span className="min-w-0 flex-1 truncate">{n.title || t("panel.untitled")}</span>
-            </button>
+            </Button>
           ))}
           {!candidates.length && <div className="px-2 py-4 text-center text-xs text-muted-foreground">{t("navigation.noMatch")}</div>}
         </ScrollArea>

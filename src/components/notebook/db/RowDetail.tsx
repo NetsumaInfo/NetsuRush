@@ -1,6 +1,7 @@
 // Panneau « détail de ligne » — ouvre une ligne en modale : titre = champ
 // primaire, navigation ‹ › entre lignes (ordre de la vue active), chaque champ en colonne (icône + nom
 // + éditeur), + ajout de propriété, dupliquer, supprimer. Toute mutation passe par les ops.
+import { Button } from "@/components/ui/button";
 import { createElement } from "react";
 import i18n from "@/i18n";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -38,11 +39,11 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
         {/* Navigation + position */}
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" disabled={!prev} onClick={() => prev && onNavigate(prev.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="size-4 rotate-180" /></button>} />
+            <TooltipTrigger render={<Button variant="ghost" type="button" disabled={!prev} onClick={() => prev && onNavigate(prev.id)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="size-4 rotate-180" /></Button>} />
             <TooltipContent>{i18n.t("notebook:dbBasics.previousRow")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" disabled={!next} onClick={() => next && onNavigate(next.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="size-4" /></button>} />
+            <TooltipTrigger render={<Button variant="ghost" type="button" disabled={!next} onClick={() => next && onNavigate(next.id)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="size-4" /></Button>} />
             <TooltipContent>{i18n.t("notebook:dbBasics.nextRow")}</TooltipContent>
           </Tooltip>
           {pos >= 0 && <span className="tabular-nums">{pos + 1} / {ordered.length}</span>}
@@ -75,12 +76,12 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
             <span>{i18n.t("notebook:dbBasics.newProperty")}</span>
           </div>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={() => { ops.duplicateRow(rowId); onClose(); }} className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+            <Button variant="ghost" type="button" onClick={() => { ops.duplicateRow(rowId); onClose(); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <NetsuIcon name="copy" className="size-3.5" /> {i18n.t("notebook:actions.duplicate")}
-            </button>
-            <button type="button" onClick={() => { ops.removeRow(rowId); onClose(); }} className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-destructive">
+            </Button>
+            <Button variant="ghost" type="button" onClick={() => { ops.removeRow(rowId); onClose(); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-destructive">
               <NetsuIcon name="trash" className="size-3.5" /> {i18n.t("notebook:dbBasics.delete")}
-            </button>
+            </Button>
           </div>
         </div>
       </DialogContent>

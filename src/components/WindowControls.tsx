@@ -2,6 +2,8 @@
 // `decorations: false` : on redessine donc les contrôles. `data-no-drag` les exclut de la région
 // non-client WebView2 utilisée par la barre de titre.
 
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { CloseGlyph, MaximizeGlyph, MinimizeGlyph, RestoreGlyph } from "@/components/ui/window-glyphs";
 import { useEffect, useState } from "react";
@@ -49,39 +51,39 @@ export function WindowControls() {
       <UpdateButton variant="icon" />
       <Tooltip>
         <TooltipTrigger render={
-          <button
+          <Button variant="ghost"
             type="button"
             aria-label={pinned ? t("windowControls.unpin") : t("windowControls.pinAbove")}
             aria-pressed={pinned}
-            className={`${btn} ${pinned ? "text-primary hover:text-primary" : ""}`}
+            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `${btn} ${pinned ? "text-primary hover:text-primary" : ""}`)}
             onClick={togglePinned}
           >
             <NetsuIcon name="window-pin" on={pinned} />
-          </button>
+          </Button>
         } />
         <TooltipContent>{pinned ? t("windowControls.unpinShort") : t("windowControls.pinAbove")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={
-          <button type="button" aria-label={t("windowControls.minimize")} className={btn} onClick={() => void win().then((w) => w.minimize()).catch(() => undefined)}>
+          <Button variant="ghost" type="button" aria-label={t("windowControls.minimize")} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", btn)} onClick={() => void win().then((w) => w.minimize()).catch(() => undefined)}>
             <MinimizeGlyph />
-          </button>
+          </Button>
         } />
         <TooltipContent>{t("windowControls.minimize")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={
-          <button type="button" aria-label={maxed ? t("windowControls.restore") : t("windowControls.maximize")} className={btn} onClick={() => void win().then((w) => w.toggleMaximize()).catch(() => undefined)}>
+          <Button variant="ghost" type="button" aria-label={maxed ? t("windowControls.restore") : t("windowControls.maximize")} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", btn)} onClick={() => void win().then((w) => w.toggleMaximize()).catch(() => undefined)}>
             {maxed ? <RestoreGlyph /> : <MaximizeGlyph />}
-          </button>
+          </Button>
         } />
         <TooltipContent>{maxed ? t("windowControls.restore") : t("windowControls.maximize")}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger render={
-          <button type="button" aria-label={t("common:action.close")} className={`${btn} hover:bg-destructive hover:text-primary-foreground`} onClick={() => void win().then((w) => w.close()).catch(() => undefined)}>
+          <Button variant="ghost" type="button" aria-label={t("common:action.close")} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `${btn} hover:bg-destructive hover:text-primary-foreground`)} onClick={() => void win().then((w) => w.close()).catch(() => undefined)}>
             <CloseGlyph />
-          </button>
+          </Button>
         } />
         <TooltipContent>{t("common:action.close")}</TooltipContent>
       </Tooltip>

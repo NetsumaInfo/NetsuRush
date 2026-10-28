@@ -1,4 +1,5 @@
 import { useState, type FocusEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useShallow } from "zustand/react/shallow";
 import { useApp } from "@/store";
@@ -85,16 +86,16 @@ export function Sidebar() {
             const active = n.id === tab;
             return (
               <li key={n.id}>
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => setTab(n.id)}
                   onPointerEnter={() => prefetchPanel(n.id)}
-                  className={cn(
+                  className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", cn(
                     "flex h-9 w-full items-center gap-3 rounded-md px-[7px] text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     active
                       ? "bg-accent text-primary"
                       : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
-                  )}
+                  ))}
                 >
                   <Icon className="size-[18px] shrink-0" />
                   <span
@@ -109,7 +110,7 @@ export function Sidebar() {
                   >
                     {t(n.labelKey)}
                   </span>
-                </button>
+                </Button>
               </li>
             );
           })}
@@ -118,16 +119,16 @@ export function Sidebar() {
         {/* Séparateurs encartés (marge latérale) : un trait pleine largeur découpait le rail en tranches. */}
         <div className="mx-1 h-px bg-border" />
         <div className="px-1">
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => setTab("settings")}
             onPointerEnter={() => prefetchPanel("settings")}
-            className={cn(
+            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", cn(
               "flex h-9 w-full items-center gap-3 rounded-md px-[7px] text-sm transition-colors",
               tab === "settings"
                 ? "bg-accent text-primary"
                 : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
-            )}
+            ))}
           >
             {/* Pastille ANCRÉE À L'ICÔNE, pas au libellé : le rail est replié par défaut et le
                 libellé disparaît — une alerte accrochée au texte serait invisible au repos. */}
@@ -149,7 +150,7 @@ export function Sidebar() {
             >
               {t("sidebar.settings")}
             </span>
-          </button>
+          </Button>
         </div>
 
         {/* Sélecteur d'hôte : quel logiciel NetsuRush pilote (Resolve / Premiere / After Effects). */}
@@ -158,7 +159,7 @@ export function Sidebar() {
           <DropdownMenu onOpenChange={(open) => { if (open) void refreshAdobeStatus(); }}>
             <DropdownMenuTrigger
               render={
-                <button type="button" className="flex h-9 w-full min-w-0 items-center gap-3 rounded-md px-[7px] text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
+                <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex h-9 w-full min-w-0 items-center gap-3 rounded-md px-[7px] text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
                   <HostIcon host={activeHost} className="size-[18px]" />
                   <span
                     className="flex-1 truncate text-left"
@@ -172,7 +173,7 @@ export function Sidebar() {
                   >
                     {hostShort(activeHost)}
                   </span>
-                </button>
+                </Button>
               }
             />
             <DropdownMenuContent side="top" align="start" className="w-56">
@@ -199,7 +200,7 @@ export function Sidebar() {
           <DropdownMenu onOpenChange={(open) => { if (open && adobeActive) void refreshAdobeStatus(); }}>
             <DropdownMenuTrigger
               render={
-                <button type="button" className="flex h-9 min-w-0 flex-1 items-center gap-3 rounded-md px-[7px] text-xs transition-colors hover:bg-accent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
+                <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex h-9 min-w-0 flex-1 items-center gap-3 rounded-md px-[7px] text-xs transition-colors hover:bg-accent outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset">
                   <span className={cn("size-2.5 shrink-0 rounded-full", activeDot)} />
                   <span
                     className="flex-1 truncate text-left"
@@ -213,7 +214,7 @@ export function Sidebar() {
                   >
                     {activeLabel}
                   </span>
-                </button>
+                </Button>
               }
             />
             <DropdownMenuContent side="top" align="start" className="w-72">
@@ -254,18 +255,18 @@ export function Sidebar() {
             </DropdownMenuContent>
           </DropdownMenu>
           {/* Clic DIRECT = rafraîchir (sans ouvrir le menu). Le menu reste sur la pastille/projet. */}
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => (adobeActive ? refreshAdobeStatus() : refreshStatus())}
             aria-label={t("status.refresh")}
-            className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
             style={{
               opacity: collapsed ? 0 : 1,
               transition: collapsed ? "opacity 120ms ease-in" : "opacity 180ms ease-out 80ms",
             }}
           >
             <NetsuIcon name="sidebar-refresh" busy={statusLoading} className="size-3.5" />
-          </button>
+          </Button>
         </div>
       </aside>
     </div>

@@ -13,6 +13,7 @@
 // curseur coincé sous la liste des modèles obligeait à dérouler tout un catalogue pour monter d'un
 // cran. (Codex met un éclair à gauche du palier — c'est son mode ultra-rapide, qui n'existe sur
 // aucune de nos lignes de commande ; l'icône n'aurait rien désigné ici.)
+import { Button } from "@/components/ui/button";
 import { Slider } from "@base-ui/react/slider";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
@@ -58,11 +59,11 @@ export function ThinkingSlider({ value, onChange, model, onPickModel, className 
               enfant de plus, il décalait le texte d'une demi-largeur de chevron vers la gauche, et
               les deux lignes empilées n'avaient plus le même centre optique. */}
           {onPickModel ? (
-            <button type="button" onClick={onPickModel}
-              className="relative inline-flex max-w-full items-center rounded px-3.5 text-[10px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Button variant="ghost" type="button" onClick={onPickModel}
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent relative inline-flex max-w-full items-center rounded px-3.5 text-[10px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <span className="truncate">{model || t("engine.default")}</span>
               <NetsuIcon name="chevron-toggle" on={false} className="absolute right-0 size-3 shrink-0 opacity-70" />
-            </button>
+            </Button>
           ) : (
             <div className="truncate text-[10px] text-muted-foreground">{model || t("engine.default")}</div>
           )}
@@ -70,9 +71,9 @@ export function ThinkingSlider({ value, onChange, model, onPickModel, className 
         </div>
         <Tooltip>
           <TooltipTrigger render={
-            <button type="button" aria-label={t("thinkingSlider.reset")} disabled={atDefault}
+            <Button variant="ghost" type="button" aria-label={t("thinkingSlider.reset")} disabled={atDefault}
               onClick={() => onChange(THINKING_DEFAULT)}
-              className="grid size-6 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground" />
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent grid size-6 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground" />
           }>
             <NetsuIcon name="reset-default" className="size-3.5" />
           </TooltipTrigger>

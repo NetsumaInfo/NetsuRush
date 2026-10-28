@@ -2,6 +2,8 @@
 // glisser pour re-parenter. Clic = ouvre dans l'onglet actif ; Alt-clic ou clic-milieu = nouvel onglet.
 // Repli local par nœud. Glisser-déposer natif (léger, pas de lib) : déposer une page
 // SUR une autre la range comme enfant ; garde-fou anti-cycle (subtree). Étoile = favori.
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/store";
@@ -50,8 +52,8 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
       <ContextMenu>
         <ContextMenuTrigger
           render={
-            // <div role="button"> (pas <button>) : le row contient d'autres boutons (chevron, +) →
-            // un <button> imbriqué dans un <button> est du HTML invalide (erreur d'hydratation).
+            // <div role="button"> (pas <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent">) : le row contient d'autres boutons (chevron, +) →
+            // un <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent"> imbriqué dans un <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent"> est du HTML invalide (erreur d'hydratation).
             <div
               role="button"
               tabIndex={0}
@@ -71,13 +73,13 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
               style={{ paddingLeft: 6 + node.depth * 12 }}
               className={`group flex cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-1.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"} ${over ? "ring-1 ring-primary" : ""}`}
             >
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={(e) => { e.stopPropagation(); toggle(node.id); }}
-                className={`shrink-0 rounded p-0.5 ${hasChildren ? "text-muted-foreground hover:bg-muted" : "invisible"}`}
+                className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `shrink-0 rounded p-0.5 ${hasChildren ? "text-muted-foreground hover:bg-muted" : "invisible"}`)}
               >
                 <NetsuIcon name="chevron-toggle" on={isOpen} className="size-3.5" />
-              </button>
+              </Button>
               <span className="flex size-4 shrink-0 items-center justify-center">
                 {node.icon ? renderPageIcon(node.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
               </span>
@@ -96,13 +98,13 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
               {isFav && <NetsuIcon name="star" on className="size-3 shrink-0 text-primary/70" />}
               <Tooltip>
                 <TooltipTrigger render={
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     onClick={(e) => { e.stopPropagation(); void createPage(node.id); }}
-                    className="hidden shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted group-hover:block outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent hidden shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted group-hover:block outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <NetsuIcon name="add" className="size-3.5" />
-                  </button>
+                  </Button>
                 } />
                 <TooltipContent>{t("tree.subpage")}</TooltipContent>
               </Tooltip>
