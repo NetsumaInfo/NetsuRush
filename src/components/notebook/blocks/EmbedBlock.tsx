@@ -46,7 +46,7 @@ export const embedSpec = createReactBlockSpec(
       if (!url) {
         return (
           <EmptyLinkInput
-            icon={<NetsuIcon name="web" className="h-4 w-4 text-primary" />}
+            icon={<NetsuIcon name="web" className="size-4 text-primary" />}
             placeholder={i18n.t("notebook:blocks.embed.pastePlaceholder")}
             onSubmit={(v) => editor.updateBlock(block, { type: "embed", props: { url: v } })}
           />

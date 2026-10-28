@@ -89,7 +89,7 @@ export function LinkToPageButton() {
                 onClick={() => linkToWeb(webUrl)}
                 className="flex w-full items-center gap-1.5 rounded px-2 py-1.5 text-left text-sm hover:bg-muted"
               >
-                <NetsuIcon name="web" className="h-4 w-4 shrink-0 text-primary" />
+                <NetsuIcon name="web" className="size-4 shrink-0 text-primary" />
                 <span className="min-w-0 flex-1 truncate">{i18n.t("notebook:linkPage.linkTo")} <span className="text-muted-foreground">{webUrl}</span></span>
               </button>
             )}
@@ -101,13 +101,13 @@ export function LinkToPageButton() {
                 onClick={() => linkToPage(p.id, p.title)}
                 className="flex w-full items-center gap-1.5 rounded px-2 py-1.5 text-left text-sm hover:bg-muted"
               >
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center">{p.icon || <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}</span>
+                <span className="flex size-4 shrink-0 items-center justify-center">{p.icon || <NetsuIcon name="file-text" className="size-3.5" />}</span>
                 <span className="truncate">{p.title || i18n.t("notebook:panel.untitled")}</span>
               </button>
             ))}
             {!webUrl && matches.length === 0 && (
               <div className="flex items-center gap-1.5 px-2 py-2 text-xs text-muted-foreground">
-                <NetsuIcon name="link" className="h-3.5 w-3.5" /> {i18n.t("notebook:linkPage.hint")}
+                <NetsuIcon name="link" className="size-3.5" /> {i18n.t("notebook:linkPage.hint")}
               </div>
             )}
           </div>

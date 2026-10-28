@@ -38,7 +38,7 @@ function ActionRow({ icon, label, accent, onClick }: { icon: React.ReactNode; la
       onClick={onClick}
       className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
     >
-      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${accent ? "bg-primary text-primary-foreground" : "bg-[var(--color-surface-2)] text-muted-foreground"}`}>
+      <span className={`flex size-5 shrink-0 items-center justify-center rounded-md ${accent ? "bg-primary text-primary-foreground" : "bg-[var(--color-surface-2)] text-muted-foreground"}`}>
         {icon}
       </span>
       {label}
@@ -186,12 +186,12 @@ export function NotebookPanel() {
             <DropdownMenuTrigger
               render={
                 <button type="button" aria-label={t("panel.notebooks")} className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
-                    <NetsuIcon name="notebook" className="h-3.5 w-3.5" />
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
+                    <NetsuIcon name="notebook" className="size-3.5" />
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold">{activeNb ? activeNb.title : t("panel.notebookFallback")}</span>
-                  {projectPath && <span aria-label={projectPath} className="flex shrink-0"><NetsuIcon name="file-check" className="h-3.5 w-3.5 text-muted-foreground" /></span>}
-                  <NetsuIcon name="chevrons-up-down" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  {projectPath && <span aria-label={projectPath} className="flex shrink-0"><NetsuIcon name="file-check" className="size-3.5 text-muted-foreground" /></span>}
+                  <NetsuIcon name="chevrons-up-down" className="size-3.5 shrink-0 text-muted-foreground" />
                 </button>
               }
             />
@@ -206,23 +206,23 @@ export function NotebookPanel() {
                 ))}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              {activeNb && <DropdownMenuItem onClick={() => setEditNotebookOpen(true)}><NetsuIcon name="edit" className="mr-1 h-3.5 w-3.5" /> {t("panel.editNotebook")}</DropdownMenuItem>}
+              {activeNb && <DropdownMenuItem onClick={() => setEditNotebookOpen(true)}><NetsuIcon name="edit" className="mr-1 size-3.5" /> {t("panel.editNotebook")}</DropdownMenuItem>}
               {activeNb && <DropdownMenuItem onClick={() => openNotebookSharing("notebook")}>{t("share.notebook")}</DropdownMenuItem>}
-              <DropdownMenuItem onClick={() => setCreateOpen(true)}><NetsuIcon name="add" className="mr-1 h-3.5 w-3.5" /> {t("panel.newNotebook")}</DropdownMenuItem>
-              {activeNb && <DropdownMenuItem onClick={() => void importMarkdown()}><NetsuIcon name="file-up" className="mr-1 h-3.5 w-3.5" /> {t("panel.importMarkdown")}</DropdownMenuItem>}
+              <DropdownMenuItem onClick={() => setCreateOpen(true)}><NetsuIcon name="add" className="mr-1 size-3.5" /> {t("panel.newNotebook")}</DropdownMenuItem>
+              {activeNb && <DropdownMenuItem onClick={() => void importMarkdown()}><NetsuIcon name="file-up" className="mr-1 size-3.5" /> {t("panel.importMarkdown")}</DropdownMenuItem>}
               {coreAvailable && (
                 <>
                   <DropdownMenuSeparator />
-                  {activeNb && <DropdownMenuItem onClick={() => void saveAsProject()}><NetsuIcon name="book-save-all" className="mr-1 h-3.5 w-3.5" /> {t("panel.saveAsProject")}</DropdownMenuItem>}
-                  <DropdownMenuItem onClick={() => void openProject()}><NetsuIcon name="file-link" className="mr-1 h-3.5 w-3.5" /> {t("panel.openProject")}</DropdownMenuItem>
+                  {activeNb && <DropdownMenuItem onClick={() => void saveAsProject()}><NetsuIcon name="book-save-all" className="mr-1 size-3.5" /> {t("panel.saveAsProject")}</DropdownMenuItem>}
+                  <DropdownMenuItem onClick={() => void openProject()}><NetsuIcon name="file-link" className="mr-1 size-3.5" /> {t("panel.openProject")}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {activeNb && <DropdownMenuItem onClick={() => void exportNetsu()}><NetsuIcon name="book-export-pack" className="mr-1 h-3.5 w-3.5" /> {t("panel.exportNetsu")}</DropdownMenuItem>}
-                  <DropdownMenuItem onClick={() => void importNetsu()}><NetsuIcon name="package" className="mr-1 h-3.5 w-3.5" /> {t("panel.importNetsu")}</DropdownMenuItem>
+                  {activeNb && <DropdownMenuItem onClick={() => void exportNetsu()}><NetsuIcon name="book-export-pack" className="mr-1 size-3.5" /> {t("panel.exportNetsu")}</DropdownMenuItem>}
+                  <DropdownMenuItem onClick={() => void importNetsu()}><NetsuIcon name="package" className="mr-1 size-3.5" /> {t("panel.importNetsu")}</DropdownMenuItem>
                 </>
               )}
               {activeNb && (
                 <DropdownMenuItem onClick={() => setConfirmDelNb(true)} className="text-destructive">
-                  <NetsuIcon name="trash" className="mr-1 h-3.5 w-3.5" /> {t("panel.deleteNotebook")}
+                  <NetsuIcon name="trash" className="mr-1 size-3.5" /> {t("panel.deleteNotebook")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -237,7 +237,7 @@ export function NotebookPanel() {
                     className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     aria-label={t("panel.editNotebook")}
                   >
-                    <NetsuIcon name="edit" className="h-4 w-4" />
+                    <NetsuIcon name="edit" className="size-4" />
                   </button>
                 }
               />
@@ -253,7 +253,7 @@ export function NotebookPanel() {
                   aria-label={t("window.detach")}
                   className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
                 >
-                  <NetsuIcon name="book-float" className="h-4 w-4" />
+                  <NetsuIcon name="book-float" className="size-4" />
                 </button>
               }
             />
@@ -268,7 +268,7 @@ export function NotebookPanel() {
                   aria-label={t("panel.collapseSidebar")}
                   className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
                 >
-                  <NetsuIcon name="panel-left-toggle" on className="h-4 w-4" />
+                  <NetsuIcon name="panel-left-toggle" on className="size-4" />
                 </button>
               }
             />
@@ -280,8 +280,8 @@ export function NotebookPanel() {
           <>
             {/* Actions rapides */}
             <div className="flex flex-col gap-0.5 px-2 pb-2">
-              <ActionRow icon={<NetsuIcon name="search" className="h-3 w-3" />} label={t("panel.search")} onClick={() => setDlg("search")} />
-              <ActionRow icon={<NetsuIcon name="add" className="h-3 w-3" />} label={t("panel.newPage")} accent onClick={() => void nbCreatePage(null)} />
+              <ActionRow icon={<NetsuIcon name="search" className="size-3" />} label={t("panel.search")} onClick={() => setDlg("search")} />
+              <ActionRow icon={<NetsuIcon name="add" className="size-3" />} label={t("panel.newPage")} accent onClick={() => void nbCreatePage(null)} />
             </div>
 
             <NotebookSidebarSections />
@@ -295,11 +295,11 @@ export function NotebookPanel() {
             {/* Pied : Corbeille · Paramètres */}
             <div className="flex items-center gap-px border-t border-border p-1.5 text-sm">
               <button type="button" onClick={() => setDlg("trash")} className="flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
-                <NetsuIcon name="trash" className="h-3.5 w-3.5" /> {t("panel.trash")}
+                <NetsuIcon name="trash" className="size-3.5" /> {t("panel.trash")}
               </button>
               <span className="h-4 w-px bg-border" />
               <button type="button" onClick={() => setDlg("settings")} className="flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
-                <NetsuIcon name="sliders" className="h-3.5 w-3.5" /> {t("panel.settings")}
+                <NetsuIcon name="sliders" className="size-3.5" /> {t("panel.settings")}
               </button>
             </div>
           </>
@@ -314,7 +314,7 @@ export function NotebookPanel() {
               onClick={() => setCreateOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-primary hover:opacity-90"
             >
-              <NetsuIcon name="add" className="h-3.5 w-3.5" /> {t("panel.newNotebook")}
+              <NetsuIcon name="add" className="size-3.5" /> {t("panel.newNotebook")}
             </button>
           </div>
         )}
@@ -340,7 +340,7 @@ export function NotebookPanel() {
                     aria-label={t("panel.expandSidebar")}
                     className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground"
                   >
-                    <NetsuIcon name="panel-left-toggle" on={false} className="h-4 w-4" />
+                    <NetsuIcon name="panel-left-toggle" on={false} className="size-4" />
                   </button>
                 }
               />
@@ -358,8 +358,8 @@ export function NotebookPanel() {
           ) : (
             <div className="flex h-full items-center justify-center p-8 text-center">
               <div className="max-w-sm">
-                <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <NetsuIcon name="sparkles" className="h-7 w-7" />
+                <span className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <NetsuIcon name="sparkles" className="size-7" />
                 </span>
                 <h2 className="mb-1.5 text-base font-semibold">{activeNb ? t("panel.emptyTitleHasNb") : t("panel.emptyTitleNoNb")}</h2>
                 <p className="mb-4 text-sm text-muted-foreground">
@@ -370,7 +370,7 @@ export function NotebookPanel() {
                   onClick={() => activeNb ? void nbCreatePage(null) : setCreateOpen(true)}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
                 >
-                  <NetsuIcon name="add" className="h-4 w-4" /> {activeNb ? t("panel.newPage") : t("panel.createNotebook")}
+                  <NetsuIcon name="add" className="size-4" /> {activeNb ? t("panel.newPage") : t("panel.createNotebook")}
                 </button>
               </div>
             </div>

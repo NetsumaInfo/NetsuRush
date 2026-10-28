@@ -59,9 +59,9 @@ export function LoginScreen({ offline = false, onSkip }: { offline?: boolean; on
         )}
 
         {busy && (
-          <button type="button" className="text-xs text-muted-foreground underline hover:text-foreground" onClick={reset}>
+          <Button variant="link" size="xs" className="text-muted-foreground" onClick={reset}>
             {t("common:action.retry")}
-          </button>
+          </Button>
         )}
       </Card>
     </GateFrame>

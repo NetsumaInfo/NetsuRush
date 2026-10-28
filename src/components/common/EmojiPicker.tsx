@@ -2,6 +2,7 @@
 // le JEU DE DONNÉES emoji-mart (@emoji-mart/data : jeu complet + mots-clés) mais avec NOTRE grille
 // thémée sur les tokens de l'app : recherche, catégories, survol cohérent. Réutilisable partout.
 import { useMemo, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import emojiData from "@emoji-mart/data";
@@ -57,12 +58,12 @@ export function EmojiPicker({ onPick, className, heightClass = "max-h-56" }: { o
   return (
     <div className={className}>
       <div className="mb-2 flex items-center gap-1.5 rounded-md border border-border bg-muted px-2">
-        <NetsuIcon name="search" className="h-3.5 w-3.5 text-muted-foreground" />
-        <input autoComplete="off" spellCheck={false}
+        <NetsuIcon name="search" className="size-3.5 text-muted-foreground" />
+        <Input autoComplete="off" spellCheck={false}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t("emoji.search")}
-          className="w-full bg-transparent py-1.5 text-sm outline-none"
+          className="h-8 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
       </div>
       <div ref={scrollRef} className={`${heightClass} overflow-y-auto pr-1`}>

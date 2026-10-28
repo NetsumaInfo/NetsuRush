@@ -3,12 +3,13 @@
 // Envoyer / Stop à droite. Les fichiers joints sont passés à l'agent comme chemins locaux (il peut
 // les lire / les voir).
 import { useEffect, useRef, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { nr } from "@/lib/bridge";
 import { useApp } from "@/store";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { basename } from "@/lib/utils";
 import { EngineMenu } from "./EngineMenu";
 
@@ -55,23 +56,26 @@ export function ChatComposer({ ready }: { ready: boolean }) {
               <span key={f} className="flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-xs text-foreground/80">
                 <NetsuIcon name="attach-file" className="size-3 shrink-0 opacity-60" />
                 <span className="max-w-40 truncate">{basename(f)}</span>
-                <button type="button" onClick={() => setFiles((arr) => arr.filter((x) => x !== f))} aria-label={t("common:action.remove")} className="rounded p-0.5 hover:text-destructive">
-                  <NetsuIcon name="close" className="size-3" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger render={<Button variant="ghost" size="icon-xs" onClick={() => setFiles((arr) => arr.filter((x) => x !== f))} aria-label={t("common:action.remove")} className="size-5 hover:text-destructive" />}>
+                    <NetsuIcon name="close" className="size-3" />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("common:action.remove")}</TooltipContent>
+                </Tooltip>
               </span>
             ))}
           </div>
         )}
 
         <div className="px-3 pt-2.5">
-          <textarea autoComplete="off"
+          <Textarea autoComplete="off"
             ref={ref}
             value={text}
             onChange={(e) => { setText(e.target.value); if (notice) setNotice(""); }}
             onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
             rows={1}
             placeholder={t("composer.placeholder")}
-            className="max-h-[200px] w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="max-h-[200px] min-h-0 resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
         </div>
 

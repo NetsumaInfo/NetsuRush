@@ -35,7 +35,7 @@ export function GalleryView({ db, view, ops, onOpenRow }: { db: Database; view: 
         );
       })}
       <button type="button" onClick={() => ops.addRow()} className="flex min-h-20 items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-primary">
-        <NetsuIcon name="add" className="h-4 w-4" /> {i18n.t("notebook:dbFields.addCard")}
+        <NetsuIcon name="add" className="size-4" /> {i18n.t("notebook:dbFields.addCard")}
       </button>
     </div>
   );

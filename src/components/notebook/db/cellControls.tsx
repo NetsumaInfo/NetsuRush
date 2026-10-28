@@ -25,11 +25,11 @@ export function NbCheck({ checked, onChange, title }: { checked: boolean; onChan
       aria-label={title || "Checkbox"}
       aria-checked={checked}
       onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
-      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors ${
+      className={`flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors ${
         checked ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40 bg-transparent hover:border-primary/70"
       }`}
     >
-      {checked && <NetsuIcon name="check" className="h-3 w-3" />}
+      {checked && <NetsuIcon name="check" className="size-3" />}
     </button>
   );
   if (!title) return btn;
@@ -77,7 +77,7 @@ function OptionEditRow({ option, onUpdate, onRemove, onDone }: {
             <TooltipTrigger
               render={
                 <button type="button" onClick={() => onUpdate({ color: c.key })} style={{ background: c.bg }}
-                  className={`h-5 w-5 rounded-full ${option.color === c.key ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}`} />
+                  className={`size-5 rounded-full ${option.color === c.key ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}`} />
               }
             />
             <TooltipContent>{c.label}</TooltipContent>
@@ -85,7 +85,7 @@ function OptionEditRow({ option, onUpdate, onRemove, onDone }: {
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <button type="button" onClick={onRemove} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:text-destructive"><NetsuIcon name="trash" className="h-3 w-3" /> {t("common:action.delete")}</button>
+        <button type="button" onClick={onRemove} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:text-destructive"><NetsuIcon name="trash" className="size-3" /> {t("common:action.delete")}</button>
         <button type="button" onClick={() => { commit(); onDone(); }} className="rounded px-2 py-0.5 text-xs text-primary hover:bg-primary/10">{t("common:status.ok")}</button>
       </div>
     </div>
@@ -144,7 +144,7 @@ export function OptionPicker({
           ) : (
             <div key={o.id} className="group flex items-center gap-1 rounded px-1 py-0.5 hover:bg-muted">
               <button type="button" aria-label={o.label} onClick={() => toggle(o.id)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
-                <span className="flex w-4 shrink-0 justify-center">{selected.includes(o.id) && <NetsuIcon name="check" className="h-3.5 w-3.5 text-primary" />}</span>
+                <span className="flex w-4 shrink-0 justify-center">{selected.includes(o.id) && <NetsuIcon name="check" className="size-3.5 text-primary" />}</span>
                 <OptionBadge option={o} />
               </button>
               {canEdit && (
@@ -152,7 +152,7 @@ export function OptionPicker({
                   <TooltipTrigger
                     render={
                       <button type="button" aria-label={i18n.t("notebook:a11y.editOption")} onClick={() => setEditingId(o.id)} className="shrink-0 rounded p-1 text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100">
-                        <NetsuIcon name="edit" className="h-3 w-3" />
+                        <NetsuIcon name="edit" className="size-3" />
                       </button>
                     }
                   />
@@ -166,7 +166,7 @@ export function OptionPicker({
           <>
             {filtered.length > 0 && <DropdownMenuSeparator />}
             <DropdownMenuItem onClick={() => { const id = onCreateOption(q.trim()); setQ(""); toggle(id); }}>
-              <NetsuIcon name="add" className="mr-1 h-3.5 w-3.5" /> {t("db.option.create", { label: q.trim() })}
+              <NetsuIcon name="add" className="mr-1 size-3.5" /> {t("db.option.create", { label: q.trim() })}
             </DropdownMenuItem>
           </>
         )}
@@ -207,7 +207,7 @@ export function ChecklistPicker({ value, onChange, trigger }: {
               onChange={(e) => set(items.map((x) => (x.id === it.id ? { ...x, label: e.target.value } : x)))}
               className={`min-w-0 flex-1 bg-transparent text-sm outline-none ${it.done ? "text-muted-foreground line-through" : ""}`}
             />
-            <button type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="h-3.5 w-3.5" /></button>
+            <button type="button" aria-label={i18n.t("notebook:a11y.removeTask")} onClick={() => set(items.filter((x) => x.id !== it.id))} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="size-3.5" /></button>
           </div>
         ))}
         <div className="mt-1 flex items-center gap-1 border-t border-border px-1 pt-1.5">
@@ -218,7 +218,7 @@ export function ChecklistPicker({ value, onChange, trigger }: {
             placeholder={t("db.checklist.addTask")}
             className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-          <button type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>
+          <button type="button" aria-label={i18n.t("notebook:a11y.addTask")} onClick={add} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-3.5" /></button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

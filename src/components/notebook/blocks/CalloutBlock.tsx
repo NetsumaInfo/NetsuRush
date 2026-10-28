@@ -60,7 +60,7 @@ export const calloutSpec = createReactBlockSpec(
             <Tooltip>
               <TooltipTrigger render={
                 <DropdownMenu>
-                  <DropdownMenuTrigger render={<button type="button" className="rounded p-1 opacity-70 hover:bg-foreground/10 hover:opacity-100"><NetsuIcon name="palette" className="h-3.5 w-3.5" /></button>} />
+                  <DropdownMenuTrigger render={<button type="button" className="rounded p-1 opacity-70 hover:bg-foreground/10 hover:opacity-100"><NetsuIcon name="palette" className="size-3.5" /></button>} />
                   <DropdownMenuContent align="end">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel>{i18n.t("notebook:callout.presets")}</DropdownMenuLabel>
@@ -80,7 +80,7 @@ export const calloutSpec = createReactBlockSpec(
                               <button
                                 type="button"
                                 onClick={() => set({ color: c.key })}
-                                className={`h-6 w-6 rounded-md border ${c.key === key ? "border-primary" : "border-transparent"}`}
+                                className={`size-6 rounded-md border ${c.key === key ? "border-primary" : "border-transparent"}`}
                                 style={{ background: c.bg }}
                               />
                             } />

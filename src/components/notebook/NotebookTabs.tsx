@@ -35,18 +35,18 @@ export function NotebookTabs() {
   const activeTab = nbTabs.find((t) => t.id === nbActiveTabId);
   const canBack = !!activeTab && activeTab.histIdx > 0;
   const canFwd = !!activeTab && activeTab.histIdx < activeTab.hist.length - 1;
-  const navBtn = "flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-30";
+  const navBtn = "flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-30";
 
   return (
     <div className="flex h-full min-w-0 flex-1 items-center gap-2">
       {/* Historique de l'onglet actif (◀ ▶) */}
       <div data-no-drag className="flex shrink-0 items-center gap-0.5">
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={navBtn}><NetsuIcon name="back" className="h-4 w-4" /></button>} />
+          <TooltipTrigger render={<button type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={navBtn}><NetsuIcon name="back" className="size-4" /></button>} />
           <TooltipContent>{tr("tabs.prev")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<button type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={navBtn}><NetsuIcon name="forward" className="h-4 w-4" /></button>} />
+          <TooltipTrigger render={<button type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={navBtn}><NetsuIcon name="forward" className="size-4" /></button>} />
           <TooltipContent>{tr("tabs.next")}</TooltipContent>
         </Tooltip>
       </div>
@@ -75,8 +75,8 @@ export function NotebookTabs() {
                             : "text-muted-foreground hover:bg-[color-mix(in_srgb,var(--color-surface-2)_60%,transparent)] hover:text-foreground"
                         }`}
                       >
-                    <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                      {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
+                    <span className="flex size-4 shrink-0 items-center justify-center">
+                      {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
                     </span>
                     <span className="min-w-0 flex-1 truncate">{titleOf(t.pageId)}</span>
                     <Tooltip>
@@ -84,9 +84,9 @@ export function NotebookTabs() {
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); nbCloseTab(t.id); }}
-                          className={`-mr-1 flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`}
+                          className={`-mr-1 flex size-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`}
                         >
-                          <NetsuIcon name="close" className="h-3 w-3" />
+                          <NetsuIcon name="close" className="size-3" />
                         </button>
                       } />
                       <TooltipContent>{tr("tabs.closeTab")}</TooltipContent>
@@ -113,7 +113,7 @@ export function NotebookTabs() {
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
                 <button type="button" data-no-drag className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                  <NetsuIcon name="chevrons-right" className="h-4 w-4" />
+                  <NetsuIcon name="chevrons-right" className="size-4" />
                 </button>
               } />
             } />
@@ -122,8 +122,8 @@ export function NotebookTabs() {
           <DropdownMenuContent className="max-h-80 w-56 overflow-y-auto">
             {nbTabs.map((t) => (
               <DropdownMenuItem key={t.id} onClick={() => void nbActivateTab(t.id)} className={t.id === nbActiveTabId ? "font-medium" : ""}>
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                  {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
+                <span className="flex size-4 shrink-0 items-center justify-center">
+                  {iconOf(t.pageId) ? renderPageIcon(iconOf(t.pageId), "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
                 </span>
                 <span className="truncate">{titleOf(t.pageId)}</span>
               </DropdownMenuItem>
@@ -139,7 +139,7 @@ export function NotebookTabs() {
             onClick={() => void nbCreatePage(null, { newTab: true })}
             className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            <NetsuIcon name="add" className="h-4 w-4" />
+            <NetsuIcon name="add" className="size-4" />
           </button>
         } />
         <TooltipContent>{tr("tabs.newPage")}</TooltipContent>

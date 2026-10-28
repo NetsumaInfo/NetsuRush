@@ -71,19 +71,19 @@ function Column({ col, fields, groupField, primaryId, tall, ops, onAdd, onOpen, 
         <span className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover/col:opacity-100">
           <DropdownMenu>
             <Tooltip>
-              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="h-3.5 w-3.5" /></button>} />} />
+              <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground"><NetsuIcon name="more" className="size-3.5" /></button>} />} />
               <TooltipContent>{i18n.t("notebook:dbFields.columnOptions")}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent>
-              {isOption && <DropdownMenuItem onClick={() => setRenaming(true)}><NetsuIcon name="edit" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:tree.rename")}</DropdownMenuItem>}
-              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, -1)}><NetsuIcon name="back" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveLeft")}</DropdownMenuItem>}
-              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, 1)}><NetsuIcon name="forward" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbView.moveRight")}</DropdownMenuItem>}
+              {isOption && <DropdownMenuItem onClick={() => setRenaming(true)}><NetsuIcon name="edit" className="mr-1.5 size-3.5" /> {i18n.t("notebook:tree.rename")}</DropdownMenuItem>}
+              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, -1)}><NetsuIcon name="back" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbView.moveLeft")}</DropdownMenuItem>}
+              {isOption && <DropdownMenuItem onClick={() => ops.reorderOption(groupField.id, col.key, 1)}><NetsuIcon name="forward" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbView.moveRight")}</DropdownMenuItem>}
               {isOption && <DropdownMenuSeparator />}
-              <DropdownMenuItem onClick={onHide}><NetsuIcon name="eye-off" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.hideColumn")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={onHide}><NetsuIcon name="eye-off" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbFields.hideColumn")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={onAdd} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={onAdd} className="text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-4" /></button>} />
             <TooltipContent>{i18n.t("notebook:dbFields.addCard")}</TooltipContent>
           </Tooltip>
         </span>
@@ -165,14 +165,14 @@ export function KanbanView({ db, view, ops, onOpenRow, tall }: { db: Database; v
         {/* Ajouter une colonne (nouvelle option du champ groupé) + colonnes masquées */}
         <div className="flex w-48 shrink-0 flex-col gap-1.5">
           <button type="button" onClick={addColumn} className="flex items-center gap-1.5 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary">
-            <NetsuIcon name="add" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.addColumn")}
+            <NetsuIcon name="add" className="size-3.5" /> {i18n.t("notebook:dbFields.addColumn")}
           </button>
           {hiddenCols.map((c) => (
             <Tooltip key={c.key}>
               <TooltipTrigger
                 render={
                   <button type="button" onClick={() => toggleHideColumn(c.key)} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
-                    <NetsuIcon name="eye" className="h-3.5 w-3.5" /> <span className="truncate">{c.label}</span> <span className="opacity-60">{c.rows.length}</span>
+                    <NetsuIcon name="eye" className="size-3.5" /> <span className="truncate">{c.label}</span> <span className="opacity-60">{c.rows.length}</span>
                   </button>
                 }
               />

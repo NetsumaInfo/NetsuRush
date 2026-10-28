@@ -18,11 +18,11 @@ function Actions({ url }: { url: string }) {
   return (
     <>
       <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="h-3.5 w-3.5" /></button>} />
+        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="size-3.5" /></button>} />
         <TooltipContent>{i18n.t("notebook:finalPass.copyLink")}</TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="h-3.5 w-3.5" /></button>} />
+        <TooltipTrigger render={<button type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-3.5" /></button>} />
         <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
       </Tooltip>
     </>
@@ -33,8 +33,8 @@ function Favicon({ src }: { src?: string }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
   return src && !failed
-    ? <img src={src} alt="" onError={() => setFailed(true)} className="h-4 w-4 rounded-sm" draggable={false} referrerPolicy="no-referrer" />
-    : <NetsuIcon name="link" className="h-4 w-4 text-muted-foreground" />;
+    ? <img src={src} alt="" onError={() => setFailed(true)} className="size-4 rounded-sm" draggable={false} referrerPolicy="no-referrer" />
+    : <NetsuIcon name="link" className="size-4 text-muted-foreground" />;
 }
 
 export function PreviewImage({ src, className }: { src?: string; className: string }) {

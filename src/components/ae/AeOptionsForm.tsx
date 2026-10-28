@@ -82,7 +82,7 @@ export function AeOptionsForm({ ae, hideTimeline = false, hideCompName = false }
               </SelectContent>
             </Select>
             <Tooltip>
-              <TooltipTrigger render={<Button variant="outline" size="icon" onClick={loadTimelines} disabled={busy}><NetsuIcon name="refresh" className="h-4 w-4" /></Button>} />
+              <TooltipTrigger render={<Button variant="outline" size="icon" onClick={loadTimelines} disabled={busy}><NetsuIcon name="refresh" className="size-4" /></Button>} />
               <TooltipContent>{t("form.refresh")}</TooltipContent>
             </Tooltip>
           </div>
@@ -259,7 +259,7 @@ export function AeOptionsForm({ ae, hideTimeline = false, hideCompName = false }
           </p>
           <Row label={outDir ? basename(outDir) : t("form.none")}>
             <Button variant={needsDir ? "destructive" : "outline"} size="sm" onClick={chooseOut} disabled={busy}>
-              <NetsuIcon name="folder-open" className="h-4 w-4" /> {t("form.choose")}
+              <NetsuIcon name="folder-open" className="size-4" /> {t("form.choose")}
             </Button>
           </Row>
         </Section>

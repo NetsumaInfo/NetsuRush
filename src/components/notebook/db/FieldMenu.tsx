@@ -25,9 +25,9 @@ export function FieldHeader({ field, ops, primary = false }: { field: DbField; o
       <DropdownMenuTrigger
         render={
           <button type="button" className="flex h-full w-full items-center gap-1.5 px-1.5 text-left text-xs font-medium">
-            {createElement(FIELD_ICON[field.type], { className: "h-3.5 w-3.5 shrink-0 text-muted-foreground" })}
+            {createElement(FIELD_ICON[field.type], { className: "size-3.5 shrink-0 text-muted-foreground" })}
             <span className="truncate">{field.name}</span>
-            <NetsuIcon name="chevron-down" className="ml-auto h-3 w-3 shrink-0 text-muted-foreground" />
+            <NetsuIcon name="chevron-down" className="ml-auto size-3 shrink-0 text-muted-foreground" />
           </button>
         }
       />
@@ -45,7 +45,7 @@ export function FieldHeader({ field, ops, primary = false }: { field: DbField; o
             <DropdownMenuRadioGroup value={field.type} onValueChange={(v) => ops.updateField(field.id, { type: v as FieldType })}>
               {TYPES.map((t) => (
                 <DropdownMenuRadioItem key={t} value={t}>
-                  {createElement(FIELD_ICON[t], { className: "mr-1.5 h-3.5 w-3.5 text-muted-foreground" })}{FIELD_TYPE_LABELS[t]}
+                  {createElement(FIELD_ICON[t], { className: "mr-1.5 size-3.5 text-muted-foreground" })}{FIELD_TYPE_LABELS[t]}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
@@ -74,17 +74,17 @@ export function FieldHeader({ field, ops, primary = false }: { field: DbField; o
           </>
         )}
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "left")}><NetsuIcon name="in-point" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.insertLeft")}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "right")}><NetsuIcon name="out-point" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.insertRight")}</DropdownMenuItem>
-          {!primary && <DropdownMenuItem onClick={() => ops.duplicateField(field.id)}><NetsuIcon name="copy" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>}
-          {!primary && <DropdownMenuItem onClick={() => ops.toggleFieldHidden(field.id)}><NetsuIcon name="eye-off" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.hide")}</DropdownMenuItem>}
-          <DropdownMenuItem onClick={() => ops.clearFieldData(field.id)}><NetsuIcon name="erase" className="mr-1.5 h-3.5 w-3.5" /> {i18n.t("notebook:dbFields.clearValues")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "left")}><NetsuIcon name="in-point" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbFields.insertLeft")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => ops.addFieldAt(field.id, "right")}><NetsuIcon name="out-point" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbFields.insertRight")}</DropdownMenuItem>
+          {!primary && <DropdownMenuItem onClick={() => ops.duplicateField(field.id)}><NetsuIcon name="copy" className="mr-1.5 size-3.5" /> {i18n.t("notebook:actions.duplicate")}</DropdownMenuItem>}
+          {!primary && <DropdownMenuItem onClick={() => ops.toggleFieldHidden(field.id)}><NetsuIcon name="eye-off" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbFields.hide")}</DropdownMenuItem>}
+          <DropdownMenuItem onClick={() => ops.clearFieldData(field.id)}><NetsuIcon name="erase" className="mr-1.5 size-3.5" /> {i18n.t("notebook:dbFields.clearValues")}</DropdownMenuItem>
         </DropdownMenuGroup>
         {!primary && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => ops.removeField(field.id)} className="text-destructive">
-              <NetsuIcon name="trash" className="mr-1 h-3.5 w-3.5" /> {i18n.t("notebook:finalPass.deleteColumn")}
+              <NetsuIcon name="trash" className="mr-1 size-3.5" /> {i18n.t("notebook:finalPass.deleteColumn")}
             </DropdownMenuItem>
           </>
         )}
@@ -97,7 +97,7 @@ export function AddFieldButton({ ops }: { ops: DatabaseOps }) {
   return (
     <DropdownMenu>
       <Tooltip>
-        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex h-full w-full items-center justify-center text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="h-4 w-4" /></button>} />} />
+        <TooltipTrigger render={<DropdownMenuTrigger render={<button type="button" className="flex h-full w-full items-center justify-center text-muted-foreground hover:text-foreground"><NetsuIcon name="add" className="size-4" /></button>} />} />
         <TooltipContent>{i18n.t("notebook:dbFields.addColumn")}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent>
@@ -105,7 +105,7 @@ export function AddFieldButton({ ops }: { ops: DatabaseOps }) {
           <DropdownMenuLabel>{i18n.t("notebook:dbFields.newColumn")}</DropdownMenuLabel>
           {TYPES.map((t) => (
             <DropdownMenuItem key={t} onClick={() => ops.addField(t)}>
-              {createElement(FIELD_ICON[t], { className: "mr-1.5 h-3.5 w-3.5 text-muted-foreground" })}{FIELD_TYPE_LABELS[t]}
+              {createElement(FIELD_ICON[t], { className: "mr-1.5 size-3.5 text-muted-foreground" })}{FIELD_TYPE_LABELS[t]}
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>

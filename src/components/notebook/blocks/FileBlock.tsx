@@ -43,7 +43,7 @@ function FileEmpty({ editor, block }: { editor: Ed; block: unknown }) {
       className={`my-1.5 flex flex-col gap-2 rounded-xl border border-dashed px-4 py-5 transition-colors ${over ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="attach-file" className="h-4 w-4" /></span>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="attach-file" className="size-4" /></span>
         <Button size="sm" onClick={() => input.current?.click()}>{i18n.t("notebook:blocksUi.chooseFile")}</Button>
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:blocksUi.fileDrop")}</span>
         <input ref={input} type="file" hidden onChange={(e) => void pick(e.target.files?.[0] || undefined)} />
@@ -70,8 +70,8 @@ function FileCard({ url, name }: { url: string; name: string }) {
   return (
     <div contentEditable={false} className="my-1.5 overflow-hidden rounded-xl border border-border bg-card/40">
       <div className="flex items-center gap-3 px-3 py-2.5">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white" style={{ background: meta.color }}>
-          {createElement(meta.icon, { className: "h-4 w-4" })}
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg text-white" style={{ background: meta.color }}>
+          {createElement(meta.icon, { className: "size-4" })}
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium text-foreground">{label}</div>
@@ -79,15 +79,15 @@ function FileCard({ url, name }: { url: string; name: string }) {
         </div>
         {previewable && (
           <button type="button" onClick={() => setPreview((v) => !v)} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-            <NetsuIcon name="chevron-toggle" on={preview} className="h-3.5 w-3.5" /> {i18n.t("notebook:blocksUi.preview")}
+            <NetsuIcon name="chevron-toggle" on={preview} className="size-3.5" /> {i18n.t("notebook:blocksUi.preview")}
           </button>
         )}
         <Tooltip>
-          <TooltipTrigger render={<a href={url} target="_blank" rel="noreferrer" className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="h-4 w-4" /></a>} />
+          <TooltipTrigger render={<a href={url} target="_blank" rel="noreferrer" className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-4" /></a>} />
           <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<a href={url} download={label} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="download" className="h-4 w-4" /></a>} />
+          <TooltipTrigger render={<a href={url} download={label} className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="download" className="size-4" /></a>} />
           <TooltipContent>{i18n.t("notebook:blocksUi.download")}</TooltipContent>
         </Tooltip>
       </div>

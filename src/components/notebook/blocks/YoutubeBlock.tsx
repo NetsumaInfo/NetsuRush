@@ -23,7 +23,7 @@ export const youtubeSpec = createReactBlockSpec(
       if (!id) {
         return (
           <EmptyLinkInput
-            icon={<Youtube className="h-4 w-4 text-red-500" />}
+            icon={<Youtube className="size-4 text-red-500" />}
             placeholder={i18n.t("notebook:blocks.youtube.pastePlaceholder")}
             onSubmit={(v) => { const y = youtubeId(v); if (y) editor.updateBlock(block, { type: "youtube", props: { videoId: y } }); }}
           />

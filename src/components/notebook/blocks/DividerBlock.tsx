@@ -26,7 +26,7 @@ function Divider({ style, onCycle }: { style: DividerStyle; onCycle: () => void 
             className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground opacity-0 shadow-sm transition-opacity hover:bg-muted group-hover/div:opacity-100"
             aria-label={i18n.t("notebook:blocksUi.changeDivider")}
           >
-            <NetsuIcon name="sliders" className="h-3.5 w-3.5" />
+            <NetsuIcon name="sliders" className="size-3.5" />
           </button>
         } />
         <TooltipContent>{i18n.t("notebook:blocksUi.changeDivider")}</TooltipContent>

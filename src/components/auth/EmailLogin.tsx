@@ -96,9 +96,10 @@ export function EmailLogin({ size }: { size?: "sm" }) {
         {sent ? t("email.signIn") : t("email.sendCode")}
       </Button>
       {sent && (
-        <button
-          type="button"
-          className="text-xs text-muted-foreground underline hover:text-foreground"
+        <Button
+          variant="link"
+          size="xs"
+          className="text-muted-foreground"
           onClick={() => {
             setSent(false);
             setCode("");
@@ -106,7 +107,7 @@ export function EmailLogin({ size }: { size?: "sm" }) {
           }}
         >
           {t("email.changeAddress")}
-        </button>
+        </Button>
       )}
     </form>
   );

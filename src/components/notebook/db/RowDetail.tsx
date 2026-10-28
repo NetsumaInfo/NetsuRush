@@ -38,11 +38,11 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
         {/* Navigation + position */}
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Tooltip>
-            <TooltipTrigger render={<button type="button" disabled={!prev} onClick={() => prev && onNavigate(prev.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="h-4 w-4 rotate-180" /></button>} />
+            <TooltipTrigger render={<button type="button" disabled={!prev} onClick={() => prev && onNavigate(prev.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="size-4 rotate-180" /></button>} />
             <TooltipContent>{i18n.t("notebook:dbBasics.previousRow")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" disabled={!next} onClick={() => next && onNavigate(next.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="h-4 w-4" /></button>} />
+            <TooltipTrigger render={<button type="button" disabled={!next} onClick={() => next && onNavigate(next.id)} className="rounded p-1 hover:bg-muted hover:text-foreground disabled:opacity-30"><NetsuIcon name="chevron-down" className="size-4" /></button>} />
             <TooltipContent>{i18n.t("notebook:dbBasics.nextRow")}</TooltipContent>
           </Tooltip>
           {pos >= 0 && <span className="tabular-nums">{pos + 1} / {ordered.length}</span>}
@@ -61,7 +61,7 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
           {rest.map((f) => (
             <div key={f.id} className="grid grid-cols-[150px_1fr] items-start gap-2">
               <div className="flex items-center gap-1.5 pt-1.5 text-sm text-muted-foreground">
-                {createElement(FIELD_ICON[f.type], { className: "h-3.5 w-3.5 shrink-0" })}
+                {createElement(FIELD_ICON[f.type], { className: "size-3.5 shrink-0" })}
                 <span className="truncate">{f.name}</span>
               </div>
               <FieldEditor field={f} value={cellValueFor(f, row)} onChange={(v) => setCell(f.id, v)} ops={ops} />
@@ -71,15 +71,15 @@ export function RowDetail({ db, rowId, view, ops, onClose, onNavigate }: {
         {/* Pied : ajouter une propriété + dupliquer + supprimer */}
         <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <span className="flex h-6 w-6 items-center justify-center"><AddFieldButton ops={ops} /></span>
+            <span className="flex size-6 items-center justify-center"><AddFieldButton ops={ops} /></span>
             <span>{i18n.t("notebook:dbBasics.newProperty")}</span>
           </div>
           <div className="flex items-center gap-1">
             <button type="button" onClick={() => { ops.duplicateRow(rowId); onClose(); }} className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
-              <NetsuIcon name="copy" className="h-3.5 w-3.5" /> {i18n.t("notebook:actions.duplicate")}
+              <NetsuIcon name="copy" className="size-3.5" /> {i18n.t("notebook:actions.duplicate")}
             </button>
             <button type="button" onClick={() => { ops.removeRow(rowId); onClose(); }} className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-destructive">
-              <NetsuIcon name="trash" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}
+              <NetsuIcon name="trash" className="size-3.5" /> {i18n.t("notebook:dbBasics.delete")}
             </button>
           </div>
         </div>

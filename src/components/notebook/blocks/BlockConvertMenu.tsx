@@ -21,7 +21,7 @@ export function BlockConvertMenu({ editor, block, url }: { editor: BlockNoteEdit
               <DropdownMenuTrigger
                 render={
                   <button type="button" className="rounded bg-background/80 p-1 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground">
-                    <NetsuIcon name="repeat" className="h-3.5 w-3.5" />
+                    <NetsuIcon name="repeat" className="size-3.5" />
                   </button>
                 }
               />
@@ -36,12 +36,12 @@ export function BlockConvertMenu({ editor, block, url }: { editor: BlockNoteEdit
               const Icon = ICONS[o.key];
               return (
                 <DropdownMenuItem key={o.key} onClick={() => convertBlockTo(editor, block, url, o.key)}>
-                  <Icon className="mr-2 h-3.5 w-3.5" /> {o.label}
+                  <Icon className="mr-2 size-3.5" /> {o.label}
                 </DropdownMenuItem>
               );
             })}
             <DropdownMenuItem className="text-destructive" onClick={() => editor.removeBlocks([block as never])}>
-              <NetsuIcon name="trash" className="mr-2 h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.delete")}
+              <NetsuIcon name="trash" className="mr-2 size-3.5" /> {i18n.t("notebook:dbBasics.delete")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

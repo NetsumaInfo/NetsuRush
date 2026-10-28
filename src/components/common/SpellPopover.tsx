@@ -99,7 +99,7 @@ export function SpellPopover({ target, onClose }: { target: SpellTarget | null; 
       style={{ top: position.top, left: position.left, maxHeight: position.maxHeight }}
     >
       <div className="flex items-center gap-1.5 border-b border-border px-2.5 py-1.5">
-        <NetsuIcon name="spell" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <NetsuIcon name="spell" className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="truncate text-xs text-muted-foreground">{t("spell.unknownWord")}</span>
         <span className="ml-auto max-w-28 truncate font-medium text-foreground">{word}</span>
       </div>
@@ -129,7 +129,7 @@ export function SpellPopover({ target, onClose }: { target: SpellTarget | null; 
                   onClick={(e) => { e.stopPropagation(); replaceEvery(suggestion); }}
                   className="flex shrink-0 items-center gap-1 rounded px-1 text-[11px] opacity-80 hover:opacity-100"
                 />}>
-                  <NetsuIcon name="replace" className="h-3 w-3" /> {occurrences}
+                  <NetsuIcon name="replace" className="size-3" /> {occurrences}
                 </TooltipTrigger>
                 <TooltipContent>{t("spell.replaceAll", { count: occurrences })}</TooltipContent>
               </Tooltip>
@@ -145,7 +145,7 @@ export function SpellPopover({ target, onClose }: { target: SpellTarget | null; 
           onClick={learn}
           className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          <NetsuIcon name="book-plus" className="h-3.5 w-3.5 shrink-0" /> {t("spell.addToDictionary")}
+          <NetsuIcon name="book-plus" className="size-3.5 shrink-0" /> {t("spell.addToDictionary")}
         </button>
         <button
           type="button"
@@ -153,7 +153,7 @@ export function SpellPopover({ target, onClose }: { target: SpellTarget | null; 
           onClick={ignore}
           className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          <NetsuIcon name="eye-off" className="h-3.5 w-3.5 shrink-0" /> {t("spell.ignoreOnce")}
+          <NetsuIcon name="eye-off" className="size-3.5 shrink-0" /> {t("spell.ignoreOnce")}
         </button>
       </div>
     </div>,

@@ -28,9 +28,9 @@ export function MiniCalendar({ value, onPick }: { value: string; onPick: (iso: s
   return (
     <div className="nb-cal w-60 select-none rounded-xl border border-border bg-card p-2.5 shadow-xl">
       <div className="mb-1.5 flex items-center justify-between px-1">
-        <button type="button" aria-label={i18n.t("notebook:a11y.previousMonth")} onClick={() => setCursor(new Date(y, m - 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="prev" className="h-4 w-4" /></button>
+        <button type="button" aria-label={i18n.t("notebook:a11y.previousMonth")} onClick={() => setCursor(new Date(y, m - 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="prev" className="size-4" /></button>
         <span className="text-sm font-medium capitalize">{new Intl.DateTimeFormat(i18n.language, { month: "long", year: "numeric" }).format(new Date(y, m, 1))}</span>
-        <button type="button" aria-label={i18n.t("notebook:a11y.nextMonth")} onClick={() => setCursor(new Date(y, m + 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="next" className="h-4 w-4" /></button>
+        <button type="button" aria-label={i18n.t("notebook:a11y.nextMonth")} onClick={() => setCursor(new Date(y, m + 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="next" className="size-4" /></button>
       </div>
       <div className="mb-1 grid grid-cols-7 gap-0.5">
         {weekdayLabels().map((w, i) => <span key={i} className="py-1 text-center text-[10px] font-semibold text-muted-foreground">{w}</span>)}

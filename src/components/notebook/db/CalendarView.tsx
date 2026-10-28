@@ -50,9 +50,9 @@ export function CalendarView({ db, view, ops, onOpenRow }: { db: Database; view:
   return (
     <div>
       <div className="mb-2 flex items-center gap-2">
-        <button type="button" aria-label={i18n.t("notebook:a11y.previousMonth")} onClick={() => setCursor(new Date(y, m - 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="prev" className="h-4 w-4" /></button>
+        <button type="button" aria-label={i18n.t("notebook:a11y.previousMonth")} onClick={() => setCursor(new Date(y, m - 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="prev" className="size-4" /></button>
         <span className="text-sm font-medium capitalize">{new Intl.DateTimeFormat(i18n.language, { month: "long", year: "numeric" }).format(new Date(y, m, 1))}</span>
-        <button type="button" aria-label={i18n.t("notebook:a11y.nextMonth")} onClick={() => setCursor(new Date(y, m + 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="next" className="h-4 w-4" /></button>
+        <button type="button" aria-label={i18n.t("notebook:a11y.nextMonth")} onClick={() => setCursor(new Date(y, m + 1, 1))} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="next" className="size-4" /></button>
         <button type="button" onClick={() => setCursor(new Date())} className="ml-auto rounded px-2 py-1 text-xs text-primary hover:bg-primary/10">{i18n.t("notebook:blocksUi.today")}</button>
       </div>
       <div className="grid grid-cols-7 overflow-hidden rounded-md border border-border">
@@ -64,9 +64,9 @@ export function CalendarView({ db, view, ops, onOpenRow }: { db: Database; view:
           return (
             <div key={i} className="group min-h-20 border-b border-r border-border p-1 last:border-r-0">
               <div className="flex items-center justify-between">
-                <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${day === today ? "bg-primary font-semibold text-primary-foreground" : "text-muted-foreground"}`}>{d}</span>
+                <span className={`inline-flex size-5 items-center justify-center rounded-full text-xs ${day === today ? "bg-primary font-semibold text-primary-foreground" : "text-muted-foreground"}`}>{d}</span>
                 <Tooltip>
-                  <TooltipTrigger render={<button type="button" onClick={() => ops.addRow({ [dateField.id]: day })} className="opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"><NetsuIcon name="add" className="h-3.5 w-3.5" /></button>} />
+                  <TooltipTrigger render={<button type="button" onClick={() => ops.addRow({ [dateField.id]: day })} className="opacity-0 transition-opacity hover:text-primary group-hover:opacity-100"><NetsuIcon name="add" className="size-3.5" /></button>} />
                   <TooltipContent>{i18n.t("notebook:gallery.add")}</TooltipContent>
                 </Tooltip>
               </div>

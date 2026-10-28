@@ -30,7 +30,7 @@ export function FilterMenu({ fields, view, onChange }: { fields: DbField[]; view
       <PopoverTrigger
         render={
           <button type="button" className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-            <NetsuIcon name="filter" className="h-3.5 w-3.5" /> {i18n.t("notebook:filterSort.filters")}{view.filters.length ? ` (${view.filters.length})` : ""}
+            <NetsuIcon name="filter" className="size-3.5" /> {i18n.t("notebook:filterSort.filters")}{view.filters.length ? ` (${view.filters.length})` : ""}
           </button>
         }
       />
@@ -63,7 +63,7 @@ export function FilterMenu({ fields, view, onChange }: { fields: DbField[]; view
                   <input autoComplete="off" aria-label={i18n.t("notebook:a11y.filterValue")} value={String(c.value ?? "")} onChange={(e) => set(c.id, { value: e.target.value })} className="w-20 min-w-0 flex-1 rounded border border-border bg-[var(--color-surface-2)] px-1.5 py-0.5 text-xs outline-none focus:border-primary" />
                 )
               )}
-              <button type="button" aria-label={i18n.t("notebook:a11y.removeFilter")} onClick={() => remove(c.id)} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="h-3.5 w-3.5" /></button>
+              <button type="button" aria-label={i18n.t("notebook:a11y.removeFilter")} onClick={() => remove(c.id)} className="text-muted-foreground hover:text-destructive"><NetsuIcon name="close" className="size-3.5" /></button>
             </div>
           );
         })}
@@ -71,7 +71,7 @@ export function FilterMenu({ fields, view, onChange }: { fields: DbField[]; view
         <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">{i18n.t("notebook:filterSort.add")}</div>
         {fields.map((f) => (
           <button key={f.id} type="button" onClick={() => add(f.id)} className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground">
-            <NetsuIcon name="add" className="h-3.5 w-3.5" />{f.name}
+            <NetsuIcon name="add" className="size-3.5" />{f.name}
           </button>
         ))}
       </PopoverContent>
@@ -91,7 +91,7 @@ export function SortMenu({ fields, view, onChange }: { fields: DbField[]; view: 
       <DropdownMenuTrigger
         render={
           <button type="button" className="flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-            <NetsuIcon name="sort" className="h-3.5 w-3.5" /> {i18n.t("notebook:filterSort.sort")}{view.sorts.length ? ` (${view.sorts.length})` : ""}
+            <NetsuIcon name="sort" className="size-3.5" /> {i18n.t("notebook:filterSort.sort")}{view.sorts.length ? ` (${view.sorts.length})` : ""}
           </button>
         }
       />

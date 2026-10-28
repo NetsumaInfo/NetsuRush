@@ -18,7 +18,7 @@ export function AfterEffectsExport() {
     <div className="mx-auto max-w-2xl space-y-6 p-7">
       <header className="space-y-1">
         <h1 className="flex items-center gap-2 text-lg font-semibold">
-          <NetsuIcon name="film-slate" className="h-5 w-5 text-primary" /> {t("header.title")}
+          <NetsuIcon name="film-slate" className="size-5 text-primary" /> {t("header.title")}
         </h1>
         <p className="text-xs text-muted-foreground">
           {t("header.subtitle")}
@@ -40,14 +40,14 @@ export function AfterEffectsExport() {
 
         {result && !result.ok && (
           <Card className="block border-destructive/40 p-3 text-xs text-destructive">
-            <NetsuIcon name="warning" className="mr-1.5 inline h-3.5 w-3.5" /> {result.error}
+            <NetsuIcon name="warning" className="mr-1.5 inline size-3.5" /> {result.error}
             {result.script && <p className="mt-1 text-muted-foreground">{t("result.scriptPrefix", { name: basename(result.script) })}</p>}
           </Card>
         )}
         {result?.ok && (
           <Card className="block p-3 text-xs">
             <div className="flex items-center gap-1.5 font-medium text-[var(--color-ok)]">
-              <NetsuIcon name="status-ok" className="h-3.5 w-3.5" />
+              <NetsuIcon name="status-ok" className="size-3.5" />
               {t("result.clipsDone", { count: result.clips, comp: result.comp })}
             </div>
             <p className="mt-1 text-muted-foreground">
@@ -62,7 +62,7 @@ export function AfterEffectsExport() {
         )}
 
         <Button className="w-full" size="lg" onClick={run} disabled={!canRun}>
-          <SendToTimelineIcon host="aeft" busy={busy} className="h-4 w-4" />
+          <SendToTimelineIcon host="aeft" busy={busy} className="size-4" />
           {busy ? t("run.busy") : t("run.label")}
         </Button>
       </div>

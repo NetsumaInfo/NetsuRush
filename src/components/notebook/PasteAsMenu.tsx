@@ -50,7 +50,7 @@ export function PasteAsMenu({ anchor, onPick, onClose }: { anchor: PasteAnchor; 
             onClick={() => onPick(o.key)}
             className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm ${i === idx ? "bg-muted text-foreground" : "text-muted-foreground"}`}
           >
-            <Icon className="h-4 w-4 shrink-0" />
+            <Icon className="size-4 shrink-0" />
             <span className="flex-1">{o.label}</span>
             <span className="truncate text-xs text-muted-foreground/70">{o.desc}</span>
           </button>

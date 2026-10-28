@@ -180,13 +180,13 @@ function ChipPreview({ pageId, blockId, title, icon }: { pageId: string; blockId
   return (
     <span className="flex max-w-full flex-col gap-0.5">
       <span className="flex items-center gap-1.5 font-medium">
-        <span className="shrink-0">{renderPageIcon(icon, "h-3.5 w-3.5", "text-sm")}</span>
+        <span className="shrink-0">{renderPageIcon(icon, "size-3.5", "text-sm")}</span>
         <span className="truncate">{title}</span>
       </span>
       {blockId && ex && !ex.found && <span className="text-muted-foreground">{i18n.t("notebook:mention.blockMissing")}</span>}
       {ex?.text ? (
         <span className="line-clamp-3 whitespace-normal text-muted-foreground">
-          {blockId && <NetsuIcon name="subpage" className="mr-1 inline h-3 w-3" />}
+          {blockId && <NetsuIcon name="subpage" className="mr-1 inline size-3" />}
           {ex.text}
         </span>
       ) : null}
@@ -210,13 +210,13 @@ function CardView({ pageId, blockId, title, icon, gone, onOpen, rootRef }: {
       className={`my-0.5 inline-flex w-full max-w-xl cursor-pointer flex-col gap-0.5 rounded-lg border border-border bg-card px-3 py-2 align-top transition-colors hover:border-primary/50 hover:bg-muted/40 ${gone ? "opacity-60" : ""}`}
     >
       <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-        <span className="shrink-0">{renderPageIcon(icon, "h-4 w-4", "text-base")}</span>
+        <span className="shrink-0">{renderPageIcon(icon, "size-4", "text-base")}</span>
         <span className="truncate">{gone ? i18n.t("notebook:mention.deletedTitle", { title }) : title}</span>
         {blockId && <span className="ml-auto shrink-0 text-[10px] font-normal text-muted-foreground">{i18n.t("notebook:mention.linkedBlock")}</span>}
       </span>
       {ex?.text ? (
         <span className="line-clamp-2 text-xs text-muted-foreground">
-          {blockId && <NetsuIcon name="subpage" className="mr-1 inline h-3 w-3" />}
+          {blockId && <NetsuIcon name="subpage" className="mr-1 inline size-3" />}
           {ex.text}
         </span>
       ) : ex && blockId && !ex.found ? (

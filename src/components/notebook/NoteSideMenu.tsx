@@ -44,7 +44,7 @@ function ChangeBlockTypeItem() {
   return (
     <Components.Generic.Menu.Root position="right" sub>
       <Components.Generic.Menu.Trigger sub>
-        <Components.Generic.Menu.Item className="bn-menu-item" subTrigger icon={<NetsuIcon name="change-type" className="h-4 w-4" />}>
+        <Components.Generic.Menu.Item className="bn-menu-item" subTrigger icon={<NetsuIcon name="change-type" className="size-4" />}>
           {i18n.t("notebook:sideMenu.changeType")}
         </Components.Generic.Menu.Item>
       </Components.Generic.Menu.Trigger>
@@ -53,7 +53,7 @@ function ChangeBlockTypeItem() {
           const Icon = item.icon;
           const selected = item.type === block.type && (!item.props || Object.entries(item.props).every(([key, value]) => block.props[key] === value));
           return (
-            <Components.Generic.Menu.Item key={item.key} className="bn-menu-item" checked={selected} icon={<Icon className="h-4 w-4" />} onClick={() => changeType(item)}>
+            <Components.Generic.Menu.Item key={item.key} className="bn-menu-item" checked={selected} icon={<Icon className="size-4" />} onClick={() => changeType(item)}>
               {i18n.t(`notebook:blockTypes.${item.key}`)}
             </Components.Generic.Menu.Item>
           );

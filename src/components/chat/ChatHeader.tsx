@@ -1,6 +1,7 @@
 // En-tête du Chat IA — ALLÉGÉ. Conversations (nouvelle / ouvrir / supprimer) + indicateur d'activité
 // + réglages. Le choix du moteur / modèle / permissions vit désormais EN BAS, dans le composer (EngineMenu).
 import { useEffect } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { useApp } from "@/store";
@@ -46,9 +47,12 @@ export function ChatHeader({ onSettings }: { onSettings: () => void }) {
                 <button type="button" onClick={() => void openConv(c.id)} className="flex-1 truncate px-2 py-1.5 text-left text-sm hover:text-accent-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   {c.title}
                 </button>
-                <button type="button" onClick={() => void delConv(c.id)} aria-label={t("common:action.delete")} className="rounded p-1 text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary hover:text-destructive outline-none">
-                  <NetsuIcon name="trash" className="size-3.5" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger render={<Button variant="ghost" size="icon-xs" onClick={() => void delConv(c.id)} aria-label={t("common:action.delete")} className="text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:text-destructive" />}>
+                    <NetsuIcon name="trash" className="size-3.5" />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("common:action.delete")}</TooltipContent>
+                </Tooltip>
               </div>
             ))}
           </div>

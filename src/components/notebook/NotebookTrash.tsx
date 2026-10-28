@@ -37,14 +37,14 @@ export function NotebookTrash({ open, onOpenChange }: { open: boolean; onOpenCha
         <div className="max-h-80 overflow-y-auto">
           {!trash.length && (
             <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
-              <NetsuIcon name="trash" className="h-8 w-8 opacity-40" />
+              <NetsuIcon name="trash" className="size-8 opacity-40" />
               <p className="text-sm">{t("trash.empty")}</p>
             </div>
           )}
           {trash.map((p) => (
             <div key={p.id} className="group flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted">
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                {p.icon ? renderPageIcon(p.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5 text-muted-foreground" />}
+              <span className="flex size-4 shrink-0 items-center justify-center">
+                {p.icon ? renderPageIcon(p.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5 text-muted-foreground" />}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm">{p.title || t("panel.untitled")}</span>
               <Tooltip>

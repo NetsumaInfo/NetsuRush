@@ -86,7 +86,7 @@ export function ResizableMediaFrame({
           type="button"
           aria-label={i18n.t("notebook:a11y.resizeMedia")}
           onPointerDown={startResize}
-          className="absolute bottom-1 right-1 z-20 h-3.5 w-3.5 cursor-nwse-resize touch-none text-muted-foreground opacity-0 transition-opacity group-hover/media:opacity-100 focus-visible:opacity-100"
+          className="absolute bottom-1 right-1 z-20 size-3.5 cursor-nwse-resize touch-none text-muted-foreground opacity-0 transition-opacity group-hover/media:opacity-100 focus-visible:opacity-100"
        >
          <svg aria-hidden="true" viewBox="0 0 12 12" className="h-full w-full">
             <line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />

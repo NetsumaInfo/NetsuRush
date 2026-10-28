@@ -27,7 +27,7 @@ export const toggleSpec = createReactBlockSpec(
                 onClick={() => editor.updateBlock(block, { type: "toggle", props: { open: !open } })}
                 className="mt-0.5 shrink-0 select-none rounded p-0.5 text-muted-foreground hover:bg-muted"
               >
-                <NetsuIcon name="chevron-toggle" on={open} className="h-4 w-4" />
+                <NetsuIcon name="chevron-toggle" on={open} className="size-4" />
               </button>
             } />
             <TooltipContent>{open ? i18n.t("notebook:blocks.toggle.collapse") : i18n.t("notebook:blocks.toggle.expand")}</TooltipContent>

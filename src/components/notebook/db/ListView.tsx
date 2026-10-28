@@ -32,7 +32,7 @@ export function ListView({ db, view, ops, onOpenRow }: { db: Database; view: DbV
         );
       })}
       <button type="button" onClick={() => ops.addRow()} className="flex w-full items-center gap-1 px-3 py-2 text-left text-xs text-muted-foreground hover:bg-muted">
-        <NetsuIcon name="add" className="h-3.5 w-3.5" /> {i18n.t("notebook:dbBasics.newRow")}
+        <NetsuIcon name="add" className="size-3.5" /> {i18n.t("notebook:dbBasics.newRow")}
       </button>
     </div>
   );

@@ -50,7 +50,7 @@ export const bookmarkSpec = createReactBlockSpec(
       if (!p.url) {
         return (
           <EmptyLinkInput
-            icon={<NetsuIcon name="link" className="h-4 w-4 text-primary" />}
+            icon={<NetsuIcon name="link" className="size-4 text-primary" />}
             placeholder={i18n.t("notebook:blocks.bookmark.pastePlaceholder")}
             onSubmit={(url) => editor.updateBlock(block, { type: "bookmark", props: { url } })}
           />

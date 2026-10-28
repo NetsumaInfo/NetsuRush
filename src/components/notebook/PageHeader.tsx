@@ -33,7 +33,7 @@ export function PageHeader({ page }: { page: NotebookPage }) {
           <img src={nr.mediaUrl(page.cover)} alt="" className="h-full w-full object-cover" draggable={false} />
           <div className="absolute right-2 top-2 hidden gap-1 group-hover:flex">
             <button type="button" onClick={pickCover} className="nr-chip rounded px-2 py-1 text-xs text-white">{i18n.t("notebook:pageHeader.change")}</button>
-             <button type="button" aria-label={i18n.t("common:action.delete")} onClick={() => setMeta({ cover: null })} className="nr-chip rounded p-1 text-white"><NetsuIcon name="close" className="h-3.5 w-3.5" /></button>
+             <button type="button" aria-label={i18n.t("common:action.delete")} onClick={() => setMeta({ cover: null })} className="nr-chip rounded p-1 text-white"><NetsuIcon name="close" className="size-3.5" /></button>
           </div>
         </div>
       ) : null}
@@ -42,8 +42,8 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         <div ref={iconWrap} className="relative">
           <Tooltip>
             <TooltipTrigger render={
-              <button type="button" onClick={() => setEmojiOpen((v) => !v)} className="flex h-14 w-14 items-center justify-center rounded-lg bg-card shadow-sm ring-1 ring-border">
-                {renderPageIcon(page.icon, "h-8 w-8")}
+              <button type="button" onClick={() => setEmojiOpen((v) => !v)} className="flex size-14 items-center justify-center rounded-lg bg-card shadow-sm ring-1 ring-border">
+                {renderPageIcon(page.icon, "size-8")}
               </button>
             } />
             <TooltipContent>{i18n.t("notebook:pageHeader.icon")}</TooltipContent>
@@ -61,7 +61,7 @@ export function PageHeader({ page }: { page: NotebookPage }) {
 
         {!page.cover && (
           <button type="button" onClick={pickCover} className="mb-1 flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-            <NetsuIcon name="image-add" className="h-3.5 w-3.5" /> {i18n.t("notebook:pageHeader.cover")}
+            <NetsuIcon name="image-add" className="size-3.5" /> {i18n.t("notebook:pageHeader.cover")}
           </button>
         )}
       </div>

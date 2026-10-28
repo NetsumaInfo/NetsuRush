@@ -33,7 +33,7 @@ function InlineConvertMenu({ onConvert }: { onConvert: (kind: LinkAs) => void })
           <TooltipTrigger
             render={
               <DropdownMenuTrigger
-                render={<button type="button" className="rounded bg-background/80 p-1 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"><NetsuIcon name="repeat" className="h-3.5 w-3.5" /></button>}
+                render={<button type="button" className="rounded bg-background/80 p-1 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"><NetsuIcon name="repeat" className="size-3.5" /></button>}
               />
             }
           />
@@ -44,7 +44,7 @@ function InlineConvertMenu({ onConvert }: { onConvert: (kind: LinkAs) => void })
             <DropdownMenuLabel>{i18n.t("notebook:finalPass.convertTo")}</DropdownMenuLabel>
             {INLINE_CONVERT_OPTIONS.map((o) => {
               const Icon = CONVERT_ICONS[o.key];
-              return <DropdownMenuItem key={o.key} onClick={() => onConvert(o.key)}><Icon className="mr-2 h-3.5 w-3.5" /> {o.label}</DropdownMenuItem>;
+              return <DropdownMenuItem key={o.key} onClick={() => onConvert(o.key)}><Icon className="mr-2 size-3.5" /> {o.label}</DropdownMenuItem>;
             })}
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -71,14 +71,14 @@ function HoverCard({ meta, anchor, onEnter, onLeave, onConvert }: { meta: Meta; 
         <div className="line-clamp-1 text-sm font-semibold text-foreground">{meta.title || host}</div>
         {meta.description && <div className="line-clamp-3 text-xs leading-4 text-muted-foreground">{meta.description}</div>}
         <div className="mt-1 flex items-center gap-1.5">
-          {meta.favicon ? <img src={meta.favicon} alt="" className="h-4 w-4 rounded-sm" draggable={false} /> : <NetsuIcon name="link" className="h-4 w-4 text-muted-foreground" />}
+          {meta.favicon ? <img src={meta.favicon} alt="" className="size-4 rounded-sm" draggable={false} /> : <NetsuIcon name="link" className="size-4 text-muted-foreground" />}
           <span className="flex-1 truncate text-xs font-semibold text-foreground">{host}</span>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => void navigator.clipboard?.writeText(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="h-3.5 w-3.5" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => void navigator.clipboard?.writeText(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="size-3.5" /></button>} />
             <TooltipContent>{i18n.t("notebook:finalPass.copyLink")}</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<button type="button" onClick={() => void nr.openExternal(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="h-3.5 w-3.5" /></button>} />
+            <TooltipTrigger render={<button type="button" onClick={() => void nr.openExternal(meta.url)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-3.5" /></button>} />
             <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
           </Tooltip>
         </div>

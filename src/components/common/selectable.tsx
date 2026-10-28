@@ -17,11 +17,11 @@ export function SelectCheck({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "pointer-events-none absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm",
+        "pointer-events-none absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm",
         className,
       )}
     >
-      <NetsuIcon name="check" className="h-3 w-3 [&_svg]:stroke-[3]" />
+      <NetsuIcon name="check" className="size-3 [&_svg]:stroke-[3]" />
     </span>
   );
 }
@@ -41,7 +41,7 @@ export function SelectToggle({ selected, onToggle, label, className }: {
       aria-label={label ?? (selected ? t("select.deselect") : t("select.select"))}
       onClick={(e) => { e.stopPropagation(); onToggle(); }}
       className={cn(
-        "absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full border transition outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full border transition outline-none focus-visible:ring-2 focus-visible:ring-primary",
         selected
           ? "border-primary bg-primary text-primary-foreground opacity-100"
           // Fond opaque, pas de `backdrop-blur` : cette pastille est posée sur des vignettes qui
@@ -52,7 +52,7 @@ export function SelectToggle({ selected, onToggle, label, className }: {
         className,
       )}
     >
-      <NetsuIcon name="check" className="h-3 w-3 [&_svg]:stroke-[3]" />
+      <NetsuIcon name="check" className="size-3 [&_svg]:stroke-[3]" />
     </button>
   );
 }

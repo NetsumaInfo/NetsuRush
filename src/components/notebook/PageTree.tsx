@@ -74,12 +74,12 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); toggle(node.id); }}
-                className={`shrink-0 rounded p-0.5 ${hasChildren ? "text-muted-foreground hover:bg-muted" : "invisible"}`}
+                className={`shrink-0 rounded p-0.5 ${hasChildren ? "text-muted-foreground hover:bg-muted" : "invisible"}`}
               >
-                <NetsuIcon name="chevron-toggle" on={isOpen} className="h-3.5 w-3.5" />
+                <NetsuIcon name="chevron-toggle" on={isOpen} className="size-3.5" />
               </button>
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                {node.icon ? renderPageIcon(node.icon, "h-3.5 w-3.5", "text-sm") : <NetsuIcon name="file-text" className="h-3.5 w-3.5" />}
+              <span className="flex size-4 shrink-0 items-center justify-center">
+                {node.icon ? renderPageIcon(node.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
               </span>
               {editing && active ? (
                 <input autoComplete="off"
@@ -93,7 +93,7 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
               ) : (
                 <span className="min-w-0 flex-1 truncate">{node.title || t("panel.untitled")}</span>
               )}
-              {isFav && <NetsuIcon name="star" on className="h-3 w-3 shrink-0 text-primary/70" />}
+              {isFav && <NetsuIcon name="star" on className="size-3 shrink-0 text-primary/70" />}
               <Tooltip>
                 <TooltipTrigger render={
                   <button
@@ -101,7 +101,7 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
                     onClick={(e) => { e.stopPropagation(); void createPage(node.id); }}
                     className="hidden shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted group-hover:block outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
-                    <NetsuIcon name="add" className="h-3.5 w-3.5" />
+                    <NetsuIcon name="add" className="size-3.5" />
                   </button>
                 } />
                 <TooltipContent>{t("tree.subpage")}</TooltipContent>
@@ -110,18 +110,18 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
           }
         />
         <ContextMenuContent>
-          <ContextMenuItem onClick={() => void openInNewTab(node.id)}><NetsuIcon name="open-external" className="mr-1 h-3.5 w-3.5" /> {t("actions.openNewTab")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => void openInNewTab(node.id)}><NetsuIcon name="open-external" className="mr-1 size-3.5" /> {t("actions.openNewTab")}</ContextMenuItem>
           <ContextMenuItem onClick={() => openNotebookSharing("notebook-page", node.id)}>{t("share.document")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${node.id}`)}><NetsuIcon name="link" className="mr-1 h-3.5 w-3.5" /> {t("actions.copyPageLink")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => void navigator.clipboard.writeText(`${NBPAGE_LINK_PREFIX}${node.id}`)}><NetsuIcon name="link" className="mr-1 size-3.5" /> {t("actions.copyPageLink")}</ContextMenuItem>
           <ContextMenuItem onClick={() => toggleFav(node.id)}>
-            {isFav ? <><NetsuIcon name="star-off" className="mr-1 h-3.5 w-3.5" /> {t("actions.removeFavorite")}</> : <><NetsuIcon name="star" className="mr-1 h-3.5 w-3.5" /> {t("actions.addFavorite")}</>}
+            {isFav ? <><NetsuIcon name="star-off" className="mr-1 size-3.5" /> {t("actions.removeFavorite")}</> : <><NetsuIcon name="star" className="mr-1 size-3.5" /> {t("actions.addFavorite")}</>}
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={() => { if (node.id !== activeId) void openPage(node.id); setEditing(true); }}><NetsuIcon name="edit" className="mr-1 h-3.5 w-3.5" /> {t("tree.rename")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => void createPage(node.id)}><NetsuIcon name="add" className="mr-1 h-3.5 w-3.5" /> {t("tree.subpage")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => void duplicate(node.id)}><NetsuIcon name="copy" className="mr-1 h-3.5 w-3.5" /> {t("actions.duplicate")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => onAskMove(node.id)}><NetsuIcon name="folder-move" className="mr-1 h-3.5 w-3.5" /> {t("navigation.moveTo")}</ContextMenuItem>
-          <ContextMenuItem onClick={() => onAskDelete(node.id, node.title)} className="text-destructive"><NetsuIcon name="trash" className="mr-1 h-3.5 w-3.5" /> {t("panel.sendToTrash")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => { if (node.id !== activeId) void openPage(node.id); setEditing(true); }}><NetsuIcon name="edit" className="mr-1 size-3.5" /> {t("tree.rename")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => void createPage(node.id)}><NetsuIcon name="add" className="mr-1 size-3.5" /> {t("tree.subpage")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => void duplicate(node.id)}><NetsuIcon name="copy" className="mr-1 size-3.5" /> {t("actions.duplicate")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => onAskMove(node.id)}><NetsuIcon name="folder-move" className="mr-1 size-3.5" /> {t("navigation.moveTo")}</ContextMenuItem>
+          <ContextMenuItem onClick={() => onAskDelete(node.id, node.title)} className="text-destructive"><NetsuIcon name="trash" className="mr-1 size-3.5" /> {t("panel.sendToTrash")}</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
       {hasChildren && isOpen && node.children.map((c) => (

@@ -75,8 +75,8 @@ export function VideoPlayer({ url, caption, width, trimStart = 0, trimEnd = 0, o
       {/* Gros bouton lecture au repos */}
       {!playing && (
         <button type="button" onClick={toggle} className="absolute inset-0 flex items-center justify-center" aria-label={i18n.t("notebook:blocksUi.play")}>
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur transition-transform group-hover:scale-105">
-            <NetsuIcon name="play" className="ml-0.5 h-6 w-6" />
+          <span className="flex size-14 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur transition-transform group-hover:scale-105">
+            <NetsuIcon name="play" className="ml-0.5 size-6" />
           </span>
         </button>
       )}
@@ -87,13 +87,13 @@ export function VideoPlayer({ url, caption, width, trimStart = 0, trimEnd = 0, o
         </div>
         <div className="pointer-events-auto flex items-center gap-2 text-white">
           <button type="button" onClick={toggle} className="hover:text-primary" aria-label={playing ? i18n.t("common:player.pause") : i18n.t("common:player.play")}>
-            <NetsuIcon name="play-pause" on={playing} className="h-4 w-4" />
+            <NetsuIcon name="play-pause" on={playing} className="size-4" />
           </button>
           <button type="button" onClick={toggleMute} className="hover:text-primary" aria-label={muted ? i18n.t("common:player.soundOn") : i18n.t("common:player.soundOff")}>
-            <NetsuIcon name="mute" on={muted} className="h-4 w-4" />
+            <NetsuIcon name="mute" on={muted} className="size-4" />
           </button>
           <span className="text-xs tabular-nums text-white/85">{fmt(cur)} / {fmt(outPoint || dur)}</span>
-          <button type="button" onClick={full} className="ml-auto hover:text-primary" aria-label={i18n.t("notebook:blocksUi.fullscreen")}><NetsuIcon name="fullscreen" className="h-4 w-4" /></button>
+          <button type="button" onClick={full} className="ml-auto hover:text-primary" aria-label={i18n.t("notebook:blocksUi.fullscreen")}><NetsuIcon name="fullscreen" className="size-4" /></button>
         </div>
       </div>
       {dur > 0 && onTrim && (
@@ -148,7 +148,7 @@ function VideoEmpty({ editor, block }: { editor: Ed; block: unknown }) {
       className={`my-1.5 flex flex-col gap-2 rounded-xl border border-dashed px-4 py-5 transition-colors ${over ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}
     >
       <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="video" className="h-4 w-4" /></span>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-sm"><NetsuIcon name="video" className="size-4" /></span>
         <Button size="sm" onClick={() => input.current?.click()}>{i18n.t("notebook:blocksUi.chooseVideo")}</Button>
         <span className="text-xs text-muted-foreground">{i18n.t("notebook:blocksUi.dropFile")}</span>
         <input ref={input} type="file" accept="video/*" hidden onChange={(e) => void pick(e.target.files?.[0] || undefined)} />
