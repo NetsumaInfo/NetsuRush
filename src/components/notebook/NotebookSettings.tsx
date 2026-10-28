@@ -66,7 +66,7 @@ function SpellSection({ language }: { language: string }) {
                   type="button"
                   onClick={() => spell.forget(lang, word)}
                   aria-label={`${t("settings.personalRemove")} — ${word}`}
-                  className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent group flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:border-destructive/50 hover:text-foreground"
+                  className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 group flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:border-destructive/50 hover:text-foreground"
                 >
                   {word}
                   <NetsuIcon name="close" className="size-3 opacity-50 transition-opacity group-hover:opacity-100" />
@@ -195,7 +195,7 @@ export function NotebookSettings({ open, onOpenChange }: { open: boolean; onOpen
                     <Button variant="ghost"
                       type="button"
                       onClick={() => setCapturing(capturing === d.action ? null : d.action)}
-                      className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `rounded border px-2 py-0.5 font-mono text-xs ${
+                      className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `rounded border px-2 py-0.5 font-mono text-xs ${
                         capturing === d.action
                           ? "border-primary bg-primary/15 text-primary"
                           : "border-border bg-muted text-muted-foreground hover:text-foreground"

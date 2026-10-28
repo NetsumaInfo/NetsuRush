@@ -60,7 +60,7 @@ export function ThinkingSlider({ value, onChange, model, onPickModel, className 
               les deux lignes empilées n'avaient plus le même centre optique. */}
           {onPickModel ? (
             <Button variant="ghost" type="button" onClick={onPickModel}
-              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent relative inline-flex max-w-full items-center rounded px-3.5 text-[10px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 relative inline-flex max-w-full items-center rounded px-3.5 text-[10px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <span className="truncate">{model || t("engine.default")}</span>
               <NetsuIcon name="chevron-toggle" on={false} className="absolute right-0 size-3 shrink-0 opacity-70" />
             </Button>
@@ -73,7 +73,7 @@ export function ThinkingSlider({ value, onChange, model, onPickModel, className 
           <TooltipTrigger render={
             <Button variant="ghost" type="button" aria-label={t("thinkingSlider.reset")} disabled={atDefault}
               onClick={() => onChange(THINKING_DEFAULT)}
-              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent grid size-6 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground" />
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 grid size-6 shrink-0 place-items-center rounded text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground" />
           }>
             <NetsuIcon name="reset-default" className="size-3.5" />
           </TooltipTrigger>

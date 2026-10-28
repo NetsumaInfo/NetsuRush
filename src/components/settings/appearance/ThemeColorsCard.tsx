@@ -110,7 +110,7 @@ export function ThemeColorsCard() {
                   type="button"
                   onClick={() => restore(color)}
                   disabled={!overridden}
-                  className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", 
+                  className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
                     "block h-4 truncate text-[11px] outline-none",
                     overridden
                       ? "text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:underline"

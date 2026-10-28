@@ -126,7 +126,7 @@ export function ProjectScopeSheet() {
             {projects.map((p) => (
               <li key={p.name} className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted">
                 <Checkbox checked={isChecked(p.name)} onCheckedChange={() => toggle(p.name)} aria-label={p.name} />
-                <Button variant="ghost" type="button" className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent min-w-0 flex-1 text-left" onClick={() => toggle(p.name)}>
+                <Button variant="ghost" type="button" className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 min-w-0 flex-1 text-left" onClick={() => toggle(p.name)}>
                   <span className="block truncate text-sm">{p.name}</span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {t("projectScope.rushCount", { count: p.count })}

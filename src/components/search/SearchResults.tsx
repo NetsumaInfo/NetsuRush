@@ -182,7 +182,7 @@ export function SearchResults() {
         </Tooltip>
         {picked > 0 && (
           <Button variant="ghost" type="button" onClick={() => setSel(new Set())}
-            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
             {t("searchResults.deselect")}
           </Button>
         )}

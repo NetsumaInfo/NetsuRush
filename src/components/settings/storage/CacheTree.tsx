@@ -76,7 +76,7 @@ function FolderRow({ folder, selected, onToggle }: { folder: CacheFolder; select
           onCheckedChange={(v) => onToggle(sources, v)}
           className="ml-2 size-3.5"
         />
-        <Button variant="ghost" type="button" onClick={() => setOpen((v) => !v)} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent flex min-w-0 flex-1 items-center gap-1.5 text-left">
+        <Button variant="ghost" type="button" onClick={() => setOpen((v) => !v)} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex min-w-0 flex-1 items-center gap-1.5 text-left">
           <NetsuIcon name="chevron-toggle" on={open} className="size-3.5 shrink-0 text-muted-foreground" />
           <Tooltip>
             <TooltipTrigger render={<span className="min-w-0 flex-1 truncate font-medium text-foreground" />}>

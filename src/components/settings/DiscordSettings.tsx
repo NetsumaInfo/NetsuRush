@@ -39,7 +39,7 @@ function Linked({ url, className, children }: {
         render={
           <Button variant="ghost"
             type="button"
-            className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", className, "cursor-pointer text-left hover:text-foreground hover:underline")}
+            className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", className, "cursor-pointer text-left hover:text-foreground hover:underline")}
             onClick={() => void nr.openExternal(url)}
           />
         }

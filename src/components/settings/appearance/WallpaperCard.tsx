@@ -110,7 +110,7 @@ export function WallpaperCard() {
                 type="button"
                 onClick={() => void pick()}
                 disabled={busy}
-                className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", 
+                className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
                   THUMB_CLASS,
                   "grid place-items-center border-dashed border-border text-muted-foreground",
                   "hover:border-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
@@ -131,7 +131,7 @@ export function WallpaperCard() {
                 <Button variant="ghost"
                   type="button"
                   onClick={() => setWallpaper({ id: null })}
-                  className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", 
+                  className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
                     THUMB_CLASS,
                     "grid place-items-center border-border bg-card text-muted-foreground",
                     "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
@@ -154,7 +154,7 @@ export function WallpaperCard() {
                     type="button"
                     aria-pressed={entry.id === config.id}
                     onClick={() => setWallpaper({ id: entry.id })}
-                    className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", 
+                    className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
                       THUMB_CLASS,
                       "block focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                       entry.id === config.id ? "border-primary ring-1 ring-primary" : "border-border hover:border-muted-foreground",
@@ -171,7 +171,7 @@ export function WallpaperCard() {
               type="button"
               aria-label={t("appearance.wallpaper.remove")}
               onClick={() => void remove(entry.id)}
-              className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent absolute top-1 right-1 rounded bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" />}>
+              className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 absolute top-1 right-1 rounded bg-black/70 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" />}>
                 <NetsuIcon name="trash" className="size-3" />
               </TooltipTrigger>
               <TooltipContent>{t("appearance.wallpaper.remove")}</TooltipContent>

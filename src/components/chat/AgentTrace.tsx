@@ -85,7 +85,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
-      className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-sm px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 shrink-0 rounded-sm px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       {copied ? <NetsuIcon name="check" className="size-3 text-[var(--color-ok)]" /> : <NetsuIcon name="copy" className="size-3" />}
     </Button>
   );
@@ -197,7 +197,7 @@ function ReasoningRow({ text, active }: { text: string; active: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-col">
-      <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ROW)}>
+      <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", ROW)}>
         <RowIcon open={open} expandable><NetsuIcon name="brain" className="size-3.5 opacity-75" /></RowIcon>
         {active
           ? <Shimmer>{t("message.thinking")}</Shimmer>
@@ -223,7 +223,7 @@ function ToolRow({ tool, t }: { tool: UiToolCall; t: TFunction<"chat"> }) {
   return (
     <ContextMenu>
       <ContextMenuTrigger render={<div className="flex flex-col" />}>
-        <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ROW)}>
+        <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", ROW)}>
           <RowIcon open={open} expandable>
             {!tool.done
               ? <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-[1.5px] border-muted-foreground/30 border-t-foreground" />
@@ -332,7 +332,7 @@ export function AgentTrace({ msg, active, status }: {
   return (
     <div className="flex w-full flex-col">
       <Button variant="ghost" type="button" aria-expanded={open} onClick={() => setManual(!open)}
-        className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent group flex w-fit items-center gap-1.5 rounded-sm text-left text-[13px] text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 group flex w-fit items-center gap-1.5 rounded-sm text-left text-[13px] text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {running && <PixelDots />}
         {running
           ? <Shimmer>{label || t("trace.working")}</Shimmer>

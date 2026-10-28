@@ -78,9 +78,9 @@ export function NotebookWindow() {
             </Tooltip>
             {isTauri && (
               <>
-                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ctlBtn)} aria-label={i18n.t("notebook:window.minimize")} onClick={minimize}><MinimizeGlyph /></Button>
-                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", ctlBtn)} aria-label={maxed ? i18n.t("notebook:window.restore") : i18n.t("notebook:window.maximize")} onClick={toggleMax}>{maxed ? <RestoreGlyph /> : <MaximizeGlyph />}</Button>
-                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `${ctlBtn} hover:bg-destructive hover:text-destructive-foreground`)} aria-label={i18n.t("notebook:window.close")} onClick={close}><CloseGlyph /></Button>
+                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", ctlBtn)} aria-label={i18n.t("notebook:window.minimize")} onClick={minimize}><MinimizeGlyph /></Button>
+                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", ctlBtn)} aria-label={maxed ? i18n.t("notebook:window.restore") : i18n.t("notebook:window.maximize")} onClick={toggleMax}>{maxed ? <RestoreGlyph /> : <MaximizeGlyph />}</Button>
+                <Button variant="ghost" type="button" className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `${ctlBtn} hover:bg-destructive hover:text-destructive-foreground`)} aria-label={i18n.t("notebook:window.close")} onClick={close}><CloseGlyph /></Button>
               </>
             )}
           </div>

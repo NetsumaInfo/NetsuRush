@@ -82,13 +82,13 @@ function ImageTab({ current, onPick }: { current: string | null; onPick: (icon: 
           {library.map((src) => (
             <div key={src} className="group/icn relative">
               <Button variant="ghost" type="button" aria-label={t("iconPicker.importedImage")} onClick={() => onPick({ type: "image", src })}
-                className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", "flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 p-1 transition-colors",
+                className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", "flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40 p-1 transition-colors",
                   current === src ? "border-primary ring-1 ring-primary" : "border-border hover:border-foreground/40")}>
                 <img src={src} alt="" className="max-h-full max-w-full object-contain" draggable={false} />
               </Button>
               <Tooltip>
                 <TooltipTrigger render={<Button variant="ghost" type="button" aria-label={t("iconPicker.removeFromLibrary")} onClick={() => removeIcon(src)}
-                className="h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent absolute -right-1 -top-1 hidden size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover/icn:flex focus-visible:flex" />}>
+                className="h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 absolute -right-1 -top-1 hidden size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground group-hover/icn:flex focus-visible:flex" />}>
                   <X className="size-2.5" />
                 </TooltipTrigger>
                 <TooltipContent>{t("iconPicker.removeFromLibrary")}</TooltipContent>
@@ -136,7 +136,7 @@ export function IconPicker({ profile, onChange }: { profile: ExportProfile; onCh
             <div className="mb-2 flex items-center gap-1 border-b border-border pb-2">
               {tabs.map((t) => (
                 <Button variant="ghost" key={t.id} type="button" onClick={() => setTab(t.id)}
-                  className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent", "flex items-center gap-1 rounded-md px-2 py-1 text-sm", tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                  className={cn("h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", "flex items-center gap-1 rounded-md px-2 py-1 text-sm", tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}>
                   {createElement(t.icon, { className: "size-3.5" })} {t.label}
                 </Button>
               ))}

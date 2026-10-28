@@ -98,7 +98,7 @@ export function DocActions({ onMove, onAskDelete }: {
             <Button variant="ghost"
               type="button"
               onClick={() => toggleFav(pageId)}
-              className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `rounded-md p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent ${isFav ? "text-primary" : "text-muted-foreground hover:text-foreground"}`)}
+              className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `rounded-md p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent ${isFav ? "text-primary" : "text-muted-foreground hover:text-foreground"}`)}
             >
               <NetsuIcon name="star" on={isFav} className="size-4" />
             </Button>
@@ -112,7 +112,7 @@ export function DocActions({ onMove, onAskDelete }: {
             render={
               <DropdownMenuTrigger
                 render={
-                  <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
+                  <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 rounded-md p-1.5 text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent hover:text-foreground">
                     <NetsuIcon name="more" className="size-4" />
                   </Button>
                 }

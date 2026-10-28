@@ -99,7 +99,7 @@ function ShotCardImpl({
         {/* L'aperçu dans la carte reste réservé au survol/à la lecture auto. Ce bouton ouvre le lecteur. */}
         {onPlay && !playing && (
           <Button variant="ghost" type="button" aria-label={t("shotCard.playShot", { n: index + 1 })} onClick={(e) => { e.stopPropagation(); onPlay(); }}
-            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-90 focus-visible:opacity-100">
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-90 focus-visible:opacity-100">
             <Play className="size-7 drop-shadow" />
           </Button>
         )}

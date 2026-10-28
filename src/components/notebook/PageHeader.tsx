@@ -33,8 +33,8 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         <div className="group relative h-40 w-full overflow-hidden rounded-lg">
           <img src={nr.mediaUrl(page.cover)} alt="" className="h-full w-full object-cover" draggable={false} />
           <div className="absolute right-2 top-2 hidden gap-1 group-hover:flex">
-            <Button variant="ghost" type="button" onClick={pickCover} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent nr-chip rounded px-2 py-1 text-xs text-white">{i18n.t("notebook:pageHeader.change")}</Button>
-             <Button variant="ghost" type="button" aria-label={i18n.t("common:action.delete")} onClick={() => setMeta({ cover: null })} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent nr-chip rounded p-1 text-white"><NetsuIcon name="close" className="size-3.5" /></Button>
+            <Button variant="ghost" type="button" onClick={pickCover} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 nr-chip rounded px-2 py-1 text-xs text-white">{i18n.t("notebook:pageHeader.change")}</Button>
+             <Button variant="ghost" type="button" aria-label={i18n.t("common:action.delete")} onClick={() => setMeta({ cover: null })} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 nr-chip rounded p-1 text-white"><NetsuIcon name="close" className="size-3.5" /></Button>
           </div>
         </div>
       ) : null}
@@ -43,7 +43,7 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         <div ref={iconWrap} className="relative">
           <Tooltip>
             <TooltipTrigger render={
-              <Button variant="ghost" type="button" onClick={() => setEmojiOpen((v) => !v)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex size-14 items-center justify-center rounded-lg bg-card shadow-sm ring-1 ring-border">
+              <Button variant="ghost" type="button" onClick={() => setEmojiOpen((v) => !v)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex size-14 items-center justify-center rounded-lg bg-card shadow-sm ring-1 ring-border">
                 {renderPageIcon(page.icon, "size-8")}
               </Button>
             } />
@@ -61,7 +61,7 @@ export function PageHeader({ page }: { page: NotebookPage }) {
         </div>
 
         {!page.cover && (
-          <Button variant="ghost" type="button" onClick={pickCover} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent mb-1 flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
+          <Button variant="ghost" type="button" onClick={pickCover} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 mb-1 flex items-center gap-1 rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
             <NetsuIcon name="image-add" className="size-3.5" /> {i18n.t("notebook:pageHeader.cover")}
           </Button>
         )}

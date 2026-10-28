@@ -197,7 +197,7 @@ function CardAction({ label, onClick, children }: { label: string; onClick: () =
             type="button"
             aria-label={label}
             onClick={onClick}
-            className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent rounded bg-black/70 p-1 text-white outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 rounded bg-black/70 p-1 text-white outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {children}
           </Button>

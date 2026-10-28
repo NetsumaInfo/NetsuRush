@@ -19,11 +19,11 @@ function Actions({ url }: { url: string }) {
   return (
     <>
       <Tooltip>
-        <TooltipTrigger render={<Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="size-3.5" /></Button>} />
+        <TooltipTrigger render={<Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); void navigator.clipboard?.writeText(url); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="copy" className="size-3.5" /></Button>} />
         <TooltipContent>{i18n.t("notebook:finalPass.copyLink")}</TooltipContent>
       </Tooltip>
       <Tooltip>
-        <TooltipTrigger render={<Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-3.5" /></Button>} />
+        <TooltipTrigger render={<Button variant="ghost" type="button" onClick={(e) => { e.stopPropagation(); void nr.openExternal(url); }} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><NetsuIcon name="open-external" className="size-3.5" /></Button>} />
         <TooltipContent>{i18n.t("notebook:blocksUi.open")}</TooltipContent>
       </Tooltip>
     </>

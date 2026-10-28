@@ -204,7 +204,7 @@ function FolderView({ node, path, depth, collapsed, toggle, lib, folderByPath, o
           <ContextMenuTrigger render={
             <Button variant="ghost" type="button" onClick={() => toggle(path)}
               style={{ paddingLeft: pad }}
-              className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm text-foreground hover:bg-accent/60" />
+              className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-sm text-foreground hover:bg-accent/60" />
           }>
             <NetsuIcon name="chevron-toggle" on={isOpen} className="size-4 shrink-0 text-muted-foreground" />
             <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />

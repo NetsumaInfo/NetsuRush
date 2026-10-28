@@ -39,7 +39,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <Button variant="ghost"
           type="button"
           onClick={() => location.reload()}
-          className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent self-start rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 self-start rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {i18n.t("shell:errorBoundary.reload")}
         </Button>

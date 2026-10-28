@@ -40,7 +40,7 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
         <TooltipTrigger render={<Button variant="ghost"
           type="button"
           onClick={onToggle}
-          className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+          className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
             "relative block aspect-square w-full overflow-hidden rounded-lg border bg-muted transition-colors",
             active ? "border-primary ring-2 ring-primary" : "border-border hover:border-foreground/40",
           )}
@@ -70,7 +70,7 @@ function FaceCell({ thumb, domain, active, onToggle, refPayload, suggestion, onS
       {suggestion && (
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" type="button" onClick={onSearchChar}
-            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent mt-1 block w-full truncate rounded bg-primary/15 px-1 py-0.5 text-[10px] text-primary hover:bg-primary/25 outline-none focus-visible:ring-2 focus-visible:ring-primary" />}>
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 mt-1 block w-full truncate rounded bg-primary/15 px-1 py-0.5 text-[10px] text-primary hover:bg-primary/25 outline-none focus-visible:ring-2 focus-visible:ring-primary" />}>
             ≈ {suggestion.name}
           </TooltipTrigger>
           <TooltipContent>{t("faceRefPicker.suggestionTooltip", { name: suggestion.name, pct: Math.round(suggestion.score * 100) })}</TooltipContent>

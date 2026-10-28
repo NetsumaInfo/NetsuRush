@@ -27,7 +27,7 @@ function Section({ title, icon, pages, defaultOpen = true }: {
       <Button variant="ghost"
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent/60 hover:text-foreground"
+        className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary hover:bg-accent/60 hover:text-foreground"
       >
         <NetsuIcon name="chevron-toggle" on={open} className="size-3 shrink-0" />
         {icon}
@@ -39,7 +39,7 @@ function Section({ title, icon, pages, defaultOpen = true }: {
           type="button"
           onClick={(e) => { if (e.altKey) void openInNewTab(p.id); else void openPage(p.id); }}
           onAuxClick={(e) => { if (e.button === 1) { e.preventDefault(); void openInNewTab(p.id); } }}
-          className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `flex w-full items-center gap-1.5 rounded-md py-1.5 pr-1.5 pl-5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary ${p.id === activeId ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"}`)}
+          className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `flex w-full items-center gap-1.5 rounded-md py-1.5 pr-1.5 pl-5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary ${p.id === activeId ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"}`)}
         >
           <span className="flex size-4 shrink-0 items-center justify-center">
             {p.icon ? renderPageIcon(p.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}

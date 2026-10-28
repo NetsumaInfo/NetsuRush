@@ -28,7 +28,7 @@ export function HeaderLinks() {
           <Button variant="ghost"
             type="button"
             aria-label={t("windowControls.github")}
-            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", TITLEBAR_BTN)}
+            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", TITLEBAR_BTN)}
             onClick={() => void nr.openExternal(GITHUB_REPO)}
           >
             <GithubIcon />
@@ -41,7 +41,7 @@ export function HeaderLinks() {
           <Button variant="ghost"
             type="button"
             aria-label={t("windowControls.support")}
-            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", TITLEBAR_BTN)}
+            className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", TITLEBAR_BTN)}
             onClick={() => openSettings("about")}
           >
             <NetsuIcon name="support" />

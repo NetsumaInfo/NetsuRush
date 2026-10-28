@@ -216,7 +216,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
                       )}
                     >
                       <Tooltip>
-                        <TooltipTrigger render={<Button variant="ghost" type="button" className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent block w-full text-left"
+                        <TooltipTrigger render={<Button variant="ghost" type="button" className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 block w-full text-left"
                           onClick={() => { setPreviewIdx(i); setGoto({ t: s.start, n: (goto?.n || 0) + 1 }); }}>
                           <LazyThumb path={single.path} at={s.start} out={s.end} rootMargin={600} className="aspect-video w-full rounded" />
                           <div className="flex items-center justify-between px-1.5 py-1 text-[10px]">
@@ -229,7 +229,7 @@ export function UpscalePreview({ up }: { up: ProcController }) {
                       <Tooltip>
                         <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => toggleScene(i)}
                           aria-label={sel ? t("preview.deselect") : t("preview.select")}
-                          className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", 
+                          className={cn("h-auto font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
                             "absolute right-1 top-1 flex size-5 items-center justify-center rounded-full border transition-colors",
                             sel ? "border-primary bg-primary text-primary-foreground"
                                 : "border-white/40 bg-black/40 text-transparent hover:border-primary hover:text-primary/70",

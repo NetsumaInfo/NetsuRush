@@ -52,8 +52,8 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
       <ContextMenu>
         <ContextMenuTrigger
           render={
-            // <div role="button"> (pas <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent">) : le row contient d'autres boutons (chevron, +) →
-            // un <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent"> imbriqué dans un <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent"> est du HTML invalide (erreur d'hydratation).
+            // <div role="button"> (pas <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0">) : le row contient d'autres boutons (chevron, +) →
+            // un <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0"> imbriqué dans un <Button variant="ghost" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0"> est du HTML invalide (erreur d'hydratation).
             <div
               role="button"
               tabIndex={0}
@@ -76,7 +76,7 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
               <Button variant="ghost"
                 type="button"
                 onClick={(e) => { e.stopPropagation(); toggle(node.id); }}
-                className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `shrink-0 rounded p-0.5 ${hasChildren ? "text-muted-foreground hover:bg-muted" : "invisible"}`)}
+                className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `shrink-0 rounded p-0.5 ${hasChildren ? "text-muted-foreground hover:bg-muted" : "invisible"}`)}
               >
                 <NetsuIcon name="chevron-toggle" on={isOpen} className="size-3.5" />
               </Button>
@@ -101,7 +101,7 @@ function TreeNode({ node, activeId, collapsed, toggle, onAskDelete, onAskMove }:
                   <Button variant="ghost"
                     type="button"
                     onClick={(e) => { e.stopPropagation(); void createPage(node.id); }}
-                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent hidden shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted group-hover:block outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 hidden shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted group-hover:block outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <NetsuIcon name="add" className="size-3.5" />
                   </Button>

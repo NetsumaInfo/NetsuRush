@@ -44,7 +44,7 @@ function ShotCell({ shot, thumb, active, onToggle }: {
         onClick={onToggle}
         onMouseEnter={onEnter}
         onMouseLeave={() => setHover(false)}
-        className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+        className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
           "group relative aspect-video overflow-hidden rounded-lg border bg-muted transition-colors",
           active ? "border-primary ring-2 ring-primary" : "border-border hover:border-foreground/40",
         )}
@@ -155,7 +155,7 @@ export function ReferencePicker({ onClose }: { onClose: () => void }) {
                       <TooltipTrigger render={<Button variant="ghost"
                         type="button"
                         onClick={() => openClip(c.path)}
-                        className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
+                        className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
                       >
                       <NetsuIcon name="film" className="size-4 shrink-0 text-muted-foreground" />
                       <span className="truncate">{c.name}</span>

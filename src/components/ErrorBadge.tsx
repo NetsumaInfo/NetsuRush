@@ -44,7 +44,7 @@ export function ErrorBadge() {
             type="button"
             onClick={() => { openConsole(); markConsoleSeen(); }}
             aria-label={t("errorBadge.aria", { count })}
-            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent pointer-events-auto flex items-center gap-1.5 rounded-full bg-destructive px-3 py-2 text-xs font-medium text-destructive-foreground shadow-lg ring-1 ring-black/20 transition-transform hover:scale-105 active:scale-95"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 pointer-events-auto flex items-center gap-1.5 rounded-full bg-destructive px-3 py-2 text-xs font-medium text-destructive-foreground shadow-lg ring-1 ring-black/20 transition-transform hover:scale-105 active:scale-95"
           />
         }
       >

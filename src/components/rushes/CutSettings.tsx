@@ -42,7 +42,7 @@ function Seg({ active, onClick, disabled, children }: {
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active}
-      className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+      className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
         "inline-flex items-center gap-1.5 rounded border px-2 py-1 text-xs font-medium transition-colors disabled:opacity-40",
         active ? "border-transparent bg-primary text-primary-foreground" : "border-border bg-transparent text-muted-foreground hover:text-foreground",
       )}

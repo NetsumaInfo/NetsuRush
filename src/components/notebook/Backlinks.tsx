@@ -18,7 +18,7 @@ export function Backlinks() {
             key={p.id}
             type="button"
             onClick={() => void openPage(p.id)}
-            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex items-center gap-2 rounded px-2 py-1 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex items-center gap-2 rounded px-2 py-1 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <NetsuIcon name="subpage" className="size-3.5 shrink-0" />
             <span className="shrink-0">{p.icon || "📄"}</span>

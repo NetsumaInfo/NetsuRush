@@ -76,7 +76,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
                     key={p.id}
                     type="button"
                     onClick={() => pick(p.id, "")}
-                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+                    className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
                   >
                     <span className="flex size-4 shrink-0 items-center justify-center">
                       {p.icon ? renderPageIcon(p.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5 text-muted-foreground" />}
@@ -92,7 +92,7 @@ export function NotebookSearch({ open, onOpenChange }: { open: boolean; onOpenCh
               key={`${r.pageId}-${r.blockId}`}
               type="button"
               onClick={() => pick(r.pageId, r.blockId)}
-              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-start gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-start gap-2 rounded px-2 py-1.5 text-left hover:bg-muted"
             >
               <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
                 {r.icon ? renderPageIcon(r.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5 text-muted-foreground" />}

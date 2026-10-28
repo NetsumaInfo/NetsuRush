@@ -132,7 +132,7 @@ export function UpscaleModelSettings({ settings, patch, disabled }: {
       {/* Réglages experts repliés par défaut → panneau épuré. IA = VRAM/précision ; temps réel =
           filtres libplacebo, ou paramètres du RTX Video SDK (les deux n'ont rien en commun). */}
       <Button variant="ghost" type="button" onClick={() => setAdvanced((a) => !a)}
-        className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
+        className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
         <NetsuIcon name="chevron-toggle" on={advanced} className="size-3.5" /> {t("settings.advanced")}
       </Button>
 

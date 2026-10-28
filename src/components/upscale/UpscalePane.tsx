@@ -35,7 +35,7 @@ export function SettingsPane({
           {summary && <span className="min-w-0 flex-1 truncate text-right text-[11px] font-normal text-muted-foreground">{summary}</span>}
         </Button>
         {control}
-        <Button variant="ghost" type="button" aria-hidden tabIndex={-1} onClick={onToggle} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent shrink-0 text-muted-foreground transition-colors hover:text-foreground">
+        <Button variant="ghost" type="button" aria-hidden tabIndex={-1} onClick={onToggle} className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 shrink-0 text-muted-foreground transition-colors hover:text-foreground">
           <NetsuIcon name="chevron-toggle" on={open} className="size-3.5" />
         </Button>
       </div>

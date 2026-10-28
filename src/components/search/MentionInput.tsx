@@ -150,7 +150,7 @@ function MentionList({ matches, active, setActive, pick }: {
             aria-selected={i === active}
             onMouseEnter={() => setActive(i)}
             onMouseDown={(e) => { e.preventDefault(); pick(c); }}
-            className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+            className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
               "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none",
               i === active ? "bg-accent text-accent-foreground" : "hover:bg-accent/50",
             )}

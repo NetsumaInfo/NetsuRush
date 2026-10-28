@@ -13,7 +13,7 @@ export function InfoTip({ text }: { text: string }) {
     <Tooltip>
       <TooltipTrigger
         closeOnClick={false}
-        render={<Button variant="ghost" type="button" className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent shrink-0 text-muted-foreground transition-colors hover:text-foreground" aria-label={text} />}
+        render={<Button variant="ghost" type="button" className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 shrink-0 text-muted-foreground transition-colors hover:text-foreground" aria-label={text} />}
       >
         <NetsuIcon name="info" className="size-3.5" />
       </TooltipTrigger>

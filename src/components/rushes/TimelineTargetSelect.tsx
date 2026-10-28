@@ -59,7 +59,7 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
             {/* destinations fixes */}
             <div className="space-y-1">
               {current && (
-                <Button variant="ghost" type="button" onClick={() => pick("open")} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", rowCls(value === "open"))}>
+                <Button variant="ghost" type="button" onClick={() => pick("open")} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", rowCls(value === "open"))}>
                   <NetsuIcon name="folder-open" className="size-3.5 shrink-0 opacity-70" />
                   <span className="min-w-0 flex-1 truncate">{t("target.openedTimeline")}</span>
                   <Badge variant={value === "open" ? "secondary" : "outline"} className="shrink-0 text-[10px]">{current}</Badge>
@@ -67,7 +67,7 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
               )}
               {/* « Nouvelle timeline » ne ferme PAS le popover : le champ de nom s'ouvre juste dessous
                   (nom vide = nom déduit du contexte, affiché en placeholder par l'appelant). */}
-              <Button variant="ghost" type="button" onClick={() => { setValue(value.startsWith("new:") ? value : "new"); }} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", rowCls(isNew))}>
+              <Button variant="ghost" type="button" onClick={() => { setValue(value.startsWith("new:") ? value : "new"); }} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", rowCls(isNew))}>
                 <NetsuIcon name="add" className="size-3.5 shrink-0 opacity-70" />
                 <span className="min-w-0 flex-1 truncate">{t("target.newTimeline")}</span>
               </Button>
@@ -97,7 +97,7 @@ export function TimelineTargetSelect({ target, className, disabled }: { target: 
                   ) : visible.map((tl) => {
                     const v = `tl:${tl.name}`;
                     return (
-                      <Button variant="ghost" key={tl.name} type="button" onClick={() => pick(v)} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", rowCls(value === v))}>
+                      <Button variant="ghost" key={tl.name} type="button" onClick={() => pick(v)} className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", rowCls(value === v))}>
                         <NetsuIcon name="film" className="size-3.5 shrink-0 opacity-70" />
                         <span className="min-w-0 flex-1 truncate">{tl.name}</span>
                       </Button>

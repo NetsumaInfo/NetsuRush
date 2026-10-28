@@ -44,11 +44,11 @@ export function NotebookTabs() {
       {/* Historique de l'onglet actif (◀ ▶) */}
       <div data-no-drag className="flex shrink-0 items-center gap-0.5">
         <Tooltip>
-          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", navBtn)}><NetsuIcon name="back" className="size-4" /></Button>} />
+          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => void nbTabBack()} disabled={!canBack} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", navBtn)}><NetsuIcon name="back" className="size-4" /></Button>} />
           <TooltipContent>{tr("tabs.prev")}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", navBtn)}><NetsuIcon name="forward" className="size-4" /></Button>} />
+          <TooltipTrigger render={<Button variant="ghost" type="button" onClick={() => void nbTabFwd()} disabled={!canFwd} className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", navBtn)}><NetsuIcon name="forward" className="size-4" /></Button>} />
           <TooltipContent>{tr("tabs.next")}</TooltipContent>
         </Tooltip>
       </div>
@@ -86,7 +86,7 @@ export function NotebookTabs() {
                         <Button variant="ghost"
                           type="button"
                           onClick={(e) => { e.stopPropagation(); nbCloseTab(t.id); }}
-                          className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `-mr-1 flex size-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`)}
+                          className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `-mr-1 flex size-4 shrink-0 items-center justify-center rounded hover:bg-accent ${active ? "" : "opacity-0 group-hover:opacity-100"}`)}
                         >
                           <NetsuIcon name="close" className="size-3" />
                         </Button>
@@ -114,7 +114,7 @@ export function NotebookTabs() {
           <Tooltip>
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
-                <Button variant="ghost" type="button" data-no-drag className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                <Button variant="ghost" type="button" data-no-drag className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                   <NetsuIcon name="chevrons-right" className="size-4" />
                 </Button>
               } />
@@ -139,7 +139,7 @@ export function NotebookTabs() {
             type="button"
             data-no-drag
             onClick={() => void nbCreatePage(null, { newTab: true })}
-            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <NetsuIcon name="add" className="size-4" />
           </Button>

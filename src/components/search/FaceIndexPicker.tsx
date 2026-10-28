@@ -81,7 +81,7 @@ export function FaceIndexPicker({ open, onClose, onIndex }: Props) {
                 key={c.path}
                 type="button"
                 onClick={() => setPick((s) => { const n = new Set(s); n.has(c.path) ? n.delete(c.path) : n.add(c.path); return n; })}
-                className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", "flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   on ? "bg-accent" : "hover:bg-accent/50", info && !on && "opacity-50")}
               >
                 <span className={cn("flex size-4 shrink-0 items-center justify-center rounded border",

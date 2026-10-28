@@ -24,7 +24,7 @@ function Crumb({ page, current, siblings, onOpen }: {
       <Button variant="ghost"
         type="button"
         onClick={() => { if (!current) onOpen(page.id); }}
-        className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent", `flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm transition-colors ${current ? "font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`)}
+        className={cn("h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", `flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm transition-colors ${current ? "font-medium text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`)}
       >
         <span className="flex size-4 shrink-0 items-center justify-center">
           {page.icon ? renderPageIcon(page.icon, "size-4", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}
@@ -36,7 +36,7 @@ function Crumb({ page, current, siblings, onOpen }: {
           <Tooltip>
             <TooltipTrigger render={
               <DropdownMenuTrigger render={
-                <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded p-0.5 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground">
+                <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 rounded p-0.5 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground">
                   <NetsuIcon name="chevron-down" className="size-3" />
                 </Button>
               } />
@@ -107,7 +107,7 @@ export function NotebookBreadcrumb() {
               <Tooltip>
                 <TooltipTrigger render={
                   <DropdownMenuTrigger render={
-                    <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                    <Button variant="ghost" type="button" className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                       <NetsuIcon name="more" className="size-4" />
                     </Button>
                   } />

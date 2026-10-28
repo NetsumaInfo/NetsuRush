@@ -90,7 +90,7 @@ export function SystemSpecsCard({ context, loading, onRefresh, manual, onManualC
           <Button variant="ghost"
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent mt-2 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 mt-2 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
           >
             <NetsuIcon name="chevron-toggle" on={open} className="size-3" />
             {open ? t("bugReport.specs.less") : t("bugReport.specs.more")}

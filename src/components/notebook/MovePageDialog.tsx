@@ -47,7 +47,7 @@ export function MovePageDialog({ pageId, onClose }: { pageId: string | null; onC
           <Button variant="ghost"
             type="button"
             onClick={() => void move(null)}
-            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <NetsuIcon name="notebook" className="size-3.5 shrink-0 text-primary" /> {t("navigation.notebookRoot")}
           </Button>
@@ -57,7 +57,7 @@ export function MovePageDialog({ pageId, onClose }: { pageId: string | null; onC
               type="button"
               onClick={() => void move(n.id)}
               style={{ paddingLeft: 8 + (q.trim() ? 0 : n.depth) * 14 }}
-              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <span className="flex size-4 shrink-0 items-center justify-center">
                 {n.icon ? renderPageIcon(n.icon, "size-3.5", "text-sm") : <NetsuIcon name="file-text" className="size-3.5" />}

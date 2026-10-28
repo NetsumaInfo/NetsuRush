@@ -368,7 +368,7 @@ export function UpscaleSources({ up }: { up: ProcController }) {
           <div className="space-y-0.5">
             <div className="flex items-center gap-1 px-1 pb-1">
               <Button variant="ghost" type="button" onClick={() => { setQuery(""); setOpened(null); setCuts([]); }}
-                className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                className="h-auto font-normal whitespace-normal justify-start hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
                 <NetsuIcon name="prev" className="size-3.5" /> {t("sources.timelines")}
               </Button>
               <span className="min-w-0 flex-1 truncate text-xs font-medium">{opened}</span>

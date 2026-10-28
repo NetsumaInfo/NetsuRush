@@ -39,7 +39,7 @@ function GalleryCardImpl({ f, anySel, selected, onSearch, onToggle, onCreateOne,
       <ContextMenuTrigger>
         <Button variant="ghost" type="button"
           onClick={anySel ? onToggle : onSearch}
-          className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+          className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
             "group relative block aspect-square w-full overflow-hidden rounded-lg border bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
             selected ? "border-primary ring-2 ring-primary" : "border-border hover:border-primary",
           )}>

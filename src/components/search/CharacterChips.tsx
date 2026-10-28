@@ -64,7 +64,7 @@ export function CharacterChips() {
                   type="button"
                   onClick={() => onChipClick(c)}
                   onDoubleClick={() => setRenamingId(c.id)}
-                  className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+                  className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
                     "inline-flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-2 text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     active
                       ? "border-primary bg-primary/15 text-primary hover:bg-primary/20"

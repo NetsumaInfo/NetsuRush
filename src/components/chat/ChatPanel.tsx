@@ -62,7 +62,7 @@ export function ChatPanel() {
             <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary"><NetsuIcon name="chat-empty" className="size-5" /></div>
             <div className="text-sm font-semibold">{t("panel.copilot")}</div>
             {!ready && (
-              <Button variant="ghost" type="button" onClick={() => setShowSettings(true)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent text-xs text-primary underline-offset-2 hover:underline">
+              <Button variant="ghost" type="button" onClick={() => setShowSettings(true)} className="h-auto gap-0 rounded-none px-0 py-0 text-[length:inherit] font-normal whitespace-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 text-xs text-primary underline-offset-2 hover:underline">
                 {provider === "cli" ? t("panel.noCliAgent") : t("panel.configureKey")}
               </Button>
             )}

@@ -111,7 +111,7 @@ function CollectionPicker({ shots, close }: { shots: CollectionShot[]; close: ()
   const Row = (c: CollectionMeta) => (
     <div key={c.id} className="group/row flex items-center gap-1 rounded-lg pr-1 transition-colors hover:bg-accent">
       <Button variant="ghost" onClick={() => range(c.id)} disabled={!!busy || readOnly(c)}
-        className="h-auto min-w-0 flex-1 justify-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-normal hover:bg-transparent dark:hover:bg-transparent">
+        className="h-auto min-w-0 flex-1 justify-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-normal hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0">
         <CollectionGlyph icon={c.icon} color={c.color} size={22} />
         <span className="min-w-0 flex-1 truncate">{c.name}</span>
         {busy === c.id ? <Spinner className="size-3.5 text-muted-foreground" />

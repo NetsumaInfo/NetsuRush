@@ -69,7 +69,7 @@ export function TimelineFolders({
             type="button"
             disabled={busy}
             onClick={() => (onToggle ? onToggle(t.name) : onOpen?.(t.name))}
-            className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent", 
+            className={cn("h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0", 
               "group relative flex flex-col overflow-hidden rounded-lg border text-left transition-all disabled:opacity-60",
               on ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50 hover:-translate-y-0.5",
             )} />
@@ -118,7 +118,7 @@ export function TimelineFolders({
             <ContextMenuTrigger render={
               <Button variant="ghost" type="button" onClick={() => toggleFolder(node.path)}
                 style={{ paddingLeft: (depth - 1) * 16 }}
-                className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 text-sm text-foreground transition-colors hover:bg-accent/60" />
+                className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 text-sm text-foreground transition-colors hover:bg-accent/60" />
             }>
               <NetsuIcon name="chevron-toggle" on={!isCol} className="size-4 shrink-0 text-muted-foreground" />
               <NetsuIcon name="folder-open" className="size-4 shrink-0 text-muted-foreground" />

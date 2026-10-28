@@ -58,7 +58,7 @@ export function DerushHome() {
       <div className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Button variant="ghost" type="button" onClick={enterMediaPool}
-            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent group flex flex-row items-center gap-4 rounded-xl bg-card p-4 text-left shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-start sm:gap-3 sm:p-6">
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 group flex flex-row items-center gap-4 rounded-xl bg-card p-4 text-left shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-start sm:gap-3 sm:p-6">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
               <NetsuIcon name="browse-media" className="size-5" />
             </div>
@@ -71,7 +71,7 @@ export function DerushHome() {
           </Button>
 
           <Button variant="ghost" type="button" onClick={pickFiles}
-            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent group flex flex-row items-center gap-4 rounded-xl bg-card p-4 text-left shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-start sm:gap-3 sm:p-6">
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 group flex flex-row items-center gap-4 rounded-xl bg-card p-4 text-left shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-start sm:gap-3 sm:p-6">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
               <NetsuIcon name="import-videos" className="size-5" />
             </div>
@@ -86,7 +86,7 @@ export function DerushHome() {
           {/* Découpe d'une timeline entière : flux natif Resolve, ou — sur hôte Adobe — détection sur
               les rushs de la séquence du snapshot puis montage par le job du panneau (hostCutTimeline). */}
           <Button variant="ghost" type="button" onClick={openCutTimeline}
-            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent group flex w-full items-center gap-4 rounded-xl bg-card p-4 text-left sm:p-5 shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring">
+            className="h-auto justify-start whitespace-normal text-left font-normal border-0 p-0 gap-0 rounded-none hover:bg-transparent dark:hover:bg-transparent justify-start shrink select-auto active:not-aria-[haspopup]:translate-y-0 group flex w-full items-center gap-4 rounded-xl bg-card p-4 text-left sm:p-5 shadow-xs ring-1 ring-foreground/10 outline-none transition-all hover:-translate-y-0.5 hover:ring-primary/60 focus-visible:ring-2 focus-visible:ring-ring">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
               <NetsuIcon name="cut-timeline" className="size-5" />
             </div>
