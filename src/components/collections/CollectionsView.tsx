@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
-import { Plus, Folder, ChevronRight, MoreVertical, Star } from "lucide-react";
+import { Plus, Folder, ChevronRight, MoreVertical } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { netsuIconOf, type IconComponent } from "@/components/NetsuIconOf";
 import { useApp } from "@/store";
@@ -362,7 +362,7 @@ export function CollectionsView() {
                   </div>
                   <div className="mt-1.5 px-0.5">
                     <div className="flex items-center gap-1 text-sm font-medium">
-                      {favs.includes(c.id) && <Star className="size-3 shrink-0 fill-amber-400 text-amber-400" />}
+                      {favs.includes(c.id) && <NetsuIcon name="star" on className="size-3 shrink-0 text-amber-400" />}
                       <span className="truncate">{c.name}</span>
                     </div>
                     {display.description && c.description && <div className="truncate text-[11px] text-muted-foreground">{c.description}</div>}
@@ -389,7 +389,7 @@ export function CollectionsView() {
                   <CollectionGlyph icon={c.icon} color={c.color} size={glyphSize} />
                   <div className="min-w-0 max-w-full text-center">
                     <div className={cn("flex items-center justify-center gap-1 font-medium", view === "compact" ? "text-[11px]" : "text-sm")}>
-                      {favs.includes(c.id) && <Star className="size-3 shrink-0 fill-amber-400 text-amber-400" />}
+                      {favs.includes(c.id) && <NetsuIcon name="star" on className="size-3 shrink-0 text-amber-400" />}
                       <span className="truncate">{c.name}</span>
                     </div>
                     {view !== "compact" && (

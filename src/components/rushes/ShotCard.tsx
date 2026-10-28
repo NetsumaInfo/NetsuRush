@@ -4,7 +4,7 @@
 // (collection), supprimer.
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, X, Check, Star } from "lucide-react";
+import { Play, X, Check } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { hoverLiftLayer } from "@/components/common/hoverLift";
@@ -153,7 +153,7 @@ function ShotCardImpl({
       <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1.5 rounded nr-chip px-1.5 py-0.5 text-[10px] font-medium tabular-nums">
         {labelColor && <span role="img" aria-label={labelName} className="size-1.5 shrink-0 rounded-full" style={{ background: labelColor }} />}
         {!!rating && rating > 0 && (
-          <span className="flex items-center gap-0.5"><Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />{rating}</span>
+          <span className="flex items-center gap-0.5"><NetsuIcon name="star" on className="size-2.5 text-amber-400" />{rating}</span>
         )}
         {!!tagCount && tagCount > 0 && <span className="text-white/70">#{tagCount}</span>}
         {dur}

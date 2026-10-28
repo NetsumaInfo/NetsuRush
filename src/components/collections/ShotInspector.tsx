@@ -41,7 +41,7 @@ export function ShotInspector({ shot, suggestions, onPatch, onClose }: {
         {/* Note */}
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] text-muted-foreground">{tr("inspector.rating")}</span>
-          <StarRating value={shot.rating ?? 0} onChange={(n) => onPatch({ rating: n || null })} size={16} />
+          <StarRating value={shot.rating ?? 0} onChange={(n) => onPatch({ rating: n || null })} iconClassName="size-4" />
         </div>
 
         {/* Label couleur */}
