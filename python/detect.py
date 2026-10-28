@@ -54,55 +54,18 @@ def _progress(pct):
     return True
 
 
-# Part du travail supposée faite à l'échéance prévue. Le reste de la course est ASYMPTOTIQUE :
-# une estimation temps-based qui saturerait à son plafond rendrait la barre IMMOBILE dès que le
-# travail dépasse la durée prévue — ce qui arrive à chaque découpe en lot, où N détections se
-# partagent le même GPU et durent donc N fois plus longtemps que l'estimation d'un job seul.
-# Une barre figée à 99 % se lit comme une application plantée ; mieux vaut ralentir sans fin.
-_ESTIMATE_KNEE = 0.85
-
-
-def _estimate_ratio(elapsed, expected):
-    """Avancement estimé dans [0, 1[ — linéaire jusqu'à l'échéance, asymptotique ensuite.
-
-    Continu au genou (`elapsed == expected` → `_ESTIMATE_KNEE`), strictement croissant, et
-    n'atteint JAMAIS 1 : il reste toujours de quoi avancer, si tard soit-il."""
-    expected = max(1.0, expected)
-    elapsed = max(0.0, elapsed)
-    if elapsed <= expected:
-        return _ESTIMATE_KNEE * elapsed / expected
-    return 1.0 - (1.0 - _ESTIMATE_KNEE) * expected / elapsed
-
-
 @contextlib.contextmanager
-def _heartbeat(interval=20.0, estimate=None):
-    """Bat sur stderr toutes les `interval` s. OmniShotCut lit TOUTE la vidéo en RAM (ffmpeg) AVANT
-    d'émettre sa 1re progression → ~70 s muets sur 24 min, plus sous contention. Le core a un watchdog
-    d'INACTIVITÉ (tue un process sans sortie) → sans ce battement, plusieurs détections EN PARALLÈLE
-    (dont les lectures se chevauchent et s'allongent) déclenchaient « délai dépassé ». Le battement
-    nourrit le watchdog pendant la phase muette ; un process réellement bloqué cesse TOUT (thread
-    compris) → le watchdog le rattrape quand même.
-
-    `estimate=(base, span, expected_s)` : en plus du battement, émet une progression
-    ESTIMÉE temps-based (base..base+span) — OmniShotCut n'émet aucune progression pendant
-    `inference`, sans ça la barre reste figée plusieurs minutes."""
+def _heartbeat(interval=20.0):
+    """Bat sur stderr toutes les `interval` s. Le core a un watchdog d'INACTIVITÉ (tue un process sans
+    sortie) : un chargement de modèle ou une fenêtre lente sous contention (plusieurs détections EN
+    PARALLÈLE) ne doit pas passer pour un process mort. Un process réellement bloqué cesse TOUT
+    (thread compris) → le watchdog le rattrape quand même."""
     stop = threading.Event()
-    t0 = time.time()
 
     def beat():
         while not stop.wait(interval):
             try:
-                if estimate:
-                    base, span, expected = estimate
-                    ratio = _estimate_ratio(time.time() - t0, expected)
-                    # Le ratio ne sature jamais, mais _progress est MONOTONE À L'ENTIER : deux
-                    # tics rapprochés peuvent retomber sur la même valeur. On garde alors le
-                    # marqueur de vie, sinon une inférence GPU lente passe pour un process mort
-                    # aux yeux du watchdog du core.
-                    if not _progress(base + span * ratio):
-                        sys.stderr.write("HEARTBEAT\n"); sys.stderr.flush()
-                else:
-                    sys.stderr.write("HEARTBEAT\n"); sys.stderr.flush()
+                sys.stderr.write("HEARTBEAT\n"); sys.stderr.flush()
             except Exception:  # noqa: BLE001
                 break
 
@@ -164,7 +127,7 @@ def _canonical_options(model, threshold, options=None):
         selected_inter = sorted({str(x) for x in (omni.get("interLabels") or all_inter) if str(x) in all_inter})
         out["omnishotcut"] = {
             "mode": "default" if omni.get("mode") == "default" else "clean_shot",
-            "overlapWindowLength": max(0, min(239, int(omni.get("overlapWindowLength", 10) or 0))),
+            "overlapWindowLength": max(0, min(99, int(omni.get("overlapWindowLength", 20) or 0))),
             "intraLabels": selected_intra or all_intra,
             "interLabels": selected_inter or all_inter,
         }
@@ -579,8 +542,10 @@ def _detect_autoshot(path, options):
     return fps, nframes, scenes
 
 
-def _detect_omnishot(path, options, concurrency=1):
+def _detect_omnishot(path, options):
     import cv2
+
+    import nromni
 
     sys.stderr.write("STAGE:load\n"); sys.stderr.flush()
     _progress(2)
@@ -600,27 +565,19 @@ def _detect_omnishot(path, options, concurrency=1):
             nframes = probed_frames
     if not fps or fps != fps:
         fps = 24.0
-    duration = (nframes / fps) if fps else 0.0
 
     sys.stderr.write("STAGE:infer\n"); sys.stderr.flush()
-    # redirect stdout→stderr : aucun print du package ne pollue notre JSON. `inference` est
-    # entièrement muette (lecture full-vidéo + prédiction) → progression ESTIMÉE temps-based
-    # (nourrit aussi le watchdog), calée sur ~12 % de la durée du média.
-    #
-    # L'estimation PLAFONNE À 90 (5 + 85), et jamais plus haut : la barre du renderer s'autorise
-    # 8 points d'avance au-dessus de la dernière mesure et bute sur 99 (cf. `lib/smoothProgress`).
-    # Une estimation qui monterait à 95 collerait donc l'affichage à 99 % — figé — pendant tout ce
-    # que l'inférence prend au-delà du prévu. Sous 90, il reste toujours de la marge pour avancer.
-    #
-    # `concurrency` = nombre de détections qui se partagent le GPU en ce moment (le core le sait, il
-    # tient le pool). Une découpe en lot en lance plusieurs : chacune dure alors à peu près autant de
-    # fois plus longtemps, et une estimation calée sur un job seul se ferait dépasser à tous les coups.
-    expected = max(30.0, duration * 0.12) * max(1, int(concurrency or 1))
-    overlap = int(options.get("overlapWindowLength", 10))
-    with contextlib.redirect_stdout(sys.stderr), _heartbeat(interval=2.0, estimate=(5, 85, expected)):
-        ranges, intra_labels, inter_labels = model.inference(path, mode="default", overlap=overlap)
-    # L'inférence est finie pour de bon : on quitte l'estimation et on le dit. Ce qui suit (filtrage
-    # des labels, normalisation des bornes) est une poignée de boucles sur quelques milliers de plans.
+    # Decoding and inference run in one streamed pass (python/nromni.py), so progress is measured
+    # per window: 5..95. The heartbeat only keeps the core's inactivity watchdog fed if a window
+    # stalls. redirect stdout→stderr: nothing the package prints may pollute our JSON line.
+    overlap = int(options.get("overlapWindowLength", 20))
+    with contextlib.redirect_stdout(sys.stderr), _heartbeat(interval=2.0):
+        ranges, intra_labels, inter_labels, decoded = nromni.detect(
+            model, path, overlap, nframes_hint=nframes, on_progress=lambda r: _progress(5 + 90 * r))
+    if decoded:
+        nframes = decoded
+    if not nframes:  # unreadable file: without this the output holds a ghost shot [0, -1]
+        raise ValueError(t("no_decoded_frame"))
     _progress(96)
 
     allowed_intra = set(options.get("intraLabels") or [])
@@ -712,10 +669,7 @@ def _link_existing_cut(path, model, threshold, options):
     return got if got.get("cached") else None
 
 
-# `concurrency` n'entre NI dans les options NI dans la clé de cache : c'est une donnée de charge du
-# moment, pas un réglage de découpe. L'y mettre ferait rater le cache d'un rush selon qu'il a été
-# découpé seul ou en lot.
-def cmd_detect(path, threshold, model, options=None, concurrency=1):
+def cmd_detect(path, threshold, model, options=None):
     _reset_progress()  # échelle 0..100 par job (mode serve : jobs successifs)
     model = model if model in ("omnishotcut", "autoshot") else "transnetv2"
     linked = _link_existing_cut(path, model, 0.0 if model == "omnishotcut" else threshold, options)
@@ -725,7 +679,7 @@ def cmd_detect(path, threshold, model, options=None, concurrency=1):
         if model == "omnishotcut":
             threshold = 0.0  # OmniShotCut n'a pas de seuil (mode auto) → clé de cache stable
             normalized, options_key = _canonical_options(model, threshold, options)
-            fps, nframes, scenes = _detect_omnishot(path, normalized["omnishotcut"], concurrency)
+            fps, nframes, scenes = _detect_omnishot(path, normalized["omnishotcut"])
         elif model == "autoshot":
             normalized, options_key = _canonical_options(model, threshold, options)
             fps, nframes, scenes = _detect_autoshot(path, normalized["autoshot"])
@@ -777,8 +731,7 @@ def serve():
                 res = cmd_get(path, model, float(thr) if thr is not None else None, req.get("options"))
             else:
                 with contextlib.redirect_stdout(sys.stderr):
-                    res = cmd_detect(path, float(req.get("threshold", 0.5)), model, req.get("options"),
-                                     req.get("concurrency") or 1)
+                    res = cmd_detect(path, float(req.get("threshold", 0.5)), model, req.get("options"))
         except Exception as exc:  # noqa: BLE001
             res = {"scenes": [], "error": str(exc)}
         real_out.write(json.dumps({"id": rid, "result": res}) + "\n")
@@ -800,8 +753,7 @@ def main():
         threshold = float(sys.argv[3]) if len(sys.argv) > 3 else 0.5
         model = sys.argv[4] if len(sys.argv) > 4 else "transnetv2"
         options = json.loads(sys.argv[5]) if len(sys.argv) > 5 else None
-        concurrency = int(sys.argv[6]) if len(sys.argv) > 6 else 1
-        print(json.dumps(cmd_detect(path, threshold, model, options, concurrency)))
+        print(json.dumps(cmd_detect(path, threshold, model, options)))
 
 
 if __name__ == "__main__":

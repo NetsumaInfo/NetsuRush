@@ -86,7 +86,7 @@ After each indexed clip, `warmIndexedThumbs` builds that clip's missing thumbnai
 Two selectable models, cache in SQLite `~/.netsurush/netsurush.db`, table **`scene_cache_v3`**, PK `(file_path, threshold, model)` — cache separated per model. PySceneDetect was removed; do not bring it back.
 
 - **TransNetV2** (default): bundled weights, CPU. The UI threshold is a **precision preset** (`PRESETS`), not a raw number.
-- **OmniShotCut** (MIT): more accurate on transitions and dissolves, **no threshold** (auto mode, slider disabled). Fully local: repo vendored under `vendor/`, patched so `.to("cuda")` becomes device-aware, weights read offline through an env var.
+- **OmniShotCut** (MIT): more accurate on transitions and dissolves, **no threshold** (auto mode, slider disabled). Fully local: repo vendored under `vendor/`, patched so `.to("cuda")` becomes device-aware, weights read offline through an env var. It runs through `python/nromni.py`, which streams decoding and inference (same windows and stitching as upstream, identical output on the same frames). **Frames are scaled with `flags=bilinear`**: that is decord's output, the pixels v1.5 was trained on; ffmpeg's default bicubic scaler made v1.5 miss obvious hard cuts. Overlap defaults to **20** — 10 and 30 each lost hard cuts on test material. NVDEC was measured and rejected: slower in the full run (its CUDA context fights PyTorch's) and it drops cuts.
 
 Commands: `serve` (**JSON-lines daemon**, the nominal mode — models stay warm between jobs), `detect <video> [thr] [model]` (one-shot fallback if the daemon dies), `get <video> [model]` (reads the cache **without** loading a model → instant shots when reopening).
 

@@ -390,20 +390,17 @@ test('NetsuCut exposes only the three wired detection engines and option-aware c
   assert.doesNotMatch(registry, /scenesdetect/i);
 });
 
-test('the GPU load of the moment reaches the estimator without touching the cut cache key', () => {
+test('OmniShotCut reports measured progress from a streamed decode', () => {
   const sidecars = fs.readFileSync(path.join(root, 'core', 'sidecars.js'), 'utf8');
   const detect = fs.readFileSync(path.join(root, 'python', 'detect.py'), 'utf8');
-  // Compté APRÈS l'acquisition : ce job est dans le nombre qu'il reçoit.
-  const dispatch = sidecars.slice(sidecars.indexOf('async function detectScenes'), sidecars.indexOf('// Lecture DIRECTE du cache'));
-  assert.ok(dispatch.indexOf('detectPool.acquire()') < dispatch.indexOf('slot.busy'));
-  assert.match(dispatch, /const concurrency = detectPool\.pool\.filter\(\(slot\) => slot\.busy\)\.length \|\| 1/);
-  // Champ de PREMIER NIVEAU du job. Dans `options`, il entrerait dans la clé de cache et un rush
-  // découpé en lot ne retrouverait plus la découpe qu'il a faite seul.
-  assert.match(dispatch, /model, options, concurrency \}/);
-  assert.doesNotMatch(dispatch, /options: \{[^}]*concurrency/);
-  assert.match(detect, /def cmd_detect\(path, threshold, model, options=None, concurrency=1\)/);
-  assert.match(detect, /_detect_omnishot\(path, normalized\["omnishotcut"\], concurrency\)/);
-  assert.match(detect, /max\(30\.0, duration \* 0\.12\) \* max\(1, int\(concurrency or 1\)\)/);
+  const omni = fs.readFileSync(path.join(root, 'python', 'nromni.py'), 'utf8');
+  // Progress is measured per window, so no estimate needs the number of jobs sharing the GPU.
+  assert.doesNotMatch(sidecars, /concurrency \}/);
+  assert.match(detect, /def cmd_detect\(path, threshold, model, options=None\)/);
+  assert.match(detect, /nromni\.detect\(/);
+  assert.doesNotMatch(detect, /model\.inference\(path/);
+  // Bilinear = decord's pixels, the ones v1.5 was trained on.
+  assert.match(omni, /flags=bilinear/);
 });
 
 test('first-run setup never bypasses the gate when the core is temporarily unavailable', () => {

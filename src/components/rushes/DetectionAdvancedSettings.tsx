@@ -201,7 +201,7 @@ export function DetectionAdvancedSettings({ model, disabled = false, compact = f
             <NumberSetting label={t("advanced.minSceneFrames")} hint={t("advanced.minSceneFramesHint")} value={options.minSceneFrames} min={1} max={300} onChange={(minSceneFrames) => patch({ minSceneFrames })} />
 
             {model === "omnishotcut" && (<>
-              <NumberSetting label={t("advanced.overlapWindow")} hint={t("advanced.overlapHint")} value={omni.overlapWindowLength} min={0} max={239} onChange={(overlapWindowLength) => patch({ omnishotcut: { ...omni, overlapWindowLength } })} />
+              <NumberSetting label={t("advanced.overlapWindow")} hint={t("advanced.overlapHint")} value={omni.overlapWindowLength} min={0} max={99} onChange={(overlapWindowLength) => patch({ omnishotcut: { ...omni, overlapWindowLength } })} />
             </>)}
 
           </div>)}

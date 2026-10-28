@@ -216,17 +216,11 @@ function detectProgress(event, tagPath) {
 async function detectScenes(event, filePath, threshold = 0.5, model = 'transnetv2', options = {}) {
   const onProg = detectProgress(event, filePath);
   const e = await detectPool.acquire();
-  // Détections qui se partagent le GPU à cet instant, celle-ci comprise (elle vient d'acquérir son
-  // daemon). OmniShotCut n'émet aucune progression pendant son inférence : il l'ESTIME sur le temps,
-  // et une estimation calée sur un job seul se fait dépasser dès qu'un lot en lance plusieurs — la
-  // barre butait alors sur son plafond et paraissait figée. Ce nombre n'entre PAS dans `options` :
-  // ce serait un réglage de découpe, donc une clé de cache différente selon la charge du moment.
-  const concurrency = detectPool.pool.filter((slot) => slot.busy).length || 1;
   try {
-    let r = await e.d.req({ cmd: 'detect', path: filePath, threshold: Number(threshold), model, options, concurrency }, onProg);
+    let r = await e.d.req({ cmd: 'detect', path: filePath, threshold: Number(threshold), model, options }, onProg);
     // `daemonDown`, never the message: the text follows the interface language.
     if (r && r.daemonDown) {
-      r = await runDetect(event, ['detect', filePath, String(threshold), model, JSON.stringify(options || {}), String(concurrency)], filePath);
+      r = await runDetect(event, ['detect', filePath, String(threshold), model, JSON.stringify(options || {})], filePath);
     }
     return r;
   } finally {
