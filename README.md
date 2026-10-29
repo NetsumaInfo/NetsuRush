@@ -10,7 +10,7 @@
 
 </div>
 
-NetsuRush is a **standalone desktop app**, not a plugin: a **Tauri** shell plus a local **Node "core"** service that talks to Resolve through external scripting (`DaVinciResolveScript`). It reads Media Pool clips, detects shot boundaries, and hands back cuts or a whole timeline. Around that core sit a reference board, a notebook, a script editor, AI processing tools and bridges to Premiere Pro and After Effects.
+NetsuRush is a **standalone desktop app**, not a plugin: a **Tauri** shell plus a local **Node "core"** service that talks to Resolve through external scripting (`DaVinciResolveScript`). It reads Media Pool clips, detects shot boundaries, and hands back cuts or a whole timeline. Around that core sit a media library, shot collections that can be shared peer to peer, a notebook, AI processing tools, an AI copilot and bridges to Premiere Pro and After Effects.
 
 Because the app drives Resolve **from the outside**, nothing is installed inside your editor and Resolve never has to be restarted to pick up a new version.
 
@@ -18,7 +18,7 @@ Because the app drives Resolve **from the outside**, nothing is installed inside
 
 | Module | What it does |
 |---|---|
-| **NetsuCut** | Footage review: preview, AI shot detection, lossless cutting, frame-accurate timeline building, shot collections |
+| **NetsuCut** | Footage review: media library, preview, AI shot detection, lossless cutting, export profiles, frame-accurate timeline building, shot collections (shareable peer to peer) |
 | **NetsuSearch** | Find a shot by describing it (SigLIP 2), plus duplicates, groups and face search |
 | **NetsuBook** | Notebook with linked pages, databases and exports |
 | **NetsuLab** | Upscaling, frame interpolation, depth, background removal, matting, interactive roto |
@@ -92,7 +92,7 @@ core/server.js      Node service on 127.0.0.1:8730
   ├─ rpc            POST /rpc + SSE /events
   ├─ resolve-bridge + resolve_helper.py → external Python bridge to Resolve
   ├─ adobe          round-trip jobs to the CEP panel (Premiere / After Effects)
-  └─ ffmpeg · thumbs · proxy · sidecars · timeline · export · transfer · reference
+  └─ ffmpeg · thumbs · proxy · sidecars · timeline · export · transfer · library · collections
       │ HTTP/SSE
 src/                React renderer (lib/bridge.ts → coreClient.ts)
 ```
@@ -101,10 +101,10 @@ src/                React renderer (lib/bridge.ts → coreClient.ts)
 |---|---|
 | `src/` | React renderer — UI, zustand store, `lib/bridge.ts` as the single contact point with the backend |
 | `core/` | Node service (CommonJS): RPC, media server, Resolve bridge, ffmpeg, sidecars, export |
-| `python/` | ML sidecars: shot detection, search, upscaling, roto, voice |
-| `src-tauri/` | Rust shell: window, native mpv player, NSIS packaging |
+| `python/` | ML sidecars: shot detection, search, upscaling, processing, roto, audio language detection |
+| `src-tauri/` | Rust shell: window, native mpv player, peer-to-peer sharing, NSIS packaging |
 | `adobe-cep/` | CEP extension for Premiere Pro and After Effects (committed, zero build) |
-| `convex/` | Optional authentication backend |
+| `convex/` | Optional authentication and sharing-rendezvous backend |
 | `scripts/` | Build, packaging, dependency provisioning, checks |
 | `test/` | Node (`*.test.cjs`) and Python (`test_*.py`) suites |
 
@@ -119,6 +119,9 @@ src/                React renderer (lib/bridge.ts → coreClient.ts)
 | Per-module engineering notes | [`docs/modules.md`](docs/modules.md) |
 | Adobe panel and timeline transfer | [`docs/host-bridges.md`](docs/host-bridges.md) |
 | Packaging, first-run setup, accounts | [`docs/distribution.md`](docs/distribution.md) |
+| Sharing and collaboration | [`docs/collab.md`](docs/collab.md) |
+| AI copilot, tools and MCP servers | [`docs/ai-agent-mcp.md`](docs/ai-agent-mcp.md) |
+| Release process | [`docs/releasing.md`](docs/releasing.md) |
 | Third-party licences before redistributing | [`docs/licensing.md`](docs/licensing.md) |
 
 ## Inspiration
@@ -135,8 +138,6 @@ NetsuRush would not look the way it does without these projects. Each one shaped
 
 > [!NOTE]
 > These are **inspirations, not sources**: what was taken is the idea, the interaction design, the problem worth solving. Nothing was copied — every feature above is an independent implementation, written from scratch for this codebase. That matters legally as much as morally, since several of these projects are GPL or AGPL licensed: see [`docs/licensing.md`](docs/licensing.md).
-
-Also worth naming: **PureRef** for the idea of a single living document file, and **autocut** for silence removal.
 
 ## Resources
 
