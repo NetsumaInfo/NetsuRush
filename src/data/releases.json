@@ -1,5 +1,56 @@
 [
   {
+    "id": "netsurush-0.4.2",
+    "version": "0.4.2",
+    "date": "2026-10-29",
+    "title": {
+      "fr": "Partage des collections et interface unifiée",
+      "en": "Collection sharing and unified interface",
+      "es": "Colecciones compartidas e interfaz unificada",
+      "de": "Geteilte Sammlungen und einheitliche Oberfläche",
+      "ja": "コレクション共有と統一インターフェース",
+      "zh": "收藏共享与统一界面"
+    },
+    "highlights": {
+      "fr": [
+        "Le partage d’une collection est maintenant visible sur sa carte, dans son détail et sur l’accueil.",
+        "Icônes harmonisées dans toute l’application et nouveau menu contextuel pour les champs de texte.",
+        "Les étoiles de notation ont une taille et une icône cohérentes.",
+        "Après une mise à jour de l’app, un modèle OmniShotCut périmé est rafraîchi automatiquement."
+      ],
+      "en": [
+        "Collection sharing is now visible on its card, in its detail view and on the home screen.",
+        "Icons unified across the app, plus a new context menu for text fields.",
+        "Rating stars now have a consistent size and icon.",
+        "After an app update, an outdated OmniShotCut model is refreshed automatically."
+      ],
+      "es": [
+        "El uso compartido de una colección ahora se ve en su tarjeta, en su detalle y en la pantalla de inicio.",
+        "Iconos unificados en toda la aplicación y nuevo menú contextual para los campos de texto.",
+        "Las estrellas de valoración tienen ahora un tamaño y un icono coherentes.",
+        "Tras actualizar la app, un modelo OmniShotCut obsoleto se actualiza automáticamente."
+      ],
+      "de": [
+        "Das Teilen einer Sammlung ist jetzt auf ihrer Karte, in der Detailansicht und auf der Startseite sichtbar.",
+        "Einheitliche Symbole in der gesamten App und ein neues Kontextmenü für Textfelder.",
+        "Bewertungssterne haben jetzt eine einheitliche Größe und ein einheitliches Symbol.",
+        "Nach einem App-Update wird ein veraltetes OmniShotCut-Modell automatisch erneuert."
+      ],
+      "ja": [
+        "コレクションの共有状態がカード、詳細画面、ホームに表示されるようになりました。",
+        "アプリ全体でアイコンを統一し、テキスト欄用の新しいコンテキストメニューを追加しました。",
+        "評価の星のサイズとアイコンを統一しました。",
+        "アプリ更新後、古い OmniShotCut モデルが自動的に更新されます。"
+      ],
+      "zh": [
+        "收藏的共享状态现在会显示在卡片、详情页和主页上。",
+        "全应用统一图标，并为文本框新增右键菜单。",
+        "评分星星的大小和图标保持一致。",
+        "应用更新后，过期的 OmniShotCut 模型会自动刷新。"
+      ]
+    }
+  },
+  {
     "id": "netsurush-0.4.1",
     "version": "0.4.1",
     "date": "2026-10-27",
