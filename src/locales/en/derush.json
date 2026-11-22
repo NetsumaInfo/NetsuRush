@@ -274,6 +274,7 @@
     "failures_one": " · {{count}} failure",
     "failures_other": " · {{count}} failures",
     "pending": "pending",
+    "cancelled": "Stopped",
     "shots_one": "{{count}} shot",
     "shots_other": "{{count}} shots",
     "doneHint": "Cutting done — open a clip to see its shots (already cached).",

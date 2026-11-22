@@ -663,7 +663,8 @@
     },
     "ai": {
       "models": "動画",
-      "indexing": "インデックス作成"
+      "indexing": "インデックス作成",
+      "agents": "外部エージェント"
     },
     "storage": {
       "media": "メディアキャッシュ",
@@ -740,6 +741,43 @@
       "collection": "コレクション",
       "notebook": "ノートブック",
       "notebook-page": "ノートブックのページ"
+    }
+  },
+  "mcp": {
+    "title": "外部エージェント(MCP)",
+    "subtitle": "外部のAIアプリ(Claude Desktop、Claude Code、Codex、Cursor)が MCP サーバー経由で NetsuRush を操作できるようにします。",
+    "enable": "外部エージェントを許可",
+    "enableHint": "オフにすると、クライアントがインストール済みでも MCP サーバーはすべての呼び出しを拒否します。",
+    "on": "オン",
+    "off": "オフ",
+    "modeLabel": "権限",
+    "maxSubagents": "並列サブエージェント",
+    "maxSubagentsHint": "素材を調べる小さな AI エージェントを同時にいくつ動かすか（最大 64）。残りは順番を待ちます。インストール済みのアプリ（Claude Code または Codex）の最も安価なモデルを使い、サブスクリプションを消費します。",
+    "modeHint": "読み取り専用:エージェントは参照のみで、何も変更できません。確認:破壊的な操作は確認を待ちます。すべて許可:確認なしでエージェントが自動で実行します。",
+    "mode": {
+      "read-only": "読み取り専用",
+      "ask": "破壊的な操作は確認",
+      "auto": "すべて許可"
+    },
+    "clients": "アプリ",
+    "status": {
+      "installed": "インストール済み",
+      "detected": "検出済み",
+      "notDetected": "未検出"
+    },
+    "install": "インストール",
+    "remove": "削除",
+    "copyJson": "JSON設定をコピー",
+    "copied": "設定をコピーしました。",
+    "restartNote": "インストール後にクライアントアプリを再起動してください。エージェントを動かすには NetsuRush を開いたままにする必要があります。",
+    "recent": "最近のアクティビティ",
+    "recentEmpty": "まだ呼び出しはありません。",
+    "ok": "OK",
+    "failed": "失敗",
+    "risk": {
+      "read": "読み取り",
+      "write": "書き込み",
+      "destructive": "破壊的"
     }
   }
 }

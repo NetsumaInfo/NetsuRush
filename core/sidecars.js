@@ -56,6 +56,9 @@ function procEnv() {
 // bascule des Paramètres sont donc prises en compte sans redémarrer le core pour les prochains
 // workers, tout en conservant intégralement l'environnement ML existant.
 /** @param {NodeJS.ProcessEnv} [extra] @returns {NodeJS.ProcessEnv} */
+// Heavy background sidecars run below normal priority (see python/nrprio.py): the UI goes first.
+const LOW_PRIORITY = { NETSURUSH_LOW_PRIORITY: '1' };
+
 function langEnv(extra = {}) {
   return { ...DETECT_ENV, ...perfEnv(), NR_LANG: language(), ...extra };
 }
@@ -72,9 +75,15 @@ const TRANSCRIBE_SCRIPT = path.join(PY_DIR, 'transcribe.py');
 // silence prolongé = process figé (hang CUDA, deadlock decode) → on tue et on résout proprement,
 // sinon le handler RPC pend indéfiniment et bloque cutTimeline + le poll Resolve. Watchdog
 // d'INACTIVITÉ (pas un délai total : un long film prend légitimement des minutes).
-// 5 min sans aucune sortie : OmniShotCut lit toute la vidéo en RAM AVANT d'émettre sa 1re
-// progression (~70 s muets pour 24 min, ~130 s pour ~45 min) → marge pour les longs films.
+// Only a PROGRESS line counts as activity: detect.py prints a HEARTBEAT every 2 s from a side
+// thread, which keeps beating while the main thread is stuck in ffmpeg or CUDA, so counting any
+// output let a frozen job sit at the same percentage forever.
 const DETECT_IDLE_MS = 300000;
+const isProgress = (s) => /PROGRESS:\d+/.test(s);
+// detect.py writes STAGE:load within seconds of starting. Nothing at all after this long means the
+// interpreter itself never ran (a Microsoft Store Python whose launch alias hangs until Windows
+// restarts): say so instead of waiting out the 5 min watchdog, then failing every later file too.
+const PY_START_MS = 45000;
 
 // Lance detect.py one-shot, renvoie la dernière ligne JSON. `tagPath` (chemin du rush) accompagne
 // chaque événement `scenes:progress` → la découpe EN LOT (N détections en parallèle) route le pct
@@ -102,8 +111,8 @@ function runDetect(event, args, tagPath) {
     py.stdout.on('data', (d) => { last = Date.now(); out += d.toString(); });
     py.stderr.setEncoding('utf8');
     py.stderr.on('data', (d) => {
-      last = Date.now();
       const s = d.toString();
+      if (isProgress(s)) last = Date.now();
       errTail = (errTail + s).slice(-600);
       logbus.py('detect', s);
       emit(s);
@@ -123,25 +132,29 @@ function runDetect(event, args, tagPath) {
 // detectConcurrency() selon la VRAM libre. Même squelette que makeSearchDaemon (watchdog d'inactivité
 // pendant un job en cours ; un daemon mort rejette proprement ses jobs → repli one-shot).
 function makeDetectDaemon() {
-  let proc = null, seq = 0, buf = '', last = 0, wd = null, curProg = null;
+  let proc = null, seq = 0, buf = '', last = 0, wd = null, curProg = null, started = false, spawnedAt = 0;
+  /** @type {false | true | 'start' | 'cancel'} */
+  let stalled = false;
   const pending = new Map();
   const touch = () => { last = Date.now(); };
   function startWatch() {
     if (wd) return;
     wd = setInterval(() => {
       if (!proc || pending.size === 0) { clearInterval(wd); wd = null; return; }
-      if (Date.now() - last > DETECT_IDLE_MS) { try { proc.kill('SIGKILL'); } catch (_) {} }
+      if (!started && Date.now() - spawnedAt > PY_START_MS) { stalled = 'start'; try { proc.kill('SIGKILL'); } catch (_) {} }
+      else if (Date.now() - last > DETECT_IDLE_MS) { stalled = true; try { proc.kill('SIGKILL'); } catch (_) {} }
     }, 5000);
   }
   function start() {
     if (proc) return;
-    proc = spawn(PYTHON, [DETECT_SCRIPT, 'serve'], { env: langEnv() });
+    proc = spawn(PYTHON, [DETECT_SCRIPT, 'serve'], { env: langEnv(LOW_PRIORITY) });
     // Decoding a whole episode on every core must not freeze the grid next to it.
     lowerPriority(proc);
+    started = false; spawnedAt = Date.now();
     touch();
     proc.stdout.setEncoding('utf8');
     proc.stdout.on('data', (d) => {
-      touch();
+      touch(); started = true;
       buf += d.toString();
       let nl;
       while ((nl = buf.indexOf('\n')) >= 0) {
@@ -153,11 +166,21 @@ function makeDetectDaemon() {
       }
     });
     proc.stderr.setEncoding('utf8');
-    proc.stderr.on('data', (d) => { touch(); const s = d.toString(); logbus.py('detect', s); if (curProg) curProg(s); });
+    proc.stderr.on('data', (d) => { started = true; const s = d.toString(); if (isProgress(s)) touch(); logbus.py('detect', s); if (curProg) curProg(s); });
     const onDead = () => {
       proc = null; buf = '';
       if (wd) { clearInterval(wd); wd = null; }
-      for (const resolve of pending.values()) resolve({ scenes: [], error: t('detectEngineStopped'), daemonDown: true });
+      // A stalled job is not retried one-shot: the same file would stall again, from 0 and cold,
+      // and hold the batch slot another 5 min before failing anyway.
+      const result = stalled === 'cancel'
+        ? { scenes: [], error: null, cancelled: true }
+        : stalled === 'start'
+        ? { scenes: [], error: t('pythonWontStart') }
+        : stalled
+        ? { scenes: [], error: t('engineStalled') }
+        : { scenes: [], error: t('detectEngineStopped'), daemonDown: true };
+      stalled = false;
+      for (const resolve of pending.values()) resolve(result);
       pending.clear();
     };
     proc.on('exit', onDead);
@@ -178,6 +201,8 @@ function makeDetectDaemon() {
       }).finally(() => { if (curProg === onProg) curProg = null; });
     },
     kill() { try { proc?.kill(); } catch (_) {} },
+    // Stop: the job in flight resolves as cancelled (no one-shot retry) and the next job respawns.
+    cancel() { if (proc && pending.size) { stalled = 'cancel'; try { proc.kill('SIGKILL'); } catch (_) {} } },
     idle() { return pending.size === 0; },
   };
 }
@@ -186,6 +211,11 @@ const MAX_DETECT_DAEMONS = 6;
 const DETECT_JOB_MB = 1600;   // coût VRAM d'une détection GPU (modèle + frames + activations + marge)
 const detectPool = scheduler.makePool(makeDetectDaemon, { max: MAX_DETECT_DAEMONS, seed: makeDetectDaemon() });
 // Nb de détections tenables en parallèle (VRAM libre, repli RAM sur machine sans GPU NVIDIA).
+// Kills every detection in flight. Without it "Stop" only stopped queuing new files: the 4-6 jobs
+// already running went on to the end (or to the 5 min watchdog) and the batch stayed busy.
+function detectCancel() {
+  for (const e of detectPool.pool) if (e.busy) /** @type {any} */ (e.d).cancel();
+}
 function detectConcurrency() {
   return scheduler.concurrencyFor({ perJobMB: DETECT_JOB_MB, max: MAX_DETECT_DAEMONS });
 }
@@ -455,7 +485,7 @@ const INDEX_DETECT_LO = 5, INDEX_DETECT_HI = 35;
 const INDEX_EMBED_LO = 40, INDEX_EMBED_HI = 95;
 const spanPct = (lo, hi, f) => lo + Math.round((hi - lo) * Math.max(0, Math.min(1, f)));
 
-function makeIndexRouter(event, kind) {
+function makeIndexRouter(event, kind, file) {
   let phase = '';
   let lastPct = -1;
   // Un daemon peut regrouper plusieurs marqueurs stderr dans un même chunk. Clamp par job pour que
@@ -467,7 +497,8 @@ function makeIndexRouter(event, kind) {
       if (n < lastPct) return;
       lastPct = n;
     }
-    event.sender.send('search:progress', { pct, phase, kind });
+    // `file` lets a parallel batch tell its jobs apart (one bar, several clips in flight).
+    event.sender.send('search:progress', { pct, phase, kind, file });
   };
   return (s) => {
     const ph = s.match(/PHASE:(\w+)/);
@@ -490,7 +521,7 @@ function makeIndexRouter(event, kind) {
   };
 }
 
-const dGpu = makeSearchDaemon({}, null, 180000);   // GPU : index + requêtes si libre (3 min sans sortie = hang → kill)
+const dGpu = makeSearchDaemon(LOW_PRIORITY, null, 180000);   // GPU : index + requêtes si libre (3 min sans sortie = hang → kill)
 const dCpu = makeSearchDaemon({ NETSURUSH_SIGLIP_DEVICE: 'cpu' }, null);   // CPU : requêtes pendant une indexation
 let indexActive = 0;   // nb d'indexations en cours → route les requêtes vers CPU tant que > 0
 
@@ -499,12 +530,16 @@ let indexActive = 0;   // nb d'indexations en cours → route les requêtes vers
 // daemons supplémentaires sont spawné à la demande quand plusieurs indexations arrivent en même temps.
 // La concurrence est plafonnée CÔTÉ RENDERER via indexConcurrency() selon la VRAM libre → le pool ne
 // dépasse jamais ce que la VRAM tient. Idle-kill 3 min → les daemons extra libèrent leur VRAM après.
-const MAX_INDEX_DAEMONS = 6;
-const idxPool = scheduler.makePool(() => makeSearchDaemon({}, null, 180000),
+// Capped at 3: past that, ffmpeg decoding saturates the CPU before the GPU gains anything.
+const MAX_INDEX_DAEMONS = 3;
+const idxPool = scheduler.makePool(() => makeSearchDaemon(LOW_PRIORITY, null, 180000),
   { max: MAX_INDEX_DAEMONS, seed: dGpu });
 
 // Nb d'indexations GPU tenables EN PARALLÈLE selon la VRAM libre (repli RAM sans GPU NVIDIA).
-const SIGLIP_MB = 1200;      // coût d'un daemon supplémentaire (modèle ~0,6 Go + activations + marge)
+// Cost of one more daemon, MEASURED with siglip2-so400m: 2.2 GB of weights, 2.5 GB peak at batch 24,
+// plus the CUDA context. At the old 1200 MB estimate an 8 GB card got 6 daemons, VRAM spilled into
+// shared memory and indexing crawled to a standstill.
+const SIGLIP_MB = 3000;
 function indexConcurrency() {
   return scheduler.concurrencyFor({ perJobMB: SIGLIP_MB, max: MAX_INDEX_DAEMONS });
 }
@@ -530,7 +565,7 @@ function searchIndex(event, cmd, payload, kind) {
   indexActive++;
   return idxPool.acquire()
     .then((e) => {
-      e.d.setRoute(makeIndexRouter(event, kind || 'clip'));
+      e.d.setRoute(makeIndexRouter(event, kind || 'clip', payload?.path));
       return e.d.req(cmd, payload).finally(() => { e.d.setRoute(null); idxPool.release(e); });
     })
     .finally(() => { indexActive = Math.max(0, indexActive - 1); });
@@ -1217,7 +1252,7 @@ async function runUpscaleGif(opts) {
 }
 
 module.exports = {
-  detectScenes, getCachedScenes, detectConcurrency,
+  detectScenes, getCachedScenes, detectConcurrency, detectCancel,
   searchIndex, abortIndex, queryReq, cpuReq, killSearch, killSidecars, indexConcurrency, refreshPerfEnv,
   releaseVenvLocks,
   runUpscale, runUpscaleFrame, runUpscaleImage, runUpscaleGif, recordTestFrames,

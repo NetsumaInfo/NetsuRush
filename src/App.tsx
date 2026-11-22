@@ -23,6 +23,8 @@ import { IS_REMOTE } from "@/lib/remote";
 import { WallpaperLayer } from "@/components/theme/WallpaperLayer";
 import { useHostSync } from "@/hooks/useHostSync";
 import { useTabSync } from "@/hooks/useTabSync";
+import { useAgentDataSync } from "@/hooks/useAgentDataSync";
+import { ExternalApprovalHost } from "@/components/mcp/ExternalApprovalHost";
 import { BrandIcon } from "@/components/BrandIcon";
 import { BetaBadge } from "@/components/BetaBadge";
 import { UpdateBootstrap } from "@/components/updates/UpdateBootstrap";
@@ -123,6 +125,7 @@ function Shell() {
 
   useTabSync();
   useHostSync();
+  useAgentDataSync();
 
   // Les modules qui chargent durablement des modèles IA proposent la fermeture sûre de Resolve dès
   // leur ouverture. Les actions ponctuelles gardent leurs propres déclencheurs au lancement du job.
@@ -283,6 +286,7 @@ function Shell() {
           <MainContent />
         </ViewContextMenu>
       </div>
+      <ExternalApprovalHost />
       {/* Colonne flottante du coin bas-droit : les pastilles d'état transitoires s'empilent au-dessus
           de l'indicateur d'erreur, qui reste ancré au bas. */}
       <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">

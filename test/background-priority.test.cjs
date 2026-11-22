@@ -33,9 +33,15 @@ test('grid proxies, thumbnails and detection run below the interface', () => {
   assert.match(sidecars, /\[DETECT_SCRIPT, \.\.\.args\][^\n]*\n\s*lowerPriority\(py\);/);
 });
 
-test('a thumbnail run never outranks the cards on screen', () => {
+test('a generation run gets guaranteed workers but never takes the last ones from the cards', () => {
   const cache = read('src', 'components', 'rushes', 'previewCache.ts');
-  assert.match(cache, /nr\.thumbnail\(shot\.path, thumbTime\(shot\.in, shot\.out\), "low"\)/);
+  assert.match(cache, /nr\.thumbnail\(shot\.path, thumbTime\(shot\.in, shot\.out\), "gen"\)/);
+  assert.match(cache, /getProxy\(shot\.path, shot\.in, shot\.out, "gen", height, token\)/);
+  const thumbs = read('core', 'thumbs.js');
+  assert.match(thumbs, /thumbQGen\.length && thumbGenActive < THUMB_GEN_MIN/);
+  assert.match(thumbs, /thumbActive < THUMB_LOW_MAX && thumbQGen\.length/);
+  const proxy = read('core', 'proxy.js');
+  assert.match(proxy, /qGen\.length && proxyGenActive < Math\.max\(1, Math\.floor\(proxyMax \/ 2\)\)/);
   assert.match(cache, /throttledPublisher\(setProxyGen\)/);
   assert.match(cache, /throttledPublisher\(setThumbsGen\)/);
 });

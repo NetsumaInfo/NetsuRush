@@ -16,7 +16,7 @@ import { errorText } from "@/lib/errorText";
 interface BatchDetectItem {
   path: string;
   name: string;
-  status: "pending" | "running" | "done" | "error";
+  status: "pending" | "running" | "done" | "error" | "cancelled";
   pct: number;
   scenes?: number;        // nb de plans détectés (status done)
   error?: string;
@@ -262,7 +262,9 @@ export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (s
       let result: Partial<BatchDetectItem>;
       try {
         const r = await nr.detectScenes(paths[i], effectiveThreshold, model, detectionOptions);
-        result = r.error
+        result = r.cancelled
+          ? { status: "cancelled", pct: 0 }
+          : r.error
           ? { status: "error", error: r.error, pct: 100 }
           : { status: "done", pct: 100, scenes: (r.scenes ?? []).length };
       } catch (e) {
@@ -288,10 +290,12 @@ export const createDerushSlice: StateCreator<AppState, [], [], DerushSlice> = (s
       await Promise.all(Array.from({ length: conc }, () => worker()));
     } finally {
       off();
-      set((s) => (s.batchDetect ? { batchDetect: { ...s.batchDetect, running: false } } : {}));
+      // Files never started read "stopped", not "pending" forever.
+      set((s) => (s.batchDetect ? { batchDetect: { ...s.batchDetect, running: false,
+        items: s.batchCancel ? s.batchDetect.items.map((it) => (it.status === "pending" ? { ...it, status: "cancelled" as const } : it)) : s.batchDetect.items } } : {}));
     }
   },
-  cancelBatchDetect: () => set({ batchCancel: true }),
+  cancelBatchDetect: () => { set({ batchCancel: true }); nr.detectCancel(); },
   dismissBatchDetect: () => set({ batchDetect: null, batchCancel: false }),
 
   tlBusy: null,

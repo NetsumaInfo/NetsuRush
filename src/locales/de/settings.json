@@ -663,7 +663,8 @@
     },
     "ai": {
       "models": "Video",
-      "indexing": "Indizierung"
+      "indexing": "Indizierung",
+      "agents": "Externe Agenten"
     },
     "storage": {
       "media": "Medien-Cache",
@@ -740,6 +741,43 @@
       "collection": "Sammlungen",
       "notebook": "Notizbücher",
       "notebook-page": "Notizbuchseiten"
+    }
+  },
+  "mcp": {
+    "title": "Externe Agenten (MCP)",
+    "subtitle": "Lässt eine externe KI-App (Claude Desktop, Claude Code, Codex, Cursor) NetsuRush über den MCP-Server steuern.",
+    "enable": "Externe Agenten zulassen",
+    "enableHint": "Ausgeschaltet lehnt der MCP-Server jeden Aufruf ab, auch wenn ein Client installiert ist.",
+    "on": "An",
+    "off": "Aus",
+    "modeLabel": "Berechtigungen",
+    "maxSubagents": "Parallele Unteragenten",
+    "maxSubagentsHint": "Wie viele kleine KI-Agenten gleichzeitig deine Rushes durchsuchen (bis zu 64). Die übrigen warten. Sie nutzen die installierte App (Claude Code oder Codex) mit ihrem günstigsten Modell und verbrauchen dein Abo.",
+    "modeHint": "Nur Lesen: Der Agent kann nachsehen, aber nichts ändern. Nachfragen: Jede zerstörerische Aktion wartet auf deine Bestätigung. Alles erlauben: keine Bestätigung, der Agent handelt allein.",
+    "mode": {
+      "read-only": "Nur Lesen",
+      "ask": "Bei Zerstörerischem nachfragen",
+      "auto": "Alles erlauben"
+    },
+    "clients": "Apps",
+    "status": {
+      "installed": "Installiert",
+      "detected": "Erkannt",
+      "notDetected": "Nicht erkannt"
+    },
+    "install": "Installieren",
+    "remove": "Entfernen",
+    "copyJson": "JSON-Konfiguration kopieren",
+    "copied": "Konfiguration kopiert.",
+    "restartNote": "Starte die Client-App nach der Installation neu. NetsuRush muss geöffnet bleiben, damit der Agent funktioniert.",
+    "recent": "Letzte Aktivität",
+    "recentEmpty": "Noch keine Aufrufe.",
+    "ok": "OK",
+    "failed": "Fehlgeschlagen",
+    "risk": {
+      "read": "Lesen",
+      "write": "Schreiben",
+      "destructive": "Zerstörerisch"
     }
   }
 }

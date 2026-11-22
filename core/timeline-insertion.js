@@ -24,6 +24,29 @@ function sourceOutFrame(ssf, sef, span, maxFrame = Infinity) {
   return Number.isFinite(maxFrame) && sef >= maxFrame ? maxFrame : sef - 1;
 }
 
+// GetSourceStartFrame sometimes reads ONE frame early. Measured on
+// Resolve Studio 21.1.2: 28 of 934 items in a test project, on same-rate forward clips, with
+// GetLeftOffset one frame later. Exporting the timeline frame (Timeline.ExportFrame) and matching it
+// against the decoded source proved GetLeftOffset right twice: a shot laid 951→964 showed source 951
+// first and 964 last while reading ssf=950, sef=964; on a BluRay MKV the real cut sat between 1928
+// and 1929, the first frame shown was 1929 = GetLeftOffset, and ssf read 1928 — a frame of the
+// previous shot. GetLeftOffset cannot replace it outright: it counts TIMELINE frames on a rush at
+// another rate, carries the source timecode on some files, and drifts on freezes. It only settles
+// this one-frame disagreement, on a same-rate forward clip.
+// The end is left alone: GetSourceEndFrame was early with the start on one shot (sef=964 for an
+// exclusive 965) and right on the other (sef=2034 for 2034), and `sourceOutFrame` reads both right
+// from the corrected start and the timeline span (964 inclusive as the clamped case, 2033 as the
+// exclusive one). Shifting it too made the second shot one frame long.
+function correctSourceStart(ssf, sef, leftOffset, { sameRate, maxFrame = Infinity }) {
+  if (sameRate && Number.isFinite(ssf) && Number.isFinite(sef) && Number.isFinite(leftOffset)
+    && ssf < sef && leftOffset - ssf === 1 && leftOffset <= maxFrame) {
+    return { ssf: leftOffset, sef };
+  }
+  return { ssf, sef };
+}
+
+const sameFrameRate = (a, b) => Number(a) > 0 && Number(b) > 0 && Math.abs(Number(a) - Number(b)) < 0.01;
+
 // Detector frame → Resolve frame. Resolve often counts one or two frames more than were decoded
 // (it takes the container duration, audio included): measured 1501 for 1500, 1799 for 1798, 2399 for
 // 2397, with frame N showing the same picture as ffmpeg's frame N everywhere in the file. Stretching
@@ -159,6 +182,6 @@ function firstFreeVideoTrack(trackRanges, startFrame, endFrame) {
 }
 
 module.exports = {
-  resolveRange, sourceOutFrame, frameRemap, timecodeToFrames, timelineRecordFrame, timelineClipDuration, timelineClipLayout, firstFreeVideoTrack,
+  resolveRange, sourceOutFrame, correctSourceStart, sameFrameRate, frameRemap, timecodeToFrames, timelineRecordFrame, timelineClipDuration, timelineClipLayout, firstFreeVideoTrack,
   appendContiguousTimelineClips,
 };

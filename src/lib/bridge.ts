@@ -114,6 +114,7 @@ export interface SceneResult {
   model?: DetectModel | string | null;
   optionsKey?: string | null;
   cached?: boolean;
+  cancelled?: boolean;
   error?: string | null;
 }
 
@@ -1793,6 +1794,8 @@ export interface CollectionsApi {
   delete(id: string): Promise<{ ok: boolean; error?: string }>;
   addShots(id: string, shots: CollectionShot[]): Promise<{ ok: boolean; id?: string; added?: number; count?: number; updatedAt?: number; error?: string }>;
   removeShot(id: string, shotId: string): Promise<{ ok: boolean; count?: number; updatedAt?: number; error?: string }>;
+  /** Manual shot order (first = shown first under the default "recently added" sort). */
+  reorderShots(id: string, shotIds: string[]): Promise<{ ok: boolean; count?: number; ordered?: number; updatedAt?: number; error?: string }>;
   // Édite un plan rangé : méta (tags/label/note/étoiles) ET le plan (bornes/frames/nom/source).
   updateShot(id: string, shotId: string, patch: CollectionShotPatch): Promise<{ ok: boolean; updatedAt?: number; error?: string }>;
   saveIcon(bytes: ArrayBuffer, ext: string): Promise<{ ok: boolean; path?: string; error?: string }>;
@@ -2595,6 +2598,8 @@ export interface NrApi {
   cachedScenes(filePath: string, model?: DetectModel, threshold?: number, options?: DetectOptions): Promise<SceneResult>;
   // Nb de détections à lancer en parallèle selon la VRAM/RAM libres (1 = séquentiel).
   detectConcurrency(): Promise<number>;
+  // Kills every detection in flight; their calls resolve with `cancelled: true`.
+  detectCancel(): void;
   // Édits de découpe persistés (clé = chemin fichier source + modèle de détection, chaque modèle
   // ayant ses propres frontières de plans) : réappliqués à la réouverture/re-détection.
   getCutEdits(filePath: string, model: DetectModel, optionsKey?: string): Promise<CutEdits>;
@@ -2604,7 +2609,7 @@ export interface NrApi {
   onScenesProgress(cb: (p: { path: string | null; pct: number }) => void): () => void;
   // `pingpong`: the range encoded forwards then backwards in one file, played as a plain loop. Refused
   // (`ok: false`) when the range is too long to reverse in memory — cf. core/proxy.js.
-  proxy(opts: { input: string; start: number; end: number; priority?: "high" | "low"; height?: number; token?: number; codec?: "h264" | "hevc"; requireVideo?: boolean; requireAudio?: boolean; pingpong?: boolean; settings?: PreviewGenerationSettings["proxy"] }): Promise<{ ok: boolean; path?: string; error?: string; cancelled?: boolean; pingpong?: boolean }>;
+  proxy(opts: { input: string; start: number; end: number; priority?: "high" | "low" | "gen"; height?: number; token?: number; codec?: "h264" | "hevc"; requireVideo?: boolean; requireAudio?: boolean; pingpong?: boolean; settings?: PreviewGenerationSettings["proxy"] }): Promise<{ ok: boolean; path?: string; error?: string; cancelled?: boolean; pingpong?: boolean }>;
   // Résout en UN appel les proxies DÉJÀ encodés d'un lot de plans (aucun ffmpeg, aucune file) :
   // `file` vaut null quand la plage n'est pas en cache. Une grille amorce ainsi son cache d'URL à
   // l'ouverture au lieu de laisser chaque carte réclamer le sien au défilement — cf. core/proxy.js.
@@ -2619,12 +2624,22 @@ export interface NrApi {
   // `priority` : "high" (défaut) pour une carte à l'écran, "low" pour une carte encore hors champ —
   // le core réserve ses derniers ouvriers aux demandes "high", donc une bande d'anticipation large
   // ne doit surtout pas y entrer en concurrence.
-  thumbnail(filePath: string, time?: number, priority?: "high" | "low"): Promise<string | { error: string }>;
+  thumbnail(filePath: string, time?: number, priority?: "high" | "low" | "gen"): Promise<string | { error: string }>;
   compareRenderFrames(opts: RenderCompareOpts): Promise<RenderCompareResult>;
-  thumbsBatch(filePath: string, items: { time: number; frame: number }[]): Promise<{ ok: boolean; made?: number; error?: string }>;
+  thumbsBatch(filePath: string, items: { time: number; frame: number }[], priority?: "low" | "gen"): Promise<{ ok: boolean; made?: number; error?: string }>;
   // Résout en UN appel les chemins des vignettes DÉJÀ en cache (sans rien générer) → le renderer
   // amorce son cache d'un coup et n'émet plus 1 RPC par carte (scroll fluide même cache plein).
   thumbsResolve(items: { path: string; time: number }[]): Promise<{ path: string; time: number; file: string | null }[]>;
+  /** One image holding the frames of a shot, evenly spread, in reading order. */
+  shotSheet(opts: { path: string; inFrame?: number; outFrame?: number; start?: number; end?: number; cols?: number; rows?: number; width?: number }): Promise<{ ok: boolean; path?: string; cols?: number; rows?: number; frames?: number[]; error?: string }>;
+  /** One image holding frames picked anywhere in a file. */
+  /** Which frames to show for each shot: more where more happens. */
+  shotFrames(opts: { path: string; shots: { inFrame?: number; outFrame?: number; startSec: number; endSec: number }[]; framesPerShot?: number }): Promise<{ ok: boolean; analysed?: boolean; plans?: number[][]; error?: string }>;
+  /** Measures how much the picture changes in a file (a full low-resolution decode, then cached). */
+  analyzeMotion(filePath: string): Promise<{ ok: boolean; frames?: number; fps?: number; jumps?: number; seconds?: number; error?: string }>;
+  /** Boundaries that are not cuts, and jumps inside shots worth checking. */
+  checkCuts(opts: { path: string; shots: { inFrame: number; outFrame: number }[] }): Promise<{ ok: boolean; falseCuts?: { frame: number; shots: number[] }[]; missedCuts?: { frame: number; shot: number; inFrame: number; outFrame: number; similarity: number }[]; error?: string }>;
+  frameGrid(opts: { path?: string; times?: number[]; items?: { path: string; time: number }[]; labels?: (string | number | null)[]; cells?: number[]; cols?: number; width?: number }): Promise<{ ok: boolean; path?: string; cols?: number; rows?: number; times?: number[]; error?: string }>;
   exportClip(opts: { input: string; start: number; end: number; output: string }): Promise<ExportResult>;
   // Export piloté par profil (remux/encode, GPU/CPU choisi, per-clip ou fusion) — bouton « Télécharger ».
   exportClips(opts: ExportClipsOpts): Promise<ExportClipsResult>;
@@ -2733,6 +2748,13 @@ export interface NrApi {
   // Arrêt immédiat de l'indexation en cours (tue les daemons ; les jobs en vol rendent « annulée »).
   cancelIndexJobs(): Promise<{ ok: boolean }>;
   searchShots(filePath: string): Promise<ShotsResult>;
+  /** Drops files from the shot index, the face index and/or the scene cache. */
+  searchForget(opts: { filePaths: string[]; kinds?: Array<"search" | "faces" | "scenes"> }): Promise<{ ok: boolean; removed?: Record<string, number>; error?: string }>;
+  /** Imposes hand-corrected shot boundaries (inclusive frames) used by the next index of the file. */
+  searchSetScenes(opts: { path: string; scenes: Array<{ startFrame: number; endFrame: number }>; fps?: number; frames?: number }): Promise<{ ok: boolean; scenes?: number; error?: string }>;
+  searchClearScenes(filePath: string): Promise<{ ok: boolean; removed?: number; error?: string }>;
+  /** Assigns one indexed face to a character (charId null = nobody); reset drops the correction. */
+  faceLabel(opts: { filePath: string; sceneIndex: number; faceIndex: number; domain?: string; charId?: number | null; reset?: boolean }): Promise<{ ok: boolean; error?: string }>;
   faceIndex(filePath: string, force?: boolean, model?: string, options?: DetectOptions): Promise<IndexResult>;
   faceSearch(opts: { path?: string; filePath?: string; sceneIndex?: number; refs?: SearchRef[]; topK?: number; minScore?: number; filePaths?: string[] }): Promise<SearchResult>;
   // Visages détectés dans une image (picker de référence : cliquer LE visage à chercher).
@@ -2758,7 +2780,7 @@ export interface NrApi {
   charLabelIndex(o?: { minScore?: number }): Promise<{ ok: boolean; labeled?: number; faces?: number; error?: string | null }>;
   charMerge(o: { sourceId: number; targetId: number }): Promise<{ ok: boolean; target_id?: number; error?: string | null }>;
   charDuplicates(o?: { minScore?: number }): Promise<{ pairs: DuplicatePair[]; error?: string | null }>;
-  onSearchProgress(cb: (p: { pct: number | null; phase: string; kind?: "clip" | "face" | "label" }) => void): () => void;
+  onSearchProgress(cb: (p: { pct: number | null; phase: string; kind?: "clip" | "face" | "label"; file?: string }) => void): () => void;
   startDrag(file: string): void;
   // `defaultPath` ouvre le sélecteur SUR un dossier — le dernier utilisé, pour ne pas repartir de la
   // racine à chaque export.
@@ -2816,6 +2838,7 @@ export interface NrApi {
   chat?: ChatApi;
   outbox?: OutboxApi;
   power?: PowerApi;
+  mcp?: McpApi;
   snapshot?: SnapshotApi;
   cache?: CacheApi;
 }
@@ -3002,6 +3025,35 @@ export interface PowerApi {
   restart(host: PowerHost): Promise<{ ok: boolean; host?: PowerHost; project?: string | null; error?: string }>;
   onChanged(cb: (s: PowerState) => void): () => void;
   onProgress(cb: (p: PowerProgress) => void): () => void;
+}
+
+// ---- Agents externes (serveur MCP de NetsuRush, consommé par Claude Desktop, Codex, Cursor…) ----
+export type McpClientId = "claude-desktop" | "claude-code" | "codex" | "cursor";
+export type McpPermissionMode = "read-only" | "ask" | "auto";
+export type McpRisk = "read" | "write" | "destructive";
+export interface McpClientInfo { id: McpClientId; label: string; configPath: string; installed: boolean; detected: boolean }
+export interface McpActivity { at: number; name: string; action?: string; risk: McpRisk; ok: boolean; error?: string }
+export interface McpExternalState {
+  enabled: boolean;
+  mode: McpPermissionMode;
+  /** Sub-agents running at once (netsu_agents); the rest queue. */
+  maxSubagents: number;
+  clients: McpClientInfo[];
+  recent: McpActivity[];
+  serverCommand: { command: string; args: string[] };
+}
+/** An agent changed app data: the renderer stores of that tool must refetch. */
+export interface AgentDataChange { tool: string; action?: string }
+export interface McpApi {
+  get(): Promise<McpExternalState>;
+  set(patch: { enabled?: boolean; mode?: McpPermissionMode; maxSubagents?: number }): Promise<McpExternalState>;
+  install(clientId: McpClientId): Promise<{ ok: boolean; configPath?: string; error?: string }>;
+  uninstall(clientId: McpClientId): Promise<{ ok: boolean; error?: string }>;
+  snippet(): Promise<{ json: string }>;
+  onActivity(cb: (a: McpActivity) => void): () => void;
+  /** Settings changed (any window): the full new state. */
+  onChanged(cb: (s: McpExternalState) => void): () => void;
+  onDataChanged(cb: (c: AgentDataChange) => void): () => void;
 }
 
 // ---- « Cache projet » : file d'attente des envois différés (hôte fermé) ----------------------
@@ -3214,6 +3266,7 @@ const mock: NrApi = {
   detectScenes: async () => ({ scenes: [], duration: 0 }),
   cachedScenes: async () => ({ scenes: [], cached: false }),
   detectConcurrency: async () => 1,
+  detectCancel: () => {},
   getCutEdits: async () => ({ merges: [], removed: [] }),
   saveCutEdits: async () => ({ ok: false }),
   clearCutEdits: async () => ({ ok: false }),
@@ -3227,6 +3280,11 @@ const mock: NrApi = {
   compareRenderFrames: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
   thumbsBatch: async () => ({ ok: true, made: 0 }),
   thumbsResolve: async (items) => items.map((i) => ({ path: i.path, time: i.time, file: null })),
+  shotSheet: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  frameGrid: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  shotFrames: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  analyzeMotion: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  checkCuts: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
   exportClip: async () => ({ ok: false, error: "mock" }),
   exportClips: async () => ({ ok: false, error: "mock" }),
   // Hors app : aucune sonde possible → ok:false, donc le renderer ne masque AUCUN codec (l'UI se rend
@@ -3316,6 +3374,10 @@ const mock: NrApi = {
   onProjectScan: () => () => {},
   searchIndexed: async () => ({ indexed: {} }),
   searchShots: async () => ({ shots: [] }),
+  searchForget: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  searchSetScenes: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  searchClearScenes: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
+  faceLabel: async () => ({ ok: false, error: i18n.t("common:mock.outsideApp") }),
   faceIndex: async () => ({ ok: false, error: i18n.t("common:mock.resolveUnavailable") }),
   faceSearch: async () => ({ hits: [] }),
   faceDetect: async () => ({ faces: [] }),
@@ -3596,6 +3658,18 @@ const mock: NrApi = {
         write(o);
         return { ok: true, count: c.shots.length, updatedAt: c.updatedAt };
       },
+      reorderShots: async (id: string, shotIds: string[]) => {
+        const o = read();
+        const c = o[id];
+        if (!c) return { ok: false, error: i18n.t("common:mock.collectionNotFound") };
+        const now = Date.now();
+        const rank = new Map(shotIds.map((sid, i) => [sid, i]));
+        c.shots = [...c.shots].sort((a, b) => (rank.get(a.id ?? "") ?? Infinity) - (rank.get(b.id ?? "") ?? Infinity))
+          .map((s, i) => ({ ...s, addedAt: now - i }));
+        c.updatedAt = now;
+        write(o);
+        return { ok: true, count: c.shots.length, ordered: shotIds.length, updatedAt: now };
+      },
       updateShot: async (id: string, shotId: string, patch: CollectionShotPatch) => {
         const o = read();
         const c = o[id];
@@ -3821,6 +3895,17 @@ const mock: NrApi = {
     onChanged: () => () => {},
     onProgress: () => () => {},
   } satisfies PowerApi,
+  // Mock navigateur : aucun serveur MCP hors app.
+  mcp: {
+    get: async () => ({ enabled: false, mode: "ask", maxSubagents: 8, clients: [], recent: [], serverCommand: { command: "", args: [] } }),
+    set: async () => ({ enabled: false, mode: "ask", maxSubagents: 8, clients: [], recent: [], serverCommand: { command: "", args: [] } }),
+    install: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+    uninstall: async () => ({ ok: false, error: i18n.t("common:mock.appUnavailable") }),
+    snippet: async () => ({ json: "" }),
+    onActivity: () => () => {},
+    onChanged: () => () => {},
+    onDataChanged: () => () => {},
+  } satisfies McpApi,
   snapshot: {
     state: async () => null,
     clear: async () => ({ ok: true }),

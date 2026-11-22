@@ -302,6 +302,30 @@ function createCollectionStore(dataDir) {
     }
   }
 
+  // Manual order of the shots. The grid sorts by date added (newest first) by default, so the order
+  // is written as fresh `addedAt` stamps, first shot newest: that sort then shows exactly this order.
+  // Shots not listed keep their relative order after the listed ones.
+  function reorderShots(id, shotIds) {
+    try {
+      const c = loadCollection(id);
+      if (!c) return { ok: false, error: t('collectionMissing') };
+      const wanted = (Array.isArray(shotIds) ? shotIds : []).map(String);
+      const byId = new Map(c.shots.map((s) => [s.id, s]));
+      const listed = wanted.filter((sid) => byId.has(sid));
+      const rest = c.shots
+        .filter((s) => !listed.includes(s.id))
+        .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
+        .map((s) => s.id);
+      const order = [...listed, ...rest];
+      const now = Date.now();
+      const shots = order.map((sid, i) => ({ ...byId.get(sid), addedAt: now - i }));
+      backend.put(c.id, c.name, encode(c, shots), now);
+      return { ok: true, count: shots.length, ordered: listed.length, updatedAt: now };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
   // Édite un plan : méta d'organisation (tags / label / note étoiles / annotation) ET le plan LUI-MÊME
   // (rognage in/out + frames, renommage, repointage vers un autre fichier source). Champ absent du
   // patch = inchangé ; null = effacé.
@@ -562,7 +586,7 @@ function createCollectionStore(dataDir) {
 
   return {
     kind, listCollections, loadCollection, saveCollection, deleteCollection,
-    addShots, removeShot, updateShot, saveIcon, removeIcon,
+    addShots, removeShot, reorderShots, updateShot, saveIcon, removeIcon,
     listFolders, saveFolder, deleteFolder, moveCollection, allTags, markArchived,
     offlineShots, relinkPath, relinkDir,
   };

@@ -4,7 +4,7 @@
 // Dialogs / openExternal passent par les plugins Tauri (chargés à la demande, seulement sous Tauri).
 
 import { convertFileSrc } from "@tauri-apps/api/core";
-import type { NrApi, WallpaperApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, SnapshotApi, CacheApi } from "./bridge";
+import type { NrApi, WallpaperApi, CollectionsApi, LibraryApi, ChatApi, NotebookApi, OutboxApi, PowerApi, McpApi, SnapshotApi, CacheApi } from "./bridge";
 import i18n from "@/i18n";
 import { logError } from "@/lib/appLog";
 import { readPreviewSettings } from "@/lib/previewSettings";
@@ -492,6 +492,7 @@ const collections: CollectionsApi = {
   delete: (id) => call("collections:delete", [id]),
   addShots: (id, shots) => call("collections:addShots", [id, shots]),
   removeShot: (id, shotId) => call("collections:removeShot", [id, shotId]),
+  reorderShots: (id, shotIds) => call("collections:reorderShots", [id, shotIds]),
   updateShot: (id, shotId, patch) => call("collections:updateShot", [id, shotId, patch]),
   saveIcon: (bytes, ext) => call("collections:saveIcon", [{ __b64: abToB64(bytes) }, ext]),
   listFolders: () => call("collections:listFolders"),
@@ -545,6 +546,17 @@ const power: PowerApi = {
   restart: (host) => call("power:restart", [host]),
   onChanged: (cb) => on("power:changed", cb as (p: unknown) => void),
   onProgress: (cb) => on("power:progress", cb as (p: unknown) => void),
+};
+
+const mcp: McpApi = {
+  get: () => call("mcp:external:get"),
+  set: (patch) => call("mcp:external:set", [patch]),
+  install: (clientId) => call("mcp:external:install", [clientId]),
+  uninstall: (clientId) => call("mcp:external:uninstall", [clientId]),
+  snippet: () => call("mcp:external:snippet"),
+  onActivity: (cb) => on("mcp:activity", cb as (p: unknown) => void),
+  onChanged: (cb) => on("mcp:external:changed", cb as (p: unknown) => void),
+  onDataChanged: (cb) => on("agent:dataChanged", cb as (p: unknown) => void),
 };
 
 const snapshot: SnapshotApi = {
@@ -775,6 +787,7 @@ export function makeCoreClient(): NrApi {
     detectScenes: (p, threshold, model, options) => call("ffmpeg:detectScenes", [p, threshold, model, options]),
     cachedScenes: (p, model, threshold, options) => call("ffmpeg:cachedScenes", [p, model, threshold, options]),
     detectConcurrency: () => call("ffmpeg:detectConcurrency"),
+    detectCancel: () => { call("ffmpeg:detectCancel").catch(() => {}); },
     getCutEdits: (p, model, optionsKey) => call("cut:getEdits", [p, model, optionsKey]),
     saveCutEdits: (p, model, edits, optionsKey) => call("cut:saveEdits", [p, model, edits, optionsKey]),
     clearCutEdits: (p, model, optionsKey) => call("cut:clearEdits", [p, model, optionsKey]),
@@ -800,8 +813,13 @@ export function makeCoreClient(): NrApi {
     proxyCancelAll: () => { call("ffmpeg:proxyCancelAll").catch(() => {}); },
     thumbnail: (p, t, priority) => call("ffmpeg:thumbnail", [{ path: p, time: t, priority, settings: readPreviewSettings().thumbnail }]),
     compareRenderFrames: (opts) => call("ffmpeg:compareFrames", [opts]),
-    thumbsBatch: (p, items) => call("ffmpeg:thumbsBatch", [{ path: p, items, settings: readPreviewSettings().thumbnail }]),
+    thumbsBatch: (p, items, priority) => call("ffmpeg:thumbsBatch", [{ path: p, items, priority, settings: readPreviewSettings().thumbnail }]),
     thumbsResolve: (items) => call("ffmpeg:thumbsResolve", [{ items, settings: readPreviewSettings().thumbnail }]),
+    shotSheet: (opts) => call("ffmpeg:shotSheet", [opts]),
+    frameGrid: (opts) => call("ffmpeg:frameGrid", [opts]),
+    shotFrames: (opts) => call("ffmpeg:shotFrames", [opts]),
+    analyzeMotion: (p) => call("ffmpeg:analyzeMotion", [p]),
+    checkCuts: (opts) => call("ffmpeg:checkCuts", [opts]),
     exportClip: (opts) => call("ffmpeg:export", [opts]),
     exportClips: (opts) => call("export:clips", [opts]),
     exportCapabilities: (opts) => call("export:capabilities", [opts ?? {}]),
@@ -882,6 +900,10 @@ export function makeCoreClient(): NrApi {
     searchIndexed: () => call("search:indexed"),
     cancelIndexJobs: () => call("search:cancelIndex"),
     searchShots: (p) => call("search:shots", [p]),
+    searchForget: (opts) => call("search:forget", [opts]),
+    searchSetScenes: (opts) => call("search:setScenes", [opts]),
+    searchClearScenes: (p) => call("search:clearScenes", [p]),
+    faceLabel: (opts) => call("face:label", [opts]),
     faceIndex: (p, force, model, options) => call("face:index", [p, force, model, options]),
     faceSearch: (opts) => call("face:search", [opts]),
     faceDetect: (p) => call("face:detect", [p]),
@@ -973,6 +995,7 @@ export function makeCoreClient(): NrApi {
     chat,
     outbox,
     power,
+    mcp,
     snapshot,
     cache,
   };

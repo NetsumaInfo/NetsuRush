@@ -192,7 +192,7 @@ function createResolveMcp({ registry, bin: forcedBin, client: forcedClient }) {
           // stays destructive whatever it reads: outside the sandbox, a
           // "read-only" script still reaches the disk and the network.
           ...(name === 'run_script' ? { riskFor: scriptRisk } : {}),
-          surfaces: ['pilot'],
+          surfaces: ['pilot', 'external'],
           handler: async (/** @type {any} */ args) => {
             try { return normalize(await client.callTool(name, args), name); }
             catch (e) { return { ok: false, error: String((e && /** @type {any} */ (e).message) || e) }; }

@@ -63,7 +63,7 @@ def grab_ffmpeg(path, sec, accurate=False, timeout=GRAB_TIMEOUT, max_edge=0):
     cmd += _seek_args(sec)
     cmd += ["-i", path, "-frames:v", "1"]
     cmd += _scale_args(max_edge)
-    cmd += ["-f", "image2pipe", "-vcodec", "mjpeg", "-"]
+    cmd += ["-f", "image2pipe", "-vcodec", "mjpeg", "-q:v", "2", "-"]
     try:
         p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=timeout)
     except Exception:  # noqa: BLE001  (TimeoutExpired tue le process, ou ffmpeg absent)
@@ -106,7 +106,7 @@ def grab_shot(path, secs, max_edge=0, accurate=False, timeout=GRAB_TIMEOUT):
                 outputs.append(output)
                 cmd += ["-map", "%d:v:0" % index, "-frames:v", "1"]
                 cmd += _scale_args(max_edge)
-                cmd += ["-f", "image2", "-vcodec", "mjpeg", output]
+                cmd += ["-f", "image2", "-vcodec", "mjpeg", "-q:v", "2", output]
             try:
                 subprocess.run(
                     cmd,
@@ -128,6 +128,71 @@ def grab_shot(path, secs, max_edge=0, accurate=False, timeout=GRAB_TIMEOUT):
             return frames
     except Exception:  # noqa: BLE001  (temp indisponible ou ffmpeg absent → plan sauté)
         return []
+
+
+def grab_segment(path, fps, frames, max_edge=0, threads=0, timeout=GRAB_TIMEOUT):
+    """Exact frames of one stretch of video, in a single sequential decode.
+
+    `frames` are sorted absolute frame indices. ffmpeg seeks precisely to the first one and
+    `select` keeps only the wanted frames, so each image is the frame asked for, not the keyframe
+    before it: on long-GOP sources that keyframe sits seconds earlier, often in the previous shot.
+    Decoding the stretch once also costs less than one seek per frame when shots are dense.
+
+    Returns a list aligned with `frames`, or None when the output cannot be matched to the request
+    (a frame missing from the output says nothing about WHICH one) — the caller then falls back."""
+    import os
+    import subprocess
+    import tempfile
+
+    from PIL import Image
+
+    wanted = sorted(set(int(f) for f in frames))
+    if not wanted or not fps:
+        return None
+    first, last = wanted[0], wanted[-1]
+    terms = "+".join("eq(n,%d)" % (f - first) for f in wanted)
+    vf = "select='%s'" % terms
+    if max_edge:
+        vf += ",scale='min(%d,iw)':'min(%d,ih)':force_original_aspect_ratio=decrease" % (max_edge, max_edge)
+    # Half a frame early so rounding never lands the seek one frame past `first`.
+    start = max(0.0, (first - 0.5) / fps)
+    duration = (last - first + 2) / fps
+    try:
+        with tempfile.TemporaryDirectory(prefix="nr-seg-") as tmp:
+            cmd = [ffmpeg_bin(), "-nostdin", "-v", "error"]
+            if threads:
+                cmd += ["-threads", str(threads)]
+            cmd += _seek_args(start)
+            cmd += ["-i", path, "-t", "%.3f" % duration, "-map", "0:v:0", "-vf", vf,
+                    "-fps_mode", "passthrough", "-frames:v", str(len(wanted)),
+                    "-f", "image2", "-vcodec", "mjpeg", "-q:v", "2", os.path.join(tmp, "f-%d.jpg")]
+            # Budget = the frames to decode, not the frames kept: a stretch is mostly skipped frames.
+            # Sized for a loaded machine (several indexings in parallel): 1x real time of the
+            # stretch on top of the fixed part. Too tight, and every segment fell back to the
+            # per-shot path, which is heavier still.
+            budget = timeout * 2 + (last - first) / max(fps, 1.0)
+            timed_out = False
+            try:
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=budget)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+            except Exception:  # noqa: BLE001
+                return None
+            out = []
+            for index in range(1, len(wanted) + 1):
+                name = os.path.join(tmp, "f-%d.jpg" % index)
+                if not os.path.isfile(name):
+                    break
+                with Image.open(name) as image:
+                    out.append(image.convert("RGB").copy())
+            # A killed decode stops at a frame: what it wrote is the head of the request, in order.
+            # A decode that ENDED short skipped a frame somewhere, so nothing can be matched.
+            if len(out) < len(wanted) and not timed_out:
+                return None
+            by_frame = dict(zip(wanted, out))
+            return [by_frame.get(int(f)) for f in frames]
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def thumb_bytes(img):
@@ -153,7 +218,8 @@ def _cached_cut(con, path, model, threshold, options_key):
     une détection complète à chaque « Indexer », leur découpe étant rangée sous une autre clé
     d'options (ou dans le cache v3, qui n'en a pas). Ce que la découpe retenue vaut vraiment est
     tranché ensuite par `cut_identity` : l'index n'est refait que si les frontières ont bougé."""
-    steps = []
+    # Boundaries imposed by hand (nrsearch/edits.py `set-scenes`) beat any detection.
+    steps = [("scene_cache_v4", "AND model='manual'", ())]
     if options_key:
         steps.append(("scene_cache_v4", "AND model=? AND options_key=?", (model, options_key)))
     steps += [

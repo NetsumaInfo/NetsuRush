@@ -663,7 +663,8 @@
     },
     "ai": {
       "models": "Vidéo",
-      "indexing": "Indexation"
+      "indexing": "Indexation",
+      "agents": "Agents externes"
     },
     "storage": {
       "media": "Cache médias",
@@ -740,6 +741,43 @@
       "collection": "Collections",
       "notebook": "Carnets",
       "notebook-page": "Pages de carnet"
+    }
+  },
+  "mcp": {
+    "title": "Agents externes (MCP)",
+    "subtitle": "Laisse une app d'IA externe (Claude Desktop, Claude Code, Codex, Cursor) piloter NetsuRush via son serveur MCP.",
+    "enable": "Autoriser les agents externes",
+    "enableHint": "Coupé, le serveur MCP refuse tous les appels, même si le client est installé.",
+    "on": "Activé",
+    "off": "Désactivé",
+    "modeLabel": "Permissions",
+    "maxSubagents": "Sous-agents en parallèle",
+    "maxSubagentsHint": "Combien de petits agents IA tournent en même temps pour fouiller les rushs (jusqu'à 64). Les suivants attendent leur tour. Ils utilisent l'application installée (Claude Code ou Codex) avec son modèle le moins cher, et consomment ton abonnement.",
+    "modeHint": "Lecture seule : l'agent consulte, ne modifie rien. Demander : toute action destructive attend ta confirmation. Tout autoriser : aucune confirmation, l'agent agit seul.",
+    "mode": {
+      "read-only": "Lecture seule",
+      "ask": "Demander pour le destructif",
+      "auto": "Tout autoriser"
+    },
+    "clients": "Applications",
+    "status": {
+      "installed": "Installé",
+      "detected": "Détecté",
+      "notDetected": "Non détecté"
+    },
+    "install": "Installer",
+    "remove": "Retirer",
+    "copyJson": "Copier la config JSON",
+    "copied": "Configuration copiée.",
+    "restartNote": "Redémarre l'application cliente après l'installation. NetsuRush doit rester ouvert pour que l'agent fonctionne.",
+    "recent": "Activité récente",
+    "recentEmpty": "Aucun appel pour l'instant.",
+    "ok": "OK",
+    "failed": "Échec",
+    "risk": {
+      "read": "lecture",
+      "write": "écriture",
+      "destructive": "destructif"
     }
   }
 }

@@ -30,12 +30,22 @@ interface DownloadResult {
 // on retombe alors sur « <base>.<conteneur> ».
 async function suggestName(profile: ExportProfile, baseName: string, clips: ExportClipInput[], merge: boolean): Promise<string> {
   try {
-    const preview = await nr.exportPreviewName({ profile, baseName, clip: clips[0], total: clips.length, index: 1 });
+    // A busy core (thumbnail or proxy work queued) must not hold the dialog back: after a short wait
+    // the click opens it with the fallback name.
+    const preview = await Promise.race([
+      nr.exportPreviewName({ profile, baseName, clip: clips[0], total: clips.length, index: 1 }),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 800)),
+    ]);
+    if (!preview) throw new Error("timeout");
     const name = merge ? preview.merged : preview.name;
     if (name) return name;
   } catch { /* repli ci-dessous */ }
   return `${baseName || "export"}.${profile.container}`;
 }
+
+// Covers the save dialog too, before `exportBusy` is set: module-level because every button mounts its
+// own copy of the hook.
+let downloading = false;
 
 export function useExport() {
   const profiles = useApp((s) => s.exportProfiles);
@@ -48,8 +58,25 @@ export function useExport() {
 
   useEffect(() => nr.onExportProgress((p) => setExportProgress(p.pct)), [setExportProgress]);
 
-  async function download({ clips, baseName, merge, profileId }: DownloadArgs): Promise<DownloadResult> {
-    if (!clips.length || busy) return { ok: false };
+  async function download(args: DownloadArgs): Promise<DownloadResult> {
+    // Lock read from the store, not from this render: a double click fired before React re-rendered
+    // used to open two dialogs and start two exports.
+    if (!args.clips.length || downloading || useApp.getState().exportBusy) return { ok: false };
+    downloading = true;
+    try {
+      return await run(args);
+    } catch (e) {
+      // A core that drops mid-export must not leave the buttons disabled for the rest of the session.
+      const message = e instanceof Error && e.message ? e.message : i18n.t("export:notice.exportFailed");
+      setExportError(message);
+      return { ok: false, error: message };
+    } finally {
+      downloading = false;
+      setExportBusy(null);
+    }
+  }
+
+  async function run({ clips, baseName, merge, profileId }: DownloadArgs): Promise<DownloadResult> {
     const profile = getActiveExportProfile(profiles, profileId ?? activeId);
     const shouldMerge = (merge || profile.mergeEnabled) && clips.length > 1;
 
@@ -93,8 +120,6 @@ export function useExport() {
     setExportBusy(shouldMerge ? i18n.t("export:notice.merging") : i18n.t("export:notice.exporting"));
 
     const r = await nr.exportClips({ clips, dir, savePath, baseName, profile, merge: shouldMerge });
-
-    setExportBusy(null);
     if (r.ok) {
       const n = r.files?.length ?? 0;
       const failed = r.failed ? i18n.t("export:notice.failedSuffix", { count: r.failed }) : "";

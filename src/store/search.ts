@@ -333,7 +333,6 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     }),
     removeRef: (idx) => set((s) => ({ refs: s.refs.filter((_, i) => i !== idx) })),
     clearRefs: () => set({ refs: [] }),
-
     refreshSearchStatus: async () => {
       const filePaths = searchScopePaths(get());
       const s = await nr.searchStatus({ filePaths });
@@ -615,17 +614,27 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         // PARALLÈLE : pool de `conc` workers (le core spawne un daemon SigLIP par job, borné VRAM).
         // Progression AGRÉGÉE (done/total + nb en cours) : le pct par plan n'a pas de sens à N daemons.
         let cursor = 0, done = 0, running = 0;
+        // Progress of each clip in flight (core pct, keyed by path): without it the bar only moved
+        // when a whole clip finished — tens of minutes on a feature film, read as a frozen bar.
+        const live = new Map<string, number>();
+        const liveSum = () => { let s = 0; for (const v of live.values()) s += Math.max(0, Math.min(1, v / 95)); return s; };
         // Lissée sur la FENÊTRE en vol : `done` ne bouge qu'à la fin d'un clip, donc à N workers la
         // barre serait immobile pendant des minutes puis sauterait de N crans d'un coup.
         const track = createSmoothProgress((pct) => scheduleProg({ pct }));
         const bump = () => {
-          track.to(batchProgress(done, total, 0), batchCeiling(done, total, running));
+          track.to(Math.round(((done + liveSum()) / total) * 100), batchCeiling(done, total, running));
           set({ indexBusy: {
             file: i18n.t("search:store.parallelRunning", { running, conc }),
             pct: track.value(), done, total, phase: "embed", ts: Date.now(),
           } });
         };
         bump();
+        const offLive = nr.onSearchProgress((p) => {
+          if (p.kind === "face" || p.kind === "label" || !p.file || p.pct == null) return;
+          if (!live.has(p.file)) return;
+          live.set(p.file, Math.max(live.get(p.file) ?? 0, p.pct));
+          track.to(Math.round(((done + liveSum()) / total) * 100), batchCeiling(done, total, running));
+        });
         // Keepalive : un clip prend des minutes → sans ça l'UI croit l'indexation « bloquée » (>12 s).
         const keepalive = setInterval(() => { const b = get().indexBusy; if (b) set({ indexBusy: { ...b, ts: Date.now() } }); }, 3000);
         const worker = async () => {
@@ -633,19 +642,21 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
             if (get().indexCancel) { stopped = true; return; }
             const i = cursor++;
             if (i >= total) return;
-            running++; bump();
+            running++; live.set(paths[i], 0); bump();
             try {
               const r = await withDaemonRetry(() => nr.indexClip(paths[i], force, frames, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().indexCancel);
               if (isCanceled(r)) { stopped = true; running--; return; }
               if (r.error) { failed++; lastErr = r.error; }
               else void warmIndexedThumbs(paths[i]);
             } catch (e) { failed++; lastErr = errorText(e); }
+            live.delete(paths[i]);
             running--; done++; bump();
           }
         };
         try {
           await Promise.all(Array.from({ length: conc }, () => worker()));
         } finally {
+          offLive();
           clearInterval(keepalive);
           track.stop();
           set({ indexBusy: null, indexCancel: false });

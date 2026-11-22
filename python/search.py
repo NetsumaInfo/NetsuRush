@@ -31,6 +31,7 @@ from nrsearch.faces import (
     cmd_face_detect, cmd_face_engines, cmd_face_gallery, cmd_face_index, cmd_face_indexed,
     cmd_face_search, cmd_face_status,
 )
+from nrsearch.edits import cmd_clear_scenes, cmd_face_label, cmd_forget, cmd_set_scenes
 from nrsearch.index import cmd_index
 from nrsearch.query import cmd_cluster, cmd_dedup, cmd_query, cmd_query_image, cmd_search, cmd_warm
 
@@ -95,6 +96,14 @@ def _dispatch(cmd, req):
         return cmd_cluster(req)
     if cmd == "indexed":
         return cmd_indexed()
+    if cmd == "forget":
+        return cmd_forget(req)
+    if cmd == "set-scenes":
+        return cmd_set_scenes(req)
+    if cmd == "clear-scenes":
+        return cmd_clear_scenes(req)
+    if cmd == "face-label":
+        return cmd_face_label(req)
     return cmd_status(req.get("file_paths") if "file_paths" in req else None)
 
 
@@ -134,6 +143,8 @@ def serve():
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
     if cmd == "serve":
+        import nrprio
+        nrprio.lower_if_asked()
         serve()
         return
     try:

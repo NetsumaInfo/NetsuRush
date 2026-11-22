@@ -82,7 +82,7 @@ export function previewKey(path: string, start: number, end: number): string {
 
 export interface PreviewCache {
   /** Generates (or fetches from cache) the preview proxy of a range. `token` makes it cancellable. */
-  getProxy: (path: string, start: number, end: number, priority?: "high" | "low", height?: number, token?: number) => Promise<string | null>;
+  getProxy: (path: string, start: number, end: number, priority?: "high" | "low" | "gen", height?: number, token?: number) => Promise<string | null>;
   /** SYNCHRONOUS read of the URL cache: a card mounts its <video> in its first render instead of
    *  waiting on a promise. */
   peekProxy: (path: string, start: number, end: number) => string | null;
@@ -153,7 +153,7 @@ export function usePreviewCache(): PreviewCache {
   // chaque sélection de carte — exactement la rafale que la préchauffe existe pour éviter.
   const getProxy = useCallback(async (
     path: string, start: number, end: number,
-    priority: "high" | "low" = "high", height?: number, token?: number,
+    priority: "high" | "low" | "gen" = "high", height?: number, token?: number,
   ): Promise<string | null> => {
     const key = previewKey(path, start, end);
     const cached = cache.get(key);
@@ -347,7 +347,7 @@ export function usePreviewCache(): PreviewCache {
       const encode = async (shot: PreviewRange): Promise<boolean> => {
         const token = nextProxyToken();
         proxyTokensRef.current.push(token);
-        return !!await getProxy(shot.path, shot.in, shot.out, "low", height, token);
+        return !!await getProxy(shot.path, shot.in, shot.out, "gen", height, token);
       };
       const worker = async () => {
         for (;;) {
@@ -422,9 +422,9 @@ export function usePreviewCache(): PreviewCache {
           publish();
           seen.push(shot);
           try {
-            // Low: the core keeps two workers for the cards on screen, so a run over a whole rush
-            // never makes the visible thumbnails wait behind it.
-            const result = await nr.thumbnail(shot.path, thumbTime(shot.in, shot.out), "low");
+            // "gen": half the core workers are guaranteed to the run and two always stay free for
+            // the cards on screen, so neither a scrolled grid nor the run starves the other.
+            const result = await nr.thumbnail(shot.path, thumbTime(shot.in, shot.out), "gen");
             if (typeof result !== "string") failed++;
           } catch { failed++; }
           done++; publish();

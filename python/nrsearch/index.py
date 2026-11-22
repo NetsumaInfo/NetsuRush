@@ -13,9 +13,10 @@ from nri18n import t
 
 from . import media, model
 from . import sampling
-from .config import (DECODE_WORKERS, DEFAULT_SAMPLING_FRAMES, FORCE_TIMEOUT, GRAB_MAX_EDGE,
-                     INDEX_CHUNK, MODEL_TAG, SHOT_DECODE, STATIC_THR, is_image, sampling_current,
-                     sampling_format, sampling_frames, sampling_tag)
+from .config import (DECODE_WORKERS, DEFAULT_SAMPLING_FRAMES, FORCE_TIMEOUT, GPU_BATCH,
+                     GRAB_MAX_EDGE, INDEX_CHUNK, MODEL_TAG, SEGMENT_GAP_SEC, SEGMENT_SHOTS,
+                     SEGMENT_THREADS, SHOT_DECODE, STATIC_THR, is_image, sampling_current, sampling_format,
+                     sampling_frames, sampling_tag)
 from .db import db_emb
 
 
@@ -151,7 +152,7 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         indexed += len(row_buf)
         row_buf.clear()
 
-    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
     def scene_meta(sc):
         sf = int(sc.get("startFrame", 0)); ef = int(sc.get("endFrame", sf))
@@ -161,7 +162,9 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         return sf, ef, mid, ss, es
 
     def grab(sec):
-        return media.grab_ffmpeg(path, sec, max_edge=GRAB_MAX_EDGE)
+        # Precise seek: a keyframe seek returns the keyframe BEFORE `sec`, seconds away on long-GOP
+        # sources, so a retry meant to skip a black opening could land in the previous shot.
+        return media.grab_ffmpeg(path, sec, accurate=True, max_edge=GRAB_MAX_EDGE)
 
     def replace_flat(images, times, start, end):
         """Reprend un peu plus loin les images qui n'ont aucun contenu. Un plan peut s'ouvrir sur
@@ -178,28 +181,62 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
                 images[index] = again
         return images
 
-    def decode_shot(ci_sc):
-        """Toutes les images d'un plan en UN passage : leur nombre ne dépend que de sa durée, donc
-        rien ne reste à décider après coup. Échec + FORCER = seek précis (centre puis début)."""
-        ci, sc = ci_sc
-        sf, ef, mid, ss, es = scene_meta(sc)
-        times = sampling.shot_times(ss, es, sampling.frame_count(max(0.0, es - ss), asked_frames))
-        if SHOT_DECODE and len(times) > 1:
-            frames = media.grab_shot(path, times, max_edge=GRAB_MAX_EDGE)
-            # `grab_shot` saute silencieusement un timestamp illisible : une liste plus courte ne dit
-            # pas LEQUEL manque, donc on ne peut plus apparier images et instants — on renonce à la
-            # reprise des aplats plutôt que de retenter au mauvais endroit.
-            if len(frames) == len(times):
-                frames = replace_flat(list(frames), times, ss, es)
-        else:
-            frames = replace_flat([grab(t) for t in times], times, ss, es)
-            frames = [im for im in frames if im is not None]
+    def to_frame(sec, ss, es):
+        """Frame of the decoded stream shown at `sec`, kept inside the shot [ss, es)."""
+        lo = int(round(ss * fps))
+        hi = max(lo, int(round(es * fps)) - 1)
+        return max(lo, min(hi, int(round(sec * fps))))
+
+    def decode_shot(ci, meta, times):
+        """Fallback, one shot at a time, when its segment could not be read in one pass. Precise
+        seek: a keyframe seek returned the keyframe before the instant, often from the previous
+        shot. Failure + FORCE = longer timeout (centre, then start)."""
+        ss = meta[3]
+        frames = media.grab_shot(path, times, max_edge=GRAB_MAX_EDGE, accurate=True)
+        # `grab_shot` saute silencieusement un timestamp illisible : une liste plus courte ne dit
+        # pas LEQUEL manque, donc on renonce à la reprise des aplats plutôt que de retenter au
+        # mauvais endroit.
+        if len(frames) == len(times):
+            frames = replace_flat(list(frames), times, ss, meta[4])
         if not frames and force:
             im = (media.grab_ffmpeg(path, times[len(times) // 2], accurate=True, timeout=FORCE_TIMEOUT, max_edge=GRAB_MAX_EDGE)
                   or media.grab_ffmpeg(path, ss, accurate=True, timeout=FORCE_TIMEOUT, max_edge=GRAB_MAX_EDGE))
             if im is not None:
                 frames = [im]
-        return ci, (sf, ef, mid, ss, es), frames
+        return ci, meta, frames
+
+    # Reading plan: each shot gives its instants (see `sampling`); consecutive shots are grouped
+    # into SEGMENTS read by one exact sequential decode. A long gap between two instants ends the
+    # segment: decoding every frame across it would cost more than a fresh seek.
+    plans = []
+    for ci, sc in enumerate(scenes):
+        meta = scene_meta(sc)
+        times = sampling.shot_times(meta[3], meta[4], sampling.frame_count(max(0.0, meta[4] - meta[3]), asked_frames))
+        plans.append((ci, meta, times, [to_frame(x, meta[3], meta[4]) for x in times] if fps else []))
+    segments = []
+    gap = SEGMENT_GAP_SEC * fps
+    for plan in plans:
+        cur = segments[-1] if segments else None
+        if (cur is not None and SHOT_DECODE and plan[3] and cur[-1][3] and len(cur) < SEGMENT_SHOTS
+                and plan[3][0] - cur[-1][3][-1] <= gap):
+            cur.append(plan)
+        else:
+            segments.append([plan])
+
+    def decode_segment(seg):
+        wanted = [f for plan in seg for f in plan[3]]
+        images = media.grab_segment(path, fps, wanted, max_edge=GRAB_MAX_EDGE,
+                                    threads=SEGMENT_THREADS) if wanted else None
+        if images is None:
+            return [decode_shot(ci, meta, times) for ci, meta, times, _ in seg]
+        out, k = [], 0
+        for ci, meta, times, frames in seg:
+            shot = list(images[k:k + len(frames)]); k += len(frames)
+            if any(im is None for im in shot):  # segment cut short: only these shots fall back
+                out.append(decode_shot(ci, meta, times))
+            else:
+                out.append((ci, meta, replace_flat(shot, times, meta[3], meta[4])))
+        return out
 
     def pool_scene(embs):
         """Plusieurs frames → 1 vecteur. spread (mouvement en espace embedding) < STATIC_THR →
@@ -215,48 +252,83 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         nrm = float(np.linalg.norm(m))
         return (m / nrm).astype(np.float32) if nrm > 0 else embs[embs.shape[0] // 2]
 
-    def embed_batched(frames):
-        """1 gros batch GPU (sature le GPU). VRAM saturée → libère et reprend en plus petits batches."""
-        if not frames:
-            return np.zeros((0, 0), dtype=np.float32)
-        try:
-            return model.embed_images(frames)
-        except RuntimeError:
-            model.free_memory()
-            return model.embed_images(frames, batch=8)
+    # Progress = decode + embedding, each over n shots. Embedding a batch takes seconds: without a
+    # beat during it, the UI declared the indexing stalled in the middle of normal work.
+    work = {"decoded": 0, "embedded": 0.0}
 
-    proc = 0  # plans décodés (progression : le décodage domine le temps)
+    def report():
+        done = work["decoded"] + work["embedded"]
+        sys.stderr.write("STAGE:prog:%d/%d\n" % (int(done * 1000), 2 * n * 1000)); sys.stderr.flush()
+
+    def embed_batched(frames, shots_count):
+        """GPU sub-batches, one progress beat each. VRAM saturated → free and redo the sub-batch
+        smaller."""
+        out = []
+        step = shots_count / max(1, len(frames))
+        for i in range(0, len(frames), GPU_BATCH):
+            sub = frames[i:i + GPU_BATCH]
+            try:
+                out.append(model.embed_images(sub))
+            except RuntimeError:
+                model.free_memory()
+                out.append(model.embed_images(sub, batch=8))
+            work["embedded"] += step * len(sub)
+            report()
+        return np.concatenate(out, axis=0)
+
+    def embed_shots(shots):
+        nonlocal skipped
+        flat = []; owner = []  # owner[k] = position (dans shots) du plan de la frame flat[k]
+        for pos, (_, _, frames) in enumerate(shots):
+            for im in frames:
+                flat.append(im); owner.append(pos)
+        empty = sum(1 for _, _, frames in shots if not frames)
+        work["embedded"] += empty
+        eb = embed_batched(flat, len(shots) - empty) if flat else None
+        per = [[] for _ in shots]
+        for k, pos in enumerate(owner):
+            per[pos].append(eb[k])
+        for pos, (ci, meta, frames) in enumerate(shots):
+            if not frames:
+                skipped += 1  # aucune frame lisible → plan sauté (le clip continue)
+                continue
+            sf, ef, mid, ss, es = meta
+            vec = pool_scene(np.stack(per[pos]))
+            row_buf.append(
+                (path, mt, MODEL_TAG, ci, sf, ef, mid, ss, es, fps, src_frames,
+                 vec.astype(np.float32).tobytes(), int(vec.shape[0]), time.time())
+            )
+            if len(row_buf) >= 16:
+                flush_rows()
+
+    # Decode and GPU overlap: the next segments decode (ffmpeg processes, GIL released) while the
+    # current batch embeds. Segments in flight are capped, so memory stays bounded.
+    ready = []
     with ThreadPoolExecutor(max_workers=DECODE_WORKERS) as pool:
-        for cstart in range(0, n, INDEX_CHUNK):
-            chunk = scenes[cstart:cstart + INDEX_CHUNK]
-            shots = [None] * len(chunk)   # shots[ci] = (meta, images décodées)
-            futs = {pool.submit(decode_shot, (idx, sc)): idx for idx, sc in enumerate(chunk)}
-            for fut in as_completed(futs):  # progression fluide au fil des décodages parallèles
-                ci, meta, frames = fut.result()
-                shots[ci] = (meta, frames)
-                proc += 1
-                sys.stderr.write("STAGE:prog:%d/%d\n" % (proc, n)); sys.stderr.flush()
-            flat = []; owner = []  # owner[k] = index (dans chunk) du plan de la frame flat[k]
-            for ci, (meta, frames) in enumerate(shots):
-                for im in frames:
-                    flat.append(im); owner.append(ci)
-            eb = embed_batched(flat)
-            per = [[] for _ in chunk]  # per[ci] = embeddings du plan
-            for k, ci in enumerate(owner):
-                per[ci].append(eb[k])
-            for ci, (meta, frames) in enumerate(shots):
-                if not frames:
-                    skipped += 1  # aucune frame lisible → plan sauté (le clip continue)
-                    continue
-                sf, ef, mid, ss, es = meta
-                vec = pool_scene(np.stack(per[ci]))
-                row_buf.append(
-                    (path, mt, MODEL_TAG, cstart + ci, sf, ef, mid, ss, es, fps, src_frames,
-                     vec.astype(np.float32).tobytes(), int(vec.shape[0]), time.time())
-                )
-                if len(row_buf) >= 16:
-                    flush_rows()
-            shots = None  # libère les frames décodées du lot (mémoire bornée)
+        queue = iter(segments)
+        inflight = set()
+
+        def fill():
+            while len(inflight) < DECODE_WORKERS + 2:
+                seg = next(queue, None)
+                if seg is None:
+                    return
+                inflight.add(pool.submit(decode_segment, seg))
+
+        fill()
+        while inflight or ready:
+            if inflight:
+                finished, _ = wait(inflight, return_when=FIRST_COMPLETED)
+                for fut in finished:
+                    inflight.discard(fut)
+                    shots = fut.result()
+                    ready.extend(shots)
+                    work["decoded"] += len(shots)
+                fill()
+                report()
+            if ready and (len(ready) >= INDEX_CHUNK or not inflight):
+                batch, ready = ready, []
+                embed_shots(batch)
 
     flush_rows()
     # Reliquat du passage précédent : plans en trop d'une découpe plus courte, ou embeddings d'une

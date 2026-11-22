@@ -7,7 +7,7 @@ const { readTimelineXml } = require('../transfer/resolveXml');
 const { graftAnimation } = require('./animation');
 const { sanitizeName: sanitize } = require('../utils');
 const { t } = require('../i18n');
-const { sourceOutFrame } = require('../timeline-insertion');
+const { sourceOutFrame, correctSourceStart, sameFrameRate } = require('../timeline-insertion');
 // `collect` below names its track index `t`.
 const tr = t;
 
@@ -41,13 +41,18 @@ async function mediaStartTcFrames(mpi, fps) {
 // GetLeftOffset est en fallback seulement (il dérive — décalé de plusieurs frames — et renvoie un
 // timecode garbage, ex 86400, sur les freeze).
 // Renvoie { srcIn, srcOut (inclusifs), freeze, reverse, srcSpan, retimed }.
-async function sourceRange(it, tlStart, tlEnd, tcFrames = 0, maxFrame = Infinity) {
+// `sameRate` (clip rate = timeline rate) lets GetLeftOffset settle a one-frame error of
+// GetSourceStartFrame (`correctSourceStart`).
+async function sourceRange(it, tlStart, tlEnd, tcFrames = 0, maxFrame = Infinity, sameRate = false) {
   const span = Math.max(1, tlEnd - tlStart);
   const rd = async (k) => { try { const v = parseInt(await it[k](), 10); return Number.isFinite(v) ? v : NaN; } catch (_) { return NaN; } };
   // Dé-ancrage TC uniquement si la valeur dépasse la longueur du fichier (normalement déjà 0-based).
   const deTc = (v) => (tcFrames > 0 && Number.isFinite(maxFrame) && v > maxFrame) ? v - tcFrames : v;
   let ssf = deTc(await rd('GetSourceStartFrame'));
   let sef = deTc(await rd('GetSourceEndFrame'));
+  if (sameRate && Number.isFinite(ssf) && Number.isFinite(sef)) {
+    ({ ssf } = correctSourceStart(ssf, sef, deTc(await rd('GetLeftOffset')), { sameRate, maxFrame }));
+  }
   if (Number.isFinite(ssf) && Number.isFinite(sef) && ssf >= 0 && sef >= 0) {
     let srcIn, srcOut, reverse = false, freeze = false;
     if (ssf === sef) { srcIn = srcOut = ssf; freeze = true; }             // freeze : 1 frame tenue
@@ -347,7 +352,7 @@ async function readTimelineEdit(resolve, timelineName, renderOpts = {}) {
           const srcFrames = parseInt(await mpi.GetClipProperty('Frames'), 10) || 0;
           const tcFrames = type === 'video' ? await mediaStartTcFrames(mpi, fpsClip) : 0;
           const maxFrame = srcFrames > 0 ? srcFrames - 1 : Infinity;
-          const sr = await sourceRange(it, tlS, tlE, tcFrames, maxFrame);
+          const sr = await sourceRange(it, tlS, tlE, tcFrames, maxFrame, type === 'video' && sameFrameRate(fpsClip, fps));
           let { srcIn, srcOut } = sr;
           let freeze = sr.freeze, reverse = sr.reverse, retimed = sr.retimed;
           if (place) {   // segment d'une timeline imbriquée → reprojeté, pas de retime géré ici

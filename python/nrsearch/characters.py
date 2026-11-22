@@ -14,6 +14,7 @@ from nri18n import t
 from . import faces, media
 from .catalog import path_chunks
 from .db import db_emb
+from .edits import _overrides_table, apply_label_overrides
 from .faceengines import engines
 
 
@@ -124,6 +125,8 @@ def cmd_char_delete(req):
         con.execute("DELETE FROM characters_v1 WHERE id=?", (int(cid),))
         con.execute("DELETE FROM character_samples_v1 WHERE char_id=?", (int(cid),))
         con.execute("DELETE FROM face_labels_v1 WHERE char_id=?", (int(cid),))
+        _overrides_table(con)
+        con.execute("DELETE FROM face_label_overrides_v1 WHERE char_id=?", (int(cid),))
         con.commit()
         return {"ok": True, "error": None}
     finally:
@@ -156,6 +159,8 @@ def cmd_char_merge(req):
                     (json.dumps(tags), notes, tgt_row[3] or src_row[3] or "", avatar, time.time(), tgt))
         con.execute("UPDATE character_samples_v1 SET char_id=? WHERE char_id=?", (tgt, src))
         con.execute("UPDATE face_labels_v1 SET char_id=? WHERE char_id=?", (tgt, src))
+        _overrides_table(con)
+        con.execute("UPDATE face_label_overrides_v1 SET char_id=? WHERE char_id=?", (tgt, src))
         con.execute("DELETE FROM characters_v1 WHERE id=?", (src,))
         con.commit()
         return {"ok": True, "target_id": tgt, "error": None}
@@ -460,6 +465,7 @@ def cmd_char_label_index(req):
         for (fp, si, fi, dom), (s, cid) in best.items():
             con.execute("INSERT OR REPLACE INTO face_labels_v1(file_path, scene_index, face_index, domain, char_id, score) "
                         "VALUES (?,?,?,?,?,?)", (fp, si, fi, dom, cid, s))
+        apply_label_overrides(con)   # hand corrections survive the purge above
         con.commit()
         return {"ok": True, "labeled": len(best), "faces": n_faces, "error": None}
     finally:

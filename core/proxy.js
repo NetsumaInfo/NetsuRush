@@ -86,6 +86,11 @@ let proxyActive = 0;
 let proxyOkStreak = 0;          // série de succès depuis le dernier refus (pilote la remontée)
 const qHigh = [];
 const qLow = [];
+// 'gen' = the "Generate proxies" button. As 'low' it only ran once no card wanted anything, i.e.
+// never while the grid was being scrolled; it now always gets at least half the slots.
+const qGen = [];
+let proxyGenActive = 0;
+const queueOf = (prio) => (prio === 'gen' ? qGen : prio === 'low' ? qLow : qHigh);
 const cancelledTokens = new Set();   // tokens annulés (carte sortie de l'écran) — sautés au pump
 const proxyChildren = new Map();     // token -> child ffmpeg EN COURS (kill immédiat à l'annulation)
 
@@ -93,10 +98,20 @@ const proxyChildren = new Map();     // token -> child ffmpeg EN COURS (kill imm
 // MAINTENANT (après un scroll) passe devant les demandes périmées (cartes scrollées au-dessus,
 // hors écran). Low (préchauffe de fond) reste FIFO. Les jobs annulés entre-temps sont jetés ici.
 function takeJob() {
+  const skip = (j) => j.token != null && cancelledTokens.has(j.token)
+    && (cancelledTokens.delete(j.token), j.resolve({ ok: false, cancelled: true }), true);
+  while (qGen.length && proxyGenActive < Math.max(1, Math.floor(proxyMax / 2))) {
+    const j = qGen.shift();
+    if (!skip(j)) return j;
+  }
   while (qHigh.length) {
     const j = qHigh.pop();
     if (j.token != null && cancelledTokens.has(j.token)) { cancelledTokens.delete(j.token); j.resolve({ ok: false, cancelled: true }); continue; }
     return j;
+  }
+  while (qGen.length) {
+    const j = qGen.shift();
+    if (!skip(j)) return j;
   }
   while (qLow.length) {
     const j = qLow.shift();
@@ -110,6 +125,7 @@ function proxyPump() {
     const job = takeJob();
     if (!job) break;
     proxyActive++;
+    if (job.prio === 'gen') proxyGenActive++;
     job.fn().then((res) => {
       // Le pilote a refusé une session (trop de sessions concurrentes) : baisse le plafond et
       // ré-enfile le job après un court backoff (le temps qu'une session se libère). unshift =
@@ -119,7 +135,7 @@ function proxyPump() {
         proxyOkStreak = 0;   // refus → on repart à zéro avant de retenter de remonter
         job.tries = (job.tries || 0) + 1;
         if (job.tries <= 8) {
-          setTimeout(() => { (job.prio === 'low' ? qLow : qHigh).unshift(job); proxyPump(); }, 200 * job.tries);
+          setTimeout(() => { queueOf(job.prio).unshift(job); proxyPump(); }, 200 * job.tries);
           return;   // pas de resolve : nouvelle tentative au prochain pump
         }
         return job.resolve({ ok: false, error: res.error });   // abandon après trop d'essais
@@ -130,13 +146,13 @@ function proxyPump() {
         proxyMax++; proxyOkStreak = 0; proxyPump();
       }
       job.resolve(res);
-    }).finally(() => { proxyActive--; proxyPump(); });
+    }).finally(() => { proxyActive--; if (job.prio === 'gen') proxyGenActive--; proxyPump(); });
   }
 }
 function proxyGate(fn, priority, token) {
   return new Promise((resolve) => {
-    const job = { fn, resolve, prio: priority === 'low' ? 'low' : 'high', tries: 0, token };
-    (job.prio === 'low' ? qLow : qHigh).push(job);
+    const job = { fn, resolve, prio: priority === 'low' || priority === 'gen' ? priority : 'high', tries: 0, token };
+    queueOf(job.prio).push(job);
     proxyPump();
   });
 }
@@ -164,6 +180,7 @@ function proxyCancelAll() {
   let killed = 0;
   while (qHigh.length) qHigh.pop().resolve({ ok: false, cancelled: true });
   while (qLow.length) qLow.shift().resolve({ ok: false, cancelled: true });
+  while (qGen.length) qGen.shift().resolve({ ok: false, cancelled: true });
   for (const [tok, ch] of proxyChildren) {
     cancelledTokens.add(tok);   // marque annulé → le close SIGKILL n'est pas traité en erreur
     try { ch.kill('SIGKILL'); killed++; } catch (_) {}
@@ -174,7 +191,7 @@ function proxyCancelAll() {
 // Encodes de proxy EN VOL + demandes en file. Sert de signal « NetsuRush travaille » à la
 // surveillance mémoire (core/optimize/watchdog.js), qui ne s'arme que pendant une tâche lourde.
 function proxyActiveCount() {
-  return { encoding: proxyChildren.size, queued: qHigh.length + qLow.length };
+  return { encoding: proxyChildren.size, queued: qHigh.length + qLow.length + qGen.length };
 }
 
 // Paliers de hauteur proxy. La grille décode autant de <video> que de cartes visibles → le coût

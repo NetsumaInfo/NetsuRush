@@ -130,7 +130,9 @@ export function NetsuIcon({ name, mode, busy = false, on, className }: NetsuIcon
     <span
       ref={box}
       aria-hidden
-      className={cn("inline-flex size-4 shrink-0 [&>svg]:size-full", className)}
+      // `!`: Button/Tabs size any unsized descendant svg to 16 px with a more specific selector, which
+      // left the glyph stuck in the top-left corner of a larger box.
+      className={cn("inline-flex size-4 shrink-0 items-center justify-center [&>svg]:size-full!", className)}
       // The markup comes from NetsuIcon's core, which escapes every attribute it writes.
       dangerouslySetInnerHTML={{ __html: markup }}
     />

@@ -274,6 +274,7 @@
     "failures_one": " · {{count}} échec",
     "failures_other": " · {{count}} échecs",
     "pending": "en attente",
+    "cancelled": "Arrêté",
     "shots_one": "{{count}} plan",
     "shots_other": "{{count}} plans",
     "doneHint": "Découpe terminée — ouvre un rush pour voir ses plans (déjà en cache).",

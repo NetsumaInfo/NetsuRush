@@ -174,5 +174,11 @@
   },
   "thinkingSlider": {
     "reset": "Zurück zum Standardaufwand"
+  },
+  "externalApproval": {
+    "title": "Ein externer Agent bittet um Erlaubnis",
+    "input": "Parameter",
+    "countdown_one": "{{count}} s",
+    "countdown_other": "{{count}} s"
   }
 }

@@ -17,16 +17,18 @@ const { t: tr } = require('../../i18n');
  * @property {object} inputSchema  JSON Schema de l'objet d'arguments
  * @property {ToolRisk} risk
  * @property {(input:any)=>ToolRisk} [riskFor]  risque dynamique par appel (dispatchers compound)
- * @property {readonly Surface[]} [surfaces]  fenêtres où l'outil est proposé (défaut : 'pilot')
+ * @property {readonly Surface[]} [surfaces]  fenêtres où l'outil est proposé (défaut : toutes)
  * @property {(args:any, ctx:any)=>Promise<any>|any} handler
  */
 
 /// Les surfaces de l'agent : un registre unique, filtré par fenêtre.
+/// 'external' is an MCP client the user connected from outside the app (Claude Desktop, Codex…):
+/// it gets the same tools as the in-app pilot, under its own permission mode.
 /**
- * @typedef {'pilot'} Surface
+ * @typedef {'pilot'|'external'} Surface
  */
-const SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot']));
-const DEFAULT_SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot']));
+const SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot', 'external']));
+const DEFAULT_SURFACES = /** @type {readonly Surface[]} */ (Object.freeze(['pilot', 'external']));
 
 function createToolRegistry() {
   /** @type {Map<string, ToolDef>} */
@@ -95,13 +97,23 @@ function createToolRegistry() {
     }));
   }
 
+  /// MCP annotations mirror the risk the gate uses. A compound tool's risk depends on its action,
+  /// so it is never advertised as read-only; only a fixed 'destructive' risk sets destructiveHint.
   /** @param {Surface} [surface] */
   function toMcpTools(surface) {
-    return list(surface).map((t) => ({
-      name: t.name,
-      description: t.description,
-      inputSchema: t.inputSchema,
-    }));
+    return list(surface).map((t) => {
+      const readOnly = t.risk === 'read' && !t.riskFor;
+      return {
+        name: t.name,
+        description: t.description,
+        inputSchema: t.inputSchema,
+        annotations: {
+          readOnlyHint: readOnly,
+          ...(readOnly ? {} : { destructiveHint: t.risk === 'destructive' || !!t.riskFor }),
+          openWorldHint: false,
+        },
+      };
+    });
   }
 
   // Exécute un outil. La permission est gérée EN AMONT (session/permissions), pas ici.

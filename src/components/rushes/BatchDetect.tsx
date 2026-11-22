@@ -116,6 +116,7 @@ export function BatchDetectProgress() {
                 {it.status === "done" ? t("batch.shots", { count: it.scenes ?? 0 })
                   : it.status === "error" ? t("shared.failedShort")
                   : it.status === "running" ? fmtPercent(it.pct / 100)
+                  : it.status === "cancelled" ? t("batch.cancelled")
                   : t("batch.pending")}
               </span>
             </div>
@@ -133,7 +134,7 @@ export function BatchDetectProgress() {
   );
 }
 
-function StatusIcon({ status }: { status: "pending" | "running" | "done" | "error" }) {
+function StatusIcon({ status }: { status: "pending" | "running" | "done" | "error" | "cancelled" }) {
   if (status === "running") return <Spinner className="size-3.5 shrink-0 text-primary" />;
   if (status === "done") return <NetsuIcon name="check" className="size-3.5 shrink-0 text-[var(--color-ok)]" />;
   if (status === "error") return <NetsuIcon name="warning" className="size-3.5 shrink-0 text-destructive" />;

@@ -36,14 +36,23 @@ const THUMB_MAX = Math.max(6, Math.min(16, os.cpus().length - 2));
 // La préchauffe ne peut jamais prendre tous les workers : deux places restent disponibles pour les
 // cartes visibles. Sans cette réserve, un gros lot de fond fige l'affichage jusqu'à la fin des seeks.
 const THUMB_LOW_MAX = Math.max(1, THUMB_MAX - 2);
+// 'gen' = the "Generate thumbnails" button. It used to share 'low' and waited for the visible queue
+// to empty, which never happens after a scroll (card requests are not cancellable): the button
+// seemed dead. Half the workers are now guaranteed to it whenever it has work queued.
+const THUMB_GEN_MIN = Math.max(1, Math.floor(THUMB_MAX / 2));
 let thumbActive = 0;
+let thumbGenActive = 0;
 const thumbQHigh = [];
 const thumbQLow = [];
+const thumbQGen = [];
 const thumbInFlight = new Map();
 function thumbPump() {
   while (true) {
     let task = null;
-    if (thumbActive < THUMB_MAX && thumbQHigh.length) task = thumbQHigh.pop();
+    if (thumbActive >= THUMB_MAX) break;
+    if (thumbQGen.length && thumbGenActive < THUMB_GEN_MIN) task = thumbQGen.shift();
+    else if (thumbQHigh.length) task = thumbQHigh.pop();
+    else if (thumbActive < THUMB_LOW_MAX && thumbQGen.length) task = thumbQGen.shift();
     else if (thumbActive < THUMB_LOW_MAX && thumbQLow.length) task = thumbQLow.shift();
     if (!task) break;
     thumbActive++;
@@ -52,8 +61,12 @@ function thumbPump() {
 }
 function thumbGate(fn, priority) {
   return new Promise((resolve) => {
-    const task = () => { fn().then(resolve).finally(() => { thumbActive--; thumbPump(); }); };
-    (priority === 'low' ? thumbQLow : thumbQHigh).push(task);
+    const gen = priority === 'gen';
+    const task = () => {
+      if (gen) thumbGenActive++;
+      fn().then(resolve).finally(() => { thumbActive--; if (gen) thumbGenActive--; thumbPump(); });
+    };
+    (gen ? thumbQGen : priority === 'low' ? thumbQLow : thumbQHigh).push(task);
     thumbPump();
   });
 }
@@ -176,7 +189,7 @@ async function thumbnail(filePath, time = 1, priority = 'high', settings) {
 // `select` (qui décode tout le fichier séquentiellement et n'écrit qu'à la fin = grille noire
 // longtemps). items: [{ time, frame }]. Mêmes clés de cache que thumbnail().
 const batchKeys = new Map();
-async function thumbsBatch(filePath, items, settings) {
+async function thumbsBatch(filePath, items, settings, priority = 'low') {
   const s = normalizeThumbSettings(settings);
   const seen = new Set();
   const todo = [];
@@ -218,7 +231,7 @@ async function thumbsBatch(filePath, items, settings) {
           made++;
         }
       } catch (_) {}
-    }, 'low');
+    }, priority === 'gen' ? 'gen' : 'low');
     thumbInFlight.set(t.key, job);
     try { await job; } finally { if (thumbInFlight.get(t.key) === job) thumbInFlight.delete(t.key); }
   }));

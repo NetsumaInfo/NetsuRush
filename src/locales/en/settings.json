@@ -663,7 +663,8 @@
     },
     "ai": {
       "models": "Video",
-      "indexing": "Indexing"
+      "indexing": "Indexing",
+      "agents": "External agents"
     },
     "storage": {
       "media": "Media cache",
@@ -740,6 +741,43 @@
       "collection": "Collections",
       "notebook": "Notebooks",
       "notebook-page": "Notebook pages"
+    }
+  },
+  "mcp": {
+    "title": "External agents (MCP)",
+    "subtitle": "Let an external AI app (Claude Desktop, Claude Code, Codex, Cursor) drive NetsuRush through its MCP server.",
+    "enable": "Allow external agents",
+    "enableHint": "When off, the MCP server rejects every call, even if a client is installed.",
+    "on": "On",
+    "off": "Off",
+    "modeLabel": "Permissions",
+    "maxSubagents": "Parallel sub-agents",
+    "maxSubagentsHint": "How many small AI agents run at once to go through your rushes (up to 64). The rest wait their turn. They use the app you have installed (Claude Code or Codex) with its cheapest model, and draw on your subscription.",
+    "modeHint": "Read-only: the agent can look but never change anything. Ask: any destructive action waits for your confirmation. Allow all: no confirmation, the agent acts on its own.",
+    "mode": {
+      "read-only": "Read-only",
+      "ask": "Ask for destructive actions",
+      "auto": "Allow everything"
+    },
+    "clients": "Apps",
+    "status": {
+      "installed": "Installed",
+      "detected": "Detected",
+      "notDetected": "Not detected"
+    },
+    "install": "Install",
+    "remove": "Remove",
+    "copyJson": "Copy JSON config",
+    "copied": "Config copied.",
+    "restartNote": "Restart the client app after installing. NetsuRush must stay open for the agent to work.",
+    "recent": "Recent activity",
+    "recentEmpty": "No calls yet.",
+    "ok": "OK",
+    "failed": "Failed",
+    "risk": {
+      "read": "read",
+      "write": "write",
+      "destructive": "destructive"
     }
   }
 }

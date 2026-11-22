@@ -12,6 +12,7 @@ const path = require('path');
 const fs = require('fs');
 const { getResolve } = require('../../resolve-proxy');
 const { t } = require('../../i18n');
+const { createMediaPoolOps, mediaPoolRisk, ACTIONS: MEDIA_POOL_ACTIONS } = require('./mediaPool');
 
 async function ctx() {
   const resolve = await getResolve();
@@ -230,58 +231,49 @@ function createResolveTools(deps) {
     },
 
     // ---- Media Pool ----------------------------------------------------------
+    // Bins are addressed by PATH from the root ("Rushes/Episode 1"; "" = root) so the agent can sort
+    // a whole tree without holding Resolve object handles. Clips are addressed by file path or by the
+    // unique id list_clips returns (a generated clip — timeline, compound — has no file path).
+    // The API cannot rename a bin: renaming is create + move contents + delete.
     {
       name: 'resolve_media_pool',
-      description: 'Media Pool. action: list_clips | import(paths) | append_to_timeline(paths) | '
-        + 'create_empty_timeline(name) | create_timeline_from_clips(name,paths) | add_subfolder(name) | '
-        + 'set_current_folder(name) | delete_clips(paths). delete_clips is destructive.',
+      description: 'DaVinci Resolve Media Pool: bins (folders) and clips. Bins are paths from the root, e.g. "Rushes/Ep1" ("" = root). '
+        + 'Clips are given by file path (paths) or by id (ids, from list_clips). action: '
+        + 'list_folders | list_clips(folder?, recursive?) | create_folder(folder) — creates missing parents | '
+        + 'move_clips(paths|ids, folder) — creates the bin if missing | move_folder(folder, to) | '
+        + 'import(paths, folder?) | rename_clip(path|id, name) | set_clip_color(paths|ids, color; "" clears) | '
+        + 'set_current_folder(folder) | append_to_timeline(paths|ids) | create_empty_timeline(name) | '
+        + 'create_timeline_from_clips(name, paths|ids) | delete_clips(paths|ids) | delete_folders(folders). '
+        + 'delete_clips and delete_folders are destructive (a deleted bin takes its clips with it). Bins cannot be renamed by the API: '
+        + 'create the new bin, move_clips/move_folder its content, then delete the old one.',
       risk: 'write',
-      riskFor: (/** @type {any} */ a) => (a.action === 'list_clips' ? 'read' : a.action === 'delete_clips' ? 'destructive' : 'write'),
+      riskFor: mediaPoolRisk,
       inputSchema: {
         type: 'object',
         properties: {
-          action: { type: 'string', enum: ['list_clips', 'import', 'append_to_timeline', 'create_empty_timeline', 'create_timeline_from_clips', 'add_subfolder', 'set_current_folder', 'delete_clips'] },
-          name: { type: 'string' }, paths: { type: 'array', items: { type: 'string' } },
+          action: {
+            type: 'string',
+            enum: MEDIA_POOL_ACTIONS,
+          },
+          name: { type: 'string', description: 'Timeline name, new clip name, or (add_subfolder) bin name' },
+          paths: { type: 'array', items: { type: 'string' }, description: 'Absolute file paths of clips (or of files to import)' },
+          ids: { type: 'array', items: { type: 'string' }, description: 'Clip unique ids from list_clips' },
+          path: { type: 'string', description: 'rename_clip: file path of the clip' },
+          id: { type: 'string', description: 'rename_clip: clip id' },
+          folder: { type: 'string', description: 'Bin path from the root, "/"-separated; "" or "/" = root' },
+          folders: { type: 'array', items: { type: 'string' }, description: 'delete_folders: bin paths' },
+          to: { type: 'string', description: 'move_folder: destination parent bin path' },
+          recursive: { type: 'boolean', description: 'list_clips: include sub-bins (default true)' },
+          color: { type: 'string', description: 'Clip color: Orange, Apricot, Yellow, Lime, Olive, Green, Teal, Navy, Blue, Purple, Violet, Pink, Tan, Beige, Brown, Chocolate; "" clears' },
         },
         required: ['action'],
       },
       handler: g(async (/** @type {any} */ a) => {
-        const { resolve, proj } = await needProj();
+        const { proj } = await needProj();
         const mp = await proj.GetMediaPool();
         const root = await mp.GetRootFolder();
-        const findItems = async (/** @type {string[]} */ paths) => {
-          const want = new Set(paths || []);
-          const found = [];
-          const walk = async (/** @type {any} */ folder) => {
-            for (const it of (await folder.GetClipList()) || []) {
-              try { if (want.has(await it.GetClipProperty('File Path'))) found.push(it); } catch { /* skip */ }
-            }
-            for (const sub of (await folder.GetSubFolderList()) || []) await walk(sub);
-          };
-          await walk(root);
-          return found;
-        };
-        switch (a.action) {
-          case 'import': { const ms = await resolve.GetMediaStorage(); const items = await ms.AddItemListToMediaPool(a.paths || []); return ok({ count: items ? items.length : 0 }); }
-          case 'append_to_timeline': { const items = await findItems(a.paths); const r = await mp.AppendToTimeline(items); return ok({ appended: Array.isArray(r) ? r.length : !!r }); }
-          case 'create_empty_timeline': return ok({ created: !!(await mp.CreateEmptyTimeline(String(a.name || 'Timeline'))) });
-          case 'create_timeline_from_clips': { const items = await findItems(a.paths); return ok({ created: !!(await mp.CreateTimelineFromClips(String(a.name || 'Timeline'), items)) }); }
-          case 'add_subfolder': return ok({ created: !!(await mp.AddSubFolder(root, String(a.name))) });
-          case 'set_current_folder': { for (const sub of (await root.GetSubFolderList()) || []) if ((await sub.GetName()) === a.name) return ok({ set: await mp.SetCurrentFolder(sub) }); throw new Error(t('folderMissing')); }
-          case 'delete_clips': { const items = await findItems(a.paths); return ok({ deleted: await mp.DeleteClips(items) }); }
-          case 'list_clips':
-          default: {
-            const clips = [];
-            const walk = async (/** @type {any} */ folder, /** @type {string} */ prefix) => {
-              for (const it of (await folder.GetClipList()) || []) {
-                try { clips.push({ name: await it.GetName(), path: await it.GetClipProperty('File Path'), bin: prefix }); } catch { /* skip */ }
-              }
-              for (const sub of (await folder.GetSubFolderList()) || []) await walk(sub, (prefix ? prefix + '/' : '') + (await sub.GetName()));
-            };
-            await walk(root, '');
-            return ok({ clips });
-          }
-        }
+        const pool = createMediaPoolOps(mp, root);
+        return pool.run(a);
       }),
     },
 

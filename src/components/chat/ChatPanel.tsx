@@ -13,6 +13,7 @@ import { ChatSettings } from "./ChatSettings";
 import { ChatComposer } from "./ChatComposer";
 import { ApprovalBar } from "./ApprovalBar";
 import { Message } from "./Message";
+import { EXTERNAL_RUN_ID } from "@/hooks/useExternalApprovals";
 import { buildEngines, toEngineId } from "@/lib/agentCatalog";
 
 export function ChatPanel() {
@@ -32,7 +33,10 @@ export function ChatPanel() {
   useEffect(() => {
     void loadAgents();
     const offEv = nr.chat?.onEvent(ingest);
-    const offAp = nr.chat?.onApproval(setApproval);
+    // External agents' requests are answered by the global ExternalApprovalHost, not here.
+    const offAp = nr.chat?.onApproval((request) => {
+      if (request.runId !== EXTERNAL_RUN_ID) setApproval(request);
+    });
     return () => { offEv?.(); offAp?.(); };
   }, [ingest, setApproval, loadAgents]);
 

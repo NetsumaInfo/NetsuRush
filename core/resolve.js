@@ -10,7 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const { yieldLoop } = require("./config");
 const { RUSH_EXTS, MEDIA_EXTS, isMediaPath } = require("./utils");
-const { getResolve, bridge } = require("./resolve-proxy");
+const { getResolve, bridge, makeProxy } = require("./resolve-proxy");
 const { t } = require("./i18n");
 
 // Signature LÉGÈRE de l'état Resolve (projet/timeline/nb clips/nb timelines), pour le polling de
@@ -289,4 +289,28 @@ async function findItemByPath(folder, target) {
   return null;
 }
 
-module.exports = { getResolve, resolveStatus, listMediaPool, importToMediaPool, importMediaTree, importToBin, findItemByPath, resolveSignature };
+// Media Pool items for several paths in ONE helper walk (Python aggregate `findItems`), with their
+// FPS/Frames props. Must run inside the caller's Resolve op (after getResolve): the handles it
+// returns live in the same registry. Falls back to one proxy walk per path if the aggregate fails.
+// @returns {Promise<Map<string, { item: any, fps: any, frames: any }>>}
+async function findItemsByPaths(root, paths) {
+  const unique = [...new Set(paths)];
+  const out = new Map();
+  try {
+    const r = (await bridge.findItems(unique)) || {};
+    for (const [p, hit] of Object.entries(r)) {
+      if (hit && hit.item && typeof hit.item.__handle__ === "number") {
+        out.set(p, { item: makeProxy(hit.item.__handle__), fps: hit.fps, frames: hit.frames });
+      }
+    }
+    return out;
+  } catch (_) {
+    for (const p of unique) {
+      const item = await findItemByPath(root, p);
+      if (item) out.set(p, { item, fps: await item.GetClipProperty("FPS"), frames: await item.GetClipProperty("Frames") });
+    }
+    return out;
+  }
+}
+
+module.exports = { getResolve, resolveStatus, listMediaPool, importToMediaPool, importMediaTree, importToBin, findItemByPath, findItemsByPaths, resolveSignature };

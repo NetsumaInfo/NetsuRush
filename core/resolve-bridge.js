@@ -165,6 +165,10 @@ function createResolveBridge() {
     listMediaPool: () => rpc("listMediaPool"),
     readTimeline: (name) => rpc("readTimeline", { name: name || null }),
     sig: () => rpc("resolveSig"),
+    listTimelines: () => rpc("listTimelines"),
+    timelineTree: () => rpc("timelineTree"),
+    findItems: (paths) => rpc("findItems", { paths }),
+    timelineFirstClips: (start, count) => rpc("timelineFirstClips", { start, count }),
     stop: () => {
       if (child) {
         try {

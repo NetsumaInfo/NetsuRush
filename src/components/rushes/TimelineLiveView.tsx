@@ -112,10 +112,21 @@ export function TimelineLiveView() {
   // propre reset ci-dessous.
   useEffect(() => {
     if (!connected || adobe.active) return;
+    // Events arrive in bursts (a whole project at once from the core aggregate): one grid render per
+    // frame, not one per timeline.
+    let pending: { name: string; path: string; in: number }[] = [];
+    let raf = 0;
+    const flush = () => {
+      raf = 0;
+      const batch = pending;
+      pending = [];
+      setThumbs((m) => { const n = new Map(m); for (const t of batch) n.set(t.name, { path: t.path, in: t.in }); return n; });
+    };
     const off = nr.onTimelineThumb((t) => {
-      setThumbs((m) => { const n = new Map(m); n.set(t.name, { path: t.path, in: t.in }); return n; });
+      pending.push(t);
+      if (!raf) raf = requestAnimationFrame(flush);
     });
-    return () => off();
+    return () => { off(); if (raf) cancelAnimationFrame(raf); };
   }, [connected, adobe.active]);
   // Adobe : la vignette de chaque carte est le 1er plan de la séquence, déjà présent dans le
   // snapshot → aucun scan, la grille est peinte dès l'arrivée des données.
@@ -414,6 +425,7 @@ export function TimelineLiveView() {
     // montage repart en SECONDES par le job du panneau — même route que Derush et Recherche.
     if (adobe.active) {
       const r = await hostBuildTimeline(state.activeHost, {
+        ...opts,
         name,
         input: list[0].path,
         mode: forceAppend ? "append" : opts.mode,

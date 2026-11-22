@@ -6,10 +6,9 @@ import { useApp } from "@/store";
 import { basename } from "@/store/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ScenePlayer, type ScenePlayerApi } from "@/components/player/ScenePlayer";
 import { canFewerCols, canMoreCols, fmt, gridContainerStyle, gridMetrics, stepCols, type Segment } from "./cutStudioShared";
 import { RATE_LADDER } from "./cutShortcuts";
@@ -72,7 +71,7 @@ export function CutStudio() {
     info, duration, segments, detecting, cacheLoading, progress,
     active, activeUrl, sourceOf, pathOf,
     err, setErr, preset, setPreset, model, setModel,
-    getProxy, peekProxy, bustProxy, warmProxies, playScene, detect,
+    getProxy, peekProxy, bustProxy, warmProxies, playScene, detect, cancelDetect,
     generateProxies: genProxies, generateThumbs: genThumbs, proxyGen, thumbsGen,
     hasEdits, clearEdits, undoEdit, redoEdit,
   } = det;
@@ -176,7 +175,8 @@ export function CutStudio() {
   };
 
   // Vide la sélection (héritée des plans précédents) avant de relancer la détection.
-  function runDetect() { setSel(new Set()); detect(); }
+  // While a detection runs the same button stops it.
+  function runDetect() { if (detecting) { cancelDetect(); return; } setSel(new Set()); detect(); }
 
   // Un flux dont un rush n'est pas encore découpé se contenterait sinon de ne pas le montrer : on
   // défilerait sans jamais l'atteindre, et rien ne dirait pourquoi. Les découper ne retouche pas les
@@ -321,25 +321,16 @@ export function CutStudio() {
           <DetectionPresetSelect model={model} preset={preset} onChange={setPreset} disabled={detecting} className={narrow ? "w-24" : "w-28"} />
           <DetectionAdvancedSettings model={model} disabled={detecting} compact />
           <Tooltip>
-            <TooltipTrigger render={<Button type="button" variant="ghost" size="icon-sm" onClick={runDetect} disabled={detecting} aria-label={t("shared.detectShots")} />}>
+            <TooltipTrigger render={<Button type="button" variant="ghost" size="icon-sm" onClick={runDetect} aria-label={detecting ? t("shared.stop") : t("shared.detectShots")} />}>
               <NetsuIcon name="cut-detect" busy={detecting} className="size-4" />
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {detecting && progress ? `${t("shared.analyzing")} ${fmtPercent(progress / 100)}` : t("shared.detectShots")}
+              {detecting ? `${t("shared.analyzing")}${progress ? ` ${fmtPercent(progress / 100)}` : ""} · ${t("shared.stop")}` : t("shared.detectShots")}
             </TooltipContent>
           </Tooltip>
         </div>
-        {/* progression : fine ligne sur la bordure du bas (n'agrandit pas l'entête → zéro saut) */}
-        {detecting && (
-          <Progress value={progress} className="absolute inset-x-0 bottom-0 [&_[data-slot=progress-track]]:h-0.5 [&_[data-slot=progress-track]]:rounded-none" />
-        )}
       </div>
       )}
-      {/* progression de détection en compact (pas de header) : fine ligne en haut de la grille */}
-      {compact && detecting && (
-        <Progress value={progress} className="shrink-0 [&_[data-slot=progress-track]]:h-0.5 [&_[data-slot=progress-track]]:rounded-none" />
-      )}
-
       {/* Grille à gauche (défile seule), lecteur + actions à droite (fixe, redimensionnable).
           Vue étroite → colonne : lecteur en tête, grille dessous. */}
       <div className={"flex min-h-0 flex-1 px-4 " + (narrow ? "flex-col" : "")}>
@@ -480,15 +471,24 @@ export function CutStudio() {
                       pos={fmt(s.in)} dur={fmt(s.out - s.in)} />
                   );
                 })}
+                {/* Shots still arriving: placeholder cards where the next ones will land. */}
+                {detecting && Array.from({ length: 4 }).map((_, i) => <Skeleton key={`sk${i}`} className="aspect-video w-full rounded-xl" />)}
               </div>
               </RangeSelectionProvider>
             ) : detecting || cacheLoading ? (
-              // Chargement du cache (réouverture d'un rush déjà découpé) OU détection en cours : on
-              // montre un loader, JAMAIS l'invite « Détecter » — sinon ça clignote « non découpé »
-              // pendant la remontée du cache alors que le rush l'est déjà.
-              <Card className="mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-                <Spinner className="size-6" /> {t("common:status.loading")}
-              </Card>
+              // Loading the cache (reopening a rush already cut) OR detection running: placeholder
+              // cards, NEVER the "Detect" prompt, which would flash "not cut" while the cache comes
+              // back for a rush that already is.
+              <div className="space-y-2">
+                {detecting && (
+                  <p className="text-xs tabular-nums text-muted-foreground">
+                    {`${t("shared.analyzing")}${progress ? ` ${fmtPercent(progress / 100)}` : ""}`}
+                  </p>
+                )}
+                <div className="grid gap-3" style={gridContainerStyle(actualCols, cell)}>
+                  {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-video w-full rounded-xl" />)}
+                </div>
+              </div>
             ) : (
               <Card className="mt-3 flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
                 <NetsuIcon name="film" className="size-8" />

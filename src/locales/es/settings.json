@@ -663,7 +663,8 @@
     },
     "ai": {
       "models": "Vídeo",
-      "indexing": "Indexación"
+      "indexing": "Indexación",
+      "agents": "Agentes externos"
     },
     "storage": {
       "media": "Caché de medios",
@@ -740,6 +741,43 @@
       "collection": "Colecciones",
       "notebook": "Cuadernos",
       "notebook-page": "Páginas de cuaderno"
+    }
+  },
+  "mcp": {
+    "title": "Agentes externos (MCP)",
+    "subtitle": "Permite que una app de IA externa (Claude Desktop, Claude Code, Codex, Cursor) controle NetsuRush mediante su servidor MCP.",
+    "enable": "Permitir agentes externos",
+    "enableHint": "Desactivado, el servidor MCP rechaza todas las llamadas, aunque haya un cliente instalado.",
+    "on": "Activado",
+    "off": "Desactivado",
+    "modeLabel": "Permisos",
+    "maxSubagents": "Subagentes en paralelo",
+    "maxSubagentsHint": "Cuántos agentes de IA pequeños funcionan a la vez para revisar tus rushes (hasta 64). Los demás esperan su turno. Usan la aplicación instalada (Claude Code o Codex) con su modelo más barato y consumen tu suscripción.",
+    "modeHint": "Solo lectura: el agente consulta pero no modifica nada. Preguntar: cualquier acción destructiva espera tu confirmación. Permitir todo: sin confirmación, el agente actúa solo.",
+    "mode": {
+      "read-only": "Solo lectura",
+      "ask": "Preguntar en acciones destructivas",
+      "auto": "Permitir todo"
+    },
+    "clients": "Aplicaciones",
+    "status": {
+      "installed": "Instalado",
+      "detected": "Detectado",
+      "notDetected": "No detectado"
+    },
+    "install": "Instalar",
+    "remove": "Quitar",
+    "copyJson": "Copiar configuración JSON",
+    "copied": "Configuración copiada.",
+    "restartNote": "Reinicia la aplicación cliente tras la instalación. NetsuRush debe permanecer abierto para que el agente funcione.",
+    "recent": "Actividad reciente",
+    "recentEmpty": "Aún no hay llamadas.",
+    "ok": "OK",
+    "failed": "Error",
+    "risk": {
+      "read": "lectura",
+      "write": "escritura",
+      "destructive": "destructivo"
     }
   }
 }

@@ -293,27 +293,8 @@ def _iter_frame_chunks(path, on_frames=None):
 def _prefetch(chunks, depth=8):
     """Décode en avance sur un thread. Le tube ffmpeg ne fait que 64 Kio : sans ce thread, le
     décodeur se bloque dès la première inférence et l'entrelacement ne sert plus à rien."""
-    import queue
-    done = object()
-    q = queue.Queue(maxsize=depth)
-
-    def pump():
-        try:
-            for chunk in chunks:
-                q.put(chunk)
-        except BaseException as exc:  # noqa: BLE001 - relayée telle quelle au consommateur
-            q.put(exc)
-        else:
-            q.put(done)
-
-    threading.Thread(target=pump, daemon=True).start()
-    while True:
-        item = q.get()
-        if item is done:
-            return
-        if isinstance(item, BaseException):
-            raise item
-        yield item
+    import nromni
+    return nromni._prefetch(chunks, depth)
 
 
 def _transnet_frames(path):
@@ -741,6 +722,8 @@ def serve():
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "detect"
     if cmd == "serve":
+        import nrprio
+        nrprio.lower_if_asked()
         serve()
         return
     path = sys.argv[2] if len(sys.argv) > 2 else ""

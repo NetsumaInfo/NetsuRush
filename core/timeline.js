@@ -11,14 +11,14 @@ const { pathToFileURL } = require("url");
 const { fsp, yieldLoop } = require("./config");
 
 const { parseHostFloat, parseHostInt } = require("./hostNumber"); // FPS / Frames text from Resolve, either decimal mark
-const { getResolve, findItemByPath } = require("./resolve");
+const { getResolve, findItemsByPaths } = require("./resolve");
 const { bridge } = require("./resolve-proxy");
 const { detectScenes, getCachedScenes } = require("./sidecars");
 const { buildFcpxml, buildEmptyFcpxml, fpsRational } = require("./fcpxml");
 const { t } = require("./i18n");
 const {
   timelineRecordFrame, timelineClipLayout, firstFreeVideoTrack,
-  appendContiguousTimelineClips, sourceOutFrame, frameRemap, timecodeToFrames,
+  appendContiguousTimelineClips, sourceOutFrame, correctSourceStart, sameFrameRate, frameRemap, timecodeToFrames,
 } = require("./timeline-insertion");
 const { createFitToFillMedia } = require("./timeline-fit");
 
@@ -305,7 +305,7 @@ async function buildTimeline(opts) {
     const mp = await proj.GetMediaPool();
     const root = await mp.GetRootFolder();
 
-    let item = await findItemByPath(root, input);
+    let item = (await findItemsByPaths(root, [input])).get(input)?.item || null;
     if (!item) {
       try {
         const ms = await resolve.GetMediaStorage();
@@ -495,20 +495,20 @@ async function buildTimelineFromBlocks(opts) {
     const mp = await proj.GetMediaPool();
     const root = await mp.GetRootFolder();
 
-    // Résolution (+ import au besoin) de chaque source, en cache par chemin.
-    const itemCache = new Map();
+    // Every source resolved in ONE Media Pool walk (with FPS/Frames); a source not in the pool is
+    // imported, then its props are read once. Cached per path.
+    const itemCache = await findItemsByPaths(root, blocks.map((b) => b.filePath));
     async function resolveItem(filePath) {
       if (itemCache.has(filePath)) return itemCache.get(filePath);
-      let item = await findItemByPath(root, filePath);
-      if (!item) {
-        try {
-          const ms = await resolve.GetMediaStorage();
-          const added = await ms.AddItemListToMediaPool([filePath]);
-          if (added && added.length) item = added[0];
-        } catch (_) {}
-      }
-      itemCache.set(filePath, item || null);
-      return item || null;
+      let hit = null;
+      try {
+        const ms = await resolve.GetMediaStorage();
+        const added = await ms.AddItemListToMediaPool([filePath]);
+        const item = added && added.length ? added[0] : null;
+        if (item) hit = { item, fps: await item.GetClipProperty("FPS"), frames: await item.GetClipProperty("Frames") };
+      } catch (_) {}
+      itemCache.set(filePath, hit);
+      return hit;
     }
 
     // clipInfos ordonnés + fps de référence (1er clip résolu) + détection de mélange de fps.
@@ -522,16 +522,17 @@ async function buildTimelineFromBlocks(opts) {
     const clipBlockIndex = []; // clipInfos[i] ← blocks[clipBlockIndex[i]] (sources manquantes sautées)
     for (let bi = 0; bi < blocks.length; bi++) {
       const b = blocks[bi];
-      const item = await resolveItem(b.filePath);
-      if (!item) { missing.push(b.filePath); continue; }
-      const fpsStr = await item.GetClipProperty("FPS");
+      const hit = await resolveItem(b.filePath);
+      if (!hit) { missing.push(b.filePath); continue; }
+      const item = hit.item;
+      const fpsStr = hit.fps;
       const fpsValid = fpsStr != null && !Number.isNaN(parseHostFloat(fpsStr));
       let clipFps = parseHostFloat(fpsStr);
       if (!clipFps || Number.isNaN(clipFps)) clipFps = Number(b.fps) || 24;
       if (timelineFps == null) { timelineFps = clipFps; timelineFpsStr = fpsValid ? String(fpsStr) : String(clipFps); }
       else if (Math.abs(clipFps - timelineFps) > 0.01) fpsMismatch = true;
 
-      const resFrames = parseHostInt(await item.GetClipProperty("Frames")) || 0;
+      const resFrames = parseHostInt(hit.frames) || 0;
       const maxFrame = resFrames > 0 ? resFrames - 1 : Number.MAX_SAFE_INTEGER;
       const startFrame = Math.min(maxFrame, Math.max(0, Math.round(b.inFrame || 0)));
       const endFrame =
@@ -651,6 +652,20 @@ async function buildTimelineFromBlocks(opts) {
 
 async function listTimelines() {
   try {
+    const c = await bridge.connect();
+    if (c && c.connected) {
+      const r = await bridge.listTimelines();
+      const curName = r.current || null;
+      const timelines = (r.names || []).map((name) => ({ name, current: name === curName }));
+      if (curName && !timelines.some((timeline) => timeline.name === curName)) timelines.unshift({ name: curName, current: true });
+      return { ok: true, current: curName, timelines };
+    }
+  } catch (_) { /* old helper or transient failure: proxy walk below */ }
+  return listTimelinesViaProxy();
+}
+
+async function listTimelinesViaProxy() {
+  try {
     const resolve = await getResolve();
   if (!resolve) return { ok: false, error: t("resolveUnavailable"), timelines: [] };
     const pm = await resolve.GetProjectManager();
@@ -684,6 +699,18 @@ async function listTimelines() {
 // Cross-référence avec GetTimelineByIndex (vérité) → ne garde que les vraies timelines + marque la
 // courante. Sert le navigateur Timeline Live à replier/trier par dossier comme le Media Pool.
 async function timelineTree() {
+  try {
+    const c = await bridge.connect();
+    if (c && c.connected) {
+      const r = await bridge.timelineTree();
+      const curName = r.current || null;
+      return { ok: true, current: curName, timelines: (r.timelines || []).map((x) => ({ name: x.name, bin: x.bin || "", current: x.name === curName })) };
+    }
+  } catch (_) { /* old helper or transient failure: proxy walk below */ }
+  return timelineTreeViaProxy();
+}
+
+async function timelineTreeViaProxy() {
   try {
     const resolve = await getResolve();
   if (!resolve) return { ok: false, error: t("resolveUnavailable"), timelines: [] };
@@ -787,6 +814,38 @@ async function timelineThumbs(ev, opts = {}) {
   }
   thumbsInFlightProject = reqProject;
   const scan = (async () => {
+    // Python aggregate: first source clip of a few timelines per round-trip, instead of the proxy
+    // walk below (~8 round-trips per timeline).
+    try {
+      const c = await bridge.connect();
+      if (c && c.connected) {
+        // Read in small chunks: a timeline with thousands of items costs Resolve hundreds of ms, and
+        // one call for the whole project held the sequential bridge for seconds. Between chunks,
+        // listTimelines/readTimelineCuts get their turn, and the cards fill as each chunk lands.
+        const CHUNK = 4;
+        const cache = new Map();
+        const thumbs = [];
+        let r = null;
+        for (let start = 1; ; start += CHUNK) {
+          r = await bridge.timelineFirstClips(start, CHUNK);
+          const chunk = (r && r.clips) || [];
+          for (const row of chunk) {
+            let fps = parseHostFloat(row.fps);
+            if (!fps || Number.isNaN(fps)) fps = 24;
+            const ssf = parseInt(row.sourceStart, 10);
+            const clip = { path: row.path, in: (Number.isNaN(ssf) ? 0 : Math.max(0, ssf)) / fps };
+            cache.set(row.name, clip);
+            thumbs.push({ name: row.name, ...clip });
+            send(row.name, clip);
+          }
+          if (!r || start + CHUNK > (r.total || 0)) break;
+          await yieldLoop();
+        }
+        thumbsCache = cache;
+        thumbsProject = (r && r.project) || null;
+        return { ok: true, thumbs };
+      }
+    } catch (_) { /* old helper or transient failure: proxy walk below */ }
     try {
       const resolve = await getResolve();
   if (!resolve) return { ok: false, error: t("resolveUnavailable"), thumbs: [] };
@@ -896,6 +955,8 @@ async function readTimelineCuts(opts = {}) {
         if (Number.isNaN(ssf) || Number.isNaN(sef)) {
           ssf = parseInt(row.lo, 10) || 0;
           sef = ssf + span; // exclusif
+        } else {
+          ({ ssf, sef } = correctSourceStart(ssf, sef, parseInt(row.lo, 10), { sameRate: sameFrameRate(fps, parseHostFloat(r.fps)), maxFrame }));
         }
         const inFrame = Math.max(0, Math.min(maxFrame, ssf));
         const outFrame = Math.max(inFrame, Math.min(maxFrame, sourceOutFrame(ssf, sef, span, maxFrame))); // inclusif
@@ -942,6 +1003,8 @@ async function readTimelineCutsViaProxy(opts = {}) {
   if (!tl) return { ok: false, error: t("noTimeline"), cuts: [] };
     }
     const tlName = await tl.GetName();
+    let tlFps = NaN;
+    try { tlFps = parseHostFloat(await tl.GetSetting("timelineFrameRate")); } catch (_) { /* API absente */ }
 
     const cuts = [];
     let n = 0;
@@ -984,6 +1047,8 @@ async function readTimelineCutsViaProxy(opts = {}) {
           if (Number.isNaN(ssf) || Number.isNaN(sef)) {
             ssf = parseInt(await it.GetLeftOffset(), 10) || 0;
             sef = ssf + span; // exclusif, comme l'API
+          } else {
+            ({ ssf, sef } = correctSourceStart(ssf, sef, parseInt(await it.GetLeftOffset(), 10), { sameRate: sameFrameRate(fps, tlFps), maxFrame }));
           }
           const inFrame = Math.max(0, Math.min(maxFrame, ssf));
           const outFrame = Math.max(inFrame, Math.min(maxFrame, sourceOutFrame(ssf, sef, span, maxFrame))); // inclusif

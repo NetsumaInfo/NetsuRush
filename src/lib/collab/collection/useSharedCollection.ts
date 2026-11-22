@@ -44,6 +44,18 @@ export function useSharedCollection(local: Collection | null) {
     let roster: Access | undefined;
     let starting = false;
     const failed = (cause: unknown) => { if (!disposed) setError(collabErrorText(cause)); };
+    // The server answers "Collection unavailable" once this account is no longer a member (removed
+    // by the owner, collection deleted, other account signed in). Retrying cannot fix that: stop
+    // listening, release the session and say so once instead of failing on every server update.
+    const revoked = (cause: unknown) => /Collection unavailable/.test(String((cause as { message?: unknown })?.message ?? cause));
+    const lostAccess = () => {
+      unquery?.(); unquery = undefined; unsubscribe?.(); unsubscribe = undefined;
+      clearTimeout(timer); timer = undefined;
+      const held = lease; lease = undefined; roster = undefined;
+      if (held) void closeProject(projectId!, held).catch(() => {});
+      if (!disposed) { setAccess(null); setShared(null); }
+      failed(collabFailure("authorization", "collection membership lost"));
+    };
     const refresh = async () => {
       if (disposed || !lease || !roster) return;
       if (running) { queued = true; return; }
@@ -115,7 +127,9 @@ export function useSharedCollection(local: Collection | null) {
       try {
       if (!(await refreshNativeCollaborationAuth())) throw collabFailure("sign_in", "sign in required");
       const backend = await collectionBackend();
-      const initial = await backend.query(api.collectionAccess.list, { projectId }) as Access;
+      let initial: Access;
+      try { initial = await backend.query(api.collectionAccess.list, { projectId }) as Access; }
+      catch (cause) { if (revoked(cause)) { lostAccess(); return; } throw cause; }
       if (disposed) return;
       roster = initial; setAccess(initial);
       // The role travels with the collection: "Range" and the collection list have to know a
@@ -134,7 +148,7 @@ export function useSharedCollection(local: Collection | null) {
           roster = value; setAccess(roster);
           void rememberCollectionRole(id!, value.role).catch(() => undefined);
           schedule();
-        } catch (cause) { failed(cause); }
+        } catch (cause) { if (revoked(cause)) lostAccess(); else failed(cause); }
       });
       schedule();
       } catch (cause) {

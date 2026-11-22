@@ -141,6 +141,8 @@ export interface ShotDetection {
   playScene: (s: Segment) => Promise<void>;
   /** Découpe le flux. `only` restreint aux rushs donnés — les autres gardent leurs plans. */
   detect: (only?: string[]) => Promise<void>;
+  /** Stops a running detection: kills the job in flight, the rushes left keep their old cut. */
+  cancelDetect: () => void;
   // Édits persistés POUR LE MODÈLE COURANT, rush par rush : fusions (union de plans) et retraits.
   // `clearEdits` oublie ceux de tout le flux (re-détecte propre) sans toucher à l'autre modèle.
   hasEdits: boolean;
@@ -201,6 +203,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
   const modelRef = useRef(model);
   modelRef.current = model;
   const detectingRef = useRef(false);
+  const cancelRef = useRef(false);
   const detectionOptions = useApp((state) => state.detectionOptions);
   const scopedOptions = useMemo(() => detectionOptionsFor(model, detectionOptions), [model, detectionOptions]);
   const optionsScope = useMemo(() => detectionOptionsKey(model, detectionOptions), [model, detectionOptions]);
@@ -301,6 +304,12 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
     setModelState(next);
   }, []);
 
+  function cancelDetect() {
+    if (!detectingRef.current) return;
+    cancelRef.current = true;
+    nr.detectCancel();
+  }
+
   async function detect(only?: string[]) {
     if (!paths.length || detectingRef.current) return;
     const wanted = only?.length ? new Set(only) : null;
@@ -308,6 +317,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
     if (!targets.length) return;
     useApp.getState().offerCloseForRam();
     detectingRef.current = true;
+    cancelRef.current = false;
     const runModel = model;
     setDetecting(true); setProgress(0); setErr(null);
     // Découpe partielle : les proxies des rushs qu'on ne touche pas restent valides, les jeter
@@ -332,9 +342,11 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
       const probed: FlowSource[] = [];
       const failed: string[] = [];
       for (const path of targets) {
+        if (cancelRef.current) break;
         current = path;
         try {
           const r = await nr.detectScenes(path, threshold, model, scopedOptions);
+          if (r.cancelled) break;
           if (r.error) { failed.push(r.error); continue; }
           const dur = r.duration || sourceOf(path).duration;
           const fps = r.fps || (r.frames && dur ? r.frames / dur : 0);
@@ -585,7 +597,7 @@ export function useShotDetection(clipPaths: string[]): ShotDetection {
     info, duration, segments, setSegments, detecting, cacheLoading, progress,
     active, setActive, activeUrl, setActiveUrl,
     err, setErr, preset, setPreset, model, setModel,
-    getProxy, peekProxy, bustProxy, warmProxies, playScene, detect,
+    getProxy, peekProxy, bustProxy, warmProxies, playScene, detect, cancelDetect,
     generateProxies, generateThumbs, proxyGen: preview.proxyGen, thumbsGen: preview.thumbsGen,
     hasEdits, recordMerge, recordRemoval, clearEdits, undoEdit, redoEdit, canUndo, canRedo,
   };

@@ -17,6 +17,13 @@ const { getDef } = require('./runtimes/defs');
 const { detectAgents } = require('./runtimes/detection');
 const { t } = require('../i18n');
 
+/// Tools whose writes can land on the open Resolve timeline (the ones a safety duplicate protects).
+const TIMELINE_TOOLS = new Set(['build_timeline', 'cut_timeline', 'import_media']);
+/** @param {string} name */
+function touchesTimeline(name) {
+  return name.startsWith('resolve_') || name.startsWith('bmd_') || TIMELINE_TOOLS.has(name);
+}
+
 /**
  * @param {{ registry:any, permissions:any, broadcast:(ch:string,p:any)=>void,
  *           dataDir?:string, resolveMcp?:any,
@@ -156,7 +163,9 @@ function createSession(deps) {
       const tool = registry.get(name);
       const risk = (tool && (tool.riskFor ? tool.riskFor(input) : tool.risk)) || 'read';
 
-      if (permissions.getDuplicateFirst() && risk !== 'read' && !duplicated) {
+      // Only a write that can reach the open timeline earns the safety copy: sorting the library or a
+      // collection has nothing to do with it and would leave a stray duplicate in the project.
+      if (permissions.getDuplicateFirst() && risk !== 'read' && !duplicated && touchesTimeline(name)) {
         duplicated = true; // une seule doublure par tour, même si la duplication échoue
         try {
           const r = await registry.execute('resolve_timeline', { action: 'duplicate' }, { runId });
@@ -166,7 +175,13 @@ function createSession(deps) {
 
       const perm = await permissions.check(runId, { name, input, risk });
       if (!perm.approved) return { ok: false, error: perm.reason || t('agentActionRefused') };
-      return registry.execute(name, input, { runId });
+      const result = await registry.execute(name, input, { runId });
+      // The renderer mirrors the library, collections and notebook in its stores: without this
+      // signal an in-app agent's moves happened on disk but never showed on screen.
+      if (risk !== 'read' && !(result && typeof result === 'object' && result.ok === false)) {
+        broadcast('agent:dataChanged', { tool: name, action: input && input.action });
+      }
+      return result;
     };
   }
 
@@ -292,6 +307,8 @@ function createSession(deps) {
   return {
     probe, configure, listAgents, listModels, send, cancel, cancelAll,
     currentCliRun, respondApproval: permissions.respond,
+    /// The gated tool runner the in-app engines use, for tests.
+    runToolFor: makeRunTool,
   };
 }
 

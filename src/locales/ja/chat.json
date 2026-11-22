@@ -174,5 +174,11 @@
   },
   "thinkingSlider": {
     "reset": "既定の思考量に戻す"
+  },
+  "externalApproval": {
+    "title": "外部エージェントが許可を求めています",
+    "input": "パラメーター",
+    "countdown_one": "{{count}}秒",
+    "countdown_other": "{{count}}秒"
   }
 }

@@ -585,6 +585,10 @@ export function CollectionDetail({ id }: { id: string }) {
           </RangeSelectionProvider>
         )}
       </div>
+      {/* Selected shot editor: inside the grid column, so the player beside it keeps its full height. */}
+      {inspected && inspected.id && (!sharedProjectId || shared.canEdit(inspected.id)) && (
+        <ShotInspector shot={inspected} suggestions={tagSuggestions} onPatch={(p) => patchShot(inspected.id!, p)} onClose={() => setSel(new Set())} />
+      )}
       </div>
 
         {/* Lecteur fermé : son trait reste, et reprend les mêmes gestes à l'envers — molette ou
@@ -632,10 +636,6 @@ export function CollectionDetail({ id }: { id: string }) {
           />
         </div>)}
       </div>
-
-      {inspected && inspected.id && (!sharedProjectId || shared.canEdit(inspected.id)) && (
-        <ShotInspector shot={inspected} suggestions={tagSuggestions} onPatch={(p) => patchShot(inspected.id!, p)} onClose={() => setSel(new Set())} />
-      )}
 
       {/* Bandeau d'état en PIED de vue, comme au Découpage : au-dessus de la grille il repoussait
           les vignettes vers le bas à chaque message. */}

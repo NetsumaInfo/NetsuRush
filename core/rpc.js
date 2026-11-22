@@ -14,6 +14,8 @@ const { watchModules } = require("./devReload");
 const { t, language, supportedLanguage } = require("./i18n");
 const ffmpeg = require("./ffmpeg");
 const thumbs = require("./thumbs");
+const contactSheet = require("./contactSheet"); // many frames in one image, for agents reading an action
+const motion = require("./motion"); // how much the picture changes: which frames to show, which cuts to check
 const proxy = require("./proxy");
 const resolveMod = require("./resolve"); // pont Python externe à resolve-proxy
 const { beginResolveOp, endResolveOp, bridge, getOpDepth } = require("./resolve-proxy"); // bracket d'op (reset sûr du registre) + pont brut (arrêt/reconnexion)
@@ -72,8 +74,13 @@ const JSONH = { "Content-Type": "application/json" };
 function createRpc() {
   const searchCatalog = createSearchCatalog();
   const clients = new Set(); // flux SSE ouverts
+  // Agent jobs read progress off the same broadcasts the UI gets (set once the agent exists).
+  let broadcastTap = null;
 
   const broadcast = (channel, payload) => {
+    if (broadcastTap) {
+      try { broadcastTap(channel, payload); } catch {}
+    }
     const line = `data: ${JSON.stringify({ channel, payload })}\n\n`;
     for (const res of clients) {
       try {
@@ -270,7 +277,16 @@ function createRpc() {
   const agent = createAgent({
     broadcast, ev, dataDir: DATA_DIR,
     modules: { resolveMod, timeline, sidecars, thumbs, proxy, ffmpeg, aeExporter, guarded, rOp },
+    // App-wide agent tools call the very channels below: one implementation, UI and agents alike.
+    invoke: async (channel, args) => {
+      const h = H[channel];
+      if (!h) throw new Error(`unknown channel: ${channel}`);
+      return h(args || [], ev);
+    },
+    channels: () => Object.keys(H),
+    channelSource: (channel) => (H[channel] ? String(H[channel]) : ""),
   });
+  broadcastTap = agent.observeBroadcast;
 
   // Archivage d'une collection : exporte TOUS ses plans (remux/encode via profil d'export) vers un
   // dossier de stockage, indépendamment de la source → on peut ensuite supprimer les rushs d'origine.
@@ -566,6 +582,7 @@ function createRpc() {
     "ffmpeg:detectScenes": ([p, threshold, model, options]) => sidecars.detectScenes(ev, p, threshold, model, options),
     "ffmpeg:cachedScenes": ([p, model, threshold, options]) => sidecars.getCachedScenes(p, model, threshold, options),
     "ffmpeg:detectConcurrency": () => sidecars.detectConcurrency(),
+    "ffmpeg:detectCancel": () => sidecars.detectCancel(),
     "cut:getEdits": ([p, model, optionsKey]) => cutEditsStore.getEdits(p, model, optionsKey),
     "cut:saveEdits": ([p, model, edits, optionsKey]) => cutEditsStore.saveEdits(p, model, edits, optionsKey),
     "cut:clearEdits": ([p, model, optionsKey]) => cutEditsStore.clearEdits(p, model, optionsKey),
@@ -587,16 +604,27 @@ function createRpc() {
       // Une carte encore hors champ demande "low" : la file de vignettes garde alors deux ouvriers
       // pour les cartes réellement visibles (cf. THUMB_LOW_MAX). Défaut "high" — un appelant qui ne
       // dit rien est un affichage immédiat.
-      const priority = o.priority === "low" ? "low" : "high";
+      const priority = o.priority === "low" || o.priority === "gen" ? o.priority : "high";
       return thumbs.thumbnail(o.path, o.time, priority, o.settings).catch((err) => ({ error: String(err) }));
     },
     "ffmpeg:thumbsBatch": ([request, legacyItems]) => {
       const o = request && typeof request === "object" && !Array.isArray(request) ? request : { path: request, items: legacyItems };
-      return thumbs.thumbsBatch(o.path, o.items, o.settings).catch((err) => ({ ok: false, error: String(err) }));
+      return thumbs.thumbsBatch(o.path, o.items, o.settings, o.priority).catch((err) => ({ ok: false, error: String(err) }));
     },
     "ffmpeg:thumbsResolve": ([request]) => {
       const o = Array.isArray(request) ? { items: request } : request || { items: [] };
       return thumbs.thumbsResolve(o.items, o.settings).catch(() => []);
+    },
+    "ffmpeg:shotSheet": ([o]) => contactSheet.shotSheet(o || {}).catch((err) => ({ ok: false, error: String(err.stderr || err) })),
+    "ffmpeg:frameGrid": ([o]) => contactSheet.frameGrid(o || {}).catch((err) => ({ ok: false, error: String(err.stderr || err) })),
+    "ffmpeg:shotFrames": ([o]) => motion.shotFrames(o || {}).catch((err) => ({ ok: false, error: String(err) })),
+    "ffmpeg:analyzeMotion": async ([p]) => {
+      const m = await motion.analyze(String(p));
+      return { ok: true, frames: m.frames, fps: m.fps, jumps: m.jumps.length, seconds: m.seconds };
+    },
+    "ffmpeg:checkCuts": async ([o]) => {
+      const m = await motion.analyze(String(o?.path));
+      return { ok: true, ...motion.checkCuts(o?.shots || [], m) };
     },
     "ffmpeg:export": ([opts]) =>
       ffmpeg
@@ -762,6 +790,11 @@ function createRpc() {
     // la fin du clip courant rendait le bouton « Arrêter » inopérant en pratique).
     "search:cancelIndex": () => sidecars.abortIndex(),
     "search:shots": ([p]) => sidecars.cpuReq("shots", { path: p }),
+    // Hand corrections of the search database (python/nrsearch/edits.py).
+    "search:forget": ([o]) => sidecars.cpuReq("forget", { file_paths: Array.isArray(o?.filePaths) ? o.filePaths : [], kinds: o?.kinds }),
+    "search:setScenes": ([o]) => sidecars.cpuReq("set-scenes", { path: o?.path, scenes: o?.scenes, fps: o?.fps, frames: o?.frames }),
+    "search:clearScenes": ([p]) => sidecars.cpuReq("clear-scenes", { path: p }),
+    "face:label": ([o]) => sidecars.cpuReq("face-label", { file_path: o?.filePath, scene_index: o?.sceneIndex, face_index: o?.faceIndex, domain: o?.domain, char_id: o?.charId ?? null, reset: !!o?.reset }),
 
     // --- Recherche par visage ---
     "face:index": guarded(([p, force, model, options]) => sidecars.searchIndex(ev, "face-index", { path: p, force: !!force, model: model || undefined, options: options || {} }, "face")),
@@ -884,6 +917,7 @@ function createRpc() {
     "collections:addShots": ([id, shots]) => collectionStore.addShots(id, shots),
     "collections:removeShot": ([id, shotId]) => collectionStore.removeShot(id, shotId),
     "collections:updateShot": ([id, shotId, patch]) => collectionStore.updateShot(id, shotId, patch),
+    "collections:reorderShots": ([id, shotIds]) => collectionStore.reorderShots(id, shotIds),
     // bytes arrive en base64 (transport JSON) → Buffer pour le store.
     "collections:saveIcon": ([bytes, ext]) => {
       const buf = bytes && bytes.__b64 ? Buffer.from(bytes.__b64, "base64") : bytes;
@@ -943,7 +977,17 @@ function createRpc() {
     "chat:history:delete": ([id, surface]) => agent.deleteConversation(id, surface),
     // Pont MCP (serveur stdio thin lancé par le CLI agent) : liste + exécution d'outils sous permission.
     "agent:toolList": ([surface]) => agent.toolList(surface ? String(surface) : undefined),
-    "agent:toolCall": ([name, input]) => agent.toolCall(name, input),
+    "agent:toolCall": ([name, input, surface]) => agent.toolCall(name, input, surface ? String(surface) : undefined),
+    "agent:subagentsCancel": () => agent.subagentsCancel(),
+    "agent:resources": () => agent.resourceList(),
+    "agent:resourceTemplates": () => agent.resourceTemplates(),
+    "agent:resourceRead": ([uri]) => agent.resourceRead(String(uri || "")),
+    // External MCP clients (Settings › External agents).
+    "mcp:external:get": () => agent.externalState(),
+    "mcp:external:set": ([patch]) => agent.externalSet(patch || {}),
+    "mcp:external:install": ([id]) => agent.externalInstall(String(id || "")),
+    "mcp:external:uninstall": ([id]) => agent.externalUninstall(String(id || "")),
+    "mcp:external:snippet": () => agent.externalSnippet(),
   };
 
   // Préchauffe SigLIP dès le démarrage du core, en fond : le chargement du modèle (plusieurs

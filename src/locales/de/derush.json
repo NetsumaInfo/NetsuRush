@@ -274,6 +274,7 @@
     "failures_one": " · {{count}} Fehler",
     "failures_other": " · {{count}} Fehler",
     "pending": "wartet",
+    "cancelled": "Gestoppt",
     "shots_one": "{{count}} Shot",
     "shots_other": "{{count}} Shots",
     "doneHint": "Schnitt fertig – öffne einen Clip, um seine Shots zu sehen (schon im Cache).",

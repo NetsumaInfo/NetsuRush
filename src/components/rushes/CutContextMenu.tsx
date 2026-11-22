@@ -75,8 +75,8 @@ export function CutContextMenu(p: CutMenuProps) {
         <ContextMenuSeparator />
 
         {/* Détection */}
-        <ContextMenuItem onClick={p.onDetect} disabled={p.detecting}>
-          <NetsuIcon name="cut-detect" busy={p.detecting} /> {p.detecting ? t("shared.analyzing") : t("shared.detectShots")}
+        <ContextMenuItem onClick={p.onDetect}>
+          <NetsuIcon name="cut-detect" busy={p.detecting} /> {p.detecting ? t("shared.stop") : t("shared.detectShots")}
         </ContextMenuItem>
         <ContextMenuSub>
           <ContextMenuSubTrigger disabled={p.detecting}>{t("cutMenu.model",{ label: MODELS.find((m) => m.id === p.model)?.label })}</ContextMenuSubTrigger>

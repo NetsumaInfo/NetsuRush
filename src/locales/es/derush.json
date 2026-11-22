@@ -274,6 +274,7 @@
     "failures_one": " · {{count}} error",
     "failures_other": " · {{count}} errores",
     "pending": "en espera",
+    "cancelled": "Detenido",
     "shots_one": "{{count}} plano",
     "shots_other": "{{count}} planos",
     "doneHint": "Corte terminado — abre un clip para ver sus planos (ya en caché).",

@@ -44,19 +44,27 @@ function createPermissions({ broadcast }) {
   function getDuplicateFirst() { return duplicateFirst; }
 
   // Décision SYNCHRONE selon le mode et le risque, ou 'prompt' si une confirmation est nécessaire.
-  /** @param {'read'|'write'|'destructive'} risk @returns {'allow'|'deny'|'prompt'} */
-  function decide(risk) {
-    if (mode === 'auto') return 'allow';
-    if (mode === 'read-only') return risk === 'read' ? 'allow' : 'deny';
+  /** @param {'read'|'write'|'destructive'} risk @param {PermMode} [override] @returns {'allow'|'deny'|'prompt'} */
+  function decide(risk, override) {
+    const m = override && MODES.includes(override) ? override : mode;
+    if (m === 'auto') return 'allow';
+    if (m === 'read-only') return risk === 'read' ? 'allow' : 'deny';
     // 'ask' : seul le DESTRUCTIF (touche fichiers/rendu/suppression média) demande confirmation ;
     // lecture + écriture timeline (montage, audio, markers, build…) passent directement.
     return risk === 'destructive' ? 'prompt' : 'allow';
   }
 
   // Vérifie une demande d'appel d'outil. Résout {approved, reason}.
-  /** @param {string} runId @param {{name:string,input:any,risk:'read'|'write'|'destructive'}} call */
-  function check(runId, call) {
-    const verdict = decide(call.risk);
+  /// `opts.mode` overrides the in-app mode: an external MCP client has its own. `opts.timeoutMs`
+  /// denies a prompt nobody answers — an external agent calls while the user may be away, and a
+  /// pending promise would hold its connection open forever.
+  /**
+   * @param {string} runId
+   * @param {{name:string,input:any,risk:'read'|'write'|'destructive'}} call
+   * @param {{ mode?:PermMode, timeoutMs?:number }} [opts]
+   */
+  function check(runId, call, opts = {}) {
+    const verdict = decide(call.risk, opts.mode);
     if (verdict === 'allow') return Promise.resolve({ approved: true });
     if (verdict === 'deny') {
       // Only read-only mode denies outright: 'auto' allows and 'ask' prompts.
@@ -65,8 +73,20 @@ function createPermissions({ broadcast }) {
     // prompt → attend la réponse du renderer
     const callId = seq++;
     return new Promise((resolve) => {
-      pending.set(callId, (approved) =>
-        resolve(approved ? { approved: true } : { approved: false, reason: t('agentUserRefused') }));
+      /** @type {ReturnType<typeof setTimeout> | undefined} */
+      let timer;
+      pending.set(callId, (approved) => {
+        if (timer) clearTimeout(timer);
+        resolve(approved ? { approved: true } : { approved: false, reason: t('agentUserRefused') });
+      });
+      if (opts.timeoutMs) {
+        timer = setTimeout(() => {
+          if (!pending.has(callId)) return;
+          pending.delete(callId);
+          broadcast('chat:approval:expired', { runId, callId });
+          resolve({ approved: false, reason: t('agentApprovalTimeout') });
+        }, opts.timeoutMs);
+      }
       broadcast('chat:approval', { runId, callId, name: call.name, input: call.input, risk: call.risk });
     });
   }
@@ -86,7 +106,7 @@ function createPermissions({ broadcast }) {
   }
 
   return {
-    setMode, getMode, setDuplicateFirst, getDuplicateFirst,
+    MODES, setMode, getMode, setDuplicateFirst, getDuplicateFirst,
     decide, check, respond, cancelAll,
   };
 }

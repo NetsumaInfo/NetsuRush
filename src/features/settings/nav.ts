@@ -62,6 +62,7 @@ export const SETTINGS_PAGES: SettingsPageDef[] = [
     tabs: [
       { id: "models", icon: settingsIcon("models") },
       { id: "indexing", icon: settingsIcon("indexing") },
+      { id: "agents", icon: settingsIcon("ai") },
     ],
   },
   // Export et Adobe restent DEUX entrées de la nav : le pont Adobe est une destination qu'on cherche

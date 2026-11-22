@@ -238,11 +238,12 @@ def read_timeline(name=None):
                     row["dur"] = it.GetDuration()
                 except Exception:
                     pass
-                if row["ssf"] is None or row["sef"] is None:
-                    try:
-                        row["lo"] = it.GetLeftOffset()
-                    except Exception:
-                        pass
+                # Always read: it settles a one-frame error of GetSourceStartFrame
+                # (core/timeline-insertion.js correctSourceStart).
+                try:
+                    row["lo"] = it.GetLeftOffset()
+                except Exception:
+                    pass
                 try:
                     row["start"] = it.GetStart()
                 except Exception:
@@ -250,7 +251,11 @@ def read_timeline(name=None):
                 items.append(row)
             except Exception:
                 continue  # item illisible : on saute
-    return {"found": True, "timeline": tl_name, "items": items}
+    try:
+        tl_fps = tl.GetSetting("timelineFrameRate")
+    except Exception:
+        tl_fps = None
+    return {"found": True, "timeline": tl_name, "items": items, "fps": tl_fps}
 
 
 def timeline_fingerprint(tl):
@@ -339,7 +344,145 @@ def resolve_sig():
     }
 
 
+def _current_project():
+    if RESOLVE is None:
+        raise HelperError("notConnected", "Resolve is not connected")
+    pm = RESOLVE.GetProjectManager()
+    proj = pm.GetCurrentProject() if pm else None
+    if not proj:
+        raise HelperError("noProject", "no project is open")
+    return proj
+
+
+def _timeline_names(proj):
+    names = []
+    for i in range(1, int(proj.GetTimelineCount() or 0) + 1):
+        try:
+            tl = proj.GetTimelineByIndex(i)
+            name = tl.GetName() if tl else None
+        except Exception:
+            name = None
+        if name:
+            names.append(name)
+    cur = proj.GetCurrentTimeline()
+    return names, (cur.GetName() if cur else None)
+
+
+# Aggregate: timeline names + current in ONE call (the proxy walk cost two round-trips per timeline).
+def list_timelines():
+    names, current = _timeline_names(_current_project())
+    return {"current": current, "names": names}
+
+
+# Aggregate: every timeline with its Media Pool bin ("A/B"), one call instead of a proxy walk of
+# every pool item. Timelines found in no bin come back with bin "".
+def timeline_tree():
+    proj = _current_project()
+    names, current = _timeline_names(proj)
+    known = set(names)
+    seen = set()
+    out = []
+
+    def walk(folder, prefix):
+        for it in (folder.GetClipList() or []):
+            try:
+                name = it.GetName()
+            except Exception:
+                continue
+            if name in known and name not in seen:
+                seen.add(name)
+                out.append({"name": name, "bin": prefix})
+        for sub in (folder.GetSubFolderList() or []):
+            try:
+                sub_name = sub.GetName() or ""
+            except Exception:
+                sub_name = ""
+            walk(sub, (prefix + "/" + sub_name) if prefix else sub_name)
+
+    walk(proj.GetMediaPool().GetRootFolder(), "")
+    for name in names:
+        if name not in seen:
+            out.append({"name": name, "bin": ""})
+    return {"current": current, "timelines": out}
+
+
+# Aggregate: Media Pool items for a set of file paths, ONE walk for all of them (the proxy walk read
+# "File Path" clip by clip, once per source). Stops as soon as every path is found. Returns
+# {path: {item, fps, frames}}; a missing path is simply absent.
+def find_items(paths):
+    proj = _current_project()
+    wanted = set(paths or [])
+    found = {}
+
+    def walk(folder):
+        for it in (folder.GetClipList() or []):
+            try:
+                p = it.GetClipProperty("File Path")
+            except Exception:
+                continue
+            if p in wanted and p not in found:
+                try:
+                    fps = it.GetClipProperty("FPS")
+                    frames = it.GetClipProperty("Frames")
+                except Exception:
+                    fps, frames = None, None
+                found[p] = {"item": wrap(it), "fps": fps, "frames": frames}
+                if len(found) == len(wanted):
+                    return True
+        for sub in (folder.GetSubFolderList() or []):
+            if walk(sub):
+                return True
+        return False
+
+    if wanted:
+        walk(proj.GetMediaPool().GetRootFolder())
+    return found
+
+
+# Aggregate: first SOURCE clip of every timeline (video item with a Media Pool file; titles,
+# generators and Fusion clips skipped), one call instead of ~8 proxy round-trips per timeline.
+# Raw props only; the frame -> seconds conversion stays in timeline.js.
+def timeline_first_clips(start=1, count=None):
+    proj = _current_project()
+    out = []
+    total = int(proj.GetTimelineCount() or 0)
+    start = max(1, int(start or 1))
+    end = total if count is None else min(total, start + int(count) - 1)
+    for i in range(start, end + 1):
+        try:
+            tl = proj.GetTimelineByIndex(i)
+            name = tl.GetName() if tl else None
+        except Exception:
+            continue
+        if not name:
+            continue
+        hit = None
+        try:
+            for t in range(1, int(tl.GetTrackCount("video") or 0) + 1):
+                for it in (tl.GetItemListInTrack("video", t) or []):
+                    try:
+                        mpi = it.GetMediaPoolItem()
+                        fp = mpi.GetClipProperty("File Path") if mpi else None
+                        if not fp:
+                            continue
+                        hit = {"name": name, "path": fp, "fps": mpi.GetClipProperty("FPS"), "sourceStart": it.GetSourceStartFrame()}
+                        break
+                    except Exception:
+                        continue
+                if hit:
+                    break
+        except Exception:
+            hit = None
+        if hit:
+            out.append(hit)
+    return {"project": proj.GetName(), "clips": out, "total": total}
+
+
 HANDLERS = {
+    "timelineFirstClips": lambda p: timeline_first_clips(p.get("start"), p.get("count")),
+    "listTimelines": lambda p: list_timelines(),
+    "timelineTree": lambda p: timeline_tree(),
+    "findItems": lambda p: find_items(p.get("paths")),
     "connect": lambda p: connect(),
     "status": lambda p: {"connected": RESOLVE is not None},
     "reset": lambda p: (REGISTRY.clear(), {"ok": True})[1],

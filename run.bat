@@ -385,7 +385,8 @@ exit /b 1
 :find_listener
 set "LISTENER_PID="
 for /f "tokens=5" %%P in ('netstat -ano -p tcp 2^>nul ^| findstr /r /c:":%~1 .*LISTENING"') do (
-  if not defined LISTENER_PID set "LISTENER_PID=%%P"
+  rem PID 0 is no process: Windows holds the port for a moment after its owner exited.
+  if not "%%P"=="0" if not defined LISTENER_PID set "LISTENER_PID=%%P"
 )
 exit /b 0
 

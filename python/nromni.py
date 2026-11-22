@@ -68,24 +68,45 @@ def _prefetch(chunks, depth=8):
     import queue
     done = object()
     q = queue.Queue(maxsize=depth)
+    stop = threading.Event()
+
+    def put(item):
+        # Never block forever: once the consumer is gone nobody drains the queue.
+        while not stop.is_set():
+            try:
+                q.put(item, timeout=0.5)
+                return True
+            except queue.Full:
+                pass
+        return False
 
     def pump():
         try:
             for c in chunks:
-                q.put(c)
+                if not put(c):
+                    break
         except BaseException as exc:  # noqa: BLE001 - handed to the consumer as is
-            q.put(exc)
+            put(exc)
         else:
-            q.put(done)
+            put(done)
+        finally:
+            # Runs iter_frames' finally on this thread: ffmpeg is killed even when inference failed,
+            # instead of living on in the serve daemon and eating the CPU of every later job.
+            close = getattr(chunks, "close", None)
+            if close:
+                close()
 
     threading.Thread(target=pump, daemon=True).start()
-    while True:
-        item = q.get()
-        if item is done:
-            return
-        if isinstance(item, BaseException):
-            raise item
-        yield item
+    try:
+        while True:
+            item = q.get()
+            if item is done:
+                return
+            if isinstance(item, BaseException):
+                raise item
+            yield item
+    finally:
+        stop.set()
 
 
 def windows(chunks, size, overlap):
@@ -145,17 +166,21 @@ def detect(model, path, overlap, nframes_hint=0, on_progress=None):
     size = int(args.max_process_window_length)
     overlap = max(0, min(size - 1, int(overlap)))
     cuts, total = [], 0
-    for win, w_start, v_start, v_end, v_len in windows(_prefetch(iter_frames(path)), size, overlap):
-        with torch.inference_mode():
-            out = net(_to_tensor(win, engine._DEVICE, torch))
-        intra = out["intra_clip_logits"].softmax(-1)[0, :, :-1].argmax(dim=-1)
-        inter = out["inter_clip_logits"].softmax(-1)[0, :, :-1].argmax(dim=-1)
-        rng = out["pred_shot_logits"].softmax(-1)[0, :, :-1].argmax(dim=-1)
-        segments = engine.decode_window_segments(intra, inter, rng, v_len)
-        cuts.extend(engine.collect_cuts_from_window(segments, w_start, v_start, v_end))
-        total = w_start + v_len
-        if on_progress and nframes_hint:
-            on_progress(min(1.0, total / nframes_hint))
+    frames = _prefetch(iter_frames(path))
+    try:
+        for win, w_start, v_start, v_end, v_len in windows(frames, size, overlap):
+            with torch.inference_mode():
+                out = net(_to_tensor(win, engine._DEVICE, torch))
+            intra = out["intra_clip_logits"].softmax(-1)[0, :, :-1].argmax(dim=-1)
+            inter = out["inter_clip_logits"].softmax(-1)[0, :, :-1].argmax(dim=-1)
+            rng = out["pred_shot_logits"].softmax(-1)[0, :, :-1].argmax(dim=-1)
+            segments = engine.decode_window_segments(intra, inter, rng, v_len)
+            cuts.extend(engine.collect_cuts_from_window(segments, w_start, v_start, v_end))
+            total = w_start + v_len
+            if on_progress and nframes_hint:
+                on_progress(min(1.0, total / nframes_hint))
+    finally:
+        frames.close()
     if not total:
         return [], [], [], 0
     ranges, intra, inter = engine.assemble_ranges(cuts, total)

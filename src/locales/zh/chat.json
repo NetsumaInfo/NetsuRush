@@ -174,5 +174,11 @@
   },
   "thinkingSlider": {
     "reset": "恢复默认思考强度"
+  },
+  "externalApproval": {
+    "title": "外部代理请求授权",
+    "input": "参数",
+    "countdown_one": "{{count}} 秒",
+    "countdown_other": "{{count}} 秒"
   }
 }

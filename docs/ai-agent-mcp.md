@@ -153,6 +153,100 @@ La liste d'outils est **lue sur le serveur**, jamais tapée ici : les schémas s
 
 ---
 
+## 4·C. External MCP clients — the whole app for outside agents
+
+NetsuRush is also an MCP **server for AI apps the user runs outside it**: Claude Desktop, Claude Code, Codex, Cursor, or any stdio MCP client. They get the same registry as the in-app copilot — the derush shortcuts, the `resolve_*` and `bmd_*` catalogues, and one compound tool per app domain — under their own switch and permission mode.
+
+```
+Claude Desktop / Codex / Cursor …
+   │  spawns (its own config file, written by Settings › External agents)
+   ▼
+node core/agent/mcp/stdio.js   NR_SURFACE=external
+   │  reads NR_HOME/core-port.json on every call (port + token change at each launch)
+   ▼
+core  /rpc agent:toolList · agent:toolCall · agent:resources · agent:resourceRead
+   │  surface 'external' → own on/off + permission mode, prompts expire after 120 s
+   ▼
+registry ── netsu_* (app domains) ──► the rpc channels the UI uses (H table, via `invoke`)
+         ├─ resolve_* / build_timeline … (derush, frame-accurate)
+         └─ bmd_* (Blackmagic's server, folded in)
+```
+
+### App-domain tools (`core/agent/tools/app/`)
+
+One compound tool per domain, built from a declarative table (`domain.js`): each action names an **existing rpc channel**, the positional args it takes, a risk, and a one-line usage the model reads. No business logic is duplicated — an agent reaches exactly the code the UI runs. Domains: `netsu_library`, `netsu_collections`, `netsu_search` (SigLIP + faces), `netsu_characters`, `netsu_media`, `netsu_export`, `netsu_process`, `netsu_models`, `netsu_host` (projects, outbox, host power, Adobe), `netsu_notebook`, `netsu_system`, `netsu_jobs`, `netsu_rpc`, `netsu_agents`.
+
+- **Risk per action** (`riskFor`). An action the table does not know is destructive: the gate never waves through a call it cannot classify.
+- **Long actions** (indexing, exports, upscales, archives) run through `core/agent/jobs.js`: they answer inline when they finish within the wait window (20 s, `waitSeconds` up to 50) and otherwise return `{background:true, jobId}`; the agent follows it with `netsu_jobs` (`status`, `wait`, `cancel`, `list`). Progress is the last `*progress*` broadcast the core already sends the UI.
+- **Media in results**: a tool adds `__images` (local image paths) and `__files` (media paths) to its JSON; `mcp/format.js` turns them into MCP image blocks and `resource_link`s and strips them from the text. The in-app engines, which speak no MCP, simply see JSON. So `netsu_media thumbnail` / `thumbnails` and search hits let the model *look* at shots.
+- **Correcting data**: an agent can fix what the pipeline got wrong, not only read it. `netsu_search forget` drops a file from the shot index, the face index and/or the cached detection; `set_scenes` imposes hand-corrected shot boundaries (stored as a scene cache row of model `manual`, which `media._cached_cut` prefers over any detection — the next `index` sees the boundaries moved and re-embeds that file only); `face_label` assigns a face to a character or to nobody, kept in `face_label_overrides_v1` and re-applied after every auto-labelling run. On shots: `netsu_collections update_shot(s)` (tags, label, rating, note, bounds, name, path) and `reorder` (manual order, written as `addedAt` stamps so the default "recently added" sort shows it).
+- **Sorting into folders** (`app/folders.js`, `tools/mediaPool.js`): every folder an agent targets is a **path** from the root (`"Anime/OP"`, `""` = root) or an id that must exist. Moves and imports create the missing levels; a `folderId` that is not an id is accepted only when it is the exact path of one folder, otherwise refused, since an unknown id stored as is hid the item from every view of the tree. `netsu_library` and `netsu_collections` both have `folders` (with paths), `create_folder`, `move(ids, folder)`, `rename_folder`, `move_folder` (cycles refused) and `delete_folder`; `netsu_collections move_shots` moves or copies shots between collections with their metadata. `resolve_media_pool` does the same for Resolve bins: `list_folders`, `create_folder` (looks each level up first, as `AddSubFolder` accepts duplicate names), `move_clips(paths|ids, folder)`, `move_folder`, `import(paths, folder)` (restores the current bin after), `rename_clip`, `set_clip_color`, `delete_folders`. The scripting API cannot rename a bin: renaming is create, move the content, delete. Moves are writes, deletions are destructive, so in **Ask** mode an agent sorts freely and every deletion waits for the user.
+- **`netsu_rpc`**: escape hatch to any core channel (`list`, `describe` = handler source showing its positional args, `call`). Risk is read off the method name: only known read verbs are reads, anything else is destructive. Channels that would widen an agent's own rights are refused: `agent:*`, `mcp:external:*`, `chat:approval*`, `chat:configure`.
+- **Data changes**: every non-read call that succeeds broadcasts `agent:dataChanged {tool, action}`, whichever engine made it (in-app API engine in `session.js`, in-app CLI, external client, sub-agent); the renderer refetches the matching store (library, collections, notebook…) so what an agent did shows up without a reload.
+
+### Seeing an action, not a still (`core/contactSheet.js`)
+
+One frame cannot tell what a shot does, so what an agent gets by default is a **sheet**: frames of the shot in one image, read left to right then top to bottom.
+
+- `netsu_search run` shows its best hits as **rows**: one row of 4 frames per shot, up to 9 shots per image, about 120 tokens per shot against 350 for a shot's own sheet. `view` switches to `sheet` or `frame`, `imageHits` sets how many hits are shown, `offset` goes further down the ranking.
+- `netsu_media sheet` makes a larger one (4x3 by default) for any range; `netsu_media overview` scans a rush page by page, one or up to four frames per shot, with `shots` telling which cell is which. Shots come from the index, else the cached detection, else regular slices (flagged as such).
+- **Cost**: a 4x3 sheet of 240 px cells weighs what one 854 px thumbnail does (about 530 tokens), and takes 0.15 s on 720p H.264, 0.76 s on a 10-bit H.265 BluRay. A range up to 30 s is decoded in one pass, since seeking per frame would redo the same GOP; a longer one goes through the shared thumbnail cache, as does `overview`.
+- **Measured on an AMV of 144 shots, with eco sub-agents, checked by eye against the shots themselves.** One still or one sheet per hit, 6 hits: 3 and 5 shots of "a hand reaching out" where about 20 exist; a full `overview` scan found them for three times the cost (0.028 $ against 0.009 $). Sheets beat stills on movement: only they caught legs running. Seeing more shots matters more than seeing each one larger, hence rows: 6 to 8 shots per search, about 0.004 $ and 24 s. A scan at 4 frames per shot found 13 for about 0.02 $ and 55 s, and still misses subtle movements such as turning around. Search ranks on still images, so it can miss a movement however it is shown: `overview` is the exhaustive route.
+- **Grids carry numbers.** A shot's number is drawn on its first frame: `label` for a search hit (its first frame, with a letter per file when hits span several), `sceneIndex` in an overview. Told only "row 7 is shot 27", Haiku described one row and attributed it to the shot above or below (a girl on the phone reported as "hands reaching"). A hit's rank does not work either: an agent running two searches read a rank on one image and took that entry of the other list. The number must belong to the shot. With no font found on the machine, the grid goes unlabelled and says so (`labelled: false`). Measured after the fix, checked by eye: 13 of 13 shots right on a scan, 10 of 10 on two searches.
+- Sheets live in the thumbnail folder (`sheet_<hash>.jpg`), recorded in the cache index, so Settings › Storage purges them with the thumbnails.
+
+### Smart frames and bad cuts (`core/motion.js`)
+
+How many frames a shot gets, and which, depends on the shot, not on a mode. A background pass decodes the file at 64x36, below the interface's priority, and keeps per frame how much the picture changed and how alike it stayed (about three bytes per frame on disk; 80 to 215 s for a 24 min BluRay episode, one file at a time). It starts by itself the first time a file is shown; until it is done, frames are placed by time, and the result says so.
+
+- **Count**: from the shot's length and how much happens per second. A nearly fixed shot (a held shot, a slow pan) gets 3 or 4 frames however long it lasts, enough to tell what kind of shot it is and no more tokens than that; a busy one up to 6; 8 only for a very long busy shot. `framesPerShot` (2, 3, 4) forces a number.
+- **Placement**: equal shares of what happens rather than of time, so a 15 s "shot" hiding three real ones shows all three. From 4 frames, the first and last sit at the very ends of the shot, where a detection hides a scene it glued on. One flash cannot capture the frames: each frame's weight is capped.
+- **Why not detect the bad cuts and fix them?** Measured by eye on that episode, a jump inside a shot is a real missed cut about 1 time in 5, the rest being flashes and fast animation, however it is filtered. So `netsu_media check_cuts` reports them as hints to look at (then `netsu_search split_shot`). False cuts are reliable: comparing the structure of both sides, ignoring brightness, separated them cleanly (a fade changes every pixel yet stays the same picture; real cuts scored 0.69 at most, false ones 0.91 and more). Fix with `merge_shots`.
+- Shots need not fit one row: a busy one carries on to the next, under its single number.
+
+**What the benchmark says** (72 eco sub-agents on a 24 min BluRay episode and a 130 min film, 6 actions, 2 repetitions, scored by eye). It is the reason for the defaults, and it does not flatter them:
+
+| Configuration | Shots found | Right | Cost per agent |
+|---|---|---|---|
+| 2 frames, medium effort | 53% | 93% | 0.0062 $ |
+| 3 frames, medium | 50% | 90% | 0.0047 $ |
+| 4 frames, medium | 56% | 90% | 0.0049 $ |
+| smart, medium | 50% | 92% | 0.0049 $ |
+| 3 frames, high | 54% | 93% | 0.0064 $ |
+| smart, high | 47% | 90% | 0.0074 $ |
+
+- **The frame count does not decide the result on these tasks**: two runs of one configuration differ more (43% and 57%) than the configurations do. Smart stays the default for what the table cannot show: nearly fixed shots cost 3 or 4 frames however long, and a badly cut shot shows its hidden scenes. Fixed counts remain available.
+- **High effort is not worth it**: no more shots, 36 to 51% more cost, about 70% slower. Medium is the default.
+- **More agents is the lever**: merging the shots of 1, 2, 4 and 8 medium agents found 51%, about 60%, 72% and 81%, at 96%, about 89%, 85% and 79% right. The reference set itself comes from merging those agents' answers, so the absolute figures are optimistic; the ordering is what to trust.
+
+### Sub-agents (`core/agent/subagents.js`, tool `netsu_agents`)
+
+Any agent (an external client or the in-app copilot) can fan out small agent processes on footage: `dispatch` takes explicit `tasks`, or one `prompt` spread over `files`, and returns each sub-agent's findings (one JSON line per shot). How many run at once is the `maxSubagents` setting (Settings › External agents, 1-64, default 8); tasks beyond the limit queue, across all dispatches. A dispatch is a long action: it follows the job rules above.
+
+- **A tier, never a model.** People have different subscriptions, so the caller asks for `tier: "eco"` (default) or `"normal"` and the core resolves it on the first installed engine: Claude Code (`haiku` / `sonnet`), else Codex (the `luna` / `terra` family, newest listed in Codex's `models_cache.json`). There is deliberately no setting for it: the tool description and the server instructions tell the agent to stay on eco unless eco proved insufficient. **The Codex runtime has never run against a real subscription**; its arguments come from `codex exec --help`.
+
+- **Cheap by construction.** Each one is `claude -p` with `--tools ""`, `--strict-mcp-config`, `--setting-sources ""`, `--disable-slash-commands`, `--no-session-persistence` and a short `--system-prompt-file`: measured 722 tokens at start, about 3 s, against the user's whole environment (MCP servers, hooks, CLAUDE.md) otherwise. `--bare` is not usable: it refuses subscription logins. Only the footage tools are listed (`TOOLS`), not the 17 000 tokens of the full registry.
+- **Rights ride in the MCP surface** of the spawned server. `subagent` reads; `subagent-write` (`access: "write"`) also writes, e.g. fills collections. Neither reaches a destructive action or anything outside `TOOLS`, whatever the permission mode, and neither can dispatch further agents. They have nobody to ask, so the decision is `subagentAllows`, not the prompting gate; dispatching itself is a `write` action, so read-only mode refuses it.
+- **Native route.** Installing the Claude Code client also writes `~/.claude/agents/netsu-scout.md` (`model: haiku`, footage tools only), so a Claude Code session can fan out with its own Task tool. Those run under the external permission mode. A file of that name without our marker is the user's and is left alone.
+
+### Resources (`core/agent/resources.js`)
+
+Read-only JSON snapshots a client can attach without a tool call: `netsurush://status`, `library`, `library/folders`, `collections`, `collections/{id}`, `notebooks`, `notebooks/{id}`, `pages/{id}`, `timelines`, `search/index`, `models`, `jobs`, `jobs/{id}`. Lists over 500 items are truncated and say so.
+
+### Protocol
+
+`stdio.js` answers protocol versions 2024-11-05 up to 2026-07-28 (echoes the client's, else the newest), advertises `tools` and `resources`, sends server `instructions`, and annotates each tool from its risk (`readOnlyHint`, `destructiveHint`; a compound tool is never advertised read-only). `structuredContent` accompanies plain results and is dropped when images or links ride along, so a client preferring it does not lose them. A call that cannot reach the app is a **tool error** ("NetsuRush is not running…"), not a protocol failure.
+
+### Access and safety
+
+- Settings › External agents: on/off, permission mode (`read-only` / `ask` / `auto`, default `ask` = only destructive actions prompt), one-click install per client, a JSON snippet for any other client, and the last 20 external calls. Stored by the core in `DATA_DIR/mcp/external.json`, so it holds with no window open.
+- External approvals are shown **globally** in the app (not only in the chat panel) and denied after 120 s unanswered — the agent gets a reason, not a hung connection.
+- Client config writers (`mcp/external.js`) touch only the `netsurush` entry, keep the rest of the file, back the original up once as `*.netsurush.bak`, and write atomically. Paths: Claude Desktop `%APPDATA%\Claude\claude_desktop_config.json`, Claude Code `~/.claude.json` (user scope), Codex `$CODEX_HOME/config.toml` (`[mcp_servers.netsurush]`), Cursor `~/.cursor/mcp.json`.
+- The spawned command is the core's own Node (`process.execPath`: the bundled `node.exe` in a release) on `stdio.js`; `NR_HOME` rides along when overridden so the server reads the right `core-port.json`.
+- `bmd_run_script_unsafe` stays off unless enabled in the Chat settings; frame-accurate timeline creation stays `build_timeline` → `core/timeline.js`.
+
+---
+
 ## 5. Abstraction `AgentBackend` — l'interface commune
 
 Une seule interface que l'UI consomme ; trois implémentations derrière. C'est elle qui rend les backends interchangeables.

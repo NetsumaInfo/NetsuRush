@@ -21,6 +21,7 @@ import { NavigationSettings } from "./NavigationSettings";
 import { NotificationSettings } from "./NotificationSettings";
 import { PlaybackSettings } from "./PlaybackSettings";
 import { IndexingSettings } from "./IndexingSettings";
+import { ExternalAgentsSettings } from "./ExternalAgentsSettings";
 import { ModelsSettings } from "./models/ModelsSettings";
 import { ExportProfileSettings } from "./ExportProfileSettings";
 import { MediaCacheSection } from "./storage/MediaCacheSection";
@@ -36,7 +37,7 @@ const PANELS: Record<SettingsPage, Record<string, ComponentType>> = {
   account: { profile: AccountSettings, discord: DiscordSettings, sharing: SharingSettings },
   interface: { theme: AppearanceSettings, language: LanguageSettings, navigation: NavigationSettings, notifications: NotificationSettings },
   media: { preview: PlaybackSettings },
-  ai: { models: ModelsSettings, indexing: IndexingSettings },
+  ai: { models: ModelsSettings, indexing: IndexingSettings, agents: ExternalAgentsSettings },
   export: { export: ExportProfileSettings },
   adobe: { adobe: AdobeBridgePanel },
   storage: { media: MediaCacheSection, cleanup: CleanupSettings, project: OutboxSettings, projects: ProjectsSection },

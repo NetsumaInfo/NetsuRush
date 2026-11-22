@@ -174,5 +174,11 @@
   },
   "thinkingSlider": {
     "reset": "Volver al esfuerzo predeterminado"
+  },
+  "externalApproval": {
+    "title": "Un agente externo solicita permiso",
+    "input": "Parámetros",
+    "countdown_one": "{{count}} s",
+    "countdown_other": "{{count}} s"
   }
 }

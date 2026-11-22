@@ -66,7 +66,9 @@ export function useShotBrowser() {
       const known = await nr.thumbsResolve(items);
       absorb(known);
       if (known.some((f) => !f.file)) {
-        await nr.thumbsBatch(path, items.map((it) => ({ time: it.time, frame: 0 })));
+        // "gen": this is the page on screen, not background warming — it must not wait behind
+        // every card request a scroll left queued.
+        await nr.thumbsBatch(path, items.map((it) => ({ time: it.time, frame: 0 })), "gen");
         absorb(await nr.thumbsResolve(items));
       }
     } catch {

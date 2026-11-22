@@ -274,6 +274,7 @@
     "failures_one": " · {{count}} 件失敗",
     "failures_other": " · {{count}} 件失敗",
     "pending": "待機中",
+    "cancelled": "停止",
     "shots_one": "{{count}} ショット",
     "shots_other": "{{count}} ショット",
     "doneHint": "カットが完了しました。素材を開くとショットを確認できます（キャッシュ済み）。",

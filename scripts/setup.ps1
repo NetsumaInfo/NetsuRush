@@ -376,16 +376,30 @@ Progress 2
 $basePy = $null
 # UNIQUEMENT 3.10-3.12. ROCm Windows exige précisément Python 3.12.
 # Si le testeur n'a que du 3.13 (ou rien), on bascule sur le build standalone 3.12 ci-dessous.
+# Microsoft Store Python is never used: its app-execution alias can stop launching altogether (the
+# process stays at one thread and never runs a line until Windows restarts), which froze every
+# detection on every file. A venv built on it inherits that, so the standalone build is taken instead.
+function Test-StorePython([string[]]$cmd) {
+  $exe = if ($cmd.Length -gt 1) { & $cmd[0] $cmd[1] -c 'import sys;print(sys.base_prefix)' 2>$null } else { & $cmd[0] -c 'import sys;print(sys.base_prefix)' 2>$null }
+  return ("$exe" -match 'WindowsApps|PythonSoftwareFoundation')
+}
 $pythonVersions = if ($MlBackend -eq 'rocm') { @('3.12') } else { @('3.12', '3.11', '3.10') }
 foreach ($v in $pythonVersions) {
-  try { & py "-$v" --version *> $null; if ($LASTEXITCODE -eq 0) { $basePy = @('py', "-$v"); break } } catch {}
+  try {
+    & py "-$v" --version *> $null
+    if ($LASTEXITCODE -eq 0) {
+      if (Test-StorePython @('py', "-$v")) { Info "Microsoft Store Python $v skipped -> standalone 3.12"; continue }
+      $basePy = @('py', "-$v"); break
+    }
+  } catch {}
 }
 if (-not $basePy) {
   # `python` nu : on n'accepte QUE 3.10-3.12 (sinon plusieurs wheels ML sont introuvables).
   try {
     $pv = (& python --version 2>&1) -replace '[^0-9.]', ''
     $pyOk = if ($MlBackend -eq 'rocm') { $pv -match '^3\.12\b' } else { $pv -match '^3\.(10|11|12)\b' }
-    if ($LASTEXITCODE -eq 0 -and $pyOk) { $basePy = @('python') }
+    if ($LASTEXITCODE -eq 0 -and $pyOk -and (Test-StorePython @('python'))) { Info "Microsoft Store Python $pv skipped -> standalone 3.12" }
+    elseif ($LASTEXITCODE -eq 0 -and $pyOk) { $basePy = @('python') }
     elseif ($LASTEXITCODE -eq 0) { Info "system python $pv skipped (NetsuRush needs 3.10-3.12) -> standalone 3.12" }
   } catch {}
 }
@@ -412,6 +426,11 @@ Progress 10
 # Un venv PÉRIMÉ (créé par une install antérieure avec un Python 3.13/3.14) doit être détruit :
 # torch cu124 n'a pas de wheel ≥3.13, et basicsr (Real-ESRGAN) casse au build sur 3.13
 # (get_version() lit exec()+locals(), comportement changé par PEP 667). On exige 3.10-3.12.
+$venvCfg = Join-Path $venvDir 'pyvenv.cfg'
+if ((Test-Path $venvCfg) -and ((Get-Content $venvCfg -Raw) -match 'WindowsApps|PythonSoftwareFoundation')) {
+  Info "venv built on Microsoft Store Python -> recreating on the standalone build"
+  Remove-Item -Recurse -Force $venvDir -ErrorAction SilentlyContinue
+}
 if (Test-Path $venvPy) {
   $venvVer = (& $venvPy --version 2>&1) -replace '[^0-9.]', ''
   $venvOk = if ($MlBackend -eq 'rocm') { $venvVer -match '^3\.12\b' } else { $venvVer -match '^3\.(10|11|12)\b' }
