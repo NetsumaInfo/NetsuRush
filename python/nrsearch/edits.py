@@ -19,7 +19,7 @@ from .db import db_emb
 
 MANUAL_MODEL = "manual"
 
-_INDEX_TABLES = ["frame_embeddings_v1", "index_runs_v1", "shot_motion_v1", "motion_runs_v1"]
+_INDEX_TABLES = ["frame_vectors_v1", "frame_embeddings_v1", "index_runs_v1", "shot_motion_v1", "motion_runs_v1"]
 _FACE_TABLES = ["face_embeddings_v2", "face_index_runs_v1", "face_labels_v1", "face_label_overrides_v1"]
 _SCENE_TABLES = ["scene_cache_v4", "scene_cache_v3"]
 

@@ -107,7 +107,8 @@ def db_emb():
                 char_id INTEGER, score REAL,
                 PRIMARY KEY(file_path, scene_index, face_index, domain))"""
         )
-    from . import motion
+    from . import framecache, motion
+    framecache.ensure_table(con)
     motion.ensure_tables(con)
     migrate_legacy_model_tags(con)
     return con

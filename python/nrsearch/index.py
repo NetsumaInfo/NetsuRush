@@ -11,7 +11,7 @@ import nrident
 from detect import file_mtime
 from nri18n import t
 
-from . import media, model, motion
+from . import framecache, media, model, motion
 from . import sampling
 from .config import (DECODE_WORKERS, DEFAULT_SAMPLING_FRAMES, FORCE_TIMEOUT, GPU_BATCH, GRAB_TIMEOUT,
                      GRAB_MAX_EDGE, INDEX_CHUNK, MODEL_TAG, MOTION_ENABLED, SEGMENT_GAP_SEC, SEGMENT_SHOTS,
@@ -22,7 +22,7 @@ from .db import db_emb
 
 # Index d'un fichier, dans l'ordre de transfert : les vecteurs d'abord, le marqueur de complétion
 # ensuite — un marqueur sans ses vecteurs annoncerait un travail qui n'existe pas.
-INDEX_TABLES = ["frame_embeddings_v1", "index_runs_v1", "shot_motion_v1", "motion_runs_v1"]
+INDEX_TABLES = ["frame_vectors_v1", "frame_embeddings_v1", "index_runs_v1", "shot_motion_v1", "motion_runs_v1"]
 
 
 def _motion_pass(con, path, mt, fps, scenes, cut_key, force, on_progress=None):
@@ -223,14 +223,18 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         # `grab_shot` saute silencieusement un timestamp illisible : une liste plus courte ne dit
         # pas LEQUEL manque, donc on renonce à la reprise des aplats plutôt que de retenter au
         # mauvais endroit.
+        idx = None
         if len(frames) == len(times):
+            original = list(frames)
             frames = replace_flat(list(frames), times, ss, meta[4])
+            idx = [to_frame(t, ss, meta[4]) if frames[i] is original[i] else None for i, t in enumerate(times)]
         if not frames and force:
             im = (media.grab_ffmpeg(path, times[len(times) // 2], accurate=True, timeout=FORCE_TIMEOUT, max_edge=GRAB_MAX_EDGE)
                   or media.grab_ffmpeg(path, ss, accurate=True, timeout=FORCE_TIMEOUT, max_edge=GRAB_MAX_EDGE))
             if im is not None:
                 frames = [im]
-        return ci, meta, frames
+                idx = None
+        return ci, meta, frames, idx
 
     # Reading plan: each shot gives its instants (see `sampling`); consecutive shots are grouped
     # into SEGMENTS read by one exact sequential decode. A long gap between two instants ends the
@@ -240,6 +244,27 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         meta = scene_meta(sc)
         times = sampling.shot_times(meta[3], meta[4], sampling.frame_count(max(0.0, meta[4] - meta[3]), asked_frames))
         plans.append((ci, meta, times, [to_frame(x, meta[3], meta[4]) for x in times] if fps else []))
+
+    # Frames already analysed for this file version (fast cut, previous cut, hand edit): a shot that
+    # holds enough of them is pooled from them and never decoded. FORCE recomputes everything.
+    # A shot that holds only some of them decodes only the instants none of them stands in for.
+    cached = {} if force else framecache.load(con, path, MODEL_TAG, mt)
+    cached_frames = sorted(cached)
+    reused = []   # (ci, meta, vectors): fully covered, never decoded
+    extra = {}    # ci -> vectors of a partly covered shot, pooled with its decoded frames
+    if cached_frames and fps:
+        remaining = []
+        for ci, meta, times, frames in plans:
+            have, missing = framecache.plan_reuse(cached_frames, meta[0], meta[1], frames)
+            if not have:
+                remaining.append((ci, meta, times, frames))
+            elif not missing:
+                reused.append((ci, meta, [cached[f] for f in have]))
+            else:
+                extra[ci] = [cached[f] for f in have]
+                keep = [(t, f) for t, f in zip(times, frames) if f in set(missing)]
+                remaining.append((ci, meta, [t for t, _ in keep], [f for _, f in keep]))
+        plans = remaining
     segments = []
     gap = SEGMENT_GAP_SEC * fps
     for plan in plans:
@@ -262,7 +287,9 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
             if any(im is None for im in shot):  # segment cut short: only these shots fall back
                 out.append(decode_shot(ci, meta, times))
             else:
-                out.append((ci, meta, replace_flat(shot, times, meta[3], meta[4])))
+                kept = replace_flat(list(shot), times, meta[3], meta[4])
+                # a frame swapped for a later one (flat retry) is not the frame its index names
+                out.append((ci, meta, kept, [f if kept[i] is shot[i] else None for i, f in enumerate(frames)]))
         return out
 
     def pool_scene(embs):
@@ -306,30 +333,47 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
             report()
         return np.concatenate(out, axis=0)
 
+    frame_buf = []  # (frame index, vector) of every analysed frame that can be named
+
+    def add_row(ci, meta, vec):
+        sf, ef, mid, ss, es = meta
+        row_buf.append(
+            (path, mt, MODEL_TAG, ci, sf, ef, mid, ss, es, fps, src_frames,
+             vec.astype(np.float32).tobytes(), int(vec.shape[0]), time.time())
+        )
+        if len(row_buf) >= 16:
+            framecache.store(con, path, MODEL_TAG, mt, frame_buf)
+            frame_buf.clear()
+            flush_rows()
+
     def embed_shots(shots):
         nonlocal skipped
         flat = []; owner = []  # owner[k] = position (dans shots) du plan de la frame flat[k]
-        for pos, (_, _, frames) in enumerate(shots):
+        for pos, (_, _, frames, _idx) in enumerate(shots):
             for im in frames:
                 flat.append(im); owner.append(pos)
-        empty = sum(1 for _, _, frames in shots if not frames)
+        empty = sum(1 for ci, _, frames, _idx in shots if not frames and ci not in extra)
         work["embedded"] += empty
         eb = embed_batched(flat, len(shots) - empty) if flat else None
         per = [[] for _ in shots]
         for k, pos in enumerate(owner):
             per[pos].append(eb[k])
-        for pos, (ci, meta, frames) in enumerate(shots):
-            if not frames:
+        for pos, (ci, meta, frames, idx) in enumerate(shots):
+            vecs = per[pos] + extra.get(ci, [])
+            if not vecs:
                 skipped += 1  # aucune frame lisible → plan sauté (le clip continue)
                 continue
-            sf, ef, mid, ss, es = meta
-            vec = pool_scene(np.stack(per[pos]))
-            row_buf.append(
-                (path, mt, MODEL_TAG, ci, sf, ef, mid, ss, es, fps, src_frames,
-                 vec.astype(np.float32).tobytes(), int(vec.shape[0]), time.time())
-            )
-            if len(row_buf) >= 16:
-                flush_rows()
+            if idx and len(idx) == len(per[pos]):
+                frame_buf.extend((f, v) for f, v in zip(idx, per[pos]) if f is not None)
+            add_row(ci, meta, pool_scene(np.stack(vecs)))
+
+    # Shots pooled from frames analysed earlier: no decode, no GPU.
+    for ci, meta, vecs in reused:
+        add_row(ci, meta, pool_scene(np.stack(vecs)))
+    work["decoded"] += len(reused)
+    work["embedded"] += len(reused)
+    if reused:
+        report()
 
     # Decode and GPU overlap: the next segments decode (ffmpeg processes, GIL released) while the
     # current batch embeds. Segments in flight are capped, so memory stays bounded.
@@ -360,7 +404,10 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
                 batch, ready = ready, []
                 embed_shots(batch)
 
+    framecache.store(con, path, MODEL_TAG, mt, frame_buf)
+    frame_buf.clear()
     flush_rows()
+    framecache.drop_stale(con, path, MODEL_TAG, mt)
     # Reliquat du passage précédent : plans en trop d'une découpe plus courte, ou embeddings d'une
     # version antérieure du fichier (mtime ≠). Les plans sautés faute de frame lisible gardent leur
     # ancienne ligne quand le fichier n'a pas changé — mieux qu'un trou.
@@ -383,4 +430,5 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
     nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()
     return {"ok": True, "file": path, "indexed": indexed, "skipped": skipped,
+            "reused": len(reused), "topped_up": len(extra),
             "total": n, "cached": False, "error": None}
