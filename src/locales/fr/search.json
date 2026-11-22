@@ -208,7 +208,9 @@
     "addToTimeline": "Ajouter à la timeline",
     "select": "Sélectionner",
     "copyPath": "Copier le chemin",
-    "fileAndShot": "{{path}} · plan #{{n}}"
+    "fileAndShot": "{{path}} · plan #{{n}}",
+    "continuation": "Trouver un raccord",
+    "continuationTooltip": "Trouver un raccord : plans qui peuvent suivre celui-ci (cherché depuis sa dernière image)"
   },
   "searchResults": {
     "analyzing": "Analyse en cours",
@@ -250,7 +252,8 @@
     "clearAria": "Vider les références",
     "clearTooltip": "Vider les références",
     "remove": "Retirer",
-    "findSimilarMenu": "Chercher les similaires"
+    "findSimilarMenu": "Chercher les similaires",
+    "lastFrame": "fin"
   },
   "searchBar": {
     "scopeAll": "Tous les rushs",
@@ -324,7 +327,8 @@
     "indexingStopped_one": "Indexation arrêtée — {{count}} clip traité partiellement.",
     "indexingStopped_other": "Indexation arrêtée — {{count}} clips traités partiellement.",
     "queryMoodboard_one": "moodboard : {{count}} réf",
-    "queryMoodboard_other": "moodboard : {{count}} réfs"
+    "queryMoodboard_other": "moodboard : {{count}} réfs",
+    "queryContinuation": "Raccord après {{name}}"
   },
   "projectScope": {
     "activeMode": "Actif",
@@ -345,5 +349,61 @@
     "scanStarting": "Préparation…",
     "selectAll": "Tout sélectionner",
     "title": "Projets inclus"
+  },
+  "motion": {
+    "aria": "Filtrer par mouvement",
+    "tooltip": "Mouvement et génériques : garder les plans qui bougent dans un sens donné (mesuré à l'indexation ; les rushs déjà indexés le reçoivent au prochain « Indexer »)",
+    "at": "Moment du plan",
+    "atAny": "Début ou fin",
+    "atStart": "Début du plan",
+    "atEnd": "Fin du plan",
+    "subject": "Sujet",
+    "camera": "Caméra",
+    "subjectTag": {
+      "left": "Vers la gauche",
+      "right": "Vers la droite",
+      "up": "Vers le haut",
+      "down": "Vers le bas",
+      "still": "Immobile"
+    },
+    "cameraTag": {
+      "pan-left": "Panoramique gauche",
+      "pan-right": "Panoramique droite",
+      "pan-up": "Panoramique haut",
+      "pan-down": "Panoramique bas",
+      "zoom-in": "Zoom avant",
+      "zoom-out": "Zoom arrière",
+      "static": "Fixe"
+    },
+    "skipEdges": "Ignorer les génériques (2 min 30 au début et à la fin)",
+    "reset": "Réinitialiser les filtres",
+    "dir": {
+      "right": "vers la droite",
+      "down-right": "vers le bas à droite",
+      "down": "vers le bas",
+      "down-left": "vers le bas à gauche",
+      "left": "vers la gauche",
+      "up-left": "vers le haut à gauche",
+      "up": "vers le haut",
+      "up-right": "vers le haut à droite"
+    },
+    "describe": {
+      "subjectMoving": "sujet {{dir}}",
+      "subjectStill": "sujet immobile",
+      "subjectUnclear": "sujet indéterminé",
+      "cameraPan": "panoramique {{dir}}",
+      "zoomIn": "zoom avant",
+      "zoomOut": "zoom arrière",
+      "cameraStatic": "caméra fixe",
+      "cameraUnclear": "caméra indéterminée",
+      "speed": {
+        "slow": "lent",
+        "medium": "moyen",
+        "fast": "rapide"
+      }
+    },
+    "badgeStart": "Début : {{desc}}",
+    "badgeEnd": "Fin : {{desc}}",
+    "badgeAria": "Mouvement du plan"
   }
 }

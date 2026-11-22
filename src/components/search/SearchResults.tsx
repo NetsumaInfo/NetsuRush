@@ -45,13 +45,13 @@ export function SearchResults() {
   const {
     searchHits, scoreThreshold, setScoreThreshold, sortMode, setSortMode,
     resultView, setResultView, runDedup, runCluster, clusters, dedupGroups, analyzing,
-    refs, findSimilar, addRef, sendHitsToTimeline, faceMode, faceChar, confirmHitAsCharacter,
+    refs, findSimilar, findContinuation, addRef, sendHitsToTimeline, faceMode, faceChar, confirmHitAsCharacter,
   } = useApp(useShallow((s) => ({
     searchHits: s.searchHits, scoreThreshold: s.scoreThreshold,
     setScoreThreshold: s.setScoreThreshold, sortMode: s.sortMode, setSortMode: s.setSortMode,
     resultView: s.resultView, setResultView: s.setResultView, runDedup: s.runDedup, runCluster: s.runCluster,
     clusters: s.clusters, dedupGroups: s.dedupGroups, analyzing: s.analyzing,
-    refs: s.refs, findSimilar: s.findSimilar, addRef: s.addRef,
+    refs: s.refs, findSimilar: s.findSimilar, findContinuation: s.findContinuation, addRef: s.addRef,
     sendHitsToTimeline: s.sendHitsToTimeline, faceMode: s.faceMode,
     faceChar: s.faceChar, confirmHitAsCharacter: s.confirmHitAsCharacter,
   })));
@@ -144,6 +144,7 @@ export function SearchResults() {
         getProxy={(ph, tok, prio) => getProxy(h, ph, tok, prio)} bustProxy={() => preview.bustProxy(r.path, r.in, r.out)}
         peekProxy={() => preview.peekProxy(r.path, r.in, r.out)}
         onFindSimilar={(thumb) => findSimilar(h, thumb)}
+        onFindContinuation={(thumb) => findContinuation(h, thumb)}
         onAddRef={(thumb) => addRef({ file_path: h.file_path, scene_index: h.scene_index, thumb })}
         refActive={refKeys.has(`${h.file_path}#${h.scene_index}`)}
         confirmChar={faceChar?.name}

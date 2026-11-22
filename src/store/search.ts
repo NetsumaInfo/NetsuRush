@@ -4,7 +4,7 @@ import type { StateCreator } from "zustand";
 import i18n from "@/i18n";
 import {
   nr, type SearchHit, type SearchStatus, type SearchRef,
-  type DedupGroup, type ClusterGroup, type ProjectScopeList,
+  type DedupGroup, type ClusterGroup, type ProjectScopeList, type MotionFilter,
 } from "@/lib/bridge";
 import { hostBuildTimeline } from "@/lib/host";
 import { parseMentions } from "@/components/search/mentions";
@@ -45,6 +45,23 @@ let faceRaf = 0;
 // groupes travaillent ainsi sur l'ensemble, pas sur une première page.
 export const SEARCH_TOP_K = 400;
 export type SearchScope = "project" | "all";
+
+// Opening and ending songs of an anime episode sit in its first and last ~2.5 minutes.
+export const EPISODE_EDGE_SEC = 150;
+export const NO_MOTION_FILTER: MotionFilter = { at: "any", subject: [], camera: [] };
+export const motionFilterActive = (f: MotionFilter) => f.subject.length > 0 || f.camera.length > 0;
+
+function readMotionFilter(): MotionFilter {
+  try {
+    const raw = JSON.parse(localStorage.getItem("nr.search.motion") || "null") as Partial<MotionFilter> | null;
+    if (!raw) return NO_MOTION_FILTER;
+    return {
+      at: raw.at === "start" || raw.at === "end" ? raw.at : "any",
+      subject: Array.isArray(raw.subject) ? raw.subject.filter((x) => typeof x === "string") : [],
+      camera: Array.isArray(raw.camera) ? raw.camera.filter((x) => typeof x === "string") : [],
+    };
+  } catch { return NO_MOTION_FILTER; }
+}
 
 export function searchScopePaths(state: Pick<AppState, "searchScope" | "clips" | "scopePaths">): string[] | undefined {
   if (state.searchScope === "all") return undefined;
@@ -87,6 +104,8 @@ export interface SearchSlice {
   scoreThreshold: number;         // 0..1 : filtre d'AFFICHAGE (slider) — ne réinterroge pas le backend
   negativeQuery: string;          // requête négative (« plages SANS personne »)
   refs: SearchRef[];              // bac de références : image→image (1) / moodboard (N)
+  motionFilter: MotionFilter;     // keeps shots that open/close moving this way (persisted)
+  skipEpisodeEdges: boolean;      // leaves out the opening/ending of each rush (persisted)
   sortMode: "relevance" | "quality";
   resultView: "flat" | "clusters" | "dedup";
   clusters: ClusterGroup[];
@@ -113,6 +132,8 @@ export interface SearchSlice {
   addImageRefs: (paths: string[]) => void;
   removeRef: (idx: number) => void;
   clearRefs: () => void;
+  setMotionFilter: (f: MotionFilter) => void;
+  setSkipEpisodeEdges: (b: boolean) => void;
 
   refreshSearchStatus: () => Promise<void>;
   setSearchScope: (scope: SearchScope) => void;
@@ -123,6 +144,8 @@ export interface SearchSlice {
   // `thumb` = la vignette AFFICHÉE par la carte : le backend ne renvoie plus d'image, et le bac
   // de références serait vide sans elle.
   findSimilar: (hit: SearchHit, thumb?: string | null) => Promise<void>;
+  // Match cut: shots that could follow this one, searched from its LAST frame.
+  findContinuation: (hit: SearchHit, thumb?: string | null) => Promise<void>;
   runDedup: (scope?: { filePath?: string }) => Promise<void>;
   runCluster: (scope?: { filePath?: string }) => Promise<void>;
   indexClips: (paths: string[], force?: boolean, frames?: SamplingFrames) => Promise<void>;
@@ -302,6 +325,8 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     scoreThreshold: 0,
     negativeQuery: "",
     refs: [],
+    motionFilter: readMotionFilter(),
+    skipEpisodeEdges: (() => { try { return localStorage.getItem("nr.search.skipEdges") === "1"; } catch { return false; } })(),
     sortMode: "relevance",
     resultView: "flat",
     clusters: [],
@@ -321,7 +346,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     setSortMode: (sortMode) => set({ sortMode }),
     setResultView: (resultView) => set({ resultView }),
     addRef: (ref) => set((s) => {
-      const key = (r: SearchRef) => (r.path ? `p:${r.path}` : `s:${r.file_path}#${r.scene_index}`);
+      const key = (r: SearchRef) => (r.path ? `p:${r.path}` : `s:${r.file_path}#${r.scene_index}${r.edge ? `:${r.edge}` : ""}`);
       return s.refs.some((r) => key(r) === key(ref)) ? {} : { refs: [...s.refs, ref] };
     }),
     addImageRefs: (paths) => set((s) => {
@@ -333,6 +358,18 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     }),
     removeRef: (idx) => set((s) => ({ refs: s.refs.filter((_, i) => i !== idx) })),
     clearRefs: () => set({ refs: [] }),
+    // A filter change re-runs the search on screen: the filter is part of the question.
+    setMotionFilter: (motionFilter) => {
+      try { localStorage.setItem("nr.search.motion", JSON.stringify(motionFilter)); } catch { /* noop */ }
+      set({ motionFilter });
+      if (get().searchQuery && !get().faceMode) void get().runSearch();
+    },
+    setSkipEpisodeEdges: (skipEpisodeEdges) => {
+      try { localStorage.setItem("nr.search.skipEdges", skipEpisodeEdges ? "1" : "0"); } catch { /* noop */ }
+      set({ skipEpisodeEdges });
+      if (get().searchQuery && !get().faceMode) void get().runSearch();
+    },
+
     refreshSearchStatus: async () => {
       const filePaths = searchScopePaths(get());
       const s = await nr.searchStatus({ filePaths });
@@ -361,7 +398,9 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
       const bits: string[] = [];
       if (mentions.length) bits.push(mentions.map((m) => `@${m.name}`).join(" "));
       if (pos) bits.push(pos);
-      else if (!pos && refs.length) bits.push(refs.length === 1 ? i18n.t("search:store.querySimilarTo", { name: refLabel(refs[0]) }) : i18n.t("search:store.queryMoodboard", { count: refs.length }));
+      else if (!pos && refs.length) bits.push(refs.length === 1
+        ? i18n.t(refs[0].edge === "end" ? "search:store.queryContinuation" : "search:store.querySimilarTo", { name: refLabel(refs[0]) })
+        : i18n.t("search:store.queryMoodboard", { count: refs.length }));
       set({
         searching: true, searchError: null, searchNotice,
         searchQuery: (bits.join(" ") || i18n.t("search:store.queryDefault")) + (neg ? `  − ${neg}` : ""),
@@ -372,10 +411,12 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
           // La langue de l'interface tranche quand la requête est trop courte pour être reconnue
           // (le sidecar cadre le prompt DANS cette langue — cf. nrsearch/qtext.py).
           text: pos, negText: neg, lang: i18n.language?.split("-")[0],
-          refs: refs.map((x) => ({ path: x.path, file_path: x.file_path, scene_index: x.scene_index })),
+          refs: refs.map((x) => ({ path: x.path, file_path: x.file_path, scene_index: x.scene_index, edge: x.edge })),
           topK: SEARCH_TOP_K, minScore: 0, beta: 0.4, aesthetic: true,
           charIds: ids.length ? ids : undefined,
           filePaths: searchScopePaths(st),
+          motion: motionFilterActive(st.motionFilter) ? st.motionFilter : undefined,
+          skipEdgesSec: st.skipEpisodeEdges ? EPISODE_EDGE_SEC : 0,
         });
         // Le sigmoïde calibré SigLIP donne des probas MINUSCULES sur du texte (top ~0.002 → badge
         // « 0% » partout, seuil inutilisable). On renormalise en RELATIF sur le lot renvoyé
@@ -399,6 +440,10 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
     },
     findSimilar: async (hit, thumb = null) => {
       set({ refs: [{ file_path: hit.file_path, scene_index: hit.scene_index, thumb }], posQuery: "", negativeQuery: "" });
+      await get().runSearch("");
+    },
+    findContinuation: async (hit, thumb = null) => {
+      set({ refs: [{ file_path: hit.file_path, scene_index: hit.scene_index, thumb, edge: "end" }], posQuery: "", negativeQuery: "" });
       await get().runSearch("");
     },
     openFacePicker: () => set({ facePicker: true }),

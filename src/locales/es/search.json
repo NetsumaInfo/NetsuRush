@@ -208,7 +208,9 @@
     "addToTimeline": "Añadir a la timeline",
     "select": "Seleccionar",
     "copyPath": "Copiar la ruta",
-    "fileAndShot": "{{path}} · plano n.º {{n}}"
+    "fileAndShot": "{{path}} · plano n.º {{n}}",
+    "continuation": "Buscar un raccord",
+    "continuationTooltip": "Buscar un raccord: planos que pueden seguir a este (buscado desde su último fotograma)"
   },
   "searchResults": {
     "analyzing": "Analizando",
@@ -250,7 +252,8 @@
     "clearAria": "Vaciar las referencias",
     "clearTooltip": "Vaciar las referencias",
     "remove": "Quitar",
-    "findSimilarMenu": "Buscar los similares"
+    "findSimilarMenu": "Buscar los similares",
+    "lastFrame": "final"
   },
   "searchBar": {
     "scopeAll": "Todos los clips",
@@ -324,7 +327,8 @@
     "indexingStopped_one": "Indexación detenida — {{count}} clip procesado en parte.",
     "indexingStopped_other": "Indexación detenida — {{count}} clips procesados en parte.",
     "queryMoodboard_one": "moodboard: {{count}} ref",
-    "queryMoodboard_other": "moodboard: {{count}} refs"
+    "queryMoodboard_other": "moodboard: {{count}} refs",
+    "queryContinuation": "Raccord tras {{name}}"
   },
   "projectScope": {
     "activeMode": "Activo",
@@ -345,5 +349,61 @@
     "scanStarting": "Preparando…",
     "selectAll": "Seleccionar todo",
     "title": "Proyectos incluidos"
+  },
+  "motion": {
+    "aria": "Filtrar por movimiento",
+    "tooltip": "Movimiento y créditos: conservar los planos que se mueven en un sentido (medido al indexar; los rushes ya indexados lo reciben en el próximo «Indexar»)",
+    "at": "Parte del plano",
+    "atAny": "Inicio o final",
+    "atStart": "Inicio del plano",
+    "atEnd": "Final del plano",
+    "subject": "Sujeto",
+    "camera": "Cámara",
+    "subjectTag": {
+      "left": "Hacia la izquierda",
+      "right": "Hacia la derecha",
+      "up": "Hacia arriba",
+      "down": "Hacia abajo",
+      "still": "Inmóvil"
+    },
+    "cameraTag": {
+      "pan-left": "Paneo a la izquierda",
+      "pan-right": "Paneo a la derecha",
+      "pan-up": "Paneo hacia arriba",
+      "pan-down": "Paneo hacia abajo",
+      "zoom-in": "Acercamiento",
+      "zoom-out": "Alejamiento",
+      "static": "Fija"
+    },
+    "skipEdges": "Ignorar créditos (2:30 al inicio y al final)",
+    "reset": "Restablecer filtros",
+    "dir": {
+      "right": "hacia la derecha",
+      "down-right": "hacia abajo a la derecha",
+      "down": "hacia abajo",
+      "down-left": "hacia abajo a la izquierda",
+      "left": "hacia la izquierda",
+      "up-left": "hacia arriba a la izquierda",
+      "up": "hacia arriba",
+      "up-right": "hacia arriba a la derecha"
+    },
+    "describe": {
+      "subjectMoving": "sujeto {{dir}}",
+      "subjectStill": "sujeto inmóvil",
+      "subjectUnclear": "sujeto indeterminado",
+      "cameraPan": "paneo {{dir}}",
+      "zoomIn": "acercamiento",
+      "zoomOut": "alejamiento",
+      "cameraStatic": "cámara fija",
+      "cameraUnclear": "cámara indeterminada",
+      "speed": {
+        "slow": "lento",
+        "medium": "medio",
+        "fast": "rápido"
+      }
+    },
+    "badgeStart": "Inicio: {{desc}}",
+    "badgeEnd": "Final: {{desc}}",
+    "badgeAria": "Movimiento del plano"
   }
 }

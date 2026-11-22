@@ -1,10 +1,11 @@
 import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { Film, Play, ScanSearch, Plus, Aperture, UserCheck } from "lucide-react";
+import { Film, Play, ScanSearch, Plus, Aperture, UserCheck, ArrowRightFromLine } from "lucide-react";
 import { NetsuIcon } from "@/components/ui/netsu-icon";
 import { SendToTimelineIcon } from "@/components/common/SendToTimelineIcon";
 import { type SearchHit } from "@/lib/bridge";
+import { MotionBadge } from "@/components/search/MotionBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCardMedia } from "@/lib/useCardMedia";
 import { IS_REMOTE } from "@/lib/remote";
@@ -36,7 +37,7 @@ function tc(sec: number): string {
 // proxy HEVC au survol ou « Tout lire ». Sélection + ajout à la timeline ouverte (append).
 function ResultCardImpl({
   hit, index, selected, play, onToggle, onDownload, getProxy, bustProxy, peekProxy,
-  onFindSimilar, onAddRef, refActive, confirmChar, onConfirmChar,
+  onFindSimilar, onFindContinuation, onAddRef, refActive, confirmChar, onConfirmChar,
 }: {
   hit: SearchHit;
   index: number;
@@ -51,6 +52,7 @@ function ResultCardImpl({
   // Reçoivent la vignette AFFICHÉE : le bac de références montre exactement l'image cliquée, et
   // la carte est le seul endroit qui la connaisse (le backend ne renvoie plus d'image).
   onFindSimilar?: (thumb: string | null) => void;
+  onFindContinuation?: (thumb: string | null) => void;   // match cut: shots that could follow this one
   onAddRef?: (thumb: string | null) => void;
   refActive?: boolean;          // ce plan est déjà dans le bac de références
   confirmChar?: string;         // recherche par personnage : nom pour « c'est bien lui »
@@ -118,9 +120,12 @@ function ResultCardImpl({
             posé sur une <video> qui joue force le compositeur à recopier et flouter le fond à
             CHAQUE image décodée, pour chaque carte. Avec une grille en lecture auto c'était le
             premier poste de coût du défilement. */}
-        <span className="nr-chip absolute bottom-2 left-2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white">
-          {tc(hit.start_sec)}
-        </span>
+        <div className="absolute bottom-2 left-2 flex items-center gap-1">
+          <span className="nr-chip rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white">
+            {tc(hit.start_sec)}
+          </span>
+          {hit.motion && <MotionBadge motion={hit.motion} interactive={chrome} />}
+        </div>
         <span className="nr-chip absolute right-2 top-2 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-white">
           {fmtPercent(hit.score)}
         </span>
@@ -184,6 +189,17 @@ function ResultCardImpl({
             <TooltipContent>{t("resultCard.similarShots")}</TooltipContent>
           </Tooltip>
         )}
+        {onFindContinuation && (
+          <Tooltip>
+            <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
+              type="button"
+              onClick={() => onFindContinuation(thumb)}
+              className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:opacity-100" />}>
+              <ArrowRightFromLine className="size-4" />
+            </TooltipTrigger>
+            <TooltipContent>{t("resultCard.continuationTooltip")}</TooltipContent>
+          </Tooltip>
+        )}
         {confirmChar && onConfirmChar && (
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon-xs"
@@ -238,6 +254,9 @@ function ResultCardImpl({
         {onFindSimilar && (
           <ContextMenuItem onClick={() => onFindSimilar(thumb)}><ScanSearch /> {t("resultCard.similarShots")}</ContextMenuItem>
         )}
+        {onFindContinuation && (
+          <ContextMenuItem onClick={() => onFindContinuation(thumb)}><ArrowRightFromLine /> {t("resultCard.continuation")}</ContextMenuItem>
+        )}
         {confirmChar && onConfirmChar && (
           <ContextMenuItem onClick={onConfirmChar} disabled={!!hit.char}>
             <UserCheck /> {hit.char ? t("resultCard.confirmedChar", { name: hit.char.name }) : t("resultCard.confirmCharShort", { name: confirmChar })}
@@ -261,7 +280,7 @@ function ResultCardImpl({
 // sont ignorés → seule la carte concernée re-rend.
 export const ResultCard = memo(ResultCardImpl, (a, b) =>
   a.hit.file_path === b.hit.file_path && a.hit.scene_index === b.hit.scene_index &&
-  a.hit.score === b.hit.score &&
+  a.hit.score === b.hit.score && a.hit.motion === b.hit.motion &&
   (a.hit.char?.id ?? null) === (b.hit.char?.id ?? null) &&
   a.index === b.index && a.selected === b.selected && a.play === b.play &&
   a.refActive === b.refActive && a.confirmChar === b.confirmChar,

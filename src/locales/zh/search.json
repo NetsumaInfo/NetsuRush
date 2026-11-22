@@ -208,7 +208,9 @@
     "addToTimeline": "添加到时间线",
     "select": "选择",
     "copyPath": "复制路径",
-    "fileAndShot": "{{path}} · 镜头 #{{n}}"
+    "fileAndShot": "{{path}} · 镜头 #{{n}}",
+    "continuation": "查找衔接镜头",
+    "continuationTooltip": "查找衔接镜头：可以接在此镜头之后的镜头（从其最后一帧搜索）"
   },
   "searchResults": {
     "analyzing": "分析中",
@@ -250,7 +252,8 @@
     "clearAria": "清空参考图",
     "clearTooltip": "清空参考图",
     "remove": "移除",
-    "findSimilarMenu": "搜索相似项"
+    "findSimilarMenu": "搜索相似项",
+    "lastFrame": "结尾"
   },
   "searchBar": {
     "scopeAll": "所有素材",
@@ -324,7 +327,8 @@
     "indexingStopped_one": "索引已停止，{{count}} 个片段仅部分处理。",
     "indexingStopped_other": "索引已停止，{{count}} 个片段仅部分处理。",
     "queryMoodboard_one": "情绪板：{{count}} 张参考",
-    "queryMoodboard_other": "情绪板：{{count}} 张参考"
+    "queryMoodboard_other": "情绪板：{{count}} 张参考",
+    "queryContinuation": "接在 {{name}} 之后"
   },
   "projectScope": {
     "activeMode": "启用",
@@ -345,5 +349,61 @@
     "scanStarting": "准备中…",
     "selectAll": "全选",
     "title": "包含的项目"
+  },
+  "motion": {
+    "aria": "按运动筛选",
+    "tooltip": "运动与片头片尾：保留朝特定方向运动的镜头（索引时测量；已索引的素材会在下次“索引”时获得）",
+    "at": "镜头位置",
+    "atAny": "开头或结尾",
+    "atStart": "镜头开头",
+    "atEnd": "镜头结尾",
+    "subject": "主体",
+    "camera": "摄像机",
+    "subjectTag": {
+      "left": "向左",
+      "right": "向右",
+      "up": "向上",
+      "down": "向下",
+      "still": "静止"
+    },
+    "cameraTag": {
+      "pan-left": "向左摇",
+      "pan-right": "向右摇",
+      "pan-up": "向上摇",
+      "pan-down": "向下摇",
+      "zoom-in": "推近",
+      "zoom-out": "拉远",
+      "static": "固定"
+    },
+    "skipEdges": "忽略片头片尾（开头和结尾各 2 分 30 秒）",
+    "reset": "重置筛选",
+    "dir": {
+      "right": "向右",
+      "down-right": "向右下",
+      "down": "向下",
+      "down-left": "向左下",
+      "left": "向左",
+      "up-left": "向左上",
+      "up": "向上",
+      "up-right": "向右上"
+    },
+    "describe": {
+      "subjectMoving": "主体{{dir}}",
+      "subjectStill": "主体静止",
+      "subjectUnclear": "主体不明",
+      "cameraPan": "摄像机{{dir}}摇",
+      "zoomIn": "推近",
+      "zoomOut": "拉远",
+      "cameraStatic": "摄像机固定",
+      "cameraUnclear": "摄像机不明",
+      "speed": {
+        "slow": "慢",
+        "medium": "中",
+        "fast": "快"
+      }
+    },
+    "badgeStart": "开头：{{desc}}",
+    "badgeEnd": "结尾：{{desc}}",
+    "badgeAria": "镜头运动"
   }
 }

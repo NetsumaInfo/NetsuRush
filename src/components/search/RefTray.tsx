@@ -44,11 +44,15 @@ export function RefTray({ refs, searching, onSearch, removeRef, clearRefs }: Pro
       </div>
       <div className="flex flex-wrap gap-2">
         {refs.map((r, i) => (
-          <ContextMenu key={r.path ? `p:${r.path}` : `s:${r.file_path}#${r.scene_index}`}>
+          <ContextMenu key={r.path ? `p:${r.path}` : `s:${r.file_path}#${r.scene_index}${r.edge ? `:${r.edge}` : ""}`}>
             <ContextMenuTrigger render={<div className="group relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted transition-colors hover:border-primary/60" />}>
               {r.thumb
                 ? <img src={r.thumb} alt="" className="h-full w-full object-cover" />
                 : <div className="flex h-full items-center justify-center text-muted-foreground"><NetsuIcon name="image-add" className="size-4" /></div>}
+              {/* A match-cut reference searches from the shot's last frame, not from what the thumbnail shows. */}
+              {r.edge === "end" && (
+                <span className="nr-chip absolute bottom-1 left-1 rounded px-1 text-[10px] font-medium text-white">{t("refTray.lastFrame")}</span>
+              )}
               {/* Retirer : pastille pleine et opaque (l'ancienne, 16 px translucide sur la vignette,
                   était illisible sur une image claire) + voile au survol pour détacher l'icône. */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100" />

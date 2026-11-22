@@ -168,6 +168,9 @@ def _env_bool(name, default):
 # Le décodage groupé garde les mêmes timestamps et les mêmes pixels d'entrée : il est donc actif par
 # défaut. La résolution d'analyse, elle, CHANGE les vecteurs produits — d'où le marqueur ci-dessous.
 SHOT_DECODE = _env_bool("NETSURUSH_SHOT_DECODE", True)
+# Motion tags (camera/subject at each end of a shot, see motion.py): CPU only, measured after the
+# embedding. Off = indexing as before, searches simply have no motion to filter on.
+MOTION_ENABLED = _env_bool("NETSURUSH_MOTION_TAGS", True)
 
 # Profil VRAM : un seul réglage utilisateur pour les trois plafonds qui décident du pic mémoire.
 # Le décodage est borné par les processus ffmpeg (RAM + CPU), l'embedding par la taille du batch
@@ -191,6 +194,16 @@ DECODE_WORKERS = _VRAM_PROFILES[VRAM_PROFILE]["workers"]  # threads ffmpeg concu
 GPU_BATCH = _VRAM_PROFILES[VRAM_PROFILE]["batch"]         # images/forward SigLIP (sature le GPU, borne la VRAM)
 INDEX_CHUNK = _VRAM_PROFILES[VRAM_PROFILE]["chunk"]       # plans décodés/embeddés par lot (borne la RAM)
 GRAB_MAX_EDGE = 512     # bord max des frames extraites pour l'embedding (px). 0 = pleine résolution.
+
+# Segment decode: consecutive shots are read by ONE exact sequential ffmpeg pass instead of one
+# keyframe seek per shot. Measured on a 1080p HEVC film (1151 shots): per-shot seeks ran at about
+# 5 frames/s and returned the keyframe BEFORE each instant, up to 3 s early — usually inside the
+# previous shot on anime. A segment stops after SEGMENT_SHOTS shots, or where two instants are more
+# than SEGMENT_GAP_SEC apart (decoding the gap would cost more than a new seek). Each ffmpeg gets
+# SEGMENT_THREADS so the DECODE_WORKERS processes share the CPU instead of oversubscribing it.
+SEGMENT_SHOTS = 12
+SEGMENT_GAP_SEC = 8.0
+SEGMENT_THREADS = max(1, _CPUS // max(1, DECODE_WORKERS))
 
 # Bascule BruteForce → FAISS. Le seuil = nb de plans dont la matrice brute (dim×4 o/plan)
 # tiendrait dans le budget RAM ; au-delà on passe à l'index compressé. Override fixe via

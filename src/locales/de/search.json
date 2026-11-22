@@ -208,7 +208,9 @@
     "addToTimeline": "Zur Timeline hinzufügen",
     "select": "Auswählen",
     "copyPath": "Pfad kopieren",
-    "fileAndShot": "{{path}} · Shot #{{n}}"
+    "fileAndShot": "{{path}} · Shot #{{n}}",
+    "continuation": "Anschluss finden",
+    "continuationTooltip": "Anschluss finden: Einstellungen, die auf diese folgen können (ab ihrem letzten Bild gesucht)"
   },
   "searchResults": {
     "analyzing": "Analyse läuft",
@@ -250,7 +252,8 @@
     "clearAria": "Referenzen leeren",
     "clearTooltip": "Referenzen leeren",
     "remove": "Entfernen",
-    "findSimilarMenu": "Ähnliche suchen"
+    "findSimilarMenu": "Ähnliche suchen",
+    "lastFrame": "Ende"
   },
   "searchBar": {
     "scopeAll": "Gesamtes Rohmaterial",
@@ -324,7 +327,8 @@
     "indexingStopped_one": "Indizierung gestoppt – {{count}} Clip teilweise verarbeitet.",
     "indexingStopped_other": "Indizierung gestoppt – {{count}} Clips teilweise verarbeitet.",
     "queryMoodboard_one": "Moodboard: {{count}} Ref",
-    "queryMoodboard_other": "Moodboard: {{count}} Refs"
+    "queryMoodboard_other": "Moodboard: {{count}} Refs",
+    "queryContinuation": "Anschluss nach {{name}}"
   },
   "projectScope": {
     "activeMode": "Aktiv",
@@ -345,5 +349,61 @@
     "scanStarting": "Vorbereitung…",
     "selectAll": "Alle auswählen",
     "title": "Einbezogene Projekte"
+  },
+  "motion": {
+    "aria": "Nach Bewegung filtern",
+    "tooltip": "Bewegung und Vor-/Abspann: Einstellungen behalten, die sich in eine Richtung bewegen (beim Indexieren gemessen; bereits indexierte Rushes erhalten sie beim nächsten „Indexieren“)",
+    "at": "Teil der Einstellung",
+    "atAny": "Anfang oder Ende",
+    "atStart": "Anfang der Einstellung",
+    "atEnd": "Ende der Einstellung",
+    "subject": "Motiv",
+    "camera": "Kamera",
+    "subjectTag": {
+      "left": "Nach links",
+      "right": "Nach rechts",
+      "up": "Nach oben",
+      "down": "Nach unten",
+      "still": "Unbewegt"
+    },
+    "cameraTag": {
+      "pan-left": "Schwenk nach links",
+      "pan-right": "Schwenk nach rechts",
+      "pan-up": "Schwenk nach oben",
+      "pan-down": "Schwenk nach unten",
+      "zoom-in": "Hineinzoomen",
+      "zoom-out": "Herauszoomen",
+      "static": "Statisch"
+    },
+    "skipEdges": "Vor- und Abspann ignorieren (je 2:30 am Anfang und Ende)",
+    "reset": "Filter zurücksetzen",
+    "dir": {
+      "right": "nach rechts",
+      "down-right": "nach rechts unten",
+      "down": "nach unten",
+      "down-left": "nach links unten",
+      "left": "nach links",
+      "up-left": "nach links oben",
+      "up": "nach oben",
+      "up-right": "nach rechts oben"
+    },
+    "describe": {
+      "subjectMoving": "Motiv {{dir}}",
+      "subjectStill": "Motiv unbewegt",
+      "subjectUnclear": "Motiv unklar",
+      "cameraPan": "Schwenk {{dir}}",
+      "zoomIn": "Hineinzoomen",
+      "zoomOut": "Herauszoomen",
+      "cameraStatic": "statische Kamera",
+      "cameraUnclear": "Kamera unklar",
+      "speed": {
+        "slow": "langsam",
+        "medium": "mittel",
+        "fast": "schnell"
+      }
+    },
+    "badgeStart": "Anfang: {{desc}}",
+    "badgeEnd": "Ende: {{desc}}",
+    "badgeAria": "Bewegung der Einstellung"
   }
 }

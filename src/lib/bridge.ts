@@ -857,6 +857,22 @@ export interface SearchHit {
   score: number;           // pertinence calibrée 0..1 (sigmoïde SigLIP), sinon cosinus brut
   aesthetic?: number;      // netteté/qualité zero-shot : cos(net)−cos(flou) (>0 = net), si demandé
   char?: { id: number; name: string; color?: string } | null;  // personnage reconnu (recherche visage), si étiqueté
+  motion?: ShotMotion;     // how the shot opens and closes (measured at indexing); absent = not measured
+}
+
+/** Eight screen directions, +y down. */
+export type MotionDirection = "right" | "down-right" | "down" | "down-left" | "left" | "up-left" | "up" | "up-right";
+export interface MotionEnd {
+  subject: MotionDirection | "still" | "unclear";
+  camera: `pan-${MotionDirection}` | "zoom-in" | "zoom-out" | "static" | "unclear";
+  speed: "slow" | "medium" | "fast" | null;
+}
+export interface ShotMotion { start: MotionEnd; end: MotionEnd }
+/** Coarse motion request: "left" also matches up-left and down-left. */
+export interface MotionFilter {
+  at: "any" | "start" | "end";
+  subject: string[];       // "left" | "right" | "up" | "down" | "still"
+  camera: string[];        // "pan-left" … | "zoom-in" | "zoom-out" | "static"
 }
 
 export interface SearchResult {
@@ -876,6 +892,7 @@ export interface SearchRef {
   thumb?: string | null;   // vignette pour l'affichage du bac de références (renderer)
   bbox?: [number, number, number, number]; // visage choisi au picker (x,y,w,h) — recherche visage
   domain?: "anime" | "real";               // domaine du visage choisi (moteur d'identité)
+  edge?: "end";            // match cut: search from the shot's LAST frame (and leave the shot out)
 }
 
 export interface SearchOpts {
@@ -890,6 +907,9 @@ export interface SearchOpts {
   charId?: number;         // filtre personnage (compat) : un seul perso
   charIds?: number[];      // mentions @perso : restreint au pool de plans de CES persos (intersection)
   filePaths?: string[];    // périmètre projet ; absent = tous les rush indexés
+  motion?: MotionFilter;   // keeps shots that move this way (needs motion tags from indexing)
+  skipEdgesSec?: number;   // leaves out shots in the first/last N seconds of each rush (opening/ending)
+  exclude?: SceneKey[];    // shots never returned
 }
 
 export interface SceneKey {

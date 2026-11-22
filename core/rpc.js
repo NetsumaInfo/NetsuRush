@@ -760,6 +760,9 @@ function createRpc() {
         aesthetic: !!opts?.aesthetic,
         char_ids: opts?.charIds ?? (opts?.charId != null ? [opts.charId] : undefined),
         file_paths: Array.isArray(opts?.filePaths) ? opts.filePaths : undefined,
+        motion: opts?.motion || undefined,              // { at, subject[], camera[] } : filtre sur les tags de mouvement
+        skip_edges_sec: Number(opts?.skipEdgesSec) || 0, // écarte les plans des N premières/dernières secondes (génériques)
+        exclude: Array.isArray(opts?.exclude) ? opts.exclude : undefined,
       }),
     "search:dedup": ([opts]) =>
       sidecars.queryReq("dedup", {

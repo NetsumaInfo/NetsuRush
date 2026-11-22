@@ -11,10 +11,10 @@ import nrident
 from detect import file_mtime
 from nri18n import t
 
-from . import media, model
+from . import media, model, motion
 from . import sampling
-from .config import (DECODE_WORKERS, DEFAULT_SAMPLING_FRAMES, FORCE_TIMEOUT, GPU_BATCH,
-                     GRAB_MAX_EDGE, INDEX_CHUNK, MODEL_TAG, SEGMENT_GAP_SEC, SEGMENT_SHOTS,
+from .config import (DECODE_WORKERS, DEFAULT_SAMPLING_FRAMES, FORCE_TIMEOUT, GPU_BATCH, GRAB_TIMEOUT,
+                     GRAB_MAX_EDGE, INDEX_CHUNK, MODEL_TAG, MOTION_ENABLED, SEGMENT_GAP_SEC, SEGMENT_SHOTS,
                      SEGMENT_THREADS, SHOT_DECODE, STATIC_THR, is_image, sampling_current, sampling_format,
                      sampling_frames, sampling_tag)
 from .db import db_emb
@@ -22,7 +22,29 @@ from .db import db_emb
 
 # Index d'un fichier, dans l'ordre de transfert : les vecteurs d'abord, le marqueur de complétion
 # ensuite — un marqueur sans ses vecteurs annoncerait un travail qui n'existe pas.
-INDEX_TABLES = ["frame_embeddings_v1", "index_runs_v1"]
+INDEX_TABLES = ["frame_embeddings_v1", "index_runs_v1", "shot_motion_v1", "motion_runs_v1"]
+
+
+def _motion_pass(con, path, mt, fps, scenes, cut_key, force, on_progress=None):
+    """Measure how every shot opens and closes (see `motion`). Skipped when the file was already
+    measured with these exact boundaries. Never fails the indexing: a file it cannot read simply
+    has no motion tags."""
+    if not MOTION_ENABLED or not fps or not scenes:
+        return
+    if not force and motion.is_current(con, path, mt, cut_key, len(scenes)):
+        return
+    shots = []
+    for index, sc in enumerate(scenes):
+        sf = int(sc.get("startFrame", 0))
+        shots.append((index, sf, int(sc.get("endFrame", sf))))
+    try:
+        measured = motion.measure_file(path, fps, shots, workers=DECODE_WORKERS,
+                                       threads=SEGMENT_THREADS, timeout=GRAB_TIMEOUT * 4,
+                                       on_progress=on_progress)
+    except Exception as exc:  # noqa: BLE001
+        sys.stderr.write("[search] motion skipped for %s: %s\n" % (path, exc)); sys.stderr.flush()
+        return
+    motion.store(con, path, mt, cut_key, shots, measured)
 
 
 def _index_image(path, mt, force=False):
@@ -122,6 +144,11 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         cur = done[2] if done else None
         current_fmt = sampling_current(cur, fmt, cut_key, legacy_key)
     if not force and usable(done, current_fmt):
+        # An index written before motion tags existed gets them now, without re-embedding.
+        def beat(done_shots, total_shots):
+            sys.stderr.write("PHASE:embed\nSTAGE:prog:%d/%d\n" % (done_shots, max(1, total_shots)))
+            sys.stderr.flush()
+        _motion_pass(con, path, mt, fps, scenes, cut_key, False, beat)
         con.close()
         return {"ok": True, "file": path, "indexed": 0, "total": n, "cached": True, "error": None}
     if n == 0:  # aucun plan détecté (fichier illisible, audio) → l'index existant reste intact
@@ -254,11 +281,14 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
 
     # Progress = decode + embedding, each over n shots. Embedding a batch takes seconds: without a
     # beat during it, the UI declared the indexing stalled in the middle of normal work.
-    work = {"decoded": 0, "embedded": 0.0}
+    # The motion pass (after the embedding, CPU only) gets its own third of the bar when it will run.
+    work = {"decoded": 0, "embedded": 0.0, "motion": 0}
+    motion_due = bool(MOTION_ENABLED and fps and (force or not motion.is_current(con, path, mt, cut_key, n)))
+    parts = 3 if motion_due else 2
 
     def report():
-        done = work["decoded"] + work["embedded"]
-        sys.stderr.write("STAGE:prog:%d/%d\n" % (int(done * 1000), 2 * n * 1000)); sys.stderr.flush()
+        done = work["decoded"] + work["embedded"] + work["motion"]
+        sys.stderr.write("STAGE:prog:%d/%d\n" % (int(done * 1000), parts * n * 1000)); sys.stderr.flush()
 
     def embed_batched(frames, shots_count):
         """GPU sub-batches, one progress beat each. VRAM saturated → free and redo the sub-batch
@@ -345,6 +375,11 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
                                    sampling_tag(fmt, cut_key)),
     )
     con.commit()
+    if motion_due:
+        def motion_beat(done_shots, _total):
+            work["motion"] = done_shots
+            report()
+        _motion_pass(con, path, mt, fps, scenes, cut_key, True, motion_beat)
     nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()
     return {"ok": True, "file": path, "indexed": indexed, "skipped": skipped,

@@ -107,6 +107,8 @@ def db_emb():
                 char_id INTEGER, score REAL,
                 PRIMARY KEY(file_path, scene_index, face_index, domain))"""
         )
+    from . import motion
+    motion.ensure_tables(con)
     migrate_legacy_model_tags(con)
     return con
 

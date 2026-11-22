@@ -208,7 +208,9 @@
     "addToTimeline": "タイムラインに追加",
     "select": "選択",
     "copyPath": "パスをコピー",
-    "fileAndShot": "{{path}} · ショット #{{n}}"
+    "fileAndShot": "{{path}} · ショット #{{n}}",
+    "continuation": "つながるカットを探す",
+    "continuationTooltip": "つながるカットを探す：このカットの後に続けられるカット（最後のフレームから検索）"
   },
   "searchResults": {
     "analyzing": "解析中",
@@ -250,7 +252,8 @@
     "clearAria": "リファレンスをクリア",
     "clearTooltip": "リファレンスをクリア",
     "remove": "外す",
-    "findSimilarMenu": "類似を検索"
+    "findSimilarMenu": "類似を検索",
+    "lastFrame": "末尾"
   },
   "searchBar": {
     "scopeAll": "すべての素材",
@@ -324,7 +327,8 @@
     "indexingStopped_one": "インデックス作成を停止しました（{{count}} クリップは一部のみ処理済み）。",
     "indexingStopped_other": "インデックス作成を停止しました（{{count}} クリップは一部のみ処理済み）。",
     "queryMoodboard_one": "ムードボード：{{count}} 件のリファレンス",
-    "queryMoodboard_other": "ムードボード：{{count}} 件のリファレンス"
+    "queryMoodboard_other": "ムードボード：{{count}} 件のリファレンス",
+    "queryContinuation": "{{name}} に続くカット"
   },
   "projectScope": {
     "activeMode": "有効",
@@ -345,5 +349,61 @@
     "scanStarting": "準備中…",
     "selectAll": "すべて選択",
     "title": "対象プロジェクト"
+  },
+  "motion": {
+    "aria": "動きで絞り込む",
+    "tooltip": "動きとOP/ED：特定の方向に動くカットだけを残す（インデックス時に計測。既にインデックス済みの素材は次の「インデックス」で付与）",
+    "at": "カットの位置",
+    "atAny": "冒頭または末尾",
+    "atStart": "カットの冒頭",
+    "atEnd": "カットの末尾",
+    "subject": "被写体",
+    "camera": "カメラ",
+    "subjectTag": {
+      "left": "左へ",
+      "right": "右へ",
+      "up": "上へ",
+      "down": "下へ",
+      "still": "静止"
+    },
+    "cameraTag": {
+      "pan-left": "左パン",
+      "pan-right": "右パン",
+      "pan-up": "上ティルト",
+      "pan-down": "下ティルト",
+      "zoom-in": "ズームイン",
+      "zoom-out": "ズームアウト",
+      "static": "固定"
+    },
+    "skipEdges": "OP・EDを除外（冒頭と末尾の2分30秒）",
+    "reset": "フィルターをリセット",
+    "dir": {
+      "right": "右",
+      "down-right": "右下",
+      "down": "下",
+      "down-left": "左下",
+      "left": "左",
+      "up-left": "左上",
+      "up": "上",
+      "up-right": "右上"
+    },
+    "describe": {
+      "subjectMoving": "被写体が{{dir}}へ",
+      "subjectStill": "被写体は静止",
+      "subjectUnclear": "被写体は不明",
+      "cameraPan": "カメラが{{dir}}へパン",
+      "zoomIn": "ズームイン",
+      "zoomOut": "ズームアウト",
+      "cameraStatic": "カメラ固定",
+      "cameraUnclear": "カメラは不明",
+      "speed": {
+        "slow": "遅い",
+        "medium": "中程度",
+        "fast": "速い"
+      }
+    },
+    "badgeStart": "冒頭：{{desc}}",
+    "badgeEnd": "末尾：{{desc}}",
+    "badgeAria": "カットの動き"
   }
 }

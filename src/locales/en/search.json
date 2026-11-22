@@ -208,7 +208,9 @@
     "addToTimeline": "Add to timeline",
     "select": "Select",
     "copyPath": "Copy path",
-    "fileAndShot": "{{path}} · shot #{{n}}"
+    "fileAndShot": "{{path}} · shot #{{n}}",
+    "continuation": "Find a match cut",
+    "continuationTooltip": "Find a match cut: shots that could follow this one (searched from its last frame)"
   },
   "searchResults": {
     "analyzing": "Analyzing",
@@ -250,7 +252,8 @@
     "clearAria": "Clear references",
     "clearTooltip": "Clear references",
     "remove": "Remove",
-    "findSimilarMenu": "Search similar"
+    "findSimilarMenu": "Search similar",
+    "lastFrame": "end"
   },
   "searchBar": {
     "scopeAll": "All footage",
@@ -324,7 +327,8 @@
     "indexingStopped_one": "Indexing stopped — {{count}} clip partly processed.",
     "indexingStopped_other": "Indexing stopped — {{count}} clips partly processed.",
     "queryMoodboard_one": "moodboard: {{count}} ref",
-    "queryMoodboard_other": "moodboard: {{count}} refs"
+    "queryMoodboard_other": "moodboard: {{count}} refs",
+    "queryContinuation": "Match cut after {{name}}"
   },
   "projectScope": {
     "activeMode": "Active",
@@ -345,5 +349,61 @@
     "scanStarting": "Preparing…",
     "selectAll": "Select all",
     "title": "Included projects"
+  },
+  "motion": {
+    "aria": "Filter by motion",
+    "tooltip": "Motion and opening/ending: keep shots that move a given way (measured at indexing; rushes indexed before get it on the next “Index”)",
+    "at": "Part of the shot",
+    "atAny": "Start or end",
+    "atStart": "Start of the shot",
+    "atEnd": "End of the shot",
+    "subject": "Subject",
+    "camera": "Camera",
+    "subjectTag": {
+      "left": "Moving left",
+      "right": "Moving right",
+      "up": "Moving up",
+      "down": "Moving down",
+      "still": "Still"
+    },
+    "cameraTag": {
+      "pan-left": "Pan left",
+      "pan-right": "Pan right",
+      "pan-up": "Tilt up",
+      "pan-down": "Tilt down",
+      "zoom-in": "Zoom in",
+      "zoom-out": "Zoom out",
+      "static": "Static"
+    },
+    "skipEdges": "Skip opening and ending (first and last 2:30)",
+    "reset": "Reset filters",
+    "dir": {
+      "right": "right",
+      "down-right": "down-right",
+      "down": "down",
+      "down-left": "down-left",
+      "left": "left",
+      "up-left": "up-left",
+      "up": "up",
+      "up-right": "up-right"
+    },
+    "describe": {
+      "subjectMoving": "subject moving {{dir}}",
+      "subjectStill": "subject still",
+      "subjectUnclear": "subject unclear",
+      "cameraPan": "camera pans {{dir}}",
+      "zoomIn": "zoom in",
+      "zoomOut": "zoom out",
+      "cameraStatic": "static camera",
+      "cameraUnclear": "camera unclear",
+      "speed": {
+        "slow": "slow",
+        "medium": "medium",
+        "fast": "fast"
+      }
+    },
+    "badgeStart": "Start: {{desc}}",
+    "badgeEnd": "End: {{desc}}",
+    "badgeAria": "Shot motion"
   }
 }

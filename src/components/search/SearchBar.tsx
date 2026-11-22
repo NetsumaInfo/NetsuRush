@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Spinner } from "@/components/ui/spinner";
 import { MentionInput } from "@/components/search/MentionInput";
+import { MotionFilterMenu } from "@/components/search/MotionFilterMenu";
 import { cn } from "@/lib/utils";
 import type { MentionChar } from "@/components/search/mentions";
 import type { SearchScope } from "@/store/search";
@@ -80,6 +81,7 @@ export function SearchBar({
         </TooltipTrigger>
         <TooltipContent>{t("searchBar.charactersTooltip")}</TooltipContent>
       </Tooltip>
+      <MotionFilterMenu />
 
       <span className="mx-1 h-5 w-px bg-border" aria-hidden />
 

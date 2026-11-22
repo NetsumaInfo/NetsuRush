@@ -5,9 +5,9 @@ ambiance, k-means cosinus à k auto). Périmètre : liste de plans, un clip, ou 
 import numpy as np
 from nri18n import language, t
 
-from .config import CHAR_POOL_THR, DEDUP_THR, IDENTITY_WEIGHT, MODEL_TAG
+from .config import CHAR_POOL_THR, DEDUP_THR, GRAB_MAX_EDGE, IDENTITY_WEIGHT, MODEL_TAG
 from .db import db_emb, purge_malformed_embeddings, usable_embeddings
-from . import model, qtext
+from . import media, model, motion, qtext, sampling
 from .store import STORE
 
 
@@ -53,11 +53,93 @@ def _ref_embedding(con, ref):
     si = ref.get("scene_index")
     if fp is None or si is None:
         return None
+    if ref.get("edge") == "end":
+        return _last_frame_embedding(con, fp, int(si))
     row = con.execute(
         "SELECT embedding FROM frame_embeddings_v1 WHERE file_path=? AND model=? AND scene_index=?",
         (fp, MODEL_TAG, int(si)),
     ).fetchone()
     return np.frombuffer(row[0], dtype=np.float32).copy() if row else None
+
+
+def _shot_bounds(con, fp, si):
+    return con.execute(
+        "SELECT start_frame, end_frame, start_sec, end_sec, fps FROM frame_embeddings_v1 "
+        "WHERE file_path=? AND model=? AND scene_index=?", (fp, MODEL_TAG, si)).fetchone()
+
+
+def _last_frame_embedding(con, fp, si):
+    """What a shot ENDS on, for a match cut: the next shot should continue from there, not from
+    the shot's average. The last frame often carries a dissolve or a cut detected one frame late,
+    so the second to last is taken, and a flat frame (black, flash) steps back a little."""
+    bounds = _shot_bounds(con, fp, si)
+    if not bounds:
+        return None
+    sf, ef, ss, es, fps = bounds
+    fps = float(fps or 0) or 24.0
+    frame = max(int(sf), int(ef) - 1)
+    sec = max(float(ss or 0.0), (frame - 0.4) / fps)
+    image = None
+    for _ in range(3):
+        image = media.grab_ffmpeg(fp, sec, accurate=True, max_edge=GRAB_MAX_EDGE)
+        if image is None or not sampling.is_flat(image) or sec <= float(ss or 0.0):
+            break
+        sec = max(float(ss or 0.0), sec - max(0.12, (float(es or sec) - float(ss or 0.0)) * 0.15))
+    if image is None:
+        return None
+    return model.embed_images([image])[0]
+
+
+def _search_filters(req, con, refs):
+    """Post-filters of a search: motion at one end of the shot, episode edges (opening and ending
+    songs), and the source shots of a match cut. None when nothing filters."""
+    raw = req.get("motion") or {}
+    subjects = [str(x) for x in (raw.get("subject") or []) if x]
+    cameras = [str(x) for x in (raw.get("camera") or []) if x]
+    at = raw.get("at") if raw.get("at") in ("start", "end") else "any"
+    skip = max(0.0, float(req.get("skip_edges_sec") or 0.0))
+    exclude = set()
+    for ref in refs:
+        if ref.get("edge") == "end" and ref.get("file_path") is not None and ref.get("scene_index") is not None:
+            exclude.add((ref["file_path"], int(ref["scene_index"])))
+    for item in req.get("exclude") or []:
+        if item.get("file_path") is not None and item.get("scene_index") is not None:
+            exclude.add((item["file_path"], int(item["scene_index"])))
+    if not (subjects or cameras or skip or exclude):
+        return None
+    return {"subjects": subjects, "cameras": cameras, "at": at, "skip": skip, "exclude": exclude}
+
+
+def _keep_hit(hit, f):
+    if (hit.get("file_path"), int(hit.get("scene_index", -1))) in f["exclude"]:
+        return False
+    if f["skip"]:
+        fps = float(hit.get("fps") or 0)
+        total = float(hit.get("src_frames") or 0) / fps if fps else 0.0
+        if total > 2 * f["skip"]:
+            if float(hit.get("start_sec") or 0) < f["skip"] or float(hit.get("end_sec") or 0) > total - f["skip"]:
+                return False
+    if f["subjects"] or f["cameras"]:
+        tags = hit.get("motion")
+        if not tags:
+            return False
+        ends = [tags["start"], tags["end"]] if f["at"] == "any" else [tags[f["at"]]]
+        if f["subjects"] and not any(motion.tag_matches(e["subject"], w) for e in ends for w in f["subjects"]):
+            return False
+        if f["cameras"] and not any(motion.tag_matches(e["camera"], w) for e in ends for w in f["cameras"]):
+            return False
+    return True
+
+
+def _finish(con, result, filters, top_k):
+    """Motion tags on every hit, then the post-filters, then the final cut to top_k."""
+    hits = result.get("hits") or []
+    if hits:
+        motion.tags_for_hits(con, hits)
+    if filters is not None:
+        hits = [h for h in hits if _keep_hit(h, filters)]
+    result["hits"] = hits[:top_k]
+    return result
 
 
 def cmd_query(text, top_k=60):
@@ -109,14 +191,19 @@ def cmd_search(req):
         if pos:
             q_pos = _unit(np.mean(np.stack(pos), axis=0)) if len(pos) > 1 else pos[0]
         q_neg = _embed_query(neg_text, ui_lang, False) if neg_text else None
+        filters = _search_filters(req, con, refs)
+        # Filters drop hits AFTER ranking: fetch deeper so the page still fills up.
+        fetch_k = top_k if filters is None else min(max(top_k * 6, top_k + 64), 6000)
         if char_ids:
             # Avec des mentions : filtre par pool perso, texte optionnel (vide = tous leurs plans).
-            return _char_filtered_search(con, q_pos, top_k, min_score, q_neg, beta, aesthetic, char_ids, file_paths)
+            return _finish(con, _char_filtered_search(con, q_pos, fetch_k, min_score, q_neg, beta, aesthetic,
+                                                      char_ids, file_paths), filters, top_k)
         if q_pos is None:
             return {"hits": [], "error": t("empty_query")}
         if file_paths is not None:
-            return STORE.search_paths(q_pos, file_paths, top_k, min_score, q_neg, beta, aesthetic)
-        return STORE.search(q_pos, top_k, min_score, q_neg, beta, aesthetic)
+            return _finish(con, STORE.search_paths(q_pos, file_paths, fetch_k, min_score, q_neg, beta, aesthetic),
+                           filters, top_k)
+        return _finish(con, STORE.search(q_pos, fetch_k, min_score, q_neg, beta, aesthetic), filters, top_k)
     finally:
         con.close()
 
