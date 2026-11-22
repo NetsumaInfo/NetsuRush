@@ -4,7 +4,7 @@ import type { StateCreator } from "zustand";
 import i18n from "@/i18n";
 import {
   nr, type SearchHit, type SearchStatus, type SearchRef,
-  type DedupGroup, type ClusterGroup, type ProjectScopeList, type MotionFilter,
+  type DedupGroup, type ClusterGroup, type ProjectScopeList, type MotionFilter, type DetectModel,
 } from "@/lib/bridge";
 import { hostBuildTimeline } from "@/lib/host";
 import { parseMentions } from "@/components/search/mentions";
@@ -620,7 +620,19 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
       set({ searchError: null, indexCancel: false });
       // Indexation = tâche GPU lourde → propose de fermer le logiciel de montage pour libérer la VRAM.
       get().offerCloseForRam();
-      const cutModel = get().searchCutModel;   // modèle de découpe choisi dans les paramètres
+      const chosenModel = get().searchCutModel;   // modèle de découpe choisi dans les paramètres
+      // Two stages: every rush is first indexed on its instant keyframe cut (searchable within
+      // seconds), then re-indexed on the model's cut. The second pass reuses the frames the first one
+      // analysed (python/nrsearch/framecache.py) and only decodes the shots none of them covers.
+      const twoStage = get().searchTwoStage && !force && chosenModel !== "keyframes";
+      const passes: { model: DetectModel; label: string | null }[] = twoStage
+        ? [{ model: "keyframes", label: i18n.t("search:indexProgress.passFast") },
+           { model: chosenModel, label: i18n.t("search:indexProgress.passRefine") }]
+        : [{ model: chosenModel, label: null }];
+      for (const pass of passes) {
+      if (stopped) break;
+      const cutModel = pass.model;
+      const named = (file: string) => (pass.label ? `${pass.label} · ${file}` : file);
 
       // Concurrence : 1 (séquentiel) ou N selon la VRAM libre si le mode parallèle est coché.
       let conc = 1;
@@ -644,7 +656,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
           for (let i = 0; i < total; i++) {
             if (get().indexCancel) { stopped = true; break; }   // arrêt demandé → on s'arrête au clip suivant
             track.to(batchProgress(i, total, 0), batchCeiling(i, total));
-            set({ indexBusy: { file: basename(paths[i]), pct: track.value(), done: i, total, phase: "", ts: Date.now() } });
+            set({ indexBusy: { file: named(basename(paths[i])), pct: track.value(), done: i, total, phase: "", ts: Date.now() } });
             const r = await withDaemonRetry(() => nr.indexClip(paths[i], force, frames, cutModel, detectionOptionsFor(cutModel, get().detectionOptions)), () => get().indexCancel);   // force = seek précis + retraite tout ; frames = images par plan ; cutModel = découpe
             if (isCanceled(r)) { stopped = true; break; }
             if (r.error) { failed++; lastErr = r.error; }   // on saute le clip fautif, on continue le reste
@@ -669,7 +681,7 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
         const bump = () => {
           track.to(Math.round(((done + liveSum()) / total) * 100), batchCeiling(done, total, running));
           set({ indexBusy: {
-            file: i18n.t("search:store.parallelRunning", { running, conc }),
+            file: named(i18n.t("search:store.parallelRunning", { running, conc })),
             pct: track.value(), done, total, phase: "embed", ts: Date.now(),
           } });
         };
@@ -706,6 +718,13 @@ export const createSearchSlice: StateCreator<AppState, [], [], SearchSlice> = (s
           track.stop();
           set({ indexBusy: null, indexCancel: false });
         }
+      }
+      // The fast pass is a complete index on its own: say so, then refine. Failures are counted on
+      // the final pass only — the same clip failing twice is one failure.
+      if (pass !== passes[passes.length - 1]) {
+        if (!stopped) void get().refreshSearchStatus();
+        failed = 0;
+      }
       }
 
       // Absorbe ici le cold-start du modèle et la reconstruction de l'index RAM : une fois la

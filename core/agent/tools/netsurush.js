@@ -46,14 +46,14 @@ function createNetsuRushTools(deps) {
     },
     {
       name: 'detect_scenes',
-      description: 'Detects the shots of a video and caches them. Models: transnetv2, omnishotcut, autoshot.',
+      description: 'Detects the shots of a video and caches them. Models: transnetv2, omnishotcut, autoshot, keyframes (instant, read from the file index, ~70% of the cuts).',
       risk: 'read',
       inputSchema: {
         type: 'object',
         properties: {
           path: { type: 'string', description: 'Path of the video' },
           threshold: { type: 'number' },
-          model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot'] },
+          model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot', 'keyframes'] },
           options: { type: 'object', description: 'Advanced settings specific to the model.' },
         },
         required: ['path'],
@@ -66,7 +66,7 @@ function createNetsuRushTools(deps) {
       risk: 'read',
       inputSchema: {
         type: 'object',
-        properties: { path: { type: 'string' }, model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot'] }, options: { type: 'object' } },
+        properties: { path: { type: 'string' }, model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot', 'keyframes'] }, options: { type: 'object' } },
         required: ['path'],
       },
       handler: (/** @type {any} */ a) => sidecars.getCachedScenes(a.path, a.model || 'transnetv2', a.threshold, a.options),
@@ -167,7 +167,7 @@ function createNetsuRushTools(deps) {
         type: 'object',
         properties: {
           timelineName: { type: 'string' },
-          model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot'] },
+          model: { type: 'string', enum: ['transnetv2', 'omnishotcut', 'autoshot', 'keyframes'] },
           threshold: { type: 'number' },
           detectionOptions: { type: 'object' },
           name: { type: 'string' },

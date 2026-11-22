@@ -159,7 +159,7 @@ module.exports = {
     detect_scenes: {
       risk: 'write', long: true,
       usage: 'detect_scenes(path, threshold?, model?, options?) — run shot detection (GPU, can take minutes) and cache it; '
-        + 'scenes [{start, end (s), startFrame, endFrame (inclusive)}]. model: transnetv2 (default) | omnishotcut | autoshot; '
+        + 'scenes [{start, end (s), startFrame, endFrame (inclusive)}]. model: transnetv2 (default) | omnishotcut | autoshot | keyframes (instant, ~70% of the cuts); '
         + 'threshold default 0.5; options {minSceneFrames?}',
       channel: 'ffmpeg:detectScenes',
       args: (a) => [a.path, a.threshold == null ? 0.5 : Number(a.threshold), a.model || 'transnetv2', a.options || {}],
@@ -201,7 +201,7 @@ module.exports = {
     page: { type: 'number', description: 'overview: page, from 1' },
     framesPerShot: { type: 'number', enum: [2, 3, 4], description: 'overview: force this many frames per shot. Leave it out: each shot gets what it needs (2 to 6, up to 8 for a very long shot)' },
     threshold: { type: 'number', description: 'Detection sensitivity (default 0.5)' },
-    model: { type: 'string', description: 'Detection model: transnetv2 (default) | omnishotcut | autoshot' },
+    model: { type: 'string', description: 'Detection model: transnetv2 (default) | omnishotcut | autoshot | keyframes' },
     options: { type: 'object', description: 'Detection options, e.g. {minSceneFrames: 6}' },
     optionsKey: { type: 'string', description: 'Key of the detection options the edits belong to (optional)' },
     edits: {

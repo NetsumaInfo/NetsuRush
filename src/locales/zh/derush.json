@@ -176,7 +176,8 @@
     "modelHintOmni": "对溶解、划像和渐变转场最可靠。全自动，需要 GPU。",
     "modelHintAutoShot": "适合快节奏剪辑和大幅运动画面。阈值见高级选项，需要 GPU。",
     "shotsCount_one": "{{count}} 个镜头",
-    "shotsCount_other": "{{count}} 个镜头"
+    "shotsCount_other": "{{count}} 个镜头",
+    "modelHintKeyframes": "即时：无需解码，直接读取文件的关键帧（一部电影只需几秒）。可找到约 70% 的剪切点，并有少量误判；每个镜头都能无损、逐帧精确地切出。"
   },
   "browser": {
     "sort": "排序",

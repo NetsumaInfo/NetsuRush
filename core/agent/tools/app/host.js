@@ -229,7 +229,7 @@ module.exports = {
     opts: { type: 'object', description: 'Timeline build options of a queued send' },
     which: { type: 'string', enum: ['all', 'done', 'pending'] },
     timelineName: { type: 'string', description: 'Timeline / sequence name; omitted = the open one' },
-    model: { type: 'string', description: 'Shot detection model: transnetv2 | omnishotcut | autoshot' },
+    model: { type: 'string', description: 'Shot detection model: transnetv2 | omnishotcut | autoshot | keyframes' },
     threshold: { type: 'number' },
     detectionOptions: { type: 'object' },
     summaryOnly: { type: 'boolean' },

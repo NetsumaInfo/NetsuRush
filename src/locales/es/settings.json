@@ -682,7 +682,9 @@
   "indexing": {
     "title": "Indexación",
     "subtitle": "Cada clip se corta en planos y luego se analiza cada plano. Lo que no cambia el resultado ya está activo.",
-    "cutTitle": "Corte en planos"
+    "cutTitle": "Corte en planos",
+    "twoStage": "Indexación en dos tiempos",
+    "twoStageHint": "Indexa primero sobre un corte instantáneo (fotogramas clave): la búsqueda funciona en segundos. Después el modelo elegido afina el corte reutilizando los fotogramas ya analizados."
   },
   "boardAssets": {
     "title": "Almacenamiento del tablero",

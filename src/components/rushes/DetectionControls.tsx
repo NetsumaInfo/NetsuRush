@@ -26,13 +26,14 @@ export function DetectionModelSelect({
   const { t } = useTranslation("derush");
   // Tant que le registre backend n'est pas disponible, seul le moteur socle bundlé est sûr.
   // Ne jamais exposer Omni/Auto par simple défaut d'UI.
-  const [available, setAvailable] = useState<typeof MODELS>(MODELS.filter((entry) => entry.id === "transnetv2"));
+  // Keyframes needs no weights: always there.
+  const [available, setAvailable] = useState<typeof MODELS>(MODELS.filter((entry) => entry.id === "transnetv2" || entry.id === "keyframes"));
   useEffect(() => {
     let live = true;
     void nr.modelsList().then((result) => {
       if (!live || !result.ok || result.models.length === 0) return;
       const installed = new Set(result.models.filter((entry) => entry.installed && entry.available !== false).map((entry) => entry.id));
-      const next = MODELS.filter((entry) => installed.has(entry.id));
+      const next = MODELS.filter((entry) => installed.has(entry.id) || entry.id === "keyframes");
       if (next.length) {
         setAvailable(next);
         if (!next.some((entry) => entry.id === model)) onChange(next[0].id);

@@ -97,7 +97,9 @@
     "preparing": "Préparation…",
     "readyingSearch": "Préparation de la première recherche…",
     "stopping": "Arrêt…",
-    "stop": "Arrêter"
+    "stop": "Arrêter",
+    "passFast": "Découpe rapide",
+    "passRefine": "Affinage"
   },
   "galleryPanel": {
     "card": {

@@ -103,7 +103,7 @@ function readPlayerVolume(): number {
 function readCutModel(): DetectModel {
   if (typeof localStorage === "undefined") return "transnetv2";
   const stored = localStorage.getItem(CUT_MODEL_KEY);
-  return stored === "omnishotcut" || stored === "autoshot" ? stored : "transnetv2";
+  return stored === "omnishotcut" || stored === "autoshot" || stored === "keyframes" ? stored : "transnetv2";
 }
 // Index dans PRESETS (0 Rapide → 3 Max). Défaut 1 = Équilibré. Sans effet sous OmniShotCut (auto).
 function readCutPreset(): number {
@@ -134,7 +134,7 @@ function readCutPlayerOpen(): boolean {
 function readSearchCutModel(): DetectModel {
   if (typeof localStorage === "undefined") return "transnetv2";
   const stored = localStorage.getItem(SEARCH_CUT_MODEL_KEY);
-  return stored === "omnishotcut" || stored === "autoshot" ? stored : "transnetv2";
+  return stored === "omnishotcut" || stored === "autoshot" || stored === "keyframes" ? stored : "transnetv2";
 }
 
 function readDetectionOptions(): NormalizedDetectOptions {
@@ -205,6 +205,9 @@ export interface SettingsSlice {
   // Modèle de découpe de la recherche SigLIP (défaut d'indexation).
   searchCutModel: DetectModel;
   setSearchCutModel: (m: DetectModel) => void;
+  // Index first on the instant keyframe cut (searchable at once), then refine with searchCutModel.
+  searchTwoStage: boolean;
+  setSearchTwoStage: (on: boolean) => void;
   // Aperçu au survol : volume du son (0..1) + coupure globale.
   hoverVolume: number;
   setHoverVolume: (v: number) => void;
@@ -397,6 +400,11 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
       set({ lang });
     },
     searchCutModel: readSearchCutModel(),
+    searchTwoStage: (() => { try { return localStorage.getItem("nr.search.twoStage") !== "0"; } catch { return true; } })(),
+    setSearchTwoStage: (searchTwoStage) => {
+      try { localStorage.setItem("nr.search.twoStage", searchTwoStage ? "1" : "0"); } catch { /* noop */ }
+      set({ searchTwoStage });
+    },
     setSearchCutModel: (searchCutModel) => {
       if (typeof localStorage !== "undefined") localStorage.setItem(SEARCH_CUT_MODEL_KEY, searchCutModel);
       set({ searchCutModel });

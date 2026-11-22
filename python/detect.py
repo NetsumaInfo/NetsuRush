@@ -486,6 +486,48 @@ def _detect_transnet(path, threshold):
     return fps, nframes, scenes
 
 
+def keyframe_scenes(times, fps, nframes):
+    """Shots cut at every keyframe: [(startFrame, endFrame)] inclusive, covering [0, nframes).
+    `times` = keyframe timestamps in seconds, counted from the first frame."""
+    bounds = sorted({int(round(t * fps)) for t in times if t > 0} | {0})
+    bounds = [b for b in bounds if b < nframes] + [nframes]
+    return [(a, b - 1) for a, b in zip(bounds, bounds[1:]) if b > a]
+
+
+def _detect_keyframes(path):
+    """Instant cut: one shot per keyframe interval, read from the container index without decoding a
+    single frame (a 2 h film in about 4 s). Encoders put a keyframe on most scene changes, so this
+    finds roughly 65-75 % of the cuts a model finds, plus a few false ones where the encoder places
+    keyframes on a fixed interval. It is the FAST stage: searchable at once, refined later by a
+    model. Every shot starts on a keyframe, so a lossless cut of it is frame-exact."""
+    import subprocess
+    sys.stderr.write("STAGE:infer\n"); sys.stderr.flush()
+    _progress(5)
+    out = subprocess.run(
+        [ffprobe_bin(), "-v", "error", "-select_streams", "v:0", "-show_entries", "packet=pts_time,flags",
+         "-of", "csv=p=0", path],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=600).stdout.decode("utf-8", "replace")
+    packets = []
+    for line in out.splitlines():
+        parts = line.split(",")
+        if len(parts) >= 2 and parts[0] not in ("", "N/A"):
+            try:
+                packets.append((float(parts[0]), "K" in parts[1]))
+            except ValueError:
+                continue
+    if not packets:
+        raise ValueError(t("no_decoded_frame"))
+    packets.sort()
+    fps, _estimate = _probe_fps_frames(path)
+    fps = fps or 24.0
+    nframes = len(packets)
+    first = packets[0][0]
+    raw = keyframe_scenes([pts - first for pts, key in packets if key], fps, nframes)
+    _progress(95)
+    scenes = [{"startFrame": a, "endFrame": b, "start": a / fps, "end": (b + 1) / fps} for a, b in raw]
+    return fps, nframes, scenes
+
+
 def _detect_autoshot(path, options):
     sys.stderr.write("STAGE:load\n"); sys.stderr.flush()
     _progress(2)
@@ -652,8 +694,8 @@ def _link_existing_cut(path, model, threshold, options):
 
 def cmd_detect(path, threshold, model, options=None):
     _reset_progress()  # échelle 0..100 par job (mode serve : jobs successifs)
-    model = model if model in ("omnishotcut", "autoshot") else "transnetv2"
-    linked = _link_existing_cut(path, model, 0.0 if model == "omnishotcut" else threshold, options)
+    model = model if model in ("omnishotcut", "autoshot", "keyframes") else "transnetv2"
+    linked = _link_existing_cut(path, model, 0.0 if model in ("omnishotcut", "keyframes") else threshold, options)
     if linked:
         return linked
     try:
@@ -664,6 +706,10 @@ def cmd_detect(path, threshold, model, options=None):
         elif model == "autoshot":
             normalized, options_key = _canonical_options(model, threshold, options)
             fps, nframes, scenes = _detect_autoshot(path, normalized["autoshot"])
+        elif model == "keyframes":
+            threshold = 0.0  # no threshold: the encoder decided → stable cache key
+            normalized, options_key = _canonical_options(model, threshold, options)
+            fps, nframes, scenes = _detect_keyframes(path)
         else:
             model = "transnetv2"
             normalized, options_key = _canonical_options(model, threshold, options)

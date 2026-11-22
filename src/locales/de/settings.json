@@ -682,7 +682,9 @@
   "indexing": {
     "title": "Indizierung",
     "subtitle": "Jeder Clip wird in Shots zerlegt, dann wird jeder Shot analysiert. Was das Ergebnis nicht ändert, ist schon aktiv.",
-    "cutTitle": "Aufteilung in Shots"
+    "cutTitle": "Aufteilung in Shots",
+    "twoStage": "Indexierung in zwei Schritten",
+    "twoStageHint": "Indexiert zuerst auf einem sofortigen Keyframe-Schnitt: Die Suche funktioniert nach wenigen Sekunden. Danach verfeinert das gewählte Modell den Schnitt und verwendet die bereits analysierten Bilder wieder."
   },
   "boardAssets": {
     "title": "Board-Speicher",

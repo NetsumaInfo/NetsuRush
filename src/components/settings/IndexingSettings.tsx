@@ -18,6 +18,8 @@ export function IndexingSettings() {
   const { t } = useTranslation("settings");
   const cutModel = useApp((s) => s.searchCutModel);
   const setCutModel = useApp((s) => s.setSearchCutModel);
+  const twoStage = useApp((s) => s.searchTwoStage);
+  const setTwoStage = useApp((s) => s.setSearchTwoStage);
   const perf = useApp((s) => s.searchPerf);
   const setPerf = useApp((s) => s.setSearchPerf);
   const resetPerf = useApp((s) => s.resetSearchPerf);
@@ -37,6 +39,13 @@ export function IndexingSettings() {
       <div>
         <h3 className="text-xs font-medium text-muted-foreground">{t("performance.indexingTitle")}</h3>
         <div className="mt-2 divide-y divide-border rounded-lg border border-border">
+          <SettingRow label={t("indexing.twoStage")} hint={t("indexing.twoStageHint")}>
+            <Toggle className="ml-auto flex" pressed={twoStage && cutModel !== "keyframes"} disabled={cutModel === "keyframes"}
+              onPressedChange={setTwoStage}>
+              <NetsuIcon name="zap" className="size-3.5" />
+              {t(twoStage && cutModel !== "keyframes" ? "performance.enabled" : "performance.disabled")}
+            </Toggle>
+          </SettingRow>
           <SettingRow label={t("performance.shotDecode")} hint={t("performance.shotDecodeHint")}>
             <Toggle className="ml-auto flex" pressed={perf.shotDecode} onPressedChange={(shotDecode) => setPerf({ shotDecode })}>
               <NetsuIcon name="zap" className="size-3.5" />

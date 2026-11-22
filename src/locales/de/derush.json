@@ -176,7 +176,8 @@
     "modelHintOmni": "Am zuverlässigsten bei Blenden, Wischern und weichen Übergängen. Automatisch, GPU.",
     "modelHintAutoShot": "Gut bei schnellen Schnitten und bewegtem Material. Schwellenwert in den erweiterten Einstellungen regelbar, GPU.",
     "shotsCount_one": "{{count}} Shot",
-    "shotsCount_other": "{{count}} Shots"
+    "shotsCount_other": "{{count}} Shots",
+    "modelHintKeyframes": "Sofort: liest die Keyframes der Datei, ohne etwas zu decodieren (wenige Sekunden für einen Film). Findet etwa 70 % der Schnitte, mit einigen falschen; jede Einstellung lässt sich verlustfrei und bildgenau schneiden."
   },
   "browser": {
     "sort": "Sortieren",

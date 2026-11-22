@@ -682,7 +682,9 @@
   "indexing": {
     "title": "Indexing",
     "subtitle": "Each clip is cut into shots, then each shot is analyzed. Anything that doesn't change the result is already on.",
-    "cutTitle": "Shot detection"
+    "cutTitle": "Shot detection",
+    "twoStage": "Two-stage indexing",
+    "twoStageHint": "Indexes on an instant keyframe cut first, so search works within seconds. The chosen model then refines the cut, reusing the frames already analysed."
   },
   "boardAssets": {
     "title": "Board storage",

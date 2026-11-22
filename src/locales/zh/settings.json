@@ -682,7 +682,9 @@
   "indexing": {
     "title": "索引",
     "subtitle": "每个素材先切成镜头，再逐个分析。不影响结果的设置已经开启。",
-    "cutTitle": "镜头分割"
+    "cutTitle": "镜头分割",
+    "twoStage": "两阶段索引",
+    "twoStageHint": "先基于即时的关键帧切分建立索引，几秒内即可搜索。随后所选模型会细化切分，并复用已分析过的画面。"
   },
   "boardAssets": {
     "title": "画板存储",

@@ -176,7 +176,8 @@
     "modelHintOmni": "Le plus fiable sur fondus, volets et transitions progressives. Automatique, GPU.",
     "modelHintAutoShot": "Bon sur montages rapides et plans très animés. Seuil réglable en avancé, GPU.",
     "shotsCount_one": "{{count}} plan",
-    "shotsCount_other": "{{count}} plans"
+    "shotsCount_other": "{{count}} plans",
+    "modelHintKeyframes": "Instantané : lit les images clés du fichier sans rien décoder (quelques secondes pour un film). Trouve environ 70 % des coupes, avec quelques fausses ; chaque plan se coupe sans perte à l'image près."
   },
   "browser": {
     "sort": "Trier",

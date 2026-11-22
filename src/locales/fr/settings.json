@@ -682,7 +682,9 @@
   "indexing": {
     "title": "Indexation",
     "subtitle": "Chaque rush est découpé en plans, puis chaque plan est analysé. Ce qui ne change pas le résultat est déjà actif.",
-    "cutTitle": "Découpe en plans"
+    "cutTitle": "Découpe en plans",
+    "twoStage": "Indexation en deux temps",
+    "twoStageHint": "Indexe d'abord sur une découpe instantanée (images clés) : la recherche marche en quelques secondes. Le modèle choisi affine ensuite la découpe, en réutilisant les images déjà analysées."
   },
   "boardAssets": {
     "title": "Stockage du board",

@@ -176,7 +176,8 @@
     "modelHintOmni": "Most reliable on dissolves, wipes and gradual transitions. Automatic, GPU.",
     "modelHintAutoShot": "Good on fast edits and very dynamic footage. Threshold adjustable in advanced settings, GPU.",
     "shotsCount_one": "{{count}} shot",
-    "shotsCount_other": "{{count}} shots"
+    "shotsCount_other": "{{count}} shots",
+    "modelHintKeyframes": "Instant: reads the file's keyframes without decoding anything (a few seconds for a film). Finds about 70% of the cuts, with a few false ones; every shot cuts losslessly to the exact frame."
   },
   "browser": {
     "sort": "Sort",

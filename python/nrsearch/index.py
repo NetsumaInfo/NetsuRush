@@ -25,7 +25,7 @@ from .db import db_emb
 INDEX_TABLES = ["frame_vectors_v1", "frame_embeddings_v1", "index_runs_v1", "shot_motion_v1", "motion_runs_v1"]
 
 
-def _motion_pass(con, path, mt, fps, scenes, cut_key, force, on_progress=None):
+def _motion_pass(con, path, mt, fps, scenes, cut_key, force, on_progress=None, reuse=True):
     """Measure how every shot opens and closes (see `motion`). Skipped when the file was already
     measured with these exact boundaries. Never fails the indexing: a file it cannot read simply
     has no motion tags."""
@@ -37,10 +37,20 @@ def _motion_pass(con, path, mt, fps, scenes, cut_key, force, on_progress=None):
     for index, sc in enumerate(scenes):
         sf = int(sc.get("startFrame", 0))
         shots.append((index, sf, int(sc.get("endFrame", sf))))
+    # A shot whose boundaries did not move (most of them, when a refined cut replaces a fast one)
+    # keeps its measurement: only shots with a new edge are decoded.
+    known = motion.previous(con, path, mt) if reuse else {}
+    carried = {i: known[(sf, ef)] for i, sf, ef in shots if (sf, ef) in known}
+    todo = [shot for shot in shots if shot[0] not in carried]
+
+    def progress(done, _total):
+        if on_progress:
+            on_progress(len(carried) + done, len(shots))
     try:
-        measured = motion.measure_file(path, fps, shots, workers=DECODE_WORKERS,
+        measured = motion.measure_file(path, fps, todo, workers=DECODE_WORKERS,
                                        threads=SEGMENT_THREADS, timeout=GRAB_TIMEOUT * 4,
-                                       on_progress=on_progress)
+                                       on_progress=progress) if todo else {}
+        measured.update(carried)
     except Exception as exc:  # noqa: BLE001
         sys.stderr.write("[search] motion skipped for %s: %s\n" % (path, exc)); sys.stderr.flush()
         return
@@ -426,7 +436,7 @@ def cmd_index(path, force=False, frames=None, cut_model=None, detect_options=Non
         def motion_beat(done_shots, _total):
             work["motion"] = done_shots
             report()
-        _motion_pass(con, path, mt, fps, scenes, cut_key, True, motion_beat)
+        _motion_pass(con, path, mt, fps, scenes, cut_key, True, motion_beat, reuse=not force)
     nrident.remember(con, path)  # témoin d'identité (cf. python/nrident.py)
     con.close()
     return {"ok": True, "file": path, "indexed": indexed, "skipped": skipped,

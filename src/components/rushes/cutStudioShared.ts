@@ -39,6 +39,7 @@ export const MODELS: { id: DetectModel; label: string; hintKey: string }[] = [
   { id: "transnetv2", label: "TransNetV2", hintKey: "shared.modelHintTransnet" },
   { id: "omnishotcut", label: "OmniShotCut", hintKey: "shared.modelHintOmni" },
   { id: "autoshot", label: "AutoShot", hintKey: "shared.modelHintAutoShot" },
+  { id: "keyframes", label: "Keyframes", hintKey: "shared.modelHintKeyframes" },
 ];
 export const modelLabel = (m: DetectModel) => MODELS.find((x) => x.id === m)?.label ?? m;
 

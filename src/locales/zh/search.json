@@ -97,7 +97,9 @@
     "preparing": "准备中…",
     "readyingSearch": "正在准备首次搜索…",
     "stopping": "停止中…",
-    "stop": "停止"
+    "stop": "停止",
+    "passFast": "快速切分",
+    "passRefine": "细化"
   },
   "galleryPanel": {
     "card": {

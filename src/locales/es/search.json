@@ -97,7 +97,9 @@
     "preparing": "Preparando…",
     "readyingSearch": "Preparando la primera búsqueda…",
     "stopping": "Deteniendo…",
-    "stop": "Detener"
+    "stop": "Detener",
+    "passFast": "Corte rápido",
+    "passRefine": "Afinado"
   },
   "galleryPanel": {
     "card": {

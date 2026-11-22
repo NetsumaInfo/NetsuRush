@@ -176,7 +176,8 @@
     "modelHintOmni": "El más fiable con fundidos, cortinillas y transiciones graduales. Automático, GPU.",
     "modelHintAutoShot": "Bueno en montajes rápidos y planos muy dinámicos. Umbral en avanzado, GPU.",
     "shotsCount_one": "{{count}} plano",
-    "shotsCount_other": "{{count}} planos"
+    "shotsCount_other": "{{count}} planos",
+    "modelHintKeyframes": "Instantáneo: lee los fotogramas clave del archivo sin decodificar nada (unos segundos para una película). Encuentra cerca del 70 % de los cortes, con algunos falsos; cada plano se corta sin pérdida al fotograma exacto."
   },
   "browser": {
     "sort": "Ordenar",

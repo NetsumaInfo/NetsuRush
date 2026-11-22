@@ -176,7 +176,8 @@
     "modelHintOmni": "ディゾルブ、ワイプ、緩やかなトランジションに最も強い。全自動、GPU。",
     "modelHintAutoShot": "速い編集や動きの大きい映像に強い。しきい値は詳細設定、GPU。",
     "shotsCount_one": "{{count}} ショット",
-    "shotsCount_other": "{{count}} ショット"
+    "shotsCount_other": "{{count}} ショット",
+    "modelHintKeyframes": "即時：何もデコードせずにファイルのキーフレームを読み取ります（映画1本で数秒）。カットの約70%を検出し、誤検出も少しあります。各カットはフレーム単位でロスレスに切り出せます。"
   },
   "browser": {
     "sort": "並び替え",

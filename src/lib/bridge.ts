@@ -72,7 +72,8 @@ export interface Scene {
   interLabel?: OmniInterLabel | null;
 }
 
-export type DetectModel = "transnetv2" | "omnishotcut" | "autoshot";
+// "keyframes" = instant cut read from the container index (no decoding, no model): the fast stage.
+export type DetectModel = "transnetv2" | "omnishotcut" | "autoshot" | "keyframes";
 export type OmniShotMode = "clean_shot" | "default";
 export type OmniIntraLabel = "General" | "Dissolve" | "Wipes" | "Push" | "Slide" | "Zoom" | "Fade" | "Doorway";
 export type OmniInterLabel = "New_Start" | "Hard_Cut" | "Transition_Source" | "Transition" | "Sudden_Jump";

@@ -357,6 +357,20 @@ def is_current(con, path, mtime, cut_key, total):
                 and row[2] == VERSION and row[3] == total)
 
 
+def previous(con, path, mtime):
+    """{(start_frame, end_frame): (start_raw, end_raw)} measured for this file version, whatever cut
+    it belonged to. A shot with the same boundaries has the same edges, so the same motion."""
+    out = {}
+    for sf, ef, row_mtime, start_raw, end_raw in con.execute(
+            "SELECT start_frame, end_frame, mtime, start_raw, end_raw FROM shot_motion_v1 WHERE file_path=?",
+            (path,)):
+        if row_mtime is None or abs(row_mtime - mtime) > 1.0:
+            continue
+        out[(int(sf), int(ef))] = (json.loads(start_raw) if start_raw else None,
+                                   json.loads(end_raw) if end_raw else None)
+    return out
+
+
 def store(con, path, mtime, cut_key, shots, measured):
     import time
     rows = []

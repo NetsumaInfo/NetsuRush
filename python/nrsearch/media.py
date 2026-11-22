@@ -227,7 +227,9 @@ def _cached_cut(con, path, model, threshold, options_key):
         ("scene_cache_v3", "AND model=? AND abs(threshold-?)<0.001", (model, float(threshold))),
         ("scene_cache_v4", "AND model=?", (model,)),
         ("scene_cache_v3", "AND model=?", (model,)),
-        ("scene_cache_v4", "", ()),
+        # Any other cut, except the instant keyframe one when a model was asked for: that one is the
+        # fast stage, and taking it here would mean the refined cut never gets computed.
+        ("scene_cache_v4", "" if model == "keyframes" else "AND model<>'keyframes'", ()),
         ("scene_cache_v3", "", ()),
     ]
     mt = file_mtime(path)
@@ -248,7 +250,7 @@ def get_scenes(path, model=None, options=None):
     """Plans pour l'indexation, du cache si possible (cf. `_cached_cut`), sinon par détection.
     `model` = modèle de découpe choisi dans les paramètres (défaut INDEX_MODEL)."""
     m = (model or INDEX_MODEL).strip() or INDEX_MODEL
-    thr = 0.0 if m == "omnishotcut" else INDEX_THRESHOLD
+    thr = 0.0 if m in ("omnishotcut", "keyframes") else INDEX_THRESHOLD
     options_key = _canonical_options(m, thr, options)[1] if options else None
     con = sqlite3.connect(db_path())
     try:

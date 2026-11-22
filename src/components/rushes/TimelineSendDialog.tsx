@@ -41,7 +41,7 @@ export function TimelineSendDialog({ clip, onClose }: { clip: Clip; onClose: () 
     Promise.all(MODELS.map((m) => nr.cachedScenes(clip.path, m.id).catch(() => null)))
       .then((res) => {
         if (!alive) return;
-        const next = { transnetv2: null, omnishotcut: null, autoshot: null } as CacheState;
+        const next = { transnetv2: null, omnishotcut: null, autoshot: null, keyframes: null } as CacheState;
         MODELS.forEach((m, i) => {
           const r = res[i];
           next[m.id] = r && r.cached && r.scenes.length ? r.scenes.length : null;
