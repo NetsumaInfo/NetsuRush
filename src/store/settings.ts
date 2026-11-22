@@ -103,7 +103,7 @@ function readPlayerVolume(): number {
 function readCutModel(): DetectModel {
   if (typeof localStorage === "undefined") return "transnetv2";
   const stored = localStorage.getItem(CUT_MODEL_KEY);
-  return stored === "omnishotcut" || stored === "autoshot" || stored === "keyframes" ? stored : "transnetv2";
+  return stored === "omnishotcut" || stored === "autoshot" ? stored : "transnetv2";
 }
 // Index dans PRESETS (0 Rapide → 3 Max). Défaut 1 = Équilibré. Sans effet sous OmniShotCut (auto).
 function readCutPreset(): number {

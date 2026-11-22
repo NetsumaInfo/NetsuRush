@@ -39,9 +39,14 @@ export const MODELS: { id: DetectModel; label: string; hintKey: string }[] = [
   { id: "transnetv2", label: "TransNetV2", hintKey: "shared.modelHintTransnet" },
   { id: "omnishotcut", label: "OmniShotCut", hintKey: "shared.modelHintOmni" },
   { id: "autoshot", label: "AutoShot", hintKey: "shared.modelHintAutoShot" },
-  { id: "keyframes", label: "Keyframes", hintKey: "shared.modelHintKeyframes" },
 ];
-export const modelLabel = (m: DetectModel) => MODELS.find((x) => x.id === m)?.label ?? m;
+// Instant keyframe cut: only for search indexing (its fast first pass). Kept out of MODELS on purpose:
+// Derush picks, on opening a rush, the first model of MODELS that has a cached cut, and the fast pass
+// of the indexing leaves a keyframe cut behind for every rush it touches.
+export const KEYFRAMES_MODEL: { id: DetectModel; label: string; hintKey: string } =
+  { id: "keyframes", label: "Keyframes", hintKey: "shared.modelHintKeyframes" };
+export const INDEX_MODELS = [...MODELS, KEYFRAMES_MODEL];
+export const modelLabel = (m: DetectModel) => INDEX_MODELS.find((x) => x.id === m)?.label ?? m;
 
 // Chrome COMMUN à toutes les barres d'action de multi-sélection (compteur + tout sélectionner +
 // options + action). Barre PLATE collée sous l'entête : lignes fines haut/bas (border-y), pas de

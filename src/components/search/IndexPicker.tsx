@@ -150,7 +150,7 @@ export function IndexPicker({ open, onClose, onIndex }: Props) {
       <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[11px] text-muted-foreground">{t("derush:shared.cutModel")}</span>
-          <DetectionModelSelect model={searchCutModel} onChange={setSearchCutModel} className="w-36" />
+          <DetectionModelSelect model={searchCutModel} onChange={setSearchCutModel} className="w-36" withKeyframes />
           <DetectionAdvancedSettings model={searchCutModel} compact />
           <span className="mx-0.5 h-5 border-l border-border" />
           <span className="text-[11px] text-muted-foreground">{t("indexPicker.detail")}</span>

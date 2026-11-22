@@ -12,7 +12,7 @@ import { DecimalInput } from "@/components/ui/decimal-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MODELS } from "./cutStudioShared";
+import { INDEX_MODELS as MODELS } from "./cutStudioShared";
 
 const OMNI_INTRA_LABEL_KEYS: Record<OmniIntraLabel, string> = {
   General: "advanced.intraGeneral",

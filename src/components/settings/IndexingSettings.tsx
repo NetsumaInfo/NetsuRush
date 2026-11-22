@@ -31,7 +31,7 @@ export function IndexingSettings() {
       <div>
         <SectionTitle as="h3" title={t("indexing.cutTitle")} info={t("detection.reindexHint")} />
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <DetectionModelSelect model={cutModel} onChange={setCutModel} className="w-56" />
+          <DetectionModelSelect model={cutModel} onChange={setCutModel} className="w-56" withKeyframes />
           <DetectionAdvancedSettings model={cutModel} compact />
         </div>
       </div>

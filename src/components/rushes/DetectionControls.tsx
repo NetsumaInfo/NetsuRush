@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { modelUsesPreset } from "@/lib/detection";
-import { MODELS, PRESETS } from "./cutStudioShared";
+import { INDEX_MODELS, MODELS, PRESETS } from "./cutStudioShared";
 
 export function DetectionModelSelect({
   model,
@@ -15,6 +15,7 @@ export function DetectionModelSelect({
   className,
   isModelDisabled,
   detail,
+  withKeyframes = false,
 }: {
   model: DetectModel;
   onChange: (model: DetectModel) => void;
@@ -22,18 +23,21 @@ export function DetectionModelSelect({
   className?: string;
   isModelDisabled?: (model: DetectModel) => boolean;
   detail?: (model: DetectModel) => string;
+  /** Offer the instant keyframe cut too (search indexing only). */
+  withKeyframes?: boolean;
 }) {
+  const choices = withKeyframes ? INDEX_MODELS : MODELS;
   const { t } = useTranslation("derush");
   // Tant que le registre backend n'est pas disponible, seul le moteur socle bundlé est sûr.
   // Ne jamais exposer Omni/Auto par simple défaut d'UI.
-  // Keyframes needs no weights: always there.
-  const [available, setAvailable] = useState<typeof MODELS>(MODELS.filter((entry) => entry.id === "transnetv2" || entry.id === "keyframes"));
+  // Keyframes needs no weights: always there when offered.
+  const [available, setAvailable] = useState<typeof MODELS>(choices.filter((entry) => entry.id === "transnetv2" || entry.id === "keyframes"));
   useEffect(() => {
     let live = true;
     void nr.modelsList().then((result) => {
       if (!live || !result.ok || result.models.length === 0) return;
       const installed = new Set(result.models.filter((entry) => entry.installed && entry.available !== false).map((entry) => entry.id));
-      const next = MODELS.filter((entry) => installed.has(entry.id) || entry.id === "keyframes");
+      const next = choices.filter((entry) => installed.has(entry.id) || entry.id === "keyframes");
       if (next.length) {
         setAvailable(next);
         if (!next.some((entry) => entry.id === model)) onChange(next[0].id);
