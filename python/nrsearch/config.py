@@ -193,7 +193,16 @@ VRAM_PROFILE = _VRAM_PROFILE if _VRAM_PROFILE in _VRAM_PROFILES else "balanced"
 DECODE_WORKERS = _VRAM_PROFILES[VRAM_PROFILE]["workers"]  # threads ffmpeg concurrents (process-bound)
 GPU_BATCH = _VRAM_PROFILES[VRAM_PROFILE]["batch"]         # images/forward SigLIP (sature le GPU, borne la VRAM)
 INDEX_CHUNK = _VRAM_PROFILES[VRAM_PROFILE]["chunk"]       # plans décodés/embeddés par lot (borne la RAM)
-GRAB_MAX_EDGE = 512     # bord max des frames extraites pour l'embedding (px). 0 = pleine résolution.
+# Long edge of the frames extracted for the embedding (px). SigLIP naflex fills its patch budget by
+# RESIZING: below what the budget covers, a frame is upscaled and a higher patch count buys nothing.
+# 512 covers up to ~576 patches on a 2.4:1 frame, so the default (256) keeps exactly its old frames.
+def grab_edge_for(patches):
+    import math
+    needed = 16 * math.sqrt(max(1, int(patches)) * 2.4)
+    return max(512, int(math.ceil(needed / 64.0)) * 64)
+
+
+GRAB_MAX_EDGE = grab_edge_for(MAX_PATCHES)
 
 # Segment decode: consecutive shots are read by ONE exact sequential ffmpeg pass instead of one
 # keyframe seek per shot. Measured on a 1080p HEVC film (1151 shots): per-shot seeks ran at about

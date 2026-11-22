@@ -18,6 +18,8 @@ Sortie stdout = 1 ligne JSON. Progression sur stderr (STAGE:load / STAGE:infer /
 routée vers le core pour progression en UI.
 """
 import json
+import os
+import time
 import sys
 from nri18n import t
 
@@ -107,6 +109,49 @@ def _dispatch(cmd, req):
     return cmd_status(req.get("file_paths") if "file_paths" in req else None)
 
 
+class _Busy:
+    """Held while a command runs; `last` = when the latest one ended."""
+    def __init__(self):
+        import threading
+        self.lock = threading.Lock()
+        self.last = time.monotonic()
+
+    def __enter__(self):
+        self.lock.acquire()
+
+    def __exit__(self, *_exc):
+        self.last = time.monotonic()
+        self.lock.release()
+
+
+def _start_standby_watch():
+    """After NETSURUSH_SEARCH_STANDBY_SEC idle seconds (default 300, 0 = never), the SigLIP weights
+    leave the VRAM for system RAM: Resolve gets its memory back, and the next search moves them back
+    in about a second instead of a cold start. Never during a command (indexing holds the lock)."""
+    import threading
+    busy = _Busy()
+    try:
+        delay = float(os.environ.get("NETSURUSH_SEARCH_STANDBY_SEC", "300"))
+    except ValueError:
+        delay = 300.0
+    if delay <= 0:
+        return busy
+
+    def watch():
+        from nrsearch import model
+        while True:
+            time.sleep(min(30.0, delay))
+            if time.monotonic() - busy.last < delay or not busy.lock.acquire(blocking=False):
+                continue
+            try:
+                model.standby()
+            finally:
+                busy.lock.release()
+
+    threading.Thread(target=watch, name="siglip-standby", daemon=True).start()
+    return busy
+
+
 def serve():
     """Daemon : modèle chargé 1 fois, traite des commandes JSON {id,cmd,...} sur stdin,
     répond {id,result} sur stdout. stdout est protégé (tout print parasite → stderr) pour
@@ -120,6 +165,7 @@ def serve():
     except Exception:  # noqa: BLE001
         pass
     real_out = sys.stdout
+    busy = _start_standby_watch()
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -130,7 +176,7 @@ def serve():
             continue
         rid = req.get("id")
         try:
-            with contextlib.redirect_stdout(sys.stderr):
+            with busy, contextlib.redirect_stdout(sys.stderr):
                 res = _dispatch(req.get("cmd"), req)
         except ImportError as exc:
             res = {"hits": [], "ok": False, "error": t("siglip_missing", error=exc)}

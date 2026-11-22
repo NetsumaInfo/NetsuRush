@@ -17,6 +17,34 @@ _BACKEND = None
 _LOGIT_SCALE = None   # exp(logit_scale) du modèle SigLIP (calibration des scores). None = non extrait.
 _LOGIT_BIAS = None
 _AES_VECS = None      # (vecteur "net/qualité", vecteur "flou") cachés pour le score esthétique zero-shot
+_HALF = True         # fp16 inference (autocast); False on GPUs without fast fp16 (NVIDIA before Volta)
+_PARKED = False      # weights moved to system RAM while idle (see standby)
+
+
+def _half_ok(torch, backend):
+    """NVIDIA cards before Volta (GTX 10xx and older, compute capability < 7) have no tensor cores
+    and run fp16 at a fraction of their fp32 speed (1/64 on consumer Pascal): fp32 is faster there."""
+    if backend != "cuda":
+        return backend != "cpu"
+    try:
+        return torch.cuda.get_device_capability()[0] >= 7
+    except Exception:  # noqa: BLE001
+        return True
+
+
+def _use_physical_cores(torch):
+    """CPU inference: one thread per PHYSICAL core. Hyper-threads share the same vector units, and
+    oversubscribing them slows matrix products down instead of speeding them up."""
+    try:
+        import psutil
+        cores = psutil.cpu_count(logical=False)
+    except Exception:  # noqa: BLE001
+        cores = None
+    if cores:
+        try:
+            torch.set_num_threads(int(cores))
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def free_memory():
@@ -34,8 +62,9 @@ def free_memory():
 
 def load():
     """Charge SigLIP 2 (lazy : status/get_scenes n'en ont pas besoin)."""
-    global _MODEL, _PROC, _DEV, _BACKEND, _LOGIT_SCALE, _LOGIT_BIAS
+    global _MODEL, _PROC, _DEV, _BACKEND, _LOGIT_SCALE, _LOGIT_BIAS, _HALF
     if _MODEL is not None:
+        _wake()
         return
     import torch
     from transformers import AutoModel, AutoProcessor
@@ -47,7 +76,10 @@ def load():
     # fp16 sur GPU = moitié VRAM/RAM (l'inférence est déjà en autocast fp16) ; low_cpu_mem_usage
     # évite le pic ×2 en RAM au chargement → pas de swap disque (le "STAGE:load" qui figeait sur
     # machine chargée : 8 Go VRAM partagés avec Resolve + pagefile bas).
-    dtype = torch.float16 if _BACKEND != "cpu" else torch.float32
+    _HALF = _half_ok(torch, _BACKEND)
+    dtype = torch.float16 if _HALF else torch.float32
+    if _BACKEND == "cpu":
+        _use_physical_cores(torch)
 
     def _fp(selected_dtype, **extra):
         try:
@@ -61,7 +93,17 @@ def load():
         except Exception:  # noqa: BLE001  (accelerate absent / autre → repli sans l'option)
             return _fp(selected_dtype)
 
-    _MODEL = _load_model(dtype)
+    _MODEL = None
+    if _BACKEND in ("cuda", "rocm"):
+        # Weights streamed from disk straight into VRAM (accelerate): no full copy in system RAM
+        # first. Any failure (accelerate missing, VRAM short) falls back to the RAM-then-move path.
+        try:
+            _MODEL = _fp(dtype, low_cpu_mem_usage=True, device_map={"": _DEV}).eval()
+        except Exception:  # noqa: BLE001
+            _MODEL = None
+            free_memory()
+    if _MODEL is None:
+        _MODEL = _load_model(dtype)
     try:
         _MODEL = _MODEL.to(_DEV).eval()
     except Exception:  # noqa: BLE001 - VRAM saturée ou backend/model non compatible
@@ -70,7 +112,8 @@ def load():
             _MODEL = _MODEL.to(_DEV).eval()
         except Exception as exc:  # noqa: BLE001 - accélérateur/runtime incomplet → CPU fiable
             sys.stderr.write("[search] backend %s unavailable (%s), falling back to CPU\n" % (_BACKEND, exc))
-            _BACKEND, _DEV = "cpu", "cpu"
+            _BACKEND, _DEV, _HALF = "cpu", "cpu", False
+            _use_physical_cores(torch)
             _MODEL = _load_model(torch.float32).to("cpu").eval()
     # Calibration : logit_scale/logit_bias appris du modèle → sigmoïde qui transforme le cosinus
     # en probabilité de pertinence lisible (slider « > X % »). logit_scale est un log-température
@@ -81,6 +124,31 @@ def load():
     except Exception:  # noqa: BLE001
         _LOGIT_SCALE = None
         _LOGIT_BIAS = None
+
+
+def standby():
+    """Idle: move the weights to system RAM and give the VRAM back (Resolve shares the card).
+    Returns True when something was moved. The next request moves them back (`_wake`), about a
+    second instead of a cold start."""
+    global _MODEL, _PARKED
+    if _MODEL is None or _PARKED or _BACKEND == "cpu":
+        return False
+    try:
+        _MODEL = _MODEL.to("cpu")
+        _PARKED = True
+        free_memory()
+        sys.stderr.write("[search] model parked in RAM (idle)\n"); sys.stderr.flush()
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _wake():
+    global _MODEL, _PARKED
+    if not _PARKED:
+        return
+    _MODEL = _MODEL.to(_DEV)
+    _PARKED = False
 
 
 def _pool(out):
@@ -128,6 +196,12 @@ def _process_images(pil_list):
     return inputs
 
 
+def _autocast(torch):
+    import contextlib
+    _wake()
+    return torch_autocast(torch, _BACKEND, torch.float16) if _HALF else contextlib.nullcontext()
+
+
 def embed_images(pil_list, batch=GPU_BATCH):
     """Embed une liste d'images en sous-batches de `batch` (sature le GPU, borne la VRAM).
     Retourne (N, dim) float32 L2-normalisé."""
@@ -139,7 +213,7 @@ def embed_images(pil_list, batch=GPU_BATCH):
         sub = pil_list[i:i + batch]
         inputs = _process_images(sub).to(_DEV)
         with torch.no_grad():
-            with torch_autocast(torch, _BACKEND, torch.float16):
+            with _autocast(torch):
                 feats = _pool(_MODEL.get_image_features(**inputs))
         out.append(_l2(feats.float()).cpu().numpy().astype(np.float32))
     return np.concatenate(out, axis=0)
@@ -154,7 +228,7 @@ def embed_texts(texts):
     inputs = _PROC(text=[t.lower() for t in texts], return_tensors="pt",
                    padding="max_length", max_length=64).to(_DEV)
     with torch.no_grad():
-        with torch_autocast(torch, _BACKEND, torch.float16):
+        with _autocast(torch):
             feats = _pool(_MODEL.get_text_features(**inputs))
     return _l2(feats.float()).cpu().numpy().astype(np.float32)
 
